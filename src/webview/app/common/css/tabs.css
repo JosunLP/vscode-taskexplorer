@@ -1,4 +1,16 @@
 
+/* Remove browser defaults */
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+.te-tabs-container {
+    align-items: center;
+    justify-content: center;
+}
+
 /* Tab Container */
 .te-tabs {
     width: 100%;
@@ -23,7 +35,7 @@
     border: 1px solid var(--vscode-button-background);
     border-radius: 2rem;
     padding-left: 0px;
-    margin-top: 10px;
+    margin-top: 1px;
 }
 
 .react-tabs__tab {

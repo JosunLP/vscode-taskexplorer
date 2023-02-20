@@ -53,35 +53,36 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		//
         const root = createRoot(document.getElementById("root") as HTMLElement);
         root.render(
-			// <Tabs className="te-tabs" selectedIndex={tabIndex} onSelect={(i) => this.setTabIndex(i)} forceRenderTabPanel={true} defaultFocus={true}></Tabs>
-			<Tabs className="te-tabs" onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
-				<TabList>
-					<Tab>Recent</Tab>
-					<Tab>Running</Tab>
-					<Tab>Famous</Tab>
-				</TabList>
-				<TabPanel>
-					<TeTaskControl
-						id="te-id-view-monitor-control-recent"
-						state={Object.assign({}, this.state, { seconds: 0 })}
-						subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
-					/>
-				</TabPanel>
-				<TabPanel>
-					<TeTaskControl
-						id="te-id-view-monitor-control-running"
-						state={Object.assign({}, this.state, { seconds: 10 })}
-						subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
-					/>
-				</TabPanel>
-				<TabPanel>
-					<TeTaskControl
-						id="te-id-view-monitor-control-famous"
-						state={Object.assign({}, this.state, { seconds: 20 })}
-						subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
-					/>
-				</TabPanel>
-			</Tabs>
+			<div className="te-tabs-container">
+				<Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
+					<TabList>
+						<Tab>Recent</Tab>
+						<Tab>Running</Tab>
+						<Tab>Famous</Tab>
+					</TabList>
+					<TabPanel>
+						<TeTaskControl
+							id="te-id-view-monitor-control-recent"
+							state={Object.assign({}, this.state, { seconds: 0 })}
+							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+						/>
+					</TabPanel>
+					<TabPanel>
+						<TeTaskControl
+							id="te-id-view-monitor-control-running"
+							state={Object.assign({}, this.state, { seconds: 10 })}
+							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+						/>
+					</TabPanel>
+					<TabPanel>
+						<TeTaskControl
+							id="te-id-view-monitor-control-famous"
+							state={Object.assign({}, this.state, { seconds: 20 })}
+							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+						/>
+					</TabPanel>
+				</Tabs>
+			</div>
         );
 
         disposables.push({
