@@ -4,6 +4,9 @@
  * to the author of the GitLens extension
  */
 
+import { ISessionToken } from "src/interface/IAuthentication";
+import { AuthenticationSession } from "vscode";
+
 export interface IpcMessage {
 	id: string;
 	method: string;
@@ -73,14 +76,14 @@ export interface DidChangeExtensionEnabledParams
 {
 	extensionEnabled: boolean;
 }
-export const DidChangeExtensionEnabledType = new IpcNotificationType<DidChangeExtensionEnabledParams>("extensionEnabled/didChange");
+export const DidChangeExtensionEnabledType = new IpcNotificationType<DidChangeExtensionEnabledParams>("extensionEnabled/change");
 
 
 export interface DidChangeConfigurationParams
 {
 	plusEnabled: boolean;
 }
-export const DidChangeConfigurationType = new IpcNotificationType<DidChangeConfigurationParams>("configuration/didChange");
+export const DidChangeConfigurationType = new IpcNotificationType<DidChangeConfigurationParams>("configuration/change");
 
 
 export const EchoCommandRequestType = new IpcNotificationType<ExecuteCommandParams>("command/echo");
@@ -90,3 +93,9 @@ export const EchoCustomCommandRequestType = new IpcNotificationType<ExecuteComma
 export type InternalNotificationType = "tempStateEvent";
 
 export type StateChangedCallback = (state: any /* State */, type?: IpcNotificationType<any> | InternalNotificationType) => void;
+
+export interface DidChangeLicenseParams {
+	license?: ISessionToken;
+	session?: AuthenticationSession;
+}
+export const DidChangeLicenseType = new IpcNotificationType<DidChangeLicenseParams>("license/change");

@@ -59,9 +59,11 @@ import { registerRemoveFromExcludesCommand } from "./command/removeFromExcludes"
 import { ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, Disposable } from "vscode";
 import { randomUUID } from "crypto";
 
+const PROVIDE_INTERIM_LICENSE_KEY = true;
 
 export class TeWrapper implements ITeWrapper, Disposable
 {
+
 	private _ready = false;
 	private _tests = false;
 	private _busy = false;
@@ -241,18 +243,21 @@ export class TeWrapper implements ITeWrapper, Disposable
 			  lastWsRootPathChange = await this.storage.get2<number>("lastWsRootPathChange", 0);
 		this.log.methodStart("app wrapper run", 1, "", true);
 		//
-		// Authentication
+		// License / Authentication
 		//
-/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-	await this.storage.updateSecret("taskmanager.licenseKey", "1234-5678-9098-7654321");
-/* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */
-	await this.storage.updateSecret("taskmanager.licenseToken", { /* TEMP */
-		token: "1234-5678-9098-7654321", /* TEMP */
-		ttl: 160000000, /* TEMP */
-		expiresFmt: "", /* TEMP */
-		issuedFmt: "" /* TEMP */
-	}); /* TEMP */
-/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		if (PROVIDE_INTERIM_LICENSE_KEY)
+		{/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+			await this.licenseManager.setLicenseKey("1234-5678-9098-7654321");
+			/* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */
+			await this.licenseManager.setLicenseToken({ /* TEMP */
+				token: "1234-5678-9098-7654321", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+				ttl: Infinity, /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+				expiresFmt: "N/A", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+				issuedFmt: "N/A" /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+			}); /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		} /* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		/* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		await this.licenseManager.checkLicense("   ");
 		// const session = await licenseManager.getSession("TeAuth", [], { create: true });
 		// if (session) {

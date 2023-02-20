@@ -78,7 +78,6 @@ export class HomeView extends TeWebviewView<State>
 			`${HomeView.viewId}View`
 		);
 		this.disposables.push(
-			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged),
 			wrapper.config.onDidChange(e => { this.onConfigurationChanged(e); }, this),
 			wrapper.storage.onDidChange(e => { this.onStorageChanged(e); }, this),
 			wrapper.treeManager.onTasksChanged(e => { this.onTasksChanged(e); }, this)
@@ -94,18 +93,6 @@ export class HomeView extends TeWebviewView<State>
 		this.wrapper.log.methodStart("HomeView Event: onConfigurationChanged", 2, this.wrapper.log.getLogPad());
 		this.wrapper.log.methodDone("HomeView Event: onConfigurationChanged", 2, this.wrapper.log.getLogPad());
 	}
-
-
-	//
-	// TODO - Remove istanbul tags when auth sessions are implemented
-	//
-	/* istanbul ignore next */
-	private onSessionChanged = (_e: TeSessionChangeEvent) =>
-	{
-		this.wrapper.log.methodStart("HomeView Event: onSessionChanged", 2, this.wrapper.log.getLogPad());
-		console.log("AuthenticationProviderAuthenticationSessionsChangeEvent!!!!!!!!!!!!!!!!");
-		this.wrapper.log.methodDone("HomeView Event: onSessionChanged", 2, this.wrapper.log.getLogPad());
-	};
 
 
 	private onStorageChanged(_e: StorageChangeEvent)

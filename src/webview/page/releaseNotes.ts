@@ -31,7 +31,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	}
 
 
-	protected override includeFontAwesome = () => ({ regular: true, icons: [ "plus", "bug", "gear", "star", "chevron-circle-up", "chevron-circle-down" ] });
+	protected override includeFontAwesome = () => ({ regular: true, icons: [ "star", "bug", "gear", "asterisk", "chevron-circle-up", "chevron-circle-down" ] });
 
 
 	protected override onHtmlFinalize = async(html: string) =>
@@ -55,7 +55,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	{
 	return `
 	<table style="margin-top:15px" width="100%">
-		${this.getNewReleaseNotesHdr("Features", "plus")}
+		${this.getNewReleaseNotesHdr("Features", "star")}
 		<tr>
 			<td colspan="2">
 				${this.getReleaseNotes("Features", version, "feature", changeLogMd)}
@@ -73,7 +73,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 				${this.getReleaseNotes("Refactoring", version, "refactoring", changeLogMd)}
 			</td>
 		</tr>
-		${this.getNewReleaseNotesHdr("Miscellaneous", "star")}
+		${this.getNewReleaseNotesHdr("Miscellaneous", "asterisk")}
 		<tr>
 			<td colspan="2">
 				${this.getReleaseNotes("Miscellaneous", version, "miscellaneous", changeLogMd)}

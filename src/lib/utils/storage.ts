@@ -43,16 +43,23 @@ class Storage implements IStorage, Memento
     }
 
 
-	public get onDidChange(): Event<StorageChangeEvent>
-    {
+	get onDidChange(): Event<StorageChangeEvent> {
 		return this._onDidChange.event;
 	}
 
-
-	public get onDidChangeSecrets(): Event<SecretStorageChangeEvent>
-    {
+	get onDidChangeSecrets(): Event<SecretStorageChangeEvent> {
 		return this._onDidChangeSecrets.event;
 	}
+
+
+    delete = async(key: string) =>
+    {
+        await this.storage.update(this.getKey(key), undefined);
+        this._onDidChange.fire({ key, workspace: false });
+    };
+
+
+    deleteSecret = (key: string) => this.secrets.delete(this.getKey(key));
 
 
     keys(): readonly string[]
@@ -125,13 +132,6 @@ class Storage implements IStorage, Memento
     getSecret = (key: string) => this.secrets.get(this.getKey(key));
 
 
-    delete = async(key: string) =>
-    {
-        await this.storage.update(this.getKey(key), undefined);
-        this._onDidChange.fire({ key, workspace: false });
-    };
-
-
     // update = (key: string, value: any) => this.storage.update(key, value);
     update = async(key: string, value: any) =>
     {
@@ -176,6 +176,12 @@ class Storage implements IStorage, Memento
     }
 
 
-    updateSecret = (key: string, value: string) => this.secrets.store(this.getKey(key), value);
+    updateSecret = (key: string, value: string | undefined): Thenable<void> =>
+    {
+        if (value) {
+            return this.secrets.store(this.getKey(key), value);
+        }
+        return this.secrets.delete(this.getKey(key));
+    };
 
 }

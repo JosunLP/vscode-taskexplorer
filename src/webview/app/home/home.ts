@@ -63,10 +63,6 @@ export class HomeWebviewApp extends TeWebviewApp<State>
         }
 	}
 
-	private updateState()
-    {
-	}
-
 	private enterLicense = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.enterLicense"});
     private getLicense = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.getLicense"});
     private showReleaseNotes = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.view.releaseNotes.show"});

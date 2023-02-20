@@ -164,14 +164,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	isLicensed = () => this.licensed;
 
 
-	//
-	// TODO - Remove istanbul tags when auth sessions are implemented
-	//
-	/* istanbul ignore next */
-	private onSessionChanged = (e: TeAuthenticationSessionChangeEvent) =>
-	{
-		this._onSessionChange.fire(e);
-	};
+	private onSessionChanged = (e: TeAuthenticationSessionChangeEvent) => this._onSessionChange.fire(e);
 
 
 	requestLicense = async(logPad: string) =>
@@ -213,10 +206,28 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	setLicenseKey = async (licenseKey: string | undefined) => this.wrapper.storage.updateSecret("taskmanager.licenseKey", licenseKey);
+	setLicenseKey = async (licenseKey: string | undefined) =>
+	{
+		this.wrapper.storage.updateSecret("taskmanager.licenseKey", licenseKey);
+		// this.onSessionChanged({
+		// 	added: [],
+		// 	removed: [],
+		// 	changed: [],
+		// 	token: undefined
+		// });
+	};
 
 
-	private setLicenseToken = async (licenseKey: ISessionToken | undefined) => this.wrapper.storage.updateSecret("taskmanager.licenseToken", licenseKey);
+	setLicenseToken = async (licenseToken: ISessionToken | undefined) =>
+	{
+		this.wrapper.storage.updateSecret("taskmanager.licenseToken", licenseToken ? JSON.stringify(licenseToken) : undefined);
+		this.onSessionChanged({
+			added: [ await this.getSession() as AuthenticationSession ],
+			removed: [],
+			changed: [],
+			token: licenseToken
+		});
+	};
 
 
 	private setLicenseKeyFromRsp = async(jso: IServerResponseData, logPad: string) =>

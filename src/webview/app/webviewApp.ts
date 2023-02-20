@@ -2,7 +2,7 @@
 import { Disposable, DOM } from "./common/dom";
 import {
 	IpcCommandType, IpcMessage, IpcMessageParams, WebviewFocusChangedParams, WebviewFocusChangedCommandType, WebviewReadyCommandType,
-	ExecuteCommandType, onIpc, EchoCommandRequestType, LogWriteCommandType, EchoCustomCommandRequestType, ExecuteCustomCommandType
+	ExecuteCommandType, onIpc, EchoCommandRequestType, LogWriteCommandType, EchoCustomCommandRequestType, ExecuteCustomCommandType, DidChangeLicenseType
 } from "../common/ipc";
 
 interface VsCodeApi {
@@ -123,7 +123,7 @@ export abstract class TeWebviewApp<State = undefined>
 		setTimeout(() => {
 			this.postMessage({ id: this.nextIpcId(), method: LogWriteCommandType.method, params: { message, value: undefined }});
 		},  1);
-		// console.log(message, ...optionalParams);
+		console.log(message, ...optionalParams);
 	};
 
 
@@ -148,6 +148,13 @@ export abstract class TeWebviewApp<State = undefined>
         this.log(`[BASE]${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`);
         switch (msg.method)
         {
+			case DidChangeLicenseType.method:
+				onIpc(DidChangeLicenseType, msg, params => {
+					(this.state as any).license = params.license;
+					(this.state as any).session = params.session;
+					this.updateState();
+				});
+				break;
 			case EchoCommandRequestType.method:       // Standard echo service for testing web->host commands in mocha tests
                 onIpc(EchoCommandRequestType, msg, params => this.sendCommand(ExecuteCommandType, params));
                 break;
@@ -163,7 +170,7 @@ export abstract class TeWebviewApp<State = undefined>
 	private postMessage = (e: IpcMessage) => this._vscode.postMessage(e);
 
 
-	protected sendCommand<TCmd extends IpcCommandType<any>>(command: TCmd, params: IpcMessageParams<TCmd>)
+	protected sendCommand<T extends IpcCommandType<any>>(command: T, params: IpcMessageParams<T>)
 	{
 		const id = this.nextIpcId();
 		this.log(`${this.appName}.sendCommand(${id}): name=${command.method}`);
@@ -177,6 +184,11 @@ export abstract class TeWebviewApp<State = undefined>
 		if (state) {
 			this._vscode.setState(state);
 		}
+	}
+
+	protected updateState()
+    {
+
 	}
 
 }

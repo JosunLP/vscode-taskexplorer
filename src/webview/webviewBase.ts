@@ -7,7 +7,7 @@
  */
 
 import { TextDecoder } from "util";
-import { ITeWebview } from "../interface";
+import { ITeWebview, TeSessionChangeEvent } from "../interface";
 // import { getNonce } from "@env/crypto";
 import { BaseState } from "./common/state";
 import { TeWrapper } from "../lib/wrapper";
@@ -17,7 +17,7 @@ import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
-	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType
+	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeConfigurationType, DidChangeLicenseType
 } from "./common/ipc";
 
 
@@ -77,7 +77,10 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 		this._originalTitle = title;
 		this._ipcSequence = 0;
 		this._isFirstLoadComplete = false;
-		this.disposables.push(this._onContentLoaded);
+		this.disposables.push(
+			this._onContentLoaded,
+			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged)
+		);
     }
 
 	dispose()
@@ -329,6 +332,10 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 				break;
 		}
 	}
+
+
+	protected onSessionChanged = async (e: TeSessionChangeEvent): Promise<boolean> =>
+		this.notify(DidChangeLicenseType, { license: e.token, session: await this.wrapper.licenseManager.getSession() });
 
 
 	private postMessage(message: IpcMessage): Promise<boolean>
