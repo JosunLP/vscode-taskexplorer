@@ -41,10 +41,18 @@
 .react-tabs__tab {
     width: 50%;
     padding: 1rem;
+    font-size: 20px;
+    line-height: 20px;
     list-style: none;
     text-align: center;
     cursor: pointer;
     transition: all 0.7s;
+}
+
+.react-tabs__tab:before {
+  font: var(--fa-font-regular);
+  content: "\f013";
+  margin-right: 12px;
 }
 
 .react-tabs__tab--selected {
