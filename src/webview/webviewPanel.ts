@@ -20,13 +20,13 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> impleme
 
 
 	constructor(wrapper: TeWrapper,
-				fileName: string,
-				title: string,
-				private readonly iconPath: string,
-				public readonly id: `taskexplorer.view.${WebviewIds}`,
-				private readonly contextKeyPrefix: `${ContextKeys.WebviewPrefix}${WebviewIds}`,
-				private readonly trackingFeature: string,
-				showCommand: Commands)
+		fileName: string,
+		title: string,
+		private readonly iconPath: string,
+		public readonly id: `taskexplorer.view.${WebviewIds}`,
+		private readonly contextKeyPrefix: `${ContextKeys.WebviewPrefix}${WebviewIds}`,
+		private readonly trackingFeature: string,
+		showCommand: Commands)
 	{
 		super(wrapper, title, fileName);
 		this.disposables.push(
@@ -35,25 +35,10 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> impleme
 		);
 	}
 
-
 	override dispose()
 	{
 		this._disposablePanel?.dispose();
 		super.dispose();
-	}
-
-
-	private _serializer: WebviewPanelSerializer =
-	{
-		deserializeWebviewPanel: async(webviewPanel: WebviewPanel, state: State) =>
-		{
-			await this.show(undefined, webviewPanel, state);
-		}
-	};
-
-
-	get serializer() {
-		return this._serializer;
 	}
 
 
@@ -66,6 +51,79 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> impleme
 			enableScripts: true,
 			localResourceRoots: [ Uri.joinPath(this.wrapper.context.extensionUri, "res") ]
 		};
+	}
+
+
+	get serializer() {
+		return this._serializer;
+	}
+
+
+	protected override includeBootstrap = (): Promise<BaseState> => this.getState();
+
+
+	protected override onHtmlPreviewBase = async(html: string, ...args: unknown[]) =>
+	{
+		return this.onHtmlPreview(html.replace(/\#\{title\}/g,
+`<table><tr>
+<td class="content-img">
+	<img class="te-icon" src="#{webroot}/img/logo-bl.png" />
+</td>
+<td class="content-title"> &nbsp;#{title}</td>
+</tr></table>`), ...args);
+	};
+
+
+	private onPanelDisposed()
+    {
+		this.resetContextKeys();
+		this.onActiveChanged?.(false);
+		this.onFocusChanged?.(false);
+		this.onVisibilityChanged?.(false);
+		this._isReady = false;
+		this._disposablePanel?.dispose();
+		this._disposablePanel = undefined;
+		this._view = undefined;
+	}
+
+
+	protected onShowCommand(...args: unknown[])
+    {
+		return this.show(undefined, ...args);
+	}
+
+
+	// protected override onViewFocusChanged(e: WebviewFocusChangedParams)
+	// {
+	// 	this.setContextKeys(undefined, e.focused, e.inputFocused);
+	// 	this.onFocusChanged?.(e.focused);
+	// }
+
+
+	protected onViewStateChanged(e: WebviewPanelOnDidChangeViewStateEvent)
+	{
+		const { active, visible } = e.webviewPanel;
+		if (visible)
+		{
+			this.setContextKeys(active);
+			this.onActiveChanged?.(active);
+			this.onFocusChanged?.(active);
+		}
+		else {
+			this.resetContextKeys();
+			this.onActiveChanged?.(false);
+			this.onFocusChanged?.(false);
+		}
+		this.onVisibilityChanged?.(visible);
+	}
+
+
+	/* istanbul ignore next */
+	private onWindowStateChanged(e: WindowState)
+	{
+		if (this.visible) {
+			this.onWindowFocusChanged?.(e.focused);
+		}
 	}
 
 
@@ -125,15 +183,6 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> impleme
 	}
 
 
-	/* istanbul ignore next */
-	private onWindowStateChanged(e: WindowState)
-	{
-		if (this.visible) {
-			this.onWindowFocusChanged?.(e.focused);
-		}
-	}
-
-
 	private resetContextKeys()
 	{
 		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, false);
@@ -150,62 +199,12 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> impleme
 	}
 
 
-	private onPanelDisposed()
-    {
-		this.resetContextKeys();
-		this.onActiveChanged?.(false);
-		this.onFocusChanged?.(false);
-		this.onVisibilityChanged?.(false);
-		this._isReady = false;
-		this._disposablePanel?.dispose();
-		this._disposablePanel = undefined;
-		this._view = undefined;
-	}
-
-
-	protected onShowCommand(...args: unknown[])
-    {
-		return this.show(undefined, ...args);
-	}
-
-
-	// protected override onViewFocusChanged(e: WebviewFocusChangedParams)
-	// {
-	// 	this.setContextKeys(undefined, e.focused, e.inputFocused);
-	// 	this.onFocusChanged?.(e.focused);
-	// }
-
-
-	protected onViewStateChanged(e: WebviewPanelOnDidChangeViewStateEvent)
+	private _serializer: WebviewPanelSerializer =
 	{
-		const { active, visible } = e.webviewPanel;
-		if (visible)
+		deserializeWebviewPanel: async(webviewPanel: WebviewPanel, state: State) =>
 		{
-			this.setContextKeys(active);
-			this.onActiveChanged?.(active);
-			this.onFocusChanged?.(active);
+			await this.show(undefined, webviewPanel, state);
 		}
-		else {
-			this.resetContextKeys();
-			this.onActiveChanged?.(false);
-			this.onFocusChanged?.(false);
-		}
-		this.onVisibilityChanged?.(visible);
-	}
-
-
-	protected override includeBootstrap = (): Promise<BaseState> => this.getState();
-
-
-	protected override onHtmlPreviewBase = async(html: string, ...args: unknown[]) =>
-	{
-		return this.onHtmlPreview(html.replace(/\#\{title\}/g,
-`<table><tr>
-<td class="content-img">
-	<img class="te-icon" src="#{webroot}/img/logo-bl.png" />
-</td>
-<td class="content-title"> &nbsp;#{title}</td>
-</tr></table>`), ...args);
 	};
 
 }
