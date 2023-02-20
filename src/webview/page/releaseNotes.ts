@@ -31,6 +31,9 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	}
 
 
+	protected override includeFontAwesome = () => ({ regular: true, icons: [ "plus", "bug", "gear", "star", "circle-chevron-up", "circle-chevron-down" ] });
+
+
 	protected override onHtmlFinalize = async(html: string) =>
 	{
 		const changelogUri = Uri.joinPath(this.wrapper.context.extensionUri, "CHANGELOG.md"),
@@ -45,7 +48,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	};
 
 
-	private getNewInThisReleaseShortDsc = () => "MAJOR RELEASE - A PLETHORA OF NEW FEATURES, BUG FIXES AND PERFORMANCE ENHANCEMENTS !!";
+	private getNewInThisReleaseShortDsc = () => "MAJOR RELEASE - A PLETHORA OF NEW FEATURES, BUG FIXES AzND PERFORMANCE ENHANCEMENTS !!";
 
 
 	private getNewReleaseNotes = (version: string, changeLogMd: string) =>

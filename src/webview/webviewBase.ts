@@ -12,7 +12,7 @@ import { ITeWebview } from "../interface";
 import { BaseState } from "./common/state";
 import { TeWrapper } from "../lib/wrapper";
 import { getNonce } from "../lib/env/node/crypto";
-// import { fontawesome } from "./common/fontawesome";
+import { fontawesome } from "./common/fontawesome";
 import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
@@ -23,11 +23,12 @@ import {
 
 export interface FontAwesomeClass
 {
+	icons: string[];
+	brands?: boolean;
 	duotone?: boolean;
-	icons?: string[];
 	light?: boolean;
 	regular?: boolean;
-	size?: number;
+	sharp?: boolean;
 	solid?: boolean;
 	thin?: boolean;
 }
@@ -178,41 +179,44 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 	private getHtmlEndOfBody = (webRoot: string, bootstrap: string | undefined, endOfBody: string | undefined): string =>
 	{
 		let html = "";
-/*
+
 		const incFa = this.includeFontAwesome?.();
-		if (incFa)
+		if (incFa && this.wrapper.utils.isArray(incFa.icons))
 		{
+			html += ` <style nonce="${this._cspNonce}">`;
+			// if (incFa.duotone)
+			// {
+			// 	html += ` ${fontawesome.fontFace("duotone-900", webRoot, this.wrapper.cacheBuster)}`;
+			// }
+			if (incFa.light)
+			{
+				html += ` ${fontawesome.fontFace("light-300", webRoot, this.wrapper.cacheBuster)}`;
+			}
 			if (incFa.regular)
 			{
-				html += ` <style nonce="${this._cspNonce}">
-							:root, :host {
-								--fa-style-family-classic: 'Font Awesome 6 Free';
-								--fa-font-regular: normal 400 1em/1 'Font Awesome 6 Free';
-							}
-							@font-face {
-								font-family: 'Font Awesome 6 Free';
-								font-display: block;
-								font-style: normal;
-								font-weight: 400;
-								src: url('${webRoot}/font/fa-regular-400.woff2?${this.wrapper.cacheBuster}') format('woff2');
-							}
-							.far,
-							.fa-regular {
-								font-weight: 400;
-							}`;
-				if (this.wrapper.utils.isArray(incFa.icons))
-				{
-					html += ` ${fontawesome.selector}`;
-					for (const icon of incFa.icons)
-					{
-						const cls = ` far .fa-${icon}:before`;
-						html += `${cls} { content: '${fontawesome[icon]}'; }`;
-					}
-				}
-				html += "</style>";
+				html += ` ${fontawesome.fontFace("regular-400", webRoot, this.wrapper.cacheBuster)}`;
 			}
+			// if (incFa.sharp)
+			// {
+			// 	html += ` ${fontawesome.fontFace("sharp-????", webRoot, this.wrapper.cacheBuster)}`;
+			// }
+			// if (incFa.solid)
+			// {
+			// 	html += ` ${fontawesome.fontFace("solid-900", webRoot, this.wrapper.cacheBuster)}`;
+			// }
+			// if (incFa.thin)
+			// {
+			// 	html += ` ${fontawesome.fontFace("thin-200", webRoot, this.wrapper.cacheBuster)}`;
+			// }
+			html += ` ${fontawesome.selector}`;
+			for (const icon of incFa.icons)
+			{
+				const cls = `.fa-${icon}::before`;
+				html += ` ${cls} { content: \"${fontawesome.icons[icon]}\"; }`;
+			}
+			html += " </style>";
 		}
-*/
+
 		if (bootstrap) {
 			html += ` <script type="text/javascript" nonce="${this._cspNonce}">
 						window.bootstrap=${JSON.stringify(bootstrap)};
@@ -223,7 +227,7 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 			html += endOfBody;
 		}
 
-		return html.trim().replace(/ {2,}/g, " ");
+		return html.trim().replace(/\s{2,}/g, " ");
 	};
 
 

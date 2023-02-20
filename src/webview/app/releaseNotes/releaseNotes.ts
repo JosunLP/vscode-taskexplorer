@@ -1,6 +1,4 @@
 
-import "../common/scss/fa/regular.scss";
-import "../common/scss/fa/fontawesome.scss";
 import "../common/css/vscode.css";
 import "../common/css/page.css";
 import "./release-notes.css";
