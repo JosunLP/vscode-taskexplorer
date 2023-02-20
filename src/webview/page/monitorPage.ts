@@ -2,9 +2,9 @@
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { TasksChangeEvent } from "../../interface";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
+import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
 
 
 export class MonitorPage extends TeWebviewPanel<State>
@@ -26,7 +26,8 @@ export class MonitorPage extends TeWebviewPanel<State>
 			Commands.ShowMonitorPage
 		);
 		this.disposables.push(
-			wrapper.treeManager.onTasksChanged(e => { this.onTasksChanged(e); }, this)
+			wrapper.treeManager.onDidTasksChange(e => { this.onTasksChanged(e); }, this),
+			wrapper.treeManager.onDidTaskStatusChange(e => this.onTaskStatusChanged(e), this)
 		);
 	}
 
@@ -47,7 +48,15 @@ export class MonitorPage extends TeWebviewPanel<State>
 	protected override includeFontAwesome = () => ({ duotone: true, regular: true, icons: [ "gears", "gear", "gears", "star" ] });
 
 
-    private async onTasksChanged(e: TasksChangeEvent)
+    private async onTasksChanged(_e: ITeTasksChangeEvent)
+	{
+		if (this.isFirstLoadComplete) {
+			await this.refresh();
+		}
+	}
+
+
+	private async onTaskStatusChanged(_e: ITeTaskStatusChangeEvent)
 	{
 		if (this.isFirstLoadComplete) {
 			await this.refresh();

@@ -4,10 +4,10 @@ import { TeWrapper } from "../wrapper";
 import { ITeLicenseManager } from "../../interface";
 import { isScriptType } from "../utils/taskTypeUtils";
 import { IServerResponseData, TeServer } from "./server";
-import { ISessionToken } from "../../interface/IAuthentication";
+import { TeAuthenticationProvider } from "./authProvider";
 import { executeCommand, registerCommand, Commands } from "../command/command";
+import { ISessionToken, TeSessionChangeEvent } from "../../interface/IAuthentication";
 import { AuthenticationSession, Disposable, env, EventEmitter, InputBoxOptions, Task, window } from "vscode";
-import { TeAuthenticationProvider, TeAuthenticationSessionChangeEvent } from "./authProvider";
 
 
 export class LicenseManager implements ITeLicenseManager, Disposable
@@ -24,7 +24,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _auth: TeAuthenticationProvider;
 	private maxFreeTasksForTaskType = 100;
 	private maxFreeTasksForScriptType = 50;
-    private _onSessionChange = new EventEmitter<TeAuthenticationSessionChangeEvent>();
+    private _onSessionChange: EventEmitter<TeSessionChangeEvent>;
 
 
 	constructor(wrapper: TeWrapper)
@@ -33,8 +33,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._server = new TeServer(wrapper);
 		this._auth = new TeAuthenticationProvider(wrapper);
 		this._auth.onDidChangeSessions(this.onSessionChanged);
+		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
 		this.disposables.push(
 			this._auth,
+			this._onSessionChange,
 			registerCommand(Commands.EnterLicense, () => this.enterLicenseKey(), this),
 			registerCommand(Commands.GetLicense, () => this.getLicense(), this)
 		);
@@ -63,7 +65,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
             d.dispose();
         });
 		this.numTasks = 0;
-		this.licensed = false;
 	}
 
 
@@ -71,8 +72,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
         return this._onSessionChange.event;
     }
 
+	get server(): TeServer {
+		return this._server;
+	}
 
-	get serverToken() {
+	get serverToken(): string {
 		return this.wrapper.server.serverToken;
 	}
 
@@ -164,7 +168,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	isLicensed = () => this.licensed;
 
 
-	private onSessionChanged = (e: TeAuthenticationSessionChangeEvent) => this._onSessionChange.fire(e);
+	private onSessionChanged = (e: TeSessionChangeEvent) => this._onSessionChange.fire(e);
 
 
 	requestLicense = async(logPad: string) =>
@@ -275,10 +279,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		}
 
 		this.wrapper.log.methodDone("license manager set tasks", 1, logPad);
-	}
-
-	get server(): TeServer {
-		return this._server;
 	}
 
 

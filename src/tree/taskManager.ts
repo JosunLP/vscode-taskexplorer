@@ -12,31 +12,21 @@ import { isScriptType } from "../lib/utils/taskTypeUtils";
 import { findDocumentPosition } from "../lib/findDocumentPosition";
 import { getDateDifference, getPackageManager, timeout } from "../lib/utils/utils";
 import {
-    CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
+    CustomExecution, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder
 } from "vscode";
 
 
-export class TaskManager implements ITeTaskManager, Disposable
+export class TaskManager implements ITeTaskManager
 {
 
     private log: ILog;
-    private disposables: Disposable[] = [];
 
 
     constructor(private readonly wrapper: TeWrapper, private readonly specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
     {
         this.log = wrapper.log;
         this.specialFolders = specialFolders;
-    }
-
-
-    dispose()
-    {
-        // this.disposables.forEach((d) => {
-        //     d.dispose();
-        // });
-        this.disposables = [];
     }
 
 

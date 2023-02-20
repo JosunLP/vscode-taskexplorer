@@ -16,7 +16,7 @@ import { addToExcludes } from "../lib/addToExcludes";
 import { isTaskIncluded } from "../lib/isTaskIncluded";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Commands, registerCommand } from "../lib/command/command";
-import { IDictionary, ITeTreeManager, TasksChangeEvent } from "../interface";
+import { IDictionary, ITeTreeManager, ITeTasksChangeEvent } from "../interface";
 import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskTypeUtils";
 import {
     TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
@@ -25,7 +25,6 @@ import {
 
 export class TaskTreeManager implements ITeTreeManager, Disposable
 {
-
     private _tasks: Task[] = [];
     private refreshPending = false;
     private _taskManager: TaskManager;
@@ -33,10 +32,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private _treeBuilder: TaskTreeBuilder;
     private firstTreeBuildDone = false;
     private currentInvalidation: string | undefined;
-    private disposables: Disposable[] = [];
-
-    private _onDidTasksChange = new EventEmitter<TasksChangeEvent>();
-    // private _onDidTasksLoad = new EventEmitter<TasksChangeEvent>();
+    private readonly disposables: Disposable[] = [];
+    private readonly _onDidTasksChange: EventEmitter<ITeTasksChangeEvent>;
+    // private readonly _onDidTasksLoad: EventEmitter<TasksChangeEvent>;
 
     private _specialFolders: {
         favorites: SpecialTaskFolder;
@@ -48,9 +46,13 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         taskExplorerSideBar: TeTreeView;
     };
 
+
     constructor(private readonly wrapper: TeWrapper)
     {
         this.wrapper.log.methodStart("construct task tree manager", 1, "   ");
+
+        this._onDidTasksChange = new EventEmitter<ITeTasksChangeEvent>();
+        // this._onDidTasksLoad = new EventEmitter<TasksChangeEvent>();
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
         this._specialFolders = {
@@ -68,9 +70,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         };
 
         this.disposables.push(
+            this._onDidTasksChange,
             this._taskWatcher,
             this._treeBuilder,
-            this._taskManager,
             this._specialFolders.favorites,
             this._specialFolders.lastTasks,
             this._views.taskExplorer,
@@ -100,13 +102,24 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     dispose()
     {
-        this.disposables.forEach((d) => {
-            d.dispose();
-        });
+        this.disposables.forEach(d => d.dispose());
+        this.disposables.splice(0);
         this._tasks = [];
-        this.disposables = [];
     }
 
+
+    get onDidTaskStatusChange() {
+        return this._taskWatcher.onDidTaskStatusChange;
+    }
+
+	get onDidTasksChange(): Event<ITeTasksChangeEvent> {
+		return this._onDidTasksChange.event;
+	}
+
+	// get onTasksLoaded(): Event<TasksChangeEvent>
+    // {
+	// 	return this._onDidTasksLoad.event;
+	// }
 
     get lastTasksFolder() {
         return this._specialFolders.lastTasks;
@@ -119,7 +132,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     get taskManager() {
         return this._taskManager;
     }
-
 
     private addRemoveSpecialTaskLabel = async(taskItem: TaskItem) =>
     {
@@ -461,17 +473,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     isBusy = () => this.refreshPending || this._treeBuilder.isBusy();
     // isBusy = () => this.views.taskExplorer.tree.isBusy() || this.views.taskExplorerSideBar.tree.isBusy() ||
     //                this.refreshPending || this._treeBuilder.isBusy();
-
-
-	get onTasksChanged(): Event<TasksChangeEvent> {
-		return this._onDidTasksChange.event;
-	}
-
-
-	// get onTasksLoaded(): Event<TasksChangeEvent>
-    // {
-	// 	return this._onDidTasksLoad.event;
-	// }
 
 
     private onWorkspaceFolderRemoved = (uri: Uri, logPad: string) =>

@@ -11,8 +11,6 @@ import {
     Disposable, env, EventEmitter, ProgressLocation, Uri, UriHandler, window
 } from "vscode";
 
-export type TeAuthenticationSessionChangeEvent = TeSessionChangeEvent;
-
 export const AUTH_TYPE = "teauth";
 const AUTH_NAME = "TeAuth";
 const CLIENT_ID = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
@@ -38,51 +36,56 @@ export class TeAuthenticationProvider implements AuthenticationProvider, Disposa
 {
 
     private _disposable: Disposable;
+    private _uriHandler: UriEventHandler;
     private _pendingStates: string[] = [];
-    private _uriHandler = new UriEventHandler();
     private _authApiEndpoint = "/api/license/validate/v1";
+    private _onSessionChange: EventEmitter<TeSessionChangeEvent>;
     private _codeExchangePromises: IDictionary<{ promise: Promise<string>; cancel: EventEmitter<void> }> = {};
-    private _onSessionChange = new EventEmitter<TeAuthenticationSessionChangeEvent>();
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
+        this._uriHandler = new UriEventHandler();
+        this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
         this._disposable = Disposable.from(
+            this._uriHandler,
+            this._onSessionChange,
             authentication.registerAuthenticationProvider(AUTH_TYPE, AUTH_NAME, this, { supportsMultipleAccounts: false }),
             window.registerUriHandler(this._uriHandler)
         );
     }
 
+
+    dispose()
+    {
+        this._disposable.dispose();
+    }
+
+
     get apiEndpoint() {
         return this._authApiEndpoint;
     }
 
-
-    get onDidChangeSessions()
-    {
+    get onDidChangeSessions() {
         return this._onSessionChange.event;
     }
 
 
     /* istanbul ignore next */
-    get redirectUri()
-    {
+    get redirectUri() {
         const publisher = this.wrapper.context.extension.packageJSON.publisher;
         const name = this.wrapper.context.extension.packageJSON.name;
         return `${env.uriScheme}://${publisher}.${name}`;
     }
 
 
-    /* istanbul ignore next */
     public async getSessions(scopes?: string[]): Promise<readonly AuthenticationSession[]>
     {
         const allSessions = await this.wrapper.storage.getSecret(SESSIONS_SECRET_KEY);
-
         if (allSessions)
         {
             return JSON.parse(allSessions) as AuthenticationSession[];
         }
-
         return [];
     }
 
@@ -91,15 +94,12 @@ export class TeAuthenticationProvider implements AuthenticationProvider, Disposa
     public async createSession(scopes: string[]): Promise<AuthenticationSession>
     {
         try
-        {
-            const token = await this.login(scopes);
-            if (!token)
-            {
+        {   const token = await this.login(scopes);
+            if (!token) {
                 throw new Error("TeAuth login failure");
             }
 
             const userinfo: { name: string; email: string } = await this.getUserInfo(token);
-
             const session: AuthenticationSession = {
                 id: uuid(),
                 accessToken: token,
@@ -111,11 +111,10 @@ export class TeAuthenticationProvider implements AuthenticationProvider, Disposa
             };
 
             await this.wrapper.storage.updateSecret(SESSIONS_SECRET_KEY, JSON.stringify([ session ]));
-
             this._onSessionChange.fire({ added: [ session ], removed: [], changed: [] });
-
             return session;
-        } catch (e)
+        }
+        catch (e)
         {
             window.showErrorMessage(`Sign in failed: ${e}`);
             throw e;
@@ -133,20 +132,11 @@ export class TeAuthenticationProvider implements AuthenticationProvider, Disposa
             const sessionIdx = sessions.findIndex(s => s.id === sessionId);
             const session = sessions[sessionIdx];
             sessions.splice(sessionIdx, 1);
-
             await this.wrapper.storage.updateSecret(SESSIONS_SECRET_KEY, JSON.stringify(sessions));
-
-            if (session)
-            {
+            if (session) {
                 this._onSessionChange.fire({ added: [], removed: [ session ], changed: [] });
             }
         }
-    }
-
-
-    public async dispose()
-    {
-        this._disposable.dispose();
     }
 
 

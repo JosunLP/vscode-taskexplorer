@@ -2,7 +2,7 @@
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { TasksChangeEvent } from "../../interface";
+import { ITeTasksChangeEvent } from "../../interface";
 import { StorageChangeEvent } from "../../interface/IStorage";
 import { ConfigurationChangeEvent, Disposable } from "vscode";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
@@ -78,7 +78,7 @@ export class HomeView extends TeWebviewView<State>
 		this.disposables.push(
 			wrapper.config.onDidChange(e => { this.onConfigurationChanged(e); }, this),
 			wrapper.storage.onDidChange(e => { this.onStorageChanged(e); }, this),
-			wrapper.treeManager.onTasksChanged(e => { this.onTasksChanged(e); }, this)
+			wrapper.treeManager.onDidTasksChange(e => { this.onTasksChanged(e); }, this)
 		);
 	}
 
@@ -103,7 +103,7 @@ export class HomeView extends TeWebviewView<State>
 	}
 
 
-	private async onTasksChanged(_e: TasksChangeEvent)
+	private async onTasksChanged(_e: ITeTasksChangeEvent)
 	{
 		this.wrapper.log.methodStart("HomeView Event: onTasksChanged", 2, this.wrapper.log.getLogPad());
 		if (this.isFirstLoadComplete) {

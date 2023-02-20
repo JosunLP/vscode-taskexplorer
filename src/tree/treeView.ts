@@ -13,10 +13,11 @@ import {
 
 export class TeTreeView implements ITaskTreeView, Disposable
 {
+    private _visible = false;
 	private readonly disposables: Disposable[] = [];
 	private readonly _tree: TaskTree;
     private readonly _view: TreeView<TreeItem>;
-    private _visible = false;
+
 
 	constructor(
 		private readonly wrapper: TeWrapper,
@@ -32,14 +33,15 @@ export class TeTreeView implements ITaskTreeView, Disposable
         this._view.title = title;
         this._view.description = description;
 		this.disposables.push(
-            this._tree,
             this._view,
             this._view.onDidChangeVisibility(this.onVisibilityChanged, this),
             // this._view.onDidCollapseElement(this.onElementCollapsed, this),
             // this._view.onDidExpandElement(this.onElementExpanded, this),
             // this._view.onDidChangeSelection(this.onElementSelectionChanged, this)
         );
+		void this.wrapper.contextTe.setContext(`${ContextKeys.KeyPrefix}:isTreeView`, true);
 	}
+
 
 	dispose()
 	{
@@ -48,6 +50,7 @@ export class TeTreeView implements ITaskTreeView, Disposable
         });
         this.disposables.splice(0);
 	}
+
 
     get tree(): TaskTree {
         return this._tree;
@@ -99,7 +102,7 @@ export class TeTreeView implements ITaskTreeView, Disposable
 
 	private setContextKeys(active: boolean | undefined)
 	{
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:active`, !!active);
+        void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:active`, !!active);
 	}
 
 }

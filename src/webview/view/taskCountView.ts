@@ -2,7 +2,7 @@
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { TasksChangeEvent } from "../../interface";
+import { ITeTasksChangeEvent } from "../../interface";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
@@ -26,12 +26,12 @@ export class TaskCountView extends TeWebviewView<State>
 			`${TaskCountView.viewId}View`
 		);
 		this.disposables.push(
-			wrapper.treeManager.onTasksChanged(e => { this.onTasksChanged(e); }, this)
+			wrapper.treeManager.onDidTasksChange(e => { this.onTasksChanged(e); }, this)
 		);
 	}
 
 
-	private async onTasksChanged(e: TasksChangeEvent)
+	private async onTasksChanged(e: ITeTasksChangeEvent)
 	{
 		if (this.isFirstLoadComplete) {
 			await this.refresh();

@@ -38,8 +38,6 @@ export interface FontAwesomeClass
 
 export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 {
-	protected readonly disposables: Disposable[] = [];
-
     abstract show(options?: any, ..._args: unknown[]): Promise<TeWebviewBase<any>>;
 
 	protected includeBody?(...args: unknown[]): string | Promise<string>;
@@ -59,28 +57,31 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 
 	protected _isReady = false;
 	protected _view: WebviewView | WebviewPanel | undefined;
+	protected readonly disposables: Disposable[] = [];
 
-	private readonly _cspNonce: string;
-	private readonly _originalTitle: string | undefined;
-    private readonly _maxSmallIntegerV8 = 2 ** 30;
-
+	private _title: string;
     private _ipcSequence: number;
 	private _isFirstLoadComplete: boolean;
-	private _title: string;
 
-	private _onContentLoaded: EventEmitter<string> = new EventEmitter<string>();
-	private _onReadyReceived: EventEmitter<void> = new EventEmitter<void>();
+	private readonly _cspNonce: string;
+    private readonly _maxSmallIntegerV8 = 2 ** 30;
+	private readonly _originalTitle: string | undefined;
+	private readonly _onReadyReceived: EventEmitter<void>;
+	private readonly _onContentLoaded: EventEmitter<string>;
 
 
     constructor(protected readonly wrapper: TeWrapper, title: string, protected readonly fileName: string)
     {
-		this._cspNonce = getNonce();
 		this._title = title;
-		this._originalTitle = title;
 		this._ipcSequence = 0;
+		this._originalTitle = title;
+		this._cspNonce = getNonce();
 		this._isFirstLoadComplete = false;
+		this._onReadyReceived = new EventEmitter<void>();
+		this._onContentLoaded = new EventEmitter<string>();
 		this.disposables.push(
 			this._onContentLoaded,
+			this._onReadyReceived,
 			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged)
 		);
     }

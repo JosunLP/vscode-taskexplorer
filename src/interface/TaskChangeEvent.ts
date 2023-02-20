@@ -1,5 +1,13 @@
+import { Task } from "vscode";
 
-export interface TasksChangeEvent
+export interface ITeTasksChangeEvent
 {
     readonly taskCount: number;
+};
+
+export interface ITeTaskStatusChangeEvent
+{
+    isRunning: boolean;
+    taskItemId: string;
+    task: Task;
 };

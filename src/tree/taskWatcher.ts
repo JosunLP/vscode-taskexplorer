@@ -5,9 +5,11 @@ import { log } from "../lib/log/log";
 import * as util from "../lib/utils/utils";
 import { TaskTreeManager } from "./treeManager";
 import { SpecialTaskFolder } from "./specialFolder";
+import { ITeTaskStatusChangeEvent } from "../interface";
 import { configuration } from "../lib/utils/configuration";
 import {
-    Disposable, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment, Task, window, TaskEndEvent
+    Disposable, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
+    Task, window, TaskEndEvent, EventEmitter, TaskProcessStartEvent, TaskProcessEndEvent
 } from "vscode";
 
 
@@ -18,6 +20,7 @@ export class TaskWatcher implements Disposable
     private treeManager: TaskTreeManager;
     private disposables: Disposable[];
     private specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder };
+    private _onTaskStatusChange: EventEmitter<ITeTaskStatusChangeEvent>;
 
 
     constructor(treeManager: TaskTreeManager, specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
@@ -26,10 +29,14 @@ export class TaskWatcher implements Disposable
         this.specialFolders = specialFolders;
         this.statusBarSpace = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this.statusBarSpace.tooltip = "Task Explorer Running Task";
+        this._onTaskStatusChange = new EventEmitter<ITeTaskStatusChangeEvent>();
         this.disposables = [
             this.statusBarSpace,
-            tasks.onDidStartTask(async (_e) => this.taskStartEvent(_e)),
-            tasks.onDidEndTask(async (_e) => this.taskFinishedEvent(_e))
+            this._onTaskStatusChange,
+            tasks.onDidStartTask(async(e) => this.taskStartEvent(e)),
+            tasks.onDidEndTask(async(e) => this.taskFinishedEvent(e)),
+            tasks.onDidStartTaskProcess(async(e) => this.taskProcessStartEvent(e)),
+            tasks.onDidEndTaskProcess(async(e) => this.taskProcessFinishedEvent(e))
         ];
     }
 
@@ -43,7 +50,12 @@ export class TaskWatcher implements Disposable
     }
 
 
-    fireTaskChangeEvents(taskItem: TaskItem, logPad: string, logLevel: number)
+    get onDidTaskStatusChange() {
+        return this._onTaskStatusChange.event;
+    }
+
+
+    fireTaskChangeEvents(taskItem: TaskItem, logPad: string, logLevel: number): void
     {
         const taskTree = this.treeManager.getTaskTree();
         /* istanbul ignore if */
@@ -117,7 +129,7 @@ export class TaskWatcher implements Disposable
     }
 
 
-    private showStatusMessage(task: Task, logPad: string)
+    private showStatusMessage(task: Task, logPad: string): void
     {
         log.methodStart("task start/stop show/hide message", 2, logPad);
         if (task && configuration.get<boolean>("showRunningTask") === true)
@@ -144,7 +156,13 @@ export class TaskWatcher implements Disposable
     }
 
 
-    private async taskStartEvent(e: TaskStartEvent)
+    private taskProcessStartEvent = (e: TaskProcessStartEvent) => this.taskStartEvent({ execution: e.execution });
+
+
+    private taskProcessFinishedEvent = (e: TaskProcessEndEvent) => this.taskFinishedEvent({ execution: e.execution });
+
+
+    private async taskStartEvent(e: TaskStartEvent): Promise<void>
     {
         const taskMap = this.treeManager.getTaskMap(),
               taskTree = this.treeManager.getTaskTree(),
@@ -181,13 +199,14 @@ export class TaskWatcher implements Disposable
             const taskItem = taskMap[taskId] as TaskItem;
             this.showStatusMessage(task, "   ");
             this.fireTaskChangeEvents(taskItem, "   ", 1);
+            this._onTaskStatusChange.fire({ task, taskItemId: taskId, isRunning: true });
         }
 
         log.methodDone("task started event", 1);
     }
 
 
-    private async taskFinishedEvent(e: TaskEndEvent)
+    private async taskFinishedEvent(e: TaskEndEvent): Promise<void>
     {
         const taskMap = this.treeManager.getTaskMap(),
               taskTree = this.treeManager.getTaskTree(),
@@ -226,6 +245,7 @@ export class TaskWatcher implements Disposable
         }
         else {
             this.fireTaskChangeEvents(taskMap[taskId] as TaskItem, "   ", 1);
+            this._onTaskStatusChange.fire({ task, taskItemId: taskId, isRunning: false });
         }
 
         log.methodDone("task finished event", 1);

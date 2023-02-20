@@ -33,14 +33,13 @@ import { Event, EventEmitter, Task, TreeItem, Disposable, TreeDataProvider } fro
  *        refresh the tree ui, with the TreeItem that needs to be provided (or undefined/null if
  *        asking to provide the entire tree).
  */
-export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Disposable
+export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree
 {
     private visible = false;
     private wasVisible = false;
     private refreshPending = false;
     private eventQueue: IEvent[] = [];
     private treeManager: TaskTreeManager;
-    // private disposables: Disposable[] = [];
     private defaultGetChildrenLogPad = "";
     private defaultGetChildrenLogLevel = 1;
     private currentRefreshEvent: string | undefined;
@@ -54,20 +53,6 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     {
         this.treeManager = treeManager;
     }
-
-
-    dispose = () =>
-    {   //
-        // Don't have any disposables anymore after tree manager extraction, but the disposal
-        // indexing in tree manager is based on where the instance TaskTree is located, so
-        // we keep the dispose() event here.  Who knows maybe we'll need it again someday. I
-        // know if I removed it, i 100% would need it again.
-        //
-        // his.disposables.forEach((d) => {
-        //    d.dispose();
-        // );
-        // this.disposables = [];
-    };
 
 
     fireTreeRefreshEvent = (logPad: string, logLevel: number, treeItem?: TreeItem) =>

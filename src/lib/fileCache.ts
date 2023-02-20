@@ -7,7 +7,7 @@ import { statusBarItem } from "./statusBarItem";
 import * as taskTypeUtils from "./utils/taskTypeUtils";
 import { findFiles, numFilesInDirectory } from "./utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
-import { workspace, RelativePattern, WorkspaceFolder, Uri, commands } from "vscode";
+import { workspace, RelativePattern, WorkspaceFolder, Uri } from "vscode";
 
 
 export class TeFileCache implements ITeFileCache
@@ -25,10 +25,11 @@ export class TeFileCache implements ITeFileCache
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        void commands.executeCommand("setContext", "vscodeTaskExplorer.parsedFiles", []);
         this.taskFilesMap = {};
         this.projectFilesMap = {};
         this.projectToFileCountMap = {};
+        void wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskFiles`, []);
+        // void wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskTypes`, []);
     }
 
 
@@ -395,8 +396,8 @@ export class TeFileCache implements ITeFileCache
             }
         }
         taskFiles.sort();
-        await this.wrapper.contextTe.setContext(ContextKeys.TaskFiles, taskFiles);
-        // await commands.executeCommand("setContext", "vscodeTaskExplorer.taskTypes", taskTypes);
+        await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskFiles`, taskFiles);
+        // await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskTypes`, taskTypes);
         statusBarItem.hide();
         this.cacheBuilding = false;
         this.cancel = false;

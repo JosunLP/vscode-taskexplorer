@@ -12,6 +12,7 @@ export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
 export const enum ContextKeys
 {
 	ActionPrefix = "taskexplorer:action:",
+	FileCachePrefix = "taskexplorer:fileCache:",
 	KeyPrefix = "taskexplorer:key:",
 	TreeViewPrefix = "taskexplorer:treeView:",
 	TreeViewExplorerPrefix = "taskexplorer:treeView:taskTreeExplorer",
@@ -26,10 +27,13 @@ export const enum ContextKeys
 	TaskMonitor  = "taskexplorer:taskMonitor",
 	ParsingReport = "taskexplorer:parsingReport",
 	ReleaseNotes = "taskexplorer:releaseNotes",
-	TaskFiles = "taskexplorer:taskFiles",
 	Tests = "taskexplorer:tests",
 	TestsTest = "taskexplorer:testsTest"
 }
+
+type FileCacheContextKeys =
+	`${ContextKeys.FileCachePrefix}:taskFiles`
+	| `${ContextKeys.FileCachePrefix}:taskTypes`;
 
 type TreeviewContextKeys =
 	`${ContextKeys.TreeViewPrefix}${TreeViewIds}:active`;
@@ -39,15 +43,15 @@ type WebviewPageContextKeys =
 	| `${ContextKeys.WebviewPrefix}${WebviewIds}:focus`
 	| `${ContextKeys.WebviewPrefix}${WebviewIds}:inputFocus`;
 
-
 type WebviewViewContextKeys =
 	`${ContextKeys.WebviewViewPrefix}${WebviewViewIds}:focus`
 	| `${ContextKeys.WebviewViewPrefix}${WebviewViewIds}:inputFocus`;
 
 type AllContextKeys =
 	ContextKeys | TreeviewContextKeys | WebviewPageContextKeys | WebviewViewContextKeys
-	| `${ContextKeys.ActionPrefix}${string}`
-	| `${ContextKeys.KeyPrefix}${string}`;
+	| `${ContextKeys.ActionPrefix}${string}` | FileCacheContextKeys
+	| `${ContextKeys.KeyPrefix}${string}`
+	| `${ContextKeys.FileCachePrefix}${string}`;
 
 
 export class TeContext implements ITeContext
