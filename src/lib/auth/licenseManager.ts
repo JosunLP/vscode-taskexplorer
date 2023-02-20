@@ -6,7 +6,7 @@ import { isScriptType } from "../utils/taskTypeUtils";
 import { IServerResponseData, TeServer } from "./server";
 import { ISessionToken } from "../../interface/IAuthentication";
 import { executeCommand, registerCommand, Commands } from "../command/command";
-import { Disposable, env, EventEmitter, InputBoxOptions, Task, window } from "vscode";
+import { AuthenticationSession, Disposable, env, EventEmitter, InputBoxOptions, Task, window } from "vscode";
 import { TeAuthenticationProvider, TeAuthenticationSessionChangeEvent } from "./authProvider";
 
 
@@ -134,7 +134,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	getLicenseKey = () => this.wrapper.storage.getSecret("license_key"); // for now, "1234-5678-9098-7654321" is a valid license
+	getLicenseKey = () => this.wrapper.storage.getSecret("taskmanager.licenseKey"); // for now, "1234-5678-9098-7654321" is a valid license
+
+
+	getLicenseToken = async(): Promise<ISessionToken | undefined> =>
+	{
+		const token = await this.wrapper.storage.getSecret("taskmanager.licenseToken");
+		return token ? JSON.parse(token) as ISessionToken : undefined;
+	};
 
 
 	getMaxNumberOfTasks = (taskType?: string) =>
@@ -143,6 +150,9 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 
 	getMaxNumberOfTaskFiles = () =>  (this.licensed ? Infinity : this.maxFreeTaskFiles);
+
+
+	getSession = async(): Promise<AuthenticationSession |  undefined> =>  (await this._auth.getSessions())[0];
 
 
 	getVersion = () => this.wrapper.version;
@@ -171,7 +181,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 		this.wrapper.log.methodStart("request license", 1, logPad);
 
-		if (await this.wrapper.storage.getSecret("license_key_30day") !== undefined)
+		if (await this.wrapper.storage.getSecret("taskmanager.licenseKey30Day") !== undefined)
 		{   // this.log("   a 30-day license has already been allocated to this machine", logPad);
 			this.busy = false;
 			return;
@@ -194,7 +204,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			token = rsp.data.token.token;
 			await this.setLicenseKeyFromRsp(rsp.data, logPad);
-			await this.wrapper.storage.updateSecret("license_key_30day", token);
+			await this.wrapper.storage.updateSecret("taskmanager.licenseKey30Day", token);
 		}
 
 		this.busy = false;
@@ -203,7 +213,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	setLicenseKey = async (licenseKey: string | undefined) => this.wrapper.storage.updateSecret("license_key", licenseKey);
+	setLicenseKey = async (licenseKey: string | undefined) => this.wrapper.storage.updateSecret("taskmanager.licenseKey", licenseKey);
+
+
+	private setLicenseToken = async (licenseKey: ISessionToken | undefined) => this.wrapper.storage.updateSecret("taskmanager.licenseToken", licenseKey);
 
 
 	private setLicenseKeyFromRsp = async(jso: IServerResponseData, logPad: string) =>
@@ -213,6 +226,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.value("   issued", token.issuedFmt, 1, logPad);
 		this.wrapper.log.value("   expires", token.expiresFmt /* || jso.expiresFmt */, 1, logPad);
 		await this.setLicenseKey(token.token);
+		await this.setLicenseToken(token);
 		this.wrapper.log.write("license key saved to secure storage", 1, logPad);
 	};
 

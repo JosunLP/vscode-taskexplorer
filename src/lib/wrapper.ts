@@ -243,6 +243,16 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// Authentication
 		//
+/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+	await this.storage.updateSecret("taskmanager.licenseKey", "1234-5678-9098-7654321");
+/* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */
+	await this.storage.updateSecret("taskmanager.licenseToken", { /* TEMP */
+		token: "1234-5678-9098-7654321", /* TEMP */
+		ttl: 160000000, /* TEMP */
+		expiresFmt: "", /* TEMP */
+		issuedFmt: "" /* TEMP */
+	}); /* TEMP */
+/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		await this.licenseManager.checkLicense("   ");
 		// const session = await licenseManager.getSession("TeAuth", [], { create: true });
 		// if (session) {

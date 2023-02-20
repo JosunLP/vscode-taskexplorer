@@ -243,7 +243,10 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 			enabled: this.wrapper.views.taskExplorer.enabled || this.wrapper.views.taskExplorerSideBar.enabled,
 			nonce: this._cspNonce,
 			pinned: false,
-			webroot: this.getWebRoot()
+			webroot: this.getWebRoot(),
+			isLicensed: this.wrapper.licenseManager.isLicensed(),
+			session: await this.wrapper.licenseManager.getSession(),
+			license: await this.wrapper.licenseManager.getLicenseToken()
 		};
 	}
 

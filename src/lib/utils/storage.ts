@@ -176,6 +176,6 @@ class Storage implements IStorage, Memento
     }
 
 
-    updateSecret = (key: string, value: any) => this.secrets.store(this.getKey(key), value);
+    updateSecret = (key: string, value: string) => this.secrets.store(this.getKey(key), value);
 
 }

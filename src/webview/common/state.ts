@@ -1,4 +1,6 @@
 
+import { AuthenticationSession } from "vscode";
+import { ISessionToken } from "../../interface/IAuthentication";
 
 export interface State extends BaseState
 {
@@ -12,4 +14,7 @@ export interface BaseState
 	nonce?: string;
 	pinned: boolean;
 	webroot?: string;
+	isLicensed?: boolean;
+	license?: ISessionToken;
+	session?: AuthenticationSession;
 }

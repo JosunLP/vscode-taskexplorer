@@ -140,7 +140,13 @@ export const activate = async (instance?: Mocha.Context) =>
         //
         // Set a valid license key to run in 'licensed mode' at startup
         //
-        await teWrapper.storage.updateSecret("license_key", "1234-5678-9098-7654321");
+        await teWrapper.storage.updateSecret("taskmanager.licenseKey", "1234-5678-9098-7654321");
+        await teWrapper.storage.updateSecret("taskmanager.licenseToken", {
+            token: "1234-5678-9098-7654321",
+            ttl: 160000000,
+            expiresFmt: "",
+            issuedFmt: ""
+        });
         //
         // waitForIdle() added 1/2/03 - Tree loads in delay 'after' activate()
         //
