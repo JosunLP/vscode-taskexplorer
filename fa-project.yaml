@@ -1,0 +1,23 @@
+projectName: Unsaved Project
+version: 6.3.0
+icons:
+  - gears:
+      - solid
+      - regular
+      - duotone
+  - lock:
+      - light
+  - circle-chevron-up:
+      - regular
+  - circle-chevron-down:
+      - regular
+  - bug:
+      - regular
+  - asterisk:
+      - regular
+  - gear:
+      - regular
+  - plus:
+      - regular
+  - star:
+      - regular

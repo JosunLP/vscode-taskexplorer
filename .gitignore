@@ -16,6 +16,7 @@ tsconfig.tsbuildinfo
 .dccache
 /res/**/home.*
 /res/css
+/res/font
 /res/js
 /res/page
 /res/img/webview

@@ -7,7 +7,6 @@
  */
 
 import { TextDecoder } from "util";
-import { randomUUID } from "crypto";
 import { ITeWebview } from "../interface";
 // import { getNonce } from "@env/crypto";
 import { BaseState } from "./common/state";
@@ -20,6 +19,7 @@ import {
 	ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
 	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType
 } from "./common/ipc";
+import { fontawesome } from "./common/fontawesome";
 
 
 export interface CodiconClass
@@ -192,11 +192,11 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 		const incCodicon = this.includeCodicon?.();
 		if (incCodicon)
 		{
-			html += `<style nonce="${this._cspNonce}">
+			html += ` <style nonce="${this._cspNonce}">
 						@font-face {
 							font-family:'codicon';
 							font-display:block;
-							src:url('${webRoot}/page/codicon.ttf?${randomUUID()}') format('truetype'); 
+							src:url('${webRoot}/font/codicon.ttf?${this.wrapper.cacheBuster}') format('truetype'); 
 						}`;
 			if (this.wrapper.utils.isArray(incCodicon.icons))
 			{
@@ -210,26 +210,42 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 			html += "</style>";
 		}
 
-		if (this.includeFontAwesome?.())
+		const incFa = this.includeFontAwesome?.();
+		if (incFa)
 		{
-		// 	html += `<style nonce="#{cspNonce}">
-		// 				@font-face {
-		// 					font-family: 'Font Awesome 6 Pro';
-		// 					font-display: block;
-		// 					src: url('#{webRoot}/page/fa-regular-400.ttf?${randomUUID()}') format('truetype');
-		// 					src: url('#{webRoot}/page/fa-regular-400.woff2?${randomUUID()}') format('woff2');
-		// 					font-style: normal;
-		// 					font-weight: 400;
-		// 					font-display: $fa-font-display;
-		// 					src: url('#{webRoot}/page/fa-regular-400.woff2?${randomUUID()}') format('woff2'),
-		// 					src: url('#{webRoot}/page/fa-duotone-900.woff2?${randomUUID()}') format('woff2'),
-		// 						 url('#{webRoot}/page/fa-regular-400.ttf') format('truetype');
-		// 				}
-		// 			</style>`;
+			if (incFa.regular)
+			{
+				html += ` <style nonce="${this._cspNonce}">
+							:root, :host {
+								--fa-style-family-classic: 'Font Awesome 6 Free';
+								--fa-font-regular: normal 400 1em/1 'Font Awesome 6 Free';
+							}
+							@font-face {
+								font-family: 'Font Awesome 6 Free';
+								font-display: block;
+								font-style: normal;
+								font-weight: 400;
+								src: url('${webRoot}/font/fa-regular-400.woff2?${this.wrapper.cacheBuster}') format('woff2');
+							}
+							.far,
+							.fa-regular {
+								font-weight: 400;
+							}`;
+				if (this.wrapper.utils.isArray(incFa.icons))
+				{
+					html += ` ${fontawesome.selector}`;
+					for (const icon of incFa.icons)
+					{
+						const cls = ` far .fa-${icon}:before`;
+						html += `${cls} { content: '${fontawesome[icon]}'; }`;
+					}
+				}
+				html += "</style>";
+			}
 		}
 
 		if (bootstrap) {
-			html += `<script type="text/javascript" nonce="${this._cspNonce}">
+			html += ` <script type="text/javascript" nonce="${this._cspNonce}">
 						window.bootstrap=${JSON.stringify(bootstrap)};
 					</script>`;
 		}
@@ -238,7 +254,7 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 			html += endOfBody;
 		}
 
-		return html;
+		return html.trim().replace(/ {2,}/g, " ");
 	};
 
 
