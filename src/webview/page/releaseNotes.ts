@@ -31,7 +31,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	}
 
 
-	protected override includeFontAwesome = () => ({ regular: true, icons: [ "plus", "bug", "gear", "star", "circle-chevron-up", "circle-chevron-down" ] });
+	protected override includeFontAwesome = () => ({ regular: true, icons: [ "plus", "bug", "gear", "star", "chevron-circle-up", "chevron-circle-down" ] });
 
 
 	protected override onHtmlFinalize = async(html: string) =>

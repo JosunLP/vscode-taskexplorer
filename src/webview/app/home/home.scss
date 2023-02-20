@@ -1,4 +1,37 @@
 
-// button:hover {
-//     background-color: lighten(var(--vscode-button-background), 10%);
-// }
+button {
+    background-color: var(--vscode-background);
+    /* color: var(--vscode-button-foreground); */
+    color: var(--vscode-foreground);
+    padding: 4px 2px;
+    cursor: pointer;
+    width: -webkit-fill-available;
+    font-size: 10px;
+    border-radius: 3px;
+    margin-right: 5px;
+    border: gray 1px solid;
+    max-width: 160px;
+    background: -webkit-linear-gradient(bottom, #000000, #222222, #696767, #222222, #000000);
+	.vscode-light & {
+        border: rgb(58, 56, 56) 1px solid;
+	}
+	.vscode-dark & {
+        border: gray 1px solid;
+	}
+	transition: background-color 250ms, border-color 250ms, color 250ms;
+	&:not([disabled]):hover,
+	&:not([disabled]):focus {
+        cursor: pointer;
+        background: inherit;
+        background: -webkit-linear-gradient(bottom, #222222, #444444, #727272, #444444, #222222);
+		.vscode-light & {
+            border: rgb(58, 56, 56) 1px solid;
+		}
+		.vscode-dark & {
+            border: gray 1px solid;
+		}
+	}
+	.preload & {
+		transition-duration: 0s !important;
+	}
+}
