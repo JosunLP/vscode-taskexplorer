@@ -31,9 +31,6 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	}
 
 
-	protected override includeCodicon = () => ({ icons: [ "plus", "bug", "gear", "star", "chevronup", "chevrondown" ] });
-
-
 	protected override onHtmlFinalize = async(html: string) =>
 	{
 		const changelogUri = Uri.joinPath(this.wrapper.context.extensionUri, "CHANGELOG.md"),
@@ -84,17 +81,14 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 
 
 	private getNewReleaseNotesHdr = (title: string, icon: string) =>
-	{   //
-		// <span class="codicon codicon-${icon} content-section-fa-img"></span>
-		// <span class=\"far fa-${icon} content-section-fa-img\"></span>
-		//
+	{
 		return `
 		<tr><td width="100%" colspan="2">
 			<hr>
 		</td></tr>
 		<tr class="content-section-header">
 			<td>
-				<span class="te-release-notes-section-header-icon">&nbsp;<span class=\"codicon codicon-${icon} content-section-fa-img\"></span></span>
+				<span class="te-release-notes-section-header-icon">&nbsp;<span class=\"far fa-${icon} content-section-fa-img\"></span></span>
 				<span class="te-release-notes-section-header-title">&nbsp;${title}</span>
 			</td>
 		</tr>

@@ -237,12 +237,6 @@ const wpPlugin =
 				});
 			}
 
-			patterns.push(
-			{
-				from: path.posix.join(psx__dirname, "node_modules", "@vscode", "codicons", "dist", "codicon.ttf"),
-				to: path.posix.join(psx__dirname, "res", "font"),
-			});
-
 			// const proPath = path.join(__dirname, "res", "font", "fa-duotone-900.woff2");
 			// if (fs.existsSync(proPath)) {
 			// 	try { fs.unlinkSync(path.join(__dirname, "res", "font", "fa-duotone-900.woff2")); } catch {}

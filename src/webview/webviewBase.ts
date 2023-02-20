@@ -10,24 +10,15 @@ import { TextDecoder } from "util";
 import { ITeWebview } from "../interface";
 // import { getNonce } from "@env/crypto";
 import { BaseState } from "./common/state";
-import { codicon } from "./common/codicon";
 import { TeWrapper } from "../lib/wrapper";
 import { getNonce } from "../lib/env/node/crypto";
+// import { fontawesome } from "./common/fontawesome";
 import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
 	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType
 } from "./common/ipc";
-import { fontawesome } from "./common/fontawesome";
-
-
-export interface CodiconClass
-{
-	all?: boolean;
-	icons?: string[];
-	size?: number;
-}
 
 
 export interface FontAwesomeClass
@@ -50,7 +41,6 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 
 	protected includeBody?(...args: unknown[]): string | Promise<string>;
 	protected includeBootstrap?(...args: unknown[]): any;
-	protected includeCodicon?(): CodiconClass;
 	protected includeEndOfBody?(...args: unknown[]): string | Promise<string>;
 	protected includeFontAwesome?(): FontAwesomeClass;
 	protected includeHead?(...args: unknown[]): string | Promise<string>;
@@ -188,27 +178,6 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 	private getHtmlEndOfBody = (webRoot: string, bootstrap: string | undefined, endOfBody: string | undefined): string =>
 	{
 		let html = "";
-
-		const incCodicon = this.includeCodicon?.();
-		if (incCodicon)
-		{
-			html += ` <style nonce="${this._cspNonce}">
-						@font-face {
-							font-family:'codicon';
-							font-display:block;
-							src:url('${webRoot}/font/codicon.ttf?${this.wrapper.cacheBuster}') format('truetype'); 
-						}`;
-			if (this.wrapper.utils.isArray(incCodicon.icons))
-			{
-				html += ` ${codicon.selector}`;
-				for (const icon of incCodicon.icons)
-				{
-					const cls = ` .codicon-${icon}:before`;
-					html += `${cls} { content: '${codicon[icon]}'; }`;
-				}
-			}
-			html += "</style>";
-		}
 /*
 		const incFa = this.includeFontAwesome?.();
 		if (incFa)
