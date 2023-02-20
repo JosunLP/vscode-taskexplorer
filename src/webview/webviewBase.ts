@@ -17,7 +17,7 @@ import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
-	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeConfigurationType, DidChangeLicenseType
+	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeStateType
 } from "./common/ipc";
 
 
@@ -335,7 +335,12 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 
 
 	protected onSessionChanged = async (e: TeSessionChangeEvent): Promise<boolean> =>
-		this.notify(DidChangeLicenseType, { license: e.token, session: await this.wrapper.licenseManager.getSession() });
+	{
+		const state = await this.getState();
+		return this.notify(DidChangeStateType, Object.assign(state, {
+			license: e.token
+		}));
+	};
 
 
 	private postMessage(message: IpcMessage): Promise<boolean>

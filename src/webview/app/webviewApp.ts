@@ -1,8 +1,9 @@
 
 import { Disposable, DOM } from "./common/dom";
 import {
-	IpcCommandType, IpcMessage, IpcMessageParams, WebviewFocusChangedParams, WebviewFocusChangedCommandType, WebviewReadyCommandType,
-	ExecuteCommandType, onIpc, EchoCommandRequestType, LogWriteCommandType, EchoCustomCommandRequestType, ExecuteCustomCommandType, DidChangeLicenseType
+	IpcCommandType, IpcMessage, IpcMessageParams, WebviewFocusChangedParams, WebviewFocusChangedCommandType,
+	WebviewReadyCommandType, ExecuteCommandType, onIpc, EchoCommandRequestType, LogWriteCommandType,
+	EchoCustomCommandRequestType, ExecuteCustomCommandType, DidChangeStateType
 } from "../common/ipc";
 
 interface VsCodeApi {
@@ -148,10 +149,16 @@ export abstract class TeWebviewApp<State = undefined>
         this.log(`[BASE]${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`);
         switch (msg.method)
         {
-			case DidChangeLicenseType.method:
-				onIpc(DidChangeLicenseType, msg, params => {
-					(this.state as any).license = params.license;
-					(this.state as any).session = params.session;
+			// case DidChangeLicenseType.method:
+			// 	onIpc(DidChangeLicenseType, msg, params => {
+			// 		(this.state as any).license = params.license;
+			// 		(this.state as any).session = params.session;
+			// 		this.updateState();
+			// 	});
+			// 	break;
+			case DidChangeStateType.method:
+				onIpc(DidChangeStateType, msg, params => {
+					(this.state as any) = params;
 					this.updateState();
 				});
 				break;

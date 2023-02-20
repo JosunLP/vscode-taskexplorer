@@ -14,7 +14,7 @@ export interface BaseState
 	nonce?: string;
 	pinned: boolean;
 	webroot?: string;
-	isLicensed?: boolean;
+	isLicensed: boolean;
 	license?: ISessionToken;
 	session?: AuthenticationSession;
 }

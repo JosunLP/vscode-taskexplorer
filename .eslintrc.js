@@ -248,7 +248,7 @@ module.exports = {
         ],
         "prefer-arrow/prefer-arrow-functions": "warn",
         "prefer-const": "warn",
-        "prefer-object-spread": "warn",
+        "prefer-object-spread": "off",
         "quote-props": [
             "warn",
             "consistent-as-needed"
