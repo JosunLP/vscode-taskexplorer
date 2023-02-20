@@ -86,7 +86,7 @@ export class HomeView extends TeWebviewView<State>
 	}
 
 
-	protected override includeFontAwesome = () => ({ light: true, icons: [ "lock" ]});
+	protected override includeFontAwesome = () => ({ duotone: true, light: true, icons: [ "lock", "gears" ]});
 
 
 	private onConfigurationChanged(e: ConfigurationChangeEvent)

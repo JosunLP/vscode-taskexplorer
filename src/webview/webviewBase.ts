@@ -183,11 +183,17 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 		const incFa = this.includeFontAwesome?.();
 		if (incFa && this.wrapper.utils.isArray(incFa.icons))
 		{
+			const _addCls = (icons: string[]) => {
+				for (const icon of icons) {
+					const cls = `.fa-${icon}::before`;
+					html += ` ${cls} { content: \"${fontawesome.icons[icon]}\"; }`;
+				}
+			};
 			html += ` <style nonce="${this._cspNonce}">`;
-			// if (incFa.duotone)
-			// {
-			// 	html += ` ${fontawesome.fontFace("duotone-900", webRoot, this.wrapper.cacheBuster)}`;
-			// }
+			if (incFa.duotone)
+			{
+				html += ` ${fontawesome.fontFace("duotone-900", webRoot, this.wrapper.cacheBuster)}`;
+			}
 			if (incFa.light)
 			{
 				html += ` ${fontawesome.fontFace("light-300", webRoot, this.wrapper.cacheBuster)}`;
@@ -209,11 +215,11 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 			// 	html += ` ${fontawesome.fontFace("thin-200", webRoot, this.wrapper.cacheBuster)}`;
 			// }
 			html += ` ${fontawesome.selector}`;
-			for (const icon of incFa.icons)
-			{
-				const cls = `.fa-${icon}::before`;
-				html += ` ${cls} { content: \"${fontawesome.icons[icon]}\"; }`;
-			}
+			// Object.keys(incFa).forEach(k =>
+			// {
+			// 	_addCls();
+			// });
+			_addCls(incFa.icons);
 			html += " </style>";
 		}
 
