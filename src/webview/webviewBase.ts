@@ -209,7 +209,7 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 			}
 			html += "</style>";
 		}
-
+/*
 		const incFa = this.includeFontAwesome?.();
 		if (incFa)
 		{
@@ -243,7 +243,7 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 				html += "</style>";
 			}
 		}
-
+*/
 		if (bootstrap) {
 			html += ` <script type="text/javascript" nonce="${this._cspNonce}">
 						window.bootstrap=${JSON.stringify(bootstrap)};

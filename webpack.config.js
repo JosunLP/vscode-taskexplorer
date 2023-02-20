@@ -44,6 +44,7 @@ module.exports = (env, argv) =>
 		clean: false,
 		analyze: false,
 		esbuild: false,
+		fa: "custom",
 		imageOpt: true,
 		environment: "prod",
 		target: "node"

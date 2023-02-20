@@ -1,7 +1,10 @@
 
+import "../common/scss/fa/regular.scss";
+import "../common/scss/fa/fontawesome.scss";
 import "../common/css/vscode.css";
 import "../common/css/page.css";
 import "./release-notes.css";
+
 import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
 import { Disposable, DOM } from "../common/dom";
@@ -46,8 +49,8 @@ export class ReleaseNotesWebviewApp extends TeWebviewApp<State>
 	{
 		const x = document.getElementById("releaseNotesDiv") as HTMLElement;
 		const showing = x.classList.toggle("is-show");
-		element.classList.remove(!showing ? "codicon-chevrondown" : "codicon-chevronup");
-		element.classList.add(!showing ? "codicon-chevronup" : "codicon-chevrondown");
+		element.classList.remove(!showing ? "fa-circle-chevron-down" : "fa-circle-chevron-up");
+		element.classList.add(!showing ? "fa-circle-chevron-up" : "fa-circle-chevron-down");
 	};
 
 }
