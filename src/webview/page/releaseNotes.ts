@@ -31,7 +31,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	}
 
 
-	protected override includeCodicon = () => ({ all: true });
+	protected override includeCodicon = () => ({ icons: [ "plus", "bug", "gear", "star", "chevronup", "chevrondown" ] });
 
 
 	protected override onHtmlFinalize = async(html: string) =>

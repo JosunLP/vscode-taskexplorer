@@ -2,8 +2,6 @@
 import "../common/css/vscode.css";
 import "../common/css/page.css";
 import "./release-notes.css";
-// import "../common/css/fa.css";
-import "../common/scss/codicons.scss";
 import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
 import { Disposable, DOM } from "../common/dom";
@@ -50,8 +48,8 @@ export class ReleaseNotesWebviewApp extends TeWebviewApp<State>
 		const showing = x.classList.toggle("is-show");
 		// element.classList.remove(!showing ? "fa-chevron-down" : "fa-chevron-up");
 		// element.classList.add(!showing ? "fa-chevron-up" : "fa-chevron-down");
-		element.classList.remove(!showing ? "codicon-chevron-down" : "codicon-chevron-up");
-		element.classList.add(!showing ? "codicon-chevron-up" : "codicon-chevron-down");
+		element.classList.remove(!showing ? "codicon-chevrondown" : "codicon-chevronup");
+		element.classList.add(!showing ? "codicon-chevronup" : "codicon-chevrondown");
 	};
 
 }

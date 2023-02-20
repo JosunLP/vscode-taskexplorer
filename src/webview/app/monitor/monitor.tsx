@@ -2,7 +2,6 @@
 import "../common/css/vscode.css";
 import "./monitor.css";
 import "./monitor.scss";
-import "../common/scss/codicons.scss";
 import React from "react";
 import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";

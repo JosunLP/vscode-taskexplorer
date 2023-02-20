@@ -7,8 +7,11 @@
  */
 
 import { TextDecoder } from "util";
+import { randomUUID } from "crypto";
 import { ITeWebview } from "../interface";
 // import { getNonce } from "@env/crypto";
+import { BaseState } from "./common/state";
+import { codicon } from "./common/codicon";
 import { TeWrapper } from "../lib/wrapper";
 import { getNonce } from "../lib/env/node/crypto";
 import { Commands, executeCommand } from "../lib/command/command";
@@ -17,8 +20,6 @@ import {
 	ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
 	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType
 } from "./common/ipc";
-import { randomUUID } from "crypto";
-import { BaseState } from "./common/state";
 
 
 export interface CodiconClass
@@ -188,26 +189,22 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 	{
 		let html = "";
 
-		const codicon = this.includeCodicon?.();
-		if (codicon)
+		const incCodicon = this.includeCodicon?.();
+		if (incCodicon)
 		{
-			const getIconChar = () =>
-			{
-
-			};
-
 			html += `<style nonce="${this._cspNonce}">
 						@font-face {
 							font-family:'codicon';
 							font-display:block;
 							src:url('${webRoot}/page/codicon.ttf?${randomUUID()}') format('truetype'); 
 						}`;
-			if (codicon.icons)
+			if (this.wrapper.utils.isArray(incCodicon.icons))
 			{
-				for (const icon of codicon.icons)
+				html += ` ${codicon.selector}`;
+				for (const icon of incCodicon.icons)
 				{
-					const cls = `.codicon-${icon}:before`;
-					html += `${cls} { content: '\\ea75'; }`;
+					const cls = ` .codicon-${icon}:before`;
+					html += `${cls} { content: '${codicon[icon]}'; }`;
 				}
 			}
 			html += "</style>";

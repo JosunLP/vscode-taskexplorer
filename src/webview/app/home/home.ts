@@ -2,7 +2,6 @@
 import "../common/css/vscode.css";
 import "./home.css";
 import "./home.scss";
-import "../common/scss/codicons.scss";
 import { Disposable } from "vscode";
 import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
