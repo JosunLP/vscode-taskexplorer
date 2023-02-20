@@ -44,6 +44,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		this.log(`${this.appName}.onBind`);
 		// const [ tabIndex, setTabIndex ] = useState(0);
 
+		// const [ tabIndex, setTabIndex ] = useState(0);
 		//
 		// Without the 'forceRenderTabPanel' flag, the TabPanel component is
 		// destroyed / removed from the DOM as soon as it loses focus i.e. every
@@ -52,7 +53,8 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		//
         const root = createRoot(document.getElementById("root") as HTMLElement);
         root.render(
-			<Tabs className="te-tabs" forceRenderTabPanel={true}>
+			// <Tabs className="te-tabs" selectedIndex={tabIndex} onSelect={(i) => this.setTabIndex(i)} forceRenderTabPanel={true} defaultFocus={true}></Tabs>
+			<Tabs className="te-tabs" onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
 				<TabList>
 					<Tab>Recent</Tab>
 					<Tab>Running</Tab>
@@ -60,12 +62,25 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 				</TabList>
 				<TabPanel>
 					<TeTaskControl
-						state={this.state}
+						id="te-id-view-monitor-control-recent"
+						state={Object.assign({}, this.state, { seconds: 0 })}
 						subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
 					/>
 				</TabPanel>
-				<TabPanel>TODO</TabPanel>
-				<TabPanel>TODO</TabPanel>
+				<TabPanel>
+					<TeTaskControl
+						id="te-id-view-monitor-control-running"
+						state={Object.assign({}, this.state, { seconds: 10 })}
+						subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+					/>
+				</TabPanel>
+				<TabPanel>
+					<TeTaskControl
+						id="te-id-view-monitor-control-famous"
+						state={Object.assign({}, this.state, { seconds: 20 })}
+						subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+					/>
+				</TabPanel>
 			</Tabs>
         );
 
@@ -77,7 +92,13 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 	}
 
 
-	protected override onMessageReceived(e: MessageEvent)
+	private onTabSelected = (index: number, lastIndex: number) =>
+	{
+		this.log(`${this.appName}.onTabSelected: index=${index}: lastIdex=${lastIndex}`);
+	};
+
+
+	protected override onMessageReceived = (e: MessageEvent) =>
     {
 		const msg = e.data as IpcMessage;
 		this.log(`${this.appName}.onMessageReceived(${msg.id}): name=${msg.method}`);
@@ -92,33 +113,33 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 			default:
 				super.onMessageReceived?.(e);
 		}
-	}
+	};
 
 
-	protected override setState(state: State, type?: IpcNotificationType<any>) // | InternalNotificationType)
+	protected override setState = (state: State, type?: IpcNotificationType<any>) => // | InternalNotificationType)
     {
 		this.log(`${this.appName}.setState`);
 		this.state = state;
 		// super.setState(state); // Don't call base (for now), not using internally provided vscode state
 		this.callback?.(this.state, type);
-	}
+	};
 
 
-	private registerEvents(callback: StateChangedCallback): () => void
+	private registerEvents = (callback: StateChangedCallback): (() => void) =>
     {
 		this.callback = callback;
 		return () => {
 			this.callback = undefined;
 		};
-	}
+	};
 
 
-	private refresh(state: State)
+	private refresh = (state: State) =>
 	{
 		// const taskControlRef =  ReactDOM.findDOMNode(this);// document.getElementById("te-id-task-control") as HTMLElement;
 		// taskControlRef.innerHTML = "";
 		// taskControlRef.
-	}
+	};
 
 }
 

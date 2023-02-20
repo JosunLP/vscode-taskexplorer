@@ -23,6 +23,7 @@
     border: 1px solid var(--vscode-button-background);
     border-radius: 2rem;
     padding-left: 0px;
+    margin-top: 10px;
 }
 
 .react-tabs__tab {
@@ -39,8 +40,12 @@
 }
 
 .react-tabs__tab--disabled {
-    color: GrayText;
+    color: var(--vscode-disabledForeground);
     cursor: default;
+}
+
+.react-tabs__tab:focus {
+    outline-color: var(--vscode-focusBorder) !important;
 }
 
 .react-tabs__tab:hover {
