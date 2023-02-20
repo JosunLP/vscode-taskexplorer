@@ -5,6 +5,7 @@ import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
+import { DidChangeStateType } from "../common/ipc";
 
 
 export class MonitorPage extends TeWebviewPanel<State>
@@ -37,7 +38,10 @@ export class MonitorPage extends TeWebviewPanel<State>
 		return {
 			...(await super.getState()),
 			seconds: 0,
-			taskType: "grunt"
+			taskType: "grunt",
+			param1: undefined, // task
+			param2: undefined, // `is running` flag
+			param3: undefined  // task `item id`
 		};
 	}
 
@@ -56,11 +60,15 @@ export class MonitorPage extends TeWebviewPanel<State>
 	}
 
 
-	private async onTaskStatusChanged(_e: ITeTaskStatusChangeEvent)
+	private async onTaskStatusChanged(e: ITeTaskStatusChangeEvent)
 	{
-		if (this.isFirstLoadComplete) {
-			await this.refresh();
-		}
+		await this.refresh();
+		const state = await this.getState();
+		return this.notify(DidChangeStateType, Object.assign(state, {
+			param1: e.task,
+			param2: e.isRunning,
+			param3: e.taskItemId
+		}));
 	}
 
 

@@ -6,7 +6,7 @@ import "../common/css/page.css";
 import "./monitor.css";
 import "./monitor.scss";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
 import { State } from "../../common/state";
@@ -14,7 +14,7 @@ import { TeWebviewApp } from "../webviewApp";
 import { TeTaskControl } from "./cmp/control";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
-import { IpcMessage, IpcNotificationType, StateChangedCallback } from "../../common/ipc";
+import { DidChangeStateType, IpcMessage, IpcNotificationType, onIpc, StateChangedCallback } from "../../common/ipc";
 
 
 class TaskMonitorWebviewApp extends TeWebviewApp<State>
@@ -27,17 +27,35 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 	}
 
 
+	protected override onInitialize()
+	{
+		this.log(`${this.appName}.onInitialize`);
+		this.state = this.getState() ?? this.state;
+		if (this.state) {
+			this.refresh(this.state);
+		}
+		// const [ tasks, setTasks ] = useState(this.state.param1 ?? []);
+	}
+
+
     protected override onBind()
     {
 		const disposables = super.onBind?.() ?? [];
 		this.log(`${this.appName}.onBind`);
+		// const [ tabIndex, setTabIndex ] = useState(0);
 
+		//
+		// Without the 'forceRenderTabPanel' flag, the TabPanel component is
+		// destroyed / removed from the DOM as soon as it loses focus i.e. every
+		// time a tab is selected.  This was a better option than tracking each
+		// tab's state from this component.
+		//
         const root = createRoot(document.getElementById("root") as HTMLElement);
         root.render(
-			<Tabs className="te-tabs">
+			<Tabs className="te-tabs" forceRenderTabPanel={true}>
 				<TabList>
-					<Tab>Running</Tab>
 					<Tab>Recent</Tab>
+					<Tab>Running</Tab>
 					<Tab>Famous</Tab>
 				</TabList>
 				<TabPanel>
@@ -53,22 +71,10 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 
         disposables.push({
             dispose: () => root.unmount()
-            // DOM.on(window, 'keyup', e => this.onKeyUp(e))
         });
 
 		return disposables;
 	}
-
-
-	// private onKeyUp(e: KeyboardEvent)
-    // {
-	// 	if (e.key === 'Enter' || e.key === ' ') {
-	// 		const inputFocused = e.composedPath().some(el => (el as HTMLElement).tagName === 'INPUT');
-	// 		if (inputFocused) {
-	// 		   const $target = e.target as HTMLElement;
-    //      }
-	// 	 }
-	// }
 
 
 	protected override onMessageReceived(e: MessageEvent)
@@ -77,6 +83,12 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		this.log(`${this.appName}.onMessageReceived(${msg.id}): name=${msg.method}`);
 
 		switch (msg.method) {
+			case DidChangeStateType.method:
+				onIpc(DidChangeStateType, msg, params => {
+					(this.state as any) = params;
+					this.updateState();
+				});
+				break;
 			default:
 				super.onMessageReceived?.(e);
 		}
@@ -98,6 +110,14 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		return () => {
 			this.callback = undefined;
 		};
+	}
+
+
+	private refresh(state: State)
+	{
+		// const taskControlRef =  ReactDOM.findDOMNode(this);// document.getElementById("te-id-task-control") as HTMLElement;
+		// taskControlRef.innerHTML = "";
+		// taskControlRef.
 	}
 
 }
