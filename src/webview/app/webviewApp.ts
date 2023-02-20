@@ -39,7 +39,7 @@ export abstract class TeWebviewApp<State = undefined>
 		(window as any).bootstrap = undefined;
 
 		const disposables: Disposable[] = [];
-		this.log(`${this.appName}()`);
+		this.log(`${this.appName}.constructor()`);
 
 		this._vscode = acquireVsCodeApi();
 
@@ -68,12 +68,12 @@ export abstract class TeWebviewApp<State = undefined>
 	}
 
 
-	protected get vscode() {
+	protected get vscode(): VsCodeApi {
 		return this._vscode;
 	}
 
 
-	protected initialize()
+	protected initialize(): void
 	{
 		this.bindDisposables?.forEach(d => d.dispose());
 		this.bindDisposables = this.onBind?.();
@@ -116,10 +116,12 @@ export abstract class TeWebviewApp<State = undefined>
 				}
 			})
 		);
+
+		this.updateState();
 	}
 
 
-	protected log = (message: string, ...optionalParams: any[]) =>
+	protected log = (message: string, ...optionalParams: any[]): void =>
 	{
 		setTimeout(() => {
 			this.postMessage({ id: this.nextIpcId(), method: LogWriteCommandType.method, params: { message, value: undefined }});
@@ -128,10 +130,10 @@ export abstract class TeWebviewApp<State = undefined>
 	};
 
 
-	protected getState = () => this._vscode.getState() as State;
+	protected getState = (): State => this._vscode.getState() as State;
 
 
-	private nextIpcId = () =>
+	private nextIpcId = (): string =>
 	{
 		if (this.ipcSequence === this.maxSmallIntegerV8) {
 			this.ipcSequence = 1;
@@ -143,7 +145,7 @@ export abstract class TeWebviewApp<State = undefined>
 	};
 
 
-	private _onMessageReceived(e: MessageEvent)
+	private _onMessageReceived(e: MessageEvent): void
     {
 		const msg = e.data as IpcMessage;
         this.log(`[BASE]${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`);
@@ -174,7 +176,7 @@ export abstract class TeWebviewApp<State = undefined>
 	};
 
 
-	private postMessage = (e: IpcMessage) => this._vscode.postMessage(e);
+	private postMessage = (e: IpcMessage): void => this._vscode.postMessage(e);
 
 
 	protected sendCommand<T extends IpcCommandType<any>>(command: T, params: IpcMessageParams<T>)
@@ -185,7 +187,7 @@ export abstract class TeWebviewApp<State = undefined>
 	}
 
 
-	protected setState(state: State)
+	protected setState(state: State): void
 	{
 		this.state = state;
 		if (state) {
@@ -193,9 +195,30 @@ export abstract class TeWebviewApp<State = undefined>
 		}
 	}
 
-	protected updateState()
+	protected updateState(): void
     {
-
+		let btn = document.getElementById("btnEnterLicense");
+		if (btn)
+		{
+			const isLicensed = (this.state as any).isLicensed as boolean;
+			(btn.parentNode as HTMLElement).hidden = isLicensed;
+			(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
+			btn = document.getElementById("btnGetLicense");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = isLicensed;
+				(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
+			}
+			btn = document.getElementById("btnTaskMonitor");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = !isLicensed;
+				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
+			}
+			btn = document.getElementById("btnViewLicense");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = !isLicensed;
+				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
+			}
+		}
 	}
 
 }

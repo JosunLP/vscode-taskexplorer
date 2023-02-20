@@ -5,7 +5,6 @@ import { TeWrapper } from "../../lib/wrapper";
 import { ContextKeys } from "../../lib/context";
 import { TeWebviewPanel, WebviewIds } from "../webviewPanel";
 import { createTaskCountTable } from "../common/taskCountTable";
-import { removeViewLicenseButton } from "../common/removeLicenseButtons";
 
 
 export class LicensePage extends TeWebviewPanel<State>
@@ -33,7 +32,6 @@ export class LicensePage extends TeWebviewPanel<State>
 	{
 		const newKey = args[0] as string | undefined;
 		html = await createTaskCountTable(this.wrapper, undefined, html);
-		html = removeViewLicenseButton(html);
 		let infoContent = await this.getExtraContent(newKey);
 		html = html.replace("#{licensePageBodyTop}", infoContent);
 		infoContent = this.getExtraContent2();

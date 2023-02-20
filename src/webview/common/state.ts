@@ -10,11 +10,14 @@ export interface State extends BaseState
 
 export interface BaseState
 {
-	enabled: boolean;
-	nonce?: string;
-	pinned: boolean;
-	webroot?: string;
+	isEnabled: boolean;
 	isLicensed: boolean;
 	license?: ISessionToken;
+	nonce?: string;
+	param1?: any;
+	param2?: any;
+	param3?: any;
+	pinned: boolean;
 	session?: AuthenticationSession;
+	webroot?: string;
 }

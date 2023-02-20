@@ -87,49 +87,4 @@ export namespace DOM
 		};
 	}
 
-
-	export function insertTemplate(id: string, $slot: HTMLElement, options?: { bindings?: Record<string, unknown>; visible?: Record<string, boolean> })
-	{
-		const $template = document.getElementById(id) as HTMLTemplateElement;
-		$slot.replaceChildren($template?.content.cloneNode(true));
-		$slot.className = $template.className;
-
-		if (options?.visible)
-		{
-			const $els = $slot.querySelectorAll<HTMLElement>("[data-visible]");
-			for (const $el of $els)
-			{
-				const key = $el.dataset.visible;
-				if (!key) continue;
-				if (options.visible[key]) {
-					$el.style.display = "initial";
-				}
-				else {
-					$el.style.display = "none";
-				}
-			}
-		}
-
-		if (options?.bindings)
-		{
-			const $els = $slot.querySelectorAll<HTMLElement>("[data-bind]");
-			for (const $el of $els)
-			{
-				const key = $el.dataset.bind;
-				if (!key) continue;
-				const value = options.bindings[key];
-				if (value) {
-					$el.textContent = String(value);
-				}
-			}
-		}
-	}
-
-
-	export function resetSlot($slot: HTMLElement)
-	{
-		$slot.replaceChildren();
-		$slot.className = "";
-	}
-
 }

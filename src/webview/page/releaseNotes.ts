@@ -7,7 +7,6 @@ import { Commands } from "../../lib/command/command";
 import { TeWrapper } from "../../lib/wrapper";
 import { ContextKeys } from "../../lib/context";
 import { TeWebviewPanel, WebviewIds } from "../webviewPanel";
-import { removeLicenseButtons } from "../common/removeLicenseButtons";
 
 
 export class ReleaseNotesPage extends TeWebviewPanel<State>
@@ -31,6 +30,9 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	}
 
 
+	protected override includeBootstrap = (): Promise<State> => this.getState();
+
+
 	protected override includeFontAwesome = () => ({ regular: true, icons: [ "star", "bug", "gear", "asterisk", "chevron-circle-up", "chevron-circle-down" ] });
 
 
@@ -43,7 +45,6 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 		html = html.replace("#{changelog}", changeLogHtml)
 				   .replace("#{subtitle}", this.getNewInThisReleaseShortDsc())
 				   .replace("#{releasenotes}", this.getNewReleaseNotes(version, changeLogMd));
-		html = removeLicenseButtons(this.wrapper, html);
 		return html;
 	};
 

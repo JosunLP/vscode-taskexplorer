@@ -194,6 +194,9 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> impleme
 	}
 
 
+	protected override includeBootstrap = (): Promise<BaseState> => this.getState();
+
+
 	protected override onHtmlPreviewBase = async(html: string, ...args: unknown[]) =>
 	{
 		return this.onHtmlPreview(html.replace(/\#\{title\}/g,

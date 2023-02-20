@@ -3,7 +3,6 @@ import { Task, workspace } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
 import { IDictionary } from "../../interface";
 import { getTaskTypes } from "../../lib/utils/taskTypeUtils";
-import { removeLicenseButtons } from "./removeLicenseButtons";
 import { getWorkspaceProjectName, isWorkspaceFolder } from "../../lib/utils/utils";
 
 
@@ -45,7 +44,6 @@ export const createTaskCountTable = async(wrapper: TeWrapper, project?: string, 
 
     if (html)
     {
-        html = removeLicenseButtons(wrapper, html);
         html = html.replace(/\#\{taskCounts\.table\}/g, tableTemplate);
         html = html.replace(/\#\{taskCounts\.length\}/g, tasks.length.toString())
                     .replace(/\#\{taskTypes\.length\}/g, Object.keys(taskCounts).length.toString())

@@ -243,13 +243,13 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 	protected async getState(): Promise<BaseState>
 	{
 		return {
-			enabled: this.wrapper.views.taskExplorer.enabled || this.wrapper.views.taskExplorerSideBar.enabled,
+			isEnabled: this.wrapper.views.taskExplorer.enabled || this.wrapper.views.taskExplorerSideBar.enabled,
+			isLicensed: this.wrapper.licenseManager.isLicensed(),
+			license: await this.wrapper.licenseManager.getLicenseToken(),
 			nonce: this._cspNonce,
 			pinned: false,
-			webroot: this.getWebRoot(),
-			isLicensed: this.wrapper.licenseManager.isLicensed(),
 			session: await this.wrapper.licenseManager.getSession(),
-			license: await this.wrapper.licenseManager.getLicenseToken()
+			webroot: this.getWebRoot()
 		};
 	}
 

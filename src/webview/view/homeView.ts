@@ -2,12 +2,10 @@
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { ContextKeys } from "../../lib/context";
-import { TasksChangeEvent, TeSessionChangeEvent } from "../../interface";
+import { TasksChangeEvent } from "../../interface";
 import { StorageChangeEvent } from "../../interface/IStorage";
 import { ConfigurationChangeEvent, Disposable } from "vscode";
 import { TeWebviewView, WebviewViewIds } from "../webviewView";
-import { removeLicenseButtons } from "../common/removeLicenseButtons";
-import { IpcMessage, onIpc } from "../common/ipc";
 
 /*
 https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/webview/main.ts
@@ -85,6 +83,9 @@ export class HomeView extends TeWebviewView<State>
 	}
 
 
+	protected override includeBootstrap = (): Promise<State> => this.getState();
+
+
 	protected override includeFontAwesome = () => ({ duotone: true, light: true, icons: [ "lock", "gears" ]});
 
 
@@ -132,7 +133,7 @@ export class HomeView extends TeWebviewView<State>
 				   .replace("#{taskCounts.today}", this.wrapper.taskManager.getTodayCount("").toString())
 				   .replace("#{license.status}", "UNLICENSED")
 				   .replace("#{license.statusIcon}", "lock");
-		return removeLicenseButtons(this.wrapper, html);
+		return html;
 	};
 
 
@@ -161,10 +162,13 @@ export class HomeView extends TeWebviewView<State>
 	// 	return this.getState();
 	// }
 
-	// private async getState(): Promise<State> { // For coverage, haven't messed with states yet
-	// 	return {
-	// 		pinned: true, // this.wrapper.storage.get('home:state:pinned') ?? true;
-	// 		extensionEnabled: !!getContext(ContextKeys.Enabled, false)
-	// 	};
-	// }
+	protected override async getState(): Promise<State>
+	{
+		return {
+			...(await super.getState()),
+			seconds: 0,
+			taskType: "grunt"
+		};
+	}
+
 }
