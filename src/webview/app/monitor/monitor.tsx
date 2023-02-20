@@ -34,7 +34,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 
         const root = createRoot(document.getElementById("root") as HTMLElement);
         root.render(
-			<Tabs className="Tabs">
+			<Tabs className="te-tabs">
 				<TabList>
 					<Tab>Running</Tab>
 					<Tab>Recent</Tab>

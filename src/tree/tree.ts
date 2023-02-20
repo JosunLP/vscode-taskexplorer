@@ -3,9 +3,9 @@ import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
-import { IEvent, ITeTaskTree } from "../interface";
-import { TreeViewIds } from "./treeView";
+import { TreeViewIds } from "src/lib/context";
 import { TaskTreeManager } from "./treeManager";
+import { IEvent, ITeTaskTree } from "../interface";
 import { Event, EventEmitter, Task, TreeItem, Disposable, TreeDataProvider } from "vscode";
 
 
