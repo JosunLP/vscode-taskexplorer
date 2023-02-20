@@ -1,14 +1,4 @@
 
-button {
-    background-color: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    padding: 8px 12px;
-    cursor: pointer;
-    width: 150px;
-    border-radius: 5px;
-    border: gray 1px solid;
-}
-
 hr {
     height: 2px;
     border: none;
@@ -40,6 +30,10 @@ hr {
 }
 
 /*
+Would like to use the woof2 for the bg image but the new fa fonts changed the 'gears' icon
+andnow includes two wheels.  The old one, that I hadthe svg for, has 3, which looks nicer in
+the bg and provides a nice bit of a variance on the logo using both in different spots
+
 .te-page-bg {
     padding-left: 32px;
     position: relative;

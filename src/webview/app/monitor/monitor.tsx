@@ -1,6 +1,8 @@
 
 import "../common/css/vscode.css";
+import "../common/css/react.css";
 import "../common/css/tabs.css";
+import "../common/css/page.css";
 import "./monitor.css";
 import "./monitor.scss";
 

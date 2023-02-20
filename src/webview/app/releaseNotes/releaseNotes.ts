@@ -1,6 +1,7 @@
 
 import "../common/css/vscode.css";
 import "../common/css/page.css";
+import "../common/scss/page.scss";
 import "./release-notes.css";
 
 import { State } from "../../common/state";

@@ -1,6 +1,7 @@
 
 import "../common/css/vscode.css";
 import "../common/css/page.css";
+import "../common/scss/page.scss";
 import "./license.css";
 import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
