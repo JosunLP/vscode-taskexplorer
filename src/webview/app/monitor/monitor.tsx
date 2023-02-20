@@ -1,19 +1,23 @@
 
 import "../common/css/vscode.css";
+import "../common/css/tabs.css";
 import "./monitor.css";
 import "./monitor.scss";
+
 import React from "react";
+import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+
 import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
 import { TeTaskControl } from "./cmp/control";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
-import { IpcMessage, IpcNotificationType, UpdateStateCallback } from "../../common/ipc";
+import { IpcMessage, IpcNotificationType, StateChangedCallback } from "../../common/ipc";
 
 
 class TaskMonitorWebviewApp extends TeWebviewApp<State>
 {
-    private callback?: UpdateStateCallback;
+    private callback?: StateChangedCallback;
 
     constructor()
     {
@@ -28,10 +32,21 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 
         const root = createRoot(document.getElementById("root") as HTMLElement);
         root.render(
-            <TeTaskControl
-                state={this.state}
-                subscribe={(callback: UpdateStateCallback) => this.registerEvents(callback)}
-            />
+			<Tabs className="Tabs">
+				<TabList>
+					<Tab>Running</Tab>
+					<Tab>Recent</Tab>
+					<Tab>Famous</Tab>
+				</TabList>
+				<TabPanel>
+					<TeTaskControl
+						state={this.state}
+						subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+					/>
+				</TabPanel>
+				<TabPanel>TODO</TabPanel>
+				<TabPanel>TODO</TabPanel>
+			</Tabs>
         );
 
         disposables.push({
@@ -75,7 +90,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 	}
 
 
-	private registerEvents(callback: UpdateStateCallback): () => void
+	private registerEvents(callback: StateChangedCallback): () => void
     {
 		this.callback = callback;
 		return () => {

@@ -46,8 +46,6 @@ export class ReleaseNotesWebviewApp extends TeWebviewApp<State>
 	{
 		const x = document.getElementById("releaseNotesDiv") as HTMLElement;
 		const showing = x.classList.toggle("is-show");
-		// element.classList.remove(!showing ? "fa-chevron-down" : "fa-chevron-up");
-		// element.classList.add(!showing ? "fa-chevron-up" : "fa-chevron-down");
 		element.classList.remove(!showing ? "codicon-chevrondown" : "codicon-chevronup");
 		element.classList.add(!showing ? "codicon-chevronup" : "codicon-chevrondown");
 	};

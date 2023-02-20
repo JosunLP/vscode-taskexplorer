@@ -1,4 +1,8 @@
 
+.te-tsx-container.te-tsx-monitor-container {
+    height: 200px;
+}
+
 .te-monitor-control-container {
     opacity: 1;
 }

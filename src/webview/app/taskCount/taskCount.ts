@@ -13,6 +13,9 @@ export class TaskCountWebviewApp extends TeWebviewApp<State>
 		super("TaskCountWebviewApp");
 	}
 
+	//
+	// TODO - Add clickactions on icons
+	//
 	// protected override onDataActionClicked(_e: MouseEvent, target: HTMLElement)
     // {
 	// 	// const action = target.dataset.action;

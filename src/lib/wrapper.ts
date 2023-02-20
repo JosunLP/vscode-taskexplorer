@@ -57,6 +57,7 @@ import { registerEnableTaskTypeCommand } from "./command/enableTaskType";
 import { registerDisableTaskTypeCommand } from "./command/disableTaskType";
 import { registerRemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import { ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, Disposable } from "vscode";
+import { randomUUID } from "crypto";
 
 
 export class TeWrapper implements ITeWrapper, Disposable
@@ -65,6 +66,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private _tests = false;
 	private _busy = false;
 	private _initialized = false;
+	private _cacheBuster: string;
 
 	private readonly _log: ILog;
 	private readonly _teApi: TeApi;
@@ -105,6 +107,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
+		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", randomUUID());
 
 		this._teContext = new TeContext();
 		this._fileCache = new TeFileCache(this);
@@ -246,10 +249,13 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//     window.showInformationMessage(`Welcome back ${session.account.name}`);
 		// }
 		//
-		// Maybe how 'what's new'or 'welcome' page
+		// Maybe show the 'what's new / welcome' page
 		//
 		/* istanbul ignore next */
-		if (this.versionchanged) { /* TODO */ }
+		if (this.versionchanged) {
+			this._cacheBuster = randomUUID();
+			/* TODO - Show 'welcome / what's new' page */
+		}
 		// utilities.oneTimeEvent(this.onReady)(() => { /* TODO */ });
 		//
 		// Build the file cache, this kicks off the whole process as refresh cmd will be issued
@@ -354,6 +360,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get busy(): boolean {
 		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy() || this._treeManager.isBusy() ||
 			   this._fileWatcher.isBusy() || this._configWatcher.isBusy() || this._licenseManager.isBusy();
+	}
+
+	get cacheBuster(): string {
+		return this._cacheBuster;
 	}
 
 	get commonUtils(): typeof commonUtils {

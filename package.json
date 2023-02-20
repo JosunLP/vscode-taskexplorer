@@ -56,7 +56,7 @@
     "scripts": {
         "clean": "npm run clean:extension && npm run clean:webviews && npm run test:clean",
         "clean:extension": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-        "clean:webviews": "rimraf res/css && rimraf res/js && rimraf res/page",
+        "clean:webviews": "rimraf res/css && rimraf res/font && rimraf res/js && rimraf res/page",
         "copy-build-to-code": "cmd /c xcopy .\\dist\\*.js ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\dist /s /i /y",
         "copy-res-to-code": "cmd /c xcopy .\\res\\*.* ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\res /s /i /y",
         "copy-pkgjson-to-code": "cmd /c copy /Y .\\package*.json ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2",
@@ -172,6 +172,7 @@
         "path-browserify": "^1.0.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "react-tabs": "^6.0.0",
         "uuid": "^9.0.0",
         "vscode-nls": "^4.1.2",
         "xml2js": "^0.4.23"

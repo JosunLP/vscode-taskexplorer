@@ -89,4 +89,4 @@ export const EchoCustomCommandRequestType = new IpcNotificationType<ExecuteComma
 
 export type InternalNotificationType = "tempStateEvent";
 
-export type UpdateStateCallback = (state: any /* State */, type?: IpcNotificationType<any> | InternalNotificationType, themingChanged?: boolean) => void;
+export type StateChangedCallback = (state: any /* State */, type?: IpcNotificationType<any> | InternalNotificationType) => void;
