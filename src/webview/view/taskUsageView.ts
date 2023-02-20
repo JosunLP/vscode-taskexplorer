@@ -1,10 +1,9 @@
 
-import { Disposable } from "vscode";
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
-import { ContextKeys } from "../../lib/context";
+import { TeWebviewView } from "../webviewView";
 import { StorageChangeEvent } from "../../interface";
-import { TeWebviewView, WebviewViewIds } from "../webviewView";
+import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 
 export class TaskUsageView extends TeWebviewView<State>

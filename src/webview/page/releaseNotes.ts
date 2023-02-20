@@ -3,10 +3,10 @@ import { marked } from "marked";
 import { TextDecoder } from "util";
 import { State } from "../common/state";
 import { Uri, workspace } from "vscode";
-import { Commands } from "../../lib/command/command";
 import { TeWrapper } from "../../lib/wrapper";
-import { ContextKeys } from "../../lib/context";
-import { TeWebviewPanel, WebviewIds } from "../webviewPanel";
+import { TeWebviewPanel } from "../webviewPanel";
+import { Commands } from "../../lib/command/command";
+import { ContextKeys, WebviewIds  } from "../../lib/context";
 
 
 export class ReleaseNotesPage extends TeWebviewPanel<State>

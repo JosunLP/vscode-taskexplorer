@@ -1,16 +1,22 @@
 
-import { ContextKeys } from "../lib/context";
+/**
+ * @class TeWebviewView
+ *
+ * @since 3.0.0
+ *
+ * Credits to the author of the Gitlens vscode extension for the webview / webpanel encapsulation
+ * concepts that got my super-praise (4th time ever) and thus used in Task Explorer as a starting point.
+ */
+
 import { TeWrapper } from "../lib/wrapper";
 import { timeout } from "../lib/utils/utils";
 import { TeWebviewBase } from "./webviewBase";
 import { registerCommand } from "../lib/command/command";
+import { ContextKeys, WebviewViewIds } from "../lib/context";
 import {
 	CancellationToken, WebviewView, WebviewViewProvider, WebviewViewResolveContext,
 	WindowState, Disposable, window, commands, Uri
 } from "vscode";
-
-
-export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
 
 
 export abstract class TeWebviewView<State, SerializedState = State> extends TeWebviewBase<State> implements WebviewViewProvider, Disposable

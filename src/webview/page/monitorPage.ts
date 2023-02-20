@@ -1,10 +1,10 @@
 
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
-import { ContextKeys } from "../../lib/context";
+import { TeWebviewPanel } from "../webviewPanel";
 import { TasksChangeEvent } from "../../interface";
 import { Commands } from "../../lib/command/command";
-import { TeWebviewPanel, WebviewIds } from "../webviewPanel";
+import { ContextKeys, WebviewIds } from "../../lib/context";
 
 
 export class MonitorPage extends TeWebviewPanel<State>
@@ -57,15 +57,15 @@ export class MonitorPage extends TeWebviewPanel<State>
 
 	protected override onVisibilityChanged(visible: boolean)
 	{
-		this.wrapper.log.methodStart("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad(), false, [[ "visible", visible ]]);
-		this.wrapper.log.methodDone("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad());
+		// this.wrapper.log.methodStart("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad(), false, [[ "visible", visible ]]);
+		// this.wrapper.log.methodDone("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad());
 	}
 
 
 	protected override onFocusChanged(focused: boolean): void
 	{
-		this.wrapper.log.methodStart("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad(), false, [[ "focus", focused ]]);
-		this.wrapper.log.methodDone("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad());
+		// this.wrapper.log.methodStart("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad(), false, [[ "focus", focused ]]);
+		// this.wrapper.log.methodDone("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad());
 	}
 
 }

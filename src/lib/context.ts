@@ -4,14 +4,18 @@
 import { VsCodeCommands } from "./command/command";
 import { ITeContext, IDictionary } from "../interface";
 import { commands, Event, EventEmitter } from "vscode";
-import type { WebviewIds } from "../webview/webviewPanel";
-import type { WebviewViewIds } from "../webview/webviewView";
+
+export type TreeViewIds = "taskTreeExplorer" | "taskTreeSideBar";
+export type WebviewIds = "parsingReport" | "licensePage" | "releaseNotes" | "taskMonitor";
+export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
 
 export const enum ContextKeys
 {
 	ActionPrefix = "taskexplorer:action:",
 	KeyPrefix = "taskexplorer:key:",
 	TreeViewPrefix = "taskexplorer:treeView:",
+	TreeViewExplorerPrefix = "taskexplorer:treeView:taskTreeExplorer",
+	TreeViewSideBarPrefix = "taskexplorer:treeView:tasktreeSideBar",
 	WebviewPrefix = "taskexplorer:webview:",
 	WebviewViewPrefix = "taskexplorer:webviewView:",
 	Debugging = "taskexplorer:debugging",
@@ -27,21 +31,21 @@ export const enum ContextKeys
 	TestsTest = "taskexplorer:testsTest"
 }
 
+type TreeviewContextKeys =
+	`${ContextKeys.TreeViewPrefix}${TreeViewIds}:active`;
+
 type WebviewPageContextKeys =
-	| `${ContextKeys.WebviewPrefix}${WebviewIds}:active`
+	`${ContextKeys.WebviewPrefix}${WebviewIds}:active`
 	| `${ContextKeys.WebviewPrefix}${WebviewIds}:focus`
 	| `${ContextKeys.WebviewPrefix}${WebviewIds}:inputFocus`;
 
 
 type WebviewViewContextKeys =
-	| `${ContextKeys.WebviewViewPrefix}${WebviewViewIds}:focus`
+	`${ContextKeys.WebviewViewPrefix}${WebviewViewIds}:focus`
 	| `${ContextKeys.WebviewViewPrefix}${WebviewViewIds}:inputFocus`;
 
-
 type AllContextKeys =
-	| ContextKeys
-	| WebviewPageContextKeys
-	| WebviewViewContextKeys
+	ContextKeys | TreeviewContextKeys | WebviewPageContextKeys | WebviewViewContextKeys
 	| `${ContextKeys.ActionPrefix}${string}`
 	| `${ContextKeys.KeyPrefix}${string}`;
 
@@ -58,7 +62,6 @@ export class TeContext implements ITeContext
 	}
 
 	getContext = <T>(key: AllContextKeys, defaultValue?: T) => this.contextStorage[key] as T | undefined || defaultValue;
-
 
 	setContext = async(key: AllContextKeys, value: unknown): Promise<void> =>
 	{

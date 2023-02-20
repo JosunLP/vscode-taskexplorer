@@ -1,11 +1,11 @@
 
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
-import { ContextKeys } from "../../lib/context";
+import { TeWebviewView } from "../webviewView";
 import { TasksChangeEvent } from "../../interface";
 import { StorageChangeEvent } from "../../interface/IStorage";
 import { ConfigurationChangeEvent, Disposable } from "vscode";
-import { TeWebviewView, WebviewViewIds } from "../webviewView";
+import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 /*
 https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/webview/main.ts

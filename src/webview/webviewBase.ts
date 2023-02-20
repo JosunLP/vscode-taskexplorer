@@ -2,8 +2,10 @@
 /**
  * @class TeWebviewBase
  *
- * Credits to the author of the Gitlens extension for the webview/webpanel encapsulation
- * concepts that got my praise and thus used in Task Explorer as a starting point.
+ * @since 3.0.0
+ *
+ * Credits to the author of the Gitlens vscode extension for the webview / webpanel encapsulation
+ * concepts that got my super-praise (4th time ever) and thus used in Task Explorer as a starting point.
  */
 
 import { TextDecoder } from "util";
@@ -240,6 +242,11 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 	};
 
 
+	/**
+	 * @method getState
+	 * To initiate state on a webview, implement a includeBootstrap() override in the top
+	 * level webviewView / webviewPanel.
+	 */
 	protected async getState(): Promise<BaseState>
 	{
 		return {

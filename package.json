@@ -721,12 +721,12 @@
                 },
                 {
                     "command": "taskexplorer.donate",
-                    "when": "view == taskexplorer.view.taskTreeExplorer.views.home",
+                    "when": "view == taskexplorer.view.home",
                     "group": "navigation"
                 },
                 {
                     "command": "taskexplorer.clearTaskStats",
-                    "when": "view == taskexplorer.view.taskTreeExplorer.views.taskUsage",
+                    "when": "view == taskexplorer.view.taskUsage",
                     "group": "navigation"
                 }
             ],

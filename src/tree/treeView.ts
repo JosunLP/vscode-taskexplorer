@@ -2,15 +2,13 @@
 import { TaskTree } from "./tree";
 import { TeWrapper } from "../lib/wrapper";
 import { ITaskTreeView } from "../interface";
-import { ContextKeys } from "../lib/context";
 import { TaskTreeManager } from "./treeManager";
+import { ContextKeys, TreeViewIds } from "../lib/context";
 import {
     Disposable, TreeItem, TreeView, /* TreeViewExpansionEvent, TreeViewSelectionChangeEvent, */
     TreeViewVisibilityChangeEvent, window
 } from "vscode";
 
-
-export type TreeViewIds = "taskTreeExplorer" | "taskTreeSideBar";
 
 
 export class TeTreeView implements ITaskTreeView, Disposable
@@ -82,7 +80,26 @@ export class TeTreeView implements ITaskTreeView, Disposable
     onVisibilityChanged(e: TreeViewVisibilityChangeEvent)
     {
         this._visible = e.visible;
+        if (this._visible)
+		{
+			this.setContextKeys(this._visible);
+		}
+		else {
+			this.resetContextKeys();
+		}
         this._tree.onVisibilityChanged(e.visible, true);
     }
+
+
+	private resetContextKeys()
+	{
+		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:active`, false);
+	}
+
+
+	private setContextKeys(active: boolean | undefined)
+	{
+		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:active`, !!active);
+	}
 
 }

@@ -1,16 +1,23 @@
 
+/**
+ * @class TeWebviewPanel
+ *
+ * @since 3.0.0
+ *
+ * Credits to the author of the Gitlens vscode extension for the webview / webpanel encapsulation
+ * concepts that got my super-praise (4th time ever) and thus used in Task Explorer as a starting point.
+ */
+
 import { TeWrapper } from "../lib/wrapper";
-import { ContextKeys } from "../lib/context";
+import { BaseState } from "./common/state";
 import { TeWebviewBase } from "./webviewBase";
 import { isObject, timeout } from "../lib/utils/utils";
+import { ContextKeys, WebviewIds } from "../lib/context";
 import { Commands, registerCommand } from "../lib/command/command";
 import {
     WebviewOptions, WebviewPanel, WebviewPanelOnDidChangeViewStateEvent, WebviewPanelOptions, WindowState,
     Disposable, Uri, ViewColumn, window, WebviewPanelSerializer
 } from "vscode";
-import { BaseState } from "./common/state";
-
-export type WebviewIds = "parsingReport" | "licensePage" | "releaseNotes" | "taskMonitor";
 
 
 export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> implements Disposable

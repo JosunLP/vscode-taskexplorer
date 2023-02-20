@@ -1,10 +1,10 @@
 
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
-import { ContextKeys } from "../../lib/context";
+import { TeWebviewView } from "../webviewView";
 import { TasksChangeEvent } from "../../interface";
-import { TeWebviewView, WebviewViewIds } from "../webviewView";
 import { createTaskCountTable } from "../common/taskCountTable";
+import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 
 export class TaskCountView extends TeWebviewView<State>
