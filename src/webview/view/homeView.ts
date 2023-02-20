@@ -157,11 +157,6 @@ export class HomeView extends TeWebviewView<State>
 	}
 
 
-	// protected override async includeBootstrap(): Promise<State>
-	// {
-	// 	return this.getState();
-	// }
-
 	protected override async getState(): Promise<State>
 	{
 		return {

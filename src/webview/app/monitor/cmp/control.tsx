@@ -61,26 +61,32 @@ export class TeTaskControl extends React.Component<any, State, State>
     override render()
     {
         return (
-            <div className="te-monitor-control-container">
-                <table width="100%" cellPadding="0" cellSpacing="0">
-                    <tbody>
-                        <tr className="te-monitor-control-row te-monitor-control-top-row">
-                            <td className="te-monitor-control-icon-column">
-                                <img src={this.state.webroot + "/img/sources/" + this.state.taskType + ".svg"} height="70" />
-                            </td>
-                            <td className="te-monitor-control-content-column">
-                                <span className="te-monitor-control-content-container">
-                                    Content
-                                </span>
-                            </td>
-                            <td className="te-monitor-control-timer-column">
-                                <TeReactTaskTimer state={this.state} />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            this.createControl()
         );
+    }
+
+
+    private createControl()
+    {
+        return <div className="te-monitor-control-container">
+            <table width="100%" cellPadding="0" cellSpacing="0">
+                <tbody>
+                    <tr className="te-monitor-control-row te-monitor-control-top-row">
+                        <td className="te-monitor-control-icon-column">
+                            <img src={this.state.webroot + "/img/sources/" + this.state.taskType + ".svg"} height="70" />
+                        </td>
+                        <td className="te-monitor-control-content-column">
+                            <span className="te-monitor-control-content-container">
+                                Content
+                            </span>
+                        </td>
+                        <td className="te-monitor-control-timer-column">
+                            <TeReactTaskTimer state={this.state} />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>;
     }
 
 }

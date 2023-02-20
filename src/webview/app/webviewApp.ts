@@ -126,7 +126,7 @@ export abstract class TeWebviewApp<State = undefined>
 		setTimeout(() => {
 			this.postMessage({ id: this.nextIpcId(), method: LogWriteCommandType.method, params: { message, value: undefined }});
 		},  1);
-		console.log(message, ...optionalParams);
+		console.log("[WEBVIEW]: " + message, ...optionalParams);
 	};
 
 
