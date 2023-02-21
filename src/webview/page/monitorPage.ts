@@ -1,5 +1,5 @@
 
-import { State } from "../common/state";
+import { AppMonitorState, AppState, State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
@@ -33,15 +33,13 @@ export class MonitorPage extends TeWebviewPanel<State>
 	}
 
 
-	protected override async getState<AppState extends State>(): Promise<AppState>
+	protected override async getState(): Promise<AppMonitorState>
 	{
 		return {
 			...(await super.getState()),
 			seconds: 0,
 			taskType: "grunt",
-			param1: undefined, // task
-			param2: undefined, // `is running` flag
-			param3: undefined  // task `item id`
+			tasks: []
 		};
 	}
 
@@ -63,7 +61,7 @@ export class MonitorPage extends TeWebviewPanel<State>
 	private async onTaskStatusChanged(e: ITeTaskStatusChangeEvent)
 	{
 		await this.refresh();
-		const state = await this.getState<State>();
+		const state = await this.getState();
 		return this.notify(DidChangeStateType, Object.assign(state, {
 			param1: e.task,
 			param2: e.isRunning,

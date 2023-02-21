@@ -1,8 +1,8 @@
 
-import { AuthenticationSession } from "vscode";
+import { AuthenticationSession, Task } from "vscode";
 import { ISessionToken } from "../../interface/IAuthentication";
 
-export interface State
+export interface BaseState
 {
 	isEnabled: boolean;
 	isLicensed: boolean;
@@ -14,4 +14,15 @@ export interface State
 	pinned: boolean;
 	session?: AuthenticationSession;
 	webroot?: string;
+}
+
+export interface State extends BaseState {}
+
+export interface AppState extends State {}
+
+export interface AppMonitorState extends AppState
+{
+	seconds: number;
+	tasks: Task[];
+	taskType: string; // temp for testing
 }

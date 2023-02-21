@@ -17,6 +17,7 @@ import {
     WebviewOptions, WebviewPanel, WebviewPanelOnDidChangeViewStateEvent, WebviewPanelOptions, WindowState,
     Disposable, Uri, ViewColumn, window, WebviewPanelSerializer
 } from "vscode";
+import { BaseState } from "./common/state";
 
 
 export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> implements Disposable
@@ -65,7 +66,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> impleme
 	}
 
 
-	protected override includeBootstrap = (): Promise<State> => this.getState<State>();
+	protected override includeBootstrap = (): Promise<BaseState> => this.getState();
 
 
 	protected override onHtmlPreviewBase = async(html: string, ...args: unknown[]) =>
