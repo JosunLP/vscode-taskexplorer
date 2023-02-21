@@ -157,12 +157,10 @@ export class HomeView extends TeWebviewView<State>
 	}
 
 
-	protected override async getState(): Promise<State>
+	protected override async getState<AppState extends State>(): Promise<AppState>
 	{
 		return {
-			...(await super.getState()),
-			seconds: 0,
-			taskType: "grunt"
+			...(await super.getState<AppState>())
 		};
 	}
 

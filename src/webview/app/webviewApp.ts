@@ -130,7 +130,7 @@ export abstract class TeWebviewApp<State = undefined>
 	};
 
 
-	protected getState = (): State => this._vscode.getState() as State;
+	protected getState = <T>(): T => this._vscode.getState() as T;
 
 
 	private nextIpcId = (): string =>

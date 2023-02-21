@@ -3,9 +3,10 @@ import { State } from "../../../common/state";
 import React, { createElement, useEffect, useMemo, useRef, useState } from "react";
 import { InternalNotificationType, IpcNotificationType } from "src/webview/common/ipc";
 import { TeReactTaskTimer } from "./timer";
+import { AppMonitorState } from "../monitor";
 
 
-export class TeTaskControl extends React.Component<any, State, State>
+export class TeTaskControl extends React.Component<any, AppMonitorState, AppMonitorState>
 {
     nonce?: string;
 

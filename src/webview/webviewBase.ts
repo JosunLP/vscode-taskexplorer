@@ -11,7 +11,7 @@
 import { TextDecoder } from "util";
 import { ITeWebview, TeSessionChangeEvent } from "../interface";
 // import { getNonce } from "@env/crypto";
-import { BaseState } from "./common/state";
+import { State } from "./common/state";
 import { TeWrapper } from "../lib/wrapper";
 import { getNonce } from "../lib/env/node/crypto";
 import { fontawesome } from "./common/fontawesome";
@@ -38,7 +38,7 @@ export interface FontAwesomeClass
 
 export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 {
-    abstract show(options?: any, ..._args: unknown[]): Promise<TeWebviewBase<any>>;
+    abstract show(options?: any, ..._args: unknown[]): Promise<TeWebviewBase<State>>;
 
 	protected includeBody?(...args: unknown[]): string | Promise<string>;
 	protected includeBootstrap?(...args: unknown[]): any;
@@ -248,7 +248,7 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 	 * To initiate state on a webview, implement a includeBootstrap() override in the top
 	 * level webviewView / webviewPanel.
 	 */
-	protected async getState(): Promise<BaseState>
+	protected async getState<T extends State>(): Promise<T>
 	{
 		return {
 			isEnabled: this.wrapper.views.taskExplorer.enabled || this.wrapper.views.taskExplorerSideBar.enabled,
@@ -258,7 +258,7 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 			pinned: false,
 			session: await this.wrapper.licenseManager.getSession(),
 			webroot: this.getWebRoot()
-		};
+		} as unknown as T;
 	}
 
 
@@ -344,10 +344,10 @@ export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
 
 	protected onSessionChanged = async (e: TeSessionChangeEvent): Promise<boolean> =>
 	{
-		const state = await this.getState();
-		return this.notify(DidChangeStateType, Object.assign(state, {
+		const state = await this.getState<State>();
+		return this.notify(DidChangeStateType, Object.assign(state as any, {
 			license: e.token
-		}));
+		} as any));
 	};
 
 

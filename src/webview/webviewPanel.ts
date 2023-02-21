@@ -9,7 +9,6 @@
  */
 
 import { TeWrapper } from "../lib/wrapper";
-import { BaseState } from "./common/state";
 import { TeWebviewBase } from "./webviewBase";
 import { isObject, timeout } from "../lib/utils/utils";
 import { ContextKeys, WebviewIds } from "../lib/context";
@@ -66,7 +65,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State> impleme
 	}
 
 
-	protected override includeBootstrap = (): Promise<BaseState> => this.getState();
+	protected override includeBootstrap = (): Promise<State> => this.getState<State>();
 
 
 	protected override onHtmlPreviewBase = async(html: string, ...args: unknown[]) =>

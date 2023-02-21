@@ -16,6 +16,11 @@ import { TeTaskControl } from "./cmp/control";
 import { createRoot } from "react-dom/client";
 import { DidChangeStateType, IpcMessage, IpcNotificationType, onIpc, StateChangedCallback } from "../../common/ipc";
 
+export interface AppMonitorState extends State
+{
+	seconds: number;
+	taskType: string;
+};
 
 class TaskMonitorWebviewApp extends TeWebviewApp<State>
 {
@@ -30,9 +35,13 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 	protected override onInitialize()
 	{
 		this.log(`${this.appName}.onInitialize`);
-		this.state = this.getState() ?? this.state;
+		this.state = this.getState<AppMonitorState>() ?? this.state;
 		if (this.state) {
-			this.refresh(this.state);
+			Object.assign(this.state, {
+				seconds: 0,
+				taskType: "ant"
+			});
+		 	this.refresh(this.state);
 		}
 		// const [ tasks, setTasks ] = useState(this.state.param1 ?? []);
 	}
@@ -63,21 +72,21 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 					<TabPanel>
 						<TeTaskControl
 							id="te-id-view-monitor-control-recent"
-							state={Object.assign({}, this.state, { seconds: 0 })}
+							state={Object.assign({}, this.state, { seconds: 0, taskType: "ant" })}
 							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
 						/>
 					</TabPanel>
 					<TabPanel>
 						<TeTaskControl
 							id="te-id-view-monitor-control-running"
-							state={Object.assign({}, this.state, { seconds: 10 })}
+							state={Object.assign({}, this.state, { seconds: 10, taskType: "gulp" })}
 							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
 						/>
 					</TabPanel>
 					<TabPanel>
 						<TeTaskControl
 							id="te-id-view-monitor-control-famous"
-							state={Object.assign({}, this.state, { seconds: 20 })}
+							state={Object.assign({}, this.state, { seconds: 20, taskType: "grunt" })}
 							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
 						/>
 					</TabPanel>

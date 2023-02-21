@@ -2,13 +2,7 @@
 import { AuthenticationSession } from "vscode";
 import { ISessionToken } from "../../interface/IAuthentication";
 
-export interface State extends BaseState
-{
-	seconds?: number;
-	taskType?: string;
-}
-
-export interface BaseState
+export interface State
 {
 	isEnabled: boolean;
 	isLicensed: boolean;

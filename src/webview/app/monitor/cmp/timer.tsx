@@ -1,9 +1,9 @@
 
 import React from "react";
-import { State } from "../../../common/state";
+import { AppMonitorState } from "../monitor";
 
 
-export class TeReactTaskTimer extends React.Component<any, State>
+export class TeReactTaskTimer extends React.Component<any, AppMonitorState>
 {
     private interval: NodeJS.Timeout | undefined;
     nonce?: string;

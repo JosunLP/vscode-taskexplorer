@@ -33,7 +33,7 @@ export class MonitorPage extends TeWebviewPanel<State>
 	}
 
 
-	protected override async getState(): Promise<State>
+	protected override async getState<AppState extends State>(): Promise<AppState>
 	{
 		return {
 			...(await super.getState()),
@@ -63,7 +63,7 @@ export class MonitorPage extends TeWebviewPanel<State>
 	private async onTaskStatusChanged(e: ITeTaskStatusChangeEvent)
 	{
 		await this.refresh();
-		const state = await this.getState();
+		const state = await this.getState<State>();
 		return this.notify(DidChangeStateType, Object.assign(state, {
 			param1: e.task,
 			param2: e.isRunning,
