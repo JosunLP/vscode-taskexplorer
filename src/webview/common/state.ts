@@ -23,6 +23,13 @@ export interface AppState extends State {}
 export interface AppMonitorState extends AppState
 {
 	seconds: number;
-	tasks: Task[];
+	tasks: ITask[];
 	taskType: string; // temp for testing
+}
+
+export interface ITask
+{
+	name: string;
+	definition: any;
+	source: string;
 }
