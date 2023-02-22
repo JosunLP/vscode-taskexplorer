@@ -123,5 +123,7 @@ export interface DidChangeTaskParams
 	tasks: ITask[];
 };
 export const DidChangeTaskType = new IpcNotificationType<DidChangeTaskParams>("tasks/change");
+export const DidChangeFavoriteTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/favorites");
+export const DidChangeFamousTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/famous");
 export const DidChangeLastTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/lasttasks");
 export const DidChangeRunningTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/runningtasks");

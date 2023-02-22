@@ -1,27 +1,10 @@
 
 .te-tsx-root-container.te-tsx-monitor-root-container {
-    height: 200px;
+    opacity: 1
 }
 
 .te-monitor-control-container {
-    opacity: 1;
-}
-
-.te-monitor-control-content-container {
-    opacity: 1;
-}
-
-.te-monitor-control-content-title {
-    font-size: 18px;
-}
-
-.te-monitor-control-content-details {
-    font-size: 14px;
-}
-
-.te-monitor-control-timer {
-    font-size: 70px;
-    line-height: 70px;
+    margin-bottom: 10px;
 }
 
 .te-monitor-control-row {
@@ -40,10 +23,35 @@
   
 .te-monitor-control-content-column {
     flex: 1;
+    margin-top: 5px;
 }
   
 .te-monitor-control-timer-column {
     width: 200px;
     padding-right: 10px;
     text-align: right;
+}
+
+.te-monitor-control-content-container {
+    opacity: 1;
+}
+
+.te-monitor-control-content-table {
+    text-align:left;
+}
+
+.te-monitor-control-content-title {
+    font-size: 18px;
+    padding-right: 12px;
+    vertical-align: top;
+}
+
+.te-monitor-control-content-details {
+    font-size: 14px;
+    text-align: left;
+}
+
+.te-monitor-control-timer {
+    font-size: 70px;
+    line-height: 70px;
 }

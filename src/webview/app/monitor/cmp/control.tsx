@@ -5,13 +5,7 @@ import { ReactProps } from "../../common/react";
 import { TeReactTaskTimer } from "./timer";
 
 
-
-interface SerializedState
-{
-	tasks: ITask[];
-}
-
-interface State extends SerializedState
+interface State
 {
     seconds: number;
 	tasks: ITask[];
@@ -19,7 +13,7 @@ interface State extends SerializedState
 }
 
 
-export class TeTaskControl extends React.Component<ReactProps, State, SerializedState>
+export class TeTaskControl extends React.Component<ReactProps, State>
 {
     private id: string | undefined;
     private callback?: StateChangedCallback;
@@ -89,9 +83,7 @@ export class TeTaskControl extends React.Component<ReactProps, State, Serialized
                         <td className="te-monitor-control-content-column">
                             {this.getTaskDetails(task)}
                         </td>
-                        <td className="te-monitor-control-timer-column">
-                            <TeReactTaskTimer state={this.state} />
-                        </td>
+                        {this.getTimer()}
                     </tr>
                 </tbody>
             </table>
@@ -102,7 +94,7 @@ export class TeTaskControl extends React.Component<ReactProps, State, Serialized
     private getTaskDetails = (task: ITask) =>
     {
         return <span className="te-monitor-control-content-container">
-            <table>
+            <table className="te-monitor-control-content-table">
                 <tbody>
                     <tr>
                         <td className="te-monitor-control-content-title">
@@ -110,12 +102,40 @@ export class TeTaskControl extends React.Component<ReactProps, State, Serialized
                         </td>
                         <td className="te-monitor-control-content-details">
                             {task.name}<br />
-                            {task.definition.type}
+                            {task.definition.type}<br />
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            # of Runtimes (Last 7 Days)
+                                        </td>
+                                        <td>
+                                            : &nbsp;xx
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            # of Runtimes (Total)
+                                        </td>
+                                        <td>
+                                            : &nbsp;xx
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </span>;
+    };
+
+
+    private getTimer = () =>
+    {
+        return this.state.seconds !== undefined ? <td className="te-monitor-control-timer-column">
+            <TeReactTaskTimer state={this.state} />
+        </td> : <></>;
     };
 
 

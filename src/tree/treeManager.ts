@@ -120,6 +120,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     // {
 	// 	return this._onDidTasksLoad.event;
 	// }
+    get famousTasks() {
+        return this._specialFolders.favorites.taskFiles.map(f => f.task); // TODO - Famous (most used) tasks
+    }
 
     get favoriteTasks() {
         return this._specialFolders.favorites.taskFiles.map(f => f.task);
