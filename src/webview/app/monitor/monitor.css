@@ -25,17 +25,23 @@
 }
   
 .te-monitor-control-top-row {
-    height: 100px;
+    display: inherit;
+    height: 90px;
 }
   
 .te-monitor-control-icon-column {
     width: 100px;
-    margin-top: 5px;
+    margin-top: 8px;
+}
+
+.te-monitor-control-icon-img {
+    height: 80px;
+    vertical-align: middle;
 }
   
 .te-monitor-control-content-column {
     flex: 1;
-    margin-top: 5px;
+    padding: 5px;
 }
   
 .te-monitor-control-timer-column {
@@ -61,6 +67,10 @@
 .te-monitor-control-content-details {
     font-size: 14px;
     text-align: left;
+}
+
+.te-monitor-control-content-details-body {
+    display: contents;
 }
 
 .te-monitor-control-timer {

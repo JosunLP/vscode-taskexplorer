@@ -8,9 +8,7 @@ interface State
 
 interface ReactProps
 {
-    id?:  string;
-    state: any;
-    seconds?: number;
+    run?: boolean;
 }
 
 export class TeReactTaskTimer extends React.Component<ReactProps, State>
@@ -20,17 +18,20 @@ export class TeReactTaskTimer extends React.Component<ReactProps, State>
     constructor(props: ReactProps)
     {
         super(props);
-        this.state = props.state || {
+        this.state = {
             seconds: 0
         };
     }
 
-    private tick = () => this.setState(state => ({ seconds: (state.seconds || 0) + 1 }));
+    private tick = () => this.setState(state => ({ seconds: state.seconds + 1 }));
 
 
     override componentDidMount = () =>
-    {   // eslint-disable-next-line @typescript-eslint/tslint/config
-        this.interval = setInterval(() => this.tick(), 1000);
+    {
+        if (this.props.run) {
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            this.interval = setInterval(() => this.tick(), 1000);
+        }
     };
 
 

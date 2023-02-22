@@ -15,6 +15,7 @@ export interface ControlState
 interface ReactProps
 {
     id?:  string;
+    startTimer?: boolean;
     state: any;
     subscribe?: any;
     tasks?: any;
@@ -29,6 +30,7 @@ export const TeTaskControlWrapper = (props: ReactProps) =>
     return (
         <TeTaskControl
             id={props.id}
+            startTimer={props.startTimer}
             state={props.state}
             subscribe={props.subscribe}
             tasks={tasks}
@@ -62,12 +64,14 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
                 <tbody>
                     <tr className="te-monitor-control-row te-monitor-control-top-row">
                         <td className="te-monitor-control-icon-column">
-                            <img src={this.state.webroot + "/img/sources/" + task.source + ".svg"} height="70" />
+                            <img className="te-monitor-control-icon-img" src={this.state.webroot + "/img/sources/" + task.source + ".svg"} />
                         </td>
                         <td className="te-monitor-control-content-column">
                             {this.getTaskDetails(task)}
                         </td>
-                        {this.getTimer()}
+                        <td className="te-monitor-control-timer-column">
+                            <TeReactTaskTimer run={this.props.startTimer} />
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -82,19 +86,33 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
                 <tbody>
                     <tr>
                         <td className="te-monitor-control-content-title">
-                            Task Details
+                            Task Details:
                         </td>
                         <td className="te-monitor-control-content-details">
-                            {task.name}<br />
-                            {task.definition.type}<br />
                             <table>
-                                <tbody>
+                                <tbody className="te-monitor-control-content-details-body">
+                                    <tr>
+                                        <td>
+                                            Name
+                                        </td>
+                                        <td>
+                                            &nbsp;&nbsp; : &nbsp;{task.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Type
+                                        </td>
+                                        <td>
+                                            &nbsp;&nbsp; : &nbsp;{task.definition.type}
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <td>
                                             # of Runtimes (Last 7 Days)
                                         </td>
                                         <td>
-                                            : &nbsp;xx
+                                            &nbsp;&nbsp; : &nbsp;xx
                                         </td>
                                     </tr>
                                     <tr>
@@ -102,7 +120,7 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
                                             # of Runtimes (Total)
                                         </td>
                                         <td>
-                                            : &nbsp;xx
+                                            &nbsp;&nbsp; : &nbsp;xx
                                         </td>
                                     </tr>
                                 </tbody>
@@ -112,14 +130,6 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
                 </tbody>
             </table>
         </span>;
-    };
-
-
-    private getTimer = () =>
-    {
-        return this.state.seconds !== undefined ? <td className="te-monitor-control-timer-column">
-            <TeReactTaskTimer state={this.state} />
-        </td> : <></>;
     };
 
 
