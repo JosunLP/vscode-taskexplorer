@@ -115,6 +115,11 @@ class App extends React.Component<{ state: State }, State>
     {
         // this.log(`${this.appName}.onTabSelected: index=${index}: lastIdex=${lastIndex}`);
     };
+
+    private clearTasks = () =>
+    {
+        // await storage.update("lastTasks", []);
+    };
 }
 
 

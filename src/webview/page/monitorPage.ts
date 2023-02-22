@@ -73,25 +73,7 @@ export class MonitorPage extends TeWebviewPanel<State>
 	private onFamousTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onLastTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onRunningTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
-	private onTaskStatusChanged = (_e: ITeTaskStatusChangeEvent) =>
-	{
-		// return this.notify(DidChangeRunningTasksType, {
-		// 	tasks: this.prepareTasksForTransport(this.wrapper.treeManager.runningTasks)
-		// });
-		// return !! await (Promise.all([
-		// 	this.notify(DidChangeRunningTasksType, {
-		// 		tasks: this.prepareTasksForTransport(this.wrapper.treeManager.runningTasks)
-		// 	}),
-		// 	this.notify(DidChangeTaskStatusType, {
-		// 		task: {
-		// 			name: e.task.name,
-		// 			definition: e.task.definition,
-		// 			source: e.task.source,
-		// 			treeId: e.taskItemId
-		// 		}
-		// 	})
-		// ]));
-	};
+	private onTaskStatusChanged = (_e: ITeTaskStatusChangeEvent) => {};
 
 
 	protected override onVisibilityChanged = (visible: boolean) =>

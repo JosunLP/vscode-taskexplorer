@@ -126,13 +126,13 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 		return this._specialFolders.lastTasks.onDidTasksChange;
 	}
 
-	get onDidTasksChange(): Event<ITeTasksChangeEvent> {
-		return this._onDidTasksChange.event;
-	}
-
     get onDidRunningTasksChange(): Event<ITeTasksChangeEvent> {
         return this._onDidRunningTasksChange.event;
     }
+
+	get onDidTasksChange(): Event<ITeTasksChangeEvent> {
+		return this._onDidTasksChange.event;
+	}
 
     get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {
         return this._taskWatcher.onDidTaskStatusChange;
@@ -355,14 +355,14 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this.wrapper.utils.showMaxTasksReachedMessage(licMgr);
         }
         //
-        // Create/build the ui task tree if not built already
+        // Create/build the ui task tree and signal  the task list has changed
         //
         await this._treeBuilder.createTaskItemTree(logPad + "   ", 2);
+        this._onDidTasksChange.fire({ tasks: this._tasks, type: "all" });
         //
         // Done!
         //
         this.firstTreeBuildDone = true;
-        // this._onDidTasksLoad.fire({ taskCount: this._tasks.length });
         this.wrapper.log.methodDone("fetch tasks", 1, logPad);
     };
 
@@ -374,7 +374,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             v.tree.fireTreeRefreshEvent(logPad + "   ", logLevel, treeItem);
         });
-        this._onDidTasksChange.fire({ tasks: this._tasks, type: "all" });
     };
 
 

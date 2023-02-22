@@ -90,25 +90,25 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 				break;
 			case DidChangeLastTasksType.method:
 				onIpc(DidChangeLastTasksType, msg, params => {
-					this.state.last = { ...params.tasks };
+					this.state.last = [ ...params.tasks ];
 					this.setState(this.state, DidChangeLastTasksType);
 				});
 				break;
 			case DidChangeRunningTasksType.method:
 				onIpc(DidChangeRunningTasksType, msg, params => {
-					this.state.running = { ...params.tasks };
+					this.state.running = [ ...params.tasks ];
 					this.setState(this.state, DidChangeRunningTasksType);
 				});
 				break;
 			case DidChangeFamousTasksType.method:
 				onIpc(DidChangeFamousTasksType, msg, params => {
-					this.state.favorites = { ...params.tasks };
+					this.state.favorites = [ ...params.tasks ];
 					this.setState(this.state, DidChangeFamousTasksType);
 				});
 				break;
 			case DidChangeFavoriteTasksType.method:
 				onIpc(DidChangeFavoriteTasksType, msg, params => {
-					this.state.favorites = { ...params.tasks };
+					this.state.favorites = [ ...params.tasks ];
 					this.setState(this.state, DidChangeFavoriteTasksType);
 				});
 				break;
