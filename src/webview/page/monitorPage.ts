@@ -27,13 +27,15 @@ export class MonitorPage extends TeWebviewPanel<State>
 			`${MonitorPage.viewId}View`,
 			Commands.ShowMonitorPage
 		);
+
 		this.disposables.push(
-			wrapper.treeManager.onDidTasksChange(e => { this.onTasksChanged(e); }, this),
-			wrapper.treeManager.onDidLastTasksChange(e => { this.onLastTasksChanged(e); }, this),
-			wrapper.treeManager.onDidFavoriteTasksChange(e => { this.onFavoriteTasksChanged(e); }, this),
-			wrapper.treeManager.onDidFamousTasksChange(e => { this.onFamousTasksChanged(e); }, this),
-			wrapper.treeManager.onDidRunningTasksChange(e => { this.onRunningTasksChanged(e); }, this),
-			wrapper.treeManager.onDidTaskStatusChange(e => this.onTaskStatusChanged(e), this)
+			wrapper.treeManager.onReady(this.onTaskTreeManagerReady, this),
+			wrapper.treeManager.onDidTasksChange(this.onTasksChanged, this),
+			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this),
+			wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
+			wrapper.treeManager.onDidFamousTasksChange(this.onFamousTasksChanged, this),
+			wrapper.treeManager.onDidRunningTasksChange(this.onRunningTasksChanged, this),
+			wrapper.treeManager.onDidTaskStatusChange(this.onTaskStatusChanged, this)
 		);
 	}
 
@@ -63,17 +65,16 @@ export class MonitorPage extends TeWebviewPanel<State>
 
 
 	protected override includeBootstrap = (): Promise<State> => this.getState();
-
-
 	protected override includeFontAwesome = () => ({ duotone: true, regular: true, icons: [ "gears", "gear", "gears", "star" ] });
 
 
-    private onTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeTaskType, await this.getState());
-	private onFavoriteTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onFamousTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
+	private onFavoriteTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onLastTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onRunningTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
+    private onTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeTaskType, await this.getState());
 	private onTaskStatusChanged = (_e: ITeTaskStatusChangeEvent) => {};
+	private onTaskTreeManagerReady = (_e: ITeTasksChangeEvent) => {};
 
 
 	protected override onVisibilityChanged = (visible: boolean) =>

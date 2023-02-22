@@ -29,7 +29,6 @@ export const AppWrapper = (props: { state: State; subscribe: any }) =>
     {
 		switch (type) {
             case DidChangeTaskType:
-                // updateLastTasks?.({ tasks: state.last });
                 break;
             case DidChangeLastTasksType:
                 updateLastTasks?.({ tasks: state.last });

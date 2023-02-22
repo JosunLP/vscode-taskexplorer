@@ -36,7 +36,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private readonly _onDidTasksChange: EventEmitter<ITeTasksChangeEvent>;
     private readonly _onDidFamousTasksChange: EventEmitter<ITeTasksChangeEvent>;
     private readonly _onDidRunningTasksChange: EventEmitter<ITeTasksChangeEvent>;
-    // private readonly _onDidTasksLoad: EventEmitter<TasksChangeEvent>;
+    private readonly _onReady: EventEmitter<ITeTasksChangeEvent>;
 
     private _specialFolders: {
         favorites: SpecialTaskFolder;
@@ -53,10 +53,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         this.wrapper.log.methodStart("construct task tree manager", 1, "   ");
 
+        this._onReady = new EventEmitter<ITeTasksChangeEvent>();
         this._onDidTasksChange = new EventEmitter<ITeTasksChangeEvent>();
         this._onDidFamousTasksChange = new EventEmitter<ITeTasksChangeEvent>();
         this._onDidRunningTasksChange = new EventEmitter<ITeTasksChangeEvent>();
-        // this._onDidTasksLoad = new EventEmitter<TasksChangeEvent>();
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
         this._specialFolders = {
@@ -74,6 +74,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         };
 
         this.disposables.push(
+            this._onReady,
             this._onDidTasksChange,
             this._onDidFamousTasksChange,
             this._onDidRunningTasksChange,
@@ -136,6 +137,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {
         return this._taskWatcher.onDidTaskStatusChange;
+    }
+
+    get onReady(): Event<ITeTasksChangeEvent> {
+        return this._onReady.event;
     }
 
 	// get onTasksLoaded(): Event<TasksChangeEvent>
@@ -355,10 +360,16 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this.wrapper.utils.showMaxTasksReachedMessage(licMgr);
         }
         //
-        // Create/build the ui task tree and signal  the task list has changed
+        // Create/build the ui task tree
         //
         await this._treeBuilder.createTaskItemTree(logPad + "   ", 2);
+        //
+        // Signal that the task list / tree has changed
+        //
         this._onDidTasksChange.fire({ tasks: this._tasks, type: "all" });
+        if (!this.firstTreeBuildDone) {
+            this._onReady.fire({ tasks: this._tasks, type: "all" });
+        }
         //
         // Done!
         //
