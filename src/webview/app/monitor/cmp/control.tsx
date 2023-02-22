@@ -73,10 +73,13 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
                             <TeReactTaskTimer run={this.props.startTimer} />
                         </td>
                         <td className="te-monitor-control-button-column">
-                            <button className="te-monitor-control-button" />
+                            <button className="te-monitor-control-button-favorite te-monitor-control-button" />
+                        </td>
+                        <td className="te-monitor-control-button-column">
+                            <button className="te-monitor-control-button-open te-monitor-control-button" />
                         </td>
                         <td className="te-monitor-control-button-column te-monitor-control-button-column-last">
-                            <button className="te-monitor-control-button te-monitor-control-button-last" />
+                            <button className="te-monitor-control-button-run te-monitor-control-button te-monitor-control-button-last" />
                         </td>
                     </tr>
                 </tbody>
