@@ -93,7 +93,9 @@
 .te-monitor-control-button {
     width: 76px;
     height: 76px;
-    line-height: 76px;
+    border-radius: 38px;
+    font-size: 50px;
+    line-height: 50px;
     mask-size: cover;
     margin-right: -15px;
     -webkit-mask-size: cover;
@@ -117,8 +119,6 @@
 }
 
 .te-monitor-control-button-favorite {
-    mask: url("../img/dark/favorite.svg") no-repeat 100% 100%;
-    -webkit-mask:url("../img/dark/favorite.svg") no-repeat 100% 100%;
     margin-right: -5px;
 }
 
