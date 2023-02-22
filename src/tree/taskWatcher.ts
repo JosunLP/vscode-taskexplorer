@@ -8,7 +8,7 @@ import { SpecialTaskFolder } from "./specialFolder";
 import { ITeTaskStatusChangeEvent } from "../interface";
 import { configuration } from "../lib/utils/configuration";
 import {
-    Disposable, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
+    Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
     Task, window, TaskEndEvent, EventEmitter, TaskProcessStartEvent, TaskProcessEndEvent
 } from "vscode";
 
@@ -50,7 +50,7 @@ export class TaskWatcher implements Disposable
     }
 
 
-    get onDidTaskStatusChange() {
+    get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {
         return this._onTaskStatusChange.event;
     }
 

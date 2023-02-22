@@ -2,16 +2,16 @@
 import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
-import { IDictionary } from "../interface";
+import { Strings } from "../lib/constants";
 import { sortTasks } from "../lib/sortTasks";
 import { storage } from "../lib/utils/storage";
 import { TaskTreeManager } from "./treeManager";
-import { Globs, Strings } from "../lib/constants";
 import { configuration } from "../lib/utils/configuration";
 import { isString, removeFromArray } from "../lib/utils/utils";
+import { IDictionary, ITeTasksChangeEvent } from "../interface";
 import {
-    commands, ConfigurationChangeEvent, Disposable, InputBoxOptions, ThemeIcon, TreeItem,
-    TreeItemCollapsibleState, window, workspace
+    commands, ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
+    TreeItem, TreeItemCollapsibleState, window, workspace
 } from "vscode";
 
 
@@ -24,40 +24,62 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
 {
 
     public treeManager: TaskTreeManager;
-    public disposables: Disposable[];
-    private storeName: string;
-    private isFavorites: boolean;
     public override taskFiles: TaskItem[];
+
     private store: string[];
     private enabled: boolean;
+    private storeName: string;
+    private isFavorites: boolean;
     private settingNameEnabled: string;
+    private readonly _disposables: Disposable[];
+    private readonly _onDidTasksChange: EventEmitter<ITeTasksChangeEvent>;
 
 
     constructor(treeManager: TaskTreeManager, label: string, state: TreeItemCollapsibleState)
     {
         super(label, state);
+        this.taskFiles = [];
+        this._disposables = [];
         this.treeManager = treeManager;
         this.iconPath = ThemeIcon.Folder;
         this.isFavorites = label === Strings.FAV_TASKS_LABEL;
         this.contextValue = label.toLowerCase().replace(/[\W \_\-]/g, "");
         this.storeName = this.isFavorites ? Strings.FAV_TASKS_STORE : Strings.LAST_TASKS_STORE;
         this.store = storage.get<string[]>(this.storeName, []);
+        this.tooltip = `A tree folder to store '${label}' tasks`;
         this.settingNameEnabled = "specialFolders.show" + label.replace(/ /g, "");
         this.enabled = configuration.get<boolean>(this.settingNameEnabled);
-        this.tooltip = `A tree folder to store '${label}' tasks`;
-        this.disposables = [];
-        this.taskFiles = [];
+        this._onDidTasksChange = new EventEmitter<ITeTasksChangeEvent>();
         if (this.isFavorites)
         {
-            this.disposables.push(commands.registerCommand("taskexplorer.addRemoveFavorite", (taskItem: TaskItem) => this.addRemoveFavorite(taskItem), this));
-            this.disposables.push(commands.registerCommand("taskexplorer.clearFavorites", () => this.clearSavedTasks(), this));
+            this._disposables.push(
+                commands.registerCommand("taskexplorer.addRemoveFavorite", (taskItem: TaskItem) => this.addRemoveFavorite(taskItem), this),
+                commands.registerCommand("taskexplorer.clearFavorites", () => this.clearSavedTasks(), this)
+            );
         }
         else {
-            this.disposables.push(commands.registerCommand("taskexplorer.clearLastTasks", () => this.clearSavedTasks(), this));
+            this._disposables.push(commands.registerCommand("taskexplorer.clearLastTasks", () => this.clearSavedTasks(), this));
         }
-        const d = workspace.onDidChangeConfiguration(async e => { await this.processConfigChanges(e); }, this);
-        this.disposables.push(d);
+        this._disposables.push(
+            this._onDidTasksChange,
+            workspace.onDidChangeConfiguration(async e => { await this.processConfigChanges(e); }, this)
+        );
     }
+
+
+    dispose()
+    {
+        this._disposables.forEach((d) => {
+            d.dispose();
+        });
+        this._disposables.splice(0);
+        this.taskFiles = [];
+    }
+
+
+	get onDidTasksChange(): Event<ITeTasksChangeEvent> {
+		return this._onDidTasksChange.event;
+	}
 
 
     override async addTaskFile(taskItem: TaskItem, logPad?: string)
@@ -254,16 +276,6 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    dispose()
-    {
-        this.disposables.forEach((d) => {
-            d.dispose();
-        });
-        this.disposables = [];
-        this.taskFiles = [];
-    }
-
-
     getLastRanId = () =>
     {
         let lastTaskId: string | undefined;
@@ -410,6 +422,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
                 await storage.update(Strings.LAST_TASKS_STORE, this.store);
             }
             this.treeManager.fireTreeRefreshEvent(logPad, 1, this);
+            this._onDidTasksChange.fire({ tasks: this.taskFiles.map(f => f.task), type: this.isFavorites ? "favorites" : "last" });
         }
     }
 
@@ -439,6 +452,8 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
         await storage.update(this.storeName, this.store);
 
         this.pushToTop(taskItem);
+
+        this._onDidTasksChange.fire({ tasks: this.taskFiles.map(f => f.task), type: this.isFavorites ? "favorites" : "last" });
 
         log.methodDone("save task", 1, logPad, [[ "new # of saved tasks", this.store.length ]]);
     }

@@ -29,23 +29,18 @@ export const AppWrapper = (props: { state: State; subscribe: any }) =>
     {
 		switch (type) {
             case DidChangeTaskType:
-                console.log("UPDATESTATE: DidChangeTaskType");
-                updateLastTasks?.({ tasks: state.last });
+                // updateLastTasks?.({ tasks: state.last });
                 break;
             case DidChangeLastTasksType:
-                console.log("UPDATESTATE: DidChangeLastTasksType");
                 updateLastTasks?.({ tasks: state.last });
                 break;
             case DidChangeFavoriteTasksType:
-                console.log("UPDATESTATE: DidChangeFavoriteTasksType");
                 updateFavoriteTasks?.({ tasks: state.favorites });
                 break;
             case DidChangeFamousTasksType:
-                console.log("UPDATESTATE: DidChangeFamousTasksType");
                 updateFamousTasks?.({ tasks: state.famous });
                 break;
             case DidChangeRunningTasksType:
-                console.log("UPDATESTATE: DidChangeRunningTasksType");
                 updateRunningTasks?.({ tasks: state.running });
                 break;
         }

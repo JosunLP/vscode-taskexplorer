@@ -6,9 +6,9 @@ import { TeWrapper } from "../lib/wrapper";
 import { pathExists } from "../lib/utils/fs";
 import { getTerminal } from "../lib/getTerminal";
 import { SpecialTaskFolder } from "./specialFolder";
-import { ILog, ITeTaskManager, TaskMap } from "../interface";
 import { ScriptTaskProvider } from "../providers/script";
 import { isScriptType } from "../lib/utils/taskTypeUtils";
+import { ILog, ITeTaskManager, TaskMap } from "../interface";
 import { findDocumentPosition } from "../lib/findDocumentPosition";
 import { getDateDifference, getPackageManager, timeout } from "../lib/utils/utils";
 import {

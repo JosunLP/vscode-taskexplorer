@@ -6,7 +6,7 @@ import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
-import { DidChangeRunningTasksType, DidChangeTaskStatusType, DidChangeTaskType, ITask } from "../common/ipc";
+import { DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType, DidChangeTaskStatusType, DidChangeTaskType, ITask } from "../common/ipc";
 
 
 export class MonitorPage extends TeWebviewPanel<State>
@@ -29,6 +29,10 @@ export class MonitorPage extends TeWebviewPanel<State>
 		);
 		this.disposables.push(
 			wrapper.treeManager.onDidTasksChange(e => { this.onTasksChanged(e); }, this),
+			wrapper.treeManager.onDidLastTasksChange(e => { this.onLastTasksChanged(e); }, this),
+			wrapper.treeManager.onDidFavoriteTasksChange(e => { this.onFavoriteTasksChanged(e); }, this),
+			wrapper.treeManager.onDidFamousTasksChange(e => { this.onFamousTasksChanged(e); }, this),
+			wrapper.treeManager.onDidRunningTasksChange(e => { this.onRunningTasksChanged(e); }, this),
 			wrapper.treeManager.onDidTaskStatusChange(e => this.onTaskStatusChanged(e), this)
 		);
 	}
@@ -65,8 +69,10 @@ export class MonitorPage extends TeWebviewPanel<State>
 
 
     private onTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeTaskType, await this.getState());
-
-
+	private onFavoriteTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
+	private onFamousTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
+	private onLastTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
+	private onRunningTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onTaskStatusChanged = (_e: ITeTaskStatusChangeEvent) =>
 	{
 		// return this.notify(DidChangeRunningTasksType, {

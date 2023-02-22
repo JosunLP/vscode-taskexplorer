@@ -16,7 +16,7 @@ import { addToExcludes } from "../lib/addToExcludes";
 import { isTaskIncluded } from "../lib/isTaskIncluded";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Commands, registerCommand } from "../lib/command/command";
-import { IDictionary, ITeTreeManager, ITeTasksChangeEvent } from "../interface";
+import { IDictionary, ITeTreeManager, ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../interface";
 import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskTypeUtils";
 import {
     TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
@@ -34,6 +34,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private currentInvalidation: string | undefined;
     private readonly disposables: Disposable[] = [];
     private readonly _onDidTasksChange: EventEmitter<ITeTasksChangeEvent>;
+    private readonly _onDidFamousTasksChange: EventEmitter<ITeTasksChangeEvent>;
+    private readonly _onDidRunningTasksChange: EventEmitter<ITeTasksChangeEvent>;
     // private readonly _onDidTasksLoad: EventEmitter<TasksChangeEvent>;
 
     private _specialFolders: {
@@ -52,6 +54,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.wrapper.log.methodStart("construct task tree manager", 1, "   ");
 
         this._onDidTasksChange = new EventEmitter<ITeTasksChangeEvent>();
+        this._onDidFamousTasksChange = new EventEmitter<ITeTasksChangeEvent>();
+        this._onDidRunningTasksChange = new EventEmitter<ITeTasksChangeEvent>();
         // this._onDidTasksLoad = new EventEmitter<TasksChangeEvent>();
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
@@ -71,6 +75,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         this.disposables.push(
             this._onDidTasksChange,
+            this._onDidFamousTasksChange,
+            this._onDidRunningTasksChange,
             this._taskWatcher,
             this._treeBuilder,
             this._specialFolders.favorites,
@@ -79,21 +85,21 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._views.taskExplorerSideBar,
             registerCommand(Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this),
             registerCommand(Commands.AddRemoveCustomLabel, async(taskItem: TaskItem) => this.addRemoveSpecialTaskLabel(taskItem), this),
-            registerCommand(Commands.Run,  async (item: TaskItem) => this.taskManager.run(item), this),
-            registerCommand(Commands.RunWithNoTerminal,  async (item: TaskItem) => this.taskManager.run(item, true, false), this),
-            registerCommand(Commands.RunWithArgs,  async (item: TaskItem, args?: string) => this._taskManager.run(item, false, true, args), this),
+            registerCommand(Commands.Run,  (item: TaskItem) => this.taskManager.run(item), this),
+            registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.taskManager.run(item, true, false), this),
+            registerCommand(Commands.RunWithArgs, (item: TaskItem, args?: string) => this._taskManager.run(item, false, true, args), this),
             registerCommand(Commands.RunLastTask,  async () => this.taskManager.runLastTask(this._treeBuilder.getTaskMap()), this),
-            registerCommand(Commands.Stop, async (item: TaskItem) => this.taskManager.stop(item), this),
-            registerCommand(Commands.Restart,  async (item: TaskItem) => this.taskManager.restart(item), this),
-            registerCommand(Commands.Pause,  (item: TaskItem) => this.taskManager.pause(item), this),
-            registerCommand(Commands.Open, async (item: TaskItem, itemClick?: boolean) => this.taskManager.open(item, itemClick), this),
+            registerCommand(Commands.Stop, (item: TaskItem) => this.taskManager.stop(item), this),
+            registerCommand(Commands.Restart, (item: TaskItem) => this.taskManager.restart(item), this),
+            registerCommand(Commands.Pause, (item: TaskItem) => this.taskManager.pause(item), this),
+            registerCommand(Commands.Open, (item: TaskItem, itemClick?: boolean) => this.taskManager.open(item, itemClick), this),
             registerCommand(Commands.OpenTerminal, (item: TaskItem) => this.openTerminal(item), this),
-            registerCommand(Commands.NpmRunInstall, async (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "install"), this),
-            registerCommand(Commands.NpmRunUpdate, async (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "update"), this),
-            registerCommand(Commands.NpmRunUpdatePackage, async (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "update <packagename>"), this),
-            registerCommand(Commands.NpmRunAudit, async (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "audit"), this),
-            registerCommand(Commands.NpmRunAuditFix, async (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "audit fix"), this),
-            registerCommand(Commands.AddToExcludes, async (taskFile: TaskFile | TaskItem) => this.addToExcludes(taskFile), this)
+            registerCommand(Commands.NpmRunInstall, (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "install"), this),
+            registerCommand(Commands.NpmRunUpdate, (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "update"), this),
+            registerCommand(Commands.NpmRunUpdatePackage, (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "update <packagename>"), this),
+            registerCommand(Commands.NpmRunAudit, (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "audit"), this),
+            registerCommand(Commands.NpmRunAuditFix, (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "audit fix"), this),
+            registerCommand(Commands.AddToExcludes, (taskFile: TaskFile | TaskItem) => this.addToExcludes(taskFile), this)
         );
 
         this.wrapper.log.methodDone("construct task tree manager", 1, "   ");
@@ -108,13 +114,29 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
 
-    get onDidTaskStatusChange() {
-        return this._taskWatcher.onDidTaskStatusChange;
-    }
+	get onDidFamousTasksChange(): Event<ITeTasksChangeEvent> {
+		return this._onDidFamousTasksChange.event;
+	}
+
+	get onDidFavoriteTasksChange(): Event<ITeTasksChangeEvent> {
+		return this._specialFolders.favorites.onDidTasksChange;
+	}
+
+	get onDidLastTasksChange(): Event<ITeTasksChangeEvent> {
+		return this._specialFolders.lastTasks.onDidTasksChange;
+	}
 
 	get onDidTasksChange(): Event<ITeTasksChangeEvent> {
 		return this._onDidTasksChange.event;
 	}
+
+    get onDidRunningTasksChange(): Event<ITeTasksChangeEvent> {
+        return this._onDidRunningTasksChange.event;
+    }
+
+    get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {
+        return this._taskWatcher.onDidTaskStatusChange;
+    }
 
 	// get onTasksLoaded(): Event<TasksChangeEvent>
     // {
@@ -352,7 +374,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             v.tree.fireTreeRefreshEvent(logPad + "   ", logLevel, treeItem);
         });
-        this._onDidTasksChange.fire({ taskCount: this._tasks.length });
+        this._onDidTasksChange.fire({ tasks: this._tasks, type: "all" });
     };
 
 

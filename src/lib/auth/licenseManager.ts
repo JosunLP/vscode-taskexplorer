@@ -7,7 +7,7 @@ import { IServerResponseData, TeServer } from "./server";
 import { TeAuthenticationProvider } from "./authProvider";
 import { executeCommand, registerCommand, Commands } from "../command/command";
 import { ISessionToken, TeSessionChangeEvent } from "../../interface/IAuthentication";
-import { AuthenticationSession, Disposable, env, EventEmitter, InputBoxOptions, Task, window } from "vscode";
+import { AuthenticationSession, Disposable, env, Event, EventEmitter, InputBoxOptions, Task, window } from "vscode";
 
 
 export class LicenseManager implements ITeLicenseManager, Disposable
@@ -68,7 +68,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	}
 
 
-    get onDidSessionChange() {
+    get onDidSessionChange(): Event<TeSessionChangeEvent> {
         return this._onSessionChange.event;
     }
 

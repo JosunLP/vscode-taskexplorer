@@ -9,20 +9,20 @@
  */
 
 import { TextDecoder } from "util";
+import { BaseState } from "./common/state";
+import { TeWebviewView } from "./webviewView";
+import { TeWebviewPanel } from "./webviewPanel";
 import { ITeWebview, TeSessionChangeEvent } from "../interface";
 // import { getNonce } from "@env/crypto";
 import { TeWrapper } from "../lib/wrapper";
 import { getNonce } from "../lib/env/node/crypto";
 import { fontawesome } from "./common/fontawesome";
 import { Commands, executeCommand } from "../lib/command/command";
-import { Disposable, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
+import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
 	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeStateType
 } from "./common/ipc";
-import { BaseState } from "./common/state";
-import { TeWebviewView } from "./webviewView";
-import { TeWebviewPanel } from "./webviewPanel";
 
 
 export interface FontAwesomeClass
@@ -98,11 +98,11 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		return this._isFirstLoadComplete;
 	}
 
-	get onContentLoaded() {
+	get onContentLoaded(): Event<string> {
 		return this._onContentLoaded.event;
 	}
 
-	get onReadyReceived() {
+	get onReadyReceived(): Event<void> {
 		return this._onReadyReceived.event;
 	}
 

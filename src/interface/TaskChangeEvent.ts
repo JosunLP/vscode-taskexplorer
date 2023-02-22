@@ -2,7 +2,8 @@ import { Task } from "vscode";
 
 export interface ITeTasksChangeEvent
 {
-    readonly taskCount: number;
+    readonly type: "all" | "last" | "favorites" | "famous" | "running";
+    readonly tasks: Task[];
 };
 
 export interface ITeTaskStatusChangeEvent
