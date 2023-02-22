@@ -119,6 +119,8 @@
 }
 
 .te-monitor-control-button-favorite {
+    mask: url("../img/dark/favorite.svg") no-repeat 100% 100%;
+    -webkit-mask:url("../img/dark/favorite.svg") no-repeat 100% 100%;
     margin-right: -5px;
 }
 
