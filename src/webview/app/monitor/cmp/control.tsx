@@ -72,6 +72,12 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
                         <td className="te-monitor-control-timer-column">
                             <TeReactTaskTimer run={this.props.startTimer} />
                         </td>
+                        <td className="te-monitor-control-button-column">
+                            <button className="te-monitor-control-button" />
+                        </td>
+                        <td className="te-monitor-control-button-column te-monitor-control-button-column-last">
+                            <button className="te-monitor-control-button te-monitor-control-button-last" />
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -110,6 +116,14 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
                                     <tr>
                                         <td>
                                             # of Runtimes (Last 7 Days)
+                                        </td>
+                                        <td>
+                                            &nbsp;&nbsp; : &nbsp;xx
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            # of Runtimes (Last 30 Days)
                                         </td>
                                         <td>
                                             &nbsp;&nbsp; : &nbsp;xx
