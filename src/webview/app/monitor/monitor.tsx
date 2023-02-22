@@ -141,8 +141,6 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 	protected override setState = (state: State, type?:  IpcNotificationType<any>) => // | InternalNotificationType)
     {
 		this.log(`${this.appName}.setState`);
-		console.log(state);
-		console.log(this.state);
 		Object.assign(this.state, { ...state });
 		this.callback?.(this.state, type);
 	};

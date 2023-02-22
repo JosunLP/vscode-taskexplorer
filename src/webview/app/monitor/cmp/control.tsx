@@ -21,15 +21,10 @@ interface ReactProps
 }
 
 
-export const ControlWrapper = (props: ReactProps) =>
+export const TeTaskControlWrapper = (props: ReactProps) =>
 {
     const [ tasks, setTasks ] = useState(props.tasks);
-    const updateState = (state: ControlState) =>
-    {
-        console.log("[TEST]: AppWrapper UPDATESTATE");
-        console.log(state);
-		setTasks(state.tasks);
-    };
+    const updateState = (state: ControlState) => setTasks(state.tasks);
 	useEffect(() => props.subscribe?.(updateState), []);
     return (
         <TeTaskControl
@@ -130,7 +125,6 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
 
     override render()
     {
-        console.log("render: " + this.id, this.state, this.props);
         const els: JSX.Element[] = [];
         this.props.tasks.forEach((t: ITask) => els.push(this.createControl(t)));
         return els;
