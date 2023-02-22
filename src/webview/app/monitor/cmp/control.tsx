@@ -5,18 +5,17 @@ import { ReactProps } from "../../common/react";
 import { TeReactTaskTimer } from "./timer";
 
 
-interface State
+export interface ControlState
 {
-    seconds: number;
+    seconds?: number;
 	tasks: ITask[];
     webroot: string;
 }
 
 
-export class TeTaskControl extends React.Component<ReactProps, State>
+export class TeTaskControl extends React.Component<ReactProps, ControlState>
 {
     private id: string | undefined;
-    private callback?: StateChangedCallback;
     private counter = 0;
 
     constructor(props: ReactProps)
@@ -24,51 +23,12 @@ export class TeTaskControl extends React.Component<ReactProps, State>
         super(props);
         this.id = props.id;
         this.state = props.state;
-        this.callback = props.subscribe;
-
-        // const controlRef = useRef<TeTaskControl>(null);
-
-        // // const [subscription, setSubscription] = useState<Subscription | undefined>(state.subscription);
-	    // // const [ context, setContext ] = useState(props.state.context);
-        // // const [ isLoading, setIsLoading ] = useState(props.state.loading);
-
-        // const updateState = (
-        //     state: State,
-        //     type?: IpcNotificationType<any> | InternalNotificationType
-        // ) => {};
-
-        // useEffect(() => props.subscribe?.(updateState), []);
-
-        // useEffect(() => {
-        //     window.addEventListener("keydown", this.handleKeyDown);
-
-        //     return () => {
-        //         window.removeEventListener("keydown", this.handleKeyDown);
-        //     };
-        // }, [ null ]);
     }
 
 
-    override componentDidMount()
-    {
-        // eslint-disable-next-line @typescript-eslint/tslint/config
-        // this.interval = setInterval(() => this.tick(), 1000);
-    }
-
-
-    override componentWillUnmount()
-    {
-        // clearInterval(this.interval as NodeJS.Timeout);
-    }
-
-
-    handleKeyDown = (e: KeyboardEvent) =>
-    {
-		if (e.key === "Enter" || e.key === " ")
-        {
-            this.callback?.(this.state);
-		}
-	};
+    override componentDidMount = () => console.log("componentDidMount: " + this.id);
+    override componentWillUnmount = () => console.log("componentWillUnmount: " + this.id);
+    override componentDidUpdate = (props: any) => console.log("componentDidUpdate: " + this.id, props);
 
 
     private createControl = (task: ITask) =>
@@ -141,11 +101,10 @@ export class TeTaskControl extends React.Component<ReactProps, State>
 
     override render()
     {
+        console.log("render: " + this.id, this.state, this.props);
         const els: JSX.Element[] = [];
-        this.state.tasks.forEach(t => els.push(this.createControl(t)));
-        return (
-            els
-        );
+        this.props.tasks.forEach((t: ITask) => els.push(this.createControl(t)));
+        return els;
     }
 
 }

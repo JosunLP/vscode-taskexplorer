@@ -3,6 +3,18 @@
     opacity: 1
 }
 
+.te-tab-favorites:before  {
+    content: "\f005";
+}
+
+.te-tab-famous:before  {
+    content: "\f005";
+}
+
+.te-tab-running:before  {
+    content: "\f085";
+}
+
 .te-monitor-control-container {
     margin-bottom: 10px;
 }

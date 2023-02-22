@@ -5,4 +5,5 @@ export interface ReactProps
     id?:  string;
     state: any;
     subscribe?: any;
+    tasks?: any;
 }

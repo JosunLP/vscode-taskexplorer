@@ -49,9 +49,9 @@ export class MonitorPage extends TeWebviewPanel<State>
 	{
 		return {
 			...(await super.getState()),
-			lastTasks: this.prepareTasksForTransport(this.wrapper.treeManager.lastTasks),
+			last: this.prepareTasksForTransport(this.wrapper.treeManager.lastTasks),
 			favorites: this.prepareTasksForTransport(this.wrapper.treeManager.favoriteTasks),
-			runningTasks: this.prepareTasksForTransport(this.wrapper.treeManager.runningTasks),
+			running: this.prepareTasksForTransport(this.wrapper.treeManager.runningTasks),
 			famous: this.prepareTasksForTransport(this.wrapper.treeManager.famousTasks),
 			tasks: this.prepareTasksForTransport(this.wrapper.treeManager.getTasks())
 		};

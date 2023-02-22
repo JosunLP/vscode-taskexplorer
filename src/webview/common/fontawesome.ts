@@ -17,8 +17,7 @@ export const fontawesome = {
         bug: "\\f188",
         plus: "\\+",
         add: "\\+",
-        gears: "\\f085",
-        cogs: "\\f085"
+        gears: "\\f085"
     } as IDictionary<string>,
 
     sizes: `
