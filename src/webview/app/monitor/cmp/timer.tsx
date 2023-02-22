@@ -1,10 +1,16 @@
 
 import React from "react";
-import { ReactProps } from "../../common/react";
 
 interface State
 {
     seconds: number;
+}
+
+interface ReactProps
+{
+    id?:  string;
+    state: any;
+    seconds?: number;
 }
 
 export class TeReactTaskTimer extends React.Component<ReactProps, State>

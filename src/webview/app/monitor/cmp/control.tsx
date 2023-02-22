@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import React, { createElement, useEffect, useMemo, useRef, useState } from "react";
 import { InternalNotificationType, IpcNotificationType, ITask, StateChangedCallback } from "../../../common/ipc";
-import { ReactProps } from "../../common/react";
 import { TeReactTaskTimer } from "./timer";
 
 
@@ -11,6 +11,35 @@ export interface ControlState
 	tasks: ITask[];
     webroot: string;
 }
+
+interface ReactProps
+{
+    id?:  string;
+    state: any;
+    subscribe?: any;
+    tasks?: any;
+}
+
+
+export const ControlWrapper = (props: ReactProps) =>
+{
+    const [ tasks, setTasks ] = useState(props.tasks);
+    const updateState = (state: ControlState) =>
+    {
+        console.log("[TEST]: AppWrapper UPDATESTATE");
+        console.log(state);
+		setTasks(state.tasks);
+    };
+	useEffect(() => props.subscribe?.(updateState), []);
+    return (
+        <TeTaskControl
+            id={props.id}
+            state={props.state}
+            subscribe={props.subscribe}
+            tasks={tasks}
+        />
+    );
+};
 
 
 export class TeTaskControl extends React.Component<ReactProps, ControlState>

@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // export default {};
 
-import { TeTaskControl } from "./control";
-import { ReactProps } from "../../common/react";
+import { ControlWrapper, TeTaskControl } from "./control";
 import React, { useEffect, useState } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import {
     DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType,
-    DidChangeRunningTasksType, DidChangeTaskType, IpcNotificationType, ITask
+    DidChangeRunningTasksType, DidChangeTaskType, IpcNotificationType, ITask, StateChangedCallback
 } from "../../../common/ipc";
 
 interface State
@@ -20,20 +19,88 @@ interface State
     webroot: string;
 }
 
+interface ReactProps
+{
+    id?:  string;
+    state: any;
+    subscribe?: any;
+    tasks?: any;
+}
+
+let updateLastTasks: StateChangedCallback | undefined;
+let updateRunningTasks: StateChangedCallback | undefined;
+let updateFavoriteTasks: StateChangedCallback | undefined;
+let updateFamousTasks: StateChangedCallback | undefined;
+
 const onTabSelected = (index: number, lastIndex: number) =>
 {
     // this.log(`${this.appName}.onTabSelected: index=${index}: lastIdex=${lastIndex}`);
+};
+
+export interface Indexer<TValue>
+{
+    [id: string]: TValue;
+}
+
+interface UpdateTasks extends Indexer<StateChangedCallback | undefined>
+{
+    last: StateChangedCallback | undefined;
+    running: StateChangedCallback | undefined;
+    favorites: StateChangedCallback | undefined;
+    famous: StateChangedCallback | undefined;
+};
+
+const updateTasks: UpdateTasks = {
+    last: undefined,
+    running: undefined,
+    favorites: undefined,
+    famous: undefined
+};
+
+const registerUpdateTasks = (callback: StateChangedCallback, taskSet: string): (() => void) =>
+{
+    updateTasks[taskSet] = callback;
+    return () => {
+        updateLastTasks = undefined;
+    };
+};
+
+const registerUpdateLastTasks = (callback: StateChangedCallback): (() => void) =>
+{
+    updateLastTasks = callback;
+    return () => {
+        updateLastTasks = undefined;
+    };
+};
+
+const registerUpdateRunningTasks = (callback: StateChangedCallback): (() => void) =>
+{
+    updateRunningTasks = callback;
+    return () => {
+        updateRunningTasks = undefined;
+    };
+};
+
+const registerUpdateFavoriteTasks = (callback: StateChangedCallback): (() => void) =>
+{
+    updateFavoriteTasks = callback;
+    return () => {
+        updateFavoriteTasks = undefined;
+    };
+};
+
+const registerUpdateFamousTasks = (callback: StateChangedCallback): (() => void) =>
+{
+    updateFamousTasks = callback;
+    return () => {
+        updateFamousTasks = undefined;
+    };
 };
 
 export const AppWrapper = (props: ReactProps) =>
 {
     console.log("[TEST]: AppWrapper");
     console.log(props);
-
-    const [ lastTasks, setLastTasks ] = useState(props.state.last);
-    const [ famousTasks, setFamousTasks ] = useState(props.state.famous);
-    const [ favoriteTasks, setFavoriteTasks ] = useState(props.state.favorites);
-    const [ runningTasks, setRunningTasks ] = useState(props.state.running);
 
     const updateState = (state: State, type?: IpcNotificationType<any>) =>
     {
@@ -42,204 +109,89 @@ export const AppWrapper = (props: ReactProps) =>
 		switch (type) {
             case DidChangeTaskType:
                 console.log("UPDATESTATE: DidChangeTaskType");
-                setLastTasks(state.last);
+                updateLastTasks?.({ tasks: state.last });
                 break;
             case DidChangeLastTasksType:
                 console.log("UPDATESTATE: DidChangeLastTasksType");
-                setLastTasks(state.last);
+                updateLastTasks?.({ tasks: state.last });
                 break;
             case DidChangeFavoriteTasksType:
                 console.log("UPDATESTATE: DidChangeFavoriteTasksType");
-                setFavoriteTasks(state.favorites);
+                updateFavoriteTasks?.({ tasks: state.favorites });
                 break;
             case DidChangeFamousTasksType:
                 console.log("UPDATESTATE: DidChangeFamousTasksType");
-                setFamousTasks(state.famous);
+                updateFamousTasks?.({ tasks: state.famous });
                 break;
             case DidChangeRunningTasksType:
                 console.log("UPDATESTATE: DidChangeRunningTasksType");
-                setRunningTasks(state.running);
+                updateRunningTasks?.({ tasks: state.running });
                 break;
         }
     };
 	useEffect(() => props.subscribe?.(updateState), []);
 
     return (
-    <>
-        <div className="te-tabs-container">
-            <Tabs className="te-tabs"  onSelect={onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
-                <TabList>
-                    <Tab className="react-tabs__tab te-tab-recent">Recent</Tab>
-                    <Tab className="react-tabs__tab te-tab-running">Running</Tab>
-                    <Tab className="react-tabs__tab te-tab-favorites">Favorites</Tab>
-                    <Tab className="react-tabs__tab te-tab-famous">Famous</Tab>
-                </TabList>
-                <TabPanel>
-                    <TeTaskControl
-                        id="te-id-view-monitor-control-recent"
-                        tasks={lastTasks}
-                        state={{ tasks: lastTasks, webroot: props.state.webroot }}
-                    />
-                </TabPanel>
-                <TabPanel>
-                    <TeTaskControl
-                        id="te-id-view-monitor-control-running"
-                        tasks={runningTasks}
-                        state={{ seconds: 0, tasks: runningTasks, webroot: props.state.webroot }}
-                    />
-                </TabPanel>
-                <TabPanel>
-                    <TeTaskControl
-                        id="te-id-view-monitor-control-favorites"
-                        tasks={favoriteTasks}
-                        state={{ tasks: favoriteTasks, webroot: props.state.webroot }}
-                    />
-                </TabPanel>
-                <TabPanel>
-                    <TeTaskControl
-                        id="te-id-view-monitor-control-famous"
-                        tasks={famousTasks}
-                        state={{ tasks: famousTasks, webroot: props.state.webroot }}
-                    />
-                </TabPanel>
-            </Tabs>
-        </div>
-    </>);
+        <>
+            <App state={props.state} />
+        </>
+    );
 };
 
-// export class App extends React.Component<ReactProps, State>
-// {
-//     private id: string | undefined;
-//     private counter = 0;
-//     // private controlState: ControlStates;
-//
-//     constructor(props: ReactProps)
-//     {
-//         super(props);
-//         console.log("[TEST]: App");
-//         console.log(props);
-//         this.id = props.id;
-//         this.state = props.state;
-//        // this.controlState = {
-//        //     last: Object.assign({}, { tasks: props.state.lastTasks, webroot: props.state.webroot }),
-//        //     running: Object.assign({}, { seconds: 10, tasks: [ ...props.state.runningTasks ], webroot: props.state.webroot }),
-//        //     favorites: Object.assign({}, { seconds: 20, tasks: [ ...props.state.favorites ], webroot: props.state.webroot }),
-//        //     famous: Object.assign({}, { seconds: 30, tasks: [ ...props.state.favorites ], webroot: props.state.webroot }),
-//        // };
-//         // props.subscribe = (state: State, type?: IpcNotificationType<any>) =>
-//         // {
-//         //     console.log("UPDATESTATE!!!");
-//         //     switch (type) {
-//         //         case DidChangeTaskType:
-//         //             console.log("UPDATESTATE: DidChangeTaskType");
-//         //             // setTasks(state.tasks);
-//         //             controlStates.last.tasks = state.tasks;
-//         //             this.setState({ last: state.last });
-//         //             break;
-//         //         case DidChangeLastTasksType:
-//         //             console.log("UPDATESTATE: DidChangeLastTasksType");
-//         //             break;
-//         //         case DidChangeFavoriteTasksType:
-//         //             console.log("UPDATESTATE: DidChangeFavoriteTasksType");
-//         //             break;
-//         //         case DidChangeFamousTasksType:
-//         //             console.log("UPDATESTATE: DidChangeFamousTasksType");
-//         //             break;
-//         //         case DidChangeRunningTasksType:
-//         //             console.log("UPDATESTATE: DidChangeRunningTasksType");
-//         //             break;
-//         //     }
-//         // };
-//         // props.subscribe = updateState;
-//         // useEffect(() => props.subscribe?.(updateState), []);
-//     }
-//
-//
-//     // override componentDidMount()
-//     // {
-//     //     const updateState = (state: State, type?: IpcNotificationType<any>) =>
-//     //     {
-//     //         console.log("App UPDATESTATE");
-//     //         switch (type) {
-//     //             case DidChangeTaskType:
-//     //                 console.log("UPDATESTATE: DidChangeTaskType");
-//     //                 // setTasks(state.tasks);
-//     //                 controlStates.last.tasks = state.tasks;
-//     //                 this.setState({ last: state.last });
-//     //                 break;
-//     //             case DidChangeLastTasksType:
-//     //                 console.log("UPDATESTATE: DidChangeLastTasksType");
-//     //                 break;
-//     //             case DidChangeFavoriteTasksType:
-//     //                 console.log("UPDATESTATE: DidChangeFavoriteTasksType");
-//     //                 break;
-//     //             case DidChangeFamousTasksType:
-//     //                 console.log("UPDATESTATE: DidChangeFamousTasksType");
-//     //                 break;
-//     //             case DidChangeRunningTasksType:
-//     //                 console.log("UPDATESTATE: DidChangeRunningTasksType");
-//     //                 break;
-//     //         }
-//     //     };
-//     //     useEffect(() => this.props.subscribe?.(updateState), []);
-//     // }
-//
-//
-//     // override componentWillUnmount()
-//     // {
-//     //     // clearInterval(this.interval as NodeJS.Timeout);
-//     // }
-//
-//     // override componentDidUpdate(props: any)
-//     // {
-//     //     console.log("App componentDidUpdate");
-//     //     console.log(props);
-//     //     // this.setState({ tasks: props.tasks });
-//     // }
-//
-//     override render = () =>
-//     {
-//         console.log("[TEST]: App render");
-//         console.log(this.state);
-//         return (<>
-//         <div className="te-tabs-container">
-//             <Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
-//                 <TabList>
-//                     <Tab>Recent</Tab>
-//                     <Tab>Running</Tab>
-//                     <Tab>Favorites</Tab>
-//                     <Tab>Famous</Tab>
-//                 </TabList>
-//                 <TabPanel>
-//                     <TeTaskControl
-//                         id="te-id-view-monitor-control-recent"
-//                         tasks={this.state.last}
-//                         state={{ tasks: this.state.last, webroot: this.state.webroot }}
-//                     />
-//                 </TabPanel>
-//                 <TabPanel>
-//                     <TeTaskControl
-//                         id="te-id-view-monitor-control-running"
-//                         tasks={this.state.running}
-//                         state={{  seconds: 0, tasks: this.state.running, webroot: this.state.webroot }}
-//                     />
-//                 </TabPanel>
-//                 <TabPanel>
-//                     <TeTaskControl
-//                         id="te-id-view-monitor-control-favorites"
-//                         tasks={this.state.favorites}
-//                         state={{ tasks: this.state.favorites, webroot: this.state.webroot }}
-//                     />
-//                 </TabPanel>
-//                 <TabPanel>
-//                     <TeTaskControl
-//                         id="te-id-view-monitor-control-famous"
-//                         tasks={this.state.famous}
-//                         state={{ tasks: this.state.famous, webroot: this.state.webroot }}
-//                     />
-//                 </TabPanel>
-//             </Tabs>
-//         </div>
-//         </>);
-//     };
-// }
+
+class App extends React.Component<ReactProps, State>
+{
+    constructor(props: ReactProps)
+    {
+        super(props);
+        this.state = props.state;
+    }
+
+    override render = () =>
+    {
+        return (
+            <div className="te-tabs-container">
+                <Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
+                    <TabList>
+                        <Tab className="react-tabs__tab te-tab-recent">Recent</Tab>
+                        <Tab className="react-tabs__tab te-tab-running">Running</Tab>
+                        <Tab className="react-tabs__tab te-tab-favorites">Favorites</Tab>
+                        <Tab className="react-tabs__tab te-tab-famous">Famous</Tab>
+                    </TabList>
+                    <TabPanel>
+                        <ControlWrapper
+                            id="te-id-view-monitor-control-recent"
+                            tasks={this.props.state.last}
+                            state={{ tasks: this.props.state.last, webroot: this.props.state.webroot }}
+                            subscribe={(callback: StateChangedCallback) => registerUpdateLastTasks(callback)}
+                        />
+                    </TabPanel>
+                    <TabPanel>
+                        <ControlWrapper
+                            id="te-id-view-monitor-control-running"
+                            tasks={this.props.state.running}
+                            state={{ seconds: 0, tasks: this.props.state.running, webroot: this.props.state.webroot }}
+                            subscribe={(callback: StateChangedCallback) => registerUpdateRunningTasks(callback)}
+                        />
+                    </TabPanel>
+                    <TabPanel>
+                        <ControlWrapper
+                            id="te-id-view-monitor-control-favorites"
+                            tasks={this.props.state.favorites}
+                            state={{ tasks: this.props.state.favorites, webroot: this.props.state.webroot }}
+                            subscribe={(callback: StateChangedCallback) => registerUpdateFavoriteTasks(callback)}
+                        />
+                    </TabPanel>
+                    <TabPanel>
+                        <ControlWrapper
+                            id="te-id-view-monitor-control-famous"
+                            tasks={this.props.state.famous}
+                            state={{ tasks: this.props.state.famous, webroot: this.props.state.webroot }}
+                            subscribe={(callback: StateChangedCallback) => registerUpdateFamousTasks(callback)}
+                        />
+                    </TabPanel>
+                </Tabs>
+            </div>
+        );
+    };
+}
