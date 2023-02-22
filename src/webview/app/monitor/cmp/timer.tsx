@@ -1,14 +1,17 @@
 
 import React from "react";
-import { AppMonitorState } from "../monitor";
+import { ReactProps } from "../../common/react";
 
+interface State
+{
+    seconds: number;
+}
 
-export class TeReactTaskTimer extends React.Component<any, AppMonitorState>
+export class TeReactTaskTimer extends React.Component<ReactProps, State>
 {
     private interval: NodeJS.Timeout | undefined;
-    nonce?: string;
 
-    constructor(props: any)
+    constructor(props: ReactProps)
     {
         super(props);
         this.state = props.state || {
@@ -19,10 +22,10 @@ export class TeReactTaskTimer extends React.Component<any, AppMonitorState>
     private tick = () => this.setState(state => ({ seconds: (state.seconds || 0) + 1 }));
 
 
-    override componentDidMount()
+    override componentDidMount = () =>
     {   // eslint-disable-next-line @typescript-eslint/tslint/config
         this.interval = setInterval(() => this.tick(), 1000);
-    }
+    };
 
 
     override componentWillUnmount = () => clearInterval(this.interval as NodeJS.Timeout);

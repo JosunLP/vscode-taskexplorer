@@ -69,7 +69,7 @@ class Storage implements IStorage, Memento
     }
 
 
-    private getKey = (key: string) => (!this.isTests ? /* istanbul ignore next */"" :
+    private getKey = (key: string) => (!this.isTests && !this.isDev ? /* istanbul ignore next */"" :
                                       (this.isDev ? /* istanbul ignore next */"dev" : "tests")) + key;
 
 

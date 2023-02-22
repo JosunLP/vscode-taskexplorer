@@ -19,7 +19,7 @@ import {
 } from "vscode";
 
 
-export abstract class TeWebviewView<State, SerializedState = State> extends TeWebviewBase<State> implements WebviewViewProvider, Disposable
+export abstract class TeWebviewView<State, SerializedState = State> extends TeWebviewBase<State, SerializedState> implements WebviewViewProvider, Disposable
 {
 	private _description: string | undefined;
 	private _disposableView: Disposable | undefined;
@@ -48,8 +48,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	}
 
 
-	get description(): string | undefined
-	{
+	get description(): string | undefined {
 		return this._description;
 	}
 

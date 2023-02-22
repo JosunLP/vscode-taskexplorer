@@ -74,11 +74,11 @@ export interface LogWriteCommandTypeParams
 export const LogWriteCommandType = new IpcCommandType<LogWriteCommandTypeParams>("command/log");
 
 
-export interface DidChangeExtensionEnabledParams
+export interface DidChangeEnabledParams
 {
-	extensionEnabled: boolean;
+	enabled: boolean;
 }
-export const DidChangeExtensionEnabledType = new IpcNotificationType<DidChangeExtensionEnabledParams>("extensionEnabled/change");
+export const DidChangeEnabledType = new IpcNotificationType<DidChangeEnabledParams>("enabled/change");
 
 
 export interface DidChangeConfigurationParams
@@ -105,3 +105,23 @@ export type StateChangedCallback = (state: any /* State */, type?: IpcNotificati
 
 export interface DidChangeStateParams extends State {};
 export const DidChangeStateType = new IpcNotificationType<DidChangeStateParams>("state/change");
+
+export interface ITask
+{
+	name: string;
+	definition: any;
+	source: string;
+	treeId: string;
+}
+export interface DidChangeTaskStatusParams
+{
+	task: ITask;
+};
+export const DidChangeTaskStatusType = new IpcNotificationType<DidChangeTaskStatusParams>("tasks/change/status");
+export interface DidChangeTaskParams
+{
+	tasks: ITask[];
+};
+export const DidChangeTaskType = new IpcNotificationType<DidChangeTaskParams>("tasks/change");
+export const DidChangeLastTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/lasttasks");
+export const DidChangeRunningTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/runningtasks");

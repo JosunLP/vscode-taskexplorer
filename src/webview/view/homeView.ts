@@ -1,5 +1,5 @@
 
-import { AppState, BaseState, State } from "../common/state";
+import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
 import { ITeTasksChangeEvent } from "../../interface";
@@ -157,7 +157,7 @@ export class HomeView extends TeWebviewView<State>
 	}
 
 
-	protected override async getState(): Promise<AppState>
+	protected override async getState()
 	{
 		return {
 			...(await super.getState())

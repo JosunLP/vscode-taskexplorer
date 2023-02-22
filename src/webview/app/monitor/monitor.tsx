@@ -9,45 +9,70 @@ import "./monitor.scss";
 import React, { useRef, useState } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
-import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
 import { TeTaskControl } from "./cmp/control";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
-import { DidChangeStateType, IpcMessage, IpcNotificationType, onIpc, StateChangedCallback } from "../../common/ipc";
+import { DidChangeLastTasksType, DidChangeRunningTasksType, DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeTaskType, InternalNotificationType, IpcMessage, IpcNotificationType, ITask, onIpc, StateChangedCallback } from "../../common/ipc";
 
-export interface AppMonitorState extends State
+
+interface State
 {
-	seconds: number;
-	taskType: string;
+	tasks: ITask[];
+	favorites: ITask[];
+	lastTasks: ITask[];
+	runningTasks: ITask[];
+    webroot: string;
+}
+
+interface ControlState
+{
+	last: State;
+	running: State;
+	favorites: State;
+	famous: State;
 };
 
 class TaskMonitorWebviewApp extends TeWebviewApp<State>
 {
     private callback?: StateChangedCallback;
+    private controlState: ControlState;
 
     constructor()
     {
 		super("TaskMonitorWebviewApp");
+		//
+		// this.state is populated in the the TeWebviewApp (super) constructor,
+		// read from window.bootstrap
+		//
+		this.controlState = {
+			last: Object.assign({}, this.state, { seconds: 0, tasks: this.state.lastTasks }),
+			running: Object.assign({}, this.state, { seconds: 10, tasks: this.state.runningTasks }),
+			favorites: Object.assign({}, this.state, { seconds: 20, tasks: this.state.favorites }),
+			famous: Object.assign({}, this.state, { seconds: 30, tasks: this.state.favorites }),
+		};
 	}
 
 
-	protected override onInitialize()
+	protected override onInitialize = () =>
 	{
 		this.log(`${this.appName}.onInitialize`);
-		this.state = this.getState<AppMonitorState>() ?? this.state;
-		if (this.state) {
-			Object.assign(this.state, {
-				seconds: 0,
-				taskType: "ant"
-			});
-		 	this.refresh(this.state);
+
+		//
+		// TODO - Test what vscode.getState/setState is all about...
+		//
+		const state = this.getState();
+		if (state) {
+			console.log("!!!");
+			console.log("!!! VSCODE GETSTATE() ");
+			console.log(state);
+			console.log("!!!");
 		}
 		// const [ tasks, setTasks ] = useState(this.state.param1 ?? []);
-	}
+	};
 
 
-    protected override onBind()
+    protected override onBind = () =>
     {
 		const disposables = super.onBind?.() ?? [];
 		this.log(`${this.appName}.onBind`);
@@ -67,27 +92,39 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 					<TabList>
 						<Tab>Recent</Tab>
 						<Tab>Running</Tab>
+						<Tab>Favorites</Tab>
 						<Tab>Famous</Tab>
 					</TabList>
 					<TabPanel>
 						<TeTaskControl
 							id="te-id-view-monitor-control-recent"
-							state={Object.assign({}, this.state, { seconds: 0, taskType: "ant" })}
-							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+							key="tsx-id-view-monitor-control-recent"
+							state={this.controlState.last}
+							subscribe={(callback: StateChangedCallback) => this.registerEventCallback(callback)}
 						/>
 					</TabPanel>
 					<TabPanel>
 						<TeTaskControl
-							id="te-id-view-monitor-control-running"
-							state={Object.assign({}, this.state, { seconds: 10, taskType: "gulp" })}
-							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+							id="te-id-view-monitor-control-recent"
+							key="tsx-id-view-monitor-control-recent"
+							state={this.controlState.running}
+							subscribe={(callback: StateChangedCallback) => this.registerEventCallback(callback)}
+						/>
+					</TabPanel>
+					<TabPanel>
+						<TeTaskControl
+							id="te-id-view-monitor-control-favorites"
+							key="tsx-id-view-monitor-control-favorites"
+							state={this.controlState.favorites}
+							subscribe={(callback: StateChangedCallback) => this.registerEventCallback(callback)}
 						/>
 					</TabPanel>
 					<TabPanel>
 						<TeTaskControl
 							id="te-id-view-monitor-control-famous"
-							state={Object.assign({}, this.state, { seconds: 20, taskType: "grunt" })}
-							subscribe={(callback: StateChangedCallback) => this.registerEvents(callback)}
+							key="tsx-id-view-monitor-control-famous"
+							state={this.controlState.famous}
+							subscribe={(callback: StateChangedCallback) => this.registerEventCallback(callback)}
 						/>
 					</TabPanel>
 				</Tabs>
@@ -99,7 +136,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
         });
 
 		return disposables;
-	}
+	};
 
 
 	private onTabSelected = (index: number, lastIndex: number) =>
@@ -114,10 +151,33 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		this.log(`${this.appName}.onMessageReceived(${msg.id}): name=${msg.method}`);
 
 		switch (msg.method) {
+			case DidChangeTaskType.method:
+				onIpc(DidChangeTaskType, msg, params => {
+					this.state.tasks  = { ...params.tasks };
+					this.setState(this.state, DidChangeTaskType);
+				});
+				break;
+			case DidChangeLastTasksType.method:
+				onIpc(DidChangeTaskType, msg, params => {
+					this.state.lastTasks = { ...params.tasks };
+					this.setState(this.state);
+				});
+				break;
+			case DidChangeRunningTasksType.method:
+				onIpc(DidChangeTaskType, msg, params => {
+					this.state.runningTasks = { ...params.tasks };
+					this.setState(this.state);
+				});
+				break;
+			case DidChangeTaskStatusType.method:
+				onIpc(DidChangeTaskStatusType, msg, params => {
+					// this.state.tasks  = params.task;
+					this.setState(this.state);
+				});
+				break;
 			case DidChangeStateType.method:
 				onIpc(DidChangeStateType, msg, params => {
-					(this.state as any) = params;
-					this.updateState();
+					this.processBaseStateChange(params);
 				});
 				break;
 			default:
@@ -126,29 +186,31 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 	};
 
 
-	protected override setState = (state: State, type?: IpcNotificationType<any>) => // | InternalNotificationType)
+	private processBaseStateChange = (params: DidChangeStateParams) =>
+    {
+		this.log(`${this.appName}.processBaseStateChange`);
+		this.state = Object.assign({ ...this.state }, { ...params  });
+		// this.state = Object.assign({ ...this.state, }, { state });
+		// super.setState(state); // TODO - Check out how to use internally provided vscode state
+		this.callback?.(this.state, DidChangeStateType);
+	};
+
+
+	protected override setState = (state: State, type?:  IpcNotificationType<any>) => // | InternalNotificationType)
     {
 		this.log(`${this.appName}.setState`);
 		this.state = state;
-		// super.setState(state); // Don't call base (for now), not using internally provided vscode state
+		// super.setState(state); // TODO - Check out how to use internally provided vscode state
 		this.callback?.(this.state, type);
 	};
 
 
-	private registerEvents = (callback: StateChangedCallback): (() => void) =>
+	private registerEventCallback = (callback: StateChangedCallback): (() => void) =>
     {
 		this.callback = callback;
 		return () => {
 			this.callback = undefined;
 		};
-	};
-
-
-	private refresh = (state: State) =>
-	{
-		// const taskControlRef =  ReactDOM.findDOMNode(this);// document.getElementById("te-id-task-control") as HTMLElement;
-		// taskControlRef.innerHTML = "";
-		// taskControlRef.
 	};
 
 }

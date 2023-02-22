@@ -1,11 +1,12 @@
 
-import { AppMonitorState, AppState, State } from "../common/state";
+import { Task } from "vscode";
+import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
-import { DidChangeStateType } from "../common/ipc";
+import { DidChangeRunningTasksType, DidChangeTaskStatusType, DidChangeTaskType, ITask } from "../common/ipc";
 
 
 export class MonitorPage extends TeWebviewPanel<State>
@@ -33,15 +34,27 @@ export class MonitorPage extends TeWebviewPanel<State>
 	}
 
 
-	protected override async getState(): Promise<AppMonitorState>
+	private prepareTasksForTransport = (tasks: Task[]): ITask[] =>
+	{
+		return tasks.map<ITask>(t => ({
+			name: t.name,
+			definition: t.definition,
+			source: t.source,
+			treeId: ""
+		}));
+	};
+
+
+	protected override getState = async() =>
 	{
 		return {
 			...(await super.getState()),
-			seconds: 0,
-			taskType: "grunt",
-			tasks: []
+			lastTasks: this.prepareTasksForTransport(this.wrapper.treeManager.lastTasks),
+			favorites: this.prepareTasksForTransport(this.wrapper.treeManager.favoriteTasks),
+			runningTasks: this.prepareTasksForTransport(this.wrapper.treeManager.runningTasks),
+			tasks: this.prepareTasksForTransport(this.wrapper.treeManager.getTasks())
 		};
-	}
+	};
 
 
 	protected override includeBootstrap = (): Promise<State> => this.getState();
@@ -50,37 +63,41 @@ export class MonitorPage extends TeWebviewPanel<State>
 	protected override includeFontAwesome = () => ({ duotone: true, regular: true, icons: [ "gears", "gear", "gears", "star" ] });
 
 
-    private async onTasksChanged(_e: ITeTasksChangeEvent)
+    private onTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeTaskType, await this.getState());
+
+
+	private onTaskStatusChanged = (_e: ITeTaskStatusChangeEvent) =>
 	{
-		if (this.isFirstLoadComplete) {
-			await this.refresh();
-		}
-	}
+		// return this.notify(DidChangeRunningTasksType, {
+		// 	tasks: this.prepareTasksForTransport(this.wrapper.treeManager.runningTasks)
+		// });
+		// return !! await (Promise.all([
+		// 	this.notify(DidChangeRunningTasksType, {
+		// 		tasks: this.prepareTasksForTransport(this.wrapper.treeManager.runningTasks)
+		// 	}),
+		// 	this.notify(DidChangeTaskStatusType, {
+		// 		task: {
+		// 			name: e.task.name,
+		// 			definition: e.task.definition,
+		// 			source: e.task.source,
+		// 			treeId: e.taskItemId
+		// 		}
+		// 	})
+		// ]));
+	};
 
 
-	private async onTaskStatusChanged(e: ITeTaskStatusChangeEvent)
-	{
-		await this.refresh();
-		const state = await this.getState();
-		return this.notify(DidChangeStateType, Object.assign(state, {
-			param1: e.task,
-			param2: e.isRunning,
-			param3: e.taskItemId
-		}));
-	}
-
-
-	protected override onVisibilityChanged(visible: boolean)
+	protected override onVisibilityChanged = (visible: boolean) =>
 	{
 		// this.wrapper.log.methodStart("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad(), false, [[ "visible", visible ]]);
 		// this.wrapper.log.methodDone("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad());
-	}
+	};
 
 
-	protected override onFocusChanged(focused: boolean): void
+	protected override onFocusChanged = (focused: boolean): void =>
 	{
 		// this.wrapper.log.methodStart("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad(), false, [[ "focus", focused ]]);
 		// this.wrapper.log.methodDone("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad());
-	}
+	};
 
 }

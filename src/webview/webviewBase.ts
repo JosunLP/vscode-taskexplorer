@@ -11,7 +11,6 @@
 import { TextDecoder } from "util";
 import { ITeWebview, TeSessionChangeEvent } from "../interface";
 // import { getNonce } from "@env/crypto";
-import { BaseState, State } from "./common/state";
 import { TeWrapper } from "../lib/wrapper";
 import { getNonce } from "../lib/env/node/crypto";
 import { fontawesome } from "./common/fontawesome";
@@ -21,6 +20,9 @@ import {
 	ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
 	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeStateType
 } from "./common/ipc";
+import { BaseState } from "./common/state";
+import { TeWebviewView } from "./webviewView";
+import { TeWebviewPanel } from "./webviewPanel";
 
 
 export interface FontAwesomeClass
@@ -36,9 +38,9 @@ export interface FontAwesomeClass
 }
 
 
-export abstract class TeWebviewBase<State> implements ITeWebview, Disposable
+export abstract class TeWebviewBase<State, SerializedState> implements ITeWebview, Disposable
 {
-    abstract show(options?: any, ..._args: unknown[]): Promise<TeWebviewBase<State>>;
+    abstract show(options?: any, ..._args: unknown[]): Promise<TeWebviewPanel<State> | TeWebviewView<State, SerializedState>>;
 
 	protected includeBody?(...args: unknown[]): string | Promise<string>;
 	protected includeBootstrap?(...args: unknown[]): any;

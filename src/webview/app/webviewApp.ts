@@ -35,15 +35,15 @@ export abstract class TeWebviewApp<State = undefined>
 
 	constructor(protected readonly appName: string)
 	{
-		this.state = (window as any).bootstrap;
-		(window as any).bootstrap = undefined;
+		const domWindow = window as any;
+		this.state = domWindow.bootstrap;
+		delete domWindow.bootstrap;
 
 		const disposables: Disposable[] = [];
 		this.log(`${this.appName}.constructor()`);
 
 		this._vscode = acquireVsCodeApi();
 
-		// requestAnimationFrame(() =>
 		DOM.on(window, "load", () =>
 		{
 			this.log(`${this.appName}.initializing`);
@@ -71,6 +71,35 @@ export abstract class TeWebviewApp<State = undefined>
 	protected get vscode(): VsCodeApi {
 		return this._vscode;
 	}
+
+	private applyLicenseContent(): void
+    {
+		let btn = document.getElementById("btnEnterLicense");
+		if (btn)
+		{
+			const isLicensed = (this.state as any).isLicensed as boolean;
+			(btn.parentNode as HTMLElement).hidden = isLicensed;
+			(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
+			btn = document.getElementById("btnGetLicense");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = isLicensed;
+				(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
+			}
+			btn = document.getElementById("btnTaskMonitor");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = !isLicensed;
+				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
+			}
+			btn = document.getElementById("btnViewLicense");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = !isLicensed;
+				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
+			}
+		}
+	}
+
+
+	protected getState = <T>(): T => this._vscode.getState() as T;
 
 
 	protected initialize(): void
@@ -117,7 +146,7 @@ export abstract class TeWebviewApp<State = undefined>
 			})
 		);
 
-		this.updateState();
+		this.applyLicenseContent();
 	}
 
 
@@ -128,9 +157,6 @@ export abstract class TeWebviewApp<State = undefined>
 		},  1);
 		console.log("[WEBVIEW]: " + message, ...optionalParams);
 	};
-
-
-	protected getState = <T>(): T => this._vscode.getState() as T;
 
 
 	private nextIpcId = (): string =>
@@ -148,7 +174,7 @@ export abstract class TeWebviewApp<State = undefined>
 	private _onMessageReceived(e: MessageEvent): void
     {
 		const msg = e.data as IpcMessage;
-        this.log(`[BASE]${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`);
+        this.log(`WebviewAppBase[${this.appName}].onMessageReceived(${msg.id}): method=${msg.method}`);
         switch (msg.method)
         {
 			// case DidChangeLicenseType.method:
@@ -158,12 +184,6 @@ export abstract class TeWebviewApp<State = undefined>
 			// 		this.updateState();
 			// 	});
 			// 	break;
-			case DidChangeStateType.method:
-				onIpc(DidChangeStateType, msg, params => {
-					(this.state as any) = params;
-					this.updateState();
-				});
-				break;
 			case EchoCommandRequestType.method:       // Standard echo service for testing web->host commands in mocha tests
                 onIpc(EchoCommandRequestType, msg, params => this.sendCommand(ExecuteCommandType, params));
                 break;
@@ -192,32 +212,6 @@ export abstract class TeWebviewApp<State = undefined>
 		this.state = state;
 		if (state) {
 			this._vscode.setState(state);
-		}
-	}
-
-	protected updateState(): void
-    {
-		let btn = document.getElementById("btnEnterLicense");
-		if (btn)
-		{
-			const isLicensed = (this.state as any).isLicensed as boolean;
-			(btn.parentNode as HTMLElement).hidden = isLicensed;
-			(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
-			btn = document.getElementById("btnGetLicense");
-			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = isLicensed;
-				(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
-			}
-			btn = document.getElementById("btnTaskMonitor");
-			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = !isLicensed;
-				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
-			}
-			btn = document.getElementById("btnViewLicense");
-			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = !isLicensed;
-				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
-			}
 		}
 	}
 

@@ -1,11 +1,12 @@
 
-import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { createTaskCountTable } from "../common/taskCountTable";
+import { BaseState } from "../common/state";
 
+interface State extends BaseState {};
 
 export class LicensePage extends TeWebviewPanel<State>
 {

@@ -386,6 +386,9 @@ export class TaskManager implements ITeTaskManager
     };
 
 
+    getRunningTasks = () => tasks.taskExecutions.map(e => e.task);
+
+
     getTodayCount = (logPad: string) =>
     {
         let count = 0;

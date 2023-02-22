@@ -19,7 +19,6 @@ export class HomeWebviewApp extends TeWebviewApp<State>
 
 	protected override onInitialize()
     {
-		this.updateState();
 	}
 
 

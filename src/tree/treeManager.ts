@@ -121,8 +121,20 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 	// 	return this._onDidTasksLoad.event;
 	// }
 
+    get favoriteTasks() {
+        return this._specialFolders.favorites.taskFiles.map(f => f.task);
+    }
+
+    get lastTasks() {
+        return this._specialFolders.lastTasks.taskFiles.map(f => f.task);
+    }
+
     get lastTasksFolder() {
         return this._specialFolders.lastTasks;
+    }
+
+    get runningTasks() {
+        return this._taskManager.getRunningTasks();
     }
 
     get views() {
