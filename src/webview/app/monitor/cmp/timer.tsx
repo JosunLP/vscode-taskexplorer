@@ -1,17 +1,18 @@
 
 import React from "react";
 
-interface State
+interface ReactState
 {
+    run: boolean;
     seconds: number;
 }
 
 interface ReactProps
 {
-    run?: boolean;
+    start?: boolean;
 }
 
-export class TeReactTaskTimer extends React.Component<ReactProps, State>
+export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
 {
     private interval: NodeJS.Timeout | undefined;
 
@@ -19,16 +20,18 @@ export class TeReactTaskTimer extends React.Component<ReactProps, State>
     {
         super(props);
         this.state = {
+            run: !!props.start,
             seconds: 0
         };
     }
+
 
     private tick = () => this.setState(state => ({ seconds: state.seconds + 1 }));
 
 
     override componentDidMount = () =>
     {
-        if (this.props.run) {
+        if (this.state.run) {
             // eslint-disable-next-line @typescript-eslint/tslint/config
             this.interval = setInterval(() => this.tick(), 1000);
         }
@@ -48,5 +51,13 @@ export class TeReactTaskTimer extends React.Component<ReactProps, State>
             <span className="te-monitor-control-timer">{tmF}</span>
         );
     }
+
+    startTimer = () => {
+
+    };
+
+    stopTimer = () => {
+
+    };
 
 }

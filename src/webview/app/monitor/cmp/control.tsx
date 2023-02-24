@@ -5,50 +5,34 @@ import { InternalNotificationType, IpcNotificationType, ITask, StateChangedCallb
 import { TeReactTaskTimer } from "./timer";
 
 
-export interface ControlState
+interface ReactState
 {
-    seconds?: number;
 	tasks: ITask[];
-    webroot: string;
 }
 
 interface ReactProps
 {
-    id?:  string;
+    id:  string;
     startTimer?: boolean;
-    state: any;
-    subscribe?: any;
-    tasks?: any;
+    tasks: ITask[];
+    webroot: string;
 }
 
-
-export const TeTaskControlWrapper = (props: ReactProps) =>
-{
-    const [ tasks, setTasks ] = useState(props.tasks);
-    const updateState = (state: ControlState) => setTasks(state.tasks);
-	useEffect(() => props.subscribe?.(updateState), []);
-    return (
-        <TeTaskControl
-            id={props.id}
-            startTimer={props.startTimer}
-            state={props.state}
-            subscribe={props.subscribe}
-            tasks={tasks}
-        />
-    );
-};
-
-
-export class TeTaskControl extends React.Component<ReactProps, ControlState>
+export class TeTaskControl extends React.Component<ReactProps, ReactState>
 {
     private id: string | undefined;
     private counter = 0;
+    private timerEl;
+
 
     constructor(props: ReactProps)
     {
         super(props);
         this.id = props.id;
-        this.state = props.state;
+        this.state = {
+            tasks: props.tasks
+        };
+        this.timerEl = React.createRef<TeReactTaskTimer>();
     }
 
 
@@ -64,22 +48,22 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
                 <tbody>
                     <tr className="te-monitor-control-row te-monitor-control-top-row">
                         <td className="te-monitor-control-icon-column">
-                            <img className="te-monitor-control-icon-img" src={this.state.webroot + "/img/sources/" + task.source + ".svg"} />
+                            <img className="te-monitor-control-icon-img" src={this.props.webroot + "/img/sources/" + task.source + ".svg"} />
                         </td>
                         <td className="te-monitor-control-content-column">
                             {this.getTaskDetails(task)}
                         </td>
                         <td className="te-monitor-control-timer-column">
-                            <TeReactTaskTimer run={this.props.startTimer} />
+                            <TeReactTaskTimer ref={this.timerEl} start={task.name === "running"} />
                         </td>
                         <td className="te-monitor-control-button-column">
-                            <button className="te-monitor-control-button-favorite te-monitor-control-button" />
+                            <button onClick={this.clickFavorite} className="te-monitor-control-button-favorite te-monitor-control-button" />
                         </td>
                         <td className="te-monitor-control-button-column">
-                            <button className="te-monitor-control-button-open te-monitor-control-button" />
+                            <button onClick={this.clickOpen} className="te-monitor-control-button-open te-monitor-control-button" />
                         </td>
                         <td className="te-monitor-control-button-column te-monitor-control-button-column-last">
-                            <button className="te-monitor-control-button-run te-monitor-control-button te-monitor-control-button-last" />
+                            <button onClick={this.clickRun} className="te-monitor-control-button-run te-monitor-control-button te-monitor-control-button-last" />
                         </td>
                     </tr>
                 </tbody>
@@ -153,8 +137,25 @@ export class TeTaskControl extends React.Component<ReactProps, ControlState>
     override render()
     {
         const els: JSX.Element[] = [];
-        this.props.tasks.forEach((t: ITask) => els.push(this.createControl(t)));
+        this.state.tasks.forEach((t: ITask) => els.push(this.createControl(t)));
         return els;
     }
+
+    setTasks = (tasks: ITask[]) => this.setState({ tasks });
+
+
+    private clickFavorite = () => {
+
+    };
+
+
+    private clickOpen = () => {
+
+    };
+
+
+    private clickRun = () => {
+        this.timerEl.current?.startTimer();
+    };
 
 }

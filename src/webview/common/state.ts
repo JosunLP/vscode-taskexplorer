@@ -7,10 +7,10 @@ export interface BaseState
 	isEnabled: boolean;
 	isLicensed: boolean;
 	license?: ISessionToken;
-	nonce?: string;
+	nonce: string;
 	pinned: boolean;
 	session?: AuthenticationSession;
-	webroot?: string;
+	webroot: string;
 }
 
 export interface State extends BaseState {};

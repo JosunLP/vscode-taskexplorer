@@ -112,6 +112,15 @@ export interface ITask
 	definition: any;
 	source: string;
 	treeId: string;
+	running: boolean;
+}
+export interface MonitorAppState extends State
+{
+	famous: ITask[];
+	favorites: ITask[];
+	last: ITask[];
+	tasks: ITask[];
+	running: ITask[];
 }
 export interface DidChangeTaskStatusParams
 {

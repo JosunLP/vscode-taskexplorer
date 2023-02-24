@@ -7,30 +7,39 @@ import "./monitor.css";
 import "./monitor.scss";
 
 import React from "react";
-import { AppWrapper } from "./cmp/app";
+import { App } from "./cmp/app";
 import { TeWebviewApp } from "../webviewApp";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
 	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeTaskType,
-	IpcMessage, IpcNotificationType, ITask, onIpc, StateChangedCallback
+	IpcMessage, IpcNotificationType, ITask, onIpc, StateChangedCallback, MonitorAppState
 } from "../../common/ipc";
 
 interface State
 {
-	tasks: ITask[];
 	famous: ITask[];
 	favorites: ITask[];
+	isEnabled: boolean;
+	isLicensed: boolean;
 	last: ITask[];
+	license: {
+		expiresFmt: string;
+		issuedFmt: string;
+		token: string;
+		ttl?: number;
+	};
+	nonce: string;
+	pinned: boolean;
 	running: ITask[];
+	tasks: ITask[];
     webroot: string;
 }
 
-class TaskMonitorWebviewApp extends TeWebviewApp<State>
+class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 {
-    private callback?: StateChangedCallback;
-    // private controlState: ControlState;
+	private appRef: React.RefObject<App>;
 
     constructor()
     {   //
@@ -38,6 +47,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		// read from window.bootstrap
 		//
 		super("TaskMonitorWebviewApp");
+		this.appRef = React.createRef<App>();
 	}
 
 
@@ -63,9 +73,9 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		this.log(`${this.appName}.onBind`);
         const root = createRoot(document.getElementById("root") as HTMLElement);
         root.render(
-			<AppWrapper
+			<App
+				ref={this.appRef}
 				state={this.state}
-				subscribe={(callback: StateChangedCallback) => this.registerEventCallback(callback)}
 			 />
         );
         disposables.push({
@@ -134,25 +144,25 @@ class TaskMonitorWebviewApp extends TeWebviewApp<State>
 		this.log(`${this.appName}.processBaseStateChange`);
 		Object.assign(this.state, { ...params  });
 		// super.setState(state); // TODO - Check out how to use internally provided vscode state
-		this.callback?.(this.state, DidChangeStateType);
+		this.appRef.current?.updateTasks(this.state, DidChangeStateType);
 	};
 
 
-	protected override setState = (state: State, type?:  IpcNotificationType<any>) => // | InternalNotificationType)
+	protected override setState = (state: MonitorAppState, type?:  IpcNotificationType<any>) => // | InternalNotificationType)
     {
-		this.log(`${this.appName}.setState`);
+		this.log(`${this.appName}.setState`, state);
 		Object.assign(this.state, { ...state });
-		this.callback?.(this.state, type);
+		this.appRef.current?.updateTasks(state, type);
 	};
 
 
-	private registerEventCallback = (callback: StateChangedCallback): (() => void) =>
-    {
-		this.callback = callback;
-		return () => {
-			this.callback = undefined;
-		};
-	};
+	// private registerEventCallback = (callback: StateChangedCallback): (() => void) =>
+    // {
+	// 	this.callback = callback;
+	// 	return () => {
+	// 		this.callback = undefined;
+	// 	};
+	// };
 
 }
 

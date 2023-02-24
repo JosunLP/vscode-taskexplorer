@@ -1,15 +1,17 @@
 
 import { Task } from "vscode";
-import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
-import { DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType, DidChangeTaskStatusType, DidChangeTaskType, ITask } from "../common/ipc";
+import { DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState, DidChangeTaskType, ITask } from "../common/ipc";
 
 
-export class MonitorPage extends TeWebviewPanel<State>
+
+
+
+export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 {
 	static viewTitle = "Task Monitor";
 	static viewId: WebviewIds = "taskMonitor"; // Must match view id in package.json
@@ -46,12 +48,13 @@ export class MonitorPage extends TeWebviewPanel<State>
 			name: t.name,
 			definition: t.definition,
 			source: t.source,
-			treeId: ""
+			treeId: "",
+			running: false // TODO - Set `running` flag
 		}));
 	};
 
 
-	protected override getState = async() =>
+	protected override getState = async(): Promise<MonitorAppState> =>
 	{
 		return {
 			...(await super.getState()),
@@ -64,7 +67,7 @@ export class MonitorPage extends TeWebviewPanel<State>
 	};
 
 
-	protected override includeBootstrap = (): Promise<State> => this.getState();
+	protected override includeBootstrap = (): Promise<MonitorAppState> => this.getState();
 	protected override includeFontAwesome = () => ({ duotone: true, regular: true, icons: [ "gears", "gear", "gears", "star" ] });
 
 
