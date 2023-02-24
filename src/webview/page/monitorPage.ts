@@ -76,22 +76,22 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) =>
 	{
 		this.notify(DidChangeTaskStatusType, { task: this.prepareTasksForTransport([ e.task ], e.isRunning, e.taskItemId)[0] });
-		let task = this.wrapper.treeManager.lastTasks.find(t => e.task.name === t.name);
-		if (task) {
-			this.onLastTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "last" });
-		}
-		task = this.wrapper.treeManager.runningTasks.find(t => e.task.name === t.name);
-		if (task) {
-			this.onRunningTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "running" });
-		}
-		task = this.wrapper.treeManager.favoriteTasks.find(t => e.task.name === t.name);
-		if (task) {
-			this.onFavoriteTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "favorites" });
-		}
-		task = this.wrapper.treeManager.famousTasks.find(t => e.task.name === t.name);
-		if (task) {
-			this.onFamousTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "famous" });
-		}
+		// let task = this.wrapper.treeManager.lastTasks.find(t => e.task.name === t.name);
+		// if (task) {
+		// 	this.onLastTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "last" });
+		// }
+		// task = this.wrapper.treeManager.runningTasks.find(t => e.task.name === t.name);
+		// if (task) {
+		// 	this.onRunningTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "running" });
+		// }
+		// task = this.wrapper.treeManager.favoriteTasks.find(t => e.task.name === t.name);
+		// if (task) {
+		// 	this.onFavoriteTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "favorites" });
+		// }
+		// task = this.wrapper.treeManager.famousTasks.find(t => e.task.name === t.name);
+		// if (task) {
+		// 	this.onFamousTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "famous" });
+		// }
 	};
 
 

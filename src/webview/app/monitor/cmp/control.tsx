@@ -30,6 +30,7 @@ interface ReactProps
 export class TeTaskControl extends React.Component<ReactProps, ReactState>
 {
     private timerEl;
+    private counter = 0;
     private buttons: ITeAppButtons;
     private log: (message: string, ...optionalParams: any[]) => void;
     private executeCommand: (command: string, task: ITask) => void;
@@ -133,7 +134,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     override render()
     {
         return (
-            <div className="te-monitor-control-container">
+            <div className="te-monitor-control-container" key={`te-id-task-control-${++this.counter}`}>
                 <table width="100%" cellPadding="0" cellSpacing="0">
                     <tbody>
                         <tr className="te-monitor-control-row te-monitor-control-top-row">
@@ -190,5 +191,11 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
             </div>
         );
     }
+
+
+    setTask = (task: ITask) =>
+    {
+        this.setState({ task });
+    };
 
 }

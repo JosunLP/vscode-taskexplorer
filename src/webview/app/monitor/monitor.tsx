@@ -3,7 +3,6 @@ import "../common/css/vscode.css";
 import "../common/css/react.css";
 import "../common/css/tabs.css";
 import "../common/css/page.css";
-import "./monitor.css";
 import "./monitor.scss";
 
 import React from "react";
@@ -46,22 +45,15 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
 	private handleTaskStateChangeEvent = (params: DidChangeTaskStatusParams): void =>
 	{
-		// let task = this.state.last.find(t => params.task.name === t.name);
-		// if (task) {
-		// 	this.app.recentTab.setState({ tasks: this.state.last });
-		// }
-		// task = this.state.running.find(t => params.task.name === t.name);
-		// if (task) {
-		// 	this.app.runningTab.setState({ tasks: this.state.running });
-		// }
-		// task = this.state.favorites.find(t => params.task.name === t.name);
-		// if (task) {
-		// 	this.app.favoritesTab.setState({ tasks: this.state.favorites });
-		// }
-		// task = this.state.famous.find(t => params.task.name === t.name);
-		// if (task) {
-		// 	this.app.famousTab.setState({ tasks: this.state.famous });
-		// }
+		const tIdx = this.state.tasks.findIndex(t => params.task.treeId === t.treeId);
+		if (tIdx !== -1) {
+			this.state.tasks.splice(tIdx, 1, params.task);
+			this.setState(this.state);
+		}
+		this.app.recentTab.setTask(params.task);
+		this.app.runningTab.setTask(params.task);
+		this.app.favoritesTab.setTask(params.task);
+		this.app.famousTab.setTask(params.task);
 	};
 
 
@@ -117,28 +109,28 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				onIpc(DidChangeLastTasksType, msg, params => {
 					this.state.last = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.last);
-					this.app.recentTab.setState({ tasks: this.state.last });
+					this.app.recentTab.setTasks(this.state.last);
 				});
 				break;
 			case DidChangeRunningTasksType.method:
 				onIpc(DidChangeRunningTasksType, msg, params => {
 					this.state.running = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.running);
-					this.app.runningTab.setState({ tasks: this.state.running });
+					this.app.runningTab.setTasks(this.state.running);
 				});
 				break;
 			case DidChangeFamousTasksType.method:
 				onIpc(DidChangeFamousTasksType, msg, params => {
 					this.state.famous = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.famous);
-					this.app.famousTab.setState({ tasks: this.state.famous });
+					this.app.famousTab.setTasks(this.state.famous);
 				});
 				break;
 			case DidChangeFavoriteTasksType.method:
 				onIpc(DidChangeFavoriteTasksType, msg, params => {
 					this.state.favorites = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.favorites);
-					this.app.favoritesTab.setState({ tasks: this.state.favorites });
+					this.app.favoritesTab.setTasks(this.state.favorites);
 				});
 				break;
 			case DidChangeTaskStatusType.method:
@@ -163,7 +155,8 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
     {
 		this.log("processBaseStateChange");
 		Object.assign(this.state, { ...params  });
-		this.setState(this.state);
+		// this.setState(this.state);
+		// super.setState(state); // TODO - Check out how to use internally provided vscode state
 	};
 
 

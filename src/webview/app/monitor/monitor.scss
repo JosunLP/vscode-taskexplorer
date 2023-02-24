@@ -39,6 +39,89 @@ button {
 	}
 }
 
+
+.te-tsx-root-container.te-tsx-monitor-root-container {
+    opacity: 1
+}
+
+.te-tab-favorites:before  {
+    content: "\f005";
+}
+
+.te-tab-famous:before  {
+    content: "\f005";
+}
+
+.te-tab-running:before  {
+    content: "\f085";
+}
+
+.te-monitor-control-container {
+    margin-bottom: 10px;
+}
+
+.te-monitor-control-row {
+    display: flex;
+    align-items: stretch;
+}
+  
+.te-monitor-control-top-row {
+    height: 90px;
+}
+  
+.te-monitor-control-icon-column {
+    width: 100px;
+    margin-top: 8px;
+}
+
+.te-monitor-control-icon-img {
+    height: 80px;
+    vertical-align: middle;
+}
+  
+.te-monitor-control-content-column {
+    padding: 5px;
+}
+
+.te-monitor-control-spacer-column {
+    flex: 1;
+}
+  
+.te-monitor-control-button-column {
+    padding: 7px 0px 7px 0px;
+}
+  
+.te-monitor-control-button-column-last {
+    padding: 7px 20px 7px 0px;
+}
+
+.te-monitor-control-content-container {
+    opacity: 1;
+}
+
+.te-monitor-control-content-table {
+    text-align: left;
+    width: 100%;
+    flex: 1;
+}
+
+.te-monitor-control-content-title {
+    font-size: 18px;
+    line-height: 18px;
+    padding-right: 12px;
+    vertical-align: top;
+}
+
+.te-monitor-control-content-details {
+    font-size: 14px;
+    line-height: 14px;
+    text-align: left;
+}
+
+.te-monitor-control-content-details-body {
+    opacity: 1;
+}
+
 .te-monitor-control-button-last {
     margin-right: 5px;
 }
