@@ -28,7 +28,7 @@ export class TeTaskButton extends React.Component<ReactProps, { hidden: boolean}
                 <button
                     hidden={this.state.hidden}
                     onClick={this.props.clickHandler}
-                    className={`te-monitor-control-button-${this.props.name} te-monitor-control-button${this.props.lastButton ? " te-monitor-control-button-button-last" : ""}`}
+                    className={`te-monitor-control-button-${this.props.name}${this.props.lastButton ? " te-monitor-control-button-button-last" : ""} te-monitor-control-button`}
                 />
             </td>
         );

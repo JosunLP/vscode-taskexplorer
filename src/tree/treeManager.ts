@@ -86,15 +86,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._views.taskExplorerSideBar,
             registerCommand(Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this),
             registerCommand(Commands.AddRemoveCustomLabel, async(taskItem: TaskItem) => this.addRemoveSpecialTaskLabel(taskItem), this),
-            registerCommand(Commands.Run,  (item: TaskItem | ITeTask) => this.taskManager.run(item), this),
+            registerCommand(Commands.Run,  (item: TaskItem | ITeTask) => this.taskManager.run(this.getTask(item)), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.taskManager.run(item, true, false), this),
             registerCommand(Commands.RunWithArgs, (item: TaskItem, args?: string) => this._taskManager.run(item, false, true, args), this),
             registerCommand(Commands.RunLastTask,  async () => this.taskManager.runLastTask(this._treeBuilder.getTaskMap()), this),
-            registerCommand(Commands.Stop, (item: TaskItem) => this.taskManager.stop(item), this),
+            registerCommand(Commands.Stop, (item: TaskItem | ITeTask) => this.taskManager.stop(this.getTask(item)), this),
             registerCommand(Commands.Restart, (item: TaskItem) => this.taskManager.restart(item), this),
-            registerCommand(Commands.Pause, (item: TaskItem) => this.taskManager.pause(item), this),
-            registerCommand(Commands.Open, (item: TaskItem, itemClick?: boolean) => this.taskManager.open(item, itemClick), this),
-            registerCommand(Commands.OpenTerminal, (item: TaskItem) => this.openTerminal(item), this),
+            registerCommand(Commands.Pause, (item: TaskItem | ITeTask) => this.taskManager.pause(this.getTask(item)), this),
+            registerCommand(Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.taskManager.open(this.getTask(item), itemClick), this),
+            registerCommand(Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.getTask(item)), this),
             registerCommand(Commands.NpmRunInstall, (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "install"), this),
             registerCommand(Commands.NpmRunUpdate, (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "update"), this),
             registerCommand(Commands.NpmRunUpdatePackage, (taskFile: TaskFile) => this.taskManager.runNpmCommand(taskFile, "update <packagename>"), this),
@@ -385,6 +385,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             v.tree.fireTreeRefreshEvent(logPad + "   ", logLevel, treeItem);
         });
+    };
+
+
+    private getTask =  (taskItem: TaskItem | ITeTask) =>
+    {
+        if (!(taskItem instanceof TaskItem)) {
+            taskItem = this._treeBuilder.getTaskMap()[taskItem.definition.taskItemId] as TaskItem;
+        }
+        return taskItem;
     };
 
 

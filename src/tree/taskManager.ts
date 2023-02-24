@@ -8,7 +8,7 @@ import { getTerminal } from "../lib/getTerminal";
 import { SpecialTaskFolder } from "./specialFolder";
 import { ScriptTaskProvider } from "../providers/script";
 import { isScriptType } from "../lib/utils/taskTypeUtils";
-import { ILog, ITeTask, ITeTaskManager, TaskMap } from "../interface";
+import { ILog, ITeTaskManager, TaskMap } from "../interface";
 import { findDocumentPosition } from "../lib/findDocumentPosition";
 import { getDateDifference, getPackageManager, timeout } from "../lib/utils/utils";
 import {
@@ -159,7 +159,7 @@ export class TaskManager implements ITeTaskManager
      * @param withArgs Whether or not to prompt for arguments
      * Note that only script type tasks use arguments (and Gradle, ref ticket #88)
      */
-    run = async(taskItem: TaskItem | ITeTask, noTerminal = false, withArgs = false, args?: string) =>
+    run = async(taskItem: TaskItem, noTerminal = false, withArgs = false, args?: string) =>
     {
         let exec: TaskExecution | undefined;
 
@@ -167,10 +167,6 @@ export class TaskManager implements ITeTaskManager
         {
             window.showInformationMessage("Busy, please wait...");
             return exec;
-        }
-
-        if (!(taskItem instanceof TaskItem)) {
-            taskItem = this.wrapper.treeManager.getTaskMap()[taskItem.definition.taskItemId] as TaskItem;
         }
 
         this.log.methodStart("run task", 1, "", true, [[ "task name", taskItem.label ]]);

@@ -57,7 +57,7 @@
 }
   
 .te-monitor-control-button-column-last {
-    padding: 7px 10px 7px 0px;
+    padding: 7px 20px 7px 0px;
 }
 
 .te-monitor-control-content-container {
@@ -105,45 +105,49 @@
 }
 
 .te-monitor-control-button-last {
-    margin-right: -5px;
-  }
+    margin-right: 5px;
+}
   
-  .te-monitor-control-button-open {
+.te-monitor-control-button-open {
     width: 62px;
     height: 62px;
     margin-top: 5px;
     mask: url("../img/dark/file.svg") no-repeat 100% 100%;
     -webkit-mask: url("../img/dark/file.svg") no-repeat 100% 100%;
-  }
+}
   
-  .te-monitor-control-button-run {
+.te-monitor-control-button-run {
     width: 64px;
     height: 64px;
     margin-top: 5px;
     mask: url("../img/dark/start.svg") no-repeat 100% 100%;
     -webkit-mask: url("../img/dark/start.svg") no-repeat 100% 100%;
-  }
+}
   
-  .te-monitor-control-button-favorite {
+.te-monitor-control-button-favorite {
     width: 68px;
     height: 68px;
     mask: url("../img/dark/favorite.svg") no-repeat 100% 100%;
     -webkit-mask: url("../img/dark/favorite.svg") no-repeat 100% 100%;
     margin-right: -5px;
-  }
-  
-  .te-monitor-control-button-stop {
+}
+
+.te-monitor-control-button-stop {
     mask: url("../img/dark/stop.svg") no-repeat 100% 100%;
     -webkit-mask: url("../img/dark/stop.svg") no-repeat 100% 100%;
-  }
-  
-  .te-monitor-control-button-pause {
+}
+
+.te-monitor-control-button-pause {
+    margin-right: -21px;
     mask: url("../img/dark/pause.svg") no-repeat 100% 100%;
     -webkit-mask: url("../img/dark/pause.svg") no-repeat 100% 100%;
-  }
+}
   
-  .te-monitor-control-button-terminal {
+.te-monitor-control-button-terminal {
+    width: 68px;
+    height: 68px;
+    margin-top: 3px;
+    margin-left: 10px;
     mask: url("../img/dark/terminal.svg") no-repeat 100% 100%;
     -webkit-mask: url("../img/dark/terminal.svg") no-repeat 100% 100%;
-  }
-
+}
