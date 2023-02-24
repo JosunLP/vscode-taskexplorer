@@ -20,7 +20,7 @@ interface ReactProps
 
 export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
 {
-    // private counter = 0;
+    private counter = 0;
     private children: JSX.Element[];
     private controlRefs: ControlRefs;
 
@@ -54,11 +54,11 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
             this.children.push(
                 <TeTaskControl
                     task={t}
-                    ref={this.controlRefs[t.treeId]}
                     log={this.props.log}
                     webroot={this.props.webroot}
+                    ref={this.controlRefs[t.treeId]}
                     executeCommand={this.props.executeCommand}
-                    // key={`te-id-task-control-${++this.counter}`}
+                    key={`te-id-task-control-${++this.counter}`}
                 />
             );
         });
@@ -73,7 +73,14 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
             if (t !== -1) {
                 this.state.tasks.splice(t, 1, task);
             }
-            r.current?.setTask(task);
+            React.Children.forEach(this.children, c => {
+                if (c.props.task.treeId === task.treeId) {
+                    // console.log("RESET KEY)");
+                    // c.key = `te-id-task-control-${++this.counter}`;
+                    // Object.assign(c.props, { task: { ...task }});
+                }
+            });
+            r.current?.setTask.call(r.current, task);
         }
     };
 

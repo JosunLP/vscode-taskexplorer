@@ -63,7 +63,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
 
     override componentDidMount = () => this.log("TeTaskControl.componentDidMount");
     override componentWillUnmount = () => this.log("TeTaskControl.componentWillUnmount");
-    override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props);
+    override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
 
 
     private getTaskDetails = () =>
@@ -75,9 +75,9 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                     <tbody>
                         <tr>
                             <td className="te-monitor-control-content-title">
-                                Task Details:
+                                Details:
                             </td>
-                            <td className="te-monitor-control-content-details">
+                            <td className="te-monitor-control-content-details te-monitor-control-content-details-col1">
                                 <table>
                                     <tbody className="te-monitor-control-content-details-body">
                                         <tr>
@@ -123,6 +123,52 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                     </tbody>
                                 </table>
                             </td>
+                            <td className="te-monitor-control-content-details te-monitor-control-content-details-col2">
+                                <table>
+                                    <tbody className="te-monitor-control-content-details-body">
+                                        <tr>
+                                            <td>
+                                                Fastest Runtime
+                                            </td>
+                                            <td>
+                                                &nbsp;&nbsp; : &nbsp;xx
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Average Runtime
+                                            </td>
+                                            <td>
+                                                &nbsp;&nbsp; : &nbsp;xx
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Slowest Runtime
+                                            </td>
+                                            <td>
+                                                &nbsp;&nbsp; : &nbsp;xx
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                First Runtime
+                                            </td>
+                                            <td>
+                                                &nbsp;&nbsp; : &nbsp;xx
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Last Runtime
+                                            </td>
+                                            <td>
+                                                &nbsp;&nbsp; : &nbsp;xx
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -134,7 +180,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     override render()
     {
         return (
-            <div className="te-monitor-control-container" key={`te-id-task-control-${++this.counter}`}>
+            <div className="te-monitor-control-container" key={`te-id-task-inner-control-${++this.counter}`}>
                 <table width="100%" cellPadding="0" cellSpacing="0">
                     <tbody>
                         <tr className="te-monitor-control-row te-monitor-control-top-row">

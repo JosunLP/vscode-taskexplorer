@@ -35,8 +35,8 @@ export class TaskWatcher implements Disposable
             this._onTaskStatusChange,
             tasks.onDidStartTask(async(e) => this.taskStartEvent(e)),
             tasks.onDidEndTask(async(e) => this.taskFinishedEvent(e)),
-            tasks.onDidStartTaskProcess(async(e) => this.taskProcessStartEvent(e)),
-            tasks.onDidEndTaskProcess(async(e) => this.taskProcessFinishedEvent(e))
+            // tasks.onDidStartTaskProcess(async(e) => this.taskProcessStartEvent(e)),
+            // tasks.onDidEndTaskProcess(async(e) => this.taskProcessFinishedEvent(e))
         ];
     }
 
@@ -156,10 +156,10 @@ export class TaskWatcher implements Disposable
     }
 
 
-    private taskProcessStartEvent = (e: TaskProcessStartEvent) => this.taskStartEvent({ execution: e.execution });
+    // private taskProcessStartEvent = (e: TaskProcessStartEvent) => this.taskStartEvent({ execution: e.execution });
 
 
-    private taskProcessFinishedEvent = (e: TaskProcessEndEvent) => this.taskFinishedEvent({ execution: e.execution });
+    // private taskProcessFinishedEvent = (e: TaskProcessEndEvent) => this.taskFinishedEvent({ execution: e.execution });
 
 
     private async taskStartEvent(e: TaskStartEvent): Promise<void>
