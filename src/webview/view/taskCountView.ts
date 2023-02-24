@@ -26,7 +26,7 @@ export class TaskCountView extends TeWebviewView<State>
 			`${TaskCountView.viewId}View`
 		);
 		this.disposables.push(
-			wrapper.treeManager.onDidTasksChange(e => { this.onTasksChanged(e); }, this)
+			wrapper.treeManager.onDidAllTasksChange(e => { this.onTasksChanged(e); }, this)
 		);
 	}
 

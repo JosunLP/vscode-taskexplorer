@@ -1,5 +1,5 @@
 
-import { Task } from "vscode";
+import { Task, tasks } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
@@ -7,7 +7,7 @@ import { ContextKeys, WebviewIds } from "../../lib/context";
 import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
-	DidChangeAllTasksType, ITask
+	DidChangeAllTasksType, ITask, DidChangeTaskStatusType
 } from "../common/ipc";
 
 
@@ -32,7 +32,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 		this.disposables.push(
 			wrapper.treeManager.onReady(this.onTaskTreeManagerReady, this),
-			wrapper.treeManager.onDidTasksChange(this.onTasksChanged, this),
+			wrapper.treeManager.onDidAllTasksChange(this.onAllTasksChanged, this),
 			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this),
 			wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
 			wrapper.treeManager.onDidFamousTasksChange(this.onFamousTasksChanged, this),
@@ -42,15 +42,21 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	}
 
 
-	private prepareTasksForTransport = (tasks: Task[]): ITask[] =>
+	private prepareTasksForTransport = (teTasks: Task[], isRunning?: boolean, treeId = ""): ITask[] =>
 	{
-		return tasks.map<ITask>(t => ({
-			name: t.name,
-			definition: t.definition,
-			source: t.source,
-			treeId: "",
-			running: false // TODO - Set `running` flag
-		}));
+		return teTasks.map<ITask>(t =>
+		{
+			const running = isRunning !== undefined ? isRunning :
+				  tasks.taskExecutions.filter(e => e.task.name === t.name && e.task.source === t.source &&
+											  e.task.scope === t.scope && e.task.definition.path === t.definition.path).length > 0;
+			return {
+				name: t.name,
+				definition: t.definition,
+				source: t.source,
+				running,
+				treeId
+			};
+		});
 	};
 
 
@@ -67,6 +73,28 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	};
 
 
+	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) =>
+	{
+		this.notify(DidChangeTaskStatusType, { task: this.prepareTasksForTransport([ e.task ], e.isRunning, e.taskItemId)[0] });
+		let task = this.wrapper.treeManager.lastTasks.find(t => e.task.name === t.name);
+		if (task) {
+			this.onLastTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "last" });
+		}
+		task = this.wrapper.treeManager.runningTasks.find(t => e.task.name === t.name);
+		if (task) {
+			this.onRunningTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "running" });
+		}
+		task = this.wrapper.treeManager.favoriteTasks.find(t => e.task.name === t.name);
+		if (task) {
+			this.onFavoriteTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "favorites" });
+		}
+		task = this.wrapper.treeManager.famousTasks.find(t => e.task.name === t.name);
+		if (task) {
+			this.onFamousTasksChanged({ tasks: this.wrapper.treeManager.lastTasks, type: "famous" });
+		}
+	};
+
+
 	protected override includeBootstrap = (): Promise<MonitorAppState> => this.getState();
 	protected override includeFontAwesome = () => ({ duotone: true, regular: true, icons: [ "gears", "gear", "gears", "star" ] });
 
@@ -75,9 +103,9 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onFavoriteTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onLastTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onRunningTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
-    private onTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
-	private onTaskStatusChanged = (_e: ITeTaskStatusChangeEvent) => {};
-	private onTaskTreeManagerReady = (_e: ITeTasksChangeEvent) => {};
+    private onAllTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
+	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
+	private onTaskTreeManagerReady = (e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 
 
 	protected override onVisibilityChanged = (visible: boolean) =>

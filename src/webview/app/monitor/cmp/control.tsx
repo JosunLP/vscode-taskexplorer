@@ -3,7 +3,15 @@
 import React from "react";
 import { TeReactTaskTimer } from "./timer";
 import { ITask } from "../../../common/ipc";
+import { TeTaskButton } from "./button";
 
+interface ITeAppButtons {
+    favorite: React.RefObject<TeTaskButton>;
+    open: React.RefObject<TeTaskButton>;
+    pause: React.RefObject<TeTaskButton>;
+    run: React.RefObject<TeTaskButton>;
+    stop: React.RefObject<TeTaskButton>;
+};
 
 interface ReactState
 {
@@ -12,33 +20,46 @@ interface ReactState
 
 interface ReactProps
 {
-    log: (message: string) => void;
+    log: (...message: any) => void;
     startTimer?: boolean;
     task: ITask;
     webroot: string;
 }
 
+
 export class TeTaskControl extends React.Component<ReactProps, ReactState>
 {
     private timerEl;
+    private buttons: ITeAppButtons;
+    private log: (...message: any) => void;
 
     constructor(props: ReactProps)
     {
         super(props);
+        this.log = props.log;
+        this.timerEl = React.createRef<TeReactTaskTimer>();
+        this.buttons = {
+            favorite: React.createRef<TeTaskButton>(),
+            open: React.createRef<TeTaskButton>(),
+            pause: React.createRef<TeTaskButton>(),
+            run: React.createRef<TeTaskButton>(),
+            stop: React.createRef<TeTaskButton>()
+        };
         this.state = {
             task: props.task
         };
-        this.timerEl = React.createRef<TeReactTaskTimer>();
     }
 
 
-    private clickFavorite = () =>  console.log("clickFavorite");
-    private clickOpen = () =>  console.log("clickOpen");
-    private clickRun = () => this.timerEl.current?.setState({ run: true, seconds: 0 });
+    private clickFavorite = () =>  { this.log("TeTaskControl.clickFavorite"); this.timerEl.current?.setState({ run: false }); };
+    private clickOpen = () =>  { this.log("TeTaskControl.clickOpen"); this.timerEl.current?.setState({ run: false }); };
+    private clickPause = () => { this.log("TeTaskControl.clickPause"); this.timerEl.current?.setState({ run: false }); };
+    private clickRun = () => { this.log("TeTaskControl.clickPause"); this.timerEl.current?.setState({ run: true, seconds: 0 }); };
+    private clickStop = () => { this.log("TeTaskControl.clickStop"); this.timerEl.current?.setState({ run: false }); };
 
-    override componentDidMount = () => console.log("componentDidMount: TeTaskControl");
-    override componentWillUnmount = () => console.log("componentWillUnmount: TeTaskControl");
-    override componentDidUpdate = (props: any) => console.log("componentDidUpdate: TeTaskControl", props);
+    override componentDidMount = () => this.log("TeTaskControl.componentDidMount");
+    override componentWillUnmount = () => this.log("TeTaskControl.componentWillUnmount");
+    override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props);
 
 
     private getTaskDetails = () =>
@@ -119,18 +140,40 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                             <td className="te-monitor-control-content-column">
                                 {this.getTaskDetails()}
                             </td>
-                            <td className="te-monitor-control-timer-column">
-                                <TeReactTaskTimer ref={this.timerEl} start={!!this.props.startTimer} />
-                            </td>
-                            <td className="te-monitor-control-button-column">
-                                <button onClick={this.clickFavorite} className="te-monitor-control-button-favorite te-monitor-control-button" />
-                            </td>
-                            <td className="te-monitor-control-button-column">
-                                <button onClick={this.clickOpen} className="te-monitor-control-button-open te-monitor-control-button" />
-                            </td>
-                            <td className="te-monitor-control-button-column te-monitor-control-button-column-last">
-                                <button onClick={this.clickRun} className="te-monitor-control-button-run te-monitor-control-button te-monitor-control-button-last" />
-                            </td>
+                            <TeReactTaskTimer
+                                ref={this.timerEl}
+                                start={!!this.props.startTimer}
+                            />
+                            <TeTaskButton
+                                name="favorite"
+                                ref={this.buttons.favorite}
+                                clickHandler={this.clickFavorite.bind(this)}
+                            />
+                            <TeTaskButton
+                                name="open"
+                                ref={this.buttons.open}
+                                clickHandler={this.clickOpen.bind(this)}
+                            />
+                            <TeTaskButton
+                                name="pause"
+                                ref={this.buttons.pause}
+                                hidden={!this.state.task.running}
+                                clickHandler={this.clickPause.bind(this)}
+                            />
+                            <TeTaskButton
+                                name="stop"
+                                lastButton={true}
+                                ref={this.buttons.stop}
+                                hidden={!this.state.task.running}
+                                clickHandler={this.clickStop.bind(this)}
+                            />
+                            <TeTaskButton
+                                name="run"
+                                lastButton={true}
+                                ref={this.buttons.run}
+                                hidden={this.state.task.running}
+                                clickHandler={this.clickRun.bind(this)}
+                            />
                         </tr>
                     </tbody>
                 </table>

@@ -78,7 +78,7 @@ export class HomeView extends TeWebviewView<State>
 		this.disposables.push(
 			wrapper.config.onDidChange(e => { this.onConfigurationChanged(e); }, this),
 			wrapper.storage.onDidChange(e => { this.onStorageChanged(e); }, this),
-			wrapper.treeManager.onDidTasksChange(e => { this.onTasksChanged(e); }, this)
+			wrapper.treeManager.onDidAllTasksChange(e => { this.onTasksChanged(e); }, this)
 		);
 	}
 

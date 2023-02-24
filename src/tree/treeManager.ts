@@ -115,6 +115,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
 
+	get onDidAllTasksChange(): Event<ITeTasksChangeEvent> {
+		return this._onDidTasksChange.event;
+	}
+
 	get onDidFamousTasksChange(): Event<ITeTasksChangeEvent> {
 		return this._onDidFamousTasksChange.event;
 	}
@@ -130,10 +134,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     get onDidRunningTasksChange(): Event<ITeTasksChangeEvent> {
         return this._onDidRunningTasksChange.event;
     }
-
-	get onDidTasksChange(): Event<ITeTasksChangeEvent> {
-		return this._onDidTasksChange.event;
-	}
 
     get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {
         return this._taskWatcher.onDidTaskStatusChange;

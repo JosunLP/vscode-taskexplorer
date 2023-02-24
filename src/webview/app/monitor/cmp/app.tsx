@@ -4,7 +4,7 @@ import { TeTaskTab } from "./tab";
 import { MonitorAppState } from "../../../common/ipc";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
-interface IControls {
+interface ITeAppTabs {
     recent: React.RefObject<TeTaskTab>;
     running: React.RefObject<TeTaskTab>;
     favorites: React.RefObject<TeTaskTab>;
@@ -13,24 +13,21 @@ interface IControls {
 
 interface ReactProps
 {
-    log: (message: string) => void;
-    appName: string;
+    log: (message: string, ...optionalParams: any[]) => void;
     state: MonitorAppState;
 }
 
 
-export class App extends React.Component<{ state: MonitorAppState }, MonitorAppState>
+export class App extends React.Component<ReactProps, MonitorAppState>
 {
-    private appName: string;
-    private log: (message: string) => void;
-    private controls: IControls;
+    private log: (message: string, ...optionalParams: any[]) => void;
+    private tabs: ITeAppTabs;
 
     constructor(props: ReactProps)
     {
         super(props);
         this.log = props.log;
-        this.appName = props.appName;
-        this.controls = {
+        this.tabs = {
             recent: React.createRef<TeTaskTab>(),
             running: React.createRef<TeTaskTab>(),
             favorites: React.createRef<TeTaskTab>(),
@@ -43,19 +40,19 @@ export class App extends React.Component<{ state: MonitorAppState }, MonitorAppS
 
 
     get famousTab() {
-        return this.controls.famous.current as TeTaskTab;
+        return this.tabs.famous.current as TeTaskTab;
     }
 
     get favoritesTab() {
-        return this.controls.favorites.current as TeTaskTab;
+        return this.tabs.favorites.current as TeTaskTab;
     }
 
     get recentTab() {
-        return this.controls.recent.current as TeTaskTab;
+        return this.tabs.recent.current as TeTaskTab;
     }
 
     get runningTab() {
-        return this.controls.running.current as TeTaskTab;
+        return this.tabs.running.current as TeTaskTab;
     }
 
 
@@ -67,7 +64,7 @@ export class App extends React.Component<{ state: MonitorAppState }, MonitorAppS
 
     private onTabSelected = (index: number, lastIndex: number) =>
     {
-        this.log(`${this.appName}.onTabSelected: index=${index}: lastIdex=${lastIndex}`);
+        this.log(`onTabSelected: index=${index}: lastIdex=${lastIndex}`);
     };
 
 
@@ -85,7 +82,7 @@ export class App extends React.Component<{ state: MonitorAppState }, MonitorAppS
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
-                            ref={this.controls.recent}
+                            ref={this.tabs.recent}
                             tasks={this.props.state.last}
                             webroot={this.props.state.webroot}
                         />
@@ -93,7 +90,7 @@ export class App extends React.Component<{ state: MonitorAppState }, MonitorAppS
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
-                            ref={this.controls.running}
+                            ref={this.tabs.running}
                             startTimer={true}
                             tasks={this.props.state.running}
                             webroot={this.props.state.webroot}
@@ -102,7 +99,7 @@ export class App extends React.Component<{ state: MonitorAppState }, MonitorAppS
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
-                            ref={this.controls.favorites}
+                            ref={this.tabs.favorites}
                             tasks={this.props.state.favorites}
                             webroot={this.props.state.webroot}
                         />
@@ -110,7 +107,7 @@ export class App extends React.Component<{ state: MonitorAppState }, MonitorAppS
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
-                            ref={this.controls.famous}
+                            ref={this.tabs.famous}
                             tasks={this.props.state.famous}
                             webroot={this.props.state.webroot}
                         />

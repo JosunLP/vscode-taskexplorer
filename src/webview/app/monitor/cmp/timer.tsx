@@ -47,7 +47,9 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
               tmS = Math.floor(tm % 60),
               tmF = `${tmM}:${tmS >= 10 ? tmS : "0" + tmS}`;
         return (
-            <span className="te-monitor-control-timer">{tmF}</span>
+            <td className="te-monitor-control-timer-column">
+                <span className="te-monitor-control-timer">{tmF}</span>
+            </td>
         );
     }
 

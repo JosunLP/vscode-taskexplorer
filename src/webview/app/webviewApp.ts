@@ -152,6 +152,7 @@ export abstract class TeWebviewApp<State = undefined>
 
 	protected log = (message: string, ...optionalParams: any[]): void =>
 	{
+		message = `${this.appName}.${message}`;
 		setTimeout(() => {
 			this.postMessage({ id: this.nextIpcId(), method: LogWriteCommandType.method, params: { message, value: undefined }});
 		},  1);
