@@ -3,7 +3,7 @@ import { Disposable, DOM } from "./common/dom";
 import {
 	IpcCommandType, IpcMessage, IpcMessageParams, WebviewFocusChangedParams, WebviewFocusChangedCommandType,
 	WebviewReadyCommandType, ExecuteCommandType, onIpc, EchoCommandRequestType, LogWriteCommandType,
-	EchoCustomCommandRequestType, ExecuteCustomCommandType, DidChangeStateType
+	EchoCustomCommandRequestType, ExecuteCustomCommandType
 } from "../common/ipc";
 
 interface VsCodeApi {

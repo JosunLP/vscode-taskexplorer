@@ -5,8 +5,6 @@
  */
 
 import { State } from "./state";
-import { AuthenticationSession } from "vscode";
-import { ISessionToken } from "src/interface/IAuthentication";
 
 
 export interface IpcMessage {
@@ -92,10 +90,6 @@ export const EchoCommandRequestType = new IpcNotificationType<ExecuteCommandPara
 
 export const EchoCustomCommandRequestType = new IpcNotificationType<ExecuteCommandParams>("command/custom/echo");
 
-export type InternalNotificationType = "tempStateEvent";
-
-export type StateChangedCallback = (state: any /* State */, type?: IpcNotificationType<any> | InternalNotificationType) => void;
-
 // export interface DidChangeLicenseParams {
 // 	license?: ISessionToken;
 // 	session?: AuthenticationSession;
@@ -133,7 +127,7 @@ export interface DidChangeTaskParams
 {
 	tasks: ITask[];
 };
-export const DidChangeTaskType = new IpcNotificationType<DidChangeTaskParams>("tasks/change");
+export const DidChangeAllTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change");
 export const DidChangeFamousTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/famous");
 export const DidChangeLastTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/lasttasks");
 export const DidChangeTaskStatusType = new IpcNotificationType<DidChangeTaskStatusParams>("tasks/change/status");

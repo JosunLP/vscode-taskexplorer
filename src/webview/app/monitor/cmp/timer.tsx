@@ -12,6 +12,7 @@ interface ReactProps
     start?: boolean;
 }
 
+
 export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
 {
     private interval: NodeJS.Timeout | undefined;
@@ -26,19 +27,17 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     }
 
 
-    private tick = () => this.setState(state => ({ seconds: state.seconds + 1 }));
+    override componentDidMount = () => this.startTimer();
 
 
-    override componentDidMount = () =>
+    override componentWillUnmount = () => this.stopTimer();
+
+
+    override componentDidUpdate = (_props: any) =>
     {
-        if (this.state.run) {
-            // eslint-disable-next-line @typescript-eslint/tslint/config
-            this.interval = setInterval(() => this.tick(), 1000);
-        }
+        this.stopTimer();
+        this.startTimer();
     };
-
-
-    override componentWillUnmount = () => clearInterval(this.interval as NodeJS.Timeout);
 
 
     override render()
@@ -52,12 +51,23 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
         );
     }
 
-    startTimer = () => {
-
+    private startTimer = () =>
+    {
+        if (this.state.run) {
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            this.interval = setInterval(() => this.tick(), 1000);
+        }
     };
 
-    stopTimer = () => {
-
+    private stopTimer = () =>
+    {
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = undefined;
+        }
     };
+
+
+    private tick = () => this.setState(state => ({ seconds: state.seconds + 1 }));
 
 }

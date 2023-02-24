@@ -1,86 +1,73 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import React from "react";
-import { TeTaskControl } from "./control";
+import { TeTaskTab } from "./tab";
+import { MonitorAppState } from "../../../common/ipc";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import {
-    DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType,
-    DidChangeRunningTasksType, DidChangeTaskType, IpcNotificationType, ITask, MonitorAppState, StateChangedCallback
-} from "../../../common/ipc";
 
 interface IControls {
-    recent: React.RefObject<TeTaskControl>;
-    running: React.RefObject<TeTaskControl>;
-    favorites: React.RefObject<TeTaskControl>;
-    famous: React.RefObject<TeTaskControl>;
+    recent: React.RefObject<TeTaskTab>;
+    running: React.RefObject<TeTaskTab>;
+    favorites: React.RefObject<TeTaskTab>;
+    famous: React.RefObject<TeTaskTab>;
 };
 
-interface AppState extends MonitorAppState
+interface ReactProps
 {
-	showHideDemo1: boolean;
-    showHideDemo2: boolean;
-    showHideDemo3: boolean;
-    controls: IControls;
+    log: (message: string) => void;
+    appName: string;
+    state: MonitorAppState;
 }
 
 
-export class App extends React.Component<{ state: MonitorAppState }, AppState>
+export class App extends React.Component<{ state: MonitorAppState }, MonitorAppState>
 {
-    constructor(props: { state: MonitorAppState })
+    private appName: string;
+    private log: (message: string) => void;
+    private controls: IControls;
+
+    constructor(props: ReactProps)
     {
         super(props);
+        this.log = props.log;
+        this.appName = props.appName;
+        this.controls = {
+            recent: React.createRef<TeTaskTab>(),
+            running: React.createRef<TeTaskTab>(),
+            favorites: React.createRef<TeTaskTab>(),
+            famous: React.createRef<TeTaskTab>()
+        };
         this.state = {
-            showHideDemo1: false,
-            showHideDemo2: false,
-            showHideDemo3: false,
-            controls: {
-                recent: React.createRef<TeTaskControl>(),
-                running: React.createRef<TeTaskControl>(),
-                favorites: React.createRef<TeTaskControl>(),
-                famous: React.createRef<TeTaskControl>()
-            },
             ...props.state
         };
-        // this.hideComponent = this.hideComponent.bind(this);
     }
 
 
-    hideComponent = (name: string) =>
+    get famousTab() {
+        return this.controls.famous.current as TeTaskTab;
+    }
+
+    get favoritesTab() {
+        return this.controls.favorites.current as TeTaskTab;
+    }
+
+    get recentTab() {
+        return this.controls.recent.current as TeTaskTab;
+    }
+
+    get runningTab() {
+        return this.controls.running.current as TeTaskTab;
+    }
+
+
+    private clearTasks = () =>
     {
-        console.log(name);
-        switch (name) {
-          case "showHideDemo1":
-            this.setState({ showHideDemo1: !this.state.showHideDemo1 });
-            break;
-          case "showHideDemo2":
-            this.setState({ showHideDemo2: !this.state.showHideDemo2 });
-            break;
-          case "showHideDemo3":
-            this.setState({ showHideDemo3: !this.state.showHideDemo3 });
-            break;
-          default:
-            break;
-        }
+        // await storage.update("lastTasks", []);
     };
 
 
-    updateTasks = (state: MonitorAppState, type?: IpcNotificationType<any>) =>
+    private onTabSelected = (index: number, lastIndex: number) =>
     {
-        switch (type) {
-            case DidChangeTaskType:
-                break;
-            case DidChangeLastTasksType:
-                this.state.controls.recent.current?.setTasks(state.last);
-                break;
-            case DidChangeFavoriteTasksType:
-                this.state.controls.favorites.current?.setTasks(state.favorites);
-                break;
-            case DidChangeFamousTasksType:
-                this.state.controls.famous.current?.setTasks(state.famous);
-                break;
-            case DidChangeRunningTasksType:
-                this.state.controls.running.current?.setTasks(state.running);
-                break;
-        }
+        this.log(`${this.appName}.onTabSelected: index=${index}: lastIdex=${lastIndex}`);
     };
 
 
@@ -96,34 +83,34 @@ export class App extends React.Component<{ state: MonitorAppState }, AppState>
                         <Tab className="react-tabs__tab te-tab-famous">Famous</Tab>
                     </TabList>
                     <TabPanel>
-                        <TeTaskControl
-                            id="te-id-view-monitor-control-recent"
-                            ref={this.state.controls.recent}
+                        <TeTaskTab
+                            log={this.log}
+                            ref={this.controls.recent}
                             tasks={this.props.state.last}
                             webroot={this.props.state.webroot}
                         />
                     </TabPanel>
                     <TabPanel>
-                        <TeTaskControl
-                            id="te-id-view-monitor-control-running"
-                            ref={this.state.controls.running}
+                        <TeTaskTab
+                            log={this.log}
+                            ref={this.controls.running}
                             startTimer={true}
                             tasks={this.props.state.running}
                             webroot={this.props.state.webroot}
                         />
                     </TabPanel>
                     <TabPanel>
-                        <TeTaskControl
-                            id="te-id-view-monitor-control-favorites"
-                            ref={this.state.controls.favorites}
+                        <TeTaskTab
+                            log={this.log}
+                            ref={this.controls.favorites}
                             tasks={this.props.state.favorites}
                             webroot={this.props.state.webroot}
                         />
                     </TabPanel>
                     <TabPanel>
-                        <TeTaskControl
-                            id="te-id-view-monitor-control-famous"
-                            ref={this.state.controls.famous}
+                        <TeTaskTab
+                            log={this.log}
+                            ref={this.controls.famous}
                             tasks={this.props.state.famous}
                             webroot={this.props.state.webroot}
                         />
@@ -133,13 +120,4 @@ export class App extends React.Component<{ state: MonitorAppState }, AppState>
         );
     };
 
-    private onTabSelected = (index: number, lastIndex: number) =>
-    {
-        // this.log(`${this.appName}.onTabSelected: index=${index}: lastIdex=${lastIndex}`);
-    };
-
-    private clearTasks = () =>
-    {
-        // await storage.update("lastTasks", []);
-    };
 }

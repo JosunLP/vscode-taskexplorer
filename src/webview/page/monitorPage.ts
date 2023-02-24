@@ -5,10 +5,10 @@ import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
-import { DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState, DidChangeTaskType, ITask } from "../common/ipc";
-
-
-
+import {
+	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
+	DidChangeAllTasksType, ITask
+} from "../common/ipc";
 
 
 export class MonitorPage extends TeWebviewPanel<MonitorAppState>
@@ -75,7 +75,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onFavoriteTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onLastTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
 	private onRunningTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForTransport(e.tasks) });
-    private onTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeTaskType, await this.getState());
+    private onTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
 	private onTaskStatusChanged = (_e: ITeTaskStatusChangeEvent) => {};
 	private onTaskTreeManagerReady = (_e: ITeTasksChangeEvent) => {};
 

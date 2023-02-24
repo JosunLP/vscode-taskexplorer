@@ -13,8 +13,8 @@ import { TeWebviewApp } from "../webviewApp";
 import { createRoot } from "react-dom/client";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
-	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeTaskType,
-	IpcMessage, IpcNotificationType, ITask, onIpc, StateChangedCallback, MonitorAppState
+	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeAllTasksType, IpcMessage,
+	IpcNotificationType, onIpc, MonitorAppState, ITask, DidChangeTaskStatusParams
 } from "../../common/ipc";
 
 
@@ -24,12 +24,38 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
     constructor()
     {   //
-		// this.state is populated in the the TeWebviewApp (super) constructor,
+		// `this.state` is populated in the the TeWebviewApp (super) constructor,
 		// read from window.bootstrap
 		//
 		super("TaskMonitorWebviewApp");
 		this.appRef = React.createRef<App>();
 	}
+
+
+	get app() {
+		return this.appRef.current as App;
+	}
+
+
+	private handleTaskStateChangeEvent = (params: DidChangeTaskStatusParams) =>
+	{
+		let task = this.state.last.find(t => params.task.name === t.name);
+		if (task) {
+			this.setState(this.state, DidChangeLastTasksType);
+		}
+		task = this.state.running.find(t => params.task.name === t.name);
+		if (task) {
+			this.setState(this.state, DidChangeRunningTasksType);
+		}
+		task = this.state.favorites.find(t => params.task.name === t.name);
+		if (task) {
+			this.setState(this.state, DidChangeFavoriteTasksType);
+		}
+		task = this.state.famous.find(t => params.task.name === t.name);
+		if (task) {
+			this.setState(this.state, DidChangeFamousTasksType);
+		}
+	};
 
 
 	protected override onInitialize = () =>
@@ -73,10 +99,10 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
 		switch (msg.method)
 		{
-			case DidChangeTaskType.method:
-				onIpc(DidChangeTaskType, msg, params => {
+			case DidChangeAllTasksType.method:
+				onIpc(DidChangeAllTasksType, msg, params => {
 					Object.assign(this.state, { ...params });
-					this.setState(this.state, DidChangeTaskType);
+					this.setState(this.state, DidChangeAllTasksType);
 				});
 				break;
 			case DidChangeLastTasksType.method:
@@ -105,8 +131,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				break;
 			case DidChangeTaskStatusType.method:
 				onIpc(DidChangeTaskStatusType, msg, params => {
-					// this.state.tasks  = params.task;
-					// this.setState(this.state, DidChangeTaskStatusType);
+					this.handleTaskStateChangeEvent(params);
 				});
 				break;
 			case DidChangeStateType.method:
@@ -125,25 +150,31 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 		this.log(`${this.appName}.processBaseStateChange`);
 		Object.assign(this.state, { ...params  });
 		// super.setState(state); // TODO - Check out how to use internally provided vscode state
-		this.appRef.current?.updateTasks(this.state, DidChangeStateType);
+		this.setState(this.state, DidChangeStateType);
 	};
 
 
-	protected override setState = (state: MonitorAppState, type?:  IpcNotificationType<any>) => // | InternalNotificationType)
+	protected override setState = (state: MonitorAppState, type?:  IpcNotificationType<any>) =>
     {
 		this.log(`${this.appName}.setState`, state);
 		Object.assign(this.state, { ...state });
-		this.appRef.current?.updateTasks(state, type);
+		switch (type) {
+            case DidChangeStateType:
+                break;
+            case DidChangeLastTasksType:
+                this.app.recentTab.setState({ tasks: state.last });
+                break;
+            case DidChangeFavoriteTasksType:
+                this.app.favoritesTab.setState({ tasks: state.favorites });
+                break;
+            case DidChangeFamousTasksType:
+                this.app.famousTab.setState({ tasks: state.famous });
+                break;
+            case DidChangeRunningTasksType:
+                this.app.runningTab.setState({ tasks: state.running });
+                break;
+        }
 	};
-
-
-	// private registerEventCallback = (callback: StateChangedCallback): (() => void) =>
-    // {
-	// 	this.callback = callback;
-	// 	return () => {
-	// 		this.callback = undefined;
-	// 	};
-	// };
 
 }
 
