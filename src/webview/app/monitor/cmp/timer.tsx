@@ -27,6 +27,24 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     }
 
 
+    private clickHide = () =>
+    {
+        console.log("clickHide");
+    };
+
+
+    private clickShow = () =>
+    {
+        console.log("clickShow");
+    };
+
+
+    private clickShowMs = () =>
+    {
+        console.log("clickShowMs");
+    };
+
+
     override componentDidMount = () => this.startTimer();
 
 
@@ -48,7 +66,20 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
               tmF = `${tmM}:${tmS >= 10 ? tmS : "0" + tmS}`;
         return (
             <td className="te-monitor-control-timer-column">
-                <span className="te-monitor-control-timer">{tmF}</span>
+                <table cellPadding="0" cellSpacing="0">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <span className="te-monitor-control-timer">{tmF}</span>
+                            </td>
+                            <td className="te-monitor-control-timer-buttons">
+                                <div onClick={() => this.clickShow()} className="te-monitor-control-timer-button-show">&lt;</div>
+                                <div onClick={() => this.clickShowMs()} className="te-monitor-control-timer-button-show-ms">&lt;&lt;</div>
+                                <div onClick={() => this.clickHide()} className="te-monitor-control-timer-button-hide">&gt;</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </td>
         );
     }

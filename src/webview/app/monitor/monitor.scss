@@ -36,7 +36,6 @@ button {
 		.vscode-dark & {
             opacity: 0.8
 		}
-		
 	}
 }
 
@@ -137,4 +136,35 @@ button {
 		mask: url("../img/dark/terminal.svg") no-repeat 100% 100%;
 		-webkit-mask: url("../img/dark/terminal.svg") no-repeat 100% 100%;
 	}
+}
+
+.te-monitor-control-timer-buttons {
+	padding-left: 10px;
+}
+
+.te-monitor-control-timer-button-show {
+	font-size: 16px;
+}
+
+.te-monitor-control-timer-button-show:hover {
+	color: var(--vscode-button-hoverBackground);
+	cursor: pointer;
+}
+
+.te-monitor-control-timer-button-show-ms {
+	font-size: 16px;
+}
+
+.te-monitor-control-timer-button-show-ms:hover {
+	color: var(--vscode-button-hoverBackground);
+	cursor: pointer;
+}
+
+.te-monitor-control-timer-button-hide {
+	font-size: 16px;
+}
+
+.te-monitor-control-timer-button-hide:hover {
+	color: var(--vscode-button-hoverBackground);
+	cursor: pointer;
 }
