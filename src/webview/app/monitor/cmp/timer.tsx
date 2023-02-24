@@ -3,8 +3,11 @@ import React from "react";
 
 interface ReactState
 {
+    hide: boolean;
     run: boolean;
+    countMs: boolean;
     seconds: number;
+    milliseconds: number;
 }
 
 interface ReactProps
@@ -21,8 +24,11 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     {
         super(props);
         this.state = {
+            hide: false,
             run: !!props.start,
-            seconds: 0
+            countMs: false,
+            seconds: 0,
+            milliseconds: 0
         };
     }
 
@@ -30,18 +36,21 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     private clickHide = () =>
     {
         console.log("clickHide");
+        this.setState({ hide: true });
     };
 
 
     private clickShow = () =>
     {
         console.log("clickShow");
+        this.setState({ hide: false, countMs: false });
     };
 
 
     private clickShowMs = () =>
     {
         console.log("clickShowMs");
+        this.setState({ hide: false, countMs: true });
     };
 
 
@@ -60,16 +69,19 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
 
     override render()
     {
-        const tm = this.state?.seconds || 0,
+        const tm = this.state.seconds,
               tmM = Math.floor(tm / 60),
               tmS = Math.floor(tm % 60),
-              tmF = `${tmM}:${tmS >= 10 ? tmS : "0" + tmS}`;
+              tmSF = tmS >= 10 ? tmS : "0" + tmS,
+              tmMS = this.state.milliseconds % 1000,
+              tmMSF = this.state.countMs ? "." + tmMS : "", // (tmMS >= 10 ? tmMS : "0" + tmMS) : "",
+              tmF = `${tmM}:${tmSF}${tmMSF}`;
         return (
             <td className="te-monitor-control-timer-column">
                 <table cellPadding="0" cellSpacing="0">
                     <tbody>
                         <tr>
-                            <td>
+                            <td hidden={this.state.hide} className="te-monitor-control-timer-inner-column">
                                 <span className="te-monitor-control-timer">{tmF}</span>
                             </td>
                             <td className="te-monitor-control-timer-buttons">
@@ -88,7 +100,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     {
         if (this.state.run) {
             // eslint-disable-next-line @typescript-eslint/tslint/config
-            this.interval = setInterval(() => this.tick(), 1000);
+            this.interval = setInterval(() => this.tick(), !this.state.countMs ? 1000 : 100);
         }
     };
 
@@ -101,6 +113,8 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     };
 
 
-    private tick = () => this.setState(state => ({ seconds: state.seconds + 1 }));
+    private tick = () => this.setState(state =>
+        (!state.countMs ? { seconds: state.seconds + 1, milliseconds: 0 } :
+                          { seconds: state.seconds + 0.1, milliseconds: state.milliseconds + 100 }));
 
 }

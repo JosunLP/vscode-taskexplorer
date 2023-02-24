@@ -39,6 +39,10 @@ button {
 	}
 }
 
+.te-monitor-control-button-last {
+    margin-right: 5px;
+}
+
 .te-monitor-control-container {
 	.vscode-light & {
 		border: 5px solid var(--vscode-button-background);
@@ -138,8 +142,24 @@ button {
 	}
 }
 
+.te-monitor-control-timer {
+    font-size: 70px;
+    line-height: 70px;
+}
+  
+.te-monitor-control-timer-column {
+    padding-top: 6px;
+    padding-left: 10px;
+    text-align: right;
+}
+
+.te-monitor-control-timer-inner-column {
+    padding-right: 15px;
+}
+
 .te-monitor-control-timer-buttons {
-	padding-left: 10px;
+	padding-right: 10px;
+	line-height: 23px;
 }
 
 .te-monitor-control-timer-button-show {
@@ -153,6 +173,7 @@ button {
 
 .te-monitor-control-timer-button-show-ms {
 	font-size: 16px;
+	line-height: 24px;
 }
 
 .te-monitor-control-timer-button-show-ms:hover {

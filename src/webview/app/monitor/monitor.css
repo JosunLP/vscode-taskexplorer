@@ -46,12 +46,6 @@
     flex: 1;
 }
   
-.te-monitor-control-timer-column {
-    padding-right: 15px;
-    padding-top: 6px;
-    text-align: right;
-}
-  
 .te-monitor-control-button-column {
     padding: 7px 0px 7px 0px;
 }
@@ -85,13 +79,4 @@
 
 .te-monitor-control-content-details-body {
     opacity: 1;
-}
-
-.te-monitor-control-timer {
-    font-size: 70px;
-    line-height: 70px;
-}
-
-.te-monitor-control-button-last {
-    margin-right: 5px;
 }
