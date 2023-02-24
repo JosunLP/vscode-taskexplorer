@@ -84,6 +84,7 @@
 
 .react-tabs__tab-panel {
     display: none;
+    color: var(--vscode-foreground);
 }
 
 .react-tabs__tab-panel--selected {
