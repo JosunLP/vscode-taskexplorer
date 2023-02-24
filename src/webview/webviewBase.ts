@@ -259,7 +259,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			nonce: this._cspNonce,
 			pinned: false,
 			session: await this.wrapper.licenseManager.getSession(),
-			webroot: this.getWebRoot()
+			webroot: this.getWebRoot() as string
 		};
 	}
 

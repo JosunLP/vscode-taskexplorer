@@ -17,25 +17,6 @@ import {
 	IpcMessage, IpcNotificationType, ITask, onIpc, StateChangedCallback, MonitorAppState
 } from "../../common/ipc";
 
-interface State
-{
-	famous: ITask[];
-	favorites: ITask[];
-	isEnabled: boolean;
-	isLicensed: boolean;
-	last: ITask[];
-	license: {
-		expiresFmt: string;
-		issuedFmt: string;
-		token: string;
-		ttl?: number;
-	};
-	nonce: string;
-	pinned: boolean;
-	running: ITask[];
-	tasks: ITask[];
-    webroot: string;
-}
 
 class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 {

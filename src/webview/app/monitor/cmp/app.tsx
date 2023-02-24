@@ -1,21 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import React, { useEffect } from "react";
+import React from "react";
 import { TeTaskControl } from "./control";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import {
     DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType,
     DidChangeRunningTasksType, DidChangeTaskType, IpcNotificationType, ITask, MonitorAppState, StateChangedCallback
 } from "../../../common/ipc";
-
-interface State
-{
-	tasks: ITask[];
-	famous: ITask[];
-	favorites: ITask[];
-	last: ITask[];
-	running: ITask[];
-    webroot: string;
-}
 
 interface IControls {
     recent: React.RefObject<TeTaskControl>;
@@ -50,7 +40,7 @@ export class App extends React.Component<{ state: MonitorAppState }, AppState>
             },
             ...props.state
         };
-        this.hideComponent = this.hideComponent.bind(this);
+        // this.hideComponent = this.hideComponent.bind(this);
     }
 
 
@@ -73,7 +63,7 @@ export class App extends React.Component<{ state: MonitorAppState }, AppState>
     };
 
 
-    updateTasks = (state: State, type?: IpcNotificationType<any>) =>
+    updateTasks = (state: MonitorAppState, type?: IpcNotificationType<any>) =>
     {
         switch (type) {
             case DidChangeTaskType:
