@@ -8,7 +8,7 @@ button {
 		transition-duration: 0s !important;
 	}
 }
-  
+
 .te-monitor-control-button {
 	width: 76px;
     height: 76px;
@@ -27,6 +27,16 @@ button {
 		.vscode-dark & {
             background-color: var(--vscode-button-hoverBackground);
 		}
+		
+	}
+	&:not([disabled]):active {
+		.vscode-light & {
+            opacity: 0.8
+		}
+		.vscode-dark & {
+            opacity: 0.8
+		}
+		
 	}
 }
 
