@@ -7,3 +7,83 @@
 		border: 5px solid var(--vscode-button-background);
 	}
 }
+
+.te-monitor-control-button-open {
+    width: 62px;
+    height: 62px;
+    margin-top: 5px;
+	.vscode-light & {
+		mask: url("../img/light/file.svg") no-repeat 100% 100%;
+    	-webkit-mask: url("../img/light/file.svg") no-repeat 100% 100%;
+	}
+	.vscode-dark & {
+		mask: url("../img/dark/file.svg") no-repeat 100% 100%;
+    	-webkit-mask: url("../img/dark/file.svg") no-repeat 100% 100%;
+	}
+}
+  
+.te-monitor-control-button-run {
+    width: 64px;
+    height: 64px;
+    margin-top: 5px;
+	.vscode-light & {
+		mask: url("../img/light/start.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/light/start.svg") no-repeat 100% 100%;
+	}
+	.vscode-dark & {
+		mask: url("../img/dark/start.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/dark/start.svg") no-repeat 100% 100%;
+	}
+}
+  
+.te-monitor-control-button-favorite {
+    width: 68px;
+    height: 68px;
+    margin-right: -5px;
+	.vscode-light & {
+		mask: url("../img/light/favorite.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/light/favorite.svg") no-repeat 100% 100%;
+	}
+	.vscode-dark & {
+		mask: url("../img/dark/favorite.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/dark/favorite.svg") no-repeat 100% 100%;
+	}
+}
+
+.te-monitor-control-button-stop {
+	.vscode-light & {
+		mask: url("../img/light/stop.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/light/stop.svg") no-repeat 100% 100%;
+	}
+	.vscode-dark & {
+		mask: url("../img/dark/stop.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/dark/stop.svg") no-repeat 100% 100%;
+	}
+}
+
+.te-monitor-control-button-pause {
+    margin-right: -21px;
+	.vscode-light & {
+		mask: url("../img/light/pause.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/light/pause.svg") no-repeat 100% 100%;
+	}
+	.vscode-dark & {
+		mask: url("../img/dark/pause.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/dark/pause.svg") no-repeat 100% 100%;
+	}
+}
+  
+.te-monitor-control-button-terminal {
+    width: 68px;
+    height: 68px;
+    margin-top: 3px;
+    margin-left: 10px;
+	.vscode-light & {
+		mask: url("../img/light/terminal.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/light/terminal.svg") no-repeat 100% 100%;
+	}
+	.vscode-dark & {
+		mask: url("../img/dark/terminal.svg") no-repeat 100% 100%;
+		-webkit-mask: url("../img/dark/terminal.svg") no-repeat 100% 100%;
+	}
+}

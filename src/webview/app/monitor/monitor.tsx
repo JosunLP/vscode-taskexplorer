@@ -8,13 +8,14 @@ import "./monitor.scss";
 
 import React from "react";
 import { App } from "./cmp/app";
+import { Disposable } from "../common/dom";
 import { TeWebviewApp } from "../webviewApp";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
 	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeAllTasksType, IpcMessage,
-	IpcNotificationType, onIpc, MonitorAppState, ITask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType
+	onIpc, MonitorAppState, ITask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType
 } from "../../common/ipc";
 
 
@@ -32,18 +33,18 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	}
 
 
-	get app() {
+	get app(): App {
 		return this.appRef.current as App;
 	}
 
 
-    private executeCommand = (command: string, task: ITask) =>
+    private executeCommand = (command: string, task: ITask): void =>
     {
 		this.sendCommand(ExecuteCommandType, { command: `taskexplorer.${command}`, args: [ task ] });
     };
 
 
-	private handleTaskStateChangeEvent = (params: DidChangeTaskStatusParams) =>
+	private handleTaskStateChangeEvent = (params: DidChangeTaskStatusParams): void =>
 	{
 		// let task = this.state.last.find(t => params.task.name === t.name);
 		// if (task) {
@@ -64,7 +65,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
-	protected override onInitialize = () =>
+	protected override onInitialize = (): void =>
 	{
 		this.log("onInitialize");
 		//
@@ -80,7 +81,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
-    protected override onBind = () =>
+    protected override onBind = (): Disposable[] =>
     {
 		const disposables = super.onBind?.() ?? [];
 		this.log("onBind");
@@ -100,7 +101,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
-	protected override onMessageReceived = (e: MessageEvent) =>
+	protected override onMessageReceived = (e: MessageEvent): void =>
     {
 		const msg = e.data as IpcMessage;
 		switch (msg.method)
@@ -158,7 +159,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
-	private processBaseStateChange = (params: DidChangeStateParams) =>
+	private processBaseStateChange = (params: DidChangeStateParams): void =>
     {
 		this.log("processBaseStateChange");
 		Object.assign(this.state, { ...params  });
@@ -166,7 +167,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
-	protected override setState = (state: MonitorAppState) =>
+	protected override setState = (state: MonitorAppState): void =>
     {
 		this.log("setState", state);
 		Object.assign(this.state, { ...state  });
