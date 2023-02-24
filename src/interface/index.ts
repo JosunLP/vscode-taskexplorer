@@ -2,6 +2,7 @@
 export type { ILog } from "./ILog";
 export type { IEvent } from "./IEvent";
 export type { IRecord } from "./IRecord";
+export type { ITeTask } from "./ITeTask";
 export type { ITaskItem } from "./ITaskItem";
 export type { ITaskFile } from "./ITaskFile";
 export type { ICacheItem } from "./ICacheItem";

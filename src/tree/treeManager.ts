@@ -16,7 +16,7 @@ import { addToExcludes } from "../lib/addToExcludes";
 import { isTaskIncluded } from "../lib/isTaskIncluded";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Commands, registerCommand } from "../lib/command/command";
-import { IDictionary, ITeTreeManager, ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../interface";
+import { IDictionary, ITeTreeManager, ITeTasksChangeEvent, ITeTaskStatusChangeEvent, ITeTask } from "../interface";
 import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskTypeUtils";
 import {
     TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
@@ -86,7 +86,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._views.taskExplorerSideBar,
             registerCommand(Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this),
             registerCommand(Commands.AddRemoveCustomLabel, async(taskItem: TaskItem) => this.addRemoveSpecialTaskLabel(taskItem), this),
-            registerCommand(Commands.Run,  (item: TaskItem) => this.taskManager.run(item), this),
+            registerCommand(Commands.Run,  (item: TaskItem | ITeTask) => this.taskManager.run(item), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.taskManager.run(item, true, false), this),
             registerCommand(Commands.RunWithArgs, (item: TaskItem, args?: string) => this._taskManager.run(item, false, true, args), this),
             registerCommand(Commands.RunLastTask,  async () => this.taskManager.runLastTask(this._treeBuilder.getTaskMap()), this),

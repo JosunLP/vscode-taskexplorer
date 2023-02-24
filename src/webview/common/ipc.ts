@@ -4,6 +4,7 @@
  * to the author of the GitLens extension
  */
 
+import { ITeTask } from "../../interface";
 import { State } from "./state";
 
 
@@ -103,14 +104,7 @@ export const DidChangeStateType = new IpcNotificationType<DidChangeStateParams>(
 //
 // TASK MONITOR APP
 //
-export interface ITask
-{
-	name: string;
-	definition: any;
-	source: string;
-	treeId: string;
-	running: boolean;
-}
+export interface ITask extends ITeTask {};
 export interface MonitorAppState extends State
 {
 	famous: ITask[];

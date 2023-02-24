@@ -14,7 +14,7 @@ import { createRoot } from "react-dom/client";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
 	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeAllTasksType, IpcMessage,
-	IpcNotificationType, onIpc, MonitorAppState, ITask, DidChangeTaskStatusParams
+	IpcNotificationType, onIpc, MonitorAppState, ITask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType
 } from "../../common/ipc";
 
 
@@ -35,6 +35,12 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	get app() {
 		return this.appRef.current as App;
 	}
+
+
+    private executeCommand = (command: string, task: ITask) =>
+    {
+		this.sendCommand(ExecuteCommandType, { command: `taskexplorer.${command}`, args: [ task ] });
+    };
 
 
 	private handleTaskStateChangeEvent = (params: DidChangeTaskStatusParams) =>
@@ -81,9 +87,10 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
         const root = createRoot(document.getElementById("root") as HTMLElement);
         root.render(
 			<App
-				log={this.log.bind(this)}
 				ref={this.appRef}
 				state={this.state}
+				log={this.log.bind(this)}
+				executeCommand={this.executeCommand.bind(this)}
 			 />
         );
         disposables.push({

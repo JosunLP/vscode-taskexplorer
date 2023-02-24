@@ -41,13 +41,15 @@
 .te-monitor-control-content-column {
     padding: 5px;
 }
+
+.te-monitor-control-spacer-column {
+    flex: 1;
+}
   
 .te-monitor-control-timer-column {
-    min-width: 200px;
     padding-right: 15px;
     padding-top: 6px;
     text-align: right;
-    flex: 1;
 }
   
 .te-monitor-control-button-column {
@@ -138,5 +140,10 @@
   .te-monitor-control-button-pause {
     mask: url("../img/dark/pause.svg") no-repeat 100% 100%;
     -webkit-mask: url("../img/dark/pause.svg") no-repeat 100% 100%;
+  }
+  
+  .te-monitor-control-button-terminal {
+    mask: url("../img/dark/terminal.svg") no-repeat 100% 100%;
+    -webkit-mask: url("../img/dark/terminal.svg") no-repeat 100% 100%;
   }
 

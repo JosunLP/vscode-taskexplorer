@@ -7,10 +7,10 @@ import { ITask } from "../../../common/ipc";
 
 interface ReactProps
 {
-    log: (message: string, ...optionalParams: any[]) => void;
-    startTimer?: boolean;
     tasks: ITask[];
     webroot: string;
+    executeCommand: (command: string, task: ITask) => void;
+    log: (message: string, ...optionalParams: any[]) => void;
 }
 
 
@@ -34,11 +34,11 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
             this.props.log(`TeTaskTab.render: task=${t.name} source=${t.source} running=${t.running}`);
             els.push(
                 <TeTaskControl
-                    log={this.props.log}
                     task={t}
-                    key={`te-id-task-control-${++this.counter}`}
-                    startTimer={this.props.startTimer}
+                    log={this.props.log}
                     webroot={this.props.webroot}
+                    executeCommand={this.props.executeCommand}
+                    key={`te-id-task-control-${++this.counter}`}
                 />
             );
         });

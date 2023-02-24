@@ -42,7 +42,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	}
 
 
-	private prepareTasksForTransport = (teTasks: Task[], isRunning?: boolean, treeId = ""): ITask[] =>
+	private prepareTasksForTransport = (teTasks: Task[], isRunning?: boolean, treeId?: string): ITask[] =>
 	{
 		return teTasks.map<ITask>(t =>
 		{
@@ -54,7 +54,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 				definition: t.definition,
 				source: t.source,
 				running,
-				treeId
+				treeId: treeId || t.definition.taskItemId
 			};
 		});
 	};

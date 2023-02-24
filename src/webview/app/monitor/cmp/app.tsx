@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import React from "react";
 import { TeTaskTab } from "./tab";
-import { MonitorAppState } from "../../../common/ipc";
+import { ITask, MonitorAppState } from "../../../common/ipc";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
 interface ITeAppTabs {
@@ -13,8 +13,9 @@ interface ITeAppTabs {
 
 interface ReactProps
 {
-    log: (message: string, ...optionalParams: any[]) => void;
     state: MonitorAppState;
+    executeCommand: (command: string, task: ITask) => void;
+    log: (message: string, ...optionalParams: any[]) => void;
 }
 
 
@@ -85,15 +86,16 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             ref={this.tabs.recent}
                             tasks={this.props.state.last}
                             webroot={this.props.state.webroot}
+                            executeCommand={this.props.executeCommand}
                         />
                     </TabPanel>
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
                             ref={this.tabs.running}
-                            startTimer={true}
                             tasks={this.props.state.running}
                             webroot={this.props.state.webroot}
+                            executeCommand={this.props.executeCommand}
                         />
                     </TabPanel>
                     <TabPanel>
@@ -102,6 +104,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             ref={this.tabs.favorites}
                             tasks={this.props.state.favorites}
                             webroot={this.props.state.webroot}
+                            executeCommand={this.props.executeCommand}
                         />
                     </TabPanel>
                     <TabPanel>
@@ -110,6 +113,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             ref={this.tabs.famous}
                             tasks={this.props.state.famous}
                             webroot={this.props.state.webroot}
+                            executeCommand={this.props.executeCommand}
                         />
                     </TabPanel>
                 </Tabs>
