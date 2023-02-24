@@ -103,34 +103,40 @@
 }
 
 .te-monitor-control-button-last {
-    width: 76px;
-    height: 76px;
     margin-right: -5px;
-}
-
-.te-monitor-control-button-open {
+  }
+  
+  .te-monitor-control-button-open {
+    width: 62px;
+    height: 62px;
+    margin-top: 5px;
     mask: url("../img/dark/file.svg") no-repeat 100% 100%;
-    -webkit-mask:url("../img/dark/file.svg") no-repeat 100% 100%;
-}
-
-.te-monitor-control-button-run {
+    -webkit-mask: url("../img/dark/file.svg") no-repeat 100% 100%;
+  }
+  
+  .te-monitor-control-button-run {
+    width: 64px;
+    height: 64px;
+    margin-top: 5px;
     mask: url("../img/dark/start.svg") no-repeat 100% 100%;
-    -webkit-mask:url("../img/dark/start.svg") no-repeat 100% 100%;
-}
-
-.te-monitor-control-button-favorite {
+    -webkit-mask: url("../img/dark/start.svg") no-repeat 100% 100%;
+  }
+  
+  .te-monitor-control-button-favorite {
+    width: 68px;
+    height: 68px;
     mask: url("../img/dark/favorite.svg") no-repeat 100% 100%;
-    -webkit-mask:url("../img/dark/favorite.svg") no-repeat 100% 100%;
+    -webkit-mask: url("../img/dark/favorite.svg") no-repeat 100% 100%;
     margin-right: -5px;
-}
-
-.te-monitor-control-button-stop {
+  }
+  
+  .te-monitor-control-button-stop {
     mask: url("../img/dark/stop.svg") no-repeat 100% 100%;
-    -webkit-mask:url("../img/dark/stop.svg") no-repeat 100% 100%;
-}
-
-.te-monitor-control-button-pause {
+    -webkit-mask: url("../img/dark/stop.svg") no-repeat 100% 100%;
+  }
+  
+  .te-monitor-control-button-pause {
     mask: url("../img/dark/pause.svg") no-repeat 100% 100%;
-    -webkit-mask:url("../img/dark/pause.svg") no-repeat 100% 100%;
-}
+    -webkit-mask: url("../img/dark/pause.svg") no-repeat 100% 100%;
+  }
 
