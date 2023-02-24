@@ -9,15 +9,25 @@ export const fontawesome = {
     {
         "chevron-circle-down": "\\f13a",
         "chevron-circle-up": "\\f139",
-        asterisk: "\\*",
-        lock: "\\f023",
-        star: "\\f005",
-        gear: "\\f013",
-        cog: "\\f013",
-        bug: "\\f188",
-        plus: "\\+",
+        "chevron-circle-left": "\\f137",
+        "chevron-circle-right": "\\f138",
+        "chevron-double-left": "\\f323",
+        "chevron-double-right": "\\f324",
+        "chevron-left": "\\f053",
+        "chevron-right": "\\f054",
+        "user-unlock": "\\e058",
         add: "\\+",
-        gears: "\\f085"
+        asterisk: "\\*",
+        bars: "\\f0c9",
+        bug: "\\f188",
+        cog: "\\f013",
+        gear: "\\f013",
+        gears: "\\f085",
+        lock: "\\f023",
+        plus: "\\+",
+        star: "\\f005",
+        thumbtack: "\\f08d",
+        unlock: "\\f09c"
     } as IDictionary<string>,
 
     sizes: `

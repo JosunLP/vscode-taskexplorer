@@ -76,6 +76,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                         <tr>
                             <td className="te-monitor-control-content-title">
                                 Details:
+                                <div className="far fa-thumbtack te-monitor-control-pin" />
                             </td>
                             <td className="te-monitor-control-content-details te-monitor-control-content-details-col1">
                                 <table>

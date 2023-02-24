@@ -80,7 +80,9 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 
 	protected override includeBootstrap = (): Promise<MonitorAppState> => this.getState();
-	protected override includeFontAwesome = () => ({ duotone: true, regular: true, icons: [ "gears", "gear", "gears", "star" ] });
+	protected override includeFontAwesome = () => ({ duotone: true, regular: true, solid: true, icons: [
+		"gear", "gears", "star", "thumbtack", "chevron-right", "chevron-left", "chevron-double-left", "chevron-double-right"
+	]});
 
 
 	private onFamousTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: this.prepareTasksForIpc(e.tasks) });

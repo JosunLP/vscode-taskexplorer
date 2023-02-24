@@ -51,7 +51,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 			this.setState(this.state);
 		}
 		this.app.recentTab.setTask(params.task);
-		this.app.runningTab.setTask(params.task);
+		this.app.runningTab.setTask(params.task, true);
 		this.app.favoritesTab.setTask(params.task);
 		this.app.famousTab.setTask(params.task);
 	};

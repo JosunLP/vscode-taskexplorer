@@ -65,22 +65,41 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
         return this.children;
     }
 
-    setTask = (task: ITask) =>
+
+    setTask = (task: ITask, isRunningTab?: boolean) =>
     {
-        const r  = this.controlRefs[task.treeId];
-        if (r) {
-            const t  = this.state.tasks.findIndex(t => t.treeId === task.treeId);
-            if (t !== -1) {
-                this.state.tasks.splice(t, 1, task);
-            }
-            React.Children.forEach(this.children, c => {
-                if (c.props.task.treeId === task.treeId) {
-                    // console.log("RESET KEY)");
-                    // c.key = `te-id-task-control-${++this.counter}`;
-                    // Object.assign(c.props, { task: { ...task }});
+        if (isRunningTab !== true)
+        {
+            const r  = this.controlRefs[task.treeId];
+            if (r) {
+                const t  = this.state.tasks.findIndex(t => t.treeId === task.treeId);
+                if (t !== -1) {
+                    this.state.tasks.splice(t, 1, task);
                 }
-            });
-            r.current?.setTask.call(r.current, task);
+                // React.Children.forEach(this.children, c => {
+                //     if (c.props.task.treeId === task.treeId) {
+                //         // console.log("RESET KEY)");
+                //         // c.key = `te-id-task-control-${++this.counter}`;
+                //         // Object.assign(c.props, { task: { ...task }});
+                //     }
+                // });
+                r.current?.setTask(task);
+            }
+        }
+        else // if (isRunningTab === true)
+        {
+            if (task.running)
+            {
+                this.state.tasks.push(task);
+                this.setState({tasks: [ ...this.state.tasks ]});
+            }
+            else {
+                const tIdx = this.state.tasks.findIndex(t => task.treeId === t.treeId);
+                if (tIdx !== -1) {
+                    this.state.tasks.splice(tIdx, 1);
+                    this.setState({tasks: [ ...this.state.tasks ]});
+                }
+            }
         }
     };
 

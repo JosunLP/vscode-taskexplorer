@@ -78,15 +78,20 @@ button {
     height: 80px;
     vertical-align: middle;
 }
-  
+
 .te-monitor-control-content-column {
     padding: 5px;
+}
+
+.te-monitor-control-pin {
+	font-size: 28px;
+	line-height: 28px;
 }
 
 .te-monitor-control-spacer-column {
     flex: 1;
 }
-  
+
 .te-monitor-control-button-column {
     padding: 7px 0px 7px 0px;
 }
