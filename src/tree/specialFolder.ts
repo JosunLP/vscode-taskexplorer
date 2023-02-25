@@ -113,7 +113,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     private async addRemoveFavorite(taskItem: TaskItem)
     {
         let removed = false;
-        const id = this.getTaskItemId(taskItem);
+        const id = this.getTaskItemId(taskItem.id);
 
         log.methodStart("add/remove " + this.contextValue, 1, "", false, [
             [ "id", taskItem.id ], [ "current fav count", this.store.length ]
@@ -140,7 +140,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     async addRemoveRenamedLabel(taskItem: TaskItem)
     {
         const renames = storage.get<string[][]>(Strings.TASKS_RENAME_STORE, []),
-              id = this.getTaskItemId(taskItem);
+              id = this.getTaskItemId(taskItem.id);
 
         log.methodStart("add/remove rename special", 1, "", false, [[ "id", id ], [ "current # of items in store", renames.length ]]);
 
@@ -290,7 +290,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     {
         let label = taskItem.taskFile.folder.label + " - " + taskItem.taskSource;
         const renames = storage.get<string[][]>(Strings.TASKS_RENAME_STORE, []),
-              id = this.getTaskItemId(taskItem);
+              id = this.getTaskItemId(taskItem.id);
         for (const i in renames)
         {
             if (id === renames[i][0])
@@ -306,15 +306,15 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     getStore = () => this.store; // for 'tasks' tests
 
 
-    getTaskItemId(taskItem: TaskItem)
+    private getTaskItemId(taskItemId: string)
     {
-        return taskItem.id.replace(Strings.LAST_TASKS_LABEL + ":", "")
-                          .replace(Strings.FAV_TASKS_LABEL + ":", "")
-                          .replace(Strings.USER_TASKS_LABEL + ":", "");
+        return taskItemId.replace(Strings.LAST_TASKS_LABEL + ":", "")
+                         .replace(Strings.FAV_TASKS_LABEL + ":", "")
+                         .replace(Strings.USER_TASKS_LABEL + ":", "");
     }
 
 
-    hasTask = (taskItem: TaskItem) => !!(this.enabled && this.taskFiles.find(t =>  this.getTaskItemId(t) === taskItem.id) && this.store.includes(this.getTaskItemId(taskItem)));
+    hasTask = (taskItem: TaskItem) => !!(this.enabled && this.taskFiles.find(t =>  this.getTaskItemId(t.id) === taskItem.id) && this.store.includes(this.getTaskItemId(taskItem.id)));
 
 
     isEnabled = () => this.enabled;
@@ -333,7 +333,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
 
     private pushToTop(taskItem: TaskItem, logPad = "")
     {
-        const taskId = this.label + ":" + this.getTaskItemId(taskItem);
+        const taskId = this.label + ":" + this.getTaskItemId(taskItem.id);
 
         /* istanbul ignore if */
         if (!taskItem.task) {
@@ -412,7 +412,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
             taskFile = this.taskFiles.splice(idx, 1)[0];
             if (persist)
             {
-                const idx = this.store.findIndex(f => f === id);
+                const idx = this.store.findIndex(f => f === this.getTaskItemId(id));
                 this.store.splice(idx, 1);
                 await storage.update(this.storeName, this.store);
             }
@@ -424,7 +424,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
 
     async saveTask(taskItem: TaskItem, logPad: string)
     {
-        const taskId =  this.getTaskItemId(taskItem);
+        const taskId =  this.getTaskItemId(taskItem.id);
         const maxTasks = configuration.get<number>("specialFolders.numLastTasks");
 
         log.methodStart("save task", 1, logPad, false, [
