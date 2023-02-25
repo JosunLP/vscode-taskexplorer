@@ -57,7 +57,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 				running,
 				listType,
 				treeId: t.definition.taskItemId,
-				pinned: this.getPinned(`${listType}-${t.definition.taskItemId}`)
+				pinned: this.getPinned(t.definition.taskItemId, listType)
 			};
 		});
 	};
@@ -71,7 +71,13 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			favorites: this.prepareTasksForIpc(this.wrapper.treeManager.favoriteTasks, "favorites"),
 			running: this.prepareTasksForIpc(this.wrapper.treeManager.runningTasks, "running"),
 			famous: this.prepareTasksForIpc(this.wrapper.treeManager.famousTasks, "famous"),
-			tasks: this.prepareTasksForIpc(this.wrapper.treeManager.getTasks(), "all")
+			tasks: this.prepareTasksForIpc(this.wrapper.treeManager.getTasks(), "all"),
+			pinned: {
+				last: this.wrapper.storage.get<ITask[]>("taskexplorer.pinned.last", []),
+				famous: this.wrapper.storage.get<ITask[]>("taskexplorer.pinned.famous", []),
+				favorites: this.wrapper.storage.get<ITask[]>("taskexplorer.pinned.favorites", []),
+				running: this.wrapper.storage.get<ITask[]>("taskexplorer.pinned.running", [])
+			}
 		};
 	};
 
@@ -111,16 +117,23 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	};
 
 
-	private getPinned = (id: string) => this.wrapper.storage.get<boolean>(`taskexplorer.pinned.taskmonitor-${id}`, false);
+	private getPinned = (id: string, listType: TaskListType): boolean =>
+	{
+		const storageKey = `taskexplorer.pinned.${listType}`;
+		const pinnedTaskList = this.wrapper.storage.get<ITask[]>(storageKey, []);
+		return !!pinnedTaskList.find(t => t.treeId === id);
+	};
 
 
-	private setPinned = async (task: ITask) =>
+	private setPinned = async (task: ITask): Promise<void> =>
 	{
 		const mMsg = "MonitorPage Event: setPinned",
 			  logPad = this.wrapper.log.getLogPad(),
-			  id = `${task.listType}-${task.definition.taskItemId}`;
-		this.wrapper.log.methodStart(mMsg, 2, logPad, false, [[ "id", id ], [ "pinned", task.pinned ]]);
-		await this.wrapper.storage.update(`taskexplorer.pinned.taskmonitor-${id}`, task.pinned);
+			  storageKey = `taskexplorer.pinned.${task.listType}`;
+		this.wrapper.log.methodStart(mMsg, 2, logPad, false, [[ "id", task.treeId ], [ "pinned", task.pinned ]]);
+		const pinnedTaskList = this.wrapper.storage.get<ITask[]>(storageKey, []);
+		pinnedTaskList.push({  ...task });
+		await this.wrapper.storage.update(storageKey, pinnedTaskList);
 		this.wrapper.log.methodDone(mMsg, 2, logPad);
 	};
 

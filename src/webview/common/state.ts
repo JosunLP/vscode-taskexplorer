@@ -8,7 +8,6 @@ export interface BaseState
 	isLicensed: boolean;
 	license?: ISessionToken;
 	nonce: string;
-	pinned: boolean;
 	session?: AuthenticationSession;
 	webroot: string;
 }

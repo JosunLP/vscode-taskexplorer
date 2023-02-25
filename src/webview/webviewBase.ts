@@ -257,7 +257,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			isLicensed: this.wrapper.licenseManager.isLicensed(),
 			license: await this.wrapper.licenseManager.getLicenseToken(),
 			nonce: this._cspNonce,
-			pinned: false,
 			session: await this.wrapper.licenseManager.getSession(),
 			webroot: this.getWebRoot() as string
 		};

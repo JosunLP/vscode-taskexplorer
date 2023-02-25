@@ -41,14 +41,6 @@ export async function activate(context: ExtensionContext)
     // Initialize persistent storage
     //
     await initStorage(context);
-//
-// TEMP!!!
-// TESTING TASK MONITOR REACT APP
-//
-await storage.update("lastTasks", []);
-//
-// ^^^^^^^^^^^^^ TEMP ^^^^^^^^^^
-//
     //
     // !!! Temporary after settings layout redo / rename !!!
     // !!! Remove sometime down the road (from 12/22/22) !!!

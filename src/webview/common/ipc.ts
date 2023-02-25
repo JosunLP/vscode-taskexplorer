@@ -109,12 +109,6 @@ export interface ITask extends ITeTask
 {
 	pinned: boolean;
 	listType:  TaskListType;
-	// pinned: {
-	// 	last: boolean;
-	// 	favorites: boolean;
-	// 	famous: boolean;
-	// 	running: boolean;
-	// };
 };
 export interface MonitorAppState extends State
 {
@@ -123,6 +117,12 @@ export interface MonitorAppState extends State
 	last: ITask[];
 	tasks: ITask[];
 	running: ITask[];
+	pinned: {
+		last: ITask[];
+		favorites: ITask[];
+		famous: ITask[];
+		running: ITask[];
+	};
 }
 export interface DidChangeTaskStatusParams
 {
