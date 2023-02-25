@@ -128,7 +128,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
             await this.saveTask(taskItem, "   ");
         }
         else {
-           await this.removeTaskFile(id, "   ", true);
+           await this.removeTaskFile(`${Strings.FAV_TASKS_LABEL}:${id}`, "   ", true);
            removed = true;
         }
 

@@ -48,9 +48,7 @@
         "bash"
     ],
     "main": "./dist/extension",
-    "activationEvents": [
-        "*"
-    ],
+    "activationEvents": [],
     "preview": false,
     "pricing": "Trial",
     "scripts": {
