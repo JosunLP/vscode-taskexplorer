@@ -11,7 +11,8 @@ import { TaskTree } from "../tree/tree";
 import * as utilities from "./utils/utils";
 import * as pathUtils from "./utils/pathUtils";
 import { IStorage } from "../interface/IStorage";
-import { IDictionary, ILog, ITeFilesystem } from "../interface";
+// import { getUuid } from "@env/crypto";
+import { getUuid } from "../lib/env/node/crypto";
 import * as taskUtils from "./utils/taskTypeUtils";
 import * as commonUtils from "./utils/commonUtils";
 import { TaskManager } from "../tree/taskManager";
@@ -48,6 +49,7 @@ import { IConfiguration } from "../interface/IConfiguration";
 import { TaskCountView } from "../webview/view/taskCountView";
 import { TaskUsageView } from "../webview/view/taskUsageView";
 import { ReleaseNotesPage } from "../webview/page/releaseNotes";
+import { IDictionary, ILog, ITeFilesystem } from "../interface";
 import { PowershellTaskProvider } from "../providers/powershell";
 import { ITaskExplorerProvider } from "../interface/ITaskProvider";
 import { AppPublisherTaskProvider } from "../providers/appPublisher";
@@ -57,7 +59,6 @@ import { registerEnableTaskTypeCommand } from "./command/enableTaskType";
 import { registerDisableTaskTypeCommand } from "./command/disableTaskType";
 import { registerRemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import { ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, Disposable } from "vscode";
-import { randomUUID } from "crypto";
 
 const PROVIDE_INTERIM_LICENSE_KEY = true;
 
@@ -109,7 +110,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
-		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", randomUUID());
+		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
 
 		this._teContext = new TeContext();
 		this._fileCache = new TeFileCache(this);
@@ -268,7 +269,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		/* istanbul ignore next */
 		if (this.versionchanged) {
-			this._cacheBuster = randomUUID();
+			this._cacheBuster = getUuid();
 			/* TODO - Show 'welcome / what's new' page */
 		}
 		// utilities.oneTimeEvent(this.onReady)(() => { /* TODO */ });

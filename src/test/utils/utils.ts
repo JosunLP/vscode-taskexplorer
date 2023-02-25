@@ -140,10 +140,10 @@ export const activate = async (instance?: Mocha.Context) =>
         //
         // Set a valid license key to run in 'licensed mode' at startup
         //
-        await teWrapper.storage.updateSecret("taskmanager.licenseKey", "1234-5678-9098-7654321");
-        await teWrapper.storage.updateSecret("taskmanager.licenseToken", JSON.stringify({
+        await teWrapper.storage.updateSecret("taskexplorer.licenseKey", "1234-5678-9098-7654321");
+        await teWrapper.storage.updateSecret("taskexplorer.licenseToken", JSON.stringify({
             token: "1234-5678-9098-7654321",
-            ttl: Infinity,
+            ttl: 365,
             expiresFmt: "N/A",
             issuedFmt: "N/A"
         }));
@@ -474,6 +474,12 @@ export const setLicensed = async (valid: boolean) =>
     const licMgr = teWrapper.licenseManager;
     teWrapper.tests = !valid;
     await licMgr.setLicenseKey(valid ? "1234-5678-9098-7654321" : undefined);
+    // await licMgr.setLicenseToken", {
+    //      token: "1234-5678-9098-7654321",
+    //      ttl: Infinity,
+    //      expiresFmt: "N/A",
+    //      issuedFmt: "N/A"
+    //  });
     await licMgr.checkLicense();
     teWrapper.tests = true;
 };

@@ -1,5 +1,6 @@
 // import { createHash, randomBytes, randomUUID } from "crypto";
 import { randomBytes } from "crypto";
 export const getNonce = () => randomBytes(16).toString("base64");
-// export const md5 = (data: string | Uint8Array, encoding: "base64" | "hex" = "base64") =>  createHash("md5").update(data).digest(encoding);
-// export const uuid = () => randomUUID();
+// export const getMd5 = (data: string | Uint8Array, encoding: "base64" | "hex" = "base64") =>  createHash("md5").update(data).digest(encoding);
+// export const getUuid = () => randomUUID(); // <---  randomUUID() not added until Node v14.17, VSCode Version 1.67 and lower will fail
+export const getUuid = () => randomBytes(24).toString("hex");

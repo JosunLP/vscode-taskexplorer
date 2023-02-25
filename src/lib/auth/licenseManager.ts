@@ -138,12 +138,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	getLicenseKey = () => this.wrapper.storage.getSecret("taskmanager.licenseKey"); // for now, "1234-5678-9098-7654321" is a valid license
+	getLicenseKey = () => this.wrapper.storage.getSecret("taskexplorer.licenseKey"); // for now, "1234-5678-9098-7654321" is a valid license
 
 
 	getLicenseToken = async(): Promise<ISessionToken | undefined> =>
 	{
-		const token = await this.wrapper.storage.getSecret("taskmanager.licenseToken");
+		const token = await this.wrapper.storage.getSecret("taskexplorer.licenseToken");
 		return token ? JSON.parse(token) as ISessionToken : undefined;
 	};
 
@@ -178,7 +178,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 		this.wrapper.log.methodStart("request license", 1, logPad);
 
-		if (await this.wrapper.storage.getSecret("taskmanager.licenseKey30Day") !== undefined)
+		if (await this.wrapper.storage.getSecret("taskexplorer.licenseKey30Day") !== undefined)
 		{   // this.log("   a 30-day license has already been allocated to this machine", logPad);
 			this.busy = false;
 			return;
@@ -201,7 +201,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			token = rsp.data.token.token;
 			await this.setLicenseKeyFromRsp(rsp.data, logPad);
-			await this.wrapper.storage.updateSecret("taskmanager.licenseKey30Day", token);
+			await this.wrapper.storage.updateSecret("taskexplorer.licenseKey30Day", token);
 		}
 
 		this.busy = false;
@@ -212,7 +212,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	setLicenseKey = async (licenseKey: string | undefined) =>
 	{
-		this.wrapper.storage.updateSecret("taskmanager.licenseKey", licenseKey);
+		await this.wrapper.storage.updateSecret("taskexplorer.licenseKey", licenseKey);
 		// this.onSessionChanged({
 		// 	added: [],
 		// 	removed: [],
@@ -224,7 +224,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	setLicenseToken = async (licenseToken: ISessionToken | undefined) =>
 	{
-		this.wrapper.storage.updateSecret("taskmanager.licenseToken", licenseToken ? JSON.stringify(licenseToken) : undefined);
+		await this.wrapper.storage.updateSecret("taskexplorer.licenseToken", licenseToken ? JSON.stringify(licenseToken) : undefined);
 		this.onSessionChanged({
 			added: [ await this.getSession() as AuthenticationSession ],
 			removed: [],

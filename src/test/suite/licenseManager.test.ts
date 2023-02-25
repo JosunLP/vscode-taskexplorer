@@ -41,8 +41,8 @@ suite("License Manager Tests", () =>
 		// we just disable TLS_REJECT_UNAUTHORIZED in the NodeJS environment.
 		//
         ({ teWrapper } = await utils.activate(this));
-		oLicenseKey = await teWrapper.storage.getSecret("taskmanager.licenseKey");
-		await teWrapper.storage.updateSecret("taskmanager.licenseKey30Day", undefined);
+		oLicenseKey = await teWrapper.storage.getSecret("taskexplorer.licenseKey");
+		await teWrapper.storage.updateSecret("taskexplorer.licenseKey30Day", undefined);
 		licMgr = teWrapper.licenseManager;
 		licMgr.setTestData({
 			logRequestSteps: tc.log.licServerReqSteps,
@@ -60,9 +60,9 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this, false, true)) return;
 		teWrapper.tests = true;
 		await utils.closeEditors();
-		await teWrapper.storage.updateSecret("taskmanager.licenseKey30Day", undefined);
+		await teWrapper.storage.updateSecret("taskexplorer.licenseKey30Day", undefined);
 		if (oLicenseKey) {
-			await teWrapper.storage.updateSecret("taskmanager.licenseKey", oLicenseKey);
+			await teWrapper.storage.updateSecret("taskexplorer.licenseKey", oLicenseKey);
 		}
 		licMgr?.setTestData({
 			maxFreeTasks: licMgrMaxFreeTasks,
@@ -175,7 +175,8 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.licenseMgr.pageWithDetail + 1100 + (tc.slowTime.storageUpdate * 2) + tc.slowTime.licenseMgr.setLicenseCmd);
 		await utils.setLicensed(false);
 		await teWrapper.licensePage.show();
-		await utils.sleep(50);
+        await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
+		await utils.sleep(10);
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "getLicense" });
 		await setTasks();
 		await utils.sleep(50);
@@ -440,7 +441,7 @@ suite("License Manager Tests", () =>
 		await utils.sleep(500);
 		expect(result).to.be.equal(true);
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.get30DayLicense);
-		const newKey = await teWrapper.storage.getSecret("taskmanager.licenseKey30Day");
+		const newKey = await teWrapper.storage.getSecret("taskexplorer.licenseKey30Day");
 		await utils.closeEditors();
 		expect(newKey).to.be.a("string").with.length.that.is.greaterThan(20);
         utils.endRollingCount(this);
@@ -451,7 +452,7 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.get30DayLicense + tc.slowTime.storageSecretUpdate);
-		await teWrapper.storage.updateSecret("taskmanager.licenseKey30Day", undefined);
+		await teWrapper.storage.updateSecret("taskexplorer.licenseKey30Day", undefined);
 		const result = await executeTeCommand<{ panel: any; newKey: any }>("getLicense");
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.get30DayLicense);
 		await utils.closeEditors();
@@ -468,7 +469,7 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.commands.standard + tc.slowTime.closeEditors + tc.slowTime.storageSecretUpdate);
 		const result = await executeTeCommand<{ panel: any; newKey: any }>("getLicense");
 		await utils.closeEditors();
-		await teWrapper.storage.updateSecret("taskmanager.licenseKey30Day", undefined);
+		await teWrapper.storage.updateSecret("taskexplorer.licenseKey30Day", undefined);
 		expect(result).to.be.an("object");
 		expect(result.panel).to.not.be.undefined;
 		expect(result.newKey).to.be.undefined;
