@@ -40,5 +40,6 @@ export interface ITeUtilities
 	pushIfNotExists(arr: any[], item: any): void;
 	removeFromArray(arr: any[], item: any): void;
 	showMaxTasksReachedMessage(licMgr: any, taskType?: string, force?: boolean): void;
+	textWithElipsis(text: string, maxLength: number): string;
 	timeout(ms: number): Promise<void>;
 }

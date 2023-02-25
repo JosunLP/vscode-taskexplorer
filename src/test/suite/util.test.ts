@@ -509,6 +509,9 @@ suite("Util Tests", () =>
 		teWrapper.utils.getDateDifference(d2, dt1, "s");
 		teWrapper.utils.getDateDifference(d2, dt1);
 
+		teWrapper.utils.textWithElipsis("Shorten this text and append an elipsis", 16);
+		teWrapper.utils.textWithElipsis("Don't shorten this text or append an elipsis", 64);
+
         endRollingCount(this);
 	});
 
@@ -732,7 +735,13 @@ suite("Util Tests", () =>
 			expect(await teWrapper.storage.get2<number>("TEST_KEY2_DOESNT_EXIST", 0)).to.be.equal(0);
 			expect(await teWrapper.storage.get2<string>("TEST_KEY2_DOESNT_EXIST", "")).to.be.equal("");
 
+			await teWrapper.storage.updateSecret("testsecret", "test");
+			expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test");
 			const disposable = teWrapper.storage.onDidChangeSecrets(() => {});
+			await teWrapper.storage.updateSecret("testsecret", "test222");
+			expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test222");
+			await teWrapper.storage.deleteSecret("testsecret");
+			expect(await teWrapper.storage.getSecret("testsecret")).to.be.undefined;
 			await sleep(1);
 			disposable.dispose();
 
