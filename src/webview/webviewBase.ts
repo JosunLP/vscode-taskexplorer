@@ -214,10 +214,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			// {
 			// 	html += ` ${fontawesome.fontFace("sharp-????", webRoot, this.wrapper.cacheBuster)}`;
 			// }
-			// if (incFa.solid)
-			// {
-			// 	html += ` ${fontawesome.fontFace("solid-900", webRoot, this.wrapper.cacheBuster)}`;
-			// }
+			if (incFa.solid)
+			{
+				html += ` ${fontawesome.fontFace("solid-900", webRoot, this.wrapper.cacheBuster)}`;
+			}
 			// if (incFa.thin)
 			// {
 			// 	html += ` ${fontawesome.fontFace("thin-200", webRoot, this.wrapper.cacheBuster)}`;

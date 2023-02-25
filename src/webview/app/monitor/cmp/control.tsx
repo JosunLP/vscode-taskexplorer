@@ -67,9 +67,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     // override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
 
 
-    private getPinnedIcon = (): string  => {
-        return `${(!this.state.task.pinned ? "far" : "fas")} fa-thumbtack te-monitor-control-pin`;
-    };
+    private getPinnedIconCls = (): string  => `${(!this.state.task.pinned ? "far" : "fas")} fa-thumbtack te-monitor-control-pin`;
 
 
     private getTaskDetails = (): JSX.Element =>
@@ -90,7 +88,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                         </tr>
                                         <tr>
                                             <td className="te-monitor-control-pin-container">
-                                                <span className={this.getPinnedIcon()} onClick={this.setPinned.bind(this)} />
+                                                <span className={this.getPinnedIconCls()} onClick={this.setPinned.bind(this)} />
                                             </td>
                                         </tr>
                                     </tbody>
@@ -273,9 +271,6 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     };
 
 
-    setTask = (task: ITask) =>
-    {
-        this.setState({ task });
-    };
+    setTask = (task: ITask) => this.setState({ task });
 
 }
