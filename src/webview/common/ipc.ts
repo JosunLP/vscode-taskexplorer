@@ -104,7 +104,18 @@ export const DidChangeStateType = new IpcNotificationType<DidChangeStateParams>(
 //
 // TASK MONITOR APP
 //
-export interface ITask extends ITeTask {};
+export type TaskListType = "none" | "last" | "running" | "favorites" | "famous" | "all";
+export interface ITask extends ITeTask
+{
+	pinned: boolean;
+	listType:  TaskListType;
+	// pinned: {
+	// 	last: boolean;
+	// 	favorites: boolean;
+	// 	famous: boolean;
+	// 	running: boolean;
+	// };
+};
 export interface MonitorAppState extends State
 {
 	famous: ITask[];

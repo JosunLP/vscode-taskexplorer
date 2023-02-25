@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import React from "react";
+import { TeTaskButton } from "./button";
 import { TeReactTaskTimer } from "./timer";
 import { ITask } from "../../../common/ipc";
-import { TeTaskButton } from "./button";
 
 interface ITeAppButtons {
     favorite: React.RefObject<TeTaskButton>;
@@ -15,6 +15,7 @@ interface ITeAppButtons {
 
 interface ReactState
 {
+    pinned?: boolean;
 	task: ITask;
 }
 
@@ -61,12 +62,17 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     private clickStop = () => { this.log("TeTaskControl.clickStop"); this.executeCommand("stop", this.state.task); };
     private clickTerminal = () => { this.log("TeTaskControl.clickTerminal"); this.executeCommand("openTerminal", this.state.task); };
 
-    override componentDidMount = () => this.log("TeTaskControl.componentDidMount");
-    override componentWillUnmount = () => this.log("TeTaskControl.componentWillUnmount");
-    override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
+    // override componentDidMount = () => this.log("TeTaskControl.componentDidMount");
+    // override componentWillUnmount = () => this.log("TeTaskControl.componentWillUnmount");
+    // override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
 
 
-    private getTaskDetails = () =>
+    private getPinnedIcon = (): string  => {
+        return `${(!this.state.task.pinned ? "far" : "fas")} fa-thumbtack te-monitor-control-pin`;
+    };
+
+
+    private getTaskDetails = (): JSX.Element =>
     {
         const task = this.state.task;
         return (
@@ -74,9 +80,21 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                 <table className="te-monitor-control-content-table">
                     <tbody>
                         <tr>
-                            <td className="te-monitor-control-content-title">
-                                Details:
-                                <div className="far fa-thumbtack te-monitor-control-pin" />
+                            <td className="te-monitor-control-content-details-col0">
+                                <table cellPadding="0" cellSpacing="0">
+                                    <tbody>
+                                        <tr>
+                                            <td className="te-monitor-control-content-title">
+                                                Details:
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="te-monitor-control-pin-container">
+                                                <span className={this.getPinnedIcon()} onClick={this.setPinned.bind(this)} />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </td>
                             <td className="te-monitor-control-content-details te-monitor-control-content-details-col1">
                                 <table>
@@ -179,7 +197,13 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
 
 
     override render()
-    {
+    {   //
+        // Add a unique key to the top-level <div>.
+        // The current way I'm handling the setState() in TeTaskControl doesnt seem to update the
+        // state/display if the key is set there,butnot here. SOMething to do with TeTaskTab holding
+        // on to an old state value because of the JSX.Element[] list and keys.  I'm sure there's a
+        // better or a correct way to handle, but havent figured it out yet.  Look into again.
+        //
         return (
             <div className="te-monitor-control-container" key={`te-id-task-inner-control-${++this.counter}`}>
                 <table width="100%" cellPadding="0" cellSpacing="0">
@@ -238,6 +262,15 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
             </div>
         );
     }
+
+
+    setPinned = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>): void => {
+        const el = e.target as HTMLSpanElement;
+        this.log(`TeTaskControl.clickPinned: target=${el.className}`);
+        this.state.task.pinned = !this.state.task.pinned;
+        this.setState({ pinned: this.state.task.pinned });
+        this.executeCommand("setPinned", this.state.task);
+    };
 
 
     setTask = (task: ITask) =>

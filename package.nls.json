@@ -145,6 +145,7 @@
 	"command.enterLicense" : "Task Explorer: Enter License Key",
 	"command.getLicense" : "Task Explorer: Get 30-Day license key",
 	"command.removeFromExcludes": "Task Explorer: Remove from Excludes List",
+	"command.setPinned": "Set task pinned state for current list",
 	"command.showOutput": "Task Explorer: Show the log output window",
 
 	"command.view.licensePage.show" : "Task Explorer: View licensing information",

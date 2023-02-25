@@ -2,12 +2,12 @@
 import { Task, tasks } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
+import { Commands, registerCommand } from "../../lib/command/command";
 import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
-	DidChangeAllTasksType, ITask, DidChangeTaskStatusType
+	DidChangeAllTasksType, ITask, DidChangeTaskStatusType, TaskListType
 } from "../common/ipc";
 
 
@@ -31,6 +31,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 		);
 
 		this.disposables.push(
+			registerCommand(Commands.SetPinned, this.setPinned, this),
 			wrapper.treeManager.onReady(this.onTaskTreeManagerReady, this),
 			wrapper.treeManager.onDidAllTasksChange(this.onAllTasksChanged, this),
 			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this),
@@ -42,7 +43,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	}
 
 
-	private prepareTasksForIpc = (teTasks: Task[], isRunning?: boolean, treeId?: string): ITask[] =>
+	private prepareTasksForIpc = (teTasks: Task[], listType: TaskListType, isRunning?: boolean): ITask[] =>
 	{
 		return teTasks.map<ITask>(t =>
 		{
@@ -54,7 +55,9 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 				definition: t.definition,
 				source: t.source,
 				running,
-				treeId: treeId || t.definition.taskItemId
+				listType,
+				treeId: t.definition.taskItemId,
+				pinned: this.getPinned(`${listType}-${t.definition.taskItemId}`)
 			};
 		});
 	};
@@ -64,18 +67,18 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	{
 		return {
 			...(await super.getState()),
-			last: this.prepareTasksForIpc(this.wrapper.treeManager.lastTasks),
-			favorites: this.prepareTasksForIpc(this.wrapper.treeManager.favoriteTasks),
-			running: this.prepareTasksForIpc(this.wrapper.treeManager.runningTasks),
-			famous: this.prepareTasksForIpc(this.wrapper.treeManager.famousTasks),
-			tasks: this.prepareTasksForIpc(this.wrapper.treeManager.getTasks())
+			last: this.prepareTasksForIpc(this.wrapper.treeManager.lastTasks, "last"),
+			favorites: this.prepareTasksForIpc(this.wrapper.treeManager.favoriteTasks, "favorites"),
+			running: this.prepareTasksForIpc(this.wrapper.treeManager.runningTasks, "running"),
+			famous: this.prepareTasksForIpc(this.wrapper.treeManager.famousTasks, "famous"),
+			tasks: this.prepareTasksForIpc(this.wrapper.treeManager.getTasks(), "all")
 		};
 	};
 
 
 	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) =>
 	{
-		this.notify(DidChangeTaskStatusType, { task: this.prepareTasksForIpc([ e.task ], e.isRunning, e.taskItemId)[0] });
+		this.notify(DidChangeTaskStatusType, { task: this.prepareTasksForIpc([ e.task ], "none", e.isRunning)[0] });
 	};
 
 
@@ -85,13 +88,13 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	]});
 
 
-	private onFamousTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: this.prepareTasksForIpc(e.tasks) });
-	private onFavoriteTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: this.prepareTasksForIpc(e.tasks) });
-	private onLastTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForIpc(e.tasks) });
-	private onRunningTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForIpc(e.tasks) });
+	private onFamousTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: this.prepareTasksForIpc(e.tasks, "famous") });
+	private onFavoriteTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: this.prepareTasksForIpc(e.tasks, "favorites") });
+	private onLastTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForIpc(e.tasks, "last") });
+	private onRunningTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: this.prepareTasksForIpc(e.tasks, "running") });
     private onAllTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
-	private onTaskTreeManagerReady = (e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: this.prepareTasksForIpc(e.tasks) });
+	private onTaskTreeManagerReady = (e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: this.prepareTasksForIpc(e.tasks, "all") });
 
 
 	protected override onVisibilityChanged = (visible: boolean) =>
@@ -105,6 +108,20 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	{
 		// this.wrapper.log.methodStart("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad(), false, [[ "focus", focused ]]);
 		// this.wrapper.log.methodDone("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad());
+	};
+
+
+	private getPinned = (id: string) => this.wrapper.storage.get<boolean>(`taskexplorer.pinned.taskmonitor-${id}`, false);
+
+
+	private setPinned = async (task: ITask) =>
+	{
+		const mMsg = "MonitorPage Event: setPinned",
+			  logPad = this.wrapper.log.getLogPad(),
+			  id = `${task.listType}-${task.definition.taskItemId}`;
+		this.wrapper.log.methodStart(mMsg, 2, logPad, false, [[ "id", id ], [ "pinned", task.pinned ]]);
+		await this.wrapper.storage.update(`taskexplorer.pinned.taskmonitor-${id}`, task.pinned);
+		this.wrapper.log.methodDone(mMsg, 2, logPad);
 	};
 
 }

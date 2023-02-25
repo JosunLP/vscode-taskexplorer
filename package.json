@@ -523,6 +523,11 @@
                 }
             },
             {
+                "command": "taskexplorer.setPinned",
+                "title": "%command.setPinned%",
+                "when": "taskexplorer:enabled"
+            },
+            {
                 "command": "taskexplorer.runInstall",
                 "title": "%command.runInstall%",
                 "when": "taskexplorer:enabled"
@@ -685,6 +690,10 @@
                 },
                 {
                     "command": "taskexplorer.openTerminal",
+                    "when": "false"
+                },
+                {
+                    "command": "taskexplorer.setPinned",
                     "when": "false"
                 },
                 {

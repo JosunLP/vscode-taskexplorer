@@ -84,8 +84,22 @@ button {
 }
 
 .te-monitor-control-pin {
-	font-size: 28px;
-	line-height: 28px;
+	font-size: 32px;
+	line-height: 32px;
+	margin-right: 10px;
+}
+
+.te-monitor-control-pin:hover {
+	cursor: pointer;
+	opacity: 0.8;
+	color: var(--vscode-button-hoverBackground);
+}
+
+.te-monitor-control-pin-container {
+	vertical-align: middle;
+	display: inline-table;
+	width: 100%;
+	text-align: center;
 }
 
 .te-monitor-control-spacer-column {
@@ -121,6 +135,10 @@ button {
     font-size: 14px;
     line-height: 14px;
     text-align: left;
+}
+
+.te-monitor-control-content-details-col0  {
+	vertical-align: top;
 }
 
 .te-monitor-control-content-details-col1 {

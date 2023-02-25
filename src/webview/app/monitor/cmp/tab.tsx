@@ -43,14 +43,6 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
         {
             this.props.log(`TeTaskTab.render: task=${t.name} source=${t.source} running=${t.running}`);
             this.controlRefs[t.treeId] = React.createRef<TeTaskControl>();
-            //
-            // TODO - Correct use of `key` property on a list
-            // Docs say'key' should be defined here on each TeTaskControl i.e.:
-            //     key={`te-id-task-control-${++this.counter}`}
-            // But the current way I'm handling the setState() in TeTaskControl doesnt seem to update
-            // the state if the key is set here.  Works ok when the key is set on the top-level <div>
-            // in TeTaskControl.  but must not be correct, docs say it explicitly.  Look into sometime.
-            //
             this.children.push(
                 <TeTaskControl
                     task={t}

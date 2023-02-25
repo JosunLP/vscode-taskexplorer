@@ -48,6 +48,7 @@ export const enum Commands
     RunLastTask = "taskexplorer.runLastTask",
     RunWithArgs = "taskexplorer.runWithArgs",
 	RunWithNoTerminal = "taskexplorer.runNoTerm",
+	SetPinned = "taskexplorer.setPinned",
 	ShowLicensePage = "taskexplorer.view.licensePage.show",
 	ShowMonitorPage = "taskexplorer.view.taskMonitor.show",
 	ShowParsingReportPage = "taskexplorer.view.parsingReport.show",
