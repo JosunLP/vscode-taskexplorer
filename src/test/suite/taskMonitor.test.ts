@@ -1,11 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { Extension } from "vscode";
+import { Extension, TaskExecution } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
-import { executeTeCommand } from "../utils/commandUtils";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, promiseFromEvent } from "../utils/utils";
+import { executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
+import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, promiseFromEvent, waitForTaskExecution, treeUtils, waitForTeIdle } from "../utils/utils";
 
 let teWrapper: ITeWrapper;
 
@@ -23,7 +23,6 @@ suite("Task Monitor App Tests", () =>
 	suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-		await closeEditors();
         suiteFinished(this);
 	});
 
@@ -54,9 +53,21 @@ suite("Task Monitor App Tests", () =>
 	test("Run Task", async function()
 	{
         if (exitRollingCount(this)) return;
-	    // await teWrapper.releaseNotesPage.view?.webview.postMessage({ command: "showParsingReport" });
-		// await sleep(500);
-		await closeEditors();
+		const lastTasks = teWrapper.treeManager.lastTasks,
+			  // task = lastTasks[0],
+			  ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
+		await waitForTeIdle(testControl.waitTime.getTreeTasks);
+		const task = (ant.find(t => !t.taskFile.fileName.includes("hello.xml")) as ITaskItem).task;
+		const exec = await executeTeCommand2<TaskExecution | undefined>("taskexplorer.run", [{
+			name: task.name,
+			definition: task.definition,
+			source: task.source,
+			running: false,
+			listType: "last",
+			treeId: task.definition.taskItemId,
+			pinned: false
+		}]);
+        await waitForTaskExecution(exec, 800);
         endRollingCount(this);
 	});
 

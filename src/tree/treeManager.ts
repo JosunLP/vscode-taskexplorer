@@ -147,15 +147,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     // {
 	// 	return this._onDidTasksLoad.event;
 	// }
-    get famousTasks() {
+    get famousTasks(): Task[] {
         return this._specialFolders.favorites.taskFiles.map(f => f.task); // TODO - Famous (most used) tasks
     }
 
-    get favoriteTasks() {
+    get favoriteTasks(): Task[] {
         return this._specialFolders.favorites.taskFiles.map(f => f.task);
     }
 
-    get lastTasks() {
+    get lastTasks(): Task[] {
         return this._specialFolders.lastTasks.taskFiles.map(f => f.task);
     }
 
@@ -163,7 +163,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         return this._specialFolders.lastTasks;
     }
 
-    get runningTasks() {
+    get runningTasks(): Task[] {
         return this._taskManager.getRunningTasks();
     }
 

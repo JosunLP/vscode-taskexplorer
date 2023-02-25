@@ -39,6 +39,7 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this, false, true)) return;
         await executeSettingsUpdate("taskButtons.clickAction", clickAction);
+		await utils.closeEditors(); // close task monitor from previous test suite
         utils.suiteFinished(this);
     });
 
@@ -76,6 +77,8 @@ suite("Task Tests", () =>
         const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
         expect(tree).to.not.be.oneOf([ undefined, null ]);
         const lastTasksFolder = tree[0] as any;
+        utils.overrideNextShowInfoBox("Yes");
+        await executeTeCommand("taskexplorer.clearLastTasks");
         lastTasksFolder.clearTaskItems();
         await utils.sleep(1);
         expect(await executeTeCommand("runLastTask", tc.waitTime.runCommandMin)).to.be.equal(undefined, "Return TaskExecution should be undefined");
