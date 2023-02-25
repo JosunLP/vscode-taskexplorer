@@ -55,6 +55,7 @@ suite("Task Monitor App Tests", () =>
 	test("Simulate Run Task", async function()
 	{
         if (exitRollingCount(this)) return;
+		this.slow(testControl.slowTime.commands.run);
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		await waitForTeIdle(testControl.waitTime.getTreeTasks);
 		task = (ant.find(t => !t.taskFile.fileName.includes("hello.xml")) as ITaskItem).task;
@@ -82,6 +83,7 @@ suite("Task Monitor App Tests", () =>
 	test("Simulate Pin Task", async function()
 	{
         if (exitRollingCount(this)) return;
+		this.slow(testControl.slowTime.commands.standard * 2);
 		await executeTeCommand2<TaskExecution | undefined>("taskexplorer.setPinned", [{
 			name: task.name,
 			definition: task.definition,

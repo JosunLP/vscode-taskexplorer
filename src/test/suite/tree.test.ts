@@ -66,20 +66,6 @@ suite("Tree Tests", () =>
     });
 
 
-    test("Remove from Favorites", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.standard * 6);
-        await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
-        await executeTeCommand2("addRemoveFavorite", [ batch[1] ]);
-        await executeTeCommand2("addRemoveFavorite", [ ant[0] ]);
-        await executeTeCommand2("addRemoveFavorite", [ bash[0] ]);
-        await executeTeCommand2("addRemoveFavorite", [ python[0] ]);
-        await executeTeCommand2("addRemoveFavorite", [ python[1] ]);
-        utils.endRollingCount(this);
-    });
-
-
     test("Show Last Tasks", async function()
     {
         if (utils.exitRollingCount(this)) return;
@@ -366,6 +352,20 @@ suite("Tree Tests", () =>
         utils.clearOverrideShowInputBox();
         utils.overrideNextShowInputBox(undefined);
         await executeTeCommand2("addRemoveCustomLabel", [ cstItem3 ]);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Remove from Favorites", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.commands.standard * 6);
+        await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
+        await executeTeCommand2("addRemoveFavorite", [ batch[1] ]);
+        await executeTeCommand2("addRemoveFavorite", [ ant[0] ]);
+        await executeTeCommand2("addRemoveFavorite", [ bash[0] ]);
+        await executeTeCommand2("addRemoveFavorite", [ python[0] ]);
+        await executeTeCommand2("addRemoveFavorite", [ python[1] ]);
         utils.endRollingCount(this);
     });
 
