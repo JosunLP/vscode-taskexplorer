@@ -265,14 +265,8 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
         {
             this.store = [];
             this.taskFiles = [];
-            if (this.isFavorites) {
-                await storage.update(Strings.FAV_TASKS_STORE, this.store);
-                this.refresh(true);
-            }
-            else {
-                await storage.update(Strings.LAST_TASKS_STORE, this.store);
-                this.refresh(true);
-            }
+            await storage.update(this.storeName, this.store);
+            this.refresh(true);
         }
     }
 
@@ -420,7 +414,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
             {
                 const idx = this.store.findIndex(f => f === id);
                 this.store.splice(idx, 1);
-                await storage.update(Strings.LAST_TASKS_STORE, this.store);
+                await storage.update(this.storeName, this.store);
             }
             this.treeManager.fireTreeRefreshEvent(logPad, 1, this);
             this._onDidTasksChange.fire({ tasks: this.taskFiles.map(f => f.task), type: this.isFavorites ? "favorites" : "last" });
