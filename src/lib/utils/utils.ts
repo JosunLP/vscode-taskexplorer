@@ -289,4 +289,7 @@ export const showMaxTasksReachedMessage = (licMgr: LicenseManager, taskType?: st
 export const testPattern = (path: string, pattern: string) => minimatch(path, pattern, { dot: true, nocase: true });
 
 
+export const textWithElipsis = (text: string, maxLength: number) => text.length > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
+
+
 export const timeout = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));

@@ -169,19 +169,21 @@ const wpPlugin =
 				const basePath = path.posix.join(__dirname.replace(/\\/g, "/"), "res");
 				plugin = new CleanWebpackPlugin(
 				{
+					dry: false,
+					dangerouslyAllowCleanPatternsOutsideProject: true,
 					cleanOnceBeforeBuildPatterns: [
 						path.posix.join(basePath, "css", "**"),
 						path.posix.join(basePath, "js", "**"),
 						path.posix.join(basePath, "page", "**")
-					],
-					dangerouslyAllowCleanPatternsOutsideProject: true,
-					dry: false
+					]
 				});
 			}
 			else
 			{
 				plugin = new CleanWebpackPlugin(
 				{
+					dry: false,
+					dangerouslyAllowCleanPatternsOutsideProject: true,
 					cleanOnceBeforeBuildPatterns: wpConfig.mode === "production" ? [
 						path.posix.join(__dirname.replace(/\\/g, "/"), "dist", "**"),
 						path.posix.join(__dirname.replace(/\\/g, "/"), "coverage", "**"),
@@ -190,9 +192,7 @@ const wpPlugin =
 					] : [
 						path.posix.join(__dirname.replace(/\\/g, "/"), "dist", "**"),
 						"!dist/webview/app/**"
-					],
-					dangerouslyAllowCleanPatternsOutsideProject: true,
-					dry: false
+					]
 				});
 			}
 		}
