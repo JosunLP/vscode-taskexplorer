@@ -21,6 +21,12 @@
 
 _**IMPORTANT NOTE**_: This extension has surpassed where I was ever going to take it, and the time that ended up going into it were more than I ever intended.  Considering a pay scheme (cheap, e.g. $10 - $20), with free usage up to the # of to-be-determined number of parsed tasks.  Note the license, this codebase is NOT permitted to be copied or distributed without my permission.
 
+## VERSION 3
+
+**VERSION 3 COMING SOON!!**
+
+Version 3 includes a plethora of new features, as well as bug fixes, two of which have existed since Version 1.  Note that Version 3 is *licensable* and will introduce a small subscription fee for unlimited parsed tasks and a full featured **Task Monitor** (more info available soon).  Of course, you can continue to use Version 3 at no cost, but with a semi-limited set of tasks parsed for a single or multi-root workspace.
+
 ## Description
 
 Provides a view in either (or both) the SideBar and/or Explorer that displays all supported tasks organized into a treeview, with parent task file nodes, grouped nodes, and project folders (convenient for large multi-root workspaces).  Tasks can be opened for view/edit, executed, and stopped, among other things for specific task types, for example NPM file nodes support common npm command(s) (i.e. 'install') via context menu.
@@ -28,6 +34,7 @@ Provides a view in either (or both) the SideBar and/or Explorer that displays al
 ## Table of Contents
 
 - [Task Explorer - View and Run Tasks from Visual Studio Code](#task-explorer---view-and-run-tasks-from-visual-studio-code)
+  - [VERSION 3](#version-3)
   - [Description](#description)
   - [Table of Contents](#table-of-contents)
   - [Screenshots by Version](#screenshots-by-version)

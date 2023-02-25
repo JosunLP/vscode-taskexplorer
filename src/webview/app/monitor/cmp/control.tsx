@@ -55,12 +55,12 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     }
 
 
-    private clickFavorite = () =>  { this.log("TeTaskControl.clickFavorite"); this.executeCommand("addRemoveRavorite", this.state.task); };
-    private clickOpen = () =>  { this.log("TeTaskControl.clickOpen"); this.executeCommand("open", this.state.task); };
-    private clickPause = () => { this.log("TeTaskControl.clickPause"); this.executeCommand("pause", this.state.task); };
-    private clickRun = () => { this.log("TeTaskControl.clickPause"); this.executeCommand("run", this.state.task); };
-    private clickStop = () => { this.log("TeTaskControl.clickStop"); this.executeCommand("stop", this.state.task); };
-    private clickTerminal = () => { this.log("TeTaskControl.clickTerminal"); this.executeCommand("openTerminal", this.state.task); };
+    private clickFavorite = () =>  this.executeCommand("addRemoveRavorite", this.state.task);
+    private clickOpen = () =>  this.executeCommand("open", this.state.task);
+    private clickPause = () => this.executeCommand("pause", this.state.task);
+    private clickRun = () => this.executeCommand("run", this.state.task);
+    private clickStop = () => this.executeCommand("stop", this.state.task);
+    private clickTerminal = () => this.executeCommand("openTerminal", this.state.task);
 
     // override componentDidMount = () => this.log("TeTaskControl.componentDidMount");
     // override componentWillUnmount = () => this.log("TeTaskControl.componentWillUnmount");

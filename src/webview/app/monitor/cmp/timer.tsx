@@ -33,33 +33,13 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     }
 
 
-    private clickHide = () =>
-    {
-        console.log("clickHide");
-        this.setState({ hide: true });
-    };
-
-
-    private clickShow = () =>
-    {
-        console.log("clickShow");
-        this.setState({ hide: false, countMs: false });
-    };
-
-
-    private clickShowMs = () =>
-    {
-        console.log("clickShowMs");
-        this.setState({ hide: false, countMs: true });
-    };
+    private clickHide = () => this.setState({ hide: true });
+    private clickShow = () => this.setState({ hide: false, countMs: false });
+    private clickShowMs = () => this.setState({ hide: false, countMs: true });
 
 
     override componentDidMount = () => this.startTimer();
-
-
     override componentWillUnmount = () => this.stopTimer();
-
-
     override componentDidUpdate = (_props: any) =>
     {
         this.stopTimer();
@@ -67,7 +47,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     };
 
 
-    override render()
+    override render = () =>
     {
         const tm = this.state.seconds,
               tmM = Math.floor(tm / 60),
@@ -85,16 +65,16 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
                                 <span className="te-monitor-control-timer">{tmF}</span>
                             </td>
                             <td className="te-monitor-control-timer-buttons">
-                                <div onClick={() => this.clickShow()} className="te-monitor-control-timer-button-show">&lt;</div>
-                                <div onClick={() => this.clickShowMs()} className="te-monitor-control-timer-button-show-ms">&lt;&lt;</div>
-                                <div onClick={() => this.clickHide()} className="te-monitor-control-timer-button-hide">&gt;</div>
+                                <div onClick={() => this.clickShow()} className="te-monitor-control-timer-button-show"><span className="far fa-chevron-left" /></div>
+                                <div onClick={() => this.clickShowMs()} className="te-monitor-control-timer-button-show-ms"><span className="far fa-chevron-double-left" /></div>
+                                <div onClick={() => this.clickHide()} className="te-monitor-control-timer-button-hide"><span className="far fa-chevron-right" /></div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </td>
         );
-    }
+    };
 
     private startTimer = () =>
     {
