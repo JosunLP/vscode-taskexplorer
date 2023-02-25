@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { Task, tasks } from "vscode";
 import { properCase } from "./commonUtils";
 import { ITeTask, ITeTrackedUsageCount, TeTaskListType } from "../../interface";
+import { UsageWatcher } from "../watcher/usageWatcher";
 
 
 export function getScriptTaskTypes(): string[]
@@ -99,24 +100,36 @@ export function isWatchTask(source: string)
 }
 
 
-export const toITask = (teTasks: Task[], listType: TeTaskListType, isRunning?: boolean, taskCounts?: ITeTrackedUsageCount): ITeTask[] =>
+export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: TeTaskListType, isRunning?: boolean, usageCount?: ITeTrackedUsageCount): ITeTask[] =>
 {
-    const runCount = taskCounts ||
-    {
-        today: 0,      // TODO - add run counts
-        last7Days: 0,  // TODO - add run counts
-        last14Days: 0, // TODO - add run counts
-        last30Days: 0, // TODO - add run counts
-        last60Days: 0, // TODO - add run counts
-        last90Days: 0, // TODO - add run counts
-        total: 0       // TODO - add run counts
-    };
-
     return teTasks.map<ITeTask>(t =>
     {
         const running = isRunning !== undefined ? isRunning :
               tasks.taskExecutions.filter(e => e.task.name === t.name && e.task.source === t.source &&
                                           e.task.scope === t.scope && e.task.definition.path === t.definition.path).length > 0;
+        let runCount;
+        if (usageCount) {
+            runCount = { ...usageCount };
+        }
+        else
+        {
+            const usage = usageTracker.get(`task:${t.definition.taskItemId}`);
+            if (usage) {
+                runCount = { ...usage.count };
+            }
+            else {
+                runCount = {
+                    today: 0,
+                    last7Days: 0,
+                    last14Days: 0,
+                    last30Days: 0,
+                    last60Days: 0,
+                    last90Days: 0,
+                    total: 0,
+                    yesterday: 0
+                };
+            }
+        }
         return {
             definition: t.definition,
             listType,

@@ -77,13 +77,14 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 				timestamp,
 				timestamps: [ timestamp ],
 				count: {
-					total: 0,
-					today: 0,
+					total: 1,
+					today: 1,
 					last7Days: 0,
 					last14Days: 0,
 					last30Days: 0,
 					last60Days: 0,
-					last90Days: 0
+					last90Days: 0,
+					yesterday: 0
 				}
 			};
 			usages[key] = usage;
@@ -95,12 +96,13 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 			usage.timestamps.push(timestamp); // TODO - add setting for # of days to keep tracked tasks
 			usage.count = {
 				total: usage.timestamps.length,
-				today: usage.timestamps.filter(t => t > timestamp - (1 * dayToMsMultiplier)).length,
-				last7Days: usage.timestamps.filter(t => t > timestamp - (7 * dayToMsMultiplier)).length,
-				last14Days: usage.timestamps.filter(t => t > timestamp - (14 * dayToMsMultiplier)).length,
-				last30Days: usage.timestamps.filter(t => t > timestamp - (30 * dayToMsMultiplier)).length,
-				last60Days: usage.timestamps.filter(t => t > timestamp - (60 * dayToMsMultiplier)).length,
-				last90Days: usage.timestamps.filter(t => t > timestamp - (90 * dayToMsMultiplier)).length
+				today: usage.timestamps.filter(t => t >= timestamp - (1 * dayToMsMultiplier)).length,
+				last7Days: usage.timestamps.filter(t => t >= timestamp - (7 * dayToMsMultiplier)).length,
+				last14Days: usage.timestamps.filter(t => t >= timestamp - (14 * dayToMsMultiplier)).length,
+				last30Days: usage.timestamps.filter(t => t >= timestamp - (30 * dayToMsMultiplier)).length,
+				last60Days: usage.timestamps.filter(t => t >= timestamp - (60 * dayToMsMultiplier)).length,
+				last90Days: usage.timestamps.filter(t => t >= timestamp - (90 * dayToMsMultiplier)).length,
+				yesterday: usage.timestamps.filter(t => t >= timestamp - (2 * dayToMsMultiplier) && t < timestamp - (1 * dayToMsMultiplier)).length,
 			};
 		}
 

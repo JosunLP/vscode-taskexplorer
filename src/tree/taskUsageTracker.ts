@@ -58,6 +58,7 @@ export class TaskUsageTracker implements Disposable
         definition: { type: "N/A" },
         runCount: {
             today: 0,
+            yesterday: 0,
             last7Days: 0,
             last14Days: 0,
             last30Days: 0,
@@ -145,15 +146,18 @@ export class TaskUsageTracker implements Disposable
     track = async(taskItem: TaskItem, logPad: string) =>
     {
         const taskName = `${taskItem.task.name} (${taskItem.task.source})`,
-              iTask = this.wrapper.taskUtils.toITask([ taskItem.task ], "famous")[0],
               specTaskListLength = this.wrapper.config.get<number>(ConfigProps.SpecialFolders_NumLastTasks);
 
         this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
         //
         // Process with Usage Tracker
         //
-        const usage = await this.wrapper.usage.track(`${this._usageKey}${iTask.treeId}:${taskName}`);
-        iTask.runCount = { ...usage.count };
+        const usage = await this.wrapper.usage.track(`${this._usageKey}${taskItem.id}`);
+
+        //
+        // Convert to IPC ready ITeTask
+        //
+        const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], "famous", false, usage.count)[0];
 
         //
         // Remove from list if exists, will be re-added in following steps

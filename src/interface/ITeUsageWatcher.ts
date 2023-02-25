@@ -10,6 +10,7 @@ export interface ITeTrackedUsageCount
 	last60Days: number;
 	last90Days: number;
 	total: number;
+	yesterday: number;
 }
 
 export interface ITeTrackedUsage {

@@ -47,11 +47,11 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	{
 		return {
 			...(await super.getState()),
-			last: toITask(this.wrapper.treeManager.lastTasks, "last"),
-			favorites: toITask(this.wrapper.treeManager.favoriteTasks, "favorites"),
-			running: toITask(this.wrapper.treeManager.runningTasks, "running"),
+			last: toITask(this.wrapper.usage, this.wrapper.treeManager.lastTasks, "last"),
+			favorites: toITask(this.wrapper.usage, this.wrapper.treeManager.favoriteTasks, "favorites"),
+			running: toITask(this.wrapper.usage, this.wrapper.treeManager.runningTasks, "running"),
 			famous: this.wrapper.treeManager.famousTasks,
-			tasks: toITask(this.wrapper.treeManager.getTasks(), "all"),
+			tasks: toITask(this.wrapper.usage, this.wrapper.treeManager.getTasks(), "all"),
 			pinned: {
 				last: this.wrapper.storage.get<ITeTask[]>("taskexplorer.pinned.last", []),
 				famous: this.wrapper.storage.get<ITeTask[]>("taskexplorer.pinned.famous", []),
@@ -64,7 +64,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) =>
 	{
-		this.notify(DidChangeTaskStatusType, { task: toITask([ e.task ], "none", e.isRunning)[0] });
+		this.notify(DidChangeTaskStatusType, { task: toITask(this.wrapper.usage, [ e.task ], "none", e.isRunning)[0] });
 	};
 
 
@@ -74,13 +74,13 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	]});
 
 
-	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: toITask(e.tasks, "famous") });
-	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: toITask(e.tasks, "favorites") });
-	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(e.tasks, "last") });
-	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(e.tasks, "running") });
+	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "famous") });
+	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "favorites") });
+	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "last") });
+	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "running") });
     private onAllTasksChanged = async (_e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
-	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: toITask(e.tasks, "all") });
+	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "all") });
 
 
 	protected override onVisibilityChanged = (_visible: boolean) =>
