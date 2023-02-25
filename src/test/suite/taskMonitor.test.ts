@@ -1,13 +1,15 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { Extension, TaskExecution } from "vscode";
+import { Extension, Task, TaskExecution } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
 import { executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, promiseFromEvent, waitForTaskExecution, treeUtils, waitForTeIdle } from "../utils/utils";
 
 let teWrapper: ITeWrapper;
+let ant: ITaskItem[];
+let task: Task;
 
 
 suite("Task Monitor App Tests", () =>
@@ -43,21 +45,19 @@ suite("Task Monitor App Tests", () =>
 	});
 
 
-	test("Open All Tabs", async function()
-	{
-        if (exitRollingCount(this)) return;
-        endRollingCount(this);
-	});
+	// test("Open All Tabs", async function()
+	// {
+    //     if (exitRollingCount(this)) return;
+    //     endRollingCount(this);
+	// });
 
 
-	test("Run Task", async function()
+	test("Simulate Run Task", async function()
 	{
         if (exitRollingCount(this)) return;
-		const lastTasks = teWrapper.treeManager.lastTasks,
-			  // task = lastTasks[0],
-			  ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
+		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		await waitForTeIdle(testControl.waitTime.getTreeTasks);
-		const task = (ant.find(t => !t.taskFile.fileName.includes("hello.xml")) as ITaskItem).task;
+		task = (ant.find(t => !t.taskFile.fileName.includes("hello.xml")) as ITaskItem).task;
 		const exec = await executeTeCommand2<TaskExecution | undefined>("taskexplorer.run", [{
 			name: task.name,
 			definition: task.definition,
@@ -72,24 +72,43 @@ suite("Task Monitor App Tests", () =>
 	});
 
 
-	test("Favorite Task", async function()
+	// test("Simulate Favorite Task", async function()
+	// {
+    //     if (exitRollingCount(this)) return;
+    //     endRollingCount(this);
+	// });
+
+
+	test("Simulate Pin Task", async function()
 	{
         if (exitRollingCount(this)) return;
+		await executeTeCommand2<TaskExecution | undefined>("taskexplorer.setPinned", [{
+			name: task.name,
+			definition: task.definition,
+			source: task.source,
+			running: false,
+			listType: "last",
+			treeId: task.definition.taskItemId,
+			pinned: false
+		}]);
+		await sleep(10);
+		await executeTeCommand2<TaskExecution | undefined>("taskexplorer.setPinned", [{
+			name: task.name,
+			definition: task.definition,
+			source: task.source,
+			running: false,
+			listType: "last",
+			treeId: task.definition.taskItemId,
+			pinned: false
+		}]);
         endRollingCount(this);
 	});
 
 
-	test("Pin Task", async function()
-	{
-        if (exitRollingCount(this)) return;
-        endRollingCount(this);
-	});
-
-
-	test("Toggle Timer", async function()
-	{
-        if (exitRollingCount(this)) return;
-        endRollingCount(this);
-	});
+	// test("Toggle Timer", async function()
+	// {
+    //     if (exitRollingCount(this)) return;
+    //     endRollingCount(this);
+	// });
 
 });
