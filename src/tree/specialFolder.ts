@@ -6,6 +6,7 @@ import { Strings } from "../lib/constants";
 import { sortTasks } from "../lib/sortTasks";
 import { storage } from "../lib/utils/storage";
 import { TaskTreeManager } from "./treeManager";
+import { Commands, registerCommand } from "..//lib/command/command";
 import { configuration } from "../lib/utils/configuration";
 import { isString, removeFromArray } from "../lib/utils/utils";
 import { IDictionary, ITeTasksChangeEvent } from "../interface";
@@ -53,12 +54,12 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
         if (this.isFavorites)
         {
             this._disposables.push(
-                commands.registerCommand("taskexplorer.addRemoveFavorite", (taskItem: TaskItem) => this.addRemoveFavorite(taskItem), this),
-                commands.registerCommand("taskexplorer.clearFavorites", () => this.clearSavedTasks(), this)
+                registerCommand(Commands.AddRemoveFavorite, (taskItem: TaskItem) => this.addRemoveFavorite(taskItem), this),
+                registerCommand(Commands.ClearFavorites, () => this.clearSavedTasks(), this)
             );
         }
         else {
-            this._disposables.push(commands.registerCommand("taskexplorer.clearLastTasks", () => this.clearSavedTasks(), this));
+            this._disposables.push(registerCommand(Commands.ClearLastTasks, () => this.clearSavedTasks(), this));
         }
         this._disposables.push(
             this._onDidTasksChange,
@@ -262,9 +263,9 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
         const choice = await window.showInformationMessage(`Clear all tasks from the \`${this.label}\` folder?`, "Yes", "No");
         if (choice === "Yes")
         {
+            this.store = [];
             this.taskFiles = [];
             if (this.isFavorites) {
-                this.store = [];
                 await storage.update(Strings.FAV_TASKS_STORE, this.store);
                 this.refresh(true);
             }
