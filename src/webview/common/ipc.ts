@@ -4,7 +4,7 @@
  * to the author of the GitLens extension
  */
 
-import { ITeTask } from "../../interface";
+import { ITeTask, TeTaskListType } from "../../interface";
 import { State } from "./state";
 
 
@@ -104,12 +104,7 @@ export const DidChangeStateType = new IpcNotificationType<DidChangeStateParams>(
 //
 // TASK MONITOR APP
 //
-export type TaskListType = "none" | "last" | "running" | "favorites" | "famous" | "all";
-export interface ITask extends ITeTask
-{
-	pinned: boolean;
-	listType:  TaskListType;
-};
+export interface ITask extends ITeTask {};
 export interface MonitorAppState extends State
 {
 	famous: ITask[];

@@ -34,7 +34,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private currentInvalidation: string | undefined;
     private readonly disposables: Disposable[] = [];
     private readonly _onDidTasksChange: EventEmitter<ITeTasksChangeEvent>;
-    private readonly _onDidFamousTasksChange: EventEmitter<ITeTasksChangeEvent>;
     private readonly _onReady: EventEmitter<ITeTasksChangeEvent>;
 
     private _specialFolders: {
@@ -54,7 +53,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         this._onReady = new EventEmitter<ITeTasksChangeEvent>();
         this._onDidTasksChange = new EventEmitter<ITeTasksChangeEvent>();
-        this._onDidFamousTasksChange = new EventEmitter<ITeTasksChangeEvent>();
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
         this._specialFolders = {
@@ -74,7 +72,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.disposables.push(
             this._onReady,
             this._onDidTasksChange,
-            this._onDidFamousTasksChange,
+            this._taskManager,
             this._taskWatcher,
             this._treeBuilder,
             this._specialFolders.favorites,
@@ -117,7 +115,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 	}
 
 	get onDidFamousTasksChange(): Event<ITeTasksChangeEvent> {
-		return this._onDidFamousTasksChange.event;
+		return this._taskManager.onDidFamousTasksChange;
 	}
 
 	get onDidFavoriteTasksChange(): Event<ITeTasksChangeEvent> {
@@ -140,12 +138,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         return this._onReady.event;
     }
 
-	// get onTasksLoaded(): Event<TasksChangeEvent>
-    // {
-	// 	return this._onDidTasksLoad.event;
-	// }
-    get famousTasks(): Task[] {
-        return this._specialFolders.favorites.taskFiles.map(f => f.task); // TODO - Famous (most used) tasks
+    get famousTasks(): ITeTask[] {
+        return this._taskManager.getFamousTasks();
     }
 
     get favoriteTasks(): Task[] {
@@ -388,7 +382,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private getTask =  (taskItem: TaskItem | ITeTask) =>
     {
         if (!(taskItem instanceof TaskItem)) {
-            taskItem = this._treeBuilder.getTaskMap()[taskItem.definition.taskItemId] as TaskItem;
+            taskItem = this._treeBuilder.getTaskMap()[taskItem.definition.taskItemId as string] as TaskItem;
         }
         return taskItem;
     };

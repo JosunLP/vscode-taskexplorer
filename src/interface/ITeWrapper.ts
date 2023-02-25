@@ -7,6 +7,8 @@ import { ITeFigures } from "./ITeFigures";
 import { IDictionary } from "./IDictionary";
 import { ITeFileCache } from "./ITeFileCache";
 import { ITeFilesystem } from "./ITeFilesystem";
+import { ITeTreeManager } from "./ITeTreeManager";
+import { ITeTaskManager } from "./ITeTaskManager";
 import { IConfiguration } from "./IConfiguration";
 import { ITeFileWatcher } from "./ITeFileWatcher";
 import { ITeUsageWatcher } from "./ITeUsageWatcher";
@@ -16,8 +18,6 @@ import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
 import { ExtensionContext, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import { ITeCommonUtilities, ITePathUtilities, ITeTaskUtilities, ITeUtilities } from "./ITeUtilities";
-import { ITeTreeManager } from "./ITeTreeManager";
-import { ITeTaskManager } from "./ITeTaskManager";
 
 
 export interface ITeWrapper

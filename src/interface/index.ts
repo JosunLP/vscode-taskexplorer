@@ -29,4 +29,4 @@ export type { ITeTaskManager, TaskMap } from "./ITeTaskManager";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
 export type { ITeUsageWatcher, TrackedUsage, UsageChangeEvent } from "./ITeUsageWatcher";
 export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITeTaskUtilities } from "./ITeUtilities";
-export type { ITeTasksChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "./TaskChangeEvent";
+export type { ITeTasksChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType } from "./TaskChangeEvent";

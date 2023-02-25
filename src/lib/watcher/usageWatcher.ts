@@ -24,7 +24,25 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 	get = (key: string): TrackedUsage | undefined => this.wrapper.storage.get<TrackedUsage>("usages." + key);
 
 
-	getAll = (): IDictionary<TrackedUsage> => this.wrapper.storage.get<IDictionary<TrackedUsage>>("usages", {});
+	getAll = (key?: string): IDictionary<TrackedUsage> =>
+	{
+		const storeAll = this.wrapper.storage.get<IDictionary<TrackedUsage>>("usages", {}),
+			  store: IDictionary<TrackedUsage> = {};
+		if (!key)
+		{
+			Object.assign(store, storeAll);
+		}
+		else
+		{
+			Object.keys(storeAll).forEach(k =>
+			{
+				if (k.startsWith(key)) {
+					store[k] = { ...storeAll[k] };
+				}
+			});
+		}
+		return store;
+	};
 
 
 	async reset(key?: string): Promise<void>
@@ -42,7 +60,7 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 	}
 
 
-	async track(key: string): Promise<void>
+	async track(key: string): Promise<TrackedUsage>
 	{
 		let usages =  this.wrapper.storage.get<IDictionary<TrackedUsage>>("usages");
 		if (!usages) {
@@ -81,5 +99,6 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 		//  this.wrapper.telemetry.sendEvent("usage/track", { "usage.key": key, "usage.count": usage.count });
 		await this.wrapper.storage.update("usages", usages);
 		this._onDidChange.fire({ key, usage });
+		return usage;
 	}
 }

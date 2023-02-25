@@ -20,5 +20,5 @@ export interface ITeUsageWatcher
     get(key: string): TrackedUsage | undefined;
     getAll(): IDictionary<TrackedUsage>;
     reset(key?: string): Promise<void>;
-    track(key: string): Promise<void>;
+    track(key: string): Promise<TrackedUsage>;
 }

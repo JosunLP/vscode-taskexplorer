@@ -1,8 +1,10 @@
 import { Task } from "vscode";
 
+export type TeTaskListType = "none" | "last" | "running" | "favorites" | "famous" | "all";
+
 export interface ITeTasksChangeEvent
 {
-    readonly type: "all" | "last" | "favorites" | "famous" | "running";
+    readonly type: TeTaskListType;
     readonly tasks: Task[];
 };
 

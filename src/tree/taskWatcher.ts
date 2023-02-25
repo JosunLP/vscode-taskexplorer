@@ -5,13 +5,12 @@ import { log } from "../lib/log/log";
 import * as util from "../lib/utils/utils";
 import { TaskTreeManager } from "./treeManager";
 import { SpecialTaskFolder } from "./specialFolder";
-import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../interface";
 import { configuration } from "../lib/utils/configuration";
+import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../interface";
 import {
     Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
-    Task, window, TaskEndEvent, EventEmitter, TaskProcessStartEvent, TaskProcessEndEvent
+    Task, window, TaskEndEvent, EventEmitter
 } from "vscode";
-import { ITeRunningTaskChangeEvent } from "src/interface/TaskChangeEvent";
 
 
 export class TaskWatcher implements Disposable
@@ -53,10 +52,10 @@ export class TaskWatcher implements Disposable
         this.disposables = [];
     }
 
+
     get onDidRunningTasksChange(): Event<ITeRunningTaskChangeEvent> {
         return this._onDidRunningTasksChange.event;
     }
-
 
     get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {
         return this._onTaskStatusChange.event;

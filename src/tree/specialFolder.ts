@@ -6,12 +6,12 @@ import { Strings } from "../lib/constants";
 import { sortTasks } from "../lib/sortTasks";
 import { storage } from "../lib/utils/storage";
 import { TaskTreeManager } from "./treeManager";
-import { Commands, registerCommand } from "..//lib/command/command";
 import { configuration } from "../lib/utils/configuration";
 import { isString, removeFromArray } from "../lib/utils/utils";
 import { IDictionary, ITeTasksChangeEvent } from "../interface";
+import { Commands, registerCommand } from "../lib/command/command";
 import {
-    commands, ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
+    ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
     TreeItem, TreeItemCollapsibleState, window, workspace
 } from "vscode";
 

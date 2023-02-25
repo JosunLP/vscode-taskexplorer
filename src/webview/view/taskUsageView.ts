@@ -47,14 +47,13 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	protected override onHtmlFinalize = async (html: string) =>
 	{
-    	const lastTime = this.wrapper.taskManager.getLastRanTaskTime(""),
-			  lastTimeFmt = new Date(lastTime).toLocaleDateString() + " " + new Date(lastTime).toLocaleTimeString(),
-			  mostUsedTask = this.wrapper.taskManager.getMostUsedTask("");
+    	const lastTime = this.wrapper.taskManager.getLastRanTaskTime(),
+			  mostUsedTask = await this.wrapper.taskManager.getMostUsedTask();
 		html = html.replace(/\#\{taskUsage\.avgPerDay\}/g, this.wrapper.taskManager.getAvgRunCount("d", "").toString())
 				   .replace(/\#\{taskUsage\.avgPerWeek\}/g, this.wrapper.taskManager.getAvgRunCount("w", "").toString())
-				   .replace(/\#\{taskUsage\.mostUsedTask\}/g, this.wrapper.utils.textWithElipsis(mostUsedTask, 26))
+				   .replace(/\#\{taskUsage\.mostUsedTask\}/g, this.wrapper.utils.textWithElipsis(mostUsedTask.name, 26))
 				   .replace(/\#\{taskUsage\.today\}/g, this.wrapper.taskManager.getTodayCount("").toString())
-				   .replace(/\#\{taskUsage\.lastTaskRanAt\}/g, lastTimeFmt);
+				   .replace(/\#\{taskUsage\.lastTaskRanAt\}/g, lastTime);
 		return html;
 	};
 
