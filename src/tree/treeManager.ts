@@ -16,7 +16,7 @@ import { addToExcludes } from "../lib/addToExcludes";
 import { isTaskIncluded } from "../lib/isTaskIncluded";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Commands, registerCommand } from "../lib/command/command";
-import { IDictionary, ITeTreeManager, ITeTasksChangeEvent, ITeTaskStatusChangeEvent, ITeTask } from "../interface";
+import { IDictionary, ITeTreeManager, ITeTasksChangeEvent, ITeTaskStatusChangeEvent, ITeTask, ITeRunningTaskChangeEvent } from "../interface";
 import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskTypeUtils";
 import {
     TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
@@ -35,7 +35,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private readonly disposables: Disposable[] = [];
     private readonly _onDidTasksChange: EventEmitter<ITeTasksChangeEvent>;
     private readonly _onDidFamousTasksChange: EventEmitter<ITeTasksChangeEvent>;
-    private readonly _onDidRunningTasksChange: EventEmitter<ITeTasksChangeEvent>;
     private readonly _onReady: EventEmitter<ITeTasksChangeEvent>;
 
     private _specialFolders: {
@@ -56,7 +55,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this._onReady = new EventEmitter<ITeTasksChangeEvent>();
         this._onDidTasksChange = new EventEmitter<ITeTasksChangeEvent>();
         this._onDidFamousTasksChange = new EventEmitter<ITeTasksChangeEvent>();
-        this._onDidRunningTasksChange = new EventEmitter<ITeTasksChangeEvent>();
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
         this._specialFolders = {
@@ -77,7 +75,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._onReady,
             this._onDidTasksChange,
             this._onDidFamousTasksChange,
-            this._onDidRunningTasksChange,
             this._taskWatcher,
             this._treeBuilder,
             this._specialFolders.favorites,
@@ -131,8 +128,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 		return this._specialFolders.lastTasks.onDidTasksChange;
 	}
 
-    get onDidRunningTasksChange(): Event<ITeTasksChangeEvent> {
-        return this._onDidRunningTasksChange.event;
+    get onDidRunningTasksChange(): Event<ITeRunningTaskChangeEvent> {
+        return this._taskWatcher.onDidRunningTasksChange;
     }
 
     get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {

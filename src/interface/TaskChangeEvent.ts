@@ -12,3 +12,8 @@ export interface ITeTaskStatusChangeEvent
     taskItemId: string;
     task: Task;
 };
+
+export interface ITeRunningTaskChangeEvent extends ITeTaskStatusChangeEvent
+{
+    readonly tasks: Task[];
+};

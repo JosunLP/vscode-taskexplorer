@@ -5,12 +5,13 @@ import { log } from "../lib/log/log";
 import * as util from "../lib/utils/utils";
 import { TaskTreeManager } from "./treeManager";
 import { SpecialTaskFolder } from "./specialFolder";
-import { ITeTaskStatusChangeEvent } from "../interface";
+import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../interface";
 import { configuration } from "../lib/utils/configuration";
 import {
     Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
     Task, window, TaskEndEvent, EventEmitter, TaskProcessStartEvent, TaskProcessEndEvent
 } from "vscode";
+import { ITeRunningTaskChangeEvent } from "src/interface/TaskChangeEvent";
 
 
 export class TaskWatcher implements Disposable
@@ -20,7 +21,8 @@ export class TaskWatcher implements Disposable
     private treeManager: TaskTreeManager;
     private disposables: Disposable[];
     private specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder };
-    private _onTaskStatusChange: EventEmitter<ITeTaskStatusChangeEvent>;
+    private readonly _onTaskStatusChange: EventEmitter<ITeTaskStatusChangeEvent>;
+    private readonly _onDidRunningTasksChange: EventEmitter<ITeRunningTaskChangeEvent>;
 
 
     constructor(treeManager: TaskTreeManager, specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
@@ -30,9 +32,11 @@ export class TaskWatcher implements Disposable
         this.statusBarSpace = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this.statusBarSpace.tooltip = "Task Explorer Running Task";
         this._onTaskStatusChange = new EventEmitter<ITeTaskStatusChangeEvent>();
+        this._onDidRunningTasksChange = new EventEmitter<ITeRunningTaskChangeEvent>();
         this.disposables = [
             this.statusBarSpace,
             this._onTaskStatusChange,
+            this._onDidRunningTasksChange,
             tasks.onDidStartTask(async(e) => this.taskStartEvent(e)),
             tasks.onDidEndTask(async(e) => this.taskFinishedEvent(e)),
             // tasks.onDidStartTaskProcess(async(e) => this.taskProcessStartEvent(e)),
@@ -47,6 +51,10 @@ export class TaskWatcher implements Disposable
             d.dispose();
         });
         this.disposables = [];
+    }
+
+    get onDidRunningTasksChange(): Event<ITeRunningTaskChangeEvent> {
+        return this._onDidRunningTasksChange.event;
     }
 
 
@@ -200,6 +208,7 @@ export class TaskWatcher implements Disposable
             this.showStatusMessage(task, "   ");
             this.fireTaskChangeEvents(taskItem, "   ", 1);
             this._onTaskStatusChange.fire({ task, taskItemId: taskId, isRunning: true });
+            this._onDidRunningTasksChange.fire({ tasks: [], task, taskItemId: taskId, isRunning: true });
         }
 
         log.methodDone("task started event", 1);
@@ -246,6 +255,7 @@ export class TaskWatcher implements Disposable
         else {
             this.fireTaskChangeEvents(taskMap[taskId] as TaskItem, "   ", 1);
             this._onTaskStatusChange.fire({ task, taskItemId: taskId, isRunning: false });
+            this._onDidRunningTasksChange.fire({ tasks: [], task, taskItemId: taskId, isRunning: false });
         }
 
         log.methodDone("task finished event", 1);
