@@ -80,7 +80,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _teContext: TeContext;
 	private readonly _fileCache: TeFileCache;
 	private readonly _licensePage: LicensePage;
-	private readonly _monitorPage: MonitorPage;
+	private readonly _taskMonitorPage: MonitorPage;
 	private readonly _disposables: Disposable[];
 	private readonly _context: ExtensionContext;
 	private readonly _fileWatcher: TeFileWatcher;
@@ -126,7 +126,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._taskUsageView = new TaskUsageView(this);
 
 		this._licensePage = new LicensePage(this);
-		this._monitorPage = new MonitorPage(this);
+		this._taskMonitorPage = new MonitorPage(this);
 		this._parsingReportPage = new ParsingReportPage(this);
 		this._releaseNotesPage = new ReleaseNotesPage(this);
 
@@ -166,7 +166,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._homeView,
 			this._treeManager,
 			this._licensePage,
-			this._monitorPage,
+			this._taskMonitorPage,
 			this._fileWatcher,
 			this._configWatcher,
 			this._taskCountView,
@@ -473,10 +473,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._licensePage;
 	}
 
-	get monitorPage(): MonitorPage {
-		return this._monitorPage;
-	}
-
 	get parsingReportPage(): ParsingReportPage {
 		return this._parsingReportPage;
 	}
@@ -515,6 +511,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get taskCountView(): TaskCountView {
 		return this._taskCountView;
+	}
+
+	get taskMonitorPage(): MonitorPage {
+		return this._taskMonitorPage;
 	}
 
 	get taskUsageView(): TaskUsageView {

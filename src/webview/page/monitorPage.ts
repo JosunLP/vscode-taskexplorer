@@ -7,7 +7,7 @@ import { Commands, registerCommand } from "../../lib/command/command";
 import { ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
-	DidChangeAllTasksType, ITask, DidChangeTaskStatusType, TaskListType
+	DidChangeAllTasksType, ITask, DidChangeTaskStatusType, TaskListType, IpcMessageParams, IpcNotificationType
 } from "../common/ipc";
 
 
@@ -27,7 +27,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			`taskexplorer.view.${MonitorPage.viewId}`,
 			`${ContextKeys.WebviewPrefix}taskMonitor`,
 			`${MonitorPage.viewId}View`,
-			Commands.ShowMonitorPage
+			Commands.ShowTaskMonitorPage
 		);
 
 		this.disposables.push(
@@ -103,14 +103,24 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onTaskTreeManagerReady = (e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: this.prepareTasksForIpc(e.tasks, "all") });
 
 
-	protected override onVisibilityChanged = (visible: boolean) =>
+	override notify = async <T extends IpcNotificationType<any>>(type: T, params: IpcMessageParams<T>, completionId?: string | undefined): Promise<boolean> =>
+	{
+		let rc = false;
+		if (this.visible) {
+			rc = await super.notify(type, params, completionId);
+		}
+		return rc;
+	};
+
+
+	protected override onVisibilityChanged = (_visible: boolean) =>
 	{
 		// this.wrapper.log.methodStart("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad(), false, [[ "visible", visible ]]);
 		// this.wrapper.log.methodDone("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad());
 	};
 
 
-	protected override onFocusChanged = (focused: boolean): void =>
+	protected override onFocusChanged = (_focused: boolean): void =>
 	{
 		// this.wrapper.log.methodStart("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad(), false, [[ "focus", focused ]]);
 		// this.wrapper.log.methodDone("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad());

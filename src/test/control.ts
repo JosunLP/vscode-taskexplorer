@@ -160,6 +160,7 @@ export const testControl: ITestControl =
             verifyFirstCall: 550
         },
         viewReleaseNotes: 415,
+        viewTaskMonitor: 800,
         viewReport: 380,
         wsFolder: {
             add: 1650,     // bumped for multi-root ws in utils/initSettings
@@ -222,7 +223,8 @@ export const testControl: ITestControl =
         reorderWorkspaceFolders: 100,
         runCommandMin: 425,
         taskCommand: 375,
-        viewReport: 80
+        viewReport: 80,
+        viewTaskMonitor: 200
     }
 };
 
@@ -335,6 +337,7 @@ export interface ISlowTimes
         verifyFirstCall: number;
     };
     viewReleaseNotes: number;
+    viewTaskMonitor: number;
     viewReport: number;
     wsFolder: {
         add: number;
@@ -397,6 +400,7 @@ export interface IWaitTimes
     runCommandMin: number;
     taskCommand: number;
     viewReport: number;
+    viewTaskMonitor: number;
 };
 
 

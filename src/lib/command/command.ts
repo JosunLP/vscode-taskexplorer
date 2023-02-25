@@ -50,9 +50,9 @@ export const enum Commands
 	RunWithNoTerminal = "taskexplorer.runNoTerm",
 	SetPinned = "taskexplorer.setPinned",
 	ShowLicensePage = "taskexplorer.view.licensePage.show",
-	ShowMonitorPage = "taskexplorer.view.taskMonitor.show",
 	ShowParsingReportPage = "taskexplorer.view.parsingReport.show",
 	ShowReleaseNotesPage = "taskexplorer.view.releaseNotes.show",
+	ShowTaskMonitorPage = "taskexplorer.view.taskMonitor.show",
 	ShowWelcomePage = "taskexplorer.view.welcome.show",
 	Stop = "taskexplorer.stop"
 }

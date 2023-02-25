@@ -102,7 +102,7 @@ export abstract class TeWebviewApp<State = undefined>
 	protected getState = <T>(): T => this._vscode.getState() as T;
 
 
-	protected initialize(): void
+	private initialize(): void
 	{
 		this.bindDisposables?.forEach(d => d.dispose());
 		this.bindDisposables = this.onBind?.();

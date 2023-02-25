@@ -56,6 +56,7 @@ export interface ITeWrapper
 	storage: IStorage;
 	treeManager: ITeTreeManager;
 	taskManager: ITeTaskManager;
+	taskMonitorPage: ITeWebview;
 	taskUsageView: ITeWebview;
 	taskCountView: ITeWebview;
 	taskUtils: ITeTaskUtilities;
