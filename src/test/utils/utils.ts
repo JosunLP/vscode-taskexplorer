@@ -474,12 +474,12 @@ export const setLicensed = async (valid: boolean) =>
     const licMgr = teWrapper.licenseManager;
     teWrapper.tests = !valid;
     await licMgr.setLicenseKey(valid ? "1234-5678-9098-7654321" : undefined);
-    // await licMgr.setLicenseToken", {
-    //      token: "1234-5678-9098-7654321",
-    //      ttl: Infinity,
-    //      expiresFmt: "N/A",
-    //      issuedFmt: "N/A"
-    //  });
+    await licMgr.setLicenseToken(valid ? {
+        token: "1234-5678-9098-7654321",
+        ttl: 365,
+        expiresFmt: "N/A",
+        issuedFmt: "N/A"
+    } : undefined);
     await licMgr.checkLicense();
     teWrapper.tests = true;
 };

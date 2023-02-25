@@ -1,6 +1,7 @@
 
 
 import { Task } from "vscode";
+import { ISessionToken } from "./IAuthentication";
 
 export interface ITeLicenseManager
 {
@@ -13,4 +14,5 @@ export interface ITeLicenseManager
     getVersion: () => string;
     isLicensed: () => boolean;
     setLicenseKey: (licenseKey: string | undefined) => Promise<void>;
+    setLicenseToken: (licenseToken: ISessionToken | undefined) => Promise<void>;
 }

@@ -246,19 +246,21 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// License / Authentication
 		//
+/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		if (PROVIDE_INTERIM_LICENSE_KEY)
+		/* istanbul ignore else *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		if (PROVIDE_INTERIM_LICENSE_KEY) /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		{/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-			await this.licenseManager.setLicenseKey("1234-5678-9098-7654321");
+			await this.licenseManager.setLicenseKey("1234-5678-9098-7654321"); /* TEMP *//* TEMP */
 			/* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */
-			await this.licenseManager.setLicenseToken({ /* TEMP */
+			await this.licenseManager.setLicenseToken({ /* TEMP *//* TEMP *//* TEMP *//* TEMP */
 				token: "1234-5678-9098-7654321", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-				ttl: Infinity, /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+				ttl: 365, /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 				expiresFmt: "N/A", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 				issuedFmt: "N/A" /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 			}); /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		} /* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		/* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+/* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		await this.licenseManager.checkLicense("   ");
 		// const session = await licenseManager.getSession("TeAuth", [], { create: true });
 		// if (session) {
@@ -577,17 +579,8 @@ export class TeWrapper implements ITeWrapper, Disposable
     //     await utils.sleep(1); // let progress update
     // };
 
-	// private _keyboard: Keyboard;
-	// get keyboard() {
-	// 	return this._keyboard;
-	// }
-
 	// get subscription() {
 	// 	return this._subscription;
-	// }
-
-	// get subscriptionAuthentication() {
-	// 	return this._subscriptionAuthentication;
 	// }
 
 	// get statusBar() {
@@ -596,13 +589,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	// get telemetry(): TelemetryService {
 	// 	return this._telemetry;
-	// }
-
-	// get viewCommands() {
-	// 	if (!this._viewCommands) {
-	// 		this._viewCommands = new ViewCommands(this);
-	// 	}
-	// 	return this._viewCommands;
 	// }
 
 }
