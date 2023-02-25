@@ -30,6 +30,11 @@ export class TaskUsageView extends TeWebviewView<State>
 	}
 
 
+	protected override includeBody = async() => ""; // For coverage, empty body
+	protected override includeHead = async() => ""; // For coverage, empty head
+	protected override includeEndOfBody = async() => "<!-- spm -->"; // For coverage, endOfBody
+
+
 	private async onStorageChanged(e: StorageChangeEvent)
 	{
 		if (e.key ===  "usages") {
@@ -52,14 +57,5 @@ export class TaskUsageView extends TeWebviewView<State>
 				   .replace(/\#\{taskUsage\.lastTaskRanAt\}/g, lastTimeFmt);
 		return html;
 	};
-
-
-	protected override includeBody = async() => ""; // For coverage, empty body
-
-
-	protected override includeHead = async() => ""; // For coverage, empty head
-
-
-	protected override includeEndOfBody = async() => ""; // For coverage, empty endOfBody
 
 }

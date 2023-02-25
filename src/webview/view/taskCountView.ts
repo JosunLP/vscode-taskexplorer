@@ -31,23 +31,17 @@ export class TaskCountView extends TeWebviewView<State>
 	}
 
 
+	protected override includeBody = async() => createTaskCountTable(this.wrapper);
+	protected override includeHead = async() => "";
+	protected override includeEndOfBody = async() => "";
+	protected override includeBootstrap = (): Promise<State> => this.getState();
+
+
 	private async onTasksChanged(e: ITeTasksChangeEvent)
 	{
 		if (this.isFirstLoadComplete) {
 			await this.refresh();
 		}
 	}
-
-
-	protected override includeBody = async() => createTaskCountTable(this.wrapper);
-
-
-	protected override includeHead = async() => "";
-
-
-	protected override includeEndOfBody = async() => "";
-
-
-	protected override includeBootstrap = (): Promise<State> => this.getState();
 
 }

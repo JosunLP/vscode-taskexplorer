@@ -103,16 +103,6 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onTaskTreeManagerReady = (e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: this.prepareTasksForIpc(e.tasks, "all") });
 
 
-	override notify = async <T extends IpcNotificationType<any>>(type: T, params: IpcMessageParams<T>, completionId?: string | undefined): Promise<boolean> =>
-	{
-		let rc = false;
-		if (this.visible) {
-			rc = await super.notify(type, params, completionId);
-		}
-		return rc;
-	};
-
-
 	protected override onVisibilityChanged = (_visible: boolean) =>
 	{
 		// this.wrapper.log.methodStart("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad(), false, [[ "visible", visible ]]);

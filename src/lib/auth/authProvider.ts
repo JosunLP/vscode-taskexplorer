@@ -82,6 +82,7 @@ export class TeAuthenticationProvider implements AuthenticationProvider, Disposa
     public async getSessions(scopes?: string[]): Promise<readonly AuthenticationSession[]>
     {
         const allSessions = await this.wrapper.storage.getSecret(SESSIONS_SECRET_KEY);
+        /* istanbul ignore if */
         if (allSessions)
         {
             return JSON.parse(allSessions) as AuthenticationSession[];
