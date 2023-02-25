@@ -5,7 +5,7 @@ import { TeWrapper } from "./lib/wrapper";
 import { initStorage, storage } from "./lib/utils/storage";
 import { ExtensionContext, ExtensionMode, workspace } from "vscode";
 import { configuration, registerConfiguration } from "./lib/utils/configuration";
-import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./lib/utils/taskTypeUtils";
+import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./lib/utils/taskUtils";
 
 // import "tsconfig-paths/register";
 

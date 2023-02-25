@@ -6,7 +6,7 @@ import { TaskFile } from "./file";
 import { TaskFolder } from "./folder";
 import { configuration } from "../lib/utils/configuration";
 import { getInstallPathSync } from "../lib/utils/pathUtils";
-import { getTaskTypeFriendlyName } from "../lib/utils/taskTypeUtils";
+import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import {
     Task, TaskExecution, TreeItem, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command, Uri
 }

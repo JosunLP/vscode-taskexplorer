@@ -17,7 +17,7 @@ import { addToExcludes } from "../lib/addToExcludes";
 import { isTaskIncluded } from "../lib/isTaskIncluded";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Commands, registerCommand } from "../lib/command/command";
-import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskTypeUtils";
+import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskUtils";
 import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
 import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeTask, ITeRunningTaskChangeEvent } from "../interface";
 

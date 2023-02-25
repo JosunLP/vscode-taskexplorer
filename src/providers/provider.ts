@@ -8,7 +8,7 @@ import { configuration } from "../lib/utils/configuration";
 import { isDirectory, pathExistsSync } from "../lib/utils/fs";
 import { Uri, Task, WorkspaceFolder, workspace } from "vscode";
 import { ITaskExplorerProvider } from "../interface/ITaskProvider";
-import { getTaskTypeFriendlyName } from "../lib/utils/taskTypeUtils";
+import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import { isExcluded, isTaskTypeEnabled, showMaxTasksReachedMessage } from "../lib/utils/utils";
 
 

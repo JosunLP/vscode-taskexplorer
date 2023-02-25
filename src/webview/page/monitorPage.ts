@@ -1,7 +1,7 @@
 
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { toITask } from "../../lib/utils/taskTypeUtils";
+import { toITask } from "../../lib/utils/taskUtils";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { Commands, registerCommand } from "../../lib/command/command";
 import { ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";

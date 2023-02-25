@@ -4,7 +4,7 @@ import { TextDocument } from "vscode";
 import { TaskItem } from "../tree/item";
 import { TeWrapper } from "./wrapper";
 import { IDictionary } from "../interface";
-import { isWatchTask } from "./utils/taskTypeUtils";
+import { isWatchTask } from "./utils/taskUtils";
 
 
 const jsonMap: IDictionary<{object: string; preKey: string; postKey: string}> = {

@@ -8,7 +8,7 @@ import { getTerminal } from "../lib/getTerminal";
 import { SpecialTaskFolder } from "./specialFolder";
 import { TaskUsageTracker } from "./taskUsageTracker";
 import { ScriptTaskProvider } from "../providers/script";
-import { isScriptType } from "../lib/utils/taskTypeUtils";
+import { isScriptType } from "../lib/utils/taskUtils";
 import { getPackageManager, timeout } from "../lib/utils/utils";
 import { findDocumentPosition } from "../lib/findDocumentPosition";
 import { ILog, ITeTaskManager, ITeTaskChangeEvent, TaskMap } from "../interface";

@@ -4,7 +4,7 @@ import { join } from "path";
 import { TeWrapper } from "./wrapper";
 import { ContextKeys } from "./context";
 import { statusBarItem } from "./statusBarItem";
-import * as taskTypeUtils from "./utils/taskTypeUtils";
+import * as taskTypeUtils from "./utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "./utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
 import { workspace, RelativePattern, WorkspaceFolder, Uri } from "vscode";

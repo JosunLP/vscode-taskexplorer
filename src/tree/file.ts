@@ -7,7 +7,7 @@ import * as util from "../lib/utils/utils";
 import { ITaskDefinition } from "../interface";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
-import { getTaskTypeFriendlyName } from "../lib/utils/taskTypeUtils";
+import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { getInstallPathSync, getUserDataPath } from "../lib/utils/pathUtils";
 

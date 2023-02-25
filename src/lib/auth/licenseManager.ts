@@ -2,7 +2,7 @@
 
 import { TeWrapper } from "../wrapper";
 import { ITeLicenseManager } from "../../interface";
-import { isScriptType } from "../utils/taskTypeUtils";
+import { isScriptType } from "../utils/taskUtils";
 import { IServerResponseData, TeServer } from "./server";
 import { TeAuthenticationProvider } from "./authProvider";
 import { executeCommand, registerCommand, Commands } from "../command/command";
