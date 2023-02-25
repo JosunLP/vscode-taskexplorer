@@ -1,9 +1,9 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { Task, tasks } from "vscode";
-import { ITeTask, TeTaskListType } from "../../interface";
-import { properCase } from "./commonUtils";
 import { storage } from "./storage";
+import { Task, tasks } from "vscode";
+import { properCase } from "./commonUtils";
+import { ITeTask, ITeTrackedUsageCount, TeTaskListType } from "../../interface";
 
 
 export function getScriptTaskTypes(): string[]
@@ -99,22 +99,33 @@ export function isWatchTask(source: string)
 }
 
 
-export const toITask = (teTasks: Task[], listType: TeTaskListType, isRunning?: boolean): ITeTask[] =>
+export const toITask = (teTasks: Task[], listType: TeTaskListType, isRunning?: boolean, taskCounts?: ITeTrackedUsageCount): ITeTask[] =>
 {
+    const runCount = taskCounts ||
+    {
+        today: 0,      // TODO - add run counts
+        last7Days: 0,  // TODO - add run counts
+        last14Days: 0, // TODO - add run counts
+        last30Days: 0, // TODO - add run counts
+        last60Days: 0, // TODO - add run counts
+        last90Days: 0, // TODO - add run counts
+        total: 0       // TODO - add run counts
+    };
+
     return teTasks.map<ITeTask>(t =>
     {
         const running = isRunning !== undefined ? isRunning :
               tasks.taskExecutions.filter(e => e.task.name === t.name && e.task.source === t.source &&
                                           e.task.scope === t.scope && e.task.definition.path === t.definition.path).length > 0;
         return {
-            name: t.name,
             definition: t.definition,
-            source: t.source,
-            running,
             listType,
-            runCount: 0, // TODO - add run count
-            treeId: t.definition.taskItemId,
-            pinned: isPinned(t.definition.taskItemId, listType)
+            name: t.name,
+            pinned: isPinned(t.definition.taskItemId, listType),
+            runCount,
+            running,
+            source: t.source,
+            treeId: t.definition.taskItemId
         };
     });
 };

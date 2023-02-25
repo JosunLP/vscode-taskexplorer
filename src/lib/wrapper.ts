@@ -59,6 +59,7 @@ import { registerEnableTaskTypeCommand } from "./command/enableTaskType";
 import { registerDisableTaskTypeCommand } from "./command/disableTaskType";
 import { registerRemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import { ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, Disposable } from "vscode";
+import { TaskUsageTracker } from "src/tree/taskUsageTracker";
 
 const PROVIDE_INTERIM_LICENSE_KEY = true;
 
@@ -507,12 +508,16 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._storage;
 	}
 
+	get taskCountView(): TaskCountView {
+		return this._taskCountView;
+	}
+
 	get taskManager(): TaskManager {
 		return this._treeManager.taskManager;
 	}
 
-	get taskCountView(): TaskCountView {
-		return this._taskCountView;
+	get taskUsageTracker(): TaskUsageTracker {
+		return this._treeManager.taskManager.usageTracker;
 	}
 
 	get taskMonitorPage(): MonitorPage {

@@ -4,7 +4,7 @@
  * to the author of the GitLens extension
  */
 
-import { ITeTask, TeTaskListType } from "../../interface";
+import { ITeTask } from "../../interface";
 import { State } from "./state";
 
 

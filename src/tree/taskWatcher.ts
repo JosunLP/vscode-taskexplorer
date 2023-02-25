@@ -174,10 +174,10 @@ export class TaskWatcher implements Disposable
         const taskMap = this.treeManager.getTaskMap(),
               taskTree = this.treeManager.getTaskTree(),
               task = e.execution.task,
-              taskId = task.definition.taskItemId,
+              treeId = task.definition.taskItemId,
               isMapEmpty = util.isObjectEmpty(taskMap);
 
-        log.methodStart("task started event", 1, "", false, [[ "task name", task.name ], [ "task id", taskId ]]);
+        log.methodStart("task started event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 
         //
         // If taskMap is empty, then this view has not yet been made visible, an there's nothing
@@ -185,10 +185,10 @@ export class TaskWatcher implements Disposable
         // before the timer check above, but hey, just in case taskMap goes empty between events
         // for some un4seen reason.
         //
-        if (isMapEmpty || !taskMap[taskId])
+        if (isMapEmpty || !taskMap[treeId])
         {
             /* istanbul ignore if */ /* istanbul ignore next */
-            if (taskTree && !taskMap[taskId] && taskTree.length > 0 && taskTree[0].contextValue !== "noscripts")
+            if (taskTree && !taskMap[treeId] && taskTree.length > 0 && taskTree[0].contextValue !== "noscripts")
             {
                 if (task.source === "npm" && task.definition.type === "npm" &&
                 (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit")))
@@ -203,11 +203,11 @@ export class TaskWatcher implements Disposable
         }
         else
         {
-            const taskItem = taskMap[taskId] as TaskItem;
+            const taskItem = taskMap[treeId] as TaskItem;
             this.showStatusMessage(task, "   ");
             this.fireTaskChangeEvents(taskItem, "   ", 1);
-            this._onTaskStatusChange.fire({ task, taskItemId: taskId, isRunning: true });
-            this._onDidRunningTasksChange.fire({ tasks: [], task, taskItemId: taskId, isRunning: true });
+            this._onTaskStatusChange.fire({ task, treeId, isRunning: true });
+            this._onDidRunningTasksChange.fire({ tasks: [], task, treeId, isRunning: true });
         }
 
         log.methodDone("task started event", 1);
@@ -219,10 +219,10 @@ export class TaskWatcher implements Disposable
         const taskMap = this.treeManager.getTaskMap(),
               taskTree = this.treeManager.getTaskTree(),
               task = e.execution.task,
-              taskId = task.definition.taskItemId,
+              treeId = task.definition.taskItemId,
               isMapEmpty = util.isObjectEmpty(taskMap);
 
-        log.methodStart("task finished event", 1, "", false, [[ "task name", task.name ], [ "task id", taskId ]]);
+        log.methodStart("task finished event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 
         this.showStatusMessage(task, "  "); // hides
 
@@ -235,10 +235,10 @@ export class TaskWatcher implements Disposable
         // the Explorer and SideBar views are enabled, but the sidebar hasn't received a visible
         // event yet, i.e. it hasn't been opened yet by the user.
         //
-        if (isMapEmpty || !taskMap[taskId])
+        if (isMapEmpty || !taskMap[treeId])
         {
             /* istanbul ignore if */ /* istanbul ignore next */
-            if (taskTree && !taskMap[taskId] && taskTree.length > 0 && taskTree[0].contextValue !== "noscripts")
+            if (taskTree && !taskMap[treeId] && taskTree.length > 0 && taskTree[0].contextValue !== "noscripts")
             {
                 if (task.source === "npm" && task.definition.type === "npm" &&
                 (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit")))
@@ -252,9 +252,9 @@ export class TaskWatcher implements Disposable
             }
         }
         else {
-            this.fireTaskChangeEvents(taskMap[taskId] as TaskItem, "   ", 1);
-            this._onTaskStatusChange.fire({ task, taskItemId: taskId, isRunning: false });
-            this._onDidRunningTasksChange.fire({ tasks: [], task, taskItemId: taskId, isRunning: false });
+            this.fireTaskChangeEvents(taskMap[treeId] as TaskItem, "   ", 1);
+            this._onTaskStatusChange.fire({ task, treeId, isRunning: false });
+            this._onDidRunningTasksChange.fire({ tasks: [], task, treeId, isRunning: false });
         }
 
         log.methodDone("task finished event", 1);

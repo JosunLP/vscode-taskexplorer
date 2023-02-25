@@ -45,13 +45,18 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree
     private currentRefreshEvent: string | undefined;
     private getChildrenLogPad = this.defaultGetChildrenLogPad;
     private getChildrenLogLevel = this.defaultGetChildrenLogLevel;
-    private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void> = new EventEmitter<TreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: Event<TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+    private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void>;
 
 
     constructor(public readonly name: TreeViewIds, treeManager: TaskTreeManager)
     {
         this.treeManager = treeManager;
+        this._onDidChangeTreeData = new EventEmitter<TreeItem | undefined | null | void>();
+    }
+
+
+    get onDidChangeTreeData(): Event<TreeItem | undefined | null | void> {
+        return this._onDidChangeTreeData.event;
     }
 
 

@@ -21,6 +21,11 @@ export const Strings =
 	NoTasks: localize("appstrings.noTasks", "No tasks found")
 };
 
+export const ConfigProps =
+{
+	SpecialFolders_NumLastTasks: "specialFolders.numLastTasks"
+};
+
 export const Globs: IDictionary<string> =
 {
     GLOB_ANT: "**/[Bb][Uu][Ii][Ll][Dd].[Xx][Mm][Ll]",
@@ -93,3 +98,8 @@ export const enum GlyphChars
 	Warning = "\u26a0",
 	ZeroWidthSpace = "\u200b",
 }
+
+export const StorageProps =
+{
+	TaskUsage: "taskmanager.taskUsage"
+};

@@ -2,7 +2,6 @@
 export type { ILog } from "./ILog";
 export type { IEvent } from "./IEvent";
 export type { IRecord } from "./IRecord";
-export type { ITeTask } from "./ITeTask";
 export type { ITaskItem } from "./ITaskItem";
 export type { ITaskFile } from "./ITaskFile";
 export type { ICacheItem } from "./ICacheItem";
@@ -27,6 +26,6 @@ export type { IStorage, StorageChangeEvent } from "./IStorage";
 export type { ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
 export type { ITeTaskManager, TaskMap } from "./ITeTaskManager";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
-export type { ITeUsageWatcher, TrackedUsage, UsageChangeEvent } from "./ITeUsageWatcher";
 export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITeTaskUtilities } from "./ITeUtilities";
-export type { ITeTasksChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType } from "./TaskChangeEvent";
+export type { ITeUsageWatcher, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount } from "./ITeUsageWatcher";
+export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType } from "./ITeTask";

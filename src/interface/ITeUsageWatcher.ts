@@ -1,24 +1,35 @@
 import { Event } from "vscode";
 import { IDictionary } from "./IDictionary";
 
-export interface TrackedUsage {
-	count: number;
-	countToday: number;
-	firstUsedAt: number;
-	lastUsedAt: number;
+export interface ITeTrackedUsageCount
+{
+	today: number;
+	last7Days: number;
+	last14Days: number;
+	last30Days: number;
+	last60Days: number;
+	last90Days: number;
+	total: number;
 }
 
-export interface UsageChangeEvent
+export interface ITeTrackedUsage {
+	count: ITeTrackedUsageCount;
+	firstUsedAt: number;
+	timestamp: number;
+	timestamps: number[];
+}
+
+export interface ITeUsageChangeEvent
 {
 	readonly key: string;
-	readonly usage?: TrackedUsage;
+	readonly usage?: ITeTrackedUsage;
 };
 
 export interface ITeUsageWatcher
 {
-	onDidChange: Event<UsageChangeEvent | undefined>;
-    get(key: string): TrackedUsage | undefined;
-    getAll(): IDictionary<TrackedUsage>;
+	onDidChange: Event<ITeUsageChangeEvent | undefined>;
+    get(key: string): ITeTrackedUsage | undefined;
+    getAll(): IDictionary<ITeTrackedUsage>;
     reset(key?: string): Promise<void>;
-    track(key: string): Promise<TrackedUsage>;
+    track(key: string): Promise<ITeTrackedUsage>;
 }

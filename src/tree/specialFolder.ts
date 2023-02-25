@@ -8,7 +8,7 @@ import { storage } from "../lib/utils/storage";
 import { TaskTreeManager } from "./treeManager";
 import { configuration } from "../lib/utils/configuration";
 import { isString, removeFromArray } from "../lib/utils/utils";
-import { IDictionary, ITeTasksChangeEvent } from "../interface";
+import { IDictionary, ITeTaskChangeEvent } from "../interface";
 import { Commands, registerCommand } from "../lib/command/command";
 import {
     ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
@@ -33,7 +33,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     private isFavorites: boolean;
     private settingNameEnabled: string;
     private readonly _disposables: Disposable[];
-    private readonly _onDidTasksChange: EventEmitter<ITeTasksChangeEvent>;
+    private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
 
 
     constructor(treeManager: TaskTreeManager, label: string, state: TreeItemCollapsibleState)
@@ -50,7 +50,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
         this.tooltip = `A tree folder to store '${label}' tasks`;
         this.settingNameEnabled = "specialFolders.show" + label.replace(/ /g, "");
         this.enabled = configuration.get<boolean>(this.settingNameEnabled);
-        this._onDidTasksChange = new EventEmitter<ITeTasksChangeEvent>();
+        this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         if (this.isFavorites)
         {
             this._disposables.push(
@@ -78,7 +78,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-	get onDidTasksChange(): Event<ITeTasksChangeEvent> {
+	get onDidTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._onDidTasksChange.event;
 	}
 

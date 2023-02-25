@@ -4,7 +4,7 @@ import { TeWebviewPanel } from "../webviewPanel";
 import { toITask } from "../../lib/utils/taskTypeUtils";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { Commands, registerCommand } from "../../lib/command/command";
-import { ITeRunningTaskChangeEvent, ITeTask, ITeTasksChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
+import { ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
 	DidChangeAllTasksType, DidChangeTaskStatusType
@@ -74,13 +74,13 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	]});
 
 
-	private onFamousTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: toITask(e.tasks, "famous") });
-	private onFavoriteTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: toITask(e.tasks, "favorites") });
-	private onLastTasksChanged = async (e: ITeTasksChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(e.tasks, "last") });
+	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: toITask(e.tasks, "famous") });
+	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: toITask(e.tasks, "favorites") });
+	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(e.tasks, "last") });
 	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(e.tasks, "running") });
-    private onAllTasksChanged = async (_e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
+    private onAllTasksChanged = async (_e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
-	private onTaskTreeManagerReady = (e: ITeTasksChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: toITask(e.tasks, "all") });
+	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: toITask(e.tasks, "all") });
 
 
 	protected override onVisibilityChanged = (_visible: boolean) =>

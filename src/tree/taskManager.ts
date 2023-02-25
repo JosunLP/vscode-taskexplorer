@@ -6,39 +6,32 @@ import { TeWrapper } from "../lib/wrapper";
 import { pathExists } from "../lib/utils/fs";
 import { getTerminal } from "../lib/getTerminal";
 import { SpecialTaskFolder } from "./specialFolder";
+import { TaskUsageTracker } from "./taskUsageTracker";
 import { ScriptTaskProvider } from "../providers/script";
 import { isScriptType } from "../lib/utils/taskTypeUtils";
+import { getPackageManager, timeout } from "../lib/utils/utils";
 import { findDocumentPosition } from "../lib/findDocumentPosition";
-import { getDateDifference, getPackageManager, timeout } from "../lib/utils/utils";
-import { ILog, ITeTask, ITeTaskManager, ITeTasksChangeEvent, TaskMap } from "../interface";
+import { ILog, ITeTaskManager, ITeTaskChangeEvent, TaskMap } from "../interface";
 import {
-    CustomExecution, Disposable, EventEmitter, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
+    CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder, Event
 } from "vscode";
-
-interface ITaskUsageStats
-{
-    famous: ITeTask[];
-    lastRuntime: number;
-    taskLastRan: ITeTask;
-    taskMostUsed: ITeTask;
-}
 
 
 export class TaskManager implements ITeTaskManager, Disposable
 {
 
     private log: ILog;
+    private readonly _taskUsageTracker: TaskUsageTracker;
     private readonly disposables: Disposable[] = [];
-    private readonly _onDidFamousTasksChange: EventEmitter<ITeTasksChangeEvent>;
 
 
     constructor(private readonly wrapper: TeWrapper, private readonly specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
     {
         this.log = wrapper.log;
         this.specialFolders = specialFolders;
-        this._onDidFamousTasksChange = new EventEmitter<ITeTasksChangeEvent>();
-        this.disposables.push(this._onDidFamousTasksChange);
+        this._taskUsageTracker = new TaskUsageTracker(wrapper);
+        this.disposables.push(this._taskUsageTracker);
     }
 
 
@@ -49,41 +42,13 @@ export class TaskManager implements ITeTaskManager, Disposable
     }
 
 
-	get onDidFamousTasksChange(): Event<ITeTasksChangeEvent> {
-		return this._onDidFamousTasksChange.event;
+	get onDidFamousTasksChange(): Event<ITeTaskChangeEvent> {
+		return this._taskUsageTracker.onDidFamousTasksChange;
 	}
 
-
-    private getEmptyITask = (): ITeTask =>
-    ({
-        name: "N/A",
-        listType: "none",
-        pinned: false,
-        runCount: 0,
-        running: false,
-        source: "N/A",
-        treeId: "N/A",
-        definition: {
-            type: "N/A"
-        }
-    });
-
-
-    private getStore = async() =>
-    {
-        let store = this.wrapper.storage.get<ITaskUsageStats>("taskmanager.taskUsage");
-        if (!store)
-        {
-            store = {
-                famous: [],
-                lastRuntime: 0,
-                taskLastRan: this.getEmptyITask(),
-                taskMostUsed: this.getEmptyITask()
-            };
-            await this.wrapper.storage.update("taskmanager.taskUsage", store);
-        }
-        return store;
-    };
+	get usageTracker(): TaskUsageTracker {
+		return this._taskUsageTracker;
+	}
 
 
     open = async(selection: TaskItem, itemClick = false) =>
@@ -343,7 +308,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         task.presentationOptions.reveal = noTerminal !== true ? TaskRevealKind.Always : TaskRevealKind.Silent;
         const exec = await tasks.executeTask(task);
         await this.specialFolders.lastTasks.saveTask(taskItem, logPad);
-        await this.saveRunDetails(taskItem, logPad);
+        await this._taskUsageTracker.track(taskItem, logPad);
         this.log.methodDone("run task", 1, logPad, [[ "success", !!exec ]]);
         return exec;
     };
@@ -399,120 +364,6 @@ export class TaskManager implements ITeTaskManager, Disposable
         this.log.methodDone("run task with arguments", 1, logPad);
         return exec;
     };
-
-
-    private saveRunDetails = async(taskItem: TaskItem, logPad: string) =>
-    {
-        this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskItem.task.name ]]);
-
-        const usage = this.wrapper.usage,
-              stats = await this.getStore(),
-              storage = this.wrapper.storage,
-              taskName = `${taskItem.task.name} (${taskItem.task.source})`,
-              iTask = this.wrapper.taskUtils.toITask([ taskItem.task ], "famous")[0],
-              specTaskListLength = this.wrapper.config.get<number>("specialFolders.numLastTasks");
-        //
-        // Process with Usage Tracker
-        //
-        const taskUsage = await usage.track(`task:${iTask.treeId}:${taskName}`);
-
-        //
-        // Remove from list if exists, will be re-added in following steps
-        //
-        const nITaskIdx = stats.famous.findIndex(t => t.treeId === taskItem.id);
-        if (nITaskIdx !== -1) {
-            stats.famous.splice(nITaskIdx, 1);
-        }
-
-        //
-        // Add  to 'famous tasks' list maybe
-        //
-        let added = false;
-        for (let f = 0; f < stats.famous.length; f++)
-        {
-            if (taskUsage.count > stats.famous[f].runCount)
-            {
-                stats.famous.splice(f, 0, iTask);
-                if (stats.famous.length > specTaskListLength) {
-                    stats.famous.pop();
-                }
-                if (f === 0) { // There's a new most famous/used task
-                    stats.taskMostUsed = { ...iTask };
-                    this._onDidFamousTasksChange.fire({ tasks: [ taskItem.task ], type: "famous" });
-                }
-                added = true;
-                break;
-            }
-        }
-        if (!added && stats.famous.length < specTaskListLength)
-        {
-            stats.famous.push(iTask);
-        }
-
-        //
-        // Set `last task` stats
-        //
-        stats.taskLastRan = { ...iTask };
-        stats.lastRuntime = Date.now();
-
-        await storage.update("taskmanager.taskUsage", stats);
-
-        this.log.methodDone("save task run details", 2, logPad);
-    };
-
-
-    getAvgRunCount = (period: "d" | "w", logPad: string) =>
-    {
-        const now = Date.now();
-        let avg = 0,
-            lowestTime = now;
-        this.log.methodStart("get average run count", 2, logPad, false, [[ "period", period ]]);
-        const taskStats = this.wrapper.usage.getAll();
-        Object.keys(taskStats).filter(k => k.startsWith("task:")).forEach(k =>
-        {
-            if (taskStats[k].lastUsedAt < lowestTime)  {
-                lowestTime = taskStats[k].lastUsedAt ;
-            }
-        });
-        const daysSinceFirstRunTask = getDateDifference(lowestTime, now, "d")  || 1;
-        avg = Math.floor(Object.keys(taskStats).length / daysSinceFirstRunTask / (period === "d" ? 1 : 7));
-        this.log.methodDone("get average run count", 2, logPad, [[ "calculated average", avg ]]);
-        return avg;
-    };
-
-
-    getRunningTasks = () => tasks.taskExecutions.map(e => e.task);
-
-
-    getTodayCount = (logPad: string) =>
-    {
-        let count = 0;
-        this.log.methodStart("get today run count", 2, logPad);
-        const taskStats = this.wrapper.usage.getAll();
-        Object.keys(taskStats).filter(k => k.startsWith("task:")).forEach(k =>
-        {
-            count += taskStats[k].countToday;
-        });
-        this.log.methodDone("get today run count", 2, logPad, [[ "today run count", count ]]);
-        return count;
-    };
-
-
-    getFamousTasks = () => this.wrapper.storage.get<ITeTask[]>("taskmanager.taskUsage.famous", []);
-
-
-    getLastRanTaskTime = (): string =>
-    {
-        const  tm = this.wrapper.storage.get<number>("taskmanager.taskUsage.lastRun");
-        if (tm) {
-            return new Date(tm).toLocaleDateString() + " " + new Date(tm).toLocaleTimeString();
-        }
-        return "N/A";
-    };
-
-
-    getMostUsedTask = async (): Promise<ITeTask> => (await this.getStore()).taskMostUsed;
-
 
     stop = async(taskItem: TaskItem) =>
     {

@@ -2,7 +2,7 @@
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { ITeTasksChangeEvent } from "../../interface";
+import { ITeTaskChangeEvent } from "../../interface";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
@@ -37,7 +37,7 @@ export class TaskCountView extends TeWebviewView<State>
 	protected override includeBootstrap = (): Promise<State> => this.getState();
 
 
-	private async onTasksChanged(e: ITeTasksChangeEvent)
+	private async onTasksChanged(e: ITeTaskChangeEvent)
 	{
 		if (this.isFirstLoadComplete) {
 			await this.refresh();

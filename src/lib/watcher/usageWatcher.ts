@@ -1,12 +1,12 @@
 
 import { TeWrapper } from "../wrapper";
 import { Disposable, Event, EventEmitter } from "vscode";
-import { IDictionary, ITeUsageWatcher, TrackedUsage, UsageChangeEvent } from "../../interface";
+import { IDictionary, ITeUsageWatcher, ITeTrackedUsage, ITeUsageChangeEvent } from "../../interface";
 
 
 export class UsageWatcher implements ITeUsageWatcher, Disposable
 {
-	private _onDidChange = new EventEmitter<UsageChangeEvent | undefined>();
+	private _onDidChange = new EventEmitter<ITeUsageChangeEvent | undefined>();
 
 
 	constructor(private readonly wrapper: TeWrapper) {}
@@ -15,19 +15,19 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 	dispose(): void {}
 
 
-	get onDidChange(): Event<UsageChangeEvent | undefined>
+	get onDidChange(): Event<ITeUsageChangeEvent | undefined>
 	{
 		return this._onDidChange.event;
 	}
 
 
-	get = (key: string): TrackedUsage | undefined => this.wrapper.storage.get<TrackedUsage>("usages." + key);
+	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<ITeTrackedUsage>("usages." + key);
 
 
-	getAll = (key?: string): IDictionary<TrackedUsage> =>
+	getAll = (key?: string): IDictionary<ITeTrackedUsage> =>
 	{
-		const storeAll = this.wrapper.storage.get<IDictionary<TrackedUsage>>("usages", {}),
-			  store: IDictionary<TrackedUsage> = {};
+		const storeAll = this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("usages", {}),
+			  store: IDictionary<ITeTrackedUsage> = {};
 		if (!key)
 		{
 			Object.assign(store, storeAll);
@@ -47,7 +47,7 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 
 	async reset(key?: string): Promise<void>
 	{
-		const usages =  this.wrapper.storage.get<IDictionary<TrackedUsage>>("usages");
+		const usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("usages");
 		if (!usages) return;
 		if (!key) {
 			await  this.wrapper.storage.delete("usages");
@@ -60,37 +60,48 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 	}
 
 
-	async track(key: string): Promise<TrackedUsage>
+	async track(key: string): Promise<ITeTrackedUsage>
 	{
-		let usages =  this.wrapper.storage.get<IDictionary<TrackedUsage>>("usages");
+		let usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("usages");
 		if (!usages) {
 			usages = {}; // as NonNullable<typeof usages>;
 		}
 
-		const usedAt = Date.now();
+		const timestamp = Date.now();
 
 		let usage = usages[key];
 		if (!usage)
 		{
 			usage = {
-				count: 1,
-				countToday: 1,
-				firstUsedAt: usedAt,
-				lastUsedAt: usedAt,
+				firstUsedAt: timestamp,
+				timestamp,
+				timestamps: [ timestamp ],
+				count: {
+					total: 0,
+					today: 0,
+					last7Days: 0,
+					last14Days: 0,
+					last30Days: 0,
+					last60Days: 0,
+					last90Days: 0
+				}
 			};
 			usages[key] = usage;
 		}
 		else
 		{
-			const now = Date.now(),
-				  lastDate = new Date(usage.lastUsedAt);
-			/* istanbul ignore if */
-			if (lastDate.getDate() !== new Date(now).getDate()) {
-				usage.countToday = 0; // Reset, the day has changed since the last record ran task
-			}
-			usage.count++;
-			usage.countToday++;
-			usage.lastUsedAt = usedAt;
+			const dayToMsMultiplier = 24 * 60 * 60 * 1000;
+			usage.timestamp = timestamp;
+			usage.timestamps.push(timestamp); // TODO - add setting for # of days to keep tracked tasks
+			usage.count = {
+				total: usage.timestamps.length,
+				today: usage.timestamps.filter(t => t > timestamp - (1 * dayToMsMultiplier)).length,
+				last7Days: usage.timestamps.filter(t => t > timestamp - (7 * dayToMsMultiplier)).length,
+				last14Days: usage.timestamps.filter(t => t > timestamp - (14 * dayToMsMultiplier)).length,
+				last30Days: usage.timestamps.filter(t => t > timestamp - (30 * dayToMsMultiplier)).length,
+				last60Days: usage.timestamps.filter(t => t > timestamp - (60 * dayToMsMultiplier)).length,
+				last90Days: usage.timestamps.filter(t => t > timestamp - (90 * dayToMsMultiplier)).length
+			};
 		}
 
 		//

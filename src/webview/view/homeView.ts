@@ -2,7 +2,7 @@
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { ITeTasksChangeEvent } from "../../interface";
+import { ITeTaskChangeEvent } from "../../interface";
 import { StorageChangeEvent } from "../../interface/IStorage";
 import { ConfigurationChangeEvent, Disposable } from "vscode";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
@@ -103,7 +103,7 @@ export class HomeView extends TeWebviewView<State>
 	}
 
 
-	private async onTasksChanged(_e: ITeTasksChangeEvent)
+	private async onTasksChanged(_e: ITeTaskChangeEvent)
 	{
 		this.wrapper.log.methodStart("HomeView Event: onTasksChanged", 2, this.wrapper.log.getLogPad());
 		if (this.isFirstLoadComplete) {
@@ -130,7 +130,7 @@ export class HomeView extends TeWebviewView<State>
 	protected override onHtmlFinalize = async (html: string) =>
 	{
     	html = html.replace("#{taskCounts.length}", this.wrapper.treeManager.getTasks().length.toString())
-				   .replace("#{taskCounts.today}", this.wrapper.taskManager.getTodayCount("").toString())
+				   .replace("#{taskCounts.today}", this.wrapper.taskUsageTracker.getTodayCount("").toString())
 				   .replace("#{license.status}", "UNLICENSED")
 				   .replace("#{license.statusIcon}", "lock");
 		return html;

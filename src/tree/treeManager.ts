@@ -10,17 +10,16 @@ import { TaskWatcher } from "./taskWatcher";
 import { isDirectory } from "../lib/utils/fs";
 import { TaskTreeBuilder } from "./treeBuilder";
 import { getTerminal } from "../lib/getTerminal";
-import { SpecialTaskFolder } from "./specialFolder";
+import { FavoritesFolder } from "./favoritesFolder";
+import { LastTasksFolder } from "./lastTasksFolder";
 import { statusBarItem } from "../lib/statusBarItem";
 import { addToExcludes } from "../lib/addToExcludes";
 import { isTaskIncluded } from "../lib/isTaskIncluded";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Commands, registerCommand } from "../lib/command/command";
-import { IDictionary, ITeTreeManager, ITeTasksChangeEvent, ITeTaskStatusChangeEvent, ITeTask, ITeRunningTaskChangeEvent } from "../interface";
 import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskTypeUtils";
-import {
-    TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
-} from "vscode";
+import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
+import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeTask, ITeRunningTaskChangeEvent } from "../interface";
 
 
 export class TaskTreeManager implements ITeTreeManager, Disposable
@@ -33,12 +32,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private firstTreeBuildDone = false;
     private currentInvalidation: string | undefined;
     private readonly disposables: Disposable[] = [];
-    private readonly _onDidTasksChange: EventEmitter<ITeTasksChangeEvent>;
-    private readonly _onReady: EventEmitter<ITeTasksChangeEvent>;
+    private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
+    private readonly _onReady: EventEmitter<ITeTaskChangeEvent>;
 
     private _specialFolders: {
-        favorites: SpecialTaskFolder;
-        lastTasks: SpecialTaskFolder;
+        favorites: FavoritesFolder;
+        lastTasks: LastTasksFolder;
     };
 
     private _views: {
@@ -51,13 +50,13 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         this.wrapper.log.methodStart("construct task tree manager", 1, "   ");
 
-        this._onReady = new EventEmitter<ITeTasksChangeEvent>();
-        this._onDidTasksChange = new EventEmitter<ITeTasksChangeEvent>();
+        this._onReady = new EventEmitter<ITeTaskChangeEvent>();
+        this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
         this._specialFolders = {
-            favorites: new SpecialTaskFolder(this, Strings.FAV_TASKS_LABEL, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
-            lastTasks: new SpecialTaskFolder(this, Strings.LAST_TASKS_LABEL, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
+            favorites: new FavoritesFolder(this, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
+            lastTasks: new LastTasksFolder(this, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
         };
 
         this._taskWatcher = new TaskWatcher(this, this._specialFolders);
@@ -110,19 +109,19 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
 
-	get onDidAllTasksChange(): Event<ITeTasksChangeEvent> {
+	get onDidAllTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._onDidTasksChange.event;
 	}
 
-	get onDidFamousTasksChange(): Event<ITeTasksChangeEvent> {
+	get onDidFamousTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._taskManager.onDidFamousTasksChange;
 	}
 
-	get onDidFavoriteTasksChange(): Event<ITeTasksChangeEvent> {
+	get onDidFavoriteTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._specialFolders.favorites.onDidTasksChange;
 	}
 
-	get onDidLastTasksChange(): Event<ITeTasksChangeEvent> {
+	get onDidLastTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._specialFolders.lastTasks.onDidTasksChange;
 	}
 
@@ -134,12 +133,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         return this._taskWatcher.onDidTaskStatusChange;
     }
 
-    get onReady(): Event<ITeTasksChangeEvent> {
+    get onReady(): Event<ITeTaskChangeEvent> {
         return this._onReady.event;
     }
 
     get famousTasks(): ITeTask[] {
-        return this._taskManager.getFamousTasks();
+        return this._taskManager.usageTracker.getFamousTasks();
     }
 
     get favoriteTasks(): Task[] {
@@ -155,7 +154,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
     get runningTasks(): Task[] {
-        return this._taskManager.getRunningTasks();
+        return this._taskManager.usageTracker.getRunningTasks();
     }
 
     get views() {
