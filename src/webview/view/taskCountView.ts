@@ -26,7 +26,7 @@ export class TaskCountView extends TeWebviewView<State>
 			`${TaskCountView.viewId}View`
 		);
 		this.disposables.push(
-			wrapper.treeManager.onDidAllTasksChange(e => { this.onTasksChanged(e); }, this)
+			wrapper.treeManager.onDidTaskCountChange(e => this.onTaskCountChanged(e), this)
 		);
 	}
 
@@ -37,7 +37,7 @@ export class TaskCountView extends TeWebviewView<State>
 	protected override includeBootstrap = (): Promise<State> => this.getState();
 
 
-	private async onTasksChanged(_e: ITeTaskChangeEvent)
+	private async onTaskCountChanged(_e: ITeTaskChangeEvent)
 	{
 		if (this.isFirstLoadComplete) {
 			await this.refresh();

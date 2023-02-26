@@ -31,6 +31,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private currentInvalidation: string | undefined;
     private readonly disposables: Disposable[] = [];
     private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
+    private readonly _onDidTaskCountChange: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onReady: EventEmitter<ITeTaskChangeEvent>;
 
     private _specialFolders: {
@@ -50,6 +51,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         this._onReady = new EventEmitter<ITeTaskChangeEvent>();
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
+        this._onDidTaskCountChange = new EventEmitter<ITeTaskChangeEvent>();
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
         this._specialFolders = {
@@ -68,6 +70,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.disposables.push(
             this._onReady,
             this._onDidTasksChange,
+            this._onDidTaskCountChange,
             this._taskManager,
             this._treeBuilder,
             this._specialFolders.favorites,
@@ -94,6 +97,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
 	get onDidAllTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._onDidTasksChange.event;
+	}
+
+    get onDidTaskCountChange(): Event<ITeTaskChangeEvent> {
+		return this._onDidTaskCountChange.event;
 	}
 
 	get onDidFamousTasksChange(): Event<ITeTaskChangeEvent> {
@@ -271,6 +278,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     private fetchTasks = async(logPad: string) =>
     {
+        let count = this._tasks.length;
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
         if (this._tasks.length === 0 || !this.currentInvalidation || this.currentInvalidation  === "Workspace" || this.currentInvalidation === "tsc")
         {
@@ -339,15 +347,21 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         //
         // Signal that the task list / tree has changed
         //
-        const iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this._tasks, "all");
-        this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
-        if (!this.firstTreeBuildDone) {
-            this._onReady.fire({ tasks: iTasks, type: "all" });
-        }
+        queueMicrotask(() =>
+        {
+            const iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this._tasks, "all");
+            this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
+            if (this._tasks.length !== count) {
+                this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
+            }
+            if (!this.firstTreeBuildDone) {
+                this._onReady.fire({ tasks: iTasks, type: "all" });
+            }
+            this.firstTreeBuildDone = true;
+        });
         //
         // Done!
         //
-        this.firstTreeBuildDone = true;
         this.wrapper.log.methodDone("fetch tasks", 1, logPad);
     };
 

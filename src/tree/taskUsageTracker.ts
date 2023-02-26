@@ -4,8 +4,9 @@ import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
 import { getDateDifference } from "../lib/utils/utils";
 import { ConfigProps, StorageProps } from "../lib/constants";
-import { ILog, ITeTask, ITeTaskChangeEvent } from "../interface";
+import { ILog, ITeTask, ITeTaskChangeEvent, ITeTrackedUsage } from "../interface";
 import { Disposable, EventEmitter, tasks, Event, Task } from "vscode";
+import { UsageWatcher } from "src/lib/watcher/usageWatcher";
 
 interface ITaskUsageStats
 {
@@ -169,31 +170,57 @@ export class TaskUsageTracker implements Disposable
     track = async(taskItem: TaskItem, logPad: string) =>
     {
         const stats = await this.getStore(),
-              taskName = `${taskItem.task.name} (${taskItem.task.source})`,
-              specTaskListLength = this.wrapper.config.get<number>(ConfigProps.SpecialFolders_NumLastTasks);
+              taskName = `${taskItem.task.name} (${taskItem.task.source})`;
 
         this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
         //
         // Process with Usage Tracker
         //
         const usage = await this.wrapper.usage.track(`${this._usageKey}${taskItem.id}`);
-
         //
         // Convert to IPC ready ITeTask
         //
         const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], "all", false, usage)[0];
+        //
+        // Add  to 'famous tasks' list, maybe
+        //
+        const famousChanged = this.trackFamous(taskItem, iTask, stats, usage);
+        //
+        // Record this task as the last task ran and the time it was ran
+        //
+        stats.lastRuntime = Date.now();
+        stats.taskLastRan = { ...iTask };
+        //
+        // Persist / save stats
+        //
+        await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
+        //
+        // Maybe notify any listeners that the `famous tasks` list has changed
+        //
+        if (famousChanged) {
+            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ type: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
+        }
+        this.log.methodDone("save task run details", 2, logPad);
+    };
 
-        //
-        // Add  to 'famous tasks' list maybe
-        //
+
+    private trackFamous = (taskItem: TaskItem, iTask: ITeTask, stats: ITaskUsageStats, usage: ITeTrackedUsage) =>
+    {
         let added = false,
-            famousTasksChanged = false;
+            changed = false;
+        const specTaskListLength = this.wrapper.config.get<number>(ConfigProps.SpecialFolders_NumLastTasks);
+        //
+        // First remove this task from the list of it is present, it'll be put back
+        // in the following steps
+        //
         const nITaskIdx = stats.famous.findIndex(t => t.treeId === taskItem.id);
-
         if (nITaskIdx !== -1) {
             stats.famous.splice(nITaskIdx, 1);
         }
-
+        //
+        // Scan the set of most used / famous tasks, and insert this task into the list
+        // based on task run count, if it makes the cut
+        //
         for (let f = 0; f < stats.famous.length; f++)
         {
             if (usage.count.total > stats.famous[f].runCount.total)
@@ -205,30 +232,24 @@ export class TaskUsageTracker implements Disposable
                 if (f === 0) { // There's a new most famous/used task
                     stats.taskMostUsed = { ...iTask, ...{ type: "famous" }};
                 }
-                added = famousTasksChanged = true;
+                added = changed = true;
                 break;
             }
         }
-
+        //
+        // If the task was not added to the list in the above loop, and there are less than
+        // the max # oof famous tasks to store, then this task by default makes the cut, just
+        // like a trophy for a 10th place finisher.
+        //
         if (!added && stats.famous.length < specTaskListLength)
         {
-            famousTasksChanged = true;
+            changed = true;
             stats.famous.push({ ...iTask, ...{ type: "famous" }});
             if (stats.famous.length === 1) {
                 stats.taskMostUsed = { ...iTask, ...{ type: "famous" }};
             }
         }
-
-        stats.lastRuntime = Date.now();
-        stats.taskLastRan = { ...iTask };
-
-        await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
-
-        if (famousTasksChanged) {
-            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ type: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
-        }
-
-        this.log.methodDone("save task run details", 2, logPad);
+        return changed;
     };
 
 }
