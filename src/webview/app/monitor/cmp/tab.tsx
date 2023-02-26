@@ -2,7 +2,7 @@
 
 import React from "react";
 import { TeTaskControl } from "./control";
-import { ITask } from "../../../common/ipc";
+import { IIpcTask } from "../../../common/ipc";
 
 interface ControlRefs
 {
@@ -11,14 +11,14 @@ interface ControlRefs
 
 interface ReactProps
 {
-    tasks: ITask[];
+    tasks: IIpcTask[];
     webroot: string;
-    executeCommand: (command: string, task: ITask) => void;
+    executeCommand: (command: string, task: IIpcTask) => void;
     log: (message: string, ...optionalParams: any[]) => void;
 }
 
 
-export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
+export class TeTaskTab extends React.Component<ReactProps, { tasks: IIpcTask[] }>
 {
     private counter = 0;
     private children: JSX.Element[];
@@ -39,7 +39,7 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
     {
         this.controlRefs = {};
         this.children.splice(0);
-        this.state.tasks.forEach((t: ITask) =>
+        this.state.tasks.forEach((t: IIpcTask) =>
         {
             this.props.log(`TeTaskTab.render: task=${t.name} source=${t.source} running=${t.running}`);
             this.controlRefs[t.treeId] = React.createRef<TeTaskControl>();
@@ -58,7 +58,7 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
     }
 
 
-    setTask = (task: ITask, isRunningTab?: boolean) =>
+    setTask = (task: IIpcTask, isRunningTab?: boolean) =>
     {
         if (isRunningTab !== true)
         {
@@ -96,6 +96,6 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: ITask[] }>
     };
 
 
-    setTasks = (tasks: ITask[]) => this.setState({ tasks });
+    setTasks = (tasks: IIpcTask[]) => this.setState({ tasks });
 
 }

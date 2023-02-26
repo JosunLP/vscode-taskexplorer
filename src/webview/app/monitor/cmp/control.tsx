@@ -3,7 +3,7 @@
 import React from "react";
 import { TeTaskButton } from "./button";
 import { TeReactTaskTimer } from "./timer";
-import { ITask } from "../../../common/ipc";
+import { IIpcTask } from "../../../common/ipc";
 
 interface ITeAppButtons {
     favorite: React.RefObject<TeTaskButton>;
@@ -16,14 +16,14 @@ interface ITeAppButtons {
 interface ReactState
 {
     pinned?: boolean;
-	task: ITask;
+	task: IIpcTask;
 }
 
 interface ReactProps
 {
-    task: ITask;
+    task: IIpcTask;
     webroot: string;
-    executeCommand: (command: string, task: ITask) => void;
+    executeCommand: (command: string, task: IIpcTask) => void;
     log: (message: string, ...optionalParams: any[]) => void;
 }
 
@@ -34,7 +34,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     private counter = 0;
     private buttons: ITeAppButtons;
     private log: (message: string, ...optionalParams: any[]) => void;
-    private executeCommand: (command: string, task: ITask) => void;
+    private executeCommand: (command: string, task: IIpcTask) => void;
 
     constructor(props: ReactProps)
     {
@@ -268,6 +268,6 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     };
 
 
-    setTask = (task: ITask) => this.setState({ task });
+    setTask = (task: IIpcTask) => this.setState({ task });
 
 }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import React from "react";
 import { TeTaskTab } from "./tab";
-import { ITask, MonitorAppState } from "../../../common/ipc";
+import { IIpcTask, MonitorAppState } from "../../../common/ipc";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
 interface ITeAppTabs {
@@ -14,7 +14,7 @@ interface ITeAppTabs {
 interface ReactProps
 {
     state: MonitorAppState;
-    executeCommand: (command: string, task: ITask) => void;
+    executeCommand: (command: string, task: IIpcTask) => void;
     log: (message: string, ...optionalParams: any[]) => void;
 }
 

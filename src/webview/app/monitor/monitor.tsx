@@ -14,7 +14,7 @@ import { createRoot } from "react-dom/client";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
 	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeAllTasksType, IpcMessage,
-	onIpc, MonitorAppState, ITask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType
+	onIpc, MonitorAppState, IIpcTask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType
 } from "../../common/ipc";
 
 
@@ -37,7 +37,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	}
 
 
-    private executeCommand = (command: string, task: ITask): void =>
+    private executeCommand = (command: string, task: IIpcTask): void =>
     {
 		this.sendCommand(ExecuteCommandType, { command: `taskexplorer.${command}`, args: [ task ] });
     };

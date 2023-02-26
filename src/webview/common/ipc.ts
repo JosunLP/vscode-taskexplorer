@@ -104,28 +104,28 @@ export const DidChangeStateType = new IpcNotificationType<DidChangeStateParams>(
 //
 // TASK MONITOR APP
 //
-export interface ITask extends ITeTask {};
+export interface IIpcTask extends ITeTask {};
 export interface MonitorAppState extends State
 {
-	famous: ITask[];
-	favorites: ITask[];
-	last: ITask[];
-	tasks: ITask[];
-	running: ITask[];
+	famous: IIpcTask[];
+	favorites: IIpcTask[];
+	last: IIpcTask[];
+	tasks: IIpcTask[];
+	running: IIpcTask[];
 	pinned: {
-		last: ITask[];
-		favorites: ITask[];
-		famous: ITask[];
-		running: ITask[];
+		last: IIpcTask[];
+		favorites: IIpcTask[];
+		famous: IIpcTask[];
+		running: IIpcTask[];
 	};
 }
 export interface DidChangeTaskStatusParams
 {
-	task: ITask;
+	task: IIpcTask;
 };
 export interface DidChangeTaskParams
 {
-	tasks: ITask[];
+	tasks: IIpcTask[];
 };
 export const DidChangeAllTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change");
 export const DidChangeFamousTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/famous");
