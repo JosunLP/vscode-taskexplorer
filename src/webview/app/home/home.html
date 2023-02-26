@@ -54,8 +54,10 @@
                                                 <td colspan="2" width="100%">
                                                     <table class="homeview-license-status-container margin-top-3" width="100%">
                                                         <tr>
-                                                            <td class="homeview-license-status">
-                                                                <span class="fal fa-#{license.statusIcon} homeview-license-status-icon">&nbsp;</span>
+                                                            <td class="homeview-license-status-icon-td">
+                                                                <span class="#{license.statusIconCls} homeview-license-status-icon"></span>
+                                                            </td>
+                                                            <td class="homeview-license-status-label-td">
                                                                 <span class="homeview-license-status-label">#{license.status}</span>
                                                             </td>
                                                         </tr>

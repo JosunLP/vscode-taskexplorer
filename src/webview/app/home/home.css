@@ -83,9 +83,9 @@ svg {
 	opacity: 0.725;
 }
 
-.homeview-license-status {
+.homeview-license-status-container {
+    padding: 0px;
     border: gray 1px solid;
-    text-align: center;
     opacity: .92;
     width: 100%;
     border-radius: 3px;
@@ -94,12 +94,18 @@ svg {
     /* background: -webkit-linear-gradient(bottom, #000000, #222222, #696767, #222222, #000000); */
 }
 
-.homeview-license-mode-label {
+.homeview-license-status-label-td {
+    text-align: center;
+    flex: 1;
+}
+
+.homeview-license-status-icon-td {
     text-align: left;
+    width: 1%;
+    padding-left: 7px;
 }
 
 .homeview-license-status-label {
-    text-align: left;
     line-height: 12px;
 }
 
@@ -107,8 +113,4 @@ svg {
     line-height: 12px !important;
     padding: 0px;
     margin-top: -3px;
-}
-
-.homeview-license-status-container {
-    padding: 0px;
 }

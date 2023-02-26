@@ -85,7 +85,7 @@ export class HomeView extends TeWebviewView<State>
 	protected override includeBootstrap = (): Promise<State> => this.getState();
 
 
-	protected override includeFontAwesome = () => ({ duotone: true, light: true, icons: [ "lock", "gears" ]});
+	protected override includeFontAwesome = () => ({ duotone: true, light: true, icons: [ "lock", "gears", "unlock" ]});
 
 
 	private onConfigurationChanged(e: ConfigurationChangeEvent)
@@ -121,10 +121,11 @@ export class HomeView extends TeWebviewView<State>
 
 	protected override onHtmlFinalize = async (html: string) =>
 	{
+		const isLic = this.wrapper.licenseManager.isLicensed();
     	html = html.replace("#{taskCounts.length}", this.wrapper.treeManager.getTasks().length.toString())
 				   .replace("#{taskCounts.today}", this.wrapper.taskUsageTracker.getTodayCount("").toString())
-				   .replace("#{license.status}", "UNLICENSED")
-				   .replace("#{license.statusIcon}", "lock");
+				   .replace("#{license.status}", isLic ? "LICENSED" : "UNLICENSED")
+				   .replace("#{license.statusIconCls}", "fal fa-" + (isLic ? "unlock te-color-ok-green" : "lock te-color-failure-red"));
 		return html;
 	};
 
