@@ -139,18 +139,32 @@ button {
 
 .te-monitor-control-content-details-col0  {
 	vertical-align: top;
+	width: 80px;
+	max-width: 80px;
 }
 
 .te-monitor-control-content-details-col1 {
-    padding-right: 10px;
+	max-width: 275px;
+	overflow: hidden;
+	padding-right: 10px;
+	width: 275px;
+	white-space: nowrap;
 }
-
+  
 .te-monitor-control-content-details-col2 {
-    padding-left: 10px;
+	max-width: 225px;
+	overflow: hidden;
+	padding-left: 10px;
+	width: 225px;
+	white-space: nowrap;
 }
 
 .te-monitor-control-content-details-body {
     opacity: 1;
+}
+
+.te-monitor-control-content-details-task-name {
+	font-weight: bold;
 }
 
 .te-monitor-control-button-last {

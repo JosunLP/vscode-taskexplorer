@@ -98,11 +98,8 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                 <table>
                                     <tbody className="te-monitor-control-content-details-body">
                                         <tr>
-                                            <td>
-                                                Name
-                                            </td>
-                                            <td>
-                                                &nbsp;&nbsp; : &nbsp;{task.name}
+                                            <td colSpan={2} className="te-monitor-control-content-details-task-name">
+                                                {task.name}
                                             </td>
                                         </tr>
                                         <tr>
@@ -118,7 +115,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 # of Runtimes (Last 7 Days)
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;xx
+                                                &nbsp;&nbsp; : &nbsp;82
                                             </td>
                                         </tr>
                                         <tr>
@@ -126,7 +123,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 # of Runtimes (Last 30 Days)
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;xx
+                                                &nbsp;&nbsp; : &nbsp;345
                                             </td>
                                         </tr>
                                         <tr>
@@ -134,7 +131,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 # of Runtimes (Total)
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;xx
+                                                &nbsp;&nbsp; : &nbsp;1,543
                                             </td>
                                         </tr>
                                     </tbody>
@@ -148,7 +145,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 Fastest Runtime
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;xx
+                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
                                             </td>
                                         </tr>
                                         <tr>
@@ -156,7 +153,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 Average Runtime
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;xx
+                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
                                             </td>
                                         </tr>
                                         <tr>
@@ -164,7 +161,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 Slowest Runtime
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;xx
+                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
                                             </td>
                                         </tr>
                                         <tr>
@@ -172,7 +169,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 First Runtime
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;xx
+                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
                                             </td>
                                         </tr>
                                         <tr>
@@ -180,7 +177,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 Last Runtime
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;xx
+                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
                                             </td>
                                         </tr>
                                     </tbody>
