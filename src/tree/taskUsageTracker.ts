@@ -134,12 +134,12 @@ export class TaskUsageTracker implements Disposable
     };
 
 
-    getFamousTasks = (): ITeTask[] => this.wrapper.storage.get<ITeTask[]>("taskmanager.taskUsage.famous", []);
+    getFamousTasks = (): ITeTask[] => this.wrapper.storage.get<ITeTask[]>("taskexplorer.taskUsage.famous", []);
 
 
     getLastRanTaskTime = (): string =>
     {
-        const  tm = this.wrapper.storage.get<number>("taskmanager.taskUsage.lastRun");
+        const  tm = this.wrapper.storage.get<number>("taskexplorer.taskUsage.lastRun");
         if (tm) {
             return new Date(tm).toLocaleDateString() + " " + new Date(tm).toLocaleTimeString();
         }

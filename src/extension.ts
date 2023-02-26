@@ -41,13 +41,18 @@ export async function activate(context: ExtensionContext)
     // Initialize persistent storage
     //
     await initStorage(context);
-    //
+/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+    await storage.update("lastTasks", []);
+    // await storage.delete("taskexplorer.licenseKey");
+    // await storage.delete("taskexplorer.licenseToken");
+    // await storage.delete("taskexplorer.usages");
+    // await storage.delete("taskexplorer.taskUsage");
+/* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
     // !!! Temporary after settings layout redo / rename !!!
     // !!! Remove sometime down the road (from 12/22/22) !!!
-    //
     await migrateSettings();
-    //
     // !!! End temporary !!!
+/* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
     //
     //
     // Instantiate application container (beautiful concept from GitLens project)

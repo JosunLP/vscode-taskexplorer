@@ -248,12 +248,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// License / Authentication
 		//
 /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// await this.storage.update("lastTasks", []);
-		// await this.storage.delete("taskexplorer.licenseKey");
-		// await this.storage.delete("taskexplorer.licenseToken");
-		// await this.storage.update("taskexplorer.usages", []);
-		// await this.storage.delete("taskmanager.taskUsage");
-		/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		/* istanbul ignore else *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		if (PROVIDE_INTERIM_LICENSE_KEY) /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		{/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
@@ -276,11 +270,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// Maybe show the 'what's new / welcome' page
 		//
 		/* istanbul ignore next */
-		if (this.versionchanged) {
+		if (this.versionchanged)
+		{
 			this._cacheBuster = getUuid();
-			/* TODO - Show 'welcome / what's new' page */
+			// TODO - Show 'welcome / what's new' page
+			// utilities.oneTimeEvent(this.onReady)(() => { /* TODO */ });
 		}
-		// utilities.oneTimeEvent(this.onReady)(() => { /* TODO */ });
 		//
 		// Build the file cache, this kicks off the whole process as refresh cmd will be issued
 		// down the line in the initialization process.
@@ -313,7 +308,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		this._treeManager.setMessage(Strings.RequestingTasks);
 		await this._treeManager.loadTasks("   ");
-		this._treeManager.setMessage();
+		this._treeManager.setMessage(); // clear status bar message
 		//
 		// Log the environment
 		//
@@ -322,7 +317,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 			[ "remote name", env.remoteName ], [ "is new ap install", env.isNewAppInstall ]
 		]);
 		//
-		// Signal that the startup work has completed
+		// Signal that the startup work has completed.  `queueMicrotask` is interesting, I saw it
+		// in the GitLens extension code, seems to sneak into the scheduler between each standard
+		// scheduled task to run itself.  Might give a little boost on startup completion time when
+		// queueMicrotask CPU resources with other extensions when VSCode starts up., i.e. notably
+		// the f'ing Google Cloud Tools and Python interpreter.
 		//
 		queueMicrotask(() => { this._ready = true; /* this._onReady.fire(); */ });
 	};

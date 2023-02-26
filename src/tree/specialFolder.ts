@@ -21,7 +21,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 {
     protected abstract onTaskSave(taskItem: TaskItem, logPad: string): void;
 
-
     public treeManager: TaskTreeManager;
     public override taskFiles: TaskItem[];
 
@@ -61,9 +60,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     dispose()
     {
-        this.disposables.forEach((d) => {
-            d.dispose();
-        });
+        this.disposables.forEach((d) => d.dispose());
         this.disposables.splice(0);
         this.taskFiles = [];
     }
@@ -232,21 +229,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
               iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], taskListType)[0],
               iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this.taskFiles.map(f => f.task), taskListType);
         this._onDidTasksChange.fire({ tasks: iTasks, task: iTask, type: taskListType });
-    };
-
-
-    getLastRanId = () =>
-    {
-        let lastTaskId: string | undefined;
-        if (this.store.length > 0)
-        {
-            lastTaskId = this.store[this.store.length - 1];
-        }
-        if (!lastTaskId)
-        {
-            window.showInformationMessage("No saved tasks!");
-        }
-        return lastTaskId;
     };
 
 

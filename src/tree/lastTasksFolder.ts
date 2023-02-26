@@ -3,8 +3,8 @@ import { TaskItem } from "./item";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
-import { TreeItemCollapsibleState } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
+import { TreeItemCollapsibleState, window } from "vscode";
 import { Commands, registerCommand } from "../lib/command/command";
 
 
@@ -21,6 +21,21 @@ export class LastTasksFolder extends SpecialTaskFolder
         super(wrapper, treeManager, Strings.LAST_TASKS_LABEL, state);
         this.disposables.push(registerCommand(Commands.ClearLastTasks, () => this.clearSavedTasks(), this));
     }
+
+
+    getLastRanId = () =>
+    {
+        let lastTaskId: string | undefined;
+        if (this.store.length > 0)
+        {
+            lastTaskId = this.store[this.store.length - 1];
+        }
+        if (!lastTaskId)
+        {
+            window.showInformationMessage("No saved tasks!");
+        }
+        return lastTaskId;
+    };
 
 
     protected onTaskSave = (taskItem: TaskItem, logPad: string) =>
