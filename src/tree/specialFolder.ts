@@ -5,7 +5,7 @@ import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { sortTasks } from "../lib/sortTasks";
 import { TaskTreeManager } from "./treeManager";
-import { IDictionary, ILog, ITeTaskChangeEvent } from "../interface";
+import { IDictionary, ILog, ITeTaskChangeEvent, TeTaskListType } from "../interface";
 import {
     ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
     TreeItem, TreeItemCollapsibleState, window, workspace
@@ -19,6 +19,7 @@ import {
  */
 export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 {
+    protected abstract listType: TeTaskListType;
     protected abstract onTaskSave(taskItem: TaskItem, logPad: string): void;
 
     public treeManager: TaskTreeManager;
@@ -82,7 +83,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             taskItem2.label = this.getRenamedTaskName(taskItem2);
             taskItem2.folder = this;
             this.insertTaskFile(taskItem2, 0);
-            this.sort(logPad + "   ");
+            this.sort();
 
             this.log.methodDone(`add tree taskitem to ${this.label}`, 3, logPad);
         }
@@ -172,7 +173,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             }
         }
 
-        this.sort(logPad + "   ");
+        this.sort();
 
         tree.splice(treeIdx, 0, this);
 
@@ -225,10 +226,9 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     private fireChangeEvent = (taskItem: TaskItem) =>
     {
-        const taskListType = this.isFavorites ? "favorites" : "last",
-              iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], taskListType)[0],
-              iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this.taskFiles.map(f => f.task), taskListType);
-        this._onDidTasksChange.fire({ tasks: iTasks, task: iTask, type: taskListType });
+        const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], this.listType)[0],
+              iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this.taskFiles.map(f => f.task), this.listType);
+        this._onDidTasksChange.fire({ tasks: iTasks, task: iTask, type: this.listType });
     };
 
 
@@ -355,6 +355,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    protected sort = (logPad: string) => sortTasks(this.taskFiles, logPad, 4);
+    protected sort = () => sortTasks(this.taskFiles, this.listType);
 
 }

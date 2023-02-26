@@ -6,6 +6,7 @@ import { TaskTreeManager } from "./treeManager";
 import { TreeItemCollapsibleState } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
 import { Commands, registerCommand } from "../lib/command/command";
+import { TeTaskListType } from "src/interface";
 
 
 /**
@@ -15,6 +16,7 @@ import { Commands, registerCommand } from "../lib/command/command";
  */
 export class FavoritesFolder extends SpecialTaskFolder
 {
+    protected listType: TeTaskListType = "favorites";
 
     constructor(wrapper: TeWrapper, treeManager: TaskTreeManager, state: TreeItemCollapsibleState)
     {

@@ -56,7 +56,7 @@ export class TaskTreeBuilder implements Disposable
                 log.write(`   skipping ${folder.label} folder for grouping`, logLevel, logPad);
                 continue;
             }
-            sortTasks.sortTaskFolder(folder, logPad + "   ", logLevel + 1);
+            sortTasks.sortTaskFolder(folder);
             //
             // Create groupings by task type
             //
@@ -318,7 +318,7 @@ export class TaskTreeBuilder implements Disposable
         //
         // Resort after making adds/removes
         //
-        sortTasks.sortTaskFolder(folder, logPad + "   ", logLevel + 1);
+        sortTasks.sortTaskFolder(folder);
 
         log.methodDone("create tree node folder grouping", logLevel, logPad);
     };

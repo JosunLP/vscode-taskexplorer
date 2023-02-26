@@ -5,10 +5,11 @@ import { IIpcTask, MonitorAppState } from "../../../common/ipc";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
 interface ITeAppTabs {
+    all: React.RefObject<TeTaskTab>;
+    famous: React.RefObject<TeTaskTab>;
+    favorites: React.RefObject<TeTaskTab>;
     recent: React.RefObject<TeTaskTab>;
     running: React.RefObject<TeTaskTab>;
-    favorites: React.RefObject<TeTaskTab>;
-    famous: React.RefObject<TeTaskTab>;
 };
 
 interface ReactProps
@@ -29,10 +30,11 @@ export class App extends React.Component<ReactProps, MonitorAppState>
         super(props);
         this.log = props.log;
         this.tabs = {
-            recent: React.createRef<TeTaskTab>(),
-            running: React.createRef<TeTaskTab>(),
+            all: React.createRef<TeTaskTab>(),
+            famous: React.createRef<TeTaskTab>(),
             favorites: React.createRef<TeTaskTab>(),
-            famous: React.createRef<TeTaskTab>()
+            recent: React.createRef<TeTaskTab>(),
+            running: React.createRef<TeTaskTab>()
         };
         this.state = {
             ...props.state
@@ -79,6 +81,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                         <Tab className="react-tabs__tab te-tab-running">Running</Tab>
                         <Tab className="react-tabs__tab te-tab-favorites">Favorites</Tab>
                         <Tab className="react-tabs__tab te-tab-famous">Famous</Tab>
+                        <Tab className="react-tabs__tab te-tab-all">All</Tab>
                     </TabList>
                     <TabPanel>
                         <TeTaskTab
@@ -112,6 +115,15 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             log={this.log}
                             ref={this.tabs.famous}
                             tasks={this.props.state.famous}
+                            webroot={this.props.state.webroot}
+                            executeCommand={this.props.executeCommand}
+                        />
+                    </TabPanel>
+                    <TabPanel>
+                        <TeTaskTab
+                            log={this.log}
+                            ref={this.tabs.all}
+                            tasks={this.props.state.tasks}
                             webroot={this.props.state.webroot}
                             executeCommand={this.props.executeCommand}
                         />

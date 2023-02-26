@@ -3,9 +3,11 @@ import { TaskItem } from "./item";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
+import { isPinned } from "../lib/utils/taskUtils";
 import { SpecialTaskFolder } from "./specialFolder";
 import { TreeItemCollapsibleState, window } from "vscode";
 import { Commands, registerCommand } from "../lib/command/command";
+import { TeTaskListType } from "src/interface";
 
 
 /**
@@ -15,6 +17,7 @@ import { Commands, registerCommand } from "../lib/command/command";
  */
 export class LastTasksFolder extends SpecialTaskFolder
 {
+    protected listType: TeTaskListType = "last";
 
     constructor(wrapper: TeWrapper, treeManager: TaskTreeManager, state: TreeItemCollapsibleState)
     {
@@ -71,16 +74,24 @@ export class LastTasksFolder extends SpecialTaskFolder
     };
 
 
-    protected override sort = (logPad: string) =>
+    protected override sort = () =>
     {
-        this.wrapper.log.methodStart("sort last tasks", 4, logPad);
         this.taskFiles?./* istanbul ignore else */sort((a: TaskItem, b: TaskItem) =>
         {
-            const aIdx = this.store.indexOf(a.id.replace(Strings.LAST_TASKS_LABEL + ":", ""));
-            const bIdx = this.store.indexOf(b.id.replace(Strings.LAST_TASKS_LABEL + ":", ""));
+            const aId = this.getTaskItemId(a.id),
+                  bId = this.getTaskItemId(b.id),
+                  aIdx = this.store.indexOf(aId),
+                  bIdx = this.store.indexOf(bId),
+                  aIsPinned = isPinned(aId,  "last"),
+                  bIsPinned = isPinned(bId, "last");
+            if (aIsPinned && !bIsPinned) {
+                return -1;
+            }
+            else if (!aIsPinned && bIsPinned) {
+                return 1;
+            }
             return aIdx < bIdx ? 1 : -1;
         });
-        this.wrapper.log.methodDone("sort last tasks", 4, logPad);
     };
 
 }

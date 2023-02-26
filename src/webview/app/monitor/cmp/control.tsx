@@ -104,18 +104,10 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                         </tr>
                                         <tr>
                                             <td>
-                                                Type
-                                            </td>
-                                            <td>
-                                                &nbsp;&nbsp; : &nbsp;{task.definition.type}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
                                                 # of Runtimes (Last 7 Days)
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;82
+                                                &nbsp;&nbsp; : &nbsp;{task.runCount.last7Days}
                                             </td>
                                         </tr>
                                         <tr>
@@ -123,7 +115,15 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 # of Runtimes (Last 30 Days)
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;345
+                                                &nbsp;&nbsp; : &nbsp;{task.runCount.last30Days}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                # of Runtimes (Last 90 Days)
+                                            </td>
+                                            <td>
+                                                &nbsp;&nbsp; : &nbsp;{task.runCount.last90Days}
                                             </td>
                                         </tr>
                                         <tr>
@@ -131,7 +131,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 # of Runtimes (Total)
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;1,543
+                                                &nbsp;&nbsp; : &nbsp;{task.runCount.total}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -205,7 +205,20 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                     <tbody>
                         <tr className="te-monitor-control-row te-monitor-control-top-row">
                             <td className="te-monitor-control-icon-column">
-                                <img className="te-monitor-control-icon-img" src={this.props.webroot + "/img/sources/" + this.state.task.source + ".svg"} />
+                                <table cellPadding={0} cellSpacing={0} width="100%">
+                                    <tbody>
+                                        <tr>
+                                            <td align="center" className="te-monitor-control-icon-type-td">
+                                                {this.state.task.definition.type}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center">
+                                                <img className="te-monitor-control-icon-img" src={this.props.webroot + "/img/sources/" + this.state.task.source + ".svg"} />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </td>
                             <td className="te-monitor-control-content-column">
                                 {this.getTaskDetails()}

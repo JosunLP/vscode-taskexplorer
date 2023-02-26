@@ -44,6 +44,10 @@ button {
     opacity: 1
 }
 
+.te-tab-all:before  {
+    content: "\f085";
+}
+
 .te-tab-favorites:before  {
     content: "\f005";
 }
@@ -52,8 +56,12 @@ button {
     content: "\f005";
 }
 
+.te-tab-recent:before  {
+    content: "\f013";
+}
+
 .te-tab-running:before  {
-    content: "\f085";
+    content: "\f013";
 }
 
 .te-monitor-control-container {
@@ -70,12 +78,20 @@ button {
 }
   
 .te-monitor-control-icon-column {
-    width: 100px;
+    width: 88px;
     margin-top: 8px;
 }
 
+.te-monitor-control-icon-type-td {
+	font-size: 12px;
+	line-height: 12px;
+	font-weight: bold;
+	padding-bottom: 2px;
+	text-transform: uppercase;
+}
+
 .te-monitor-control-icon-img {
-    height: 80px;
+    height: 66px;
     vertical-align: middle;
 }
 

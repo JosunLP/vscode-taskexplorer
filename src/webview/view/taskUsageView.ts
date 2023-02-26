@@ -33,7 +33,7 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	protected override includeBody = async() => ""; // For coverage, empty body
 	protected override includeHead = async() => ""; // For coverage, empty head
-	protected override includeEndOfBody = async() => "<!-- spm -->"; // For coverage, endOfBody
+	protected override includeEndOfBody = async() => "<!-- spm -->"; // For coverage, endOfBody and no bootstrap
 
 
 	private async onStorageChanged(e: StorageChangeEvent)
