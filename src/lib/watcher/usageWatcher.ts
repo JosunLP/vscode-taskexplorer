@@ -6,13 +6,22 @@ import { IDictionary, ITeUsageWatcher, ITeTrackedUsage, ITeUsageChangeEvent } fr
 
 export class UsageWatcher implements ITeUsageWatcher, Disposable
 {
-	private _onDidChange = new EventEmitter<ITeUsageChangeEvent | undefined>();
+	private readonly _disposables: Disposable[];
+	private readonly _onDidChange: EventEmitter<ITeUsageChangeEvent | undefined>;
 
 
-	constructor(private readonly wrapper: TeWrapper) {}
+	constructor(private readonly wrapper: TeWrapper)
+	{
+		this._onDidChange = new EventEmitter<ITeUsageChangeEvent | undefined>();
+		this._disposables = [ this._onDidChange ];
+	}
 
 
-	dispose(): void {}
+	dispose()
+    {
+        this._disposables.forEach(d => d.dispose());
+        this._disposables.splice(0);
+    }
 
 
 	get onDidChange(): Event<ITeUsageChangeEvent | undefined>
@@ -21,12 +30,12 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 	}
 
 
-	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<ITeTrackedUsage>("usages." + key);
+	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<ITeTrackedUsage>("taskexplorer.usages." + key);
 
 
 	getAll = (key?: string): IDictionary<ITeTrackedUsage> =>
 	{
-		const storeAll = this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("usages", {}),
+		const storeAll = this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("taskexplorer.usages", {}),
 			  store: IDictionary<ITeTrackedUsage> = {};
 		if (!key)
 		{
@@ -47,14 +56,14 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 
 	async reset(key?: string): Promise<void>
 	{
-		const usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("usages");
+		const usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("taskexplorer.usages");
 		if (!usages) return;
 		if (!key) {
-			await  this.wrapper.storage.delete("usages");
+			await  this.wrapper.storage.delete("taskexplorer.usages");
 			this._onDidChange.fire(undefined);
 		}
 		else {
-			await  this.wrapper.storage.delete("usages." + key);
+			await  this.wrapper.storage.delete("taskexplorer.usages." + key);
 			this._onDidChange.fire({ key, usage: undefined });
 		}
 	}
@@ -62,7 +71,7 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 
 	async track(key: string): Promise<ITeTrackedUsage>
 	{
-		let usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("usages");
+		let usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("taskexplorer.usages");
 		if (!usages) {
 			usages = {}; // as NonNullable<typeof usages>;
 		}
@@ -110,7 +119,7 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 		// TODO - Telemetry
 		//
 		//  this.wrapper.telemetry.sendEvent("usage/track", { "usage.key": key, "usage.count": usage.count });
-		await this.wrapper.storage.update("usages", usages);
+		await this.wrapper.storage.update("taskexplorer.usages", usages);
 		this._onDidChange.fire({ key, usage });
 		return usage;
 	}

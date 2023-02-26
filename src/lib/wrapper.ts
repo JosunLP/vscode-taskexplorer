@@ -10,10 +10,10 @@ import { TeFileCache } from "./fileCache";
 import { TaskTree } from "../tree/tree";
 import * as utilities from "./utils/utils";
 import * as pathUtils from "./utils/pathUtils";
+import * as taskUtils from "./utils/taskUtils";
 import { IStorage } from "../interface/IStorage";
 // import { getUuid } from "@env/crypto";
 import { getUuid } from "../lib/env/node/crypto";
-import * as taskUtils from "./utils/taskUtils";
 import * as commonUtils from "./utils/commonUtils";
 import { TaskManager } from "../tree/taskManager";
 import { ContextKeys, TeContext } from "./context";
@@ -43,6 +43,7 @@ import { LicensePage } from "../webview/page/licensePage";
 import { MonitorPage } from "../webview/page/monitorPage";
 import { WebpackTaskProvider } from "../providers/webpack";
 import { JenkinsTaskProvider } from "../providers/jenkins";
+import { TaskUsageTracker } from "../tree/taskUsageTracker";
 import { ComposerTaskProvider } from "../providers/composer";
 import { TaskExplorerProvider } from "../providers/provider";
 import { IConfiguration } from "../interface/IConfiguration";
@@ -59,7 +60,6 @@ import { registerEnableTaskTypeCommand } from "./command/enableTaskType";
 import { registerDisableTaskTypeCommand } from "./command/disableTaskType";
 import { registerRemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import { ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, Disposable } from "vscode";
-import { TaskUsageTracker } from "src/tree/taskUsageTracker";
 
 const PROVIDE_INTERIM_LICENSE_KEY = true;
 
@@ -248,6 +248,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// License / Authentication
 		//
 /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		await this.storage.update("lastTasks", []);
+		// await this.storage.delete("taskexplorer.licenseKey");
+		// await this.storage.delete("taskexplorer.licenseToken");
+		// await this.storage.update("usages", []);
+		await this.storage.delete("taskmanager.taskUsage");
 		/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		/* istanbul ignore else *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		if (PROVIDE_INTERIM_LICENSE_KEY) /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */

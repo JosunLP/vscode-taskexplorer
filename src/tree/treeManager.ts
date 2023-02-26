@@ -6,7 +6,6 @@ import { TeTreeView } from "./treeView";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskManager } from "./taskManager";
-import { TaskWatcher } from "./taskWatcher";
 import { isDirectory } from "../lib/utils/fs";
 import { TaskTreeBuilder } from "./treeBuilder";
 import { getTerminal } from "../lib/getTerminal";
@@ -27,7 +26,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private _tasks: Task[] = [];
     private refreshPending = false;
     private _taskManager: TaskManager;
-    private _taskWatcher: TaskWatcher;
     private _treeBuilder: TaskTreeBuilder;
     private firstTreeBuildDone = false;
     private currentInvalidation: string | undefined;
@@ -59,9 +57,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             lastTasks: new LastTasksFolder(this, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
         };
 
-        this._taskWatcher = new TaskWatcher(this, this._specialFolders);
         this._treeBuilder = new TaskTreeBuilder(this, this._specialFolders);
-        this._taskManager = new TaskManager(wrapper, this._specialFolders);
+        this._taskManager = new TaskManager(wrapper, this, this._specialFolders);
 
         this._views = {
             taskExplorer: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer", "taskTreeExplorer"),
@@ -72,7 +69,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._onReady,
             this._onDidTasksChange,
             this._taskManager,
-            this._taskWatcher,
             this._treeBuilder,
             this._specialFolders.favorites,
             this._specialFolders.lastTasks,
@@ -126,11 +122,11 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 	}
 
     get onDidRunningTasksChange(): Event<ITeRunningTaskChangeEvent> {
-        return this._taskWatcher.onDidRunningTasksChange;
+        return this._taskManager.taskWatcher.onDidRunningTasksChange;
     }
 
     get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {
-        return this._taskWatcher.onDidTaskStatusChange;
+        return this._taskManager.taskWatcher.onDidTaskStatusChange;
     }
 
     get onReady(): Event<ITeTaskChangeEvent> {

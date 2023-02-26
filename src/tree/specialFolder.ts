@@ -9,7 +9,6 @@ import { TaskTreeManager } from "./treeManager";
 import { configuration } from "../lib/utils/configuration";
 import { isString, removeFromArray } from "../lib/utils/utils";
 import { IDictionary, ITeTaskChangeEvent } from "../interface";
-import { Commands, registerCommand } from "../lib/command/command";
 import {
     ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
     TreeItem, TreeItemCollapsibleState, window, workspace
@@ -21,18 +20,21 @@ import {
  *
  * A tree node that represents a special folder i.e. the `Favorites` or `Last Tasks` folder
  */
-export class SpecialTaskFolder extends TaskFolder implements Disposable
+export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 {
+    protected abstract onTaskSave(taskItem: TaskItem, logPad: string): void;
+
 
     public treeManager: TaskTreeManager;
     public override taskFiles: TaskItem[];
 
-    private store: string[];
+    protected store: string[];
+    protected readonly disposables: Disposable[];
+
     private enabled: boolean;
     private storeName: string;
     private isFavorites: boolean;
     private settingNameEnabled: string;
-    private readonly _disposables: Disposable[];
     private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
 
 
@@ -40,7 +42,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     {
         super(label, state);
         this.taskFiles = [];
-        this._disposables = [];
+        this.disposables = [];
         this.treeManager = treeManager;
         this.iconPath = ThemeIcon.Folder;
         this.isFavorites = label === Strings.FAV_TASKS_LABEL;
@@ -51,17 +53,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
         this.settingNameEnabled = "specialFolders.show" + label.replace(/ /g, "");
         this.enabled = configuration.get<boolean>(this.settingNameEnabled);
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
-        if (this.isFavorites)
-        {
-            this._disposables.push(
-                registerCommand(Commands.AddRemoveFavorite, (taskItem: TaskItem) => this.addRemoveFavorite(taskItem), this),
-                registerCommand(Commands.ClearFavorites, () => this.clearSavedTasks(), this)
-            );
-        }
-        else {
-            this._disposables.push(registerCommand(Commands.ClearLastTasks, () => this.clearSavedTasks(), this));
-        }
-        this._disposables.push(
+        this.disposables.push(
             this._onDidTasksChange,
             workspace.onDidChangeConfiguration(async e => { await this.processConfigChanges(e); }, this)
         );
@@ -70,10 +62,10 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
 
     dispose()
     {
-        this._disposables.forEach((d) => {
+        this.disposables.forEach((d) => {
             d.dispose();
         });
-        this._disposables.splice(0);
+        this.disposables.splice(0);
         this.taskFiles = [];
     }
 
@@ -98,42 +90,6 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
 
             log.methodDone(`add tree taskitem to ${this.label}`, 3, logPad);
         }
-    }
-
-
-    /**
-     * @method addRemoveFavorite
-     * @since 2.0.0
-     *
-     * Adds/removes tasks from the Favorites List.  Basically a toggle, if the task exists as a
-     * favorite already when this function is called, it gets removed, if it doesnt exist, it gets added.
-     *
-     * @param taskItem The representative TaskItem of the task to add/remove
-     */
-    private async addRemoveFavorite(taskItem: TaskItem)
-    {
-        let removed = false;
-        const id = this.getTaskItemId(taskItem.id);
-
-        log.methodStart("add/remove " + this.contextValue, 1, "", false, [
-            [ "id", taskItem.id ], [ "current fav count", this.store.length ]
-        ]);
-
-        //
-        // If this task exists in the store, remove it, if it doesnt, then add it
-        //
-        const idx = this.store.findIndex(f => f === id);
-        if (idx === -1)
-        {
-            await this.saveTask(taskItem, "   ");
-        }
-        else {
-           await this.removeTaskFile(`${Strings.FAV_TASKS_LABEL}:${id}`, "   ", true);
-           removed = true;
-        }
-
-        log.methodDone("add/remove favorite", 1);
-        return removed;
     }
 
 
@@ -258,7 +214,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
      *
      * @since 2.0.0
      */
-    private async clearSavedTasks()
+    protected async clearSavedTasks()
     {
         const choice = await window.showInformationMessage(`Clear all tasks from the \`${this.label}\` folder?`, "Yes", "No");
         if (choice === "Yes")
@@ -286,7 +242,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    private getRenamedTaskName(taskItem: TaskItem)
+    protected getRenamedTaskName(taskItem: TaskItem)
     {
         let label = taskItem.taskFile.folder.label + " - " + taskItem.taskSource;
         const renames = storage.get<string[][]>(Strings.TASKS_RENAME_STORE, []),
@@ -306,7 +262,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     getStore = () => this.store; // for 'tasks' tests
 
 
-    private getTaskItemId(taskItemId: string)
+    protected getTaskItemId(taskItemId: string)
     {
         return taskItemId.replace(Strings.LAST_TASKS_LABEL + ":", "")
                          .replace(Strings.FAV_TASKS_LABEL + ":", "")
@@ -328,40 +284,6 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
             this.enabled = configuration.get<boolean>(this.settingNameEnabled);
             this.refresh(this.enabled);
         }
-    }
-
-
-    private pushToTop(taskItem: TaskItem, logPad = "")
-    {
-        const taskId = this.label + ":" + this.getTaskItemId(taskItem.id);
-
-        /* istanbul ignore if */
-        if (!taskItem.task) {
-            return;
-        }
-
-        let taskItem2 = this.taskFiles.find(t => t instanceof TaskItem && t.id === taskId);
-        /* istanbul ignore else */
-        if (taskItem2)
-        {
-            this.removeTaskFile(taskItem2, logPad + "   ", false);
-        }
-        else if (this.taskFiles.length >= configuration.get<number>("specialFolders.numLastTasks"))
-        {
-            this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad + "   ", false);
-        }
-
-        if (!taskItem2)
-        {
-            taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad + "   ");
-            taskItem2.id = taskId;
-            taskItem2.label = this.getRenamedTaskName(taskItem2);
-            taskItem2.folder = this;
-        }
-
-        log.value(logPad + "   add item", taskItem2.id, 2);
-        this.insertTaskFile(taskItem2, 0);
-        this.treeManager.fireTreeRefreshEvent("   ", 1, this);
     }
 
 
@@ -415,9 +337,9 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
                 const idx = this.store.findIndex(f => f === this.getTaskItemId(id));
                 this.store.splice(idx, 1);
                 await storage.update(this.storeName, this.store);
+                this._onDidTasksChange.fire({ tasks: this.taskFiles.map(f => f.task), type: this.isFavorites ? "favorites" : "last" });
+                this.treeManager.fireTreeRefreshEvent(logPad, 1, this);
             }
-            this.treeManager.fireTreeRefreshEvent(logPad, 1, this);
-            this._onDidTasksChange.fire({ tasks: this.taskFiles.map(f => f.task), type: this.isFavorites ? "favorites" : "last" });
         }
     }
 
@@ -446,7 +368,7 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
         this.store.push(taskId);
         await storage.update(this.storeName, this.store);
 
-        this.pushToTop(taskItem);
+        this.onTaskSave(taskItem, logPad);
 
         this._onDidTasksChange.fire({ tasks: this.taskFiles.map(f => f.task), type: this.isFavorites ? "favorites" : "last" });
 
@@ -454,28 +376,6 @@ export class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    private sort(logPad: string)
-    {
-        if (this.label === Strings.LAST_TASKS_LABEL)
-        {
-            this.sortLastTasks(this.taskFiles, this.store, logPad, 4);
-        }
-        else {
-            sortTasks(this.taskFiles, logPad, 4);
-        }
-    }
-
-
-    private sortLastTasks(items: TaskItem[] | undefined, lastTasks: string[], logPad: string, logLevel: number)
-    {
-        log.methodStart("sort last tasks", logLevel, logPad);
-        items?./* istanbul ignore else */sort((a: TaskItem, b: TaskItem) =>
-        {
-            const aIdx = lastTasks.indexOf(a.id.replace(Strings.LAST_TASKS_LABEL + ":", ""));
-            const bIdx = lastTasks.indexOf(b.id.replace(Strings.LAST_TASKS_LABEL + ":", ""));
-            return aIdx < bIdx ? 1 : -1;
-        });
-        log.methodDone("sort last tasks", logLevel, logPad);
-    }
+    protected sort = (logPad: string) => sortTasks(this.taskFiles, logPad, 4);
 
 }

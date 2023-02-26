@@ -16,22 +16,29 @@ import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder, Event
 } from "vscode";
+import { TaskWatcher } from "./taskWatcher";
+import { TaskTreeManager } from "./treeManager";
 
 
 export class TaskManager implements ITeTaskManager, Disposable
 {
 
     private log: ILog;
-    private readonly _taskUsageTracker: TaskUsageTracker;
+    private readonly _taskWatcher: TaskWatcher;
     private readonly disposables: Disposable[] = [];
+    private readonly _taskUsageTracker: TaskUsageTracker;
 
 
-    constructor(private readonly wrapper: TeWrapper, private readonly specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
+    constructor(private readonly wrapper: TeWrapper, treeManager: TaskTreeManager, private readonly specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
     {
         this.log = wrapper.log;
         this.specialFolders = specialFolders;
-        this._taskUsageTracker = new TaskUsageTracker(wrapper);
-        this.disposables.push(this._taskUsageTracker);
+        this._taskWatcher = new TaskWatcher(wrapper, specialFolders);
+        this._taskUsageTracker = new TaskUsageTracker(wrapper, treeManager);
+        this.disposables.push(
+            this._taskWatcher,
+            this._taskUsageTracker
+        );
     }
 
 
@@ -44,6 +51,10 @@ export class TaskManager implements ITeTaskManager, Disposable
 
 	get onDidFamousTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._taskUsageTracker.onDidFamousTasksChange;
+	}
+
+	get taskWatcher(): TaskWatcher {
+		return this._taskWatcher;
 	}
 
 	get usageTracker(): TaskUsageTracker {

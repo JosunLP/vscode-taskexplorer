@@ -7,7 +7,7 @@ import { Commands, registerCommand } from "../../lib/command/command";
 import { ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
-	DidChangeAllTasksType, DidChangeTaskStatusType
+	DidChangeAllTasksType, DidChangeTaskStatusType, DidChangeRunningTasksType
 } from "../common/ipc";
 
 
@@ -77,7 +77,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "famous") });
 	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "favorites") });
 	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "last") });
-	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "running") });
+	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(DidChangeRunningTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "running") });
     private onAllTasksChanged = async (_e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
 	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: toITask(this.wrapper.usage, e.tasks, "all") });

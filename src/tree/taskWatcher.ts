@@ -1,32 +1,27 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { TaskItem } from "./item";
-import { log } from "../lib/log/log";
-import * as util from "../lib/utils/utils";
-import { TaskTreeManager } from "./treeManager";
 import { SpecialTaskFolder } from "./specialFolder";
-import { configuration } from "../lib/utils/configuration";
 import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../interface";
 import {
     Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
     Task, window, TaskEndEvent, EventEmitter
 } from "vscode";
+import { TeWrapper } from "src/lib/wrapper";
 
 
 export class TaskWatcher implements Disposable
 {
 
     private statusBarSpace: StatusBarItem;
-    private treeManager: TaskTreeManager;
     private disposables: Disposable[];
     private specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder };
     private readonly _onTaskStatusChange: EventEmitter<ITeTaskStatusChangeEvent>;
     private readonly _onDidRunningTasksChange: EventEmitter<ITeRunningTaskChangeEvent>;
 
 
-    constructor(treeManager: TaskTreeManager, specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
+    constructor(private readonly wrapper: TeWrapper, specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
     {
-        this.treeManager = treeManager;
         this.specialFolders = specialFolders;
         this.statusBarSpace = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this.statusBarSpace.tooltip = "Task Explorer Running Task";
@@ -64,35 +59,35 @@ export class TaskWatcher implements Disposable
 
     fireTaskChangeEvents(taskItem: TaskItem, logPad: string, logLevel: number): void
     {
-        const taskTree = this.treeManager.getTaskTree();
+        const taskTree = this.wrapper.treeManager.getTaskTree();
         /* istanbul ignore if */
         if (!taskItem || !taskItem.task || !taskItem.taskFile) {
-            log.error(`fire task change event type invalid, received ${typeof taskItem}`);
+            this.wrapper.log.error(`fire task change event type invalid, received ${typeof taskItem}`);
             return;
         }
         /* istanbul ignore if */
         if (!taskItem.task || !taskItem.taskFile) {
-            log.error(`fire task change event invalid (${!taskItem.task}/${!taskItem.taskFile})`);
+            this.wrapper.log.error(`fire task change event invalid (${!taskItem.task}/${!taskItem.taskFile})`);
             return;
         }
 
         const isTaskItem = taskItem instanceof TaskItem;
-        log.methodStart("fire task change events", logLevel, logPad, false, [
+        this.wrapper.log.methodStart("fire task change events", logLevel, logPad, false, [
             [ "task name", taskItem.task.name ], [ "task type", taskItem.task.source ],
             [ "resource path", taskItem.taskFile.resourceUri.fsPath ]
         ]);
 
         /* istanbul ignore if */
         if (!taskTree) {
-            log.write("   no task tree!!", logLevel, logPad);
-            log.methodDone("fire task change events", logLevel, logPad);
+            this.wrapper.log.write("   no task tree!!", logLevel, logPad);
+            this.wrapper.log.methodDone("fire task change events", logLevel, logPad);
             return;
         }
 
         /* istanbul ignore if */
         if (!isTaskItem) {
-            log.write("   change event object is not a taskitem!!", logLevel, logPad);
-            log.methodDone("fire task change events", logLevel, logPad);
+            this.wrapper.log.write("   change event object is not a taskitem!!", logLevel, logPad);
+            this.wrapper.log.methodDone("fire task change events", logLevel, logPad);
             return;
         }
 
@@ -103,7 +98,7 @@ export class TaskWatcher implements Disposable
         // tree, so this is still good.  TODO possibly this gets fixed in the future to be able to
         // invalidate just the TaskItem, so check back on this sometime.
         //
-        this.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskItem.taskFile);
+        this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskItem.taskFile);
 
         //
         // Fire change event for the 'Last Tasks' folder if the task exists there
@@ -112,7 +107,7 @@ export class TaskWatcher implements Disposable
         {   //
             // 'Last Tasks' folder, if enabled, will always be the 1st tree item
             //
-            this.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[0]);
+            this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[0]);
         }
 
         //
@@ -125,27 +120,27 @@ export class TaskWatcher implements Disposable
             //
             if (taskTree[0] && taskTree[0].label === this.specialFolders.favorites.label)
             {
-                this.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[0]);
+                this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[0]);
             }
             else {
-                this.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[1]);
+                this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[1]);
             }
         }
 
-        log.methodDone("fire task change events", logLevel, logPad);
+        this.wrapper.log.methodDone("fire task change events", logLevel, logPad);
     }
 
 
     private showStatusMessage(task: Task, logPad: string): void
     {
-        log.methodStart("task start/stop show/hide message", 2, logPad);
-        if (task && configuration.get<boolean>("showRunningTask") === true)
+        this.wrapper.log.methodStart("task start/stop show/hide message", 2, logPad);
+        if (task && this.wrapper.config.get<boolean>("showRunningTask") === true)
         {
             const exec = tasks.taskExecutions.find(e => e.task.name === task.name && e.task.source === task.source &&
                          e.task.scope === task.scope && e.task.definition.path === task.definition.path);
             if (exec)
             {
-                log.methodStart("   found running task, show status message", 2, logPad);
+                this.wrapper.log.methodStart("   found running task, show status message", 2, logPad);
                 let statusMsg = task.name;
                 /* istanbul ignore else */
                 if ((task.scope as WorkspaceFolder).name) {
@@ -155,11 +150,11 @@ export class TaskWatcher implements Disposable
                 this.statusBarSpace.show();
             }
             else {
-                log.methodStart("   found idle/stopped task, hide status message", 2, logPad);
+                this.wrapper.log.methodStart("   found idle/stopped task, hide status message", 2, logPad);
                 this.statusBarSpace.hide();
             }
         }
-        log.methodDone("task start/stop show/hide message", 2, logPad);
+        this.wrapper.log.methodDone("task start/stop show/hide message", 2, logPad);
     }
 
 
@@ -171,13 +166,13 @@ export class TaskWatcher implements Disposable
 
     private async taskStartEvent(e: TaskStartEvent): Promise<void>
     {
-        const taskMap = this.treeManager.getTaskMap(),
-              taskTree = this.treeManager.getTaskTree(),
+        const taskMap = this.wrapper.treeManager.getTaskMap(),
+              taskTree = this.wrapper.treeManager.getTaskTree(),
               task = e.execution.task,
               treeId = task.definition.taskItemId,
-              isMapEmpty = util.isObjectEmpty(taskMap);
+              isMapEmpty = this.wrapper.utils.isObjectEmpty(taskMap);
 
-        log.methodStart("task started event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
+        this.wrapper.log.methodStart("task started event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 
         //
         // If taskMap is empty, then this view has not yet been made visible, an there's nothing
@@ -195,10 +190,10 @@ export class TaskWatcher implements Disposable
                 {
                     return;
                 }
-                log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
-                          `the task tree is non-null and holds ${taskTree.length} folders (task start event)`,
-                          [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
-                          [ "task source", task.source ], [ "task type", task.definition.type ]]);
+                this.wrapper.log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
+                                       `the task tree is non-null and holds ${taskTree.length} folders (task start event)`,
+                                       [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
+                                       [ "task source", task.source ], [ "task type", task.definition.type ]]);
             }
         }
         else
@@ -210,19 +205,19 @@ export class TaskWatcher implements Disposable
             this._onDidRunningTasksChange.fire({ tasks: [], task, treeId, isRunning: true });
         }
 
-        log.methodDone("task started event", 1);
+        this.wrapper.log.methodDone("task started event", 1);
     }
 
 
     private async taskFinishedEvent(e: TaskEndEvent): Promise<void>
     {
-        const taskMap = this.treeManager.getTaskMap(),
-              taskTree = this.treeManager.getTaskTree(),
+        const taskMap = this.wrapper.treeManager.getTaskMap(),
+              taskTree = this.wrapper.treeManager.getTaskTree(),
               task = e.execution.task,
               treeId = task.definition.taskItemId,
-              isMapEmpty = util.isObjectEmpty(taskMap);
+              isMapEmpty = this.wrapper.utils.isObjectEmpty(taskMap);
 
-        log.methodStart("task finished event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
+        this.wrapper.log.methodStart("task finished event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 
         this.showStatusMessage(task, "  "); // hides
 
@@ -245,10 +240,10 @@ export class TaskWatcher implements Disposable
                 {
                     return;
                 }
-                log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
-                          `the task tree is non-null and holds ${taskTree.length} folders (task start event)`,
-                          [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
-                          [ "task source", task.source ], [ "task type", task.definition.type ]]);
+                this.wrapper.log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
+                                       `the task tree is non-null and holds ${taskTree.length} folders (task start event)`,
+                                       [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
+                                       [ "task source", task.source ], [ "task type", task.definition.type ]]);
             }
         }
         else {
@@ -257,7 +252,7 @@ export class TaskWatcher implements Disposable
             this._onDidRunningTasksChange.fire({ tasks: [], task, treeId, isRunning: false });
         }
 
-        log.methodDone("task finished event", 1);
+        this.wrapper.log.methodDone("task finished event", 1);
     }
 
 }

@@ -1,6 +1,7 @@
 
 import { TaskItem } from "./item";
 import { TeWrapper } from "../lib/wrapper";
+import { TaskTreeManager } from "./treeManager";
 import { getDateDifference } from "../lib/utils/utils";
 import { ConfigProps, StorageProps } from "../lib/constants";
 import { Disposable, EventEmitter, tasks, Event, Task } from "vscode";
@@ -27,11 +28,14 @@ export class TaskUsageTracker implements Disposable
     private readonly _onDidFamousTasksChange: EventEmitter<ITeTaskChangeEvent>;
 
 
-    constructor(private readonly wrapper: TeWrapper)
+    constructor(private readonly wrapper: TeWrapper, treeManager: TaskTreeManager)
     {
         this.log = wrapper.log;
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
-        this._disposables.push(this._onDidFamousTasksChange);
+        this._disposables.push(
+            this._onDidFamousTasksChange,
+			treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this)
+        );
     }
 
 
@@ -55,7 +59,9 @@ export class TaskUsageTracker implements Disposable
         running: false,
         source: "N/A",
         treeId: "N/A",
-        definition: { type: "N/A" },
+        definition: {
+            type: "N/A"
+        },
         runCount: {
             today: 0,
             yesterday: 0,
@@ -143,9 +149,15 @@ export class TaskUsageTracker implements Disposable
     getMostUsedTask = async (): Promise<ITeTask> => (await this.getStore()).taskMostUsed;
 
 
+    private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) =>
+    {
+    };
+
+
     track = async(taskItem: TaskItem, logPad: string) =>
     {
-        const taskName = `${taskItem.task.name} (${taskItem.task.source})`,
+        const stats = await this.getStore(),
+              taskName = `${taskItem.task.name} (${taskItem.task.source})`,
               specTaskListLength = this.wrapper.config.get<number>(ConfigProps.SpecialFolders_NumLastTasks);
 
         this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
@@ -157,41 +169,48 @@ export class TaskUsageTracker implements Disposable
         //
         // Convert to IPC ready ITeTask
         //
-        const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], "famous", false, usage.count)[0];
-
-        //
-        // Remove from list if exists, will be re-added in following steps
-        //
-        const stats = await this.getStore(),
-              nITaskIdx = stats.famous.findIndex(t => t.treeId === taskItem.id);
-        if (nITaskIdx !== -1) {
-            stats.famous.splice(nITaskIdx, 1);
-        }
+        const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], "all", false, usage)[0];
 
         //
         // Add  to 'famous tasks' list maybe
         //
         let added = false,
-            isFamous = false;
+            famousTasksChanged = false,
+            nITaskIdx = stats.famous.findIndex(t => t.treeId === taskItem.id);
+        if (nITaskIdx !== -1) {
+            stats.famous.splice(nITaskIdx, 1);
+        }
         for (let f = 0; f < stats.famous.length; f++)
         {
             if (usage.count.total > stats.famous[f].runCount.total)
             {
-                stats.famous.splice(f, 0, iTask);
+                stats.famous.splice(f, 0, { ...iTask, ...{ type: "famous" }});
                 if (stats.famous.length > specTaskListLength) {
                     stats.famous.pop();
                 }
                 if (f === 0) { // There's a new most famous/used task
-                    stats.taskMostUsed = { ...iTask };
+                    stats.taskMostUsed = { ...iTask, ...{ type: "famous" }};
                 }
-                added = isFamous = true;
+                added = famousTasksChanged = true;
                 break;
             }
         }
         if (!added && stats.famous.length < specTaskListLength)
         {
-            isFamous = true;
-            stats.famous.push(iTask);
+            famousTasksChanged = true;
+            stats.famous.push({ ...iTask, ...{ type: "famous" }});
+        }
+
+        //
+        // Add to `last tasks` list
+        //
+        nITaskIdx = stats.last.findIndex(t => t.treeId === taskItem.id);
+        if (nITaskIdx !== -1) {
+            stats.last.splice(nITaskIdx, 1);
+        }
+        stats.last.unshift({ ...iTask, ...{ type: "last" }});
+        if (stats.last.length > specTaskListLength) {
+            stats.last.pop();
         }
 
         //
@@ -202,8 +221,8 @@ export class TaskUsageTracker implements Disposable
 
         await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
 
-        if (isFamous) {
-            this._onDidFamousTasksChange.fire({ task: iTask, tasks: [ taskItem.task ], type: "famous" });
+        if (famousTasksChanged) {
+            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ type: "famous" }}, tasks: [ taskItem.task ], type: "famous" });
         }
 
         this.log.methodDone("save task run details", 2, logPad);

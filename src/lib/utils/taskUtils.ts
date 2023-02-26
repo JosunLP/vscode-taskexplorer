@@ -3,8 +3,8 @@
 import { storage } from "./storage";
 import { Task, tasks } from "vscode";
 import { properCase } from "./commonUtils";
-import { ITeTask, ITeTrackedUsageCount, TeTaskListType } from "../../interface";
 import { UsageWatcher } from "../watcher/usageWatcher";
+import { ITeTask, ITeTrackedUsage, TeTaskListType } from "../../interface";
 
 
 export function getScriptTaskTypes(): string[]
@@ -100,7 +100,16 @@ export function isWatchTask(source: string)
 }
 
 
-export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: TeTaskListType, isRunning?: boolean, usageCount?: ITeTrackedUsageCount): ITeTask[] =>
+/**
+ * @method toITask
+ * @since 3.0.0
+ * @param usageTracker The application usage tracker instance
+ * @param teTasks Array of ITeTask[]
+ * @param listType Task list type
+ * @param isRunning Provide when on;y when one task is being converted
+ * @param usage Provide when on;y when one task is being converted
+ */
+export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: TeTaskListType, isRunning?: boolean, usage?: ITeTrackedUsage): ITeTask[] =>
 {
     return teTasks.map<ITeTask>(t =>
     {
@@ -108,12 +117,12 @@ export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: T
               tasks.taskExecutions.filter(e => e.task.name === t.name && e.task.source === t.source &&
                                           e.task.scope === t.scope && e.task.definition.path === t.definition.path).length > 0;
         let runCount;
-        if (usageCount) {
-            runCount = { ...usageCount };
+        if (usage) {
+            runCount = { ...usage.count };
         }
         else
         {
-            const usage = usageTracker.get(`task:${t.definition.taskItemId}`);
+            usage = usageTracker.get(`task:${t.definition.taskItemId}`);
             if (usage) {
                 runCount = { ...usage.count };
             }
