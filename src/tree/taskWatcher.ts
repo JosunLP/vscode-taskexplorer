@@ -55,7 +55,7 @@ export class TaskWatcher implements Disposable
     }
 
 
-    fireTaskChangeEvents(taskItem: TaskItem, logPad: string, logLevel: number): void
+    private fireTaskChangeEvents(taskItem: TaskItem, isRunning: boolean, logPad: string, logLevel: number): void
     {
         const taskTree = this.wrapper.treeManager.getTaskTree();
         /* istanbul ignore if */
@@ -124,6 +124,12 @@ export class TaskWatcher implements Disposable
                 this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[1]);
             }
         }
+
+        const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], "running")[0];
+        // const iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this.wrapper.treeManager.runningTasks, "running");
+        this._onTaskStatusChange.fire({ task: iTask, treeId: taskItem.id, isRunning });
+        // this._onDidRunningTasksChange.fire({ tasks: iTasks, task: iTask, treeId: taskItem.id, isRunning });
+        this._onDidRunningTasksChange.fire({ tasks: [], task: iTask, treeId: taskItem.id, isRunning });
 
         this.wrapper.log.methodDone("fire task change events", logLevel, logPad);
     }
@@ -198,10 +204,7 @@ export class TaskWatcher implements Disposable
         {
             const taskItem = taskMap[treeId] as TaskItem;
             this.showStatusMessage(task, "   ");
-            this.fireTaskChangeEvents(taskItem, "   ", 1);
-            const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ task ], "running")[0];
-            this._onTaskStatusChange.fire({ task: iTask, treeId, isRunning: true });
-            this._onDidRunningTasksChange.fire({ tasks: [], task: iTask, treeId, isRunning: true });
+            this.fireTaskChangeEvents(taskItem, true, "   ", 1);
         }
 
         this.wrapper.log.methodDone("task started event", 1);
@@ -246,10 +249,8 @@ export class TaskWatcher implements Disposable
             }
         }
         else {
-            this.fireTaskChangeEvents(taskMap[treeId] as TaskItem, "   ", 1);
-            const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ task ], "running")[0];
-            this._onTaskStatusChange.fire({ task: iTask, treeId, isRunning: false });
-            this._onDidRunningTasksChange.fire({ tasks: [], task: iTask, treeId, isRunning: false });
+            const taskItem = taskMap[treeId] as TaskItem;
+            this.fireTaskChangeEvents(taskItem, false, "   ", 1);
         }
 
         this.wrapper.log.methodDone("task finished event", 1);
