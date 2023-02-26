@@ -111,6 +111,12 @@ svg {
     padding-left: 3px;
 }
 
+.homeview-place-status-icon-td {
+    text-align: left;
+    width: 1%;
+    padding-left: 3px;
+}
+
 .homeview-license-status-label {
     line-height: 12px;
 }
@@ -122,6 +128,13 @@ svg {
 }
 
 .homeview-session-status-icon {
+    line-height: 12px !important;
+    padding: 0px;
+    margin-top: -3px;
+    opacity: 0.85;
+}
+
+.homeview-place-status-icon {
     line-height: 12px !important;
     padding: 0px;
     margin-top: -3px;
