@@ -3,7 +3,7 @@ import { Globs } from "../constants";
 import { TeWrapper } from "../wrapper";
 import { loadMessageBundle } from "vscode-nls";
 import { Disposable, Uri, window } from "vscode";
-import { removeFromExcludes } from "../addToExcludes";
+import { removeFromExcludes } from "../utils/addToExcludes";
 import { Commands, executeCommand, registerCommand } from "./command";
 
 const localize = loadMessageBundle();

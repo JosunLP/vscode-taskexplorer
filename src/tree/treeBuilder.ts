@@ -1,13 +1,13 @@
 
-import { log } from "../lib/log/log";
 import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
+import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
 import { Strings } from "../lib/constants";
 import * as utils from "../lib/utils/utils";
-import * as sortTasks from "../lib/sortTasks";
 import { TaskTreeManager } from "./treeManager";
+import * as sortTasks from "../lib/utils/sortTasks";
 import { SpecialTaskFolder } from "./specialFolder";
 import { IDictionary, TaskMap } from "../interface";
 import { statusBarItem } from "../lib/statusBarItem";

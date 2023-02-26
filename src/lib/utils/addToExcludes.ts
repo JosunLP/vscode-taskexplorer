@@ -1,8 +1,8 @@
 
 
-import { log } from "./log/log";
-import { configuration } from "./utils/configuration";
-import { pushIfNotExists, removeFromArray } from "./utils/utils";
+import { log } from "../log/log";
+import { configuration } from "./configuration";
+import { pushIfNotExists, removeFromArray } from "./utils";
 
 
 export const addToExcludes = async(paths: string[], excludesList: string, logPad: string) =>

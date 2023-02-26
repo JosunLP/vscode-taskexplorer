@@ -3,18 +3,14 @@ import { dirname } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { TeWrapper } from "../lib/wrapper";
-import { TaskWatcher } from "./taskWatcher";
 import { pathExists } from "../lib/utils/fs";
-import { TaskTreeManager } from "./treeManager";
-import { getTerminal } from "../lib/getTerminal";
-import { SpecialTaskFolder } from "./specialFolder";
 import { isScriptType } from "../lib/utils/taskUtils";
-import { TaskUsageTracker } from "./taskUsageTracker";
+import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "../providers/script";
 import { getPackageManager, timeout } from "../lib/utils/utils";
 import { findDocumentPosition } from "../lib/findDocumentPosition";
 import { Commands, registerCommand } from "../lib/command/command";
-import { ILog, ITeTaskManager, ITeTaskChangeEvent, TaskMap, ITeTask } from "../interface";
+import { ILog, ITeTaskManager, TaskMap, ITeTask } from "../interface";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder, Event

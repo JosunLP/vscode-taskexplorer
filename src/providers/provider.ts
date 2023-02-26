@@ -1,14 +1,14 @@
 
+import { extname } from "path";
 import { log } from "../lib/log/log";
 import { Globs } from "../lib/constants";
-import { extname } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { isTaskIncluded } from "../lib/isTaskIncluded";
 import { configuration } from "../lib/utils/configuration";
+import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { isDirectory, pathExistsSync } from "../lib/utils/fs";
 import { Uri, Task, WorkspaceFolder, workspace } from "vscode";
-import { ITaskExplorerProvider } from "../interface/ITaskProvider";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
+import { ITaskExplorerProvider } from "../interface/ITaskProvider";
 import { isExcluded, isTaskTypeEnabled, showMaxTasksReachedMessage } from "../lib/utils/utils";
 
 

@@ -5,20 +5,19 @@ import { TaskFolder } from "./folder";
 import { TeTreeView } from "./treeView";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { TaskManager } from "./taskManager";
 import { isDirectory } from "../lib/utils/fs";
 import { TaskTreeBuilder } from "./treeBuilder";
-import { getTerminal } from "../lib/getTerminal";
 import { FavoritesFolder } from "./favoritesFolder";
 import { LastTasksFolder } from "./lastTasksFolder";
 import { statusBarItem } from "../lib/statusBarItem";
-import { addToExcludes } from "../lib/addToExcludes";
-import { isTaskIncluded } from "../lib/isTaskIncluded";
+import { getTerminal } from "../lib/utils/getTerminal";
+import { addToExcludes } from "../lib/utils/addToExcludes";
+import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Commands, registerCommand } from "../lib/command/command";
 import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskUtils";
+import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask } from "../interface";
 import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
-import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeTask, ITeRunningTaskChangeEvent } from "../interface";
 
 
 export class TaskTreeManager implements ITeTreeManager, Disposable

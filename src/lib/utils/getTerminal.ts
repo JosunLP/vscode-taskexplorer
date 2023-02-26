@@ -1,8 +1,8 @@
 
-import { log } from "./log/log";
 import { basename } from "path";
-import { TaskItem } from "../tree/item";
+import { log } from "../log/log";
 import { window, Terminal } from "vscode";
+import { TaskItem } from "../../tree/item";
 
 
 export const getTerminal = (taskItem: TaskItem, logPad = ""): Terminal | undefined =>

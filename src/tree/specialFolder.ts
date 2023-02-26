@@ -3,8 +3,8 @@ import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { sortTasks } from "../lib/sortTasks";
 import { TaskTreeManager } from "./treeManager";
+import { sortTasks } from "../lib/utils/sortTasks";
 import { IDictionary, ILog, ITeTaskChangeEvent, TeTaskListType } from "../interface";
 import {
     ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,

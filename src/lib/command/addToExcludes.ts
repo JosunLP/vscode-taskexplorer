@@ -4,7 +4,7 @@ import { Globs } from "../constants";
 import { TeWrapper } from "../wrapper";
 import { loadMessageBundle } from "vscode-nls";
 import { Disposable, Uri, window } from "vscode";
-import { addToExcludes } from "../addToExcludes";
+import { addToExcludes } from "../utils/addToExcludes";
 import { Commands, executeCommand, registerCommand } from "./command";
 
 const localize = loadMessageBundle();

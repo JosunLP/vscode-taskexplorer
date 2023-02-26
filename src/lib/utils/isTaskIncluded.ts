@@ -1,13 +1,13 @@
 
-import { log } from "./log/log";
 import { join } from "path";
 import { Task } from "vscode";
-import { TeWrapper } from "./wrapper";
-import { readFileSync } from "./utils/fs";
-import { configuration } from "./utils/configuration";
-import { isString, isTaskTypeEnabled, isWorkspaceFolder } from "./utils/utils";
+import { log } from "../log/log";
+import { readFileSync } from "./fs";
+import { TeWrapper } from "../wrapper";
+import { configuration } from "./configuration";
+import { isString, isTaskTypeEnabled, isWorkspaceFolder } from "./utils";
 //
-// FOr JSON5, if I don't specifically import index.js with 'require', then the
+// For JSON5, if I don't specifically import index.js with 'require', then the
 // damn mjs module file is included by webpack.  I'm sure there's a way to have
 // it import the commonjs module nicely, but couldn't find a way. JSON5 is needed
 // to read the VSCode tasks.json file since it allows comments, and VSCode doesn't
