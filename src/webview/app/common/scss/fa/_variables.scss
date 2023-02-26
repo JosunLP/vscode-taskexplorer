@@ -48,6 +48,16 @@ $fa-stack-z-index       : auto !default;
 $fa-font-display        : block !default;
 $fa-font-path           : "../font" !default;
 
+$fa-var-0: \30;
+$fa-var-1: \31;
+$fa-var-2: \32;
+$fa-var-3: \33;
+$fa-var-4: \34;
+$fa-var-5: \35;
+$fa-var-6: \36;
+$fa-var-7: \37;
+$fa-var-8: \38;
+$fa-var-9: \39;
 $fa-var-circle-chevron-right: \f138;
 $fa-var-chevron-circle-right: \f138;
 $fa-var-chevrons-left: \f323;
@@ -87,6 +97,16 @@ $fa-var-notdef: \e1fe;
 
 
 $fa-icons: (
+  "0": $fa-var-0,
+  "1": $fa-var-1,
+  "2": $fa-var-2,
+  "3": $fa-var-3,
+  "4": $fa-var-4,
+  "5": $fa-var-5,
+  "6": $fa-var-6,
+  "7": $fa-var-7,
+  "8": $fa-var-8,
+  "9": $fa-var-9,
   "circle-chevron-right": $fa-var-circle-chevron-right,
   "chevron-circle-right": $fa-var-chevron-circle-right,
   "chevrons-left": $fa-var-chevrons-left,
