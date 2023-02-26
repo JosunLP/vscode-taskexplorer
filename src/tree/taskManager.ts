@@ -25,20 +25,13 @@ export class TaskManager implements ITeTaskManager, Disposable
 {
 
     private log: ILog;
-    private readonly _taskWatcher: TaskWatcher;
     private readonly _disposables: Disposable[] = [];
-    private readonly _taskUsageTracker: TaskUsageTracker;
 
 
-    constructor(private readonly wrapper: TeWrapper, treeManager: TaskTreeManager, private readonly specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
+    constructor(private readonly wrapper: TeWrapper)
     {
         this.log = wrapper.log;
-        this.specialFolders = specialFolders;
-        this._taskWatcher = new TaskWatcher(wrapper, specialFolders);
-        this._taskUsageTracker = new TaskUsageTracker(wrapper, treeManager);
         this._disposables.push(
-            this._taskWatcher,
-            this._taskUsageTracker,
 			registerCommand(Commands.SetPinned, (item: ITeTask) => this.setPinned(item), this),
             registerCommand(Commands.Run,  (item: TaskItem | ITeTask) => this.run(this.getTask(item)), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
@@ -62,19 +55,6 @@ export class TaskManager implements ITeTaskManager, Disposable
         this._disposables.forEach(d => d.dispose());
         this._disposables.splice(0);
     }
-
-
-	get onDidFamousTasksChange(): Event<ITeTaskChangeEvent> {
-		return this._taskUsageTracker.onDidFamousTasksChange;
-	}
-
-	get taskWatcher(): TaskWatcher {
-		return this._taskWatcher;
-	}
-
-	get usageTracker(): TaskUsageTracker {
-		return this._taskUsageTracker;
-	}
 
 
     getTask =  (taskItem: TaskItem | ITeTask) =>
@@ -342,8 +322,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         this.log.methodStart("run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
         task.presentationOptions.reveal = noTerminal !== true ? TaskRevealKind.Always : TaskRevealKind.Silent;
         const exec = await tasks.executeTask(task);
-        await this._taskUsageTracker.track(taskItem, logPad);
-        await this.specialFolders.lastTasks.saveTask(taskItem, logPad);
+        await this.wrapper.treeManager.lastTasksFolder.saveTask(taskItem, logPad);
         this.log.methodDone("run task", 1, logPad, [[ "success", !!exec ]]);
         return exec;
     };

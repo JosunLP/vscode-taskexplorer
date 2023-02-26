@@ -35,9 +35,9 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			wrapper.treeManager.onDidAllTasksChange(this.onAllTasksChanged, this),
 			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this),
 			wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
-			wrapper.treeManager.onDidFamousTasksChange(this.onFamousTasksChanged, this),
-			wrapper.treeManager.onDidRunningTasksChange(this.onRunningTasksChanged, this),
-			wrapper.treeManager.onDidTaskStatusChange(this.onTaskStatusChanged, this)
+			wrapper.taskUsageTracker.onDidFamousTasksChange(this.onFamousTasksChanged, this),
+			wrapper.taskWatcher.onDidRunningTasksChange(this.onRunningTasksChanged, this),
+			wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this)
 		);
 	}
 
@@ -47,7 +47,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 		return {
 			...(await super.getState()),
 			last: toITask(this.wrapper.usage, this.wrapper.treeManager.lastTasks, "last"),
-			favorites: toITask(this.wrapper.usage, this.wrapper.treeManager.favoriteTasks, "favorites"),
+			favorites: toITask(this.wrapper.usage, this.wrapper.treeManager.favoritesTasks, "favorites"),
 			running: toITask(this.wrapper.usage, this.wrapper.treeManager.runningTasks, "running"),
 			famous: await this.wrapper.treeManager.famousTasks,
 			tasks: toITask(this.wrapper.usage, this.wrapper.treeManager.getTasks(), "all"),

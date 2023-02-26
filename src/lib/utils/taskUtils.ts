@@ -2,9 +2,9 @@
 
 import { storage } from "./storage";
 import { Task, tasks } from "vscode";
-import { properCase } from "./commonUtils";
+import { pickBy, properCase } from "./commonUtils";
 import { UsageWatcher } from "../watcher/usageWatcher";
-import { ITeTask, ITeTrackedUsage, TeTaskListType } from "../../interface";
+import { ITaskDefinition, ITeTask, ITeTrackedUsage, TeTaskListType } from "../../interface";
 
 
 export function getScriptTaskTypes(): string[]
@@ -140,7 +140,7 @@ export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: T
             }
         }
         return {
-            definition: t.definition,
+            definition: pickBy<ITaskDefinition>(t.definition, (k => k !== "uri")),
             listType,
             name: t.name,
             pinned: isPinned(t.definition.taskItemId, listType),

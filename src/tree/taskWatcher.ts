@@ -15,14 +15,12 @@ export class TaskWatcher implements Disposable
 
     private statusBarSpace: StatusBarItem;
     private disposables: Disposable[];
-    private specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder };
     private readonly _onTaskStatusChange: EventEmitter<ITeTaskStatusChangeEvent>;
     private readonly _onDidRunningTasksChange: EventEmitter<ITeRunningTaskChangeEvent>;
 
 
-    constructor(private readonly wrapper: TeWrapper, specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
+    constructor(private readonly wrapper: TeWrapper)
     {
-        this.specialFolders = specialFolders;
         this.statusBarSpace = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this.statusBarSpace.tooltip = "Task Explorer Running Task";
         this._onTaskStatusChange = new EventEmitter<ITeTaskStatusChangeEvent>();
@@ -103,7 +101,7 @@ export class TaskWatcher implements Disposable
         //
         // Fire change event for the 'Last Tasks' folder if the task exists there
         //
-        if (this.specialFolders.lastTasks.hasTask(taskItem))
+        if (this.wrapper.treeManager.lastTasksFolder.hasTask(taskItem))
         {   //
             // 'Last Tasks' folder, if enabled, will always be the 1st tree item
             //
@@ -113,12 +111,12 @@ export class TaskWatcher implements Disposable
         //
         // Fire change event for the 'Favorites' folder if the task exists there
         //
-        if (this.specialFolders.favorites.hasTask(taskItem))
+        if (this.wrapper.treeManager.favoritesFolder.hasTask(taskItem))
         {   //
             // 'Favorites' folder, if enabled, can be the 1st tree item or 2d, depending on if
             // the 'Last Tasks' folder is enabled, which is always the 1st item in the tree if enabled
             //
-            if (taskTree[0] && taskTree[0].label === this.specialFolders.favorites.label)
+            if (taskTree[0] && taskTree[0].label === this.wrapper.treeManager.favoritesFolder.label)
             {
                 this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[0]);
             }

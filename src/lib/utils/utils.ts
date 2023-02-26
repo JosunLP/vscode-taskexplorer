@@ -3,6 +3,7 @@ import { log } from "../log/log";
 import minimatch = require("minimatch");
 import { TaskFile } from "../../tree/file";
 import { TaskItem } from "../../tree/item";
+import { IDictionary } from "src/interface";
 import { basename, extname, sep } from "path";
 import { Globs, Strings } from "../constants";
 import { configuration } from "./configuration";

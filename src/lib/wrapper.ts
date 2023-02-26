@@ -14,8 +14,9 @@ import * as taskUtils from "./utils/taskUtils";
 import { IStorage } from "../interface/IStorage";
 // import { getUuid } from "@env/crypto";
 import { getUuid } from "../lib/env/node/crypto";
-import * as commonUtils from "./utils/commonUtils";
 import { TaskManager } from "../tree/taskManager";
+import { TaskWatcher } from "../tree/taskWatcher";
+import * as commonUtils from "./utils/commonUtils";
 import { ContextKeys, TeContext } from "./context";
 import { AntTaskProvider } from "../providers/ant";
 import { HomeView } from "../webview/view/homeView";
@@ -80,18 +81,21 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _usage: UsageWatcher;
 	private readonly _teContext: TeContext;
 	private readonly _fileCache: TeFileCache;
+    private readonly _taskWatcher: TaskWatcher;
 	private readonly _licensePage: LicensePage;
-	private readonly _taskMonitorPage: MonitorPage;
+    private readonly _taskManager: TaskManager;
 	private readonly _disposables: Disposable[];
 	private readonly _context: ExtensionContext;
 	private readonly _fileWatcher: TeFileWatcher;
 	private readonly _treeManager: TaskTreeManager;
 	private readonly _taskUsageView: TaskUsageView;
 	private readonly _taskCountView: TaskCountView;
+	private readonly _taskMonitorPage: MonitorPage;
 	private readonly _configuration: IConfiguration;
 	private readonly _configWatcher: TeConfigWatcher;
 	// private readonly _telemetry: TelemetryService;
 	private readonly _licenseManager: LicenseManager;
+    private readonly _taskUsageTracker: TaskUsageTracker;
 	private readonly _releaseNotesPage: ReleaseNotesPage;
 	private readonly _previousVersion: string | undefined;
 	private readonly _parsingReportPage: ParsingReportPage;
@@ -119,8 +123,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._configWatcher = new TeConfigWatcher(this);
 
 		this._licenseManager = new LicenseManager(this);
-		this._treeManager = new TaskTreeManager(this);
 		this._usage = new UsageWatcher(this);
+
+		this._treeManager = new TaskTreeManager(this);
+        this._taskManager = new TaskManager(this);
+        this._taskWatcher = new TaskWatcher(this);
+        this._taskUsageTracker = new TaskUsageTracker(this);
 
 		this._homeView = new HomeView(this);
 		this._taskCountView = new TaskCountView(this);
@@ -165,6 +173,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._disposables = [
 			this._usage,
 			this._homeView,
+            this._taskWatcher,
+            this._taskUsageTracker,
+            this._taskManager,
 			this._treeManager,
 			this._licensePage,
 			this._taskMonitorPage,
@@ -517,11 +528,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 	}
 
 	get taskManager(): TaskManager {
-		return this._treeManager.taskManager;
+		return this._taskManager;
 	}
 
 	get taskUsageTracker(): TaskUsageTracker {
-		return this._treeManager.taskManager.usageTracker;
+		return this._taskUsageTracker;
 	}
 
 	get taskMonitorPage(): MonitorPage {
@@ -534,6 +545,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get taskUtils(): typeof taskUtils {
 		return taskUtils;
+	}
+
+	get taskWatcher(): TaskWatcher {
+		return this._taskWatcher;
 	}
 
 	get tests(): boolean {

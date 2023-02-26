@@ -15,7 +15,7 @@ export interface ITeTrackedUsageCount
 
 export interface ITeTrackedUsage {
 	count: ITeTrackedUsageCount;
-	firstUsedAt: number;
+	first: number;
 	timestamp: number;
 	timestamps: number[];
 }

@@ -82,7 +82,7 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 		if (!usage)
 		{
 			usage = {
-				firstUsedAt: timestamp,
+				first: timestamp,
 				timestamp,
 				timestamps: [ timestamp ],
 				count: {

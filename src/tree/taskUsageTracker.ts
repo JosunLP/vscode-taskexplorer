@@ -4,9 +4,8 @@ import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
 import { getDateDifference } from "../lib/utils/utils";
 import { ConfigProps, StorageProps } from "../lib/constants";
-import { ILog, ITeTask, ITeTaskChangeEvent, ITeTrackedUsage } from "../interface";
 import { Disposable, EventEmitter, tasks, Event, Task } from "vscode";
-import { UsageWatcher } from "src/lib/watcher/usageWatcher";
+import { IDictionary, ILog, ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeTrackedUsage } from "../interface";
 
 interface ITaskUsageStats
 {
@@ -14,10 +13,11 @@ interface ITaskUsageStats
     famous: ITeTask[];
     favorites: ITeTask[];
     last: ITeTask[];
-    lastRuntime: number;
     running: ITeTask[];
+    runtimes: IDictionary<any>;
     taskLastRan: ITeTask;
     taskMostUsed: ITeTask;
+    timeLastRan: number;
 }
 
 
@@ -29,29 +29,15 @@ export class TaskUsageTracker implements Disposable
     private readonly _onDidFamousTasksChange: EventEmitter<ITeTaskChangeEvent>;
 
 
-    constructor(private readonly wrapper: TeWrapper, treeManager: TaskTreeManager)
+    constructor(private readonly wrapper: TeWrapper)
     {
         this.log = wrapper.log;
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
-        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage);
-        if (!store)
-        {
-            store = {
-                famous: [],
-                favorites: [],
-                last: [],
-                all: [],
-                running: [],
-                lastRuntime: 0,
-                taskLastRan: this.getEmptyITask(),
-                taskMostUsed: this.getEmptyITask()
-            }; // kind of a hack here, should await or have a sep init(), it'll be fine though
-            this.wrapper.storage.update(StorageProps.TaskUsage, store);
-        }
         this._disposables.push(
             this._onDidFamousTasksChange,
-			treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
-			treeManager.onDidLastTasksChange(this.onLastTasksChanged, this)
+            wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
+			wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
+			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this)
         );
     }
 
@@ -61,7 +47,6 @@ export class TaskUsageTracker implements Disposable
         this._disposables.forEach(d => d.dispose());
         this._disposables.splice(0);
     }
-
 
 
     get famousTasks(): ITeTask[] {
@@ -101,7 +86,25 @@ export class TaskUsageTracker implements Disposable
     });
 
 
-    private getStore = (): ITaskUsageStats => this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage) as ITaskUsageStats;
+    private getStore = (): ITaskUsageStats =>
+    {
+        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage);
+        if (!store)
+        {
+            store = {
+                famous: [],
+                favorites: [],
+                last: [],
+                all: [],
+                running: [],
+                runtimes: [],
+                timeLastRan: 0,
+                taskLastRan: this.getEmptyITask(),
+                taskMostUsed: this.getEmptyITask()
+            };
+        }
+        return store;
+    };
 
 
     getAvgRunCount = (period: "d" | "w", logPad: string): number =>
@@ -143,9 +146,10 @@ export class TaskUsageTracker implements Disposable
 
     getLastRanTaskTime = (): string =>
     {
-        const  tm = this.getStore().lastRuntime;
+        const  tm = this.getStore().timeLastRan;
         if (tm) {
-            return new Date(tm).toLocaleDateString() + " " + new Date(tm).toLocaleTimeString();
+            const dt = new Date(tm);
+            return dt.toLocaleDateString() + " " + dt.toLocaleTimeString();
         }
         return "N/A";
     };
@@ -155,7 +159,7 @@ export class TaskUsageTracker implements Disposable
     {
         const stats = this.getStore();
         stats.favorites = [ ...e.tasks ];
-        await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
+        await this.saveStore(stats);
     };
 
 
@@ -163,37 +167,62 @@ export class TaskUsageTracker implements Disposable
     {
         const stats = this.getStore();
         stats.last = [ ...e.tasks ];
-        await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
+        await this.saveStore(stats);
     };
 
 
-    track = async(taskItem: TaskItem, logPad: string) =>
+    private onTaskStatusChanged = async(e: ITeTaskStatusChangeEvent) =>
+    {
+        this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [[ "tree id", e.task.treeId ]]);
+        if (e.isRunning)
+        {
+            e.task.definition.startTime  = Date.now();
+            await this.track(e.task, "   ");
+        }
+        else
+        {
+            const stats = this.getStore();
+            if (!stats.runtimes[e.treeId]) {
+                stats.runtimes[e.treeId] = [];
+            }
+            stats.runtimes[e.treeId].push({
+                start: e.task.definition.startTime,
+                end: Date.now(),
+                time: e.task.definition.endTime - e.task.definition.startTime
+            });
+            delete e.task.definition.startTime;
+            this.saveStore(stats);
+        }
+        this.log.methodDone("task usage tracker: on running task changed", 2, "");
+    };
+
+
+    private saveStore = (store: ITaskUsageStats) => this.wrapper.storage.update(StorageProps.TaskUsage, store);
+
+
+    private track = async(iTask: ITeTask, logPad: string) =>
     {
         const stats = this.getStore(),
-              taskName = `${taskItem.task.name} (${taskItem.task.source})`;
+              taskName = `${iTask.name} (${iTask.source})`;
 
         this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
         //
         // Process with Usage Tracker
         //
-        const usage = await this.wrapper.usage.track(`${this._usageKey}${taskItem.id}`);
-        //
-        // Convert to IPC ready ITeTask
-        //
-        const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], "all", false, usage)[0];
+        const usage = await this.wrapper.usage.track(`${this._usageKey}${iTask.treeId}`);
         //
         // Add  to 'famous tasks' list, maybe
         //
-        const famousChanged = this.trackFamous(taskItem, iTask, stats, usage);
+        const famousChanged = this.trackFamous(iTask, stats, usage);
         //
         // Record this task as the last task ran and the time it was ran
         //
-        stats.lastRuntime = Date.now();
+        stats.timeLastRan = Date.now();
         stats.taskLastRan = { ...iTask };
         //
         // Persist / save stats
         //
-        await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
+        await this.saveStore(stats);
         //
         // Maybe notify any listeners that the `famous tasks` list has changed
         //
@@ -204,7 +233,7 @@ export class TaskUsageTracker implements Disposable
     };
 
 
-    private trackFamous = (taskItem: TaskItem, iTask: ITeTask, stats: ITaskUsageStats, usage: ITeTrackedUsage) =>
+    private trackFamous = (iTask: ITeTask, stats: ITaskUsageStats, usage: ITeTrackedUsage) =>
     {
         let added = false,
             changed = false;
@@ -213,7 +242,7 @@ export class TaskUsageTracker implements Disposable
         // First remove this task from the list of it is present, it'll be put back
         // in the following steps
         //
-        const nITaskIdx = stats.famous.findIndex(t => t.treeId === taskItem.id);
+        const nITaskIdx = stats.famous.findIndex(t => t.treeId === iTask.treeId);
         if (nITaskIdx !== -1) {
             stats.famous.splice(nITaskIdx, 1);
         }

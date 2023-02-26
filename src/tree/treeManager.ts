@@ -25,7 +25,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 {
     private _tasks: Task[] = [];
     private refreshPending = false;
-    private _taskManager: TaskManager;
     private _treeBuilder: TaskTreeBuilder;
     private firstTreeBuildDone = false;
     private currentInvalidation: string | undefined;
@@ -60,7 +59,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         };
 
         this._treeBuilder = new TaskTreeBuilder(this, this._specialFolders);
-        this._taskManager = new TaskManager(wrapper, this, this._specialFolders);
 
         this._views = {
             taskExplorer: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer", "taskTreeExplorer"),
@@ -71,7 +69,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._onReady,
             this._onDidTasksChange,
             this._onDidTaskCountChange,
-            this._taskManager,
             this._treeBuilder,
             this._specialFolders.favorites,
             this._specialFolders.lastTasks,
@@ -103,10 +100,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 		return this._onDidTaskCountChange.event;
 	}
 
-	get onDidFamousTasksChange(): Event<ITeTaskChangeEvent> {
-		return this._taskManager.onDidFamousTasksChange;
-	}
-
 	get onDidFavoriteTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._specialFolders.favorites.onDidTasksChange;
 	}
@@ -115,23 +108,19 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 		return this._specialFolders.lastTasks.onDidTasksChange;
 	}
 
-    get onDidRunningTasksChange(): Event<ITeRunningTaskChangeEvent> {
-        return this._taskManager.taskWatcher.onDidRunningTasksChange;
-    }
-
-    get onDidTaskStatusChange(): Event<ITeTaskStatusChangeEvent> {
-        return this._taskManager.taskWatcher.onDidTaskStatusChange;
-    }
-
     get onReady(): Event<ITeTaskChangeEvent> {
         return this._onReady.event;
     }
 
     get famousTasks(): ITeTask[] {
-        return this._taskManager.usageTracker.famousTasks;
+        return this.wrapper.taskUsageTracker.famousTasks;
     }
 
-    get favoriteTasks(): Task[] {
+    get favoritesFolder(): FavoritesFolder {
+        return this._specialFolders.favorites;
+    }
+
+    get favoritesTasks(): Task[] {
         return this._specialFolders.favorites.taskFiles.map(f => f.task);
     }
 
@@ -144,7 +133,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
     get runningTasks(): Task[] {
-        return this._taskManager.usageTracker.getRunningTasks();
+        return this.wrapper.taskUsageTracker.getRunningTasks();
     }
 
     get views() {
@@ -152,7 +141,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
     get taskManager() {
-        return this._taskManager;
+        return this.wrapper.taskManager;
     }
 
     private addRemoveSpecialTaskLabel = async(taskItem: TaskItem) =>
