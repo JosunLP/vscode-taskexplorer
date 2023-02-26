@@ -128,7 +128,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
     get famousTasks(): ITeTask[] {
-        return this._taskManager.usageTracker.getFamousTasks();
+        return this._taskManager.usageTracker.famousTasks;
     }
 
     get favoriteTasks(): Task[] {
@@ -278,7 +278,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     private fetchTasks = async(logPad: string) =>
     {
-        let count = this._tasks.length;
+        const count = this._tasks.length;
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
         if (this._tasks.length === 0 || !this.currentInvalidation || this.currentInvalidation  === "Workspace" || this.currentInvalidation === "tsc")
         {

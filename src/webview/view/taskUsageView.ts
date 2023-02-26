@@ -49,8 +49,8 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	protected override onHtmlFinalize = async (html: string) =>
 	{
-    	const lastTime = await this.wrapper.taskUsageTracker.getLastRanTaskTime(),
-			  mostUsedTask = await this.wrapper.taskUsageTracker.getMostUsedTask();
+    	const lastTime = this.wrapper.taskUsageTracker.getLastRanTaskTime(),
+			  mostUsedTask = this.wrapper.taskUsageTracker.mostUsedTask;
 		html = html.replace(/\#\{taskUsage\.avgPerDay\}/g, this.wrapper.taskUsageTracker.getAvgRunCount("d", "").toString())
 				   .replace(/\#\{taskUsage\.avgPerWeek\}/g, this.wrapper.taskUsageTracker.getAvgRunCount("w", "").toString())
 				   .replace(/\#\{taskUsage\.mostUsedTask\}/g, this.wrapper.utils.textWithElipsis(mostUsedTask.name, 26))

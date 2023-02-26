@@ -33,6 +33,21 @@ export class TaskUsageTracker implements Disposable
     {
         this.log = wrapper.log;
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
+        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage);
+        if (!store)
+        {
+            store = {
+                famous: [],
+                favorites: [],
+                last: [],
+                all: [],
+                running: [],
+                lastRuntime: 0,
+                taskLastRan: this.getEmptyITask(),
+                taskMostUsed: this.getEmptyITask()
+            }; // kind of a hack here, should await or have a sep init(), it'll be fine though
+            this.wrapper.storage.update(StorageProps.TaskUsage, store);
+        }
         this._disposables.push(
             this._onDidFamousTasksChange,
 			treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
@@ -47,6 +62,15 @@ export class TaskUsageTracker implements Disposable
         this._disposables.splice(0);
     }
 
+
+
+    get famousTasks(): ITeTask[] {
+        return this.getStore().famous;
+    }
+
+    get mostUsedTask(): ITeTask {
+        return this.getStore().taskMostUsed;
+    }
 
 	get onDidFamousTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._onDidFamousTasksChange.event;
@@ -77,25 +101,7 @@ export class TaskUsageTracker implements Disposable
     });
 
 
-    private getStore = async(): Promise<ITaskUsageStats> =>
-    {
-        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage);
-        if (!store)
-        {
-            store = {
-                famous: [],
-                favorites: [],
-                last: [],
-                all: [],
-                running: [],
-                lastRuntime: 0,
-                taskLastRan: this.getEmptyITask(),
-                taskMostUsed: this.getEmptyITask()
-            };
-            await this.wrapper.storage.update(StorageProps.TaskUsage, store);
-        }
-        return store;
-    };
+    private getStore = (): ITaskUsageStats => this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage) as ITaskUsageStats;
 
 
     getAvgRunCount = (period: "d" | "w", logPad: string): number =>
@@ -135,12 +141,9 @@ export class TaskUsageTracker implements Disposable
     };
 
 
-    getFamousTasks = (): ITeTask[] => this.wrapper.storage.get<ITeTask[]>(`${StorageProps.TaskUsage}.famous`, []);
-
-
-    getLastRanTaskTime = async(): Promise<string> =>
+    getLastRanTaskTime = (): string =>
     {
-        const  tm = (await this.getStore()).lastRuntime;
+        const  tm = this.getStore().lastRuntime;
         if (tm) {
             return new Date(tm).toLocaleDateString() + " " + new Date(tm).toLocaleTimeString();
         }
@@ -148,20 +151,17 @@ export class TaskUsageTracker implements Disposable
     };
 
 
-    getMostUsedTask = async (): Promise<ITeTask> => (await this.getStore()).taskMostUsed;
-
-
-    private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) =>
+    private onFavoriteTasksChanged = async(e: ITeTaskChangeEvent) =>
     {
-        const stats = await this.getStore();
+        const stats = this.getStore();
         stats.favorites = [ ...e.tasks ];
         await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
     };
 
 
-    private onLastTasksChanged = async (e: ITeTaskChangeEvent) =>
+    private onLastTasksChanged = async(e: ITeTaskChangeEvent) =>
     {
-        const stats = await this.getStore();
+        const stats = this.getStore();
         stats.last = [ ...e.tasks ];
         await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
     };
@@ -169,7 +169,7 @@ export class TaskUsageTracker implements Disposable
 
     track = async(taskItem: TaskItem, logPad: string) =>
     {
-        const stats = await this.getStore(),
+        const stats = this.getStore(),
               taskName = `${taskItem.task.name} (${taskItem.task.source})`;
 
         this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
