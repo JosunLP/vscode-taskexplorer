@@ -1,4 +1,4 @@
-projectName: Unsaved Project
+projectName: 'C:\Projects\vscode-taskexplorer\fa-project'
 version: 6.3.0
 icons:
   - gears:
@@ -21,3 +21,34 @@ icons:
       - regular
   - star:
       - regular
+  - chevrons-left:
+      - regular
+  - chevron-right:
+      - regular
+  - chevron-left:
+      - regular
+  - chevrons-right:
+      - regular
+  - circle-chevron-right:
+      - regular
+  - circle-chevron-left:
+      - regular
+  - thumbtack:
+      - duotone
+      - regular
+      - solid
+  - unlock:
+      - light
+  - bars:
+      - duotone
+      - regular
+  - user-group:
+      - light
+  - users:
+      - light
+  - user-slash:
+      - light
+  - user-crown:
+      - light
+  - user:
+      - light

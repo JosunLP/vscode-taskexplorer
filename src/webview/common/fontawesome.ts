@@ -15,7 +15,10 @@ export const fontawesome = {
         "chevron-double-right": "\\f324",
         "chevron-left": "\\f053",
         "chevron-right": "\\f054",
-        "user-unlock": "\\e058",
+        "user-group": "\\f500",
+        "user-friends": "\\f500",
+        "user-crown": "\\f6a4",
+        "user-slash": "\\f506",
         add: "\\+",
         asterisk: "\\*",
         bars: "\\f0c9",
@@ -27,7 +30,9 @@ export const fontawesome = {
         plus: "\\+",
         star: "\\f005",
         thumbtack: "\\f08d",
-        unlock: "\\f09c"
+        unlock: "\\f09c",
+        user: "\\f007",
+        users: "\\f0c0"
     } as IDictionary<string>,
 
     sizes: `
