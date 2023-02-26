@@ -1,5 +1,6 @@
 
 import { TeWrapper } from "../wrapper";
+import { StorageProps } from "../constants";
 import { Disposable, Event, EventEmitter } from "vscode";
 import { IDictionary, ITeUsageWatcher, ITeTrackedUsage, ITeUsageChangeEvent } from "../../interface";
 
@@ -24,18 +25,17 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
     }
 
 
-	get onDidChange(): Event<ITeUsageChangeEvent | undefined>
-	{
+	get onDidChange(): Event<ITeUsageChangeEvent | undefined> {
 		return this._onDidChange.event;
 	}
 
 
-	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<ITeTrackedUsage>("taskexplorer.usages." + key);
+	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<ITeTrackedUsage>(`${StorageProps.Usage}.${key}`);
 
 
 	getAll = (key?: string): IDictionary<ITeTrackedUsage> =>
 	{
-		const storeAll = this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("taskexplorer.usages", {}),
+		const storeAll = this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>(StorageProps.Usage, {}),
 			  store: IDictionary<ITeTrackedUsage> = {};
 		if (!key)
 		{
@@ -56,14 +56,14 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 
 	async reset(key?: string): Promise<void>
 	{
-		const usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("taskexplorer.usages");
+		const usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>(StorageProps.Usage);
 		if (!usages) return;
 		if (!key) {
-			await  this.wrapper.storage.delete("taskexplorer.usages");
+			await  this.wrapper.storage.delete(StorageProps.Usage);
 			this._onDidChange.fire(undefined);
 		}
 		else {
-			await  this.wrapper.storage.delete("taskexplorer.usages." + key);
+			await  this.wrapper.storage.delete(`${StorageProps.Usage}.${key}`);
 			this._onDidChange.fire({ key, usage: undefined });
 		}
 	}
@@ -71,7 +71,7 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 
 	async track(key: string): Promise<ITeTrackedUsage>
 	{
-		let usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>("taskexplorer.usages");
+		let usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>(StorageProps.Usage);
 		if (!usages) {
 			usages = {}; // as NonNullable<typeof usages>;
 		}
@@ -119,7 +119,7 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 		// TODO - Telemetry
 		//
 		//  this.wrapper.telemetry.sendEvent("usage/track", { "usage.key": key, "usage.count": usage.count });
-		await this.wrapper.storage.update("taskexplorer.usages", usages);
+		await this.wrapper.storage.update(StorageProps.Usage, usages);
 		this._onDidChange.fire({ key, usage });
 		return usage;
 	}

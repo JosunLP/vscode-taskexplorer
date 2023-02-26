@@ -101,5 +101,6 @@ export const enum GlyphChars
 
 export const StorageProps =
 {
-	TaskUsage: "taskexplorer.taskUsage"
+	TaskUsage: "taskexplorer.taskUsage",
+	Usage: "taskexplorer.usage"
 };

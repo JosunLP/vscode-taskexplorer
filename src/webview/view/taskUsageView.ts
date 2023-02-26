@@ -2,6 +2,7 @@
 import { State } from "../common/state";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
+import { StorageProps } from "../../lib/constants";
 import { StorageChangeEvent } from "../../interface";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
@@ -37,7 +38,7 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	private async onStorageChanged(e: StorageChangeEvent)
 	{
-		if (e.key ===  "taskexplorer.usages") {
+		if (e.key === StorageProps.Usage || e.key === StorageProps.TaskUsage) {
 			this.wrapper.log.methodStart("TaskUsageView Event: onStorageChanged", 2, this.wrapper.log.getLogPad());
 			await this.refresh();
 			this.wrapper.log.methodDone("TaskUsageView Event: onStorageChanged", 2, this.wrapper.log.getLogPad());
@@ -47,7 +48,7 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	protected override onHtmlFinalize = async (html: string) =>
 	{
-    	const lastTime = this.wrapper.taskUsageTracker.getLastRanTaskTime(),
+    	const lastTime = await this.wrapper.taskUsageTracker.getLastRanTaskTime(),
 			  mostUsedTask = await this.wrapper.taskUsageTracker.getMostUsedTask();
 		html = html.replace(/\#\{taskUsage\.avgPerDay\}/g, this.wrapper.taskUsageTracker.getAvgRunCount("d", "").toString())
 				   .replace(/\#\{taskUsage\.avgPerWeek\}/g, this.wrapper.taskUsageTracker.getAvgRunCount("w", "").toString())

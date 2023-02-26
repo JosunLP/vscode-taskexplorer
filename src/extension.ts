@@ -42,11 +42,11 @@ export async function activate(context: ExtensionContext)
     //
     await initStorage(context);
 /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-    await storage.update("lastTasks", []);
+    // await storage.update("lastTasks", []);
     // await storage.delete("taskexplorer.licenseKey");
     // await storage.delete("taskexplorer.licenseToken");
-    // await storage.delete("taskexplorer.usages");
     // await storage.delete("taskexplorer.taskUsage");
+    // await storage.delete("taskexplorer.usage");
 /* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
     // !!! Temporary after settings layout redo / rename !!!
     // !!! Remove sometime down the road (from 12/22/22) !!!

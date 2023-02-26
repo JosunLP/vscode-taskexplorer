@@ -134,12 +134,12 @@ export class TaskUsageTracker implements Disposable
     };
 
 
-    getFamousTasks = (): ITeTask[] => this.wrapper.storage.get<ITeTask[]>("taskexplorer.taskUsage.famous", []);
+    getFamousTasks = (): ITeTask[] => this.wrapper.storage.get<ITeTask[]>(`${StorageProps.TaskUsage}.famous`, []);
 
 
-    getLastRanTaskTime = (): string =>
+    getLastRanTaskTime = async(): Promise<string> =>
     {
-        const  tm = this.wrapper.storage.get<number>("taskexplorer.taskUsage.lastRun");
+        const  tm = (await this.getStore()).lastRuntime;
         if (tm) {
             return new Date(tm).toLocaleDateString() + " " + new Date(tm).toLocaleTimeString();
         }
@@ -214,10 +214,14 @@ export class TaskUsageTracker implements Disposable
         {
             famousTasksChanged = true;
             stats.famous.push({ ...iTask, ...{ type: "famous" }});
+            if (stats.famous.length === 1) {
+                stats.taskMostUsed = { ...iTask, ...{ type: "famous" }};
+            }
         }
 
         stats.lastRuntime = Date.now();
         stats.taskLastRan = { ...iTask };
+
         await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
 
         if (famousTasksChanged) {
