@@ -53,8 +53,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
         this._specialFolders = {
-            favorites: new FavoritesFolder(this, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
-            lastTasks: new LastTasksFolder(this, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
+            favorites: new FavoritesFolder(wrapper, this, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
+            lastTasks: new LastTasksFolder(wrapper, this, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
         };
 
         this._treeBuilder = new TaskTreeBuilder(this, this._specialFolders);
@@ -352,9 +352,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         //
         // Signal that the task list / tree has changed
         //
-        this._onDidTasksChange.fire({ tasks: this._tasks, type: "all" });
+        const iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this._tasks, "all");
+        this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
         if (!this.firstTreeBuildDone) {
-            this._onReady.fire({ tasks: this._tasks, type: "all" });
+            this._onReady.fire({ tasks: iTasks, type: "all" });
         }
         //
         // Done!

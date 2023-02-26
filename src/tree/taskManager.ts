@@ -25,7 +25,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     private log: ILog;
     private readonly _taskWatcher: TaskWatcher;
-    private readonly disposables: Disposable[] = [];
+    private readonly _disposables: Disposable[] = [];
     private readonly _taskUsageTracker: TaskUsageTracker;
 
 
@@ -35,7 +35,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         this.specialFolders = specialFolders;
         this._taskWatcher = new TaskWatcher(wrapper, specialFolders);
         this._taskUsageTracker = new TaskUsageTracker(wrapper, treeManager);
-        this.disposables.push(
+        this._disposables.push(
             this._taskWatcher,
             this._taskUsageTracker
         );
@@ -44,8 +44,8 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     dispose()
     {
-        this.disposables.forEach(d => d.dispose());
-        this.disposables.splice(0);
+        this._disposables.forEach(d => d.dispose());
+        this._disposables.splice(0);
     }
 
 
@@ -318,8 +318,8 @@ export class TaskManager implements ITeTaskManager, Disposable
         this.log.methodStart("run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
         task.presentationOptions.reveal = noTerminal !== true ? TaskRevealKind.Always : TaskRevealKind.Silent;
         const exec = await tasks.executeTask(task);
-        await this.specialFolders.lastTasks.saveTask(taskItem, logPad);
         await this._taskUsageTracker.track(taskItem, logPad);
+        await this.specialFolders.lastTasks.saveTask(taskItem, logPad);
         this.log.methodDone("run task", 1, logPad, [[ "success", !!exec ]]);
         return exec;
     };

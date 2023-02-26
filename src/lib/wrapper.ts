@@ -248,11 +248,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// License / Authentication
 		//
 /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		await this.storage.update("lastTasks", []);
+		// await this.storage.update("lastTasks", []);
 		// await this.storage.delete("taskexplorer.licenseKey");
 		// await this.storage.delete("taskexplorer.licenseToken");
-		// await this.storage.update("usages", []);
-		await this.storage.delete("taskmanager.taskUsage");
+		// await this.storage.update("taskexplorer.usages", []);
+		// await this.storage.delete("taskmanager.taskUsage");
 		/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		/* istanbul ignore else *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		if (PROVIDE_INTERIM_LICENSE_KEY) /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */

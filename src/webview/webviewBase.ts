@@ -358,9 +358,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			return Promise.resolve(false);
 		}
 		//
-		// From GitLens:
+		// From GitLens extension, noticed this note:
 		//     It looks like there is a bug where `postMessage` can sometimes just hang infinitely.
 		//     Not sure why, but ensure we don't hang
+		// Note sure if it's still valid, but use a promise race just in case
 		//
 		return Promise.race<boolean>(
 		[

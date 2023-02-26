@@ -1,4 +1,4 @@
-import { Task } from "vscode";
+
 import { ITaskDefinition } from "./ITaskDefinition";
 import { ITeTrackedUsageCount } from "./ITeUsageWatcher";
 
@@ -20,18 +20,18 @@ export interface ITeTask
 export interface ITeTaskChangeEvent
 {
     type: TeTaskListType;
-    tasks: Task[];
+    tasks: ITeTask[];
     task?: ITeTask;
 };
 
 export interface ITeTaskStatusChangeEvent
 {
     isRunning: boolean;
-    task: Task;
+    task: ITeTask;
     treeId: string;
 };
 
 export interface ITeRunningTaskChangeEvent extends ITeTaskStatusChangeEvent
 {
-    tasks: Task[];
+    tasks: ITeTask[];
 };

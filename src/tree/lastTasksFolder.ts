@@ -1,11 +1,10 @@
 
 import { TaskItem } from "./item";
-import { log } from "../lib/log/log";
 import { Strings } from "../lib/constants";
+import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
 import { TreeItemCollapsibleState } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
-import { configuration } from "../lib/utils/configuration";
 import { Commands, registerCommand } from "../lib/command/command";
 
 
@@ -17,9 +16,9 @@ import { Commands, registerCommand } from "../lib/command/command";
 export class LastTasksFolder extends SpecialTaskFolder
 {
 
-    constructor(treeManager: TaskTreeManager, state: TreeItemCollapsibleState)
+    constructor(wrapper: TeWrapper, treeManager: TaskTreeManager, state: TreeItemCollapsibleState)
     {
-        super(treeManager, Strings.LAST_TASKS_LABEL, state);
+        super(wrapper, treeManager, Strings.LAST_TASKS_LABEL, state);
         this.disposables.push(registerCommand(Commands.ClearLastTasks, () => this.clearSavedTasks(), this));
     }
 
@@ -40,7 +39,7 @@ export class LastTasksFolder extends SpecialTaskFolder
         {
             this.removeTaskFile(taskItem2, logPad + "   ", false);
         }
-        else if (this.taskFiles.length >= configuration.get<number>("specialFolders.numLastTasks"))
+        else if (this.taskFiles.length >= this.wrapper.config.get<number>("specialFolders.numLastTasks"))
         {
             this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad + "   ", false);
         }
@@ -51,7 +50,7 @@ export class LastTasksFolder extends SpecialTaskFolder
             taskItem2.label = this.getRenamedTaskName(taskItem2);
             taskItem2.folder = this;
         }
-        log.value(logPad + "   add item", taskItem2.id, 2);
+        this.wrapper.log.value(logPad + "   add item", taskItem2.id, 2);
         this.insertTaskFile(taskItem2, 0);
         this.treeManager.fireTreeRefreshEvent("   ", 1, this);
     };
@@ -59,14 +58,14 @@ export class LastTasksFolder extends SpecialTaskFolder
 
     protected override sort = (logPad: string) =>
     {
-        log.methodStart("sort last tasks", 4, logPad);
+        this.wrapper.log.methodStart("sort last tasks", 4, logPad);
         this.taskFiles?./* istanbul ignore else */sort((a: TaskItem, b: TaskItem) =>
         {
             const aIdx = this.store.indexOf(a.id.replace(Strings.LAST_TASKS_LABEL + ":", ""));
             const bIdx = this.store.indexOf(b.id.replace(Strings.LAST_TASKS_LABEL + ":", ""));
             return aIdx < bIdx ? 1 : -1;
         });
-        log.methodDone("sort last tasks", 4, logPad);
+        this.wrapper.log.methodDone("sort last tasks", 4, logPad);
     };
 
 }

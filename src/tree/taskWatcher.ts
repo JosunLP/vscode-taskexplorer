@@ -1,13 +1,13 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { TaskItem } from "./item";
+import { TeWrapper } from "../lib/wrapper";
 import { SpecialTaskFolder } from "./specialFolder";
 import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../interface";
 import {
     Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
     Task, window, TaskEndEvent, EventEmitter
 } from "vscode";
-import { TeWrapper } from "src/lib/wrapper";
 
 
 export class TaskWatcher implements Disposable
@@ -201,8 +201,9 @@ export class TaskWatcher implements Disposable
             const taskItem = taskMap[treeId] as TaskItem;
             this.showStatusMessage(task, "   ");
             this.fireTaskChangeEvents(taskItem, "   ", 1);
-            this._onTaskStatusChange.fire({ task, treeId, isRunning: true });
-            this._onDidRunningTasksChange.fire({ tasks: [], task, treeId, isRunning: true });
+            const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ task ], "running")[0];
+            this._onTaskStatusChange.fire({ task: iTask, treeId, isRunning: true });
+            this._onDidRunningTasksChange.fire({ tasks: [], task: iTask, treeId, isRunning: true });
         }
 
         this.wrapper.log.methodDone("task started event", 1);
@@ -248,8 +249,9 @@ export class TaskWatcher implements Disposable
         }
         else {
             this.fireTaskChangeEvents(taskMap[treeId] as TaskItem, "   ", 1);
-            this._onTaskStatusChange.fire({ task, treeId, isRunning: false });
-            this._onDidRunningTasksChange.fire({ tasks: [], task, treeId, isRunning: false });
+            const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ task ], "running")[0];
+            this._onTaskStatusChange.fire({ task: iTask, treeId, isRunning: false });
+            this._onDidRunningTasksChange.fire({ tasks: [], task: iTask, treeId, isRunning: false });
         }
 
         this.wrapper.log.methodDone("task finished event", 1);

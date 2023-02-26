@@ -37,7 +37,7 @@ export class TaskCountView extends TeWebviewView<State>
 	protected override includeBootstrap = (): Promise<State> => this.getState();
 
 
-	private async onTasksChanged(e: ITeTaskChangeEvent)
+	private async onTasksChanged(_e: ITeTaskChangeEvent)
 	{
 		if (this.isFirstLoadComplete) {
 			await this.refresh();

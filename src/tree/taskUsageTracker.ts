@@ -4,8 +4,8 @@ import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
 import { getDateDifference } from "../lib/utils/utils";
 import { ConfigProps, StorageProps } from "../lib/constants";
-import { Disposable, EventEmitter, tasks, Event, Task } from "vscode";
 import { ILog, ITeTask, ITeTaskChangeEvent } from "../interface";
+import { Disposable, EventEmitter, tasks, Event, Task } from "vscode";
 
 interface ITaskUsageStats
 {
@@ -34,7 +34,8 @@ export class TaskUsageTracker implements Disposable
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         this._disposables.push(
             this._onDidFamousTasksChange,
-			treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this)
+			treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
+			treeManager.onDidLastTasksChange(this.onLastTasksChanged, this)
         );
     }
 
@@ -151,6 +152,17 @@ export class TaskUsageTracker implements Disposable
 
     private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) =>
     {
+        const stats = await this.getStore();
+        stats.favorites = [ ...e.tasks ];
+        await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
+    };
+
+
+    private onLastTasksChanged = async (e: ITeTaskChangeEvent) =>
+    {
+        const stats = await this.getStore();
+        stats.last = [ ...e.tasks ];
+        await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
     };
 
 
@@ -175,11 +187,13 @@ export class TaskUsageTracker implements Disposable
         // Add  to 'famous tasks' list maybe
         //
         let added = false,
-            famousTasksChanged = false,
-            nITaskIdx = stats.famous.findIndex(t => t.treeId === taskItem.id);
+            famousTasksChanged = false;
+        const nITaskIdx = stats.famous.findIndex(t => t.treeId === taskItem.id);
+
         if (nITaskIdx !== -1) {
             stats.famous.splice(nITaskIdx, 1);
         }
+
         for (let f = 0; f < stats.famous.length; f++)
         {
             if (usage.count.total > stats.famous[f].runCount.total)
@@ -195,34 +209,19 @@ export class TaskUsageTracker implements Disposable
                 break;
             }
         }
+
         if (!added && stats.famous.length < specTaskListLength)
         {
             famousTasksChanged = true;
             stats.famous.push({ ...iTask, ...{ type: "famous" }});
         }
 
-        //
-        // Add to `last tasks` list
-        //
-        nITaskIdx = stats.last.findIndex(t => t.treeId === taskItem.id);
-        if (nITaskIdx !== -1) {
-            stats.last.splice(nITaskIdx, 1);
-        }
-        stats.last.unshift({ ...iTask, ...{ type: "last" }});
-        if (stats.last.length > specTaskListLength) {
-            stats.last.pop();
-        }
-
-        //
-        // Set `last task` stats
-        //
-        stats.taskLastRan = { ...iTask };
         stats.lastRuntime = Date.now();
-
+        stats.taskLastRan = { ...iTask };
         await this.wrapper.storage.update(StorageProps.TaskUsage, stats);
 
         if (famousTasksChanged) {
-            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ type: "famous" }}, tasks: [ taskItem.task ], type: "famous" });
+            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ type: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
         }
 
         this.log.methodDone("save task run details", 2, logPad);

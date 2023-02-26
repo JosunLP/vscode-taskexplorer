@@ -1,7 +1,7 @@
 
 import { TaskItem } from "./item";
-import { log } from "../lib/log/log";
 import { Strings } from "../lib/constants";
+import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
 import { TreeItemCollapsibleState } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
@@ -16,9 +16,9 @@ import { Commands, registerCommand } from "../lib/command/command";
 export class FavoritesFolder extends SpecialTaskFolder
 {
 
-    constructor(treeManager: TaskTreeManager, state: TreeItemCollapsibleState)
+    constructor(wrapper: TeWrapper, treeManager: TaskTreeManager, state: TreeItemCollapsibleState)
     {
-        super(treeManager, Strings.FAV_TASKS_LABEL, state);
+        super(wrapper, treeManager, Strings.FAV_TASKS_LABEL, state);
         this.disposables.push(
             registerCommand(Commands.AddRemoveFavorite, (taskItem: TaskItem) => this.addRemoveFavorite(taskItem), this),
             registerCommand(Commands.ClearFavorites, () => this.clearSavedTasks(), this)
@@ -40,7 +40,7 @@ export class FavoritesFolder extends SpecialTaskFolder
         let removed = false;
         const id = this.getTaskItemId(taskItem.id);
 
-        log.methodStart("add/remove " + this.contextValue, 1, "", false, [
+        this.wrapper.log.methodStart("add/remove " + this.contextValue, 1, "", false, [
             [ "id", taskItem.id ], [ "current fav count", this.store.length ]
         ]);
 
@@ -57,7 +57,7 @@ export class FavoritesFolder extends SpecialTaskFolder
            removed = true;
         }
 
-        log.methodDone("add/remove favorite", 1);
+        this.wrapper.log.methodDone("add/remove favorite", 1);
         return removed;
     }
 
