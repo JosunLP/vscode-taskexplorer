@@ -111,7 +111,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		const { active, visible } = e.webviewPanel;
 		if (visible)
 		{
-			if (this.skippedNotify) {
+			if (this.skippedNotify || this.wrapper.env === "dev") {
 				await this.refresh();
 			}
 			this.setContextKeys(active);

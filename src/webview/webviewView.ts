@@ -149,7 +149,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	{
 		if (visible)
 		{
-			if (this.skippedNotify) {
+			if (this.skippedNotify || this.wrapper.env === "dev") {
 				await this.refresh();
 			}
 		}
