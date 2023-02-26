@@ -3,21 +3,22 @@ import { dirname } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { TeWrapper } from "../lib/wrapper";
+import { TaskWatcher } from "./taskWatcher";
 import { pathExists } from "../lib/utils/fs";
+import { TaskTreeManager } from "./treeManager";
 import { getTerminal } from "../lib/getTerminal";
 import { SpecialTaskFolder } from "./specialFolder";
+import { isScriptType } from "../lib/utils/taskUtils";
 import { TaskUsageTracker } from "./taskUsageTracker";
 import { ScriptTaskProvider } from "../providers/script";
-import { isScriptType } from "../lib/utils/taskUtils";
 import { getPackageManager, timeout } from "../lib/utils/utils";
 import { findDocumentPosition } from "../lib/findDocumentPosition";
-import { ILog, ITeTaskManager, ITeTaskChangeEvent, TaskMap } from "../interface";
+import { Commands, registerCommand } from "../lib/command/command";
+import { ILog, ITeTaskManager, ITeTaskChangeEvent, TaskMap, ITeTask } from "../interface";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder, Event
 } from "vscode";
-import { TaskWatcher } from "./taskWatcher";
-import { TaskTreeManager } from "./treeManager";
 
 
 export class TaskManager implements ITeTaskManager, Disposable
@@ -37,7 +38,21 @@ export class TaskManager implements ITeTaskManager, Disposable
         this._taskUsageTracker = new TaskUsageTracker(wrapper, treeManager);
         this._disposables.push(
             this._taskWatcher,
-            this._taskUsageTracker
+            this._taskUsageTracker,
+			registerCommand(Commands.SetPinned, (item: ITeTask) => this.setPinned(item), this),
+            registerCommand(Commands.Run,  (item: TaskItem | ITeTask) => this.run(this.getTask(item)), this),
+            registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
+            registerCommand(Commands.RunLastTask,  () => this.runLastTask(this.wrapper.treeManager.getTaskMap()), this),
+            registerCommand(Commands.RunWithArgs, (item: TaskItem, args?: string) => this.run(item, false, true, args), this),
+            registerCommand(Commands.Stop, (item: TaskItem | ITeTask) => this.stop(this.getTask(item)), this),
+            registerCommand(Commands.Restart, (item: TaskItem) => this.restart(item), this),
+            registerCommand(Commands.Pause, (item: TaskItem | ITeTask) => this.pause(this.getTask(item)), this),
+            registerCommand(Commands.NpmRunInstall, (item: TaskFile) => this.runNpmCommand(item, "install"), this),
+            registerCommand(Commands.NpmRunUpdate, (item: TaskFile) => this.runNpmCommand(item, "update"), this),
+            registerCommand(Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
+            registerCommand(Commands.NpmRunAuditFix, (item: TaskFile) => this.runNpmCommand(item, "audit fix"), this),
+            registerCommand(Commands.NpmRunUpdatePackage, (item: TaskFile) => this.runNpmCommand(item, "update <packagename>"), this),
+            registerCommand(Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.getTask(item), itemClick), this),
         );
     }
 
@@ -60,6 +75,15 @@ export class TaskManager implements ITeTaskManager, Disposable
 	get usageTracker(): TaskUsageTracker {
 		return this._taskUsageTracker;
 	}
+
+
+    getTask =  (taskItem: TaskItem | ITeTask) =>
+    {
+        if (!(taskItem instanceof TaskItem)) {
+            taskItem = this.wrapper.treeManager.getTaskMap()[taskItem.definition.taskItemId as string] as TaskItem;
+        }
+        return taskItem;
+    };
 
 
     open = async(selection: TaskItem, itemClick = false) =>
@@ -375,6 +399,19 @@ export class TaskManager implements ITeTaskManager, Disposable
         this.log.methodDone("run task with arguments", 1, logPad);
         return exec;
     };
+
+
+	setPinned = async (task: ITeTask): Promise<void> =>
+	{
+		const storageKey = `taskexplorer.pinned.${task.listType}`;
+		this.log.methodStart("set pinned task", 2, "", false, [[ "id", task.treeId ], [ "pinned", task.pinned ]]);
+		const pinnedTaskList = this.wrapper.storage.get<ITeTask[]>(storageKey, []);
+		pinnedTaskList.push({  ...task });
+		await this.wrapper.storage.update(storageKey, pinnedTaskList);
+		this.log.methodDone("set pinned task", 2);
+        // await this._taskUsageTracker.setPinned(task, logPad);
+	};
+
 
     stop = async(taskItem: TaskItem) =>
     {

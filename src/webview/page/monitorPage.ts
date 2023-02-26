@@ -3,7 +3,7 @@ import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { toITask } from "../../lib/utils/taskUtils";
 import { ContextKeys, WebviewIds } from "../../lib/context";
-import { Commands, registerCommand } from "../../lib/command/command";
+import { Commands } from "../../lib/command/command";
 import { ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
@@ -31,7 +31,6 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 		);
 
 		this.disposables.push(
-			registerCommand(Commands.SetPinned, this.setPinned, this),
 			wrapper.treeManager.onReady(this.onTaskTreeManagerReady, this),
 			wrapper.treeManager.onDidAllTasksChange(this.onAllTasksChanged, this),
 			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this),
@@ -89,19 +88,6 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	{
 		// this.wrapper.log.methodStart("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad(), false, [[ "focus", focused ]]);
 		// this.wrapper.log.methodDone("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad());
-	};
-
-
-	private setPinned = async (task: ITeTask): Promise<void> =>
-	{
-		const mMsg = "MonitorPage Event: setPinned",
-			  logPad = this.wrapper.log.getLogPad(),
-			  storageKey = `taskexplorer.pinned.${task.listType}`;
-		this.wrapper.log.methodStart(mMsg, 2, logPad, false, [[ "id", task.treeId ], [ "pinned", task.pinned ]]);
-		const pinnedTaskList = this.wrapper.storage.get<ITeTask[]>(storageKey, []);
-		pinnedTaskList.push({  ...task });
-		await this.wrapper.storage.update(storageKey, pinnedTaskList);
-		this.wrapper.log.methodDone(mMsg, 2, logPad);
 	};
 
 }
