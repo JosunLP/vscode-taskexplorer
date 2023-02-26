@@ -106,11 +106,14 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	// }
 
 
-	protected onViewStateChanged(e: WebviewPanelOnDidChangeViewStateEvent)
+	protected async onViewStateChanged(e: WebviewPanelOnDidChangeViewStateEvent)
 	{
 		const { active, visible } = e.webviewPanel;
 		if (visible)
 		{
+			if (this.skippedNotify) {
+				await this.refresh();
+			}
 			this.setContextKeys(active);
 			this.onActiveChanged?.(active);
 			this.onFocusChanged?.(active);

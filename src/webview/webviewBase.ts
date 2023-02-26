@@ -58,6 +58,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected registerCommands?(): Disposable[];
 
 	protected _isReady = false;
+	protected skippedNotify = false;
 	protected _view: WebviewView | WebviewPanel | undefined;
 	protected readonly disposables: Disposable[] = [];
 
@@ -355,8 +356,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	private postMessage(message: IpcMessage): Promise<boolean>
 	{
 		if (!this._view || !this._isReady || !this.visible) {
+			this.skippedNotify = !!this._view && !!this._isReady;
 			return Promise.resolve(false);
 		}
+		this.skippedNotify = false;
 		//
 		// From GitLens extension, noticed this note:
 		//     It looks like there is a bug where `postMessage` can sometimes just hang infinitely.
@@ -374,7 +377,9 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected async refresh(force?: boolean, ...args: unknown[]): Promise<void>
     {
 		if (!this._view) return;
+		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 		this._isReady = false;
+		this.skippedNotify = false;
 		const html = await this.getHtml(this._view.webview, ...args);
 		if (force) {
 			this._view.webview.html = "";
@@ -385,6 +390,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		}
 		this._view.webview.html = html;
 		setTimeout(() => this._onContentLoaded.fire(html), 1);
+		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 	}
 
 }

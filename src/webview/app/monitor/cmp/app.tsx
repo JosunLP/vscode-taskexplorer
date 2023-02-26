@@ -65,7 +65,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
 
     private onTabSelected = (index: number, lastIndex: number) =>
     {
-        this.log(`onTabSelected: index=${index}: lastIdex=${lastIndex}`);
+        this.log(`onTabSelected: index=${index}: lastIndex=${lastIndex}`);
     };
 
 

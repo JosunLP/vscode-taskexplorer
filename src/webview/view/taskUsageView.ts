@@ -38,7 +38,8 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	private async onStorageChanged(e: StorageChangeEvent)
 	{
-		if (e.key === StorageProps.Usage || e.key === StorageProps.TaskUsage) {
+		if (e.key === StorageProps.Usage || e.key === StorageProps.TaskUsage)
+		{
 			this.wrapper.log.methodStart("TaskUsageView Event: onStorageChanged", 2, this.wrapper.log.getLogPad());
 			await this.refresh();
 			this.wrapper.log.methodDone("TaskUsageView Event: onStorageChanged", 2, this.wrapper.log.getLogPad());

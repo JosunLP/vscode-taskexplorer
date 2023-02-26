@@ -77,7 +77,6 @@ export class HomeView extends TeWebviewView<State>
 		);
 		this.disposables.push(
 			wrapper.config.onDidChange(e => { this.onConfigurationChanged(e); }, this),
-			wrapper.storage.onDidChange(e => { this.onStorageChanged(e); }, this),
 			wrapper.treeManager.onDidAllTasksChange(e => { this.onTasksChanged(e); }, this)
 		);
 	}
@@ -93,13 +92,6 @@ export class HomeView extends TeWebviewView<State>
 	{
 		this.wrapper.log.methodStart("HomeView Event: onConfigurationChanged", 2, this.wrapper.log.getLogPad());
 		this.wrapper.log.methodDone("HomeView Event: onConfigurationChanged", 2, this.wrapper.log.getLogPad());
-	}
-
-
-	private onStorageChanged(_e: StorageChangeEvent)
-	{
-		this.wrapper.log.methodStart("HomeView Event: onStorageChanged", 2, this.wrapper.log.getLogPad());
-		this.wrapper.log.methodDone("HomeView Event: onStorageChanged", 2, this.wrapper.log.getLogPad());
 	}
 
 

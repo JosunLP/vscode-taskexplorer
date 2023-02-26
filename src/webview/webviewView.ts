@@ -149,7 +149,9 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	{
 		if (visible)
 		{
-			await this.refresh();
+			if (this.skippedNotify) {
+				await this.refresh();
+			}
 		}
 		else {
 			this.onFocusChanged?.(false);
