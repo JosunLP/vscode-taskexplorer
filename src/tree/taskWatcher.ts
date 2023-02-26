@@ -2,7 +2,6 @@
 
 import { TaskItem } from "./item";
 import { TeWrapper } from "../lib/wrapper";
-import { SpecialTaskFolder } from "./specialFolder";
 import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../interface";
 import {
     Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,

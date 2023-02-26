@@ -109,35 +109,28 @@ export function isWatchTask(source: string)
  * @param isRunning Provide when on;y when one task is being converted
  * @param usage Provide when on;y when one task is being converted
  */
-export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: TeTaskListType, isRunning?: boolean, usage?: ITeTrackedUsage): ITeTask[] =>
+export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: TeTaskListType): ITeTask[] =>
 {
     return teTasks.map<ITeTask>(t =>
     {
-        const running = isRunning !== undefined ? isRunning :
-              tasks.taskExecutions.filter(e => e.task.name === t.name && e.task.source === t.source &&
-                                          e.task.scope === t.scope && e.task.definition.path === t.definition.path).length > 0;
         let runCount;
+        const usage = usageTracker.get(`task:${t.definition.taskItemId}`);
+        const running = tasks.taskExecutions.filter(e => e.task.name === t.name && e.task.source === t.source &&
+                                                    e.task.scope === t.scope && e.task.definition.path === t.definition.path).length > 0;
         if (usage) {
             runCount = { ...usage.count };
         }
-        else
-        {
-            usage = usageTracker.get(`task:${t.definition.taskItemId}`);
-            if (usage) {
-                runCount = { ...usage.count };
-            }
-            else {
-                runCount = {
-                    today: 0,
-                    last7Days: 0,
-                    last14Days: 0,
-                    last30Days: 0,
-                    last60Days: 0,
-                    last90Days: 0,
-                    total: 0,
-                    yesterday: 0
-                };
-            }
+        else {
+            runCount = {
+                today: 0,
+                last7Days: 0,
+                last14Days: 0,
+                last30Days: 0,
+                last60Days: 0,
+                last90Days: 0,
+                total: 0,
+                yesterday: 0
+            };
         }
         return {
             definition: pickBy<ITaskDefinition>(t.definition, (k => k !== "uri")),
