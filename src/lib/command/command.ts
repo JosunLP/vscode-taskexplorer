@@ -94,7 +94,7 @@ export const registerCommand = (command: string, callback: (...args: any[]) => a
 	return commands.registerCommand(
 		command,
 		function (this: any, ...args) {
-			void this?.wrapper?.usage.track(`command:${command}`);
+			void this.wrapper.usage.track(`command:${command}`);
 			return callback.call(this, ...args);
 		},
 		thisArg

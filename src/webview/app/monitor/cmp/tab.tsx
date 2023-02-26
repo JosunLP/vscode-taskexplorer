@@ -41,7 +41,7 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: IIpcTask[] }
         this.children.splice(0);
         this.state.tasks.forEach((t: IIpcTask) =>
         {
-            this.props.log(`TeTaskTab.render: task=${t.name} source=${t.source} running=${t.running}`);
+            // this.props.log(`TeTaskTab.render: task=${t.name} source=${t.source} running=${t.running}`);
             this.controlRefs[t.treeId] = React.createRef<TeTaskControl>();
             this.children.push(
                 <TeTaskControl

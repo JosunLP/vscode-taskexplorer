@@ -4,6 +4,8 @@ import { StorageProps } from "../constants";
 import { Disposable, Event, EventEmitter } from "vscode";
 import { IDictionary, ITeUsageWatcher, ITeTrackedUsage, ITeUsageChangeEvent } from "../../interface";
 
+type UsageStore = IDictionary<ITeTrackedUsage>;
+
 
 export class UsageWatcher implements ITeUsageWatcher, Disposable
 {
@@ -30,13 +32,13 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 	}
 
 
-	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<ITeTrackedUsage>(`${StorageProps.Usage}.${key}`);
+	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<UsageStore>(StorageProps.Usage, {})[key];
 
 
-	getAll = (key?: string): IDictionary<ITeTrackedUsage> =>
+	getAll = (key?: string): UsageStore =>
 	{
-		const storeAll = this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>(StorageProps.Usage, {}),
-			  store: IDictionary<ITeTrackedUsage> = {};
+		const storeAll = this.wrapper.storage.get<UsageStore>(StorageProps.Usage, {}),
+			  store: UsageStore = {};
 		if (!key)
 		{
 			Object.assign(store, storeAll);
@@ -56,7 +58,7 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 
 	async reset(key?: string): Promise<void>
 	{
-		const usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>(StorageProps.Usage);
+		const usages =  this.wrapper.storage.get<UsageStore>(StorageProps.Usage);
 		if (!usages) return;
 		if (!key) {
 			await  this.wrapper.storage.delete(StorageProps.Usage);
@@ -71,12 +73,8 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 
 	async track(key: string): Promise<ITeTrackedUsage>
 	{
-		let usages =  this.wrapper.storage.get<IDictionary<ITeTrackedUsage>>(StorageProps.Usage);
-		if (!usages) {
-			usages = {}; // as NonNullable<typeof usages>;
-		}
-
-		const timestamp = Date.now();
+		const timestamp = Date.now(),
+			  usages =  this.wrapper.storage.get<UsageStore>(StorageProps.Usage, {});
 
 		let usage = usages[key];
 		if (!usage)
@@ -88,11 +86,11 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 				count: {
 					total: 1,
 					today: 1,
-					last7Days: 0,
-					last14Days: 0,
-					last30Days: 0,
-					last60Days: 0,
-					last90Days: 0,
+					last7Days: 1,
+					last14Days: 1,
+					last30Days: 1,
+					last60Days: 1,
+					last90Days: 1,
 					yesterday: 0
 				}
 			};
@@ -115,11 +113,11 @@ export class UsageWatcher implements ITeUsageWatcher, Disposable
 			};
 		}
 
+		await this.wrapper.storage.update(StorageProps.Usage, usages);
 		//
 		// TODO - Telemetry
 		//
 		//  this.wrapper.telemetry.sendEvent("usage/track", { "usage.key": key, "usage.count": usage.count });
-		await this.wrapper.storage.update(StorageProps.Usage, usages);
 		this._onDidChange.fire({ key, usage });
 		return usage;
 	}

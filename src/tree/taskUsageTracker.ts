@@ -1,11 +1,9 @@
 
-import { TaskItem } from "./item";
 import { TeWrapper } from "../lib/wrapper";
-import { TaskTreeManager } from "./treeManager";
 import { getDateDifference } from "../lib/utils/utils";
 import { ConfigProps, StorageProps } from "../lib/constants";
 import { Disposable, EventEmitter, tasks, Event, Task } from "vscode";
-import { IDictionary, ILog, ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeTrackedUsage } from "../interface";
+import { IDictionary, ILog, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeTrackedUsage } from "../interface";
 
 interface ITaskUsageStats
 {
@@ -207,9 +205,10 @@ export class TaskUsageTracker implements Disposable
 
         this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
         //
-        // Process with Usage Tracker
+        // Process with Usage Tracker and copy usage stats to task usage tracking state
         //
         const usage = await this.wrapper.usage.track(`${this._usageKey}${iTask.treeId}`);
+        Object.assign(iTask.runCount, usage.count);
         //
         // Add  to 'famous tasks' list, maybe
         //
