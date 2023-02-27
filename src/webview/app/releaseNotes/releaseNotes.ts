@@ -4,10 +4,9 @@ import "../common/css/page.css";
 import "../common/scss/page.scss";
 import "./release-notes.css";
 
-import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
 import { Disposable, DOM } from "../common/dom";
-import { ExecuteCommandType } from "../../common/ipc";
+import { ExecuteCommandType, State } from "../../common/ipc";
 // import { provideVSCodeDesignSystem, vsCodeButton } from "@vscode/webview-ui-toolkit";
 
 

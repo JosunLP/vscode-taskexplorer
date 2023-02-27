@@ -4,9 +4,8 @@ import "../common/css/page.css";
 import "../common/scss/page.scss";
 import "./parsing-report.css";
 
-import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
-import { ExecuteCommandType, IpcMessage } from "../../common/ipc";
+import { ExecuteCommandType, IpcMessage, State } from "../../common/ipc";
 
 
 export class ParsingReportWebviewApp extends TeWebviewApp<State>

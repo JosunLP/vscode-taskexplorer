@@ -52,6 +52,7 @@ suite("Wrapper Tests", () =>
         expect(teWrapper.treeManager).to.not.be.undefined;
         expect(teWrapper.homeView).to.not.be.undefined;
         expect(teWrapper.taskCountView).to.not.be.undefined;
+        expect(teWrapper.promiseUtils).to.not.be.undefined;
         endRollingCount(this);
     });
 

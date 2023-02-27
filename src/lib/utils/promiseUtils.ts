@@ -1,5 +1,6 @@
 
 import { Disposable, Event, EventEmitter } from "vscode";
+import { PromiseAdapter } from "../../interface/ITeUtilities";
 
 //
 //  TODO - Remove istanbul tags when sessions are implemented
@@ -7,23 +8,18 @@ import { Disposable, Event, EventEmitter } from "vscode";
 /* istanbul ignore next */
 const passthrough = (value: any, resolve: (value?: any) => void) => resolve(value);
 
-export type PromiseAdapter<T, U> = (
-    value: T,
-    resolve:
-        (value: U | PromiseLike<U>) => void,
-    reject:
-        (reason: any) => void
-) => any;
-
-
-// export const oneTimeEvent = <T>(event: Event<T>): Event<T> =>
-// {
-// 	return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) =>
-//     {
-// 		const result = event(e => { result.dispose(); return listener.call(thisArgs, e); }, null, disposables);
-// 		return result;
-// 	};
-// };
+//
+//  TODO - Remove istanbul tags when sessions are implemented
+//
+/* istanbul ignore next */
+export const oneTimeEvent = <T>(event: Event<T>): Event<T> =>
+{
+	return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) =>
+    {
+		const result = event(e => { result.dispose(); return listener.call(thisArgs, e); }, null, disposables);
+		return result;
+	};
+};
 
 
 /**

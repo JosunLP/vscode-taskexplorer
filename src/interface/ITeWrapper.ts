@@ -17,7 +17,9 @@ import { ITeConfigWatcher } from "./ITeConfigWatcher";
 import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
 import { ExtensionContext, TreeItem, TreeView, WorkspaceFolder } from "vscode";
-import { ITeCommonUtilities, ITePathUtilities, ITeTaskUtilities, ITeUtilities } from "./ITeUtilities";
+import {
+	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeUtilities
+} from "./ITeUtilities";
 
 
 export interface ITeWrapper
@@ -49,10 +51,11 @@ export interface ITeWrapper
 	logControl: IDictionary<any>;
 	parsingReportPage: ITeWebview;
 	pathUtils: ITePathUtilities;
+	promiseUtils: ITePromiseUtilities;
 	releaseNotesPage: ITeWebview;
 	sidebar: ITeTaskTree;
 	sidebarView: TreeView<TreeItem>;
-	sorters: any;
+	sorters: ITeSortUtilities;
 	storage: IStorage;
 	treeManager: ITeTreeManager;
 	taskManager: ITeTaskManager;

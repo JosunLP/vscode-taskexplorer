@@ -4,9 +4,8 @@ import "./home.css";
 import "./home.scss";
 
 import { Disposable } from "vscode";
-import { State } from "../../common/state";
 import { TeWebviewApp } from "../webviewApp";
-import { ExecuteCommandType } from "../../common/ipc";
+import { ExecuteCommandType, State } from "../../common/ipc";
 
 
 export class HomeWebviewApp extends TeWebviewApp<State>

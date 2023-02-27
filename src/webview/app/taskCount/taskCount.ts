@@ -1,7 +1,8 @@
 
 import "../common/css/vscode.css";
 import "./task-count.css";
-import { State } from "../../common/state";
+
+import { State } from "../../common/ipc";
 import { TeWebviewApp } from "../webviewApp";
 // import { ExecuteCommandType } from "../../common/ipc";
 

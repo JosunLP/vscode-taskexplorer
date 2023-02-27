@@ -4,11 +4,11 @@
 import { v4 as uuid } from "uuid";
 import { URLSearchParams } from "url";
 import { TeWrapper } from "../wrapper";
-import { IDictionary, TeSessionChangeEvent } from "../../interface";
-import { PromiseAdapter, promiseFromEvent } from "../utils/promiseUtils";
+import { promiseFromEvent } from "../utils/promiseUtils";
+import { IDictionary, PromiseAdapter, TeSessionChangeEvent } from "../../interface";
 import {
-    authentication, AuthenticationProvider, AuthenticationSession,
-    Disposable, env, EventEmitter, ProgressLocation, Uri, UriHandler, window
+    authentication, AuthenticationProvider, AuthenticationSession, Disposable, env, EventEmitter,
+    ProgressLocation, Uri, UriHandler, window
 } from "vscode";
 
 export const AUTH_TYPE = "teauth";

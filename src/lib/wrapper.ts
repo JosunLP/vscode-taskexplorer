@@ -21,6 +21,7 @@ import * as commonUtils from "./utils/commonUtils";
 import { ContextKeys, TeContext } from "./context";
 import { AntTaskProvider } from "../providers/ant";
 import { HomeView } from "../webview/view/homeView";
+import * as promiseUtils from "./utils/promiseUtils";
 import { BashTaskProvider } from "../providers/bash";
 import { GulpTaskProvider } from "../providers/gulp";
 import { MakeTaskProvider } from "../providers/make";
@@ -50,7 +51,7 @@ import { IConfiguration } from "../interface/IConfiguration";
 import { TaskCountView } from "../webview/view/taskCountView";
 import { TaskUsageView } from "../webview/view/taskUsageView";
 import { ReleaseNotesPage } from "../webview/page/releaseNotes";
-import { IDictionary, ILog, ITeFilesystem } from "../interface";
+import { IDictionary, ILog, ITeFilesystem, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeUtilities } from "../interface";
 import { PowershellTaskProvider } from "../providers/powershell";
 import { ITaskExplorerProvider } from "../interface/ITaskProvider";
 import { AppPublisherTaskProvider } from "../providers/appPublisher";
@@ -59,7 +60,7 @@ import { registerAddToExcludesCommand } from "./command/addToExcludes";
 import { registerEnableTaskTypeCommand } from "./command/enableTaskType";
 import { registerDisableTaskTypeCommand } from "./command/disableTaskType";
 import { registerRemoveFromExcludesCommand } from "./command/removeFromExcludes";
-import { ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, Disposable } from "vscode";
+import { ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, Disposable, EventEmitter } from "vscode";
 
 const PROVIDE_INTERIM_LICENSE_KEY = true;
 
@@ -98,9 +99,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _previousVersion: string | undefined;
 	private readonly _parsingReportPage: ParsingReportPage;
     private readonly _providers: IDictionary<ITaskExplorerProvider>;
-	// private _onReady: EventEmitter<void> = new EventEmitter<void>();
-	// private _onInitialized: EventEmitter<void> = new EventEmitter<void>();
-	// private _onWorkCompleted: EventEmitter<void> = new EventEmitter<void>();
+	private readonly _onReady: EventEmitter<void>;
+	// private _onInitialized: EventEmitter<void>;
+	// private _onWorkCompleted: EventEmitter<void>;
 
 
 	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: ILog)
@@ -168,8 +169,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// 	endTime,
 		// );
 
+		this._onReady = new EventEmitter<void>();
+
 		this._disposables = [
 			this._usage,
+			this._onReady,
 			this._homeView,
             this._taskWatcher,
             this._taskManager,
@@ -281,8 +285,15 @@ export class TeWrapper implements ITeWrapper, Disposable
 		if (this.versionchanged)
 		{
 			this._cacheBuster = getUuid();
-			// TODO - Show 'welcome / what's new' page
-			// utilities.oneTimeEvent(this.onReady)(() => { /* TODO */ });
+			promiseUtils.oneTimeEvent(this.onReady)(() =>
+			{
+				if (!this.isNewInstall) {
+					this.releaseNotesPage.show();
+				}
+				else {
+					/* TODO - Show Welcome page */
+				}
+			});
 		}
 		//
 		// Build the file cache, this kicks off the whole process as refresh cmd will be issued
@@ -331,7 +342,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// queueMicrotask CPU resources with other extensions when VSCode starts up., i.e. notably
 		// the f'ing Google Cloud Tools and Python interpreter.
 		//
-		queueMicrotask(() => { this._ready = true; /* this._onReady.fire(); */ });
+		queueMicrotask(() => { this._ready = true; this._onReady.fire(); });
 	};
 
 
@@ -460,6 +471,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._context.extension.id;
 	}
 
+	get isNewInstall(): boolean {
+		return this.versionchanged && this._previousVersion === undefined;
+	}
+
 	get log(): ILog {
 		return this._log;
 	}
@@ -472,9 +487,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 	// 	return this._onInitialized.event;
 	// }
 
-	// get onReady() {
-	// 	return this._onReady.event;
-	// }
+	get onReady() {
+		return this._onReady.event;
+	}
 
 	get providers(): IDictionary<ITaskExplorerProvider> {
 		return this._providers;
@@ -492,8 +507,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._parsingReportPage;
 	}
 
-	get pathUtils(): typeof pathUtils {
+	get pathUtils(): ITePathUtilities {
 		return pathUtils;
+	}
+
+	get promiseUtils(): ITePromiseUtilities {
+		return promiseUtils;
 	}
 
 	get releaseNotesPage(): ReleaseNotesPage {
@@ -512,7 +531,7 @@ export class TeWrapper implements ITeWrapper, Disposable
         return this.treeManager.views.taskExplorerSideBar.view;
     }
 
-    get sorters(): typeof sorters {
+    get sorters(): ITeSortUtilities {
         return sorters;
     }
 
@@ -536,7 +555,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._taskUsageView;
 	}
 
-	get taskUtils(): typeof taskUtils {
+	get taskUtils(): ITeTaskUtilities {
 		return taskUtils;
 	}
 
@@ -560,7 +579,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._usage;
 	}
 
-	get utils(): typeof utilities {
+	get utils(): ITeUtilities {
 		return utilities;
 	}
 

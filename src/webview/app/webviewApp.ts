@@ -28,6 +28,7 @@ export abstract class TeWebviewApp<State = undefined>
 
 	private _ipcSequence = 0;
 	private _focused?: boolean;
+	private readonly _tzOffset: number;
 	private _inputFocused?: boolean;
 	private _bindDisposables: Disposable[] | undefined;
 	private readonly _maxSmallIntegerV8 = 2 ** 30; // Max # that can be stored in V8's smis (small int)
@@ -41,6 +42,8 @@ export abstract class TeWebviewApp<State = undefined>
 		delete domWindow.bootstrap;
 
 		const disposables: Disposable[] = [];
+		this._tzOffset = (new Date()).getTimezoneOffset() * 60000;
+
 		this.log(`${this.appName}.constructor()`);
 
 		this._vscode = acquireVsCodeApi();
@@ -151,11 +154,13 @@ export abstract class TeWebviewApp<State = undefined>
 
 	protected log = (message: string, ...optionalParams: any[]): void =>
 	{
+		const timeTags = (new Date(Date.now() - this._tzOffset)).toISOString().slice(0, -1).split("T");
 		message = `${this.appName}.${message}`;
-		setTimeout(() => {
-			this.postMessage({ id: this.nextIpcId(), method: LogWriteCommandType.method, params: { message, value: undefined }});
-		},  1);
-		console.log("[WEBVIEW]: " + message, ...optionalParams);
+		// setTimeout(() => {
+		// 	this.postMessage({ id: this.nextIpcId(), method: LogWriteCommandType.method, params: { message, value: undefined }});
+		// },  1);
+		// console.log(`${timeTags.join(" ")} > [WEBVIEW]:${message}`, ...optionalParams);
+		console.log(`${timeTags[1]} > [WEBVIEW]: ${message}`, ...optionalParams);
 	};
 
 
