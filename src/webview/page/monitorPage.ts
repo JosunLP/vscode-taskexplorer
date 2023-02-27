@@ -35,7 +35,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			wrapper.treeManager.onDidAllTasksChange(this.onAllTasksChanged, this),
 			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this),
 			wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
-			wrapper.taskUsage.onDidFamousTasksChange(this.onFamousTasksChanged, this),
+			wrapper.usage.onDidFamousTasksChange(this.onFamousTasksChanged, this),
 			wrapper.taskWatcher.onDidRunningTasksChange(this.onRunningTasksChanged, this),
 			wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this)
 		);

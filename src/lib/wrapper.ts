@@ -10,7 +10,6 @@ import { TeServer } from "./auth/server";
 import { TeFileCache } from "./fileCache";
 import * as utilities from "./utils/utils";
 import * as sorters from "./utils/sortTasks";
-import { TaskUsage } from "../tree/taskUsage";
 import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
 import { IStorage } from "../interface/IStorage";
@@ -80,7 +79,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _storage: IStorage;
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
-    private readonly _taskUsage: TaskUsage;
 	private readonly _fileCache: TeFileCache;
     private readonly _taskWatcher: TaskWatcher;
 	private readonly _licensePage: LicensePage;
@@ -123,12 +121,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._configWatcher = new TeConfigWatcher(this);
 
 		this._licenseManager = new LicenseManager(this);
-		this._usage = new Usage(this);
 
 		this._treeManager = new TaskTreeManager(this);
         this._taskManager = new TaskManager(this);
         this._taskWatcher = new TaskWatcher(this);
-        this._taskUsage = new TaskUsage(this);
+
+		this._usage = new Usage(this);
 
 		this._homeView = new HomeView(this);
 		this._taskCountView = new TaskCountView(this);
@@ -174,7 +172,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._usage,
 			this._homeView,
             this._taskWatcher,
-            this._taskUsage,
             this._taskManager,
 			this._treeManager,
 			this._licensePage,
@@ -529,10 +526,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get taskManager(): TaskManager {
 		return this._taskManager;
-	}
-
-	get taskUsage(): TaskUsage {
-		return this._taskUsage;
 	}
 
 	get taskMonitorPage(): MonitorPage {

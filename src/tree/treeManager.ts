@@ -112,7 +112,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
     get famousTasks(): ITeTask[] {
-        return this.wrapper.taskUsage.famousTasks;
+        return this.wrapper.usage.famousTasks;
     }
 
     get favoritesFolder(): FavoritesFolder {
@@ -132,7 +132,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
     get runningTasks(): Task[] {
-        return this.wrapper.taskUsage.getRunningTasks();
+        return tasks.taskExecutions.map(e => e.task);
     }
 
     get views() {

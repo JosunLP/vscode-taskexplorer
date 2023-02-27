@@ -142,7 +142,7 @@ export const toITask = (wrapper: TeWrapper, teTasks: Task[], listType: TeTaskLis
             running,
             source: t.source,
             treeId: t.definition.taskItemId,
-            runTime: wrapper.taskUsage.getRuntimeInfo(t.definition.taskItemId)
+            runTime: wrapper.usage.getRuntimeInfo(t.definition.taskItemId)
         };
     });
 };
