@@ -4,7 +4,7 @@ import { Globs } from "../constants";
 import { testPattern } from "../utils/utils";
 import { loadMessageBundle } from "vscode-nls";
 import { Disposable, Uri, window } from "vscode";
-import { configuration } from "../utils/configuration";
+import { configuration } from "../configuration";
 import { Commands, registerCommand } from "./command";
 
 const localize = loadMessageBundle();

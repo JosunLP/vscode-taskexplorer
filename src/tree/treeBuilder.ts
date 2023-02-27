@@ -11,7 +11,7 @@ import * as sortTasks from "../lib/utils/sortTasks";
 import { SpecialTaskFolder } from "./specialFolder";
 import { IDictionary, TaskMap } from "../interface";
 import { statusBarItem } from "../lib/statusBarItem";
-import { configuration } from "../lib/utils/configuration";
+import { configuration } from "../lib/configuration";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Disposable, Task, TreeItemCollapsibleState } from "vscode";
 

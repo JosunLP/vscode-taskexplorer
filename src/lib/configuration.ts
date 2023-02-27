@@ -1,6 +1,6 @@
 
-import { isObject } from "./utils";
-import { IConfiguration } from "../../interface/IConfiguration";
+import { isObject } from "./utils/utils";
+import { IConfiguration } from "../interface/IConfiguration";
 import {
     ConfigurationChangeEvent, workspace, WorkspaceConfiguration, ConfigurationTarget, ExtensionContext, ExtensionMode, Event, EventEmitter
 } from "vscode";

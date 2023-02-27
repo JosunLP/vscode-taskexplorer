@@ -7,8 +7,8 @@ import { TeWrapper } from "../lib/wrapper";
 import { timeout } from "../lib/utils/utils";
 import { readFileAsync } from "../lib/utils/fs";
 import { TaskExplorerProvider } from "./provider";
+import { configuration } from "../lib/configuration";
 import { getRelativePath } from "../lib/utils/pathUtils";
-import { configuration } from "../lib/utils/configuration";
 import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace } from "vscode";
 

@@ -1,13 +1,13 @@
 
+import { env } from "process";
 import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskExplorerProvider } from "./provider";
+import { configuration } from "../lib/configuration";
 import { getRelativePath } from "../lib/utils/pathUtils";
 import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
-import { configuration } from "../lib/utils/configuration";
-import { env } from "process";
 
 
 export class JenkinsTaskProvider extends TaskExplorerProvider implements TaskExplorerProvider

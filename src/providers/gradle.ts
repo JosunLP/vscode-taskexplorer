@@ -4,8 +4,8 @@ import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
 import { readFileAsync } from "../lib/utils/fs";
 import { TaskExplorerProvider } from "./provider";
+import { configuration } from "../lib/configuration";
 import { getRelativePath } from "../lib/utils/pathUtils";
-import { configuration } from "../lib/utils/configuration";
 import { IDictionary, ITaskDefinition } from "../interface";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace } from "vscode";
 

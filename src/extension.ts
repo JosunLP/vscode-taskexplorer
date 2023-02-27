@@ -2,9 +2,9 @@
 
 import { log } from "./lib/log/log";
 import { TeWrapper } from "./lib/wrapper";
-import { initStorage, storage } from "./lib/utils/storage";
+import { initStorage, storage } from "./lib/storage";
 import { ExtensionContext, ExtensionMode, workspace } from "vscode";
-import { configuration, registerConfiguration } from "./lib/utils/configuration";
+import { configuration, registerConfiguration } from "./lib/configuration";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./lib/utils/taskUtils";
 
 // import "tsconfig-paths/register";

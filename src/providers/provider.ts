@@ -3,7 +3,7 @@ import { extname } from "path";
 import { log } from "../lib/log/log";
 import { Globs } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { configuration } from "../lib/utils/configuration";
+import { configuration } from "../lib/configuration";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { isDirectory, pathExistsSync } from "../lib/utils/fs";
 import { Uri, Task, WorkspaceFolder, workspace } from "vscode";

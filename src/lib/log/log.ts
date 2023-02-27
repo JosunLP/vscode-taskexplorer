@@ -7,8 +7,8 @@ import { figures } from "../figures";
 import { dirname, join } from "path";
 import { value, values } from "./value";
 import { createDir } from "../utils/fs";
+import { configuration } from "../configuration";
 import { methodDone, methodStart } from "./method";
-import { configuration } from "../utils/configuration";
 import { IDictionary, ILogQueueItem } from "../../interface";
 import { OutputChannel, ExtensionContext, commands, window, workspace, ConfigurationChangeEvent } from "vscode";
 

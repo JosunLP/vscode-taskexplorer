@@ -1,7 +1,7 @@
 
 
 import { log } from "../log/log";
-import { configuration } from "./configuration";
+import { configuration } from "../configuration";
 import { pushIfNotExists, removeFromArray } from "./utils";
 
 

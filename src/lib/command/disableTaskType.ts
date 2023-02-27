@@ -3,8 +3,8 @@ import { log } from "../log/log";
 import { Globs } from "../constants";
 import { Disposable, Uri } from "vscode";
 import { testPattern } from "../utils/utils";
+import { configuration } from "../configuration";
 import { Commands, registerCommand } from "./command";
-import { configuration } from "../utils/configuration";
 
 
 const disableTaskType = async(uri: Uri) =>

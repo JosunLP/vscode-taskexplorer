@@ -3,8 +3,8 @@ import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskExplorerProvider } from "./provider";
+import { configuration, } from "../lib/configuration";
 import { getRelativePath } from "../lib/utils/pathUtils";
-import { configuration } from "../lib/utils/configuration";
 import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 

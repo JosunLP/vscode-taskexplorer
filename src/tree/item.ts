@@ -1,10 +1,10 @@
 
 import * as path from "path";
-import * as util from "../lib/utils/utils";
-import { log } from "../lib/log/log";
 import { TaskFile } from "./file";
+import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
-import { configuration } from "../lib/utils/configuration";
+import { isSpecial } from "../lib/utils/utils";
+import { configuration } from "../lib/configuration";
 import { getInstallPathSync } from "../lib/utils/pathUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import {
@@ -178,7 +178,7 @@ export class TaskItem extends TreeItem
         // Note that TaskItems of type 'scriptFile' can be ran with arguments and this will have an additional
         // entry added to it's context menu - "Run with arguments"
         //
-        if (util.isSpecial(this))
+        if (isSpecial(this))
         {
             if (task.definition.scriptFile || this.taskSource === "gradle") {
                 this.contextValue = running ? "scriptRunningS" : "scriptFileS";

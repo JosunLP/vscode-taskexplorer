@@ -4,7 +4,7 @@ import { Task } from "vscode";
 import { log } from "../log/log";
 import { readFileSync } from "./fs";
 import { TeWrapper } from "../wrapper";
-import { configuration } from "./configuration";
+import { configuration } from "../configuration";
 import { isString, isTaskTypeEnabled, isWorkspaceFolder } from "./utils";
 //
 // For JSON5, if I don't specifically import index.js with 'require', then the
