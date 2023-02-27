@@ -51,7 +51,9 @@ Provides a view in either (or both) the SideBar and/or Explorer that displays al
   - [Webpack 5 Problem Matcher](#webpack-5-problem-matcher)
   - [Parsing Reports](#parsing-reports)
   - [External Provider Integration API](#external-provider-integration-api)
-  - [Feedback \& Contributing](#feedback--contributing)
+  - [Contributing - Add a New Task Provider](#contributing---add-a-new-task-provider)
+    - [Task Type](#task-type)
+  - [Feedback](#feedback)
     - [Rate It - Leave Some Stars](#rate-it---leave-some-stars)
   - [Thank You](#thank-you)
   - [Open Source Projects](#open-source-projects)
@@ -422,13 +424,36 @@ Putting it all together:
 - As of v2.7.0, the external task API has not been formally tested, a.  Who will be the guineau?  Hahaha ;)
 - As of v2.7.0, the API does not support custom icons from the task definition, but for extension testing you can place an icon in `res/img/sources` or `res/img/dark` / `res/img/light` of the TaskExplorer installation folder, named using the same task type name in the `registerProvider` call mentioned above, and will be used by the Task Explorer tree.
 
-## Feedback & Contributing
+## Contributing - Add a New Task Provider
+
+Use the following steps as a guideline to add a new task provider.
+
+### Task Type
+
+Each task provider requires a unique name, for example `grunt`, `npm`, `tsc`, etc.  The first step is to choose the unique task provider name.
+
+Define the task type in `package.json`. **TODO**
+
+There are two types of task files, `script files` and `task files`.  A `script` file is exactly that, a script, than can be considered **1 task**.  A `task file` is a file that can contain multiple tasks, for example there can be any number of tasks defined in the 8scripts8 section of package.json.
+
+If adding a `script file` type provider, add the task type to the array return in the getScriptTaskTypes functionfound in the lib/utils/taskUtils module.  For example, if the new task provider task type name is *"newprovider"*, modify the function to the following:
+
+    export function getScriptTaskTypes(): string[]
+    {
+        return [
+            "bash", "batch", "newprovider", "nsis", "perl", "powershell", "python", "ruby"
+        ];
+    }
+
+**TODO**
+
+  [Pull Requests](https://github.com/spmeesseman/vscode-taskexplorer/pulls)
+- [Contributors](https://github.com/spmeesseman/vscode-taskexplorer/graphs/contributors)
+
+## Feedback
 
 - Please report any bugs, suggestions or documentation requests via the
   [Issues](https://github.com/spmeesseman/vscode-taskexplorer/issues)
-- Feel free to submit
-  [Pull Requests](https://github.com/spmeesseman/vscode-taskexplorer/pulls)
-- [Contributors](https://github.com/spmeesseman/vscode-taskexplorer/graphs/contributors)
 
 ### Rate It - Leave Some Stars
 
@@ -440,10 +465,11 @@ Icon Contributors:
 
 - pkief - [Material Icon Theme](https://github.com/PKief/vscode-material-icon-theme)
 - idleberg - [NSIS Extension](https://marketplace.visualstudio.com/items?itemName=idleberg.nsis)
+- Font Awesome - [Font Awesome](https://fontawesome.com/)
 - Microsoft - [VSCode](https://github.com/Microsoft/vscode)
 - Microsoft - [Maven for VSCode](https://github.com/Microsoft/vscode-maven)
 
-Other Contributors:
+Contributors:
 
 - antfu
 - eamodio (fixed [#114](https://github.com/spmeesseman/vscode-taskexplorer/issues/114))
