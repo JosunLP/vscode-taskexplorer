@@ -8,9 +8,9 @@ import { isScriptType } from "../lib/utils/taskUtils";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "../providers/script";
 import { getPackageManager, timeout } from "../lib/utils/utils";
-import { findDocumentPosition } from "../lib/findDocumentPosition";
 import { Commands, registerCommand } from "../lib/command/command";
 import { ILog, ITeTaskManager, TaskMap, ITeTask } from "../interface";
+import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder, Event
