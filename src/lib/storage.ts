@@ -1,10 +1,10 @@
 
 import { join } from "path";
-import { Memento, ExtensionContext, SecretStorage, ExtensionMode, SecretStorageChangeEvent, EventEmitter, Disposable, Event } from "vscode";
-import { IDictionary } from "../../interface";
-import { IStorage, StorageChangeEvent } from "../../interface/IStorage";
-import { createDir, pathExists, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./fs";
-import { isNumber, isString } from "./utils";
+import { IDictionary } from "../interface";
+import { isNumber, isString } from "./utils/utils";
+import { IStorage, StorageChangeEvent } from "../interface/IStorage";
+import { createDir, pathExists, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./utils/fs";
+import { Memento, ExtensionContext, SecretStorage, ExtensionMode, SecretStorageChangeEvent, EventEmitter, Event } from "vscode";
 
 export let storage: IStorage;
 

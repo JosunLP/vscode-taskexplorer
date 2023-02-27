@@ -1,5 +1,6 @@
 
 import { TeApi } from "./api";
+import { Usage } from "./usage";
 import * as fs from "./utils/fs";
 import { figures } from "./figures";
 import { Strings } from "./constants";
@@ -27,7 +28,6 @@ import { RubyTaskProvider } from "../providers/ruby";
 import { NsisTaskProvider } from "../providers/nsis";
 import { PerlTaskProvider } from "../providers/perl";
 import { ITeWrapper } from "../interface/ITeWrapper";
-import { UsageWatcher } from "./watcher/usageWatcher";
 import { TeFileWatcher } from "./watcher/fileWatcher";
 import { TaskTreeManager } from "../tree/treeManager";
 import { LicenseManager } from "./auth/licenseManager";
@@ -74,11 +74,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private _cacheBuster: string;
 
 	private readonly _log: ILog;
+	private readonly _usage: Usage;
 	private readonly _teApi: TeApi;
 	private readonly _version: string;
 	private readonly _storage: IStorage;
 	private readonly _homeView: HomeView;
-	private readonly _usage: UsageWatcher;
 	private readonly _teContext: TeContext;
 	private readonly _fileCache: TeFileCache;
     private readonly _taskWatcher: TaskWatcher;
@@ -123,7 +123,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._configWatcher = new TeConfigWatcher(this);
 
 		this._licenseManager = new LicenseManager(this);
-		this._usage = new UsageWatcher(this);
+		this._usage = new Usage(this);
 
 		this._treeManager = new TaskTreeManager(this);
         this._taskManager = new TaskManager(this);
@@ -563,7 +563,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._treeManager;
 	}
 
-	get usage(): UsageWatcher {
+	get usage(): Usage {
 		return this._usage;
 	}
 

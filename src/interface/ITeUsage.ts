@@ -26,7 +26,7 @@ export interface ITeUsageChangeEvent
 	readonly usage?: ITeTrackedUsage;
 };
 
-export interface ITeUsageWatcher
+export interface ITeUsage
 {
 	onDidChange: Event<ITeUsageChangeEvent | undefined>;
     get(key: string): ITeTrackedUsage | undefined;

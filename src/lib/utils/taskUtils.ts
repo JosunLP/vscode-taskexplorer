@@ -1,12 +1,11 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { storage } from "./storage";
+import { Usage } from "../usage";
+import { storage } from "../storage";
 import { Task, tasks } from "vscode";
-import { pickBy, properCase } from "./commonUtils";
-import { UsageWatcher } from "../watcher/usageWatcher";
-import { ITaskDefinition, ITeTask, ITeTrackedUsage, TeTaskListType } from "../../interface";
-import { TaskUsageTracker } from "src/tree/taskUsageTracker";
 import { TeWrapper } from "../wrapper";
+import { pickBy, properCase } from "./commonUtils";
+import { ITaskDefinition, ITeTask, TeTaskListType } from "../../interface";
 
 
 export function getScriptTaskTypes(): string[]

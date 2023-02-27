@@ -1,6 +1,6 @@
 
+import { ITeTrackedUsageCount } from "./ITeUsage";
 import { ITaskDefinition } from "./ITaskDefinition";
-import { ITeTrackedUsageCount } from "./ITeUsageWatcher";
 
 
 export type TeTaskListType = "none" | "last" | "running" | "favorites" | "famous" | "all";

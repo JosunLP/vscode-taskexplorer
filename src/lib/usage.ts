@@ -1,13 +1,13 @@
 
-import { TeWrapper } from "../wrapper";
-import { StorageProps } from "../constants";
+import { TeWrapper } from "./wrapper";
+import { StorageProps } from "./constants";
 import { Disposable, Event, EventEmitter } from "vscode";
-import { IDictionary, ITeUsageWatcher, ITeTrackedUsage, ITeUsageChangeEvent } from "../../interface";
+import { IDictionary, ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent } from "../interface";
 
 type UsageStore = IDictionary<ITeTrackedUsage>;
 
 
-export class UsageWatcher implements ITeUsageWatcher, Disposable
+export class Usage implements ITeUsage, Disposable
 {
 	private readonly _disposables: Disposable[];
 	private readonly _onDidChange: EventEmitter<ITeUsageChangeEvent | undefined>;

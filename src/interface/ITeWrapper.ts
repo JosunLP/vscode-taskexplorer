@@ -1,5 +1,6 @@
 
 import { ILog } from "./ILog";
+import { ITeUsage } from "./ITeUsage";
 import { IStorage } from "./IStorage";
 import { ITeContext } from "./ITeContext";
 import { ITeWebview } from "./ITeWebview";
@@ -11,7 +12,6 @@ import { ITeTreeManager } from "./ITeTreeManager";
 import { ITeTaskManager } from "./ITeTaskManager";
 import { IConfiguration } from "./IConfiguration";
 import { ITeFileWatcher } from "./ITeFileWatcher";
-import { ITeUsageWatcher } from "./ITeUsageWatcher";
 import { ITaskExplorerApi } from "./ITaskExplorerApi";
 import { ITeConfigWatcher } from "./ITeConfigWatcher";
 import { ITeLicenseManager } from "./ITeLicenseManager";
@@ -60,7 +60,7 @@ export interface ITeWrapper
 	taskUsageView: ITeWebview;
 	taskCountView: ITeWebview;
 	taskUtils: ITeTaskUtilities;
-	usage: ITeUsageWatcher;
+	usage: ITeUsage;
 	utils: ITeUtilities;
 	views: IDictionary<ITaskTreeView>;
 	wsfolder: WorkspaceFolder;

@@ -26,6 +26,6 @@ export type { IStorage, StorageChangeEvent } from "./IStorage";
 export type { ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
 export type { ITeTaskManager, TaskMap } from "./ITeTaskManager";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
+export type { ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount } from "./ITeUsage";
 export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITeTaskUtilities } from "./ITeUtilities";
-export type { ITeUsageWatcher, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount } from "./ITeUsageWatcher";
 export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType } from "./ITeTask";
