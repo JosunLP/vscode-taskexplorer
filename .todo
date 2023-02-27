@@ -7,16 +7,37 @@ Bugs:
     ✔ Swutching away from view while task is running, and switching back after task has ended, view still shows it as running, must refresh @done(20-10-09 02:41)
     ✔ Damn son of bitch shit hole bug - '..... is already registered' @done(23-01-08 16:23)
     ☐ Again - Running task not updating icon when task is finished
-        random, mostly when view was not visiblewhen ended
+        random, mostly when view was not visible when finished
 
 Features:
 
     ☐ Task Monitor React App
 
-        ✔ Initial base implementation @done(23-02-26 22:30)
+        ✔ Initial base implementation @done(23-02-26 21:30)
         ☐ The `all` tab needs to be paged or loaded as user scrolls
+        ✔ Task last ran stats @done(23-02-26 21:47)
         ☐ Fix - Runtimes displaying 00:00:00:000 still
         ☐ Save state / re-order after `pinned` on or off
+        ☐ Reveal task file in file explorer and/or taskexplorer tree from  monitor
+            Use 'eye' icon button, maybe next to pin icon button
+            Implement `reveal api` on trees
+        ☐ Filter by task type for tabs
+            Just `all` tab,  or for all displayed tabs?  Use task type icons.
+            Either a new tabstrip, or if possible a flyout menu, upper right menu button inline w/ top tabstrip
+            Or possible to include menu in vs code embedded little context menu in uper right corder of editor?
+        ☐ Fix - Timer resetting to 0:00 when task finishes
+        ☐ Fix - Timer always resets to m:s when task starts if it is hidden or in m:s:ms display mode
+        ☐ Maybe redo the timer mode buttonswhen changin to diferentdisplay modes
+            e.g. the middle iconcan sitchto chevron-right when timer mode is in m:s:ms mode
+        ☐ Apply limits for unlicensed mode?  Or full-featured?
+        ☐ Graph usage over time
+            Maybe new view i terminal pane? (I forget what it's called)
+        ☐ Clear buttons / options
+            Clear single task from list, or entire list (except for all tab)
+            seperate semi-clear buttons too for rntimes,  runcounts, etc
+        ☐ Always display vertical scrollbar
+            so page doesnt jump when switching tabs if 1 pghas and 1 pg doesn't
+        ☐ Ensure sync running timer w/ true task runtime when task finishes
 
     ✔ Option persisted cache @done(23-01-22 18:34)
         For tasks to load from fs on startup
@@ -52,14 +73,15 @@ Features:
     
     ☐ Decorate ative editor task file i.e. package.json with task actions
         Run command, etc, inline in file while open in editor, at end of line of defined tasks
+        plenty of other extenions can do this, i dunno, maybe not do this
 
     ☐ Add 'Task Counts (Today)' view in Sidebar Container
         Replicate 'Task Counts', but track daily
 
-    ☐ Icons in  Task Counts view action
+    ☐ Icons in Task Counts view action
         Make clickable, open up a page webview with nice large layout, can run the tasks in the group clicked from
 
-    ☐ New 'Famous Tasks' webview page/panel
+    ✔ New 'Famous Tasks' webview page/panel @done(23-02-26 23:38)
         Display Most Used tasks
         Big green 'run' buttons layout
         Maybe use tabs and list most used tasks per project
@@ -70,6 +92,8 @@ Features:
 
     ☐ Display message for 'set new record' when new daily high total is seen
         Maybe suppress msg until user has used extension for at least a month or so
+
+    ☐ New config option for max-folder levels deep to earch for task files
 
 General Todos:
 
@@ -98,6 +122,8 @@ General Todos:
         Webview page currently has very basic layout and info
     
     ☐ License state change events
+
+    ☐ Better integrate special folders (i.e. last tasks and favs) (way things are saved) w/ usage tracker
 
 Tests:
 
