@@ -46,11 +46,11 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	{
 		return {
 			...(await super.getState()),
-			last: toITask(this.wrapper.usage, this.wrapper.treeManager.lastTasks, "last"),
-			favorites: toITask(this.wrapper.usage, this.wrapper.treeManager.favoritesTasks, "favorites"),
-			running: toITask(this.wrapper.usage, this.wrapper.treeManager.runningTasks, "running"),
+			last: toITask(this.wrapper, this.wrapper.treeManager.lastTasks, "last"),
+			favorites: toITask(this.wrapper, this.wrapper.treeManager.favoritesTasks, "favorites"),
+			running: toITask(this.wrapper, this.wrapper.treeManager.runningTasks, "running"),
 			famous: this.wrapper.treeManager.famousTasks,
-			tasks: toITask(this.wrapper.usage, this.wrapper.treeManager.getTasks(), "all"),
+			tasks: toITask(this.wrapper, this.wrapper.treeManager.getTasks(), "all"),
 			pinned: {
 				last: this.wrapper.storage.get<ITeTask[]>("taskexplorer.pinned.last", []),
 				famous: this.wrapper.storage.get<ITeTask[]>("taskexplorer.pinned.famous", []),

@@ -1,9 +1,27 @@
 
 import { TeWrapper } from "../lib/wrapper";
+import { pickBy } from "../lib/utils/commonUtils";
 import { getDateDifference } from "../lib/utils/utils";
 import { ConfigProps, StorageProps } from "../lib/constants";
 import { Disposable, EventEmitter, tasks, Event, Task } from "vscode";
 import { IDictionary, ILog, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeTrackedUsage } from "../interface";
+
+interface ITaskRuntime
+{
+    end: number;
+    start: number;
+    time: number;
+}
+
+interface ITaskRuntimeInfo
+{
+    runtimes: ITaskRuntime[];
+    average: number;
+    fastest: number;
+    first: number;
+    last: number;
+    slowest: number;
+}
 
 interface ITaskUsageStats
 {
@@ -12,7 +30,7 @@ interface ITaskUsageStats
     favorites: ITeTask[];
     last: ITeTask[];
     running: ITeTask[];
-    runtimes: IDictionary<any>;
+    runtimes: IDictionary<ITaskRuntimeInfo>;
     taskLastRan: ITeTask;
     taskMostUsed: ITeTask;
     timeLastRan: number;
@@ -80,6 +98,13 @@ export class TaskUsageTracker implements Disposable
             last60Days: 0,
             last90Days: 0,
             total: 0
+        },
+        runTime: {
+            average: 0,
+            fastest: 0,
+            first: 0,
+            last: 0,
+            slowest: 0
         }
     });
 
@@ -95,7 +120,7 @@ export class TaskUsageTracker implements Disposable
                 last: [],
                 all: [],
                 running: [],
-                runtimes: [],
+                runtimes: {},
                 timeLastRan: 0,
                 taskLastRan: this.getEmptyITask(),
                 taskMostUsed: this.getEmptyITask()
@@ -126,6 +151,22 @@ export class TaskUsageTracker implements Disposable
 
 
     getRunningTasks = (): Task[] => tasks.taskExecutions.map(e => e.task);
+
+
+    getRuntimeInfo = (treeId: string): { average: 0; fastest: 0;  first: 0;  last: 0;  slowest: 0 } =>
+    {
+        const stats = this.getStore();
+        if (stats.runtimes[treeId]) {
+            return pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
+        }
+        return {
+            average: 0,
+            fastest: 0,
+            first: 0,
+            last: 0,
+            slowest: 0
+        };
+    };
 
 
     getTodayCount = (logPad: string) =>
@@ -179,15 +220,38 @@ export class TaskUsageTracker implements Disposable
         }
         else
         {
+            let avg = 0;
             const stats = this.getStore();
-            if (!stats.runtimes[e.treeId]) {
-                stats.runtimes[e.treeId] = [];
-            }
-            stats.runtimes[e.treeId].push({
+            const newRtStats = {
                 start: e.task.definition.startTime,
                 end: Date.now(),
                 time: e.task.definition.endTime - e.task.definition.startTime
+            };
+            let taskRtStats = stats.runtimes[e.treeId];
+            if (!taskRtStats)
+            {
+                taskRtStats = stats.runtimes[e.treeId] = {
+                      runtimes: [],
+                      average: newRtStats.time,
+                      fastest: newRtStats.time,
+                      first: newRtStats.time,
+                      last: newRtStats.time,
+                      slowest: newRtStats.time
+                };
+            }
+            taskRtStats.runtimes.push(newRtStats);
+            taskRtStats.runtimes.forEach(r =>
+            {
+                avg += r.time;
+                if (r.time < taskRtStats.fastest) {
+                    taskRtStats.fastest = r.time;
+                }
+                else if (r.time > taskRtStats.slowest) {
+                    taskRtStats.slowest = r.time;
+                }
             });
+            taskRtStats.last = newRtStats.time;
+            taskRtStats.average = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
             delete e.task.definition.startTime;
             this.saveStore(stats);
         }

@@ -5,6 +5,8 @@ import { Task, tasks } from "vscode";
 import { pickBy, properCase } from "./commonUtils";
 import { UsageWatcher } from "../watcher/usageWatcher";
 import { ITaskDefinition, ITeTask, ITeTrackedUsage, TeTaskListType } from "../../interface";
+import { TaskUsageTracker } from "src/tree/taskUsageTracker";
+import { TeWrapper } from "../wrapper";
 
 
 export function getScriptTaskTypes(): string[]
@@ -109,12 +111,12 @@ export function isWatchTask(source: string)
  * @param isRunning Provide when on;y when one task is being converted
  * @param usage Provide when on;y when one task is being converted
  */
-export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: TeTaskListType): ITeTask[] =>
+export const toITask = (wrapper: TeWrapper, teTasks: Task[], listType: TeTaskListType): ITeTask[] =>
 {
     return teTasks.map<ITeTask>(t =>
     {
         let runCount;
-        const usage = usageTracker.get(`task:${t.definition.taskItemId}`);
+        const usage = wrapper.usage.get(`task:${t.definition.taskItemId}`);
         const running = tasks.taskExecutions.filter(e => e.task.name === t.name && e.task.source === t.source &&
                                                     e.task.scope === t.scope && e.task.definition.path === t.definition.path).length > 0;
         if (usage) {
@@ -140,7 +142,8 @@ export const toITask = (usageTracker: UsageWatcher, teTasks: Task[], listType: T
             runCount,
             running,
             source: t.source,
-            treeId: t.definition.taskItemId
+            treeId: t.definition.taskItemId,
+            runTime: wrapper.taskUsageTracker.getRuntimeInfo(t.definition.taskItemId)
         };
     });
 };

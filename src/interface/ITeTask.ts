@@ -15,6 +15,13 @@ export interface ITeTask
 	running: boolean;
 	source: string;
 	treeId: string;
+	runTime: {
+		average: number;
+		fastest: number;
+		first: number;
+		last: number;
+		slowest: number;
+	};
 }
 
 export interface ITeTaskChangeEvent

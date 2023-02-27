@@ -124,7 +124,7 @@ export class TaskWatcher implements Disposable
             }
         }
 
-        const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], "running")[0];
+        const iTask = this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], "running")[0];
         // const iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this.wrapper.treeManager.runningTasks, "running");
         this._onTaskStatusChange.fire({ task: iTask, treeId: taskItem.id, isRunning });
         // this._onDidRunningTasksChange.fire({ tasks: iTasks, task: iTask, treeId: taskItem.id, isRunning });

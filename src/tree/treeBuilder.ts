@@ -85,7 +85,7 @@ export class TaskTreeBuilder implements Disposable
         // The 'Last Tasks' folder will be 1st in the tree
         //
         this.specialFolders.lastTasks.clearTaskItems();
-        if (this.specialFolders.lastTasks.isEnabled())
+        if (this.specialFolders.lastTasks.isEnabled)
         {
             folders[this.specialFolders.lastTasks.label as string] = this.specialFolders.lastTasks;
         }
@@ -95,7 +95,7 @@ export class TaskTreeBuilder implements Disposable
         // the 'Last Tasks' folder)
         //
         this.specialFolders.favorites.clearTaskItems();
-        if (this.specialFolders.favorites.isEnabled())
+        if (this.specialFolders.favorites.isEnabled)
         {
             folders[this.specialFolders.favorites.label as string] = this.specialFolders.favorites;
         }

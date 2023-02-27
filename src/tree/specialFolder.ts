@@ -67,6 +67,10 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
+    get isEnabled() {
+        return this.enabled;
+    }
+
 	get onDidTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._onDidTasksChange.event;
 	}
@@ -226,8 +230,8 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     private fireChangeEvent = (taskItem: TaskItem) =>
     {
-        const iTask = this.wrapper.taskUtils.toITask(this.wrapper.usage, [ taskItem.task ], this.listType)[0],
-              iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this.taskFiles.map(f => f.task), this.listType);
+        const iTask = this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], this.listType)[0],
+              iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this.taskFiles.map(f => f.task), this.listType);
         this._onDidTasksChange.fire({ tasks: iTasks, task: iTask, type: this.listType });
     };
 
@@ -260,10 +264,9 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    hasTask = (taskItem: TaskItem) => !!(this.enabled && this.taskFiles.find(t =>  this.getTaskItemId(t.id) === taskItem.id) && this.store.includes(this.getTaskItemId(taskItem.id)));
-
-
-    isEnabled = () => this.enabled;
+    hasTask = (taskItem: TaskItem) =>
+                !!(this.enabled && this.taskFiles.find(t =>  this.getTaskItemId(t.id) === taskItem.id) &&
+                this.store.includes(this.getTaskItemId(taskItem.id)));
 
 
     async processConfigChanges(e: ConfigurationChangeEvent)

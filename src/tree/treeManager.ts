@@ -337,7 +337,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         //
         queueMicrotask(() =>
         {
-            const iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this._tasks, "all");
+            const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
             this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
             if (this._tasks.length !== count) {
                 this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
