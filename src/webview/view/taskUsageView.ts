@@ -49,12 +49,12 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	protected override onHtmlFinalize = async (html: string) =>
 	{
-    	const lastTime = this.wrapper.taskUsageTracker.getLastRanTaskTime(),
-			  mostUsedTask = this.wrapper.taskUsageTracker.mostUsedTask;
-		html = html.replace(/\#\{taskUsage\.avgPerDay\}/g, this.wrapper.taskUsageTracker.getAvgRunCount("d", "").toString())
-				   .replace(/\#\{taskUsage\.avgPerWeek\}/g, this.wrapper.taskUsageTracker.getAvgRunCount("w", "").toString())
+    	const lastTime = this.wrapper.taskUsage.getLastRanTaskTime(),
+			  mostUsedTask = this.wrapper.taskUsage.mostUsedTask;
+		html = html.replace(/\#\{taskUsage\.avgPerDay\}/g, this.wrapper.taskUsage.getAvgRunCount("d", "").toString())
+				   .replace(/\#\{taskUsage\.avgPerWeek\}/g, this.wrapper.taskUsage.getAvgRunCount("w", "").toString())
 				   .replace(/\#\{taskUsage\.mostUsedTask\}/g, this.wrapper.utils.textWithElipsis(mostUsedTask.name, 26))
-				   .replace(/\#\{taskUsage\.today\}/g, this.wrapper.taskUsageTracker.getTodayCount("").toString())
+				   .replace(/\#\{taskUsage\.today\}/g, this.wrapper.taskUsage.getTodayCount("").toString())
 				   .replace(/\#\{taskUsage\.lastTaskRanAt\}/g, lastTime);
 		return html;
 	};

@@ -125,7 +125,7 @@ export class HomeView extends TeWebviewView<State>
 	{
 		const isLic = this.wrapper.licenseManager.isLicensed();
     	html = html.replace("#{taskCounts.length}", this.wrapper.treeManager.getTasks().length.toString())
-				   .replace("#{taskCounts.today}", this.wrapper.taskUsageTracker.getTodayCount("").toString())
+				   .replace("#{taskCounts.today}", this.wrapper.taskUsage.getTodayCount("").toString())
 				   .replace("#{license.status}", isLic ? "LICENSED" : "UNLICENSED")
 				   .replace("#{license.placeIconCls}", "fal fa-1")
 				   .replace("#{license.sessionIconCls}", "fal fa-" + (isLic ? "user-slash" : "user-slash"))

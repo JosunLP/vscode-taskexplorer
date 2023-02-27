@@ -37,7 +37,7 @@ interface ITaskUsageStats
 }
 
 
-export class TaskUsageTracker implements Disposable
+export class TaskUsage implements Disposable
 {
     private readonly log: ILog;
     private readonly _usageKey = "task:";

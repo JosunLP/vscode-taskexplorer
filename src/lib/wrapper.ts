@@ -5,11 +5,12 @@ import * as fs from "./utils/fs";
 import { figures } from "./figures";
 import { Strings } from "./constants";
 import { logControl } from "./log/log";
+import { TaskTree } from "../tree/tree";
 import { TeServer } from "./auth/server";
 import { TeFileCache } from "./fileCache";
-import { TaskTree } from "../tree/tree";
 import * as utilities from "./utils/utils";
 import * as sorters from "./utils/sortTasks";
+import { TaskUsage } from "../tree/taskUsage";
 import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
 import { IStorage } from "../interface/IStorage";
@@ -44,7 +45,6 @@ import { LicensePage } from "../webview/page/licensePage";
 import { MonitorPage } from "../webview/page/monitorPage";
 import { WebpackTaskProvider } from "../providers/webpack";
 import { JenkinsTaskProvider } from "../providers/jenkins";
-import { TaskUsageTracker } from "../tree/taskUsageTracker";
 import { ComposerTaskProvider } from "../providers/composer";
 import { TaskExplorerProvider } from "../providers/provider";
 import { IConfiguration } from "../interface/IConfiguration";
@@ -80,6 +80,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _storage: IStorage;
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
+    private readonly _taskUsage: TaskUsage;
 	private readonly _fileCache: TeFileCache;
     private readonly _taskWatcher: TaskWatcher;
 	private readonly _licensePage: LicensePage;
@@ -95,7 +96,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _configWatcher: TeConfigWatcher;
 	// private readonly _telemetry: TelemetryService;
 	private readonly _licenseManager: LicenseManager;
-    private readonly _taskUsageTracker: TaskUsageTracker;
 	private readonly _releaseNotesPage: ReleaseNotesPage;
 	private readonly _previousVersion: string | undefined;
 	private readonly _parsingReportPage: ParsingReportPage;
@@ -128,7 +128,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._treeManager = new TaskTreeManager(this);
         this._taskManager = new TaskManager(this);
         this._taskWatcher = new TaskWatcher(this);
-        this._taskUsageTracker = new TaskUsageTracker(this);
+        this._taskUsage = new TaskUsage(this);
 
 		this._homeView = new HomeView(this);
 		this._taskCountView = new TaskCountView(this);
@@ -174,7 +174,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._usage,
 			this._homeView,
             this._taskWatcher,
-            this._taskUsageTracker,
+            this._taskUsage,
             this._taskManager,
 			this._treeManager,
 			this._licensePage,
@@ -531,8 +531,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._taskManager;
 	}
 
-	get taskUsageTracker(): TaskUsageTracker {
-		return this._taskUsageTracker;
+	get taskUsage(): TaskUsage {
+		return this._taskUsage;
 	}
 
 	get taskMonitorPage(): MonitorPage {
