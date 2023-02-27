@@ -380,12 +380,12 @@ export class Usage implements ITeUsage, Disposable
         {
             if (usage.count.total > stats.famous[f].runCount.total)
             {
-                stats.famous.splice(f, 0, { ...iTask, ...{ type: "famous" }});
+                stats.famous.splice(f, 0, { ...iTask, ...{ type: "famous", running: false }});
                 if (stats.famous.length > specTaskListLength) {
                     stats.famous.pop();
                 }
                 if (f === 0) { // There's a new most famous/used task
-                    stats.taskMostUsed = { ...iTask, ...{ type: "famous" }};
+                    stats.taskMostUsed = { ...iTask, ...{ type: "famous", running: false }};
                 }
                 added = changed = true;
                 break;
@@ -399,9 +399,9 @@ export class Usage implements ITeUsage, Disposable
         if (!added && stats.famous.length < specTaskListLength)
         {
             changed = true;
-            stats.famous.push({ ...iTask, ...{ type: "famous" }});
+            stats.famous.push({ ...iTask, ...{ type: "famous", running: false }});
             if (stats.famous.length === 1) {
-                stats.taskMostUsed = { ...iTask, ...{ type: "famous" }};
+                stats.taskMostUsed = { ...iTask, ...{ type: "famous", running: false }};
             }
         }
         return changed;
