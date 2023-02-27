@@ -11,6 +11,13 @@ Bugs:
 
 Features:
 
+    ☐ Task Monitor React App
+
+        ✔ Initial base implementation @done(23-02-26 22:30)
+        ☐ The `all` tab needs to be paged or loaded as user scrolls
+        ☐ Fix - Runtimes displaying 00:00:00:000 still
+        ☐ Save state / re-order after `pinned` on or off
+
     ✔ Option persisted cache @done(23-01-22 18:34)
         For tasks to load from fs on startup
         Instant load time

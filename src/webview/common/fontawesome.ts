@@ -29,6 +29,7 @@ export const fontawesome = {
         "chevron-double-right": "\\f324",
         "chevron-left": "\\f053",
         "chevron-right": "\\f054",
+        "clock": "\\f017",
         "cog": "\\f013",
         "gear": "\\f013",
         "gears": "\\f085",
