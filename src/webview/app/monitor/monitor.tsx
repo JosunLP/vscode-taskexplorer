@@ -75,8 +75,8 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
     protected override onBind = (): Disposable[] =>
     {
-		const disposables = super.onBind?.() ?? [];
 		this.log("onBind");
+		const disposables = [];
         const root = createRoot(document.getElementById("root") as HTMLElement);
         root.render(
 			<App
@@ -84,7 +84,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				state={this.state}
 				log={this.log.bind(this)}
 				executeCommand={this.executeCommand.bind(this)}
-			 />
+			/>
         );
         disposables.push({
             dispose: () => root.unmount()

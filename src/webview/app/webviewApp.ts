@@ -24,14 +24,14 @@ export abstract class TeWebviewApp<State = undefined>
 	protected onDataActionClicked?(e: MouseEvent, target: HTMLElement): void;
 	protected onInitialized?(): void;
 	protected onMessageReceived?(e: MessageEvent): void;
-
-	private readonly _vscode: VsCodeApi;
 	protected state: State;
+
+	private _ipcSequence = 0;
 	private _focused?: boolean;
 	private _inputFocused?: boolean;
-	private bindDisposables: Disposable[] | undefined;
-	private ipcSequence = 0;
-	private maxSmallIntegerV8 = 2 ** 30; // Max # that can be stored in V8's smis (small ints)
+	private _bindDisposables: Disposable[] | undefined;
+	private readonly _maxSmallIntegerV8 = 2 ** 30; // Max # that can be stored in V8's smis (small int)
+	private readonly _vscode: VsCodeApi;
 
 
 	constructor(protected readonly appName: string)
@@ -62,8 +62,8 @@ export abstract class TeWebviewApp<State = undefined>
 			DOM.on(window, "pagehide", () =>
 			{
 				disposables?.forEach(d => d.dispose());
-				this.bindDisposables?.forEach(d => d.dispose());
-				this.bindDisposables = undefined;
+				this._bindDisposables?.forEach(d => d.dispose());
+				this._bindDisposables = undefined;
 			})
 		);
 	}
@@ -72,6 +72,7 @@ export abstract class TeWebviewApp<State = undefined>
 	protected get vscode(): VsCodeApi {
 		return this._vscode;
 	}
+
 
 	private applyLicenseContent(): void
     {
@@ -105,11 +106,8 @@ export abstract class TeWebviewApp<State = undefined>
 
 	private initialize(): void
 	{
-		this.bindDisposables?.forEach(d => d.dispose());
-		this.bindDisposables = this.onBind?.();
-		if (!this.bindDisposables) {
-			this.bindDisposables = [];
-		}
+		this._bindDisposables?.forEach(d => d.dispose());
+		this._bindDisposables = this.onBind?.() || [];
 
 		//
 		// GitLens author uses this debounce method here for some reason...  i'm sure it'll
@@ -121,12 +119,12 @@ export abstract class TeWebviewApp<State = undefined>
 		const sendWebviewFocusChangedCommand = (p: WebviewFocusChangedParams) => this.sendCommand(WebviewFocusChangedCommandType, p);
 
 		if (this.onDataActionClicked) {
-			this.bindDisposables.push(
+			this._bindDisposables.push(
 				DOM.on("[data-action]", "click", this.onDataActionClicked.bind(this))
 			);
 		}
 
-		this.bindDisposables.push(
+		this._bindDisposables.push(
 			DOM.on(document, "focusin", (e) =>
 			{
 				const inputFocused = e.composedPath().some(el => (el as HTMLElement).tagName === "INPUT");
@@ -163,13 +161,13 @@ export abstract class TeWebviewApp<State = undefined>
 
 	private nextIpcId = (): string =>
 	{
-		if (this.ipcSequence === this.maxSmallIntegerV8) {
-			this.ipcSequence = 1;
+		if (this._ipcSequence === this._maxSmallIntegerV8) {
+			this._ipcSequence = 1;
 		}
 		else {
-			this.ipcSequence++;
+			this._ipcSequence++;
 		}
-		return `webview:${this.ipcSequence}`;
+		return `webview:${this._ipcSequence}`;
 	};
 
 
