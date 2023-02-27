@@ -359,7 +359,7 @@ export class Usage implements ITeUsage, Disposable
 	}
 
 
-    private trackFamous = (iTask: ITeTask, stats: ITaskUsageStats, usage: ITeTrackedUsage) =>
+    private trackFamousTasks = (iTask: ITeTask, stats: ITaskUsageStats, usage: ITeTrackedUsage) =>
     {
         let added = false,
             changed = false;
@@ -422,7 +422,7 @@ export class Usage implements ITeUsage, Disposable
         //
         // Add  to 'famous tasks' list, maybe
         //
-        const famousChanged = this.trackFamous(iTask, stats, usage);
+        const famousChanged = this.trackFamousTasks(iTask, stats, usage);
         //
         // Record this task as the last task ran and the time it was ran
         //
