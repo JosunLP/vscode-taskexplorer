@@ -70,11 +70,11 @@ export class Usage implements ITeUsage, Disposable
 
 
     get famousTasks(): ITeTask[] {
-        return this.getStore().famous;
+        return this.getTaskUsageStore().famous;
     }
 
     get mostUsedTask(): ITeTask {
-        return this.getStore().taskMostUsed;
+        return this.getTaskUsageStore().taskMostUsed;
     }
 
 	get onDidChange(): Event<ITeUsageChangeEvent | undefined> {
@@ -110,6 +110,184 @@ export class Usage implements ITeUsage, Disposable
 	};
 
 
+	private getEmptyITask = (): ITeTask =>
+    ({
+        name: "N/A",
+        listType: "none",
+        pinned: false,
+        running: false,
+        source: "N/A",
+        treeId: "N/A",
+        definition: {
+            type: "N/A"
+        },
+        runCount: {
+            today: 0,
+            yesterday: 0,
+            last7Days: 0,
+            last14Days: 0,
+            last30Days: 0,
+            last60Days: 0,
+            last90Days: 0,
+            total: 0
+        },
+        runTime: {
+            average: 0,
+            fastest: 0,
+            first: 0,
+            last: 0,
+            slowest: 0
+        }
+    });
+
+
+    private getTaskUsageStore = (): ITaskUsageStats =>
+    {
+        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage);
+        if (!store)
+        {
+            store = {
+                famous: [],
+                favorites: [],
+                last: [],
+                all: [],
+                running: [],
+                runtimes: {},
+                timeLastRan: 0,
+                taskLastRan: this.getEmptyITask(),
+                taskMostUsed: this.getEmptyITask()
+            };
+        }
+        return store;
+    };
+
+
+    getAvgRunCount = (period: "d" | "w", logPad: string): number =>
+    {
+        const now = Date.now();
+        let avg = 0,
+            lowestTime = now;
+        this.log.methodStart("get average run count", 2, logPad, false, [[ "period", period ]]);
+        const taskStats = this.wrapper.usage.getAll(this._taskUsageKey);
+        Object.keys(taskStats).forEach(k =>
+        {
+            if (taskStats[k].timestamp < lowestTime)  {
+                lowestTime = taskStats[k].timestamp ;
+            }
+        });
+        const daysSinceFirstRunTask = getDateDifference(lowestTime, now, "d")  || 1;
+        avg = Math.floor(Object.keys(taskStats).length / daysSinceFirstRunTask / (period === "d" ? 1 : 7));
+        this.log.methodDone("get average run count", 2, logPad, [[ "calculated average", avg ]]);
+        return avg;
+    };
+
+
+    getRuntimeInfo = (treeId: string): { average: 0; fastest: 0;  first: 0;  last: 0;  slowest: 0 } =>
+    {
+        const stats = this.getTaskUsageStore();
+        if (stats.runtimes[treeId]) {
+            return pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
+        }
+        return {
+            average: 0,
+            fastest: 0,
+            first: 0,
+            last: 0,
+            slowest: 0
+        };
+    };
+
+
+    getTodayCount = (logPad: string) =>
+    {
+        let count = 0;
+        this.log.methodStart("get today run count", 2, logPad);
+        const taskStats = this.wrapper.usage.getAll();
+        Object.keys(taskStats).filter(k => k.startsWith(this._taskUsageKey)).forEach(k =>
+        {
+            count += taskStats[k].count.today;
+        });
+        this.log.methodDone("get today run count", 2, logPad, [[ "today run count", count ]]);
+        return count;
+    };
+
+
+    getLastRanTaskTime = (): string =>
+    {
+        const  tm = this.getTaskUsageStore().timeLastRan;
+        if (tm) {
+            const dt = new Date(tm);
+            return dt.toLocaleDateString() + " " + dt.toLocaleTimeString();
+        }
+        return "N/A";
+    };
+
+
+    private onFavoriteTasksChanged = async(e: ITeTaskChangeEvent) =>
+    {
+        const stats = this.getTaskUsageStore();
+        stats.favorites = [ ...e.tasks ];
+        await this.saveTaskUsageStore(stats);
+    };
+
+
+    private onLastTasksChanged = async(e: ITeTaskChangeEvent) =>
+    {
+        const stats = this.getTaskUsageStore();
+        stats.last = [ ...e.tasks ];
+        await this.saveTaskUsageStore(stats);
+    };
+
+
+    private onTaskStatusChanged = async(e: ITeTaskStatusChangeEvent) =>
+    {
+        this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [[ "tree id", e.task.treeId ]]);
+        if (e.isRunning)
+        {
+            e.task.definition.startTime  = Date.now();
+            await this.trackTask(e.task, "   ");
+        }
+        else
+        {
+            let avg = 0;
+            const stats = this.getTaskUsageStore();
+            const newRtStats = {
+                start: e.task.definition.startTime,
+                end: Date.now(),
+                time: e.task.definition.endTime - e.task.definition.startTime
+            };
+            let taskRtStats = stats.runtimes[e.treeId];
+            if (!taskRtStats)
+            {
+                taskRtStats = stats.runtimes[e.treeId] = {
+                      runtimes: [],
+                      average: newRtStats.time,
+                      fastest: newRtStats.time,
+                      first: newRtStats.time,
+                      last: newRtStats.time,
+                      slowest: newRtStats.time
+                };
+            }
+            taskRtStats.runtimes.push(newRtStats);
+            taskRtStats.runtimes.forEach(r =>
+            {
+                avg += r.time;
+                if (r.time < taskRtStats.fastest) {
+                    taskRtStats.fastest = r.time;
+                }
+                else if (r.time > taskRtStats.slowest) {
+                    taskRtStats.slowest = r.time;
+                }
+            });
+            taskRtStats.last = newRtStats.time;
+            taskRtStats.average = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
+            delete e.task.definition.startTime;
+            this.saveTaskUsageStore(stats);
+        }
+        this.log.methodDone("task usage tracker: on running task changed", 2, "");
+    };
+
+
 	async reset(key?: string): Promise<void>
 	{
 		const usages =  this.wrapper.storage.get<UsageStore>(StorageProps.Usage);
@@ -123,6 +301,10 @@ export class Usage implements ITeUsage, Disposable
 			this._onDidChange.fire({ key, usage: undefined });
 		}
 	}
+
+
+    private saveTaskUsageStore = (store: ITaskUsageStats) => this.wrapper.storage.update(StorageProps.TaskUsage, store);
+
 
 
 	async track(key: string): Promise<ITeTrackedUsage>
@@ -177,221 +359,6 @@ export class Usage implements ITeUsage, Disposable
 	}
 
 
-	private getEmptyITask = (): ITeTask =>
-    ({
-        name: "N/A",
-        listType: "none",
-        pinned: false,
-        running: false,
-        source: "N/A",
-        treeId: "N/A",
-        definition: {
-            type: "N/A"
-        },
-        runCount: {
-            today: 0,
-            yesterday: 0,
-            last7Days: 0,
-            last14Days: 0,
-            last30Days: 0,
-            last60Days: 0,
-            last90Days: 0,
-            total: 0
-        },
-        runTime: {
-            average: 0,
-            fastest: 0,
-            first: 0,
-            last: 0,
-            slowest: 0
-        }
-    });
-
-
-    private getStore = (): ITaskUsageStats =>
-    {
-        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage);
-        if (!store)
-        {
-            store = {
-                famous: [],
-                favorites: [],
-                last: [],
-                all: [],
-                running: [],
-                runtimes: {},
-                timeLastRan: 0,
-                taskLastRan: this.getEmptyITask(),
-                taskMostUsed: this.getEmptyITask()
-            };
-        }
-        return store;
-    };
-
-
-    getAvgRunCount = (period: "d" | "w", logPad: string): number =>
-    {
-        const now = Date.now();
-        let avg = 0,
-            lowestTime = now;
-        this.log.methodStart("get average run count", 2, logPad, false, [[ "period", period ]]);
-        const taskStats = this.wrapper.usage.getAll(this._taskUsageKey);
-        Object.keys(taskStats).forEach(k =>
-        {
-            if (taskStats[k].timestamp < lowestTime)  {
-                lowestTime = taskStats[k].timestamp ;
-            }
-        });
-        const daysSinceFirstRunTask = getDateDifference(lowestTime, now, "d")  || 1;
-        avg = Math.floor(Object.keys(taskStats).length / daysSinceFirstRunTask / (period === "d" ? 1 : 7));
-        this.log.methodDone("get average run count", 2, logPad, [[ "calculated average", avg ]]);
-        return avg;
-    };
-
-
-    getRuntimeInfo = (treeId: string): { average: 0; fastest: 0;  first: 0;  last: 0;  slowest: 0 } =>
-    {
-        const stats = this.getStore();
-        if (stats.runtimes[treeId]) {
-            return pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
-        }
-        return {
-            average: 0,
-            fastest: 0,
-            first: 0,
-            last: 0,
-            slowest: 0
-        };
-    };
-
-
-    getTodayCount = (logPad: string) =>
-    {
-        let count = 0;
-        this.log.methodStart("get today run count", 2, logPad);
-        const taskStats = this.wrapper.usage.getAll();
-        Object.keys(taskStats).filter(k => k.startsWith(this._taskUsageKey)).forEach(k =>
-        {
-            count += taskStats[k].count.today;
-        });
-        this.log.methodDone("get today run count", 2, logPad, [[ "today run count", count ]]);
-        return count;
-    };
-
-
-    getLastRanTaskTime = (): string =>
-    {
-        const  tm = this.getStore().timeLastRan;
-        if (tm) {
-            const dt = new Date(tm);
-            return dt.toLocaleDateString() + " " + dt.toLocaleTimeString();
-        }
-        return "N/A";
-    };
-
-
-    private onFavoriteTasksChanged = async(e: ITeTaskChangeEvent) =>
-    {
-        const stats = this.getStore();
-        stats.favorites = [ ...e.tasks ];
-        await this.saveStore(stats);
-    };
-
-
-    private onLastTasksChanged = async(e: ITeTaskChangeEvent) =>
-    {
-        const stats = this.getStore();
-        stats.last = [ ...e.tasks ];
-        await this.saveStore(stats);
-    };
-
-
-    private onTaskStatusChanged = async(e: ITeTaskStatusChangeEvent) =>
-    {
-        this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [[ "tree id", e.task.treeId ]]);
-        if (e.isRunning)
-        {
-            e.task.definition.startTime  = Date.now();
-            await this.trackTask(e.task, "   ");
-        }
-        else
-        {
-            let avg = 0;
-            const stats = this.getStore();
-            const newRtStats = {
-                start: e.task.definition.startTime,
-                end: Date.now(),
-                time: e.task.definition.endTime - e.task.definition.startTime
-            };
-            let taskRtStats = stats.runtimes[e.treeId];
-            if (!taskRtStats)
-            {
-                taskRtStats = stats.runtimes[e.treeId] = {
-                      runtimes: [],
-                      average: newRtStats.time,
-                      fastest: newRtStats.time,
-                      first: newRtStats.time,
-                      last: newRtStats.time,
-                      slowest: newRtStats.time
-                };
-            }
-            taskRtStats.runtimes.push(newRtStats);
-            taskRtStats.runtimes.forEach(r =>
-            {
-                avg += r.time;
-                if (r.time < taskRtStats.fastest) {
-                    taskRtStats.fastest = r.time;
-                }
-                else if (r.time > taskRtStats.slowest) {
-                    taskRtStats.slowest = r.time;
-                }
-            });
-            taskRtStats.last = newRtStats.time;
-            taskRtStats.average = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
-            delete e.task.definition.startTime;
-            this.saveStore(stats);
-        }
-        this.log.methodDone("task usage tracker: on running task changed", 2, "");
-    };
-
-
-    private saveStore = (store: ITaskUsageStats) => this.wrapper.storage.update(StorageProps.TaskUsage, store);
-
-
-    private trackTask = async(iTask: ITeTask, logPad: string) =>
-    {
-        const stats = this.getStore(),
-              taskName = `${iTask.name} (${iTask.source})`;
-
-        this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
-        //
-        // Process with Usage Tracker and copy usage stats to task usage tracking state
-        //
-        const usage = await this.wrapper.usage.track(`${this._taskUsageKey}${iTask.treeId}`);
-        Object.assign(iTask.runCount, usage.count);
-        //
-        // Add  to 'famous tasks' list, maybe
-        //
-        const famousChanged = this.trackFamous(iTask, stats, usage);
-        //
-        // Record this task as the last task ran and the time it was ran
-        //
-        stats.timeLastRan = Date.now();
-        stats.taskLastRan = { ...iTask };
-        //
-        // Persist / save stats
-        //
-        await this.saveStore(stats);
-        //
-        // Maybe notify any listeners that the `famous tasks` list has changed
-        //
-        if (famousChanged) {
-            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ type: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
-        }
-        this.log.methodDone("save task run details", 2, logPad);
-    };
-
-
     private trackFamous = (iTask: ITeTask, stats: ITaskUsageStats, usage: ITeTrackedUsage) =>
     {
         let added = false,
@@ -439,4 +406,39 @@ export class Usage implements ITeUsage, Disposable
         }
         return changed;
     };
+
+
+    private trackTask = async(iTask: ITeTask, logPad: string) =>
+    {
+        const stats = this.getTaskUsageStore(),
+              taskName = `${iTask.name} (${iTask.source})`;
+
+        this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
+        //
+        // Process with Usage Tracker and copy usage stats to task usage tracking state
+        //
+        const usage = await this.wrapper.usage.track(`${this._taskUsageKey}${iTask.treeId}`);
+        Object.assign(iTask.runCount, usage.count);
+        //
+        // Add  to 'famous tasks' list, maybe
+        //
+        const famousChanged = this.trackFamous(iTask, stats, usage);
+        //
+        // Record this task as the last task ran and the time it was ran
+        //
+        stats.timeLastRan = Date.now();
+        stats.taskLastRan = { ...iTask };
+        //
+        // Persist / save stats
+        //
+        await this.saveTaskUsageStore(stats);
+        //
+        // Maybe notify any listeners that the `famous tasks` list has changed
+        //
+        if (famousChanged) {
+            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ type: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
+        }
+        this.log.methodDone("save task run details", 2, logPad);
+    };
+
 }

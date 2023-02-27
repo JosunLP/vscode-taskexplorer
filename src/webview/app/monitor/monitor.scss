@@ -53,7 +53,7 @@ button {
 }
 
 .te-tab-famous:before  {
-    content: "\f005";
+    content: "\f2eb";
 }
 
 .te-tab-recent:before  {
@@ -157,21 +157,23 @@ button {
 	vertical-align: top;
 	width: 80px;
 	max-width: 80px;
+	padding-left: 5px;
 }
 
 .te-monitor-control-content-details-col1 {
-	max-width: 275px;
+	max-width: 160px;
 	overflow: hidden;
+	padding-left: 10px;
 	padding-right: 10px;
-	width: 275px;
+	width: 160px;
 	white-space: nowrap;
 }
   
 .te-monitor-control-content-details-col2 {
-	max-width: 225px;
+	max-width: 250px;
 	overflow: hidden;
 	padding-left: 10px;
-	width: 225px;
+	width: 250px;
 	white-space: nowrap;
 }
 

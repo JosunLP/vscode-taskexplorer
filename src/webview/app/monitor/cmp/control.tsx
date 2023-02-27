@@ -67,6 +67,21 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     // override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
 
 
+    private formatRuntime = (runtime: number) =>
+    {
+        let h = (runtime / 1000 / 60 / 60).toString(),
+            m = (runtime / 1000 / 60).toString(),
+            s = (runtime / 1000 % 60).toString(),
+            ms = (runtime % 1000).toString();
+        if (h.length < 2) h = `0${h}`;
+        if (m.length < 2) m = `0${m}`;
+        if (s.length < 2) s = `0${s}`;
+        if (ms.length < 2) ms = `0${ms}`;
+        if (ms.length < 3) ms = `0${ms}`;
+        return `${h}h : ${m}m : ${s}s : ${ms}ms`;
+    };
+
+
     private getPinnedIconCls = (): string  => `${(!this.state.task.pinned ? "far" : "fas")} fa-thumbtack te-monitor-control-pin`;
 
 
@@ -104,7 +119,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                         </tr>
                                         <tr>
                                             <td>
-                                                # of Runtimes (Last 7 Days)
+                                                Last 7 Days
                                             </td>
                                             <td>
                                                 &nbsp;&nbsp; : &nbsp;{task.runCount.last7Days}
@@ -112,7 +127,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                         </tr>
                                         <tr>
                                             <td>
-                                                # of Runtimes (Last 30 Days)
+                                                Last 30 Days
                                             </td>
                                             <td>
                                                 &nbsp;&nbsp; : &nbsp;{task.runCount.last30Days}
@@ -120,7 +135,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                         </tr>
                                         <tr>
                                             <td>
-                                                # of Runtimes (Last 90 Days)
+                                                Last 90 Days
                                             </td>
                                             <td>
                                                 &nbsp;&nbsp; : &nbsp;{task.runCount.last90Days}
@@ -128,7 +143,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                         </tr>
                                         <tr>
                                             <td>
-                                                # of Runtimes (Total)
+                                                Total
                                             </td>
                                             <td>
                                                 &nbsp;&nbsp; : &nbsp;{task.runCount.total}
@@ -142,42 +157,42 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                     <tbody className="te-monitor-control-content-details-body">
                                         <tr>
                                             <td>
-                                                Fastest Runtime
+                                                Average
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                Average Runtime
-                                            </td>
-                                            <td>
-                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.average)}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
-                                                Slowest Runtime
+                                                Fastest
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                First Runtime
-                                            </td>
-                                            <td>
-                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.fastest)}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
-                                                Last Runtime
+                                                Slowest
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;0:00:03.342
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.slowest)}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                First
+                                            </td>
+                                            <td>
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.first)}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Last
+                                            </td>
+                                            <td>
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.last)}
                                             </td>
                                         </tr>
                                     </tbody>

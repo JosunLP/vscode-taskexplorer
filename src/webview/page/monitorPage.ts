@@ -63,7 +63,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 	protected override includeBootstrap = (): Promise<MonitorAppState> => this.getState();
 	protected override includeFontAwesome = () => ({ duotone: true, regular: true, solid: true, icons: [
-		"gear", "gears", "star", "thumbtack", "chevron-right", "chevron-left", "chevron-double-left", "chevron-double-right"
+		"gear", "gears", "star", "trophy-star", "thumbtack", "chevron-right", "chevron-left", "chevron-double-left", "chevron-double-right"
 	]});
 
 

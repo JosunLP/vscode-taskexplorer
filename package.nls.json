@@ -143,15 +143,15 @@
 	"command.disableTaskType": "Task Explorer: Disable Tasks of this Type",
 	"command.enableTaskType": "Task Explorer: Enable Tasks of this Type",
 	"command.enterLicense" : "Task Explorer: Enter License Key",
-	"command.getLicense" : "Task Explorer: Get 30-Day license key",
+	"command.getLicense" : "Task Explorer: Get 30-Day License ey",
 	"command.removeFromExcludes": "Task Explorer: Remove from Excludes List",
 	"command.setPinned": "Set task pinned state for current list",
-	"command.showOutput": "Task Explorer: Show the log output window",
+	"command.showOutput": "Task Explorer: Show Log Output Window",
 
-	"command.view.licensePage.show" : "Task Explorer: View licensing information",
-	"command.view.releaseNotes.show" : "Task Explorer: View release notes",
-	"command.view.parsingReport.show" : "Task Explorer: View parsing report",
-	"command.view.taskMonitor.show" : "Task Explorer: Open task monitor",
+	"command.view.licensePage.show" : "Task Explorer: View Licensing Information",
+	"command.view.releaseNotes.show" : "Task Explorer: View Release Notes",
+	"command.view.parsingReport.show" : "Task Explorer: View Parsing Report",
+	"command.view.taskMonitor.show" : "Task Explorer: Open Task Monitor",
 
 	"messages.noAssociatedTaskType": "This file does not appear to be associated to any known task type"
 }

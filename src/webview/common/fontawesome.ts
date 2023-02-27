@@ -36,6 +36,7 @@ export const fontawesome = {
         "plus": "\\+",
         "star": "\\f005",
         "thumbtack": "\\f08d",
+        "trophy-star": "\\f2eb",
         "unlock": "\\f09c",
         "user": "\\f007",
         "users": "\\f0c0",
