@@ -9,7 +9,6 @@
  */
 
 import { TextDecoder } from "util";
-import { BaseState } from "./common/state";
 import { TeWebviewView } from "./webviewView";
 import { TeWebviewPanel } from "./webviewPanel";
 import { ITeWebview, TeSessionChangeEvent } from "../interface";
@@ -20,7 +19,7 @@ import { fontawesome } from "./common/fontawesome";
 import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
-	ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
+	BaseState, ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
 	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeStateType
 } from "./common/ipc";
 

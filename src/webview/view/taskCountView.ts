@@ -1,5 +1,5 @@
 
-import { State } from "../common/state";
+import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
 import { ITeTaskChangeEvent } from "../../interface";

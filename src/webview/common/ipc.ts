@@ -5,8 +5,20 @@
  */
 
 import { ITeTask } from "../../interface";
-import { State } from "./state";
+import { AuthenticationSession } from "vscode";
+import { ISessionToken } from "../../interface/IAuthentication";
 
+export interface BaseState
+{
+	isEnabled: boolean;
+	isLicensed: boolean;
+	license?: ISessionToken;
+	nonce: string;
+	session?: AuthenticationSession;
+	webroot: string;
+}
+
+export interface State extends BaseState {};
 
 export interface IpcMessage {
 	id: string;

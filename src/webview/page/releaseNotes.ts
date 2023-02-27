@@ -1,7 +1,7 @@
 
 import { marked } from "marked";
 import { TextDecoder } from "util";
-import { State } from "../common/state";
+import { State } from "../common/ipc";
 import { Uri, workspace } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";

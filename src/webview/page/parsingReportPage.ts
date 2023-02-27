@@ -1,6 +1,6 @@
 
 import { Task, Uri } from "vscode";
-import { State } from "../common/state";
+import { State } from "../common/ipc";
 import { dirname, relative } from "path";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
