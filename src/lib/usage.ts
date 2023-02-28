@@ -242,14 +242,17 @@ export class Usage implements ITeUsage, Disposable
 
     private onTaskStatusChanged = async(e: ITeTaskStatusChangeEvent) =>
     {
-        this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [[ "tree id", e.task.treeId ]]);
+        const taskName = `${e.task.name} (${e.task.source})`;
+        this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [
+            [ "task name", taskName ], [ "tree id", e.task.treeId ], [ "is running", e.isRunning ]
+        ]);
         if (e.isRunning)
         {
             this._runStartTimes[e.treeId] = Date.now();
             await this.trackTask(e.task, "   ");
         }
         else {
-            await this.trackTaskRuntime(e);
+            await this.trackTaskRuntime(e, "   ");
         }
         this.log.methodDone("task usage tracker: on running task changed", 2, "");
     };
@@ -377,10 +380,8 @@ export class Usage implements ITeUsage, Disposable
 
     private trackTask = async(iTask: ITeTask, logPad: string) =>
     {
-        const stats = this.getTaskUsageStore(),
-              taskName = `${iTask.name} (${iTask.source})`;
-
-        this.log.methodStart("save task run details", 2, logPad, false, [[ "task name", taskName ]]);
+        const stats = this.getTaskUsageStore();
+        this.log.methodStart("track task usage details", 2, logPad);
         //
         // Process with Usage Tracker and copy usage stats to task usage tracking state
         //
@@ -405,15 +406,19 @@ export class Usage implements ITeUsage, Disposable
         if (famousChanged) {
             this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ listType: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
         }
-        this.log.methodDone("save task run details", 2, logPad);
+        this.log.methodDone("track task usage details", 2, logPad);
     };
 
 
-    private trackTaskRuntime = async(e: ITeTaskStatusChangeEvent) =>
+    private trackTaskRuntime = async(e: ITeTaskStatusChangeEvent, logPad: string) =>
     {
         let avg = 0;
-        const now = Date.now();
-        const stats = this.getTaskUsageStore();
+        const now = Date.now(),
+              stats = this.getTaskUsageStore();
+        this.log.methodStart("track task runtime details", 2, logPad);
+        //
+        // Create runtime stats and add to stats store
+        //
         const newRtStats = {
             start: this._runStartTimes[e.treeId],
             end: now,
@@ -432,6 +437,9 @@ export class Usage implements ITeUsage, Disposable
             };
         }
         taskRtStats.runtimes.push(newRtStats);
+        //
+        // Check fastest runtimes, see if this time was the fastest
+        //
         taskRtStats.runtimes.forEach(r =>
         {
             avg += r.time;
@@ -442,10 +450,17 @@ export class Usage implements ITeUsage, Disposable
                 taskRtStats.slowest = r.time;
             }
         });
+        //
+        // Record last and avg runtime
+        //
         taskRtStats.last = newRtStats.time;
         taskRtStats.average = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
         delete this._runStartTimes[e.treeId];
-        this.saveTaskUsageStore(stats);
+        //
+        // Persist / save stats
+        //
+        await this.saveTaskUsageStore(stats);
+        this.log.methodDone("track task runtime details", 2, logPad);
     };
 
 }
