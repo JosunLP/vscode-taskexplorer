@@ -11,7 +11,7 @@ import {
     ProgressLocation, Uri, UriHandler, window
 } from "vscode";
 
-export const AUTH_TYPE = "teauth";
+const AUTH_TYPE = "spm_auth";
 const AUTH_NAME = "TeAuth";
 const CLIENT_ID = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 const TEAUTH_DOMAIN = "app1.spmeesseman.com";
@@ -195,7 +195,8 @@ export class TeAuthenticationProvider implements AuthenticationProvider, Disposa
                     new Promise<string>((_, reject) => setTimeout(() => reject("Cancelled"), 60000)),
                     promiseFromEvent<any, any>(token.onCancellationRequested, (_, __, reject) => { reject("User Cancelled"); }).promise
                 ]);
-            } finally
+            }
+            finally
             {
                 this._pendingStates = this._pendingStates.filter(n => n !== stateId);
                 codeExchangePromise?.cancel.fire();

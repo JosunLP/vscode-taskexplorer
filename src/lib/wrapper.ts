@@ -3,7 +3,7 @@ import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
 import { figures } from "./figures";
-import { Strings } from "./constants";
+import { StorageProps, Strings } from "./constants";
 import { logControl } from "./log/log";
 import { TaskTree } from "../tree/tree";
 import { TeServer } from "./auth/server";
@@ -111,6 +111,7 @@ export class TeWrapper implements ITeWrapper, Disposable
         this._configuration = configuration;
 		this._log = log;
 		this._providers = {};
+		this._onReady = new EventEmitter<void>();
 
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
@@ -168,8 +169,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// 	startTime,
 		// 	endTime,
 		// );
-
-		this._onReady = new EventEmitter<void>();
 
 		this._disposables = [
 			this._usage,
@@ -252,9 +251,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	private run = async() =>
 	{
-		const now = Date.now(),
-			  lastDeactivated = await this.storage.get2<number>("lastDeactivated", 0),
-			  lastWsRootPathChange = await this.storage.get2<number>("lastWsRootPathChange", 0);
 		this.log.methodStart("app wrapper run", 1, "", true);
 		//
 		// License / Authentication
@@ -278,8 +274,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// if (session) {
 		//     window.showInformationMessage(`Welcome back ${session.account.name}`);
 		// }
+
 		//
-		// Maybe show the 'what's new / welcome' page
+		// Maybe show the 'what's new' or 'welcome' page if the version has changed ot this is
+		// a new installation / first runtime.
 		//
 		/* istanbul ignore next */
 		if (this.versionchanged)
@@ -295,6 +293,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 				}
 			});
 		}
+
 		//
 		// Build the file cache, this kicks off the whole process as refresh cmd will be issued
 		// down the line in the initialization process.
@@ -303,8 +302,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// regardless if the user settings has activated it or not when the extension deactivates
 		// in this scenario. So check this case and proceed as necessary.
 		//
+		const now = Date.now(),
+			  lastDeactivated = await this.storage.get2<number>("lastDeactivated", 0),
+			  lastWsRootPathChange = await this.storage.get2<number>("lastWsRootPathChange", 0),
+			  rootFolderChanged  = now < lastDeactivated + 5000 && /* istanbul ignore next */now < lastWsRootPathChange + 5000;
 		this._treeManager.setMessage(Strings.ScanningTaskFiles);
-		const rootFolderChanged  = now < lastDeactivated + 5000 && /* istanbul ignore next */now < lastWsRootPathChange + 5000;
 		/* istanbul ignore else */
 		if (this.tests || /* istanbul ignore next */!rootFolderChanged)
 		{
@@ -319,15 +321,28 @@ export class TeWrapper implements ITeWrapper, Disposable
 			await this.config.update("enablePersistentFileCaching", enablePersistentFileCaching);
 			this._configWatcher.enableConfigWatcher(true);
 		}
-
 		await this.storage.update2("lastDeactivated", 0);
 		await this.storage.update2("lastWsRootPathChange", 0);
+
+		//
+		// Write all usage stores to disk for examination, if we're in development mode
+		//
+		/* istanbul ignore next */
+		if (this.env === "dev")
+		{
+			const rPath = await this.pathUtils.getInstallPath() + "\\dist\\",
+				  taskUsage = this.storage.get<any>(StorageProps.TaskUsage, {}),
+				  allUsage = { usage: this._usage.getAll(), taskUsage };
+			await this.fs.writeFile(rPath + "usage.json", JSON.stringify(allUsage, null, 3));
+		}
+
 		//
 		// Start the first tree build/load
 		//
 		this._treeManager.setMessage(Strings.RequestingTasks);
 		await this._treeManager.loadTasks("   ");
 		this._treeManager.setMessage(); // clear status bar message
+
 		//
 		// Log the environment
 		//
@@ -335,6 +350,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			[ "machine id", env.machineId ], [ "session id", env.sessionId ], [ "app name", env.appName ],
 			[ "remote name", env.remoteName ], [ "is new ap install", env.isNewAppInstall ]
 		]);
+
 		//
 		// Signal that the startup work has completed.  `queueMicrotask` is interesting, I saw it
 		// in the GitLens extension code, seems to sneak into the scheduler between each standard

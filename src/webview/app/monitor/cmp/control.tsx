@@ -69,16 +69,14 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
 
     private formatRuntime = (runtime: number) =>
     {
-        let h = (runtime / 1000 / 60 / 60).toString(),
-            m = (runtime / 1000 / 60).toString(),
-            s = (runtime / 1000 % 60).toString(),
+        let m = Math.floor(runtime / 1000 / 60).toString(),
+            s = Math.floor(runtime / 1000 % 60).toString(),
             ms = (runtime % 1000).toString();
-        if (h.length < 2) h = `0${h}`;
         if (m.length < 2) m = `0${m}`;
         if (s.length < 2) s = `0${s}`;
         if (ms.length < 2) ms = `0${ms}`;
         if (ms.length < 3) ms = `0${ms}`;
-        return `${h}h : ${m}m : ${s}s : ${ms}ms`;
+        return `${m}m : ${s}s : ${ms}ms`;
     };
 
 

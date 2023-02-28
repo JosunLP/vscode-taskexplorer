@@ -43,6 +43,7 @@ export class Usage implements ITeUsage, Disposable
     private readonly log: ILog;
     private readonly _taskUsageKey = "task:";
     private readonly _disposables: Disposable[] = [];
+    private readonly _runStartTimes: IDictionary<number> = {};
     private readonly _onDidFamousTasksChange: EventEmitter<ITeTaskChangeEvent>;
 	private readonly _onDidChange: EventEmitter<ITeUsageChangeEvent | undefined>;
 
@@ -244,45 +245,11 @@ export class Usage implements ITeUsage, Disposable
         this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [[ "tree id", e.task.treeId ]]);
         if (e.isRunning)
         {
-            e.task.definition.startTime  = Date.now();
+            this._runStartTimes[e.treeId] = Date.now();
             await this.trackTask(e.task, "   ");
         }
-        else
-        {
-            let avg = 0;
-            const stats = this.getTaskUsageStore();
-            const newRtStats = {
-                start: e.task.definition.startTime,
-                end: Date.now(),
-                time: e.task.definition.endTime - e.task.definition.startTime
-            };
-            let taskRtStats = stats.runtimes[e.treeId];
-            if (!taskRtStats)
-            {
-                taskRtStats = stats.runtimes[e.treeId] = {
-                      runtimes: [],
-                      average: newRtStats.time,
-                      fastest: newRtStats.time,
-                      first: newRtStats.time,
-                      last: newRtStats.time,
-                      slowest: newRtStats.time
-                };
-            }
-            taskRtStats.runtimes.push(newRtStats);
-            taskRtStats.runtimes.forEach(r =>
-            {
-                avg += r.time;
-                if (r.time < taskRtStats.fastest) {
-                    taskRtStats.fastest = r.time;
-                }
-                else if (r.time > taskRtStats.slowest) {
-                    taskRtStats.slowest = r.time;
-                }
-            });
-            taskRtStats.last = newRtStats.time;
-            taskRtStats.average = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
-            delete e.task.definition.startTime;
-            this.saveTaskUsageStore(stats);
+        else {
+            await this.trackTaskRuntime(e);
         }
         this.log.methodDone("task usage tracker: on running task changed", 2, "");
     };
@@ -380,12 +347,12 @@ export class Usage implements ITeUsage, Disposable
         {
             if (usage.count.total > stats.famous[f].runCount.total)
             {
-                stats.famous.splice(f, 0, { ...iTask, ...{ type: "famous", running: false }});
+                stats.famous.splice(f, 0, { ...iTask, ...{ listType: "famous", running: false }});
                 if (stats.famous.length > specTaskListLength) {
                     stats.famous.pop();
                 }
                 if (f === 0) { // There's a new most famous/used task
-                    stats.taskMostUsed = { ...iTask, ...{ type: "famous", running: false }};
+                    stats.taskMostUsed = { ...iTask, ...{ listType: "famous", running: false }};
                 }
                 added = changed = true;
                 break;
@@ -399,9 +366,9 @@ export class Usage implements ITeUsage, Disposable
         if (!added && stats.famous.length < specTaskListLength)
         {
             changed = true;
-            stats.famous.push({ ...iTask, ...{ type: "famous", running: false }});
+            stats.famous.push({ ...iTask, ...{ listType: "famous", running: false }});
             if (stats.famous.length === 1) {
-                stats.taskMostUsed = { ...iTask, ...{ type: "famous", running: false }};
+                stats.taskMostUsed = { ...iTask, ...{ listType: "famous", running: false }};
             }
         }
         return changed;
@@ -436,9 +403,49 @@ export class Usage implements ITeUsage, Disposable
         // Maybe notify any listeners that the `famous tasks` list has changed
         //
         if (famousChanged) {
-            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ type: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
+            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ listType: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
         }
         this.log.methodDone("save task run details", 2, logPad);
+    };
+
+
+    private trackTaskRuntime = async(e: ITeTaskStatusChangeEvent) =>
+    {
+        let avg = 0;
+        const now = Date.now();
+        const stats = this.getTaskUsageStore();
+        const newRtStats = {
+            start: this._runStartTimes[e.treeId],
+            end: now,
+            time: now - this._runStartTimes[e.treeId]
+        };
+        let taskRtStats = stats.runtimes[e.treeId];
+        if (!taskRtStats)
+        {
+            taskRtStats = stats.runtimes[e.treeId] = {
+                    runtimes: [],
+                    average: newRtStats.time,
+                    fastest: newRtStats.time,
+                    first: newRtStats.time,
+                    last: newRtStats.time,
+                    slowest: newRtStats.time
+            };
+        }
+        taskRtStats.runtimes.push(newRtStats);
+        taskRtStats.runtimes.forEach(r =>
+        {
+            avg += r.time;
+            if (r.time < taskRtStats.fastest) {
+                taskRtStats.fastest = r.time;
+            }
+            else if (r.time > taskRtStats.slowest) {
+                taskRtStats.slowest = r.time;
+            }
+        });
+        taskRtStats.last = newRtStats.time;
+        taskRtStats.average = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
+        delete this._runStartTimes[e.treeId];
+        this.saveTaskUsageStore(stats);
     };
 
 }
