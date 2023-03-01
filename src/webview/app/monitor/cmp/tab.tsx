@@ -2,7 +2,7 @@
 
 import React from "react";
 import { TeTaskControl } from "./control";
-import { IIpcTask } from "../../../common/ipc";
+import { IIpcTask, IMonitorAppTimerMode } from "../../../common/ipc";
 
 interface ControlRefs
 {
@@ -13,6 +13,7 @@ interface ReactProps
 {
     tasks: IIpcTask[];
     webroot: string;
+    timerMode: IMonitorAppTimerMode;
     executeCommand: (command: string, task: IIpcTask) => void;
     log: (message: string, ...optionalParams: any[]) => void;
 }
@@ -58,6 +59,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState>
                     log={this.props.log}
                     webroot={this.props.webroot}
                     ref={this.controlRefs[t.treeId]}
+                    timerMode={this.props.timerMode}
                     executeCommand={this.props.executeCommand}
                     key={`te-id-task-control-${++this.counter}`}
                 />
@@ -107,6 +109,9 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState>
 
 
     setTasks = (tasks: IIpcTask[]) => this.setState({ tasks });
+
+
+    // setTimerMode = (mode: IMonitorAppTimerMode) => this.setState({ timerMode: mode });
 
 
     override shouldComponentUpdate = (_nextProps: ReactProps, _nextState: ReactState) => !this.rendered;

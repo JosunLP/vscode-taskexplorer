@@ -95,6 +95,8 @@
 	"config.taskexplorer.taskButtons.showExecuteWithArgumentsButton": "Show the `Execute with Arguments` button inline with the Execute button.",
 	"config.taskexplorer.taskButtons.showFavoritesButton": "Show the `Favorites` button inline with the Execute button. Has no effect if `#specialFolders.showFavorites#` is disabled.",
 
+	"config.taskexplorer.taskMonitor.timerMode": "Timer mode for running tasks",
+
 	"config.taskexplorer.visual.disableAnimatedIcons": "Use static non-animated icons for running tasks as opposed to the spinning icons.",
 	"config.taskexplorer.visual.enableAnsiconForAnt": "Enable/use ansicon output colorization for ant tasks.",
 

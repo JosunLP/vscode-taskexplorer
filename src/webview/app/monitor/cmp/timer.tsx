@@ -1,11 +1,11 @@
 
 import React from "react";
+import { IMonitorAppTimerMode } from "src/webview/common/ipc";
 
 interface ReactState
 {
-    hide: boolean;
     run: boolean;
-    countMs: boolean;
+    mode: IMonitorAppTimerMode;
     seconds: number;
     milliseconds: number;
 }
@@ -43,14 +43,14 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
               tmS = Math.floor(tm % 60),
               tmSF = tmS >= 10 ? tmS : "0" + tmS,
               tmMS = this.state.milliseconds % 1000,
-              tmMSF = this.state.countMs ? "." + tmMS : "", // (tmMS >= 10 ? tmMS : "0" + tmMS) : "",
+              tmMSF = this.state.mode === "MM:SS:MS" ? "." + tmMS : "", // (tmMS >= 10 ? tmMS : "0" + tmMS) : "",
               tmF = `${tmM}:${tmSF}${tmMSF}`;
         return (
             <td className="te-monitor-control-timer-column">
                 <table cellPadding="0" cellSpacing="0">
                     <tbody>
                         <tr>
-                            <td hidden={this.state.hide} className="te-monitor-control-timer-inner-column">
+                            <td hidden={this.state.mode === "Hide"} className="te-monitor-control-timer-inner-column">
                                 <span className="te-monitor-control-timer">{tmF}</span>
                             </td>
                         </tr>
@@ -65,7 +65,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     {
         if (this.state.run) {
             // eslint-disable-next-line @typescript-eslint/tslint/config
-            this.interval = setInterval(() => this.tick(), !this.state.countMs ? 1000 : 100);
+            this.interval = setInterval(() => this.tick(), this.state.mode !== "MM:SS:MS" ? 1000 : 100);
         }
     };
 
@@ -80,7 +80,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
 
 
     private tick = () => this.setState(state =>
-        (!state.countMs ? { seconds: state.seconds + 1, milliseconds: 0 } :
-                          { seconds: state.seconds + 0.1, milliseconds: state.milliseconds + 100 }));
+        (this.state.mode !== "MM:SS:MS" ? { seconds: state.seconds + 1, milliseconds: 0 } :
+                                          { seconds: state.seconds + 0.1, milliseconds: state.milliseconds + 100 }));
 
 }

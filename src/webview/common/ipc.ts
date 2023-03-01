@@ -117,14 +117,16 @@ export const DidChangeStateType = new IpcNotificationType<DidChangeStateParams>(
 // TASK MONITOR APP
 //
 export interface IIpcTask extends ITeTask {};
+export type IMonitorAppTimerMode = "Hide" | "MM:SS" | "MM:SS:MS";
 export interface MonitorAppState extends State
 {
 	famous: IIpcTask[];
 	favorites: IIpcTask[];
 	last: IIpcTask[];
 	menuVisible?: boolean;
-	tasks: IIpcTask[];
 	running: IIpcTask[];
+	tasks: IIpcTask[];
+	timerMode: IMonitorAppTimerMode;
 	pinned: {
 		last: IIpcTask[];
 		favorites: IIpcTask[];

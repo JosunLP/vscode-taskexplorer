@@ -1746,6 +1746,23 @@
                 }
             },
             {
+                "id": "taskMonitor",
+                "order": 110,
+                "title": "Task Monitor",
+                "properties": {
+                    "taskexplorer.taskMonitor.timerMode": {
+                        "type": "string",
+                        "enum": [
+                            "Hide",
+                            "MM:SS",
+                            "MM:SS:MS"
+                        ],
+                        "default": "MM:SS",
+                        "description": "%config.taskexplorer.taskMonitor.timerMode%"
+                    }
+                }
+            },
+            {
                 "id": "visual",
                 "order": 120,
                 "title": "Visual",

@@ -109,14 +109,16 @@ button {
 
 .te-monitor-menu-button-container {
 	float: right;
+	margin-top: 1px;
+	margin-right: 1px;
 }
 
 .te-monitor-menu-button {
 	font-size: 40px;
 	background-color: unset;
 	border-radius: 7px;
-	width:48px;
-	height:48px;
+	width: 48px;
+	height: 48px;
 }
 
 .te-monitor-menu {

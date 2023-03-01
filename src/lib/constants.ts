@@ -23,7 +23,8 @@ export const Strings =
 
 export const ConfigKeys =
 {
-	SpecialFolders_NumLastTasks: "specialFolders.numLastTasks"
+	SpecialFolders_NumLastTasks: "specialFolders.numLastTasks",
+    TaskMonitor_TimerMode: "taskMonitor.timerMode"
 };
 
 export const Globs: IDictionary<string> =

@@ -83,11 +83,15 @@ icons:
   - arrow-up:
       - solid
       - regular
-  - face-sad-sweat:
-      - regular
   - react:
       - brands
   - github:
       - brands
   - paypal:
       - brands
+  - turtle:
+      - solid
+  - rabbit:
+      - solid
+  - minus:
+      - solid

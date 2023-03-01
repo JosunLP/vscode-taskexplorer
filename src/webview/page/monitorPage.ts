@@ -1,13 +1,16 @@
 
 import { TeWrapper } from "../../lib/wrapper";
+import { ConfigKeys } from "../../lib/constants";
 import { TeWebviewPanel } from "../webviewPanel";
 import { toITask } from "../../lib/utils/taskUtils";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { Commands } from "../../lib/command/command";
-import { ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
+import {
+	ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent
+} from "../../interface";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
-	DidChangeAllTasksType, DidChangeTaskStatusType, DidChangeRunningTasksType
+	DidChangeAllTasksType, DidChangeTaskStatusType, DidChangeRunningTasksType, IMonitorAppTimerMode
 } from "../common/ipc";
 
 
@@ -51,6 +54,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			running: toITask(this.wrapper, this.wrapper.treeManager.runningTasks, "running"),
 			famous: this.wrapper.treeManager.famousTasks,
 			tasks: toITask(this.wrapper, this.wrapper.treeManager.getTasks(), "all"),
+			timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode),
 			pinned: {
 				last: this.wrapper.storage.get<ITeTask[]>("taskexplorer.pinned.last", []),
 				famous: this.wrapper.storage.get<ITeTask[]>("taskexplorer.pinned.famous", []),
@@ -62,10 +66,13 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 
 	protected override includeBootstrap = (): Promise<MonitorAppState> => this.getState();
-	protected override includeFontAwesome = () => ({ animations: true, brands: true, duotone: true, regular: true, solid: true, icons: [
-		"gear", "gears", "trophy-star", "thumbtack", "chevron-right", "chevron-left", "minus", "bars",
-		"chevron-double-left", "chevron-double-right", "clock", "arrow-up", "arrow-down", "turtle", "rabbit"
-	]});
+	protected override includeFontAwesome = () => ({
+		animations: true, brands: true, duotone: true, regular: true, solid: true,
+		icons: [
+			"gear", "gears", "trophy-star", "thumbtack", "chevron-right", "chevron-left", "minus", "bars",
+			"chevron-double-left", "chevron-double-right", "clock", "arrow-up", "arrow-down", "turtle", "rabbit"
+		]
+	});
 
 
 	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) => this.notify(DidChangeTaskStatusType, { task: e.task });

@@ -3,7 +3,7 @@
 import React from "react";
 import { TeTaskButton } from "./button";
 import { TeReactTaskTimer } from "./timer";
-import { IIpcTask } from "../../../common/ipc";
+import { IIpcTask, IMonitorAppTimerMode } from "../../../common/ipc";
 
 interface ITeAppButtons {
     favorite: React.RefObject<TeTaskButton>;
@@ -23,6 +23,7 @@ interface ReactProps
 {
     task: IIpcTask;
     webroot: string;
+    timerMode: IMonitorAppTimerMode;
     executeCommand: (command: string, task: IIpcTask) => void;
     log: (message: string, ...optionalParams: any[]) => void;
 }
@@ -37,9 +38,8 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     private log: (message: string, ...optionalParams: any[]) => void;
     private executeCommand: (command: string, task: IIpcTask) => void;
     private timerState = {
-        hide: false,
         run: false,
-        countMs: false,
+        mode: this.props.timerMode,
         seconds: 0,
         milliseconds: 0
     };
@@ -356,7 +356,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     });
 
 
-    setTimerMode = (ms: boolean) => this.timerEl.current?.setState({ countMs: ms });
+    setTimerMode = (mode: IMonitorAppTimerMode) => this.timerEl.current?.setState({ mode });
 
 
     private startTimeChangeTimer = () =>

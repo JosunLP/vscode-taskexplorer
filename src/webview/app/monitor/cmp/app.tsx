@@ -99,6 +99,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             log={this.log}
                             ref={this.tabs.recent}
                             tasks={this.props.state.last}
+                            timerMode={this.state.timerMode}
                             webroot={this.props.state.webroot}
                             executeCommand={this.props.executeCommand}
                         />
@@ -108,6 +109,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             log={this.log}
                             ref={this.tabs.running}
                             tasks={this.props.state.running}
+                            timerMode={this.state.timerMode}
                             webroot={this.props.state.webroot}
                             executeCommand={this.props.executeCommand}
                         />
@@ -117,6 +119,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             log={this.log}
                             ref={this.tabs.favorites}
                             tasks={this.props.state.favorites}
+                            timerMode={this.state.timerMode}
                             webroot={this.props.state.webroot}
                             executeCommand={this.props.executeCommand}
                         />
@@ -126,6 +129,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             log={this.log}
                             ref={this.tabs.famous}
                             tasks={this.props.state.famous}
+                            timerMode={this.state.timerMode}
                             webroot={this.props.state.webroot}
                             executeCommand={this.props.executeCommand}
                         />
@@ -135,6 +139,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                             log={this.log}
                             ref={this.tabs.all}
                             tasks={this.props.state.tasks}
+                            timerMode={this.state.timerMode}
                             webroot={this.props.state.webroot}
                             executeCommand={this.props.executeCommand}
                         />
