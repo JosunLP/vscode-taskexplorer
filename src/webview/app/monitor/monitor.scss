@@ -410,37 +410,3 @@ button {
 .te-monitor-control-timer-inner-column {
     padding-right: 15px;
 }
-
-.te-monitor-control-timer-buttons {
-	line-height: 23px;
-	padding-right: 10px;
-	padding-top: 4px;
-}
-
-.te-monitor-control-timer-button-show {
-	font-size: 16px;
-}
-
-.te-monitor-control-timer-button-show:hover {
-	color: var(--vscode-button-hoverBackground);
-	cursor: pointer;
-}
-
-.te-monitor-control-timer-button-show-ms {
-	font-size: 16px;
-	line-height: 24px;
-}
-
-.te-monitor-control-timer-button-show-ms:hover {
-	color: var(--vscode-button-hoverBackground);
-	cursor: pointer;
-}
-
-.te-monitor-control-timer-button-hide {
-	font-size: 16px;
-}
-
-.te-monitor-control-timer-button-hide:hover {
-	color: var(--vscode-button-hoverBackground);
-	cursor: pointer;
-}

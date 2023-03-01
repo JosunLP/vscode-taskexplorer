@@ -256,9 +256,6 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
         <span className={this.getChangeTimeCls("turtle", "slowest", "beat", "te-color-failure-red")} />;
 
 
-    private onTimerStateChanged = (state: any):  void => this.timerState = { ...state };
-
-
     override render()
     {   //
         // Add a unique key to the top-level <div>.
@@ -333,7 +330,6 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                             <TeReactTaskTimer
                                 ref={this.timerEl}
                                 state={this.timerState}
-                                onTimerStateChanged={this.onTimerStateChanged.bind(this)}
                             />
                         </tr>
                     </tbody>

@@ -13,7 +13,6 @@ interface ReactState
 interface ReactProps
 {
     state: ReactState;
-    onTimerStateChanged: (state: ReactState) => void;
 }
 
 
@@ -26,11 +25,6 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
         super(props);
         this.state = { ...this.props.state };
     }
-
-
-    private clickHide = () => { this.setState({ hide: true }); queueMicrotask(() => this.props.onTimerStateChanged(this.state)); };
-    private clickShow = () => { this.setState({ hide: false, countMs: false }); queueMicrotask(() => this.props.onTimerStateChanged(this.state)); };
-    private clickShowMs = () => { this.setState({ hide: false, countMs: true }); queueMicrotask(() => this.props.onTimerStateChanged(this.state)); };
 
 
     override componentDidMount = () => this.startTimer();
@@ -58,11 +52,6 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
                         <tr>
                             <td hidden={this.state.hide} className="te-monitor-control-timer-inner-column">
                                 <span className="te-monitor-control-timer">{tmF}</span>
-                            </td>
-                            <td className="te-monitor-control-timer-buttons">
-                                <div onClick={() => this.clickShow()} className="te-monitor-control-timer-button-show"><span className="far fa-chevron-left" /></div>
-                                <div onClick={() => this.clickShowMs()} className="te-monitor-control-timer-button-show-ms"><span className="far fa-chevron-double-left" /></div>
-                                <div onClick={() => this.clickHide()} className="te-monitor-control-timer-button-hide"><span className="far fa-chevron-right" /></div>
                             </td>
                         </tr>
                     </tbody>
