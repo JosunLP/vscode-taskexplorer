@@ -247,7 +247,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
 
 
     private getTimeChangedSlowest = (): JSX.Element  =>
-        <span className={this.getChangeTimeCls("turtle", "slowest", "shake", "te-color-failure-red")} />;
+        <span className={this.getChangeTimeCls("turtle", "slowest", "beat", "te-color-failure-red")} />;
 
 
     private onTimerStateChanged = (state: any):  void => this.timerState = { ...state };

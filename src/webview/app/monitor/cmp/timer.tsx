@@ -28,9 +28,9 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     }
 
 
-    private clickHide = () => { this.setState({ hide: true }); this.props.onTimerStateChanged(this.state); };
-    private clickShow = () => { this.setState({ hide: false, countMs: false }); this.props.onTimerStateChanged(this.state); };
-    private clickShowMs = () => { this.setState({ hide: false, countMs: true }); this.props.onTimerStateChanged(this.state); };
+    private clickHide = () => { this.setState({ hide: true }); queueMicrotask(() => this.props.onTimerStateChanged(this.state)); };
+    private clickShow = () => { this.setState({ hide: false, countMs: false }); queueMicrotask(() => this.props.onTimerStateChanged(this.state)); };
+    private clickShowMs = () => { this.setState({ hide: false, countMs: true }); queueMicrotask(() => this.props.onTimerStateChanged(this.state)); };
 
 
     override componentDidMount = () => this.startTimer();
@@ -71,6 +71,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
         );
     };
 
+
     private startTimer = () =>
     {
         if (this.state.run) {
@@ -78,6 +79,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
             this.interval = setInterval(() => this.tick(), !this.state.countMs ? 1000 : 100);
         }
     };
+
 
     private stopTimer = () =>
     {

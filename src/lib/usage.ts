@@ -472,13 +472,16 @@ export class Usage implements ITeUsage, Disposable
             newSlow: false
         });
         //
-        // Check fastest runtimes, see if this time was the fastest
+        // Check fastest runtime, was this time was the fastest?
         //
         if (newRtStats.time < taskRtStats.fastest) {
             taskRtStats.fastest = newRtStats.time;
             taskRtStats.newFast = true;
         }
-        if (newRtStats.time > taskRtStats.slowest) {
+        //
+        // Check slowest runtime, was this time was the slowest?
+        //
+        else if (newRtStats.time > taskRtStats.slowest) {
             taskRtStats.slowest = newRtStats.time;
             taskRtStats.newSlow = true;
         }
