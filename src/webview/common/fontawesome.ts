@@ -18,6 +18,8 @@ export const fontawesome = {
         "8": "\\38",
         "9": "\\39",
         "add": "\\+",
+        "arrow-down": "\\f063",
+        "arrow-up": "\\f062",
         "asterisk": "\\*",
         "bars": "\\f0c9",
         "bug": "\\f188",
@@ -33,11 +35,18 @@ export const fontawesome = {
         "cog": "\\f013",
         "gear": "\\f013",
         "gears": "\\f085",
+        "github": "\\f09b",
         "lock": "\\f023",
+        "minus": "\\f068",
+        "paypal": "\\f1ed",
         "plus": "\\+",
+        "rabbit": "\\f708",
+        "react": "\\f41b",
         "star": "\\f005",
+        "subtract": "\\f068",
         "thumbtack": "\\f08d",
         "trophy-star": "\\f2eb",
+        "turtle": "\\f726",
         "unlock": "\\f09c",
         "user": "\\f007",
         "users": "\\f0c0",
@@ -458,7 +467,7 @@ export const fontawesome = {
       }
     */
 
-    fontFace: (faCls: "regular-400" | "light-300" | "duotone-900" | "solid-900", webRoot: string, cacheBuster: string) =>
+    fontFace: (faCls: "regular-400" | "light-300" | "duotone-900" | "solid-900" | "brands-400", webRoot: string, cacheBuster: string) =>
     {
         const woff2 = faCls.split("-");
         return `

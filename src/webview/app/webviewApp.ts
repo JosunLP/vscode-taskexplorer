@@ -1,5 +1,7 @@
 
 import "./common/css/te.css";
+import "./common/scss/te.scss";
+
 import { Disposable, DOM } from "./common/dom";
 import {
 	IpcCommandType, IpcMessage, IpcMessageParams, WebviewFocusChangedParams, WebviewFocusChangedCommandType,

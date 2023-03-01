@@ -1,6 +1,6 @@
 
-import { ITeTrackedUsageCount } from "./ITeUsage";
 import { ITaskDefinition } from "./ITaskDefinition";
+import { ITeTrackedUsageCount, ITaskRuntimeInfo } from "./ITeUsage";
 
 
 export type TeTaskListType = "none" | "last" | "running" | "favorites" | "famous" | "all";
@@ -15,13 +15,7 @@ export interface ITeTask
 	running: boolean;
 	source: string;
 	treeId: string;
-	runTime: {
-		average: number;
-		fastest: number;
-		first: number;
-		last: number;
-		slowest: number;
-	};
+	runTime: ITaskRuntimeInfo;
 }
 
 export interface ITeTaskChangeEvent

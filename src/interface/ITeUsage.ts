@@ -13,6 +13,21 @@ export interface ITeTrackedUsageCount
 	yesterday: number;
 }
 
+export interface ITaskRuntimeInfo
+{
+    average: number;
+    fastest: number;
+    first: number;
+    last: number;
+    slowest: number;
+    avgDown: boolean;
+    avgUp: boolean;
+    lastDown: boolean;
+    lastUp: boolean;
+    newFast: boolean;
+    newSlow: boolean;
+}
+
 export interface ITeTrackedUsage {
 	count: ITeTrackedUsageCount;
 	first: number;

@@ -15,7 +15,7 @@ interface ITeAppButtons {
 
 interface ReactState
 {
-    pinned?: boolean;
+    animateChangedTimeIcons?: boolean;
 	task: IIpcTask;
 }
 
@@ -33,6 +33,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     private timerEl;
     private counter = 0;
     private buttons: ITeAppButtons;
+    private interval: NodeJS.Timeout | undefined;
     private log: (message: string, ...optionalParams: any[]) => void;
     private executeCommand: (command: string, task: IIpcTask) => void;
 
@@ -62,16 +63,17 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     private clickStop = () => this.executeCommand("stop", this.state.task);
     private clickTerminal = () => this.executeCommand("openTerminal", this.state.task);
 
-    // override componentDidMount = () => this.log("TeTaskControl.componentDidMount");
-    // override componentWillUnmount = () => this.log("TeTaskControl.componentWillUnmount");
+
+    // override componentDidMount = () => this.startTimeChangeTimer();
+    override componentWillUnmount = () => this.stopTimeChangeTimer();
     // override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
 
 
-    private formatRuntime = (runtime: number) =>
+    private formatRuntime = (runtime: number, type?: string) =>
     {
         let m = Math.floor(runtime / 1000 / 60).toString(),
             s = Math.floor(runtime / 1000 % 60).toString(),
-            ms = (runtime % 1000).toString();
+            ms = Math.round(runtime % 1000).toString();
         if (m.length < 2) m = `0${m}`;
         if (s.length < 2) s = `0${s}`;
         if (ms.length < 2) ms = `0${ms}`;
@@ -158,7 +160,10 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 Average
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.average)}
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.average, "average")}
+                                                {this.state.task.runTime.avgDown && this.getTimeChangedDown()}
+                                                {this.state.task.runTime.avgUp && this.getTimeChangedUp()}
+                                                {!this.state.task.runTime.avgUp && !this.state.task.runTime.avgDown && this.getTimeChangedNone()}
                                             </td>
                                         </tr>
                                         <tr>
@@ -166,7 +171,9 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 Fastest
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.fastest)}
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.fastest, "fastest")}
+                                                {this.state.task.runTime.newFast && this.getTimeChangedFastest()}
+                                                {!this.state.task.runTime.newFast && this.getTimeChangedNone()}
                                             </td>
                                         </tr>
                                         <tr>
@@ -174,7 +181,9 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 Slowest
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.slowest)}
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.slowest, "slowest")}
+                                                {this.state.task.runTime.newSlow && this.getTimeChangedSlowest()}
+                                                {!this.state.task.runTime.newSlow && this.getTimeChangedNone()}
                                             </td>
                                         </tr>
                                         <tr>
@@ -182,7 +191,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                                 First
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.first)}
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.first)}{this.getTimeChangedNone()}
                                             </td>
                                         </tr>
                                         <tr>
@@ -191,6 +200,9 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                                             </td>
                                             <td>
                                                 &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.last)}
+                                                {this.state.task.runTime.lastDown && this.getTimeChangedDown()}
+                                                {this.state.task.runTime.lastUp && this.getTimeChangedUp()}
+                                                {!this.state.task.runTime.lastUp && !this.state.task.runTime.lastDown && this.getTimeChangedNone()}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -202,6 +214,31 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
             </span>
         );
     };
+
+
+    private getChangeTimeCls = (iconCls: string, timeCls: string, animation: string, colorCls: string): string => this.state.animateChangedTimeIcons ?
+        `fas fa-${iconCls} fa-${animation} ${colorCls} te-monitor-control-time-changed te-monitor-control-time-changed-${timeCls}` :
+        `fas fa-${iconCls} te-monitor-control-time-changed te-monitor-control-time-changed-${timeCls}`;
+
+
+    private getTimeChangedDown = (): JSX.Element =>
+        <span className={this.getChangeTimeCls("arrow-down", "avg-down", "bounce", "te-color-ok-green")} />;
+
+
+    private getTimeChangedUp = (): JSX.Element =>
+        <span className={this.getChangeTimeCls("arrow-up", "avg-up", "bounce", "te-color-failure-red")} />;
+
+
+    private getTimeChangedFastest = (): JSX.Element  =>
+        <span className={this.getChangeTimeCls("rabbit", "fastest", "beat", "te-color-favorite-yellow")} />;
+
+
+    private getTimeChangedNone = (): JSX.Element =>
+        <span className="fas fa-minus te-monitor-control-time-changed" />;
+
+
+    private getTimeChangedSlowest = (): JSX.Element  =>
+        <span className={this.getChangeTimeCls("turtle", "slowest", "shake", "te-color-failure-red")} />;
 
 
     override render()
@@ -285,15 +322,39 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     }
 
 
-    setPinned = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>): void => {
+    setPinned = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>): void =>
+    {
         const el = e.target as HTMLSpanElement;
         this.log(`TeTaskControl.clickPinned: target=${el.className}`);
         this.state.task.pinned = !this.state.task.pinned;
-        this.setState({ pinned: this.state.task.pinned });
+        this.setState({ task: { ...this.state.task }});
         this.executeCommand("setPinned", this.state.task);
     };
 
 
-    setTask = (task: IIpcTask) => this.setState({ task });
+    setTask = (task: IIpcTask) => this.setState(state =>
+    {
+        this.startTimeChangeTimer();
+        return { task: { ...task }, animateChangedTimeIcons: true };
+    });
+
+
+    private startTimeChangeTimer = () =>
+    {
+        this.stopTimeChangeTimer();
+        // eslint-disable-next-line @typescript-eslint/tslint/config
+        this.interval = setInterval(() =>
+            this.setState({ animateChangedTimeIcons: false }), 5000);
+            // this.setState({ averageDown: false, averageUp: false, newFastestTime: false, newSlowestTime: false }), 5000);
+    };
+
+
+    private stopTimeChangeTimer = () =>
+    {
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = undefined;
+        }
+    };
 
 }

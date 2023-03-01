@@ -78,13 +78,18 @@ $fa-var-circle-chevron-up: \f139;
 $fa-var-chevron-circle-up: \f139;
 $fa-var-trophy-star: \f2eb;
 $fa-var-trophy-alt: \f2eb;
+$fa-var-rabbit: \f708;
 $fa-var-user-crown: \f6a4;
 $fa-var-user-slash: \f506;
+$fa-var-minus: \f068;
+$fa-var-subtract: \f068;
 $fa-var-gear: \f013;
 $fa-var-cog: \f013;
 $fa-var-clock: \f017;
 $fa-var-clock-four: \f017;
 $fa-var-bug: \f188;
+$fa-var-arrow-down: \f063;
+$fa-var-arrow-up: \f062;
 $fa-var-plus: \2b;
 $fa-var-add: \2b;
 $fa-var-chevron-left: \f053;
@@ -95,10 +100,14 @@ $fa-var-gears: \f085;
 $fa-var-cogs: \f085;
 $fa-var-circle-chevron-left: \f137;
 $fa-var-chevron-circle-left: \f137;
+$fa-var-turtle: \f726;
 $fa-var-chevrons-right: \f324;
 $fa-var-chevron-double-right: \f324;
 $fa-var-notdef: \e1fe;
 
+$fa-var-react: \f41b;
+$fa-var-paypal: \f1ed;
+$fa-var-github: \f09b;
 
 $fa-icons: (
   "0": $fa-var-0,
@@ -131,13 +140,18 @@ $fa-icons: (
   "chevron-circle-up": $fa-var-chevron-circle-up,
   "trophy-star": $fa-var-trophy-star,
   "trophy-alt": $fa-var-trophy-alt,
+  "rabbit": $fa-var-rabbit,
   "user-crown": $fa-var-user-crown,
   "user-slash": $fa-var-user-slash,
+  "minus": $fa-var-minus,
+  "subtract": $fa-var-subtract,
   "gear": $fa-var-gear,
   "cog": $fa-var-cog,
   "clock": $fa-var-clock,
   "clock-four": $fa-var-clock-four,
   "bug": $fa-var-bug,
+  "arrow-down": $fa-var-arrow-down,
+  "arrow-up": $fa-var-arrow-up,
   "plus": $fa-var-plus,
   "add": $fa-var-add,
   "chevron-left": $fa-var-chevron-left,
@@ -148,10 +162,14 @@ $fa-icons: (
   "cogs": $fa-var-cogs,
   "circle-chevron-left": $fa-var-circle-chevron-left,
   "chevron-circle-left": $fa-var-chevron-circle-left,
+  "turtle": $fa-var-turtle,
   "chevrons-right": $fa-var-chevrons-right,
   "chevron-double-right": $fa-var-chevron-double-right,
   "notdef": $fa-var-notdef,
 );
 
 $fa-brand-icons: (
+  "react": $fa-var-react,
+  "paypal": $fa-var-paypal,
+  "github": $fa-var-github,
 );

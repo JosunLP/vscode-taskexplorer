@@ -29,12 +29,12 @@ svg {
 .homeview-title-container {
     display: inline-block;
     vertical-align: top;
-    margin-left: -20px;
+    margin-left: -30px;
     margin-top: -2px;
 }
 
 .homeview-info-panel {
-    width: 160px;
+    width: 150px;
     padding-right: 5px;
     display: inline-block;
 }

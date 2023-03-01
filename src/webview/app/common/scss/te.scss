@@ -1,0 +1,18 @@
+
+.te-color-ok-green {
+    .vscode-light & {
+        color: #388a34;
+	}
+	.vscode-dark & {
+        color: #89d185;
+	}
+}
+
+.te-color-failure-red {
+    .vscode-light & {
+        color: #a1260d;
+    }
+	.vscode-dark & {
+        color: #f48771;
+	}
+}

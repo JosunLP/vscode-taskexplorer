@@ -177,6 +177,31 @@ button {
 	white-space: nowrap;
 }
 
+.te-monitor-control-time-changed {
+	margin-left: 5px;
+	font-size: 12px;
+}
+
+.te-monitor-control-time-changed-hidden {
+	display: none;
+}
+
+.te-monitor-control-time-changed-avg-down {
+	margin-left: 5px;
+}
+
+.te-monitor-control-time-changed-avg-up {
+	margin-left: 5px;
+}
+
+.te-monitor-control-time-changed-fastest {
+	margin-left: 5px;
+}
+
+.te-monitor-control-time-changed-slowest {
+	margin-left: 5px;
+}
+
 .te-monitor-control-content-details-body {
     opacity: 1;
 }

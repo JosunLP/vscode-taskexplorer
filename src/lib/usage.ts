@@ -1,10 +1,13 @@
 
 import { TeWrapper } from "./wrapper";
-import { ConfigProps, StorageProps } from "./constants";
-import { Disposable, Event, EventEmitter } from "vscode";
-import { IDictionary, ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ILog } from "../interface";
 import { pickBy } from "./utils/commonUtils";
 import { getDateDifference } from "./utils/utils";
+import { ConfigProps, StorageProps } from "./constants";
+import { Disposable, Event, EventEmitter } from "vscode";
+import {
+    IDictionary, ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent,
+    ITeTaskStatusChangeEvent, ILog, ITaskRuntimeInfo
+} from "../interface";
 
 type UsageStore = IDictionary<ITeTrackedUsage>;
 
@@ -15,14 +18,9 @@ interface ITaskRuntime
     time: number;
 }
 
-interface ITaskRuntimeInfo
+interface ITaskUsageRuntimeInfo extends ITaskRuntimeInfo
 {
     runtimes: ITaskRuntime[];
-    average: number;
-    fastest: number;
-    first: number;
-    last: number;
-    slowest: number;
 }
 
 interface ITaskUsageStats
@@ -32,7 +30,7 @@ interface ITaskUsageStats
     favorites: ITeTask[];
     last: ITeTask[];
     running: ITeTask[];
-    runtimes: IDictionary<ITaskRuntimeInfo>;
+    runtimes: IDictionary<ITaskUsageRuntimeInfo>;
     taskLastRan: ITeTask;
     taskMostUsed: ITeTask;
     timeLastRan: number;
@@ -137,7 +135,13 @@ export class Usage implements ITeUsage, Disposable
             fastest: 0,
             first: 0,
             last: 0,
-            slowest: 0
+            slowest: 0,
+            avgDown: false,
+            avgUp: false,
+            lastDown: false,
+            lastUp: false,
+            newFast: false,
+            newSlow: false
         }
     });
 
@@ -183,7 +187,7 @@ export class Usage implements ITeUsage, Disposable
     };
 
 
-    getRuntimeInfo = (treeId: string): { average: 0; fastest: 0;  first: 0;  last: 0;  slowest: 0 } =>
+    getRuntimeInfo = (treeId: string): ITaskRuntimeInfo =>
     {
         const stats = this.getTaskUsageStore();
         if (stats.runtimes[treeId]) {
@@ -194,7 +198,13 @@ export class Usage implements ITeUsage, Disposable
             fastest: 0,
             first: 0,
             last: 0,
-            slowest: 0
+            slowest: 0,
+            avgDown: false,
+            avgUp: false,
+            lastDown: false,
+            lastUp: false,
+            newFast: false,
+            newSlow: false
         };
     };
 
@@ -252,7 +262,7 @@ export class Usage implements ITeUsage, Disposable
             await this.trackTask(e.task, "   ");
         }
         else {
-            await this.trackTaskRuntime(e, "   ");
+            await this.trackTaskRuntime(e.task, "   ");
         }
         this.log.methodDone("task usage tracker: on running task changed", 2, "");
     };
@@ -410,7 +420,7 @@ export class Usage implements ITeUsage, Disposable
     };
 
 
-    private trackTaskRuntime = async(e: ITeTaskStatusChangeEvent, logPad: string) =>
+    private trackTaskRuntime = async(iTask: ITeTask, logPad: string) =>
     {
         let avg = 0;
         const now = Date.now(),
@@ -420,20 +430,26 @@ export class Usage implements ITeUsage, Disposable
         // Create runtime stats and add to stats store
         //
         const newRtStats = {
-            start: this._runStartTimes[e.treeId],
+            start: this._runStartTimes[iTask.treeId],
             end: now,
-            time: now - this._runStartTimes[e.treeId]
+            time: now - this._runStartTimes[iTask.treeId]
         };
-        let taskRtStats = stats.runtimes[e.treeId];
+        let taskRtStats = stats.runtimes[iTask.treeId];
         if (!taskRtStats)
         {
-            taskRtStats = stats.runtimes[e.treeId] = {
-                    runtimes: [],
-                    average: newRtStats.time,
-                    fastest: newRtStats.time,
-                    first: newRtStats.time,
-                    last: newRtStats.time,
-                    slowest: newRtStats.time
+            taskRtStats = stats.runtimes[iTask.treeId] = {
+                runtimes: [],
+                average: newRtStats.time,
+                fastest: newRtStats.time,
+                first: newRtStats.time,
+                last: newRtStats.time,
+                slowest: newRtStats.time,
+                avgDown: false,
+                avgUp: false,
+                lastDown: false,
+                lastUp: false,
+                newFast: false,
+                newSlow: false
             };
         }
         taskRtStats.runtimes.push(newRtStats);
@@ -445,17 +461,35 @@ export class Usage implements ITeUsage, Disposable
             avg += r.time;
             if (r.time < taskRtStats.fastest) {
                 taskRtStats.fastest = r.time;
+                taskRtStats.newFast = true;
             }
             else if (r.time > taskRtStats.slowest) {
                 taskRtStats.slowest = r.time;
+                taskRtStats.newSlow = true;
             }
         });
         //
-        // Record last and avg runtime
+        // Record last runtime
         //
+        const newLast = newRtStats.time;
+        taskRtStats.lastDown = newLast < taskRtStats.last;
+        taskRtStats.lastUp = newLast > taskRtStats.last;
         taskRtStats.last = newRtStats.time;
-        taskRtStats.average = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
-        delete this._runStartTimes[e.treeId];
+        //
+        // Record avg runtime
+        //
+        const newAvg = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
+        taskRtStats.avgDown = newAvg < taskRtStats.average;
+        taskRtStats.avgUp = newAvg > taskRtStats.average;
+        taskRtStats.average = newAvg;
+        //
+        // Remove the temp runtime start time from the startTime dictionary
+        //
+        delete this._runStartTimes[iTask.treeId];
+        //
+        // Update reference iTask with new calculated runtimes
+        //
+        Object.assign(iTask.runTime, this.wrapper.commonUtils.pickBy(taskRtStats, t => t !== "runtimes"));
         //
         // Persist / save stats
         //

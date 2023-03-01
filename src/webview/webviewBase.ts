@@ -27,6 +27,7 @@ import {
 export interface FontAwesomeClass
 {
 	icons: string[];
+	animations?: boolean;
 	brands?: boolean;
 	duotone?: boolean;
 	light?: boolean;
@@ -198,6 +199,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				}
 			};
 			html += ` <style nonce="${this._cspNonce}">`;
+			if (incFa.brands)
+			{
+				html += ` ${fontawesome.fontFace("brands-400", webRoot, this.wrapper.cacheBuster)}`;
+			}
 			if (incFa.duotone)
 			{
 				html += ` ${fontawesome.fontFace("duotone-900", webRoot, this.wrapper.cacheBuster)}`;
@@ -222,6 +227,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			// {
 			// 	html += ` ${fontawesome.fontFace("thin-200", webRoot, this.wrapper.cacheBuster)}`;
 			// }
+			if (incFa.animations)
+			{
+				html += ` ${fontawesome.animations}`;
+			}
 			html += ` ${fontawesome.selector}`;
 			// Object.keys(incFa).forEach(k =>
 			// {
