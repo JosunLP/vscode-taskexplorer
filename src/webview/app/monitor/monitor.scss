@@ -39,6 +39,55 @@ button {
 	}
 }
 
+#te-monitor-id-flyout-menu {
+	width: 20vw;
+	height: 20vh;
+	background-color: var(--vscode-menu-background);
+	position: fixed;
+	top: 0;
+	left: 0;
+	transition: transform .3s
+				cubic-bezier(0, .52, 0, 1);
+	overflow: scroll;
+	z-index: 1000;
+	border-radius: 5px;
+	border: 2px solid var(--vscode-button-background);
+}
+
+#te-monitor-id-flyout-menu.hide {
+	transform: translate3d(100vw, 0, 0);
+}
+   
+#te-monitor-id-flyout-menu.show {
+	transform: translate3d(80vw, 0, 0);
+	overflow: hidden;
+}
+
+#te-monitor-id-flyout-menu h2 a {
+	color: var(--vscode-menu-foreground);
+	margin-left: 10px;
+	text-decoration: none;
+}
+
+#te-monitor-id-flyout-menu h2 a:hover {
+	text-decoration: underline;
+}
+
+.te-monitor-menu-button-container {
+	float: right;
+}
+
+.te-monitor-menu-button {
+	font-size: 40px;
+	background-color: unset;
+	border-radius: 7px;
+	width:48px;
+	height:48px;
+}
+
+.te-monitor-menu {
+	float: right;
+}
 
 .te-tsx-root-container.te-tsx-monitor-root-container {
     opacity: 1

@@ -3,6 +3,9 @@ import React from "react";
 import { TeTaskTab } from "./tab";
 import { IIpcTask, MonitorAppState } from "../../../common/ipc";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { AppMenu } from "./menu";
+import { AppMenuButton } from "./menuButton";
+
 
 interface ITeAppTabs {
     all: React.RefObject<TeTaskTab>;
@@ -59,9 +62,10 @@ export class App extends React.Component<ReactProps, MonitorAppState>
     }
 
 
-    private clearTasks = () =>
+    private handleMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
-        // await storage.update("lastTasks", []);
+        this.toggleMenu();
+        e.stopPropagation();
     };
 
 
@@ -76,6 +80,13 @@ export class App extends React.Component<ReactProps, MonitorAppState>
         return (
             <div className="te-tabs-container">
                 <Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
+                    <AppMenuButton
+                        handleMouseDown={this.handleMouseDown.bind(this)}
+                    />
+                    <AppMenu
+                        handleMouseDown={this.handleMouseDown.bind(this)}
+                        menuVisibility={!!this.state.menuVisible}
+                    />
                     <TabList>
                         <Tab className="react-tabs__tab te-tab-recent">Recent</Tab>
                         <Tab className="react-tabs__tab te-tab-running">Running</Tab>
@@ -131,6 +142,13 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                 </Tabs>
             </div>
         );
+    };
+
+
+    toggleMenu = () => {
+        this.setState(state => ({
+            menuVisible: !state.menuVisible
+        }));
     };
 
 }

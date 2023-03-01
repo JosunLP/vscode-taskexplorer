@@ -49,6 +49,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     {
         super(props);
         this.log = props.log;
+        this.log("TeTaskControl.constructor: task=" + props.task.name);
         this.executeCommand = props.executeCommand;
         this.timerEl = React.createRef<TeReactTaskTimer>();
         this.buttons = {
@@ -77,6 +78,10 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     override componentWillUnmount = () => this.stopTimeChangeTimer();
     // override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
 
+    override shouldComponentUpdate(nextProps: ReactProps, nextState: ReactState)
+    {
+        return true;
+    }
 
     private formatRuntime = (runtime: number, type?: string) =>
     {
@@ -261,6 +266,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
         // on to an old state value because of the JSX.Element[] list and keys.  I'm sure there's a
         // better or a correct way to handle, but havent figured it out yet.  Look into again.
         //
+        this.log("TeTaskControl.render: task=" + this.state.task.name);
         this.timerState.run = this.state.task.running;
         return (
             <div className="te-monitor-control-container" key={`te-id-task-inner-control-${++this.counter}`}>

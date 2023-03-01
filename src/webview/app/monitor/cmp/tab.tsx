@@ -17,16 +17,23 @@ interface ReactProps
     log: (message: string, ...optionalParams: any[]) => void;
 }
 
+interface ReactState { tasks: IIpcTask[] }
 
-export class TeTaskTab extends React.Component<ReactProps, { tasks: IIpcTask[] }>
+
+export class TeTaskTab extends React.Component<ReactProps, ReactState>
 {
     private counter = 0;
+    private rendered = false;
     private children: JSX.Element[];
     private controlRefs: ControlRefs;
+    private log: (message: string, ...optionalParams: any[]) => void;
+
 
     constructor(props: ReactProps)
     {
         super(props);
+        this.log = props.log;
+        this.log("TeTaskTab.constructor: task count=" + props.tasks.length);
         this.children = [];
         this.controlRefs = {};
         this.state = {
@@ -37,6 +44,8 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: IIpcTask[] }
 
     override render()
     {
+        this.rendered = true;
+        this.log("TeTaskTab.render: task count=" + this.state.tasks.length);
         this.controlRefs = {};
         this.children.splice(0);
         this.state.tasks.forEach((t: IIpcTask) =>
@@ -60,6 +69,7 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: IIpcTask[] }
 
     setTask = (task: IIpcTask, isRunningTab?: boolean) =>
     {
+        this.log("TeTaskTab.render: isRunningTab=" + isRunningTab);
         if (isRunningTab !== true)
         {
             const r  = this.controlRefs[task.treeId];
@@ -97,5 +107,8 @@ export class TeTaskTab extends React.Component<ReactProps, { tasks: IIpcTask[] }
 
 
     setTasks = (tasks: IIpcTask[]) => this.setState({ tasks });
+
+
+    override shouldComponentUpdate = (_nextProps: ReactProps, _nextState: ReactState) => !this.rendered;
 
 }

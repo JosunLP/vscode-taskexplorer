@@ -122,6 +122,7 @@ export interface MonitorAppState extends State
 	famous: IIpcTask[];
 	favorites: IIpcTask[];
 	last: IIpcTask[];
+	menuVisible?: boolean;
 	tasks: IIpcTask[];
 	running: IIpcTask[];
 	pinned: {
