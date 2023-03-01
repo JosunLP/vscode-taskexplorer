@@ -10,8 +10,9 @@ import {
 } from "../../interface";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
-	DidChangeAllTasksType, DidChangeTaskStatusType, DidChangeRunningTasksType, IMonitorAppTimerMode
+	DidChangeAllTasksType, DidChangeTaskStatusType, DidChangeRunningTasksType, IMonitorAppTimerMode, DidChangeConfigurationType
 } from "../common/ipc";
+import { ConfigurationChangeEvent } from "vscode";
 
 
 export class MonitorPage extends TeWebviewPanel<MonitorAppState>
@@ -40,7 +41,8 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
 			wrapper.usage.onDidFamousTasksChange(this.onFamousTasksChanged, this),
 			wrapper.taskWatcher.onDidRunningTasksChange(this.onRunningTasksChanged, this),
-			wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this)
+			wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
+			wrapper.config.onDidChange(e => { this.onConfigChanged(e); }, this)
 		);
 	}
 
@@ -84,6 +86,16 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
 	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: e.tasks });
 
+	private async onConfigChanged(e: ConfigurationChangeEvent)
+	{
+		if (e.affectsConfiguration("taskexplorer." + ConfigKeys.TaskMonitor_TimerMode))
+		{
+			return this.notify(DidChangeConfigurationType, {
+				timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode)
+			});
+		}
+		return false;
+	}
 
 	protected override onVisibilityChanged = (_visible: boolean) =>
 	{

@@ -45,6 +45,10 @@ export class App extends React.Component<ReactProps, MonitorAppState>
     }
 
 
+    get allTab() {
+        return this.tabs.all.current as TeTaskTab;
+    }
+
     get famousTab() {
         return this.tabs.famous.current as TeTaskTab;
     }

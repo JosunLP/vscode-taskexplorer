@@ -56,6 +56,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             this._onDidTasksChange,
             workspace.onDidChangeConfiguration(async e => { await this.processConfigChanges(e); }, this)
         );
+        console.log(this.store);
     }
 
 

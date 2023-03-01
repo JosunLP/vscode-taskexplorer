@@ -94,7 +94,7 @@ export const DidChangeEnabledType = new IpcNotificationType<DidChangeEnabledPara
 
 export interface DidChangeConfigurationParams
 {
-	plusEnabled: boolean;
+	timerMode: IMonitorAppTimerMode;
 }
 export const DidChangeConfigurationType = new IpcNotificationType<DidChangeConfigurationParams>("configuration/change");
 

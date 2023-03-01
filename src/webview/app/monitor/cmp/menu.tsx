@@ -38,25 +38,27 @@ export class AppMenu extends React.Component<ReactProps>
                             </td>
                         </tr>
                         <tr>
-                            <table className="te-monitor-flyout-menu-section-items">
-                                <tbody>
-                                    <tr>
-                                        <td className="te-monitor-flyout-menu-section-item-td">
-                                            <span className="far fa-chevron-right" /> <span className="te-monitor-flyout-menu-section-item">Hide</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="te-monitor-flyout-menu-section-item-td">
-                                            <span className="far fa-chevron-right" /> <span className="te-monitor-flyout-menu-section-item">MM:SS</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="te-monitor-flyout-menu-section-item-td">
-                                            <span className="far fa-chevron-right" /> <span className="te-monitor-flyout-menu-section-item">MM:SS:MS</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <td>
+                                <table className="te-monitor-flyout-menu-section-items">
+                                    <tbody>
+                                        <tr>
+                                            <td className="te-monitor-flyout-menu-section-item-td">
+                                                <span className="far fa-chevron-right" /> <span className="te-monitor-flyout-menu-section-item">Hide</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="te-monitor-flyout-menu-section-item-td">
+                                                <span className="far fa-chevron-right" /> <span className="te-monitor-flyout-menu-section-item">MM:SS</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="te-monitor-flyout-menu-section-item-td">
+                                                <span className="far fa-chevron-right" /> <span className="te-monitor-flyout-menu-section-item">MM:SS:MS</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

@@ -111,9 +111,9 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState>
     setTasks = (tasks: IIpcTask[]) => this.setState({ tasks });
 
 
-    // setTimerMode = (mode: IMonitorAppTimerMode) => this.setState({ timerMode: mode });
+    setTimerMode = (mode: IMonitorAppTimerMode) => { console.log("set timer mode: " + mode); }; // this.setState({ timerMode: mode });
 
 
-    override shouldComponentUpdate = (_nextProps: ReactProps, _nextState: ReactState) => !this.rendered;
+    override shouldComponentUpdate = (_nextProps: ReactProps, nextState: ReactState) => !this.rendered || nextState.tasks.length !== this.state.tasks.length;
 
 }

@@ -14,7 +14,7 @@ import { createRoot } from "react-dom/client";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
 	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeAllTasksType, IpcMessage,
-	onIpc, MonitorAppState, IIpcTask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType
+	onIpc, MonitorAppState, IIpcTask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType, DidChangeConfigurationType
 } from "../../common/ipc";
 
 
@@ -143,6 +143,16 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				onIpc(DidChangeStateType, msg, params => {
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
 					this.processBaseStateChange(params);
+				});
+				break;
+			case DidChangeConfigurationType.method:
+				onIpc(DidChangeConfigurationType, msg, params => {
+					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
+					this.app.allTab.setTimerMode(params.timerMode);
+					this.app.famousTab.setTimerMode(params.timerMode);
+					this.app.favoritesTab.setTimerMode(params.timerMode);
+					this.app.recentTab.setTimerMode(params.timerMode);
+					this.app.runningTab.setTimerMode(params.timerMode);
 				});
 				break;
 			default:
