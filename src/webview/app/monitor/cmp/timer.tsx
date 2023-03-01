@@ -12,7 +12,8 @@ interface ReactState
 
 interface ReactProps
 {
-    start?: boolean;
+    state: ReactState;
+    onTimerStateChanged: (state: ReactState) => void;
 }
 
 
@@ -23,19 +24,13 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     constructor(props: ReactProps)
     {
         super(props);
-        this.state = {
-            hide: false,
-            run: !!props.start,
-            countMs: false,
-            seconds: 0,
-            milliseconds: 0
-        };
+        this.state = { ...this.props.state };
     }
 
 
-    private clickHide = () => this.setState({ hide: true });
-    private clickShow = () => this.setState({ hide: false, countMs: false });
-    private clickShowMs = () => this.setState({ hide: false, countMs: true });
+    private clickHide = () => { this.setState({ hide: true }); this.props.onTimerStateChanged(this.state); };
+    private clickShow = () => { this.setState({ hide: false, countMs: false }); this.props.onTimerStateChanged(this.state); };
+    private clickShowMs = () => { this.setState({ hide: false, countMs: true }); this.props.onTimerStateChanged(this.state); };
 
 
     override componentDidMount = () => this.startTimer();

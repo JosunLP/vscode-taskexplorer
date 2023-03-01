@@ -15,6 +15,7 @@ import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder, Event
 } from "vscode";
+import { PinnedStorageKey } from "src/lib/constants";
 
 
 export class TaskManager implements ITeTaskManager, Disposable
@@ -41,7 +42,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             registerCommand(Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
             registerCommand(Commands.NpmRunAuditFix, (item: TaskFile) => this.runNpmCommand(item, "audit fix"), this),
             registerCommand(Commands.NpmRunUpdatePackage, (item: TaskFile) => this.runNpmCommand(item, "update <packagename>"), this),
-            registerCommand(Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.getTask(item), itemClick), this),
+            registerCommand(Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.getTask(item), itemClick), this)
         );
     }
 
@@ -378,7 +379,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
 	setPinned = async (task: ITeTask): Promise<void> =>
 	{
-		const storageKey = `taskexplorer.pinned.${task.listType}`;
+		const storageKey: PinnedStorageKey = `taskexplorer.pinned.${task.listType}`;
 		this.log.methodStart("set pinned task", 2, "", false, [[ "id", task.treeId ], [ "pinned", task.pinned ]]);
 		const pinnedTaskList = this.wrapper.storage.get<ITeTask[]>(storageKey, []);
 		pinnedTaskList.push({  ...task });

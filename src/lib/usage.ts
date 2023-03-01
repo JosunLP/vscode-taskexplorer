@@ -2,7 +2,7 @@
 import { TeWrapper } from "./wrapper";
 import { pickBy } from "./utils/commonUtils";
 import { getDateDifference } from "./utils/utils";
-import { ConfigProps, StorageProps } from "./constants";
+import { ConfigKeys, StorageKeys } from "./constants";
 import { Disposable, Event, EventEmitter } from "vscode";
 import {
     IDictionary, ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent,
@@ -85,12 +85,12 @@ export class Usage implements ITeUsage, Disposable
 	}
 
 
-	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<UsageStore>(StorageProps.Usage, {})[key];
+	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {})[key];
 
 
 	getAll = (key?: string): UsageStore =>
 	{
-		const storeAll = this.wrapper.storage.get<UsageStore>(StorageProps.Usage, {}),
+		const storeAll = this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {}),
 			  store: UsageStore = {};
 		if (!key)
 		{
@@ -148,7 +148,7 @@ export class Usage implements ITeUsage, Disposable
 
     private getTaskUsageStore = (): ITaskUsageStats =>
     {
-        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageProps.TaskUsage);
+        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageKeys.TaskUsage);
         if (!store)
         {
             store = {
@@ -270,27 +270,27 @@ export class Usage implements ITeUsage, Disposable
 
 	async reset(key?: string): Promise<void>
 	{
-		const usages =  this.wrapper.storage.get<UsageStore>(StorageProps.Usage);
+		const usages =  this.wrapper.storage.get<UsageStore>(StorageKeys.Usage);
 		if (!usages) return;
 		if (!key) {
-			await  this.wrapper.storage.delete(StorageProps.Usage);
+			await  this.wrapper.storage.delete(StorageKeys.Usage);
 			this._onDidChange.fire(undefined);
 		}
 		else {
-			await  this.wrapper.storage.delete(`${StorageProps.Usage}.${key}`);
+			await  this.wrapper.storage.delete(`${StorageKeys.Usage}.${key}`);
 			this._onDidChange.fire({ key, usage: undefined });
 		}
 	}
 
 
-    private saveTaskUsageStore = (store: ITaskUsageStats) => this.wrapper.storage.update(StorageProps.TaskUsage, store);
+    private saveTaskUsageStore = (store: ITaskUsageStats) => this.wrapper.storage.update(StorageKeys.TaskUsage, store);
 
 
 
 	async track(key: string): Promise<ITeTrackedUsage>
 	{
 		const timestamp = Date.now(),
-			  usages =  this.wrapper.storage.get<UsageStore>(StorageProps.Usage, {});
+			  usages =  this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {});
 
 		let usage = usages[key];
 		if (!usage)
@@ -329,7 +329,7 @@ export class Usage implements ITeUsage, Disposable
 			};
 		}
 
-		await this.wrapper.storage.update(StorageProps.Usage, usages);
+		await this.wrapper.storage.update(StorageKeys.Usage, usages);
 		//
 		// TODO - Telemetry
 		//
@@ -343,7 +343,7 @@ export class Usage implements ITeUsage, Disposable
     {
         let added = false,
             changed = false;
-        const specTaskListLength = this.wrapper.config.get<number>(ConfigProps.SpecialFolders_NumLastTasks);
+        const specTaskListLength = this.wrapper.config.get<number>(ConfigKeys.SpecialFolders_NumLastTasks);
         //
         // First remove this task from the list of it is present, it'll be put back
         // in the following steps
@@ -397,6 +397,14 @@ export class Usage implements ITeUsage, Disposable
         //
         const usage = await this.wrapper.usage.track(`${this._taskUsageKey}${iTask.treeId}`);
         Object.assign(iTask.runCount, usage.count);
+        // Object.assign(iTask.runTime, {
+        //     avgDown: false,
+        //     avgUp: false,
+        //     lastDown: false,
+        //     lastUp: false,
+        //     newFast: false,
+        //     newSlow: false
+        // });
         //
         // Add  to 'famous tasks' list, maybe
         //
@@ -452,22 +460,28 @@ export class Usage implements ITeUsage, Disposable
                 newSlow: false
             };
         }
-        taskRtStats.runtimes.push(newRtStats);
+        //
+        // Clear flags in base stats object
+        //
+        Object.assign(taskRtStats, {
+            avgDown: false,
+            avgUp: false,
+            lastDown: false,
+            lastUp: false,
+            newFast: false,
+            newSlow: false
+        });
         //
         // Check fastest runtimes, see if this time was the fastest
         //
-        taskRtStats.runtimes.forEach(r =>
-        {
-            avg += r.time;
-            if (r.time < taskRtStats.fastest) {
-                taskRtStats.fastest = r.time;
-                taskRtStats.newFast = true;
-            }
-            else if (r.time > taskRtStats.slowest) {
-                taskRtStats.slowest = r.time;
-                taskRtStats.newSlow = true;
-            }
-        });
+        if (newRtStats.time < taskRtStats.fastest) {
+            taskRtStats.fastest = newRtStats.time;
+            taskRtStats.newFast = true;
+        }
+        if (newRtStats.time > taskRtStats.slowest) {
+            taskRtStats.slowest = newRtStats.time;
+            taskRtStats.newSlow = true;
+        }
         //
         // Record last runtime
         //
@@ -478,10 +492,16 @@ export class Usage implements ITeUsage, Disposable
         //
         // Record avg runtime
         //
-        const newAvg = parseFloat((avg / taskRtStats.runtimes.length).toFixed(3));
+        avg = newRtStats.time;
+        taskRtStats.runtimes.forEach(r =>  avg += r.time);
+        const newAvg = parseFloat((avg / (taskRtStats.runtimes.length + 1)).toFixed(3));
         taskRtStats.avgDown = newAvg < taskRtStats.average;
         taskRtStats.avgUp = newAvg > taskRtStats.average;
         taskRtStats.average = newAvg;
+        //
+        // Record the current runtime stats instance in the runtimes array
+        //
+        taskRtStats.runtimes.push(newRtStats);
         //
         // Remove the temp runtime start time from the startTime dictionary
         //

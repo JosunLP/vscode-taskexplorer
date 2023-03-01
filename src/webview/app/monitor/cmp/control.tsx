@@ -15,7 +15,7 @@ interface ITeAppButtons {
 
 interface ReactState
 {
-    animateChangedTimeIcons?: boolean;
+    animateChangedTimeIcons: boolean;
 	task: IIpcTask;
 }
 
@@ -36,6 +36,14 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     private interval: NodeJS.Timeout | undefined;
     private log: (message: string, ...optionalParams: any[]) => void;
     private executeCommand: (command: string, task: IIpcTask) => void;
+    private timerState = {
+        hide: false,
+        run: false,
+        countMs: false,
+        seconds: 0,
+        milliseconds: 0
+    };
+
 
     constructor(props: ReactProps)
     {
@@ -51,7 +59,8 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
             stop: React.createRef<TeTaskButton>()
         };
         this.state = {
-            task: props.task
+            task: props.task,
+            animateChangedTimeIcons: false
         };
     }
 
@@ -241,6 +250,9 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
         <span className={this.getChangeTimeCls("turtle", "slowest", "shake", "te-color-failure-red")} />;
 
 
+    private onTimerStateChanged = (state: any):  void => this.timerState = { ...state };
+
+
     override render()
     {   //
         // Add a unique key to the top-level <div>.
@@ -249,6 +261,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
         // on to an old state value because of the JSX.Element[] list and keys.  I'm sure there's a
         // better or a correct way to handle, but havent figured it out yet.  Look into again.
         //
+        this.timerState.run = this.state.task.running;
         return (
             <div className="te-monitor-control-container" key={`te-id-task-inner-control-${++this.counter}`}>
                 <table width="100%" cellPadding="0" cellSpacing="0">
@@ -312,7 +325,8 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                             />
                             <TeReactTaskTimer
                                 ref={this.timerEl}
-                                start={this.state.task.running}
+                                state={this.timerState}
+                                onTimerStateChanged={this.onTimerStateChanged.bind(this)}
                             />
                         </tr>
                     </tbody>
@@ -335,8 +349,11 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     setTask = (task: IIpcTask) => this.setState(state =>
     {
         this.startTimeChangeTimer();
-        return { task: { ...task }, animateChangedTimeIcons: true };
+        return { task: { ...task }, animateChangedTimeIcons: !task.running };
     });
+
+
+    setTimerMode = (ms: boolean) => this.timerEl.current?.setState({ countMs: ms });
 
 
     private startTimeChangeTimer = () =>

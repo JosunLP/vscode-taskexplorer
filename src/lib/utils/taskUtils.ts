@@ -6,6 +6,7 @@ import { Task, tasks } from "vscode";
 import { TeWrapper } from "../wrapper";
 import { pickBy, properCase } from "./commonUtils";
 import { ITaskDefinition, ITeTask, TeTaskListType } from "../../interface";
+import { PinnedStorageKey } from "../constants";
 
 
 export function getScriptTaskTypes(): string[]
@@ -150,7 +151,7 @@ export const toITask = (wrapper: TeWrapper, teTasks: Task[], listType: TeTaskLis
 
 export const isPinned = (id: string, listType: TeTaskListType): boolean =>
 {
-    const storageKey = `taskexplorer.pinned.${listType}`;
+    const storageKey: PinnedStorageKey = `taskexplorer.pinned.${listType}`;
     const pinnedTaskList = storage.get<ITeTask[]>(storageKey, []);
     return !!pinnedTaskList.find(t => t.treeId === id);
 };

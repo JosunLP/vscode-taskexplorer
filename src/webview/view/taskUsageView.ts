@@ -2,7 +2,7 @@
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { StorageProps } from "../../lib/constants";
+import { StorageKeys } from "../../lib/constants";
 import { StorageChangeEvent } from "../../interface";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
@@ -38,7 +38,7 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	private async onStorageChanged(e: StorageChangeEvent)
 	{
-		if (e.key === StorageProps.Usage || e.key === StorageProps.TaskUsage)
+		if (e.key === StorageKeys.Usage || e.key === StorageKeys.TaskUsage)
 		{
 			this.wrapper.log.methodStart("TaskUsageView Event: onStorageChanged", 2, this.wrapper.log.getLogPad());
 			await this.refresh();

@@ -3,7 +3,6 @@ import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
 import { figures } from "./figures";
-import { StorageProps, Strings } from "./constants";
 import { logControl } from "./log/log";
 import { TaskTree } from "../tree/tree";
 import { TeServer } from "./auth/server";
@@ -18,6 +17,7 @@ import { getUuid } from "../lib/env/node/crypto";
 import { TaskManager } from "../tree/taskManager";
 import { TaskWatcher } from "../tree/taskWatcher";
 import * as commonUtils from "./utils/commonUtils";
+import { StorageKeys, Strings } from "./constants";
 import { ContextKeys, TeContext } from "./context";
 import { AntTaskProvider } from "../providers/ant";
 import { HomeView } from "../webview/view/homeView";
@@ -331,7 +331,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		if (this.env === "dev")
 		{
 			const rPath = await this.pathUtils.getInstallPath() + "\\dist\\",
-				  taskUsage = this.storage.get<any>(StorageProps.TaskUsage, {}),
+				  taskUsage = this.storage.get<any>(StorageKeys.TaskUsage, {}),
 				  allUsage = { usage: this._usage.getAll(), taskUsage };
 			await this.fs.writeFile(rPath + "usage.json", JSON.stringify(allUsage, null, 3));
 		}
