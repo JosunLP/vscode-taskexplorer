@@ -2,3 +2,12 @@
 .te-color-favorite-yellow {
     color: #ffd54f
 }
+
+.te-title {
+    font-size: 24px;
+    line-height: 24px;
+    font-weight: bold;
+    text-align: left;
+    color: var(--vscode-button-background);
+    text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 2px 1px #777, 1px 1px 0px #666, 0px 2px 0px #555, 1px 2px 0px #444, 0px 2px 0px #333, 0px 3px 1px #001135;
+}

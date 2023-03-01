@@ -39,9 +39,9 @@ button {
 	}
 }
 
-#te-monitor-id-flyout-menu {
+#te-monitor-flyout-menu-id {
 	width: 20vw;
-	height: 20vh;
+	height: 25vh;
 	background-color: var(--vscode-menu-background);
 	position: fixed;
 	top: 0;
@@ -52,25 +52,59 @@ button {
 	z-index: 1000;
 	border-radius: 5px;
 	border: 2px solid var(--vscode-button-background);
+	padding: 7px 15px 7px 15px;
 }
 
-#te-monitor-id-flyout-menu.hide {
+#te-monitor-flyout-menu-id.hide {
 	transform: translate3d(100vw, 0, 0);
 }
    
-#te-monitor-id-flyout-menu.show {
+#te-monitor-flyout-menu-id.show {
 	transform: translate3d(80vw, 0, 0);
 	overflow: hidden;
 }
 
-#te-monitor-id-flyout-menu h2 a {
+.te-monitor-flyout-menu-title-td {
+	padding-bottom: 10px;
+}
+
+.te-monitor-flyout-menu-title {
+	font-size: 22px;
+}
+
+/*
+.te-monitor-flyout-menu-title:before {
+	content: "\f085";
+	color: var(--fa-primary-color);
+}
+*/
+
+/*.te-monitor-flyout-menu-title:after {
+	content: "\f085";
+	color: var(--fa-secondary-color);
+}*/
+
+.te-monitor-flyout-menu-section {
+	font-weight: bold;
+	font-size: 16px;
+}
+
+.te-monitor-flyout-menu-section-items {
+	font-size: 14px;
+}
+
+.te-monitor-flyout-menu-section-item-td  {
+	padding-left: 10px;
+}
+
+.te-monitor-flyout-menu-section-item {
 	color: var(--vscode-menu-foreground);
-	margin-left: 10px;
 	text-decoration: none;
 }
 
-#te-monitor-id-flyout-menu h2 a:hover {
+.te-monitor-flyout-menu-section-item:hover {
 	text-decoration: underline;
+	cursor: pointer;
 }
 
 .te-monitor-menu-button-container {
