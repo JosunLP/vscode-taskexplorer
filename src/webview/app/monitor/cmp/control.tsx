@@ -78,8 +78,9 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     override componentWillUnmount = () => this.stopTimeChangeTimer();
     // override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
 
-    override shouldComponentUpdate(nextProps: ReactProps, nextState: ReactState)
+    override shouldComponentUpdate(_nextProps: ReactProps, _nextState: ReactState)
     {
+        // TODO - Only render when needed!!
         return true;
     }
 

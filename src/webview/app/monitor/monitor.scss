@@ -40,8 +40,8 @@ button {
 }
 
 #te-monitor-flyout-menu-id {
-	width: 20vw;
-	height: 25vh;
+	width: 230px;
+  	height: 150px;
 	background-color: var(--vscode-menu-background);
 	position: fixed;
 	top: 0;
@@ -60,7 +60,7 @@ button {
 }
    
 #te-monitor-flyout-menu-id.show {
-	transform: translate3d(80vw, 0, 0);
+	transform: translate3d(calc(100vw - 230px), 0, 0);
 	overflow: hidden;
 }
 
