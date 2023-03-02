@@ -28,8 +28,9 @@ interface ReactProps
 
 export class App extends React.Component<ReactProps, MonitorAppState, MonitorAppSerializedState>
 {
-    private log: (message: string, ...optionalParams: any[]) => void;
     private tabs: ITeAppTabs;
+    private log: (message: string, ...optionalParams: any[]) => void;
+
 
     constructor(props: ReactProps)
     {
@@ -48,11 +49,10 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     }
 
 
-    private handleMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+    private handleMouseDown = (_e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
         if (this.state.menuVisible) {
             this.toggleMenu();
-            // e.stopPropagation();
         }
     };
 
@@ -167,13 +167,6 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
 
 
     setTimerMode = (mode: IMonitorAppTimerMode) => { if (this.state.timerMode !== mode) { this.setState({ timerMode: mode }); }};
-    // {
-    //     this.tabs.all.current?.setTimerMode(mode);
-    //     this.tabs.famous.current?.setTimerMode(mode);
-    //     this.tabs.favorites.current?.setTimerMode(mode);
-    //     this.tabs.last.current?.setTimerMode(mode);
-    //     this.tabs.running.current?.setTimerMode(mode);
-    // };
 
 
     toggleMenu = () => this.setState(state => ({ menuVisible: !state.menuVisible }));

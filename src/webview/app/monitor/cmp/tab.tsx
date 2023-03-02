@@ -56,7 +56,6 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
         this.children.splice(0);
         this.state.tasks.forEach((t: IIpcTask) =>
         {
-            // this.props.log(`TeTaskTab.render: task=${t.name} source=${t.source} running=${t.running}`);
             this.controlRefs[t.treeId] = React.createRef<TeTaskControl>();
             this.children.push(
                 <TeTaskControl
@@ -116,14 +115,6 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
 
 
     setTasks = (tasks: IIpcTask[]) => this.setState({ tasks });
-
-
-    setTimerMode = (mode: IMonitorAppTimerMode) =>
-    {
-        React.Children.forEach(this.children, c => {
-            this.controlRefs[c.props.task.treeId].current?.setTimerMode(mode);
-        });
-    };
 
 
     override shouldComponentUpdate = (nextProps: ReactProps, nextState: ReactState) =>

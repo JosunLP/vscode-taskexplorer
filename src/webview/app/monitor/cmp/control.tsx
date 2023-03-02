@@ -63,22 +63,32 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
 
 
     private clickFavorite = () =>  this.executeCommand("addRemoveRavorite", this.state.task);
+
+
     private clickOpen = () =>  this.executeCommand("open", this.state.task);
+
+
     private clickPause = () => this.executeCommand("pause", this.state.task);
+
+
     private clickRun = () => this.executeCommand("run", this.state.task);
+
+
     private clickStop = () => this.executeCommand("stop", this.state.task);
+
+
     private clickTerminal = () => this.executeCommand("openTerminal", this.state.task);
 
 
-    // override componentDidMount = () => this.startTimeChangeTimeout();
     override componentWillUnmount = () => this.stopTimeChangeTimeout();
-    // override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
+
 
     override shouldComponentUpdate(_nextProps: ReactProps, _nextState: ReactState)
     {
         // TODO - Only render when needed!!
         return true;
     }
+
 
     private formatRuntime = (runtime: number, type?: string) =>
     {
@@ -100,6 +110,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
     {
         const task = this.state.task;
         return (
+            <td className="te-monitor-control-content-column">
             <span className="te-monitor-control-content-container">
                 <table className="te-monitor-control-content-table">
                     <tbody>
@@ -223,6 +234,28 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
                     </tbody>
                 </table>
             </span>
+            </td>
+        );
+    };
+
+
+    private getTaskIconLabel = () =>
+    {
+        return (
+            <td className="te-monitor-control-icon-column">
+            <table cellPadding={0} cellSpacing={0} width="100%"><tbody>
+                <tr>
+                    <td align="center" className="te-monitor-control-icon-type-td">
+                        {this.state.task.definition.type}
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center">
+                        <img className="te-monitor-control-icon-img" src={this.props.webroot + "/img/sources/" + this.state.task.source + ".svg"} />
+                    </td>
+                </tr>
+            </tbody></table>
+            </td>
         );
     };
 
@@ -263,76 +296,57 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
         this.log("TeTaskControl.render: task=" + this.state.task.name);
         return (
             <div className="te-monitor-control-container" key={`te-id-task-inner-control-${++this.counter}`}>
-                <table width="100%" cellPadding="0" cellSpacing="0">
-                    <tbody>
-                        <tr className="te-monitor-control-row te-monitor-control-top-row">
-                            <td className="te-monitor-control-icon-column">
-                                <table cellPadding={0} cellSpacing={0} width="100%">
-                                    <tbody>
-                                        <tr>
-                                            <td align="center" className="te-monitor-control-icon-type-td">
-                                                {this.state.task.definition.type}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td align="center">
-                                                <img className="te-monitor-control-icon-img" src={this.props.webroot + "/img/sources/" + this.state.task.source + ".svg"} />
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                            <td className="te-monitor-control-content-column">
-                                {this.getTaskDetails()}
-                            </td>
-                            <td className="te-monitor-control-spacer-column"></td>
-                            <TeTaskButton
-                                name="favorite"
-                                ref={this.buttons.favorite}
-                                clickHandler={this.clickFavorite.bind(this)}
-                            />
-                            <TeTaskButton
-                                name="open"
-                                ref={this.buttons.open}
-                                clickHandler={this.clickOpen.bind(this)}
-                            />
-                            <TeTaskButton
-                                name="terminal"
-                                ref={this.buttons.pause}
-                                hidden={!this.state.task.running}
-                                clickHandler={this.clickTerminal.bind(this)}
-                            />
-                            <TeTaskButton
-                                name="pause"
-                                ref={this.buttons.pause}
-                                hidden={!this.state.task.running}
-                                clickHandler={this.clickPause.bind(this)}
-                            />
-                            <TeTaskButton
-                                name="stop"
-                                lastButton={true}
-                                ref={this.buttons.stop}
-                                hidden={!this.state.task.running}
-                                clickHandler={this.clickStop.bind(this)}
-                            />
-                            <TeTaskButton
-                                name="run"
-                                lastButton={true}
-                                ref={this.buttons.run}
-                                hidden={this.state.task.running}
-                                clickHandler={this.clickRun.bind(this)}
-                            />
-                            <TeReactTaskTimer
-                                ref={this.timerEl}
-                                state={{
-                                    run: this.state.task.running,
-                                    mode: this.props.timerMode,
-                                    ms: !this.state.task.running ? this.state.task.runTime.last : 0
-                                }}
-                            />
-                        </tr>
-                    </tbody>
-                </table>
+                <table width="100%" cellPadding="0" cellSpacing="0"><tbody>
+                    <tr className="te-monitor-control-row te-monitor-control-top-row">
+                        {this.getTaskIconLabel()}
+                        {this.getTaskDetails()}
+                        <td className="te-monitor-control-spacer-column"></td>
+                        <TeTaskButton
+                            name="favorite"
+                            ref={this.buttons.favorite}
+                            clickHandler={this.clickFavorite.bind(this)}
+                        />
+                        <TeTaskButton
+                            name="open"
+                            ref={this.buttons.open}
+                            clickHandler={this.clickOpen.bind(this)}
+                        />
+                        <TeTaskButton
+                            name="terminal"
+                            ref={this.buttons.pause}
+                            hidden={!this.state.task.running}
+                            clickHandler={this.clickTerminal.bind(this)}
+                        />
+                        <TeTaskButton
+                            name="pause"
+                            ref={this.buttons.pause}
+                            hidden={!this.state.task.running}
+                            clickHandler={this.clickPause.bind(this)}
+                        />
+                        <TeTaskButton
+                            name="stop"
+                            lastButton={true}
+                            ref={this.buttons.stop}
+                            hidden={!this.state.task.running}
+                            clickHandler={this.clickStop.bind(this)}
+                        />
+                        <TeTaskButton
+                            name="run"
+                            lastButton={true}
+                            ref={this.buttons.run}
+                            hidden={this.state.task.running}
+                            clickHandler={this.clickRun.bind(this)}
+                        />
+                        <TeReactTaskTimer
+                            ref={this.timerEl}
+                            state={{
+                                run: this.state.task.running,
+                                mode: this.props.timerMode,
+                                ms: !this.state.task.running ? this.state.task.runTime.last : 0
+                            }}
+                        />
+                    </tr>
+                </tbody></table>
             </div>
         );
     }
@@ -354,9 +368,6 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
         this.startTimeChangeTimeout();
         return { task: { ...task }, animateChangedTimeIcons: !task.running };
     });
-
-
-    setTimerMode = (mode: IMonitorAppTimerMode) => this.timerEl.current?.setState({ mode });
 
 
     private startTimeChangeTimeout = () =>
