@@ -35,7 +35,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState, Re
     override componentWillUnmount = () => this.stopTimer();
 
 
-    override componentDidUpdate = (_props: any) => { this.stopTimer(); this.startTimer(); };
+    override componentDidUpdate = () => this.startTimer();
 
 
     override render = () =>
@@ -46,7 +46,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState, Re
               tmSF = tmS >= 10 ? tmS + "" : "0" + tmS,
               tmMS = tm % 1000,
               tmMSF = tmMS >= 100 ? tmMS + "" : (tmMS > 10 ? "0" + tmMS : "00" + tmMS),
-              tmF = `${tmM}:${tmSF}${this.state.mode === "MM:SS:MS" ? "." + tmMSF : ""}`;
+              tmF = `${tmM}:${tmSF}${this.state.mode.startsWith("MM:SS:MS") ? "." + (this.state.mode === "MM:SS:MSS" ? tmMSF : tmMSF.slice(0, -1)) : ""}`;
         return (
             <td className="te-monitor-control-timer-column">
                 <table cellPadding="0" cellSpacing="0">
@@ -65,9 +65,12 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState, Re
 
     private startTimer = () =>
     {
+        this.stopTimer();
         if (this.state.run) {
             // eslint-disable-next-line @typescript-eslint/tslint/config
-            this.interval = setInterval(() => this.tick(), this.state.mode !== "MM:SS:MS" ? 1000 : 27);
+            this.interval = setInterval(
+                () => this.tick(), this.state.mode === "MM:SS" ? 1000 : (this.state.mode === "MM:SS:MS" ? 37 : /* MM:SS:MSS */27)
+            );
         }
     };
 

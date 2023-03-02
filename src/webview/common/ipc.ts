@@ -131,7 +131,7 @@ export const DidChangeStateType = new IpcNotificationType<DidChangeStateParams>(
 export interface IIpcTask extends ITeTask {};
 export type IIpcTaskListType = TeTaskListType;
 export interface IIpcDictionary<T> extends IDictionary<T> {};
-export type IMonitorAppTimerMode = "Hide" | "MM:SS" | "MM:SS:MS";
+export type IMonitorAppTimerMode = "Hide" | "MM:SS" | "MM:SS:MS"  | "MM:SS:MSS";
 
 export interface MonitorAppState extends State
 {

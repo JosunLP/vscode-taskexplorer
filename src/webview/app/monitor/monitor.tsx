@@ -29,6 +29,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 {
 	private appRef: React.RefObject<App>;
 
+
     constructor()
     {
 		super("TaskMonitorWebviewApp");

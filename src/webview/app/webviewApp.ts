@@ -47,7 +47,7 @@ export abstract class TeWebviewApp<State = undefined>
 		const disposables: Disposable[] = [];
 		this._tzOffset = (new Date()).getTimezoneOffset() * 60000;
 
-		this.log(`${this.appName}.constructor()`);
+		this.log("Base.constructor");
 
 		this._vscode = acquireVsCodeApi();
 

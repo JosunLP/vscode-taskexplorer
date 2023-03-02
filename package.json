@@ -1759,7 +1759,8 @@
                         "enum": [
                             "Hide",
                             "MM:SS",
-                            "MM:SS:MS"
+                            "MM:SS:MS",
+                            "MM:SS:MSS"
                         ],
                         "default": "MM:SS",
                         "description": "%config.taskexplorer.taskMonitor.timerMode%"

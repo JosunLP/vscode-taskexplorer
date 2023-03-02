@@ -74,7 +74,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 		animations: true, brands: true, duotone: true, regular: true, solid: true,
 		icons: [
 			"gear", "gears", "trophy-star", "thumbtack", "chevron-right", "minus", "bars", "circle-xmark",
-			"chevron-double-right", "clock", "arrow-up", "arrow-down", "turtle", "rabbit", "refresh"
+			"chevron-double-right", "clock", "arrow-up", "arrow-down", "turtle", "rabbit", "refresh", "memo-pad"
 		]
 	});
 

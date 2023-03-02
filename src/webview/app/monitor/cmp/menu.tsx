@@ -52,26 +52,56 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
                         General
                     </td>
                 </tr>
-                <tr>
-                    <td>
-                        <table className="te-monitor-flyout-menu-section-item-table">
-                            <tbody>
-                            <tr>
-                                <td className="te-monitor-flyout-menu-section-item-td">
-                                    <span className="far fa-refresh te-monitor-flyout-menu-section-item-icon" />
-                                    <span className="te-monitor-flyout-menu-section-item"
-                                        onMouseDown={this.oMenuItemMouseDown}
-                                        onClick={this.onRefreshClick}>
-                                        Refresh
-                                    </span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
+                {this.getRefreshItem()}
+                {this.getReleaseNotesItem()}
             </tbody></table>
         );
+    };
+
+
+    private getRefreshItem = () =>
+    {
+        return (
+            <tr><td>
+                <table className="te-monitor-flyout-menu-section-item-table">
+                    <tbody>
+                    <tr>
+                        <td className="te-monitor-flyout-menu-section-item-td">
+                            <span className="far fa-refresh te-monitor-flyout-menu-section-item-icon" />
+                            <span className="te-monitor-flyout-menu-section-item"
+                                onMouseDown={this.oMenuItemMouseDown}
+                                onClick={(e) => this.onCommandClick("refresh", e)}>
+                                Refresh
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td></tr>
+        );
+    };
+
+
+    private getReleaseNotesItem = () =>
+    {
+        return (
+            <tr><td>
+                <table className="te-monitor-flyout-menu-section-item-table">
+                    <tbody>
+                    <tr>
+                        <td className="te-monitor-flyout-menu-section-item-td">
+                            <span className="far fa-memo-pad te-monitor-flyout-menu-section-item-icon" />
+                            <span className="te-monitor-flyout-menu-section-item"
+                                onMouseDown={this.oMenuItemMouseDown}
+                                onClick={(e) => this.onCommandClick("view.releaseNotes.show", e)}>
+                                View Release Notes
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td></tr>
+    );
     };
 
 
@@ -108,6 +138,7 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
                                 {this.getTimerModeItem("Hide")}
                                 {this.getTimerModeItem("MM:SS")}
                                 {this.getTimerModeItem("MM:SS:MS")}
+                                {this.getTimerModeItem("MM:SS:MSS")}
                             </tbody>
                         </table>
                     </td>
@@ -134,10 +165,10 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
     };
 
 
-    private onRefreshClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+    private onCommandClick = (command: string, e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
-        this.log("AppMenu.onRefreshClick");
-        this.props.executeCommand("refresh");
+        this.log(`AppMenu.onRefreshClick: ${command}`);
+        this.props.executeCommand(command);
         this.props.handleMouseDown(e);
     };
 
