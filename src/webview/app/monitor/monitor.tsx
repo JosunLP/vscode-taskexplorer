@@ -12,9 +12,9 @@ import { TeWebviewApp } from "../webviewApp";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
 import {
-	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
-	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeAllTasksType, IpcMessage,
-	onIpc, MonitorAppState, DidChangeTaskStatusParams, ExecuteCommandType, DidChangeConfigurationType, UpdateConfigCommandType
+	IpcDidChangeFamousTasks, IpcDidChangeFavoriteTasks, IpcDidChangeLastTasks, IpcDidChangeRunningTasks,
+	DidChangeStateParams, IpcDidChangeState, IpcDidChangeTaskStatus, IpcDidChangeAllTasks, IIpcMessage,
+	onIpc, MonitorAppState, DidChangeTaskStatusParams, IpcExecCommand, IpcDidChangeConfig, IpcUpdateConfigCommand
 } from "../../common/ipc";
 
 
@@ -43,11 +43,11 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
 
     private executeCommand = (command: string, ...args: any[]): void =>
-		this.sendCommand(ExecuteCommandType, { command: `taskexplorer.${command}`, args });
+		this.sendCommand(IpcExecCommand, { command: `taskexplorer.${command}`, args });
 
 
     private executeUpdateConfig = (key: string, value?: any): void =>
-		this.sendCommand(UpdateConfigCommandType, { key: `taskMonitor.${key}`, value });
+		this.sendCommand(IpcUpdateConfigCommand, { key: `taskMonitor.${key}`, value });
 
 
 	private handleTaskStateChangeEvent = (params: DidChangeTaskStatusParams): void =>
@@ -98,59 +98,59 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
 	protected override onMessageReceived = (e: MessageEvent): void =>
     {
-		const msg = e.data as IpcMessage;
+		const msg = e.data as IIpcMessage;
 		switch (msg.method)
 		{
-			case DidChangeAllTasksType.method:
-				onIpc(DidChangeAllTasksType, msg, params => {
+			case IpcDidChangeAllTasks.method:
+				onIpc(IpcDidChangeAllTasks, msg, params => {
 					Object.assign(this.state, { ...params });
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method}`);
 					this.app.setTasks("all", this.state.tasks);
 					this.setState(this.state);
 				});
 				break;
-			case DidChangeLastTasksType.method:
-				onIpc(DidChangeLastTasksType, msg, params => {
+			case IpcDidChangeLastTasks.method:
+				onIpc(IpcDidChangeLastTasks, msg, params => {
 					this.state.last = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.last);
 					this.app.setTasks("last", this.state.last);
 				});
 				break;
-			case DidChangeRunningTasksType.method:
-				onIpc(DidChangeRunningTasksType, msg, params => {
+			case IpcDidChangeRunningTasks.method:
+				onIpc(IpcDidChangeRunningTasks, msg, params => {
 					this.state.running = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.running);
 					this.app.setTasks("running", this.state.running);
 				});
 				break;
-			case DidChangeFamousTasksType.method:
-				onIpc(DidChangeFamousTasksType, msg, params => {
+			case IpcDidChangeFamousTasks.method:
+				onIpc(IpcDidChangeFamousTasks, msg, params => {
 					this.state.famous = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.famous);
 					this.app.setTasks("famous", this.state.famous);
 				});
 				break;
-			case DidChangeFavoriteTasksType.method:
-				onIpc(DidChangeFavoriteTasksType, msg, params => {
+			case IpcDidChangeFavoriteTasks.method:
+				onIpc(IpcDidChangeFavoriteTasks, msg, params => {
 					this.state.favorites = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.favorites);
 					this.app.setTasks("favorites", this.state.favorites);
 				});
 				break;
-			case DidChangeTaskStatusType.method:
-				onIpc(DidChangeTaskStatusType, msg, params => {
+			case IpcDidChangeTaskStatus.method:
+				onIpc(IpcDidChangeTaskStatus, msg, params => {
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
 					this.handleTaskStateChangeEvent(params);
 				});
 				break;
-			case DidChangeStateType.method:
-				onIpc(DidChangeStateType, msg, params => {
+			case IpcDidChangeState.method:
+				onIpc(IpcDidChangeState, msg, params => {
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
 					this.processBaseStateChange(params);
 				});
 				break;
-			case DidChangeConfigurationType.method:
-				onIpc(DidChangeConfigurationType, msg, params => {
+			case IpcDidChangeConfig.method:
+				onIpc(IpcDidChangeConfig, msg, params => {
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
 					this.app.setTimerMode(params.timerMode);
 				});

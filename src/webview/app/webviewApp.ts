@@ -4,9 +4,9 @@ import "./common/scss/te.scss";
 
 import { Disposable, DOM } from "./common/dom";
 import {
-	IpcCommandType, IpcMessage, IpcMessageParams, WebviewFocusChangedParams, WebviewFocusChangedCommandType,
-	WebviewReadyCommandType, ExecuteCommandType, onIpc, EchoCommandRequestType, EchoCustomCommandRequestType,
-	ExecuteCustomCommandType,
+	IpcCommand, IIpcMessage, IpcMessageParams, IpcWvFocusChangedParams, IpcWvFocusChangedCommand,
+	IpcWvReadyCommand, IpcExecCommand, onIpc, IpcEchoCommandRequest, IpcEchoCustomCommandRequest,
+	IpcExecCustomCommand,
 	debounce
 } from "../common/ipc";
 
@@ -60,7 +60,7 @@ export abstract class TeWebviewApp<State = undefined>
 				disposables.push(DOM.on(window, "message", this.onMessageReceived.bind(this)));
 			}
 			disposables.push(DOM.on(window, "message", this._onMessageReceived.bind(this)));
-			this.sendCommand(WebviewReadyCommandType, undefined);
+			this.sendCommand(IpcWvReadyCommand, undefined);
 			this.onInitialized?.();
 		});
 
@@ -129,7 +129,7 @@ export abstract class TeWebviewApp<State = undefined>
 				{
 					this._focused = true;
 					this._inputFocused = inputFocused;
-					debounce(p => this.sendCommand(WebviewFocusChangedCommandType, p), 150, { focused: true, inputFocused });
+					debounce(p => this.sendCommand(IpcWvFocusChangedCommand, p), 150, { focused: true, inputFocused });
 				}
 			}),
 			DOM.on(document, "focusout", () =>
@@ -137,7 +137,7 @@ export abstract class TeWebviewApp<State = undefined>
 				if (this._focused !== false || this._inputFocused !== false)
 				{
 					this._focused = this._inputFocused = false;
-					debounce(p => this.sendCommand(WebviewFocusChangedCommandType, p), 150, { focused: false, inputFocused: false });
+					debounce(p => this.sendCommand(IpcWvFocusChangedCommand, p), 150, { focused: false, inputFocused: false });
 				}
 			})
 		);
@@ -151,7 +151,7 @@ export abstract class TeWebviewApp<State = undefined>
 		const timeTags = (new Date(Date.now() - this._tzOffset)).toISOString().slice(0, -1).split("T");
 		message = `${this.appName}.${message}`;
 		// setTimeout(() => {
-		// 	this.postMessage({ id: this.nextIpcId(), method: LogWriteCommandType.method, params: { message, value: undefined }});
+		// 	this.postMessage({ id: this.nextIpcId(), method: IpcLogWriteCommand.method, params: { message, value: undefined }});
 		// },  1);
 		// console.log(`${timeTags.join(" ")} > [WEBVIEW]:${message}`, ...optionalParams);
 		console.log(`${timeTags[1]} > [WEBVIEW]: ${message}`, ...optionalParams);
@@ -172,16 +172,16 @@ export abstract class TeWebviewApp<State = undefined>
 
 	private _onMessageReceived(e: MessageEvent): void
     {
-		const msg = e.data as IpcMessage;
+		const msg = e.data as IIpcMessage;
         switch (msg.method)
         {
-			case EchoCommandRequestType.method:       // Standard echo service for testing web->host commands in mocha tests
+			case IpcEchoCommandRequest.method:       // Standard echo service for testing web->host commands in mocha tests
 				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`);
-                onIpc(EchoCommandRequestType, msg, params => this.sendCommand(ExecuteCommandType, params));
+                onIpc(IpcEchoCommandRequest, msg, params => this.sendCommand(IpcExecCommand, params));
                 break;
-			case EchoCustomCommandRequestType.method: // Standard echo service for testing web->host commands in mocha tests
+			case IpcEchoCustomCommandRequest.method: // Standard echo service for testing web->host commands in mocha tests
 				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`);
-				onIpc(EchoCustomCommandRequestType, msg, params => this.sendCommand(ExecuteCustomCommandType, params));
+				onIpc(IpcEchoCustomCommandRequest, msg, params => this.sendCommand(IpcExecCustomCommand, params));
                 break;
 			default:
                 break;
@@ -189,10 +189,10 @@ export abstract class TeWebviewApp<State = undefined>
 	};
 
 
-	private postMessage = (e: IpcMessage): void => this._vscode.postMessage(e);
+	private postMessage = (e: IIpcMessage): void => this._vscode.postMessage(e);
 
 
-	protected sendCommand<T extends IpcCommandType<any>>(command: T, params: IpcMessageParams<T>)
+	protected sendCommand<T extends IpcCommand<any>>(command: T, params: IpcMessageParams<T>)
 	{
 		const id = this.nextIpcId();
 		this.log(`sendCommand(${id}): name=${command.method}`);

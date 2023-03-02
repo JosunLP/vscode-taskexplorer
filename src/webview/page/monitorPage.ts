@@ -9,8 +9,8 @@ import {
 	ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent
 } from "../../interface";
 import {
-	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, MonitorAppState,
-	DidChangeAllTasksType, DidChangeTaskStatusType, DidChangeRunningTasksType, IMonitorAppTimerMode, DidChangeConfigurationType
+	IpcDidChangeFamousTasks, IpcDidChangeFavoriteTasks, IpcDidChangeLastTasks, MonitorAppState,
+	IpcDidChangeAllTasks, IpcDidChangeTaskStatus, IpcDidChangeRunningTasks, IMonitorAppTimerMode, IpcDidChangeConfig
 } from "../common/ipc";
 import { ConfigurationChangeEvent } from "vscode";
 
@@ -79,35 +79,35 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	});
 
 
-	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) => this.notify(DidChangeTaskStatusType, { task: e.task });
+	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) => this.notify(IpcDidChangeTaskStatus, { task: e.task });
 
 
-	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: e.tasks });
+	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(IpcDidChangeFamousTasks, { tasks: e.tasks });
 
 
-	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: e.tasks });
+	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(IpcDidChangeFavoriteTasks, { tasks: e.tasks });
 
 
-	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: e.tasks });
+	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(IpcDidChangeLastTasks, { tasks: e.tasks });
 
 
-	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(DidChangeRunningTasksType, { tasks: e.tasks });
+	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(IpcDidChangeRunningTasks, { tasks: e.tasks });
 
 
-    private onAllTasksChanged = async (_e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
+    private onAllTasksChanged = async (_e: ITeTaskChangeEvent) => this.notify(IpcDidChangeAllTasks, await this.getState());
 
 
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
 
 
-	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: e.tasks });
+	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(IpcDidChangeAllTasks, { tasks: e.tasks });
 
 
 	private async onConfigChanged(e: ConfigurationChangeEvent)
 	{
 		if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.TaskMonitor_TimerMode}`))
 		{
-			return this.notify(DidChangeConfigurationType, {
+			return this.notify(IpcDidChangeConfig, {
 				timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode)
 			});
 		}

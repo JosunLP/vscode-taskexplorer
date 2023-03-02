@@ -136,7 +136,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	}
 
 
-	// protected onViewFocusChanged(e: WebviewFocusChangedParams): void
+	// protected onViewFocusChanged(e: IpcWvFocusChangedParams): void
 	// {
 	// 	this.setContextKeys(e.focused, e.inputFocused);
 	// 	this.onFocusChanged?.(e.focused);

@@ -18,8 +18,8 @@ import { fontawesome } from "./common/fontawesome";
 import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
-	BaseState, ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, LogWriteCommandType,
-	onIpc, WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeStateType, UpdateConfigCommandType
+	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
+	onIpc, IpcWvFocusChangedParams, IpcWvReadyCommand, IpcDidChangeState, IpcUpdateConfigCommand
 } from "./common/ipc";
 
 
@@ -49,9 +49,9 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected onActiveChanged?(active: boolean): void;
 	protected onInitializing?(): Disposable[] | undefined;
 	protected onFocusChanged?(focused: boolean): void;
-	protected onMessageReceived?(e: IpcMessage): void;
+	protected onMessageReceived?(e: IIpcMessage): void;
 	protected onReady?(): void;
-    protected onViewFocusChanged?(e: WebviewFocusChangedParams): void;
+    protected onViewFocusChanged?(e: IpcWvFocusChangedParams): void;
 	protected onVisibilityChanged?(visible: boolean): void;
 	protected onWindowFocusChanged?(focused: boolean): void;
 	protected registerCommands?(): Disposable[];
@@ -294,7 +294,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
     };
 
 
-	notify<T extends IpcNotificationType<any>>(type: T, params: IpcMessageParams<T>, completionId?: string): Promise<boolean>
+	notify<T extends IpcNotification<any>>(type: T, params: IpcMessageParams<T>, completionId?: string): Promise<boolean>
 	{
 		return this.postMessage(
 		{
@@ -318,20 +318,20 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected onHtmlFinalizeBase = async(html: string, ...args: unknown[]): Promise<string> => this.onHtmlFinalize(html, ...args);
 
 
-	protected onMessageReceivedBase(e: IpcMessage): void
+	protected onMessageReceivedBase(e: IIpcMessage): void
 	{
 		switch (e.method)
 		{
-			case WebviewReadyCommandType.method:
-				onIpc(WebviewReadyCommandType, e, () => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
+			case IpcWvReadyCommand.method:
+				onIpc(IpcWvReadyCommand, e, () => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
 				break;
 
-			// case WebviewFocusChangedCommandType.method:
-			// 	onIpc(WebviewFocusChangedCommandType, e, params => this.onViewFocusChanged(params));
+			// case IpcWvFocusChangedCommand.method:
+			// 	onIpc(IpcWvFocusChangedCommand, e, params => this.onViewFocusChanged(params));
 			// 	break;
 
-			case ExecuteCommandType.method:
-				onIpc(ExecuteCommandType, e, params =>
+			case IpcExecCommand.method:
+				onIpc(IpcExecCommand, e, params =>
 				{
 					if (params.args) {
 						void executeCommand(params.command as Commands, ...params.args);
@@ -342,12 +342,12 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				});
 				break;
 
-			case UpdateConfigCommandType.method:
-				onIpc(UpdateConfigCommandType, e, params => void this.wrapper.config.update(params.key, params.value));
+			case IpcUpdateConfigCommand.method:
+				onIpc(IpcUpdateConfigCommand, e, params => void this.wrapper.config.update(params.key, params.value));
 				break;
 
-			case LogWriteCommandType.method:
-				onIpc(LogWriteCommandType, e, params => void this.wrapper.log.write("[WEBVIEW]: " + params.message, 1));
+			case IpcLogWriteCommand.method:
+				onIpc(IpcLogWriteCommand, e, params => void this.wrapper.log.write("[WEBVIEW]: " + params.message, 1));
 				break;
 
 			default:
@@ -360,13 +360,13 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected onSessionChanged = async (e: TeSessionChangeEvent): Promise<boolean> =>
 	{
 		const state = await this.getState();
-		return this.notify(DidChangeStateType, Object.assign(state as any, {
+		return this.notify(IpcDidChangeState, Object.assign(state as any, {
 			license: e.token
 		}));
 	};
 
 
-	private postMessage(message: IpcMessage): Promise<boolean>
+	private postMessage(message: IIpcMessage): Promise<boolean>
 	{
 		if (!this._view || !this._isReady || !this.visible) {
 			this.skippedNotify = !!this._view && !!this._isReady;

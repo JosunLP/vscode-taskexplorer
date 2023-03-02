@@ -5,7 +5,7 @@ import "../common/scss/page.scss";
 import "./parsing-report.css";
 
 import { TeWebviewApp } from "../webviewApp";
-import { ExecuteCommandType, IpcMessage, State } from "../../common/ipc";
+import { IpcExecCommand, IIpcMessage, State } from "../../common/ipc";
 
 
 export class ParsingReportWebviewApp extends TeWebviewApp<State>
@@ -20,14 +20,14 @@ export class ParsingReportWebviewApp extends TeWebviewApp<State>
     {
 		const action = target.dataset.action;
 		if (action) {
-			this.sendCommand(ExecuteCommandType, { command: action.slice(8) });
+			this.sendCommand(IpcExecCommand, { command: action.slice(8) });
 		}
 	}
 
 
 	protected override onMessageReceived(e: MessageEvent)
     {
-		const msg = e.data as IpcMessage;
+		const msg = e.data as IIpcMessage;
         this.log(`${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`);
 		const message = e.data; // JSON data from tests
         switch (message.command)
@@ -47,10 +47,10 @@ export class ParsingReportWebviewApp extends TeWebviewApp<State>
         }
 	}
 
-	private enterLicense = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.view.enterLicense"});
-    private getLicense = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.view.getLicense"});
-    private showReleaseNotes = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.view.releaseNotes.show"});
-    private showLicensePage = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.view.licensePage.show"});
+	private enterLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.enterLicense"});
+    private getLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.getLicense"});
+    private showReleaseNotes = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.releaseNotes.show"});
+    private showLicensePage = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.licensePage.show"});
 }
 
 new ParsingReportWebviewApp();

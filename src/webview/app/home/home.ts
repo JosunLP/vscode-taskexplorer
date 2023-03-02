@@ -5,7 +5,7 @@ import "./home.scss";
 
 import { Disposable } from "vscode";
 import { TeWebviewApp } from "../webviewApp";
-import { ExecuteCommandType, State } from "../../common/ipc";
+import { IpcExecCommand, State } from "../../common/ipc";
 
 
 export class HomeWebviewApp extends TeWebviewApp<State>
@@ -25,7 +25,7 @@ export class HomeWebviewApp extends TeWebviewApp<State>
     {
 		const action = target.dataset.action;
 		if (action) {
-			this.sendCommand(ExecuteCommandType, { command: action.slice(8) });
+			this.sendCommand(IpcExecCommand, { command: action.slice(8) });
 		}
 	}
 
@@ -61,11 +61,11 @@ export class HomeWebviewApp extends TeWebviewApp<State>
         }
 	}
 
-	private enterLicense = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.enterLicense"});
-    private getLicense = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.getLicense"});
-    private showReleaseNotes = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.view.releaseNotes.show"});
-    private showParsingReport = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.view.parsingReport.show"});
-    private showLicensePage = () => this.sendCommand(ExecuteCommandType, { command: "taskexplorer.view.licensePage.show"});
+	private enterLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.enterLicense"});
+    private getLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.getLicense"});
+    private showReleaseNotes = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.releaseNotes.show"});
+    private showParsingReport = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.parsingReport.show"});
+    private showLicensePage = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.licensePage.show"});
 }
 
 

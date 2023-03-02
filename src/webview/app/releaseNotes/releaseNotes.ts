@@ -6,7 +6,7 @@ import "./release-notes.css";
 
 import { TeWebviewApp } from "../webviewApp";
 import { Disposable, DOM } from "../common/dom";
-import { ExecuteCommandType, State } from "../../common/ipc";
+import { IpcExecCommand, State } from "../../common/ipc";
 // import { provideVSCodeDesignSystem, vsCodeButton } from "@vscode/webview-ui-toolkit";
 
 
@@ -38,7 +38,7 @@ export class ReleaseNotesWebviewApp extends TeWebviewApp<State>
     {
 		const action = target.dataset.action;
 		if (action) {
-			this.sendCommand(ExecuteCommandType, { command: action.slice(8) });
+			this.sendCommand(IpcExecCommand, { command: action.slice(8) });
 		}
 	}
 

@@ -4,7 +4,7 @@ import "./task-count.css";
 
 import { State } from "../../common/ipc";
 import { TeWebviewApp } from "../webviewApp";
-// import { ExecuteCommandType } from "../../common/ipc";
+// import { IpcExecCommand } from "../../common/ipc";
 
 
 export class TaskCountWebviewApp extends TeWebviewApp<State>
@@ -21,7 +21,7 @@ export class TaskCountWebviewApp extends TeWebviewApp<State>
     // {
 	// 	// const action = target.dataset.action;
 	// 	// if (action) {
-	// 	// 	this.sendCommand(ExecuteCommandType, { command: action.slice(8) });
+	// 	// 	this.sendCommand(IpcExecCommand, { command: action.slice(8) });
 	// 	// }
 	// }
 }

@@ -12,20 +12,20 @@ import {
     activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep, suiteFinished, testControl as tc, waitForTeIdle
 } from "../utils/utils";
 
-abstract class IpcMessageType<Params = void>
+abstract class IpcMessage<Params = void>
 {
 	_?: Params; // Required for type inferencing to work properly
 	constructor(public readonly method: string, public readonly overwriteable: boolean = false) {}
 }
-interface ExecuteCommandParams
+interface IpcExecCommandParams
 {
 	command: string;
 	args?: any[];
 }
-class IpcNotificationType<Params = void> extends IpcMessageType<Params> {}
+class IpcNotification<Params = void> extends IpcMessage<Params> {}
 
-const EchoCommandRequestType = new IpcNotificationType<ExecuteCommandParams>("command/echo");
-const EchoCustomCommandRequestType = new IpcNotificationType<ExecuteCommandParams>("command/custom/echo");
+const IpcEchoCommandRequest = new IpcNotification<IpcExecCommandParams>("command/echo");
+const IpcEchoCustomCommandRequest = new IpcNotification<IpcExecCommandParams>("command/custom/echo");
 
 
 let teWrapper: ITeWrapper;
@@ -84,14 +84,14 @@ suite("Webview Tests", () =>
         expect(teWrapper.homeView.description).to.not.be.undefined;
         await focusExplorerView(teWrapper);
         await sleep(5);
-        await teWrapper.homeView.notify(EchoCommandRequestType, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
+        await teWrapper.homeView.notify(IpcEchoCommandRequest, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
         await commands.executeCommand("taskexplorer.view.home.focus");
         await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
         await sleep(5);
-        await teWrapper.homeView.notify(EchoCommandRequestType, { command: "taskexplorer.view.parsingReport.show", args: [ Uri.file(getWsPath(".")) ] });
+        await teWrapper.homeView.notify(IpcEchoCommandRequest, { command: "taskexplorer.view.parsingReport.show", args: [ Uri.file(getWsPath(".")) ] });
         await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
         await sleep(5);
-        await teWrapper.homeView.notify(EchoCommandRequestType, { command: "taskexplorer.view.releaseNotes.show" });
+        await teWrapper.homeView.notify(IpcEchoCommandRequest, { command: "taskexplorer.view.releaseNotes.show" });
         await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
         await sleep(5);
         await commands.executeCommand("taskexplorer.view.home.refresh");
@@ -158,7 +158,7 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.fast + 1100);
         await commands.executeCommand("taskexplorer.view.home.focus");
-        await teWrapper.homeView.notify(EchoCustomCommandRequestType, { command: "taskexplorer.view.releaseNotes.show" });
+        await teWrapper.homeView.notify(IpcEchoCustomCommandRequest, { command: "taskexplorer.view.releaseNotes.show" });
         await sleep(550); // wait for webworker to respond, takes ~ 400-600ms
         endRollingCount(this);
     });
