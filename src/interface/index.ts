@@ -21,7 +21,7 @@ export type { ITaskExplorerApi } from "./ITaskExplorerApi";
 export type { ITeLicenseManager } from "./ITeLicenseManager";
 export type { ITaskExplorerProvider } from "./ITaskProvider";
 export type { IExternalProvider } from "./IExternalProvider";
-export type { TeSessionChangeEvent } from "./IAuthentication";
+export type { TeSessionChangeEvent, ISessionToken } from "./IAuthentication";
 export type { IStorage, StorageChangeEvent } from "./IStorage";
 export type { ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
 export type { ITeTaskManager, TaskMap } from "./ITeTaskManager";

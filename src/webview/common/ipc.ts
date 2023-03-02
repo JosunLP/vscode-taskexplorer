@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /**
- * A nice little set of definitions for communication between webview<->extension, all credit
- * to the author of the GitLens extension
+ * A nice little set of definitions for communication between webview<->extension, most credit
+ * gotta to the author of the GitLens extension, who has several nice little ideas in his project
  */
 
-import { IDictionary, ITeTask, TeTaskListType } from "../../interface";
 import { AuthenticationSession } from "vscode";
-import { ISessionToken } from "../../interface/IAuthentication";
+import { IDictionary, ITeTask, TeTaskListType, ISessionToken } from "../../../types/lib";
 
 export interface BaseState
 {

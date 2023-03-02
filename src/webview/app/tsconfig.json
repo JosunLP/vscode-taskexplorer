@@ -13,7 +13,7 @@
 	"include": [
 		"**/*",
 		"../../../types/lib/**/*",
-		"../shared/ipc.ts"
+		"../common/ipc.ts"
 	],
 	"exclude": [ "node_modules", "test" ]
 }
