@@ -52,7 +52,6 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 		return this._description;
 	}
 
-
 	set description(description: string | undefined)
 	{
 		this._description = description;
@@ -63,7 +62,6 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 
 
 	protected override includeBootstrap?(): SerializedState | Promise<SerializedState>;
-	// protected override includeBootstrap = async(): Promise<State | SerializedState> => this.getState() as State;
 
 
 	async resolveWebviewView(webviewView: WebviewView, _context: WebviewViewResolveContext, _token: CancellationToken): Promise<void>

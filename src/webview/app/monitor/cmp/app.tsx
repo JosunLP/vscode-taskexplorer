@@ -73,7 +73,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     override render = () =>
     {
         return (
-            <div className="te-tabs-container" onMouseDown={this.handleMouseDown.bind(this)}>
+            <div className="te-tabs-container" onMouseDown={this.handleMouseDown}>
                 <Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
                     <AppMenuButton
                         handleMouseDown={this.handleMenuMouseDown.bind(this)}
