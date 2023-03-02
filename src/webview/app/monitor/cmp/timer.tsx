@@ -19,6 +19,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
 {
     private interval: NodeJS.Timeout | undefined;
 
+
     constructor(props: ReactProps)
     {
         super(props);
@@ -27,12 +28,12 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
 
 
     override componentDidMount = () => this.startTimer();
+
+
     override componentWillUnmount = () => this.stopTimer();
-    override componentDidUpdate = (_props: any) =>
-    {
-        this.stopTimer();
-        this.startTimer();
-    };
+
+
+    override componentDidUpdate = (_props: any) => { this.stopTimer(); this.startTimer(); };
 
 
     override render = () =>
@@ -40,10 +41,10 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
         const tm = this.state.ms,
               tmM = Math.floor(tm / 1000 / 60),
               tmS = Math.floor(tm / 1000 % 60),
-              tmSF = tmS >= 10 ? tmS : "0" + tmS,
-              tmMS = Math.round(this.state.ms % 1000),
-              tmMSF = this.state.mode === "MM:SS:MS" ? "." + tmMS : "", // (tmMS >= 10 ? tmMS : "0" + tmMS) : "",
-              tmF = `${tmM}:${tmSF}${tmMSF}`;
+              tmSF = tmS >= 10 ? tmS + "" : "0" + tmS,
+              tmMS = tm % 1000,
+              tmMSF = tmMS >= 100 ? tmMS + "" : (tmMS > 10 ? "0" + tmMS : "00" + tmMS),
+              tmF = `${tmM}:${tmSF}${this.state.mode === "MM:SS:MS" ? "." + tmMSF : ""}`;
         return (
             <td className="te-monitor-control-timer-column">
                 <table cellPadding="0" cellSpacing="0">
