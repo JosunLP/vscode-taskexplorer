@@ -41,12 +41,14 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState, Re
     override render = () =>
     {
         const tm = this.state.ms,
+              msMode = this.state.mode.startsWith("MM:SS:MS"),
+              mssMode = this.state.mode === "MM:SS:MSS",
               tmM = Math.floor(tm / 1000 / 60),
               tmS = Math.floor(tm / 1000 % 60),
               tmSF = tmS >= 10 ? tmS + "" : "0" + tmS,
               tmMS = tm % 1000,
               tmMSF = tmMS >= 100 ? tmMS + "" : (tmMS > 10 ? "0" + tmMS : "00" + tmMS),
-              tmF = `${tmM}:${tmSF}${this.state.mode.startsWith("MM:SS:MS") ? "." + (this.state.mode === "MM:SS:MSS" ? tmMSF : tmMSF.slice(0, -1)) : ""}`;
+              tmF = `${tmM}:${tmSF}${msMode ? "." + (mssMode ? tmMSF : tmMSF.slice(0, -1)) : ""}`;
         return (
             <td className="te-monitor-control-timer-column">
                 <table cellPadding="0" cellSpacing="0">
