@@ -56,6 +56,19 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
+	protected override onFocuschanged = (focused: boolean): void =>
+	{
+		this.log(`onFocuschanged: focused=${focused}`);
+		if (!focused) {
+		// 	queueMicrotask(() => {
+		// 		if (this.app.state.menuVisible) {
+		// 			this.app.toggleMenu();
+		// 		}
+		// 	});
+		}
+	};
+
+
 	protected override onInitialize = (): void =>
 	{
 		this.log("onInitialize");

@@ -55,10 +55,10 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     };
 
 
-    private handleMouseDown = (_e: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+    private handleMouseDown = (_e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
         if (this.state.menuVisible) {
-            this.toggleMenu();
+            //  this.toggleMenu();
         }
     };
 

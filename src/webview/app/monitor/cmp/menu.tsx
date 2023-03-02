@@ -14,7 +14,7 @@ interface ReactProps
 {
     menuVisibility: boolean;
     timerMode: IMonitorAppTimerMode;
-    handleMouseDown: MouseEventHandler<HTMLDivElement>;
+    handleMouseDown: MouseEventHandler<HTMLElement>;
     log: (message: string, ...optionalParams: any[]) => void;
     updateConfig: (key: string, value?: any) => void;
 }
@@ -51,7 +51,11 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
             <tr>
                 <td className="te-monitor-flyout-menu-section-item-td">
                     <span className={this.getMenuItemIconCls(mode)} />
-                    <span className="te-monitor-flyout-menu-section-item" onClick={(_e) => this.onTimerModeClick(mode)}>{mode}</span>
+                    <span className="te-monitor-flyout-menu-section-item"
+                          onMouseDown={this.oMenuItemMouseDown}
+                          onClick={(e) => this.onTimerModeClick(mode, e)}>
+                        {mode}
+                    </span>
                 </td>
             </tr>
         );
@@ -100,12 +104,17 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
     };
 
 
-    private onTimerModeClick = (mode: IMonitorAppTimerMode) =>
+    private onTimerModeClick = (mode: IMonitorAppTimerMode, e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
+        this.log(`AppMenu.onTimerModeClick: ${mode}: current mode=${this.state.timerMode}`);
         if (mode !== this.state.timerMode) {
-            this.props.updateConfig("timerMode", "MM:SS");
+            this.props.updateConfig("timerMode", mode);
         }
+        this.props.handleMouseDown(e);
     };
+
+
+    private oMenuItemMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>) => e.stopPropagation();
 
 
     override render()

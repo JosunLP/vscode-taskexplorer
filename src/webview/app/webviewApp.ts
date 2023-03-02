@@ -5,8 +5,8 @@ import "./common/scss/te.scss";
 import { Disposable, DOM } from "./common/dom";
 import {
 	IpcCommandType, IpcMessage, IpcMessageParams, WebviewFocusChangedParams, WebviewFocusChangedCommandType,
-	WebviewReadyCommandType, ExecuteCommandType, onIpc, EchoCommandRequestType, LogWriteCommandType,
-	EchoCustomCommandRequestType, ExecuteCustomCommandType
+	WebviewReadyCommandType, ExecuteCommandType, onIpc, EchoCommandRequestType, EchoCustomCommandRequestType,
+	ExecuteCustomCommandType
 } from "../common/ipc";
 
 interface VsCodeApi {
@@ -24,6 +24,7 @@ export abstract class TeWebviewApp<State = undefined>
 	protected onInitialize?(): void;
 	protected onBind?(): Disposable[];
 	protected onDataActionClicked?(e: MouseEvent, target: HTMLElement): void;
+	protected onFocuschanged?(focused: boolean): void;
 	protected onInitialized?(): void;
 	protected onMessageReceived?(e: MessageEvent): void;
 	protected state: State;
@@ -114,15 +115,6 @@ export abstract class TeWebviewApp<State = undefined>
 		this._bindDisposables?.forEach(d => d.dispose());
 		this._bindDisposables = this.onBind?.() || [];
 
-		//
-		// GitLens author uses this debounce method here for some reason...  i'm sure it'll
-		// smack me in the fac one of these days and I'll find out why
-		//
-		// const sendWebviewFocusChangedCommand = debounce((params: WebviewFocusChangedParams) => {
-		// 	this.sendCommand(WebviewFocusChangedCommandType, params);
-		// }, 150);
-		const sendWebviewFocusChangedCommand = (p: WebviewFocusChangedParams) => this.sendCommand(WebviewFocusChangedCommandType, p);
-
 		if (this.onDataActionClicked) {
 			this._bindDisposables.push(
 				DOM.on("[data-action]", "click", this.onDataActionClicked.bind(this))
@@ -137,15 +129,16 @@ export abstract class TeWebviewApp<State = undefined>
 				{
 					this._focused = true;
 					this._inputFocused = inputFocused;
-					sendWebviewFocusChangedCommand({ focused: true, inputFocused });
+					this.onFocuschanged?.(this._focused);
+					this.sendCommand(WebviewFocusChangedCommandType, { focused: true, inputFocused });
 				}
 			}),
 			DOM.on(document, "focusout", () =>
 			{
 				if (this._focused !== false || this._inputFocused !== false) {
-					this._focused = false;
-					this._inputFocused = false;
-					sendWebviewFocusChangedCommand({ focused: false, inputFocused: false });
+					this._focused = this._inputFocused = false;
+					this.onFocuschanged?.(this._focused);
+					this.sendCommand(WebviewFocusChangedCommandType, { focused: false, inputFocused: false });
 				}
 			})
 		);
@@ -183,19 +176,12 @@ export abstract class TeWebviewApp<State = undefined>
 		const msg = e.data as IpcMessage;
         switch (msg.method)
         {
-			// case DidChangeLicenseType.method:
-			// 	onIpc(DidChangeLicenseType, msg, params => {
-			// 		(this.state as any).license = params.license;
-			// 		(this.state as any).session = params.session;
-			// 		this.updateState();
-			// 	});
-			// 	break;
 			case EchoCommandRequestType.method:       // Standard echo service for testing web->host commands in mocha tests
-				this.log(`WebviewAppBase[${this.appName}].onMessageReceived(${msg.id}): method=${msg.method}`);
+				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`);
                 onIpc(EchoCommandRequestType, msg, params => this.sendCommand(ExecuteCommandType, params));
                 break;
 			case EchoCustomCommandRequestType.method: // Standard echo service for testing web->host commands in mocha tests
-				this.log(`WebviewAppBase[${this.appName}].onMessageReceived(${msg.id}): method=${msg.method}`);
+				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`);
 				onIpc(EchoCustomCommandRequestType, msg, params => this.sendCommand(ExecuteCustomCommandType, params));
                 break;
 			default:
@@ -210,7 +196,7 @@ export abstract class TeWebviewApp<State = undefined>
 	protected sendCommand<T extends IpcCommandType<any>>(command: T, params: IpcMessageParams<T>)
 	{
 		const id = this.nextIpcId();
-		this.log(`${this.appName}.sendCommand(${id}): name=${command.method}`);
+		this.log(`sendCommand(${id}): name=${command.method}`);
 		this.postMessage({ id, method: command.method, params });
 	}
 
