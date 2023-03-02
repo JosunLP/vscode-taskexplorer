@@ -54,6 +54,7 @@
             "powershell": "powershell",
             "python": "c:\\Code\\python\\python.exe",
             "ruby": "ruby"
-        }
+        },
+        "taskexplorer.taskMonitor.timerMode": "MM:SS:MS"
     }
 }

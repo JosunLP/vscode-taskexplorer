@@ -126,7 +126,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
     };
 
 
-    override shouldComponentUpdate = (_nextProps: ReactProps, nextState: ReactState) =>
-        !this.rendered || nextState.tasks.length !== this.state.tasks.length;
+    override shouldComponentUpdate = (nextProps: ReactProps, nextState: ReactState) =>
+        !this.rendered || nextState.tasks.length !== this.state.tasks.length || nextProps.timerMode !== this.props.timerMode;
 
 }

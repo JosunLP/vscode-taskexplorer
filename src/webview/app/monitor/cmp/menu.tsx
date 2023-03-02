@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import React, { FocusEventHandler, MouseEventHandler } from "react";
+import React, { MouseEventHandler } from "react";
 import { IMonitorAppTimerMode } from "src/webview/common/ipc";
 
-interface ReactState
-{
-    timerMode: IMonitorAppTimerMode;
-}
+interface ReactState {}
 
 interface ReactSerializedState extends ReactState {}
 
@@ -106,8 +103,8 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
 
     private onTimerModeClick = (mode: IMonitorAppTimerMode, e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
-        this.log(`AppMenu.onTimerModeClick: ${mode}: current mode=${this.state.timerMode}`);
-        if (mode !== this.state.timerMode) {
+        this.log(`AppMenu.onTimerModeClick: ${mode}: current mode=${this.props.timerMode}`);
+        if (mode !== this.props.timerMode) {
             this.props.updateConfig("timerMode", mode);
         }
         this.props.handleMouseDown(e);
