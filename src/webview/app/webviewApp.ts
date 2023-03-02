@@ -25,7 +25,6 @@ export abstract class TeWebviewApp<State = undefined>
 	protected onInitialize?(): void;
 	protected onBind?(): Disposable[];
 	protected onDataActionClicked?(e: MouseEvent, target: HTMLElement): void;
-	// protected onFocusChanged?(focused: boolean): void;
 	protected onInitialized?(): void;
 	protected onMessageReceived?(e: MessageEvent): void;
 	protected state: State;
@@ -122,23 +121,6 @@ export abstract class TeWebviewApp<State = undefined>
 			);
 		}
 
-		//
-		// The GitLens author uses this debounce method when dealing with webview focus events
-		// for some reason...  I'm sure it'll  smack me in the face one of these days and I'll
-		// find out why. Leaving a comment.
-		// UPDATE 3/2/2023- Got smacked in the face tonight, I knew it, lol.  But Jesus, the Lodash
-		// debounce function increases the dev build by almost 2MB, and the production build by 200k,
-		// both ~60% size increases in the webview builds.  Um, no thanks.  Providing a basic
-		// debounce-er-er function free of app bloating, and works just fine.
-		//
-		const sendWebviewFocusChangedCommand = (params: WebviewFocusChangedParams) =>
-		{
-			debounce<void>((params: WebviewFocusChangedParams) => {
-				// this.onFocusChanged?.(params.focused);
-				this.sendCommand(WebviewFocusChangedCommandType, params);
-			}, 150, params);
-		};
-
 		this._bindDisposables.push(
 			DOM.on(document, "focusin", (e) =>
 			{
@@ -147,14 +129,15 @@ export abstract class TeWebviewApp<State = undefined>
 				{
 					this._focused = true;
 					this._inputFocused = inputFocused;
-					sendWebviewFocusChangedCommand({ focused: true, inputFocused });
+					debounce(p => this.sendCommand(WebviewFocusChangedCommandType, p), 150, { focused: true, inputFocused });
 				}
 			}),
 			DOM.on(document, "focusout", () =>
 			{
-				if (this._focused !== false || this._inputFocused !== false) {
+				if (this._focused !== false || this._inputFocused !== false)
+				{
 					this._focused = this._inputFocused = false;
-					sendWebviewFocusChangedCommand({ focused: false, inputFocused: false });
+					debounce(p => this.sendCommand(WebviewFocusChangedCommandType, p), 150, { focused: false, inputFocused: false });
 				}
 			})
 		);
