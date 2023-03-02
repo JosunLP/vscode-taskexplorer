@@ -73,8 +73,8 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	protected override includeFontAwesome = () => ({
 		animations: true, brands: true, duotone: true, regular: true, solid: true,
 		icons: [
-			"gear", "gears", "trophy-star", "thumbtack", "chevron-right", "minus", "bars",
-			"chevron-double-right", "clock", "arrow-up", "arrow-down", "turtle", "rabbit"
+			"gear", "gears", "trophy-star", "thumbtack", "chevron-right", "minus", "bars", "circle-xmark",
+			"chevron-double-right", "clock", "arrow-up", "arrow-down", "turtle", "rabbit", "refresh"
 		]
 	});
 

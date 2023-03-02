@@ -65,6 +65,7 @@
         "vsix",
         "vslauncher",
         "webpackte",
-        "wsfolder"
+        "wsfolder",
+        "xmark"
     ]
 }

@@ -65,7 +65,7 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     {
         if (this.state.run) {
             // eslint-disable-next-line @typescript-eslint/tslint/config
-            this.interval = setInterval(() => this.tick(), this.state.mode !== "MM:SS:MS" ? 1000 : 100);
+            this.interval = setInterval(() => this.tick(), this.state.mode !== "MM:SS:MS" ? 1000 : 27);
         }
     };
 
@@ -79,5 +79,5 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     };
 
 
-    private tick = () => this.setState(state => this.state.mode !== "MM:SS:MS" ? { ms: state.ms + 1000 } : { ms: state.ms + 100 });
+    private tick = () => this.setState(state => this.state.mode !== "MM:SS:MS" ? { ms: state.ms + 1000 } : { ms: state.ms + 27 });
 }
