@@ -59,65 +59,65 @@ export const onIpc = <T extends IpcMessage<any>>(type: T, msg: IIpcMessage, fn: 
  * IPC COMMAND TYPES : Webview -> Extension
  */
 
-export const IpcWvReadyCommand = new IpcCommand("webview/ready");
-
 export interface IpcWvFocusChangedParams
 {
 	focused: boolean;
 	inputFocused: boolean;
 }
-export const IpcWvFocusChangedCommand = new IpcCommand<IpcWvFocusChangedParams>("webview/focus");
 
 export interface IpcExecCommandParams
 {
 	command: string;
 	args?: any[];
 }
-export const IpcExecCommand = new IpcCommand<IpcExecCommandParams>("command/execute");
-export const IpcExecCustomCommand = new IpcCommand<IpcExecCommandParams>("command/custom/execute");
 
 export interface IpcUpdateConfigCommandParams
 {
 	key: string;
 	value?: any;
 }
-export const IpcUpdateConfigCommand = new IpcCommand<IpcUpdateConfigCommandParams>("config/update");
 
 export interface IpcLogWriteCommandParams
 {
 	message: string;
 	value?: any;
 }
+
+export const IpcReadyCommand = new IpcCommand("webview/ready");
+export const IpcFocusChangedCommand = new IpcCommand<IpcWvFocusChangedParams>("webview/focus");
+export const IpcExecCommand = new IpcCommand<IpcExecCommandParams>("command/execute");
+export const IpcExecCustomCommand = new IpcCommand<IpcExecCommandParams>("command/custom/execute");
+export const IpcUpdateConfigCommand = new IpcCommand<IpcUpdateConfigCommandParams>("config/update");
 export const IpcLogWriteCommand = new IpcCommand<IpcLogWriteCommandParams>("log/write");
 
 /**
  * IPC NOTIFICATION TYPES : Extension -> Webview
  */
 
-export interface DidChangeStateParams extends State {};
+export interface IpcStateChangedParams extends State {};
 
-export interface DidChangeEnabledParams
+export interface IpcEnabledChangedParams
 {
 	enabled: boolean;
 }
 
-export interface DidChangeLicenseParams {
+export interface IpcLicenseChangedParams {
 	license?: ISessionToken;
 	session?: AuthenticationSession;
 	isLicensed: boolean;
 }
 
-export interface DidChangeConfigurationParams
+export interface IpcConfigChangedParams
 {
 	timerMode: IMonitorAppTimerMode;
 }
 
-export const IpcDidChangeEnabled = new IpcNotification<DidChangeEnabledParams>("enabled/change");
-export const IpcDidChangeConfig = new IpcNotification<DidChangeConfigurationParams>("configuration/change");
+export const IpcEnabledChangedMsg = new IpcNotification<IpcEnabledChangedParams>("enabled/change");
+export const IpcConfigChangedMsg = new IpcNotification<IpcConfigChangedParams>("configuration/change");
 export const IpcEchoCommandRequest = new IpcNotification<IpcExecCommandParams>("command/echo");
 export const IpcEchoCustomCommandRequest = new IpcNotification<IpcExecCommandParams>("command/custom/echo");
-export const IpcDidChangeLicense = new IpcNotification<DidChangeLicenseParams>("license/change");
-export const IpcDidChangeState = new IpcNotification<DidChangeStateParams>("state/change");
+export const IpcLicenseChangedMsg = new IpcNotification<IpcLicenseChangedParams>("license/change");
+export const IpcStateChangedMsg = new IpcNotification<IpcStateChangedParams>("state/change");
 
 //
 // TASK MONITOR APP
@@ -147,22 +147,11 @@ export interface MonitorAppState extends State
 
 export interface MonitorAppSerializedState extends MonitorAppState {}
 
-export interface DidChangeTaskStatusParams
-{
-	task: IIpcTask;
-};
+export interface IpcTaskChangedParams { task: IIpcTask; list?: IIpcTaskListType };
+export interface IpcTasksChangedParams { tasks: IIpcTask[]; list: IIpcTaskListType };
 
-export interface DidChangeTaskParams
-{
-	tasks: IIpcTask[];
-};
-
-export const IpcDidChangeAllTasks = new IpcNotification<DidChangeTaskParams>("tasks/change");
-export const IpcDidChangeFamousTasks = new IpcNotification<DidChangeTaskParams>("tasks/change/famous");
-export const IpcDidChangeLastTasks = new IpcNotification<DidChangeTaskParams>("tasks/change/lasttasks");
-export const IpcDidChangeTaskStatus = new IpcNotification<DidChangeTaskStatusParams>("tasks/change/status");
-export const IpcDidChangeFavoriteTasks = new IpcNotification<DidChangeTaskParams>("tasks/change/favorites");
-export const IpcDidChangeRunningTasks = new IpcNotification<DidChangeTaskParams>("tasks/change/runningtasks");
+export const IpcTasksChangedMsg = new IpcNotification<IpcTasksChangedParams>("tasks/change");
+export const IpcTaskChangedMsg = new IpcNotification<IpcTaskChangedParams>("tasks/change/status");
 
 interface IDebounceParams { fn: (...args: any[]) => any; start: number; args: any[] }
 const _debounceDict: IIpcDictionary<IDebounceParams> = {};

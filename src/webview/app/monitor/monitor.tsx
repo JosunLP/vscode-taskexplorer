@@ -12,9 +12,8 @@ import { TeWebviewApp } from "../webviewApp";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
 import {
-	IpcDidChangeFamousTasks, IpcDidChangeFavoriteTasks, IpcDidChangeLastTasks, IpcDidChangeRunningTasks,
-	DidChangeStateParams, IpcDidChangeState, IpcDidChangeTaskStatus, IpcDidChangeAllTasks, IIpcMessage,
-	onIpc, MonitorAppState, DidChangeTaskStatusParams, IpcExecCommand, IpcDidChangeConfig, IpcUpdateConfigCommand
+	IpcStateChangedParams, IpcStateChangedMsg, IpcTaskChangedMsg, IpcTasksChangedMsg, IIpcMessage,
+	onIpc, MonitorAppState, IpcTaskChangedParams, IpcExecCommand, IpcConfigChangedMsg, IpcUpdateConfigCommand
 } from "../../common/ipc";
 
 
@@ -50,7 +49,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 		this.sendCommand(IpcUpdateConfigCommand, { key: `taskMonitor.${key}`, value });
 
 
-	private handleTaskStateChangeEvent = (params: DidChangeTaskStatusParams): void =>
+	private handleTaskChangeEvent = (params: IpcTaskChangedParams): void =>
 	{
 		const tIdx = this.state.tasks.findIndex(t => params.task.treeId === t.treeId);
 		if (tIdx !== -1) {
@@ -70,7 +69,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 		const state = this.getState();
 		if (state) {
 			console.log("!!!");
-			console.log("!!! VSCODE GETSTATE() ");
+			console.log("!!! VSCODE GETSTATE()");
 			console.log(state);
 			console.log("!!!");
 		}
@@ -101,56 +100,28 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 		const msg = e.data as IIpcMessage;
 		switch (msg.method)
 		{
-			case IpcDidChangeAllTasks.method:
-				onIpc(IpcDidChangeAllTasks, msg, params => {
+			case IpcTasksChangedMsg.method:
+				onIpc(IpcTasksChangedMsg, msg, params => {
 					Object.assign(this.state, { ...params });
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method}`);
-					this.app.setTasks("all", this.state.tasks);
+					this.app.setTasks(params.list, this.state.tasks);
 					this.setState(this.state);
 				});
 				break;
-			case IpcDidChangeLastTasks.method:
-				onIpc(IpcDidChangeLastTasks, msg, params => {
-					this.state.last = [ ...params.tasks ];
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.last);
-					this.app.setTasks("last", this.state.last);
-				});
-				break;
-			case IpcDidChangeRunningTasks.method:
-				onIpc(IpcDidChangeRunningTasks, msg, params => {
-					this.state.running = [ ...params.tasks ];
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.running);
-					this.app.setTasks("running", this.state.running);
-				});
-				break;
-			case IpcDidChangeFamousTasks.method:
-				onIpc(IpcDidChangeFamousTasks, msg, params => {
-					this.state.famous = [ ...params.tasks ];
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.famous);
-					this.app.setTasks("famous", this.state.famous);
-				});
-				break;
-			case IpcDidChangeFavoriteTasks.method:
-				onIpc(IpcDidChangeFavoriteTasks, msg, params => {
-					this.state.favorites = [ ...params.tasks ];
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.favorites);
-					this.app.setTasks("favorites", this.state.favorites);
-				});
-				break;
-			case IpcDidChangeTaskStatus.method:
-				onIpc(IpcDidChangeTaskStatus, msg, params => {
+			case IpcTaskChangedMsg.method:
+				onIpc(IpcTaskChangedMsg, msg, params => {
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
-					this.handleTaskStateChangeEvent(params);
+					this.handleTaskChangeEvent(params);
 				});
 				break;
-			case IpcDidChangeState.method:
-				onIpc(IpcDidChangeState, msg, params => {
+			case IpcStateChangedMsg.method:
+				onIpc(IpcStateChangedMsg, msg, params => {
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
 					this.processBaseStateChange(params);
 				});
 				break;
-			case IpcDidChangeConfig.method:
-				onIpc(IpcDidChangeConfig, msg, params => {
+			case IpcConfigChangedMsg.method:
+				onIpc(IpcConfigChangedMsg, msg, params => {
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
 					this.app.setTimerMode(params.timerMode);
 				});
@@ -161,7 +132,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
-	private processBaseStateChange = (params: DidChangeStateParams): void =>
+	private processBaseStateChange = (params: IpcStateChangedParams): void =>
     {
 		this.log("processBaseStateChange");
 		Object.assign(this.state, { ...params  });

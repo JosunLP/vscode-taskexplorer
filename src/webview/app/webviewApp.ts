@@ -4,8 +4,8 @@ import "./common/scss/te.scss";
 
 import { Disposable, DOM } from "./common/dom";
 import {
-	IpcCommand, IIpcMessage, IpcMessageParams, IpcWvFocusChangedParams, IpcWvFocusChangedCommand,
-	IpcWvReadyCommand, IpcExecCommand, onIpc, IpcEchoCommandRequest, IpcEchoCustomCommandRequest,
+	IpcCommand, IIpcMessage, IpcMessageParams, IpcWvFocusChangedParams, IpcFocusChangedCommand,
+	IpcReadyCommand, IpcExecCommand, onIpc, IpcEchoCommandRequest, IpcEchoCustomCommandRequest,
 	IpcExecCustomCommand,
 	debounce
 } from "../common/ipc";
@@ -60,7 +60,7 @@ export abstract class TeWebviewApp<State = undefined>
 				disposables.push(DOM.on(window, "message", this.onMessageReceived.bind(this)));
 			}
 			disposables.push(DOM.on(window, "message", this._onMessageReceived.bind(this)));
-			this.sendCommand(IpcWvReadyCommand, undefined);
+			this.sendCommand(IpcReadyCommand, undefined);
 			this.onInitialized?.();
 		});
 
@@ -129,7 +129,7 @@ export abstract class TeWebviewApp<State = undefined>
 				{
 					this._focused = true;
 					this._inputFocused = inputFocused;
-					debounce(p => this.sendCommand(IpcWvFocusChangedCommand, p), 150, { focused: true, inputFocused });
+					debounce(p => this.sendCommand(IpcFocusChangedCommand, p), 150, { focused: true, inputFocused });
 				}
 			}),
 			DOM.on(document, "focusout", () =>
@@ -137,7 +137,7 @@ export abstract class TeWebviewApp<State = undefined>
 				if (this._focused !== false || this._inputFocused !== false)
 				{
 					this._focused = this._inputFocused = false;
-					debounce(p => this.sendCommand(IpcWvFocusChangedCommand, p), 150, { focused: false, inputFocused: false });
+					debounce(p => this.sendCommand(IpcFocusChangedCommand, p), 150, { focused: false, inputFocused: false });
 				}
 			})
 		);

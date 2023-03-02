@@ -19,7 +19,7 @@ import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
-	onIpc, IpcWvFocusChangedParams, IpcWvReadyCommand, IpcDidChangeState, IpcUpdateConfigCommand
+	onIpc, IpcWvFocusChangedParams, IpcReadyCommand, IpcStateChangedMsg, IpcUpdateConfigCommand
 } from "./common/ipc";
 
 
@@ -322,12 +322,12 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	{
 		switch (e.method)
 		{
-			case IpcWvReadyCommand.method:
-				onIpc(IpcWvReadyCommand, e, () => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
+			case IpcReadyCommand.method:
+				onIpc(IpcReadyCommand, e, () => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
 				break;
 
-			// case IpcWvFocusChangedCommand.method:
-			// 	onIpc(IpcWvFocusChangedCommand, e, params => this.onViewFocusChanged(params));
+			// case IpcFocusChangedCommand.method:
+			// 	onIpc(IpcFocusChangedCommand, e, params => this.onViewFocusChanged(params));
 			// 	break;
 
 			case IpcExecCommand.method:
@@ -360,7 +360,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected onSessionChanged = async (e: TeSessionChangeEvent): Promise<boolean> =>
 	{
 		const state = await this.getState();
-		return this.notify(IpcDidChangeState, Object.assign(state as any, {
+		return this.notify(IpcStateChangedMsg, Object.assign(state as any, {
 			license: e.token
 		}));
 	};
