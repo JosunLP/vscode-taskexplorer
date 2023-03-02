@@ -3,7 +3,7 @@ import { ITaskDefinition } from "./ITaskDefinition";
 import { ITeTrackedUsageCount, ITaskRuntimeInfo } from "./ITeUsage";
 
 
-export type TeTaskListType = "none" | "last" | "running" | "favorites" | "famous" | "all";
+export type TeTaskListType = "last" | "running" | "favorites" | "famous" | "all";
 
 export interface ITeTask
 {

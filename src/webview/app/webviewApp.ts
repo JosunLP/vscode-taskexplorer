@@ -181,7 +181,6 @@ export abstract class TeWebviewApp<State = undefined>
 	private _onMessageReceived(e: MessageEvent): void
     {
 		const msg = e.data as IpcMessage;
-        this.log(`WebviewAppBase[${this.appName}].onMessageReceived(${msg.id}): method=${msg.method}`);
         switch (msg.method)
         {
 			// case DidChangeLicenseType.method:
@@ -192,9 +191,11 @@ export abstract class TeWebviewApp<State = undefined>
 			// 	});
 			// 	break;
 			case EchoCommandRequestType.method:       // Standard echo service for testing web->host commands in mocha tests
+				this.log(`WebviewAppBase[${this.appName}].onMessageReceived(${msg.id}): method=${msg.method}`);
                 onIpc(EchoCommandRequestType, msg, params => this.sendCommand(ExecuteCommandType, params));
                 break;
 			case EchoCustomCommandRequestType.method: // Standard echo service for testing web->host commands in mocha tests
+				this.log(`WebviewAppBase[${this.appName}].onMessageReceived(${msg.id}): method=${msg.method}`);
 				onIpc(EchoCustomCommandRequestType, msg, params => this.sendCommand(ExecuteCustomCommandType, params));
                 break;
 			default:

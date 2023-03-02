@@ -20,7 +20,7 @@ import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	BaseState, ExecuteCommandType, IpcMessage, IpcMessageParams, IpcNotificationType, onIpc, LogWriteCommandType,
-	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeStateType
+	/* WebviewFocusChangedCommandType, */ WebviewFocusChangedParams, WebviewReadyCommandType, DidChangeStateType, UpdateConfigCommandType
 } from "./common/ipc";
 
 
@@ -337,12 +337,18 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 					if (params.args) {
 						void executeCommand(params.command as Commands, ...params.args);
 					}
-					else { void executeCommand(params.command as Commands); }
+					else {
+						void executeCommand(params.command as Commands);
+					}
 				});
 				break;
 
+			case UpdateConfigCommandType.method:
+				onIpc(UpdateConfigCommandType, e, params => void this.wrapper.config.update(params.key, params.value));
+				break;
+
 			case LogWriteCommandType.method:
-				onIpc(LogWriteCommandType, e, params => this.wrapper.log.write("[WEBVIEW]: " + params.message, 1));
+				onIpc(LogWriteCommandType, e, params => void this.wrapper.log.write("[WEBVIEW]: " + params.message, 1));
 				break;
 
 			default:

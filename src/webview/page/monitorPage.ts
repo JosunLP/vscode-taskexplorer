@@ -68,27 +68,44 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 
 	protected override includeBootstrap = (): Promise<MonitorAppState> => this.getState();
+
+
 	protected override includeFontAwesome = () => ({
 		animations: true, brands: true, duotone: true, regular: true, solid: true,
 		icons: [
-			"gear", "gears", "trophy-star", "thumbtack", "chevron-right", "chevron-left", "minus", "bars",
-			"chevron-double-left", "chevron-double-right", "clock", "arrow-up", "arrow-down", "turtle", "rabbit"
+			"gear", "gears", "trophy-star", "thumbtack", "chevron-right", "minus", "bars",
+			"chevron-double-right", "clock", "arrow-up", "arrow-down", "turtle", "rabbit"
 		]
 	});
 
 
 	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) => this.notify(DidChangeTaskStatusType, { task: e.task });
+
+
 	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFamousTasksType, { tasks: e.tasks });
+
+
 	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeFavoriteTasksType, { tasks: e.tasks });
+
+
 	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(DidChangeLastTasksType, { tasks: e.tasks });
+
+
 	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(DidChangeRunningTasksType, { tasks: e.tasks });
+
+
     private onAllTasksChanged = async (_e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, await this.getState());
+
+
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
+
+
 	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(DidChangeAllTasksType, { tasks: e.tasks });
+
 
 	private async onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (e.affectsConfiguration("taskexplorer." + ConfigKeys.TaskMonitor_TimerMode))
+		if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.TaskMonitor_TimerMode}`))
 		{
 			return this.notify(DidChangeConfigurationType, {
 				timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode)
@@ -96,6 +113,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 		}
 		return false;
 	}
+
 
 	protected override onVisibilityChanged = (_visible: boolean) =>
 	{

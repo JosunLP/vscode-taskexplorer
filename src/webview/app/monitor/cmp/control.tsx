@@ -19,6 +19,8 @@ interface ReactState
 	task: IIpcTask;
 }
 
+interface ReactSerializedState extends ReactState {}
+
 interface ReactProps
 {
     task: IIpcTask;
@@ -29,12 +31,12 @@ interface ReactProps
 }
 
 
-export class TeTaskControl extends React.Component<ReactProps, ReactState>
+export class TeTaskControl extends React.Component<ReactProps, ReactState, ReactSerializedState>
 {
     private timerEl;
     private counter = 0;
     private buttons: ITeAppButtons;
-    private interval: NodeJS.Timeout | undefined;
+    private animationTimeout: NodeJS.Timeout | undefined;
     private log: (message: string, ...optionalParams: any[]) => void;
     private executeCommand: (command: string, task: IIpcTask) => void;
     private timerState = {
@@ -49,7 +51,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     {
         super(props);
         this.log = props.log;
-        this.log("TeTaskControl.constructor: task=" + props.task.name);
+        this.log(`TeTaskControl.constructor: task=${props.task.name}`);
         this.executeCommand = props.executeCommand;
         this.timerEl = React.createRef<TeReactTaskTimer>();
         this.buttons = {
@@ -74,8 +76,8 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     private clickTerminal = () => this.executeCommand("openTerminal", this.state.task);
 
 
-    // override componentDidMount = () => this.startTimeChangeTimer();
-    override componentWillUnmount = () => this.stopTimeChangeTimer();
+    // override componentDidMount = () => this.startTimeChangeTimeout();
+    override componentWillUnmount = () => this.stopTimeChangeTimeout();
     // override componentDidUpdate = (props: any) => this.log("TeTaskControl.componentDidUpdate", props.task, this.state.task);
 
     override shouldComponentUpdate(_nextProps: ReactProps, _nextState: ReactState)
@@ -265,7 +267,10 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
         // better or a correct way to handle, but havent figured it out yet.  Look into again.
         //
         this.log("TeTaskControl.render: task=" + this.state.task.name);
-        this.timerState.run = this.state.task.running;
+        Object.assign(this.timerState, {
+            run: this.state.task.running,
+            milliseconds: !this.state.task.running ? this.state.task.runTime.last : 0
+        });
         return (
             <div className="te-monitor-control-container" key={`te-id-task-inner-control-${++this.counter}`}>
                 <table width="100%" cellPadding="0" cellSpacing="0">
@@ -329,7 +334,11 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
                             />
                             <TeReactTaskTimer
                                 ref={this.timerEl}
-                                state={this.timerState}
+                                state={{
+                                    run: this.state.task.running,
+                                    mode: this.props.timerMode,
+                                    ms: !this.state.task.running ? this.state.task.runTime.last : 0
+                                }}
                             />
                         </tr>
                     </tbody>
@@ -349,9 +358,10 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     };
 
 
-    setTask = (task: IIpcTask) => this.setState(state =>
+    setTask = (task: IIpcTask) => this.setState(_state =>
     {
-        this.startTimeChangeTimer();
+        this.log(`TeTaskControl.setTask: id=${task.treeId}`);
+        this.startTimeChangeTimeout();
         return { task: { ...task }, animateChangedTimeIcons: !task.running };
     });
 
@@ -359,21 +369,20 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState>
     setTimerMode = (mode: IMonitorAppTimerMode) => this.timerEl.current?.setState({ mode });
 
 
-    private startTimeChangeTimer = () =>
+    private startTimeChangeTimeout = () =>
     {
-        this.stopTimeChangeTimer();
-        // eslint-disable-next-line @typescript-eslint/tslint/config
-        this.interval = setInterval(() =>
+        this.stopTimeChangeTimeout();
+        this.animationTimeout = setTimeout(() =>
             this.setState({ animateChangedTimeIcons: false }), 5000);
             // this.setState({ averageDown: false, averageUp: false, newFastestTime: false, newSlowestTime: false }), 5000);
     };
 
 
-    private stopTimeChangeTimer = () =>
+    private stopTimeChangeTimeout = () =>
     {
-        if (this.interval) {
-            clearInterval(this.interval);
-            this.interval = undefined;
+        if (this.animationTimeout) {
+            clearTimeout(this.animationTimeout);
+            this.animationTimeout = undefined;
         }
     };
 

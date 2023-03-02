@@ -40,11 +40,11 @@ button {
 }
 
 #te-monitor-flyout-menu-id {
-	width: 230px;
-  	height: 150px;
+	width: 270px;
+  	height: 175px;
 	background-color: var(--vscode-menu-background);
 	position: fixed;
-	top: 0;
+	top: 3px;
 	left: 0;
 	transition: transform .3s
 				cubic-bezier(0, .52, 0, 1);
@@ -60,16 +60,17 @@ button {
 }
    
 #te-monitor-flyout-menu-id.show {
-	transform: translate3d(calc(100vw - 230px), 0, 0);
+	transform: translate3d(calc(100vw - 273px), 0, 0);
 	overflow: hidden;
 }
 
 .te-monitor-flyout-menu-title-td {
 	padding-bottom: 10px;
+	vertical-align: middle;
 }
 
-.te-monitor-flyout-menu-title {
-	font-size: 22px;
+.te-title.te-monitor-flyout-menu-title {
+	font-size: 32px;
 }
 
 /*
@@ -86,11 +87,11 @@ button {
 
 .te-monitor-flyout-menu-section {
 	font-weight: bold;
-	font-size: 16px;
+	font-size: 20px;
 }
 
-.te-monitor-flyout-menu-section-items {
-	font-size: 14px;
+.te-monitor-flyout-menu-section-item-table {
+	font-size: 18px;
 }
 
 .te-monitor-flyout-menu-section-item-td  {
@@ -102,9 +103,42 @@ button {
 	text-decoration: none;
 }
 
-.te-monitor-flyout-menu-section-item:hover {
-	text-decoration: underline;
-	cursor: pointer;
+// @import '../common/scss/background-gradient.scss';
+
+.te-monitor-flyout-menu-section-item:hover
+{ 
+    cursor: pointer;
+    font-weight: bold;
+    // border-right: solid 0px transparent;
+    // border-top: solid 0px transparent;
+    // border-left: solid 0px transparent;
+    // color: if(lightness($body-background-color) < 50, mix(#000, $base-color, 2%), mix(#fff, $base-color, 11%));
+   //  border-bottom: solid 2px var(--vscode-button-background) !important;
+	// border-style: solid;
+	// border-image: linear-gradient(var(--vscode-button-background), transparent) 1;
+	// border-bottom:0;
+    // border-width: 0px 0 3px 0px;
+    // border-style: solid;
+    // -webkit-border-image: 
+    //   -webkit-gradient(linear, 100% 0, 0 0, from(var(--vscode-button-background)), to(transparent)) 1 100%;
+    // -webkit-border-image: 
+    //   -webkit-linear-gradient(right, var(--vscode-button-background), transparent) 1 100%;
+    // -moz-border-image:
+    //   -moz-linear-gradient(right, var(--vscode-button-background), transparent) 1 100%;  
+    // -o-border-image:
+    //   -o-linear-gradient(right, var(--vscode-button-background), transparent) 1 100%;
+    // border-image:
+    //   linear-gradient(to right, var(--vscode-button-background), transparent) 1 100%; 
+    // @include background-gradient(mix($body-background-color, $neutral-color, 66%), color-stops(mix($body-background-color, $neutral-color, 86%), mix($body-background-color,$neutral-color, 98%)), bottom);
+    // @include background-gradient($panel-body-background-color, (mix($panel-body-background-color, $te-navigator-highlight-color, 74%), mix($panel-body-background-color, $te-navigator-highlight-color, 84%), mix($panel-body-background-color, $te-navigator-highlight-color, 92%), mix($panel-body-background-color, $te-navigator-highlight-color, 97%), $panel-body-background-color), bottom);
+}
+
+.te-monitor-flyout-menu-section-item-td:hover .te-monitor-flyout-menu-section-item-icon {
+	color: var(--vscode-button-hoverBackground);
+}
+
+.te-monitor-flyout-menu-section-item-icon {
+	width: 22px;
 }
 
 .te-monitor-menu-button-container {

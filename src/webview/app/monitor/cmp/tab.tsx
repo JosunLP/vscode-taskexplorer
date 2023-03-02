@@ -11,6 +11,7 @@ interface ControlRefs
 
 interface ReactProps
 {
+    name: string;
     tasks: IIpcTask[];
     webroot: string;
     timerMode: IMonitorAppTimerMode;
@@ -20,23 +21,29 @@ interface ReactProps
 
 interface ReactState { tasks: IIpcTask[] }
 
+interface ReactSerializedState extends ReactState {}
 
-export class TeTaskTab extends React.Component<ReactProps, ReactState>
+
+export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSerializedState>
 {
+    private name: string;
     private counter = 0;
     private rendered = false;
     private children: JSX.Element[];
     private controlRefs: ControlRefs;
+    private timerMode: IMonitorAppTimerMode;
     private log: (message: string, ...optionalParams: any[]) => void;
 
 
     constructor(props: ReactProps)
     {
         super(props);
+        this.name = props.name;
         this.log = props.log;
-        this.log("TeTaskTab.constructor: task count=" + props.tasks.length);
+        this.log(`TeTaskTab.${this.name}.constructor: task count=${props.tasks.length}`);
         this.children = [];
         this.controlRefs = {};
+        this.timerMode = props.timerMode;
         this.state = {
             tasks: props.tasks
         };
@@ -46,7 +53,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState>
     override render()
     {
         this.rendered = true;
-        this.log("TeTaskTab.render: task count=" + this.state.tasks.length);
+        this.log(`TeTaskTab.${this.name}.render: task count=${this.state.tasks.length}`);
         this.controlRefs = {};
         this.children.splice(0);
         this.state.tasks.forEach((t: IIpcTask) =>
@@ -69,10 +76,10 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState>
     }
 
 
-    setTask = (task: IIpcTask, isRunningTab?: boolean) =>
+    setTask = (task: IIpcTask) =>
     {
-        this.log("TeTaskTab.render: isRunningTab=" + isRunningTab);
-        if (isRunningTab !== true)
+        this.log(`TeTaskTab.${this.name}.setTask: id=${task.treeId}`);
+        if (this.name !== "running")
         {
             const r  = this.controlRefs[task.treeId];
             if (r) {
@@ -84,14 +91,16 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState>
                 //     if (c.props.task.treeId === task.treeId) {
                 //         // console.log("RESET KEY)");
                 //         // c.key = `te-id-task-control-${++this.counter}`;
-                //         // Object.assign(c.props, { task: { ...task }});
+                //         // Object.assign(c.props, { task: { ...task }});z
                 //     }
                 // });
+                this.log(`   TeTaskTab.${this.name}.setTask.controlRef.setTask`);
                 r.current?.setTask(task);
             }
         }
-        else // if (isRunningTab === true)
+        else
         {
+            this.log(`   TeTaskTab.${this.name}.setTask.updateRunningTasks`);
             if (task.running)
             {
                 this.state.tasks.push(task);
@@ -111,9 +120,16 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState>
     setTasks = (tasks: IIpcTask[]) => this.setState({ tasks });
 
 
-    setTimerMode = (mode: IMonitorAppTimerMode) => { console.log("set timer mode: " + mode); }; // this.setState({ timerMode: mode });
+    setTimerMode = (mode: IMonitorAppTimerMode) =>
+    {
+        this.timerMode = mode;
+        React.Children.forEach(this.children, c => {
+            this.controlRefs[c.props.task.treeId].current?.setTimerMode(mode);
+        });
+    };
 
 
-    override shouldComponentUpdate = (_nextProps: ReactProps, nextState: ReactState) => !this.rendered || nextState.tasks.length !== this.state.tasks.length;
+    override shouldComponentUpdate = (_nextProps: ReactProps, nextState: ReactState) =>
+        !this.rendered || nextState.tasks.length !== this.state.tasks.length;
 
 }

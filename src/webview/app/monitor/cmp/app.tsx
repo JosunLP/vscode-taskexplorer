@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import React from "react";
-import { TeTaskTab } from "./tab";
-import { IIpcTask, MonitorAppState } from "../../../common/ipc";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { AppMenu } from "./menu";
+import { TeTaskTab } from "./tab";
 import { AppMenuButton } from "./menuButton";
+import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { IIpcTask, IIpcTaskListType, IMonitorAppTimerMode, MonitorAppSerializedState, MonitorAppState } from "../../../common/ipc";
 
+type ITabDictionary<T> = { [id in IIpcTaskListType]: T; };
 
-interface ITeAppTabs {
+interface ITeAppTabs extends ITabDictionary<React.RefObject<TeTaskTab>>
+{
     all: React.RefObject<TeTaskTab>;
     famous: React.RefObject<TeTaskTab>;
     favorites: React.RefObject<TeTaskTab>;
-    recent: React.RefObject<TeTaskTab>;
+    last: React.RefObject<TeTaskTab>;
     running: React.RefObject<TeTaskTab>;
 };
 
@@ -20,10 +22,11 @@ interface ReactProps
     state: MonitorAppState;
     executeCommand: (command: string, task: IIpcTask) => void;
     log: (message: string, ...optionalParams: any[]) => void;
+    updateConfig: (key: string, value?: any) => void;
 }
 
 
-export class App extends React.Component<ReactProps, MonitorAppState>
+export class App extends React.Component<ReactProps, MonitorAppState, MonitorAppSerializedState>
 {
     private log: (message: string, ...optionalParams: any[]) => void;
     private tabs: ITeAppTabs;
@@ -36,7 +39,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
             all: React.createRef<TeTaskTab>(),
             famous: React.createRef<TeTaskTab>(),
             favorites: React.createRef<TeTaskTab>(),
-            recent: React.createRef<TeTaskTab>(),
+            last: React.createRef<TeTaskTab>(),
             running: React.createRef<TeTaskTab>()
         };
         this.state = {
@@ -45,31 +48,18 @@ export class App extends React.Component<ReactProps, MonitorAppState>
     }
 
 
-    get allTab() {
-        return this.tabs.all.current as TeTaskTab;
-    }
-
-    get famousTab() {
-        return this.tabs.famous.current as TeTaskTab;
-    }
-
-    get favoritesTab() {
-        return this.tabs.favorites.current as TeTaskTab;
-    }
-
-    get recentTab() {
-        return this.tabs.recent.current as TeTaskTab;
-    }
-
-    get runningTab() {
-        return this.tabs.running.current as TeTaskTab;
-    }
-
-
-    private handleMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+    private handleMenuMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
         this.toggleMenu();
         e.stopPropagation();
+    };
+
+
+    private handleMouseDown = (_e: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+    {
+        if (this.state.menuVisible) {
+            this.toggleMenu();
+        }
     };
 
 
@@ -82,14 +72,17 @@ export class App extends React.Component<ReactProps, MonitorAppState>
     override render = () =>
     {
         return (
-            <div className="te-tabs-container">
+            <div className="te-tabs-container" onMouseDown={this.handleMouseDown}>
                 <Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
                     <AppMenuButton
-                        handleMouseDown={this.handleMouseDown.bind(this)}
+                        handleMouseDown={this.handleMenuMouseDown.bind(this)}
                     />
                     <AppMenu
-                        handleMouseDown={this.handleMouseDown.bind(this)}
+                        log={this.log}
+                        handleMouseDown={this.handleMenuMouseDown.bind(this)}
+                        updateConfig = {this.props.updateConfig}
                         menuVisibility={!!this.state.menuVisible}
+                        timerMode={this.state.timerMode}
                     />
                     <TabList>
                         <Tab className="react-tabs__tab te-tab-recent">Recent</Tab>
@@ -101,7 +94,8 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
-                            ref={this.tabs.recent}
+                            name="last"
+                            ref={this.tabs.last}
                             tasks={this.props.state.last}
                             timerMode={this.state.timerMode}
                             webroot={this.props.state.webroot}
@@ -111,6 +105,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
+                            name="running"
                             ref={this.tabs.running}
                             tasks={this.props.state.running}
                             timerMode={this.state.timerMode}
@@ -121,6 +116,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
+                            name="favorites"
                             ref={this.tabs.favorites}
                             tasks={this.props.state.favorites}
                             timerMode={this.state.timerMode}
@@ -131,6 +127,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
+                            name="famous"
                             ref={this.tabs.famous}
                             tasks={this.props.state.famous}
                             timerMode={this.state.timerMode}
@@ -141,6 +138,7 @@ export class App extends React.Component<ReactProps, MonitorAppState>
                     <TabPanel>
                         <TeTaskTab
                             log={this.log}
+                            name="all"
                             ref={this.tabs.all}
                             tasks={this.props.state.tasks}
                             timerMode={this.state.timerMode}
@@ -154,10 +152,29 @@ export class App extends React.Component<ReactProps, MonitorAppState>
     };
 
 
-    toggleMenu = () => {
-        this.setState(state => ({
-            menuVisible: !state.menuVisible
-        }));
+    setTask = (task: IIpcTask) =>
+    {
+        this.tabs.all.current?.setTask(task);
+        this.tabs.famous.current?.setTask(task);
+        this.tabs.favorites.current?.setTask(task);
+        this.tabs.last.current?.setTask(task);
+        this.tabs.running.current?.setTask(task);
     };
+
+
+    setTasks = (listType: IIpcTaskListType, tasks: IIpcTask[]) => void this.tabs[listType]?.current?.setTasks(tasks);
+
+
+    setTimerMode = (mode: IMonitorAppTimerMode) => { if (this.state.timerMode !== mode) { this.setState({ timerMode: mode }); }};
+    // {
+    //     this.tabs.all.current?.setTimerMode(mode);
+    //     this.tabs.famous.current?.setTimerMode(mode);
+    //     this.tabs.favorites.current?.setTimerMode(mode);
+    //     this.tabs.last.current?.setTimerMode(mode);
+    //     this.tabs.running.current?.setTimerMode(mode);
+    // };
+
+
+    toggleMenu = () => this.setState(state => ({ menuVisible: !state.menuVisible }));
 
 }

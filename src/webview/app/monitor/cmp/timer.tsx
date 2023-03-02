@@ -6,8 +6,7 @@ interface ReactState
 {
     run: boolean;
     mode: IMonitorAppTimerMode;
-    seconds: number;
-    milliseconds: number;
+    ms: number;
 }
 
 interface ReactProps
@@ -38,11 +37,11 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
 
     override render = () =>
     {
-        const tm = this.state.seconds,
-              tmM = Math.floor(tm / 60),
-              tmS = Math.floor(tm % 60),
+        const tm = this.state.ms,
+              tmM = Math.floor(tm / 1000 / 60),
+              tmS = Math.floor(tm / 1000 % 60),
               tmSF = tmS >= 10 ? tmS : "0" + tmS,
-              tmMS = this.state.milliseconds % 1000,
+              tmMS = Math.round(this.state.ms % 1000),
               tmMSF = this.state.mode === "MM:SS:MS" ? "." + tmMS : "", // (tmMS >= 10 ? tmMS : "0" + tmMS) : "",
               tmF = `${tmM}:${tmSF}${tmMSF}`;
         return (
@@ -79,8 +78,5 @@ export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
     };
 
 
-    private tick = () => this.setState(state =>
-        (this.state.mode !== "MM:SS:MS" ? { seconds: state.seconds + 1, milliseconds: 0 } :
-                                          { seconds: state.seconds + 0.1, milliseconds: state.milliseconds + 100 }));
-
+    private tick = () => this.setState(state => this.state.mode !== "MM:SS:MS" ? { ms: state.ms + 1000 } : { ms: state.ms + 100 });
 }

@@ -14,7 +14,7 @@ import { createRoot } from "react-dom/client";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
 	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeAllTasksType, IpcMessage,
-	onIpc, MonitorAppState, IIpcTask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType, DidChangeConfigurationType
+	onIpc, MonitorAppState, IIpcTask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType, DidChangeConfigurationType, UpdateConfigCommandType
 } from "../../common/ipc";
 
 
@@ -38,9 +38,11 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
 
     private executeCommand = (command: string, task: IIpcTask): void =>
-    {
 		this.sendCommand(ExecuteCommandType, { command: `taskexplorer.${command}`, args: [ task ] });
-    };
+
+
+    private executeUpdateConfig = (key: string, value?: any): void =>
+		this.sendCommand(UpdateConfigCommandType, { key: `taskMonitor.${key}`, value });
 
 
 	private handleTaskStateChangeEvent = (params: DidChangeTaskStatusParams): void =>
@@ -50,10 +52,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 			this.state.tasks.splice(tIdx, 1, params.task);
 			this.setState(this.state);
 		}
-		this.app.recentTab.setTask(params.task);
-		this.app.runningTab.setTask(params.task, true);
-		this.app.favoritesTab.setTask(params.task);
-		this.app.famousTab.setTask(params.task);
+		this.app.setTask(params.task);
 	};
 
 
@@ -84,11 +83,10 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				state={this.state}
 				log={this.log.bind(this)}
 				executeCommand={this.executeCommand.bind(this)}
+				updateConfig={this.executeUpdateConfig.bind(this)}
 			/>
         );
-        disposables.push({
-            dispose: () => root.unmount()
-        });
+        disposables.push({ dispose: () => root.unmount() });
 		return disposables;
 	};
 
@@ -102,6 +100,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				onIpc(DidChangeAllTasksType, msg, params => {
 					Object.assign(this.state, { ...params });
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method}`);
+					this.app.setTasks("all", this.state.tasks);
 					this.setState(this.state);
 				});
 				break;
@@ -109,28 +108,28 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				onIpc(DidChangeLastTasksType, msg, params => {
 					this.state.last = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.last);
-					this.app.recentTab.setTasks(this.state.last);
+					this.app.setTasks("last", this.state.last);
 				});
 				break;
 			case DidChangeRunningTasksType.method:
 				onIpc(DidChangeRunningTasksType, msg, params => {
 					this.state.running = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.running);
-					this.app.runningTab.setTasks(this.state.running);
+					this.app.setTasks("running", this.state.running);
 				});
 				break;
 			case DidChangeFamousTasksType.method:
 				onIpc(DidChangeFamousTasksType, msg, params => {
 					this.state.famous = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.famous);
-					this.app.famousTab.setTasks(this.state.famous);
+					this.app.setTasks("famous", this.state.famous);
 				});
 				break;
 			case DidChangeFavoriteTasksType.method:
 				onIpc(DidChangeFavoriteTasksType, msg, params => {
 					this.state.favorites = [ ...params.tasks ];
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} tasks=`, this.state.favorites);
-					this.app.favoritesTab.setTasks(this.state.favorites);
+					this.app.setTasks("favorites", this.state.favorites);
 				});
 				break;
 			case DidChangeTaskStatusType.method:
@@ -148,11 +147,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 			case DidChangeConfigurationType.method:
 				onIpc(DidChangeConfigurationType, msg, params => {
 					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
-					this.app.allTab.setTimerMode(params.timerMode);
-					this.app.famousTab.setTimerMode(params.timerMode);
-					this.app.favoritesTab.setTimerMode(params.timerMode);
-					this.app.recentTab.setTimerMode(params.timerMode);
-					this.app.runningTab.setTimerMode(params.timerMode);
+					this.app.setTimerMode(params.timerMode);
 				});
 				break;
 			default:

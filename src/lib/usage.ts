@@ -112,7 +112,7 @@ export class Usage implements ITeUsage, Disposable
 	private getEmptyITask = (): ITeTask =>
     ({
         name: "N/A",
-        listType: "none",
+        listType: "all",
         pinned: false,
         running: false,
         source: "N/A",
@@ -130,19 +130,23 @@ export class Usage implements ITeUsage, Disposable
             last90Days: 0,
             total: 0
         },
-        runTime: {
-            average: 0,
-            fastest: 0,
-            first: 0,
-            last: 0,
-            slowest: 0,
-            avgDown: false,
-            avgUp: false,
-            lastDown: false,
-            lastUp: false,
-            newFast: false,
-            newSlow: false
-        }
+        runTime: this.getEmptyITaskRuntimeInfo()
+    });
+
+
+    private getEmptyITaskRuntimeInfo = (): ITaskRuntimeInfo => (
+    {
+        average: 0,
+        fastest: 0,
+        first: 0,
+        last: 0,
+        slowest: 0,
+        avgDown: false,
+        avgUp: false,
+        lastDown: false,
+        lastUp: false,
+        newFast: false,
+        newSlow: false
     });
 
 
@@ -193,19 +197,7 @@ export class Usage implements ITeUsage, Disposable
         if (stats.runtimes[treeId]) {
             return pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
         }
-        return {
-            average: 0,
-            fastest: 0,
-            first: 0,
-            last: 0,
-            slowest: 0,
-            avgDown: false,
-            avgUp: false,
-            lastDown: false,
-            lastUp: false,
-            newFast: false,
-            newSlow: false
-        };
+        return this.getEmptyITaskRuntimeInfo();
     };
 
 
