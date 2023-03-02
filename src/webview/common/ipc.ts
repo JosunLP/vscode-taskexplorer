@@ -168,3 +168,23 @@ export const DidChangeLastTasksType = new IpcNotificationType<DidChangeTaskParam
 export const DidChangeTaskStatusType = new IpcNotificationType<DidChangeTaskStatusParams>("tasks/change/status");
 export const DidChangeFavoriteTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/favorites");
 export const DidChangeRunningTasksType = new IpcNotificationType<DidChangeTaskParams>("tasks/change/runningtasks");
+
+interface IDebounceParams { fn: (...args: any[]) => any; start: number; args: any[] }
+const _debounceDict: IIpcDictionary<IDebounceParams> = {};
+export const debounce = <T>(fn: (...args: any[]) => T, wait: number, ...args: any[]) => new Promise<T|void>(async(resolve) =>
+{
+	if (!_debounceDict[fn.name])
+	{
+		_debounceDict[fn.name] = { fn, start: Date.now(), args };
+		setTimeout((p: IDebounceParams) =>
+		{
+			resolve(p.fn.call(this, ...p.args));
+			delete _debounceDict[fn.name];
+		},
+		wait, _debounceDict[fn.name]);
+	}
+	else {
+		Object.assign(_debounceDict[fn.name], { args });
+		setTimeout(() => resolve(), Date.now() - _debounceDict[fn.name].start);
+	}
+});

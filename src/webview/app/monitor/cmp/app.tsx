@@ -48,18 +48,19 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     }
 
 
+    private handleMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+    {
+        if (this.state.menuVisible) {
+            this.toggleMenu();
+            // e.stopPropagation();
+        }
+    };
+
+
     private handleMenuMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
         this.toggleMenu();
         e.stopPropagation();
-    };
-
-
-    private handleMouseDown = (_e: React.MouseEvent<HTMLElement, MouseEvent>) =>
-    {
-        if (this.state.menuVisible) {
-            //  this.toggleMenu();
-        }
     };
 
 
@@ -72,7 +73,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     override render = () =>
     {
         return (
-            <div className="te-tabs-container" onMouseDown={this.handleMouseDown}>
+            <div className="te-tabs-container" onMouseDown={this.handleMouseDown.bind(this)}>
                 <Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
                     <AppMenuButton
                         handleMouseDown={this.handleMenuMouseDown.bind(this)}

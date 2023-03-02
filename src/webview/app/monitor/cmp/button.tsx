@@ -13,6 +13,8 @@ interface ReactProps
 
 export class TeTaskButton extends React.Component<ReactProps, { hidden: boolean}>
 {
+    private rendered = false;
+
     constructor(props: ReactProps)
     {
         super(props);
@@ -23,6 +25,7 @@ export class TeTaskButton extends React.Component<ReactProps, { hidden: boolean}
 
     override render()
     {
+        this.rendered = true;
         return (
             <td className={`te-monitor-control-button-column${this.props.lastButton ? " te-monitor-control-button-column-last" : ""}`} hidden={this.state.hidden}>
                 <button
@@ -33,4 +36,8 @@ export class TeTaskButton extends React.Component<ReactProps, { hidden: boolean}
             </td>
         );
     }
+
+
+    override shouldComponentUpdate = () => !this.rendered;
+
 }

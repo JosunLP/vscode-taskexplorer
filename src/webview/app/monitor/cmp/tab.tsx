@@ -31,7 +31,6 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
     private rendered = false;
     private children: JSX.Element[];
     private controlRefs: ControlRefs;
-    private timerMode: IMonitorAppTimerMode;
     private log: (message: string, ...optionalParams: any[]) => void;
 
 
@@ -43,7 +42,6 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
         this.log(`TeTaskTab.${this.name}.constructor: task count=${props.tasks.length}`);
         this.children = [];
         this.controlRefs = {};
-        this.timerMode = props.timerMode;
         this.state = {
             tasks: props.tasks
         };
@@ -122,7 +120,6 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
 
     setTimerMode = (mode: IMonitorAppTimerMode) =>
     {
-        this.timerMode = mode;
         React.Children.forEach(this.children, c => {
             this.controlRefs[c.props.task.treeId].current?.setTimerMode(mode);
         });

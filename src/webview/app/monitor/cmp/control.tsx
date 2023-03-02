@@ -39,12 +39,6 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
     private animationTimeout: NodeJS.Timeout | undefined;
     private log: (message: string, ...optionalParams: any[]) => void;
     private executeCommand: (command: string, task: IIpcTask) => void;
-    private timerState = {
-        run: false,
-        mode: this.props.timerMode,
-        seconds: 0,
-        milliseconds: 0
-    };
 
 
     constructor(props: ReactProps)
@@ -267,10 +261,6 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
         // better or a correct way to handle, but havent figured it out yet.  Look into again.
         //
         this.log("TeTaskControl.render: task=" + this.state.task.name);
-        Object.assign(this.timerState, {
-            run: this.state.task.running,
-            milliseconds: !this.state.task.running ? this.state.task.runTime.last : 0
-        });
         return (
             <div className="te-monitor-control-container" key={`te-id-task-inner-control-${++this.counter}`}>
                 <table width="100%" cellPadding="0" cellSpacing="0">
