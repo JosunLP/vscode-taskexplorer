@@ -46,7 +46,7 @@ $fa-stack-width         : ($fa-fw-width * 2) !default;
 $fa-stack-z-index       : auto !default;
 
 $fa-font-display        : block !default;
-$fa-font-path           : "../font" !default;
+$fa-font-path           : "../webfonts" !default;
 
 $fa-var-0: \30;
 $fa-var-1: \31;
@@ -60,6 +60,8 @@ $fa-var-8: \38;
 $fa-var-9: \39;
 $fa-var-circle-chevron-right: \f138;
 $fa-var-chevron-circle-right: \f138;
+$fa-var-circle-minus: \f056;
+$fa-var-minus-circle: \f056;
 $fa-var-chevrons-left: \f323;
 $fa-var-chevron-double-left: \f323;
 $fa-var-bars: \f0c9;
@@ -76,6 +78,9 @@ $fa-var-user-friends: \f500;
 $fa-var-unlock: \f09c;
 $fa-var-circle-chevron-up: \f139;
 $fa-var-chevron-circle-up: \f139;
+$fa-var-arrows-rotate: \f021;
+$fa-var-refresh: \f021;
+$fa-var-sync: \f021;
 $fa-var-trophy-star: \f2eb;
 $fa-var-trophy-alt: \f2eb;
 $fa-var-rabbit: \f708;
@@ -101,8 +106,13 @@ $fa-var-cogs: \f085;
 $fa-var-circle-chevron-left: \f137;
 $fa-var-chevron-circle-left: \f137;
 $fa-var-turtle: \f726;
+$fa-var-circle-plus: \f055;
+$fa-var-plus-circle: \f055;
 $fa-var-chevrons-right: \f324;
 $fa-var-chevron-double-right: \f324;
+$fa-var-circle-xmark: \f057;
+$fa-var-times-circle: \f057;
+$fa-var-xmark-circle: \f057;
 $fa-var-notdef: \e1fe;
 
 $fa-var-react: \f41b;
@@ -122,6 +132,8 @@ $fa-icons: (
   "9": $fa-var-9,
   "circle-chevron-right": $fa-var-circle-chevron-right,
   "chevron-circle-right": $fa-var-chevron-circle-right,
+  "circle-minus": $fa-var-circle-minus,
+  "minus-circle": $fa-var-minus-circle,
   "chevrons-left": $fa-var-chevrons-left,
   "chevron-double-left": $fa-var-chevron-double-left,
   "bars": $fa-var-bars,
@@ -138,6 +150,9 @@ $fa-icons: (
   "unlock": $fa-var-unlock,
   "circle-chevron-up": $fa-var-circle-chevron-up,
   "chevron-circle-up": $fa-var-chevron-circle-up,
+  "arrows-rotate": $fa-var-arrows-rotate,
+  "refresh": $fa-var-refresh,
+  "sync": $fa-var-sync,
   "trophy-star": $fa-var-trophy-star,
   "trophy-alt": $fa-var-trophy-alt,
   "rabbit": $fa-var-rabbit,
@@ -163,8 +178,13 @@ $fa-icons: (
   "circle-chevron-left": $fa-var-circle-chevron-left,
   "chevron-circle-left": $fa-var-chevron-circle-left,
   "turtle": $fa-var-turtle,
+  "circle-plus": $fa-var-circle-plus,
+  "plus-circle": $fa-var-plus-circle,
   "chevrons-right": $fa-var-chevrons-right,
   "chevron-double-right": $fa-var-chevron-double-right,
+  "circle-xmark": $fa-var-circle-xmark,
+  "times-circle": $fa-var-times-circle,
+  "xmark-circle": $fa-var-xmark-circle,
   "notdef": $fa-var-notdef,
 );
 

@@ -95,3 +95,11 @@ icons:
       - solid
   - minus:
       - solid
+  - arrows-rotate:
+      - regular
+  - circle-xmark:
+      - regular
+  - circle-minus:
+      - regular
+  - circle-plus:
+      - regular
