@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import React, { MouseEventHandler } from "react";
-import { IIpcTask, IMonitorAppTimerMode } from "src/webview/common/ipc";
+import { IMonitorAppTimerMode } from "src/webview/common/ipc";
 
 interface ReactState {}
 

@@ -103,3 +103,10 @@ icons:
       - regular
   - circle-plus:
       - regular
+  - memo-pad:
+      - regular
+  - badge-check:
+      - regular
+      - duotone
+  - badger-honey:
+      - regular

@@ -82,7 +82,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
             if (r) {
                 const t  = this.state.tasks.findIndex(t => t.treeId === task.treeId);
                 if (t !== -1) {
-                    this.state.tasks.splice(t, 1, task);
+                    this.state.tasks.splice(t, 1, { ...task  });
                 }
                 // React.Children.forEach(this.children, c => {
                 //     if (c.props.task.treeId === task.treeId) {

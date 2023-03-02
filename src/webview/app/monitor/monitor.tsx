@@ -14,19 +14,23 @@ import { createRoot } from "react-dom/client";
 import {
 	DidChangeFamousTasksType, DidChangeFavoriteTasksType, DidChangeLastTasksType, DidChangeRunningTasksType,
 	DidChangeStateParams, DidChangeStateType, DidChangeTaskStatusType, DidChangeAllTasksType, IpcMessage,
-	onIpc, MonitorAppState, IIpcTask, DidChangeTaskStatusParams, IpcCommandType, ExecuteCommandType, DidChangeConfigurationType, UpdateConfigCommandType
+	onIpc, MonitorAppState, DidChangeTaskStatusParams, ExecuteCommandType, DidChangeConfigurationType, UpdateConfigCommandType
 } from "../../common/ipc";
 
 
+/**
+ * @class TaskMonitorWebviewApp
+ * @since 3.0.0
+ *
+ * `this.state` is populated in the the base TeWebviewApp super constructor, passed from
+ * the extension using `window.bootstrap`.
+ */
 class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 {
 	private appRef: React.RefObject<App>;
 
     constructor()
-    {   //
-		// `this.state` is populated in the the TeWebviewApp (super) constructor,
-		// read from window.bootstrap
-		//
+    {
 		super("TaskMonitorWebviewApp");
 		this.appRef = React.createRef<App>();
 	}

@@ -4,7 +4,9 @@ import { AppMenu } from "./menu";
 import { TeTaskTab } from "./tab";
 import { AppMenuButton } from "./menuButton";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { IIpcTask, IIpcTaskListType, IMonitorAppTimerMode, MonitorAppSerializedState, MonitorAppState } from "../../../common/ipc";
+import {
+    IIpcTask, IIpcTaskListType, IMonitorAppTimerMode, MonitorAppSerializedState, MonitorAppState
+} from "../../../common/ipc";
 
 type ITabDictionary<T> = { [id in IIpcTaskListType]: T; };
 

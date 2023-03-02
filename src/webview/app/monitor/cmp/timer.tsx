@@ -9,13 +9,15 @@ interface ReactState
     ms: number;
 }
 
+interface ReactSerializedState extends ReactState {}
+
 interface ReactProps
 {
     state: ReactState;
 }
 
 
-export class TeReactTaskTimer extends React.Component<ReactProps, ReactState>
+export class TeReactTaskTimer extends React.Component<ReactProps, ReactState, ReactSerializedState>
 {
     private interval: NodeJS.Timeout | undefined;
 
