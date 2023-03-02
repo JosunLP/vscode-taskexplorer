@@ -20,7 +20,7 @@ interface ITeAppTabs extends ITabDictionary<React.RefObject<TeTaskTab>>
 interface ReactProps
 {
     state: MonitorAppState;
-    executeCommand: (command: string, task: IIpcTask) => void;
+    executeCommand: (command: string, ...args: any[]) => void;
     log: (message: string, ...optionalParams: any[]) => void;
     updateConfig: (key: string, value?: any) => void;
 }
@@ -81,9 +81,10 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
                     <AppMenu
                         log={this.log}
                         handleMouseDown={this.handleMenuMouseDown.bind(this)}
-                        updateConfig = {this.props.updateConfig}
                         menuVisibility={!!this.state.menuVisible}
                         timerMode={this.state.timerMode}
+                        updateConfig = {this.props.updateConfig}
+                        executeCommand={this.props.executeCommand}
                     />
                     <TabList>
                         <Tab className="react-tabs__tab te-tab-recent">Recent</Tab>

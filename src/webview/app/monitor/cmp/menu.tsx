@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import React, { MouseEventHandler } from "react";
-import { IMonitorAppTimerMode } from "src/webview/common/ipc";
+import { IIpcTask, IMonitorAppTimerMode } from "src/webview/common/ipc";
 
 interface ReactState {}
 
@@ -12,6 +12,7 @@ interface ReactProps
     menuVisibility: boolean;
     timerMode: IMonitorAppTimerMode;
     handleMouseDown: MouseEventHandler<HTMLElement>;
+    executeCommand: (command: string, ...args: any[]) => void;
     log: (message: string, ...optionalParams: any[]) => void;
     updateConfig: (key: string, value?: any) => void;
 }
@@ -33,7 +34,7 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
     }
 
 
-    private getMenuItemIconCls = (mode: IMonitorAppTimerMode) =>
+    private getTimerModeMenuItemIconCls = (mode: IMonitorAppTimerMode) =>
     {
         if (this.props.timerMode === mode) {
             return "far fa-chevron-double-right te-monitor-flyout-menu-section-item-icon";
@@ -42,12 +43,44 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
     };
 
 
+    private getGeneralSection = () =>
+    {
+        return (
+            <table><tbody>
+                <tr>
+                    <td className="te-monitor-flyout-menu-section">
+                        General
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table className="te-monitor-flyout-menu-section-item-table">
+                            <tbody>
+                            <tr>
+                                <td className="te-monitor-flyout-menu-section-item-td">
+                                    <span className="far fa-refresh te-monitor-flyout-menu-section-item-icon" />
+                                    <span className="te-monitor-flyout-menu-section-item"
+                                        onMouseDown={this.oMenuItemMouseDown}
+                                        onClick={this.onRefreshClick}>
+                                        Refresh
+                                    </span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody></table>
+        );
+    };
+
+
     private getTimerModeItem = (mode: IMonitorAppTimerMode) =>
     {
         return (
             <tr>
                 <td className="te-monitor-flyout-menu-section-item-td">
-                    <span className={this.getMenuItemIconCls(mode)} />
+                    <span className={this.getTimerModeMenuItemIconCls(mode)} />
                     <span className="te-monitor-flyout-menu-section-item"
                           onMouseDown={this.oMenuItemMouseDown}
                           onClick={(e) => this.onTimerModeClick(mode, e)}>
@@ -101,6 +134,14 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
     };
 
 
+    private onRefreshClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+    {
+        this.log("AppMenu.onRefreshClick");
+        this.props.executeCommand("refresh");
+        this.props.handleMouseDown(e);
+    };
+
+
     private onTimerModeClick = (mode: IMonitorAppTimerMode, e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
         this.log(`AppMenu.onTimerModeClick: ${mode}: current mode=${this.props.timerMode}`);
@@ -121,6 +162,7 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerial
         return (
             <div id="te-monitor-flyout-menu-id" onMouseDown={this.props.handleMouseDown} className={cls}>
                 {this.getTitleHeader()}
+                {this.getGeneralSection()}
                 {this.getTimerModeSection()}
             </div>
         );

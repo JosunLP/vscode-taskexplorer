@@ -37,8 +37,8 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	}
 
 
-    private executeCommand = (command: string, task: IIpcTask): void =>
-		this.sendCommand(ExecuteCommandType, { command: `taskexplorer.${command}`, args: [ task ] });
+    private executeCommand = (command: string, ...args: any[]): void =>
+		this.sendCommand(ExecuteCommandType, { command: `taskexplorer.${command}`, args });
 
 
     private executeUpdateConfig = (key: string, value?: any): void =>
