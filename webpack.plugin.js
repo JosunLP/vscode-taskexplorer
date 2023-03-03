@@ -424,16 +424,6 @@ const wpPlugin =
 				typescript: {
 					configFile: path.join(env.basePath, "tsconfig.json"),
 				}
-				// eslint: {
-				// 	enabled: true,
-				// 	files: path.join(env.basePath, "**", "*.ts?(x)"),
-				// 	options: {
-				// 		cache: true,
-				// 		cacheLocation: path.join(__dirname, ".eslintcache", "webviews/"),
-				// 		cacheStrategy: "content",
-				// 		fix: mode !== "production",
-				// 	},
-				// }
 			})
 		}
 		else
@@ -444,22 +434,7 @@ const wpPlugin =
 				formatter: "basic",
 				typescript: {
 					configFile: path.join(env.basePath, env.build === "extension_web" ? "tsconfig.browser.json" : "tsconfig.json"),
-				},
-				// @ts-ignore
-				eslint: {
-					enabled: true,
-					files: "src/**/*.ts?(x)",
-					options: {
-						cache: true,
-						cacheLocation: path.join(__dirname, ".eslintcache/", env.build === "extension_web" ? "browser/" : ""),
-						cacheStrategy: "content",
-						fix: wpConfig.mode !== "production",
-						overrideConfigFile: path.join(
-							__dirname,
-							env.build === "extension_web" ? ".eslintrc.browser.js" : ".eslintrc.js",
-						),
-					},
-			 	}
+				}
 			})
 		}
 		if (!plugin) {

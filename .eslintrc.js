@@ -36,10 +36,12 @@ module.exports = {
         "eslint-plugin-no-null",
         "eslint-plugin-import",
         "eslint-plugin-prefer-arrow",
+        "anti-trojan-source",
         "@typescript-eslint",
         "@typescript-eslint/tslint"
     ],
     "rules": {
+		"anti-trojan-source/no-bidi": "error",
         "@typescript-eslint/adjacent-overload-signatures": "warn",
         "@typescript-eslint/array-type": [
             "warn",
