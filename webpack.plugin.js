@@ -238,7 +238,9 @@ const wpPlugin =
 				});
 			}
 
-			plugin = new CopyPlugin({ patterns: patterns });
+			if (patterns.length > 0) {
+				plugin = new CopyPlugin({ patterns: patterns });
+			}
 		}
 		if (!plugin) {
 			plugin = /** @type {CopyPlugin} */(/** @type {unknown} */(undefined));
@@ -418,6 +420,10 @@ const wpPlugin =
 			plugin = new ForkTsCheckerPlugin(
 			{
 				async: false,
+				formatter: "basic",
+				typescript: {
+					configFile: path.join(env.basePath, "tsconfig.json"),
+				}
 				// eslint: {
 				// 	enabled: true,
 				// 	files: path.join(env.basePath, "**", "*.ts?(x)"),
@@ -427,38 +433,34 @@ const wpPlugin =
 				// 		cacheStrategy: "content",
 				// 		fix: mode !== "production",
 				// 	},
-				// },
-				formatter: "basic",
-				typescript: {
-					configFile: path.join(env.basePath, "tsconfig.json"),
-				}
+				// }
 			})
 		}
 		else
 		{
-			// plugin = new ForkTsCheckerPlugin({});
-			// plugin = new ForkTsCheckerPlugin({
-			// 	async: false,
-			// 	// @ts-ignore
-			// 	eslint: {
-			// 		enabled: true,
-			// 		files: "src/**/*.ts?(x)",
-			// 		options: {
-			// 			cache: true,
-			// 			cacheLocation: path.join(__dirname, ".eslintcache/", wpConfig.target === "webworker" ? "browser/" : ""),
-			// 			cacheStrategy: "content",
-			// 			fix: wpConfig.mode !== "production",
-			// 			overrideConfigFile: path.join(
-			// 				__dirname,
-			// 				wpConfig.target === "webworker" ? ".eslintrc.browser.json" : ".eslintrc.json",
-			// 			),
-			// 		},
-			//  },
-			// 	formatter: "basic",
-			// 	typescript: {
-			// 		configFile: path.join(__dirname, wpConfig.target === "webworker" ? "tsconfig.browser.json" : "tsconfig.json"),
-			// 	}
-			// })
+			plugin = new ForkTsCheckerPlugin(
+			{
+				async: false,
+				formatter: "basic",
+				typescript: {
+					configFile: path.join(env.basePath, env.build === "extension_web" ? "tsconfig.browser.json" : "tsconfig.json"),
+				},
+				// @ts-ignore
+				eslint: {
+					enabled: true,
+					files: "src/**/*.ts?(x)",
+					options: {
+						cache: true,
+						cacheLocation: path.join(__dirname, ".eslintcache/", env.build === "extension_web" ? "browser/" : ""),
+						cacheStrategy: "content",
+						fix: wpConfig.mode !== "production",
+						overrideConfigFile: path.join(
+							__dirname,
+							env.build === "extension_web" ? ".eslintrc.browser.js" : ".eslintrc.js",
+						),
+					},
+			 	}
+			})
 		}
 		if (!plugin) {
 			plugin = /** @type {ForkTsCheckerPlugin} */(/** @type {unknown} */(undefined));
