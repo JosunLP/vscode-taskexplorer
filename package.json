@@ -251,16 +251,9 @@
         "webpack-cli": "^4.9.2",
         "webpack-node-externals": "^3.0.0"
     },
-    "greenkeeper": {
-        "ignore": [
-            "@types/node"
-        ]
-    },
     "publishConfig": {
         "access": "public"
     },
-    "mocha": {},
-    "nyc": {},
     "contributes": {
         "viewsContainers": {
             "activitybar": [
@@ -328,34 +321,44 @@
                 }
             ]
         },
-        "commands": [
+        "walkthroughs": [
             {
-                "command": "taskexplorer.clearTaskStats",
-                "title": "%command.clearTaskStats%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/clear.svg",
-                    "dark": "res/img/dark/clear.svg"
-                }
-            },
+                "id": "taskexplorer.welcome",
+                "title": "Get Started with Task Explorer",
+                "description": "Run, track, view and organize all of your project scripts and tasks",
+                "steps": [
+                    {
+                        "id": "taskexplorer.welcome.tutorial",
+                        "title": "Read Tutorial",
+                        "description": "Read the Welcome Tutorial.\n\n[Open Tutorial](command:taskexplorer.view.welcome.show?false \"Read the Welcome Tutorial\")",
+                        "media": {
+                            "markdown": "res/walkthrough/welcome/0-welcome.md"
+                        }
+                    },
+                    {
+                        "id": "taskexplorer.welcome.settings",
+                        "title": "Customize your experience with a variety of settings",
+                        "description": "An organized settings section to easily customize the way Task Explorer works.\n\n[Open Settings](command:taskexplorer.openSettings \"Open the Task Explorer Extension Settings\")",
+                        "media": {
+                            "markdown": "res/walkthrough/welcome/1-settings.md"
+                        }
+                    },
+                    {
+                        "id": "taskexplorer.welcome.licensing",
+                        "title": "Support development by purchasing a license",
+                        "description": "Support ongoing development by purchasing a license.\n\n[Learn about Task Explorer licensing](command:taskexplorer.view.licensePage.show?false \"Open the Licensing details page\")",
+                        "media": {
+                            "markdown": "res/walkthrough/welcome/2-licensing.md"
+                        }
+                    }
+                ]
+            }
+        ],
+        "commands": [
             {
                 "command": "taskexplorer.getApi",
                 "title": "%command.getApi%",
                 "enablement": "false"
-            },
-            {
-                "command": "taskexplorer.showOutput",
-                "title": "Task Explorer: Show Log in Output Window",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.donate",
-                "title": "%command.donate%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/donate.svg",
-                    "dark": "res/img/dark/donate.svg"
-                }
             },
             {
                 "command": "taskexplorer.enterLicense",
@@ -370,16 +373,56 @@
                 "title": "%command.view.licensePage.show%"
             },
             {
+                "command": "taskexplorer.view.welcome.show",
+                "title": "%command.view.welcome.show%"
+            },
+            {
                 "command": "taskexplorer.view.releaseNotes.show",
                 "title": "%command.view.releaseNotes.show%"
             },
             {
+                "command": "taskexplorer.openBugReports",
+                "title": "%command.openBugReports%",
+                "icon": {
+                    "light": "res/img/light/bug.svg",
+                    "dark": "res/img/dark/bug.svg"
+                }
+            },
+            {
+                "command": "taskexplorer.openRepository",
+                "title": "%command.openRepository%",
+                "icon": {
+                    "light": "res/img/light/github.svg",
+                    "dark": "res/img/dark/github.svg"
+                }
+            },
+            {
+                "command": "taskexplorer.showOutput",
+                "title": "Task Explorer: Show Log in Output Window",
+                "when": "taskexplorer:enabled"
+            },
+            {
+                "command": "taskexplorer.donate",
+                "title": "%command.donate%",
+                "when": "taskexplorer:enabled",
+                "icon": {
+                    "light": "res/img/light/paypal.svg",
+                    "dark": "res/img/dark/paypal.svg"
+                }
+            },
+            {
                 "command": "taskexplorer.view.parsingReport.show",
-                "title": "%command.view.parsingReport.show%"
+                "title": "%command.view.parsingReport.show%",
+                "when": "taskexplorer:enabled"
             },
             {
                 "command": "taskexplorer.view.taskMonitor.show",
-                "title": "%command.view.taskMonitor.show%"
+                "title": "%command.view.taskMonitor.show%",
+                "when": "taskexplorer:enabled",
+                "icon": {
+                    "light": "res/img/light/react.svg",
+                    "dark": "res/img/dark/react.svg"
+                }
             },
             {
                 "command": "taskexplorer.enableTaskType",
@@ -390,6 +433,15 @@
                 "command": "taskexplorer.disableTaskType",
                 "title": "%command.disableTaskType%",
                 "when": "taskexplorer:enabled"
+            },
+            {
+                "command": "taskexplorer.clearTaskStats",
+                "title": "%command.clearTaskStats%",
+                "when": "taskexplorer:enabled",
+                "icon": {
+                    "light": "res/img/light/clear.svg",
+                    "dark": "res/img/dark/clear.svg"
+                }
             },
             {
                 "command": "taskexplorer.addToExcludesEx",
@@ -611,6 +663,22 @@
             ],
             "commandPalette": [
                 {
+                    "command": "taskexplorer.view.parsingReport.show",
+                    "when": "taskexplorer:enabled"
+                },
+                {
+                    "command": "taskexplorer.view.taskMonitor.show",
+                    "when": "taskexplorer:enabled"
+                },
+                {
+                    "command": "taskexplorer.openBugReports",
+                    "when": "taskexplorer:enabled"
+                },
+                {
+                    "command": "taskexplorer.openRepository",
+                    "when": "taskexplorer:enabled"
+                },
+                {
                     "command": "taskexplorer.refresh",
                     "when": "taskexplorer:enabled"
                 },
@@ -628,14 +696,6 @@
                 },
                 {
                     "command": "taskexplorer.clearTaskStats",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.view.parsingReport.show",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.view.taskMonitor.show",
                     "when": "taskexplorer:enabled"
                 },
                 {
@@ -726,16 +786,36 @@
             "view/title": [
                 {
                     "command": "taskexplorer.runLastTask",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ || view == taskexplorer.view.taskTreeSideBar",
+                    "when": "view =~ /^taskexplorer.view.taskTree/",
                     "group": "navigation"
                 },
                 {
                     "command": "taskexplorer.refresh",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ || view == taskexplorer.view.taskTreeSideBar",
+                    "when": "view =~ /^taskexplorer.view.taskTree/",
+                    "group": "navigation"
+                },
+                {
+                    "command": "taskexplorer.view.taskMonitor.show",
+                    "when": "view =~ /^taskexplorer.view.taskTree/",
+                    "group": "navigation"
+                },
+                {
+                    "command": "taskexplorer.openBugReports",
+                    "when": "view == taskexplorer.view.home",
+                    "group": "navigation"
+                },
+                {
+                    "command": "taskexplorer.openRepository",
+                    "when": "view == taskexplorer.view.home",
                     "group": "navigation"
                 },
                 {
                     "command": "taskexplorer.donate",
+                    "when": "view == taskexplorer.view.home",
+                    "group": "navigation"
+                },
+                {
+                    "command": "taskexplorer.view.taskMonitor.show",
                     "when": "view == taskexplorer.view.home",
                     "group": "navigation"
                 },

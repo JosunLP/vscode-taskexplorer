@@ -141,11 +141,14 @@
 	"command.runUpdatePackage": "Run pkg mgr update [package]",
 	"command.runWithArgs": "Run with arguments",
 	"command.stop": "Stop",
+
 	"command.addToExcludesEx": "Task Explorer: Add to Excludes List",
 	"command.disableTaskType": "Task Explorer: Disable Tasks of this Type",
 	"command.enableTaskType": "Task Explorer: Enable Tasks of this Type",
 	"command.enterLicense" : "Task Explorer: Enter License Key",
 	"command.getLicense" : "Task Explorer: Get 30-Day License ey",
+	"command.openBugReports": "Task Explorer: Open Github Bug Reports Page",
+	"command.openRepository": "Task Explorer: Open Github Repository Page",
 	"command.removeFromExcludes": "Task Explorer: Remove from Excludes List",
 	"command.setPinned": "Set task pinned state for current list",
 	"command.showOutput": "Task Explorer: Show Log Output Window",
@@ -154,6 +157,7 @@
 	"command.view.releaseNotes.show" : "Task Explorer: View Release Notes",
 	"command.view.parsingReport.show" : "Task Explorer: View Parsing Report",
 	"command.view.taskMonitor.show" : "Task Explorer: Open Task Monitor",
+	"command.view.welcome.show" : "Task Explorer: View Welcome Tutorial",
 
 	"messages.noAssociatedTaskType": "This file does not appear to be associated to any known task type"
 }
