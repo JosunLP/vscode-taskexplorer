@@ -8,7 +8,7 @@ import { Globs, Strings } from "../constants";
 import { configuration } from "../configuration";
 import { LicenseManager } from "../auth/licenseManager";
 import { Commands, executeCommand } from "../command/command";
-import { WorkspaceFolder, Uri, workspace, window } from "vscode";
+import { WorkspaceFolder, Uri, workspace, window, env } from "vscode";
 
 
 export const getCombinedGlobPattern = (defaultPattern: string, globs: string[]) =>
@@ -197,6 +197,13 @@ export const lowerCaseFirstChar = (s: string, removeSpaces: boolean) =>
         }
     }
     return fs;
+};
+
+
+export const openUrl = (url: string) =>
+{
+    log.methodOnce("homeview", "open url", 1, log.getLogPad(), [[ "url", url ]]);
+    env.openExternal(Uri.parse(url));
 };
 
 

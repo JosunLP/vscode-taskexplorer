@@ -72,6 +72,7 @@ export interface ITeUtilities
 	isTaskTypeEnabled(taskType: string): boolean;
 	isUri(u: any): u is Uri;
 	isWorkspaceFolder(value: any): value is WorkspaceFolder;
+	openUrl(url: string): void;
 	pushIfNotExists(arr: any[], item: any): void;
 	removeFromArray(arr: any[], item: any): void;
 	showMaxTasksReachedMessage(licMgr: any, taskType?: string, force?: boolean): void;
