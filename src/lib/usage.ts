@@ -322,10 +322,15 @@ export class Usage implements ITeUsage, Disposable
 		}
 
 		await this.wrapper.storage.update(StorageKeys.Usage, usages);
+
 		//
 		// TODO - Telemetry
 		//
 		//  this.wrapper.telemetry.sendEvent("usage/track", { "usage.key": key, "usage.count": usage.count });
+
+        //
+        // Fire usage change event
+        //
 		this._onDidChange.fire({ key, usage });
 		return usage;
 	}

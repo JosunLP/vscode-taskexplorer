@@ -28,6 +28,7 @@ import { RubyTaskProvider } from "../providers/ruby";
 import { NsisTaskProvider } from "../providers/nsis";
 import { PerlTaskProvider } from "../providers/perl";
 import { ITeWrapper } from "../interface/ITeWrapper";
+import { WelcomePage } from "../webview/page/welcome";
 import { TeFileWatcher } from "./watcher/fileWatcher";
 import { TaskTreeManager } from "../tree/treeManager";
 import { LicenseManager } from "./auth/licenseManager";
@@ -38,7 +39,6 @@ import { registerStatusBarItem } from "./statusBarItem";
 import { GradleTaskProvider } from "../providers/gradle";
 import { PipenvTaskProvider } from "../providers/pipenv";
 import { PythonTaskProvider } from "../providers/python";
-import { registerDonateCommand } from "./command/donate";
 import { TeConfigWatcher } from "./watcher/configWatcher";
 import { LicensePage } from "../webview/page/licensePage";
 import { MonitorPage } from "../webview/page/monitorPage";
@@ -50,7 +50,6 @@ import { IConfiguration } from "../interface/IConfiguration";
 import { TaskCountView } from "../webview/view/taskCountView";
 import { TaskUsageView } from "../webview/view/taskUsageView";
 import { ReleaseNotesPage } from "../webview/page/releaseNotes";
-import { IDictionary, ILog, ITeFilesystem, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeUtilities } from "../interface";
 import { PowershellTaskProvider } from "../providers/powershell";
 import { ITaskExplorerProvider } from "../interface/ITaskProvider";
 import { AppPublisherTaskProvider } from "../providers/appPublisher";
@@ -59,7 +58,15 @@ import { registerAddToExcludesCommand } from "./command/addToExcludes";
 import { registerEnableTaskTypeCommand } from "./command/enableTaskType";
 import { registerDisableTaskTypeCommand } from "./command/disableTaskType";
 import { registerRemoveFromExcludesCommand } from "./command/removeFromExcludes";
-import { ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, Disposable, EventEmitter } from "vscode";
+import {
+	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem,
+	TreeView, Disposable, EventEmitter
+} from "vscode";
+import {
+	IDictionary, ILog, ITeFilesystem, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities,
+	ITeTaskUtilities, ITeUtilities
+} from "../interface";
+import { Commands, registerCommand } from "./command/command";
 
 const PROVIDE_INTERIM_LICENSE_KEY = true;
 
@@ -82,6 +89,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _fileCache: TeFileCache;
     private readonly _taskWatcher: TaskWatcher;
 	private readonly _licensePage: LicensePage;
+	private readonly _welcomePage: WelcomePage;
     private readonly _taskManager: TaskManager;
 	private readonly _disposables: Disposable[];
 	private readonly _context: ExtensionContext;
@@ -137,6 +145,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._taskMonitorPage = new MonitorPage(this);
 		this._parsingReportPage = new ParsingReportPage(this);
 		this._releaseNotesPage = new ReleaseNotesPage(this);
+		this._welcomePage = new WelcomePage(this);
 
 		this._teApi = new TeApi(this);
 
@@ -183,6 +192,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._taskCountView,
 			this._taskUsageView,
 			this._licenseManager,
+			this._welcomePage,
 			this._releaseNotesPage,
 			this._parsingReportPage
 		];
@@ -209,6 +219,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
 		await this.storage.update("taskexplorer.version", this._version);
+		//
+		// Register global commands
+		//
+		this.registerGlobalCommands();
 		//
 		// Register global status bar item
 		//
@@ -361,9 +375,18 @@ export class TeWrapper implements ITeWrapper, Disposable
 	};
 
 
+	private registerGlobalCommands = () =>
+	{
+		this._disposables.push(
+			registerCommand(Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
+			registerCommand(Commands.OpenBugReports, () => this.utils.openUrl("https://github.com/spmeesseman/vscode-taskexplorer/issues"), this),
+			registerCommand(Commands.OpenRepository, () => this.utils.openUrl("https://github.com/spmeesseman/vscode-taskexplorer"), this)
+		);
+	};
+
+
 	private registerContextMenuCommands = () =>
 	{
-		registerDonateCommand(this._disposables);
 		registerDisableTaskTypeCommand(this._disposables);
 		registerEnableTaskTypeCommand(this._disposables);
 		registerAddToExcludesCommand(this, this._disposables);
@@ -373,7 +396,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
     private registerTaskProvider = (providerName: string, provider: TaskExplorerProvider) =>
     {
-        this.context.subscriptions.push(tasks.registerTaskProvider(providerName, provider));
+        this._disposables.push(tasks.registerTaskProvider(providerName, provider));
         this._providers[providerName] = provider;
     };
 
@@ -609,6 +632,10 @@ export class TeWrapper implements ITeWrapper, Disposable
     get views() {
         return this.treeManager.views;
     }
+
+	get welcomePage(): WelcomePage {
+		return this._welcomePage;
+	}
 
 	get wsfolder(): WorkspaceFolder {
 		return (workspace.workspaceFolders as WorkspaceFolder[])[0];

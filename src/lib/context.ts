@@ -6,7 +6,7 @@ import { ITeContext, IDictionary } from "../interface";
 import { commands, Event, EventEmitter } from "vscode";
 
 export type TreeViewIds = "taskTreeExplorer" | "taskTreeSideBar";
-export type WebviewIds = "parsingReport" | "licensePage" | "releaseNotes" | "taskMonitor";
+export type WebviewIds = "parsingReport" | "licensePage" | "releaseNotes" | "taskMonitor" | "welcome";
 export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
 
 export const enum ContextKeys

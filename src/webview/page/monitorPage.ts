@@ -114,17 +114,11 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	}
 
 
-	protected override onVisibilityChanged = (_visible: boolean) =>
-	{
-		// this.wrapper.log.methodStart("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad(), false, [[ "visible", visible ]]);
-		// this.wrapper.log.methodDone("MonitorPage Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad());
-	};
+	protected override onVisibilityChanged = (visible: boolean) =>
+		this.wrapper.log.methodOnce("monitor view", "visibility changed", 2, this.wrapper.log.getLogPad(), [[ "visible", visible ]]);
 
 
-	protected override onFocusChanged = (_focused: boolean): void =>
-	{
-		// this.wrapper.log.methodStart("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad(), false, [[ "focus", focused ]]);
-		// this.wrapper.log.methodDone("MonitorPage Event: onFocusChanged", 2, this.wrapper.log.getLogPad());
-	};
+	protected override onFocusChanged = (focused: boolean): void =>
+		this.wrapper.log.methodOnce("monitor view", "focus changed", 2, this.wrapper.log.getLogPad(), [[ "focused", focused ]]);
 
 }
