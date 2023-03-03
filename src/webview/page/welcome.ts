@@ -8,7 +8,7 @@ import { ContextKeys, WebviewIds  } from "../../lib/context";
 
 export class WelcomePage extends TeWebviewPanel<State>
 {
-	static viewTitle = "Task Explorer Walkthrough";
+	static viewTitle = "Task Explorer Tutorial";
 	static viewId: WebviewIds = "welcome";
 
 

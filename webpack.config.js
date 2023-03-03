@@ -24,6 +24,7 @@ const webviewApps =
 	parsingReport: "./parsingReport/parsingReport.ts",
 	releaseNotes: "./releaseNotes/releaseNotes.ts",
 	taskCount: "./taskCount/taskCount.ts",
+	taskDetails: "./taskDetails/taskDetails.ts",
 	taskUsage: "./taskUsage/taskUsage.ts",
 	welcome: "./welcome/welcome.ts",
 };

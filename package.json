@@ -430,6 +430,15 @@
                 }
             },
             {
+                "command": "taskexplorer.view.taskDetails.show",
+                "title": "%command.view.taskDetails.show%",
+                "when": "taskexplorer:enabled",
+                "icon": {
+                    "light": "res/img/light/open.svg",
+                    "dark": "res/img/dark/open.svg"
+                }
+            },
+            {
                 "command": "taskexplorer.enableTaskType",
                 "title": "%command.enableTaskType%",
                 "when": "taskexplorer:enabled"
