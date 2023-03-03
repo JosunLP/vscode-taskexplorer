@@ -96,6 +96,11 @@ export abstract class TeWebviewApp<State = undefined>
 				(btn.parentNode as HTMLElement).hidden = isLicensed;
 				(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
 			}
+			btn = document.getElementById("btnViewReleaseNotes");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = !isLicensed;
+				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
+			}
 			btn = document.getElementById("btnTaskMonitor");
 			if (btn) {
 				(btn.parentNode as HTMLElement).hidden = !isLicensed;

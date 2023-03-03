@@ -101,13 +101,17 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
                                 <table cellPadding="0" cellSpacing="0">
                                     <tbody>
                                         <tr>
-                                            <td className="te-monitor-control-content-title">
+                                            <td className="te-monitor-control-content-title" colSpan={2}>
                                                 Details:
                                             </td>
                                         </tr>
                                         <tr>
                                             <td className="te-monitor-control-pin-container">
                                                 <span className={this.getPinnedIconCls()} onClick={this.setPinned.bind(this)} />
+                                            </td>
+                                            <td className="te-monitor-control-alt-btn-container">
+                                                <div className="far fa-circle-info te-monitor-control-alt-btn" onClick={this.viewDetails.bind(this)} />
+                                                <div className="far fa-circle-xmark te-monitor-control-alt-btn" onClick={this.viewDetails.bind(this)} />
                                             </td>
                                         </tr>
                                     </tbody>
@@ -360,6 +364,13 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
             clearTimeout(this.animationTimeout);
             this.animationTimeout = undefined;
         }
+    };
+
+
+    private viewDetails = (e: React.MouseEvent<HTMLDivElement, MouseEvent>): void =>
+    {
+        this.log(`TeTaskControl.clickPinned: target id=${e.currentTarget.id}`);
+        this.executeCommand("view.taskDetails.show", this.state.task);
     };
 
 }
