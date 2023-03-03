@@ -174,7 +174,8 @@ const wpPlugin =
 					cleanOnceBeforeBuildPatterns: [
 						path.posix.join(basePath, "css", "**"),
 						path.posix.join(basePath, "js", "**"),
-						path.posix.join(basePath, "page", "**")
+						path.posix.join(basePath, "page", "**"),
+						path.posix.join(basePath, "webview", "**")
 					]
 				});
 			}
@@ -223,7 +224,7 @@ const wpPlugin =
 				app => patterns.push(
 				{
 					from: path.posix.join(psxBasePath, app, "res", "*.*"),
-					to: path.posix.join(psx__dirname, "res", "img", "webview"),
+					to: path.posix.join(psx__dirname, "res", "webview"),
 					context: path.posix.join(psxBasePath, app, "res")
 				})
 			);
@@ -232,87 +233,11 @@ const wpPlugin =
 			{
 				patterns.push({
 					from: path.posix.join(psxBasePath, "res", "*.*"),
-					to: path.posix.join(psx__dirname, "res", "img", "webview"),
+					to: path.posix.join(psx__dirname, "res", "webview"),
 					context: path.posix.join(psxBasePath, "res")
 				});
 			}
 
-			// const proPath = path.join(__dirname, "res", "font", "fa-duotone-900.woff2");
-			// if (fs.existsSync(proPath)) {
-			// 	try { fs.unlinkSync(path.join(__dirname, "res", "font", "fa-duotone-900.woff2")); } catch {}
-			// 	try { fs.unlinkSync(path.join(__dirname, "res", "font", "fa-light-300.woff2")); } catch {}
-			// 	try { fs.unlinkSync(path.join(__dirname, "res", "font", "fa-sharp-solid-900.woff2")); } catch {}
-			// 	try { fs.unlinkSync(path.join(__dirname, "res", "font", "fa-thin-100.woff2")); } catch {}
-			// }
-
-			if (env.fa == "custom")
-			{
-				// patterns.push(
-				// {
-				// 	from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "LICENSE.txt"),
-				// 	to: path.posix.join(psx__dirname, "res", "font", "fontawesome-pro.LICENSE")
-				// });
-			}
-			else if (env.fa == "free")
-			{
-				patterns.push(
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-brands-400.woff2"),
-					to: path.posix.join(psx__dirname, "res", "font")
-				},
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-regular-400.woff2"),
-					to: path.posix.join(psx__dirname, "res", "font")
-				},
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-free", "webfonts", "fa-solid-900.woff2"),
-					to: path.posix.join(psx__dirname, "res", "font")
-				},
-				// {
-				// 	from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "LICENSE.txt"),
-				// 	to: path.posix.join(psx__dirname, "res", "font", "fontawesome-pro.LICENSE"),
-				// },
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-free", "LICENSE.txt"),
-					to: path.posix.join(psx__dirname, "res", "font", "fontawesome-free.LICENSE")
-				});
-			}
-			else if (env.fa === "pro")
-			{
-				patterns.push(
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "webfonts", "fa-brands-400.woff2"),
-					to: path.posix.join(psx__dirname, "res", "font")
-				},
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "webfonts", "fa-regular-400.woff2"),
-					to: path.posix.join(psx__dirname, "res", "font")
-				},
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "webfonts", "fa-solid-900.woff2"),
-					to: path.posix.join(psx__dirname, "res", "font")
-				},
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "webfonts", "fa-duotone-900.woff2"),
-					to: path.posix.join(psx__dirname, "res", "font")
-				},
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "webfonts", "fa-light-300.woff2"),
-					to: path.posix.join(psx__dirname, "res", "font")
-				},
-				// {
-				// 	from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "webfonts", "fa-sharp-solid-900.woff2"),
-				// 	to: path.posix.join(psx__dirname, "res", "font"),
-				// },
-				//{
-				//	from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "webfonts", "fa-thin-100.woff2"),
-				//	to: path.posix.join(psx__dirname, "res", "font"),
-				//},
-				{
-					from: path.posix.join(psx__dirname, "node_modules", "@fortawesome", "fontawesome-pro", "LICENSE.txt"),
-					to: path.posix.join(psx__dirname, "res", "font", "fontawesome-pro.LICENSE")
-				});
-			}
 			plugin = new CopyPlugin({ patterns: patterns });
 		}
 		if (!plugin) {

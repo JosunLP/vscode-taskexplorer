@@ -18,7 +18,6 @@ declare interface WebpackEnvironment
     clean: boolean;
     environment: "dev"|"prod"|"test"|"testprod";
     esbuild: boolean; // Is ES build
-    fa: "custom" | "free" | "pro" | "none";
     imageOpt: boolean; // Perform image optimization
     target: "webworker"|"node"|"web";
 }
