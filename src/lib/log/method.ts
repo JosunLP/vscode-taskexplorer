@@ -21,3 +21,12 @@ export const methodDone = (msg: string, level?: number, logPad = "", params?: (s
     values(lLevel, logPad + "   ", params, queueId);
     write("*done* " + msg, lLevel, logPad, queueId); // , LogColor.cyan);
 };
+
+
+export const methodOnce = (tag: string, msg: string, level?: number, logPad = "", params?: (string|any)[][], queueId?: string) =>
+{
+    const lLevel = level || 1;
+    write(`*${tag} start* ` + msg, lLevel, logPad, queueId);
+    values(lLevel, logPad + "   ", params, queueId);
+    write(`*${tag} end* ` + msg, lLevel, logPad, queueId);
+};

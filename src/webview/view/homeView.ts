@@ -91,8 +91,7 @@ export class HomeView extends TeWebviewView<State>
 
 	private onConfigurationChanged(e: ConfigurationChangeEvent)
 	{
-		this.wrapper.log.methodStart("HomeView Event: onConfigurationChanged", 2, this.wrapper.log.getLogPad());
-		this.wrapper.log.methodDone("HomeView Event: onConfigurationChanged", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodOnce("homeview event", "configuration changed", 2, this.wrapper.log.getLogPad());
 	}
 
 
@@ -108,15 +107,13 @@ export class HomeView extends TeWebviewView<State>
 
 	protected override async onReady()
 	{
-		this.wrapper.log.methodStart("HomeView Event: onReady", 2, this.wrapper.log.getLogPad());
-		this.wrapper.log.methodDone("HomeView Event: onReady", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodOnce("homeview event", "ready", 2, this.wrapper.log.getLogPad());
 	}
 
 
 	protected override onFocusChanged(_focused: boolean): void
 	{
-		this.wrapper.log.methodStart("HomeView Event: onFocusChanged", 2, this.wrapper.log.getLogPad());
-		this.wrapper.log.methodDone("HomeView Event: onFocusChanged", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodOnce("homeview event", "focus changed", 2, this.wrapper.log.getLogPad());
 	}
 
 
@@ -135,8 +132,7 @@ export class HomeView extends TeWebviewView<State>
 
 	protected override onVisibilityChanged(_visible: boolean)
 	{
-		this.wrapper.log.methodStart("HomeView Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad());
-		this.wrapper.log.methodDone("HomeView Event: onVisibilityChanged", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodOnce("homeview event", "visibility changed", 2, this.wrapper.log.getLogPad());
 	}
 
 

@@ -8,7 +8,7 @@ import { dirname, join } from "path";
 import { value, values } from "./value";
 import { createDir } from "../utils/fs";
 import { configuration } from "../configuration";
-import { methodDone, methodStart } from "./method";
+import { methodDone, methodOnce, methodStart } from "./method";
 import { IDictionary, ILogQueueItem } from "../../interface";
 import { OutputChannel, ExtensionContext, commands, window, workspace, ConfigurationChangeEvent } from "vscode";
 
@@ -91,6 +91,7 @@ const enableLog = (enable: boolean) =>
         error: enable ? error : () => {},
         methodStart: enable ? methodStart : () => {},
         methodDone: enable ? methodDone : () => {},
+        methodOnce: enable ? methodOnce : () => {},
         value: enable ? value : () => {},
         values: enable ? values : () => {},
         warn: enable ? warn : () => {},
@@ -250,6 +251,7 @@ const logFunctions =
     isLoggingEnabled,
     methodStart,
     methodDone,
+    methodOnce,
     setWriteToConsole,
     value,
     values,
