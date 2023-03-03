@@ -55,6 +55,23 @@ button {
 	padding: 7px 15px 7px 15px;
 }
 
+#te-monitor-flyout-menu-id::before {
+    content: "";
+	position: absolute;
+	top: 10px;
+	left: 125px;
+	width: 128px;
+	height: 128px;
+	z-index: -1;
+	opacity: 0.08;
+	mask-size: cover;
+	background-color: #777;
+	-webkit-mask-size: cover;
+	mask: url("../img/dark/react.svg") no-repeat 100% 100%;
+	-webkit-mask: url("../img/dark/react.svg") no-repeat 100% 100%;
+}
+
+
 #te-monitor-flyout-menu-id.hide {
 	transform: translate3d(100vw, 0, 0);
 }
