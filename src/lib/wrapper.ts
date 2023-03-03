@@ -271,17 +271,21 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		/* istanbul ignore else *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		if (PROVIDE_INTERIM_LICENSE_KEY) /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		{/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-			await this.licenseManager.setLicenseKey("1234-5678-9098-7654321"); /* TEMP *//* TEMP */
-			/* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */
-			await this.licenseManager.setLicenseToken({ /* TEMP *//* TEMP *//* TEMP *//* TEMP */
-				token: "1234-5678-9098-7654321", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-				ttl: 365, /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-				expiresFmt: "N/A", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-				issuedFmt: "N/A" /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-			}); /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		} /* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// if (PROVIDE_INTERIM_LICENSE_KEY) /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// {/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// 	await this.licenseManager.setLicenseKey("1234-5678-9098-7654321"); /* TEMP *//* TEMP */
+		// 	/* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */
+		// 	await this.licenseManager.setLicenseToken({ /* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// 		token: "1234-5678-9098-7654321", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// 		ttl: 365, /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// 		expiresFmt: "N/A", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// 		issuedFmt: "N/A" /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// 	}); /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// } /* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		// await this.storage.deleteSecret("taskexplorer.licenseKey");
+		// await this.storage.deleteSecret("taskexplorer.licenseToken");
+		// await this.storage.deleteSecret("taskexplorer.licenseKey30Day");
+		// await this.storage.deleteSecret("taskexplorer.licenseKeyTrial");
 /* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
 		await this.licenseManager.checkLicense("   ");
 		// const session = await licenseManager.getSession("TeAuth", [], { create: true });

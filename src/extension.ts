@@ -43,8 +43,6 @@ export async function activate(context: ExtensionContext)
     await initStorage(context);
 /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
     // await storage.update("lastTasks", []);
-    // await storage.delete("taskexplorer.licenseKey");
-    // await storage.delete("taskexplorer.licenseToken");
     // await storage.delete("taskexplorer.taskUsage");
     // await storage.delete("taskexplorer.usage");
 /* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
