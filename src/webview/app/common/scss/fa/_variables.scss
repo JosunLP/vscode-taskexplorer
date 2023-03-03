@@ -46,7 +46,7 @@ $fa-stack-width         : ($fa-fw-width * 2) !default;
 $fa-stack-z-index       : auto !default;
 
 $fa-font-display        : block !default;
-$fa-font-path           : "../webfonts" !default;
+$fa-font-path           : "../font" !default;
 
 $fa-var-0: \30;
 $fa-var-1: \31;
@@ -89,6 +89,8 @@ $fa-var-rabbit: \f708;
 $fa-var-badge-check: \f336;
 $fa-var-user-crown: \f6a4;
 $fa-var-user-slash: \f506;
+$fa-var-circle-info: \f05a;
+$fa-var-info-circle: \f05a;
 $fa-var-minus: \f068;
 $fa-var-subtract: \f068;
 $fa-var-gear: \f013;
@@ -164,6 +166,8 @@ $fa-icons: (
   "badge-check": $fa-var-badge-check,
   "user-crown": $fa-var-user-crown,
   "user-slash": $fa-var-user-slash,
+  "circle-info": $fa-var-circle-info,
+  "info-circle": $fa-var-info-circle,
   "minus": $fa-var-minus,
   "subtract": $fa-var-subtract,
   "gear": $fa-var-gear,

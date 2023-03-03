@@ -4,6 +4,30 @@
 // Creates 'icons' section in src/webview/common/fontawesome.ts from src/webview/app/common/scss/fa/_variables.scss
 //
 
+const copyFolderRecursiveSync = (source, target, filter) =>
+{
+    var files = [];
+
+    if (!fs.existsSync(target)) {
+        fs.mkdirSync(target);
+    }
+    if (fs.lstatSync(source).isDirectory())
+    {
+        files = fs.readdirSync(source);
+        files.filter(f => !filter || f.match(filter)).forEach(function(file)
+        {
+            var curSource = path.join(source, file);
+            if (fs.lstatSync(curSource).isDirectory())
+            {
+                copyFolderRecursiveSync(curSource, target);
+            }
+            else {
+                fs.copyFileSync(curSource, path.join(target, path.basename(curSource)));
+            }
+        });
+    }
+};
+
 const fs = require("fs"),
       path = require("path"),
       execSync = require("child_process").execSync
@@ -13,22 +37,29 @@ const iconDefs = {},
       faZipPath = path.join(__dirname, "Subset.zip"),
       faFontSrcPath = path.resolve(__dirname, "..", "res", "font"),
       faTsModulePath =path.resolve(__dirname, "..", "src", "webview", "common", "fontawesome.ts"),
-      faScssSrcPath = path.resolve(__dirname, "..", "src", "webview", "app", "common", "scss", "fa"),
+      scssSrcPath = path.resolve(__dirname, "..", "src", "webview", "app", "common", "scss"),
+      faScssSrcPath = path.join(scssSrcPath, "fa"),
       faScssVarsPath = path.join(faScssSrcPath, "_variables.scss"),
-      faVars_scss = fs.readFileSync(faScssVarsPath).toString(),
+      faExtractedDirName = path.join(__dirname, "fontawesome-subset"),
       regex = /(?:^\$fa\-var\-)([a-z0-9\-]*?): *(\\[0-9a-f]{1,4});/gmi,
       regex2 = / +icons:\s*(\{[^]+\}) as IDictionary<string>/gmi,
-      doExtractFromFaZip = process.argv.includes("-x") || process.argv.includes("--extract");
-
-let match;
-let fa_ts = fs.readFileSync(faTsModulePath).toString();
+      doExtractFromFaZip = (process.argv.includes("-x") || process.argv.includes("--extract")) && fs.existsSync(faZipPath);
 
 if (doExtractFromFaZip)
 {
-    execSync(`7za.exe e -tzip ${faZipPath} -o .`, { cwd: __dirname });
-    copyFolderRecursiveSync(path.join(__dirname, "fontawesome-subset", "scss"), faScssSrcPath);
-    copyFolderRecursiveSync(path.join(__dirname, "fontawesome-subset", "webfonts", /\.woff2/), faFontSrcPath);
+    if (fs.existsSync(faExtractedDirName)) {
+        fs.rmSync(faExtractedDirName, { recursive: true });
+    }
+    execSync(`7za.exe e -r -spf Subset.zip -o${__dirname}`, { cwd: __dirname });
+    copyFolderRecursiveSync(path.join(faExtractedDirName, "scss"), faScssSrcPath);
+    copyFolderRecursiveSync(path.join(faExtractedDirName, "webfonts"), faFontSrcPath, /\.woff2/);
+
 }
+
+let match;
+let fa_ts = fs.readFileSync(faTsModulePath).toString();
+const faVars_scss = fs.readFileSync(faScssVarsPath).toString();
+fs.writeFileSync(faScssVarsPath, faVars_scss.replace("../webfonts", "../font"));
 
 while ((match = regex.exec(faVars_scss)) !== null) { iconVars.push({ a: match[1], b: match[2] }) }
 
@@ -44,31 +75,7 @@ if ((match = regex2.exec(fa_ts)) !== null)
 if (doExtractFromFaZip)
 {
     fs.unlinkSync(faZipPath);
-    fs.unlinkSync(path.join(__dirname, "fontawesome-subset"));
+    if (fs.existsSync(faExtractedDirName)) {
+        fs.rmSync(faExtractedDirName, { recursive: true });
+    }
 }
-
-const copyFolderRecursiveSync = (source, target, filter) =>
-{
-    var files = [];
-
-    var targetFolder = path.join(target, path.basename(source));
-    if (!fs.existsSync(targetFolder)) {
-        fs.mkdirSync(targetFolder);
-    }
-
-    if (fs.lstatSync(source).isDirectory())
-    {
-        files = fs.readdirSync(source);
-        files.filter(f => !filter || f.match(filter)).forEach(function(file)
-        {
-            var curSource = path.join(source, file);
-            if (fs.lstatSync(curSource).isDirectory())
-            {
-                helper.copyFolderRecursiveSync(curSource, targetFolder);
-            }
-            else {
-                helper.copyFileSync(curSource, targetFolder);
-            }
-        });
-    }
-};

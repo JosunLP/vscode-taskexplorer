@@ -140,6 +140,7 @@
         "tsc-watch": "tsc -watch -p ./",
         "tsc-watch_2": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
         "update-fa-icon-module": "node script\\update-fa-module.js",
+        "build-fa-icon-module": "node script\\update-fa-module.js --extract",
         "webpack-watch": "npm run update-fa-icon-module && webpack -w --mode development --config ./webpack.config.js",
         "webpack-build": "npm run update-fa-icon-module && webpack --mode production --config ./webpack.config.js",
         "webpack-build:analyze": "npm run update-fa-icon-module && webpack --mode production --env analyze=true --config ./webpack.config.js",
