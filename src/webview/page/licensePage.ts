@@ -45,7 +45,7 @@ export class LicensePage extends TeWebviewPanel<State>
 		const licMgr = this.wrapper.licenseManager;
 		const key = await licMgr.getLicenseKey();
 		const details = !newKey ?
-	(!licMgr.isLicensed() ? `
+	(!licMgr.isLicensed ? `
 	<table class="margin-top-15">
 		<tr><td class="content-subsection-header">
 			Licensing Note

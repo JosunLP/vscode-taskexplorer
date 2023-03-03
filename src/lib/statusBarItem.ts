@@ -1,20 +1,73 @@
-import { ExtensionContext, StatusBarAlignment, StatusBarItem, window } from "vscode";
 
-class TeStatusBarItem
+import { Disposable, StatusBarAlignment, StatusBarItem, window } from "vscode";
+
+
+/**
+ * @class TeStatusBar
+ * @since 3.0.0
+ */
+export class TeStatusBar implements Disposable
 {
+    private hidden = true;
     private statusBarNumChars = 65;
     private statusBarItem: StatusBarItem;
+
+
     constructor()
     {
         this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this.statusBarItem.tooltip = "Task Explorer Status";
     }
+
+
+    dispose = () => this.statusBarItem.dispose();
+
+
+    //
+    // TODO - Add an optional 'with progress' window when displaying status
+    //
+	// await window.withProgress(
+	// {
+	// 	location: ProgressLocation.Window,
+	// 	cancellable: false,
+	// 	title: "ExtJs"
+	// },
+	// async (progress) => _run(progress));
+
+    // private updateProgress = async(action: string, pct: number) =>
+    // {
+    //     (this.progress as Progress<{ message: string }>).report({
+    //         message: `: Parsing ${action} ${pct}%`
+    //     });
+    //     await utils.sleep(1); // let progress update
+    // };
+
+
     get = () => this.statusBarItem.text;
-    hide = () => this.statusBarItem.hide();
-    init = (context: ExtensionContext) => context.subscriptions.push(this.statusBarItem);
-    show = () => this.statusBarItem.show();
+
+
+    hide = () => { if (!this.hidden) { this.statusBarItem.hide(); this.hidden = true; }};
+
+
+    show = () => { if (this.hidden) { this.statusBarItem.show(); this.hidden = false; }};
+
+
     // tooltip = (msg: string) => this.statusBarItem.tooltip = msg;
-    update = (msg: string) => this.statusBarItem.text = this.getStatusString(msg);
+
+
+    update = (msg: string) =>
+    {
+        if (!msg)  {
+            msg = "";
+            this.statusBarItem.hide();
+        }
+        else {
+            this.statusBarItem.show();
+        }
+        this.statusBarItem.text = this.getStatusString(msg);
+    };
+
+
     private getStatusString = (msg: string) =>
     {
         if (msg.length < this.statusBarNumChars)
@@ -28,11 +81,5 @@ class TeStatusBarItem
         }
         return "$(loading~spin) " + msg;
     };
+
 }
-
-export const registerStatusBarItem = (context: ExtensionContext) =>
-{
-    statusBarItem.init(context);
-};
-
-export const statusBarItem: TeStatusBarItem = new TeStatusBarItem();

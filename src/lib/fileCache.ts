@@ -3,7 +3,6 @@
 import { join } from "path";
 import { TeWrapper } from "./wrapper";
 import { ContextKeys } from "./context";
-import { statusBarItem } from "./statusBarItem";
 import * as taskTypeUtils from "./utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "./utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
@@ -50,7 +49,7 @@ export class TeFileCache implements ITeFileCache
     private addFromStorage = async() =>
     {
         await this.startBuild();
-        statusBarItem.update("Loading tasks from file cache...");
+        this.wrapper.statusBar.update("Loading tasks from file cache...");
         this.taskFilesMap = await this.wrapper.storage.get2<IDictionary<ICacheItem[]>>("fileCacheTaskFilesMap", {});
         this.projectFilesMap = await this.wrapper.storage.get2<IDictionary<IDictionary<string[]>>>("fileCacheProjectFilesMap", {});
         this.projectToFileCountMap = await this.wrapper.storage.get2<IDictionary<IDictionary<number>>>("fileCacheProjectFileToFileCountMap", {});
@@ -102,7 +101,7 @@ export class TeFileCache implements ITeFileCache
                     }
 
                     const dspTaskType = taskTypeUtils.getTaskTypeFriendlyName(providerName);
-                    statusBarItem.update(`Scanning for ${dspTaskType} tasks in project ${wsFolder.name}`);
+                    this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${wsFolder.name}`);
 
                     if (!isExternal)
                     {
@@ -111,7 +110,7 @@ export class TeFileCache implements ITeFileCache
                         try
                         {   let maxFiles = Infinity;
                             this.wrapper.log.write(`      Start folder scan for ${providerName} tasks`, 3, logPad);
-                            if (licMgr && !licMgr.isLicensed())
+                            if (licMgr && !licMgr.isLicensed)
                             {
                                 const cachedFileCount = this.getTaskFileCount();
                                 maxFiles = licMgr.getMaxNumberOfTaskFiles() - cachedFileCount;
@@ -241,7 +240,7 @@ export class TeFileCache implements ITeFileCache
             dspTaskType = taskTypeUtils.getTaskTypeFriendlyName(taskType);
 
         this.wrapper.log.methodStart(logMsg, 1, logPad);
-        statusBarItem.update(`Scanning for ${dspTaskType} tasks in project ${folder.name}`);
+        this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${folder.name}`);
 
         this.initMaps(taskType, folder.name);
 
@@ -259,7 +258,7 @@ export class TeFileCache implements ITeFileCache
             try
             {   let maxFiles = Infinity;
                 this.wrapper.log.write(`   Start workspace folder scan for ${taskType} files`, 3, logPad);
-                if (licMgr && !licMgr.isLicensed())
+                if (licMgr && !licMgr.isLicensed)
                 {
                     const cachedFileCount = this.getTaskFileCount();
                     maxFiles = licMgr.getMaxNumberOfTaskFiles() - cachedFileCount;
@@ -398,7 +397,7 @@ export class TeFileCache implements ITeFileCache
         taskFiles.sort();
         await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskFiles`, taskFiles);
         // await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskTypes`, taskTypes);
-        statusBarItem.hide();
+        this.wrapper.statusBar.hide();
         this.cacheBuilding = false;
         this.cancel = false;
     };
@@ -514,12 +513,12 @@ export class TeFileCache implements ITeFileCache
         if (clear !== true && (force || this.wrapper.config.get<boolean>("enablePersistentFileCaching")))
         // if (clear !== true && (!teApi.isTests() || this.wrapper.config.get<boolean>("enablePersistentFileCaching")))
         {
-            const text = statusBarItem.get();
-            statusBarItem.update("Persisting file cache...");
+            const text = this.wrapper.statusBar.get();
+            this.wrapper.statusBar.update("Persisting file cache...");
             this.wrapper.storage.update2Sync("fileCacheTaskFilesMap", this.taskFilesMap);
             this.wrapper.storage.update2Sync("fileCacheProjectFilesMap", this.projectFilesMap);
             this.wrapper.storage.update2Sync("fileCacheProjectFileToFileCountMap", this.projectToFileCountMap);
-            statusBarItem.update(text);
+            this.wrapper.statusBar.update(text);
         }
         else if (clear === true)
         {
@@ -744,7 +743,7 @@ export class TeFileCache implements ITeFileCache
             await this.wrapper.utils.timeout(100);
         }
         this.cacheBuilding = true;
-        statusBarItem.show();
+        this.wrapper.statusBar.show();
     };
 
 }

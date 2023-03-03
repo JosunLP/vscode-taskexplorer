@@ -4,10 +4,8 @@ import "./common/scss/te.scss";
 
 import { Disposable, DOM } from "./common/dom";
 import {
-	IpcCommand, IIpcMessage, IpcMessageParams, IpcWvFocusChangedParams, IpcFocusChangedCommand,
-	IpcReadyCommand, IpcExecCommand, onIpc, IpcEchoCommandRequest, IpcEchoCustomCommandRequest,
-	IpcExecCustomCommand,
-	debounce
+	debounce, IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand,
+	IpcExecCommand, onIpc, IpcEchoCommandRequest, IpcEchoCustomCommandRequest, IpcExecCustomCommand
 } from "../common/ipc";
 
 interface VsCodeApi {
@@ -85,10 +83,15 @@ export abstract class TeWebviewApp<State = undefined>
 		let btn = document.getElementById("btnEnterLicense");
 		if (btn)
 		{
-			const isLicensed = (this.state as any).isLicensed as boolean;
+			const isLicensed = (this.state as any).isLicensed;
 			(btn.parentNode as HTMLElement).hidden = isLicensed;
 			(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
-			btn = document.getElementById("btnGetLicense");
+			btn = document.getElementById("btnExtendTrial");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = isLicensed;
+				(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
+			}
+			btn = document.getElementById("btnRegister");
 			if (btn) {
 				(btn.parentNode as HTMLElement).hidden = isLicensed;
 				(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
@@ -195,7 +198,7 @@ export abstract class TeWebviewApp<State = undefined>
 	protected sendCommand<T extends IpcCommand<any>>(command: T, params: IpcMessageParams<T>)
 	{
 		const id = this.nextIpcId();
-		this.log(`sendCommand(${id}): name=${command.method}`);
+		this.log(`Base.sendCommand(${id}): command=${command.method}`);
 		this.postMessage({ id, method: command.method, params });
 	}
 
@@ -203,9 +206,7 @@ export abstract class TeWebviewApp<State = undefined>
 	protected setState(state: State): void
 	{
 		this.state = state;
-		if (state) {
-			this._vscode.setState(state);
-		}
+		this._vscode.setState(state);
 	}
 
 }

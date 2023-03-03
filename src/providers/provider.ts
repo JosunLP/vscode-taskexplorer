@@ -69,7 +69,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
         {
             const licMgr = this.wrapper.licenseManager;
             this.cachedTasks = await this.readTasks(TaskExplorerProvider.logPad + "   ");
-            if (licMgr && !licMgr.isLicensed())
+            if (licMgr && !licMgr.isLicensed)
             {
                 const maxTasks = licMgr.getMaxNumberOfTasks(this.providerName);
                 if (this.cachedTasks.length > maxTasks)

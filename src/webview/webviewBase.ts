@@ -19,7 +19,7 @@ import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
-	onIpc, IpcWvFocusChangedParams, IpcReadyCommand, IpcStateChangedMsg, IpcUpdateConfigCommand
+	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcStateChangedMsg, IpcUpdateConfigCommand
 } from "./common/ipc";
 
 
@@ -51,7 +51,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected onFocusChanged?(focused: boolean): void;
 	protected onMessageReceived?(e: IIpcMessage): void;
 	protected onReady?(): void;
-    protected onViewFocusChanged?(e: IpcWvFocusChangedParams): void;
+    protected onViewFocusChanged?(e: IpcFocusChangedParams): void;
 	protected onVisibilityChanged?(visible: boolean): void;
 	protected onWindowFocusChanged?(focused: boolean): void;
 	protected registerCommands?(): Disposable[];
@@ -262,7 +262,9 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	{
 		return {
 			isEnabled: this.wrapper.views.taskExplorer.enabled || this.wrapper.views.taskExplorerSideBar.enabled,
-			isLicensed: this.wrapper.licenseManager.isLicensed(),
+			isLicensed: this.wrapper.licenseManager.isLicensed,
+			isRegistered: this.wrapper.licenseManager.isRegistered,
+			isTrial: this.wrapper.licenseManager.isTrial,
 			license: await this.wrapper.licenseManager.getLicenseToken(),
 			nonce: this._cspNonce,
 			session: await this.wrapper.licenseManager.getSession(),

@@ -17,6 +17,8 @@ export interface BaseState
 {
 	isEnabled: boolean;
 	isLicensed: boolean;
+	isRegistered: boolean;
+	isTrial: boolean;
 	license?: ISessionToken;
 	nonce: string;
 	session?: AuthenticationSession;
@@ -59,7 +61,7 @@ export const onIpc = <T extends IpcMessage<any>>(type: T, msg: IIpcMessage, fn: 
  * IPC COMMAND TYPES : Webview -> Extension
  */
 
-export interface IpcWvFocusChangedParams
+export interface IpcFocusChangedParams
 {
 	focused: boolean;
 	inputFocused: boolean;
@@ -84,7 +86,7 @@ export interface IpcLogWriteCommandParams
 }
 
 export const IpcReadyCommand = new IpcCommand("webview/ready");
-export const IpcFocusChangedCommand = new IpcCommand<IpcWvFocusChangedParams>("webview/focus");
+export const IpcFocusChangedCommand = new IpcCommand<IpcFocusChangedParams>("webview/focus");
 export const IpcExecCommand = new IpcCommand<IpcExecCommandParams>("command/execute");
 export const IpcExecCustomCommand = new IpcCommand<IpcExecCommandParams>("command/custom/execute");
 export const IpcUpdateConfigCommand = new IpcCommand<IpcUpdateConfigCommandParams>("config/update");

@@ -10,6 +10,7 @@ import { TeServer } from "./auth/server";
 import { TeFileCache } from "./fileCache";
 import * as utilities from "./utils/utils";
 import * as sorters from "./utils/sortTasks";
+import { TeStatusBar } from "./statusBarItem";
 import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
 import { IStorage } from "../interface/IStorage";
@@ -35,7 +36,6 @@ import { LicenseManager } from "./auth/licenseManager";
 import { BatchTaskProvider } from "../providers/batch";
 import { MavenTaskProvider } from "../providers/maven";
 import { GruntTaskProvider } from "../providers/grunt";
-import { registerStatusBarItem } from "./statusBarItem";
 import { GradleTaskProvider } from "../providers/gradle";
 import { PipenvTaskProvider } from "../providers/pipenv";
 import { PythonTaskProvider } from "../providers/python";
@@ -87,6 +87,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
 	private readonly _fileCache: TeFileCache;
+	private readonly _statusBar: TeStatusBar;
     private readonly _taskWatcher: TaskWatcher;
 	private readonly _licensePage: LicensePage;
 	private readonly _welcomePage: WelcomePage;
@@ -125,6 +126,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
 
 		this._teContext = new TeContext();
+		this._statusBar = new TeStatusBar();
 		this._fileCache = new TeFileCache(this);
 		this._fileWatcher = new TeFileWatcher(this);
 		this._configWatcher = new TeConfigWatcher(this);
@@ -182,6 +184,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._usage,
 			this._onReady,
 			this._homeView,
+			this._statusBar,
             this._taskWatcher,
             this._taskManager,
 			this._treeManager,
@@ -223,10 +226,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// Register global commands
 		//
 		this.registerGlobalCommands();
-		//
-		// Register global status bar item
-		//
-		registerStatusBarItem(this._context);
 		//
 		// Register all task provider services, i.e. ant, batch, bash, python, etc...
 		//
@@ -439,7 +438,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get busy(): boolean {
 		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy() || this._treeManager.isBusy() ||
-			   this._fileWatcher.isBusy() || this._configWatcher.isBusy() || this._licenseManager.isBusy();
+			   this._fileWatcher.isBusy() || this._configWatcher.isBusy() || this._licenseManager.isBusy;
 	}
 
 	get cacheBuster(): string {
@@ -573,6 +572,10 @@ export class TeWrapper implements ITeWrapper, Disposable
         return sorters;
     }
 
+	get statusBar(): TeStatusBar {
+		return this._statusBar;
+	}
+
 	get storage(): IStorage {
 		return this._storage;
 	}
@@ -640,30 +643,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get wsfolder(): WorkspaceFolder {
 		return (workspace.workspaceFolders as WorkspaceFolder[])[0];
 	}
-
-	// await window.withProgress(
-	// {
-	// 	location: ProgressLocation.Window,
-	// 	cancellable: false,
-	// 	title: "ExtJs"
-	// },
-	// async (progress) => _run(progress));
-
-    // private updateProgress = async(action: string, pct: number) =>
-    // {
-    //     (this.progress as Progress<{ message: string }>).report({
-    //         message: `: Parsing ${action} ${pct}%`
-    //     });
-    //     await utils.sleep(1); // let progress update
-    // };
-
-	// get subscription() {
-	// 	return this._subscription;
-	// }
-
-	// get statusBar() {
-	// 	return this._statusBarController;
-	// }
 
 	// get telemetry(): TelemetryService {
 	// 	return this._telemetry;

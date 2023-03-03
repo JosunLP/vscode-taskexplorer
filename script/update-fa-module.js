@@ -6,7 +6,9 @@
 
 const fs = require("fs"),
       path = require("path"),
-      iconDefs = {},
+      execSync = require("child_process").execSync
+
+const iconDefs = {},
       iconVars = [],
       faZipPath = path.join(__dirname, "Subset.zip"),
       faFontSrcPath = path.resolve(__dirname, "..", "res", "font"),
@@ -16,14 +18,17 @@ const fs = require("fs"),
       faVars_scss = fs.readFileSync(faScssVarsPath).toString(),
       regex = /(?:^\$fa\-var\-)([a-z0-9\-]*?): *(\\[0-9a-f]{1,4});/gmi,
       regex2 = / +icons:\s*(\{[^]+\}) as IDictionary<string>/gmi,
-      execSync = require("child_process").execSync;
+      doExtractFromFaZip = process.argv.includes("-x") || process.argv.includes("--extract");
 
 let match;
 let fa_ts = fs.readFileSync(faTsModulePath).toString();
 
-execSync(`7za.exe e -tzip ${faZipPath} -o .`, { cwd: __dirname });
-copyFolderRecursiveSync(path.join(__dirname, "fontawesome-subset", "scss"), faScssSrcPath);
-copyFolderRecursiveSync(path.join(__dirname, "fontawesome-subset", "webfonts", /\.woff2/), faFontSrcPath);
+if (doExtractFromFaZip)
+{
+    execSync(`7za.exe e -tzip ${faZipPath} -o .`, { cwd: __dirname });
+    copyFolderRecursiveSync(path.join(__dirname, "fontawesome-subset", "scss"), faScssSrcPath);
+    copyFolderRecursiveSync(path.join(__dirname, "fontawesome-subset", "webfonts", /\.woff2/), faFontSrcPath);
+}
 
 while ((match = regex.exec(faVars_scss)) !== null) { iconVars.push({ a: match[1], b: match[2] }) }
 
@@ -36,8 +41,11 @@ if ((match = regex2.exec(fa_ts)) !== null)
     fs.writeFileSync(faTsModulePath, fa_ts);
 }
 
-fs.unlinkSync(faZipPath);
-fs.unlinkSync(path.join(__dirname, "fontawesome-subset"));
+if (doExtractFromFaZip)
+{
+    fs.unlinkSync(faZipPath);
+    fs.unlinkSync(path.join(__dirname, "fontawesome-subset"));
+}
 
 const copyFolderRecursiveSync = (source, target, filter) =>
 {

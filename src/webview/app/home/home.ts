@@ -46,8 +46,8 @@ export class HomeWebviewApp extends TeWebviewApp<State>
             case "enterLicense":
                 this.enterLicense();
                 break;
-            case "getLicense":
-                this.getLicense();
+            case "extendTrial":
+                this.extendTrial();
                 break;
             case "showLicensePage":
                 this.showLicensePage();
@@ -62,7 +62,7 @@ export class HomeWebviewApp extends TeWebviewApp<State>
 	}
 
 	private enterLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.enterLicense"});
-    private getLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.getLicense"});
+    private extendTrial = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.extendTrial"});
     private showReleaseNotes = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.releaseNotes.show"});
     private showParsingReport = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.parsingReport.show"});
     private showLicensePage = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.licensePage.show"});

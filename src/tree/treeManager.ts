@@ -9,7 +9,6 @@ import { isDirectory } from "../lib/utils/fs";
 import { TaskTreeBuilder } from "./treeBuilder";
 import { FavoritesFolder } from "./favoritesFolder";
 import { LastTasksFolder } from "./lastTasksFolder";
-import { statusBarItem } from "../lib/statusBarItem";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
@@ -57,7 +56,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             lastTasks: new LastTasksFolder(wrapper, this, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
         };
 
-        this._treeBuilder = new TaskTreeBuilder(this, this._specialFolders);
+        this._treeBuilder = new TaskTreeBuilder(wrapper);
 
         this._views = {
             taskExplorer: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer", "taskTreeExplorer"),
@@ -271,7 +270,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         if (this._tasks.length === 0 || !this.currentInvalidation || this.currentInvalidation  === "Workspace" || this.currentInvalidation === "tsc")
         {
             this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
-            statusBarItem.update("Requesting all tasks from all providers");
+            this.wrapper.statusBar.update("Requesting all tasks from all providers");
             this._tasks = await tasks.fetchTasks();
             //
             // Process the tasks cache array for any removals that might need to be made
@@ -282,7 +281,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {   //
             const taskName = getTaskTypeFriendlyName(this.currentInvalidation);
             this.wrapper.log.write(`   fetching ${taskName} tasks via VSCode fetchTasks call`, 1, logPad);
-            statusBarItem.update("Requesting  tasks from " + taskName + " task provider");
+            this.wrapper.statusBar.update("Requesting  tasks from " + taskName + " task provider");
             //
             // Get all tasks of the type defined in 'currentInvalidation' from VSCode, remove
             // all tasks of the type defined in 'currentInvalidation' from the tasks list cache,
@@ -511,7 +510,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             [ "current # of tasks", tasks.length ], [ "current # of tree folders", taskTree.length ],
             [ "project path removed", uri.fsPath ]
         ]);
-        statusBarItem.update("Deleting all tasks from removed project folder");
+        this.wrapper.statusBar.update("Deleting all tasks from removed project folder");
         tasks.reverse().forEach((item, index, object) =>
         {
             if (item.definition.uri && item.definition.uri.fsPath.startsWith(uri.fsPath))

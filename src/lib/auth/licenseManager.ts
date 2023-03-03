@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import { TeWrapper } from "../wrapper";
 import { ITeLicenseManager } from "../../interface";
@@ -12,61 +11,60 @@ import { AuthenticationSession, Disposable, env, Event, EventEmitter, InputBoxOp
 
 export class LicenseManager implements ITeLicenseManager, Disposable
 {
-	private disposables: Disposable[] = [];
-	private busy = false;
-	private wrapper: TeWrapper;
-	private licensed = false;
 	private numTasks = 0;
+	private busy = false;
+	private trial = false;
+	private licensed = false;
+	private registered = false;
 	private maxFreeTasks = 500;
 	private maxFreeTaskFiles = 100;
 	private maxTasksReached = false;
-	private readonly _server: TeServer;
-	private _auth: TeAuthenticationProvider;
 	private maxFreeTasksForTaskType = 100;
 	private maxFreeTasksForScriptType = 50;
-    private _onSessionChange: EventEmitter<TeSessionChangeEvent>;
+	private readonly _server: TeServer;
+	private readonly _disposables: Disposable[] = [];
+	private readonly _auth: TeAuthenticationProvider;
+    private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
 
 
-	constructor(wrapper: TeWrapper)
+	constructor(private readonly wrapper: TeWrapper)
     {
-		this.wrapper = wrapper;
 		this._server = new TeServer(wrapper);
 		this._auth = new TeAuthenticationProvider(wrapper);
 		this._auth.onDidChangeSessions(this.onSessionChanged);
 		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
-		this.disposables.push(
+		this._disposables.push(
 			this._auth,
 			this._onSessionChange,
-			registerCommand(Commands.EnterLicense, () => this.enterLicenseKey(), this),
-			registerCommand(Commands.GetLicense, () => this.getLicense(), this)
+			registerCommand(Commands.EnterLicense, this.enterLicenseKey, this),
+			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
+			registerCommand(Commands.Register, this.register, this)
 		);
     }
 
 
-	async checkLicense(logPad = "   ")
+	dispose = () =>
 	{
-		const storedLicenseKey = await this.getLicenseKey();
-		this.wrapper.log.methodStart("license manager check license", 1, logPad, false, [
-			[ "license key", storedLicenseKey ?? "n/a" ], [ "machine id", env.machineId ]
-		]);
-		if (storedLicenseKey) {
-			this.licensed = await this.validateLicense(storedLicenseKey, logPad + "   ");
-		}
-		else {
-			this.licensed = false;
-		}
-		this.wrapper.log.methodDone("license manager check license", 1, logPad, [[ "is licensed", this.licensed ]]);
-	}
-
-
-	dispose()
-	{
-		this.disposables.forEach((d) => {
-            d.dispose();
-        });
+		this._disposables.forEach((d) => d.dispose());
 		this.numTasks = 0;
+	};
+
+
+	get isBusy() {
+		return this.busy;
 	}
 
+	get isLicensed() {
+		return this.licensed;
+	}
+
+	get isRegistered() {
+		return this.registered;
+	}
+
+	get isTrial() {
+		return this.trial;
+	}
 
     get onDidSessionChange(): Event<TeSessionChangeEvent> {
         return this._onSessionChange.event;
@@ -79,6 +77,32 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	get serverToken(): string {
 		return this.wrapper.server.serverToken;
 	}
+
+
+	beginTrial = async() =>
+	{
+		this.wrapper.log.methodStart("get trial license command", 1, "", true);
+		const newKey = await this.requestLicense("trial", "   ");
+		const panel = await this.wrapper.licensePage.show(undefined, newKey);
+		this.wrapper.log.methodDone("get trial license command", 1);
+		return { panel: panel.view, newKey };
+	};
+
+
+	checkLicense = async(logPad = "   ") =>
+	{
+		const storedLicenseKey = await this.getLicenseKey();
+		this.wrapper.log.methodStart("license manager check license", 1, logPad, false, [
+			[ "license key", storedLicenseKey ?? "n/a" ], [ "machine id", env.machineId ]
+		]);
+		if (storedLicenseKey) {
+			this.licensed = await this.validateLicense(storedLicenseKey, logPad + "   ");
+		}
+		else {
+			this.licensed = false;
+		}
+		this.wrapper.log.methodDone("license manager check license", 1, logPad, [[ "is licensed", this.licensed ]]);
+	};
 
 
 	private displayPopup = async (message: string) =>
@@ -99,7 +123,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	async enterLicenseKey()
+	enterLicenseKey = async() =>
 	{
 		this.wrapper.log.methodStart("enter license key", 1);
 		const opts: InputBoxOptions = { prompt: "Enter license key" };
@@ -125,15 +149,15 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		}
 		catch (e) {}
 		this.wrapper.log.methodDone("enter license key", 1);
-	}
+	};
 
 
-	async getLicense()
+	extendTrial = async() =>
 	{
-		this.wrapper.log.methodStart("get 30-day license command", 1, "", true);
-		const newKey = await this.requestLicense("   ");
+		this.wrapper.log.methodStart("get trial extension license command", 1, "", true);
+		const newKey = await this.requestLicense("30Day", "   ");
 		const panel = await this.wrapper.licensePage.show(undefined, newKey);
-		this.wrapper.log.methodDone("get 30-day license command", 1);
+		this.wrapper.log.methodDone("get trial extension license command", 1);
 		return { panel: panel.view, newKey };
 	};
 
@@ -159,30 +183,35 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	getSession = async(): Promise<AuthenticationSession |  undefined> =>  (await this._auth.getSessions())[0];
 
 
-	getVersion = () => this.wrapper.version;
-
-
-	isBusy = () => this.busy;
-
-
-	isLicensed = () => this.licensed;
-
-
 	private onSessionChanged = (e: TeSessionChangeEvent) => this._onSessionChange.fire(e);
 
 
-	requestLicense = async(logPad: string) =>
+	register = async() =>
+	{
+		await this.wrapper.utils.timeout(1);
+		// this.wrapper.log.methodStart("register command", 1, "", true);
+		// const newKey = await this.requestLicense("   ");
+		// const panel = await this.wrapper.licensePage.show(undefined, newKey);
+		// // this.wrapper.utils.openUrl("https://app1.spmeesseman.com/register");
+		// this.wrapper.log.methodDone("register command", 1);
+		// return { panel: panel.view, newKey };
+	};
+
+
+	requestLicense = async(type: "trial" | "30Day", logPad: string) =>
 	{
 		let token: string | undefined;
 		this.busy = true;
 
 		this.wrapper.log.methodStart("request license", 1, logPad);
 
-		if (await this.wrapper.storage.getSecret("taskexplorer.licenseKey30Day") !== undefined)
+		if (await this.wrapper.storage.getSecret(`taskexplorer.licenseKey${type}`) !== undefined)
 		{   // this.log("   a 30-day license has already been allocated to this machine", logPad);
 			this.busy = false;
 			return;
 		}
+
+		this.wrapper.statusBar.update(`Requesting ${type} license`);
 
 		const rsp = await this.wrapper.server.request("/token",
 		{
@@ -205,6 +234,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		}
 
 		this.busy = false;
+		this.wrapper.statusBar.update("");
 		this.wrapper.log.methodDone("request license", 1, logPad, [[ "30-day key", token ]]);
 		return token;
 	};
@@ -249,7 +279,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	setMaxTasksReached = (maxReached: boolean) => this.maxTasksReached = maxReached;
 
 
-	async setTasks(tasks: Task[], logPad = "   ")
+	setTasks = async(tasks: Task[], logPad = "   ") =>
 	{
 		if (this.numTasks === tasks.length) {
 			return;
@@ -279,7 +309,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		}
 
 		this.wrapper.log.methodDone("license manager set tasks", 1, logPad);
-	}
+	};
 
 
 	setTestData = (data: any) =>
@@ -296,6 +326,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.busy = true;
 		let licensed = false;
 
+		this.wrapper.statusBar.update("Checking license mode");
+
 		const rsp = await this.wrapper.server.request(this._auth.apiEndpoint,
 		{
 			licensekey: licenseKey,
@@ -308,6 +340,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		licensed = rsp.success;
 
 		this.busy = false;
+		this.wrapper.statusBar.update("");
 		this.wrapper.log.methodDone("validate license", 1, logPad, [[ "is valid license", licensed ]]);
 		return licensed;
 	};

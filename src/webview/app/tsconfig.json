@@ -7,6 +7,7 @@
 		"paths": {
 			"@env/*": [ "src/lib/env/browser/*" ]
 		},
+		// "rootDir": "../..",
 		"useDefineForClassFields": false,
 		"skipLibCheck": true
 	},

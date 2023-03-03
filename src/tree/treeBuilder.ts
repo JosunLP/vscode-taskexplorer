@@ -5,12 +5,11 @@ import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
 import { Strings } from "../lib/constants";
+import { TeWrapper } from "../lib/wrapper";
 import * as utils from "../lib/utils/utils";
-import { TaskTreeManager } from "./treeManager";
 import * as sortTasks from "../lib/utils/sortTasks";
 import { SpecialTaskFolder } from "./specialFolder";
 import { IDictionary, TaskMap } from "../interface";
-import { statusBarItem } from "../lib/statusBarItem";
 import { configuration } from "../lib/configuration";
 import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Disposable, Task, TreeItemCollapsibleState } from "vscode";
@@ -19,17 +18,11 @@ import { Disposable, Task, TreeItemCollapsibleState } from "vscode";
 export class TaskTreeBuilder implements Disposable
 {
     private treeBuilding = false;
-    private treeManager: TaskTreeManager;
     private taskMap: TaskMap = {};
     private taskTree: TaskFolder[] | undefined | null | void = null;
-    private specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder };
 
 
-    constructor(treeManager: TaskTreeManager, specialFolders: { favorites: SpecialTaskFolder; lastTasks: SpecialTaskFolder })
-    {
-        this.treeManager = treeManager;
-        this.specialFolders = specialFolders;
-    }
+    constructor(private readonly wrapper: TeWrapper) {}
 
     dispose()
     {
@@ -77,27 +70,27 @@ export class TaskTreeBuilder implements Disposable
         const folders: IDictionary<TaskFolder> = {};
         const files: IDictionary<TaskFile> = {};
         let sortedFolders: TaskFolder[];
-        const tasks = this.treeManager.getTasks();
+        const tasks = this.wrapper.treeManager.getTasks();
 
         log.methodStart("build task tree", logLevel, logPad);
 
         //
         // The 'Last Tasks' folder will be 1st in the tree
         //
-        this.specialFolders.lastTasks.clearTaskItems();
-        if (this.specialFolders.lastTasks.isEnabled)
+        this.wrapper.treeManager.lastTasksFolder.clearTaskItems();
+        if (this.wrapper.treeManager.lastTasksFolder.isEnabled)
         {
-            folders[this.specialFolders.lastTasks.label as string] = this.specialFolders.lastTasks;
+            folders[this.wrapper.treeManager.lastTasksFolder.label as string] = this.wrapper.treeManager.lastTasksFolder;
         }
 
         //
         // The 'Favorites' folder will be 2nd in the tree (or 1st if configured to hide
         // the 'Last Tasks' folder)
         //
-        this.specialFolders.favorites.clearTaskItems();
-        if (this.specialFolders.favorites.isEnabled)
+        this.wrapper.treeManager.favoritesFolder.clearTaskItems();
+        if (this.wrapper.treeManager.favoritesFolder.isEnabled)
         {
-            folders[this.specialFolders.favorites.label as string] = this.specialFolders.favorites;
+            folders[this.wrapper.treeManager.favoritesFolder.label as string] = this.wrapper.treeManager.favoritesFolder;
         }
 
         //
@@ -222,8 +215,8 @@ export class TaskTreeBuilder implements Disposable
             //
             // Maybe add this task to the 'Favorites' and 'Last Tasks' folders
             //
-            await this.specialFolders.lastTasks.addTaskFile(taskItem, logPad + "   ");
-            await this.specialFolders.favorites.addTaskFile(taskItem, logPad + "   ");
+            await this.wrapper.treeManager.lastTasksFolder.addTaskFile(taskItem, logPad + "   ");
+            await this.wrapper.treeManager.favoritesFolder.addTaskFile(taskItem, logPad + "   ");
         }
 
         log.methodDone("build task tree list", 2, logPad);
@@ -234,12 +227,12 @@ export class TaskTreeBuilder implements Disposable
     {
         log.methodStart("create task tree", logLevel, logPad);
         this.treeBuilding = true;
-        statusBarItem.show();
+        this.wrapper.statusBar.show();
         this.taskTree = await this.buildTaskItemTree(logPad + "   ", logLevel + 1);
-        statusBarItem.update("Building task explorer tree");
-        statusBarItem.hide();
+        this.wrapper.statusBar.update("Building task explorer tree");
+        this.wrapper.statusBar.hide();
         this.treeBuilding = false;
-        log.methodDone("create task tree", logLevel, logPad, [[ "current task count", this.treeManager.getTasks().length ]]);
+        log.methodDone("create task tree", logLevel, logPad, [[ "current task count", this.wrapper.treeManager.getTasks().length ]]);
     };
 
 

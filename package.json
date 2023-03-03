@@ -361,24 +361,16 @@
                 "enablement": "false"
             },
             {
+                "command": "taskexplorer.register",
+                "title": "%command.register%"
+            },
+            {
                 "command": "taskexplorer.enterLicense",
                 "title": "%command.enterLicense%"
             },
             {
-                "command": "taskexplorer.getLicense",
-                "title": "%command.getLicense%"
-            },
-            {
-                "command": "taskexplorer.view.licensePage.show",
-                "title": "%command.view.licensePage.show%"
-            },
-            {
-                "command": "taskexplorer.view.welcome.show",
-                "title": "%command.view.welcome.show%"
-            },
-            {
-                "command": "taskexplorer.view.releaseNotes.show",
-                "title": "%command.view.releaseNotes.show%"
+                "command": "taskexplorer.extendTrial",
+                "title": "%command.extendTrial%"
             },
             {
                 "command": "taskexplorer.openBugReports",
@@ -409,6 +401,18 @@
                     "light": "res/img/light/paypal.svg",
                     "dark": "res/img/dark/paypal.svg"
                 }
+            },
+            {
+                "command": "taskexplorer.view.licensePage.show",
+                "title": "%command.view.licensePage.show%"
+            },
+            {
+                "command": "taskexplorer.view.welcome.show",
+                "title": "%command.view.welcome.show%"
+            },
+            {
+                "command": "taskexplorer.view.releaseNotes.show",
+                "title": "%command.view.releaseNotes.show%"
             },
             {
                 "command": "taskexplorer.view.parsingReport.show",
@@ -691,8 +695,12 @@
                     "when": "taskexplorer:enabled"
                 },
                 {
+                    "command": "taskexplorer.extendTrial",
+                    "when": "false"
+                },
+                {
                     "command": "taskexplorer.donate",
-                    "when": "taskexplorer:enabled"
+                    "when": "false"
                 },
                 {
                     "command": "taskexplorer.clearTaskStats",

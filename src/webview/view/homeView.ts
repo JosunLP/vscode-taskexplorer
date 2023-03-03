@@ -119,7 +119,7 @@ export class HomeView extends TeWebviewView<State>
 
 	protected override onHtmlFinalize = async (html: string) =>
 	{
-		const isLic = this.wrapper.licenseManager.isLicensed();
+		const isLic = this.wrapper.licenseManager.isLicensed;
     	html = html.replace("#{taskCounts.length}", this.wrapper.treeManager.getTasks().length.toString())
 				   .replace("#{taskCounts.today}", this.wrapper.usage.getTodayCount("").toString())
 				   .replace("#{license.status}", isLic ? "LICENSED" : "UNLICENSED")

@@ -177,7 +177,7 @@ suite("License Manager Tests", () =>
 		await teWrapper.licensePage.show();
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
 		await utils.sleep(10);
-		await teWrapper.licensePage.view?.webview.postMessage({ command: "getLicense" });
+		await teWrapper.licensePage.view?.webview.postMessage({ command: "extendTrial" });
 		await setTasks();
 		await utils.sleep(50);
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "showParsingReport" });
@@ -437,7 +437,7 @@ suite("License Manager Tests", () =>
 				  tc.slowTime.storageSecretRead + tc.slowTime.closeEditors + 1100);
 		await teWrapper.licensePage.show();
 		await utils.sleep(50);
-		const result = await teWrapper.licensePage.view?.webview.postMessage({ command: "getLicense" });
+		const result = await teWrapper.licensePage.view?.webview.postMessage({ command: "extendTrial" });
 		await utils.sleep(500);
 		expect(result).to.be.equal(true);
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.get30DayLicense);
@@ -453,7 +453,7 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.get30DayLicense + tc.slowTime.storageSecretUpdate);
 		await teWrapper.storage.updateSecret("taskexplorer.licenseKey30Day", undefined);
-		const result = await executeTeCommand<{ panel: any; newKey: any }>("getLicense");
+		const result = await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.get30DayLicense);
 		await utils.closeEditors();
 		expect(result).to.be.an("object");
@@ -467,7 +467,7 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.standard + tc.slowTime.closeEditors + tc.slowTime.storageSecretUpdate);
-		const result = await executeTeCommand<{ panel: any; newKey: any }>("getLicense");
+		const result = await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
 		await utils.closeEditors();
 		await teWrapper.storage.updateSecret("taskexplorer.licenseKey30Day", undefined);
 		expect(result).to.be.an("object");
