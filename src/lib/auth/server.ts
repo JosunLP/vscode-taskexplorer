@@ -1,3 +1,5 @@
+/* eslint-disable no-redeclare */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import { request } from "https";
 // import fetch from "@env/fetch";
@@ -6,22 +8,21 @@ import { Disposable } from "vscode";
 import { figures } from "../figures";
 import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
-import { ISessionToken } from "../../interface/IAuthentication";
 
-
-export interface IServerResponseData
+export interface ServerError extends Error
 {
-	token?: ISessionToken;
-	success: boolean;
-	message: string;
-}
-
-export interface IServerResponse
-{
-	data: IServerResponseData;
 	status: number | undefined;
-	success: boolean;
+	success: false;
 }
+interface ServerErrorConstructor extends ErrorConstructor {
+    new(message: string | undefined, status: number | undefined): ServerError;
+    (message: string | undefined, status: number | undefined): ServerError;
+    readonly prototype: ServerError;
+}
+export declare const ServerError: ServerErrorConstructor;
+
+export type ITeApiEndpoint = "license/validate" | "login" | "register" | "register/trial/start" | "register/trial/extend";
+
 
 export class TeServer
 {
@@ -29,37 +30,51 @@ export class TeServer
 	private readonly MAX_CONNECTION_TIME = 7500;
 	private busy = false;
 	private port = 443;
-	private host = "license.spmeesseman.com";
-	private idToken = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
+	private readonly clientId = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 
 
-    constructor(private readonly wrapper: TeWrapper)
-    {
-    }
+    constructor(private readonly wrapper: TeWrapper) {}
 
 
-	private getDefaultServerOptions = (apiEndpoint: string) =>
+	get isBusy() {
+		return this.busy;
+	}
+
+
+	private getApiEndpointPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
+
+
+	private getApiServer = () =>
+	{
+		switch (this.wrapper.env) {
+			case "dev":
+				return "127.0.0.1";
+				// return "license.spmeesseman.com";
+			case "tests":
+				return "license.spmeesseman.com";
+			case "production":
+				return "license.spmeesseman.com"; // "license.spmeesseman.com"
+		}
+	};
+
+
+	private getDefaultServerOptions = (apiEndpoint: ITeApiEndpoint) =>
 	{
 		return {
-			hostname: this.host,
+			hostname: this.getApiServer(),
 			port: this.port,
-			path: apiEndpoint,
+			path: this.getApiEndpointPath(apiEndpoint),
 			method: "POST",
 			//
 			// Timeout don't work worth a s***.  Do a promise race in request()
 			//
-			timeout: this.host !== "localhost" ? 4000 : /* istanbul ignore next*/1250,
+			timeout: this.getApiServer() !== "127.0.0.1" ? 4000 : /* istanbul ignore next*/1250,
 			headers: {
-				"token": this.idToken,
-				// eslint-disable-next-line @typescript-eslint/naming-convention
+				"token": this.clientId,
+				"User-Agent": "vscode-taskexplorer",
 				"Content-Type": "application/json"
 			}
 		};
-	};
-
-
-	get serverToken() {
-		return this.idToken;
 	};
 
 
@@ -119,31 +134,24 @@ export class TeServer
 	};
 
 
-	request = (endpoint: string, params: any, logPad: string) =>
+	request = async <T>(endpoint: ITeApiEndpoint, logPad: string, params: any) =>
 	{
-		return Promise.race<IServerResponse>(
+		return Promise.race<T>(
 		[
-			this._request(endpoint, params, logPad),
-			new Promise<IServerResponse>(resolve => setTimeout(resolve, this.MAX_CONNECTION_TIME,
-			<IServerResponse> {
-				data: {
-					success: false,
-					message: `Maximum connection attempt time of ${this.MAX_CONNECTION_TIME}ms reached`
-				},
-				status: undefined, success: false
-			}))
+			this._request<T>(endpoint, params, logPad),
+			new Promise<T>(reject => setTimeout(reject, this.MAX_CONNECTION_TIME, new ServerError("Timed out", 408)))
 		]);
 	};
 
 
-    private _request = (endpoint: string, params: any, logPad: string) =>
+    private _request = <T>(endpoint: ITeApiEndpoint, params: any, logPad: string) =>
 	{
 		this.busy = true;
 
-		return new Promise<IServerResponse>(async(resolve) =>
+		return new Promise<T>((resolve, reject) =>
 		{
 			let rspData = "";
-			this.wrapper.log.methodStart("request license", 1, logPad, false, [[ "host", this.host ], [ "port", this.port ]]);
+			this.wrapper.log.methodStart("request license", 1, logPad, false, [[ "host", this.getApiServer() ], [ "port", this.port ]]);
 			this.log("starting https request to license server", logPad + "   ");
 
 			const req = request(this.getDefaultServerOptions(endpoint), (res) =>
@@ -151,18 +159,29 @@ export class TeServer
 				res.on("data", (chunk) => { rspData += chunk; });
 				res.on("end", async() =>
 				{
-                    let jso = { success: false, message: "" };
-                    try {
-                        jso = JSON.parse(rspData);
-                    }
-                    catch {}
-                    this.logServerResponse(res, jso, rspData, logPad);
-					this.busy = false;
-					resolve(<IServerResponse>{
-                        data: jso,
-                        status: res.statusCode,
-                        success: res.statusCode === 200 && jso.success && jso.message === "Success"
-                    });
+					if (res.statusCode !== 200)
+					{
+						this.busy = false;
+						reject(new ServerError(res.statusMessage, res.statusCode));
+					}
+					else {
+						try
+						{   const jso = JSON.parse(rspData);
+							this.logServerResponse(res, jso, rspData, logPad);
+							resolve(jso as T);
+						}
+						catch (e)
+						{
+							reject(<ServerError>{
+								message: e.message,
+								status: undefined,
+								success: false
+							});
+						}
+						finally {
+							this.busy = false;
+						}
+					}
 				});
 			});
 
@@ -171,14 +190,7 @@ export class TeServer
 			{   // Not going to fail unless i birth a bug
 				this.onServerError(e, "request", logPad);
 				this.busy = false;
-				resolve(<IServerResponse>{
-					data: {
-						success: false,
-						message: e.message
-					},
-					status: undefined,
-					success: false
-				});
+				reject(e);
 			});
 
 			req.write(JSON.stringify(params), () =>
@@ -213,9 +225,9 @@ export class TeServer
 	// 		method: "POST",
 	// 		agent: getProxyAgent(),
 	// 		headers: {
-	// 			// "Authorization": `Bearer ${codeSession.token}`,
+	// 			// "Authorization": `Bearer ${session.token}`,
 	// 			"Authorization": `Bearer ${this.token}`,
-	// 			"User-Agent": "VSCode-TaskExplorer",
+	// 			"User-Agent": "vscode-taskexplorer",
 	// 			"Content-Type": "application/json",
 	// 		},
 	// 		body: JSON.stringify(

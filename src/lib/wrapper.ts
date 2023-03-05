@@ -84,6 +84,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _usage: Usage;
 	private readonly _teApi: TeApi;
 	private readonly _version: string;
+	private readonly _server: TeServer;
 	private readonly _storage: IStorage;
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
@@ -133,6 +134,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._fileWatcher = new TeFileWatcher(this);
 		this._configWatcher = new TeConfigWatcher(this);
 
+		this._server = new TeServer(this);
 		this._licenseManager = new LicenseManager(this);
 
 		this._treeManager = new TaskTreeManager(this);
@@ -563,7 +565,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	}
 
 	get server(): TeServer {
-		return this.licenseManager.server;
+		return this.server;
 	}
 
     get sidebar(): TaskTree {

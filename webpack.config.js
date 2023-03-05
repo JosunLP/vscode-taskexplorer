@@ -463,7 +463,7 @@ const output = (env, wpConfig) =>
 	if (env.build === "webview")
 	{
 		wpConfig.output = {
-			clean: env.clean === true ? { keep: /(img|font|readme)[\\/]/ } : undefined,
+			clean: env.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
 			path: path.join(__dirname, "res"),
 			publicPath: "#{webroot}/",
 			filename: (pathData, assetInfo) =>

@@ -18,14 +18,15 @@ export type { ITeFileWatcher } from "./ITeFileWatcher";
 export type { ITaskDefinition } from "./ITaskDefinition";
 export type { ITeConfigWatcher } from "./ITeConfigWatcher";
 export type { ITaskExplorerApi } from "./ITaskExplorerApi";
-export type { ITeLicenseManager } from "./ITeLicenseManager";
 export type { ITaskExplorerProvider } from "./ITaskProvider";
 export type { IExternalProvider } from "./IExternalProvider";
-export type { TeSessionChangeEvent, ISessionToken } from "./IAuthentication";
 export type { IStorage, StorageChangeEvent } from "./IStorage";
 export type { ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
 export type { ITeTaskManager, TaskMap } from "./ITeTaskManager";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
+export type { ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionChangeEvent } from "./ITeLicenseManager";
 export type { ITeUsage, ITaskRuntimeInfo, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount } from "./ITeUsage";
 export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType } from "./ITeTask";
 export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, PromiseAdapter } from "./ITeUtilities";
+
+export { TeLicenseType } from "./ITeLicenseManager";

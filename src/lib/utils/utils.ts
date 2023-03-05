@@ -11,6 +11,16 @@ import { Commands, executeCommand } from "../command/command";
 import { WorkspaceFolder, Uri, workspace, window, env } from "vscode";
 
 
+const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+
+
+export const formatDate = (epochMs: number, format?: "datetime" | "date" | "time") =>
+{
+    const t = (new Date((epochMs ?? Date.now()) - tzOffset)).toISOString().slice(0, -1).split("T");
+    return (!format || format === "datetime" ? `${t[0]} ${t[1]}` : (format === "date" ? t[0] : t[1]));
+};
+
+
 export const getCombinedGlobPattern = (defaultPattern: string, globs: string[]) =>
 {
     if (globs && globs.length > 0)

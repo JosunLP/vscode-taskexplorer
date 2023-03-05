@@ -56,6 +56,7 @@ export type PinnedStorageKey = `taskexplorer.pinned.${TeTaskListType}`;
 
 export const StorageKeys =
 {
+    Account: "taskexplorer.account",
 	TaskUsage: "taskexplorer.taskUsage",
 	Usage: "taskexplorer.usage"
 };

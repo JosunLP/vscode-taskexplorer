@@ -56,6 +56,7 @@ export interface ITeTaskUtilities
 
 export interface ITeUtilities
 {
+	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;
 	getGlobPattern(taskType: string): string;

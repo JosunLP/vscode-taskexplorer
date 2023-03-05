@@ -29,7 +29,8 @@ const colors = figures.colors;
 
 const moduleMap: IDictionary<string> =
 {
-    TaskTreeDataProvider: "TREE"
+    TaskTreeDataProvider: "TREE",
+    LicenseManager: "AUTH"
 };
 
 const getStamp = () =>

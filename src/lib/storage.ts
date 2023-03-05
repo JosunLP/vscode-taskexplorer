@@ -129,7 +129,14 @@ class Storage implements IStorage, Memento
     }
 
 
-    getSecret = (key: string) => this.secrets.get(this.getKey(key));
+    // getSecret = <T>(key: string) => this.secrets.get(this.getKey(key));
+
+
+    getSecret = async <T = string>(key: string, defaultValue?: T) =>
+    {
+        const secret = await this.secrets.get(this.getKey(key));
+        return secret ? JSON.parse(secret) as T : defaultValue;
+    };
 
 
     // update = (key: string, value: any) => this.storage.update(key, value);
