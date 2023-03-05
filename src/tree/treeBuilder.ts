@@ -7,10 +7,10 @@ import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeGrouper } from "./treeGrouper";
 import { IDictionary, TaskMap } from "../interface";
-import { Disposable, Task, TreeItemCollapsibleState } from "vscode";
+import { Task, TreeItemCollapsibleState } from "vscode";
 
 
-export class TaskTreeBuilder implements Disposable
+export class TaskTreeBuilder
 {
     private treeBuilding = false;
     private taskMap: TaskMap = {};
@@ -21,12 +21,6 @@ export class TaskTreeBuilder implements Disposable
     constructor(private readonly wrapper: TeWrapper)
     {
         this._treeGrouper = new TaskTreeGrouper(wrapper);
-    }
-
-    dispose()
-    {
-        this.taskMap = {};
-        this.taskTree = null;
     }
 
 

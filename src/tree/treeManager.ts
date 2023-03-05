@@ -28,12 +28,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private readonly _onDidTaskCountChange: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onReady: EventEmitter<ITeTaskChangeEvent>;
 
-    private _specialFolders: {
+    private readonly _specialFolders: {
         favorites: FavoritesFolder;
         lastTasks: LastTasksFolder;
     };
 
-    private _views: {
+    private readonly _views: {
         taskExplorer: TeTreeView;
         taskExplorerSideBar: TeTreeView;
     };
@@ -64,7 +64,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._onReady,
             this._onDidTasksChange,
             this._onDidTaskCountChange,
-            this._treeBuilder,
             this._specialFolders.favorites,
             this._specialFolders.lastTasks,
             this._views.taskExplorer,

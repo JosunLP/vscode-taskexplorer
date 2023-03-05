@@ -25,13 +25,13 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
     {
         let taskMap = teWrapper.treeManager.getTaskMap();
 
-        if (!taskMap || teWrapper.utils.isObjectEmpty(taskMap) || !findIdInTaskMap(`:${taskType}:`, taskMap))
+        if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findIdInTaskMap(`:${taskType}:`, taskMap))
         {
             await waitForTeIdle(150, 1600);
             taskMap = teWrapper.treeManager.getTaskMap();
         }
 
-        if (!taskMap || teWrapper.utils.isObjectEmpty(taskMap) || !findIdInTaskMap(`:${taskType}:`, taskMap))
+        if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findIdInTaskMap(`:${taskType}:`, taskMap))
         {
             if (retries === 0) {
                 console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor("Task map is empty, retry", teWrapper.figures.colors.grey)}`);
@@ -41,7 +41,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
                 await refresh();
                 taskMap = teWrapper.treeManager.getTaskMap();
             }
-            if (!taskMap || teWrapper.utils.isObjectEmpty(taskMap))
+            if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap))
             {
                 if (retries === 40) {
                     console.log(`    ${teWrapper.figures.color.error} ${teWrapper.figures.withColor("Task map is empty, test will fail in 3, 2, 1...", teWrapper.figures.colors.grey)}`);
@@ -113,7 +113,7 @@ export const verifyTaskCountByTree = async(teWrapper: ITeWrapper, taskType: stri
     let taskMap = teWrapper.treeManager.getTaskMap();
     const _getCount = async() =>
     {
-        if (!taskMap || teWrapper.utils.isObjectEmpty(taskMap)) {
+        if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap)) {
             await refresh();
             taskMap = teWrapper.treeManager.getTaskMap();
         }

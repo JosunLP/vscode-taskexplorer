@@ -82,53 +82,53 @@ suite("Configuration / Settings Tests", () =>
         // 3-part i.e. taskexplorer.pathToPrograms.ant
         //
         let v = teWrapper.config.get<any>("pathToPrograms.ant");
-        expect(teWrapper.utils.isString(v)).to.equal(true);
+        expect(teWrapper.typeUtils.isString(v)).to.equal(true);
         v = teWrapper.config.get<any>("pathToPrograms");
-        expect(teWrapper.utils.isObject(v)).to.equal(true);
+        expect(teWrapper.typeUtils.isObject(v)).to.equal(true);
         let cv = v.ant;
         await teWrapper.config.updateWs("pathToPrograms.ant", "/my/path/to/ant");
         v = teWrapper.config.get<any>("pathToPrograms");
-        expect(teWrapper.utils.isObject(v) && v.ant === "/my/path/to/ant").to.equal(true);
+        expect(teWrapper.typeUtils.isObject(v) && v.ant === "/my/path/to/ant").to.equal(true);
         await teWrapper.config.updateWs("pathToPrograms.ant", cv);
         v = teWrapper.config.get<any>("pathToPrograms");
-        expect(teWrapper.utils.isObject(v) && v.ant === cv).to.equal(true);
+        expect(teWrapper.typeUtils.isObject(v) && v.ant === cv).to.equal(true);
         cv = teWrapper.config.get<any>("visual.disableAnimatedIcons");
-        expect(teWrapper.utils.isBoolean(cv)).to.equal(true);
+        expect(teWrapper.typeUtils.isBoolean(cv)).to.equal(true);
         await teWrapper.config.updateWs("visual.disableAnimatedIcons", false);
         v = teWrapper.config.get<any>("visual.disableAnimatedIcons");
-        expect(teWrapper.utils.isBoolean(v) && v === false).to.equal(true);
+        expect(teWrapper.typeUtils.isBoolean(v) && v === false).to.equal(true);
         await teWrapper.config.updateWs("visual.disableAnimatedIcons", cv);
         v = teWrapper.config.get<any>("visual.disableAnimatedIcons");
-        expect(teWrapper.utils.isBoolean(v) && v === cv).to.equal(true);
+        expect(teWrapper.typeUtils.isBoolean(v) && v === cv).to.equal(true);
         //
         // 4-part i.e. taskexplorer.specialFolders.folderState.lastTasks
         //
         const cv2 = cv = teWrapper.config.get<any>("specialFolders.folderState.lastTasks");
-        expect(teWrapper.utils.isString(cv) && teWrapper.utils.isString(cv2)).to.equal(true);
+        expect(teWrapper.typeUtils.isString(cv) && teWrapper.typeUtils.isString(cv2)).to.equal(true);
         await teWrapper.config.updateWs("specialFolders.folderState.lastTasks", "Collapsed");
         v = teWrapper.config.get<any>("specialFolders.folderState.lastTasks");
-        expect(teWrapper.utils.isString(v) && v === "Collapsed").to.equal(true);
+        expect(teWrapper.typeUtils.isString(v) && v === "Collapsed").to.equal(true);
         await teWrapper.config.updateWs("specialFolders.folderState.lastTasks", "Expanded");
         v = teWrapper.config.get<any>("specialFolders.folderState.lastTasks");
-        expect(teWrapper.utils.isString(v) && v === "Expanded").to.equal(true);
+        expect(teWrapper.typeUtils.isString(v) && v === "Expanded").to.equal(true);
         await teWrapper.config.updateWs("specialFolders.folderState.lastTasks", cv);
         v = teWrapper.config.get<any>("specialFolders.folderState.lastTasks");
-        expect(teWrapper.utils.isString(v) && v === cv).to.equal(true);
+        expect(teWrapper.typeUtils.isString(v) && v === cv).to.equal(true);
         cv = teWrapper.config.get<any>("specialFolders.folderState");
-        expect(teWrapper.utils.isObject(cv)).to.equal(true);
+        expect(teWrapper.typeUtils.isObject(cv)).to.equal(true);
         cv.lastTasks = "Collapsed";
         await teWrapper.config.updateWs("specialFolders.folderState", cv);
         v = teWrapper.config.get<any>("specialFolders.folderState.lastTasks");
-        expect(teWrapper.utils.isString(v) && v === "Collapsed").to.equal(true);
-        expect(teWrapper.utils.isObject(cv)).to.equal(true);
+        expect(teWrapper.typeUtils.isString(v) && v === "Collapsed").to.equal(true);
+        expect(teWrapper.typeUtils.isObject(cv)).to.equal(true);
         cv.lastTasks = "Expanded";
         await teWrapper.config.updateWs("specialFolders.folderState", cv);
         v = teWrapper.config.get<any>("specialFolders.folderState.lastTasks");
-        expect(teWrapper.utils.isString(v) && v === "Expanded").to.equal(true);
+        expect(teWrapper.typeUtils.isString(v) && v === "Expanded").to.equal(true);
         cv.lastTasks = cv2;
         await teWrapper.config.updateWs("specialFolders.folderState.lastTasks", cv2);
         v = teWrapper.config.get<any>("specialFolders.folderState.lastTasks");
-        expect(teWrapper.utils.isString(v) && v === cv2).to.equal(true);
+        expect(teWrapper.typeUtils.isString(v) && v === cv2).to.equal(true);
         //
         // Re-enable config watcher
         //

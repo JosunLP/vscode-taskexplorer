@@ -18,7 +18,7 @@ import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
 import { ExtensionContext, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
-	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeUtilities
+	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "./ITeUtilities";
 
 
@@ -63,6 +63,7 @@ export interface ITeWrapper
 	taskUsageView: ITeWebview;
 	taskCountView: ITeWebview;
 	taskUtils: ITeTaskUtilities;
+	typeUtils: ITeTypeUtilities;
 	usage: ITeUsage;
 	utils: ITeUtilities;
 	views: IDictionary<ITaskTreeView>;
