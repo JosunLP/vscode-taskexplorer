@@ -55,6 +55,7 @@ export interface ITeAccount
 	readonly name: string;
 	readonly orgId: number;
 	readonly trialId: number;
+	errorState?: boolean;
     license: ITeLicense;
     session: ITeSession;
 	verified: boolean;

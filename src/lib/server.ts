@@ -180,17 +180,18 @@ export class TeServer
 	};
 
 
-    private _request = <T>(endpoint: ITeApiEndpoint, logPad: string, params?: any) =>
+    private _request = <T>(endpoint: ITeApiEndpoint, logPad: string, params?: any): Promise<T> =>
 	{
 		this._busy = true;
 
 		return new Promise<T>((resolve, reject) =>
 		{
 			let rspData = "";
-			this.wrapper.log.methodStart("request license", 1, logPad, false, [[ "host", this.getApiServer() ], [ "port", this.getApiPort() ]]);
+			const options = this.getDefaultServerOptions(endpoint);
+			this.wrapper.log.methodStart("request license", 1, logPad, false, [[ "host", options.hostname ], [ "port", options.port ]]);
 			this.log("starting https request to license server", logPad + "   ");
 
-			const req = request(this.getDefaultServerOptions(endpoint), (res) =>
+			const req = request(options, (res) =>
 			{
 				res.on("data", (chunk) => { rspData += chunk; });
 				res.on("end", async() =>
@@ -206,13 +207,8 @@ export class TeServer
 							this.logServerResponse(res, jso, rspData, logPad);
 							resolve(jso as T);
 						}
-						catch (e)
-						{
-							reject(<ServerError>{
-								message: e.message,
-								status: undefined,
-								success: false
-							});
+						catch (e){
+							reject(e);
 						}
 						finally {
 							this._busy = false;
