@@ -335,8 +335,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 			const account = await this._licenseManager.getAccount(),
 				  rPath = await this.pathUtils.getInstallPath() + "\\dist\\",
 				  taskUsage = this.storage.get<any>(StorageKeys.TaskUsage, {}),
-				  allUsage = { usage: this._usage.getAll(), taskUsage, account };
-			await this.fs.writeFile(rPath + "te.json", JSON.stringify(allUsage, null, 3));
+				  allData = { usage: this._usage.getAll(), taskUsage, account };
+			await this.fs.writeFile(rPath + "te_data.json", JSON.stringify(allData, null, 3));
 		}
 
 		//

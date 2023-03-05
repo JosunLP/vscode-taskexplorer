@@ -9,7 +9,6 @@ import {
 	 ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeSession, ITeTaskChangeEvent,
 	 ITeLicense, TeLicenseState
 } from "../interface";
-import { setInterval } from "timers";
 
 
 export class LicenseManager implements ITeLicenseManager, Disposable
@@ -328,6 +327,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				[ "license id", this._account.license.id ], [ "trial id", this._account.trialId ],
 				[ "access token", this._account.session.token ], [ "license key", this._account.license.key ]
 			]);
+			/* istanbul ignore if */
+			if (this.wrapper.env === "dev") {
+				const rPath = await this.wrapper.pathUtils.getInstallPath() + "\\dist\\account_saved.json";
+				await this.wrapper.fs.writeFile(rPath, JSON.stringify(this._account, null, 3));
+			}
 		}
 		await this.wrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(this._account));
 		this.onSessionChanged({ added: [ this._account.session ], removed: [], changed: [] });
