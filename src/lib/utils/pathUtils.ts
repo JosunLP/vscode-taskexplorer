@@ -81,7 +81,7 @@ export const getTaskRelativePath = (task: Task) =>
             relativePath = dirname(task.name.substring(task.name.indexOf(" - ") + 3));
         }
     }
-    return relativePath;
+    return relativePath as string;
 };
 
 

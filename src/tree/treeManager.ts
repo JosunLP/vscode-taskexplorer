@@ -5,16 +5,13 @@ import { TaskFolder } from "./folder";
 import { TeTreeView } from "./treeView";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { isDirectory } from "../lib/utils/fs";
 import { TaskTreeBuilder } from "./treeBuilder";
 import { FavoritesFolder } from "./favoritesFolder";
 import { LastTasksFolder } from "./lastTasksFolder";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
-import { getTaskRelativePath } from "../lib/utils/pathUtils";
 import { Commands, registerCommand } from "../lib/command/command";
-import { getTaskTypeFriendlyName, isScriptType } from "../lib/utils/taskUtils";
 import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask } from "../interface";
 import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
 
@@ -182,7 +179,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         else // if (selection instanceof TaskItem)
         {
             uri = false;
-            if (isScriptType(selection.taskSource))
+            if (this.wrapper.taskUtils.isScriptType(selection.taskSource))
             {
                 const resourceUri = selection.resourceUri as Uri;
                 this.wrapper.log.value("   adding file path", resourceUri.path, 2);
@@ -218,7 +215,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             // Only internally provided tasks will be present in the this.tasks cache at this point, as extension
             // provided tasks will have been skipped/ignored in the provideTasks() processing.
             //
-            if (!isTaskIncluded(this.wrapper, item, getTaskRelativePath(item), logPad + "   "))
+            if (!isTaskIncluded(this.wrapper, item, this.wrapper.pathUtils.getTaskRelativePath(item), logPad + "   "))
             {
                 ++ctRmv;
                 tasksCache.splice(object.length - 1 - index, 1);
@@ -279,7 +276,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         }     //
         else // this.currentInvalidation guaranteed to be a string (task type) here
         {   //
-            const taskName = getTaskTypeFriendlyName(this.currentInvalidation);
+            const taskName = this.wrapper.taskUtils.getTaskTypeFriendlyName(this.currentInvalidation);
             this.wrapper.log.write(`   fetching ${taskName} tasks via VSCode fetchTasks call`, 1, logPad);
             this.wrapper.statusBar.update("Requesting  tasks from " + taskName + " task provider");
             //
@@ -603,7 +600,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         await this.waitForRefreshComplete();
         this.refreshPending = true;
 
-        if (this.wrapper.typeUtils.isUri(opt) && isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
+        if (this.wrapper.typeUtils.isUri(opt) && this.wrapper.fs.isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
         {   //
             // A workspace folder was removed.  We know it's a workspace folder because isDirectory()
             // returned true and getWorkspaceFolder() returned false.  If it was a regular directory

@@ -27,6 +27,7 @@ export interface ITePathUtilities
 	getInstallPath(): Promise<string>;
 	getPortableDataPath(logPad?: string): string | undefined;
 	getRelativePath(folder: WorkspaceFolder, uri: Uri): string;
+	getTaskRelativePath(task: Task): string;
 	getUserDataPath(platform?: string, logPad?: string): string;
 }
 
