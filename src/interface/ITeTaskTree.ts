@@ -1,5 +1,14 @@
 import { TreeItem, TreeView } from "vscode";
 
+export interface ITaskTreeEvent
+{
+    id: string;
+    fn: any;
+    args: any[];
+    type: string;
+    delay: number;
+}
+
 export interface ITaskTreeView
 {
     view: TreeView<TreeItem>;

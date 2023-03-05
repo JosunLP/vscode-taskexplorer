@@ -5,7 +5,7 @@ import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
 import { TreeViewIds } from "../lib/context";
 import { TaskTreeManager } from "./treeManager";
-import { IEvent, ITeTaskTree } from "../interface";
+import { ITaskTreeEvent, ITeTaskTree } from "../interface";
 import { Event, EventEmitter, Task, TreeItem, TreeDataProvider } from "vscode";
 
 
@@ -38,7 +38,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree
     private visible = false;
     private wasVisible = false;
     private refreshPending = false;
-    private eventQueue: IEvent[] = [];
+    private eventQueue: ITaskTreeEvent[] = [];
     private treeManager: TaskTreeManager;
     private defaultGetChildrenLogPad = "";
     private defaultGetChildrenLogLevel = 1;
@@ -260,7 +260,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree
 
         if (this.eventQueue.length > 0)
         {
-            const next = this.eventQueue.shift() as IEvent; // get the next event
+            const next = this.eventQueue.shift() as ITaskTreeEvent; // get the next event
             log.write("   loaded next queued event", 2, logPad);
             log.value("      id", next.id, 1, logPad);
             log.value("      type", next.type, 1, logPad);

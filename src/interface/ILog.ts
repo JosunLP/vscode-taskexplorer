@@ -1,6 +1,5 @@
 import { OutputChannel } from "vscode";
 import { IDictionary } from "./IDictionary";
-import { ILogQueueItem } from "./ILogQueueItem";
 
 export interface ILogControl
 {
@@ -26,6 +25,13 @@ export interface ILogControl
     writeToConsole: boolean;
     writeToConsoleLevel: number;
 };
+
+export interface ILogQueueItem
+{
+    fn: any;
+    args: any[];
+    scope: any;
+}
 
 export interface ILog
 {

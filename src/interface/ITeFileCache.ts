@@ -1,6 +1,12 @@
 
-import { WorkspaceFolder } from "vscode";
-import { ICacheItem } from "./ICacheItem";
+import { Uri, WorkspaceFolder } from "vscode";
+
+export interface ICacheItem
+{
+    uri: Uri;
+    project: string;
+    timestamp?: Date;
+}
 
 export interface ITeFileCache
 {
