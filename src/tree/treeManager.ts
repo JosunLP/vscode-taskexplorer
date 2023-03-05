@@ -304,21 +304,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         //                                      //
         this.cleanFetchedTasks(logPad + "   "); // good byte shitty ass Grunt and Gulp providers, whoever
                                                 // coded you should hang it up and retire, what a damn joke.
-        //
-        // If this is the first time the tree is being built, do a few extra things
-        //
-        const licMgr = this.wrapper.licenseManager;
-        const maxTasks = licMgr.getMaxNumberOfTasks();
-        if (!this.firstTreeBuildDone)
-        {   //
-            // Update license manager w/ tasks, display info / license page if needed
-            //
-            await licMgr.setTasks(this._tasks, logPad + "   ");
+
+        if (!this.firstTreeBuildDone) {
             this.setMessage(Strings.BuildingTaskTree);
         }
         //
         // Check License Manager for any task count restrictions
         //
+        const licMgr = this.wrapper.licenseManager,
+              maxTasks = licMgr.getMaxNumberOfTasks();
         if (this._tasks.length > maxTasks)
         {
             let ctRmv = 0;

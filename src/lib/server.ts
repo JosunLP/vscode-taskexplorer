@@ -43,7 +43,7 @@ export class TeServer
 	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
 
 
-	private getApiClientId = () =>
+	getApiClientId = () =>
 	{
 		if (this.wrapper.env === "dev" && DEV_ENV_USE_LOCAL_SERVER) {
 			return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";

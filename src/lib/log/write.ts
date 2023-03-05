@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { window } from "vscode"; // TODO - this is used as scope but thought browser 'window' duh
 import { logControl } from "./log";
 import { appendFileSync } from "fs";
-import { figures } from "../figures";
-import { window } from "vscode"; // TODO - this is used as scope but thought browser 'window' duh
+import { figures } from "../utils/figures";
 import { IDictionary } from "../../interface";
 
 const colors = figures.colors;

@@ -2,7 +2,7 @@
 import { write } from "./write";
 import { value } from "./value";
 import { logControl } from "./log";
-import { figures } from "../figures";
+import { figures } from "../utils/figures";
 import { isArray, isError, isFunction, isObject, isObjectEmpty, isString } from "../utils/utils";
 
 const colors = figures.colors;

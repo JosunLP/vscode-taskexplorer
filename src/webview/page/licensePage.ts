@@ -43,7 +43,7 @@ export class LicensePage extends TeWebviewPanel<State>
 	private getExtraContent = async (newKey?: string) =>
 	{
 		const licMgr = this.wrapper.licenseManager;
-		const key = await licMgr.getLicenseKey();
+		const key = (await licMgr.getAccount()).license.key;
 		const details = !newKey ?
 	(!licMgr.isLicensed ? `
 	<table class="margin-top-15">
@@ -85,7 +85,7 @@ export class LicensePage extends TeWebviewPanel<State>
 		</td></tr>
 		<tr><td>
 			This license key is valid for30 days from the time it was issued.  Please show your support for
-			the extension and purchase the license <a href="https://license.spmeesseman.com/purchase?key=${encodeURIComponent(`${newKey}&${licMgr.serverToken}`)}">here</a>.
+			the extension and purchase the license <a href="https://license.spmeesseman.com/purchase?key=${encodeURIComponent(`${newKey}&${this.wrapper.server.getApiClientId()}`)}">here</a>.
 		</td></tr>
 	</table>
 	<table class="margin-top-20">
