@@ -9,7 +9,7 @@ import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { env } from "vscode";
 
-const USE_LOCAL_SERVER = true;
+const USE_LOCAL_SERVER = false;
 
 export interface ServerError
 {

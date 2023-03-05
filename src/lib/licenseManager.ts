@@ -6,8 +6,8 @@ import { isScriptType } from "./utils/taskUtils";
 import { executeCommand, registerCommand, Commands } from "./command/command";
 import { Disposable, Event, EventEmitter, InputBoxOptions, window } from "vscode";
 import {
-	 ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeSession, ITeTaskChangeEvent,
-	 ITeLicense, TeLicenseState
+	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeSession,
+	ITeTaskChangeEvent, ITeLicense, TeLicenseState, IDictionary
 } from "../interface";
 
 
@@ -23,8 +23,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _maxFreeTasksForScriptType = 50;
 	private _checkLicenseTask: NodeJS.Timeout;
 	private readonly _disposables: Disposable[] = [];
-	private readonly _maxTaskTypeMessageShown: any = {};
 	private readonly _checkLicenseInterval = 1000 * 60 * 60 * 4; // 4 hr
+	private readonly _maxTaskTypeMsgShown: IDictionary<boolean> = {};
     private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
 
 
@@ -104,7 +104,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			if (this._account.license.key && this._account.license.type !== TeLicenseType.Free)
 			{
-				if (this._account.session.expires + this._checkLicenseInterval < Date.now()) {
+				if (this._account.session.expires + this._checkLicenseInterval >= Date.now() - 60000) {
 					await this.validateLicense(this._account.license.key, logPad + "   ");
 				}
 			}
@@ -365,12 +365,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	setMaxTasksReached = async(taskType?: string, force?: boolean) =>
 	{
 		this._maxTasksReached = true;
-		if (force || ((!this._maxTasksMessageShown && !taskType) || (taskType && !this._maxTaskTypeMessageShown[taskType] && Object.keys(this._maxTaskTypeMessageShown).length < 3)))
+		if (force || ((!this._maxTasksMessageShown && !taskType) || (taskType && !this._maxTaskTypeMsgShown[taskType] && Object.keys(this._maxTaskTypeMsgShown).length < 3)))
 		{
 			this._maxTasksMessageShown = true;
 			if (taskType)
 			{
-				this._maxTaskTypeMessageShown[taskType] = true;
+				this._maxTaskTypeMsgShown[taskType] = true;
 			}
 			const msg = `The max # of parsed ${taskType ?? ""} tasks in un-licensed mode has been reached`;
 			return this.displayPopup(msg, "");

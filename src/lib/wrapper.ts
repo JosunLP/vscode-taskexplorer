@@ -110,7 +110,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _parsingReportPage: ParsingReportPage;
     private readonly _providers: IDictionary<ITaskExplorerProvider>;
 	private readonly _onReady: EventEmitter<void>;
-	// private _onInitialized: EventEmitter<void>;
+    private readonly _onInitialized: EventEmitter<void>;
 	// private _onWorkCompleted: EventEmitter<void>;
 
 
@@ -122,6 +122,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._log = log;
 		this._providers = {};
 		this._onReady = new EventEmitter<void>();
+		this._onInitialized = new EventEmitter<void>();
 
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
@@ -198,6 +199,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._configWatcher,
 			this._taskCountView,
 			this._taskUsageView,
+			this._onInitialized,
 			this._licenseManager,
 			this._welcomePage,
 			this._releaseNotesPage,
@@ -252,7 +254,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// Signal we are ready/done
 		//
-		queueMicrotask(() => { this._initialized = true; /* this._onInitialized.fire();  */ });
+		queueMicrotask(() => { this._initialized = true; this._onInitialized.fire(); });
 		//
 		// Start the whole work process, i.e. read task files and build the task tree, etc.
 		// Large workspaces can take a bit of time if persistent caching isn't enabled, so
@@ -270,7 +272,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// License / Authentication
 		//
 		// await this.storage.deleteSecret(StorageKeys.Account); // for dev/testing
-		await this.licenseManager.checkLicense("   ");
+		await this.licenseManager.checkLicense(undefined, "   ");
 
 		//
 		// Maybe show the 'what's new' or 'welcome' page if the version has changed ot this is

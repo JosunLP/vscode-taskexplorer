@@ -13,7 +13,7 @@ import { ILog, ITeTaskManager, TaskMap, ITeTask } from "../interface";
 import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
-    TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder, Event
+    TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder
 } from "vscode";
 import { PinnedStorageKey } from "src/lib/constants";
 

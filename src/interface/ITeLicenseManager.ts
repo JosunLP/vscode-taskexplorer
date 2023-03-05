@@ -66,7 +66,7 @@ export interface ITeLicenseManager
 {
     isLicensed: boolean;
     isRegistered: boolean;
-    checkLicense(statusMessage?: string, logPad?: string): Promise<void>;
+    checkLicense(statusMessage: string| undefined, logPad: string): Promise<void>;
 	getAccount(): Thenable<ITeAccount>;
     getMaxNumberOfTasks: (taskType?: string | undefined) => number;
     getMaxNumberOfTaskFiles: () => number;
