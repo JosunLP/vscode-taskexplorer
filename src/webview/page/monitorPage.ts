@@ -46,16 +46,24 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	}
 
 
+	private getSettingsState = () =>
+	({
+		timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode),
+		trackStats: this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats),
+		trackUsage: this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage),
+	});
+
+
 	protected override getState = async(): Promise<MonitorAppState> =>
 	{
 		return {
 			...(await super.getState()),
-			last: toITask(this.wrapper, this.wrapper.treeManager.lastTasks, "last"),
-			favorites: toITask(this.wrapper, this.wrapper.treeManager.favoritesTasks, "favorites"),
-			running: toITask(this.wrapper, this.wrapper.treeManager.runningTasks, "running"),
+			...this.getSettingsState(),
 			famous: this.wrapper.treeManager.famousTasks,
+			favorites: toITask(this.wrapper, this.wrapper.treeManager.favoritesTasks, "favorites"),
+			last: toITask(this.wrapper, this.wrapper.treeManager.lastTasks, "last"),
+			running: toITask(this.wrapper, this.wrapper.treeManager.runningTasks, "running"),
 			tasks: toITask(this.wrapper, this.wrapper.treeManager.getTasks(), "all"),
-			timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode),
 			pinned: {
 				last: this.wrapper.storage.get<ITeTask[]>("taskexplorer.pinned.last", []),
 				famous: this.wrapper.storage.get<ITeTask[]>("taskexplorer.pinned.famous", []),
@@ -106,11 +114,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor_TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor_TrackStats))
 		{
-			this.notify(IpcConfigChangedMsg, {
-				timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode),
-				trackTaskStats: this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats),
-				trackUsage: this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage)
-			});
+			this.notify(IpcConfigChangedMsg, this.getSettingsState());
 		}
 	}
 

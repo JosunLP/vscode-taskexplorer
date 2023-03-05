@@ -112,7 +112,7 @@ export interface IpcConfigChangedParams
 {
 	timerMode: IMonitorAppTimerMode;
 	trackUsage: boolean;
-	trackTaskStats: boolean;
+	trackStats: boolean;
 }
 
 export const IpcEnabledChangedMsg = new IpcNotification<IpcEnabledChangedParams>("enabled/change");
@@ -138,6 +138,8 @@ export interface MonitorAppState extends State
 	running: ITeTask[];
 	tasks: ITeTask[];
 	timerMode: IMonitorAppTimerMode;
+	trackStats: boolean;
+	trackUsage: boolean;
 	pinned: {
 		last: ITeTask[];
 		favorites: ITeTask[];
