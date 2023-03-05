@@ -1,11 +1,8 @@
 
-import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
+import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
-import { configuration, } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 
 
@@ -33,7 +30,7 @@ export class WebpackTaskProvider extends TaskExplorerProvider implements TaskExp
             script: target,
             target,
             fileName: basename(uri.fsPath),
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             uri
         };
         return def;
@@ -50,9 +47,9 @@ export class WebpackTaskProvider extends TaskExplorerProvider implements TaskExp
     {
         const tasks: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder,
-              groupSep = configuration.get<string>("groupSeparator");
+              groupSep = this.wrapper.config.get<string>("groupSeparator");
 
-        log.methodStart("read webpack uri tasks", 3, logPad, false, [[ "project folder", folder.name ], [ "path", uri.fsPath ]], this.logQueueId);
+        this.wrapper.log.methodStart("read webpack uri tasks", 3, logPad, false, [[ "project folder", folder.name ], [ "path", uri.fsPath ]], this.logQueueId);
 
         tasks.push(this.createTask(`build${groupSep}dev`, "webpack", folder, uri, [ "--mode", "development", "--env", "environment=dev" ]));
         tasks.push(this.createTask(`build${groupSep}dev*verbose`, "webpack", folder, uri, [ "--stats", "verbose", "--mode", "development", "--env", "environment=dev" ]));
@@ -70,7 +67,7 @@ export class WebpackTaskProvider extends TaskExplorerProvider implements TaskExp
         tasks.push(this.createTask(`crossenv${groupSep}rebuild${groupSep}prod`, "cross-env", folder, uri, [ "webpack", "--mode", "production", "--env", "clean=true" ]));
         tasks.push(this.createTask("watch", "webpack", folder, uri, [ "-w", "--env", "environment=dev" ]));
 
-        log.methodDone("read webpack uri tasks", 4, logPad, [[ "# of tasks found", tasks.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read webpack uri tasks", 4, logPad, [[ "# of tasks found", tasks.length ]], this.logQueueId);
         return tasks;
     }
 

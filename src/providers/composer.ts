@@ -1,13 +1,8 @@
 
-import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
-import { IDictionary } from "../interface";
 import { TeWrapper } from "../lib/wrapper";
-import { readJsonAsync } from "../lib/utils/fs";
 import { TaskExplorerProvider } from "./provider";
-import { configuration } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
+import { IDictionary, ITaskDefinition } from "../interface";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace } from "vscode";
 
 
@@ -31,7 +26,7 @@ export class ComposerTaskProvider extends TaskExplorerProvider implements TaskEx
     {
         const getCommand = (): string =>
         {
-            return configuration.get<string>("pathToPrograms.composer", this.commands[process.platform]);
+            return this.wrapper.config.get<string>("pathToPrograms.composer", this.commands[process.platform]);
         };
 
         const def = this.getDefaultDefinition(target, folder, uri);
@@ -48,22 +43,22 @@ export class ComposerTaskProvider extends TaskExplorerProvider implements TaskEx
     {
         const targets: string[] = [];
 
-        log.methodStart("find composer targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
+        this.wrapper.log.methodStart("find composer targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
 
         try {
-            const json = await readJsonAsync<any>(fsPath),
+            const json = await this.wrapper.fs.readJsonAsync<any>(fsPath),
                   scripts = json.scripts;
             if (scripts) {
                 Object.keys(scripts).forEach((k) => {
                     targets.push(k);
-                    log.value("   found composer task", k, 4, logPad, this.logQueueId);
+                    this.wrapper.log.value("   found composer task", k, 4, logPad, this.logQueueId);
                 });
             }
         } catch {
-            log.error("Invalid JSON found in " + fsPath, undefined, this.logQueueId);
+            this.wrapper.log.error("Invalid JSON found in " + fsPath, undefined, this.logQueueId);
         }
 
-        log.methodDone("Find composer targets", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("Find composer targets", 4, logPad, undefined, this.logQueueId);
         return targets;
     }
 
@@ -74,7 +69,7 @@ export class ComposerTaskProvider extends TaskExplorerProvider implements TaskEx
             type: "composer",
             script: target,
             target,
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             fileName: basename(uri.path),
             uri
         };
@@ -102,7 +97,7 @@ export class ComposerTaskProvider extends TaskExplorerProvider implements TaskEx
         const result: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder;
 
-        log.methodStart("read composer file uri task", 3, logPad, false, [
+        this.wrapper.log.methodStart("read composer file uri task", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
 
@@ -114,7 +109,7 @@ export class ComposerTaskProvider extends TaskExplorerProvider implements TaskEx
             result.push(task);
         }
 
-        log.methodDone("read composer file uri task", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read composer file uri task", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
         return result;
     }
 

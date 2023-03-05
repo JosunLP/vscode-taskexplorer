@@ -1,13 +1,9 @@
 
-import { log } from "../lib/log/log";
 import { Globs } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { readFileSync } from "../lib/utils/fs";
+import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
-import { configuration, } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
 import { basename, dirname, sep, extname, join } from "path";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 
 
@@ -35,62 +31,62 @@ export class ScriptTaskProvider extends TaskExplorerProvider implements TaskExpl
             type: "bash",
             args: [],
             pm: "$bashTe",
-            enabled: configuration.get("enabledTasks.bash")
+            enabled: this.wrapper.config.get("enabledTasks.bash")
         },
         py: {
-            exec: configuration.get("pathToPrograms.python"),
+            exec: this.wrapper.config.get("pathToPrograms.python"),
             type: "python",
             args: [],
             pm: "$msCompile",
-            enabled: configuration.get("enabledTasks.python")
+            enabled: this.wrapper.config.get("enabledTasks.python")
         },
         rb: {
-            exec: configuration.get("pathToPrograms.ruby"),
+            exec: this.wrapper.config.get("pathToPrograms.ruby"),
             type: "ruby",
             args: [],
             pm: "$msCompile",
-            enabled: configuration.get("enabledTasks.ruby")
+            enabled: this.wrapper.config.get("enabledTasks.ruby")
         },
         ps1: {
-            exec: configuration.get("pathToPrograms.powershell"),
+            exec: this.wrapper.config.get("pathToPrograms.powershell"),
             type: "powershell",
             args: [],
             pm: "$msCompile",
-            enabled: configuration.get("enabledTasks.powershell")
+            enabled: this.wrapper.config.get("enabledTasks.powershell")
         },
         pl: {
-            exec: configuration.get("pathToPrograms.perl"),
+            exec: this.wrapper.config.get("pathToPrograms.perl"),
             type: "perl",
             args: [],
             pm: "$msCompile",
-            enabled: configuration.get("enabledTasks.perl")
+            enabled: this.wrapper.config.get("enabledTasks.perl")
         },
         bat: {
             exec: "cmd",
             type: "batch",
             args: [ "/c" ],
             pm: "$batchTe",
-            enabled: configuration.get("enabledTasks.batch")
+            enabled: this.wrapper.config.get("enabledTasks.batch")
         },
         cmd: {
             exec: "cmd",
             type: "batch",
             args: [ "/c" ],
             pm: "$batchTe",
-            enabled: configuration.get("enabledTasks.batch")
+            enabled: this.wrapper.config.get("enabledTasks.batch")
         },
         nsi: {
-            exec: configuration.get("pathToPrograms.nsis"),
+            exec: this.wrapper.config.get("pathToPrograms.nsis"),
             type: "nsis",
             args: [],
-            enabled: configuration.get("enabledTasks.nsis")
+            enabled: this.wrapper.config.get("enabledTasks.nsis")
         }
     };
 
 
     public createTask(target: string, cmd: string | undefined, folder: WorkspaceFolder, uri: Uri, xArgs: string[] = [], logPad?: string): Task | undefined
     {
-        log.methodStart("create script task", 4, logPad, false, [
+        this.wrapper.log.methodStart("create script task", 4, logPad, false, [
             [ "target", target ], [ "cmd", cmd ],  [ "project", folder.name ], [ "path", uri.fsPath ]
         ], this.logQueueId);
 
@@ -102,7 +98,7 @@ export class ScriptTaskProvider extends TaskExplorerProvider implements TaskExpl
               args: string[] = [];
 
         if (!def) {
-            log.error(`Script extension type ${target} not found in script file mapping`, undefined, this.logQueueId);
+            this.wrapper.log.error(`Script extension type ${target} not found in script file mapping`, undefined, this.logQueueId);
             return;
         }
 
@@ -154,7 +150,7 @@ export class ScriptTaskProvider extends TaskExplorerProvider implements TaskExpl
         //
         // All done
         //
-        log.methodDone("create script task", 4, logPad, [
+        this.wrapper.log.methodDone("create script task", 4, logPad, [
             [ "type", scriptDef.type ], [ "file name", fileName ], [ "project", folder.name ], [ "args", args ]
         ], this.logQueueId);
         return task;
@@ -178,7 +174,7 @@ export class ScriptTaskProvider extends TaskExplorerProvider implements TaskExpl
             target: tgt,
             fileName,
             scriptFile: true, // set scriptFile to true to include all scripts in folder instead of grouped at file
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             takesArgs: false,
             uri
         };
@@ -190,7 +186,7 @@ export class ScriptTaskProvider extends TaskExplorerProvider implements TaskExpl
         //
         if (scriptDef.type === "batch")
         {
-            const contents = readFileSync(uri.fsPath);
+            const contents = this.wrapper.fs.readFileSync(uri.fsPath);
             def.takesArgs = (new RegExp("%[1-9]")).test(contents);
         }
 
@@ -213,11 +209,11 @@ export class ScriptTaskProvider extends TaskExplorerProvider implements TaskExpl
     public async readUriTasks(uri: Uri, logPad: string): Promise<Task[]>
     {
         const folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder;
-        log.methodStart("read script file uri task", 3, logPad, false, [
+        this.wrapper.log.methodStart("read script file uri task", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
         const task = this.createTask(extname(uri.fsPath).substring(1), undefined, folder, uri, undefined, logPad + "   ");
-        log.methodDone("read script file uri task", 3, logPad, [[ "# of tasks found", 1 ]], this.logQueueId);
+        this.wrapper.log.methodDone("read script file uri task", 3, logPad, [[ "# of tasks found", 1 ]], this.logQueueId);
         /* istanbul ignore next */
         return task ? [ task ] : [];
     }

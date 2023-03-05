@@ -3,7 +3,6 @@ import { Globs } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { ScriptTaskProvider } from "./script";
 import { TaskExplorerProvider } from "./provider";
-import { configuration } from "../lib/configuration";
 import { getCombinedGlobPattern } from "../lib/utils/utils";
 
 export class BashTaskProvider extends ScriptTaskProvider implements TaskExplorerProvider
@@ -12,7 +11,7 @@ export class BashTaskProvider extends ScriptTaskProvider implements TaskExplorer
 
     public override getGlobPattern()
     {
-        return getCombinedGlobPattern(Globs.GLOB_BASH, configuration.get<string[]>("globPatternsBash", []));
+        return getCombinedGlobPattern(Globs.GLOB_BASH, this.wrapper.config.get<string[]>("globPatternsBash", []));
     }
 
 }

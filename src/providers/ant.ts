@@ -1,17 +1,11 @@
 
-import { log } from "../lib/log/log";
 import { Globs } from "../lib/constants";
 import { execSync } from "child_process";
-import { IDictionary } from "../interface";
 import { TeWrapper } from "../lib/wrapper";
 import { parseStringPromise } from "xml2js";
 import { basename, dirname, join } from "path";
 import { TaskExplorerProvider } from "./provider";
-import { configuration } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
-import { getCombinedGlobPattern } from "../lib/utils/utils";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
-import { pathExistsSync, readFileAsync } from "../lib/utils/fs";
+import { IDictionary, ITaskDefinition } from "../interface";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, window, workspace, ShellExecutionOptions } from "vscode";
 
 interface StringMap { [s: string]: string }
@@ -42,11 +36,11 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
         //
         // Ansicon for Windows
         //
-        if (process.platform === "win32" && configuration.get("enableAnsiconForAnt") === true)
+        if (process.platform === "win32" && this.wrapper.config.get("enableAnsiconForAnt") === true)
         {
             let ansicon = "ansicon.exe";
-            const ansiPath: string = configuration.get("pathToPrograms.ansicon");
-            if (ansiPath && pathExistsSync(ansiPath))
+            const ansiPath: string = this.wrapper.config.get("pathToPrograms.ansicon");
+            if (ansiPath && this.wrapper.fs.pathExistsSync(ansiPath))
             {
                 ansicon = ansiPath;
                 if (!ansicon.endsWith("ansicon.exe") && !ansicon.endsWith("\\")) {
@@ -79,9 +73,9 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
     private async findAllAntScripts(path: string, logPad: string): Promise<StringMap>
     {
         const scripts: StringMap = {};
-        const useAnt = configuration.get<boolean>("useAnt");
+        const useAnt = this.wrapper.config.get<boolean>("useAnt");
 
-        log.methodStart("find ant targets", 4, logPad, false, [[ "use ant", useAnt ], [ "path", path ]], this.logQueueId);
+        this.wrapper.log.methodStart("find ant targets", 4, logPad, false, [[ "use ant", useAnt ], [ "path", path ]], this.logQueueId);
 
         //
         // Try running 'ant' itself to get the targets.  If fail, just custom parse
@@ -100,7 +94,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
         }
 
 
-        log.methodDone("find ant targets complete", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("find ant targets complete", 4, logPad, undefined, this.logQueueId);
         return scripts;
     }
 
@@ -123,7 +117,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
      */
     private findTasksWithAnt(path: string, taskMap: StringMap, logPad: string)
     {
-        log.methodStart("find tasks with ant", 4, logPad, false, [[ "path", path ]], this.logQueueId);
+        this.wrapper.log.methodStart("find tasks with ant", 4, logPad, false, [[ "path", path ]], this.logQueueId);
         //
         // Execute 'ant'/'ant.bat' to find defined tasks (ant targets)
         //
@@ -168,17 +162,17 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
             if (!line || line.match(/(target[s]{0,1}:|Buildfile:)/i)) {
                 continue;
             }
-            log.value("   Found target (ant -p)", line, 3, logPad);
+            this.wrapper.log.value("   Found target (ant -p)", line, 3, logPad);
             taskMap[defaultTask === line ? line + " - Default" : line] = line;
         }
 
-        log.methodDone("find tasks with ant", 4, logPad, [[ "# of tasks", taskMap.size ]], this.logQueueId);
+        this.wrapper.log.methodDone("find tasks with ant", 4, logPad, [[ "# of tasks", taskMap.size ]], this.logQueueId);
     }
 
 
     private logException(ex: any, prog: string)
     {
-        log.error([
+        this.wrapper.log.error([
             `Error running/executing ${prog}!!`,
             "Check to ensure the path to ant is correct and that your task/build file id valid XML",
             ex
@@ -190,9 +184,9 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
 
     private async findTasksWithXml2Js(path: string, taskMap: StringMap, logPad: string)
     {
-        log.methodStart("find tasks with xml2js", 4, logPad, false, [[ "path", path ]], this.logQueueId);
+        this.wrapper.log.methodStart("find tasks with xml2js", 4, logPad, false, [[ "path", path ]], this.logQueueId);
 
-        const buffer = await readFileAsync(path);
+        const buffer = await this.wrapper.fs.readFileAsync(path);
         //
         // Convert to JSON with Xml2Js parseString()
         //
@@ -208,22 +202,22 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
             {
                 if (tgt.$ && tgt.$.name) {
                     taskMap[defaultTask === tgt.$.name ? tgt.$.name + " - Default" : tgt.$.name] = tgt.$.name;
-                    log.value("   found ant task", tgt.$.name, 4, logPad, this.logQueueId);
+                    this.wrapper.log.value("   found ant task", tgt.$.name, 4, logPad, this.logQueueId);
                 }
             }
         }
 
-        log.methodDone("find tasks with xml2js", 4, logPad, [[ "# of tasks", taskMap.size ]], this.logQueueId);
+        this.wrapper.log.methodDone("find tasks with xml2js", 4, logPad, [[ "# of tasks", taskMap.size ]], this.logQueueId);
 
         // return new Promise((resolve, reject) =>
         // {
-        //     log.methodStart("find tasks with xml2js", 3, logPad, false, [["path", path]]);
+        //     this.wrapper.log.methodStart("find tasks with xml2js", 3, logPad, false, [["path", path]]);
         //     const buffer = util.readFileSync(path);
         //
         //     parseString(buffer, (err, text) =>
         //     {
         //         if (err){
-        //             log.methodDone("find tasks with xml2js", 3, logPad, [["error", err.toString()]]);
+        //             this.wrapper.log.methodDone("find tasks with xml2js", 3, logPad, [["error", err.toString()]]);
         //             reject(err);
         //         }
         //         else {
@@ -237,12 +231,12 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
         //                 for (const tgt of targets)                  // Check .$ and .$.name (xml2js output format)
         //                 {
         //                     if (tgt.$ && tgt.$.name) {
-        //                         log.value("   Found target (cst.)", tgt.$.name);
+        //                         this.wrapper.log.value("   Found target (cst.)", tgt.$.name);
         //                         taskMap[defaultTask === tgt.$.name ? tgt.$.name + " - Default" : tgt.$.name] = tgt.$.name;
         //                     }
         //                 }
         //             }
-        //             log.methodDone("find tasks with xml2js", 3, logPad, [["# of tasks", taskMap.size]]);
+        //             this.wrapper.log.methodDone("find tasks with xml2js", 3, logPad, [["# of tasks", taskMap.size]]);
         //             resolve(taskMap);
         //         }
         //     });
@@ -252,7 +246,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
 
     private getCommand(): string
     {
-        return configuration.get("pathToPrograms.ant", this.commands[process.platform]);
+        return this.wrapper.config.get("pathToPrograms.ant", this.commands[process.platform]);
     }
 
 
@@ -262,7 +256,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
             type: "ant",
             script: target,
             target,
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             fileName: basename(uri.path),
             uri
         };
@@ -272,9 +266,9 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
 
     public override getGlobPattern()
     {
-        return getCombinedGlobPattern(Globs.GLOB_ANT,
-                                      [ ...configuration.get<string[]>("includeAnt", []),
-                                        ...configuration.get<string[]>("globPatternsAnt", []) ]);
+        return this.wrapper.utils.getCombinedGlobPattern(Globs.GLOB_ANT,
+                                      [ ...this.wrapper.config.get<string[]>("includeAnt", []),
+                                        ...this.wrapper.config.get<string[]>("globPatternsAnt", []) ]);
     }
 
 
@@ -283,7 +277,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
         const result: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder;
 
-        log.methodStart("read ant file uri tasks", 3, logPad, false, [
+        this.wrapper.log.methodStart("read ant file uri tasks", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
 
@@ -295,7 +289,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
             result.push(task);
         }
 
-        log.methodDone("read ant file uri tasks", 3, logPad, [[ "# of tasks found", result.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read ant file uri tasks", 3, logPad, [[ "# of tasks found", result.length ]], this.logQueueId);
         return result;
     }
 

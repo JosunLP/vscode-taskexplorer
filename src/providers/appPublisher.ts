@@ -1,12 +1,8 @@
 
-import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { readJsonAsync } from "../lib/utils/fs";
+import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
-import { configuration } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 
 
@@ -42,7 +38,7 @@ export class AppPublisherTaskProvider extends TaskExplorerProvider implements Ta
             script: target,
             target,
             fileName: basename(uri.fsPath),
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             cmdLine: "npx app-publisher --no-ci",
             takesArgs: false,
             uri
@@ -67,19 +63,19 @@ export class AppPublisherTaskProvider extends TaskExplorerProvider implements Ta
     {
         const cwd = dirname(uri.fsPath),
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder,
-              groupSeparator = configuration.get<string>("groupSeparator");
+              groupSeparator = this.wrapper.config.get<string>("groupSeparator");
 
-        log.methodStart("read app-publisher file uri task", 3, logPad, false, [
+        this.wrapper.log.methodStart("read app-publisher file uri task", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
 
         try { // Validate JSON
-            await readJsonAsync(uri.fsPath);
+            await this.wrapper.fs.readJsonAsync(uri.fsPath);
         }
         catch (e: any)
         {
-            log.error(e, undefined, this.logQueueId);
-            log.methodDone("read app-publisher file uri tasks", 3, logPad, undefined, this.logQueueId);
+            this.wrapper.log.error(e, undefined, this.logQueueId);
+            this.wrapper.log.methodDone("read app-publisher file uri tasks", 3, logPad, undefined, this.logQueueId);
             return [];
         }
 
@@ -156,7 +152,7 @@ export class AppPublisherTaskProvider extends TaskExplorerProvider implements Ta
 
         taskDefs.push({
             label: "tasks" + groupSeparator + "changelog " + groupSeparator + "write pending to file",
-            cmdLine: "npx app-publisher --no-ci --task-changelog-file changelog.txt"
+            cmdLine: "npx app-publisher --no-ci --task-changelog-file changethis.wrapper.log.txt"
         });
 
         taskDefs.push({
@@ -218,7 +214,7 @@ export class AppPublisherTaskProvider extends TaskExplorerProvider implements Ta
                                 `${def.label}${apFmtLabel}`, "apppublisher", exec, undefined));
         });
 
-        log.methodDone("read app-publisher file uri tasks", 4, logPad, [[ "# of tasks found", tasks.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read app-publisher file uri tasks", 4, logPad, [[ "# of tasks found", tasks.length ]], this.logQueueId);
 
         return tasks;
     }

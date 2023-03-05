@@ -1,13 +1,9 @@
 
-import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
 import * as bombadil from "@sgarciac/bombadil";
-import { readFileAsync } from "../lib/utils/fs";
+import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
-import { configuration, } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 
 
@@ -22,7 +18,7 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
 
     public createTask(target: string, cmd: string, folder: WorkspaceFolder, uri: Uri): Task
     {
-        const pipenv = configuration.get<string>("pathToPrograms.pipenv", "pipenv");
+        const pipenv = this.wrapper.config.get<string>("pathToPrograms.pipenv", "pipenv");
         let pythonPath = pipenv;
 
         /* istanbul ignore else */
@@ -54,10 +50,10 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
 
     private async findTargets(fsPath: string, logPad: string)
     {
-        log.methodStart("find pipenv Pipfile targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
+        this.wrapper.log.methodStart("find pipenv Pipfile targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
 
         const scripts: string[] = [];
-        const contents = await readFileAsync(fsPath);
+        const contents = await this.wrapper.fs.readFileAsync(fsPath);
         //
         // Using @sgarciac/bombadil package to parse the TOML Pipfile
         //
@@ -69,10 +65,10 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
             // Only need the script name, not the whole command, since it is run as `pipenv run <scriptName>`
             //
             scripts.push(scriptName);
-            log.value("   found pipenv pipfile task", scriptName, 4, logPad, this.logQueueId);
+            this.wrapper.log.value("   found pipenv pipfile task", scriptName, 4, logPad, this.logQueueId);
         });
 
-        log.methodDone("find pipenv Pipfile targets", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("find pipenv Pipfile targets", 4, logPad, undefined, this.logQueueId);
 
         return scripts;
     }
@@ -84,7 +80,7 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
             type: "pipenv",
             script: target,
             target,
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             fileName: basename(uri.path),
             uri
         };
@@ -106,7 +102,7 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
         const result: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder;
 
-        log.methodStart("read pipenv Pipfile file uri tasks", 3, logPad, false, [
+        this.wrapper.log.methodStart("read pipenv Pipfile file uri tasks", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
 
@@ -118,7 +114,7 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
             result.push(task);
         }
 
-        log.methodDone("read pipenv Pipfile file uri tasks", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read pipenv Pipfile file uri tasks", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
         return result;
     }
 }

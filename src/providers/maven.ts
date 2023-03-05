@@ -1,13 +1,9 @@
 
-import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
 import { parseStringPromise } from "xml2js";
-import { readFileAsync } from "../lib/utils/fs";
+import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
-import { configuration, } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 
 
@@ -30,7 +26,7 @@ export class MavenTaskProvider extends TaskExplorerProvider implements TaskExplo
             script: target,
             target,
             fileName: basename(uri.fsPath),
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             cmdLine: "mvn",
             takesArgs: false,
             uri
@@ -47,7 +43,7 @@ export class MavenTaskProvider extends TaskExplorerProvider implements TaskExplo
 
     private getCommand(): string
     {
-        return configuration.get<string>("pathToPrograms.maven", "mvn");
+        return this.wrapper.config.get<string>("pathToPrograms.maven", "mvn");
     }
 
 
@@ -58,7 +54,7 @@ export class MavenTaskProvider extends TaskExplorerProvider implements TaskExplo
               defaultDef = this.getDefaultDefinition(undefined, folder, uri),
               options: ShellExecutionOptions = { cwd };
 
-        log.methodStart("read maven file uri task", 3, logPad, false, [
+        this.wrapper.log.methodStart("read maven file uri task", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
 
@@ -66,12 +62,12 @@ export class MavenTaskProvider extends TaskExplorerProvider implements TaskExplo
         // Validate XML with xml2js
         //
         try {
-            const buffer = await readFileAsync(uri.fsPath);
+            const buffer = await this.wrapper.fs.readFileAsync(uri.fsPath);
             await parseStringPromise(buffer);
         }
         catch (e: any) {
-            log.error(e, undefined, this.logQueueId);
-            log.methodDone("read maven file uri tasks", 3, logPad, [[ "# of tasks found", 0 ]], this.logQueueId);
+            this.wrapper.log.error(e, undefined, this.logQueueId);
+            this.wrapper.log.methodDone("read maven file uri tasks", 3, logPad, [[ "# of tasks found", 0 ]], this.logQueueId);
             return [];
         }
 
@@ -143,7 +139,7 @@ export class MavenTaskProvider extends TaskExplorerProvider implements TaskExplo
         const executionValidate = new ShellExecution(kindValidate.cmdLine as string, options);
         const executionVerify = new ShellExecution(kindVerify.cmdLine as string, options);
 
-        log.methodDone("read maven file uri tasks", 4, logPad, [[ "# of tasks found", 8 ]], this.logQueueId);
+        this.wrapper.log.methodDone("read maven file uri tasks", 4, logPad, [[ "# of tasks found", 8 ]], this.logQueueId);
 
         return [ new Task(kindClean, folder, "Clean", "maven", executionClean, undefined),
                  new Task(kindCompile, folder, "Compile", "maven", executionCompile, undefined),

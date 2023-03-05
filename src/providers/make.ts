@@ -1,11 +1,7 @@
 
-import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { readFileAsync } from "../lib/utils/fs";
 import { TaskExplorerProvider } from "./provider";
-import { configuration, } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
 import { IDictionary, ITaskDefinition } from "../interface";
 import {
     Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions, extensions
@@ -52,11 +48,11 @@ export class MakeTaskProvider extends TaskExplorerProvider implements TaskExplor
 
     public createTask(target: string, cmd: string, folder: WorkspaceFolder, uri: Uri, xArgs?: string[], logPad = ""): Task
     {
-        log.methodStart("create make task", 4, logPad, false, [[ "target", target ], [ "cmd", cmd ]], this.logQueueId);
+        this.wrapper.log.methodStart("create make task", 4, logPad, false, [[ "target", target ], [ "cmd", cmd ]], this.logQueueId);
 
         const getCommand = (): string =>
         {
-             return configuration.get<string>("pathToPrograms.make", this.commands[process.platform]);
+             return this.wrapper.config.get<string>("pathToPrograms.make", this.commands[process.platform]);
         };
 
         const kind = this.getDefaultDefinition(target, folder, uri);
@@ -70,7 +66,7 @@ export class MakeTaskProvider extends TaskExplorerProvider implements TaskExplor
         const execution = new ShellExecution(getCommand(), args, options);
         const problemMatcher = extensions.getExtension("ms-vscode.cpptools") ? /* istanbul ignore next */"$gcc" : "$gccTe";
 
-        log.methodDone("create make task", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("create make task", 4, logPad, undefined, this.logQueueId);
         return new Task(kind, folder, target, "make", execution, problemMatcher);
     }
 
@@ -109,9 +105,9 @@ export class MakeTaskProvider extends TaskExplorerProvider implements TaskExplor
     private async findTargets(fsPath: string, logPad: string)
     {
         const scripts: string[] = [];
-        log.methodStart("find makefile targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
+        this.wrapper.log.methodStart("find makefile targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
 
-        const contents = await readFileAsync(fsPath);
+        const contents = await this.wrapper.fs.readFileAsync(fsPath);
         let match;
         while (match = this.ruleTargetExp.exec(contents))
         {
@@ -120,12 +116,12 @@ export class MakeTaskProvider extends TaskExplorerProvider implements TaskExplor
             {
                 if (this.isNormalTarget(tgtName)) {
                     scripts.push(tgtName);
-                    log.value("   found makefile task", tgtName, 4, logPad, this.logQueueId);
+                    this.wrapper.log.value("   found makefile task", tgtName, 4, logPad, this.logQueueId);
                 }
             }
         }
 
-        log.methodDone("find makefile targets", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("find makefile targets", 4, logPad, undefined, this.logQueueId);
         return scripts;
     }
 
@@ -136,7 +132,7 @@ export class MakeTaskProvider extends TaskExplorerProvider implements TaskExplor
             type: "make",
             script: target,
             target,
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             fileName: basename(uri.path),
             problemMatcher: "",
             uri
@@ -157,7 +153,7 @@ export class MakeTaskProvider extends TaskExplorerProvider implements TaskExplor
         const result: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder;
 
-        log.methodStart("read make file uri tasks", 3, logPad, false, [
+        this.wrapper.log.methodStart("read make file uri tasks", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
         const scripts = await this.findTargets(uri.fsPath, logPad + "   ");
@@ -168,7 +164,7 @@ export class MakeTaskProvider extends TaskExplorerProvider implements TaskExplor
             result.push(task);
         }
 
-        log.methodDone("read make file uri tasks", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read make file uri tasks", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
         return result;
     }
 

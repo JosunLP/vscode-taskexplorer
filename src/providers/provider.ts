@@ -1,15 +1,10 @@
 
 import { extname } from "path";
-import { log } from "../lib/log/log";
 import { Globs } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { configuration } from "../lib/configuration";
+import { ITaskExplorerProvider } from "../interface";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
-import { isDirectory, pathExistsSync } from "../lib/utils/fs";
 import { Uri, Task, WorkspaceFolder, workspace } from "vscode";
-import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
-import { ITaskExplorerProvider } from "../interface/ITaskProvider";
-import { isExcluded, isTaskTypeEnabled } from "../lib/utils/utils";
 
 
 export abstract class TaskExplorerProvider implements ITaskExplorerProvider
@@ -64,7 +59,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
     {
         let rmvCount;
         this.logQueueId = this.providerName + (++this.callCount);
-        log.methodStart(`provide ${this.providerName} tasks`, 1, TaskExplorerProvider.logPad, true, [[ "call count", ++this.callCount ]], this.logQueueId);
+        this.wrapper.log.methodStart(`provide ${this.providerName} tasks`, 1, TaskExplorerProvider.logPad, true, [[ "call count", ++this.callCount ]], this.logQueueId);
         if (!this.cachedTasks)
         {
             const licMgr = this.wrapper.licenseManager;
@@ -75,14 +70,14 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
                 if (this.cachedTasks.length > maxTasks)
                 {
                     rmvCount = this.cachedTasks.length - maxTasks;
-                    log.write(`   removing ${rmvCount} tasks, max ${ this.providerName} task count reached (no license)`, 1, TaskExplorerProvider.logPad + "   ", this.logQueueId);
+                    this.wrapper.log.write(`   removing ${rmvCount} tasks, max ${ this.providerName} task count reached (no license)`, 1, TaskExplorerProvider.logPad + "   ", this.logQueueId);
                     this.cachedTasks.splice(maxTasks, rmvCount);
-                    licMgr.setMaxTasksReached(getTaskTypeFriendlyName(this.providerName, true));
+                    licMgr.setMaxTasksReached(this.wrapper.taskUtils.getTaskTypeFriendlyName(this.providerName, true));
                 }
             }
         }
-        log.methodDone(`provide ${this.providerName} tasks`, 1, TaskExplorerProvider.logPad, [[ "# of tasks found", this.cachedTasks.length ]], this.logQueueId);
-        log.dequeue(this.logQueueId);
+        this.wrapper.log.methodDone(`provide ${this.providerName} tasks`, 1, TaskExplorerProvider.logPad, [[ "# of tasks found", this.cachedTasks.length ]], this.logQueueId);
+        this.wrapper.log.dequeue(this.logQueueId);
         this.logQueueId = undefined;
         return this.cachedTasks;
     }
@@ -93,27 +88,27 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
         const allTasks: Task[] = [],
               visitedFiles: string[] = [],
               paths = this.wrapper.filecache.getTaskFiles(this.providerName),
-              enabled = isTaskTypeEnabled(this.providerName);
+              enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName);
 
-        log.methodStart(`read ${this.providerName} tasks`, 2, logPad, false, [[ "enabled", enabled ]], this.logQueueId);
+        this.wrapper.log.methodStart(`read ${this.providerName} tasks`, 2, logPad, false, [[ "enabled", enabled ]], this.logQueueId);
 
         if (enabled && paths)
         {
             for (const fObj of paths)
             {
-                if (!isExcluded(fObj.uri.path) && !visitedFiles.includes(fObj.uri.fsPath) && pathExistsSync(fObj.uri.fsPath))
+                if (!this.wrapper.utils.isExcluded(fObj.uri.path) && !visitedFiles.includes(fObj.uri.fsPath) && this.wrapper.fs.pathExistsSync(fObj.uri.fsPath))
                 {
                     visitedFiles.push(fObj.uri.fsPath);
                     const tasks = (await this.readUriTasks(fObj.uri, logPad + "   ")).filter(t => isTaskIncluded(this.wrapper, t, t.definition.path));
-                    log.write(`   processed ${this.providerName} file`, 2, logPad, this.logQueueId);
-                    log.value("      file", fObj.uri.fsPath, 2, logPad, this.logQueueId);
-                    log.value("      targets in file", tasks.length, 2, logPad, this.logQueueId);
+                    this.wrapper.log.write(`   processed ${this.providerName} file`, 2, logPad, this.logQueueId);
+                    this.wrapper.log.value("      file", fObj.uri.fsPath, 2, logPad, this.logQueueId);
+                    this.wrapper.log.value("      targets in file", tasks.length, 2, logPad, this.logQueueId);
                     allTasks.push(...tasks);
                 }
             }
         }
 
-        log.methodDone(`read ${this.providerName} tasks`, 2, logPad, [[ "# of tasks parsed", allTasks.length ]], this.logQueueId);
+        this.wrapper.log.methodDone(`read ${this.providerName} tasks`, 2, logPad, [[ "# of tasks parsed", allTasks.length ]], this.logQueueId);
 
         return allTasks;
     }
@@ -132,14 +127,14 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
         // Note that 'taskType' may be different than 'this.providerName' for 'script' type tasks (e.g.
         // batch, bash, python, etc...)
         //
-        log.methodStart(`invalidate ${this.providerName} tasks cache`, 1, logPad, false, [
+        this.wrapper.log.methodStart(`invalidate ${this.providerName} tasks cache`, 1, logPad, false, [
             [ "uri", uri?.path ], [ "current # of cached tasks", cachedTasks.length ]
         ]);
 
-        const enabled = isTaskTypeEnabled(this.providerName);
+        const enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName);
         if (enabled && uri)
         {
-            const pathExists = pathExistsSync(uri.fsPath) && !!workspace.getWorkspaceFolder(uri) ;
+            const pathExists = this.wrapper.fs.pathExistsSync(uri.fsPath) && !!workspace.getWorkspaceFolder(uri) ;
             //
             // Remove tasks of type '' from the 'tasks'array
             //
@@ -147,7 +142,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             {
                 if (this.needsRemoval(item, uri) && (item.source !== "Workspace" || /* istanbul ignore next */item.definition.type === this.providerName))
                 {
-                    log.write(`   removing cached task '${item.source}/${item.name}'`, 4, logPad);
+                    this.wrapper.log.write(`   removing cached task '${item.source}/${item.name}'`, 4, logPad);
                     (this.cachedTasks as Task[]).splice(object.length - 1 - index, 1);
                 }
             });
@@ -157,7 +152,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             // the the tree ui.  The check for excluded path patterns also found in the `excludes` array
             // is done by the file caching layer.
             //
-            if (pathExists && !isDirectory(uri.fsPath) && !configuration.get<string[]>("exclude", []).includes(uri.path))
+            if (pathExists && !this.wrapper.fs.isDirectory(uri.fsPath) && !this.wrapper.config.get<string[]>("exclude", []).includes(uri.path))
             {
                 const tasks = (await this.readUriTasks(uri, logPad + "   ")).filter(t => isTaskIncluded(this.wrapper, t, t.definition.path));
                 cachedTasks.push(...tasks);
@@ -169,7 +164,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             this.cachedTasks = undefined;
         }
 
-        log.methodDone(`invalidate ${this.providerName} tasks cache`, 1, logPad, [
+        this.wrapper.log.methodDone(`invalidate ${this.providerName} tasks cache`, 1, logPad, [
             [ "new # of cached tasks", this.cachedTasks ? this.cachedTasks.length : 0 ]
         ]);
     }
@@ -179,7 +174,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
     {
         const cstDef = item.definition;
         return !!(cstDef.uri &&
-                 (cstDef.uri.fsPath === uri.fsPath || !pathExistsSync(cstDef.uri.fsPath) || !workspace.getWorkspaceFolder(uri) ||
+                 (cstDef.uri.fsPath === uri.fsPath || !this.wrapper.fs.pathExistsSync(cstDef.uri.fsPath) || !workspace.getWorkspaceFolder(uri) ||
                  //
                  // If the directory wasdeleted, then isDirectory() fails, so for now rely on the fact
                  // that of the path doesn't have an extension, it's probably a directory.  FileWatcher

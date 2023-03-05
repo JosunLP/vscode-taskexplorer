@@ -1,11 +1,8 @@
 
-import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { readFileAsync } from "../lib/utils/fs";
+import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
-import { getRelativePath } from "../lib/utils/pathUtils";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace } from "vscode";
 
 
@@ -31,9 +28,9 @@ export class GruntTaskProvider extends TaskExplorerProvider implements TaskExplo
     {
         const scripts: string[] = [];
 
-        log.methodStart("find grunt targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
+        this.wrapper.log.methodStart("find grunt targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
 
-        const contents = await readFileAsync(fsPath);
+        const contents = await this.wrapper.fs.readFileAsync(fsPath);
         let idx = 0;
         let eol = contents.indexOf("\n", 0);
 
@@ -81,7 +78,7 @@ export class GruntTaskProvider extends TaskExplorerProvider implements TaskExplo
                         /* istanbul ignore else */
                         if (tgtName) {
                             scripts.push(tgtName);
-                            log.value("   found grunt task", tgtName, 4, logPad, this.logQueueId);
+                            this.wrapper.log.value("   found grunt task", tgtName, 4, logPad, this.logQueueId);
                         }
                     }
                 }
@@ -91,7 +88,7 @@ export class GruntTaskProvider extends TaskExplorerProvider implements TaskExplo
             eol = contents.indexOf("\n", idx);
         }
 
-        log.methodDone("find grunt targets", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("find grunt targets", 4, logPad, undefined, this.logQueueId);
 
         return scripts;
     }
@@ -103,7 +100,7 @@ export class GruntTaskProvider extends TaskExplorerProvider implements TaskExplo
             type: "grunt",
             script: target,
             target,
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             fileName: basename(uri.path),
             uri
         };
@@ -125,7 +122,7 @@ export class GruntTaskProvider extends TaskExplorerProvider implements TaskExplo
         const result: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder;
 
-        log.methodStart("read grunt file uri task", 3, logPad, false, [
+        this.wrapper.log.methodStart("read grunt file uri task", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
 
@@ -137,7 +134,7 @@ export class GruntTaskProvider extends TaskExplorerProvider implements TaskExplo
             result.push(task);
         }
 
-        log.methodDone("read grunt file uri tasks", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read grunt file uri tasks", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
         return result;
     }
 

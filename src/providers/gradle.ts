@@ -1,11 +1,7 @@
 
-import { log } from "../lib/log/log";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { readFileAsync } from "../lib/utils/fs";
 import { TaskExplorerProvider } from "./provider";
-import { configuration } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
 import { IDictionary, ITaskDefinition } from "../interface";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace } from "vscode";
 
@@ -27,7 +23,7 @@ export class GradleTaskProvider extends TaskExplorerProvider implements TaskExpl
 
     public createTask(target: string, cmd: string, folder: WorkspaceFolder, uri: Uri): Task
     {
-        const getCommand = (): string => configuration.get<string>("pathToPrograms.gradle", this.commands[process.platform]);
+        const getCommand = (): string => this.wrapper.config.get<string>("pathToPrograms.gradle", this.commands[process.platform]);
         const def = this.getDefaultDefinition(target, folder, uri);
         const cwd = dirname(uri.fsPath);
         const args = [ target ];
@@ -41,9 +37,9 @@ export class GradleTaskProvider extends TaskExplorerProvider implements TaskExpl
     {
         const scripts: string[] = [];
 
-        log.methodStart("find gradle targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
+        this.wrapper.log.methodStart("find gradle targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
 
-        const contents = await readFileAsync(fsPath);
+        const contents = await this.wrapper.fs.readFileAsync(fsPath);
         let idx = 0;
         let eol = contents.indexOf("\n", 0);
 
@@ -61,14 +57,14 @@ export class GradleTaskProvider extends TaskExplorerProvider implements TaskExpl
                 {
                     const tgtName = line.substring(idx1, idx2).trim();
                     scripts.push(tgtName);
-                    log.value("   found gradle task", tgtName, 4, logPad, this.logQueueId);
+                    this.wrapper.log.value("   found gradle task", tgtName, 4, logPad, this.logQueueId);
                 }
             }
             idx = eol + 1;
             eol = contents.indexOf("\n", idx);
         }
 
-        log.methodDone("Find gradle targets", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("Find gradle targets", 4, logPad, undefined, this.logQueueId);
         return scripts;
     }
 
@@ -79,7 +75,7 @@ export class GradleTaskProvider extends TaskExplorerProvider implements TaskExpl
             type: "gradle",
             script: target,
             target,
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             fileName: basename(uri.path),
             uri
         };
@@ -99,7 +95,7 @@ export class GradleTaskProvider extends TaskExplorerProvider implements TaskExpl
         const result: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder;
 
-        log.methodStart("read gradle file uri task", 3, logPad, false, [
+        this.wrapper.log.methodStart("read gradle file uri task", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
 
@@ -111,7 +107,7 @@ export class GradleTaskProvider extends TaskExplorerProvider implements TaskExpl
             result.push(task);
         }
 
-        log.methodDone("read gradle file uri task", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read gradle file uri task", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
         return result;
     }
 

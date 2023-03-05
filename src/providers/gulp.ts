@@ -1,15 +1,10 @@
 
 import { promisify } from "util";
-import { log } from "../lib/log/log";
 import { exec } from "child_process";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { sleep } from "../lib/utils/utils";
-import { readFileAsync } from "../lib/utils/fs";
+import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
-import { configuration } from "../lib/configuration";
-import { getRelativePath } from "../lib/utils/pathUtils";
-import { ITaskDefinition } from "../interface/ITaskDefinition";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace } from "vscode";
 
 
@@ -51,22 +46,22 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
     private async findTargets(fsPath: string, logPad: string)
     {
         let gulpTasks: string[] = [];
-        log.methodStart("find gulp targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
+        this.wrapper.log.methodStart("find gulp targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
 
-        if (configuration.get<boolean>("useGulp") === true)
+        if (this.wrapper.config.get<boolean>("useGulp") === true)
         {
             try
             {   const out = await promisify(exec)("npx gulp --tasks -f " + basename(fsPath), { cwd: dirname(fsPath) });
                 const stdout = out.stdout;
-                await sleep(10);
+                await this.wrapper.utils.sleep(10);
                 gulpTasks = this.parseGulpStdOut(stdout, logPad + "   ");
             }
-            catch (e: any) { /* istanbul ignore next */ log.error(e, undefined, this.logQueueId); }
+            catch (e: any) { /* istanbul ignore next */ this.wrapper.log.error(e, undefined, this.logQueueId); }
             // return new Promise<string[]>(async (resolve) => {
             //     const proc = exec("npx gulp --tasks -f " + basename(fsPath), { cwd: dirname(fsPath) });
             //     let result = "";
             //     proc.stdout?.on("data", (data: string) => { result = data; });
-            //     proc.stderr?.on("data", (data: string) => { /* istanbul ignore next */ log.error(data, undefined, this.logQueueId); });
+            //     proc.stderr?.on("data", (data: string) => { /* istanbul ignore next */ this.wrapper.log.error(data, undefined, this.logQueueId); });
             //     proc.on("exit", () => {
             //         resolve(this.parseGulpStdOut(result, logPad + "   "));
             //     });
@@ -76,7 +71,7 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
             gulpTasks = await this.parseGulpTasks(fsPath, logPad + "   ");
         }
 
-        log.methodDone("find gulp targets", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("find gulp targets", 4, logPad, undefined, this.logQueueId);
         return gulpTasks;
     }
 
@@ -87,7 +82,7 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
             type: "gulp",
             script: target,
             target,
-            path: getRelativePath(folder, uri),
+            path: this.wrapper.pathUtils.getRelativePath(folder, uri),
             fileName: basename(uri.path),
             uri
         };
@@ -98,11 +93,11 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
     private async parseGulpTasks(fsPath: string, logPad: string)
     {
         const scripts: string[] = [];
-        const contents = await readFileAsync(fsPath);
+        const contents = await this.wrapper.fs.readFileAsync(fsPath);
         let idx = 0;
         let eol = contents.indexOf("\n", 0);
 
-        log.methodStart("parse gulp tasks", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
+        this.wrapper.log.methodStart("parse gulp tasks", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
 
         while (eol !== -1)
         {
@@ -138,7 +133,7 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
                 }
                 if (tgtName) {
                     scripts.push(tgtName);
-                    log.value("   found gulp task", tgtName, 4, logPad, this.logQueueId);
+                    this.wrapper.log.value("   found gulp task", tgtName, 4, logPad, this.logQueueId);
                 }
             }
 
@@ -146,7 +141,7 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
             eol = contents.indexOf("\n", idx);
         }
 
-        log.methodDone("parse gulp tasks", 4, logPad, undefined, this.logQueueId);
+        this.wrapper.log.methodDone("parse gulp tasks", 4, logPad, undefined, this.logQueueId);
         return scripts;
     }
 
@@ -250,8 +245,8 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
             if (line && line.length > 3 && line[3])
             {
                 gulpTasks.push(line[3].toString());
-                log.write("found gulp task", 4, logPad, this.logQueueId);
-                log.value("   name", line[3].toString(), 4, logPad, this.logQueueId);
+                this.wrapper.log.write("found gulp task", 4, logPad, this.logQueueId);
+                this.wrapper.log.value("   name", line[3].toString(), 4, logPad, this.logQueueId);
             }
         }
         return gulpTasks;
@@ -311,7 +306,7 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
         const result: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder;
 
-        log.methodStart("read gulp file uri tasks", 3, logPad, false, [[ "path", uri.fsPath ], [ "project folder", folder.name ]], this.logQueueId);
+        this.wrapper.log.methodStart("read gulp file uri tasks", 3, logPad, false, [[ "path", uri.fsPath ], [ "project folder", folder.name ]], this.logQueueId);
 
         const scripts = await this.findTargets(uri.fsPath, logPad + "   ");
         for (const s of scripts)
@@ -321,7 +316,7 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
             result.push(task);
         }
 
-        log.methodDone("read gulp file uri tasks", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
+        this.wrapper.log.methodDone("read gulp file uri tasks", 3, logPad, [[ "#of tasks found", result.length ]], this.logQueueId);
         return result;
     }
 
