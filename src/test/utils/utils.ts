@@ -81,7 +81,7 @@ export const activate = async (instance?: Mocha.Context) =>
 {
     if (instance)
     {
-        instance.timeout(60 * 1000);
+        instance.sleep(60 * 1000);
         const suite = instance.currentTest?.parent;
         if (suite)
         {

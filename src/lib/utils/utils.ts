@@ -1,12 +1,10 @@
 
 import { log } from "../log/log";
 import minimatch = require("minimatch");
+import { Uri, workspace, env } from "vscode";
 import { basename, extname, sep } from "path";
 import { Globs, Strings } from "../constants";
 import { configuration } from "../configuration";
-import { LicenseManager } from "../licenseManager";
-import { Uri, workspace, window, env } from "vscode";
-import { Commands, executeCommand } from "../command/command";
 
 
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
@@ -217,39 +215,10 @@ export const removeFromArray = (arr: any[], item: any) =>
 // }
 
 
-let maxTasksMessageShown = false;
-const maxTaskTypeMessageShown: any = {};
-export const showMaxTasksReachedMessage = (licMgr: LicenseManager, taskType?: string, force?: boolean) =>
-{
-    if (force || ((!maxTasksMessageShown && !taskType) || (taskType && !maxTaskTypeMessageShown[taskType] && Object.keys(maxTaskTypeMessageShown).length < 3)))
-    {
-        maxTasksMessageShown = true;
-        licMgr.setMaxTasksReached(true);
-        if (taskType)
-        {
-            maxTaskTypeMessageShown[taskType] = true;
-        }
-        const msg = `The max # of parsed ${taskType ?? ""} tasks in un-licensed mode has been reached`;
-        return window.showInformationMessage(msg, "Enter License Key", "Info", "Not Now")
-		.then(async (action) =>
-		{
-			if (action === "Enter License Key")
-			{
-				await executeCommand(Commands.EnterLicense);
-			}
-			else if (action === "Info")
-			{
-				await executeCommand(Commands.ShowLicensePage);
-			}
-		});
-    }
-};
+export const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
 
 export const testPattern = (path: string, pattern: string) => minimatch(path, pattern, { dot: true, nocase: true });
 
 
 export const textWithElipsis = (text: string, maxLength: number) => text.length > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
-
-
-export const timeout = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));

@@ -7,7 +7,7 @@ import { pathExists } from "../lib/utils/fs";
 import { isScriptType } from "../lib/utils/taskUtils";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "../providers/script";
-import { getPackageManager, timeout } from "../lib/utils/utils";
+import { getPackageManager, sleep } from "../lib/utils/utils";
 import { Commands, registerCommand } from "../lib/command/command";
 import { ILog, ITeTaskManager, TaskMap, ITeTask } from "../interface";
 import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
@@ -420,7 +420,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                     {
                         this.log.value("   send sequence to terminal", "\\u0003", 1);
                         terminal.sendText("\u0003");
-                        await timeout(50);
+                        await sleep(50);
                         this.log.value("   send to terminal", ctrlChar, 1);
                         // terminal = getTerminal(taskItem, "   ");
                         try { /* istanbul ignore else */if (getTerminal(taskItem, "   ")) terminal.sendText(ctrlChar, true); } catch {}

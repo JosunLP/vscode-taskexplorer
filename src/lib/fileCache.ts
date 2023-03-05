@@ -117,7 +117,7 @@ export class TeFileCache implements ITeFileCache
                                 maxFiles = licMgr.getMaxNumberOfTaskFiles() - cachedFileCount;
                                 if (maxFiles <= 0)
                                 {
-                                    this.wrapper.utils.showMaxTasksReachedMessage(licMgr);
+                                    licMgr.setMaxTasksReached();
                                     this.wrapper.log.write(`      Max files limit (${licMgr.getMaxNumberOfTaskFiles()}) already reached (no license)`, 2, logPad);
                                     await this.finishBuild();
                                     return numFilesFound;
@@ -139,7 +139,7 @@ export class TeFileCache implements ITeFileCache
                         this.wrapper.log.write(`   finished adding new directory to '${providerName}' file cache`, 3, logPad);
                     }
                     else {
-                        await this.wrapper.utils.timeout(50);
+                        await this.wrapper.utils.sleep(50);
                     }
                 }
             }
@@ -265,7 +265,7 @@ export class TeFileCache implements ITeFileCache
                     maxFiles = licMgr.getMaxNumberOfTaskFiles() - cachedFileCount;
                     if (maxFiles <= 0) {
                         this.wrapper.log.write(`   Max files limit (${licMgr.getMaxNumberOfTaskFiles()}) already reached (no license)`, 2, logPad);
-                        this.wrapper.utils.showMaxTasksReachedMessage(licMgr);
+                        licMgr.setMaxTasksReached();
                         return numFilesFound;
                     }
                     this.wrapper.log.write(`   Set max files to scan at ${maxFiles} files (no license)`, 3, logPad);
@@ -291,7 +291,7 @@ export class TeFileCache implements ITeFileCache
             catch (e: any) { /* istanbul ignore next */ this.wrapper.log.error(e); }
         }
         else if (isExternal) {
-            await this.wrapper.utils.timeout(50);
+            await this.wrapper.utils.sleep(50);
         }
 
         this.wrapper.log.methodDone(logMsg, 1, logPad);
@@ -362,7 +362,7 @@ export class TeFileCache implements ITeFileCache
         {
             this.cancel = true;
             while (this.cacheBuilding) {
-                await this.wrapper.utils.timeout(100);
+                await this.wrapper.utils.sleep(100);
             }
         }
     };
@@ -741,7 +741,7 @@ export class TeFileCache implements ITeFileCache
     private startBuild = async() =>
     {
         while (this.cacheBuilding === true) {
-            await this.wrapper.utils.timeout(100);
+            await this.wrapper.utils.sleep(100);
         }
         this.cacheBuilding = true;
         this.wrapper.statusBar.show();

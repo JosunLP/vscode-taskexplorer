@@ -9,7 +9,7 @@
  */
 
 import { TeWrapper } from "../lib/wrapper";
-import { timeout } from "../lib/utils/utils";
+import { sleep } from "../lib/utils/utils";
 import { TeWebviewBase } from "./webviewBase";
 import { isObject } from "../lib/utils/typeUtils";
 import { ContextKeys, WebviewIds } from "../lib/context";
@@ -140,7 +140,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	async show(options?: { column?: ViewColumn; preserveFocus?: boolean }, ...args: any[])
 	{
 		while (this.wrapper.busy) {
-			await timeout(100);
+			await sleep(100);
 		}
 		void this.wrapper.usage.track(`${this.trackingFeature}:shown`);
 

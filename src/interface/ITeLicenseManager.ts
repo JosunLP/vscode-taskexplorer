@@ -70,5 +70,6 @@ export interface ITeLicenseManager
 	getAccount(): Thenable<ITeAccount>;
     getMaxNumberOfTasks: (taskType?: string | undefined) => number;
     getMaxNumberOfTaskFiles: () => number;
+	setMaxTasksReached(taskType?: string, force?: boolean): Promise<void>;
 	setTestData(data: any): void;
 }

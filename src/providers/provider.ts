@@ -9,7 +9,7 @@ import { isDirectory, pathExistsSync } from "../lib/utils/fs";
 import { Uri, Task, WorkspaceFolder, workspace } from "vscode";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import { ITaskExplorerProvider } from "../interface/ITaskProvider";
-import { isExcluded, isTaskTypeEnabled, showMaxTasksReachedMessage } from "../lib/utils/utils";
+import { isExcluded, isTaskTypeEnabled } from "../lib/utils/utils";
 
 
 export abstract class TaskExplorerProvider implements ITaskExplorerProvider
@@ -77,7 +77,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
                     rmvCount = this.cachedTasks.length - maxTasks;
                     log.write(`   removing ${rmvCount} tasks, max ${ this.providerName} task count reached (no license)`, 1, TaskExplorerProvider.logPad + "   ", this.logQueueId);
                     this.cachedTasks.splice(maxTasks, rmvCount);
-                    showMaxTasksReachedMessage(licMgr, getTaskTypeFriendlyName(this.providerName, true));
+                    licMgr.setMaxTasksReached(getTaskTypeFriendlyName(this.providerName, true));
                 }
             }
         }

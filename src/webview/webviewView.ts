@@ -9,7 +9,7 @@
  */
 
 import { TeWrapper } from "../lib/wrapper";
-import { timeout } from "../lib/utils/utils";
+import { sleep } from "../lib/utils/utils";
 import { TeWebviewBase } from "./webviewBase";
 import { registerCommand } from "../lib/command/command";
 import { ContextKeys, WebviewViewIds } from "../lib/context";
@@ -68,7 +68,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	{
 		while (this.wrapper.busy) {
 			/* istanbul ignore next */
-			await timeout(100);
+			await sleep(100);
 		}
 
 		this._view = webviewView;
@@ -115,7 +115,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	{
 		while (this.wrapper.busy) {
 			/* istanbul ignore next */
-			await timeout(100);
+			await sleep(100);
 		}
 		void this.wrapper.usage.track(`${this.trackingFeature}:shown`);
 		void (await commands.executeCommand(`${this.id}.focus`, options));

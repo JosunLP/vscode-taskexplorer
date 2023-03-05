@@ -151,7 +151,7 @@
         "webpack-rebuild:extension_web": "webpack --mode production --env clean=true --env build=extension_web --config ./webpack.config.js",
         "webpack-build:verbose": "webpack --stats verbose --mode production --config ./webpack.config.js",
         "webpack-build:dev": "webpack --mode development --config ./webpack.config.js",
-        "webpack-rebuild:dev": "npm run webpack-build:dev --env clean=true --config ./webpack.config.js",
+        "webpack-rebuild:dev": "webpack --mode development --env clean=true --config ./webpack.config.js",
         "webpack-build:test": "webpack --env environment=test --config ./webpack.config.js",
         "webpack-build:test:prod": "webpack --env environment=testprod --config ./webpack.config.js"
     },

@@ -18,10 +18,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _maxFreeTasks = 500;
 	private _maxFreeTaskFiles = 100;
 	private _maxTasksReached = false;
+	private _maxTasksMessageShown = false;
 	private _maxFreeTasksForTaskType = 100;
 	private _maxFreeTasksForScriptType = 50;
 	private _checkLicenseTask: NodeJS.Timeout;
 	private readonly _disposables: Disposable[] = [];
+	private readonly _maxTaskTypeMessageShown: any = {};
 	private readonly _checkLicenseInterval = 1000 * 60 * 60 * 4; // 4 hr
     private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
 
@@ -34,6 +36,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._checkLicenseTask = setInterval(this.checkLicense, this._checkLicenseInterval, "");
 		this._disposables.push(
 			this._onSessionChange,
+			// this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged),
 			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged),
 			registerCommand(Commands.EnterLicense, this.enterLicenseKey, this),
 			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
@@ -106,7 +109,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				}
 			}
 			else {
-				await this.displayPopup(logPad + "   ");
+				await this.displayPopup(undefined, logPad + "   ");
 			}
 		}
 		else {
@@ -119,7 +122,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private displayPopup = async (logPad: string): Promise<void> =>
+	private displayPopup = async (message = "Purchase a license to unlock unlimited parsed tasks.", logPad: string): Promise<void> =>
 	{
 		const lastNag = this.wrapper.storage.get<string>("taskexplorer.lastLicenseNag");
 		this.wrapper.log.methodStart("license manager display popup", 1, logPad, false, [[ "last nag", lastNag ]]);
@@ -143,7 +146,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				options.push("Extend Trial");
 			}
 			await this.wrapper.storage.update("taskexplorer.lastLicenseNag", Date.now().toString());
-			window.showInformationMessage("Purchase a license to unlock unlimited parsed tasks.", ...options)
+			window.showInformationMessage(message, ...options)
 			.then(async (action) =>
 			{
 				if (action === "Enter License Key")
@@ -301,16 +304,19 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private onSessionChanged = (e: TeSessionChangeEvent) => this._onSessionChange.fire(e);
 
 
-	private onTasksChanged = (_e: ITeTaskChangeEvent) =>
+	private onTasksChanged = (e: ITeTaskChangeEvent) =>
 	{
 		this.wrapper.log.methodOnce("license event", "on tasks changed", 1, "");
-		this.displayPopup("");
+		if (e.tasks.length > this.getMaxNumberOfTasks(e.task?.source)) {
+			this.setMaxTasksReached();
+		}
+		this.displayPopup(undefined, "");
 	};
 
 
 	private register = async(): Promise<void> =>
 	{
-		await this.wrapper.utils.timeout(1);
+		await this.wrapper.utils.sleep(1);
 		// TODO - Account registration
 		//        Need webview app to input first/last name, email address
 		await window.showInformationMessage("Not implemented yet");
@@ -344,9 +350,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	setMaxTasksReached = (maxReached: boolean): void => { this._maxTasksReached = maxReached; };
-
-
 	setTestData = (data: any): void =>
 	{
 		this._maxFreeTasks = data.maxFreeTasks || this._maxFreeTasks;
@@ -355,6 +358,22 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._maxFreeTasksForScriptType = data.maxFreeTasksForScriptType || this._maxFreeTasksForScriptType;
 		if (data.callTasksChanged) {
 			this.onTasksChanged({ tasks: [], type: "all" });
+		}
+	};
+
+
+	setMaxTasksReached = async(taskType?: string, force?: boolean) =>
+	{
+		this._maxTasksReached = true;
+		if (force || ((!this._maxTasksMessageShown && !taskType) || (taskType && !this._maxTaskTypeMessageShown[taskType] && Object.keys(this._maxTaskTypeMessageShown).length < 3)))
+		{
+			this._maxTasksMessageShown = true;
+			if (taskType)
+			{
+				this._maxTaskTypeMessageShown[taskType] = true;
+			}
+			const msg = `The max # of parsed ${taskType ?? ""} tasks in un-licensed mode has been reached`;
+			return this.displayPopup(msg, "");
 		}
 	};
 

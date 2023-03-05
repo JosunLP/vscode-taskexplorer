@@ -569,20 +569,20 @@ suite("License Manager Tests", () =>
 		utils.clearOverrideShowInputBox();
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox(undefined);
-		await teWrapper.utils.showMaxTasksReachedMessage(licMgr, undefined, true);
+		await licMgr.setMaxTasksReached(undefined, true);
 		utils.overrideNextShowInfoBox("Info");
-		await teWrapper.utils.showMaxTasksReachedMessage(licMgr, "npm", true);
+		await licMgr.setMaxTasksReached("npm", true);
 		utils.overrideNextShowInfoBox("Not Now");
-		await teWrapper.utils.showMaxTasksReachedMessage(licMgr, "ant", true);
+		await licMgr.setMaxTasksReached("ant", true);
 		utils.overrideNextShowInfoBox(undefined);
-		await teWrapper.utils.showMaxTasksReachedMessage(licMgr, "gulp", true);
+		await licMgr.setMaxTasksReached("gulp", true);
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox(undefined);
-		await teWrapper.utils.showMaxTasksReachedMessage(licMgr, "grunt", true);
+		await licMgr.setMaxTasksReached("grunt", true);
 		utils.overrideNextShowInfoBox("Info");
-		await teWrapper.utils.showMaxTasksReachedMessage(licMgr, "grunt", true);
+		await licMgr.setMaxTasksReached("grunt", true);
 		utils.overrideNextShowInfoBox("Info");
-		await teWrapper.utils.showMaxTasksReachedMessage(licMgr);
+		await licMgr.setMaxTasksReached();
         utils.endRollingCount(this);
 	});
 

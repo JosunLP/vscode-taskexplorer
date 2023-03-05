@@ -319,7 +319,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             ctRmv = this._tasks.length - maxTasks;
             this.wrapper.log.write(`      removing ${ctRmv} tasks, max count reached (no license)`, 3, logPad);
             this._tasks.splice(maxTasks, ctRmv);
-            this.wrapper.utils.showMaxTasksReachedMessage(licMgr);
+            licMgr.setMaxTasksReached();
         }
         //
         // Create/build the ui task tree
@@ -660,7 +660,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this.wrapper.log.write("waiting for previous refresh to complete...", 1, logPad);
         }
         while (this.refreshPending && waited < maxWait) {
-            await this.wrapper.utils.timeout(250);
+            await this.wrapper.utils.sleep(250);
             waited += 250;
         }
     };

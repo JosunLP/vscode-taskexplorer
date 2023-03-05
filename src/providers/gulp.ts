@@ -4,7 +4,7 @@ import { log } from "../lib/log/log";
 import { exec } from "child_process";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { timeout } from "../lib/utils/utils";
+import { sleep } from "../lib/utils/utils";
 import { readFileAsync } from "../lib/utils/fs";
 import { TaskExplorerProvider } from "./provider";
 import { configuration } from "../lib/configuration";
@@ -58,7 +58,7 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
             try
             {   const out = await promisify(exec)("npx gulp --tasks -f " + basename(fsPath), { cwd: dirname(fsPath) });
                 const stdout = out.stdout;
-                await timeout(10);
+                await sleep(10);
                 gulpTasks = this.parseGulpStdOut(stdout, logPad + "   ");
             }
             catch (e: any) { /* istanbul ignore next */ log.error(e, undefined, this.logQueueId); }

@@ -418,7 +418,7 @@ suite("Util Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 2) + 50);
 
-        teWrapper.utils.timeout(10);
+        teWrapper.utils.sleep(10);
 
         expect(teWrapper.commonUtils.properCase("taskexplorer")).to.be.equal("Taskexplorer");
         expect(teWrapper.commonUtils.properCase(undefined)).to.be.equal("");
