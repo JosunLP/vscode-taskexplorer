@@ -131,7 +131,6 @@
         "test:clean_cache_all": "rimraf .vscode-test\\user-data",
         "tsc-build": "npx tsc -p ./ && tsc-alias && npm run webpack-build:webviews:dev",
         "tsc-build_test": "npx tsc -p tsconfig.test.json && tsc-alias && npm run webpack-build:webviews:dev",
-        "tsc-build_test2": "npx tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
         "tsc-build_types": "tsc -p ./types && cmd /c xcopy .\\types\\lib\\* .\\node_modules\\@spmeesseman\\vscode-taskexplorer-types\\lib /s /i /y",
         "tsc-rebuild": "npm run clean && npm run tsc-build && npm run tsc-build_types",
         "tsc-rebuild_test": "npm run clean && && npm run tsc-rebuild_types && npm run test-default_build",
