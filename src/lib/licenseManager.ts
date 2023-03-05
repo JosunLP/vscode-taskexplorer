@@ -198,14 +198,15 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private extendTrial = async(logPad: string): Promise<void> =>
 	{
 		const ep: ITeApiEndpoint = "register/trial/extend";
-		let token: string | undefined;
 		this._busy = true;
 
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
 
 		if (this._account.license.period === 2)
 		{
-			this.wrapper.log.write("   an extended trial  license has already been allocated to this machine", 1, logPad);
+			const msg = "an extended trial license has already been allocated to this machine";
+			window.showWarningMessage("Can't proceed - " + msg);
+			this.wrapper.log.write("   " + msg, 1, logPad);
 			this.wrapper.log.methodDone("request extended trial", 1, logPad);
 			this._busy = false;
 			return;

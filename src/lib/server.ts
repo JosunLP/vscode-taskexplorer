@@ -30,7 +30,7 @@ export class TeServer
 
     constructor(private readonly wrapper: TeWrapper)
 	{
-		if (USE_LOCAL_SERVER)
+		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER)
 		{   //
 			// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
 			// Justdisable TLS rejection when using localhost, no big deal.
@@ -46,7 +46,7 @@ export class TeServer
 
 	get apiClientId()
 	{
-		if (USE_LOCAL_SERVER) {
+		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER) {
 			return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
 		}
 		return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
@@ -72,7 +72,7 @@ export class TeServer
 			case "tests":
 				return USE_LOCAL_SERVER ? "localhost" : "license.spmeesseman.com";
 			case "production":
-				return "license.spmeesseman.com"; // "app.spmeesseman.com"
+				return "license.spmeesseman.com"; // "app1.spmeesseman.com"
 		}
 	};
 
