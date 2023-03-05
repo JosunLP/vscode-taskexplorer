@@ -78,6 +78,7 @@ export interface ITeUtilities
 	lowerCaseFirstChar(s: string, removeSpaces: boolean): string;
 	isExcluded(uriPath: string, logPad?: string): boolean;
 	isTaskTypeEnabled(taskType: string): boolean;
+	isTeEnabled(): boolean;
 	openUrl(url: string): void;
 	pushIfNotExists(arr: any[], item: any): void;
 	removeFromArray(arr: any[], item: any): void;

@@ -69,7 +69,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         //
         // Main excludes list changes requires global refresh
         //
-        if (e.affectsConfiguration("taskexplorer.exclude") || e.affectsConfiguration("taskexplorer.excludeTask"))
+        if (this.wrapper.config.affectsConfiguration(e, "exclude", "excludeTask"))
         {
             this.wrapper.log.write("   the 'exclude/excludeTask' setting has changed", 1);
             this.wrapper.log.value("      exclude changed", e.affectsConfiguration("taskexplorer.exclude"), 1);
@@ -81,7 +81,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         // User Tasks / specialFolders.showUserTasks
         // Other specialFolder config events are process in tree/folderCache module
         //
-        if (e.affectsConfiguration("taskexplorer.specialFolders.showUserTasks"))
+        if (this.wrapper.config.affectsConfiguration(e, "specialFolders.showUserTasks"))
         {
             this.wrapper.log.write("   the 'specialFolders.showUserTasks' setting has changed", 1);
             this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("specialFolders.showUserTasks"), 1);
@@ -95,7 +95,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         {   //
             // Task Types
             //
-            if (e.affectsConfiguration("taskexplorer.enabledTasks"))
+            if (this.wrapper.config.affectsConfiguration(e, "enabledTasks"))
             {
                 const newEnabledTasks = this.wrapper.config.get<IDictionary<boolean>>("enabledTasks");
                 for (const p of Object.keys(this.enabledTasks))
@@ -117,8 +117,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Groupings changes require global refresh
             //
-            if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupWithSeperator}`) || e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupSeparator}`) ||
-                e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupMaxLevel}`) || e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupStripTaskLabel}`))
+            if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.GroupWithSeperator, ConfigKeys.GroupSeparator, ConfigKeys.GroupMaxLevel, ConfigKeys.GroupStripTaskLabel))
             {
                 this.wrapper.log.write("   A tree grouping setting has changed", 1);
                 this.wrapper.log.value(`      ${ConfigKeys.GroupWithSeperator} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupWithSeperator), 1);
@@ -131,7 +130,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Workspace/project folder sorting
             //
-            if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.SortProjectFoldersAlphabetically}`))
+            if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.SortProjectFoldersAlphabetically))
             {
                 this.wrapper.log.write(`   the '${ConfigKeys.SortProjectFoldersAlphabetically}' setting has changed`, 1);
                 this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically), 1);
@@ -141,7 +140,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Program paths
             //
-            if (e.affectsConfiguration("taskexplorer.pathToPrograms"))
+            if (this.wrapper.config.affectsConfiguration(e, "pathToPrograms"))
             {
                 const newPathToPrograms = this.wrapper.config.get<IDictionary<string>>("pathToPrograms");
                 for (const p of Object.keys(this.pathToPrograms))
@@ -168,7 +167,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Extra Bash Globs (for extensionless script files)
             //
-            if (e.affectsConfiguration("taskexplorer.globPatternsBash") && !refreshTaskTypes.includes("bash"))
+            if (this.wrapper.config.affectsConfiguration(e, "globPatternsBash") && !refreshTaskTypes.includes("bash"))
             {
                 this.wrapper.log.write("   the 'globPatternsBash' setting has changed", 1);
                 await this.wrapper.fileWatcher.registerFileWatcher("bash", false, this.wrapper.config.get<boolean>("enabledTasks.bash"), "   ");
@@ -178,7 +177,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Extra Apache Ant Globs (for non- build.xml files)s
             //
-            if ((e.affectsConfiguration("taskexplorer.includeAnt") || e.affectsConfiguration("taskexplorer.globPatternsAnt")) && !refreshTaskTypes.includes("ant"))
+            if (this.wrapper.config.affectsConfiguration(e, "includeAnt", "globPatternsAnt") && !refreshTaskTypes.includes("ant"))
             {
                 this.wrapper.log.write("   the 'globPatternsAnt' setting has changed", 1);
                 await this.wrapper.fileWatcher.registerFileWatcher("ant", false, this.wrapper.config.get<boolean>("enabledTasks.ant"), "   ");
@@ -188,7 +187,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Whether or not to use 'ansicon'when running 'ant' tasks
             //
-            if (e.affectsConfiguration("taskexplorer.enableAnsiconForAnt"))
+            if (this.wrapper.config.affectsConfiguration(e, "enableAnsiconForAnt"))
             {
                 const newValue = this.wrapper.config.get<boolean>("enableAnsiconForAnt");
                 this.wrapper.log.write("   the '.enableAnsiconForAnt' setting has changed", 1);
@@ -202,7 +201,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Whether or not to use the 'ant' program to detect ant tasks (default is xml2js parser)
             //
-            if (e.affectsConfiguration("taskexplorer.useAnt"))
+            if (this.wrapper.config.affectsConfiguration(e, "useAnt"))
             {
                 this.wrapper.log.write("   the 'useAnt' setting has changed", 1);
                 this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("useAnt"), 1);
@@ -212,7 +211,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Whether or not to use the 'gulp' program to detect gulp tasks (default is custom parser)
             //
-            if (e.affectsConfiguration("taskexplorer.useGulp"))
+            if (this.wrapper.config.affectsConfiguration(e, "useGulp"))
             {
                 this.wrapper.log.write("   the 'useGulp' setting has changed", 1);
                 this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("useGulp"), 1);
@@ -235,7 +234,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             // flag but the flag is not visible via the Task API Task definition, the file must be read
             // and parsed by the application to locate the value.
             //
-            if (e.affectsConfiguration("taskexplorer.showHiddenWsTasks"))
+            if (this.wrapper.config.affectsConfiguration(e, "showHiddenWsTasks"))
             {
                 this.wrapper.log.write("   the 'npm.showHiddenWsTasks' setting has changed", 1);
                 this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("showHiddenWsTasks"), 1);
@@ -246,8 +245,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             // Integrated shell.  This should bethe last check in this if() block, since it
             // is the only change in the block that can set 'refresh'.
             //
-            if (e.affectsConfiguration("terminal.integrated.shell.windows") ||
-                e.affectsConfiguration("terminal.integrated.shell.linux") ||
+            if (e.affectsConfiguration("terminal.integrated.shell.windows") || e.affectsConfiguration("terminal.integrated.shell.linux") ||
                 e.affectsConfiguration("terminal.integrated.shell.osx"))
             {   //
                 // Script type task defs will change with terminal change
@@ -263,27 +261,26 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         //
         // Explorer / sidebar view
         //
-        if (e.affectsConfiguration("taskexplorer.enableExplorerView"))
+        let t: NodeJS.Timeout |  undefined;
+        if (this.wrapper.config.affectsConfiguration(e, "enableExplorerView"))
         {
             const newValue = this.wrapper.config.get<boolean>("enableExplorerView");
             this.wrapper.log.write("   the 'enableExplorerView' setting has changed", 1);
             this.wrapper.log.value("      new value", newValue, 1);
-            await this.wrapper.contextTe.setContext(ContextKeys.Enabled, this.wrapper.config.get<boolean>("enableExplorerView") ||
-                                                                    this.wrapper.config.get<boolean>("enableSideBar"));
+            t = setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, this.wrapper.utils.isTeEnabled());
         }
-        if (e.affectsConfiguration("taskexplorer.enableSideBar"))
+        if (this.wrapper.config.affectsConfiguration(e, "enableSideBar"))
         {
             const newValue = this.wrapper.config.get<boolean>("enableSideBar");
             this.wrapper.log.write("   the 'enableSideBar' setting has changed", 1);
             this.wrapper.log.value("      new value", newValue, 1);
-            await this.wrapper.contextTe.setContext(ContextKeys.Enabled, this.wrapper.config.get<boolean>("enableExplorerView") ||
-                                                                    this.wrapper.config.get<boolean>("enableSideBar"));
+            if (!t) t = setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, this.wrapper.utils.isTeEnabled());
         }
 
         //
         // Persistent file caching
         //
-        if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.EnablePersistenFileCache}`))
+        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.EnablePersistenFileCache))
         {
             const newValue = this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
             this.wrapper.log.write(`   the '${ConfigKeys.EnablePersistenFileCache}' setting has changed`, 1);

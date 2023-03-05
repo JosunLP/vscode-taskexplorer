@@ -24,6 +24,7 @@ import {
 
 export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> implements Disposable
 {
+	private _teEnabled: boolean;
 	private _disposablePanel: Disposable | undefined;
 	protected override _view: WebviewPanel | undefined = undefined;
 
@@ -38,6 +39,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		showCommand: Commands)
 	{
 		super(wrapper, title, fileName);
+		this._teEnabled = wrapper.utils.isTeEnabled();
 		this.disposables.push(
 			registerCommand(showCommand, this.onShowCommand, this),
 			wrapper.config.onDidChange(this.onConfigChangedBase, this),
@@ -74,14 +76,16 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	private async onConfigChangedBase(e: ConfigurationChangeEvent)
 	{
-		if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.EnableExplorerTree}`) ||
-			e.affectsConfiguration(`taskexplorer.${ConfigKeys.EnableSideBar}`))
+		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.EnableExplorerTree, ConfigKeys.EnableSideBar))
 		{
-			const enabled = this.wrapper.config.get<boolean>(ConfigKeys.EnableSideBar) ||
-						    this.wrapper.config.get<boolean>(ConfigKeys.EnableExplorerTree);
-			this.notify(IpcEnabledChangedMsg, { enabled });
-			if (!enabled) {
-				setTimeout(() => this.dispose(), 500);
+			const enabled = this.wrapper.utils.isTeEnabled();
+			if (enabled !== this._teEnabled)
+			{
+				this._teEnabled = enabled;
+				this.notify(IpcEnabledChangedMsg, { enabled });
+				if (!enabled) {
+					setTimeout(() => this.dispose(), 500);
+				}
 			}
 		}
 	}

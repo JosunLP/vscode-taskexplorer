@@ -93,6 +93,10 @@ export const getWorkspaceProjectName = (fsPath: string) =>
 };
 
 
+export const isTeEnabled = () => configuration.get<boolean>(ConfigKeys.EnableSideBar) ||
+                                 configuration.get<boolean>(ConfigKeys.EnableExplorerTree);
+
+
 export const isExcluded = (uriPath: string, logPad = "") =>
 {
     const exclude = configuration.get<string[]>("exclude", []);

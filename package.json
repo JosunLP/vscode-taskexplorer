@@ -363,19 +363,23 @@
             },
             {
                 "command": "taskexplorer.register",
-                "title": "%command.register%"
+                "title": "%command.register%",
+                "when": "taskexplorer:enabled"
             },
             {
                 "command": "taskexplorer.enterLicense",
-                "title": "%command.enterLicense%"
+                "title": "%command.enterLicense%",
+                "when": "taskexplorer:enabled"
             },
             {
                 "command": "taskexplorer.extendTrial",
-                "title": "%command.extendTrial%"
+                "title": "%command.extendTrial%",
+                "when": "taskexplorer:enabled"
             },
             {
                 "command": "taskexplorer.openBugReports",
                 "title": "%command.openBugReports%",
+                "when": "taskexplorer:enabled",
                 "icon": {
                     "light": "res/img/light/bug.svg",
                     "dark": "res/img/dark/bug.svg"
@@ -384,6 +388,7 @@
             {
                 "command": "taskexplorer.openRepository",
                 "title": "%command.openRepository%",
+                "when": "taskexplorer:enabled",
                 "icon": {
                     "light": "res/img/light/github.svg",
                     "dark": "res/img/dark/github.svg"
@@ -405,15 +410,18 @@
             },
             {
                 "command": "taskexplorer.view.licensePage.show",
-                "title": "%command.view.licensePage.show%"
+                "title": "%command.view.licensePage.show%",
+                "when": "taskexplorer:enabled"
             },
             {
                 "command": "taskexplorer.view.welcome.show",
-                "title": "%command.view.welcome.show%"
+                "title": "%command.view.welcome.show%",
+                "when": "taskexplorer:enabled"
             },
             {
                 "command": "taskexplorer.view.releaseNotes.show",
-                "title": "%command.view.releaseNotes.show%"
+                "title": "%command.view.releaseNotes.show%",
+                "when": "taskexplorer:enabled"
             },
             {
                 "command": "taskexplorer.view.parsingReport.show",
@@ -629,12 +637,7 @@
             {
                 "command": "taskexplorer.runLastTask",
                 "key": "alt+r t",
-                "when": "config.taskexplorer.enableExplorerView"
-            },
-            {
-                "command": "taskexplorer.runLastTask",
-                "key": "alt+r t",
-                "when": "config.taskexplorer.enableSideBar"
+                "when": "taskexplorer:enabled"
             }
         ],
         "menus": {
@@ -642,37 +645,37 @@
                 {
                     "command": "taskexplorer.disableTaskType",
                     "group": "9_taskexplorer",
-                    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in vscodeTaskExplorer.taskFiles"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in vscodeTaskExplorer.taskFiles"
                 },
                 {
                     "command": "taskexplorer.enableTaskType",
                     "group": "9_taskexplorer",
-                    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in vscodeTaskExplorer.taskFiles"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in vscodeTaskExplorer.taskFiles"
                 },
                 {
                     "command": "taskexplorer.addToExcludesEx",
                     "group": "9_taskexplorer",
-                    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in vscodeTaskExplorer.taskFiles"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in vscodeTaskExplorer.taskFiles"
                 },
                 {
                     "command": "taskexplorer.addToExcludesEx",
                     "group": "9_taskexplorer",
-                    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourcePath && resourceScheme == folder"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourcePath && resourceScheme == folder"
                 },
                 {
                     "command": "taskexplorer.removeFromExcludes",
                     "group": "9_taskexplorer",
-                    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in vscodeTaskExplorer.taskFiles"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in vscodeTaskExplorer.taskFiles"
                 },
                 {
                     "command": "taskexplorer.removeFromExcludes",
                     "group": "9_taskexplorer",
-                    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourcePath && resourceScheme == folder"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourcePath && resourceScheme == folder"
                 },
                 {
                     "command": "taskexplorer.view.parsingReport.show",
                     "group": "9_taskexplorer",
-                    "when": "explorerViewletVisible && filesExplorerFocus && explorerResourceIsRoot && !inputFocus && resourcePath"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && explorerResourceIsRoot && !inputFocus && resourcePath"
                 }
             ],
             "commandPalette": [
@@ -705,16 +708,16 @@
                     "when": "taskexplorer:enabled"
                 },
                 {
-                    "command": "taskexplorer.extendTrial",
-                    "when": "false"
-                },
-                {
                     "command": "taskexplorer.donate",
-                    "when": "false"
+                    "when": "taskexplorer:enabled"
                 },
                 {
                     "command": "taskexplorer.clearTaskStats",
                     "when": "taskexplorer:enabled"
+                },
+                {
+                    "command": "taskexplorer.extendTrial",
+                    "when": "false"
                 },
                 {
                     "command": "taskexplorer.disableTaskType",
