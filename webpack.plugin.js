@@ -106,19 +106,19 @@ const wpPlugin =
 		{
 			/** @type {CircularDependencyPlugin | undefined} */
 			let plugin;
-			if (env.analyze === true)
-			{
+			// if (env.analyze === true)
+			// {
 				plugin = new CircularDependencyPlugin(
 				{
 					cwd: __dirname,
 					exclude: /node_modules/,
 					failOnError: false,
 					onDetected: function ({ module: _webpackModuleRecord, paths, compilation })
-					{   // @ts-ignore
-						compilation.warnings.push(new WebpackError(paths.join(" -> ")));
+					{
+						compilation.warnings.push(/**@type {*}*/(new webpack.WebpackError(paths.join(" -> "))));
 					}
 				});
-			}
+			// }
 			if (!plugin) {
 				plugin = /** @type {CircularDependencyPlugin} */(/** @type {unknown} */(undefined));
 			}

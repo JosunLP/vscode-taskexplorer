@@ -9,8 +9,9 @@
  */
 
 import { TeWrapper } from "../lib/wrapper";
+import { timeout } from "../lib/utils/utils";
 import { TeWebviewBase } from "./webviewBase";
-import { isObject, timeout } from "../lib/utils/utils";
+import { isObject } from "../lib/utils/typeUtils";
 import { ContextKeys, WebviewIds } from "../lib/context";
 import { Commands, registerCommand } from "../lib/command/command";
 import {

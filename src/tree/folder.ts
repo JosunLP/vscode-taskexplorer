@@ -1,7 +1,7 @@
 
 import { TaskItem } from "./item";
 import { TaskFile } from "./file";
-import { isString } from "../lib/utils/utils";
+import { isString } from "../lib/utils/typeUtils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "vscode";
 
 

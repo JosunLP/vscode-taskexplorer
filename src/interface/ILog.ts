@@ -1,3 +1,32 @@
+import { OutputChannel } from "vscode";
+import { IDictionary } from "./IDictionary";
+import { ILogQueueItem } from "./ILogQueueItem";
+
+export interface ILogControl
+{
+    enable: boolean;
+    enableFile: boolean;
+    enableFileSymbols: boolean;
+    enableOutputWindow: boolean;
+    fileName: string;
+    isTests: boolean;
+    isTestsBlockScaryColors: boolean;
+    lastErrorMesage: string[];
+    lastLogPad: string;
+    lastWriteWasBlank: boolean;
+    lastWriteWasBlankError: boolean;
+    lastWriteToConsoleWasBlank: boolean;
+    logLevel: number;
+    logOutputChannel: OutputChannel | undefined;
+    logValueWhiteSpace: number;
+    msgQueue: IDictionary<ILogQueueItem[]>;
+    tzOffset: number;
+    useTags: boolean;
+    useTagsMaxLength: number;
+    writeToConsole: boolean;
+    writeToConsoleLevel: number;
+};
+
 export interface ILog
 {
     blank(level?: number, queueId?: string): void;

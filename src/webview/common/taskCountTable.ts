@@ -3,7 +3,8 @@ import { Task, workspace } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
 import { IDictionary } from "../../interface";
 import { getTaskTypes } from "../../lib/utils/taskUtils";
-import { getWorkspaceProjectName, isWorkspaceFolder } from "../../lib/utils/utils";
+import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
+import { getWorkspaceProjectName } from "../../lib/utils/utils";
 
 
 export const createTaskCountTable = async(wrapper: TeWrapper, project?: string, html?: string) =>

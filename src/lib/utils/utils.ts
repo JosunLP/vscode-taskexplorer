@@ -1,14 +1,12 @@
 
 import { log } from "../log/log";
 import minimatch = require("minimatch");
-import { TaskFile } from "../../tree/file";
-import { TaskItem } from "../../tree/item";
 import { basename, extname, sep } from "path";
 import { Globs, Strings } from "../constants";
 import { configuration } from "../configuration";
 import { LicenseManager } from "../licenseManager";
+import { Uri, workspace, window, env } from "vscode";
 import { Commands, executeCommand } from "../command/command";
-import { WorkspaceFolder, Uri, workspace, window, env } from "vscode";
 
 
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
@@ -97,15 +95,6 @@ export const getWorkspaceProjectName = (fsPath: string) =>
 };
 
 
-export const isArray = <T>(value: any): value is T[] => !!value && Array.isArray(value);
-
-
-export const isBoolean = (value: any): value is boolean => (value === false || value === true) && typeof value === "boolean";
-
-
-export const isError = (e: any): e is Error => e instanceof Error;
-
-
 export const isExcluded = (uriPath: string, logPad = "") =>
 {
     const exclude = configuration.get<string[]>("exclude", []);
@@ -135,46 +124,6 @@ export const isExcluded = (uriPath: string, logPad = "") =>
 };
 
 
-export const isFunction = (value: any) => !!value && typeof value === "function";
-
-
-export const isNumber = (n: any): n is number => (n || n === 0) && typeof n === "number" && isFinite(n);
-
-
-export const isObject = (value: any): value is { [key: string]: any } => !!value && (value instanceof Object || typeof value === "object") && !isArray(value);
-
-
-export const isObjectEmpty = (value: any) =>
-{
-    if (value)
-    {
-        for (const key in value)
-        {
-            if ({}.hasOwnProperty.call(value, key)) {
-                return false;
-            }
-        }
-    }
-    return true;
-};
-
-
-export const isSpecial = (taskItem: TaskItem) =>
-{
-    return taskItem && taskItem.id &&
-           (taskItem.id.includes(Strings.LAST_TASKS_LABEL + ":") ||
-            taskItem.id.includes(Strings.FAV_TASKS_LABEL + ":") ||
-            taskItem.id.includes(Strings.USER_TASKS_LABEL + ":"));
-};
-
-
-export const isString = (value: any, notEmpty = false): value is string =>
-    (!!value || (value === "" && !notEmpty)) && (value instanceof String || typeof value === "string");
-
-
-export const isTaskFile = (t: any): t is TaskFile => t instanceof TaskFile;
-
-
 /**
  * @param taskType Task type, e.g. `npm`, `apppublisher`, `grunt`, `bash`, etc
  * @returns `true` if enabled, `false` if disabled
@@ -184,12 +133,6 @@ export const isTaskTypeEnabled = (taskType: string) =>
     const settingName = "enabledTasks." + taskType.replace(/\-/g, "").toLowerCase();
     return configuration.get<boolean>(settingName, false);
 };
-
-
-export const isUri = (u: any): u is Uri => !!u && u instanceof Uri;
-
-
-export const isWorkspaceFolder = (value: any): value is WorkspaceFolder => value && typeof value !== "number";
 
 
 export const lowerCaseFirstChar = (s: string, removeSpaces: boolean) =>

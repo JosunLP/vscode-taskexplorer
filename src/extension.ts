@@ -8,8 +8,6 @@ import { configuration, registerConfiguration } from "./lib/configuration";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./lib/utils/taskUtils";
 import { ConfigKeys } from "./lib/constants";
 
-// import "tsconfig-paths/register";
-
 let teWrapper: TeWrapper;
 
 
@@ -36,7 +34,7 @@ export async function activate(context: ExtensionContext)
     // Initialize logging
     //    0=off | 1=on w/red&yellow | 2=on w/ no red/yellow
     //
-    await log.registerLog(context, isTests ? 2 : /* istanbul ignore next */ 0);
+    await log.registerLog(context, configuration, isTests ? 2 : /* istanbul ignore next */ 0);
     log.methodStart("extension activation", 1, "", true);
     //
     // Initialize persistent storage

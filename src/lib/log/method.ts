@@ -1,5 +1,4 @@
 
-import { blank } from "./blank";
 import { write } from "./write";
 import { values } from "./value";
 
@@ -8,7 +7,7 @@ export const methodStart = (msg: string, level?: number, logPad = "", doLogBlank
 {
     const lLevel = level || 1;
     if (doLogBlank === true) {
-        blank(lLevel, queueId);
+        write("", level, "", queueId);
     }
     write("*start* " + msg, lLevel, logPad, queueId); // , color);
     values(lLevel, logPad + "   ", params, queueId);

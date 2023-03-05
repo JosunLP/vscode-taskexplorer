@@ -189,7 +189,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		let html = "";
 
 		const incFa = this.includeFontAwesome?.();
-		if (incFa && this.wrapper.utils.isArray(incFa.icons))
+		if (incFa && this.wrapper.typeUtils.isArray(incFa.icons))
 		{
 			const _addCls = (icons: string[]) => {
 				for (const icon of icons) {

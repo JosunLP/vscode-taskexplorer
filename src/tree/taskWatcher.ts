@@ -173,7 +173,7 @@ export class TaskWatcher implements Disposable
               taskTree = this.wrapper.treeManager.getTaskTree(),
               task = e.execution.task,
               treeId = task.definition.taskItemId,
-              isMapEmpty = this.wrapper.utils.isObjectEmpty(taskMap);
+              isMapEmpty = this.wrapper.typeUtils.isObjectEmpty(taskMap);
 
         this.wrapper.log.methodStart("task started event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 
@@ -216,7 +216,7 @@ export class TaskWatcher implements Disposable
               taskTree = this.wrapper.treeManager.getTaskTree(),
               task = e.execution.task,
               treeId = task.definition.taskItemId,
-              isMapEmpty = this.wrapper.utils.isObjectEmpty(taskMap);
+              isMapEmpty = this.wrapper.typeUtils.isObjectEmpty(taskMap);
 
         this.wrapper.log.methodStart("task finished event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 

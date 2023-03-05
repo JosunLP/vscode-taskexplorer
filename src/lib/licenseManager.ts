@@ -1,6 +1,6 @@
 
 import { TeWrapper } from "./wrapper";
-import { ITeApiEndpoint, ServerError } from "./server";
+import { ITeApiEndpoint } from "./server";
 import { StorageKeys } from "./constants";
 import { isScriptType } from "./utils/taskUtils";
 import { executeCommand, registerCommand, Commands } from "./command/command";

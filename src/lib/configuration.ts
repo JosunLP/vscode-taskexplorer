@@ -1,5 +1,5 @@
 
-import { isObject } from "./utils/utils";
+import { isObject } from "./utils/typeUtils";
 import { IConfiguration } from "../interface/IConfiguration";
 import {
     ConfigurationChangeEvent, workspace, WorkspaceConfiguration, ConfigurationTarget, ExtensionContext, ExtensionMode, Event, EventEmitter

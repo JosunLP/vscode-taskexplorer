@@ -1,11 +1,13 @@
 
 import { write } from "./write";
 import { value } from "./value";
-import { logControl } from "./log";
 import { figures } from "../utils/figures";
-import { isArray, isError, isFunction, isObject, isObjectEmpty, isString } from "../utils/utils";
+import { ILogControl } from "../../interface";
+import { isArray, isError, isFunction, isObject, isObjectEmpty, isString } from "../utils/typeUtils";
 
 const colors = figures.colors;
+let logControl: ILogControl;
+export const setLogControl = (lc: ILogControl) => { logControl = lc; };
 
 
 export const error = (msg: any, params?: (string|any)[][], queueId?: string, symbols: [ string, string ] = [ "", "" ]) =>

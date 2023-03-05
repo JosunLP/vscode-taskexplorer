@@ -54,6 +54,18 @@ export interface ITeTaskUtilities
 	toITask(wrapper: ITeWrapper, teTasks: Task[], listType: TeTaskListType): ITeTask[];
 }
 
+export interface ITeTypeUtilities
+{
+	isArray<T>(value: any): value is T[];
+	isBoolean(value: any): value is boolean;
+	isNumber(n: any): n is number;
+	isObject(value: any): value is { [key: string]: any };
+	isObjectEmpty(value: any): boolean;
+	isString(value: any, notEmpty?: boolean): value is string;
+	isUri(u: any): u is Uri;
+	isWorkspaceFolder(value: any): value is WorkspaceFolder;
+}
+
 export interface ITeUtilities
 {
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
@@ -63,16 +75,8 @@ export interface ITeUtilities
 	getGroupSeparator(): string;
 	getPackageManager(): string;
 	lowerCaseFirstChar(s: string, removeSpaces: boolean): string;
-	isArray<T>(value: any): value is T[];
-	isBoolean(value: any): value is boolean;
-	isNumber(n: any): n is number;
 	isExcluded(uriPath: string, logPad?: string): boolean;
-	isObject(value: any): value is { [key: string]: any };
-	isObjectEmpty(value: any): boolean;
-	isString(value: any, notEmpty?: boolean): value is string;
 	isTaskTypeEnabled(taskType: string): boolean;
-	isUri(u: any): u is Uri;
-	isWorkspaceFolder(value: any): value is WorkspaceFolder;
 	openUrl(url: string): void;
 	pushIfNotExists(arr: any[], item: any): void;
 	removeFromArray(arr: any[], item: any): void;

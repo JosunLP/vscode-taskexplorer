@@ -13,6 +13,7 @@ import * as sorters from "./utils/sortTasks";
 import { TeStatusBar } from "./statusBarItem";
 import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
+import * as typeUtils from "./utils/typeUtils";
 import { IStorage } from "../interface/IStorage";
 import { TaskManager } from "../tree/taskManager";
 import { TaskWatcher } from "../tree/taskWatcher";
@@ -66,7 +67,7 @@ import {
 } from "vscode";
 import {
 	IDictionary, ILog, ITeFilesystem, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities,
-	ITeTaskUtilities, ITeUtilities
+	ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "../interface";
 
 export class TeWrapper implements ITeWrapper, Disposable
@@ -589,6 +590,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get taskUtils(): ITeTaskUtilities {
 		return taskUtils;
+	}
+
+	get typeUtils(): ITeTypeUtilities {
+		return typeUtils;
 	}
 
 	get taskWatcher(): TaskWatcher {

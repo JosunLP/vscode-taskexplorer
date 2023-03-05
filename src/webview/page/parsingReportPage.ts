@@ -6,8 +6,9 @@ import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
+import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
 import { createTaskCountTable } from "../common/taskCountTable";
-import { getWorkspaceProjectName, isWorkspaceFolder, pushIfNotExists } from "../../lib/utils/utils";
+import { getWorkspaceProjectName, pushIfNotExists } from "../../lib/utils/utils";
 
 
 export class ParsingReportPage extends TeWebviewPanel<State>

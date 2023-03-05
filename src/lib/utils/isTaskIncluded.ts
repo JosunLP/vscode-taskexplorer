@@ -4,8 +4,9 @@ import { Task } from "vscode";
 import { log } from "../log/log";
 import { readFileSync } from "./fs";
 import { TeWrapper } from "../wrapper";
+import { isTaskTypeEnabled } from "./utils";
 import { configuration } from "../configuration";
-import { isString, isTaskTypeEnabled, isWorkspaceFolder } from "./utils";
+import { isString, isWorkspaceFolder } from "./typeUtils";
 //
 // For JSON5, if I don't specifically import index.js with 'require', then the
 // damn mjs module file is included by webpack.  I'm sure there's a way to have

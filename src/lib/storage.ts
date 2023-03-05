@@ -1,7 +1,7 @@
 
 import { join } from "path";
 import { IDictionary } from "../interface";
-import { isNumber, isString } from "./utils/utils";
+import { isNumber, isString } from "./utils/typeUtils";
 import { IStorage, StorageChangeEvent } from "../interface/IStorage";
 import { createDir, pathExists, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./utils/fs";
 import { Memento, ExtensionContext, SecretStorage, ExtensionMode, SecretStorageChangeEvent, EventEmitter, Event } from "vscode";

@@ -1,10 +1,10 @@
 
-import { log } from "../log/log";
-import { dirname, join, relative, resolve, sep } from "path";
-import { Task, Uri, WorkspaceFolder } from "vscode";
-import { pathExists, pathExistsSync } from "./fs";
 import { homedir } from "os";
-import { isWorkspaceFolder } from "./utils";
+import { log } from "../log/log";
+import { isWorkspaceFolder } from "./typeUtils";
+import { pathExists, pathExistsSync } from "./fs";
+import { dirname, join, resolve, sep } from "path";
+import { Task, Uri, WorkspaceFolder } from "vscode";
 
 
 export const getCwd = (uri: Uri): string =>

@@ -320,7 +320,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     override async removeTaskFile(taskItem: TaskItem|string, logPad: string, persist?: boolean)
     {
-        const id = this.wrapper.utils.isString(taskItem) ? taskItem : taskItem.id, // getTaskItemId(taskFile);
+        const id = this.wrapper.typeUtils.isString(taskItem) ? taskItem : taskItem.id, // getTaskItemId(taskFile);
               idx = this.taskFiles.findIndex(f => f.id === id);
         if (idx !== -1)
         {

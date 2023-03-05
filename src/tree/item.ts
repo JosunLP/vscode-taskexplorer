@@ -3,7 +3,7 @@ import * as path from "path";
 import { TaskFile } from "./file";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
-import { isSpecial } from "../lib/utils/utils";
+import { Strings } from "../lib/constants";
 import { configuration } from "../lib/configuration";
 import { getInstallPathSync } from "../lib/utils/pathUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
@@ -151,6 +151,15 @@ export class TaskItem extends TreeItem
     }
 
 
+    private isSpecial(taskItem: TaskItem)
+    {
+        return taskItem && taskItem.id &&
+               (taskItem.id.includes(Strings.LAST_TASKS_LABEL + ":") ||
+                taskItem.id.includes(Strings.FAV_TASKS_LABEL + ":") ||
+                taskItem.id.includes(Strings.USER_TASKS_LABEL + ":"));
+    }
+
+
     refreshState(logPad: string, logLevel: number)
     {
         const isExecuting = !!this.isExecuting();
@@ -178,7 +187,7 @@ export class TaskItem extends TreeItem
         // Note that TaskItems of type 'scriptFile' can be ran with arguments and this will have an additional
         // entry added to it's context menu - "Run with arguments"
         //
-        if (isSpecial(this))
+        if (this.isSpecial(this))
         {
             if (task.definition.scriptFile || this.taskSource === "gradle") {
                 this.contextValue = running ? "scriptRunningS" : "scriptFileS";

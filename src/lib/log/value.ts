@@ -1,7 +1,10 @@
 
 import { write } from "./write";
-import { logControl } from "./log";
-import { isArray, isObject, isString } from "../utils/utils";
+import { ILogControl } from "../../interface";
+import { isArray, isObject, isString } from "../utils/typeUtils";
+
+let logControl: ILogControl;
+export const setLogControl = (lc: ILogControl) => { logControl = lc; };
 
 
 export const value = (msg: string, value: any, level?: number, logPad = "", queueId?: string) =>

@@ -6,7 +6,6 @@ import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import * as utils from "../lib/utils/utils";
 import * as sortTasks from "../lib/utils/sortTasks";
 import { SpecialTaskFolder } from "./specialFolder";
 import { IDictionary, TaskMap } from "../interface";
@@ -103,7 +102,7 @@ export class TaskTreeBuilder implements Disposable
             await this.buildTaskTreeList(each, folders, files, logPad + "   ");
         }
 
-        if (!utils.isObjectEmpty(folders))
+        if (!this.wrapper.typeUtils.isObjectEmpty(folders))
         {   //
             // Sort and build groupings
             //
@@ -158,13 +157,13 @@ export class TaskTreeBuilder implements Disposable
         // Set scope name and create the TaskFolder, a "user" task will have a TaskScope scope, not
         // a WorkspaceFolder scope.
         //
-        if (utils.isWorkspaceFolder(each.scope))
+        if (this.wrapper.typeUtils.isWorkspaceFolder(each.scope))
         {
             scopeName = each.scope.name;
             folder = folders[scopeName];
             if (!folder)
             {
-                const key = utils.lowerCaseFirstChar(scopeName, true),
+                const key = this.wrapper.utils.lowerCaseFirstChar(scopeName, true),
                       state = configuration.get<"Collapsed"|"Expanded">("specialFolders.folderState." + key, "Expanded");
                 folder = new TaskFolder(each.scope, TreeItemCollapsibleState[state]);
                 folders[scopeName] = folder;
@@ -178,7 +177,7 @@ export class TaskTreeBuilder implements Disposable
             if (!folder)
             {
                 const nodeExpandedeMap = configuration.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
-                folder = new TaskFolder(scopeName, TreeItemCollapsibleState[nodeExpandedeMap[utils.lowerCaseFirstChar(scopeName, true)]]);
+                folder = new TaskFolder(scopeName, TreeItemCollapsibleState[nodeExpandedeMap[this.wrapper.utils.lowerCaseFirstChar(scopeName, true)]]);
                 folders[scopeName] = folder;
                 log.value("constructed tree user taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
             }
@@ -363,7 +362,7 @@ export class TaskTreeBuilder implements Disposable
         let prevName: string[] | undefined;
         let prevTaskItem: TaskItem | undefined;
         const newNodes: TaskFile[] = [];
-        const groupSeparator = utils.getGroupSeparator();
+        const groupSeparator = this.wrapper.utils.getGroupSeparator();
         const atMaxLevel: boolean = configuration.get<number>("groupMaxLevel") <= treeLevel + 1;
 
         log.methodStart("create task groupings by separator", logLevel, logPad, true, [
@@ -558,6 +557,9 @@ export class TaskTreeBuilder implements Disposable
     isBusy = () => this.treeBuilding;
 
 
+    private isTaskFile = (t: any): t is TaskFile => t instanceof TaskFile;
+
+
     private logTask = (task: Task, scopeName: string, logPad: string) =>
     {
         const definition = task.definition;
@@ -571,7 +573,7 @@ export class TaskTreeBuilder implements Disposable
         log.value("   source", task.source, 3, logPad);
         log.value("   scope name", scopeName, 4, logPad);
         /* istanbul ignore else */
-        if (utils.isWorkspaceFolder(task.scope))
+        if (this.wrapper.typeUtils.isWorkspaceFolder(task.scope))
         {
             log.value("   scope.name", task.scope.name, 4, logPad);
             log.value("   scope.uri.path", task.scope.uri.path, 4, logPad);
@@ -650,7 +652,7 @@ export class TaskTreeBuilder implements Disposable
 
         log.methodStart("remove grouped tasks", logLevel, logPad);
 
-        for (const each of folder.taskFiles.filter(t => utils.isTaskFile(t) && !!t.label))
+        for (const each of folder.taskFiles.filter(t => this.isTaskFile(t) && !!t.label))
         {
             const taskFile = each as TaskFile,
                   taskFileLabel = taskFile.label as string,
@@ -671,9 +673,9 @@ export class TaskTreeBuilder implements Disposable
                 {
                     this.removeTreeNodes(each2 as TaskFile, folder, subfolders, 0, logPad, logLevel + 1);
                     /* istanbul ignore if */ /* istanbul ignore next */
-                    if (utils.isTaskFile(each2) && each2.isGroup && each2.groupLevel > 0)
+                    if (this.isTaskFile(each2) && each2.isGroup && each2.groupLevel > 0)
                     {
-                        for (const each3 of each2.treeNodes.filter(e => utils.isTaskFile(e)))
+                        for (const each3 of each2.treeNodes.filter(e => this.isTaskFile(e)))
                         {
                             this.removeTreeNodes(each3 as TaskFile, folder, subfolders, 0, logPad, logLevel + 1);
                         }
@@ -707,7 +709,7 @@ export class TaskTreeBuilder implements Disposable
     {
         const me = this;
         const taskTypesRmv: (TaskFile | TaskItem)[] = [];
-        const groupSeparator = utils.getGroupSeparator();
+        const groupSeparator = this.wrapper.utils.getGroupSeparator();
 
         log.methodStart("remove tree nodes", logLevel, logPad, false);
 
@@ -768,7 +770,7 @@ export class TaskTreeBuilder implements Disposable
             return;
         }
 
-        const groupSeparator = utils.getGroupSeparator();
+        const groupSeparator = this.wrapper.utils.getGroupSeparator();
         let rmvLbl = taskFile.label as string;
         rmvLbl = rmvLbl.replace(/\(/gi, "\\(").replace(/\[/gi, "\\[");
         rmvLbl = rmvLbl.replace(/\)/gi, "\\)").replace(/\]/gi, "\\]");

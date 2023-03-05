@@ -374,8 +374,8 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         {
             const next = this.currentEvent = this.eventQueue.shift();
             this.wrapper.log.methodStart("file watcher event queue", 1, "", true, [
-                [ "event", next.event ], [ "arg1", this.wrapper.utils.isString(next.args[0]) ? next.args[0] : next.args[0].fsPath ],
-                [ "arg2", this.wrapper.utils.isUri(next.args[1]) ? next.args[1].fsPath : "none (log padding)" ],
+                [ "event", next.event ], [ "arg1", this.wrapper.typeUtils.isString(next.args[0]) ? next.args[0] : next.args[0].fsPath ],
+                [ "arg2", this.wrapper.typeUtils.isUri(next.args[1]) ? next.args[1].fsPath : "none (log padding)" ],
                 [ "# of events still pending", this.eventQueue.length ]
             ]);
             await next.fn(...next.args);

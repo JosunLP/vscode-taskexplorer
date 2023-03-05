@@ -253,7 +253,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             //
             // Remove User tasks if they're not enabled
             //
-            if (!showUserTasks && item.source === "Workspace" && !this.wrapper.utils.isWorkspaceFolder(item.scope))
+            if (!showUserTasks && item.source === "Workspace" && !this.wrapper.typeUtils.isWorkspaceFolder(item.scope))
             {
                 this._tasks.splice(object.length - 1 - index, 1);
             }
@@ -597,13 +597,13 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string) =>
     {
         this.wrapper.log.methodStart("refresh task tree", 1, logPad, logPad === "", [
-            [ "invalidate", invalidate ], [ "opt fsPath", this.wrapper.utils.isUri(opt) ? opt.fsPath : "n/a" ]
+            [ "invalidate", invalidate ], [ "opt fsPath", this.wrapper.typeUtils.isUri(opt) ? opt.fsPath : "n/a" ]
         ]);
 
         await this.waitForRefreshComplete();
         this.refreshPending = true;
 
-        if (this.wrapper.utils.isUri(opt) && isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
+        if (this.wrapper.typeUtils.isUri(opt) && isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
         {   //
             // A workspace folder was removed.  We know it's a workspace folder because isDirectory()
             // returned true and getWorkspaceFolder() returned false.  If it was a regular directory
@@ -625,7 +625,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             if (invalidate !== false) {
                 await this.handleRebuildEvent(invalidate, opt, logPad + "   ");
             }
-            if (opt !== false && this.wrapper.utils.isString(invalidate, true))
+            if (opt !== false && this.wrapper.typeUtils.isString(invalidate, true))
             {
                 this.wrapper.log.write(`   invalidation is for type '${invalidate}'`, 1, logPad);
                 this.currentInvalidation = invalidate; // 'invalidate' will be taskType if 'opt' is undefined or uri of add/remove resource

@@ -131,7 +131,7 @@ export class TeServer
 			}
 		}
 		/* istanbul ignore else */
-		if (this.wrapper.utils.isString(msg))
+		if (this.wrapper.typeUtils.isString(msg))
 		{
 			if (!value) {
 				this.wrapper.log.write(msg, 1, logPad);

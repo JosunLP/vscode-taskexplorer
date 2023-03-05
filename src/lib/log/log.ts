@@ -1,41 +1,15 @@
 
-import { warn } from "./warn";
-import { write } from "./write";
 import { blank } from "./blank";
-import { error } from "./error";
 import { dirname, join } from "path";
-import { value, values } from "./value";
 import { createDir } from "../utils/fs";
 import { figures } from "../utils/figures";
-import { configuration } from "../configuration";
+import { IConfiguration, ILogControl } from "../../interface";
 import { methodDone, methodOnce, methodStart } from "./method";
-import { IDictionary, ILogQueueItem } from "../../interface";
+import { warn, setLogControl as setLogControlWarn } from "./warn";
+import { write, setLogControl as setLogControlWrite } from "./write";
+import { error, setLogControl as setLogControlError } from "./error";
+import { value, values, setLogControl as setLogControlValue } from "./value";
 import { OutputChannel, ExtensionContext, commands, window, workspace, ConfigurationChangeEvent } from "vscode";
-
-interface ILogControl
-{
-    enable: boolean;
-    enableFile: boolean;
-    enableFileSymbols: boolean;
-    enableOutputWindow: boolean;
-    fileName: string;
-    isTests: boolean;
-    isTestsBlockScaryColors: boolean;
-    lastErrorMesage: string[];
-    lastLogPad: string;
-    lastWriteWasBlank: boolean;
-    lastWriteWasBlankError: boolean;
-    lastWriteToConsoleWasBlank: boolean;
-    logLevel: number;
-    logOutputChannel: OutputChannel | undefined;
-    logValueWhiteSpace: number;
-    msgQueue: IDictionary<ILogQueueItem[]>;
-    tzOffset: number;
-    useTags: boolean;
-    useTagsMaxLength: number;
-    writeToConsole: boolean;
-    writeToConsoleLevel: number;
-};
 
 export const logControl: ILogControl =
 {
@@ -136,20 +110,20 @@ const logLogFileLocation = () =>
 const getLogPad = () => logControl.lastLogPad;
 
 
-const processConfigChanges = (ctx: ExtensionContext, e: ConfigurationChangeEvent) =>
+const processConfigChanges = (config: IConfiguration, e: ConfigurationChangeEvent) =>
 {
     if (e.affectsConfiguration("taskexplorer.logging.enable"))
     {
-        logControl.enable = configuration.get<boolean>("logging.enable", false);
+        logControl.enable = config.get<boolean>("logging.enable", false);
         enableLog(logControl.enable);
     }
     if (e.affectsConfiguration("taskexplorer.logging.enableOutputWindow"))
     {
-        logControl.enableOutputWindow = configuration.get<boolean>("logging.enableOutputWindow", true);
+        logControl.enableOutputWindow = config.get<boolean>("logging.enableOutputWindow", true);
     }
     if (e.affectsConfiguration("taskexplorer.logging.enableFile"))
     {
-        logControl.enableFile = configuration.get<boolean>("logging.enableFile", false);
+        logControl.enableFile = config.get<boolean>("logging.enableFile", false);
         logLogFileLocation();
         if (logControl.enableFile) {
             window.showInformationMessage("Log file location: " + logControl.fileName);
@@ -157,26 +131,31 @@ const processConfigChanges = (ctx: ExtensionContext, e: ConfigurationChangeEvent
     }
     if (e.affectsConfiguration("taskexplorer.logging.enableFileSymbols"))
     {
-        logControl.enableFileSymbols = configuration.get<boolean>("logging.enableFileSymbols", true);
+        logControl.enableFileSymbols = config.get<boolean>("logging.enableFileSymbols", true);
     }
     if (e.affectsConfiguration("taskexplorer.logging.level"))
     {
-        logControl.logLevel = configuration.get<number>("logging.level", 1);
+        logControl.logLevel = config.get<number>("logging.level", 1);
     }
 };
 
 
-const registerLog = async(context: ExtensionContext, testsRunning: number) =>
+const registerLog = async(context: ExtensionContext, config: IConfiguration, testsRunning: number) =>
 {
     logControl.isTests = testsRunning > 0;
     logControl.isTestsBlockScaryColors = testsRunning > 1;
-    logControl.enable = configuration.get<boolean>("logging.enable", false);
-    logControl.logLevel = configuration.get<number>("logging.level", 1);
-    logControl.enableOutputWindow = configuration.get<boolean>("logging.enableOutputWindow", true);
-    logControl.enableFile = configuration.get<boolean>("logging.enableFile", false);
-    logControl.enableFileSymbols = configuration.get<boolean>("logging.enableFileSymbols", true);
+    logControl.enable = config.get<boolean>("logging.enable", false);
+    logControl.logLevel = config.get<number>("logging.level", 1);
+    logControl.enableOutputWindow = config.get<boolean>("logging.enableOutputWindow", true);
+    logControl.enableFile = config.get<boolean>("logging.enableFile", false);
+    logControl.enableFileSymbols = config.get<boolean>("logging.enableFileSymbols", true);
     logControl.fileName = join(context.logUri.fsPath, getFileName());
     await createDir(dirname(logControl.fileName));
+
+    setLogControlError(logControl);
+    setLogControlValue(logControl);
+    setLogControlWarn(logControl);
+    setLogControlWrite(logControl);
 
     //
     // Set up a log in the Output window (even if enableOutputWindow is off)
@@ -189,7 +168,7 @@ const registerLog = async(context: ExtensionContext, testsRunning: number) =>
     context.subscriptions.push(...[
         logControl.logOutputChannel,
         commands.registerCommand("taskexplorer.showOutput", (show: boolean) => showLogOutput(show)),
-        workspace.onDidChangeConfiguration(e => processConfigChanges(context, e))
+        workspace.onDidChangeConfiguration(e => processConfigChanges(config, e))
     ]);
 
     //
