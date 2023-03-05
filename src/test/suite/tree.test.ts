@@ -6,8 +6,9 @@
 import { expect } from "chai";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
-import { IDictionary, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
+import { Uri, ThemeIcon, MarkdownString, Command, TreeItemCollapsibleState, AccessibilityInformation } from "vscode";
 
 let teWrapper: ITeWrapper;
 const tc = utils.testControl;
@@ -661,11 +662,11 @@ suite("Tree Tests", () =>
 
 });
 
-class DumbFolder
+class DumbFolder implements ITaskFolder
 {
     public label: string;
-    constructor(lbl: string)
-    {
-        this.label = lbl;
-    }
+    constructor(lbl: string) { this.label = lbl; }
+    async addTaskFile(taskFile: ITaskItem | ITaskFile): Promise<void> {}
+    insertTaskFile(taskFile: ITaskItem | ITaskFile, index: number): void {}
+    removeTaskFile(taskFile: string | ITaskItem | ITaskFile, logPad: string): void {}
 }
