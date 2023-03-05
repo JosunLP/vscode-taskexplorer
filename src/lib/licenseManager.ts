@@ -87,12 +87,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	checkLicense = async(logPad: string): Promise<void> =>
+	checkLicense = async(statusMessage = "Checking license", logPad = ""): Promise<void> =>
 	{
 		this._busy = true;
 		this._account.errorState = false;
 
-		this.wrapper.statusBar.update("Checking license");
+		this.wrapper.statusBar.update(statusMessage);
 		this.wrapper.log.methodStart("license manager check license", 1, logPad);
 
 		this._account = await this.getAccount();
@@ -302,7 +302,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 
 	private onTasksChanged = (_e: ITeTaskChangeEvent) =>
+	{
 		this.wrapper.log.methodOnce("license event", "on tasks changed", 1, "");
+		this.displayPopup("");
+	};
 
 
 	private register = async(): Promise<void> =>
@@ -346,10 +349,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	setTestData = (data: any): void =>
 	{
-		this._maxFreeTasks = data.maxFreeTasks;
-		this._maxFreeTaskFiles = data.maxFreeTaskFiles;
-		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType;
-		this._maxFreeTasksForScriptType = data.maxFreeTasksForScriptType;
+		this._maxFreeTasks = data.maxFreeTasks || this._maxFreeTasks;
+		this._maxFreeTaskFiles = data.maxFreeTaskFiles || this._maxFreeTaskFiles;
+		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;
+		this._maxFreeTasksForScriptType = data.maxFreeTasksForScriptType || this._maxFreeTasksForScriptType;
+		if (data.callTasksChanged) {
+			this.onTasksChanged({ tasks: [], type: "all" });
+		}
 	};
 
 

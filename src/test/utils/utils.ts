@@ -469,43 +469,50 @@ export const setFailed = (ctrlc = true) =>
 };
 
 
-export const setLicensed = async (valid: boolean) =>
+export const setLicensed = async (valid?: boolean) =>
 {
     const licMgr = teWrapper.licenseManager;
     teWrapper.tests = !valid;
 
-    await teWrapper.storage.updateSecret("taskexplorer.account", JSON.stringify(
+    if (valid === undefined)
     {
-        id: valid ? 1 : 0,
-        created: Date.now(),
-        email: "",
-        firstName: "",
-        lastName: "",
-        name: "",
-        orgId: 0,
-        trialId: valid ? 1 : 0,
-        verified: false,
-        verificationPending: false,
-        session: {
-            expires: valid ? Infinity : 0,
-            issued: Date.now(),
-            token: valid ? "1234-5678-9098-7654321" : "",
-            scopes: [ "te-explorer", "te-sidebar", valid ? "te-monitor" : "te-monitor-free" ],
-        },
-        license: {
-            id: 1,
-            expired: !valid,
-            expires: valid ? Infinity : 0,
-            issued: Date.now(),
-            key: valid ? "1234-5678-9098-7654321" : "",
-            paid: valid,
-            period: valid ? 0 : 2,
-            state: valid ? 2 : 0, // Paid
-            type: valid ? 4 : 1
-        }
-    }));
+        await teWrapper.storage.deleteSecret("taskexplorer.account");
+    }
+    else
+    {
+        await teWrapper.storage.updateSecret("taskexplorer.account", JSON.stringify(
+        {
+            id: valid ? 1 : 0,
+            created: Date.now(),
+            email: "",
+            firstName: "",
+            lastName: "",
+            name: "",
+            orgId: 0,
+            trialId: valid ? 1 : 0,
+            verified: false,
+            verificationPending: false,
+            session: {
+                expires: valid ? Infinity : 0,
+                issued: Date.now(),
+                token: valid ? "1234-5678-9098-7654321" : "",
+                scopes: [ "te-explorer", "te-sidebar", valid ? "te-monitor" : "te-monitor-free" ],
+            },
+            license: {
+                id: 1,
+                expired: !valid,
+                expires: valid ? Infinity : 0,
+                issued: Date.now(),
+                key: valid ? "1234-5678-9098-7654321" : "",
+                paid: valid,
+                period: valid ? 0 : 2,
+                state: valid ? 2 : 0, // Paid
+                type: valid ? 4 : 1
+            }
+        }));
+    }
 
-    await licMgr.checkLicense("");
+    await licMgr.checkLicense();
     teWrapper.tests = true;
 };
 

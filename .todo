@@ -16,7 +16,7 @@ Features:
         ✔ Initial base implementation @done(23-02-26 21:30)
         ☐ The `all` tab needs to be paged or loaded as user scrolls
         ✔ Task last ran stats @done(23-02-26 21:47)
-        ☐ Fix - Runtimes displaying 00:00:00:000 still
+        ✔ Fix - Runtimes displaying 00:00:00:000 still @done(23-03-05 09:37)
         ☐ Save state / re-order after `pinned` on or off
         ☐ Reveal task file in file explorer and/or taskexplorer tree from  monitor
             Use 'eye' icon button, maybe next to pin icon button
@@ -25,10 +25,10 @@ Features:
             Just `all` tab,  or for all displayed tabs?  Use task type icons.
             Either a new tabstrip, or if possible a flyout menu, upper right menu button inline w/ top tabstrip
             Or possible to include menu in vs code embedded little context menu in uper right corder of editor?
-        ☐ Fix - Timer resetting to 0:00 when task finishes
-        ☐ Fix - Timer always resets to m:s when task starts if it is hidden or in m:s:ms display mode
-        ☐ Maybe redo the timer mode buttonswhen changin to diferentdisplay modes
-            e.g. the middle iconcan sitchto chevron-right when timer mode is in m:s:ms mode
+        ✔ Fix - Timer resetting to 0:00 when task finishes @done(23-03-05 09:37)
+        ✔ Fix - Timer always resets to m:s when task starts if it is hidden or in m:s:ms display mode @done(23-03-05 09:37)
+        ✔ Maybe redo the timer mode buttons when changing to diferent display modes @done(23-03-05 09:37)
+            e.g. the middle icon can switch to chevron-right when timer mode is in m:s:ms mode
         ☐ Apply limits for unlicensed mode?  Or full-featured?
         ☐ Graph usage over time
             Maybe new view i terminal pane? (I forget what it's called)
@@ -37,10 +37,15 @@ Features:
             seperate semi-clear buttons too for rntimes,  runcounts, etc
         ☐ Always display vertical scrollbar
             so page doesnt jump when switching tabs if 1 pghas and 1 pg doesn't
-        ☐ Ensure sync running timer w/ true task runtime when task finishes
+        ✔ Ensure sync running timer w/ true task runtime when task finishes @done(23-03-05 09:36)
+        ☐ Large loading icon in center of webview when page first opened
+            If1000's of tasks,loading can take several seconds, so display something that shows work is being done
+        ☐ Details columns need to either size to screen percentage, or be adjustable
+            Too much empty space on high res screens, i.e. 1920px.  Details columns look smashed and crammed
+            But current state is as wide as they can go on 1366x768 res (how i run dev instance)
 
     ✔ Option persisted cache @done(23-01-22 18:34)
-        For tasks to load from fs on startup
+        For tasks to load from fs on startups
         Instant load time
 
     ☐ Auto detect ExtJS project
