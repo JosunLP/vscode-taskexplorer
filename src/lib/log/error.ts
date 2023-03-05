@@ -38,10 +38,10 @@ export const error = (msg: any, params?: (string|any)[][], queueId?: string, sym
 
     if (!logControl.lastWriteWasBlankError && !logControl.lastWriteToConsoleWasBlank)
     {
-        errorWriteLogs("", currentWriteToFile, currentWriteToOutputWindow, symbols, queueId);
+        errorWriteLogs("", currentWriteToFile, symbols, queueId);
     }
 
-    errMsgs.forEach((m) => errorWriteLogs(m, currentWriteToFile, currentWriteToOutputWindow, symbols, queueId));
+    errMsgs.forEach((m) => errorWriteLogs(m, currentWriteToFile, symbols, queueId));
 
     if (params)
     {
@@ -73,7 +73,7 @@ export const error = (msg: any, params?: (string|any)[][], queueId?: string, sym
         }
     }
 
-    errorWriteLogs("", currentWriteToFile, currentWriteToOutputWindow, symbols, queueId);
+    errorWriteLogs("", currentWriteToFile, symbols, queueId);
 
     logControl.writeToConsole = currentWriteToConsole;
     logControl.enableFile = currentWriteToFile;
@@ -122,11 +122,11 @@ const errorOutputWindow = (msg: string, symbols: [ string, string ]) =>
 };
 
 
-const errorWriteLogs = (lMsg: string, fileOn: boolean, outWinOn: boolean, symbols: [ string, string ], queueId?: string) =>
+const errorWriteLogs = (lMsg: string, fileOn: boolean, symbols: [ string, string ], queueId?: string) =>
 {
-    errorConsole(lMsg, symbols, queueId);
+    errorConsole(lMsg, symbols, queueId); // always write errors to console
     if (fileOn) errorFile(lMsg, symbols);
-    if (outWinOn) errorOutputWindow(lMsg, symbols);
+    errorOutputWindow(lMsg, symbols);     // always write errors to output window
 };
 
 
