@@ -12,6 +12,7 @@ import {
     activate, endRollingCount, exitRollingCount, getWsPath, needsTreeBuild, suiteFinished, testControl as tc,
     treeUtils, verifyTaskCount, waitForTeIdle
 } from "../utils/utils";
+import { ConfigKeys } from "../../lib/constants";
 
 interface TaskMap { [id: string]: ITaskItem | undefined };
 
@@ -472,9 +473,9 @@ suite("Provider Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent * 3);
-        await executeSettingsUpdate("groupWithSeparator", true);
-        await executeSettingsUpdate("groupSeparator", "-");
-        await executeSettingsUpdate("groupMaxLevel", 5);
+        await executeSettingsUpdate(ConfigKeys.GroupWithSeperator, true);
+        await executeSettingsUpdate(ConfigKeys.GroupSeparator, "-");
+        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 5);
         endRollingCount(this);
     });
 

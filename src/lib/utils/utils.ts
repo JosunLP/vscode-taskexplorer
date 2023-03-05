@@ -3,7 +3,7 @@ import { log } from "../log/log";
 import minimatch = require("minimatch");
 import { Uri, workspace, env } from "vscode";
 import { basename, extname, sep } from "path";
-import { Globs, Strings } from "../constants";
+import { ConfigKeys, Globs, Strings } from "../constants";
 import { configuration } from "../configuration";
 
 
@@ -52,7 +52,7 @@ export const getDateDifference = (date1: Date | number, date2: Date | number, ty
 };
 
 
-export const getGroupSeparator = () => configuration.get<string>("groupSeparator", Strings.DEFAULT_SEPARATOR);
+export const getGroupSeparator = () => configuration.get<string>(ConfigKeys.GroupSeparator, Strings.DEFAULT_SEPARATOR);
 
 
 export const getGlobPattern = (taskType: string) =>

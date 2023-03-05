@@ -267,6 +267,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	private run = async() =>
 	{
+		await utilities.sleep(1);
 		this.log.methodStart("app wrapper run", 1, "", true);
 		//
 		// License / Authentication

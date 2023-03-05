@@ -108,9 +108,9 @@ const migrateSettings = async () =>
     {
         const oldConfig = workspace.getConfiguration("taskExplorer");
 
-        const groupSep = oldConfig.get<string>("groupSeparator", "-");
+        const groupSep = oldConfig.get<string>(ConfigKeys.GroupSeparator, "-");
         if (groupSep !== "-" && groupSep !== "_" && groupSep !== ":" && groupSep !== "|") {
-            await configuration.update("groupSeparator", "-");
+            await configuration.update(ConfigKeys.GroupSeparator, "-");
         }
 
         const taskTypes = getTaskTypes();

@@ -47,5 +47,5 @@ export interface ITeUsage
     get(key: string): ITeTrackedUsage | undefined;
     getAll(): IDictionary<ITeTrackedUsage>;
     reset(key?: string): Promise<void>;
-    track(key: string): Promise<ITeTrackedUsage>;
+    track(key: string): Promise<ITeTrackedUsage | undefined>;
 }

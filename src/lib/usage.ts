@@ -3,7 +3,7 @@ import { TeWrapper } from "./wrapper";
 import { pickBy } from "./utils/commonUtils";
 import { getDateDifference } from "./utils/utils";
 import { ConfigKeys, StorageKeys } from "./constants";
-import { Disposable, Event, EventEmitter } from "vscode";
+import { ConfigurationChangeEvent, Disposable, Event, EventEmitter } from "vscode";
 import {
     IDictionary, ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent,
     ITeTaskStatusChangeEvent, ILog, ITaskRuntimeInfo
@@ -38,6 +38,9 @@ interface ITaskUsageStats
 
 export class Usage implements ITeUsage, Disposable
 {
+    private _trackUsage: boolean;
+    private _trackTaskStats: boolean;
+    private _allowUsageReporting: boolean;
     private readonly log: ILog;
     private readonly _taskUsageKey = "task:";
     private readonly _disposables: Disposable[] = [];
@@ -51,9 +54,13 @@ export class Usage implements ITeUsage, Disposable
         this.log = wrapper.log;
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
 		this._onDidChange = new EventEmitter<ITeUsageChangeEvent | undefined>();
+        this._trackUsage = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage);
+        this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats);
+        this._allowUsageReporting = this.wrapper.config.get<boolean>(ConfigKeys.AllowUsageReporting);
 		this._disposables.push(
 			this._onDidChange,
 			this._onDidFamousTasksChange,
+            wrapper.config.onDidChange(this.onConfigChanged, this),
             wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
 			wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
 			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this)
@@ -228,17 +235,43 @@ export class Usage implements ITeUsage, Disposable
 
     private onFavoriteTasksChanged = async(e: ITeTaskChangeEvent) =>
     {
-        const stats = this.getTaskUsageStore();
-        stats.favorites = [ ...e.tasks ];
-        await this.saveTaskUsageStore(stats);
+        if (this._trackTaskStats)
+        {
+            const stats = this.getTaskUsageStore();
+            stats.favorites = [ ...e.tasks ];
+            await this.saveTaskUsageStore(stats);
+        }
     };
 
 
     private onLastTasksChanged = async(e: ITeTaskChangeEvent) =>
     {
-        const stats = this.getTaskUsageStore();
-        stats.last = [ ...e.tasks ];
-        await this.saveTaskUsageStore(stats);
+        if (this._trackTaskStats)
+        {
+            const stats = this.getTaskUsageStore();
+            stats.last = [ ...e.tasks ];
+            await this.saveTaskUsageStore(stats);
+        }
+    };
+
+
+    private onConfigChanged = async(e: ConfigurationChangeEvent) =>
+    {
+        if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.TrackUsage}`))
+        {
+            this._trackUsage = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage);
+        }
+        if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.TaskMonitor_TrackStats}`))
+        {
+            this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats);
+            if (this._trackTaskStats && !this._trackUsage){
+                await this.wrapper.config.update(ConfigKeys.TrackUsage, this._trackTaskStats);
+            }
+        }
+        if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.AllowUsageReporting}`))
+        {
+            this._allowUsageReporting = this.wrapper.config.get<boolean>(ConfigKeys.AllowUsageReporting);
+        }
     };
 
 
@@ -246,15 +279,18 @@ export class Usage implements ITeUsage, Disposable
     {
         const taskName = `${e.task.name} (${e.task.source})`;
         this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [
-            [ "task name", taskName ], [ "tree id", e.task.treeId ], [ "is running", e.isRunning ]
+            [ "task name", taskName ], [ "tree id", e.task.treeId ], [ "is running", e.isRunning ], [ "track tasks enabled", this._trackTaskStats ]
         ]);
-        if (e.isRunning)
+        if (this._trackTaskStats)
         {
-            this._runStartTimes[e.treeId] = Date.now();
-            await this.trackTask(e.task, "   ");
-        }
-        else {
-            await this.trackTaskRuntime(e.task, "   ");
+            if (e.isRunning)
+            {
+                this._runStartTimes[e.treeId] = Date.now();
+                await this.trackTask(e.task, "   ");
+            }
+            else {
+                await this.trackTaskRuntime(e.task, "   ");
+            }
         }
         this.log.methodDone("task usage tracker: on running task changed", 2, "");
     };
@@ -279,8 +315,12 @@ export class Usage implements ITeUsage, Disposable
 
 
 
-	async track(key: string): Promise<ITeTrackedUsage>
+	async track(key: string): Promise<ITeTrackedUsage | undefined>
 	{
+        if (!this._trackUsage) {
+            return;
+        }
+
 		const timestamp = Date.now(),
 			  usages =  this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {});
 
@@ -389,10 +429,11 @@ export class Usage implements ITeUsage, Disposable
     {
         const stats = this.getTaskUsageStore();
         this.log.methodStart("track task usage details", 2, logPad);
+
         //
         // Process with Usage Tracker and copy usage stats to task usage tracking state
         //
-        const usage = await this.wrapper.usage.track(`${this._taskUsageKey}${iTask.treeId}`);
+        const usage = await this.wrapper.usage.track(`${this._taskUsageKey}${iTask.treeId}`) as ITeTrackedUsage;
         Object.assign(iTask.runCount, usage.count);
         // Object.assign(iTask.runTime, {
         //     avgDown: false,

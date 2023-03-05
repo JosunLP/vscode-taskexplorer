@@ -10,16 +10,17 @@
 
 import { TextDecoder } from "util";
 import { getNonce } from "@env/crypto";
-import { TeWebviewView } from "./webviewView";
-import { TeWebviewPanel } from "./webviewPanel";
-import { ITeWebview, TeSessionChangeEvent } from "../interface";
 import { TeWrapper } from "../lib/wrapper";
+import { TeWebviewView } from "./webviewView";
+import { ConfigKeys } from "../lib/constants";
+import { TeWebviewPanel } from "./webviewPanel";
 import { fontawesome } from "./common/fontawesome";
+import { ITeWebview, TeSessionChangeEvent } from "../interface";
 import { Commands, executeCommand } from "../lib/command/command";
-import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
+import { ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
-	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcStateChangedMsg, IpcUpdateConfigCommand
+	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcStateChangedMsg, IpcUpdateConfigCommand, IpcEnabledChangedMsg
 } from "./common/ipc";
 
 
@@ -84,13 +85,14 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		this.disposables.push(
 			this._onContentLoaded,
 			this._onReadyReceived,
-			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged)
+			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged, this)
 		);
     }
 
 	dispose()
 	{
 		this.disposables.forEach(d => void d.dispose());
+		this.disposables.splice(0);
 	}
 
 

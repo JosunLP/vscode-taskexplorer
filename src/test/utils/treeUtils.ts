@@ -98,7 +98,7 @@ export const refresh = async(instance?: any) =>
         {
             // utils.getTeApi().testsApi.enableConfigWatcher(false);
             await executeSettingsUpdate(ConfigKeys.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
-            await executeSettingsUpdate("groupMaxLevel", 5, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 5, tc.waitTime.config.groupingEvent);
             // utils.getTeApi().testsApi.enableConfigWatcher(true);
             didSetGroupLevel = true;
         }

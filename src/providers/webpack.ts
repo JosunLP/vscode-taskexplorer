@@ -1,6 +1,7 @@
 
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
+import { ConfigKeys } from "../lib/constants";
 import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
@@ -47,7 +48,7 @@ export class WebpackTaskProvider extends TaskExplorerProvider implements TaskExp
     {
         const tasks: Task[] = [],
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder,
-              groupSep = this.wrapper.config.get<string>("groupSeparator");
+              groupSep = this.wrapper.config.get<string>(ConfigKeys.GroupSeparator);
 
         this.wrapper.log.methodStart("read webpack uri tasks", 3, logPad, false, [[ "project folder", folder.name ], [ "path", uri.fsPath ]], this.logQueueId);
 

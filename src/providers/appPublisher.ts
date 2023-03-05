@@ -1,6 +1,7 @@
 
 import { basename, dirname } from "path";
 import { TeWrapper } from "../lib/wrapper";
+import { ConfigKeys } from "../lib/constants";
 import { ITaskDefinition } from "../interface";
 import { TaskExplorerProvider } from "./provider";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
@@ -63,7 +64,7 @@ export class AppPublisherTaskProvider extends TaskExplorerProvider implements Ta
     {
         const cwd = dirname(uri.fsPath),
               folder = workspace.getWorkspaceFolder(uri) as WorkspaceFolder,
-              groupSeparator = this.wrapper.config.get<string>("groupSeparator");
+              groupSeparator = this.wrapper.config.get<string>(ConfigKeys.GroupSeparator);
 
         this.wrapper.log.methodStart("read app-publisher file uri task", 3, logPad, false, [
             [ "path", uri.fsPath ], [ "project folder", folder.name ]

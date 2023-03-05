@@ -8,6 +8,7 @@ import { getTaskTypes, isScriptType } from "../utils/taskUtils";
 import {
     Disposable, FileSystemWatcher, workspace, WorkspaceFolder, Uri, WorkspaceFoldersChangeEvent
 } from "vscode";
+import { ConfigKeys } from "../constants";
 
 
 export class TeFileWatcher implements ITeFileWatcher, Disposable
@@ -350,7 +351,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         else {
             this.wrapper.log.write("   workspace folder order has changed", 1);
-            if (!this.wrapper.config.get<boolean>("sortProjectFoldersAlpha"))
+            if (!this.wrapper.config.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically))
             {   //
                 // Refresh tree only, leave file cache and provider invalidation alone.  Setting
                 // the 2nd param in refresh cmd to `false` accomplishes just that.

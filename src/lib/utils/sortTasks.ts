@@ -1,5 +1,5 @@
 
-import { Strings } from "../constants";
+import { ConfigKeys, Strings } from "../constants";
 import { isPinned } from "./taskUtils";
 import { TreeItemLabel } from "vscode";
 import { TaskItem } from "../../tree/item";
@@ -31,7 +31,7 @@ export const sortFolders = (folders: IDictionary<TaskFolder>): TaskFolder[] =>
         else if (b.label === Strings.USER_TASKS_LABEL) {
             return 1;
         }
-        if (a.label && b.label && configuration.get<boolean>("sortProjectFoldersAlpha")) {
+        if (a.label && b.label && configuration.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically)) {
             return a.label.toString().localeCompare(b.label.toString());
         }
         return 0;

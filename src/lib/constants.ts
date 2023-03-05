@@ -23,10 +23,20 @@ export const Strings =
 
 export const ConfigKeys =
 {
+    AllowUsageReporting: "allowUsageReporting",
+    EnableExplorerTree: "enableExplorerView",
+    EnableSideBar: "enableSideBar",
     EnablePersistenFileCache: "enablePersistentFileCaching",
+    GroupMaxLevel: "groupMaxLevel",
+    GroupSeparator: "groupSeparator",
+    GroupStripTaskLabel: "groupStripTaskLabel",
     GroupWithSeperator: "groupWithSeparator",
+    ReportGlobalUsage: "taskMonitor.reportUsage",
+    SortProjectFoldersAlphabetically: "sortProjectFoldersAlpha",
 	SpecialFolders_NumLastTasks: "specialFolders.numLastTasks",
-    TaskMonitor_TimerMode: "taskMonitor.timerMode"
+    TaskMonitor_TimerMode: "taskMonitor.timerMode",
+    TaskMonitor_TrackStats: "taskMonitor.trackStats",
+    TrackUsage: "taskMonitor.trackUsage"
 };
 
 export const Globs: IDictionary<string> =

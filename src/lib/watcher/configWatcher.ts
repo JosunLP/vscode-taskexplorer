@@ -117,24 +117,24 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Groupings changes require global refresh
             //
-            if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupWithSeperator}`) || e.affectsConfiguration("taskexplorer.groupSeparator") ||
-                e.affectsConfiguration("taskexplorer.groupMaxLevel") || e.affectsConfiguration("taskexplorer.groupStripTaskLabel"))
+            if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupWithSeperator}`) || e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupSeparator}`) ||
+                e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupMaxLevel}`) || e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupStripTaskLabel}`))
             {
                 this.wrapper.log.write("   A tree grouping setting has changed", 1);
-                this.wrapper.log.value("      groupWithSeparator changed", this.wrapper.config.get<boolean>(ConfigKeys.GroupWithSeperator), 1);
-                this.wrapper.log.value("      groupSeparator changed", this.wrapper.config.get<boolean>("groupSeparator"), 1);
-                this.wrapper.log.value("      groupMaxLevel changed", this.wrapper.config.get<boolean>("groupMaxLevel"), 1);
-                this.wrapper.log.value("      groupStripTaskLabel changed", this.wrapper.config.get<boolean>("groupStripTaskLabel"), 1);
+                this.wrapper.log.value(`      ${ConfigKeys.GroupWithSeperator} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupWithSeperator), 1);
+                this.wrapper.log.value(`      ${ConfigKeys.GroupSeparator} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupSeparator), 1);
+                this.wrapper.log.value(`      ${ConfigKeys.GroupMaxLevel} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupMaxLevel), 1);
+                this.wrapper.log.value(`      ${ConfigKeys.GroupStripTaskLabel} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupStripTaskLabel), 1);
                 refresh2 = true; // refresh2 will rebuild the tree but won't trigger a file cache build and/or task provider invalidation
             }
 
             //
             // Workspace/project folder sorting
             //
-            if (e.affectsConfiguration("taskexplorer.sortProjectFoldersAlpha"))
+            if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.SortProjectFoldersAlphabetically}`))
             {
-                this.wrapper.log.write("   the 'sortProjectFoldersAlpha' setting has changed", 1);
-                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("sortProjectFoldersAlpha"), 1);
+                this.wrapper.log.write(`   the '${ConfigKeys.SortProjectFoldersAlphabetically}' setting has changed`, 1);
+                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically), 1);
                 refresh2 = true; // refresh2 will rebuild the tree but won't trigger a file cache build and/or task provider invalidation
             }
 
@@ -286,7 +286,7 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.EnablePersistenFileCache}`))
         {
             const newValue = this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
-            this.wrapper.log.write("   the 'enablePersistentFileCaching' setting has changed", 1);
+            this.wrapper.log.write(`   the '${ConfigKeys.EnablePersistenFileCache}' setting has changed`, 1);
             this.wrapper.log.value("      new value", newValue, 1);
             this.wrapper.filecache.persistCache(!newValue);
         }

@@ -9,6 +9,7 @@ import { startupFocus } from "../utils/suiteUtils";
 import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
 import { Uri, ThemeIcon, MarkdownString, Command, TreeItemCollapsibleState, AccessibilityInformation } from "vscode";
+import { ConfigKeys } from "../../lib/constants";
 
 let teWrapper: ITeWrapper;
 const tc = utils.testControl;
@@ -514,7 +515,7 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.sortingEvent);
-        await executeSettingsUpdate("sortProjectFoldersAlpha", false, tc.waitTime.config.sortingEvent);
+        await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, false, tc.waitTime.config.sortingEvent);
         utils.endRollingCount(this);
     });
 
@@ -523,7 +524,7 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.sortingEvent);
-        await executeSettingsUpdate("sortProjectFoldersAlpha", true, tc.waitTime.config.sortingEvent);
+        await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, true, tc.waitTime.config.sortingEvent);
         utils.endRollingCount(this);
     });
 

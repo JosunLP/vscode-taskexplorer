@@ -512,7 +512,7 @@ export const setLicensed = async (valid?: boolean) =>
         }));
     }
 
-    await licMgr.checkLicense();
+    await licMgr.checkLicense(undefined, "");
     teWrapper.tests = true;
 };
 

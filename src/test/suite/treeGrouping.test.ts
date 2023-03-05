@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
+import { ConfigKeys } from "../../lib/constants";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, focusExplorerView } from "../utils/commandUtils";
 import {
@@ -24,10 +25,10 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this, false, true)) return;
         if (getSuccessCount(this) < 10) {
-            await executeSettingsUpdate("groupMaxLevel", 5, tc.waitTime.config.groupingEvent);
-            await executeSettingsUpdate("groupSeparator", "-", tc.waitTime.config.groupingEvent);
-            await executeSettingsUpdate("groupWithSeparator", true, tc.waitTime.config.groupingEvent);
-            await executeSettingsUpdate("groupStripTaskLabel", true, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 5, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(ConfigKeys.GroupSeparator, "-", tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(ConfigKeys.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(ConfigKeys.GroupStripTaskLabel, true, tc.waitTime.config.groupingEvent);
         }
         suiteFinished(this);
     });
@@ -47,7 +48,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupWithSeparator", false, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupWithSeperator, false, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -56,7 +57,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupWithSeparator", true, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -65,7 +66,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupMaxLevel", 2, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 2, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -74,7 +75,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupMaxLevel", 4, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 4, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -83,7 +84,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupStripTaskLabel", false, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupStripTaskLabel, false, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -92,7 +93,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupMaxLevel", 3, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 3, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -101,7 +102,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupMaxLevel", 1, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 1, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -110,7 +111,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupStripTaskLabel", true, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupStripTaskLabel, true, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -119,7 +120,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupSeparator", "_", tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupSeparator, "_", tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -128,7 +129,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupMaxLevel", 3, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 3, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -137,7 +138,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupMaxLevel", 3, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 3, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -146,7 +147,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupSeparator", "-", tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupSeparator, "-", tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -155,7 +156,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate("groupMaxLevel", 5, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 5, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 

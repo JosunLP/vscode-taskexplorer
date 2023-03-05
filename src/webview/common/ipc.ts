@@ -111,6 +111,8 @@ export interface IpcLicenseChangedParams {
 export interface IpcConfigChangedParams
 {
 	timerMode: IMonitorAppTimerMode;
+	trackUsage: boolean;
+	trackTaskStats: boolean;
 }
 
 export const IpcEnabledChangedMsg = new IpcNotification<IpcEnabledChangedParams>("enabled/change");

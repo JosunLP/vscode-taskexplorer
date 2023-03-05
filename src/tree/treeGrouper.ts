@@ -175,7 +175,7 @@ export class TaskTreeGrouper
         let prevTaskItem: TaskItem | undefined;
         const newNodes: TaskFile[] = [];
         const groupSeparator = this.wrapper.utils.getGroupSeparator();
-        const atMaxLevel: boolean = this.wrapper.config.get<number>("groupMaxLevel") <= treeLevel + 1;
+        const atMaxLevel: boolean = this.wrapper.config.get<number>(ConfigKeys.GroupMaxLevel) <= treeLevel + 1;
 
         this.wrapper.log.methodStart("create task groupings by separator", logLevel, logPad, true, [
             [ "folder", folder.label ], [ "label (node name)", taskFile.label ], [ "grouping level", treeLevel ], [ "is group", taskFile.isGroup ],
@@ -439,7 +439,7 @@ export class TaskTreeGrouper
 
     private renameGroupedTasks = async(taskFile: TaskFile) =>
     {
-        const groupStripTaskLabel = this.wrapper.config.get<boolean>("groupStripTaskLabel", true);
+        const groupStripTaskLabel = this.wrapper.config.get<boolean>(ConfigKeys.GroupStripTaskLabel, true);
         if (!groupStripTaskLabel || !taskFile.label) {
             return;
         }

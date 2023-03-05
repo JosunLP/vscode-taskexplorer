@@ -10,13 +10,15 @@
 
 import { TeWrapper } from "../lib/wrapper";
 import { sleep } from "../lib/utils/utils";
+import { ConfigKeys } from "../lib/constants";
 import { TeWebviewBase } from "./webviewBase";
 import { isObject } from "../lib/utils/typeUtils";
+import { IpcEnabledChangedMsg } from "./common/ipc";
 import { ContextKeys, WebviewIds } from "../lib/context";
 import { Commands, registerCommand } from "../lib/command/command";
 import {
     WebviewOptions, WebviewPanel, WebviewPanelOnDidChangeViewStateEvent, WebviewPanelOptions, WindowState,
-    Disposable, Uri, ViewColumn, window, WebviewPanelSerializer
+    Disposable, Uri, ViewColumn, window, WebviewPanelSerializer, ConfigurationChangeEvent
 } from "vscode";
 
 
@@ -38,6 +40,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		super(wrapper, title, fileName);
 		this.disposables.push(
 			registerCommand(showCommand, this.onShowCommand, this),
+			wrapper.config.onDidChange(this.onConfigChangedBase, this),
 			window.registerWebviewPanelSerializer(id, this._serializer)
 		);
 	}
@@ -67,6 +70,21 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 
 	protected override includeBootstrap = () => this.getState();
+
+
+	private async onConfigChangedBase(e: ConfigurationChangeEvent)
+	{
+		if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.EnableExplorerTree}`) ||
+			e.affectsConfiguration(`taskexplorer.${ConfigKeys.EnableSideBar}`))
+		{
+			const enabled = this.wrapper.config.get<boolean>(ConfigKeys.EnableSideBar) ||
+						    this.wrapper.config.get<boolean>(ConfigKeys.EnableExplorerTree);
+			this.notify(IpcEnabledChangedMsg, { enabled });
+			if (!enabled) {
+				setTimeout(() => this.dispose(), 500);
+			}
+		}
+	}
 
 
 	protected override onHtmlPreviewBase = async(html: string, ...args: unknown[]) =>
