@@ -5,7 +5,7 @@ import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
 import { IDictionary } from "../interface";
-import { ConfigKeys } from "src/lib/constants";
+import { ConfigKeys } from "../lib/constants";
 import { SpecialTaskFolder } from "./specialFolder";
 
 
