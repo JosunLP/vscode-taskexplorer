@@ -23,6 +23,7 @@ export const Strings =
 
 export const ConfigKeys =
 {
+    EnablePersistenFileCache: "enablePersistentFileCaching",
 	SpecialFolders_NumLastTasks: "specialFolders.numLastTasks",
     TaskMonitor_TimerMode: "taskMonitor.timerMode"
 };
@@ -57,6 +58,7 @@ export type PinnedStorageKey = `taskexplorer.pinned.${TeTaskListType}`;
 export const StorageKeys =
 {
     Account: "taskexplorer.account",
+    CacheBuster: "taskexplorer.cacheBuster",
 	TaskUsage: "taskexplorer.taskUsage",
 	Usage: "taskexplorer.usage"
 };

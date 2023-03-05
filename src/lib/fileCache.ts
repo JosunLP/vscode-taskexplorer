@@ -7,6 +7,7 @@ import * as taskTypeUtils from "./utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "./utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
 import { workspace, RelativePattern, WorkspaceFolder, Uri } from "vscode";
+import { ConfigKeys } from "./constants";
 
 
 export class TeFileCache implements ITeFileCache
@@ -510,8 +511,8 @@ export class TeFileCache implements ITeFileCache
         // stuff going on when this was all started as async and then added to the
         // deactivate() method.
         //
-        if (clear !== true && (force || this.wrapper.config.get<boolean>("enablePersistentFileCaching")))
-        // if (clear !== true && (!teApi.isTests() || this.wrapper.config.get<boolean>("enablePersistentFileCaching")))
+        if (clear !== true && (force || this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache)))
+        // if (clear !== true && (!teApi.isTests() || this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache)))
         {
             const text = this.wrapper.statusBar.get();
             this.wrapper.statusBar.update("Persisting file cache...");
@@ -555,7 +556,7 @@ export class TeFileCache implements ITeFileCache
         //
         if (this.firstRun || forceForTests)
         {
-            if (this.wrapper.config.get<boolean>("enablePersistentFileCaching"))
+            if (this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache))
             {
                 await this.addFromStorage();
                 numFilesFound = this.getTaskFileCount();

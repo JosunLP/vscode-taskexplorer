@@ -6,6 +6,7 @@ import { initStorage, storage } from "./lib/storage";
 import { ExtensionContext, ExtensionMode, workspace } from "vscode";
 import { configuration, registerConfiguration } from "./lib/configuration";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./lib/utils/taskUtils";
+import { ConfigKeys } from "./lib/constants";
 
 // import "tsconfig-paths/register";
 
@@ -81,7 +82,7 @@ export async function deactivate()
     // reload is much quicker, especially in large workspaces.
     //
     /* istanbul ignore next */
-    if (!teWrapper.filecache.isBusy() && !teWrapper.config.get<boolean>("enablePersistentFileCaching"))
+    if (!teWrapper.filecache.isBusy() && !teWrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache))
     {
         const now = Date.now(),
               lastWsRootPathChange = teWrapper.storage.get2Sync<number>("lastWsRootPathChange", 0);

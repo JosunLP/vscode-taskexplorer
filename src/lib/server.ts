@@ -27,7 +27,6 @@ export class TeServer
 {
 	private _busy = false;
 	private readonly _maxConnectionTime = 7500;
-	private readonly _clientId = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 
 
     constructor(private readonly wrapper: TeWrapper) {}
@@ -39,6 +38,19 @@ export class TeServer
 
 
 	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
+
+
+	private getApiClientId = () =>
+	{
+		switch (this.wrapper.env)
+		{
+			case "dev":
+				return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
+			case "tests":
+			case "production":
+				return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
+		}
+	};
 
 
 	private getApiPort = () =>
@@ -71,8 +83,9 @@ export class TeServer
 
 	private getDefaultServerOptions = (apiEndpoint: ITeApiEndpoint) =>
 	{
+		const server = this.getApiServer();
 		return {
-			hostname: this.getApiServer(),
+			hostname: server,
 			method: "POST",
 			path: this.getApiPath(apiEndpoint),
 			port: this.getApiPort(),
@@ -80,9 +93,9 @@ export class TeServer
 			// TODO - Request timeouts don't work
 			// Timeout don't work worth a s***.  So do a promise race in request() for now.
 			//
-			timeout: this.getApiServer() !== "localhost" ? 4000 : /* istanbul ignore next*/1250,
+			timeout: server !== "localhost" ? 4000 : /* istanbul ignore next*/1250,
 			headers: {
-				"token": this._clientId,
+				"token": this.getApiClientId(),
 				"User-Agent": "vscode-taskexplorer",
 				"Content-Type": "application/json"
 			}

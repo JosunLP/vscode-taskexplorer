@@ -24,7 +24,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _errorState = false;
 	private _checkLicenseTask: NodeJS.Timeout;
 	private readonly _disposables: Disposable[] = [];
-	private readonly _authService = "vscode-taskexplorer-prod";
 	private readonly _checkLicenseInterval = 1000 * 60 * 60 * 4; // 4 hr
     private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
 
@@ -34,7 +33,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._account = this.getNewAccount();
 		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
 		// eslint-disable-next-line @typescript-eslint/tslint/config
-		this._checkLicenseTask = setInterval(this.checkLicense, this._checkLicenseInterval);
+		this._checkLicenseTask = setInterval(this.checkLicense, this._checkLicenseInterval, "");
 		this._disposables.push(
 			this._onSessionChange,
 			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged),
@@ -82,9 +81,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad + "   ",
 			{
 				machineId: env.machineId,
-				appName: this._authService
+				appName: this.getAuthService()
 			});
 			await this.saveAccount(logPad + "   ");
+			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.");
 		}
 		catch (e) {
 			this.handleServerError(e);
@@ -226,7 +226,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				ttl: 30,
 				appId: env.machineId,
 				machineId: env.machineId,
-				appName: this._authService,
+				appName: this.getAuthService(),
 				ip: "*",
 				json: true,
 				license: true,
@@ -242,6 +242,19 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.statusBar.update("");
 		this.wrapper.log.methodDone("request extended trial", 1, logPad);
 		return token;
+	};
+
+
+	private getAuthService = () =>
+	{
+		switch (this.wrapper.env)
+		{
+			case "dev":
+				return "vscode-taskexplorer";
+			case "tests":
+			case "production":
+				return "vscode-taskexplorer-prod";
+		}
 	};
 
 
@@ -368,7 +381,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			{
 				key,
 				machineId: env.machineId,
-				appName: this._authService
+				appName: this.getAuthService()
 			});
 			await this.saveAccount("   ");
 			this.wrapper.statusBar.update("");

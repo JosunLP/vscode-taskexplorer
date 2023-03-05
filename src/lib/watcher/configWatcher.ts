@@ -6,6 +6,7 @@ import { Commands, executeCommand } from "../command/command";
 import { IDictionary, ITeConfigWatcher } from "../../interface";
 import { getScriptTaskTypes, getTaskTypeRealName } from "../utils/taskUtils";
 import { ConfigurationChangeEvent, workspace, window, Disposable } from "vscode";
+import { ConfigKeys } from "../constants";
 
 
 export class TeConfigWatcher implements ITeConfigWatcher, Disposable
@@ -282,9 +283,9 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         //
         // Persistent file caching
         //
-        if (e.affectsConfiguration("taskexplorer.enablePersistentFileCaching"))
+        if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.EnablePersistenFileCache}`))
         {
-            const newValue = this.wrapper.config.get<boolean>("enablePersistentFileCaching");
+            const newValue = this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
             this.wrapper.log.write("   the 'enablePersistentFileCaching' setting has changed", 1);
             this.wrapper.log.value("      new value", newValue, 1);
             this.wrapper.filecache.persistCache(!newValue);

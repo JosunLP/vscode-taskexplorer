@@ -18,7 +18,7 @@ import { TaskManager } from "../tree/taskManager";
 import { TaskWatcher } from "../tree/taskWatcher";
 import { LicenseManager } from "./licenseManager";
 import * as commonUtils from "./utils/commonUtils";
-import { StorageKeys, Strings } from "./constants";
+import { ConfigKeys, StorageKeys, Strings } from "./constants";
 import { ContextKeys, TeContext } from "./context";
 import { AntTaskProvider } from "../providers/ant";
 import { HomeView } from "../webview/view/homeView";
@@ -272,7 +272,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		await this.storage.deleteSecret("taskexplorer.licenseToken");
 		await this.storage.deleteSecret("taskexplorer.licenseKey30Day");
 		await this.storage.deleteSecret("taskexplorer.licenseKeyTrial");
-		await this.storage.deleteSecret("taskexplorer.account");
+		await this.storage.deleteSecret(StorageKeys.Account);
 		await this.licenseManager.checkLicense("   ");
 
 		//
@@ -283,7 +283,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		if (this.versionchanged)
 		{
 			this._cacheBuster = getUuid();
-			await this._storage.update("taskexplorer.cacheBuster", this._cacheBuster);
+			await this._storage.update(StorageKeys.CacheBuster, this._cacheBuster);
 			promiseUtils.oneTimeEvent(this.onReady)(() =>
 			{
 				if (!this.isNewInstall) {
@@ -316,11 +316,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		}     //
 		else // See comments/notes above
 		{   //
-			const enablePersistentFileCaching = this.config.get<boolean>("enablePersistentFileCaching");
+			const enablePersistentFileCaching = this.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
 			this._configWatcher.enableConfigWatcher(false);
-			await this.config.update("enablePersistentFileCaching", true);
+			await this.config.update(ConfigKeys.EnablePersistenFileCache, true);
 			await this.filecache.rebuildCache("   ");
-			await this.config.update("enablePersistentFileCaching", enablePersistentFileCaching);
+			await this.config.update(ConfigKeys.EnablePersistenFileCache, enablePersistentFileCaching);
 			this._configWatcher.enableConfigWatcher(true);
 		}
 		await this.storage.update2("lastDeactivated", 0);
@@ -332,10 +332,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		/* istanbul ignore next */
 		if (this.env === "dev")
 		{
-			const rPath = await this.pathUtils.getInstallPath() + "\\dist\\",
+			const account = await this._licenseManager.getAccount(),
+				  rPath = await this.pathUtils.getInstallPath() + "\\dist\\",
 				  taskUsage = this.storage.get<any>(StorageKeys.TaskUsage, {}),
-				  allUsage = { usage: this._usage.getAll(), taskUsage };
-			await this.fs.writeFile(rPath + "usage.json", JSON.stringify(allUsage, null, 3));
+				  allUsage = { usage: this._usage.getAll(), taskUsage, account };
+			await this.fs.writeFile(rPath + "te.json", JSON.stringify(allUsage, null, 3));
 		}
 
 		//
