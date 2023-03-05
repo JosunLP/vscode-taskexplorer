@@ -9,19 +9,15 @@ import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { env } from "vscode";
 
-const DEV_ENV_USE_LOCAL_SERVER = true;
+const USE_LOCAL_SERVER = true;
 
-export interface ServerError extends Error
+export interface ServerError
 {
+	body?: string;
+	message: string;
 	status: number | undefined;
 	success: false;
 }
-interface ServerErrorConstructor extends ErrorConstructor {
-    new(message: string | undefined, status: number | undefined): ServerError;
-    (message: string | undefined, status: number | undefined): ServerError;
-    readonly prototype: ServerError;
-}
-export declare const ServerError: ServerErrorConstructor;
 
 export type ITeApiEndpoint = "license/validate" | "login" | "register" | "register/trial/start" | "register/trial/extend";
 
@@ -32,81 +28,85 @@ export class TeServer
 	private readonly _maxConnectionTime = 7500;
 
 
-    constructor(private readonly wrapper: TeWrapper) {}
+    constructor(private readonly wrapper: TeWrapper)
+	{
+		if (USE_LOCAL_SERVER)
+		{   //
+			// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
+			// Justdisable TLS rejection when using localhost, no big deal.
+			//
+			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+		}
+	}
 
 
 	get isBusy() {
 		return this._busy;
 	}
 
-
-	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
-
-
-	getApiClientId = () =>
+	get apiClientId()
 	{
-		if (this.wrapper.env === "dev" && DEV_ENV_USE_LOCAL_SERVER) {
+		if (USE_LOCAL_SERVER) {
 			return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
 		}
 		return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 	};
 
-
-	private getApiPort = () =>
+	private get apiPort()
 	{
 		switch (this.wrapper.env)
 		{
 			case "dev":
-				return DEV_ENV_USE_LOCAL_SERVER ? 485 : 443;
 			case "tests":
+				return USE_LOCAL_SERVER ? 485 : 443;
 			case "production":
 				return 443;
 		}
 	};
 
-
-	private getApiServer = () =>
+	private get apiServer()
 	{
 		switch (this.wrapper.env)
 		{
 			case "dev":
-				return DEV_ENV_USE_LOCAL_SERVER ? "localhost" : "license.spmeesseman.com";
 			case "tests":
-				return "license.spmeesseman.com"; // "test.spmeesseman.com"
+				return USE_LOCAL_SERVER ? "localhost" : "license.spmeesseman.com";
 			case "production":
 				return "license.spmeesseman.com"; // "app.spmeesseman.com"
 		}
 	};
 
-
-	private getAuthService = () =>
+	private get authService()
 	{
 		switch (this.wrapper.env)
 		{
 			case "dev":
-				return "vscode-taskexplorer";
 			case "tests":
+				return USE_LOCAL_SERVER ? "vscode-taskexplorer" : "vscode-taskexplorer-prod";
 			case "production":
 				return "vscode-taskexplorer-prod";
 		}
 	};
 
 
+	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
+
+
 	private getDefaultServerOptions = (apiEndpoint: ITeApiEndpoint) =>
 	{
-		const server = this.getApiServer();
+		const server = this.apiServer;
 		return {
 			hostname: server,
 			method: "POST",
 			path: this.getApiPath(apiEndpoint),
-			port: this.getApiPort(),
+			port: this.apiPort,
 			//
 			// TODO - Request timeouts don't work
 			// Timeout don't work worth a s***.  So do a promise race in request() for now.
 			//
 			timeout: server !== "localhost" ? 4000 : /* istanbul ignore next*/1250,
 			headers: {
-				"token": this.getApiClientId(),
+				"token": this.apiClientId,
 				"User-Agent": "vscode-taskexplorer",
 				"Content-Type": "application/json"
 			}
@@ -175,7 +175,7 @@ export class TeServer
 		return Promise.race<T>(
 		[
 			this._request<T>(endpoint, logPad, params),
-			new Promise<T>(reject => setTimeout(reject, this._maxConnectionTime, new ServerError("Timed out", 408)))
+			new Promise<T>(reject => setTimeout(reject, this._maxConnectionTime, <ServerError>{ message: "Timed out", status: 408 }))
 		]);
 	};
 
@@ -187,6 +187,7 @@ export class TeServer
 		return new Promise<T>((resolve, reject) =>
 		{
 			let rspData = "";
+			let errorState = false;
 			const options = this.getDefaultServerOptions(endpoint);
 			this.wrapper.log.methodStart("request license", 1, logPad, false, [[ "host", options.hostname ], [ "port", options.port ]]);
 			this.log("starting https request to license server", logPad + "   ");
@@ -196,23 +197,21 @@ export class TeServer
 				res.on("data", (chunk) => { rspData += chunk; });
 				res.on("end", async() =>
 				{
-					if (!res.statusCode || res.statusCode > 299)
-					{
-						this._busy = false;
-						reject(new ServerError(res.statusMessage, res.statusCode));
-					}
-					else {
-						try
-						{   const jso = JSON.parse(rspData);
+					try
+					{   if (!res.statusCode || res.statusCode > 299) {
+							reject(<ServerError>{ message: res.statusMessage, status: res.statusCode, body: rspData });
+						}
+						else {
+							const jso = JSON.parse(rspData);
 							this.logServerResponse(res, jso, rspData, logPad);
 							resolve(jso as T);
 						}
-						catch (e){
-							reject(e);
-						}
-						finally {
-							this._busy = false;
-						}
+					}
+					catch (e){
+						reject(<ServerError>{ message: e.message, status: res.statusCode, body: rspData });
+					}
+					finally {
+						this._busy = false;
 					}
 				});
 			});
@@ -222,13 +221,16 @@ export class TeServer
 			{   // Not going to fail unless i birth a bug
 				this.onServerError(e, "request", logPad);
 				this._busy = false;
+				errorState = true;
 				reject(e);
 			});
 
-			const payload = JSON.stringify({ ...(params || {}), appName: this.getAuthService(), machineId: env.machineId });
+			const payload = JSON.stringify({ ...(params || {}), appName: this.authService, machineId: env.machineId });
 			req.write(payload, () =>
             {
-				this.log("   output stream written, ending request and waiting for response...", logPad);
+				if (!errorState) {
+					this.log("   output stream written, ending request and waiting for response...", logPad);
+				}
 				req.end();
 			});
 		});

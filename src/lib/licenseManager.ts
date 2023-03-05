@@ -282,13 +282,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	getMaxNumberOfTaskFiles = (): number =>  (this.isLicensed ? Infinity : this._maxFreeTaskFiles);
 
 
-	private handleServerError = (e: Error | ServerError): void =>
+	private handleServerError = (e: any): void =>
 	{
-		if (e instanceof ServerError) {
-			this.wrapper.log.error(e, [[ "status code", e.status ]]);
+		if (e instanceof Error) {
+			this.wrapper.log.error(e);
 		}
 		else {
-			this.wrapper.log.error(e);
+			this.wrapper.log.value("response body", e.body, 2);
+			this.wrapper.log.error(e.message, [[ "status code", e.status ]]);
 		}
 		this._account.errorState = true;
 		this.wrapper.statusBar.update("Error");

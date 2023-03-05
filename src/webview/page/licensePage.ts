@@ -85,7 +85,7 @@ export class LicensePage extends TeWebviewPanel<State>
 		</td></tr>
 		<tr><td>
 			This license key is valid for30 days from the time it was issued.  Please show your support for
-			the extension and purchase the license <a href="https://license.spmeesseman.com/purchase?key=${encodeURIComponent(`${newKey}&${this.wrapper.server.getApiClientId()}`)}">here</a>.
+			the extension and purchase the license <a href="https://license.spmeesseman.com/purchase?key=${encodeURIComponent(`${newKey}&${this.wrapper.server.apiClientId}`)}">here</a>.
 		</td></tr>
 	</table>
 	<table class="margin-top-20">

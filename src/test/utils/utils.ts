@@ -505,7 +505,7 @@ export const setLicensed = async (valid: boolean) =>
         }
     }));
 
-    await licMgr.checkLicense();
+    await licMgr.checkLicense("");
     teWrapper.tests = true;
 };
 

@@ -132,13 +132,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._fileWatcher = new TeFileWatcher(this);
 		this._configWatcher = new TeConfigWatcher(this);
 
-		this._server = new TeServer(this);
-		this._licenseManager = new LicenseManager(this);
-
 		this._treeManager = new TaskTreeManager(this);
         this._taskManager = new TaskManager(this);
         this._taskWatcher = new TaskWatcher(this);
 
+		this._server = new TeServer(this);
+		this._licenseManager = new LicenseManager(this);
 		this._usage = new Usage(this);
 
 		this._homeView = new HomeView(this);
@@ -269,10 +268,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// License / Authentication
 		//
-		await this.storage.deleteSecret("taskexplorer.licenseToken");
-		await this.storage.deleteSecret("taskexplorer.licenseKey30Day");
-		await this.storage.deleteSecret("taskexplorer.licenseKeyTrial");
-		await this.storage.deleteSecret(StorageKeys.Account);
+		// await this.storage.deleteSecret(StorageKeys.Account); // for dev/testing
 		await this.licenseManager.checkLicense("   ");
 
 		//
