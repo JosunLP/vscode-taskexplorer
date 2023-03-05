@@ -40,9 +40,11 @@ Features:
         ✔ Ensure sync running timer w/ true task runtime when task finishes @done(23-03-05 09:36)
         ☐ Large loading icon in center of webview when page first opened
             If1000's of tasks,loading can take several seconds, so display something that shows work is being done
-        ☐ Details columns need to either size to screen percentage, or be adjustable
+        ✔ Details columns need to either size to screen percentage, or be adjustable @done(23-03-05 11:23)
             Too much empty space on high res screens, i.e. 1920px.  Details columns look smashed and crammed
             But current state is as wide as they can go on 1366x768 res (how i run dev instance)
+        ☐ Tooltip popups on task control details
+            i.e. "Last runtime was the fastest recorded to date" when hovering over rabbit icon
 
     ✔ Option persisted cache @done(23-01-22 18:34)
         For tasks to load from fs on startups

@@ -279,7 +279,7 @@ button {
     text-align: left;
 }
 
-.te-monitor-control-content-details-col0  {
+.te-monitor-control-content-details-col0 {
 	vertical-align: top;
 	width: 80px;
 	max-width: 80px;
@@ -287,19 +287,17 @@ button {
 }
 
 .te-monitor-control-content-details-col1 {
-	max-width: 160px;
 	overflow: hidden;
-	padding-left: 10px;
+	padding-left: 1.25vw;
 	padding-right: 10px;
-	width: 160px;
+	width:11vw;
 	white-space: nowrap;
 }
-  
+
 .te-monitor-control-content-details-col2 {
-	max-width: 230px;
-	overflow: hidden;
-	padding-left: 10px;
-	width: 230px;
+  	overflow: hidden;
+	padding-left: 1.25vw;
+	width:16vw;
 	white-space: nowrap;
 }
 
