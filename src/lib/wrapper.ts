@@ -3,10 +3,10 @@ import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
 import { figures } from "./figures";
+import { TeServer } from "./server";
 import { getUuid } from "@env/crypto";
 import { logControl } from "./log/log";
 import { TaskTree } from "../tree/tree";
-import { TeServer } from "./auth/server";
 import { TeFileCache } from "./fileCache";
 import * as utilities from "./utils/utils";
 import * as sorters from "./utils/sortTasks";
@@ -16,6 +16,7 @@ import * as taskUtils from "./utils/taskUtils";
 import { IStorage } from "../interface/IStorage";
 import { TaskManager } from "../tree/taskManager";
 import { TaskWatcher } from "../tree/taskWatcher";
+import { LicenseManager } from "./licenseManager";
 import * as commonUtils from "./utils/commonUtils";
 import { StorageKeys, Strings } from "./constants";
 import { ContextKeys, TeContext } from "./context";
@@ -32,7 +33,6 @@ import { ITeWrapper } from "../interface/ITeWrapper";
 import { WelcomePage } from "../webview/page/welcome";
 import { TeFileWatcher } from "./watcher/fileWatcher";
 import { TaskTreeManager } from "../tree/treeManager";
-import { LicenseManager } from "./auth/licenseManager";
 import { BatchTaskProvider } from "../providers/batch";
 import { MavenTaskProvider } from "../providers/maven";
 import { GruntTaskProvider } from "../providers/grunt";
@@ -565,7 +565,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	}
 
 	get server(): TeServer {
-		return this.server;
+		return this._server;
 	}
 
     get sidebar(): TaskTree {
