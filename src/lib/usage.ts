@@ -257,18 +257,18 @@ export class Usage implements ITeUsage, Disposable
 
     private onConfigChanged = async(e: ConfigurationChangeEvent) =>
     {
-        if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.TrackUsage}`))
+        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage))
         {
             this._trackUsage = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage);
         }
-        if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.TaskMonitor_TrackStats}`))
+        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor_TrackStats))
         {
             this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats);
             if (this._trackTaskStats && !this._trackUsage){
                 await this.wrapper.config.update(ConfigKeys.TrackUsage, this._trackTaskStats);
             }
         }
-        if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.AllowUsageReporting}`))
+        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.AllowUsageReporting))
         {
             this._allowUsageReporting = this.wrapper.config.get<boolean>(ConfigKeys.AllowUsageReporting);
         }

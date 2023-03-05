@@ -104,9 +104,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 	private async onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.TaskMonitor_TimerMode}`) ||
-		    e.affectsConfiguration(`taskexplorer.${ConfigKeys.TrackUsage}`) ||
-			e.affectsConfiguration(`taskexplorer.${ConfigKeys.TaskMonitor_TrackStats}`))
+		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor_TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor_TrackStats))
 		{
 			this.notify(IpcConfigChangedMsg, {
 				timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode),
@@ -118,10 +116,10 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 
 	protected override onVisibilityChanged = (visible: boolean) =>
-		this.wrapper.log.methodOnce("monitor view", "visibility changed", 2, this.wrapper.log.getLogPad(), [[ "visible", visible ]]);
+		this.wrapper.log.methodOnce("task monitor", "visibility changed", 2, this.wrapper.log.getLogPad(), [[ "visible", visible ]]);
 
 
 	protected override onFocusChanged = (focused: boolean): void =>
-		this.wrapper.log.methodOnce("monitor view", "focus changed", 2, this.wrapper.log.getLogPad(), [[ "focused", focused ]]);
+		this.wrapper.log.methodOnce("task monitor", "focus changed", 2, this.wrapper.log.getLogPad(), [[ "focused", focused ]]);
 
 }

@@ -54,6 +54,9 @@ class Configuration implements IConfiguration
     }
 
 
+    affectsConfiguration = (e: ConfigurationChangeEvent, ...settings: string[]) => !!settings.find(s => e.affectsConfiguration(`taskexplorer.${s}`));
+
+
     public get = <T>(key: string, defaultValue?: T) => this.configuration.get<T>(key, defaultValue!);
 
 
