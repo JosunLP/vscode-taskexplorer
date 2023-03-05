@@ -79,7 +79,7 @@ export class TeStatusBar implements Disposable
         else {
             msg = msg.substring(0, this.statusBarNumChars - 3) + "...";
         }
-        return "$(loading~spin) " + msg;
+        return "$(loading~spin) Task Explorer: " + msg;
     };
 
 }

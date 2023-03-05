@@ -5,10 +5,10 @@ import { TeTaskTab } from "./tab";
 import { AppMenuButton } from "./menuButton";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import {
-    IIpcTask, IIpcTaskListType, IMonitorAppTimerMode, MonitorAppSerializedState, MonitorAppState
+    ITeTask, TeTaskListType, IMonitorAppTimerMode, MonitorAppSerializedState, MonitorAppState
 } from "../../../common/ipc";
 
-type ITabDictionary<T> = { [id in IIpcTaskListType]: T; };
+type ITabDictionary<T> = { [id in TeTaskListType]: T; };
 
 interface ITeAppTabs extends ITabDictionary<React.RefObject<TeTaskTab>>
 {
@@ -156,7 +156,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     };
 
 
-    setTask = (task: IIpcTask) =>
+    setTask = (task: ITeTask) =>
     {
         this.tabs.all.current?.setTask(task);
         this.tabs.famous.current?.setTask(task);
@@ -166,7 +166,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     };
 
 
-    setTasks = (listType: IIpcTaskListType, tasks: IIpcTask[]) => void this.tabs[listType]?.current?.setTasks(tasks);
+    setTasks = (listType: TeTaskListType, tasks: ITeTask[]) => void this.tabs[listType]?.current?.setTasks(tasks);
 
 
     setTimerMode = (mode: IMonitorAppTimerMode) => { if (this.state.timerMode !== mode) { this.setState({ timerMode: mode }); }};

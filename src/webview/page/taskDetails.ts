@@ -1,5 +1,5 @@
 
-import type { IIpcTask, State } from "../common/ipc";
+import type { ITeTask, State } from "../common/ipc";
 import { TeWebviewPanel } from "../webviewPanel";
 import type { TeWrapper } from "../../lib/wrapper";
 import { Commands } from "../../lib/command/command";
@@ -32,7 +32,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 
     protected override includeBody = async(...args: any[]) =>
     {
-        const iTask = args[0] as IIpcTask;
+        const iTask = args[0] as ITeTask;
         // TODO - Display task details
 		return iTask.name;
     };

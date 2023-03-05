@@ -1,4 +1,4 @@
-import { ILogColors, LogColor, LogStyle } from "../interface";
+import { ILogColors, LogColor, LogStyle } from "../../interface";
 
 
 export class LogColors implements ILogColors

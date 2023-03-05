@@ -4,10 +4,9 @@
 import { request } from "https";
 // import fetch from "@env/fetch";
 // import fetch from "node-fetch";
-import { Disposable } from "vscode";
-import { figures } from "../figures";
-import { TeWrapper } from "../wrapper";
+import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
+import { figures } from "./utils/figures";
 
 export interface ServerError extends Error
 {
@@ -26,34 +25,46 @@ export type ITeApiEndpoint = "license/validate" | "login" | "register" | "regist
 
 export class TeServer
 {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	private readonly MAX_CONNECTION_TIME = 7500;
-	private busy = false;
-	private port = 443;
-	private readonly clientId = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
+	private _busy = false;
+	private readonly _maxConnectionTime = 7500;
+	private readonly _clientId = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 
 
     constructor(private readonly wrapper: TeWrapper) {}
 
 
 	get isBusy() {
-		return this.busy;
+		return this._busy;
 	}
 
 
-	private getApiEndpointPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
+	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
+
+
+	private getApiPort = () =>
+	{
+		switch (this.wrapper.env)
+		{
+			case "dev":
+				return 485;
+			case "tests":
+			case "production":
+				return 443;
+		}
+	};
 
 
 	private getApiServer = () =>
 	{
-		switch (this.wrapper.env) {
+		switch (this.wrapper.env)
+		{
 			case "dev":
-				return "127.0.0.1";
+				return "localhost";
 				// return "license.spmeesseman.com";
 			case "tests":
-				return "license.spmeesseman.com";
+				return "license.spmeesseman.com"; // "test.spmeesseman.com"
 			case "production":
-				return "license.spmeesseman.com"; // "license.spmeesseman.com"
+				return "license.spmeesseman.com"; // "app.spmeesseman.com"
 		}
 	};
 
@@ -62,15 +73,16 @@ export class TeServer
 	{
 		return {
 			hostname: this.getApiServer(),
-			port: this.port,
-			path: this.getApiEndpointPath(apiEndpoint),
 			method: "POST",
+			path: this.getApiPath(apiEndpoint),
+			port: this.getApiPort(),
 			//
-			// Timeout don't work worth a s***.  Do a promise race in request()
+			// TODO - Request timeouts don't work
+			// Timeout don't work worth a s***.  So do a promise race in request() for now.
 			//
-			timeout: this.getApiServer() !== "127.0.0.1" ? 4000 : /* istanbul ignore next*/1250,
+			timeout: this.getApiServer() !== "localhost" ? 4000 : /* istanbul ignore next*/1250,
 			headers: {
-				"token": this.clientId,
+				"token": this._clientId,
 				"User-Agent": "vscode-taskexplorer",
 				"Content-Type": "application/json"
 			}
@@ -139,19 +151,19 @@ export class TeServer
 		return Promise.race<T>(
 		[
 			this._request<T>(endpoint, params, logPad),
-			new Promise<T>(reject => setTimeout(reject, this.MAX_CONNECTION_TIME, new ServerError("Timed out", 408)))
+			new Promise<T>(reject => setTimeout(reject, this._maxConnectionTime, new ServerError("Timed out", 408)))
 		]);
 	};
 
 
     private _request = <T>(endpoint: ITeApiEndpoint, params: any, logPad: string) =>
 	{
-		this.busy = true;
+		this._busy = true;
 
 		return new Promise<T>((resolve, reject) =>
 		{
 			let rspData = "";
-			this.wrapper.log.methodStart("request license", 1, logPad, false, [[ "host", this.getApiServer() ], [ "port", this.port ]]);
+			this.wrapper.log.methodStart("request license", 1, logPad, false, [[ "host", this.getApiServer() ], [ "port", this.getApiPort() ]]);
 			this.log("starting https request to license server", logPad + "   ");
 
 			const req = request(this.getDefaultServerOptions(endpoint), (res) =>
@@ -159,9 +171,9 @@ export class TeServer
 				res.on("data", (chunk) => { rspData += chunk; });
 				res.on("end", async() =>
 				{
-					if (res.statusCode !== 200)
+					if (!res.statusCode || res.statusCode > 299)
 					{
-						this.busy = false;
+						this._busy = false;
 						reject(new ServerError(res.statusMessage, res.statusCode));
 					}
 					else {
@@ -179,7 +191,7 @@ export class TeServer
 							});
 						}
 						finally {
-							this.busy = false;
+							this._busy = false;
 						}
 					}
 				});
@@ -189,7 +201,7 @@ export class TeServer
 			req.on("error", (e) =>
 			{   // Not going to fail unless i birth a bug
 				this.onServerError(e, "request", logPad);
-				this.busy = false;
+				this._busy = false;
 				reject(e);
 			});
 

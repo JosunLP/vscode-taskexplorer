@@ -2,11 +2,11 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
-import { figures } from "./figures";
 import { TeServer } from "./server";
 import { getUuid } from "@env/crypto";
 import { logControl } from "./log/log";
 import { TaskTree } from "../tree/tree";
+import { figures } from "./utils/figures";
 import { TeFileCache } from "./fileCache";
 import * as utilities from "./utils/utils";
 import * as sorters from "./utils/sortTasks";
@@ -68,8 +68,6 @@ import {
 	IDictionary, ILog, ITeFilesystem, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities,
 	ITeTaskUtilities, ITeUtilities
 } from "../interface";
-
-const PROVIDE_INTERIM_LICENSE_KEY = true;
 
 export class TeWrapper implements ITeWrapper, Disposable
 {
@@ -271,29 +269,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// License / Authentication
 		//
-/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		/* istanbul ignore else *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// if (PROVIDE_INTERIM_LICENSE_KEY) /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// {/* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// 	await this.licenseManager.setLicenseKey("1234-5678-9098-7654321"); /* TEMP *//* TEMP */
-		// 	/* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */ /* TEMP */
-		// 	await this.licenseManager.setLicenseToken({ /* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// 		token: "1234-5678-9098-7654321", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// 		ttl: 365, /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// 		expiresFmt: "N/A", /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// 		issuedFmt: "N/A" /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// 	}); /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// } /* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-		// await this.storage.deleteSecret("taskexplorer.licenseKey");
-		// await this.storage.deleteSecret("taskexplorer.licenseToken");
-		// await this.storage.deleteSecret("taskexplorer.licenseKey30Day");
-		// await this.storage.deleteSecret("taskexplorer.licenseKeyTrial");
-/* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
+		await this.storage.deleteSecret("taskexplorer.licenseToken");
+		await this.storage.deleteSecret("taskexplorer.licenseKey30Day");
+		await this.storage.deleteSecret("taskexplorer.licenseKeyTrial");
+		await this.storage.deleteSecret("taskexplorer.account");
 		await this.licenseManager.checkLicense("   ");
-		// const session = await licenseManager.getSession("TeAuth", [], { create: true });
-		// if (session) {
-		//     window.showInformationMessage(`Welcome back ${session.account.name}`);
-		// }
 
 		//
 		// Maybe show the 'what's new' or 'welcome' page if the version has changed ot this is
@@ -303,13 +283,15 @@ export class TeWrapper implements ITeWrapper, Disposable
 		if (this.versionchanged)
 		{
 			this._cacheBuster = getUuid();
+			await this._storage.update("taskexplorer.cacheBuster", this._cacheBuster);
 			promiseUtils.oneTimeEvent(this.onReady)(() =>
 			{
 				if (!this.isNewInstall) {
-					this.releaseNotesPage.show();
+					this._releaseNotesPage.show();
 				}
 				else {
 					/* TODO - Show Welcome page */
+					this._licensePage.show();
 				}
 			});
 		}

@@ -11,7 +11,7 @@
  */
 
 import { AuthenticationSession } from "vscode";
-import { IDictionary, ITeTask, TeTaskListType, ISessionToken } from "../../../types/lib";
+import { IDictionary, ITeTask, TeTaskListType, ITeAccount } from "../../interface";
 
 export interface BaseState
 {
@@ -19,9 +19,8 @@ export interface BaseState
 	isLicensed: boolean;
 	isRegistered: boolean;
 	isTrial: boolean;
-	license?: ISessionToken;
+	account: ITeAccount;
 	nonce: string;
-	session?: AuthenticationSession;
 	webroot: string;
 }
 
@@ -34,9 +33,9 @@ export interface IIpcMessage {
 	completionId?: string;
 }
 
-abstract class IpcMessage<Params = void>
+abstract class IpcMessage<IpcParams = void>
 {
-	_?: Params; // Required for type inferencing to work properly
+	_?: IpcParams; // Required for type inferencing to work properly
 	constructor(public readonly method: string, public readonly overwriteable: boolean = false) {}
 }
 
@@ -46,13 +45,13 @@ export type IpcMessageParams<T> = T extends IpcMessage<infer P> ? P : never;
  * @class IpcCommand
  * Commands Types:  Webview -> Extension
  */
-export class IpcCommand<Params = void> extends IpcMessage<Params> {}
+export class IpcCommand<IpcParams = void> extends IpcMessage<IpcParams> {}
 
 /**
  * @class IpcNotification
  * Notification Types: Extension -> Webview
  */
-export class IpcNotification<Params = void> extends IpcMessage<Params> {}
+export class IpcNotification<IpcParams = void> extends IpcMessage<IpcParams> {}
 
 export const onIpc = <T extends IpcMessage<any>>(type: T, msg: IIpcMessage, fn: (params: IpcMessageParams<T>, type: T) => unknown) =>
 	fn(msg.params as IpcMessageParams<T>, type);
@@ -104,7 +103,7 @@ export interface IpcEnabledChangedParams
 }
 
 export interface IpcLicenseChangedParams {
-	license?: ISessionToken;
+	account?: ITeAccount;
 	session?: AuthenticationSession;
 	isLicensed: boolean;
 }
@@ -125,38 +124,36 @@ export const IpcStateChangedMsg = new IpcNotification<IpcStateChangedParams>("st
 // TASK MONITOR APP
 //
 
-export interface IIpcTask extends ITeTask {};
-export type IIpcTaskListType = TeTaskListType;
-export interface IIpcDictionary<T> extends IDictionary<T> {};
+export type { ITeTask, TeTaskListType };
 export type IMonitorAppTimerMode = "Hide" | "MM:SS" | "MM:SS:MS"  | "MM:SS:MSS";
 
 export interface MonitorAppState extends State
 {
-	famous: IIpcTask[];
-	favorites: IIpcTask[];
-	last: IIpcTask[];
+	famous: ITeTask[];
+	favorites: ITeTask[];
+	last: ITeTask[];
 	menuVisible?: boolean;
-	running: IIpcTask[];
-	tasks: IIpcTask[];
+	running: ITeTask[];
+	tasks: ITeTask[];
 	timerMode: IMonitorAppTimerMode;
 	pinned: {
-		last: IIpcTask[];
-		favorites: IIpcTask[];
-		famous: IIpcTask[];
-		running: IIpcTask[];
+		last: ITeTask[];
+		favorites: ITeTask[];
+		famous: ITeTask[];
+		running: ITeTask[];
 	};
 }
 
 export interface MonitorAppSerializedState extends MonitorAppState {}
 
-export interface IpcTaskChangedParams { task: IIpcTask; list?: IIpcTaskListType };
-export interface IpcTasksChangedParams { tasks: IIpcTask[]; list: IIpcTaskListType };
+export interface IpcTaskChangedParams { task: ITeTask; list?: TeTaskListType };
+export interface IpcTasksChangedParams { tasks: ITeTask[]; list: TeTaskListType };
 
 export const IpcTasksChangedMsg = new IpcNotification<IpcTasksChangedParams>("tasks/change");
 export const IpcTaskChangedMsg = new IpcNotification<IpcTaskChangedParams>("tasks/change/status");
 
 interface IDebounceParams { fn: (...args: any[]) => any; start: number; args: any[] }
-const _debounceDict: IIpcDictionary<IDebounceParams> = {};
+const _debounceDict: IDictionary<IDebounceParams> = {};
 export const debounce = <T>(fn: (...args: any[]) => T, wait: number, ...args: any[]) => new Promise<T|void>(async(resolve) =>
 {
 	if (!_debounceDict[fn.name])

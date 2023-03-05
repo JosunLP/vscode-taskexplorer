@@ -261,13 +261,12 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected async getState(): Promise<BaseState>
 	{
 		return {
+			account: await this.wrapper.licenseManager.getAccount(),
 			isEnabled: this.wrapper.views.taskExplorer.enabled || this.wrapper.views.taskExplorerSideBar.enabled,
 			isLicensed: this.wrapper.licenseManager.isLicensed,
 			isRegistered: this.wrapper.licenseManager.isRegistered,
 			isTrial: this.wrapper.licenseManager.isTrial,
-			license: await this.wrapper.licenseManager.getLicenseToken(),
 			nonce: this._cspNonce,
-			session: await this.wrapper.licenseManager.getSession(),
 			webroot: this.getWebRoot() as string
 		};
 	}
@@ -363,7 +362,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	{
 		const state = await this.getState();
 		return this.notify(IpcStateChangedMsg, Object.assign(state as any, {
-			license: e.token
+			license: e.added[0]
 		}));
 	};
 

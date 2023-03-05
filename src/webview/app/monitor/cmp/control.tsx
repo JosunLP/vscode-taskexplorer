@@ -3,22 +3,22 @@
 import React from "react";
 import { TeTaskButton } from "./button";
 import { TeReactTaskTimer } from "./timer";
-import { IIpcTask, IMonitorAppTimerMode } from "../../../common/ipc";
+import { ITeTask, IMonitorAppTimerMode } from "../../../common/ipc";
 
 interface ReactState
 {
     animateChangedTimeIcons: boolean;
-	task: IIpcTask;
+	task: ITeTask;
 }
 
 interface ReactSerializedState extends ReactState {}
 
 interface ReactProps
 {
-    task: IIpcTask;
+    task: ITeTask;
     webroot: string;
     timerMode: IMonitorAppTimerMode;
-    executeCommand: (command: string, task: IIpcTask) => void;
+    executeCommand: (command: string, task: ITeTask) => void;
     log: (message: string, ...optionalParams: any[]) => void;
 }
 
@@ -28,7 +28,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
     private counter = 0;
     private animationTimeout: NodeJS.Timeout | undefined;
     private log: (message: string, ...optionalParams: any[]) => void;
-    private executeCommand: (command: string, task: IIpcTask) => void;
+    private executeCommand: (command: string, task: ITeTask) => void;
 
 
     constructor(props: ReactProps)
@@ -341,7 +341,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
     };
 
 
-    setTask = (task: IIpcTask) => this.setState(_state =>
+    setTask = (task: ITeTask) => this.setState(_state =>
     {
         this.log(`TeTaskControl.setTask: id=${task.treeId}`);
         this.startTimeChangeTimeout();

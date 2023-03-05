@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { Task } from "vscode";
-
 export interface TeSessionChangeEvent
 {
     added: ITeSession[];
@@ -29,13 +27,22 @@ export const enum TeLicenseType
 
 export interface ITeLicense
 {
-	type: TeLicenseType;
 	paid: boolean;
+	state: TeLicenseState;
+	type: TeLicenseType;
 	readonly id: number;
     readonly key: string;
 	readonly issued: number;
 	readonly expires: number;
 	readonly expired: boolean;
+	readonly period: 0 | 1 | 2; // 2 indicates that extended trial was already requested/used
+}
+
+export const enum TeLicenseState
+{
+	Trial =  0,
+	Free = 1,
+	Paid = 2
 }
 
 export interface ITeAccount
@@ -45,10 +52,10 @@ export interface ITeAccount
 	readonly email: string;
 	readonly firstName: string;
 	readonly lastName: string;
-    readonly license: ITeLicense;
 	readonly name: string;
 	readonly orgId: number;
 	readonly trialId: number;
+    license: ITeLicense;
     session: ITeSession;
 	verified: boolean;
 	verificationPending: boolean;
@@ -59,6 +66,7 @@ export interface ITeLicenseManager
     isLicensed: boolean;
     isRegistered: boolean;
     checkLicense(logPad: string): Promise<void>;
+	getAccount(): Thenable<ITeAccount>;
     getMaxNumberOfTasks: (taskType?: string | undefined) => number;
     getMaxNumberOfTaskFiles: () => number;
 }

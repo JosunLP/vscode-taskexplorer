@@ -2,7 +2,7 @@
 
 import React from "react";
 import { TeTaskControl } from "./control";
-import { IIpcTask, IMonitorAppTimerMode } from "../../../common/ipc";
+import { ITeTask, IMonitorAppTimerMode } from "../../../common/ipc";
 
 interface ControlRefs
 {
@@ -12,14 +12,14 @@ interface ControlRefs
 interface ReactProps
 {
     name: string;
-    tasks: IIpcTask[];
+    tasks: ITeTask[];
     webroot: string;
     timerMode: IMonitorAppTimerMode;
-    executeCommand: (command: string, task: IIpcTask) => void;
+    executeCommand: (command: string, task: ITeTask) => void;
     log: (message: string, ...optionalParams: any[]) => void;
 }
 
-interface ReactState { tasks: IIpcTask[] }
+interface ReactState { tasks: ITeTask[] }
 
 interface ReactSerializedState extends ReactState {}
 
@@ -54,7 +54,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
         this.log(`TeTaskTab.${this.name}.render: task count=${this.state.tasks.length}`);
         this.controlRefs = {};
         this.children.splice(0);
-        this.state.tasks.forEach((t: IIpcTask) =>
+        this.state.tasks.forEach((t: ITeTask) =>
         {
             this.controlRefs[t.treeId] = React.createRef<TeTaskControl>();
             this.children.push(
@@ -73,7 +73,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
     }
 
 
-    setTask = (task: IIpcTask) =>
+    setTask = (task: ITeTask) =>
     {
         this.log(`TeTaskTab.${this.name}.setTask: id=${task.treeId}`);
         if (this.name !== "running")
@@ -114,7 +114,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
     };
 
 
-    setTasks = (tasks: IIpcTask[]) => this.setState({ tasks });
+    setTasks = (tasks: ITeTask[]) => this.setState({ tasks });
 
 
     override shouldComponentUpdate = (nextProps: ReactProps, nextState: ReactState) =>

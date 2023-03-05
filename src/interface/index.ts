@@ -29,4 +29,4 @@ export type { ITeUsage, ITaskRuntimeInfo, ITeTrackedUsage, ITeUsageChangeEvent, 
 export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType } from "./ITeTask";
 export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, PromiseAdapter } from "./ITeUtilities";
 
-export { TeLicenseType } from "./ITeLicenseManager";
+export { TeLicenseState, TeLicenseType } from "./ITeLicenseManager";
