@@ -5,6 +5,7 @@ import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
 import { IDictionary } from "../interface";
+import { ConfigKeys } from "src/lib/constants";
 import { SpecialTaskFolder } from "./specialFolder";
 
 
@@ -15,7 +16,7 @@ export class TaskTreeGrouper
 
     buildGroupings = async(folders: IDictionary<TaskFolder|SpecialTaskFolder>, logPad: string, logLevel: number) =>
     {
-        const groupWithSep = this.wrapper.config.get<boolean>("groupWithSeparator");
+        const groupWithSep = this.wrapper.config.get<boolean>(ConfigKeys.GroupWithSeperator);
         this.wrapper.log.methodStart("build tree node groupings", logLevel, logPad, false, [[ "group withseparator", groupWithSep ]]);
         //
         // Sort nodes.  By default the project folders are sorted in the same order as that

@@ -24,6 +24,7 @@ export const Strings =
 export const ConfigKeys =
 {
     EnablePersistenFileCache: "enablePersistentFileCaching",
+    GroupWithSeperator: "groupWithSeparator",
 	SpecialFolders_NumLastTasks: "specialFolders.numLastTasks",
     TaskMonitor_TimerMode: "taskMonitor.timerMode"
 };

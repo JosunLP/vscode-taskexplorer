@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { expect } from "chai";
+import { ConfigKeys } from "../../lib/constants";
 import { executeSettingsUpdate, executeTeCommand } from "./commandUtils";
 import { sleep, testControl as tc, waitForTeIdle } from "./utils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
@@ -96,7 +97,7 @@ export const refresh = async(instance?: any) =>
         if (!didSetGroupLevel)
         {
             // utils.getTeApi().testsApi.enableConfigWatcher(false);
-            await executeSettingsUpdate("groupWithSeparator", true, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(ConfigKeys.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
             await executeSettingsUpdate("groupMaxLevel", 5, tc.waitTime.config.groupingEvent);
             // utils.getTeApi().testsApi.enableConfigWatcher(true);
             didSetGroupLevel = true;

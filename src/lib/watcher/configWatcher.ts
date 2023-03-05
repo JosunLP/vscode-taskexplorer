@@ -2,11 +2,11 @@
 
 import { TeWrapper } from "../wrapper";
 import { ContextKeys } from "../context";
+import { ConfigKeys } from "../constants";
 import { Commands, executeCommand } from "../command/command";
 import { IDictionary, ITeConfigWatcher } from "../../interface";
 import { getScriptTaskTypes, getTaskTypeRealName } from "../utils/taskUtils";
 import { ConfigurationChangeEvent, workspace, window, Disposable } from "vscode";
-import { ConfigKeys } from "../constants";
 
 
 export class TeConfigWatcher implements ITeConfigWatcher, Disposable
@@ -117,11 +117,11 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
             //
             // Groupings changes require global refresh
             //
-            if (e.affectsConfiguration("taskexplorer.groupWithSeparator") || e.affectsConfiguration("taskexplorer.groupSeparator") ||
+            if (e.affectsConfiguration(`taskexplorer.${ConfigKeys.GroupWithSeperator}`) || e.affectsConfiguration("taskexplorer.groupSeparator") ||
                 e.affectsConfiguration("taskexplorer.groupMaxLevel") || e.affectsConfiguration("taskexplorer.groupStripTaskLabel"))
             {
                 this.wrapper.log.write("   A tree grouping setting has changed", 1);
-                this.wrapper.log.value("      groupWithSeparator changed", this.wrapper.config.get<boolean>("groupWithSeparator"), 1);
+                this.wrapper.log.value("      groupWithSeparator changed", this.wrapper.config.get<boolean>(ConfigKeys.GroupWithSeperator), 1);
                 this.wrapper.log.value("      groupSeparator changed", this.wrapper.config.get<boolean>("groupSeparator"), 1);
                 this.wrapper.log.value("      groupMaxLevel changed", this.wrapper.config.get<boolean>("groupMaxLevel"), 1);
                 this.wrapper.log.value("      groupStripTaskLabel changed", this.wrapper.config.get<boolean>("groupStripTaskLabel"), 1);
