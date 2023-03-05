@@ -7,6 +7,9 @@ import { request } from "https";
 import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
+import { env } from "vscode";
+
+const DEV_ENV_USE_LOCAL_SERVER = true;
 
 export interface ServerError extends Error
 {
@@ -42,14 +45,10 @@ export class TeServer
 
 	private getApiClientId = () =>
 	{
-		switch (this.wrapper.env)
-		{
-			case "dev":
-				return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
-			case "tests":
-			case "production":
-				return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
+		if (this.wrapper.env === "dev" && DEV_ENV_USE_LOCAL_SERVER) {
+			return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
 		}
+		return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 	};
 
 
@@ -58,7 +57,7 @@ export class TeServer
 		switch (this.wrapper.env)
 		{
 			case "dev":
-				return 485;
+				return DEV_ENV_USE_LOCAL_SERVER ? 485 : 443;
 			case "tests":
 			case "production":
 				return 443;
@@ -71,12 +70,24 @@ export class TeServer
 		switch (this.wrapper.env)
 		{
 			case "dev":
-				return "localhost";
-				// return "license.spmeesseman.com";
+				return DEV_ENV_USE_LOCAL_SERVER ? "localhost" : "license.spmeesseman.com";
 			case "tests":
 				return "license.spmeesseman.com"; // "test.spmeesseman.com"
 			case "production":
 				return "license.spmeesseman.com"; // "app.spmeesseman.com"
+		}
+	};
+
+
+	private getAuthService = () =>
+	{
+		switch (this.wrapper.env)
+		{
+			case "dev":
+				return "vscode-taskexplorer";
+			case "tests":
+			case "production":
+				return "vscode-taskexplorer-prod";
 		}
 	};
 
@@ -159,17 +170,17 @@ export class TeServer
 	};
 
 
-	request = async <T>(endpoint: ITeApiEndpoint, logPad: string, params: any) =>
+	request = async <T>(endpoint: ITeApiEndpoint, logPad: string, params?: any) =>
 	{
 		return Promise.race<T>(
 		[
-			this._request<T>(endpoint, params, logPad),
+			this._request<T>(endpoint, logPad, params),
 			new Promise<T>(reject => setTimeout(reject, this._maxConnectionTime, new ServerError("Timed out", 408)))
 		]);
 	};
 
 
-    private _request = <T>(endpoint: ITeApiEndpoint, params: any, logPad: string) =>
+    private _request = <T>(endpoint: ITeApiEndpoint, logPad: string, params?: any) =>
 	{
 		this._busy = true;
 
@@ -218,7 +229,8 @@ export class TeServer
 				reject(e);
 			});
 
-			req.write(JSON.stringify(params), () =>
+			const payload = JSON.stringify({ ...(params || {}), appName: this.getAuthService(), machineId: env.machineId });
+			req.write(payload, () =>
             {
 				this.log("   output stream written, ending request and waiting for response...", logPad);
 				req.end();

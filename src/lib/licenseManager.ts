@@ -4,7 +4,7 @@ import { ITeApiEndpoint, ServerError } from "./server";
 import { StorageKeys } from "./constants";
 import { isScriptType } from "./utils/taskUtils";
 import { executeCommand, registerCommand, Commands } from "./command/command";
-import { Disposable, env, Event, EventEmitter, InputBoxOptions, window } from "vscode";
+import { Disposable, Event, EventEmitter, InputBoxOptions, window } from "vscode";
 import {
 	 ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeSession, ITeTaskChangeEvent,
 	 ITeLicense, TeLicenseState
@@ -78,11 +78,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad + "   ",
-			{
-				machineId: env.machineId,
-				appName: this.getAuthService()
-			});
+			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad + "   ");
 			await this.saveAccount(logPad + "   ");
 			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.");
 		}
@@ -99,7 +95,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._errorState = false;
 
 		this.wrapper.statusBar.update("Checking license");
-		this.wrapper.log.methodStart("license manager check license", 1, logPad, false, [[ "machine id", env.machineId ]]);
+		this.wrapper.log.methodStart("license manager check license", 1, logPad);
 
 		this._account = await this.getAccount();
 
@@ -224,9 +220,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this._account.license = await this.wrapper.server.request<ITeLicense>(ep, logPad,
 			{
 				ttl: 30,
-				appId: env.machineId,
-				machineId: env.machineId,
-				appName: this.getAuthService(),
 				ip: "*",
 				json: true,
 				license: true,
@@ -242,19 +235,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.statusBar.update("");
 		this.wrapper.log.methodDone("request extended trial", 1, logPad);
 		return token;
-	};
-
-
-	private getAuthService = () =>
-	{
-		switch (this.wrapper.env)
-		{
-			case "dev":
-				return "vscode-taskexplorer";
-			case "tests":
-			case "production":
-				return "vscode-taskexplorer-prod";
-		}
 	};
 
 
@@ -377,12 +357,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("validate license", 1, logPad);
 		try
 		{
-			this._account.session = await this.wrapper.server.request<ITeSession>(ep, logPad,
-			{
-				key,
-				machineId: env.machineId,
-				appName: this.getAuthService()
-			});
+			this._account.session = await this.wrapper.server.request<ITeSession>(ep, logPad, { key });
 			await this.saveAccount("   ");
 			this.wrapper.statusBar.update("");
 		}
