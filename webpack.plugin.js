@@ -285,6 +285,7 @@ const wpPlugin =
 			filename: path.posix.join(__dirname, "res", "page", `${wwwName}.html`),
 			inject: true,
 			inlineSource: wpConfig.mode === "production" ? ".css$" : undefined,
+			// inlineSource: undefined,
 			scriptLoading: "module",
 			template: path.posix.join(name, `${wwwName}.html`),
 			minify: wpConfig.mode !== "production" ? false :
@@ -354,7 +355,8 @@ const wpPlugin =
 		let plugin;
 		if (env.build === "webview")
 		{
-			plugin = new InlineChunkHtmlPlugin(HtmlPlugin, wpConfig.mode === "production" ? ["\\.css$"] : []);
+			// plugin = new InlineChunkHtmlPlugin(HtmlPlugin, wpConfig.mode === "production" ? ["\\.css$"] : []);
+			plugin = new InlineChunkHtmlPlugin(HtmlPlugin, []);
 		}
 		if (!plugin) {
 			plugin = /** @type {InlineChunkHtmlPlugin} */(/** @type {unknown} */(undefined));
