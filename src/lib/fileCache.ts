@@ -7,7 +7,7 @@ import * as taskTypeUtils from "./utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "./utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
 import { workspace, RelativePattern, WorkspaceFolder, Uri } from "vscode";
-import { ConfigKeys } from "./constants";
+import { ConfigKeys, StorageKeys } from "./constants";
 
 
 export class TeFileCache implements ITeFileCache
@@ -51,9 +51,9 @@ export class TeFileCache implements ITeFileCache
     {
         await this.startBuild();
         this.wrapper.statusBar.update("Loading tasks from file cache...");
-        this.taskFilesMap = await this.wrapper.storage.get2<IDictionary<ICacheItem[]>>("fileCacheTaskFilesMap", {});
-        this.projectFilesMap = await this.wrapper.storage.get2<IDictionary<IDictionary<string[]>>>("fileCacheProjectFilesMap", {});
-        this.projectToFileCountMap = await this.wrapper.storage.get2<IDictionary<IDictionary<number>>>("fileCacheProjectFileToFileCountMap", {});
+        this.taskFilesMap = await this.wrapper.storage.get2<IDictionary<ICacheItem[]>>(StorageKeys.FileCacheTaskFilesMap, {});
+        this.projectFilesMap = await this.wrapper.storage.get2<IDictionary<IDictionary<string[]>>>(StorageKeys.FileCacheProjectFilesMap, {});
+        this.projectToFileCountMap = await this.wrapper.storage.get2<IDictionary<IDictionary<number>>>(StorageKeys.FileCacheProjectFileToFileCountMap, {});
         await this.finishBuild(true);
     };
 
@@ -516,16 +516,16 @@ export class TeFileCache implements ITeFileCache
         {
             const text = this.wrapper.statusBar.get();
             this.wrapper.statusBar.update("Persisting file cache...");
-            this.wrapper.storage.update2Sync("fileCacheTaskFilesMap", this.taskFilesMap);
-            this.wrapper.storage.update2Sync("fileCacheProjectFilesMap", this.projectFilesMap);
-            this.wrapper.storage.update2Sync("fileCacheProjectFileToFileCountMap", this.projectToFileCountMap);
+            this.wrapper.storage.update2Sync(StorageKeys.FileCacheTaskFilesMap, this.taskFilesMap);
+            this.wrapper.storage.update2Sync(StorageKeys.FileCacheProjectFilesMap, this.projectFilesMap);
+            this.wrapper.storage.update2Sync(StorageKeys.FileCacheProjectFileToFileCountMap, this.projectToFileCountMap);
             this.wrapper.statusBar.update(text);
         }
         else if (clear === true)
         {
-            this.wrapper.storage.update2Sync("fileCacheTaskFilesMap", undefined);
-            this.wrapper.storage.update2Sync("fileCacheProjectFilesMap", undefined);
-            this.wrapper.storage.update2Sync("fileCacheProjectFileToFileCountMap", undefined);
+            this.wrapper.storage.update2Sync(StorageKeys.FileCacheTaskFilesMap, undefined);
+            this.wrapper.storage.update2Sync(StorageKeys.FileCacheProjectFilesMap, undefined);
+            this.wrapper.storage.update2Sync(StorageKeys.FileCacheProjectFileToFileCountMap, undefined);
         }
     };
 

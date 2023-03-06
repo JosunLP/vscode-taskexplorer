@@ -225,7 +225,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this.log.methodStart("app wrapper init", 1, "", false, [
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
-		await this.storage.update("taskexplorer.version", this._version);
+		await this.storage.update(StorageKeys.Version, this._version);
 		//
 		// Register global commands
 		//
@@ -249,8 +249,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this.registerContextMenuCommands();
 		await this._teContext.setContext(ContextKeys.Debugging, this.debugging);
 		await this._teContext.setContext(ContextKeys.Tests, this.tests);
-        await this._teContext.setContext(ContextKeys.Enabled, this.config.get<boolean>("enableSideBar") ||
-                   /* istanbul ignore next */ this.config.get<boolean>("enableExplorerView"));
+        await this._teContext.setContext(ContextKeys.Enabled, this.utils.isTeEnabled());
 		//
 		// Signal we are ready/done
 		//

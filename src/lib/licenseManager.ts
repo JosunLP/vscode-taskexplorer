@@ -124,7 +124,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private displayPopup = async (message = "Purchase a license to unlock unlimited parsed tasks.", logPad: string): Promise<void> =>
 	{
-		const lastNag = this.wrapper.storage.get<string>("taskexplorer.lastLicenseNag");
+		const lastNag = this.wrapper.storage.get<string>(StorageKeys.LastLicenseNag);
 		this.wrapper.log.methodStart("license manager display popup", 1, logPad, false, [[ "last nag", lastNag ]]);
 
 		//
@@ -145,7 +145,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			if (this._account.license.type !== TeLicenseType.TrialExtended && this._account.license.type !== TeLicenseType.Free) {
 				options.push("Extend Trial");
 			}
-			await this.wrapper.storage.update("taskexplorer.lastLicenseNag", Date.now().toString());
+			await this.wrapper.storage.update(StorageKeys.LastLicenseNag, Date.now().toString());
 			window.showInformationMessage(message, ...options)
 			.then(async (action) =>
 			{

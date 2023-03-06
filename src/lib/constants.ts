@@ -36,7 +36,7 @@ export const ConfigKeys =
 	SpecialFolders_NumLastTasks: "specialFolders.numLastTasks",
     TaskMonitor_TimerMode: "taskMonitor.timerMode",
     TaskMonitor_TrackStats: "taskMonitor.trackStats",
-    TrackUsage: "taskMonitor.trackUsage"
+    TrackUsage: "trackUsage"
 };
 
 export const Globs: IDictionary<string> =
@@ -70,6 +70,11 @@ export const StorageKeys =
 {
     Account: "taskexplorer.account",
     CacheBuster: "taskexplorer.cacheBuster",
+    FileCacheProjectFilesMap: "fileCacheProjectFilesMap",
+    FileCacheProjectFileToFileCountMap: "fileCacheProjectFileToFileCountMap",
+    FileCacheTaskFilesMap: "fileCacheTaskFilesMap",
+    LastLicenseNag: "taskexplorer.lastLicenseNag",
 	TaskUsage: "taskexplorer.taskUsage",
-	Usage: "taskexplorer.usage"
+	Usage: "taskexplorer.usage",
+    Version: "taskexplorer.version"
 };
