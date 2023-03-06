@@ -134,6 +134,7 @@ export interface MonitorAppState extends State
 	famous: ITeTask[];
 	favorites: ITeTask[];
 	last: ITeTask[];
+	loadMaskVisible?: boolean;
 	menuVisible?: boolean;
 	running: ITeTask[];
 	tasks: ITeTask[];

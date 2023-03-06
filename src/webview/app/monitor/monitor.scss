@@ -39,6 +39,44 @@ button {
 	}
 }
 
+#te-monitor-load-mask-id {
+	width: 280px;
+  	height: 280px;
+	background-color: transparent;
+	position: fixed;
+	top: calc(50vh - 140px);
+	left: calc(50vw - 140px);
+	transition: transform .3s
+				cubic-bezier(0, .52, 0, 1);
+	overflow: scroll;
+	z-index: 1000;
+	opacity: 0.4;
+	line-height: 250px;
+	vertical-align: middle;
+}
+
+#te-monitor-load-mask-id::before {
+    content: "";
+	font-size: 230px;
+}
+
+
+#te-monitor-load-mask-id.hide {
+	visibility: none;
+	transform: translate3d(100vw, 0, 0);
+}
+   
+#te-monitor-load-mask-id.show {
+	transform: translate3d(0, 0, 0);
+	visibility: visible;
+	overflow: hidden;
+}
+
+.te-tab-container-loading {
+	font-size: 230px;
+	margin-top: 25px;
+}
+
 #te-monitor-flyout-menu-id {
 	width: 270px;
   	height: 295px;
@@ -154,6 +192,10 @@ button {
 
 .te-tsx-root-container.te-tsx-monitor-root-container {
     opacity: 1
+}
+
+.te-tab-container {
+	opacity: 1
 }
 
 .te-tab-all:before  {

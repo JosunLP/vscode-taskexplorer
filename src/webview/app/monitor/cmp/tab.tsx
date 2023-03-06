@@ -48,10 +48,8 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
     }
 
 
-    override render()
+    private getChildren = () =>
     {
-        this.rendered = true;
-        this.log(`TeTaskTab.${this.name}.render: task count=${this.state.tasks.length}`);
         this.controlRefs = {};
         this.children.splice(0);
         this.state.tasks.forEach((t: ITeTask) =>
@@ -70,6 +68,18 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSeri
             );
         });
         return this.children;
+    };
+
+
+    override render()
+    {
+        this.rendered = true;
+        this.log(`TeTaskTab.${this.name}.render: task count=${this.state.tasks.length}`);
+        return (
+            <div className="te-tab-container">
+                {this.getChildren()}
+            </div>
+        );
     }
 
 

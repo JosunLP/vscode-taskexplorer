@@ -2,6 +2,7 @@
 import React from "react";
 import { AppMenu } from "./menu";
 import { TeTaskTab } from "./tab";
+import { AppLoadMask } from "./loadMask";
 import { AppMenuButton } from "./menuButton";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import {
@@ -38,6 +39,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     {
         super(props);
         this.log = props.log;
+        this.log("App.constructor");
         this.tabs = {
             all: React.createRef<TeTaskTab>(),
             famous: React.createRef<TeTaskTab>(),
@@ -46,7 +48,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
             running: React.createRef<TeTaskTab>()
         };
         this.state = {
-            ...props.state
+            ...props.state, ...{ loadMaskVisible: true }
         };
     }
 
@@ -68,15 +70,34 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
 
     private onTabSelected = (index: number, lastIndex: number) =>
     {
-        this.log(`onTabSelected: index=${index}: lastIndex=${lastIndex}`);
+        this.log(`App.onTabSelected: index=${index}: lastIndex=${lastIndex}`);
     };
+
+
+    override componentDidMount(): void
+    {
+        this.log("App.componentDidMount");
+        queueMicrotask(() => this.setState({ loadMaskVisible: false }));
+    }
+
+
+    override componentDidUpdate(_prevProps: Readonly<ReactProps>, _prevState: Readonly<MonitorAppState>, _snapshot?: MonitorAppSerializedState | undefined): void
+    {
+        this.log("App.componentDidUpdate");
+        queueMicrotask(() => this.setState({ loadMaskVisible: false }));
+    }
 
 
     override render = () =>
     {
+        this.log("App.render");
         return (
             <div className="te-tabs-container" onMouseDown={this.handleMouseDown}>
                 <Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
+                    <AppLoadMask
+                        log={this.log}
+                        maskVisibility={!!this.state.loadMaskVisible}
+                    />
                     <AppMenuButton
                         handleMouseDown={this.handleMenuMouseDown.bind(this)}
                     />
@@ -166,7 +187,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     };
 
 
-    setTasks = (listType: TeTaskListType, tasks: ITeTask[]) => void this.tabs[listType]?.current?.setTasks(tasks);
+    setTasks = (listType: TeTaskListType, tasks: ITeTask[]) => this.tabs[listType]?.current?.setTasks(tasks);
 
 
     setTimerMode = (mode: IMonitorAppTimerMode) => { if (this.state.timerMode !== mode) { this.setState({ timerMode: mode }); }};
