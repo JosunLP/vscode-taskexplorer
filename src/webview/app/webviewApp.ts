@@ -24,6 +24,7 @@ export abstract class TeWebviewApp<State = undefined>
 	protected onBind?(): Disposable[];
 	protected onDataActionClicked?(e: MouseEvent, target: HTMLElement): void;
 	protected onInitialized?(): void;
+	protected onFocusChanged?(focused: boolean): void;
 	protected onMessageReceived?(e: MessageEvent): void;
 	protected state: State;
 
@@ -137,7 +138,10 @@ export abstract class TeWebviewApp<State = undefined>
 				{
 					this._focused = true;
 					this._inputFocused = inputFocused;
-					debounce(p => this.sendCommand(IpcFocusChangedCommand, p), 150, { focused: true, inputFocused });
+					debounce(p => {
+						this.onFocusChanged?.(true);
+						this.sendCommand(IpcFocusChangedCommand, p);
+					}, 150, { focused: true, inputFocused });
 				}
 			}),
 			DOM.on(document, "focusout", () =>
@@ -145,7 +149,10 @@ export abstract class TeWebviewApp<State = undefined>
 				if (this._focused !== false || this._inputFocused !== false)
 				{
 					this._focused = this._inputFocused = false;
-					debounce(p => this.sendCommand(IpcFocusChangedCommand, p), 150, { focused: false, inputFocused: false });
+					debounce(p => {
+						this.onFocusChanged?.(false);
+						this.sendCommand(IpcFocusChangedCommand, p);
+					}, 150, { focused: false, inputFocused: false });
 				}
 			})
 		);
@@ -208,6 +215,7 @@ export abstract class TeWebviewApp<State = undefined>
 	{
 		const id = this.nextIpcId();
 		this.log(`Base.sendCommand(${id}): command=${command.method}`, 1);
+		this.log(`                       : message=${JSON.stringify(params)}`, 2);
 		this.postMessage({ id, method: command.method, params });
 	}
 

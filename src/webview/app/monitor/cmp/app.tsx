@@ -54,16 +54,35 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     }
 
 
-    handleBodyMouseDown = (e: MouseEvent) =>
+    override componentDidMount = (): void => this.hideMask();
+
+
+    override componentDidUpdate = (): void => this.hideMask();
+
+
+    handleFocusChanged = (focused: boolean): void  =>
     {
-        this.log("App.onBodyMouseDown", 2);
-        if (this.state.menuVisible && e.clientY > 300 && e.clientX < screen.availWidth - 300) {
+        if (!focused && this.state.menuVisible) {
             this.toggleMenu();
         }
     };
 
 
-    private handleMouseDown = (_e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+    handleBodyMouseDown = (e: MouseEvent): void  =>
+    {
+        if (this.state.menuVisible)
+        {
+            const menuEl = document.getElementById("te-monitor-flyout-menu-id");
+            if (menuEl) {
+                if (e.clientY > menuEl.clientHeight && e.clientX < screen.availWidth - menuEl.clientWidth) {
+                    this.toggleMenu();
+                }
+            }
+        }
+    };
+
+
+    private handleMouseDown = (_e: React.MouseEvent<HTMLElement, MouseEvent>): void  =>
     {
         if (this.state.menuVisible) {
             this.toggleMenu();
@@ -71,36 +90,20 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     };
 
 
-    private handleMenuMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+    private handleMenuMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent>): void  =>
     {
         this.toggleMenu();
         e.stopPropagation();
     };
 
 
-    private onTabSelected = (index: number, lastIndex: number) =>
-    {
-        this.log(`App.onTabSelected: index=${index}: lastIndex=${lastIndex}`, 2);
-    };
+    private hideMask = (): void => { if (this.state.loadMaskVisible) setTimeout((s) => this.setState(s), 100, { loadMaskVisible: false }); };
 
 
-    override componentDidMount(): void
-    {
-        this.log("App.componentDidMount", 1);
-        setTimeout((s) => this.setState(s), 50, { loadMaskVisible: false });
-    }
+    private onTabSelected = (idx: number, lstIdx: number): void => this.log(`App.onTabSelected: idx=${idx}: lstIdx=${lstIdx}`, 2);
 
 
-    override componentDidUpdate(_prevProps: Readonly<ReactProps>, _prevState: Readonly<MonitorAppState>, _snapshot?: MonitorAppSnapShot | undefined): void
-    {
-        this.log(`App.componentDidUpdate: maskvisible = ${this.state.loadMaskVisible}`, 1);
-        if (this.state.loadMaskVisible) {
-            queueMicrotask(() => this.setState({ loadMaskVisible: false }));
-        }
-    }
-
-
-    override render = () =>
+    override render = (): JSX.Element =>
     {
         this.log("App.render", 1);
         return (
@@ -189,7 +192,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     };
 
 
-    setTask = (task: ITeTask) =>
+    setTask = (task: ITeTask): void  =>
     {
         this.tabs.all.current?.setTask(task);
         this.tabs.famous.current?.setTask(task);
@@ -199,12 +202,12 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     };
 
 
-    setTasks = (listType: TeTaskListType, tasks: ITeTask[]) => this.tabs[listType]?.current?.setTasks(tasks);
+    setTasks = (listType: TeTaskListType, tasks: ITeTask[]): void  => void this.tabs[listType]?.current?.setTasks(tasks);
 
 
-    setTimerMode = (mode: IMonitorAppTimerMode) => { if (this.state.timerMode !== mode) { this.setState({ timerMode: mode }); }};
+    setTimerMode = (mode: IMonitorAppTimerMode): void  => { if (this.state.timerMode !== mode) { this.setState({ timerMode: mode }); }};
 
 
-    toggleMenu = () => this.setState(state => ({ menuVisible: !state.menuVisible }));
+    toggleMenu = (): void  => this.setState(state => ({ menuVisible: !state.menuVisible }));
 
 }

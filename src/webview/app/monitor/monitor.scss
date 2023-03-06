@@ -50,8 +50,6 @@ html {
 	position: fixed;
 	top: 0;
 	left: 0;
-	// transition: transform .3s
-	// 			cubic-bezier(0, .52, 0, 1);
 	overflow: scroll;
 	z-index: 1000;
 	flex: 1;
@@ -67,11 +65,9 @@ html {
 #te-monitor-load-mask-id.hide {
 	visibility: none;
 	left: 100vw;
-	// transform: translate3d(100vw, 0, 0);
 }
    
 #te-monitor-load-mask-id.show {
-	// transform: translate3d(0, 0, 0);
 	visibility: visible;
 	overflow: hidden;
 	left: 0;

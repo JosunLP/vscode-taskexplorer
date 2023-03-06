@@ -60,6 +60,9 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
+	protected override onFocusChanged = (focused: boolean): void => void this.appRef.current?.handleFocusChanged(focused);
+
+
 	protected override onInitialize = (): void =>
 	{
 		this.log("onInitialize", 1);
@@ -78,10 +81,11 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
     protected override onBind = (): Disposable[] =>
     {
-		this.log("onBind", 1);
-		const disposables = [],
-			  rootEl = document.getElementById("root") as HTMLElement,
+		const rootEl = document.getElementById("root") as HTMLElement,
 			  root = createRoot(rootEl);
+
+		this.log("onBind", 1);
+
         root.render(
 			<App
 				ref={this.appRef}
@@ -91,11 +95,11 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				updateConfig={this.executeUpdateConfig.bind(this)}
 			/>
         );
-        disposables.push(
+
+        return [
 			DOM.on(rootEl, "mousedown", this.onBodyMouseDown.bind(this)),
 			{ dispose: () => root.unmount() }
-		);
-		return disposables;
+		];
 	};
 
 
@@ -136,7 +140,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
-	private onBodyMouseDown = (e: MouseEvent) => this.appRef.current?.handleBodyMouseDown(e);
+	private onBodyMouseDown = (e: MouseEvent) => void this.appRef.current?.handleBodyMouseDown(e);
 
 
 	private processBaseStateChange = (params: IpcStateChangedParams): void =>
