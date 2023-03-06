@@ -40,7 +40,7 @@ export class HomeWebviewApp extends TeWebviewApp<State>
 	protected override onMessageReceived(e: MessageEvent)
     {
 		const msg = e.data;
-        this.log(`${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`);
+        this.log(`${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`, 1);
         switch (msg.command)
         {
             case "enterLicense":

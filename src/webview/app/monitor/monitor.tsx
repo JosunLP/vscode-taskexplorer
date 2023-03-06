@@ -62,7 +62,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
 	protected override onInitialize = (): void =>
 	{
-		this.log("onInitialize");
+		this.log("onInitialize", 1);
 		//
 		// TODO - Test what vscode.getState/setState is all about...
 		//
@@ -78,11 +78,11 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
     protected override onBind = (): Disposable[] =>
     {
-		this.log("onBind");
-		const disposables = [];
-		const rootEl = document.getElementById("root") as HTMLElement;
-		rootEl.addEventListener("mousedown", this.onBodyMouseDown.bind(this));
-        const root = createRoot(rootEl);
+		this.log("onBind", 1);
+		const disposables = [],
+			  rootEl = document.getElementById("root") as HTMLElement,
+			  bodyMouseDownHandler = this.onBodyMouseDown.bind(this),
+			  root = createRoot(rootEl);
         root.render(
 			<App
 				ref={this.appRef}
@@ -92,7 +92,13 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				updateConfig={this.executeUpdateConfig.bind(this)}
 			/>
         );
-        disposables.push({ dispose: () => root.unmount() });
+		rootEl.addEventListener("mousedown", bodyMouseDownHandler);
+        disposables.push({
+			dispose: () => {
+				rootEl.removeEventListener("mousedown", bodyMouseDownHandler);
+				root.unmount();
+			}
+		});
 		return disposables;
 	};
 
@@ -105,26 +111,26 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 			case IpcTasksChangedMsg.method:
 				onIpc(IpcTasksChangedMsg, msg, params => {
 					Object.assign(this.state, { ...params });
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method}`);
+					this.log(`onMessageReceived(${msg.id}): name=${msg.method}`, 1);
 					this.app.setTasks(params.list, this.state.tasks);
 					this.setState(this.state);
 				});
 				break;
 			case IpcTaskChangedMsg.method:
 				onIpc(IpcTaskChangedMsg, msg, params => {
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
+					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, 1, params);
 					this.handleTaskChangeEvent(params);
 				});
 				break;
 			case IpcStateChangedMsg.method:
 				onIpc(IpcStateChangedMsg, msg, params => {
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
+					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, 1, params);
 					this.processBaseStateChange(params);
 				});
 				break;
 			case IpcConfigChangedMsg.method:
 				onIpc(IpcConfigChangedMsg, msg, params => {
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, params);
+					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, 1, params);
 					this.app.setTimerMode(params.timerMode);
 				});
 				break;
@@ -134,12 +140,12 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	};
 
 
-	private onBodyMouseDown = (e: MouseEvent) => this.appRef.current?.onBodyMouseDown(e);
+	private onBodyMouseDown = (e: MouseEvent) => this.appRef.current?.handleBodyMouseDown(e);
 
 
 	private processBaseStateChange = (params: IpcStateChangedParams): void =>
     {
-		this.log("processBaseStateChange");
+		this.log("processBaseStateChange", 1);
 		Object.assign(this.state, { ...params  });
 		// this.setState(this.state);
 		// super.setState(state); // TODO - Check out how to use internally provided vscode state
@@ -148,7 +154,7 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 
 	protected override setState = (state: MonitorAppState): void =>
     {
-		this.log("setState", state);
+		this.log("setState", 1, state);
 		Object.assign(this.state, { ...state  });
 		// super.setState(state); // TODO - Check out how to use internally provided vscode state
 	};

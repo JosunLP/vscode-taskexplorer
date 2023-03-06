@@ -19,7 +19,7 @@ interface ReactProps
     webroot: string;
     timerMode: IMonitorAppTimerMode;
     executeCommand: (command: string, task: ITeTask) => void;
-    log: (message: string, ...optionalParams: any[]) => void;
+    log: (message: string, level: number, ...optionalParams: any[]) => void;
 }
 
 
@@ -27,7 +27,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
 {
     private counter = 0;
     private animationTimeout: NodeJS.Timeout | undefined;
-    private log: (message: string, ...optionalParams: any[]) => void;
+    private log: (message: string, level: number, ...optionalParams: any[]) => void;
     private executeCommand: (command: string, task: ITeTask) => void;
 
 
@@ -35,7 +35,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
     {
         super(props);
         this.log = props.log;
-        this.log(`TeTaskControl.constructor: task=${props.task.name}`);
+        this.log(`TeTaskControl.constructor: task=${props.task.name}`, 3);
         this.executeCommand = props.executeCommand;
         this.state = {
             task: props.task,
@@ -279,7 +279,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
         // on to an old state value because of the JSX.Element[] list and keys.  I'm sure there's a
         // better or a correct way to handle, but havent figured it out yet.  Look into again.
         //
-        this.log("TeTaskControl.render: task=" + this.state.task.name);
+        this.log("TeTaskControl.render: task=" + this.state.task.name, 3);
         return (
             <div className="te-monitor-control-container" key={`te-id-task-inner-control-${++this.counter}`}>
                 <table width="100%" cellPadding="0" cellSpacing="0"><tbody>
@@ -334,7 +334,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
     setPinned = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>): void =>
     {
         const el = e.target as HTMLSpanElement;
-        this.log(`TeTaskControl.clickPinned: target=${el.className}`);
+        this.log(`TeTaskControl.clickPinned: target=${el.className}`, 1);
         this.state.task.pinned = !this.state.task.pinned;
         this.setState({ task: { ...this.state.task }});
         this.executeCommand("setPinned", this.state.task);
@@ -343,7 +343,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
 
     setTask = (task: ITeTask) => this.setState(_state =>
     {
-        this.log(`TeTaskControl.setTask: id=${task.treeId}`);
+        this.log(`TeTaskControl.setTask: id=${task.treeId}`, 1);
         this.startTimeChangeTimeout();
         return { task: { ...task }, animateChangedTimeIcons: !task.running };
     });
@@ -369,7 +369,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
 
     private viewDetails = (e: React.MouseEvent<HTMLDivElement, MouseEvent>): void =>
     {
-        this.log(`TeTaskControl.clickPinned: target id=${e.currentTarget.id}`);
+        this.log(`TeTaskControl.clickPinned: target id=${e.currentTarget.id}`, 1);
         this.executeCommand("view.taskDetails.show", this.state.task);
     };
 

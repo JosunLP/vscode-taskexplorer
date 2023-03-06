@@ -16,7 +16,7 @@ interface ReactProps
     webroot: string;
     timerMode: IMonitorAppTimerMode;
     executeCommand: (command: string, task: ITeTask) => void;
-    log: (message: string, ...optionalParams: any[]) => void;
+    log: (message: string, level: number, ...optionalParams: any[]) => void;
 }
 
 interface ReactState { tasks: ITeTask[] }
@@ -31,7 +31,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSnap
     private rendered = false;
     private children: JSX.Element[];
     private controlRefs: ControlRefs;
-    private log: (message: string, ...optionalParams: any[]) => void;
+    private log: (message: string, level: number, ...optionalParams: any[]) => void;
 
 
     constructor(props: ReactProps)
@@ -39,7 +39,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSnap
         super(props);
         this.name = props.name;
         this.log = props.log;
-        this.log(`TeTaskTab.${this.name}.constructor: task count=${props.tasks.length}`);
+        this.log(`TeTaskTab.${this.name}.constructor: task count=${props.tasks.length}`, 1);
         this.children = [];
         this.controlRefs = {};
         this.state = {
@@ -74,7 +74,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSnap
     override render()
     {
         this.rendered = true;
-        this.log(`TeTaskTab.${this.name}.render: task count=${this.state.tasks.length}`);
+        this.log(`TeTaskTab.${this.name}.render: task count=${this.state.tasks.length}`, 1);
         return (
             <div className="te-tab-container">
                 {this.getChildren()}
@@ -85,7 +85,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSnap
 
     setTask = (task: ITeTask) =>
     {
-        this.log(`TeTaskTab.${this.name}.setTask: id=${task.treeId}`);
+        this.log(`TeTaskTab.${this.name}.setTask: id=${task.treeId}`, 1);
         if (this.name !== "running")
         {
             const r  = this.controlRefs[task.treeId];
@@ -101,13 +101,13 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSnap
                 //         // Object.assign(c.props, { task: { ...task }});z
                 //     }
                 // });
-                this.log(`   TeTaskTab.${this.name}.setTask.controlRef.setTask`);
+                this.log(`   TeTaskTab.${this.name}.setTask.controlRef.setTask`, 1);
                 r.current?.setTask(task);
             }
         }
         else
         {
-            this.log(`   TeTaskTab.${this.name}.setTask.updateRunningTasks`);
+            this.log(`   TeTaskTab.${this.name}.setTask.updateRunningTasks`, 1);
             if (task.running)
             {
                 this.state.tasks.push(task);

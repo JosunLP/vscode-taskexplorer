@@ -45,13 +45,13 @@ export abstract class TeWebviewApp<State = undefined>
 		const disposables: Disposable[] = [];
 		this._tzOffset = (new Date()).getTimezoneOffset() * 60000;
 
-		this.log("Base.constructor");
+		this.log("Base.constructor", 1);
 
 		this._vscode = acquireVsCodeApi();
 
 		DOM.on(window, "load", () =>
 		{
-			this.log(`${this.appName}.initializing`);
+			this.log(`${this.appName}.initializing`, 1);
 			this.onInitialize?.();
 			this.initialize();
 			if (this.onMessageReceived) {
@@ -154,15 +154,19 @@ export abstract class TeWebviewApp<State = undefined>
 	}
 
 
-	protected log = (message: string, ...optionalParams: any[]): void =>
+	private logLevel = 2;
+	protected log = (message: string, level: number, ...optionalParams: any[]): void =>
 	{
-		const timeTags = (new Date(Date.now() - this._tzOffset)).toISOString().slice(0, -1).split("T");
-		message = `${this.appName}.${message}`;
-		// setTimeout(() => {
-		// 	this.postMessage({ id: this.nextIpcId(), method: IpcLogWriteCommand.method, params: { message, value: undefined }});
-		// },  1);
-		// console.log(`${timeTags.join(" ")} > [WEBVIEW]:${message}`, ...optionalParams);
-		console.log(`${timeTags[1]} > [WEBVIEW]: ${message}`, ...optionalParams);
+		if (level <= this.logLevel)
+		{
+			const timeTags = (new Date(Date.now() - this._tzOffset)).toISOString().slice(0, -1).split("T");
+			message = `${this.appName}.${message}`;
+			// setTimeout(() => {
+			// 	this.postMessage({ id: this.nextIpcId(), method: IpcLogWriteCommand.method, params: { message, value: undefined }});
+			// },  1);
+			// console.log(`${timeTags.join(" ")} > [WEBVIEW]:${message}`, ...optionalParams);
+			console.log(`${timeTags[1]} > [WEBVIEW]: ${message}`, ...optionalParams);
+		}
 	};
 
 
@@ -184,11 +188,11 @@ export abstract class TeWebviewApp<State = undefined>
         switch (msg.method)
         {
 			case IpcEchoCommandRequest.method:       // Standard echo service for testing web->host commands in mocha tests
-				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`);
+				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`, 1);
                 onIpc(IpcEchoCommandRequest, msg, params => this.sendCommand(IpcExecCommand, params));
                 break;
 			case IpcEchoCustomCommandRequest.method: // Standard echo service for testing web->host commands in mocha tests
-				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`);
+				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`, 1);
 				onIpc(IpcEchoCustomCommandRequest, msg, params => this.sendCommand(IpcExecCustomCommand, params));
                 break;
 			default:
@@ -203,7 +207,7 @@ export abstract class TeWebviewApp<State = undefined>
 	protected sendCommand<T extends IpcCommand<any>>(command: T, params: IpcMessageParams<T>)
 	{
 		const id = this.nextIpcId();
-		this.log(`Base.sendCommand(${id}): command=${command.method}`);
+		this.log(`Base.sendCommand(${id}): command=${command.method}`, 1);
 		this.postMessage({ id, method: command.method, params });
 	}
 

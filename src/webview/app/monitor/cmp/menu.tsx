@@ -13,7 +13,7 @@ interface ReactProps
     timerMode: IMonitorAppTimerMode;
     handleMouseDown: MouseEventHandler<HTMLElement>;
     executeCommand: (command: string, ...args: any[]) => void;
-    log: (message: string, ...optionalParams: any[]) => void;
+    log: (message: string, level: number, ...optionalParams: any[]) => void;
     updateConfig: (key: string, value?: any) => void;
 }
 

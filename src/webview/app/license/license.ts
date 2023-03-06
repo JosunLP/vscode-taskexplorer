@@ -28,7 +28,7 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 	protected override onMessageReceived(e: MessageEvent)
     {
 		const msg = e.data as IIpcMessage;
-        this.log(`${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`);
+        this.log(`${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`, 1);
 
 		const message = e.data; // JSON data from tests
         switch (message.command)

@@ -24,7 +24,7 @@ interface ReactProps
 {
     state: MonitorAppState;
     executeCommand: (command: string, ...args: any[]) => void;
-    log: (message: string, ...optionalParams: any[]) => void;
+    log: (message: string, level: number, ...optionalParams: any[]) => void;
     updateConfig: (key: string, value?: any) => void;
     // onBodyMouseDown: React.MouseEvent<HTMLBodyElement>;
 }
@@ -33,14 +33,14 @@ interface ReactProps
 export class App extends React.Component<ReactProps, MonitorAppState, MonitorAppSnapShot>
 {
     private tabs: ITeAppTabs;
-    private log: (message: string, ...optionalParams: any[]) => void;
+    private log: (message: string, level: number, ...optionalParams: any[]) => void;
 
 
     constructor(props: ReactProps)
     {
         super(props);
         this.log = props.log;
-        this.log("App.constructor");
+        this.log("App.constructor", 1);
         this.tabs = {
             all: React.createRef<TeTaskTab>(),
             famous: React.createRef<TeTaskTab>(),
@@ -52,6 +52,15 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
             ...props.state, ...{ loadMaskVisible: true }
         };
     }
+
+
+    handleBodyMouseDown = (e: MouseEvent) =>
+    {
+        this.log("App.onBodyMouseDown", 2);
+        if (this.state.menuVisible && e.clientY > 300 && e.clientX < screen.availWidth - 300) {
+            this.toggleMenu();
+        }
+    };
 
 
     private handleMouseDown = (_e: React.MouseEvent<HTMLElement, MouseEvent>) =>
@@ -71,38 +80,29 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
 
     private onTabSelected = (index: number, lastIndex: number) =>
     {
-        this.log(`App.onTabSelected: index=${index}: lastIndex=${lastIndex}`);
+        this.log(`App.onTabSelected: index=${index}: lastIndex=${lastIndex}`, 2);
     };
 
 
     override componentDidMount(): void
     {
-        this.log("App.componentDidMount");
+        this.log("App.componentDidMount", 1);
         queueMicrotask(() => this.setState({ loadMaskVisible: false }));
     }
 
 
     override componentDidUpdate(_prevProps: Readonly<ReactProps>, _prevState: Readonly<MonitorAppState>, _snapshot?: MonitorAppSnapShot | undefined): void
     {
-        this.log(`App.componentDidUpdate: maskvisible = ${this.state.loadMaskVisible}`);
+        this.log(`App.componentDidUpdate: maskvisible = ${this.state.loadMaskVisible}`, 1);
         if (this.state.loadMaskVisible) {
             queueMicrotask(() => this.setState({ loadMaskVisible: false }));
         }
     }
 
 
-    onBodyMouseDown = (e: MouseEvent) =>
-    {
-        this.log("App.onBodyMouseDown");
-        if (this.state.menuVisible && e.clientY > 300 && e.clientX < screen.availWidth - 300) {
-            this.toggleMenu();
-        }
-    };
-
-
     override render = () =>
     {
-        this.log("App.render");
+        this.log("App.render", 1);
         return (
             <div className="te-tabs-container" onMouseDown={this.handleMouseDown}>
                 <Tabs className="te-tabs" /* selectedIndex={tabIndex} */ onSelect={this.onTabSelected} forceRenderTabPanel={true} defaultFocus={true}>
