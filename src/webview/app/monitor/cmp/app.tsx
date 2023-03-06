@@ -26,6 +26,7 @@ interface ReactProps
     executeCommand: (command: string, ...args: any[]) => void;
     log: (message: string, ...optionalParams: any[]) => void;
     updateConfig: (key: string, value?: any) => void;
+    // onBodyMouseDown: React.MouseEvent<HTMLBodyElement>;
 }
 
 
@@ -83,9 +84,20 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
 
     override componentDidUpdate(_prevProps: Readonly<ReactProps>, _prevState: Readonly<MonitorAppState>, _snapshot?: MonitorAppSnapShot | undefined): void
     {
-        this.log("App.componentDidUpdate");
-        queueMicrotask(() => this.setState({ loadMaskVisible: false }));
+        this.log(`App.componentDidUpdate: maskvisible = ${this.state.loadMaskVisible}`);
+        if (this.state.loadMaskVisible) {
+            queueMicrotask(() => this.setState({ loadMaskVisible: false }));
+        }
     }
+
+
+    onBodyMouseDown = (e: MouseEvent) =>
+    {
+        this.log("App.onBodyMouseDown");
+        if (this.state.menuVisible && e.clientY > 300 && e.clientX < screen.availWidth - 300) {
+            this.toggleMenu();
+        }
+    };
 
 
     override render = () =>

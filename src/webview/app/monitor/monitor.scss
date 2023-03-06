@@ -9,6 +9,10 @@ button {
 	}
 }
 
+html {
+	height: 100%;
+}
+
 .te-monitor-control-button {
 	width: 76px;
     height: 76px;
@@ -77,10 +81,10 @@ button {
 	height: 240px;
 	color: #4e4c4c;
 	z-index: 1001;
-	margin-left: calc(50vw - 120px);
+	margin-left: calc(50vw - 115px);
 	margin-top: calc(50vh - 120px);
     margin-right: calc(50vw - 120px);
-    margin-bottom: calc(50vh - 120px);
+    margin-bottom: calc(50vh - 115px);
 }
 
 .te-tab-container-loading-container {

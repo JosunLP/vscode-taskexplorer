@@ -80,7 +80,9 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
     {
 		this.log("onBind");
 		const disposables = [];
-        const root = createRoot(document.getElementById("root") as HTMLElement);
+		const rootEl = document.getElementById("root") as HTMLElement;
+		rootEl.addEventListener("mousedown", this.onBodyMouseDown.bind(this));
+        const root = createRoot(rootEl);
         root.render(
 			<App
 				ref={this.appRef}
@@ -130,6 +132,9 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				super.onMessageReceived?.(e);
 		}
 	};
+
+
+	private onBodyMouseDown = (e: MouseEvent) => this.appRef.current?.onBodyMouseDown(e);
 
 
 	private processBaseStateChange = (params: IpcStateChangedParams): void =>

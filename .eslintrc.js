@@ -37,10 +37,12 @@ module.exports = {
         "eslint-plugin-import",
         "eslint-plugin-prefer-arrow",
         "anti-trojan-source",
+        "@spmeesseman/eslint-plugin",
         "@typescript-eslint",
         "@typescript-eslint/tslint"
     ],
     "rules": {
+        "@spmeesseman/extjs-array-bracket-newline": 1,
 		"anti-trojan-source/no-bidi": "error",
         "@typescript-eslint/adjacent-overload-signatures": "warn",
         "@typescript-eslint/array-type": [
