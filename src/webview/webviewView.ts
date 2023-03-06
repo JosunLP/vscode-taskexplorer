@@ -136,7 +136,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	}
 
 
-	// protected onViewFocusChanged(e: IpcWvFocusChangedParams): void
+	// protected onViewFocusChanged(e: IpcFocusChangedParams): void
 	// {
 	// 	this.setContextKeys(e.focused, e.inputFocused);
 	// 	this.onFocusChanged?.(e.focused);
@@ -147,7 +147,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	{
 		if (visible)
 		{
-			if (this.skippedNotify || this.wrapper.env === "dev") {
+			if (this.skippedNotify) { // || this.wrapper.env === "dev") {
 				await this.refresh();
 			}
 		}

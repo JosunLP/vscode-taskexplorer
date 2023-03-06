@@ -24,7 +24,7 @@ interface ReactProps
 {
     state: MonitorAppState;
     executeCommand: (command: string, ...args: any[]) => void;
-    log: (message: string, level: number, ...optionalParams: any[]) => void;
+    log: (message: string, level: number, ...args: any[]) => void;
     updateConfig: (key: string, value?: any) => void;
     // onBodyMouseDown: React.MouseEvent<HTMLBodyElement>;
 }
@@ -33,7 +33,7 @@ interface ReactProps
 export class App extends React.Component<ReactProps, MonitorAppState, MonitorAppSnapShot>
 {
     private tabs: ITeAppTabs;
-    private log: (message: string, level: number, ...optionalParams: any[]) => void;
+    private log: (message: string, level: number, ...args: any[]) => void;
 
 
     constructor(props: ReactProps)
@@ -87,7 +87,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     override componentDidMount(): void
     {
         this.log("App.componentDidMount", 1);
-        queueMicrotask(() => this.setState({ loadMaskVisible: false }));
+        setTimeout((s) => this.setState(s), 50, { loadMaskVisible: false });
     }
 
 

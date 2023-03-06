@@ -19,7 +19,7 @@ interface ReactProps
     webroot: string;
     timerMode: IMonitorAppTimerMode;
     executeCommand: (command: string, task: ITeTask) => void;
-    log: (message: string, level: number, ...optionalParams: any[]) => void;
+    log: (message: string, level: number, ...args: any[]) => void;
 }
 
 
@@ -27,7 +27,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
 {
     private counter = 0;
     private animationTimeout: NodeJS.Timeout | undefined;
-    private log: (message: string, level: number, ...optionalParams: any[]) => void;
+    private log: (message: string, level: number, ...args: any[]) => void;
     private executeCommand: (command: string, task: ITeTask) => void;
 
 

@@ -29,9 +29,9 @@ export abstract class TeWebviewApp<State = undefined>
 
 	private _ipcSequence = 0;
 	private _focused?: boolean;
-	private readonly _tzOffset: number;
 	private _inputFocused?: boolean;
 	private _bindDisposables: Disposable[] | undefined;
+	private readonly _tzOffset: number;
 	private readonly _maxSmallIntegerV8 = 2 ** 30; // Max # that can be stored in V8's smis (small int)
 	private readonly _vscode: VsCodeApi;
 

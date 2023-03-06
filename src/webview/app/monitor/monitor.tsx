@@ -7,7 +7,7 @@ import "./monitor.scss";
 
 import React from "react";
 import { App } from "./cmp/app";
-import { Disposable } from "../common/dom";
+import { Disposable, DOM } from "../common/dom";
 import { TeWebviewApp } from "../webviewApp";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
@@ -81,7 +81,6 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 		this.log("onBind", 1);
 		const disposables = [],
 			  rootEl = document.getElementById("root") as HTMLElement,
-			  bodyMouseDownHandler = this.onBodyMouseDown.bind(this),
 			  root = createRoot(rootEl);
         root.render(
 			<App
@@ -92,13 +91,10 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 				updateConfig={this.executeUpdateConfig.bind(this)}
 			/>
         );
-		rootEl.addEventListener("mousedown", bodyMouseDownHandler);
-        disposables.push({
-			dispose: () => {
-				rootEl.removeEventListener("mousedown", bodyMouseDownHandler);
-				root.unmount();
-			}
-		});
+        disposables.push(
+			DOM.on(rootEl, "mousedown", this.onBodyMouseDown.bind(this)),
+			{ dispose: () => root.unmount() }
+		);
 		return disposables;
 	};
 

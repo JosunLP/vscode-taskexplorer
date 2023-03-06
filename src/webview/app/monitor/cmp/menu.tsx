@@ -13,21 +13,21 @@ interface ReactProps
     timerMode: IMonitorAppTimerMode;
     handleMouseDown: MouseEventHandler<HTMLElement>;
     executeCommand: (command: string, ...args: any[]) => void;
-    log: (message: string, level: number, ...optionalParams: any[]) => void;
+    log: (message: string, level: number, ...args: any[]) => void;
     updateConfig: (key: string, value?: any) => void;
 }
 
 
 export class AppMenu extends React.Component<ReactProps, ReactState, ReactSnapShot>
 {
-    private log: (message: string, ...optionalParams: any[]) => void;
+    private log: (message: string, level: number, ...args: any[]) => void;
 
 
     constructor(props: ReactProps)
     {
         super(props);
         this.log = props.log;
-        this.log(`AppMenu.constructor: timerMode=${props.timerMode}`);
+        this.log(`AppMenu.constructor: timerMode=${props.timerMode}`, 1);
         this.state = {
             timerMode: props.timerMode
         };
@@ -167,7 +167,7 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSnapSh
 
     private onCommandClick = (command: string, e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
-        this.log(`AppMenu.onRefreshClick: ${command}`);
+        this.log(`AppMenu.onRefreshClick: ${command}`, 1);
         this.props.executeCommand(command);
         this.props.handleMouseDown(e);
     };
@@ -175,7 +175,7 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSnapSh
 
     private onTimerModeClick = (mode: IMonitorAppTimerMode, e: React.MouseEvent<HTMLElement, MouseEvent>) =>
     {
-        this.log(`AppMenu.onTimerModeClick: ${mode}: current mode=${this.props.timerMode}`);
+        this.log(`AppMenu.onTimerModeClick: ${mode}: current mode=${this.props.timerMode}`, 1);
         if (mode !== this.props.timerMode) {
             this.props.updateConfig("timerMode", mode);
         }
@@ -189,7 +189,7 @@ export class AppMenu extends React.Component<ReactProps, ReactState, ReactSnapSh
     override render()
     {
         const cls = this.props.menuVisibility ? "show" : "hide";
-        this.log(`AppMenu.render: menuVisibility=${this.props.menuVisibility}`);
+        this.log(`AppMenu.render: menuVisibility=${this.props.menuVisibility}`, 1);
         return (
             <div id="te-monitor-flyout-menu-id" onMouseDown={this.props.handleMouseDown} className={cls}>
                 {this.getTitleHeader()}

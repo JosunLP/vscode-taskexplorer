@@ -16,7 +16,7 @@ interface ReactProps
     webroot: string;
     timerMode: IMonitorAppTimerMode;
     executeCommand: (command: string, task: ITeTask) => void;
-    log: (message: string, level: number, ...optionalParams: any[]) => void;
+    log: (message: string, level: number, ...args: any[]) => void;
 }
 
 interface ReactState { tasks: ITeTask[] }
@@ -31,7 +31,7 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSnap
     private rendered = false;
     private children: JSX.Element[];
     private controlRefs: ControlRefs;
-    private log: (message: string, level: number, ...optionalParams: any[]) => void;
+    private log: (message: string, level: number, ...args: any[]) => void;
 
 
     constructor(props: ReactProps)
