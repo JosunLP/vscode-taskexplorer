@@ -5,7 +5,7 @@ import { IMonitorAppTimerMode } from "src/webview/common/ipc";
 
 interface ReactState {}
 
-interface ReactSerializedState extends ReactState {}
+interface ReactSnapShot extends ReactState {}
 
 interface ReactProps
 {
@@ -18,7 +18,7 @@ interface ReactProps
 }
 
 
-export class AppMenu extends React.Component<ReactProps, ReactState, ReactSerializedState>
+export class AppMenu extends React.Component<ReactProps, ReactState, ReactSnapShot>
 {
     private log: (message: string, ...optionalParams: any[]) => void;
 

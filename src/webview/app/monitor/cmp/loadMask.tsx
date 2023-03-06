@@ -26,8 +26,8 @@ export class AppLoadMask extends React.Component<ReactProps>
         this.log(`AppLoadMask.render: visibility=${this.props.maskVisibility}`);
         return (
             <div id="te-monitor-load-mask-id" className={cls}>
-                <div>
-                    <span className="far fa-sync fa-spin te-tab-container-loading" />
+                <div className="te-tab-container-loading-container">
+                    <span className="far fa-gear fa-spin te-tab-container-loading" />
                 </div>
             </div>
         );

@@ -40,24 +40,23 @@ button {
 }
 
 #te-monitor-load-mask-id {
-	width: 280px;
-  	height: 280px;
+	width: 100vw;
+  	height: 100vh;
 	background-color: transparent;
 	position: fixed;
-	top: calc(50vh - 140px);
-	left: calc(50vw - 140px);
+	top: 0;
+	left: 0;
 	transition: transform .3s
 				cubic-bezier(0, .52, 0, 1);
 	overflow: scroll;
 	z-index: 1000;
-	opacity: 0.4;
-	line-height: 250px;
-	vertical-align: middle;
+	flex: 1;
 }
 
 #te-monitor-load-mask-id::before {
     content: "";
-	font-size: 230px;
+	font-size: 240px;
+	line-height: 240px;
 }
 
 
@@ -73,8 +72,23 @@ button {
 }
 
 .te-tab-container-loading {
-	font-size: 230px;
-	margin-top: 25px;
+	font-size: 240px;
+	width: 230px;
+	height: 240px;
+	color: #4e4c4c;
+	z-index: 1001;
+	margin-left: calc(50vw - 120px);
+	margin-top: calc(50vh - 120px);
+    margin-right: calc(50vw - 120px);
+    margin-bottom: calc(50vh - 120px);
+}
+
+.te-tab-container-loading-container {
+	flex: 1;
+	height: 100vh;
+	line-height: 260px;
+	background-color: #888;
+	opacity: 0.5;
 }
 
 #te-monitor-flyout-menu-id {

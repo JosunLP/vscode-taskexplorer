@@ -11,7 +11,7 @@ interface ReactState
 	task: ITeTask;
 }
 
-interface ReactSerializedState extends ReactState {}
+interface ReactSnapShot extends ReactState {}
 
 interface ReactProps
 {
@@ -23,7 +23,7 @@ interface ReactProps
 }
 
 
-export class TeTaskControl extends React.Component<ReactProps, ReactState, ReactSerializedState>
+export class TeTaskControl extends React.Component<ReactProps, ReactState, ReactSnapShot>
 {
     private counter = 0;
     private animationTimeout: NodeJS.Timeout | undefined;

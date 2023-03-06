@@ -21,10 +21,10 @@ interface ReactProps
 
 interface ReactState { tasks: ITeTask[] }
 
-interface ReactSerializedState extends ReactState {}
+interface ReactSnapShot extends ReactState {}
 
 
-export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSerializedState>
+export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSnapShot>
 {
     private name: string;
     private counter = 0;

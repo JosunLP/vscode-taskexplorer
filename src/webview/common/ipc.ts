@@ -149,7 +149,7 @@ export interface MonitorAppState extends State
 	};
 }
 
-export interface MonitorAppSerializedState extends MonitorAppState {}
+export interface MonitorAppSnapShot extends MonitorAppState {}
 
 export interface IpcTaskChangedParams { task: ITeTask; list?: TeTaskListType };
 export interface IpcTasksChangedParams { tasks: ITeTask[]; list: TeTaskListType };

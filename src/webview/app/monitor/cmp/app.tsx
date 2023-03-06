@@ -6,7 +6,7 @@ import { AppLoadMask } from "./loadMask";
 import { AppMenuButton } from "./menuButton";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import {
-    ITeTask, TeTaskListType, IMonitorAppTimerMode, MonitorAppSerializedState, MonitorAppState
+    ITeTask, TeTaskListType, IMonitorAppTimerMode, MonitorAppSnapShot, MonitorAppState
 } from "../../../common/ipc";
 
 type ITabDictionary<T> = { [id in TeTaskListType]: T; };
@@ -29,7 +29,7 @@ interface ReactProps
 }
 
 
-export class App extends React.Component<ReactProps, MonitorAppState, MonitorAppSerializedState>
+export class App extends React.Component<ReactProps, MonitorAppState, MonitorAppSnapShot>
 {
     private tabs: ITeAppTabs;
     private log: (message: string, ...optionalParams: any[]) => void;
@@ -81,7 +81,7 @@ export class App extends React.Component<ReactProps, MonitorAppState, MonitorApp
     }
 
 
-    override componentDidUpdate(_prevProps: Readonly<ReactProps>, _prevState: Readonly<MonitorAppState>, _snapshot?: MonitorAppSerializedState | undefined): void
+    override componentDidUpdate(_prevProps: Readonly<ReactProps>, _prevState: Readonly<MonitorAppState>, _snapshot?: MonitorAppSnapShot | undefined): void
     {
         this.log("App.componentDidUpdate");
         queueMicrotask(() => this.setState({ loadMaskVisible: false }));

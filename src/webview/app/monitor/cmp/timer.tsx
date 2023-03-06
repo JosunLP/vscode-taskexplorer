@@ -9,7 +9,7 @@ interface ReactState
     ms: number;
 }
 
-interface ReactSerializedState extends ReactState {}
+interface ReactSnapShot extends ReactState {}
 
 interface ReactProps
 {
@@ -17,7 +17,7 @@ interface ReactProps
 }
 
 
-export class TeReactTaskTimer extends React.Component<ReactProps, ReactState, ReactSerializedState>
+export class TeReactTaskTimer extends React.Component<ReactProps, ReactState, ReactSnapShot>
 {
     private interval: NodeJS.Timeout | undefined;
 
