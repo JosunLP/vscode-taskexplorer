@@ -9,10 +9,6 @@ button {
 	}
 }
 
-html {
-	height: 100%;
-}
-
 .te-monitor-control-button {
 	width: 76px;
     height: 76px;
@@ -191,7 +187,7 @@ html {
 .te-monitor-menu-button-container {
 	float: right;
 	margin-top: 1px;
-	margin-right: 1px;
+	margin-right: 2px;
 }
 
 .te-monitor-menu-button {
@@ -207,11 +203,12 @@ html {
 }
 
 .te-tsx-root-container.te-tsx-monitor-root-container {
-    opacity: 1
+    opacity: 1;
+	overflow: auto;
 }
 
 .te-tab-container {
-	opacity: 1
+	opacity: 1;
 }
 
 .te-tab-all:before  {
