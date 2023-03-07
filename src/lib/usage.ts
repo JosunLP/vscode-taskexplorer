@@ -101,6 +101,7 @@ export class Usage implements ITeUsage, Disposable
 	private getEmptyITask = (): ITeTask =>
     ({
         name: "N/A",
+        fsPath: "",
         listType: "all",
         pinned: false,
         running: false,

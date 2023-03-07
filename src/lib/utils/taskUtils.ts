@@ -135,7 +135,7 @@ export const toITask = (wrapper: TeWrapper, teTasks: Task[], listType: TeTaskLis
             };
         }
         return {
-            definition: pickBy<ITaskDefinition>(t.definition, (k => k !== "uri")),
+            definition: pickBy<ITaskDefinition>(t.definition, k => k !== "uri"),
             listType,
             name: t.name,
             pinned: isPinned(t.definition.taskItemId, listType),
@@ -143,6 +143,7 @@ export const toITask = (wrapper: TeWrapper, teTasks: Task[], listType: TeTaskLis
             running,
             source: t.source,
             treeId: t.definition.taskItemId,
+            fsPath: t.definition.uri?.fsPath,
             runTime: wrapper.usage.getRuntimeInfo(t.definition.taskItemId)
         };
     });

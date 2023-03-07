@@ -4,6 +4,7 @@ import { TeWebviewPanel } from "../webviewPanel";
 import type { TeWrapper } from "../../lib/wrapper";
 import { ContextKeys, WebviewIds  } from "../../lib/context";
 import { ITeTask, ITeTaskStatusChangeEvent } from "../../interface";
+import { dirname, join } from "path";
 
 
 export class TaskDetailsPage extends TeWebviewPanel<State>
@@ -45,6 +46,9 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
     };
 
 
+	private  getPath = (task: ITeTask): string => !task.definition.scriptFile ? task.fsPath : dirname(task.fsPath);
+
+
     protected override includeBody = async(task: ITeTask) =>
     {
 		let html = "<div class=\"te-task-details-container\"><table align=\"center\" width=\"900\"<tr><td>";
@@ -56,7 +60,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 				html += `<table class="te-task-details-header-table" width="100%"><tbody><tr>
 							<td class="te-task-details-header-td te-task-details-header-title-td">
 								<div class="te-task-details-header-title-name">${task.name}</div>
-								<div class="te-task-details-header-title-location">Location: ${task.definition.path}</div>
+								<div class="te-task-details-header-title-location">Location: ${this.getPath(task)}</div>
 							</td>
 							<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
 								<table width="100%"><tbody>

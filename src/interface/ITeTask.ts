@@ -9,6 +9,7 @@ export interface ITeTask
 {
 	definition: ITaskDefinition;
 	listType:  TeTaskListType;
+	fsPath: string;
 	name: string;
 	pinned: boolean;
 	runCount: ITeTrackedUsageCount;

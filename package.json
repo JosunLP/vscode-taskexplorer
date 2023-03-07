@@ -432,7 +432,6 @@
             {
                 "command": "taskexplorer.view.taskDetails.show",
                 "title": "%command.view.taskDetails.show%",
-                "shortTitle": "%command.view.taskDetails.show:short%",
                 "when": "taskexplorer:enabled && config.taskexplorer.taskMonitor.trackStats",
                 "icon": {
                     "light": "res/img/light/open.svg",
@@ -882,7 +881,7 @@
                 },
                 {
                     "command": "taskexplorer.addToExcludes",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(File|Group)[A-Z][a-z]+/"
+                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^(task(File|Group)[A-Z][a-z]+|script(|File))/"
                 },
                 {
                     "command": "taskexplorer.addRemoveFavorite",
