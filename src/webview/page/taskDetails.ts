@@ -46,47 +46,59 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
     };
 
 
-	private  getPath = (task: ITeTask): string => !task.definition.scriptFile ? task.fsPath : dirname(task.fsPath);
+	private getIcon = (task: ITeTask): string => `#{webroot}/img/sources/${task.source}.svg`;
+
+
+	private getPath = (task: ITeTask): string => !task.definition.scriptFile ? task.fsPath : dirname(task.fsPath);
 
 
     protected override includeBody = async(task: ITeTask) =>
     {
-		let html = "<div class=\"te-task-details-container\"><table align=\"center\" width=\"900\"<tr><td>";
+		let html = `<div class=\"te-task-details-container\"><table align=\"center\" width=\"900\"<tr><td>
+					<table class="te-task-details-header-table" width="100%"><tbody><tr>
+					<td class="te-task-details-header-td te-task-details-header-title-td">
+						<table cellpadding="0" cellspacing="0"><tbody>
+						<tr>
+							<td valign="top" class="te-task-details-header-title-icon-td"><img class="te-task-details-header-title-icon" src="${this.getIcon(task)}"></td>
+							<td valign="top" class="te-task-details-header-title-name-td">${task.name}</td>
+						</tr>
+						<tr>
+							<td colspan="2" class="te-task-details-header-title-location">Location: ${this.getPath(task)}</td>
+						</tr>
+						</tbody></table>
+					</td>`;
         const usage = this.wrapper.usage.get("task:" + task.treeId);
 		if (usage)
 		{
 			if (usage.taskStats &&  usage.taskStats.runtimes && usage.taskStats.runtimes.length > 0)
 			{
-				html += `<table class="te-task-details-header-table" width="100%"><tbody><tr>
-							<td class="te-task-details-header-td te-task-details-header-title-td">
-								<div class="te-task-details-header-title-name">${task.name}</div>
-								<div class="te-task-details-header-title-location">Location: ${this.getPath(task)}</div>
-							</td>
-							<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
-								<table width="100%"><tbody>
-									<tr>
-										<td class="te-task-details-header-details-icon-td">
-											<span class="fas fa-rabbit te-color-rabbit-pink" />
-										</td>
-										<td class="te-task-details-header-details-time-td">
-											${this.formatRuntime(usage.taskStats.fastest)}
-										</td>
-									</tr>
-									<tr>
-										<td class="te-task-details-header-details-icon-td">
-											<span class="fas fa-turtle te-color-turtle-green" />
-										</td>
-										<td class="te-task-details-header-details-time-td">
-											${this.formatRuntime(usage.taskStats.slowest)}
-										</td>
-									</tr>
-								</tbody></table>
-							</td>
+				html += `<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
+							<table width="100%"><tbody>
+								<tr>
+									<td class="te-task-details-header-details-icon-td">
+										<span class="fas fa-rabbit te-color-rabbit-pink" />
+									</td>
+									<td class="te-task-details-header-details-time-td">
+										${this.formatRuntime(usage.taskStats.fastest)}
+									</td>
+								</tr>
+								<tr>
+									<td class="te-task-details-header-details-icon-td">
+										<span class="fas fa-turtle te-color-turtle-green" />
+									</td>
+									<td class="te-task-details-header-details-time-td">
+										${this.formatRuntime(usage.taskStats.slowest)}
+									</td>
+								</tr>
+							</tbody></table>
+						</td>
 						</tr></tbody></table>`;
+
 				html += `<table width="100%"><tbody>
 						 <tr class=\"te-task-details-runtimes-header\">
 						 	<td>Start</td><td>End</td><td>Run Time</td>
 						 </tr>`;
+
 				for (const r of usage.taskStats.runtimes)
 				{
 					html += `<tr class="te-task-details-runtimes-row">
@@ -95,21 +107,21 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 								<td>${this.formatRuntime(r.time)}</td>
 							</tr>`;
 				}
+
 				html += "</tbody></table>";
 			}
 			else {
-				html += `<center><table><tbody>
-							<tr><td class="te-task-details-title">${task.name}</td></tr>
-							<tr><td>No runtime statistics available</td></tr>
-						</tbody></table></center>`;
+				html += `<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
+							No tracked statistics available
+						</td></tr></tbody></table>`;
 			}
 		}
 		else {
-			html += `<center><table><tbody>
-						<tr><td class="te-task-details-title">${task.name}</td></tr>
-						<tr><td>No tracked usage available</td></tr>
-					</tbody></table></center>`;
+			html += `<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
+						No tracked usage available
+					</td></tr></tbody></table>`;
 		}
+
 		html += "</td></tr></table></div>";
 		return html;
     };

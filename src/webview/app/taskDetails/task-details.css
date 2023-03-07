@@ -4,13 +4,6 @@
 }
 
 .te-task-details-header-table {
-    display: flex;
-    align-content: stretch;
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
 }
 
 .te-task-details-header-td {
@@ -19,11 +12,21 @@
 }
 
 .te-task-details-header-title-td {
-    flex: 1;
     width: 660px;
 }
 
-.te-task-details-header-title-name {
+.te-task-details-header-title-icon {
+    height: 38px;
+    width: 45px;
+}
+
+.te-task-details-header-title-icon-td {
+    line-height: 38px;
+    width: 45px;
+}
+
+.te-task-details-header-title-name-td {
+    line-height: 38px;
     font-size: 36px;
 }
 
