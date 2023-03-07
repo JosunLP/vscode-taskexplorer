@@ -31,11 +31,19 @@ export const ConfigKeys =
     GroupSeparator: "groupSeparator",
     GroupStripTaskLabel: "groupStripTaskLabel",
     GroupWithSeperator: "groupWithSeparator",
+    KeepTerminalOnTaskDone: "keepTermOnStop",
     ReportGlobalUsage: "taskMonitor.reportUsage",
     SortProjectFoldersAlphabetically: "sortProjectFoldersAlpha",
-	SpecialFolders_NumLastTasks: "specialFolders.numLastTasks",
-    TaskMonitor_TimerMode: "taskMonitor.timerMode",
-    TaskMonitor_TrackStats: "taskMonitor.trackStats",
+	SpecialFolders: {
+        NumLastTasks: "specialFolders.numLastTasks"
+    },
+    TaskButtons: {
+        ControlCharacter: "taskButtons.controlCharacter"
+    },
+    TaskMonitor: {
+        TimerMode: "taskMonitor.timerMode",
+        TrackStats: "taskMonitor.trackStats"
+    },
     TrackUsage: "trackUsage"
 };
 

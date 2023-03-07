@@ -48,8 +48,8 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 	private getSettingsState = () =>
 	({
-		timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor_TimerMode),
-		trackStats: this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats),
+		timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor.TimerMode),
+		trackStats: this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor.TrackStats),
 		trackUsage: this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage),
 	});
 
@@ -112,7 +112,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 	private async onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor_TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor_TrackStats))
+		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor.TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
 			this.notify(IpcConfigChangedMsg, this.getSettingsState());
 		}

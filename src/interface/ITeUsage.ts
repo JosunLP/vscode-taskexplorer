@@ -1,4 +1,5 @@
 import { Event } from "vscode";
+import { ITeTask } from "./ITeTask";
 import { IDictionary } from "./IDictionary";
 
 export interface ITeTrackedUsageCount
@@ -28,11 +29,37 @@ export interface ITaskRuntimeInfo
     newSlow: boolean;
 }
 
+interface ITeTaskRuntime
+{
+    end: number;
+    start: number;
+    time: number;
+}
+
+interface ITeTaskUsageRuntimeInfo extends ITaskRuntimeInfo
+{
+    runtimes: ITeTaskRuntime[];
+}
+
+export interface ITeTaskStats
+{
+    all: ITeTask[];
+    famous: ITeTask[];
+    favorites: ITeTask[];
+    last: ITeTask[];
+    running: ITeTask[];
+    runtimes: IDictionary<ITeTaskUsageRuntimeInfo>;
+    taskLastRan: ITeTask;
+    taskMostUsed: ITeTask;
+    timeLastRan: number;
+}
+
 export interface ITeTrackedUsage {
 	count: ITeTrackedUsageCount;
 	first: number;
 	timestamp: number;
 	timestamps: number[];
+    taskStats?: ITeTaskUsageRuntimeInfo;
 }
 
 export interface ITeUsageChangeEvent

@@ -18,10 +18,10 @@ export class ReleaseNotesWebviewApp extends TeWebviewApp<State>
 	}
 
 
-	protected override onInitialize()
-    {
-		// provideVSCodeDesignSystem().register(vsCodeButton());
-	}
+	// protected override onInitialize()
+    // {
+	// 	provideVSCodeDesignSystem().register(vsCodeButton());
+	// }
 
 
     protected override onBind(): Disposable[]

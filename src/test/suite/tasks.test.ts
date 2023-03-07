@@ -8,6 +8,7 @@ import { TaskExecution } from "vscode";
 import * as utils from "../utils/utils";
 import {ITaskItem, ITeWrapper, ITaskFolder } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusExplorerView, focusSearchView } from "../utils/commandUtils";
+import { ConfigKeys } from "../../lib/constants";
 
 const tc = utils.testControl;
 const startTaskSlowTime = tc.slowTime.config.event + (tc.slowTime.config.showHideSpecialFolder * 2) + (tc.slowTime.commands.standard * 2);
@@ -90,7 +91,7 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.event + (tc.slowTime.commands.run * 2) + tc.slowTime.commands.runStop + tc.slowTime.commands.runPause + 3000);
-        await executeSettingsUpdate("keepTermOnStop", false);
+        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, false);
         let exec = await executeTeCommand2<TaskExecution | undefined>("run", [ batch[0] ], tc.waitTime.runCommandMin);
         expect(exec).to.not.be.equal(undefined, "Starting the 'batch0' task did not return a valid TaskExecution");
         await utils.waitForTaskExecution(exec, 1750);
@@ -139,7 +140,7 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runStop + tc.slowTime.config.event + 5000);
-        await executeSettingsUpdate("keepTermOnStop", true);
+        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, true);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ batch[0] ], tc.waitTime.runCommandMin) ;
         expect(exec).to.not.be.equal(undefined, "Starting the 'batch0' task did not return a valid TaskExecution");
         await utils.waitForTaskExecution(exec, 1500);
@@ -189,7 +190,7 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runPause + tc.slowTime.commands.runStop + tc.slowTime.config.event + 5600);
-        await executeSettingsUpdate("keepTermOnStop", false);
+        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ batch[0] ], tc.waitTime.runCommandMin) ;
         await utils.waitForTaskExecution(exec, 2000);
         await utils.waitForTeIdle(tc.waitTime.runCommandMin);
@@ -241,7 +242,7 @@ suite("Task Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow((tc.slowTime.config.event * 2) + tc.slowTime.commands.run + tc.slowTime.tasks.antTask);
         await executeSettingsUpdate("enableAnsiconForAnt", false, tc.waitTime.config.enableEvent);
-        await executeSettingsUpdate("keepTermOnStop", true);
+        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, true);
         await startTask(antTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin) ;
         await utils.waitForTaskExecution(exec);
@@ -260,7 +261,7 @@ suite("Task Tests", () =>
         await focusExplorerView(teWrapper); // randomly show/hide view to test refresh event queue in tree/tree.ts
         const batchTask = batch[0];
         await startTask(batchTask, true);
-        await executeSettingsUpdate("keepTermOnStop", false);
+        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, false);
         await executeSettingsUpdate("visual.disableAnimatedIcons", false);
         await executeSettingsUpdate("specialFolders.showLastTasks", false);
         //

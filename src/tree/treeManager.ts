@@ -24,19 +24,11 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private firstTreeBuildDone = false;
     private currentInvalidation: string | undefined;
     private readonly disposables: Disposable[] = [];
+    private readonly _onReady: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onDidTaskCountChange: EventEmitter<ITeTaskChangeEvent>;
-    private readonly _onReady: EventEmitter<ITeTaskChangeEvent>;
-
-    private readonly _specialFolders: {
-        favorites: FavoritesFolder;
-        lastTasks: LastTasksFolder;
-    };
-
-    private readonly _views: {
-        taskExplorer: TeTreeView;
-        taskExplorerSideBar: TeTreeView;
-    };
+    private readonly _views: { taskExplorer: TeTreeView; taskExplorerSideBar: TeTreeView };
+    private readonly _specialFolders: { favorites: FavoritesFolder; lastTasks: LastTasksFolder };
 
 
     constructor(private readonly wrapper: TeWrapper)

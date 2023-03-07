@@ -16,3 +16,21 @@
         color: #f48771;
 	}
 }
+
+.te-color-rabbit-pink {
+    .vscode-light & {
+        color: #f2b2d8;
+    }
+	.vscode-dark & {
+        color: #f6d9ef;
+	}
+}
+
+.te-color-turtle-green {
+    .vscode-light & {
+        color: #77e98e;
+    }
+	.vscode-dark & {
+        color: #9af6b9;
+	}
+}

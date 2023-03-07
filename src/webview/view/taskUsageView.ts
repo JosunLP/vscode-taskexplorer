@@ -40,7 +40,7 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	private async onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor_TrackStats))
+		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
 			this.refresh();
 		}
@@ -61,7 +61,7 @@ export class TaskUsageView extends TeWebviewView<State>
 	protected override onHtmlFinalize = async (html: string) =>
 	{
 		const trackStats = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage) &&
-						   this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats);
+						   this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor.TrackStats);
 		if (trackStats)
 		{
 			const lastTime = this.wrapper.usage.getLastRanTaskTime(),

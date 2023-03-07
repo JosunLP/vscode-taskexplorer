@@ -1,0 +1,56 @@
+
+.te-task-details-container {
+    padding: 15px;
+}
+
+.te-task-details-header-table {
+    display: flex;
+    align-content: stretch;
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+}
+
+.te-task-details-header-td {
+    border-bottom: 1px solid lightgray;
+    vertical-align: top;
+}
+
+.te-task-details-header-title-td {
+    flex: 1;
+    width: 660px;
+}
+
+.te-task-details-header-title-name {
+    font-size: 36px;
+}
+
+.te-task-details-header-title-location {
+    font-size: 12px;
+}
+
+.te-task-details-header-details-td {
+    font-size: 22px;
+    width: 240px;
+    padding: 10px;
+}
+
+.te-task-details-header-details-icon-td  {
+    font-size: 22px;
+    width: 35px;
+}
+
+.te-task-details-header-details-time-td  {
+    font-size: 22px;
+}
+
+.te-task-details-runtimes-header {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.te-task-details-runtimes-row {
+    font-size: 16px;
+}

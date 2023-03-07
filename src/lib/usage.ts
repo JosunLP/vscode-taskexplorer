@@ -6,35 +6,10 @@ import { ConfigKeys, StorageKeys } from "./constants";
 import { ConfigurationChangeEvent, Disposable, Event, EventEmitter } from "vscode";
 import {
     IDictionary, ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent,
-    ITeTaskStatusChangeEvent, ILog, ITaskRuntimeInfo
+    ITeTaskStatusChangeEvent, ILog, ITaskRuntimeInfo, ITeTaskStats
 } from "../interface";
 
 type UsageStore = IDictionary<ITeTrackedUsage>;
-
-interface ITaskRuntime
-{
-    end: number;
-    start: number;
-    time: number;
-}
-
-interface ITaskUsageRuntimeInfo extends ITaskRuntimeInfo
-{
-    runtimes: ITaskRuntime[];
-}
-
-interface ITaskUsageStats
-{
-    all: ITeTask[];
-    famous: ITeTask[];
-    favorites: ITeTask[];
-    last: ITeTask[];
-    running: ITeTask[];
-    runtimes: IDictionary<ITaskUsageRuntimeInfo>;
-    taskLastRan: ITeTask;
-    taskMostUsed: ITeTask;
-    timeLastRan: number;
-}
 
 export class Usage implements ITeUsage, Disposable
 {
@@ -55,7 +30,7 @@ export class Usage implements ITeUsage, Disposable
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
 		this._onDidChange = new EventEmitter<ITeUsageChangeEvent | undefined>();
         this._trackUsage = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage);
-        this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats);
+        this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor.TrackStats);
         this._allowUsageReporting = this.wrapper.config.get<boolean>(ConfigKeys.AllowUsageReporting);
 		this._disposables.push(
 			this._onDidChange,
@@ -92,7 +67,14 @@ export class Usage implements ITeUsage, Disposable
 	}
 
 
-	get = (key: string): ITeTrackedUsage | undefined => this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {})[key];
+	get = (key: string): ITeTrackedUsage | undefined =>
+    {
+        const usage = this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {})[key];
+        if (usage){
+            usage.taskStats = this.getTaskUsageStore().runtimes[key.replace(this._taskUsageKey, "")];
+        }
+        return usage;
+    };
 
 
 	getAll = (key?: string): UsageStore =>
@@ -157,9 +139,9 @@ export class Usage implements ITeUsage, Disposable
     });
 
 
-    private getTaskUsageStore = (): ITaskUsageStats =>
+    private getTaskUsageStore = (): ITeTaskStats =>
     {
-        let store = this.wrapper.storage.get<ITaskUsageStats>(StorageKeys.TaskUsage);
+        let store = this.wrapper.storage.get<ITeTaskStats>(StorageKeys.TaskUsage);
         if (!store)
         {
             store = {
@@ -261,9 +243,9 @@ export class Usage implements ITeUsage, Disposable
         {
             this._trackUsage = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage);
         }
-        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor_TrackStats))
+        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor.TrackStats))
         {
-            this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor_TrackStats);
+            this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor.TrackStats);
             if (this._trackTaskStats && !this._trackUsage){
                 await this.wrapper.config.update(ConfigKeys.TrackUsage, this._trackTaskStats);
             }
@@ -311,8 +293,7 @@ export class Usage implements ITeUsage, Disposable
 	}
 
 
-    private saveTaskUsageStore = (store: ITaskUsageStats) => this.wrapper.storage.update(StorageKeys.TaskUsage, store);
-
+    private saveTaskUsageStore = (store: ITeTaskStats) => this.wrapper.storage.update(StorageKeys.TaskUsage, store);
 
 
 	async track(key: string): Promise<ITeTrackedUsage | undefined>
@@ -376,11 +357,11 @@ export class Usage implements ITeUsage, Disposable
 	}
 
 
-    private trackFamousTasks = (iTask: ITeTask, stats: ITaskUsageStats, usage: ITeTrackedUsage) =>
+    private trackFamousTasks = (iTask: ITeTask, stats: ITeTaskStats, usage: ITeTrackedUsage) =>
     {
         let added = false,
             changed = false;
-        const specTaskListLength = this.wrapper.config.get<number>(ConfigKeys.SpecialFolders_NumLastTasks);
+        const specTaskListLength = this.wrapper.config.get<number>(ConfigKeys.SpecialFolders.NumLastTasks);
         //
         // First remove this task from the list of it is present, it'll be put back
         // in the following steps

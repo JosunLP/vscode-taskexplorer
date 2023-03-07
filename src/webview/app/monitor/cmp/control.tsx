@@ -72,7 +72,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
     }
 
 
-    private formatRuntime = (runtime: number, type?: string) =>
+    private formatRuntime = (runtime: number) =>
     {
         let m = Math.floor(runtime / 1000 / 60).toString(),
             s = Math.floor(runtime / 1000 % 60).toString(),
@@ -168,7 +168,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
                                                 Average
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.average, "average")}
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.average)}
                                                 {this.state.task.runTime.avgDown && this.getTimeChangedDown()}
                                                 {this.state.task.runTime.avgUp && this.getTimeChangedUp()}
                                                 {!this.state.task.runTime.avgUp && !this.state.task.runTime.avgDown && this.getTimeChangedNone()}
@@ -179,7 +179,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
                                                 Fastest
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.fastest, "fastest")}
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.fastest)}
                                                 {this.state.task.runTime.newFast && this.getTimeChangedFastest()}
                                                 {!this.state.task.runTime.newFast && this.getTimeChangedNone()}
                                             </td>
@@ -189,7 +189,7 @@ export class TeTaskControl extends React.Component<ReactProps, ReactState, React
                                                 Slowest
                                             </td>
                                             <td>
-                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.slowest, "slowest")}
+                                                &nbsp;&nbsp; : &nbsp;{this.formatRuntime(task.runTime.slowest)}
                                                 {this.state.task.runTime.newSlow && this.getTimeChangedSlowest()}
                                                 {!this.state.task.runTime.newSlow && this.getTimeChangedNone()}
                                             </td>

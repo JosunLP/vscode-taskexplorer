@@ -99,7 +99,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _treeManager: TaskTreeManager;
 	private readonly _taskUsageView: TaskUsageView;
 	private readonly _taskCountView: TaskCountView;
-	private readonly _taskDetailsPage: TaskDetailsPage;
 	private readonly _taskMonitorPage: MonitorPage;
 	private readonly _configuration: IConfiguration;
 	private readonly _configWatcher: TeConfigWatcher;
@@ -147,7 +146,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._taskUsageView = new TaskUsageView(this);
 
 		this._licensePage = new LicensePage(this);
-		this._taskDetailsPage = new TaskDetailsPage(this);
 		this._taskMonitorPage = new MonitorPage(this);
 		this._parsingReportPage = new ParsingReportPage(this);
 		this._releaseNotesPage = new ReleaseNotesPage(this);
@@ -193,7 +191,6 @@ export class TeWrapper implements ITeWrapper, Disposable
             this._taskManager,
 			this._treeManager,
 			this._licensePage,
-			this._taskDetailsPage,
 			this._taskMonitorPage,
 			this._fileWatcher,
 			this._configWatcher,
@@ -572,10 +569,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get taskCountView(): TaskCountView {
 		return this._taskCountView;
-	}
-
-	get taskDetailsPage(): TaskDetailsPage {
-		return this._taskDetailsPage;
 	}
 
 	get taskManager(): TaskManager {

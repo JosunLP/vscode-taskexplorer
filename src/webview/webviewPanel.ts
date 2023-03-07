@@ -36,16 +36,21 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		public readonly id: `taskexplorer.view.${WebviewIds}`,
 		private readonly contextKeyPrefix: `${ContextKeys.WebviewPrefix}${WebviewIds}`,
 		private readonly trackingFeature: string,
-		showCommand: Commands)
+		showCommand?: Commands)
 	{
 		super(wrapper, title, fileName);
 		this._teEnabled = wrapper.utils.isTeEnabled();
+		if (showCommand){
+			this.disposables.push(
+				registerCommand(showCommand, this.onShowCommand, this),
+				window.registerWebviewPanelSerializer(id, this._serializer)
+			);
+		}
 		this.disposables.push(
-			registerCommand(showCommand, this.onShowCommand, this),
-			wrapper.config.onDidChange(this.onConfigChangedBase, this),
-			window.registerWebviewPanelSerializer(id, this._serializer)
+			wrapper.config.onDidChange(this.onConfigChangedBase, this)
 		);
 	}
+
 
 	override dispose()
 	{
@@ -116,10 +121,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	}
 
 
-	protected onShowCommand(...args: unknown[])
-    {
-		return this.show(undefined, ...args);
-	}
+	protected onShowCommand = (...args: unknown[]) => this.show(undefined, ...args);
 
 
 	// protected override onViewFocusChanged(e: IpcWvFocusChangedParams)
