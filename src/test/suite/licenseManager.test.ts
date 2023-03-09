@@ -16,7 +16,7 @@ const licMgrMaxFreeTasks = 500;             // Should be set to what the constan
 const licMgrMaxFreeTaskFiles = 100;         // Should be set to what the constants are in lib/licenseManager
 const licMgrMaxFreeTasksForTaskType = 100;  // Should be set to what the constants are in lib/licenseManager
 const licMgrMaxFreeTasksForScriptType = 50; // Should be set to what the constants are in lib/licenseManager
-const validKey = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg1z6Av8rgBIcoC4u0NtyMBoBOcCynsuUNkbnpOao6TflQPUwLr9/4tUaKAqAeKu5mpQo5JIKsVkOAxWY3NboMP+ZBW/23K/nBLjpHBZ267hEZPFshff3CTJE/uxN3j8o84=";
+
 const invalidKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6Ik";
 let licMgr: ITeLicenseManager;
 let teWrapper: ITeWrapper;
@@ -24,8 +24,9 @@ let randomMachineId: string;
 let oMachineId: string;
 let oLicenseKey: any;
 let account: ITeAccount;
+let validKey: string;
 
-function setTasks() { /* licMgr.setTestData({ callTasksChanged: true }); */ }
+function setTasks(e: any) { licMgr.setTestData({ callTasksChanged: e }); }
 
 
 suite("License Manager Tests", () =>
@@ -47,6 +48,7 @@ suite("License Manager Tests", () =>
 		oMachineId = env.machineId;
 		randomMachineId = "te-tests-machine-id-" + teWrapper.utils.getRandomNumber();
 		oLicenseKey = await teWrapper.storage.getSecret(StorageKeys.Account);
+		validKey = utils.validLicenseKey;
 		licMgr = teWrapper.licenseManager;
 		licMgr.setTestData({
 			maxFreeTasks: licMgrMaxFreeTasks,
@@ -219,7 +221,7 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox(invalidKey);
 		utils.overrideNextShowInfoBox(undefined);
-		setTasks();
+		setTasks({ tasks: teWrapper.treeManager.getTasks() });
 		await utils.sleep(250);
 		await utils.waitForTeIdle(150);
         utils.endRollingCount(this);
@@ -260,7 +262,7 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox("1234");
 		utils.overrideNextShowInfoBox(undefined);
-		setTasks();
+		setTasks({ tasks: teWrapper.treeManager.getTasks() });
 		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
         utils.endRollingCount(this);
@@ -396,7 +398,6 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.checkLicense + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd);
 		await utils.setLicensed();
-		setTasks();
         utils.endRollingCount(this);
 	});
 
@@ -528,6 +529,7 @@ suite("License Manager Tests", () =>
 		});
 		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
 		await utils.closeEditors();
+		account = { ...(await licMgr.getAccount()) };
         utils.endRollingCount(this);
 	});
 
@@ -543,6 +545,7 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
+		setTasks({ tasks: teWrapper.treeManager.getTasks() });
 		utils.overrideNextShowInfoBox(undefined);
 		await utils.treeUtils.refresh();
 		expect(teWrapper.treeManager.getTasks().length).to.be.equal(25);
@@ -560,6 +563,7 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: 10,
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
+		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "gulp" }});
 		utils.overrideNextShowInfoBox(undefined);
 		await utils.treeUtils.refresh();
 		expect(teWrapper.treeManager.getTasks().filter((t: Task) => t.source === "gulp").length).to.be.equal(10);
@@ -577,6 +581,7 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
 			maxFreeTasksForScriptType: 1
 		});
+		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "batch" }});
 		utils.overrideNextShowInfoBox(undefined);
 		await utils.treeUtils.refresh();
 		expect(teWrapper.treeManager.getTasks().filter((t: Task) => t.source === "batch").length).to.be.equal(1);
@@ -603,6 +608,7 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
+		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "grunt" }});
 		utils.overrideNextShowInfoBox(undefined);
 		await utils.treeUtils.refresh();
 		await teWrapper.fs.copyDir(outsideWsDir, utils.getWsPath("."), undefined, true); // Cover fileCache.addFolder()
@@ -618,9 +624,8 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.refresh);
-		licMgr.setTestData({
-			machineIdL: randomMachineId
-		});
+		// await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(account));
+		utils.setLicensed(false, { checkLicense: false });
 		await teWrapper.storage.update(StorageKeys.LastLicenseNag, undefined);
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox(validKey);

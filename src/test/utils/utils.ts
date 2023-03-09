@@ -14,6 +14,7 @@ import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import { ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { commands, ConfigurationTarget, Disposable, env, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks, Uri, ViewColumn, window, workspace } from "vscode";
 import { StorageKeys } from "../../lib/constants";
+import { env as environment } from "process";
 
 
 const { symbols } = require("mocha/lib/reporters/base");
@@ -461,10 +462,18 @@ export const setFailed = (ctrlc = true) =>
 };
 
 
+export const validLicenseKey = environment.VSCODE_TASKEXPLORER_TESTS_VALID_KEY as string;
+
+
 export const setLicensed = async (valid?: boolean, opts?: any) =>
 {
-    // let setMachineId = false;
     const licMgr = teWrapper.licenseManager;
+    // let setMachineId = false;
+    let checkLicense = true;
+    if (typeof opts?.checkLicense  !== "undefined")  {
+        checkLicense = !!opts.checkLicense;
+        delete opts.checkLicense;
+    }
 
     if (valid === undefined)
     {
@@ -479,7 +488,6 @@ export const setLicensed = async (valid?: boolean, opts?: any) =>
         }
 
         const account = await licMgr.getAccount();
-        const validKey = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg1z6Av8rgBIcoC4u0NtyMBoBOcCynsuUNkbnpOao6TflQPUwLr9/4tUaKAqAeKu5mpQo5JIKsVkOAxWY3NboMP+ZBW/23K/nBLjpHBZ267hEZPFshff3CTJE/uxN3j8o84=";
 
         await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(
         { ...{
@@ -504,7 +512,7 @@ export const setLicensed = async (valid?: boolean, opts?: any) =>
                 expired: !valid,
                 expires: valid ? Infinity : 0,
                 issued: Date.now(),
-                key: valid ? validKey : "",
+                key: valid ? validLicenseKey : "",
                 paid: valid,
                 period: valid ? 0 : 2,
                 state: valid ? 2 : 1, // Paid : Free
@@ -513,7 +521,9 @@ export const setLicensed = async (valid?: boolean, opts?: any) =>
         }, ...(opts || {}) }));
     }
 
-    await licMgr.checkLicense(undefined, "");
+    if (checkLicense !== false){
+        await licMgr.checkLicense(undefined, "");
+    }
     // if (setMachineId) {
     //     licMgr.setTestData({
     //         machineId: env.machineId

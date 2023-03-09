@@ -239,6 +239,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			await this.saveAccount("   ");
 		}
 		catch (e) {
+			/* istanbul ignore next */
 			this.handleServerError(e);
 		}
 
@@ -368,7 +369,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;
 		this._maxFreeTasksForScriptType = data.maxFreeTasksForScriptType || this._maxFreeTasksForScriptType;
 		if (data.callTasksChanged) {
-			this.onTasksChanged({ tasks: [], type: "all" });
+			this.onTasksChanged(data.callTasksChanged);
 		}
 	};
 

@@ -226,7 +226,8 @@ export class TeServer
 							resolve(jso as T);
 						}
 					}
-					catch /* istanbul ignore next */(e) {
+					/* istanbul ignore next */
+					catch (e) {
 						this.log(e);
 						reject(<ServerError>{ message: e.message, status: res.statusCode, body: rspData });
 					}
