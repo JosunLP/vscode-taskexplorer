@@ -4,7 +4,7 @@ import "./common/scss/te.scss";
 
 import { Disposable, DOM } from "./common/dom";
 import {
-	debounce, IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand,
+	IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand, IDictionary,
 	IpcExecCommand, onIpc, IpcEchoCommandRequest, IpcEchoCustomCommandRequest, IpcExecCustomCommand
 } from "../common/ipc";
 
@@ -13,6 +13,8 @@ interface VsCodeApi {
 	setState(state: unknown): void;
 	getState(): unknown;
 }
+
+interface IDebounceParams { fn: (...args: any[]) => any; start: number; args: any[] }
 
 
 declare function acquireVsCodeApi(): VsCodeApi;
@@ -35,6 +37,7 @@ export abstract class TeWebviewApp<State = undefined>
 	private readonly _tzOffset: number;
 	private readonly _maxSmallIntegerV8 = 2 ** 30; // Max # that can be stored in V8's smis (small int)
 	private readonly _vscode: VsCodeApi;
+	private _debounceDict: IDictionary<IDebounceParams> = {};
 
 
 	constructor(protected readonly appName: string)
@@ -116,6 +119,25 @@ export abstract class TeWebviewApp<State = undefined>
 	}
 
 
+	private debounce = <T>(fn: (...args: any[]) => T, wait: number, ...args: any[]) => new Promise<T|void>(async(resolve) =>
+	{
+		if (!this._debounceDict[fn.name])
+		{
+			this._debounceDict[fn.name] = { fn, start: Date.now(), args };
+			setTimeout((p: IDebounceParams) =>
+			{
+				resolve(p.fn.call(this, ...p.args));
+				delete this._debounceDict[fn.name];
+			},
+			wait, this._debounceDict[fn.name]);
+		}
+		else {
+			Object.assign(this._debounceDict[fn.name], { args });
+			setTimeout(() => resolve(), Date.now() - this._debounceDict[fn.name].start);
+		}
+	});
+
+
 	protected getState = <T>(): T => this._vscode.getState() as T;
 
 
@@ -138,7 +160,7 @@ export abstract class TeWebviewApp<State = undefined>
 				{
 					this._focused = true;
 					this._inputFocused = inputFocused;
-					debounce(p => {
+					this.debounce(p => {
 						this.onFocusChanged?.(true);
 						this.sendCommand(IpcFocusChangedCommand, p);
 					}, 150, { focused: true, inputFocused });
@@ -149,7 +171,7 @@ export abstract class TeWebviewApp<State = undefined>
 				if (this._focused !== false || this._inputFocused !== false)
 				{
 					this._focused = this._inputFocused = false;
-					debounce(p => {
+					this.debounce(p => {
 						this.onFocusChanged?.(false);
 						this.sendCommand(IpcFocusChangedCommand, p);
 					}, 150, { focused: false, inputFocused: false });

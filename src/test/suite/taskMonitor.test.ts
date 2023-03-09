@@ -3,9 +3,10 @@
 
 import { Extension, Task, TaskExecution } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
-import { executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
+import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, promiseFromEvent, waitForTaskExecution, treeUtils, waitForTeIdle } from "../utils/utils";
+import { ConfigKeys } from "../../lib/constants";
 
 let teWrapper: ITeWrapper;
 let ant: ITaskItem[];
@@ -107,10 +108,30 @@ suite("Task Monitor App Tests", () =>
 	});
 
 
-	// test("Toggle Timer", async function()
-	// {
-    //     if (exitRollingCount(this)) return;
-    //     endRollingCount(this);
-	// });
+	test("Toggle Timer Setting", async function()
+	{
+        if (exitRollingCount(this)) return;
+		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TimerMode, "MM:SS:MSS");
+		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TimerMode, "MM:SS:MS");
+        endRollingCount(this);
+	});
+
+
+	test("Toggle Track Stats Setting", async function()
+	{
+        if (exitRollingCount(this)) return;
+		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
+		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
+        endRollingCount(this);
+	});
+
+
+	test("Toggle Track Usage Setting", async function()
+	{
+        if (exitRollingCount(this)) return;
+		await executeSettingsUpdate(ConfigKeys.TrackUsage, false);
+		await executeSettingsUpdate(ConfigKeys.TrackUsage, true);
+        endRollingCount(this);
+	});
 
 });

@@ -126,7 +126,7 @@ export const IpcStateChangedMsg = new IpcNotification<IpcStateChangedParams>("st
 // TASK MONITOR APP
 //
 
-export type { ITeTask, TeTaskListType };
+export type { ITeTask, TeTaskListType, IDictionary };
 export type IMonitorAppTimerMode = "Hide" | "MM:SS" | "MM:SS:MS"  | "MM:SS:MSS";
 
 export interface MonitorAppState extends State
@@ -156,23 +156,3 @@ export interface IpcTasksChangedParams { tasks: ITeTask[]; list: TeTaskListType 
 
 export const IpcTasksChangedMsg = new IpcNotification<IpcTasksChangedParams>("tasks/change");
 export const IpcTaskChangedMsg = new IpcNotification<IpcTaskChangedParams>("tasks/change/status");
-
-interface IDebounceParams { fn: (...args: any[]) => any; start: number; args: any[] }
-const _debounceDict: IDictionary<IDebounceParams> = {};
-export const debounce = <T>(fn: (...args: any[]) => T, wait: number, ...args: any[]) => new Promise<T|void>(async(resolve) =>
-{
-	if (!_debounceDict[fn.name])
-	{
-		_debounceDict[fn.name] = { fn, start: Date.now(), args };
-		setTimeout((p: IDebounceParams) =>
-		{
-			resolve(p.fn.call(this, ...p.args));
-			delete _debounceDict[fn.name];
-		},
-		wait, _debounceDict[fn.name]);
-	}
-	else {
-		Object.assign(_debounceDict[fn.name], { args });
-		setTimeout(() => resolve(), Date.now() - _debounceDict[fn.name].start);
-	}
-});
