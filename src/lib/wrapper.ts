@@ -49,18 +49,17 @@ import { TaskExplorerProvider } from "../providers/provider";
 import { IConfiguration } from "../interface/IConfiguration";
 import { TaskCountView } from "../webview/view/taskCountView";
 import { TaskUsageView } from "../webview/view/taskUsageView";
-import { TaskDetailsPage } from "../webview/page/taskDetails";
 import { Commands, registerCommand } from "./command/command";
+import { AddToExcludesCommand } from "./command/addToExcludes";
 import { ConfigKeys, StorageKeys, Strings } from "./constants";
 import { ReleaseNotesPage } from "../webview/page/releaseNotes";
+import { EnableTaskTypeCommand } from "./command/enableTaskType";
 import { PowershellTaskProvider } from "../providers/powershell";
 import { ITaskExplorerProvider } from "../interface/ITaskProvider";
+import { DisableTaskTypeCommand } from "./command/disableTaskType";
 import { AppPublisherTaskProvider } from "../providers/appPublisher";
 import { ParsingReportPage } from "../webview/page/parsingReportPage";
-import { registerAddToExcludesCommand } from "./command/addToExcludes";
-import { registerEnableTaskTypeCommand } from "./command/enableTaskType";
-import { registerDisableTaskTypeCommand } from "./command/disableTaskType";
-import { registerRemoveFromExcludesCommand } from "./command/removeFromExcludes";
+import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import {
 	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem,
 	TreeView, Disposable, EventEmitter
@@ -70,9 +69,9 @@ import {
 	ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "../interface";
 
+
 export class TeWrapper implements ITeWrapper, Disposable
 {
-
 	private _ready = false;
 	private _tests = false;
 	private _busy = false;
@@ -183,6 +182,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// );
 
 		this._disposables = [
+			this._teApi,
 			this._usage,
 			this._onReady,
 			this._homeView,
@@ -373,10 +373,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	private registerContextMenuCommands = () =>
 	{
-		registerDisableTaskTypeCommand(this._disposables);
-		registerEnableTaskTypeCommand(this._disposables);
-		registerAddToExcludesCommand(this, this._disposables);
-		registerRemoveFromExcludesCommand(this, this._disposables);
+		this._disposables.push(
+			new DisableTaskTypeCommand(this),
+			new EnableTaskTypeCommand(this),
+			new AddToExcludesCommand(this),
+			new RemoveFromExcludesCommand(this)
+		);
 	};
 
 
@@ -425,7 +427,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get busy(): boolean {
 		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy() || this._treeManager.isBusy() ||
-			   this._fileWatcher.isBusy() || this._configWatcher.isBusy() || this._licenseManager.isBusy;
+			   this._fileWatcher.isBusy() || this._configWatcher.isBusy() || this._licenseManager.isBusy || this._server.isBusy;
 	}
 
 	get cacheBuster(): string {

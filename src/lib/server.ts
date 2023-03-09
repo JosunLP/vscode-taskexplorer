@@ -148,16 +148,23 @@ export class TeServer
 
 	private logServerResponse = (res: IncomingMessage, jso: any, rspData: string, logPad: string) =>
 	{
-		this.log("   response received", logPad);
+		this.log("   response received start", logPad);
 		this.log("      status code", logPad, res.statusCode);
 		this.log("      length", logPad, rspData.length);
-		this.log("      success", logPad, jso.success);
-		this.log("      message", logPad, jso.message);
+		if (jso) {
+			this.log("      success", logPad, jso.success);
+			this.log("      message", logPad, jso.message);
+		}
+		else {
+			this.log("      body", logPad, rspData);
+		}
+		this.log("   response received end", logPad);
+		this.log("server request completed", logPad);
 	};
 
 
 	/* istanbul ignore next*/
-	private onServerError = (e: any, logPad: string, fn: string, rspData?: string) =>
+	private onServerError = (e: any, logPad: string, rspData?: string) =>
 	{
 		this.log(e, "", undefined, figures.color.errorTests);
 		if (rspData) {
@@ -165,8 +172,8 @@ export class TeServer
 		}
 		this.log("   the license server is down, offline, or there is a connection issue", logPad, undefined, figures.color.errorTests);
 		this.log("   licensed mode will be automatically enabled", logPad, undefined, figures.color.errorTests);
-		this.log("request to license server completed w/ a failure", logPad + "   ", undefined, figures.color.errorTests);
-		this.wrapper.log.methodDone(fn + " license", 1, logPad);
+		this.log("server request completed w/ a failure", logPad + "   ", undefined, figures.color.errorTests);
+		this.wrapper.log.methodDone("server request", 1, logPad);
 	};
 
 
@@ -175,7 +182,10 @@ export class TeServer
 		return Promise.race<T>(
 		[
 			this._request<T>(endpoint, logPad, params),
-			new Promise<T>(reject => setTimeout(reject, this._maxConnectionTime, <ServerError>{ message: "Timed out", status: 408 }))
+			new Promise<T>((_resolve, reject) => {
+				this._busy = false;
+				setTimeout(reject, this._maxConnectionTime, <ServerError>{ message: "Timed out", status: 408 });
+			})
 		]);
 	};
 
@@ -189,16 +199,22 @@ export class TeServer
 			let rspData = "";
 			let errorState = false;
 			const options = this.getDefaultServerOptions(endpoint);
-			this.wrapper.log.methodStart("request license", 1, logPad, false, [[ "host", options.hostname ], [ "port", options.port ]]);
+			this.wrapper.log.methodStart("server request", 1, logPad, false, [
+				[ "host", options.hostname ], [ "port", options.port ], [ "endpoint", endpoint ]
+			]);
 			this.log("starting https request to license server", logPad + "   ");
+			this.log("   endpoint", logPad + "   ", endpoint);
 
 			const req = request(options, (res) =>
 			{
 				res.on("data", (chunk) => { rspData += chunk; });
 				res.on("end", async() =>
 				{
+					this.log("   response stream read");
 					try
-					{   if (!res.statusCode || res.statusCode > 299) {
+					{   if (!res.statusCode || res.statusCode > 299)
+						{
+							this.logServerResponse(res, null, rspData, logPad);
 							reject(<ServerError>{ message: res.statusMessage, status: res.statusCode, body: rspData });
 						}
 						else {
@@ -208,6 +224,7 @@ export class TeServer
 						}
 					}
 					catch (e){
+						this.log(e);
 						reject(<ServerError>{ message: e.message, status: res.statusCode, body: rspData });
 					}
 					finally {
@@ -219,13 +236,14 @@ export class TeServer
 			/* istanbul ignore next*/
 			req.on("error", (e) =>
 			{   // Not going to fail unless i birth a bug
-				this.onServerError(e, "request", logPad);
+				this.onServerError(e, logPad);
 				this._busy = false;
 				errorState = true;
 				reject(e);
 			});
 
-			const payload = JSON.stringify({ ...(params || {}), appName: this.authService, machineId: env.machineId });
+			const payload = JSON.stringify({ ...{ appName: this.authService, machineId: env.machineId }, ...(params || {}) });
+			this.log("   payload", logPad + "   ", payload);
 			req.write(payload, () =>
             {
 				if (!errorState) {
@@ -284,7 +302,7 @@ export class TeServer
 	// 	}
 	// 	catch (e) {
 	// 		/* istanbul ignore next*/
-	// 		this.onServerError(e, "validate", logPad, res.data);
+	// 		this.onServerError(e, logPad, res.data);
 	// 	}
 	// 	finally {
 	// 		this.busy = false;

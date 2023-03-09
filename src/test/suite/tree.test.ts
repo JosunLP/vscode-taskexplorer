@@ -102,8 +102,11 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard * 13);
+console.log("t1");
         let removed = await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
+console.log("t2: " + removed);
         if (removed) {
+console.log("t3");
             await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
         }
         removed = await executeTeCommand2("addRemoveFavorite", [ batch[1] ]);
@@ -135,15 +138,18 @@ suite("Tree Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard);
         const taskTree = teWrapper.treeManager.getTaskTree();
-        if(taskTree)
+        if (taskTree)
         {
+console.log("c1: " + batch[0].id);
             const sFolder= taskTree[0].label === "Favorites" ? taskTree[0] as any :
                             (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
             if (sFolder)
             {
+console.log("c2: " + sFolder.taskFiles.length);
                 cstItem1 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === batch[0].id);
                 if (cstItem1)
                 {
+console.log("c3");
                     utils.overrideNextShowInputBox("Label 1");
                     const removed = await executeTeCommand2("addRemoveCustomLabel", [ cstItem1 ]);
                     if (removed) {

@@ -75,6 +75,7 @@ export interface ITeUtilities
 	getGlobPattern(taskType: string): string;
 	getGroupSeparator(): string;
 	getPackageManager(): string;
+	getRandomNumber(max?: number, min?: number): number;
 	lowerCaseFirstChar(s: string, removeSpaces: boolean): string;
 	isExcluded(uriPath: string, logPad?: string): boolean;
 	isTaskTypeEnabled(taskType: string): boolean;

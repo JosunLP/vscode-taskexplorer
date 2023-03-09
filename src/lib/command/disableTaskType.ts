@@ -1,25 +1,31 @@
 
-import { log } from "../log/log";
 import { Globs } from "../constants";
+import { TeWrapper } from "../wrapper";
 import { Disposable, Uri } from "vscode";
 import { testPattern } from "../utils/utils";
-import { configuration } from "../configuration";
 import { Commands, registerCommand } from "./command";
 
 
-const disableTaskType = async(uri: Uri) =>
+export class DisableTaskTypeCommand implements Disposable
 {
-    log.methodStart("disable task type file explorer command", 1, "", true, [[ "path", uri.fsPath ]]);
-    const globKey = Object.keys(Globs).find((k => k.startsWith("GLOB_") && testPattern(uri.path, Globs[k]))) as string;
-    const taskType = globKey.replace("GLOB_", "").toLowerCase();
-    await configuration.update("enabledTasks." + taskType, false);
-    log.methodDone("disable task type file explorer command", 1, "");
-};
+    private _disposables: Disposable[] = [];
 
+    constructor(private readonly wrapper: TeWrapper)
+    {
+        this._disposables.push(
+            registerCommand(Commands.DisableTaskType, (uri: Uri) => this.disableTaskType(uri), this)
+        );
+    }
 
-export const registerDisableTaskTypeCommand = (disposables: Disposable[]) =>
-{
-	disposables.push(
-        registerCommand(Commands.DisableTaskType, async (uri: Uri) => { await disableTaskType(uri); })
-    );
-};
+    dispose = () => this._disposables.forEach((d) => d.dispose());
+
+    private disableTaskType = async(uri: Uri) =>
+    {
+        this.wrapper.log.methodStart("disable task type file explorer command", 1, "", true, [[ "path", uri.fsPath ]]);
+        const globKey = Object.keys(Globs).find((k => k.startsWith("GLOB_") && testPattern(uri.path, Globs[k]))) as string;
+        const taskType = globKey.replace("GLOB_", "").toLowerCase();
+        await this.wrapper.config.update("enabledTasks." + taskType, false);
+        this.wrapper.log.methodDone("disable task type file explorer command", 1, "");
+    };
+
+}

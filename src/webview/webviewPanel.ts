@@ -88,9 +88,9 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 			{
 				this._teEnabled = enabled;
 				this.notify(IpcEnabledChangedMsg, { enabled });
-				if (!enabled) {
-					setTimeout(() => this.dispose(), 500);
-				}
+				// if (!enabled) {
+				// 	setTimeout(() => this.dispose(), 500);
+				// }
 			}
 		}
 	}

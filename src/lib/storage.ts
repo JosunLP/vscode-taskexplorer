@@ -135,7 +135,9 @@ class Storage implements IStorage, Memento
     getSecret = async <T = string>(key: string, defaultValue?: T) =>
     {
         const secret = await this.secrets.get(this.getKey(key));
-        return secret ? JSON.parse(secret) as T : defaultValue;
+        let value = secret as T | undefined;
+        if (secret) { try { value = JSON.parse(secret); } catch {} }
+        return value ? value : defaultValue;
     };
 
 

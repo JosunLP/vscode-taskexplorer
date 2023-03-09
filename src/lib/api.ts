@@ -3,26 +3,34 @@ import { TeWrapper } from "./wrapper";
 import { ContextKeys } from "./context";
 import { IExternalProvider, ITaskExplorerApi } from "../interface";
 import { executeCommand, registerCommand, Commands } from "./command/command";
+import { Disposable } from "vscode";
 
 
-export class TeApi implements ITaskExplorerApi
+export class TeApi implements ITaskExplorerApi, Disposable
 {
     private _tests: boolean;
+    private _disposables: Disposable[] = [];
 
-
-    constructor(private readonly _wrapper: TeWrapper)
+    constructor(private readonly wrapper: TeWrapper)
     {
-        this._tests = this._wrapper.tests;
+        this._tests = this.wrapper.tests;
         /* istanbul ignore else */
         if (this._tests) {
-            void _wrapper.contextTe.setContext(ContextKeys.Tests, true);
+            void wrapper.contextTe.setContext(ContextKeys.Tests, true);
         }
-        this._wrapper.context.subscriptions.push(registerCommand("taskexplorer.getApi", () => this, this));
+        this._disposables.push(registerCommand("taskexplorer.getApi", () => this, this));
+    }
+
+
+    dispose()
+    {
+        this._disposables.forEach(d => d.dispose());
+        this._disposables.splice(0);
     }
 
 
     get providers() {
-        return this._wrapper.providers;
+        return this.wrapper.providers;
     }
 
 

@@ -81,6 +81,22 @@ export const getPackageManager = () =>
 };
 
 
+/**
+ * Get a random integer betwen min and max, inclusive
+ *
+ * @since 3.0.0
+ * @param [max=100000] The maximum number to return
+ * @param [min=0] The minimum number to return
+ */
+export const getRandomNumber = (max = 100000, min = 0) =>
+{
+    const rnd = Math.random();
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(rnd * (max - min + 1) + min);
+};
+
+
 export const getWorkspaceProjectName = (fsPath: string) =>
 {
     let project = basename(fsPath);

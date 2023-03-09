@@ -518,6 +518,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         ]);
         this.fireTreeRefreshEvent(logPad + "   ", 1);
         this.refreshPending = false;
+        this.wrapper.statusBar.update("");
         this.wrapper.log.write("   workspace folder event has been processed", 1, logPad);
         this.wrapper.log.methodDone("workspace folder removed event", 1, logPad);
     };

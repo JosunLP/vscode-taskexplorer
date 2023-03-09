@@ -1,36 +1,40 @@
 
-import { log } from "../log/log";
 import { Globs } from "../constants";
+import { TeWrapper } from "../wrapper";
 import { testPattern } from "../utils/utils";
 import { loadMessageBundle } from "vscode-nls";
 import { Disposable, Uri, window } from "vscode";
-import { configuration } from "../configuration";
 import { Commands, registerCommand } from "./command";
 
-const localize = loadMessageBundle();
-
-
-const enableTaskType = async(uri: Uri) =>
+export class EnableTaskTypeCommand implements Disposable
 {
-    log.methodStart("enable task type file explorer command", 1, "", true, [[ "path", uri.fsPath ]]);
-    const globKey = Object.keys(Globs).find((k => k.startsWith("GLOB_") && testPattern(uri.path, Globs[k])));
-    if (globKey)
+    private localize = loadMessageBundle();
+    private _disposables: Disposable[] = [];
+
+    constructor(private readonly wrapper: TeWrapper)
     {
-        const taskType = globKey.replace("GLOB_", "").toLowerCase();
-        await configuration.update("enabledTasks." + taskType, true);
+        this._disposables.push(
+            registerCommand(Commands.EnableTaskType, (uri: Uri) => this.enableTaskType(uri), this)
+        );
     }
-    else{
-        const msg = "This file does not appear to be associated to any known task type";
-        log.write(msg, 1, "");
-        window.showInformationMessage(localize("messages.noAssociatedTaskType", msg));
-    }
-    log.methodDone("enable task type file explorer command", 1, "");
-};
 
+    dispose = () => this._disposables.forEach((d) => d.dispose());
 
-export const registerEnableTaskTypeCommand = (disposables: Disposable[]) =>
-{
-	disposables.push(
-        registerCommand(Commands.EnableTaskType, async (uri: Uri) => { await enableTaskType(uri); })
-    );
-};
+    private enableTaskType = async(uri: Uri) =>
+    {
+        this.wrapper.log.methodStart("enable task type file explorer command", 1, "", true, [[ "path", uri.fsPath ]]);
+        const globKey = Object.keys(Globs).find((k => k.startsWith("GLOB_") && testPattern(uri.path, Globs[k])));
+        if (globKey)
+        {
+            const taskType = globKey.replace("GLOB_", "").toLowerCase();
+            await this.wrapper.config.update("enabledTasks." + taskType, true);
+        }
+        else{
+            const msg = "This file does not appear to be associated to any known task type";
+            this.wrapper.log.write(msg, 1, "");
+            window.showInformationMessage(this.localize("messages.noAssociatedTaskType", msg));
+        }
+        this.wrapper.log.methodDone("enable task type file explorer command", 1, "");
+    };
+
+}

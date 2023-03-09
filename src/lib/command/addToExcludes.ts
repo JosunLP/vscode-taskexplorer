@@ -7,41 +7,45 @@ import { Disposable, Uri, window } from "vscode";
 import { addToExcludes } from "../utils/addToExcludes";
 import { Commands, executeCommand, registerCommand } from "./command";
 
-const localize = loadMessageBundle();
-let teWrapper: TeWrapper;
 
-
-const addUriToExcludes = async(uri: Uri) =>
+export class AddToExcludesCommand implements Disposable
 {
-    teWrapper.log.methodStart("add to excludes file explorer command", 1, "", true, [[ "path", uri.fsPath ]]);
-    if (!teWrapper.fs.isDirectory(uri.fsPath))
+    private localize = loadMessageBundle();
+    private _disposables: Disposable[] = [];
+
+    constructor(private readonly wrapper: TeWrapper)
     {
-        const globKey = Object.keys(Globs).find((k => k.startsWith("GLOB_") && teWrapper.utils.testPattern(uri.path, Globs[k])));
-        if (globKey)
+        this._disposables.push(
+            registerCommand(Commands.AddToExcludesMenu, (uri: Uri) => this.addUriToExcludes(uri), this)
+        );
+    }
+
+    dispose = () => this._disposables.forEach((d) => d.dispose());
+
+    private addUriToExcludes = async(uri: Uri) =>
+    {
+        this.wrapper.log.methodStart("add to excludes file explorer command", 1, "", true, [[ "path", uri.fsPath ]]);
+        if (!this.wrapper.fs.isDirectory(uri.fsPath))
         {
-            const taskType = globKey.replace("GLOB_", "").toLowerCase();
-            teWrapper.configWatcher.enableConfigWatcher(false);
-            await addToExcludes([ uri.path ], "exclude", "   ");
-            teWrapper.configWatcher.enableConfigWatcher(true);
-            await executeCommand(Commands.Refresh, taskType, uri, "   ");
+            const globKey = Object.keys(Globs).find((k => k.startsWith("GLOB_") && this.wrapper.utils.testPattern(uri.path, Globs[k])));
+            if (globKey)
+            {
+                const taskType = globKey.replace("GLOB_", "").toLowerCase();
+                this.wrapper.configWatcher.enableConfigWatcher(false);
+                await addToExcludes([ uri.path ], "exclude", "   ");
+                this.wrapper.configWatcher.enableConfigWatcher(true);
+                await executeCommand(Commands.Refresh, taskType, uri, "   ");
+            }
+            else{
+                const msg = "This file does not appear to be associated to any known task type";
+                this.wrapper.log.write(msg, 1, "   ");
+                window.showInformationMessage(this.localize("messages.noAssociatedTaskType", msg));
+            }
         }
-        else{
-            const msg = "This file does not appear to be associated to any known task type";
-            teWrapper.log.write(msg, 1, "   ");
-            window.showInformationMessage(localize("messages.noAssociatedTaskType", msg));
+        else {
+            await addToExcludes([ uri.path + "/**" ], "exclude", "   ");
         }
-    }
-    else {
-        await addToExcludes([ uri.path + "/**" ], "exclude", "   ");
-    }
-    teWrapper.log.methodDone("add to excludes file explorer command", 1, "");
-};
+        this.wrapper.log.methodDone("add to excludes file explorer command", 1, "");
+    };
 
-
-export const registerAddToExcludesCommand = (wrapper: TeWrapper, disposables: Disposable[]) =>
-{
-    teWrapper = wrapper;
-	disposables.push(
-        registerCommand(Commands.AddToExcludesMenu, async (uri: Uri) => { await addUriToExcludes(uri); })
-    );
-};
+}

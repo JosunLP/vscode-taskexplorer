@@ -12,7 +12,8 @@ import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import { ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { commands, ConfigurationTarget, Disposable, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks, Uri, ViewColumn, window, workspace } from "vscode";
+import { commands, ConfigurationTarget, Disposable, env, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks, Uri, ViewColumn, window, workspace } from "vscode";
+import { StorageKeys } from "../../lib/constants";
 
 
 const { symbols } = require("mocha/lib/reporters/base");
@@ -81,7 +82,7 @@ export const activate = async (instance?: Mocha.Context) =>
 {
     if (instance)
     {
-        instance.sleep(60 * 1000);
+        instance.timeout(60 * 1000);
         const suite = instance.currentTest?.parent;
         if (suite)
         {
@@ -469,19 +470,26 @@ export const setFailed = (ctrlc = true) =>
 };
 
 
-export const setLicensed = async (valid?: boolean) =>
+export const setLicensed = async (valid?: boolean, opts?: any) =>
 {
+    let setMachineId = false;
     const licMgr = teWrapper.licenseManager;
     teWrapper.tests = !valid;
 
     if (valid === undefined)
     {
-        await teWrapper.storage.deleteSecret("taskexplorer.account");
+        await teWrapper.storage.deleteSecret(StorageKeys.Account);
     }
     else
     {
-        await teWrapper.storage.updateSecret("taskexplorer.account", JSON.stringify(
-        {
+        if (opts && opts.machineId) {
+            licMgr.setTestData({ machineId: opts.machineId });
+            delete opts.machineId;
+            setMachineId = true;
+        }
+
+        await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(
+        { ...{
             id: valid ? 1 : 0,
             created: Date.now(),
             email: "",
@@ -506,14 +514,19 @@ export const setLicensed = async (valid?: boolean) =>
                 key: valid ? "1234-5678-9098-7654321" : "",
                 paid: valid,
                 period: valid ? 0 : 2,
-                state: valid ? 2 : 0, // Paid
-                type: valid ? 4 : 1
+                state: valid ? 2 : 1, // Paid : Free
+                type: valid ? 4 : 1   // Standard : Free
             }
-        }));
+        }, ...(opts || {}) }));
     }
 
     await licMgr.checkLicense(undefined, "");
     teWrapper.tests = true;
+    if (setMachineId) {
+        licMgr.setTestData({
+            machineId: env.machineId
+        });
+    }
 };
 
 

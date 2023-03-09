@@ -4,7 +4,7 @@ import { ITeApiEndpoint } from "./server";
 import { StorageKeys } from "./constants";
 import { isScriptType } from "./utils/taskUtils";
 import { executeCommand, registerCommand, Commands } from "./command/command";
-import { Disposable, Event, EventEmitter, InputBoxOptions, window } from "vscode";
+import { Disposable, env, Event, EventEmitter, InputBoxOptions, window } from "vscode";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeSession,
 	ITeTaskChangeEvent, ITeLicense, TeLicenseState, IDictionary
@@ -15,6 +15,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 {
 	private _account: ITeAccount;
 	private _busy = false;
+	private _machineId: string;
 	private _maxFreeTasks = 500;
 	private _maxFreeTaskFiles = 100;
 	private _maxTasksReached = false;
@@ -30,6 +31,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	constructor(private readonly wrapper: TeWrapper)
     {
+		this._machineId = env.machineId;
 		this._account = this.getNewAccount();
 		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
 		// eslint-disable-next-line @typescript-eslint/tslint/config
@@ -43,7 +45,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			registerCommand(Commands.Register, this.register, this)
 		);
     }
-
 
 	dispose = () =>
 	{
@@ -79,7 +80,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad + "   ");
+			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad + "   ",
+			{
+				machineId: this.wrapper.tests ? this._machineId : env.machineId
+			});
 			await this.saveAccount(logPad + "   ");
 			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.");
 		}
@@ -94,7 +98,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	{
 		this._busy = true;
 		this._account.errorState = false;
-
 		this.wrapper.statusBar.update(statusMessage);
 		this.wrapper.log.methodStart("license manager check license", 1, logPad);
 
@@ -184,6 +187,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 					{
 						window.showInformationMessage("License key validated, thank you for your support!");
 						if (this._maxTasksReached) {
+							this._maxTasksReached = false;
 							await executeCommand(Commands.Refresh);
 						}
 					}
@@ -215,16 +219,24 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			return;
 		}
 
+		//
+		// TODO - Collect name and email address to allow 2nd trial
+		//
+		const firstName = "Scott",
+			  lastName = "Meesseman",
+			  email = `spm-${this.wrapper.utils.getRandomNumber()}@gmail.com`;
+
 		this.wrapper.statusBar.update("Requesting extended trial");
 
 		try
 		{
-			this._account.license = await this.wrapper.server.request<ITeLicense>(ep, logPad,
+			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad,
 			{
-				ttl: 30,
-				ip: "*",
-				json: true,
-				license: true,
+				accountId: this._account.id,
+				email,
+				firstName,
+				lastName,
+				machineId: this.wrapper.tests ? this._machineId : env.machineId,
 				tests: this.wrapper.tests
 			});
 			await this.saveAccount("   ");
@@ -352,6 +364,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	setTestData = (data: any): void =>
 	{
+		this._machineId = data.machineId || env.machineId;
 		this._maxFreeTasks = data.maxFreeTasks || this._maxFreeTasks;
 		this._maxFreeTaskFiles = data.maxFreeTaskFiles || this._maxFreeTaskFiles;
 		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;
@@ -384,7 +397,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("validate license", 1, logPad);
 		try
 		{
-			this._account.session = await this.wrapper.server.request<ITeSession>(ep, logPad, { key });
+			this._account.session = await this.wrapper.server.request<ITeSession>(ep, logPad,
+			{
+				key,
+				machineId: this.wrapper.tests ? this._machineId : env.machineId
+			});
 			await this.saveAccount("   ");
 			this.wrapper.statusBar.update("");
 		}

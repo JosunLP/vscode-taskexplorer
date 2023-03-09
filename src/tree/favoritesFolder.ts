@@ -64,6 +64,6 @@ export class FavoritesFolder extends SpecialTaskFolder
     }
 
 
-    protected async onTaskSave(taskItem: TaskItem, logPad: string): Promise<void> {}
+    protected onTaskSave = (taskItem: TaskItem, logPad: string): Promise<void> => this.addTaskFile(taskItem, logPad);
 
 }
