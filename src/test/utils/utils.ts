@@ -139,16 +139,6 @@ export const activate = async (instance?: Mocha.Context) =>
         expect(teWrapper.explorer).to.not.be.empty;
         expect(isReady()).to.be.equal(true, `    ${teWrapper.figures.color.error} TeApi not ready`);
         //
-        // Set a valid license key to run in 'licensed mode' at startup
-        //
-        await teWrapper.storage.updateSecret("taskexplorer.licenseKey", "1234-5678-9098-7654321");
-        await teWrapper.storage.updateSecret("taskexplorer.licenseToken", JSON.stringify({
-            token: "1234-5678-9098-7654321",
-            ttl: 365,
-            expiresFmt: "N/A",
-            issuedFmt: "N/A"
-        }));
-        //
         // waitForIdle() added 1/2/03 - Tree loads in delay 'after' activate()
         //
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Waiting for extension to initialize", teWrapper.figures.colors.grey)}`);
@@ -199,9 +189,10 @@ export const cleanup = async () =>
     stopInput();
 
     //
-    // Cleanup or reset any settings
+    // Cleanup or reset any settings, and clear license/account from tests storage
     //
     await cleanupSettings();
+    await teWrapper.storage.deleteSecret(StorageKeys.Account);
 
     console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Deactivating extension", teWrapper.figures.colors.grey)}`);
     try { await deactivate(); } catch {}
@@ -488,21 +479,18 @@ export const setLicensed = async (valid?: boolean, opts?: any) =>
         }
 
         const account = await licMgr.getAccount();
-        const validKey = "'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwibGljZW5zZUlkIjozNiwidHJpYWxJZCI6MiwidHlwZSI6InRyaWFsIiwiaWF0IjoxNjc3OTkwOTU2LCJleHAiOjE2NzgwNzczNTZ9.aWK6G28G1sm9eHvNsdbWy8Mir2-iPTSK-OqtrM0y9l0'";
-        const validLicenseId = 36;
-        const validTrialId = 2;
-        const validAccountId = 2;
+        const validKey = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg1z6Av8rgBIcoC4u0NtyMBoBOcCynsuUNkbnpOao6TflQPUwLr9/4tUaKAqAeKu5mpQo5JIKsVkOAxWY3NboMP+ZBW/23K/nBLjpHBZ267hEZPFshff3CTJE/uxN3j8o84=";
 
         await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(
         { ...{
-            id: valid ? validAccountId : 0,
+            id: 52,
             created: Date.now(),
             email: "",
             firstName: "",
             lastName: "",
             name: "",
             orgId: 0,
-            trialId: valid ? validTrialId : 0,
+            trialId: 52,
             verified: false,
             verificationPending: false,
             session: {
@@ -512,7 +500,7 @@ export const setLicensed = async (valid?: boolean, opts?: any) =>
                 scopes: [ "te-explorer", "te-sidebar", valid ? "te-monitor" : "te-monitor-free" ],
             },
             license: {
-                id: valid ? validLicenseId : 0,
+                id: valid ? 6 : 0,
                 expired: !valid,
                 expires: valid ? Infinity : 0,
                 issued: Date.now(),

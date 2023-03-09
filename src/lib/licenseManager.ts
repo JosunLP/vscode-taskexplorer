@@ -82,7 +82,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad + "   ",
 			{
-				machineId: this.wrapper.tests ? this._machineId : /* istanbul ignore next */env.machineId
+				machineId: this._machineId
 			});
 			await this.saveAccount(logPad + "   ");
 			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.");
@@ -150,7 +150,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				options.push("Extend Trial");
 			}
 			await this.wrapper.storage.update(StorageKeys.LastLicenseNag, Date.now().toString());
-			const action = await window.showInformationMessage(message, ...options)
+			const action = await window.showInformationMessage(message, ...options);
 			if (action === "Enter License Key")
 			{
 				await executeCommand(Commands.EnterLicense);
@@ -161,7 +161,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			}
 			else if (action === "Info")
 			{
-				await executeCommand(Commands.ShowLicensePage);
+				await executeCommand(Commands.ShowLicensePage, "force"); // use 'force' to ignore the 'busy' flag in WebviewPanel
 			}
 		}
 
@@ -233,7 +233,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				email,
 				firstName,
 				lastName,
-				machineId: this.wrapper.tests ? this._machineId : env.machineId,
+				machineId: this._machineId,
 				tests: this.wrapper.tests
 			});
 			await this.saveAccount("   ");
@@ -362,7 +362,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	setTestData = (data: any): void =>
 	{
-		this._machineId = data.machineId || this._machineId;
+		this._machineId = data.machineId || this._machineId; // || env.machineId;
 		this._maxFreeTasks = data.maxFreeTasks || this._maxFreeTasks;
 		this._maxFreeTaskFiles = data.maxFreeTaskFiles || this._maxFreeTaskFiles;
 		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;
@@ -398,7 +398,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this._account.session = await this.wrapper.server.request<ITeSession>(ep, logPad,
 			{
 				key,
-				machineId: this.wrapper.tests ? this._machineId : env.machineId
+				machineId: this._machineId
 			});
 			await this.saveAccount("   ");
 			this.wrapper.statusBar.update("");

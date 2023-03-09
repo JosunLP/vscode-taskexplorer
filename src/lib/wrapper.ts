@@ -73,7 +73,6 @@ import {
 export class TeWrapper implements ITeWrapper, Disposable
 {
 	private _ready = false;
-	private _tests = false;
 	private _busy = false;
 	private _initialized = false;
 	private _cacheBuster: string;
@@ -268,7 +267,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// License / Authentication
 		//
-		// await this.storage.deleteSecret(StorageKeys.Account); // for dev/testing
+		// await this.storage.deleteSecret(StorageKeys.Account); // For testing
 		await this.licenseManager.checkLicense(undefined, "   ");
 
 		//
@@ -598,11 +597,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	}
 
 	get tests(): boolean {
-		return this._tests || this._context.extensionMode === ExtensionMode.Test;
-	}
-
-	set tests(v) {
-		this._tests = v;
+		return this._context.extensionMode === ExtensionMode.Test;
 	}
 
 	get treeManager(): TaskTreeManager {
