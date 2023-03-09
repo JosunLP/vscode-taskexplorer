@@ -3,7 +3,7 @@
 
 import { startupFocus } from "../utils/suiteUtils";
 import { executeTeCommand } from "../utils/commandUtils";
-import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount } from "../utils/utils";
+import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, teWrapper } from "../utils/utils";
 
 
 suite("Welcome Page Tests", () =>
@@ -35,7 +35,9 @@ suite("Welcome Page Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewReleaseNotes + 200);
 		await executeTeCommand("taskexplorer.view.welcome.show", testControl.waitTime.viewReport);
-		await sleep(100);
+		await sleep(75);
+		await teWrapper.welcomePage.show();
+		await sleep(5);
         endRollingCount(this);
 	});
 

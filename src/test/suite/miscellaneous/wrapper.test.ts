@@ -78,4 +78,20 @@ suite("Wrapper Tests", () =>
         endRollingCount(this);
     });
 
+
+    test("Status Bar", async function()
+    {
+        if (exitRollingCount(this)) return;
+        teWrapper.statusBar.show();
+        teWrapper.statusBar.update("test");
+        teWrapper.statusBar.show();
+        teWrapper.statusBar.update("test2");
+        teWrapper.statusBar.hide();
+        teWrapper.statusBar.hide();
+        teWrapper.statusBar.show();
+        teWrapper.statusBar.show();
+        teWrapper.statusBar.hide();
+        endRollingCount(this);
+    });
+
 });

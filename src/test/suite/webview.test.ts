@@ -95,7 +95,13 @@ suite("Webview Tests", () =>
         await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
         await sleep(5);
         await commands.executeCommand("taskexplorer.view.home.refresh");
+        await sleep(5);
         await commands.executeCommand("taskexplorer.donate");
+        await sleep(5);
+        await commands.executeCommand("taskexplorer.openBugReports");
+        await sleep(5);
+        await commands.executeCommand("taskexplorer.openRepository");
+        await sleep(5);
         endRollingCount(this);
     });
 

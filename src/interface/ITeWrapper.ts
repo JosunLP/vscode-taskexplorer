@@ -20,6 +20,7 @@ import { ExtensionContext, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
 	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "./ITeUtilities";
+import { ITeStatusBar } from "./ITeStatusBar";
 
 
 export interface ITeWrapper
@@ -56,6 +57,7 @@ export interface ITeWrapper
 	sidebar: ITeTaskTree;
 	sidebarView: TreeView<TreeItem>;
 	sorters: ITeSortUtilities;
+	statusBar: ITeStatusBar;
 	storage: IStorage;
 	treeManager: ITeTreeManager;
 	taskManager: ITeTaskManager;
@@ -67,5 +69,6 @@ export interface ITeWrapper
 	usage: ITeUsage;
 	utils: ITeUtilities;
 	views: IDictionary<ITaskTreeView>;
+	welcomePage: ITeWebview;
 	wsfolder: WorkspaceFolder;
 }

@@ -420,6 +420,17 @@ suite("License Manager Tests", () =>
 	});
 
 
+	test("Register (Not Implemented Yet)", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		//
+		// TODO - Register commad is not implemented yet, and may not be used
+		//
+		await executeTeCommand("register");
+        utils.endRollingCount(this);
+	});
+
+
 	test("Request 30-Day License (From Webview)", async function()
 	{
         if (utils.exitRollingCount(this)) return;

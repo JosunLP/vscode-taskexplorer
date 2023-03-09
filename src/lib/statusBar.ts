@@ -1,4 +1,5 @@
 
+import { ITeStatusBar } from "src/interface";
 import { Disposable, StatusBarAlignment, StatusBarItem, window } from "vscode";
 
 
@@ -6,7 +7,7 @@ import { Disposable, StatusBarAlignment, StatusBarItem, window } from "vscode";
  * @class TeStatusBar
  * @since 3.0.0
  */
-export class TeStatusBar implements Disposable
+export class TeStatusBar implements ITeStatusBar, Disposable
 {
     private hidden = true;
     private statusBarNumChars = 65;

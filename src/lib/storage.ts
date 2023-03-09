@@ -187,7 +187,7 @@ class Storage implements IStorage, Memento
 
     updateSecret = (key: string, value: string | undefined): Thenable<void> =>
     {
-        if (value) {
+        if (value !== undefined) {
             return this.secrets.store(this.getKey(key), value);
         }
         return this.secrets.delete(this.getKey(key));

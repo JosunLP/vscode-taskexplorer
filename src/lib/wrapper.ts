@@ -66,7 +66,7 @@ import {
 } from "vscode";
 import {
 	IDictionary, ILog, ITeFilesystem, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities,
-	ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
+	ITeStatusBar, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "../interface";
 
 
@@ -561,7 +561,7 @@ export class TeWrapper implements ITeWrapper, Disposable
         return sorters;
     }
 
-	get statusBar(): TeStatusBar {
+	get statusBar(): ITeStatusBar {
 		return this._statusBar;
 	}
 

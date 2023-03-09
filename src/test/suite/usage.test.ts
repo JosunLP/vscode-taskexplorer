@@ -35,7 +35,9 @@ suite("Usage / Telemetry Tests", () =>
         // } catch {}
         Object.keys(usage).forEach((k) => {
             teWrapper.usage.get(k as any);
-            aKey = k;
+        });
+        Object.keys(usage).forEach((k) => {
+            teWrapper.usage.getAll(k as any);
         });
         endRollingCount(this);
     });

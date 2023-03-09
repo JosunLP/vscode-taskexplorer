@@ -206,6 +206,7 @@ suite("Task Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.run + tc.slowTime.tasks.bashScript + tc.slowTime.commands.runStop  + 5200);
         const bashTask = bash[0];
+        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
         await startTask(bashTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("runNoTerm", [ bashTask ], tc.waitTime.runCommandMin) ;
         await utils.sleep(100);
@@ -233,6 +234,7 @@ suite("Task Tests", () =>
         await focusSearchView(); // randomly show/hide view to test refresh event queue in tree/tree.ts
         await utils.waitForTaskExecution(exec);
         lastTask = antTask;
+        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
         utils.endRollingCount(this);
     });
 

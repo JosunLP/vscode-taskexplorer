@@ -42,7 +42,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             registerCommand(Commands.RunLastTask,  () => this.runLastTask(this.wrapper.treeManager.getTaskMap()), this),
             registerCommand(Commands.RunWithArgs, (item: TaskItem, args?: string) => this.run(item, false, true, args), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
-			registerCommand(Commands.SetPinned, (item: ITeTask) => this.setPinned(item), this),
+			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask) => this.setPinned(item), this),
             registerCommand(Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
             registerCommand(Commands.Stop, (item: TaskItem | ITeTask) => this.stop(this.getTask(item)), this)
         );
@@ -379,12 +379,20 @@ export class TaskManager implements ITeTaskManager, Disposable
     };
 
 
-	private setPinned = async (task: ITeTask): Promise<void> =>
+	private setPinned = async (taskItem: TaskItem | ITeTask): Promise<void> =>
 	{
-		const storageKey: PinnedStorageKey = `taskexplorer.pinned.${task.listType}`;
-		this.log.methodStart("set pinned task", 2, "", false, [[ "id", task.treeId ], [ "pinned", task.pinned ]]);
+        const iTask = taskItem instanceof TaskItem ?
+                      this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], "all")[0] : taskItem,
+              storageKey: PinnedStorageKey = `taskexplorer.pinned.${iTask.listType}`;
+		this.log.methodStart("set pinned task", 2, "", false, [[ "id", iTask.treeId ], [ "pinned", iTask.pinned ]]);
 		const pinnedTaskList = this.wrapper.storage.get<ITeTask[]>(storageKey, []);
-		pinnedTaskList.push({  ...task });
+        const pinnedIdx =  pinnedTaskList.findIndex((t) => t.treeId === iTask.treeId);
+        if (pinnedIdx === -1) {
+		    pinnedTaskList.push({  ...iTask });
+        }
+        else {
+            pinnedTaskList.splice(pinnedIdx, 1);
+        }
 		await this.wrapper.storage.update(storageKey, pinnedTaskList);
 		this.log.methodDone("set pinned task", 2);
         // await this._taskUsageTracker.setPinned(task, logPad);

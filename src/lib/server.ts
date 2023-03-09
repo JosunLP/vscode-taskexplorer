@@ -30,13 +30,13 @@ export class TeServer
 
     constructor(private readonly wrapper: TeWrapper)
 	{
-		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER)
-		{   //
-			// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
-			// Justdisable TLS rejection when using localhost, no big deal.
-			//
-			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-		}
+		// if (this.wrapper.env !== "production" && USE_LOCAL_SERVER)
+		// {   //
+		// 	// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
+		// 	// Justdisable TLS rejection when using localhost, no big deal.
+		// 	//
+		// 	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+		// }
 	}
 
 
@@ -46,14 +46,15 @@ export class TeServer
 
 	get apiClientId()
 	{
-		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER) {
-			return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
-		}
+		// if (this.wrapper.env !== "production" && USE_LOCAL_SERVER) {
+		// 	return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
+		// }
 		return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 	};
 
 	private get apiPort()
 	{
+		/* istanbul ignore next */
 		switch (this.wrapper.env)
 		{
 			case "dev":
@@ -66,6 +67,7 @@ export class TeServer
 
 	private get apiServer()
 	{
+		/* istanbul ignore next */
 		switch (this.wrapper.env)
 		{
 			case "dev":
@@ -78,6 +80,7 @@ export class TeServer
 
 	private get authService()
 	{
+		/* istanbul ignore next */
 		switch (this.wrapper.env)
 		{
 			case "dev":
@@ -177,7 +180,7 @@ export class TeServer
 	};
 
 
-	request = async <T>(endpoint: ITeApiEndpoint, logPad: string, params?: any) =>
+	request = async <T>(endpoint: ITeApiEndpoint, logPad: string, params: any) =>
 	{
 		return Promise.race<T>(
 		[
@@ -190,7 +193,7 @@ export class TeServer
 	};
 
 
-    private _request = <T>(endpoint: ITeApiEndpoint, logPad: string, params?: any): Promise<T> =>
+    private _request = <T>(endpoint: ITeApiEndpoint, logPad: string, params: any): Promise<T> =>
 	{
 		this._busy = true;
 
@@ -223,7 +226,7 @@ export class TeServer
 							resolve(jso as T);
 						}
 					}
-					catch (e){
+					catch /* istanbul ignore next */(e) {
 						this.log(e);
 						reject(<ServerError>{ message: e.message, status: res.statusCode, body: rspData });
 					}
@@ -242,13 +245,11 @@ export class TeServer
 				reject(e);
 			});
 
-			const payload = JSON.stringify({ ...{ appName: this.authService, machineId: env.machineId }, ...(params || {}) });
+			const payload = JSON.stringify({ ...{ appName: this.authService, machineId: env.machineId }, ...params });
 			this.log("   payload", logPad + "   ", payload);
 			req.write(payload, () =>
             {
-				if (!errorState) {
-					this.log("   output stream written, ending request and waiting for response...", logPad);
-				}
+				this.log("   request stream written", logPad);
 				req.end();
 			});
 		});

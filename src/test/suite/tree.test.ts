@@ -515,7 +515,15 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.sortingEvent);
+        await executeTeCommand2("setPinned", [ batch[0] ]);
+        await executeTeCommand2("setPinned", [ batch[1] ]);
+        await executeTeCommand2("setPinned", [ bash[0] ]);
+        await executeTeCommand2("setPinned", [ ant[1] ]);
         await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, false, tc.waitTime.config.sortingEvent);
+        await executeTeCommand2("setPinned", [ batch[0] ]);
+        await executeTeCommand2("setPinned", [ batch[1] ]);
+        await executeTeCommand2("setPinned", [ bash[0] ]);
+        await executeTeCommand2("setPinned", [ ant[1] ]);
         utils.endRollingCount(this);
     });
 
@@ -527,7 +535,6 @@ suite("Tree Tests", () =>
         await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, true, tc.waitTime.config.sortingEvent);
         utils.endRollingCount(this);
     });
-
 
     test("Misc Sort Folders", function()
     {

@@ -6,6 +6,7 @@ export type { ITeWrapper } from "./ITeWrapper";
 export type { ITeWebview } from "./ITeWebview";
 export type { ITaskFolder } from "./ITaskFolder";
 export type { IDictionary } from "./IDictionary";
+export type { ITeStatusBar } from "./ITeStatusBar";
 export type { ITeFilesystem } from "./ITeFilesystem";
 export type { IConfiguration } from "./IConfiguration";
 export type { ITeTreeManager } from "./ITeTreeManager";

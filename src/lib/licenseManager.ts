@@ -82,12 +82,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad + "   ",
 			{
-				machineId: this.wrapper.tests ? this._machineId : env.machineId
+				machineId: this.wrapper.tests ? this._machineId : /* istanbul ignore next */env.machineId
 			});
 			await this.saveAccount(logPad + "   ");
 			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.");
 		}
 		catch (e) {
+			/* istanbul ignore next  */
 			this.handleServerError(e);
 		}
 		this.wrapper.log.methodDone("begin trial", 1, logPad);
@@ -300,6 +301,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private handleServerError = (e: any): void =>
 	{
+		/* istanbul ignore if  */
 		if (e instanceof Error) {
 			this.wrapper.log.error(e);
 		}

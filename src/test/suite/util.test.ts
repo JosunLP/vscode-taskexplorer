@@ -197,6 +197,10 @@ suite("Util Tests", () =>
 		teWrapper.log.methodDone("methodName", 1, "");
 		teWrapper.log.methodStart("methodName", 1, "", false, [[ "p1", "v1" ]]);
 		teWrapper.log.methodDone("methodName", 1, "", [[ "p2", "v2" ]]);
+		teWrapper.log.methodOnce("tag", "message", 1, "", [[ "test", "test" ]]);
+		teWrapper.log.methodOnce("tag", "message", 1, "");
+		teWrapper.log.methodOnce("tag", "message", 1);
+		teWrapper.log.methodOnce("tag", "message");
 		//
 		// Disable logging
 		//
@@ -409,6 +413,12 @@ suite("Util Tests", () =>
         if (exitRollingCount(this)) return;
 		teWrapper.explorer?.isVisible();
         await teWrapper.pathUtils.getInstallPath();
+		const now = Date.now();
+		teWrapper.utils.formatDate(now, "datetime");
+		teWrapper.utils.formatDate(now, "date");
+		teWrapper.utils.formatDate(now, "time");
+		teWrapper.utils.formatDate(now);
+		teWrapper.utils.formatDate(0);
         endRollingCount(this);
     });
 
@@ -742,6 +752,8 @@ suite("Util Tests", () =>
 			expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test222");
 			await teWrapper.storage.deleteSecret("testsecret");
 			expect(await teWrapper.storage.getSecret("testsecret")).to.be.undefined;
+			await teWrapper.storage.updateSecret("testsecret", "test333");
+			await teWrapper.storage.updateSecret("testsecret", undefined);
 			await sleep(1);
 			disposable.dispose();
 
