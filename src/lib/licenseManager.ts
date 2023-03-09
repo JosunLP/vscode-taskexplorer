@@ -95,7 +95,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	checkLicense = async(statusMessage = "Checking license", logPad = ""): Promise<void> =>
+	checkLicense = async(statusMessage = "Checking license", logPad: string): Promise<void> =>
 	{
 		this._busy = true;
 		this._account.errorState = false;
@@ -150,23 +150,19 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				options.push("Extend Trial");
 			}
 			await this.wrapper.storage.update(StorageKeys.LastLicenseNag, Date.now().toString());
-			window.showInformationMessage(message, ...options)
-			.then(async (action) =>
+			const action = await window.showInformationMessage(message, ...options)
+			if (action === "Enter License Key")
 			{
-				if (action === "Enter License Key")
-				{
-					// await executeCommand(Commands.EnterLicense);
-					executeCommand(Commands.EnterLicense);
-				}
-				else if (action === "Extend Trial")
-				{
-					await executeCommand(Commands.ExtendTrial);
-				}
-				else if (action === "Info")
-				{
-					await executeCommand(Commands.ShowLicensePage);
-				}
-			});
+				await executeCommand(Commands.EnterLicense);
+			}
+			else if (action === "Extend Trial")
+			{
+				await executeCommand(Commands.ExtendTrial);
+			}
+			else if (action === "Info")
+			{
+				await executeCommand(Commands.ShowLicensePage);
+			}
 		}
 
 		this.wrapper.log.methodDone("license manager display popup", 1, logPad);
@@ -366,7 +362,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	setTestData = (data: any): void =>
 	{
-		this._machineId = data.machineId || env.machineId;
+		this._machineId = data.machineId || this._machineId;
 		this._maxFreeTasks = data.maxFreeTasks || this._maxFreeTasks;
 		this._maxFreeTaskFiles = data.maxFreeTaskFiles || this._maxFreeTaskFiles;
 		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;

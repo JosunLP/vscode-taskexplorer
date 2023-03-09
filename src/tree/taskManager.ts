@@ -67,7 +67,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     private open = async(selection: TaskItem, itemClick = false) =>
     {
-        const clickAction = this.wrapper.config.get<string>("taskButtons.clickAction", "Open");
+        const clickAction = this.wrapper.config.get<string>(ConfigKeys.TaskButtons.ClickAction, "Open");
 
         //
         // As of v1.30.0, added option to change the entry item click to execute.  In order to avoid having

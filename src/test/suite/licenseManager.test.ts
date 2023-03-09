@@ -8,7 +8,7 @@ import * as utils from "../utils/utils";
 import { env, Task, WebviewPanel } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
 import { executeTeCommand } from "../utils/commandUtils";
-import { ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { StorageKeys } from "../../lib/constants";
 
 const tc = utils.testControl;
@@ -21,11 +21,14 @@ let licMgr: ITeLicenseManager;
 let teWrapper: ITeWrapper;
 let randomMachineId: string;
 let oMachineId: string;
+let oLicenseKey: any;
+let account: ITeAccount;
+
+function setTasks() { licMgr.setTestData({ callTasksChanged: true }); }
 
 
 suite("License Manager Tests", () =>
 {
-	let oLicenseKey: any;
 
 	suiteSetup(async function()
 	{
@@ -160,35 +163,30 @@ suite("License Manager Tests", () =>
 		await teWrapper.licensePage.show();
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
 		await utils.sleep(10);
-		await teWrapper.licensePage.view?.webview.postMessage({ command: "extendTrial" });
-		await setTasks();
-		await utils.sleep(50);
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "showParsingReport" });
         await utils.promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
         utils.endRollingCount(this);
 	});
 
 
-	test("License Info Page - Enter License Key (From Webview)", async function()
+	test("License Info Page - Enter Invalid Key (From Webview)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + 1100 + tc.slowTime.storageUpdate);
+		this.slow(tc.slowTime.licenseMgr.checkLicense + 1000 + tc.slowTime.storageUpdate);
 		utils.overrideNextShowInputBox("1234-5678-9098-0000000");
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "enterLicense" });
 		await utils.sleep(500);
-		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
 
 
-	test("Has License", async function()
+	test("License Info Page - Enter Valid Key (From Webview)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.checkLicense + tc.slowTime.licenseMgr.page + (tc.slowTime.licenseMgr.setLicenseCmd * 2) + 500);
-		teWrapper.tests = false;
-		await utils.setLicensed(true);
-		teWrapper.tests = true;
-		await utils.sleep(250);
+		this.slow(tc.slowTime.licenseMgr.checkLicense + 1000 + tc.slowTime.storageUpdate);
+		utils.overrideNextShowInputBox("1234-5678-9098-7654321");
+		await teWrapper.licensePage.view?.webview.postMessage({ command: "enterLicense" });
+		await utils.waitForTeIdle(500);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -205,9 +203,9 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox("1234-5678-9098-7654321");
 		utils.overrideNextShowInfoBox(undefined);
-		await setTasks();
+		setTasks();
 		await utils.sleep(250);
-		await utils.closeEditors();
+		await utils.waitForTeIdle(150);
         utils.endRollingCount(this);
 	});
 
@@ -222,9 +220,35 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox("1111-2222-3333-4444-5555");
 		utils.overrideNextShowInfoBox(undefined);
-		await setTasks();
+		setTasks();
 		await utils.sleep(250);
-		await utils.closeEditors();
+		await utils.waitForTeIdle(150);
+        utils.endRollingCount(this);
+	});
+
+
+	test("License Prompt (Extend Trial)", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.enterKey + tc.slowTime.storageUpdate + 500);
+		await teWrapper.storage.update(StorageKeys.LastLicenseNag, undefined);
+		account = await licMgr.getAccount();
+		await utils.setLicensed(false, {
+			id: account.id,
+			trialId: account.trialId,
+			machineId: randomMachineId,
+			license: {
+				id: account.license.id,
+				state: 0,
+				period: 1,
+				type: 2
+			}
+		});
+		utils.clearOverrideShowInfoBox();
+		utils.overrideNextShowInfoBox("Extend Trial");
+		setTasks();
+		await utils.sleep(250);
+		await utils.waitForTeIdle(150);
         utils.endRollingCount(this);
 	});
 
@@ -239,8 +263,8 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox("1234");
 		utils.overrideNextShowInfoBox(undefined);
-		await setTasks();
-		await utils.sleep(250);
+		setTasks();
+		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -252,7 +276,7 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.checkLicense + 500);
 		await utils.setLicensed(false);
 		await teWrapper.licensePage.show();
-		await utils.sleep(250);
+		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -264,7 +288,7 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.setLicenseCmd + tc.slowTime.licenseMgr.checkLicense + 500);
 		await utils.setLicensed(true);
 		await teWrapper.licensePage.show();
-		await utils.sleep(250);
+		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -296,8 +320,8 @@ suite("License Manager Tests", () =>
 		await teWrapper.storage.update(StorageKeys.LastLicenseNag, undefined);
 		await utils.setLicensed(false);
 		utils.overrideNextShowInfoBox("Info");
-		await setTasks();
-		await utils.sleep(250);
+		setTasks();
+		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -309,8 +333,8 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.setLicenseCmd + 500);
 		await utils.setLicensed(false);
 		utils.overrideNextShowInfoBox("Not Now");
-		await setTasks();
-		await utils.sleep(250);
+		setTasks();
+		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -324,8 +348,8 @@ suite("License Manager Tests", () =>
 		await teWrapper.storage.update(StorageKeys.LastLicenseNag, undefined);
 		await utils.setLicensed(false);
 		utils.overrideNextShowInfoBox(undefined);
-		await setTasks();
-		await utils.sleep(250);
+		setTasks();
+		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -340,11 +364,11 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox("1111-2222-3333-4444-5555");
 		await executeTeCommand("enterLicense");
-		await utils.sleep(250);
+		await utils.waitForTeIdle(150);
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox("");
 		await executeTeCommand("enterLicense");
-		await utils.sleep(250);
+		await utils.waitForTeIdle(150);
         utils.endRollingCount(this);
 	});
 
@@ -364,6 +388,7 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Enter License Key");
 		utils.overrideNextShowInputBox("");
 		await executeTeCommand("enterLicense", tc.waitTime.command * 2, 1100, "   ", 1);
+		await utils.waitForTeIdle(150);
         utils.endRollingCount(this);
 	});
 
@@ -373,27 +398,7 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.checkLicense + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd);
 		await utils.setLicensed();
-		await setTasks();
-        utils.endRollingCount(this);
-	});
-
-
-	test("Enter License Key on Startup (> 1st Time)", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.checkLicense + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd);
-		await utils.setLicensed(true);
-		await setTasks();
-        utils.endRollingCount(this);
-	});
-
-
-	test("Invalid License Key", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.checkLicense +  tc.slowTime.licenseMgr.setLicenseCmd);
-		await utils.setLicensed(false);
-		await setTasks();
+		setTasks();
         utils.endRollingCount(this);
 	});
 
@@ -408,6 +413,7 @@ suite("License Manager Tests", () =>
 			trialId: 0,
 			machineId: randomMachineId,
 			license: {
+				id: 0,
 				state: 0,
 				period: 0,
 				type: 0
@@ -436,11 +442,13 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.get30DayLicense +
 				  tc.slowTime.storageSecretRead + tc.slowTime.closeEditors + 1100);
+		account = await licMgr.getAccount();
 		await utils.setLicensed(false, {
-			id: 1,
-			trialId: 1,
+			id: account.id,
+			trialId: account.trialId,
 			machineId: randomMachineId,
 			license: {
+				id: account.license.id,
 				state: 0,
 				period: 1,
 				type: 2
@@ -485,11 +493,13 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.get30DayLicense + tc.slowTime.storageSecretUpdate);
+		account = await licMgr.getAccount();
 		await utils.setLicensed(false, {
-			id: 1,
-			trialId: 1,
+			id: account.id,
+			trialId: account.trialId,
 			machineId: randomMachineId,
 			license: {
+				id: account.license.id,
 				state: 0,
 				period: 1,
 				type: 2
@@ -508,10 +518,11 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.standard + tc.slowTime.closeEditors + tc.slowTime.storageSecretUpdate);
 		await utils.setLicensed(false, {
-			id: 1,
-			trialId: 1,
+			id: account.id,
+			trialId: account.trialId,
 			machineId: randomMachineId,
 			license: {
+				id: account.license.id,
 				state: 0,
 				period: 2,
 				type: 2
@@ -663,16 +674,3 @@ suite("License Manager Tests", () =>
 	});
 
 });
-
-
-async function setTasks()
-{
-	// let removed: Task | undefined;
-	// if (++setTasksCallCount % 2 === 1) {
-	// 	removed = tasks.pop();
-	// }
-	// await licMgr.setTasks(tasks);
-	// if (removed) {
-	// 	tasks.push(removed);
-	// }
-}

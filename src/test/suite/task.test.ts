@@ -6,9 +6,9 @@
 import { expect } from "chai";
 import { TaskExecution } from "vscode";
 import * as utils from "../utils/utils";
+import { ConfigKeys } from "../../lib/constants";
 import {ITaskItem, ITeWrapper, ITaskFolder } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusExplorerView, focusSearchView } from "../utils/commandUtils";
-import { ConfigKeys } from "../../lib/constants";
 
 const tc = utils.testControl;
 const startTaskSlowTime = tc.slowTime.config.event + (tc.slowTime.config.showHideSpecialFolder * 2) + (tc.slowTime.commands.standard * 2);
@@ -21,6 +21,7 @@ let batch: ITaskItem[];
 let python: ITaskItem[];
 let antTask: ITaskItem;
 let clickAction: string;
+let oNumLastTasks: number;
 
 
 suite("Task Tests", () =>
@@ -30,8 +31,10 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this, true)) return;
         ({ teWrapper } = await utils.activate(this));
-        clickAction = teWrapper.config.get<string>("taskButtons.clickAction");
-        await executeSettingsUpdate("specialFolders.showLastTasks", true);
+        clickAction = teWrapper.config.get<string>(ConfigKeys.TaskButtons.ClickAction);
+        oNumLastTasks = teWrapper.config.get<number>(ConfigKeys.SpecialFolders.NumLastTasks);
+        await executeSettingsUpdate(ConfigKeys.SpecialFolders.NumLastTasks, 2);
+        await executeSettingsUpdate(ConfigKeys.SpecialFolders.ShowLastTasks, true);
         utils.endRollingCount(this, true);
     });
 
@@ -39,7 +42,8 @@ suite("Task Tests", () =>
     suiteTeardown(async function()
     {
         if (utils.exitRollingCount(this, false, true)) return;
-        await executeSettingsUpdate("taskButtons.clickAction", clickAction);
+        await executeSettingsUpdate(ConfigKeys.SpecialFolders.NumLastTasks, oNumLastTasks);
+        await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, clickAction);
 		await utils.closeEditors(); // close task monitor from previous test suite
         utils.suiteFinished(this);
     });
@@ -233,8 +237,8 @@ suite("Task Tests", () =>
         await utils.sleep(150);
         await focusSearchView(); // randomly show/hide view to test refresh event queue in tree/tree.ts
         await utils.waitForTaskExecution(exec);
-        lastTask = antTask;
         await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
+        lastTask = antTask;
         utils.endRollingCount(this);
     });
 
@@ -278,7 +282,7 @@ suite("Task Tests", () =>
         //
         // Open task file
         //
-        await executeSettingsUpdate("taskButtons.clickAction", "Open");
+        await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, "Open");
         await executeTeCommand2("open", [ batchTask ], tc.waitTime.command);
         await utils.closeEditors();
         //
@@ -318,7 +322,7 @@ suite("Task Tests", () =>
         const batchTask = batch[1];
         await startTask(batchTask, true);
         await executeSettingsUpdate("visual.disableAnimatedIcons", true);
-        await executeSettingsUpdate("taskButtons.clickAction", "Execute");
+        await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, "Execute");
         await executeSettingsUpdate("specialFolders.showLastTasks", true);
         utils.overrideNextShowInputBox(undefined);
         let exec = await executeTeCommand2<TaskExecution | undefined>("runWithArgs", [ batchTask ], tc.waitTime.runCommandMin) ;
@@ -414,7 +418,7 @@ async function startTask(taskItem: ITaskItem, addToSpecial: boolean)
     }
     if (addToSpecial)
     {
-        await executeSettingsUpdate("taskButtons.clickAction", "Execute");
+        await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, "Execute");
         let removed = await executeTeCommand2("addRemoveFavorite", [ taskItem ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ taskItem ]);

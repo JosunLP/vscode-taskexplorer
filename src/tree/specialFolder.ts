@@ -1,7 +1,7 @@
 
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
-import { Strings } from "../lib/constants";
+import { ConfigKeys, Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
 import { sortTasks } from "../lib/utils/sortTasks";
@@ -151,7 +151,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         this.log.methodStart("create special tasks folder", 1, logPad, false, [[ "name", this.label ]]);
 
         const tree = this.treeManager.getTaskTree() as TreeItem[], // Guaranted not to be undefined - checked in .refresh
-              showLastTasks = this.wrapper.config.get<boolean>("specialFolders.showLastTasks"),
+              showLastTasks = this.wrapper.config.get<boolean>(ConfigKeys.SpecialFolders.ShowLastTasks),
               favIdx = showLastTasks ? 1 : 0,
               treeIdx = !this.isFavorites ? 0 : favIdx;
 
@@ -193,7 +193,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         //
         // The 'Last Tasks' folder will be 1st in the tree
         //
-        if (this.wrapper.config.get<boolean>("specialFolders.showLastTasks") === true)
+        if (this.wrapper.config.get<boolean>(ConfigKeys.SpecialFolders.ShowLastTasks) === true)
         {
             this.collapsibleState =  TreeItemCollapsibleState[nodeExpandedeMap.lastTasks];
         }
@@ -201,7 +201,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         // The 'Favorites' folder will be 2nd in the tree (or 1st if configured to hide
         // the 'Last Tasks' folder)
         //
-        if (this.wrapper.config.get<boolean>("specialFolders.showFavorites"))
+        if (this.wrapper.config.get<boolean>(ConfigKeys.SpecialFolders.ShowFavorites))
         {
             this.collapsibleState =  TreeItemCollapsibleState[nodeExpandedeMap.favorites];
         }

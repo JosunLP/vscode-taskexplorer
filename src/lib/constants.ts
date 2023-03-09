@@ -35,9 +35,12 @@ export const ConfigKeys =
     ReportGlobalUsage: "taskMonitor.reportUsage",
     SortProjectFoldersAlphabetically: "sortProjectFoldersAlpha",
 	SpecialFolders: {
-        NumLastTasks: "specialFolders.numLastTasks"
+        NumLastTasks: "specialFolders.numLastTasks",
+        ShowFavorites: "specialFolders.showFavorites",
+        ShowLastTasks: "specialFolders.showLastTasks"
     },
     TaskButtons: {
+        ClickAction: "taskButtons.clickAction",
         ControlCharacter: "taskButtons.controlCharacter"
     },
     TaskMonitor: {

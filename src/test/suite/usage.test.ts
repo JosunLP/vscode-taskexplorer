@@ -2,7 +2,9 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { activate, endRollingCount, exitRollingCount, suiteFinished } from "../utils/utils";
+import { ConfigKeys } from "../../lib/constants";
+import { executeSettingsUpdate, executeTeCommand } from "../utils/commandUtils";
+import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished } from "../utils/utils";
 
 let aKey: string;
 let teWrapper: ITeWrapper;
@@ -35,10 +37,36 @@ suite("Usage / Telemetry Tests", () =>
         // } catch {}
         Object.keys(usage).forEach((k) => {
             teWrapper.usage.get(k as any);
+            aKey = k;
         });
         Object.keys(usage).forEach((k) => {
             teWrapper.usage.getAll(k as any);
         });
+        endRollingCount(this);
+    });
+
+
+    test("Set Usage Off / On", async function()
+    {
+        if (exitRollingCount(this)) return;
+        await executeSettingsUpdate(ConfigKeys.AllowUsageReporting, true);
+        await executeSettingsUpdate(ConfigKeys.AllowUsageReporting, false);
+        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
+        await executeSettingsUpdate(ConfigKeys.TrackUsage, false);
+        await sleep(10);
+        await executeTeCommand("getApi");
+        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
+        await executeSettingsUpdate(ConfigKeys.TrackUsage, true);
+        endRollingCount(this);
+    });
+
+
+    test("Usage Calls", async function()
+    {
+        if (exitRollingCount(this)) return;
+        teWrapper.usage.getLastRanTaskTime();
+        teWrapper.usage.getAvgRunCount ("d", "");
+        teWrapper.usage.getAvgRunCount ("w", "");
         endRollingCount(this);
     });
 
@@ -53,6 +81,16 @@ suite("Usage / Telemetry Tests", () =>
         await teWrapper.usage.reset();
         await teWrapper.usage.reset();
         await teWrapper.storage.update("usages", usage);
+        endRollingCount(this);
+    });
+
+
+    test("Usage Calls After Reset", async function()
+    {
+        if (exitRollingCount(this)) return;
+        teWrapper.usage.getLastRanTaskTime();
+        teWrapper.usage.getAvgRunCount ("d", "");
+        teWrapper.usage.getAvgRunCount ("w", "");
         endRollingCount(this);
     });
 

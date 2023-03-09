@@ -73,6 +73,8 @@ export interface ITeUsage
 	onDidChange: Event<ITeUsageChangeEvent | undefined>;
     get(key: string): ITeTrackedUsage | undefined;
     getAll(key?: string): IDictionary<ITeTrackedUsage>;
+    getAvgRunCount(period: "d" | "w", logPad: string): number;
+    getLastRanTaskTime(): string;
     reset(key?: string): Promise<void>;
     track(key: string): Promise<ITeTrackedUsage | undefined>;
 }

@@ -284,11 +284,13 @@ export class Usage implements ITeUsage, Disposable
 		const usages =  this.wrapper.storage.get<UsageStore>(StorageKeys.Usage);
 		if (!usages) return;
 		if (!key) {
-			await  this.wrapper.storage.delete(StorageKeys.Usage);
+			await this.wrapper.storage.delete(StorageKeys.Usage);
+            await this.wrapper.storage.delete(StorageKeys.TaskUsage);
 			this._onDidChange.fire(undefined);
 		}
 		else {
-			await  this.wrapper.storage.delete(`${StorageKeys.Usage}.${key}`);
+			await this.wrapper.storage.delete(`${StorageKeys.Usage}.${key}`);
+			await this.wrapper.storage.delete(`${StorageKeys.TaskUsage}.${key}`);
 			this._onDidChange.fire({ key, usage: undefined });
 		}
 	}

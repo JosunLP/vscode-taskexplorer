@@ -472,9 +472,8 @@ export const setFailed = (ctrlc = true) =>
 
 export const setLicensed = async (valid?: boolean, opts?: any) =>
 {
-    let setMachineId = false;
+    // let setMachineId = false;
     const licMgr = teWrapper.licenseManager;
-    teWrapper.tests = !valid;
 
     if (valid === undefined)
     {
@@ -485,33 +484,39 @@ export const setLicensed = async (valid?: boolean, opts?: any) =>
         if (opts && opts.machineId) {
             licMgr.setTestData({ machineId: opts.machineId });
             delete opts.machineId;
-            setMachineId = true;
+            // setMachineId = true;
         }
+
+        const account = await licMgr.getAccount();
+        const validKey = "'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwibGljZW5zZUlkIjozNiwidHJpYWxJZCI6MiwidHlwZSI6InRyaWFsIiwiaWF0IjoxNjc3OTkwOTU2LCJleHAiOjE2NzgwNzczNTZ9.aWK6G28G1sm9eHvNsdbWy8Mir2-iPTSK-OqtrM0y9l0'";
+        const validLicenseId = 36;
+        const validTrialId = 2;
+        const validAccountId = 2;
 
         await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(
         { ...{
-            id: valid ? 1 : 0,
+            id: valid ? validAccountId : 0,
             created: Date.now(),
             email: "",
             firstName: "",
             lastName: "",
             name: "",
             orgId: 0,
-            trialId: valid ? 1 : 0,
+            trialId: valid ? validTrialId : 0,
             verified: false,
             verificationPending: false,
             session: {
                 expires: valid ? Infinity : 0,
                 issued: Date.now(),
-                token: valid ? "1234-5678-9098-7654321" : "",
+                token: valid ? account.session.token : "",
                 scopes: [ "te-explorer", "te-sidebar", valid ? "te-monitor" : "te-monitor-free" ],
             },
             license: {
-                id: 1,
+                id: valid ? validLicenseId : 0,
                 expired: !valid,
                 expires: valid ? Infinity : 0,
                 issued: Date.now(),
-                key: valid ? "1234-5678-9098-7654321" : "",
+                key: valid ? validKey : "",
                 paid: valid,
                 period: valid ? 0 : 2,
                 state: valid ? 2 : 1, // Paid : Free
@@ -521,12 +526,11 @@ export const setLicensed = async (valid?: boolean, opts?: any) =>
     }
 
     await licMgr.checkLicense(undefined, "");
-    teWrapper.tests = true;
-    if (setMachineId) {
-        licMgr.setTestData({
-            machineId: env.machineId
-        });
-    }
+    // if (setMachineId) {
+    //     licMgr.setTestData({
+    //         machineId: env.machineId
+    //     });
+    // }
 };
 
 

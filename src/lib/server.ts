@@ -245,7 +245,9 @@ export class TeServer
 				reject(e);
 			});
 
-			const payload = JSON.stringify({ ...{ appName: this.authService, machineId: env.machineId }, ...params });
+			const payload = JSON.stringify(
+				{ ...{ appName: this.authService, machineId: env.machineId, tests: this.wrapper.tests }, ...params }
+			);
 			this.log("   payload", logPad + "   ", payload);
 			req.write(payload, () =>
             {
