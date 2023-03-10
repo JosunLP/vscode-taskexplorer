@@ -75,7 +75,6 @@ export class HomeView extends TeWebviewView<State>
 			`${HomeView.viewId}View`
 		);
 		this.disposables.push(
-			wrapper.config.onDidChange(e => { this.onConfigurationChanged(e); }, this),
 			wrapper.treeManager.onDidAllTasksChange(e => { this.onTasksChanged(e); }, this)
 		);
 	}
@@ -87,12 +86,6 @@ export class HomeView extends TeWebviewView<State>
 	protected override includeFontAwesome = () => ({ light: true, icons: [
 		"lock", "unlock", "user", "user-slash", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
 	]});
-
-
-	private onConfigurationChanged(e: ConfigurationChangeEvent)
-	{
-		this.wrapper.log.methodOnce("homeview event", "configuration changed", 2, this.wrapper.log.getLogPad());
-	}
 
 
 	private async onTasksChanged(_e: ITeTaskChangeEvent)

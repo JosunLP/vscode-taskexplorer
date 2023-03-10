@@ -64,13 +64,9 @@ suite("Task Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.getTreeTasks * 4);
         bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
-        await utils.waitForTeIdle(tc.waitTime.getTreeTasks);
         batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
-        await utils.waitForTeIdle(tc.waitTime.getTreeTasks);
         ant = await utils.treeUtils.getTreeTasks(teWrapper, "ant", 3);
-        await utils.waitForTeIdle(tc.waitTime.getTreeTasks);
         python = await utils.treeUtils.getTreeTasks(teWrapper, "python", 2);
-        await utils.waitForTeIdle(tc.waitTime.getTreeTasks);
         utils.endRollingCount(this);
     });
 
@@ -234,7 +230,10 @@ suite("Task Tests", () =>
         await executeSettingsUpdate("enableAnsiconForAnt", true, tc.waitTime.config.enableEvent);
         await startTask(antTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin) ;
-        await utils.sleep(150);
+        await utils.sleep(100);
+        teWrapper.treeManager.runningTasks; // access the getter while there's an actual running task for coverage
+        await utils.sleep(50);
+        teWrapper.treeManager.runningTasks; // access the getter while there's an actual running task for coverage
         await focusSearchView(); // randomly show/hide view to test refresh event queue in tree/tree.ts
         await utils.waitForTaskExecution(exec);
         await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);

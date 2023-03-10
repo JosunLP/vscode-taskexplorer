@@ -261,20 +261,21 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         //
         // Explorer / sidebar view
         //
-        let t: NodeJS.Timeout |  undefined;
         if (this.wrapper.config.affectsConfiguration(e, "enableExplorerView"))
         {
             const newValue = this.wrapper.config.get<boolean>("enableExplorerView");
             this.wrapper.log.write("   the 'enableExplorerView' setting has changed", 1);
             this.wrapper.log.value("      new value", newValue, 1);
-            t = setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, this.wrapper.utils.isTeEnabled());
         }
         if (this.wrapper.config.affectsConfiguration(e, "enableSideBar"))
         {
             const newValue = this.wrapper.config.get<boolean>("enableSideBar");
             this.wrapper.log.write("   the 'enableSideBar' setting has changed", 1);
             this.wrapper.log.value("      new value", newValue, 1);
-            if (!t) t = setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, this.wrapper.utils.isTeEnabled());
+        }
+        if (this.wrapper.config.affectsConfiguration(e, "enableExplorerView", "enableSideBar"))
+        {
+            setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, this.wrapper.utils.isTeEnabled());
         }
 
         //

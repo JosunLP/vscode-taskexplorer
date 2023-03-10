@@ -226,9 +226,10 @@ export class TeServer
 							resolve(jso as T);
 						}
 					}
-					/* istanbul ignore next */
 					catch (e) {
+						/* istanbul ignore next */
 						this.log(e);
+						/* istanbul ignore next */
 						reject(<ServerError>{ message: e.message, status: res.statusCode, body: rspData });
 					}
 					finally {

@@ -108,27 +108,13 @@ suite("Task Monitor App Tests", () =>
 	});
 
 
-	test("Toggle Timer Setting", async function()
+	test("Toggle App Settings", async function()
 	{
         if (exitRollingCount(this)) return;
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TimerMode, "MM:SS:MSS");
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TimerMode, "MM:SS:MS");
-        endRollingCount(this);
-	});
-
-
-	test("Toggle Track Stats Setting", async function()
-	{
-        if (exitRollingCount(this)) return;
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
-        endRollingCount(this);
-	});
-
-
-	test("Toggle Track Usage Setting", async function()
-	{
-        if (exitRollingCount(this)) return;
 		await executeSettingsUpdate(ConfigKeys.TrackUsage, false);
 		await executeSettingsUpdate(ConfigKeys.TrackUsage, true);
         endRollingCount(this);

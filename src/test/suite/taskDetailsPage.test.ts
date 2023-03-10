@@ -1,13 +1,21 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
+import { ConfigKeys } from "../../lib/constants";
 import { startupFocus } from "../utils/suiteUtils";
-import { executeTeCommand2 } from "../utils/commandUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, treeUtils } from "../utils/utils";
+import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
+import {
+	activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount,
+	endRollingCount, treeUtils, waitForTaskExecution
+} from "../utils/utils";
+import { TaskExecution } from "vscode";
 
 let teWrapper: ITeWrapper;
+let ant: ITaskItem[];
+let antTask: ITaskItem;
 let batch: ITaskItem[];
+let python: ITaskItem[];
 
 
 suite("Task Details Page Tests", () =>
@@ -34,13 +42,41 @@ suite("Task Details Page Tests", () =>
 	});
 
 
-	test("Open Details Page (Used Task)", async function()
+	test("Open Details Page (Used Task Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewReleaseNotes + 200);
 		batch = await treeUtils.getTreeTasks(teWrapper, "batch", 2);
 		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ batch[0] ], testControl.waitTime.viewReport);
 		await sleep(75);
+		await closeEditors();
+        endRollingCount(this);
+	});
+
+
+	test("Open Details Page (Used Task Non-Script Type)", async function()
+	{
+        if (exitRollingCount(this)) return;
+		this.slow(testControl.slowTime.viewReleaseNotes + 200);
+		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
+		antTask = ant.find(t => t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ antTask ], testControl.waitTime.viewReport);
+		await sleep(75);
+        endRollingCount(this);
+	});
+
+
+	test("Run Task With Details page Open", async function()
+	{
+        if (exitRollingCount(this)) return;
+        this.slow((testControl.slowTime.config.event * 2) + testControl.slowTime.tasks.antTask + 300);
+        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false); // for coverage
+		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], testControl.waitTime.runCommandMin) ;
+        await sleep(150);
+        await waitForTaskExecution(exec, 1000);
+		await executeTeCommand2("stop", [ antTask ], testControl.waitTime.taskCommand);
+        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true); // for coverage ^^^
+		await closeEditors();
         endRollingCount(this);
 	});
 
@@ -49,8 +85,26 @@ suite("Task Details Page Tests", () =>
 	{
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewReleaseNotes + 200);
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ batch[1] ], testControl.waitTime.viewReport);
+		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], testControl.waitTime.viewReport);
 		await sleep(75);
+		await closeEditors();
+        endRollingCount(this);
+	});
+
+
+
+	test("Open Details Page (Tracking Disabled)", async function()
+	{
+        if (exitRollingCount(this)) return;
+		this.slow(testControl.slowTime.viewReleaseNotes + 200);
+		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
+		await executeSettingsUpdate(ConfigKeys.TrackUsage, false);
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], testControl.waitTime.viewReport);
+		await sleep(75);
+		await executeSettingsUpdate(ConfigKeys.TrackUsage, true);
+		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
+		await closeEditors();
         endRollingCount(this);
 	});
 

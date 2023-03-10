@@ -35,14 +35,13 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 
 	private formatRuntime = (runtime: number) =>
     {
-        let m = Math.floor(runtime / 1000 / 60).toString(),
-            s = Math.floor(runtime / 1000 % 60).toString(),
-            ms = Math.round(runtime % 1000).toString();
-        if (m.length < 2) m = `0${m}`;
-        if (s.length < 2) s = `0${s}`;
-        if (ms.length < 2) ms = `0${ms}`;
+		const _pad = (d: string) => (d.length < 2) ? `0${d}` : d;
+        const m = Math.floor(runtime / 1000 / 60).toString(),
+            s = Math.floor(runtime / 1000 % 60).toString();
+        let ms = Math.round(runtime % 1000).toString();
+        ms = _pad(ms);
         if (ms.length < 3) ms = `0${ms}`;
-        return `${m}m : ${s}s : ${ms}ms`;
+        return `${_pad(m)}m : ${_pad(s)}s : ${ms}ms`;
     };
 
 
@@ -68,57 +67,50 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 						</tbody></table>
 					</td>`;
         const usage = this.wrapper.usage.get("task:" + task.treeId);
-		if (usage)
+		if (usage && usage.taskStats &&  usage.taskStats.runtimes && usage.taskStats.runtimes.length > 0)
 		{
-			if (usage.taskStats &&  usage.taskStats.runtimes && usage.taskStats.runtimes.length > 0)
-			{
-				html += `<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
-							<table width="100%"><tbody>
-								<tr>
-									<td class="te-task-details-header-details-icon-td">
-										<span class="fas fa-rabbit te-color-rabbit-pink" />
-									</td>
-									<td class="te-task-details-header-details-time-td">
-										${this.formatRuntime(usage.taskStats.fastest)}
-									</td>
-								</tr>
-								<tr>
-									<td class="te-task-details-header-details-icon-td">
-										<span class="fas fa-turtle te-color-turtle-green" />
-									</td>
-									<td class="te-task-details-header-details-time-td">
-										${this.formatRuntime(usage.taskStats.slowest)}
-									</td>
-								</tr>
-							</tbody></table>
-						</td>
-						</tr></tbody></table>`;
-
-				html += `<table width="100%"><tbody>
-						 <tr class=\"te-task-details-runtimes-header\">
-						 	<td>Start</td><td>End</td><td>Run Time</td>
-						 </tr>`;
-
-				for (const r of usage.taskStats.runtimes)
-				{
-					html += `<tr class="te-task-details-runtimes-row">
-								<td>${this.wrapper.utils.formatDate(r.start)}</td>
-								<td>${this.wrapper.utils.formatDate(r.end)}</td>
-								<td>${this.formatRuntime(r.time)}</td>
-							</tr>`;
-				}
-
-				html += "</tbody></table>";
-			}
-			else {
-				html += `<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
-							No tracked statistics available
-						</td></tr></tbody></table>`;
-			}
-		}
-		else {
 			html += `<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
-						No tracked usage available
+						<table width="100%"><tbody>
+							<tr>
+								<td class="te-task-details-header-details-icon-td">
+									<span class="fas fa-rabbit te-color-rabbit-pink" />
+								</td>
+								<td class="te-task-details-header-details-time-td">
+									${this.formatRuntime(usage.taskStats.fastest)}
+								</td>
+							</tr>
+							<tr>
+								<td class="te-task-details-header-details-icon-td">
+									<span class="fas fa-turtle te-color-turtle-green" />
+								</td>
+								<td class="te-task-details-header-details-time-td">
+									${this.formatRuntime(usage.taskStats.slowest)}
+								</td>
+							</tr>
+						</tbody></table>
+					</td>
+					</tr></tbody></table>`;
+
+			html += `<table width="100%"><tbody>
+						<tr class=\"te-task-details-runtimes-header\">
+						<td>Start</td><td>End</td><td>Run Time</td>
+						</tr>`;
+
+			for (const r of usage.taskStats.runtimes)
+			{
+				html += `<tr class="te-task-details-runtimes-row">
+							<td>${this.wrapper.utils.formatDate(r.start)}</td>
+							<td>${this.wrapper.utils.formatDate(r.end)}</td>
+							<td>${this.formatRuntime(r.time)}</td>
+						</tr>`;
+			}
+
+			html += "</tbody></table>";
+		}
+		else
+		{
+			html += `<td class="te-task-details-header-td te-task-details-header-details-td" align="right">
+						No tracked statistics available
 					</td></tr></tbody></table>`;
 		}
 

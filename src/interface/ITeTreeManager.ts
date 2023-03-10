@@ -1,6 +1,7 @@
 import { Task, Uri } from "vscode";
 import { IDictionary } from "./IDictionary";
 import { ITaskFolder } from "./ITaskFolder";
+import { ITeTask } from "./ITeTask";
 import { TaskMap } from "./ITeTaskManager";
 import { ITaskTreeView } from "./ITeTaskTree";
 
@@ -10,5 +11,6 @@ export interface ITeTreeManager
     getTasks(): Task[];
     getTaskTree(): void | ITaskFolder[] | null | undefined;
     refresh(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void>;
+    runningTasks: any[];
     views: IDictionary<ITaskTreeView>;
 }
