@@ -6,11 +6,11 @@ import { ContextKeys } from "./context";
 import * as taskTypeUtils from "./utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "./utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
-import { workspace, RelativePattern, WorkspaceFolder, Uri } from "vscode";
+import { workspace, RelativePattern, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent } from "vscode";
 import { ConfigKeys, StorageKeys } from "./constants";
 
 
-export class TeFileCache implements ITeFileCache
+export class TeFileCache implements ITeFileCache, Disposable
 {
 
     private cancel = false;
@@ -18,6 +18,7 @@ export class TeFileCache implements ITeFileCache
     private cacheBusy = false;
     private taskGlobs: any = {};
     private cacheBuilding = false;
+    private _disposables: Disposable[] = [];
     private taskFilesMap: IDictionary<ICacheItem[]>;
     private projectFilesMap: IDictionary<IDictionary<string[]>>;
     private projectToFileCountMap: IDictionary<IDictionary<number>>;
@@ -28,9 +29,13 @@ export class TeFileCache implements ITeFileCache
         this.taskFilesMap = {};
         this.projectFilesMap = {};
         this.projectToFileCountMap = {};
-        void wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskFiles`, []);
-        // void wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskTypes`, []);
+        void this.setContext();
+        this._disposables.push(
+            wrapper.config.onDidChange((e) => this.onConfigurationChanged(e), this)
+        );
     }
+
+	dispose = () => this._disposables.forEach((d) => d.dispose());
 
 
     /**
@@ -383,21 +388,10 @@ export class TeFileCache implements ITeFileCache
 
     private finishBuild = async(skipPersist?: boolean) =>
     {
-        const taskFiles: string[] = [];
-            // taskTypes: string[] = [];
         if (skipPersist !== true) {
             this.persistCache();
         }
-        for (const taskType of Object.keys(this.taskFilesMap))
-        {
-            // taskTypes.push(taskType);
-            for (const cacheItem of this.taskFilesMap[taskType]) {
-                taskFiles.push(cacheItem.uri.fsPath);
-            }
-        }
-        taskFiles.sort();
-        await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskFiles`, taskFiles);
-        // await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}.taskTypes`, taskTypes);
+        await this.setContext();
         this.wrapper.statusBar.hide();
         this.cacheBuilding = false;
         this.cancel = false;
@@ -496,6 +490,21 @@ export class TeFileCache implements ITeFileCache
         }
         this.taskGlobs[taskType] = fileGlob;
         return globChanged;
+    };
+
+
+    private onConfigurationChanged = (e: ConfigurationChangeEvent) =>
+    {
+        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.EnablePersistenFileCache))
+        {
+            const newValue = this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
+            this.wrapper.log.write(`   the '${ConfigKeys.EnablePersistenFileCache}' setting has changed`, 1);
+            this.wrapper.log.value("      new value", newValue, 1);
+            this.persistCache(!newValue);
+        }
+        if (this.wrapper.config.affectsConfiguration(e, "taskexplorer.enabledTasks"))
+        {
+        }
     };
 
 
@@ -735,6 +744,25 @@ export class TeFileCache implements ITeFileCache
         }
         this.wrapper.log.methodDone("remove workspace folder", 1, logPad);
         return numFilesRemoved;
+    };
+
+
+    private setContext = async() =>
+    {
+        const taskFiles: string[] = [],
+              scriptFiles: string[] = [];
+        for (const taskType of Object.keys(this.taskFilesMap))
+        {
+            const items = this.taskFilesMap[taskType].map(i => i.uri.fsPath);
+            taskFiles.push(...items);
+            if (this.wrapper.taskUtils.isScriptType(taskType)) {
+                scriptFiles.push(...items);
+            }
+        }
+        taskFiles.sort();
+        scriptFiles.sort();
+        await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}taskFiles`, taskFiles);
+        await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}scriptFiles`, scriptFiles);
     };
 
 

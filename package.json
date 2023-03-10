@@ -113,6 +113,7 @@
         "test-single-sws-release_notes": "npm run test-default_build && node ./dist/test/runTest.js releaseNotes xDeactivate",
         "test-single-sws-ruby": "npm run test-default_build && node ./dist/test/runTest.js ruby xDeactivate",
         "test-single-sws-tasks": "npm run test-default_build && node ./dist/test/runTest.js tasks xDeactivate",
+        "test-single-sws-task_details_page": "npm run test-default_build && node ./dist/test/runTest.js taskDetailsPage xDeactivate",
         "test-single-sws-task_monitor": "npm run test-default_build && node ./dist/test/runTest.js taskMonitor xDeactivate",
         "test-single-sws-tree": "npm run test-default_build && node ./dist/test/runTest.js tree xDeactivate",
         "test-single-sws-tree_grouping": "npm run test-default_build && node ./dist/test/runTest.js treeGrouping xDeactivate",
@@ -136,7 +137,7 @@
         "tsc-rebuild": "npm run clean && npm run tsc-build && npm run tsc-build:types",
         "tsc-rebuild:test": "npm run clean && && npm run tsc-rebuild:types && npm run test-default_build",
         "tsc-rebuild:types": "rimraf types/tsconfig.tsbuildinfo && rimraf types/lib && rimraf node_modules/@spmeesseman/vscode-taskexplorer-types/lib && npm run tsc-build:types",
-        "tsc-watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
+        "tsc-watch": "(concurrently \"tsc -watch -p ./\" \"tsc-alias -w\")",
         "update-fa-icon-module": "node script\\update-fa-module.js",
         "build-fa-icon-module": "node script\\update-fa-module.js --extract",
         "webpack-watch": "webpack -w --mode development --config ./webpack.config.js",
@@ -253,7 +254,6 @@
                 {
                     "id": "taskExplorerSideBar",
                     "title": "%view.name%",
-                    "when": "config.taskexplorer.enableSideBar",
                     "contextualTitle": "TaskExplorer",
                     "icon": "res/img/logo.svg"
                 }
@@ -277,6 +277,7 @@
                     "id": "taskexplorer.view.home",
                     "name": "Home",
                     "contextualTitle": "TaskExplorer",
+                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg",
                     "initialSize": 1,
                     "visibility": "visible"
@@ -287,6 +288,7 @@
                     "name": "Explorer",
                     "initialSize": 10,
                     "contextualTitle": "TaskExplorer",
+                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg",
                     "visibility": "visible"
                 },
@@ -295,6 +297,7 @@
                     "id": "taskexplorer.view.taskUsage",
                     "name": "Task Usage",
                     "contextualTitle": "TaskExplorer",
+                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg",
                     "initialSize": 1,
                     "visibility": "collapsed"
@@ -304,6 +307,7 @@
                     "id": "taskexplorer.view.taskCount",
                     "name": "Task Count",
                     "contextualTitle": "TaskExplorer",
+                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg",
                     "initialSize": 1,
                     "visibility": "collapsed"
@@ -633,17 +637,17 @@
                 {
                     "command": "taskexplorer.disableTaskType",
                     "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in vscodeTaskExplorer.taskFiles"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:taskFiles"
                 },
                 {
                     "command": "taskexplorer.enableTaskType",
                     "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in vscodeTaskExplorer.taskFiles"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in taskexplorer:fileCache:taskFiles"
                 },
                 {
                     "command": "taskexplorer.addToExcludesEx",
                     "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in vscodeTaskExplorer.taskFiles"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:taskFiles"
                 },
                 {
                     "command": "taskexplorer.addToExcludesEx",
@@ -653,7 +657,7 @@
                 {
                     "command": "taskexplorer.removeFromExcludes",
                     "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in vscodeTaskExplorer.taskFiles"
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in taskexplorer:fileCache:taskFiles"
                 },
                 {
                     "command": "taskexplorer.removeFromExcludes",
@@ -664,6 +668,16 @@
                     "command": "taskexplorer.view.parsingReport.show",
                     "group": "9_taskexplorer",
                     "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && explorerResourceIsRoot && !inputFocus && resourcePath"
+                },
+                {
+                    "command": "taskexplorer.run",
+                    "group": "9_taskexplorer",
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:scriptFiles"
+                },
+                {
+                    "command": "taskexplorer.runWithArgs",
+                    "group": "9_taskexplorer",
+                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:tasks:scriptFilesWithArgs"
                 }
             ],
             "commandPalette": [
@@ -2254,8 +2268,8 @@
             },
             {
                 "name": "webpackTe",
-                "owner": "typescript",
-                "source": "typescript",
+                "owner": "javascript",
+                "source": "javascript",
                 "label": "Task Explorer WebPack Watch",
                 "pattern": [
                     {
@@ -2269,6 +2283,20 @@
                     "activeOnStart": true,
                     "beginsPattern": "Entrypoint\\s+extension",
                     "endsPattern": "compiled\\s+successfully\\s+in\\s+[0-9]+\\s+ms"
+                }
+            },
+            {
+                "name":"tsc-watch",
+                "label":"Task Explorer Tsc-Alias Watch",
+                "base": "$tsc-watch",
+                "background": {
+                    "activeOnStart":true,
+                    "beginsPattern": {
+                        "regexp":"^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (Starting compilation in watch mode|File change detected\\. Starting incremental compilation)\\.\\.\\."
+                    },
+                    "endsPattern": {
+                        "regexp":"^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (?:Compilation complete\\.|Found \\d+ errors?\\.) Watching for file changes\\."
+                    }
                 }
             },
             {

@@ -5,6 +5,7 @@ import { TaskFolder } from "./folder";
 import { TeTreeView } from "./treeView";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
+import { ContextKeys } from "../lib/context";
 import { TaskTreeBuilder } from "./treeBuilder";
 import { FavoritesFolder } from "./favoritesFolder";
 import { LastTasksFolder } from "./lastTasksFolder";
@@ -12,7 +13,7 @@ import { getTerminal } from "../lib/utils/getTerminal";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { Commands, registerCommand } from "../lib/command/command";
-import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask } from "../interface";
+import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition } from "../interface";
 import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
 
 
@@ -48,8 +49,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this._treeBuilder = new TaskTreeBuilder(wrapper);
 
         this._views = {
-            taskExplorer: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer", "taskTreeExplorer"),
-            taskExplorerSideBar: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeSideBar", "taskexplorer:treeView:taskTreeSideBar", "taskTreeSideBar")
+            taskExplorer: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer"),
+            taskExplorerSideBar: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeSideBar", "taskexplorer:treeView:taskTreeSideBar")
         };
 
         this.disposables.push(
@@ -313,6 +314,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // Create/build the ui task tree
         //
         await this._treeBuilder.createTaskItemTree(logPad + "   ", 2);
+        //
+        // Set relevant context keys
+        //
+        await this.setContext();
         //
         // Signal that the task list / tree has changed
         //
@@ -631,6 +636,24 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         }
 
         this.wrapper.log.methodDone("refresh task tree", 1, logPad);
+    };
+
+
+    private setContext = async() =>
+    {
+        const taskTypeProcessed: string[] = [],
+              scriptFilesWithArgs: string[] = [],
+              taskMap = <TaskItem[]>Object.values(this._treeBuilder.getTaskMap()).filter(i => !!i);
+        for (const taskItem of taskMap)
+        {
+            const task = taskItem.task;
+            if ((<ITaskDefinition>task.definition).takesArgs && taskItem.resourceUri) {
+                scriptFilesWithArgs.push(taskItem.resourceUri.fsPath);
+            }
+            if (!taskTypeProcessed.includes(task.source)) { taskTypeProcessed.push(task.source); /* TODO */ }
+        }
+        scriptFilesWithArgs.sort();
+        await this.wrapper.contextTe.setContext(`${ContextKeys.TasksPrefix}scriptFilesWithArgs`, scriptFilesWithArgs);
     };
 
 

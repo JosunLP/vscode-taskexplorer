@@ -3,7 +3,7 @@
 
 import { VsCodeCommands } from "./command/command";
 import { ITeContext, IDictionary } from "../interface";
-import { commands, Event, EventEmitter } from "vscode";
+import { commands, Disposable, Event, EventEmitter } from "vscode";
 
 export type TreeViewIds = "taskTreeExplorer" | "taskTreeSideBar";
 export type WebviewIds = "parsingReport" | "licensePage" | "releaseNotes" | "taskDetails" | "taskMonitor" | "welcome";
@@ -11,9 +11,9 @@ export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
 
 export const enum ContextKeys
 {
-	ActionPrefix = "taskexplorer:action:",
 	FileCachePrefix = "taskexplorer:fileCache:",
 	KeyPrefix = "taskexplorer:key:",
+	TasksPrefix = "taskexplorer:tasks:",
 	TreeViewPrefix = "taskexplorer:treeView:",
 	TreeViewExplorerPrefix = "taskexplorer:treeView:taskTreeExplorer",
 	TreeViewSideBarPrefix = "taskexplorer:treeView:tasktreeSideBar",
@@ -31,41 +31,40 @@ export const enum ContextKeys
 	TestsTest = "taskexplorer:testsTest"
 }
 
-type FileCacheContextKeys =
-	`${ContextKeys.FileCachePrefix}:taskFiles`
-	| `${ContextKeys.FileCachePrefix}:taskTypes`;
-
-type TreeviewContextKeys =
-	`${ContextKeys.TreeViewPrefix}${TreeViewIds}:active`;
-
-type WebviewPageContextKeys =
-	`${ContextKeys.WebviewPrefix}${WebviewIds}:active`
-	| `${ContextKeys.WebviewPrefix}${WebviewIds}:focus`
-	| `${ContextKeys.WebviewPrefix}${WebviewIds}:inputFocus`;
-
-type WebviewViewContextKeys =
-	`${ContextKeys.WebviewViewPrefix}${WebviewViewIds}:focus`
-	| `${ContextKeys.WebviewViewPrefix}${WebviewViewIds}:inputFocus`;
-
 type AllContextKeys =
-	ContextKeys | TreeviewContextKeys | WebviewPageContextKeys | WebviewViewContextKeys
-	| `${ContextKeys.ActionPrefix}${string}` | FileCacheContextKeys
+	ContextKeys
 	| `${ContextKeys.KeyPrefix}${string}`
-	| `${ContextKeys.FileCachePrefix}${string}`;
+	| `${ContextKeys.FileCachePrefix}${string}`
+	| `${ContextKeys.TasksPrefix}${string}`
+	| `${ContextKeys.TreeViewPrefix}${TreeViewIds}${string}`
+	| `${ContextKeys.WebviewPrefix}${WebviewIds}${string}`
+	| `${ContextKeys.WebviewViewPrefix}${WebviewViewIds}${string}`;
 
 
-export class TeContext implements ITeContext
+export class TeContext implements ITeContext, Disposable
 {
+	private _disposables: Disposable[] = [];
 	private contextStorage: IDictionary<unknown> = {};
-	private _onDidChangeContext = new EventEmitter<AllContextKeys>();
-	public onDidChangeContext: Event<AllContextKeys>;
+	private _onDidChangeContext: EventEmitter<AllContextKeys>;
+
 
 	constructor()
 	{
-		this.onDidChangeContext = this._onDidChangeContext.event;
+		this._onDidChangeContext = new EventEmitter<AllContextKeys>();
+		this._disposables.push(this._onDidChangeContext);
 	}
 
+
+    dispose = () => this._disposables.forEach(d => d.dispose());
+
+
+	get onDidChangeContext() {
+		return this._onDidChangeContext.event;
+	}
+
+
 	getContext = <T>(key: AllContextKeys, defaultValue?: T) => this.contextStorage[key] as T | undefined || defaultValue;
+
 
 	setContext = async(key: AllContextKeys, value: unknown): Promise<void> =>
 	{

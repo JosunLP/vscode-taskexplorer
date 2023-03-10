@@ -5,7 +5,7 @@ import { TeWrapper } from "../lib/wrapper";
 import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../interface";
 import {
     Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
-    Task, window, TaskEndEvent, EventEmitter
+    Task, window, TaskEndEvent, EventEmitter, TaskProcessEndEvent, TaskProcessStartEvent
 } from "vscode";
 
 
@@ -28,10 +28,10 @@ export class TaskWatcher implements Disposable
             this.statusBarSpace,
             this._onTaskStatusChange,
             this._onDidRunningTasksChange,
-            tasks.onDidStartTask(async(e) => this.taskStartEvent(e)),
-            tasks.onDidEndTask(async(e) => this.taskFinishedEvent(e)),
-            // tasks.onDidStartTaskProcess(async(e) => this.taskProcessStartEvent(e)),
-            // tasks.onDidEndTaskProcess(async(e) => this.taskProcessFinishedEvent(e))
+            tasks.onDidStartTask((e) => this.taskStartEvent(e), this),
+            tasks.onDidEndTask((e) => this.taskFinishedEvent(e), this),
+            tasks.onDidStartTaskProcess((e) => this.taskProcessStartEvent(e), this),
+            tasks.onDidEndTaskProcess((e) => this.taskProcessFinishedEvent(e), this)
         ];
     }
 
@@ -161,10 +161,12 @@ export class TaskWatcher implements Disposable
     }
 
 
-    // private taskProcessStartEvent = (e: TaskProcessStartEvent) => this.taskStartEvent({ execution: e.execution });
+    private taskProcessStartEvent = (e: TaskProcessStartEvent) =>
+        this.wrapper.log.methodOnce("task watcher", "process start", 2, "", [[ "pid", e.processId ], [ "task name", e.execution.task.name ]]);
 
 
-    // private taskProcessFinishedEvent = (e: TaskProcessEndEvent) => this.taskFinishedEvent({ execution: e.execution });
+    private taskProcessFinishedEvent = (e: TaskProcessEndEvent) =>
+        this.wrapper.log.methodOnce("task watcher", "process start", 2, "", [[ "exit code", e.exitCode ], [ "task name", e.execution.task.name ]]);
 
 
     private async taskStartEvent(e: TaskStartEvent): Promise<void>

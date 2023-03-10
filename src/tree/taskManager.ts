@@ -38,9 +38,9 @@ export class TaskManager implements ITeTaskManager, Disposable
             registerCommand(Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.getTask(item), itemClick), this),
             registerCommand(Commands.Pause, (item: TaskItem | ITeTask) => this.pause(this.getTask(item)), this),
             registerCommand(Commands.Restart, (item: TaskItem) => this.restart(item), this),
-            registerCommand(Commands.Run,  (item: TaskItem | ITeTask) => this.run(this.getTask(item)), this),
+            registerCommand(Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.getTask(item)), this),
             registerCommand(Commands.RunLastTask,  () => this.runLastTask(this.wrapper.treeManager.getTaskMap()), this),
-            registerCommand(Commands.RunWithArgs, (item: TaskItem, args?: string) => this.run(item, false, true, args), this),
+            registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.getTask(item), false, true, ...args), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
 			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask) => this.setPinned(item), this),
             registerCommand(Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
@@ -56,9 +56,17 @@ export class TaskManager implements ITeTaskManager, Disposable
     }
 
 
-    getTask =  (taskItem: TaskItem | ITeTask) =>
+    getTask =  (taskItem: TaskItem | ITeTask | Uri) =>
     {
-        if (!(taskItem instanceof TaskItem)) {
+        if (taskItem instanceof Uri)
+        {
+            taskItem = Object.values(this.wrapper.treeManager.getTaskMap()).find(
+                i =>  i && i.resourceUri && i.resourceUri.fsPath === (<Uri>taskItem).fsPath
+            ) as TaskItem;
+            void this.wrapper.treeManager.views.taskExplorer.view.reveal(taskItem);
+        }
+        else if (!(taskItem instanceof TaskItem)) // ITeTask
+        {
             taskItem = this.wrapper.treeManager.getTaskMap()[taskItem.definition.taskItemId as string] as TaskItem;
         }
         return taskItem;
@@ -180,7 +188,7 @@ export class TaskManager implements ITeTaskManager, Disposable
      * @param withArgs Whether or not to prompt for arguments
      * Note that only script type tasks use arguments (and Gradle, ref ticket #88)
      */
-    private run = async(taskItem: TaskItem, noTerminal = false, withArgs = false, args?: string) =>
+    private run = async(taskItem: TaskItem, noTerminal = false, withArgs = false, ...args: any[]) =>
     {
         let exec: TaskExecution | undefined;
 
@@ -195,7 +203,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
         if (withArgs === true)
         {
-            exec = await this.runWithArgs(taskItem, args, noTerminal);
+            exec = await this.runWithArgs(taskItem, noTerminal, "   ", ...args);
         }
         else if (taskItem.paused)
         {
@@ -334,7 +342,7 @@ export class TaskManager implements ITeTaskManager, Disposable
      * @param noTerminal Whether or not to show the terminal
      * Note that the terminal will be shown if there is an error
      */
-    private runWithArgs = async(taskItem: TaskItem, args?: string, noTerminal?: boolean, logPad = "   ") =>
+    private runWithArgs = async(taskItem: TaskItem, noTerminal: boolean, logPad = "   ", ...args: any[]) =>
     {
         let exec: TaskExecution | undefined;
         this.log.methodStart("run task with arguments", 1, logPad, false, [[ "no terminal", noTerminal ]]);
@@ -363,12 +371,15 @@ export class TaskManager implements ITeTaskManager, Disposable
                 return exec;
             };
 
+            if (args && !this.wrapper.typeUtils.isString(args[0])) {
+                args.splice(0);
+            }
             taskItem.taskDetached = undefined;
-            if (!args) {
+            if (!args || args.length === 0) {
                 exec = await _run(await window.showInputBox(opts));
             }
             else {
-                exec = await _run(args);
+                exec = await _run(args[0] as string);
             }
         }
         else {

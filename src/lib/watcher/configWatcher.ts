@@ -279,17 +279,6 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         }
 
         //
-        // Persistent file caching
-        //
-        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.EnablePersistenFileCache))
-        {
-            const newValue = this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
-            this.wrapper.log.write(`   the '${ConfigKeys.EnablePersistenFileCache}' setting has changed`, 1);
-            this.wrapper.log.value("      new value", newValue, 1);
-            this.wrapper.filecache.persistCache(!newValue);
-        }
-
-        //
         // Refresh tree depending on specific settings changes
         //
         try

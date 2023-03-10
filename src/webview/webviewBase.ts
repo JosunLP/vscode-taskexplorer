@@ -12,15 +12,14 @@ import { TextDecoder } from "util";
 import { getNonce } from "@env/crypto";
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewView } from "./webviewView";
-import { ConfigKeys } from "../lib/constants";
 import { TeWebviewPanel } from "./webviewPanel";
 import { fontawesome } from "./common/fontawesome";
 import { ITeWebview, TeSessionChangeEvent } from "../interface";
 import { Commands, executeCommand } from "../lib/command/command";
-import { ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
+import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
-	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcStateChangedMsg, IpcUpdateConfigCommand, IpcEnabledChangedMsg
+	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcStateChangedMsg, IpcUpdateConfigCommand
 } from "./common/ipc";
 
 
