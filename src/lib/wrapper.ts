@@ -210,7 +210,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	dispose()
 	{
-		this._disposables.forEach((d) =>  d.dispose());
+		this._disposables.forEach(d => d.dispose());
         this._disposables.splice(0);
 	}
 

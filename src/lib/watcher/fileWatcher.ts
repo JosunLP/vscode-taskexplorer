@@ -50,7 +50,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         // Refresh tree when folders/projects are added/removed from the workspace, in a multi-root ws
         //
-        this.disposables.push(workspace.onDidChangeWorkspaceFolders(this.onWsFoldersChange));
+        this.disposables.push(workspace.onDidChangeWorkspaceFolders(this.onWsFoldersChange, this));
         this.wrapper.log.methodDone("register file watchers", 1, "");
     }
 
@@ -89,11 +89,13 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         if (workspace.workspaceFolders)
         {
             this.dirWatcher.watcher = workspace.createFileSystemWatcher(this.getDirWatchGlob(workspace.workspaceFolders));
-            this.dirWatcher.onDidCreate = this.dirWatcher.watcher.onDidCreate(async (e) => { await this.onDirCreate(e); }, null);
-            this.dirWatcher.onDidDelete = this.dirWatcher.watcher.onDidDelete(async (e) => { await this.onDirDelete(e); }, null);
-            this.disposables.push(this.dirWatcher.onDidCreate);
-            this.disposables.push(this.dirWatcher.onDidDelete);
-            this.disposables.push(this.dirWatcher.watcher);
+            this.dirWatcher.onDidCreate = this.dirWatcher.watcher.onDidCreate(async (e) => { await this.onDirCreate(e); }, this);
+            this.dirWatcher.onDidDelete = this.dirWatcher.watcher.onDidDelete(async (e) => { await this.onDirDelete(e); }, this);
+            this.disposables.push(
+                this.dirWatcher.onDidCreate,
+                this.dirWatcher.onDidDelete,
+                this.dirWatcher.watcher
+            );
         }
     };
 

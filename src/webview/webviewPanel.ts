@@ -166,20 +166,15 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		while (this.wrapper.busy && args.length > 0 && !args.includes("force")) {
 			await sleep(100);
 		}
-		void this.wrapper.usage.track(`${this.trackingFeature}:shown`);
+		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
 
-		const column = options?.column ?? ViewColumn.One; // ViewColumn.Beside;
-		// Only try to open beside if there is an active tab
-		// if (column === ViewColumn.Beside && !window.tabGroups.activeTabGroup.activeTab) {
-		// 	column = ViewColumn.Active;
-		// }
-
+		const column = options?.column ?? ViewColumn.One;
 		if (!this._view)
 		{
 			if (args.length === 2 && isObject(args[0]) && args[0].webview)
 			{
 				this._view = args[0] as WebviewPanel;
-				// State = args[1],.... still don't know wtf to do with 'State'.
+				// State = args[1],.... Not using VSCode provided state yet...
 				args.splice(0, 2);
 			}
 			else
@@ -197,13 +192,13 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 			this._view.iconPath = Uri.file(this.wrapper.context.asAbsolutePath(this.iconPath));
 			this._disposablePanel = Disposable.from(
-				this._view,
 				this._view.onDidDispose(this.onPanelDisposed, this),
 				this._view.onDidChangeViewState(this.onViewStateChanged, this),
 				this._view.webview.onDidReceiveMessage(this.onMessageReceivedBase, this),
 				...(this.onInitializing?.() ?? []),
 				...(this.registerCommands?.() ?? []),
 				window.onDidChangeWindowState(this.onWindowStateChanged, this),
+				this._view
 			);
 
 			await this.refresh(false, ...args);
