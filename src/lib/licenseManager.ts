@@ -39,7 +39,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._disposables.push(
 			this._onSessionChange,
 			// this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged),
-			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged),
+			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
 			registerCommand(Commands.EnterLicense, this.enterLicenseKey, this),
 			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
 			registerCommand(Commands.Register, this.register, this)

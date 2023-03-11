@@ -39,7 +39,7 @@ class Storage implements IStorage, Memento
         this.isDev = context.extensionMode === ExtensionMode.Development;
         this.isTests = context.extensionMode === ExtensionMode.Test;
         this.storageFile = storageFile;
-        context.subscriptions.push(context.secrets.onDidChange(e => this._onDidChangeSecrets.fire(e)));
+        context.subscriptions.push(context.secrets.onDidChange(e => this._onDidChangeSecrets.fire(e), this));
     }
 
 
