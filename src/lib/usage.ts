@@ -218,7 +218,7 @@ export class Usage implements ITeUsage, Disposable
 
     private onFavoriteTasksChanged = async(e: ITeTaskChangeEvent) =>
     {
-        if (this._trackTaskStats)
+        if (this._trackUsage  && this._trackTaskStats)
         {
             const stats = this.getTaskUsageStore();
             stats.favorites = [ ...e.tasks ];
@@ -229,7 +229,7 @@ export class Usage implements ITeUsage, Disposable
 
     private onLastTasksChanged = async(e: ITeTaskChangeEvent) =>
     {
-        if (this._trackTaskStats)
+        if (this._trackUsage  && this._trackTaskStats)
         {
             const stats = this.getTaskUsageStore();
             stats.last = [ ...e.tasks ];
@@ -262,9 +262,10 @@ export class Usage implements ITeUsage, Disposable
     {
         const taskName = `${e.task.name} (${e.task.source})`;
         this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [
-            [ "task name", taskName ], [ "tree id", e.task.treeId ], [ "is running", e.isRunning ], [ "track tasks enabled", this._trackTaskStats ]
+            [ "task name", taskName ], [ "tree id", e.task.treeId ], [ "is running", e.isRunning ],
+            [ "track usage enabled", this._trackUsage ], [ "track tasks enabled", this._trackTaskStats ]
         ]);
-        if (this._trackTaskStats)
+        if (this._trackUsage  && this._trackTaskStats)
         {
             if (e.isRunning)
             {
