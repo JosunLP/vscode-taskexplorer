@@ -244,10 +244,10 @@ export const cleanup = async () =>
 };
 
 
-export const clearOverrideShowInputBox = () => overridesShowInputBox = [];
+export const clearOverrideShowInputBox = () => { overridesShowInputBox = []; };
 
 
-export const clearOverrideShowInfoBox = () => overridesShowInfoBox = [];
+export const clearOverrideShowInfoBox = () => { overridesShowInfoBox = []; };
 
 
 export const closeEditors = () => commands.executeCommand("openEditors.closeAll");

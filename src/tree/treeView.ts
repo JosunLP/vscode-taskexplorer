@@ -5,7 +5,7 @@ import { ITaskTreeView } from "../interface";
 import { TaskTreeManager } from "./treeManager";
 import { ContextKeys, TreeViewIds } from "../lib/context";
 import {
-    Disposable, TreeItem, TreeView, TreeViewExpansionEvent, TreeViewSelectionChangeEvent, /* TreeViewExpansionEvent, TreeViewSelectionChangeEvent, */
+    Disposable, TreeItem, TreeView, TreeViewExpansionEvent, TreeViewSelectionChangeEvent,
     TreeViewVisibilityChangeEvent, window
 } from "vscode";
 
@@ -34,7 +34,7 @@ export class TeTreeView implements ITaskTreeView, Disposable
 
 		this._disposables.push(
             this._view.onDidChangeVisibility(this.onVisibilityChanged, this),
-            this._view.onDidCollapseElement(this.onElementCollapsed, this),
+            // this._view.onDidCollapseElement(this.onElementCollapsed, this),
             this._view.onDidExpandElement(this.onElementExpanded, this),
             this._view.onDidChangeSelection(this.onElementSelectionChanged, this),
             this._tree,
@@ -65,8 +65,8 @@ export class TeTreeView implements ITaskTreeView, Disposable
         return this._visible;
     }
 
-    onElementCollapsed = (e: TreeViewExpansionEvent<TreeItem>) =>
-        this.wrapper.log.methodOnce("tree view", "element collapsed", 2, "", [[ "label", e.element.label ], [ "id", e.element.id ]]);
+    // onElementCollapsed = (e: TreeViewExpansionEvent<TreeItem>) =>
+    //     this.wrapper.log.methodOnce("tree view", "element collapsed", 2, "", [[ "label", e.element.label ], [ "id", e.element.id ]]);
 
 
     onElementExpanded = (e: TreeViewExpansionEvent<TreeItem>) =>

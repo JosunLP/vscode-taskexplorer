@@ -473,7 +473,7 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         utils.clearOverrideShowInfoBox();
-        this.slow(tc.slowTime.commands.standard * 4);
+        this.slow((tc.slowTime.commands.standard * 4) + 50);
         utils.overrideNextShowInfoBox("No");
         await executeTeCommand("clearLastTasks");
         utils.overrideNextShowInfoBox("No");
@@ -482,6 +482,7 @@ suite("Tree Tests", () =>
         await executeTeCommand("clearLastTasks");
         utils.overrideNextShowInfoBox("Yes");
         await executeTeCommand("clearFavorites");
+        await utils.sleep(25);
         utils.endRollingCount(this);
     });
 
@@ -489,12 +490,17 @@ suite("Tree Tests", () =>
     test("Reveal API", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.getTreeTasks * 2);
+        this.slow((tc.slowTime.getTreeTasks * 2) + 40);
         bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
         batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
+        await utils.sleep(5);
         await teWrapper.treeManager.views.taskExplorer.view.reveal(batch[0], { select: true });
-        await teWrapper.treeManager.views.taskExplorer.view.reveal(bash[0], { select: false });
+        await utils.sleep(5);
+        await teWrapper.treeManager.views.taskExplorer.view.reveal(bash[0], { select: true });
+        await utils.sleep(5);
         await teWrapper.treeManager.views.taskExplorer.view.reveal(batch[0], { select: false });
+        await utils.sleep(5);
+        await teWrapper.treeManager.views.taskExplorer.view.reveal(bash[0], { select: false });
         const taskTree = teWrapper.treeManager.getTaskTree() as any[];
         expect(teWrapper.explorer?.getParent(taskTree[0])).to.be.null; // Last Tasks
         expect(teWrapper.explorer?.getParent(taskTree[1])).to.be.null; // Last Tasks

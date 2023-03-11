@@ -512,7 +512,7 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Re-request a 30-Day License", async function()
+	test("Re-request a Trial Extension (Deny)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.standard + tc.slowTime.closeEditors + tc.slowTime.storageSecretUpdate);

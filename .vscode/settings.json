@@ -49,6 +49,7 @@
         "nobuild",
         "nocase",
         "noscripts",
+        "nosleep",
         "noworkspace",
         "OTLP",
         "Pipenv",

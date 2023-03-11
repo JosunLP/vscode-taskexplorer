@@ -255,6 +255,7 @@
                     "id": "taskExplorerSideBar",
                     "title": "%view.name%",
                     "contextualTitle": "TaskExplorer",
+                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg"
                 }
             ]
@@ -277,7 +278,6 @@
                     "id": "taskexplorer.view.home",
                     "name": "Home",
                     "contextualTitle": "TaskExplorer",
-                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg",
                     "initialSize": 1,
                     "visibility": "visible"
@@ -288,7 +288,6 @@
                     "name": "Explorer",
                     "initialSize": 10,
                     "contextualTitle": "TaskExplorer",
-                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg",
                     "visibility": "visible"
                 },
@@ -297,7 +296,6 @@
                     "id": "taskexplorer.view.taskUsage",
                     "name": "Task Usage",
                     "contextualTitle": "TaskExplorer",
-                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg",
                     "initialSize": 1,
                     "visibility": "collapsed"
@@ -307,7 +305,6 @@
                     "id": "taskexplorer.view.taskCount",
                     "name": "Task Count",
                     "contextualTitle": "TaskExplorer",
-                    "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg",
                     "initialSize": 1,
                     "visibility": "collapsed"

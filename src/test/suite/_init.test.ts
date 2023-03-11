@@ -65,7 +65,7 @@ suite("Initialization", () =>
     });
 
 
-    test("Disable Explorer Views", async function()
+    test("Disable Explorer View", async function()
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.registerExplorerEvent);

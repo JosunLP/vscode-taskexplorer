@@ -110,7 +110,7 @@ export const testControl =
         config: {
             event: 270,
             eventFast: 90,
-            registerExplorerEvent: 410,
+            registerExplorerEvent: 435,
             disableEvent: 1000,
             enableEvent: 1725,
             enableEventWorkspace: 1825,
@@ -129,8 +129,8 @@ export const testControl =
         },
         explorerViewStartup: 9500,
         fetchTasksCommand: 350,
-        findTaskPosition: 280,
-        findTaskPositionDocOpen: 30,
+        findTaskPosition: 285,
+        findTaskPositionDocOpen: 35,
         fs: {
             createEvent: 1550,
             createEventTsc: 1885,
@@ -220,7 +220,7 @@ export const testControl =
         focusCommand: 210,
         fs: {
             createEvent: 205,
-            createFolderEvent: 220,
+            createFolderEvent: 230,
             createEventTsc: 275,
             deleteEvent: 200,
             deleteEventTsc: 280,

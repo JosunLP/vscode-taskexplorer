@@ -40,7 +40,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             registerCommand(Commands.Restart, (item: TaskItem) => this.restart(item), this),
             registerCommand(Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.getTask(item)), this),
             registerCommand(Commands.RunLastTask,  () => this.runLastTask(this.wrapper.treeManager.getTaskMap()), this),
-            registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.getTask(item), false, true, ...(args || [])), this),
+            registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.getTask(item), false, true, ...args), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
 			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask) => this.setPinned(item), this),
             registerCommand(Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
@@ -58,14 +58,14 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     getTask =  (taskItem: TaskItem | ITeTask | Uri) =>
     {
-        if (taskItem instanceof Uri)
+        if (taskItem instanceof Uri) // FileExplorer Context menu
         {
             taskItem = Object.values(this.wrapper.treeManager.getTaskMap()).find(
                 i =>  i && i.resourceUri && i.resourceUri.fsPath === (<Uri>taskItem).fsPath
             ) as TaskItem;
             void this.wrapper.treeManager.views.taskExplorer.view.reveal(taskItem, { select: false });
         }
-        else if (!(taskItem instanceof TaskItem)) // ITeTask
+        else if (!(taskItem instanceof TaskItem)) // ITeTask (Webview app)
         {
             taskItem = this.wrapper.treeManager.getTaskMap()[taskItem.definition.taskItemId as string] as TaskItem;
         }
@@ -352,22 +352,17 @@ export class TaskManager implements ITeTaskManager, Disposable
 
             const _run = async (..._args: any[]) =>
             {
-                let exec: TaskExecution | undefined;
-                if (_args && _args.length > 0)
-                {
-                    let newTask = taskItem.task;
-                    const def = taskItem.task.definition,
-                        folder = taskItem.getFolder();
-                    // if (folder)
-                    // {
-                        newTask = (new ScriptTaskProvider(this.wrapper)).createTask(
-                            def.script, undefined, folder as WorkspaceFolder, def.uri, _args && _args.length ? _args : undefined, logPad + "   "
-                        ) as Task;
-                        newTask.definition.taskItemId = def.taskItemId;
-                    // }
-                    exec = await this.runTask(newTask, taskItem, noTerminal, logPad + "   ");
-                }
-                return exec;
+                let newTask = taskItem.task;
+                const def = taskItem.task.definition,
+                      folder = taskItem.getFolder();
+                // if (folder)
+                // {
+                    newTask = (new ScriptTaskProvider(this.wrapper)).createTask(
+                        def.script, undefined, folder as WorkspaceFolder, def.uri, _args, logPad + "   "
+                    ) as Task;
+                    newTask.definition.taskItemId = def.taskItemId;
+                // }
+                return this.runTask(newTask, taskItem, noTerminal, logPad + "   ");
             };
 
             if (args.length > 0 && !this.wrapper.typeUtils.isString(args[0])) {
@@ -378,7 +373,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             {
                 const opts: InputBoxOptions = { prompt: "Enter command line arguments separated by spaces"};
                 const res = await window.showInputBox(opts);
-                if (res && res.trim()) {
+                if (res !== undefined) {
                     exec = await _run(...res.trim().split(" "));
                 }
             }

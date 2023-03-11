@@ -94,6 +94,18 @@ suite("Task Details Page Tests", () =>
 	});
 
 
+	test("Open Details Page (From App)", async function()
+	{
+        if (exitRollingCount(this)) return;
+		this.slow(testControl.slowTime.viewTaskDetails + 150);
+		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
+		const iTask = teWrapper.taskUtils.toITask(teWrapper, [ batch[0].task ], "all"); // App uses ITeTask
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ iTask ], testControl.waitTime.viewReport);
+		await sleep(75);
+		await closeEditors();
+        endRollingCount(this);
+	});
+
 
 	test("Open Details Page (Tracking Disabled)", async function()
 	{

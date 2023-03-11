@@ -7,15 +7,15 @@ import { TaskExecution, Uri } from "vscode";
 import { executeTeCommand2, focusExplorerView } from "../utils/commandUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    activate, endRollingCount, exitRollingCount, getWsPath,
-    needsTreeBuild, overrideNextShowInfoBox, suiteFinished, testControl as tc, verifyTaskCount, waitForTaskExecution
+    activate, clearOverrideShowInputBox, endRollingCount, exitRollingCount, getWsPath,
+    needsTreeBuild, overrideNextShowInfoBox, overrideNextShowInputBox, suiteFinished, testControl as tc, verifyTaskCount, waitForTaskExecution
 } from "../utils/utils";
 import { expect } from "chai";
 
 let teWrapper: ITeWrapper;
 const antUri: Uri = Uri.file(getWsPath("build.xml"));
 const gruntFolderUri: Uri = Uri.file(getWsPath("grunt"));
-const bashUri: Uri = Uri.file(getWsPath("hello.sh"));
+const batchUri: Uri = Uri.file(getWsPath("hello.bat"));
 const pythonUri: Uri = Uri.file(getWsPath("test.py"));
 const readmeUri: Uri = Uri.file(getWsPath("README.md"));
 const antStartCount = 3;
@@ -129,11 +129,12 @@ suite("Menu Command Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.tasks.bashScript);
-        const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ bashUri ], tc.waitTime.config.excludesEvent);
+        clearOverrideShowInputBox();
+        overrideNextShowInputBox("--nosleep");
+        const exec = await executeTeCommand2<TaskExecution | undefined>("runWithArgs", [ batchUri, batchUri ], tc.waitTime.config.excludesEvent);
         expect(exec).to.not.be.undefined;
         await waitForTaskExecution(exec, 1000);
         endRollingCount(this);
     });
-
 
 });
