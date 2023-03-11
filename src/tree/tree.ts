@@ -6,7 +6,7 @@ import { TaskFolder } from "./folder";
 import { TreeViewIds } from "../lib/context";
 import { TaskTreeManager } from "./treeManager";
 import { ITaskTreeEvent, ITeTaskTree } from "../interface";
-import { Event, EventEmitter, Task, TreeItem, TreeDataProvider } from "vscode";
+import { Event, EventEmitter, Task, TreeItem, TreeDataProvider, Disposable } from "vscode";
 
 
 /**
@@ -33,7 +33,7 @@ import { Event, EventEmitter, Task, TreeItem, TreeDataProvider } from "vscode";
  *        refresh the tree ui, with the TreeItem that needs to be provided (or undefined/null if
  *        asking to provide the entire tree).
  */
-export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree
+export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Disposable
 {
     private visible = false;
     private wasVisible = false;
@@ -42,6 +42,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree
     private treeManager: TaskTreeManager;
     private defaultGetChildrenLogPad = "";
     private defaultGetChildrenLogLevel = 1;
+    private _disposables: Disposable[] = [];
     private currentRefreshEvent: string | undefined;
     private getChildrenLogPad = this.defaultGetChildrenLogPad;
     private getChildrenLogLevel = this.defaultGetChildrenLogLevel;
@@ -52,7 +53,10 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree
     {
         this.treeManager = treeManager;
         this._onDidChangeTreeData = new EventEmitter<TreeItem | undefined | null | void>();
+        this._disposables.push(this._onDidChangeTreeData);
     }
+
+	dispose = () => this._disposables.forEach((d) => d.dispose());
 
 
     get onDidChangeTreeData(): Event<TreeItem | undefined | null | void> {

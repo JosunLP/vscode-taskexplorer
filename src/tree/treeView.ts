@@ -14,7 +14,7 @@ import {
 export class TeTreeView implements ITaskTreeView, Disposable
 {
     private _visible = false;
-	private readonly disposables: Disposable[] = [];
+	private readonly _disposables: Disposable[] = [];
 	private readonly _tree: TaskTree;
     private readonly _view: TreeView<TreeItem>;
 
@@ -31,23 +31,21 @@ export class TeTreeView implements ITaskTreeView, Disposable
         this._view = window.createTreeView("taskexplorer.view." + id, { treeDataProvider: this._tree, showCollapseAll: true });
         this._view.title = title;
         this._view.description = description;
-		this.disposables.push(
-            this._view,
+
+		this._disposables.push(
             this._view.onDidChangeVisibility(this.onVisibilityChanged, this),
             this._view.onDidCollapseElement(this.onElementCollapsed, this),
             this._view.onDidExpandElement(this.onElementExpanded, this),
-            this._view.onDidChangeSelection(this.onElementSelectionChanged, this)
+            this._view.onDidChangeSelection(this.onElementSelectionChanged, this),
+            this._tree,
+            this._view
         );
-		void this.wrapper.contextTe.setContext(`${ContextKeys.KeyPrefix}:isTreeView`, true);
 	}
-
 
 	dispose()
 	{
-		this.disposables.forEach((d) => {
-            d.dispose();
-        });
-        this.disposables.splice(0);
+		this._disposables.forEach((d) => d.dispose());
+        this._disposables.splice(0);
 	}
 
 

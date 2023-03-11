@@ -117,8 +117,8 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 			/* istanbul ignore next */
 			await sleep(100);
 		}
-		void this.wrapper.usage.track(`${this.trackingFeature}:shown`);
-		void (await commands.executeCommand(`${this.id}.focus`, options));
+		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
+		await commands.executeCommand(`${this.id}.focus`, options);
 		this.setContextKeys(true, false);
 		return this;
 	}

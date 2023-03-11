@@ -40,7 +40,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             registerCommand(Commands.Restart, (item: TaskItem) => this.restart(item), this),
             registerCommand(Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.getTask(item)), this),
             registerCommand(Commands.RunLastTask,  () => this.runLastTask(this.wrapper.treeManager.getTaskMap()), this),
-            registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.getTask(item), false, true, ...args), this),
+            registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.getTask(item), false, true, ...(args || [])), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
 			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask) => this.setPinned(item), this),
             registerCommand(Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
@@ -349,12 +349,11 @@ export class TaskManager implements ITeTaskManager, Disposable
         /* istanbul ignore else */
         if (taskItem.task && !(taskItem.task.execution instanceof CustomExecution))
         {
-            const opts: InputBoxOptions = { prompt: "Enter command line arguments separated by spaces"};
 
-            const _run = async (_args: string | undefined) =>
+            const _run = async (..._args: any[]) =>
             {
                 let exec: TaskExecution | undefined;
-                if (_args)
+                if (_args && _args.length > 0)
                 {
                     let newTask = taskItem.task;
                     const def = taskItem.task.definition,
@@ -362,7 +361,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                     // if (folder)
                     // {
                         newTask = (new ScriptTaskProvider(this.wrapper)).createTask(
-                            def.script, undefined, folder as WorkspaceFolder, def.uri, _args.trim().split(" "), logPad + "   "
+                            def.script, undefined, folder as WorkspaceFolder, def.uri, _args && _args.length ? _args : undefined, logPad + "   "
                         ) as Task;
                         newTask.definition.taskItemId = def.taskItemId;
                     // }
@@ -371,15 +370,20 @@ export class TaskManager implements ITeTaskManager, Disposable
                 return exec;
             };
 
-            if (args && !this.wrapper.typeUtils.isString(args[0])) {
+            if (args.length > 0 && !this.wrapper.typeUtils.isString(args[0])) {
                 args.splice(0);
             }
             taskItem.taskDetached = undefined;
-            if (!args || args.length === 0) {
-                exec = await _run(await window.showInputBox(opts));
+            if (args.length === 0)
+            {
+                const opts: InputBoxOptions = { prompt: "Enter command line arguments separated by spaces"};
+                const res = await window.showInputBox(opts);
+                if (res && res.trim()) {
+                    exec = await _run(...res.trim().split(" "));
+                }
             }
             else {
-                exec = await _run(args[0] as string);
+                exec = await _run(...args);
             }
         }
         else {
