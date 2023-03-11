@@ -111,12 +111,28 @@ suite("Task Monitor App Tests", () =>
 	test("Toggle App Settings", async function()
 	{
         if (exitRollingCount(this)) return;
+		this.slow(testControl.slowTime.config.event * 6);
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TimerMode, "MM:SS:MSS");
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TimerMode, "MM:SS:MS");
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
 		await executeSettingsUpdate(ConfigKeys.TrackUsage, false);
 		await executeSettingsUpdate(ConfigKeys.TrackUsage, true);
+        endRollingCount(this);
+	});
+
+
+	test("Simulate Toggle App Settings from App Menu", async function()
+	{
+        if (exitRollingCount(this)) return;
+		this.slow((testControl.slowTime.config.eventFast * 2) + 1210);
+		const mType = { method: "echo/config/update", overwriteable: false };
+        await sleep(5);
+		await teWrapper.taskMonitorPage.notify(mType, { key: ConfigKeys.TaskMonitor.TimerMode, value: "MM:SS:MSS" });
+        await sleep(50);
+		await teWrapper.taskMonitorPage.notify(mType, { key: ConfigKeys.TaskMonitor.TimerMode, value: "MM:SS:MS" });
+        await sleep(550); // wait for webworker to respond, takes ~ 400-600ms
+		await closeEditors();
         endRollingCount(this);
 	});
 

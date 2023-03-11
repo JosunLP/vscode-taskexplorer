@@ -348,9 +348,9 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				onIpc(IpcUpdateConfigCommand, e, params => void this.wrapper.config.update(params.key, params.value));
 				break;
 
-			case IpcLogWriteCommand.method:
-				onIpc(IpcLogWriteCommand, e, params => void this.wrapper.log.write("[WEBVIEW]: " + params.message, 1));
-				break;
+			// case IpcLogWriteCommand.method:
+			// 	onIpc(IpcLogWriteCommand, e, params => void this.wrapper.log.write("[WEBVIEW]: " + params.message, 1));
+			// 	break;
 
 			default:
 				this.onMessageReceived?.(e);

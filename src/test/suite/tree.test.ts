@@ -505,7 +505,7 @@ suite("Tree Tests", () =>
     test("Project Folder State Collapsed", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.event * 2) + tc.slowTime.commands.refreshNoChanges);
+        this.slow((tc.slowTime.config.folderState * 2) + tc.slowTime.commands.refreshNoChanges);
         await executeSettingsUpdate("specialFolders.folderState.project1", "Collapsed");
         await teWrapper.treeManager.refresh(undefined, undefined, "");
         await executeSettingsUpdate("specialFolders.folderState.project1", "Expanded");
@@ -516,7 +516,7 @@ suite("Tree Tests", () =>
     test("Folder Sort Type Explorer Order", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.sortingEvent);
+        this.slow(tc.slowTime.config.sortingEvent + (tc.slowTime.config.event * 8));
         await executeTeCommand2("setPinned", [ batch[0] ]);
         await executeTeCommand2("setPinned", [ batch[1] ]);
         await executeTeCommand2("setPinned", [ bash[0] ]);

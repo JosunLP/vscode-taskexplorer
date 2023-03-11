@@ -87,7 +87,6 @@ export interface IpcLogWriteCommandParams
 export const IpcReadyCommand = new IpcCommand("webview/ready");
 export const IpcFocusChangedCommand = new IpcCommand<IpcFocusChangedParams>("webview/focus");
 export const IpcExecCommand = new IpcCommand<IpcExecCommandParams>("command/execute");
-export const IpcExecCustomCommand = new IpcCommand<IpcExecCommandParams>("command/custom/execute");
 export const IpcUpdateConfigCommand = new IpcCommand<IpcUpdateConfigCommandParams>("config/update");
 export const IpcLogWriteCommand = new IpcCommand<IpcLogWriteCommandParams>("log/write");
 
@@ -117,8 +116,6 @@ export interface IpcConfigChangedParams
 
 export const IpcEnabledChangedMsg = new IpcNotification<IpcEnabledChangedParams>("enabled/change");
 export const IpcConfigChangedMsg = new IpcNotification<IpcConfigChangedParams>("configuration/change");
-export const IpcEchoCommandRequest = new IpcNotification<IpcExecCommandParams>("command/echo");
-export const IpcEchoCustomCommandRequest = new IpcNotification<IpcExecCommandParams>("command/custom/echo");
 export const IpcLicenseChangedMsg = new IpcNotification<IpcLicenseChangedParams>("license/change");
 export const IpcStateChangedMsg = new IpcNotification<IpcStateChangedParams>("state/change");
 

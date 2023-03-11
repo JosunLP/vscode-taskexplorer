@@ -98,6 +98,7 @@ export const testControl: ITestControl =
             enableEventWorkspace: 1825,
             excludesEvent: 1775,
             excludeTasksEvent: 2750,
+            folderState: 800,
             globEvent: 1125,
             groupingEvent: 990,
             pathToProgramsEvent: 710,
@@ -159,7 +160,8 @@ export const testControl: ITestControl =
             verifyFirstCall: 550
         },
         viewReleaseNotes: 415,
-        viewTaskMonitor: 800,
+        viewTaskDetails: 415,
+        viewTaskMonitor: 2300,
         viewReport: 380,
         wsFolder: {
             add: 1650,     // bumped for multi-root ws in utils/initSettings
@@ -275,6 +277,7 @@ export interface ISlowTimes
         enableEventWorkspace: number;
         excludesEvent: number;
         excludeTasksEvent: number;
+        folderState: number;
         globEvent: number;
         groupingEvent: number;
         pathToProgramsEvent: number;
@@ -336,6 +339,7 @@ export interface ISlowTimes
         verifyFirstCall: number;
     };
     viewReleaseNotes: number;
+    viewTaskDetails: number;
     viewTaskMonitor: number;
     viewReport: number;
     wsFolder: {

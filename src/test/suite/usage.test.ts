@@ -4,7 +4,7 @@
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { ConfigKeys } from "../../lib/constants";
 import { executeSettingsUpdate, executeTeCommand } from "../utils/commandUtils";
-import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished } from "../utils/utils";
+import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc } from "../utils/utils";
 
 let aKey: string;
 let teWrapper: ITeWrapper;
@@ -49,6 +49,7 @@ suite("Usage / Telemetry Tests", () =>
     test("Set Usage Off / On", async function()
     {
         if (exitRollingCount(this)) return;
+        this.slow((tc.slowTime.config.event * 7) + 20);
         await executeSettingsUpdate(ConfigKeys.AllowUsageReporting, true);
         await executeSettingsUpdate(ConfigKeys.AllowUsageReporting, false);
         await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);

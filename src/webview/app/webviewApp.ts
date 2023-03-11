@@ -4,8 +4,7 @@ import "./common/scss/te.scss";
 
 import { Disposable, DOM } from "./common/dom";
 import {
-	IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand, IDictionary,
-	IpcExecCommand, onIpc, IpcEchoCommandRequest, IpcEchoCustomCommandRequest, IpcExecCustomCommand
+	IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand, IDictionary
 } from "../common/ipc";
 
 interface VsCodeApi {
@@ -216,14 +215,18 @@ export abstract class TeWebviewApp<State = undefined>
 		const msg = e.data as IIpcMessage;
         switch (msg.method)
         {
-			case IpcEchoCommandRequest.method:       // Standard echo service for testing web->host commands in mocha tests
+			case "echo/command/execute":       // Standard echo service for testing web->host commands in mocha tests
 				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`, 1);
-                onIpc(IpcEchoCommandRequest, msg, params => this.sendCommand(IpcExecCommand, params));
+                this.sendCommand({ method: "command/execute", overwriteable: false }, msg.params);
                 break;
-			case IpcEchoCustomCommandRequest.method: // Standard echo service for testing web->host commands in mocha tests
+			case "echo/fake": // Standard echo service for testing web->host commands in mocha tests
 				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`, 1);
-				onIpc(IpcEchoCustomCommandRequest, msg, params => this.sendCommand(IpcExecCustomCommand, params));
+				this.sendCommand({ method: "fake", overwriteable: false }, msg.params);
                 break;
+			case "echo/config/update": // Standard echo service for testing web->host commands in mocha tests
+				this.log(`Base.onMessageReceived(${msg.id}): method=${msg.method}`, 1);
+				this.sendCommand({ method: "config/update", overwriteable: false }, msg.params);
+				break;
 			default:
                 break;
 		}
