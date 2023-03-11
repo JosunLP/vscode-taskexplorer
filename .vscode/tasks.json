@@ -4,7 +4,7 @@
     {
         "type": "npm",
         "script": "tsc-watch",
-        "problemMatcher": "$tsc-watch",
+        // "problemMatcher": "$tsc-watch",
         "isBackground": true,
         "presentation": {
             "reveal": "never"
@@ -12,7 +12,20 @@
         "group": {
             "kind": "build",
             "isDefault": true
-        }
+        },
+        "problemMatcher": {
+            "base": "$tsc-watch",
+            // "applyTo": "allDocuments"
+            "background": {
+                "activeOnStart":true,
+                "beginsPattern": {
+                    "regexp":"^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (Starting compilation in watch mode|File change detected\\. Starting incremental compilation)\\.\\.\\."
+                },
+                "endsPattern": {
+                    "regexp":"^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (?:Compilation complete\\.|Found \\d+ errors?\\.) Watching for file changes\\."
+                }
+            }
+    }
     },
     {
         "type": "npm",
