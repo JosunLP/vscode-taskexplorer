@@ -126,7 +126,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 	{
 		if (e.task.treeId === this._task.treeId && !e.task.running) {
 			this._task = { ...e.task };
-			await this.refresh();
+			await this.refresh(undefined, this._task);
 		}
 	};
 
