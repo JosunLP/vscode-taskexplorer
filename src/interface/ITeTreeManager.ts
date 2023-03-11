@@ -12,5 +12,5 @@ export interface ITeTreeManager
     getTaskTree(): void | ITaskFolder[] | null | undefined;
     refresh(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void>;
     runningTasks: any[];
-    views: IDictionary<ITaskTreeView>;
+    views: { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView };
 }

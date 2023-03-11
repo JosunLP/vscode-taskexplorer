@@ -5,7 +5,7 @@
 import { expect } from "chai";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand2, focusFileExplorer, focusSidebarView } from "../utils/commandUtils";
-import { activate, closeEditors, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc, waitForTeIdle } from "../utils/utils";
+import { activate, closeEditors, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc } from "../utils/utils";
 
 
 let teWrapper: ITeWrapper;
@@ -59,7 +59,7 @@ suite("Initialization", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.refresh);
         await focusSidebarView();
-        await waitForTeIdle(tc.waitTime.refreshCommand);
+        await sleep(50);
         teWrapper.homeView.title = teWrapper.homeView.title;
         endRollingCount(this);
     });
@@ -68,9 +68,8 @@ suite("Initialization", () =>
     test("Disable Explorer Views", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.registerExplorerEvent + tc.slowTime.config.enableEvent);
-        await executeSettingsUpdate("enableExplorerView", false, tc.waitTime.config.enableEvent);
-        await waitForTeIdle(tc.waitTime.config.registerExplorerEvent);
+        this.slow(tc.slowTime.config.registerExplorerEvent);
+        await executeSettingsUpdate("enableExplorerView", false, tc.waitTime.config.registerExplorerEvent);
         expect(teWrapper.sidebar).to.not.be.undefined;
         expect(teWrapper.sidebarView).to.not.be.undefined;
         expect(teWrapper.explorer).to.not.be.undefined;
@@ -85,8 +84,7 @@ suite("Initialization", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.refresh);
-        await executeTeCommand2("refresh", [ undefined, undefined, "" ]);
-        await waitForTeIdle(tc.waitTime.refreshCommand);
+        await executeTeCommand2("refresh", [ undefined, undefined, "" ], tc.waitTime.refreshCommand);
         endRollingCount(this);
     });
 
@@ -94,9 +92,8 @@ suite("Initialization", () =>
     test("Disable SideBar View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.registerExplorerEvent + tc.slowTime.config.enableEvent);
-        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.enableEvent);
-        await waitForTeIdle(tc.waitTime.config.registerExplorerEvent);
+        this.slow(tc.slowTime.config.registerExplorerEvent);
+        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.registerExplorerEvent);
         expect(teWrapper.sidebar).to.not.be.undefined;
         expect(teWrapper.sidebarView).to.not.be.undefined;
         expect(teWrapper.explorer).to.not.be.undefined;
@@ -110,9 +107,8 @@ suite("Initialization", () =>
     test("Re-enable SideBar View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.registerExplorerEvent + tc.slowTime.config.enableEvent);
-        await executeSettingsUpdate("enableSideBar", true, tc.waitTime.config.enableEvent);
-        await waitForTeIdle(tc.waitTime.config.registerExplorerEvent);
+        this.slow(tc.slowTime.config.registerExplorerEvent);
+        await executeSettingsUpdate("enableSideBar", true, tc.waitTime.config.registerExplorerEvent);
         expect(teWrapper.sidebar).to.not.be.undefined;
         expect(teWrapper.sidebarView).to.not.be.undefined;
         expect(teWrapper.explorer).to.not.be.undefined;
@@ -127,9 +123,8 @@ suite("Initialization", () =>
     test("Re-enable Explorer View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.registerExplorerEvent + tc.slowTime.config.enableEvent);
-        await executeSettingsUpdate("enableExplorerView", true, tc.waitTime.config.enableEvent);
-        await waitForTeIdle(tc.waitTime.config.registerExplorerEvent);
+        this.slow(tc.slowTime.config.registerExplorerEvent);
+        await executeSettingsUpdate("enableExplorerView", true, tc.waitTime.config.registerExplorerEvent);
         expect(teWrapper.sidebar).to.not.be.undefined;
         expect(teWrapper.sidebarView).to.not.be.undefined;
         expect(teWrapper.explorer).to.not.be.undefined;
@@ -152,9 +147,8 @@ suite("Initialization", () =>
     test("Disable SideBar View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.registerExplorerEvent + tc.slowTime.config.enableEvent);
-        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.enableEvent);
-        await waitForTeIdle(tc.waitTime.config.registerExplorerEvent);
+        this.slow(tc.slowTime.config.registerExplorerEvent);
+        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.registerExplorerEvent);
         expect(teWrapper.sidebar).to.not.be.undefined;
         expect(teWrapper.sidebarView).to.not.be.undefined;
         expect(teWrapper.explorer).to.not.be.undefined;

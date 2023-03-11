@@ -5,14 +5,13 @@ import { join } from "path";
 import { Uri } from "vscode";
 import fsUtils from "../utils/fsUtils";
 import * as utils from "../utils/utils";
-import { ITestControl } from "../control";
 import { startupFocus } from "../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
 
 const testsName = "tsc";
 const startTaskCount = 0;
-let testControl: ITestControl;
+let testControl: any;
 let teWrapper: ITeWrapper;
 let rootPath: string;
 let dirName: string;

@@ -405,7 +405,7 @@ suite("License Manager Tests", () =>
 	test("New Account / First Time Startup", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.get30DayLicense + tc.slowTime.storageSecretUpdate);
+		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(false);
 		await utils.setLicensed(false, {
 			id: 0,
@@ -418,7 +418,7 @@ suite("License Manager Tests", () =>
 				type: 0
 			}
 		});
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.get30DayLicense);
+		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
 		await utils.closeEditors();
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
         utils.endRollingCount(this);
@@ -436,10 +436,10 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Request 30-Day License (From Webview)", async function()
+	test("Request Trial Extension (From Webview)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.get30DayLicense +
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.getTrialExtension +
 				  tc.slowTime.storageSecretRead + tc.slowTime.closeEditors + 1100);
 		account = await licMgr.getAccount();
 		await utils.setLicensed(false, {
@@ -459,7 +459,7 @@ suite("License Manager Tests", () =>
 		const result = await teWrapper.licensePage.view?.webview.postMessage({ command: "extendTrial" });
 		await utils.sleep(500);
 		expect(result).to.be.equal(true);
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.get30DayLicense);
+		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
 		await utils.closeEditors();
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
         utils.endRollingCount(this);
@@ -469,7 +469,7 @@ suite("License Manager Tests", () =>
 	test("New Account / First Time Startup", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.get30DayLicense + tc.slowTime.storageSecretUpdate);
+		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
 		randomMachineId = "te-tests-machine-id2-" + teWrapper.utils.getRandomNumber();
 		await utils.setLicensed(false, {
 			id: 0,
@@ -481,17 +481,17 @@ suite("License Manager Tests", () =>
 				type: 0
 			}
 		});
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.get30DayLicense);
+		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
 		await utils.closeEditors();
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
         utils.endRollingCount(this);
 	});
 
 
-	test("Request 30-Day License (From Command Palette)", async function()
+	test("Request Trial Extension (From Command Palette)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.get30DayLicense + tc.slowTime.storageSecretUpdate);
+		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
 		account = await licMgr.getAccount();
 		await utils.setLicensed(false, {
 			id: account.id,
@@ -505,7 +505,7 @@ suite("License Manager Tests", () =>
 			}
 		});
 		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.get30DayLicense);
+		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
 		await utils.closeEditors();
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
         utils.endRollingCount(this);

@@ -489,6 +489,12 @@ suite("Tree Tests", () =>
     test("Reveal API", async function()
     {
         if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.getTreeTasks * 2);
+        bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
+        batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
+        await teWrapper.treeManager.views.taskExplorer.view.reveal(batch[0], { select: true });
+        await teWrapper.treeManager.views.taskExplorer.view.reveal(bash[0], { select: false });
+        await teWrapper.treeManager.views.taskExplorer.view.reveal(batch[0], { select: false });
         const taskTree = teWrapper.treeManager.getTaskTree() as any[];
         expect(teWrapper.explorer?.getParent(taskTree[0])).to.be.null; // Last Tasks
         expect(teWrapper.explorer?.getParent(taskTree[1])).to.be.null; // Last Tasks

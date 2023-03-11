@@ -296,16 +296,8 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
     };
 
 
-	notify<T extends IpcNotification<any>>(type: T, params: IpcMessageParams<T>, completionId?: string): Promise<boolean>
-	{
-		return this.postMessage(
-		{
-			id: this.nextIpcId(),
-			method: type.method,
-			params,
-			completionId
-		});
-	}
+	notify = <T extends IpcNotification<any>>(type: T, params: IpcMessageParams<T>, completionId?: string): Promise<boolean> =>
+		this.postMessage({ id: this.nextIpcId(), method: type.method, params, completionId });
 
 
 	protected onHtmlPreview = async(html: string, ...args: unknown[]): Promise<string> => html;

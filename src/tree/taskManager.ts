@@ -63,7 +63,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             taskItem = Object.values(this.wrapper.treeManager.getTaskMap()).find(
                 i =>  i && i.resourceUri && i.resourceUri.fsPath === (<Uri>taskItem).fsPath
             ) as TaskItem;
-            void this.wrapper.treeManager.views.taskExplorer.view.reveal(taskItem);
+            void this.wrapper.treeManager.views.taskExplorer.view.reveal(taskItem, { select: false });
         }
         else if (!(taskItem instanceof TaskItem)) // ITeTask
         {
@@ -342,7 +342,7 @@ export class TaskManager implements ITeTaskManager, Disposable
      * @param noTerminal Whether or not to show the terminal
      * Note that the terminal will be shown if there is an error
      */
-    private runWithArgs = async(taskItem: TaskItem, noTerminal: boolean, logPad = "   ", ...args: any[]) =>
+    private runWithArgs = async(taskItem: TaskItem, noTerminal: boolean, logPad: string, ...args: any[]) =>
     {
         let exec: TaskExecution | undefined;
         this.log.methodStart("run task with arguments", 1, logPad, false, [[ "no terminal", noTerminal ]]);

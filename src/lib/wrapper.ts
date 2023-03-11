@@ -66,7 +66,7 @@ import {
 } from "vscode";
 import {
 	IDictionary, ILog, ITeFilesystem, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities,
-	ITeStatusBar, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
+	ITeStatusBar, ITeTaskTree, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "../interface";
 
 
@@ -248,6 +248,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 		await this._teContext.setContext(ContextKeys.Debugging, this.debugging);
 		await this._teContext.setContext(ContextKeys.Tests, this.tests);
         await this._teContext.setContext(ContextKeys.Enabled, this.utils.isTeEnabled());
+		this._disposables.push(
+			this._teContext.onDidChangeContext(() => {}, this) // cover until used somewhere
+		);
 		//
 		// Signal we are ready/done
 		//
@@ -466,7 +469,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return !isDev && !isTests ? "production" : (isDev ? "dev" : "tests");
 	}
 
-    get explorer(): TaskTree {
+    get explorer(): ITeTaskTree {
         return this.treeManager.views.taskExplorer.tree;
     }
 
@@ -550,7 +553,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._server;
 	}
 
-    get sidebar(): TaskTree {
+    get sidebar(): ITeTaskTree {
         return this.treeManager.views.taskExplorerSideBar.tree;
     }
 

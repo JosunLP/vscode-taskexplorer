@@ -13,7 +13,7 @@ import { getTerminal } from "../lib/utils/getTerminal";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { Commands, registerCommand } from "../lib/command/command";
-import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition } from "../interface";
+import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition, ITaskTreeView } from "../interface";
 import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
 
 
@@ -63,7 +63,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._views.taskExplorerSideBar,
             registerCommand(Commands.AddToExcludes, (item: TaskFile | TaskItem) => this.addToExcludes(item), this),
             registerCommand(Commands.AddRemoveCustomLabel, (item: TaskItem) => this.addRemoveSpecialTaskLabel(item), this),
-            registerCommand(Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.taskManager.getTask(item)), this),
+            registerCommand(Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.wrapper.taskManager.getTask(item)), this),
             registerCommand(Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this)
         );
 
@@ -115,7 +115,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         return this._specialFolders.lastTasks.taskFiles.map(f => f.task);
     }
 
-    get lastTasksFolder() {
+    get lastTasksFolder(): LastTasksFolder {
         return this._specialFolders.lastTasks;
     }
 
@@ -123,12 +123,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         return tasks.taskExecutions.map(e => e.task);
     }
 
-    get views() {
+    get views(): { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView } {
         return this._views;
-    }
-
-    get taskManager() {
-        return this.wrapper.taskManager;
     }
 
     private addRemoveSpecialTaskLabel = async(taskItem: TaskItem) =>

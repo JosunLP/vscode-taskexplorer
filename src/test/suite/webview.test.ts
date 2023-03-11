@@ -72,7 +72,6 @@ suite("Webview Tests", () =>
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
         await commands.executeCommand("taskexplorer.view.home.focus");
         await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
-        await sleep(5);
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.parsingReport.show", args: [ Uri.file(getWsPath(".")) ] });
         await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
         await sleep(5);
@@ -97,6 +96,7 @@ suite("Webview Tests", () =>
         this.slow(tc.slowTime.commands.focusChangeViews + 100);
         await commands.executeCommand("taskexplorer.view.taskUsage.focus");
         await focusExplorerView(teWrapper);
+        await teWrapper.homeView.notify({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover notify() when not visible
         await teWrapper.taskUsageView.show();
         await sleep(5);
         endRollingCount(this);
@@ -131,6 +131,7 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusChangeViews);
         await teWrapper.parsingReportPage.show();
+        await teWrapper.releaseNotesPage.notify({ method: "echo/fake" }, { command: "taskexplorer.view.releaseNotes.show" }); // cover notify() when not visible
         endRollingCount(this);
     });
 
@@ -140,6 +141,7 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusChangeViews);
         await teWrapper.licensePage.show();
+        await teWrapper.releaseNotesPage.notify({ method: "echo/fake" }, { command: "taskexplorer.view.parsingReport.show" }); // cover notify() when not visible
         endRollingCount(this);
     });
 
@@ -187,9 +189,8 @@ suite("Webview Tests", () =>
     test("Disable SideBar", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.registerExplorerEvent + tc.slowTime.config.enableEvent);
-        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.enableEvent);
-        await waitForTeIdle(tc.waitTime.config.registerExplorerEvent);
+        this.slow(tc.slowTime.config.registerExplorerEvent);
+        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.registerExplorerEvent);
         endRollingCount(this);
     });
 
