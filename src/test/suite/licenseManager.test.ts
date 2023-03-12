@@ -10,27 +10,18 @@ import { startupFocus } from "../utils/suiteUtils";
 import { executeTeCommand } from "../utils/commandUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper, TeLicenseType } from "@spmeesseman/vscode-taskexplorer-types";
 
-const tc = utils.testControl;
-
 let licMgr: ITeLicenseManager;
 let teWrapper: ITeWrapper;
-let oMachineId: string;
 let oAccount: ITeAccount;
 let licMgrMaxFreeTasks: number;
 let licMgrMaxFreeTaskFiles: number;
 let licMgrMaxFreeTasksForTaskType: number;
 let licMgrMaxFreeTasksForScriptType: number;
 
+const tc = utils.testControl;
 const restoreAccount = () => { if (oAccount) teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(oAccount)); };
 const setNag = (v?: number) => teWrapper.storage.update(teWrapper.keys.Storage.LastLicenseNag, v);
-// const saveAccount = (account: ITeAccount) => teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(account));
 const setTasks = (e: any) => { licMgr.setTestData({ callTasksChanged: e }); };
-
-// const setLicense = async (opts: any) =>
-// {
-//     await saveAccount({ ...teWrapper.licenseManager.account, ...opts });
-//     await teWrapper.licenseManager.checkLicense("");
-// };
 
 
 suite("License Manager Tests", () =>
@@ -52,7 +43,6 @@ suite("License Manager Tests", () =>
 		licMgr = teWrapper.licenseManager;
 		expect(licMgr.isLicensed).to.be.equal(true);
 		expect(licMgr.isTrial).to.be.equal(true);
-		oMachineId = env.machineId;
 		oAccount = { ...licMgr.account };
 		licMgrMaxFreeTasks = licMgr.getMaxNumberOfTasks();
 		licMgrMaxFreeTaskFiles = licMgr.getMaxNumberOfTaskFiles();
@@ -68,7 +58,6 @@ suite("License Manager Tests", () =>
 		await utils.closeEditors();
 		await restoreAccount();
 		licMgr?.setTestData({
-			machineId: oMachineId,
 			maxFreeTasks: licMgrMaxFreeTasks,
 			maxFreeTaskFiles: licMgrMaxFreeTaskFiles,
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,

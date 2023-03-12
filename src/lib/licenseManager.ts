@@ -2,7 +2,7 @@
 import { TeWrapper } from "./wrapper";
 import { ITeApiEndpoint } from "./server";
 import { executeCommand, registerCommand, Commands } from "./command/command";
-import { Disposable, env, Event, EventEmitter, InputBoxOptions, window } from "vscode";
+import { Disposable, Event, EventEmitter, InputBoxOptions, window } from "vscode";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
 	TeLicenseState, IDictionary, TeRuntimeEnvironment
@@ -13,7 +13,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 {
 	private _account: ITeAccount;
 	private _busy = false;
-	private _machineId: string;
 	private _maxFreeTasks = 500;
 	private _maxFreeTaskFiles = 100;
 	private _maxTasksReached = false;
@@ -33,14 +32,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	constructor(private readonly wrapper: TeWrapper)
     {
-		this._machineId = env.machineId;
 		this._account = this.getNewAccount();
 		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
 		// eslint-disable-next-line @typescript-eslint/tslint/config
 		this._checkLicenseTask = setInterval(this.checkLicense, this.sessionInterval, "");
 		this._disposables.push(
 			this._onSessionChange,
-			// this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged),
 			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
 			registerCommand(Commands.PurchaseLicense, this.purchaseLicenseKey, this),
 			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
@@ -90,10 +87,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, undefined, logPad + "   ",
-			{
-				machineId: this._machineId
-			});
+			this._account = await this.wrapper.server.request<ITeAccount>(ep, undefined, logPad + "   ", {});
 			await this.saveAccount(logPad + "   ");
 			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.", "More Info")
 			.then((action) =>
@@ -223,7 +217,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				email,
 				firstName,
 				lastName,
-				machineId: this._machineId,
 				tests: this.wrapper.tests
 			});
 			await this.saveAccount("   ");
@@ -441,7 +434,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	setTestData = (data: any): void =>
 	{
-		this._machineId = data.machineId || this._machineId; // || env.machineId;
 		this._maxFreeTasks = data.maxFreeTasks || this._maxFreeTasks;
 		this._maxFreeTaskFiles = data.maxFreeTaskFiles || this._maxFreeTaskFiles;
 		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;
@@ -476,11 +468,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("validate license", 1, logPad);
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad,
-			{
-				key,
-				machineId: this._machineId
-			});
+			this._account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, { key });
 			await this.saveAccount("   ");
 			this.wrapper.statusBar.update("");
 		}
