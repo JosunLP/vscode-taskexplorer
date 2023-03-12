@@ -81,11 +81,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
     }
 
 	get statusDays(): string {
-		return this.isLicensed ? "01" : "01";
+		return this.isTrial ? "01" : "*";
 	}
 
     get statusDescription(): string {
-        return this.isLicensed ? "LICENSED" : "UNLICENSED";
+        return this.isTrial ? "TRIAL" : (this.isLicensed ? "LICENSED" : "UNLICENSED");
     }
 
 
