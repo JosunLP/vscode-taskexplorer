@@ -147,7 +147,7 @@
 	"command.disableTaskType": "Task Explorer: Disable Tasks of this Type",
 	"command.donate": "Task Explorer: Donate",
 	"command.enableTaskType": "Task Explorer: Enable Tasks of this Type",
-	"command.enterLicense" : "Task Explorer: Enter License Key",
+	"command.purchaseLicense" : "Task Explorer: Purchase License",
 	"command.extendTrial" : "Task Explorer: Extend Trial",
 	"command.openBugReports": "Task Explorer: Open Github Bug Reports Page",
 	"command.openRepository": "Task Explorer: Open Github Repository Page",

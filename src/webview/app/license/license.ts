@@ -33,8 +33,8 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 		const message = e.data; // JSON data from tests
         switch (message.command)
         {
-            case "enterLicense":
-                this.enterLicense();
+            case "purchaseLicense":
+                this.buyLicense();
                 break;
             case "extendTrial":
                 this.extendTrial();
@@ -48,7 +48,7 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
         }
 	}
 
-	private enterLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.enterLicense"});
+    private purchaseLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.purchaseLicense"});
     private extendTrial = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.extendTrial"});
     private showReleaseNotes = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.releaseNotes.show"});
     private showParsingReport = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.parsingReport.show"});

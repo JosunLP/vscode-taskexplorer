@@ -42,7 +42,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this._onSessionChange,
 			// this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged),
 			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
-			registerCommand(Commands.EnterLicense, this.enterLicenseKey, this),
+			registerCommand(Commands.PurchaseLicense, this.purchaseLicenseKey, this),
 			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
 			registerCommand(Commands.Register, this.register, this)
 		);
@@ -168,17 +168,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 		if (displayPopup)
 		{
-			const options = [ "Enter License Key", "Info", "Not Now" ];
+			const options = [ "Info", "Not Now" ];
 			if (this._account.license.type !== TeLicenseType.TrialExtended && this._account.license.type !== TeLicenseType.Free) {
 				options.push("Extend Trial");
 			}
 			await this.wrapper.storage.update(this.wrapper.keys.Storage.LastLicenseNag, Date.now().toString());
 			const action = await window.showInformationMessage(message, ...options);
-			if (action === "Enter License Key")
-			{
-				await executeCommand(Commands.EnterLicense);
-			}
-			else if (action === "Extend Trial")
+			if (action === "Extend Trial")
 			{
 				await executeCommand(Commands.ExtendTrial);
 			}
@@ -189,36 +185,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		}
 
 		this.wrapper.log.methodDone("license manager display popup", 1, logPad);
-	};
-
-
-	private enterLicenseKey = async(): Promise<void> =>
-	{
-		this.wrapper.log.methodStart("enter license key", 1);
-		const opts: InputBoxOptions = { prompt: "Enter license key" };
-		try {
-			const input = await window.showInputBox(opts);
-			if (input)
-			{
-				if (input.length > 20)
-				{
-					await this.validateLicense(input, "   ");
-					if (this.isLicensed)
-					{
-						window.showInformationMessage("License key validated, thank you for your support!");
-						if (this._maxTasksReached) {
-							this._maxTasksReached = false;
-							await executeCommand(Commands.Refresh);
-						}
-					}
-				}
-				else {
-					window.showInformationMessage("This does not appear to be a valid license, validation skipped");
-				}
-			}
-		}
-		catch (e) {}
-		this.wrapper.log.methodDone("enter license key", 1);
 	};
 
 
@@ -404,6 +370,36 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this.setMaxTasksReached();
 			this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", "");
 		}
+	};
+
+
+	private purchaseLicenseKey = async(): Promise<void> =>
+	{
+		this.wrapper.log.methodStart("purchase license key", 1);
+		const opts: InputBoxOptions = { prompt: "Enter license key" };
+		try {
+			const input = await window.showInputBox(opts);
+			if (input)
+			{
+				if (input.length > 20)
+				{
+					await this.validateLicense(input, "   ");
+					if (this.isLicensed)
+					{
+						window.showInformationMessage("License key validated, thank you for your support!");
+						if (this._maxTasksReached) {
+							this._maxTasksReached = false;
+							await executeCommand(Commands.Refresh);
+						}
+					}
+				}
+				else {
+					window.showInformationMessage("This does not appear to be a valid license, validation skipped");
+				}
+			}
+		}
+		catch (e) {}
+		this.wrapper.log.methodDone("purchase license key", 1);
 	};
 
 

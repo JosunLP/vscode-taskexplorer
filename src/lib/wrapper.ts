@@ -253,7 +253,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// License / Authentication
 		//
-		await this.storage.deleteSecret(StorageKeys.Account); // For testing
+		// await this.storage.deleteSecret(StorageKeys.Account); // For testing
 		await this.licenseManager.checkLicense("   ");
 		//
 		// Maybe show the 'what's new' or 'welcome' page if the version has changed ot this is

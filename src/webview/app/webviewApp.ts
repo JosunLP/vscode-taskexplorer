@@ -83,7 +83,7 @@ export abstract class TeWebviewApp<State = undefined>
 
 	private applyLicenseContent(): void
     {
-		let btn = document.getElementById("btnEnterLicense");
+		let btn = document.getElementById("btnPurchaseLicense");
 		if (btn)
 		{
 			const isLicensed = (this.state as any).isLicensed;

@@ -43,8 +43,8 @@ export class HomeWebviewApp extends TeWebviewApp<State>
         this.log(`${this.appName}.onMessageReceived(${msg.id}): method=${msg.method}: name=${e.data.command}`, 1);
         switch (msg.command)
         {
-            case "enterLicense":
-                this.enterLicense();
+            case "purchaseLicense":
+                this.purchaseLicense();
                 break;
             case "extendTrial":
                 this.extendTrial();
@@ -61,7 +61,7 @@ export class HomeWebviewApp extends TeWebviewApp<State>
         }
 	}
 
-	private enterLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.enterLicense"});
+    private purchaseLicense = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.purchaseLicense"});
     private extendTrial = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.extendTrial"});
     private showReleaseNotes = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.releaseNotes.show"});
     private showParsingReport = () => this.sendCommand(IpcExecCommand, { command: "taskexplorer.view.parsingReport.show"});

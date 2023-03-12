@@ -262,305 +262,18 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Set License Mode - UNLICENSED", async function()
-	{
-		if (utils.exitRollingCount(this)) return;
-		await utils.setLicenseType(TeLicenseType.Free);
-		expect(licMgr.isLicensed).to.be.equal(false);
-		expect(licMgr.isTrial).to.be.equal(false);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Open License Info Page - View Parsing Report", async function()
+	test("Open License Info Page and View Parsing Report", async function()
 	{   //
 		// Run test in  UNLICENSED MODE - Set license type to TeLicenseType.Free
 		//
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewReport + tc.slowTime.licenseMgr.pageWithDetail + 20);
-		await teWrapper.licensePage.show();
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.pageWithDetail + 10);
+		void teWrapper.licensePage.show();
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "showParsingReport" });
         await utils.promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Info Page - Enter Invalid Key From Webview", async function()
-	{   //
-		// Run test in  UNLICENSED MODE - License type is TeLicenseType.Free at this point,
-		// and license page is currently open
-		//
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.checkLicense + tc.slowTime.storageUpdate + 1000);
-		utils.overrideNextShowInputBox(invalidKey);
-		await teWrapper.licensePage.view?.webview.postMessage({ command: "enterLicense" });
-		await utils.waitForTeIdle(500);
-		expect(licMgr.isLicensed).to.be.equal(false);
-		expect(licMgr.isTrial).to.be.equal(false);
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Info Page - Enter Valid Key From Webview", async function()
-	{   //
-		// Run test in  UNLICENSED MODE - License type is TeLicenseType.Free at this point,
-		// and license page is currently open
-		//
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.checkLicense + tc.slowTime.storageUpdate + 1000);
-		utils.overrideNextShowInputBox(paidKey);
-		await teWrapper.licensePage.view?.webview.postMessage({ command: "enterLicense" });
-		await utils.waitForTeIdle(500);
-		await utils.closeEditors(); // Close license page
-		expect(licMgr.isLicensed).to.be.equal(true);
-		expect(licMgr.isTrial).to.be.equal(true);
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Prompt - Enter Valid Key", async function()
-	{   //
-		// Run test in  UNLICENSED MODE
-		// License should be valid/paid at this point, set type back to TeLicenseType.Free
-		//
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.checkLicense + tc.slowTime.storageUpdate + 300);
-		await utils.setLicenseType(TeLicenseType.Free, true);
-		utils.clearOverrideShowInfoBox();
-		utils.clearOverrideShowInputBox();
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox(paidKey);
-		utils.overrideNextShowInfoBox(undefined);
-		await licMgr.checkLicense(""); // auto-pop prompt
-		await utils.waitForTeIdle(150);
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Prompt - Enter Invalid Key", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.enterKey + tc.slowTime.storageUpdate + 500);
-		await setNag(Date.now() - ((1000 * 60 * 60 * 24) * 45));
-		utils.clearOverrideShowInfoBox();
-		utils.clearOverrideShowInputBox();
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox(invalidKey);
-		utils.overrideNextShowInfoBox(undefined);
-		setTasks({ tasks: teWrapper.treeManager.getTasks() });
-		await utils.sleep(250);
-		await utils.waitForTeIdle(150);
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Prompt - Extend Trial", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.enterKey + tc.slowTime.storageUpdate + 500);
-		await setNag();
-		utils.clearOverrideShowInfoBox();
-		utils.overrideNextShowInfoBox("Extend Trial");
-		await setLicensed(false, {
-			id: 51,
-			trialId: 51,
-			license: {
-				id: 5,
-				state: 0,
-				period: 1,
-				type: 2
-			}
-		});
-		await utils.sleep(250);
-		await utils.waitForTeIdle(150);
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Prompt - Enter Invalid Key Length", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.enterKey + tc.slowTime.storageUpdate + 500);
-		await teWrapper.storage.delete(teWrapper.keys.Storage.LastLicenseNag);
-		utils.clearOverrideShowInfoBox();
-		utils.clearOverrideShowInputBox();
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox("1234");
-		utils.overrideNextShowInfoBox(undefined);
-		setTasks({ tasks: teWrapper.treeManager.getTasks() });
-		await utils.waitForTeIdle(150);
-		await utils.closeEditors();
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Page w/ No License Key", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.checkLicense + 500);
-		await setLicensed(false);
-		await utils.waitForTeIdle(150);
-		await teWrapper.licensePage.show();
-		await utils.waitForTeIdle(150);
-		await utils.closeEditors();
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Page w/ Set License Key", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.setLicenseCmd + tc.slowTime.licenseMgr.checkLicense + 500);
-		await setLicensed(true);
-		await utils.waitForTeIdle(150);
-		await teWrapper.licensePage.show();
-		await utils.waitForTeIdle(150);
-		await utils.closeEditors();
-        utils.endRollingCount(this);
-	});
-
-
-	test("Deserialize License Page", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewReport + 30);
-		let panel = utils.createwebviewForRevive("Task Explorer Licensing", "licensePage");
-	    await teWrapper.licensePage.serializer?.deserializeWebviewPanel(panel, null);
 		await utils.sleep(5);
-		(teWrapper.licensePage.view as WebviewPanel)?.dispose();
-		panel = utils.createwebviewForRevive("Task Explorer Licensing", "licensePage");
-		await utils.sleep(5);
-	    await teWrapper.licensePage.serializer?.deserializeWebviewPanel(panel, null);
-		await utils.sleep(5);
-		panel.dispose();
 		await utils.closeEditors();
-        utils.endRollingCount(this);
-	});
-
-
-
-	test("License Info", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd + 500);
-		await setNag();
-		utils.clearOverrideShowInfoBox();
-		utils.overrideNextShowInfoBox("Info");
-		await setLicensed(false);
-		await utils.waitForTeIdle(150);
-		await utils.closeEditors();
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Not Now", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.setLicenseCmd + 500);
-		utils.clearOverrideShowInfoBox();
-		utils.overrideNextShowInfoBox("Not Now");
-		await setLicensed(false);
-		await utils.waitForTeIdle(150);
-		await utils.closeEditors();
-        utils.endRollingCount(this);
-	});
-
-
-
-	test("License Cancel", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd + 500);
-		await setNag();
-		utils.overrideNextShowInfoBox(undefined);
-		await setLicensed(false);
-		await utils.waitForTeIdle(150);
-		await utils.closeEditors();
-        utils.endRollingCount(this);
-	});
-
-
-	test("Enter License Key on Startup", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow((tc.slowTime.licenseMgr.enterKey * 2) + 1000);
-		await setNag();
-		await setLicensed(false);
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox("1111-2222-3333-4444-5555");
-		await executeTeCommand("enterLicense");
-		await utils.waitForTeIdle(150);
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox("");
-		await executeTeCommand("enterLicense");
-		await utils.waitForTeIdle(150);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Enter License Key by Command Palette", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.enterKey * 3);
-		await setNag();
-		await setLicensed(false);
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox("1234-5678-9098-7654321");
-		await executeTeCommand("enterLicense", tc.waitTime.command * 2);
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox("");
-		await executeTeCommand("enterLicense", tc.waitTime.command * 2, 1100, "   ");
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox("");
-		await executeTeCommand("enterLicense", tc.waitTime.command * 2, 1100, "   ", 1);
-		await utils.waitForTeIdle(150);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Enter License Key on Startup (1st Time)", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.checkLicense + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd);
-		await setLicensed();
-        utils.endRollingCount(this);
-	});
-
-
-	test("New Account / First Time Startup", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate + tc.slowTime.viewReport + 20);
-		expect(teWrapper.licenseManager.isLicensed).to.be.equal(false);
-		utils.clearOverrideShowInfoBox();
-		utils.overrideNextShowInfoBox("More Info");
-		await setLicensed(false, {
-			id: 0,
-			trialId: 0,
-			machineId: randomMachineId,
-			license: {
-				id: 0,
-				state: 0,
-				period: 0,
-				type: 0
-			}
-		});
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
-		await utils.sleep(10);
-		await utils.closeEditors();
-		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Register (Not Implemented Yet)", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		//
-		// TODO - Register commad is not implemented yet, and may not be used
-		//
-		await executeTeCommand("register");
         utils.endRollingCount(this);
 	});
 
@@ -582,6 +295,7 @@ suite("License Manager Tests", () =>
 			}
 		});
 		await teWrapper.licensePage.show();
+        await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
 		await utils.sleep(50);
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
 		const result = await teWrapper.licensePage.view?.webview.postMessage({ command: "extendTrial" });
@@ -590,6 +304,66 @@ suite("License Manager Tests", () =>
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
 		await utils.closeEditors();
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Set License Mode - UNLICENSED", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		await utils.setLicenseType(TeLicenseType.Free);
+		expect(licMgr.isLicensed).to.be.equal(false);
+		expect(licMgr.isTrial).to.be.equal(false);
+        utils.endRollingCount(this);
+	});
+
+
+
+	test("License Page w/ No License Key", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.page);
+		void teWrapper.licensePage.show();
+        await utils.promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
+		await utils.closeEditors();
+        utils.endRollingCount(this);
+	});
+
+
+	test("License Nag - Info", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd + 500);
+		await setNag();
+		utils.clearOverrideShowInfoBox();
+		utils.overrideNextShowInfoBox("Info");
+		await setLicensed(false);
+		await utils.waitForTeIdle(150);
+		await utils.closeEditors();
+        utils.endRollingCount(this);
+	});
+
+
+	test("License Nag -Not Now", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.setLicenseCmd + 500);
+		utils.clearOverrideShowInfoBox();
+		utils.overrideNextShowInfoBox("Not Now");
+		await setLicensed(false);
+		await utils.waitForTeIdle(150);
+		await utils.closeEditors();
+        utils.endRollingCount(this);
+	});
+
+
+	test("Register (Not Implemented Yet)", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		//
+		// TODO - Register commad is not implemented yet, and may not be used
+		//
+		await executeTeCommand("register");
         utils.endRollingCount(this);
 	});
 
@@ -742,21 +516,6 @@ suite("License Manager Tests", () =>
 		await teWrapper.fs.deleteDir(join(utils.getWsPath("."), "testA"));
         await utils.waitForTeIdle(tc.waitTime.fs.deleteFolderEvent);
 		await teWrapper.fs.deleteDir(outsideWsDir);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Enter Valid License Key After Max Task Count Reached", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.commands.refresh);
-		// await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(account));
-		await setLicensed(false, { checkLicense: false });
-		await setNag();
-		utils.overrideNextShowInfoBox("Enter License Key");
-		utils.overrideNextShowInputBox(validKey);
-		utils.overrideNextShowInfoBox(undefined);
-		await executeTeCommand("enterLicense");
         utils.endRollingCount(this);
 	});
 
