@@ -111,10 +111,10 @@ svg {
     padding-left: 3px;
 }
 
-.homeview-place-status-icon-td {
+.homeview-license-status-days-td {
     text-align: left;
     width: 1%;
-    padding-left: 3px;
+    padding-left: 5px;
 }
 
 .homeview-license-status-label {
@@ -134,7 +134,7 @@ svg {
     opacity: 0.85;
 }
 
-.homeview-place-status-icon {
+.homeview-license-status-days {
     line-height: 12px !important;
     padding: 0px;
     margin-top: -3px;

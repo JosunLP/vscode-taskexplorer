@@ -80,6 +80,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
         return this._onSessionChange.event;
     }
 
+	get statusDays(): string {
+		return this.isLicensed ? "01" : "01";
+	}
+
+    get statusDescription(): string {
+        return this.isLicensed ? "LICENSED" : "UNLICENSED";
+    }
+
 
 	private beginTrial = async(logPad: string): Promise<void> =>
 	{
