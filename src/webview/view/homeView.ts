@@ -83,9 +83,7 @@ export class HomeView extends TeWebviewView<State>
 	protected override includeBootstrap = (): Promise<State> => this.getState();
 
 
-	protected override includeFontAwesome = () => ({ light: true, icons: [
-		"lock", "unlock", "user", "user-slash", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
-	]});
+	protected override includeFontAwesome = () => ({ light: true, icons: [ "lock", "unlock", "user", "user-slash" ]});
 
 
 	private async onTasksChanged(_e: ITeTaskChangeEvent)
