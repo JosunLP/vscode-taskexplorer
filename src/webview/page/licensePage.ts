@@ -30,9 +30,9 @@ export class LicensePage extends TeWebviewPanel<State>
 
 	protected override onHtmlPreview = async (html: string, ...args: any[]) =>
 	{
-		const newKey = args[0] as string | undefined;
+		// const newKey = args[0] as string | undefined;
 		html = await createTaskCountTable(this.wrapper, undefined, html);
-		let infoContent = await this.getExtraContent(newKey);
+		let infoContent = await this.getExtraContent(/* newKey */);
 		html = html.replace("#{licensePageBodyTop}", infoContent);
 		infoContent = this.getExtraContent2();
 		html = html.replace("#{licensePageBodyBottom}", infoContent);
@@ -40,11 +40,11 @@ export class LicensePage extends TeWebviewPanel<State>
 	};
 
 
-	private getExtraContent = async (newKey?: string) =>
+	private getExtraContent = async (/* newKey?: string */) =>
 	{
 		const licMgr = this.wrapper.licenseManager;
 		const key = licMgr.account.license.key;
-		const details = !newKey ?
+		const details =  // !newKey ?
 	(!licMgr.isLicensed ? `
 	<table class="margin-top-15">
 		<tr><td class="content-subsection-header">
@@ -78,7 +78,7 @@ export class LicensePage extends TeWebviewPanel<State>
 		command pallette for "all projects" to see how many tasks the extension has parsed.
 		<tr><td height="20"></td></tr>
 	</table>
-	`) : `
+	`); /* : `
 	<table class="margin-top-15">
 		<tr><td class="content-subsection-header">
 			30-Day License Key: &nbsp;${key}
@@ -94,7 +94,7 @@ export class LicensePage extends TeWebviewPanel<State>
 		command pallette for "all projects" to see how many tasks the extension has parsed.
 		<tr><td height="20"></td></tr>
 	</table>
-	`;
+	`;*/
 
 		return `<tr><td>${details}</td></tr>`;
 	};

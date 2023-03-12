@@ -1,8 +1,5 @@
 
 import { TeWrapper } from "./wrapper";
-import { pickBy } from "./utils/commonUtils";
-import { getDateDifference } from "./utils/utils";
-import { ConfigKeys, StorageKeys } from "./constants";
 import { ConfigurationChangeEvent, Disposable, Event, EventEmitter } from "vscode";
 import {
     IDictionary, ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent,
@@ -10,6 +7,7 @@ import {
 } from "../interface";
 
 type UsageStore = IDictionary<ITeTrackedUsage>;
+
 
 export class Usage implements ITeUsage, Disposable
 {
@@ -29,9 +27,9 @@ export class Usage implements ITeUsage, Disposable
         this.log = wrapper.log;
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
 		this._onDidChange = new EventEmitter<ITeUsageChangeEvent | undefined>();
-        this._trackUsage = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage);
-        this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor.TrackStats);
-        this._allowUsageReporting = this.wrapper.config.get<boolean>(ConfigKeys.AllowUsageReporting);
+        this._trackUsage = this.wrapper.config.get<boolean>(wrapper.keys.Config.TrackUsage);
+        this._trackTaskStats = this.wrapper.config.get<boolean>(wrapper.keys.Config.TaskMonitor.TrackStats);
+        this._allowUsageReporting = this.wrapper.config.get<boolean>(wrapper.keys.Config.AllowUsageReporting);
 		this._disposables.push(
 			this._onDidChange,
 			this._onDidFamousTasksChange,
@@ -69,7 +67,7 @@ export class Usage implements ITeUsage, Disposable
 
 	get = (key: string): ITeTrackedUsage | undefined =>
     {
-        const usage = this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {})[key];
+        const usage = this.wrapper.storage.get<UsageStore>(this.wrapper.keys.Storage.Usage, {})[key];
         if (usage){
             usage.taskStats = this.getTaskUsageStore().runtimes[key.replace(this._taskUsageKey, "")];
         }
@@ -79,7 +77,7 @@ export class Usage implements ITeUsage, Disposable
 
 	getAll = (key?: string): UsageStore =>
 	{
-		const storeAll = this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {}),
+		const storeAll = this.wrapper.storage.get<UsageStore>(this.wrapper.keys.Storage.Usage, {}),
 			  store: UsageStore = {};
 		if (!key)
 		{
@@ -142,7 +140,7 @@ export class Usage implements ITeUsage, Disposable
 
     private getTaskUsageStore = (): ITeTaskStats =>
     {
-        let store = this.wrapper.storage.get<ITeTaskStats>(StorageKeys.TaskUsage);
+        let store = this.wrapper.storage.get<ITeTaskStats>(this.wrapper.keys.Storage.TaskUsage);
         if (!store)
         {
             store = {
@@ -174,7 +172,7 @@ export class Usage implements ITeUsage, Disposable
                 lowestTime = taskStats[k].timestamp ;
             }
         });
-        const daysSinceFirstRunTask = getDateDifference(lowestTime, now, "d")  || 1;
+        const daysSinceFirstRunTask = this.wrapper.utils.getDateDifference(lowestTime, now, "d")  || 1;
         avg = Math.floor(Object.keys(taskStats).length / daysSinceFirstRunTask / (period === "d" ? 1 : 7));
         this.log.methodDone("get average run count", 2, logPad, [[ "calculated average", avg ]]);
         return avg;
@@ -185,7 +183,7 @@ export class Usage implements ITeUsage, Disposable
     {
         const stats = this.getTaskUsageStore();
         if (stats.runtimes[treeId]) {
-            return pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
+            return this.wrapper.commonUtils.pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
         }
         return this.getEmptyITaskRuntimeInfo();
     };
@@ -240,20 +238,20 @@ export class Usage implements ITeUsage, Disposable
 
     private onConfigChanged = async(e: ConfigurationChangeEvent) =>
     {
-        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage))
+        if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage))
         {
-            this._trackUsage = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage);
+            this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage);
         }
-        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor.TrackStats))
+        if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TaskMonitor.TrackStats))
         {
-            this._trackTaskStats = this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor.TrackStats);
+            this._trackTaskStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats);
             if (this._trackTaskStats && !this._trackUsage){
-                await this.wrapper.config.update(ConfigKeys.TrackUsage, this._trackTaskStats);
+                await this.wrapper.config.update(this.wrapper.keys.Config.TrackUsage, this._trackTaskStats);
             }
         }
-        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.AllowUsageReporting))
+        if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.AllowUsageReporting))
         {
-            this._allowUsageReporting = this.wrapper.config.get<boolean>(ConfigKeys.AllowUsageReporting);
+            this._allowUsageReporting = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.AllowUsageReporting);
         }
     };
 
@@ -265,7 +263,7 @@ export class Usage implements ITeUsage, Disposable
             [ "task name", taskName ], [ "tree id", e.task.treeId ], [ "is running", e.isRunning ],
             [ "track usage enabled", this._trackUsage ], [ "track tasks enabled", this._trackTaskStats ]
         ]);
-        if (this._trackUsage  && this._trackTaskStats)
+        if (this._trackUsage && this._trackTaskStats)
         {
             if (e.isRunning)
             {
@@ -282,22 +280,22 @@ export class Usage implements ITeUsage, Disposable
 
 	async reset(key?: string): Promise<void>
 	{
-		const usages =  this.wrapper.storage.get<UsageStore>(StorageKeys.Usage);
+		const usages =  this.wrapper.storage.get<UsageStore>(this.wrapper.keys.Storage.Usage);
 		if (!usages) return;
 		if (!key) {
-			await this.wrapper.storage.delete(StorageKeys.Usage);
-            await this.wrapper.storage.delete(StorageKeys.TaskUsage);
+			await this.wrapper.storage.delete(this.wrapper.keys.Storage.Usage);
+            await this.wrapper.storage.delete(this.wrapper.keys.Storage.TaskUsage);
 			this._onDidChange.fire(undefined);
 		}
 		else {
-			await this.wrapper.storage.delete(`${StorageKeys.Usage}.${key}`);
-			await this.wrapper.storage.delete(`${StorageKeys.TaskUsage}.${key}`);
+			await this.wrapper.storage.delete(`${this.wrapper.keys.Storage.Usage}.${key}`);
+			await this.wrapper.storage.delete(`${this.wrapper.keys.Storage.TaskUsage}.${key}`);
 			this._onDidChange.fire({ key, usage: undefined });
 		}
 	}
 
 
-    private saveTaskUsageStore = (store: ITeTaskStats) => this.wrapper.storage.update(StorageKeys.TaskUsage, store);
+    private saveTaskUsageStore = (store: ITeTaskStats) => this.wrapper.storage.update(this.wrapper.keys.Storage.TaskUsage, store);
 
 
 	async track(key: string): Promise<ITeTrackedUsage | undefined>
@@ -307,7 +305,7 @@ export class Usage implements ITeUsage, Disposable
         }
 
 		const timestamp = Date.now(),
-			  usages =  this.wrapper.storage.get<UsageStore>(StorageKeys.Usage, {});
+			  usages =  this.wrapper.storage.get<UsageStore>(this.wrapper.keys.Storage.Usage, {});
 
 		let usage = usages[key];
 		if (!usage)
@@ -346,7 +344,7 @@ export class Usage implements ITeUsage, Disposable
 			};
 		}
 
-		await this.wrapper.storage.update(StorageKeys.Usage, usages);
+		await this.wrapper.storage.update(this.wrapper.keys.Storage.Usage, usages);
 
 		//
 		// TODO - Telemetry
@@ -365,7 +363,7 @@ export class Usage implements ITeUsage, Disposable
     {
         let added = false,
             changed = false;
-        const specTaskListLength = this.wrapper.config.get<number>(ConfigKeys.SpecialFolders.NumLastTasks);
+        const specTaskListLength = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
         //
         // First remove this task from the list of it is present, it'll be put back
         // in the following steps

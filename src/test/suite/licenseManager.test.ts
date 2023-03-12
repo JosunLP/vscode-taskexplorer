@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { Task } from "vscode";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
-import { executeTeCommand } from "../utils/commandUtils";
+import { executeTeCommand, focusExplorerView } from "../utils/commandUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 const tc = utils.testControl;
@@ -161,10 +161,21 @@ suite("License Manager Tests", () =>
 	});
 
 
+	test("Open Home View in Trial Extended Mode", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		void teWrapper.homeView.show();
+        await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
+		await focusExplorerView(teWrapper);
+        utils.endRollingCount(this);
+	});
+
+
 	test("Set License Mode - UNLICENSED", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
 		await utils.setLicenseType(1);
+		await saveAccount({ ...licMgr.account});
 		expect(licMgr.isLicensed).to.be.equal(false);
 		expect(licMgr.isTrial).to.be.equal(false);
         utils.endRollingCount(this);
@@ -204,6 +215,16 @@ suite("License Manager Tests", () =>
 	});
 
 
+	test("Open Home View in Unlicensed Mode", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		void teWrapper.homeView.show();
+        await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
+		await focusExplorerView(teWrapper);
+        utils.endRollingCount(this);
+	});
+
+
 	test("Restore Trial Account", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
@@ -225,13 +246,12 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Request Trial Extension (From Command Palette)", async function()
+	test("License Nag - Extend Trial", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension);
-		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
-		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
+		await setNag();
+		utils.overrideNextShowInfoBox("Extend Trial");
+		await licMgr.checkLicense("");
         utils.endRollingCount(this);
 	});
 
@@ -240,7 +260,7 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.getTrialExtension);
-		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
+		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial", tc.waitTime.licenseMgr.request);
         utils.endRollingCount(this);
 	});
 

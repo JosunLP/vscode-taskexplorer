@@ -502,9 +502,9 @@ export class TeFileCache implements ITeFileCache, Disposable
             this.wrapper.log.value("      new value", newValue, 1);
             this.persistCache(!newValue);
         }
-        if (this.wrapper.config.affectsConfiguration(e, "taskexplorer.enabledTasks"))
-        {
-        }
+        // if (this.wrapper.config.affectsConfiguration(e, "taskexplorer.enabledTasks"))
+        // {
+        // }
     };
 
 

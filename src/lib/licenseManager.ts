@@ -182,11 +182,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			const action = await window.showInformationMessage(message, ...options);
 			if (action === "Extend Trial")
 			{
-				await executeCommand(Commands.ExtendTrial);
+				void executeCommand(Commands.ExtendTrial);
 			}
 			else if (action === "Info")
 			{
-				await executeCommand(Commands.ShowLicensePage, "force"); // use 'force' to ignore the 'busy' flag in WebviewPanel
+				void executeCommand(Commands.ShowLicensePage);
 			}
 		}
 

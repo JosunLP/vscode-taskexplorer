@@ -378,6 +378,36 @@ suite("Task Tests", () =>
         utils.endRollingCount(this);
     });
 
+
+    test("Surpass Max Last Tasks", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.showHideSpecialFolder + (tc.slowTime.config.event * 2));
+        const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
+        expect(tree).to.not.be.oneOf([ undefined, null ]);
+        const lastTasksFolder = tree[0] as any;
+        const maxLastTasks = teWrapper.config.get<number>("specialFolders.numLastTasks");
+        teWrapper.configWatcher.enableConfigWatcher(false);
+        await lastTasksFolder.removeTaskFile("invalid_id");
+        await executeSettingsUpdate("specialFolders.numLastTasks", 5);
+        try {
+            lastTasksFolder.saveTask(ant[0], "");
+            lastTasksFolder.saveTask(ant[1], "");
+            lastTasksFolder.saveTask(ant[2], "");
+            lastTasksFolder.saveTask(bash[0], "");
+            lastTasksFolder.saveTask(batch[0], "");
+            lastTasksFolder.saveTask(batch[1], "");
+            lastTasksFolder.saveTask(python[0], "");
+            lastTasksFolder.saveTask(python[1], "");
+        }
+        catch (e) { throw e; }
+        finally {
+            await executeSettingsUpdate("specialFolders.numLastTasks", maxLastTasks);
+            teWrapper.configWatcher.enableConfigWatcher(true);
+        }
+        utils.endRollingCount(this);
+    });
+
 });
 
 

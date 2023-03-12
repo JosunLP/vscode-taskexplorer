@@ -119,7 +119,7 @@ suite("Webview Tests", () =>
 	test("Focus open Editors", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.commands.focusChangeViews * 4);
+		this.slow(tc.slowTime.commands.focusChangeViews * 4 + 250);
         const echoCmd = { method: "echo/fake", overwriteable: false };
 	    await teWrapper.parsingReportPage.show();
         await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
@@ -128,11 +128,12 @@ suite("Webview Tests", () =>
         await promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
         await sleep(5);
         await teWrapper.parsingReportPage.notify(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
+        await sleep(50);
 	    await teWrapper.releaseNotesPage.show();
         await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
         await sleep(5);
         await teWrapper.licensePage.notify(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
-        await sleep(5);
+        await sleep(50);
 	    await teWrapper.licensePage.show();
         await sleep(5);
 	    await teWrapper.parsingReportPage.show();
