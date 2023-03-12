@@ -81,7 +81,9 @@ export class LicenseManager implements ITeLicenseManager, Disposable
     }
 
 	get statusDays(): string {
-		return this.isTrial ? "01" : "*";
+		return " (" + (this.isTrial ?
+			this.wrapper.utils.getDateDifference(Date.now(), this._account.license.expires, "d") :
+			this.wrapper.utils.getDateDifference(Date.now(), this._account.license.expires, "d")) + ")";
 	}
 
     get statusDescription(): string {

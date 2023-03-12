@@ -111,14 +111,6 @@ svg {
     padding-left: 3px;
 }
 
-.homeview-license-status-days-td {
-    text-align: left;
-    text-align: center;
-    flex: 0.5;
-    max-width: 30px;
-    padding-left: 5px;
-}
-
 .homeview-license-status-label {
     line-height: 12px;
 }
@@ -137,9 +129,5 @@ svg {
 }
 
 .homeview-license-status-days {
-    line-height: 12px !important;
-    padding: 0px;
-    margin-top: -3px;
-    /* color: var(--vscode-button-background) !important; */
-    color: var(--vscode-foreground) !important;
+    line-height: 12px;
 }
