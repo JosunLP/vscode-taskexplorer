@@ -32,7 +32,7 @@ export class TaskTreeGrouper
                 this.wrapper.log.write(`   skipping ${folder.label} folder for grouping`, logLevel, logPad);
                 continue;
             }
-            this.wrapper.sorters.sortTaskFolder(folder);
+            this.wrapper.sorters.sortTaskFolder(folder, "all");
             //
             // Create groupings by task type
             //
@@ -122,7 +122,7 @@ export class TaskTreeGrouper
         //
         // Resort after making adds/removes
         //
-        this.wrapper.sorters.sortTaskFolder(folder);
+        this.wrapper.sorters.sortTaskFolder(folder, "all");
 
         this.wrapper.log.methodDone("create tree node folder grouping", logLevel, logPad);
     };

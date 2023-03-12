@@ -6,7 +6,7 @@ import { join } from "path";
 import { Uri } from "vscode";
 import { expect } from "chai";
 import { executeSettingsUpdate } from "../utils/commandUtils";
-import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITaskExplorerApi, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, getWsPath, testControl, treeUtils, verifyTaskCount, suiteFinished, exitRollingCount,
     waitForTeIdle, endRollingCount, needsTreeBuild
@@ -54,7 +54,7 @@ suite("Batch Tests", () =>
     test("Document Position", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         expect(provider.getDocumentPosition()).to.be.equal(0, "Script type should return position 0");
         endRollingCount(this);
     });
@@ -72,7 +72,7 @@ suite("Batch Tests", () =>
     test("Resolve Task", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         provider.resolveTask((provider.cachedTasks as any[])[0]);
         endRollingCount(this);
     });

@@ -11,7 +11,7 @@ import { TaskDetailsPage } from "../webview/page/taskDetails";
 import { getPackageManager, sleep } from "../lib/utils/utils";
 import { ConfigKeys, PinnedStorageKey } from "../lib/constants";
 import { Commands, registerCommand } from "../lib/command/command";
-import { ILog, ITeTaskManager, TaskMap, ITeTask } from "../interface";
+import { ILog, ITeTaskManager, TaskMap, ITeTask, TeTaskListType } from "../interface";
 import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
@@ -42,7 +42,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             registerCommand(Commands.RunLastTask,  () => this.runLastTask(this.wrapper.treeManager.getTaskMap()), this),
             registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.getTask(item), false, true, ...args), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
-			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask) => this.setPinned(item), this),
+			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask, listType?: TeTaskListType) => this.setPinned(item, listType), this),
             registerCommand(Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
             registerCommand(Commands.Stop, (item: TaskItem | ITeTask) => this.stop(this.getTask(item)), this)
         );
@@ -389,10 +389,10 @@ export class TaskManager implements ITeTaskManager, Disposable
     };
 
 
-	private setPinned = async (taskItem: TaskItem | ITeTask): Promise<void> =>
+	private setPinned = async (taskItem: TaskItem | ITeTask, listType: TeTaskListType = "all"): Promise<void> =>
 	{
         const iTask = taskItem instanceof TaskItem ?
-                      this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], "all")[0] : taskItem,
+                      this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], listType)[0] : taskItem,
               storageKey: PinnedStorageKey = `taskexplorer.pinned.${iTask.listType}`;
 		this.log.methodStart("set pinned task", 2, "", false, [[ "id", iTask.treeId ], [ "pinned", iTask.pinned ]]);
 		const pinnedTaskList = this.wrapper.storage.get<ITeTask[]>(storageKey, []);

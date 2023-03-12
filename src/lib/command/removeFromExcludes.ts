@@ -15,7 +15,7 @@ export class RemoveFromExcludesCommand implements Disposable
     constructor(private readonly wrapper: TeWrapper)
     {
         this._disposables.push(
-            registerCommand(Commands.RemovefromExcludes, (uri: Uri) => this.removeUriFromExcludes(uri), this)
+            registerCommand(Commands.RemoveFromExcludes, (uri: Uri) => this.removeUriFromExcludes(uri), this)
         );
     }
 

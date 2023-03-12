@@ -8,7 +8,6 @@ import {
 
 type SupportedCommands = Commands | `taskexplorer.view.${string}.focus` | `taskexplorer.view.${string}.resetViewLocation`;
 
-
 export const enum Commands
 {
 	AddToExcludes = "taskexplorer.addToExcludes",
@@ -49,7 +48,17 @@ export const enum Commands
 	RefreshTaskUsageView = "taskexplorer.view.taskUsage.refresh",
 	RefreshWelcomePage = "taskexplorer.view.welcome.refresh",
 	Register = "taskexplorer.register",
-	RemovefromExcludes = "taskexplorer.removeFromExcludes",
+	RemoveFromExcludes = "taskexplorer.removeFromExcludes",
+	RemoveHomeView = "taskexplorer.view.home.removeView",
+	RemoveTaskCountView = "taskexplorer.view.taskCount.removeView",
+	RemoveTaskUsageView= "taskexplorer.view.taskUsage.removeView",
+	RemoveExplorerTreeView = "taskexplorer.view.taskTreeExplorer.removeView",
+	RemoveSidebarTreeView = "taskexplorer.view.taskTreeSideBar.removeView",
+	ResetHomeViewLocation = "taskexplorer.view.home.resetViewLocation",
+	ResetTaskCountViewLocation = "taskexplorer.view.taskCount.resetViewLocation",
+	ResetTaskUsageViewLocation= "taskexplorer.view.taskUsage.resetViewLocation",
+	ResetExplorerTreeViewLocation = "taskexplorer.view.taskTreeExplorer.resetViewLocation",
+	ResetSidebarTreeViewLocation = "taskexplorer.view.taskTreeSideBar.resetViewLocation",
 	Restart = "taskexplorer.restart",
     Run = "taskexplorer.run",
     RunLastTask = "taskexplorer.runLastTask",
@@ -62,7 +71,12 @@ export const enum Commands
 	ShowTaskDetailsPage = "taskexplorer.view.taskDetails.show",
 	ShowTaskMonitorPage = "taskexplorer.view.taskMonitor.show",
 	ShowWelcomePage = "taskexplorer.view.welcome.show",
-	Stop = "taskexplorer.stop"
+	Stop = "taskexplorer.stop",
+	ToggleHomeViewVisibility = "taskexplorer.view.home.toggleVisibility",
+	ToggleTaskCountViewVisibility = "taskexplorer.view.taskCount.toggleVisibility",
+	ToggleTaskUsageViewVisibility= "taskexplorer.view.taskUsage.toggleVisibility",
+	ToggleExplorerTreeViewVisibility = "taskexplorer.view.taskTreeExplorer.toggleVisibility",
+	ToggleSidebarTreeViewVisibility = "taskexplorer.view.taskTreeSideBar.toggleVisibility"
 }
 
 export const enum VsCodeCommands

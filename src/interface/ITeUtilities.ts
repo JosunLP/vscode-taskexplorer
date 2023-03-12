@@ -40,8 +40,8 @@ export interface ITePromiseUtilities
 export interface ITeSortUtilities
 {
 	sortFolders(folders: IDictionary<ITaskFolder>): ITaskFolder[];
-	sortTaskFolder(folder: ITaskFolder, listType?: TeTaskListType): void;
-	sortTasks(items: (ITaskFile | ITaskItem)[] | undefined, listType?: TeTaskListType): void;
+	sortTaskFolder(folder: ITaskFolder, listType: TeTaskListType): void;
+	sortTasks(items: (ITaskFile | ITaskItem)[] | undefined, listType: TeTaskListType): void;
 }
 
 export interface ITeTaskUtilities

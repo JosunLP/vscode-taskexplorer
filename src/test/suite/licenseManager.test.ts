@@ -265,6 +265,28 @@ suite("License Manager Tests", () =>
 	});
 
 
+	test("New Account / First Time Startup", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
+		utils.overrideNextShowInfoBox("More Info");
+		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "", state: 0, period: 0, type: 0 }});
+		await saveAccount(licMgr.account);
+        await validateLicense(this, true, true);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Restore Trial Account", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		await restoreAccount();
+		expect(licMgr.isLicensed).to.be.equal(true);
+		expect(licMgr.isTrial).to.be.equal(true);
+        utils.endRollingCount(this);
+	});
+
+
 	test("Set License Mode - UNLICENSED", async function()
 	{
 		if (utils.exitRollingCount(this)) return;

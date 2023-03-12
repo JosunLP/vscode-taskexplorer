@@ -206,6 +206,7 @@ suite("Task Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.run + tc.slowTime.tasks.bashScript + tc.slowTime.commands.runStop  + 5200);
         const bashTask = bash[0];
+        await executeTeCommand2("setPinned", [ bashTask, "last" ]) ;
         await startTask(bashTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("runNoTerm", [ bashTask ], tc.waitTime.runCommandMin) ;
         await utils.sleep(100);
@@ -248,6 +249,8 @@ suite("Task Tests", () =>
         this.slow((tc.slowTime.config.event * 2) + tc.slowTime.commands.run + tc.slowTime.tasks.antTask);
         await executeSettingsUpdate("enableAnsiconForAnt", false, tc.waitTime.config.enableEvent);
         await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, true);
+        await executeTeCommand2("setPinned", [ bash[0], "last" ]) ;
+        await executeTeCommand2("setPinned", [ antTask, "last" ]) ;
         await startTask(antTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin) ;
         await utils.waitForTaskExecution(exec);
@@ -323,6 +326,8 @@ suite("Task Tests", () =>
         await executeSettingsUpdate("visual.disableAnimatedIcons", true);
         await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, "Execute");
         await executeSettingsUpdate("specialFolders.showLastTasks", true);
+        await executeTeCommand2("setPinned", [ antTask, "last" ]) ;
+        await executeTeCommand2("setPinned", [ batchTask, "last" ]) ;
         utils.overrideNextShowInputBox(undefined);
         let exec = await executeTeCommand2<TaskExecution | undefined>("runWithArgs", [ batchTask ], tc.waitTime.runCommandMin) ;
         expect(exec).to.be.undefined;
@@ -348,6 +353,19 @@ suite("Task Tests", () =>
         await executeTeCommand2("stop", [ batchTask ], tc.waitTime.taskCommand);
         await utils.waitForTaskExecution(exec,  500);
         lastTask = batchTask;
+        utils.endRollingCount(this);
+    });
+
+
+    test("Set Pinned Tasks", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        await executeTeCommand2("setPinned", [ lastTask, "last" ]) ;
+        await executeTeCommand2("setPinned", [ batch[0], "last" ]) ;
+        await executeTeCommand2("setPinned", [ batch[0], "all" ]) ;
+        await executeTeCommand2("setPinned", [ antTask, "all" ]) ;
+        await executeTeCommand2("setPinned", [ python[0], "all" ]) ;
+        await executeTeCommand2("setPinned", [ antTask, "runing" ]) ;
         utils.endRollingCount(this);
     });
 
@@ -386,7 +404,6 @@ suite("Task Tests", () =>
         const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
         expect(tree).to.not.be.oneOf([ undefined, null ]);
         const lastTasksFolder = tree[0] as any;
-        const maxLastTasks = teWrapper.config.get<number>("specialFolders.numLastTasks");
         teWrapper.configWatcher.enableConfigWatcher(false);
         await lastTasksFolder.removeTaskFile("invalid_id");
         await executeSettingsUpdate("specialFolders.numLastTasks", 5);
@@ -402,7 +419,6 @@ suite("Task Tests", () =>
         }
         catch (e) { throw e; }
         finally {
-            await executeSettingsUpdate("specialFolders.numLastTasks", maxLastTasks);
             teWrapper.configWatcher.enableConfigWatcher(true);
         }
         utils.endRollingCount(this);

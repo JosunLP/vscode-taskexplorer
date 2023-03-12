@@ -39,17 +39,17 @@ export const sortFolders = (folders: IDictionary<TaskFolder>): TaskFolder[] =>
 };
 
 
-export const sortTaskFolder = (folder: TaskFolder, listType?: TeTaskListType) =>
+export const sortTaskFolder = (folder: TaskFolder, listType: TeTaskListType) =>
 {
     sortTasks(folder.taskFiles, listType);
     for (const each of folder.taskFiles.filter(t => t instanceof TaskFile) as TaskFile[])
     {
-        sortTasks(each.treeNodes);
+        sortTasks(each.treeNodes, listType);
     }
 };
 
 
-export const sortTasks = (items: (TaskFile | TaskItem)[] | undefined, listType?: TeTaskListType) =>
+export const sortTasks = (items: (TaskFile | TaskItem)[] | undefined, listType: TeTaskListType) =>
 {
     items?.sort((a: TaskFile | TaskItem, b: TaskFile | TaskItem) =>
     {               // TaskFiles are kept at the top, like a folder in Windows
@@ -62,19 +62,13 @@ export const sortTasks = (items: (TaskFile | TaskItem)[] | undefined, listType?:
         }
         else if (a instanceof TaskItem && b instanceof TaskItem)
         {
-            if (listType)
-            {
-                const aIsPinned = isPinned(a.id,  listType),
-                      bIsPinned = isPinned(b.id, listType);
-                if (aIsPinned && !bIsPinned) {
-                    s = -1;
-                }
-                else if (!aIsPinned && bIsPinned) {
-                    s = 1;
-                }
-                else {
-                    s = labelA.localeCompare(labelB);
-                }
+            const aIsPinned = isPinned(a.id,  listType),
+                    bIsPinned = isPinned(b.id, listType);
+            if (aIsPinned && !bIsPinned) {
+                s = -1;
+            }
+            else if (!aIsPinned && bIsPinned) {
+                s = 1;
             }
             else {
                 s = labelA.localeCompare(labelB);
