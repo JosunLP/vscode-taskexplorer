@@ -189,7 +189,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		context.subscriptions.push(this);
 	}
 
-
 	dispose()
 	{
 		this._disposables.forEach(d => d.dispose());
@@ -251,13 +250,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 	{
 		await utilities.sleep(1);
 		this.log.methodStart("app wrapper - run", 1, "", true);
-
 		//
 		// License / Authentication
 		//
 		// await this.storage.deleteSecret(StorageKeys.Account); // For testing
 		await this.licenseManager.checkLicense("   ");
-
 		//
 		// Maybe show the 'what's new' or 'welcome' page if the version has changed ot this is
 		// a new installation / first runtime.
@@ -282,7 +279,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 				}
 			});
 		}
-
 		//
 		// Build the file cache, this kicks off the whole process as refresh cmd will be issued
 		// down the line in the initialization process.
@@ -312,7 +308,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		}
 		await this.storage.update2("lastDeactivated", 0);
 		await this.storage.update2("lastWsRootPathChange", 0);
-
 		//
 		// Write all usage stores to disk for examination, if we're in development mode
 		//
@@ -325,14 +320,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 				  allData = { usage: this._usage.getAll(), taskUsage, account };
 			await this.fs.writeFile(rPath + "te_data.json", JSON.stringify(allData, null, 3));
 		}
-
 		//
 		// Start the first tree build/load
 		//
 		this._treeManager.setMessage(Strings.RequestingTasks);
 		await this._treeManager.loadTasks("   ");
 		this._treeManager.setMessage(); // clear status bar message
-
 		//
 		// Signal that the startup work has completed.  `queueMicrotask` is interesting, I saw it
 		// in the GitLens extension code, seems to sneak into the scheduler between each standard
@@ -342,7 +335,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		this.log.write("   queue wrapper ready event", 2);
 		queueMicrotask(() => { this._ready = true; this._onReady.fire(); });
-
 		//
 		// Log the environment
 		//

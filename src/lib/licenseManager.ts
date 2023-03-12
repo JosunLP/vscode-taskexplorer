@@ -366,12 +366,16 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private logAccountFields = (logPad: string) =>
 	{
+		const _v = (e: [ string, any ]) => {
+			if (!e[0].match(/(?:expires|issued)/i)) return e[1];
+			return this.wrapper.utils.formatDate(e[1]);
+		};
 		const _l = (o: object, p: string) =>
 		{
 			Object.entries(o).forEach((e) =>
 			{
 				if (!this.wrapper.typeUtils.isObject(e[1])) {
-					this.wrapper.log.value(`   ${e[0]}`, !e[0].match(/(?:token|key|machine)/i) ? e[1] : "*****", 1, p);
+					this.wrapper.log.value(`   ${e[0]}`, !e[0].match(/(?:token|key|machine)/i) ? _v(e) : "*****", 1, p);
 				}
 				else {
 					this.wrapper.log.write(`   ${e[0]} details:`,  1, p);
