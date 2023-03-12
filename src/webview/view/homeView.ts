@@ -110,13 +110,15 @@ export class HomeView extends TeWebviewView<State>
 
 	protected override onHtmlFinalize = async (html: string) =>
 	{
-		const isLic = this.wrapper.licenseManager.isLicensed;
+		const isLic = this.wrapper.licenseManager.isLicensed,
+			  isTrial = this.wrapper.licenseManager.isTrial;
     	html = html.replace("#{taskCounts.length}", this.wrapper.treeManager.getTasks().length.toString())
 				   .replace("#{taskCounts.today}", this.wrapper.usage.getTodayCount("").toString())
 				   .replace("#{license.status}", this.wrapper.licenseManager.statusDescription)
 				   .replace("#{license.statusDays}", this.wrapper.licenseManager.statusDays)
-				   .replace("#{license.sessionIconCls}", "fal fa-" + (isLic ? "user-slash" : "user-slash"))
-				   .replace("#{license.statusIconCls}", "fal fa-" + (isLic ? "unlock te-color-ok-green" : "lock te-color-failure-red"));
+				   .replace("#{license.statusTip}", isTrial ? "Days left in trial" : (isLic ? "Days left before renewal" : ""))
+				   .replace("#{license.sessionIconCls}", "fal fa-" + (isTrial ? "user-slash" : (isLic ? "user-slash" : "user-slash")))
+				   .replace("#{license.statusIconCls}", "fal fa-" + (isTrial ? "user-slash" : (isLic ? "unlock te-color-ok-green" : "lock te-color-failure-red")));
 		return html;
 	};
 
