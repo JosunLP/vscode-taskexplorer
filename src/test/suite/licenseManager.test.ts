@@ -531,8 +531,10 @@ suite("License Manager Tests", () =>
 	test("New Account / First Time Startup", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
+		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate + tc.slowTime.viewReport + 20);
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(false);
+		utils.clearOverrideShowInfoBox();
+		utils.overrideNextShowInfoBox("More Info");
 		await setLicensed(false, {
 			id: 0,
 			trialId: 0,
@@ -545,6 +547,7 @@ suite("License Manager Tests", () =>
 			}
 		});
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
+		await utils.sleep(10);
 		await utils.closeEditors();
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
         utils.endRollingCount(this);

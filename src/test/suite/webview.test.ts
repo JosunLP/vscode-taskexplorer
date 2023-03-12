@@ -55,13 +55,9 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.commands.focusChangeViews * 3) + tc.slowTime.commands.fast + (tc.slowTime.config.enableEvent * 2) + 2000);
-        let loaded = false,
-            loadTime = 0;
         const echoCmd = { method: "echo/command/execute", overwriteable: false };
-        const d = teWrapper.homeView.onContentLoaded(() => { loaded = true; }); // cover onContentLoaded
-        await teWrapper.homeView.show();
-        while (!loaded && loadTime < 21) { await sleep(10); loadTime += 10; }
-        d.dispose();
+        void teWrapper.homeView.show();
+        await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
         await commands.executeCommand("taskexplorer.view.home.focus");
         await executeSettingsUpdate("enabledTasks.bash", false, tc.waitTime.config.enableEvent);
         await sleep(5);
@@ -70,7 +66,7 @@ suite("Webview Tests", () =>
         await focusExplorerView(teWrapper);
         await sleep(5);
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
-        await commands.executeCommand("taskexplorer.view.home.focus");
+        void commands.executeCommand("taskexplorer.view.home.focus");
         await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.parsingReport.show", args: [ Uri.file(getWsPath(".")) ] });
         await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;

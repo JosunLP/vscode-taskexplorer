@@ -95,7 +95,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				machineId: this._machineId
 			});
 			await this.saveAccount(logPad + "   ");
-			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.");
+			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.", "More Info")
+			.then((action) =>
+			{
+				if (action === "More Info") {
+					void executeCommand(Commands.ShowLicensePage);
+				}
+			});
 		}
 		catch (e) {
 			/* istanbul ignore next  */

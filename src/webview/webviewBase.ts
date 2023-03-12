@@ -69,7 +69,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
     private readonly _maxSmallIntegerV8 = 2 ** 30;
 	private readonly _originalTitle: string | undefined;
 	private readonly _onReadyReceived: EventEmitter<void>;
-	private readonly _onContentLoaded: EventEmitter<string>;
 
 
     constructor(protected readonly wrapper: TeWrapper, title: string, protected readonly fileName: string)
@@ -80,9 +79,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		this._cspNonce = getNonce();
 		this._isFirstLoadComplete = false;
 		this._onReadyReceived = new EventEmitter<void>();
-		this._onContentLoaded = new EventEmitter<string>();
 		this.disposables.push(
-			this._onContentLoaded,
 			this._onReadyReceived,
 			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged, this)
 		);
@@ -97,10 +94,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	get isFirstLoadComplete(): boolean {
 		return this._isFirstLoadComplete;
-	}
-
-	get onContentLoaded(): Event<string> {
-		return this._onContentLoaded.event;
 	}
 
 	get onReadyReceived(): Event<void> {
@@ -393,10 +386,11 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		}
 		if (this._view.webview.html === html) {
 			this._isReady = true;
-			return;
+			this._onReadyReceived.fire();
 		}
-		this._view.webview.html = html;
-		setTimeout(() => this._onContentLoaded.fire(html), 1);
+		else {
+			this._view.webview.html = html;
+		}
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 	}
 
