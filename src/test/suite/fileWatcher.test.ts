@@ -3,6 +3,7 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { join } from "path";
+import { expect } from "chai";
 import fsUtils from "../utils/fsUtils";
 import * as utils from "../utils/utils";
 import { executeSettingsUpdate } from "../utils/commandUtils";
@@ -268,10 +269,16 @@ suite("File Watcher Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.taskCount.verify + (tc.slowTime.licenseMgr.setLicenseCmd * 2));
-        utils.setLicensed(false);
-        await teWrapper.fs.copyDir(outsideWsDir, insideWsDir, undefined, true); // copy folder
-        await utils.waitForTeIdle(tc.waitTime.fs.createFolderEvent);
-        utils.setLicensed(true);
+        await utils.setLicenseType(1); // Set to 'free' type (trial over, non-paid)
+		expect(teWrapper.licenseManager.isTrial).to.be.equal(false);
+		expect(teWrapper.licenseManager.isLicensed).to.be.equal(false);
+        try {
+            await teWrapper.fs.copyDir(outsideWsDir, insideWsDir, undefined, true); // copy folder
+            await utils.waitForTeIdle(tc.waitTime.fs.createFolderEvent);
+        } catch {}
+        finally {
+            await utils.setLicenseType(0); // Set back to trial
+        }
         await utils.verifyTaskCount("grunt", startTaskCountGrunt + 4);
         utils.endRollingCount(this);
     });

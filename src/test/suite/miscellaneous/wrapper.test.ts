@@ -40,10 +40,15 @@ suite("Wrapper Tests", () =>
     {
         if (exitRollingCount(this)) return;
         expect(teWrapper.env).to.equal("tests");
-        expect(teWrapper.id).to.be.a("string");
         expect(teWrapper.taskManager).to.not.be.undefined;
         expect(teWrapper.taskUsageView).to.not.be.undefined;
+        expect(teWrapper.dev).to.equal(false);
+        expect(teWrapper.production).to.equal(false);
         expect(teWrapper.tests).to.equal(true);
+        expect(teWrapper.keys.Storage).to.not.be.undefined;
+        expect(teWrapper.keys.Config).to.not.be.undefined;
+        expect(teWrapper.keys.Strings).to.not.be.undefined;
+        expect(teWrapper.keys.Globs).to.not.be.undefined;
         expect(teWrapper.storage).to.not.be.undefined;
         expect(teWrapper.licensePage).to.not.be.undefined;
         expect(teWrapper.parsingReportPage).to.not.be.undefined;
