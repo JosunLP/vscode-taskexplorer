@@ -292,32 +292,33 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			//
 			//     201  : Success
 			//     400  : Client Error (Invalid Parameters)
-			//     406  : License Key and/or Account Not Found
+			//     402  : Payment required, trial extension already granted
+			//     406  : Invalid License Key
 			//     408  : Timeout
+			//     409  : License/Account/Trial Record Not Found
 			//     500  : Server Error
 			//
 			this.wrapper.log.value("response body", e.body, 2);
 			this.wrapper.log.error(e.message, [[ "status code", e.status ]]);
-			if (e.status === 406)
+			if (e.status === 402 || e.status === 406 || e.status === 409)
 			{
 				switch (e.message)
 				{
-					case "Invalid license key":
+					case "Account does not exist":           // 409
+					case "Account trial does not exist":     // 409
+					case "Account license does not exist":   // 409
 						this._account.license.type = TeLicenseType.Free;
 						this._account.license.state = TeLicenseState.Free;
 						this._account.verified = false;
-						await this.saveAccount("   ");
 						break;
-					case "Missing account":
-						this._account.license.type = TeLicenseType.Free;
-						this._account.license.state = TeLicenseState.Free;
-						this._account.verified = false;
-						await this.saveAccount("   ");
-						break;
+					case "Account trial cannot be extended": // 402
+					case "Invalid license key":              // 406
 					default:
-						this._account.errorState = true; // In error state, licensed mode is ON
+						this._account.license.type = TeLicenseType.Free;
+						this._account.license.state = TeLicenseState.Free;
 						break;
 				}
+				await this.saveAccount("   ");
 			}
 			else {
 				this._account.errorState = true; // In error state, licensed mode is ON

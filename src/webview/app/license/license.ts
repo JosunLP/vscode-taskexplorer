@@ -34,7 +34,7 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
         switch (message.command)
         {
             case "purchaseLicense":
-                this.buyLicense();
+                this.purchaseLicense();
                 break;
             case "extendTrial":
                 this.extendTrial();
