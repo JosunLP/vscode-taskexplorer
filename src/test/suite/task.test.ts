@@ -206,7 +206,6 @@ suite("Task Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.run + tc.slowTime.tasks.bashScript + tc.slowTime.commands.runStop  + 5200);
         const bashTask = bash[0];
-        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
         await startTask(bashTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("runNoTerm", [ bashTask ], tc.waitTime.runCommandMin) ;
         await utils.sleep(100);
@@ -221,13 +220,14 @@ suite("Task Tests", () =>
     test("Run Ant Task (w/ Ansicon)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.enableEvent * 2) + tc.slowTime.commands.run +
+        this.slow((tc.slowTime.config.enableEvent * 2) + tc.slowTime.commands.run +  (tc.slowTime.config.event * 2) +
                   tc.slowTime.tasks.antTaskWithAnsicon + 300 + tc.slowTime.commands.focusChangeViews);
         antTask = ant.find(t => t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
         expect(antTask).to.not.be.equal(undefined, "The 'hello' ant task was not found in the task tree");
         await executeSettingsUpdate("pathToPrograms.ansicon", utils.getWsPath("..\\tools\\ansicon\\x64\\ansicon.exe"), tc.waitTime.config.enableEvent);
         utils.overrideNextShowInfoBox(undefined);
         await executeSettingsUpdate("enableAnsiconForAnt", true, tc.waitTime.config.enableEvent);
+        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
         await startTask(antTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin) ;
         await utils.sleep(100);

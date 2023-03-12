@@ -509,14 +509,14 @@ suite("Tree Tests", () =>
         }
         catch (e) {
             const msg = "Reveal API failed: " + e;
-            console.log(`    ${teWrapper.figures.color.warn} ${teWrapper.figures.withColor(msg, teWrapper.figures.colors.grey)}`);
-            console.log(`    ${teWrapper.figures.color.warn} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
+            console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor(msg, teWrapper.figures.colors.grey)}`);
+            console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
             await utils.sleep(100);
             try {
                 await reveal();
             }
             catch {
-                console.log(`    ${teWrapper.figures.color.warn} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
+                console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
                 await utils.sleep(100);
                 await reveal();
             }

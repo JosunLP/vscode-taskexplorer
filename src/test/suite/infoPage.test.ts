@@ -100,10 +100,13 @@ suite("Info Report Tests", () =>
 	test("View License Info from Webview", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.licenseMgr.page + 1000);
-	    const panel = await executeTeCommand("taskexplorer.view.licensePage.show", testControl.waitTime.viewParsingReport);
+		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.licenseMgr.page + 1040);
+        await teWrapper.releaseNotesPage.notify({ method: "echo/fake" }, { command: "taskexplorer.view.releaseNotes.show" }); // cover notify() when not visible
+		await sleep(10);
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "showLicensePage" });
 		await sleep(500);
+		await executeTeCommand("taskexplorer.view.licensePage.show", testControl.waitTime.viewParsingReport);
+		await sleep(10);
 		await closeEditors();
         endRollingCount(this);
 	});

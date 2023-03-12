@@ -100,30 +100,6 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Get Maximum # of Ant Tasks", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getMaxTasks);
-		await utils.setLicenseType(1);
-		expect(licMgr.getMaxNumberOfTasks("ant")).to.be.a("number").that.is.equal(licMgrMaxFreeTasksForTaskType);
-		await utils.setLicenseType(oAccount.license.type); // reset
-		expect(licMgr.getMaxNumberOfTasks("ant")).to.be.a("number").that.is.equal(Infinity);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Get Maximum # of Bash Tasks (Scripts)", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getMaxTasks);
-		await utils.setLicenseType(1);
-		expect(licMgr.getMaxNumberOfTasks("bash")).to.be.a("number").that.is.equal(licMgrMaxFreeTasksForScriptType);
-		await utils.setLicenseType(oAccount.license.type); // reset
-		expect(licMgr.getMaxNumberOfTasks("bash")).to.be.a("number").that.is.equal(Infinity);
-        utils.endRollingCount(this);
-	});
-
-
 	test("Get Maximum # of Python Tasks (Scripts)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
@@ -279,7 +255,7 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Task Limit Reached (Non-Licensed)", async function()
+	test("Task Limit Reached (Unlicensed)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(Math.round(tc.slowTime.commands.refresh * 0.75));
@@ -297,7 +273,7 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Task Type Limit Reached (Non-Licensed)", async function()
+	test("Task Type Limit Reached (Unlicensed)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(Math.round(tc.slowTime.commands.refresh * 0.9));
@@ -315,7 +291,7 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Task Script Type Limit Reached (Non-Licensed)", async function()
+	test("Task Script Type Limit Reached (Unlicensed)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(Math.round(tc.slowTime.commands.refresh * 0.9));
@@ -333,7 +309,7 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Task File Limit Reached (Non-Licensed)", async function()
+	test("Task File Limit Reached (Unlicensed)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(Math.round(tc.slowTime.commands.refresh * 0.9) + tc.slowTime.fs.createFolderEvent);

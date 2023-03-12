@@ -1,15 +1,12 @@
-/* eslint-disable no-redeclare */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import { request } from "https";
 // import fetch from "@env/fetch";
-// import fetch from "node-fetch";
 import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { env } from "vscode";
 
-const USE_LOCAL_SERVER = true;
+const USE_LOCAL_SERVER = false;
 
 export interface ServerError
 {
@@ -112,8 +109,8 @@ export class TeServer
 			timeout: 5000,
 			headers: <{[id: string]: string}>{
 				"token": this.apiClientId,
-				"User-Agent": "vscode-taskexplorer",
-				"Content-Type": "application/json"
+				// eslint-disable-next-line @typescript-eslint/naming-convention
+				"User-Agent": "vscode-taskexplorer", "Content-Type": "application/json"
 			}
 		};
 	};

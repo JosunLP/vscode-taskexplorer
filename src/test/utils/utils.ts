@@ -156,7 +156,7 @@ export const activate = async (instance?: Mocha.Context) =>
         //
         if (teWrapper.server.apiServer === "localhost")
         {
-            const factor = 2.75;
+            const factor = 2.85;
             tc.slowTime.licenseMgr.purchaseLicense  = Math.round(tc.slowTime.licenseMgr.purchaseLicense * factor);
             tc.slowTime.licenseMgr.validateLicense  = Math.round(tc.slowTime.licenseMgr.validateLicense * factor);
             tc.slowTime.licenseMgr.getTrialExtension  = Math.round(tc.slowTime.licenseMgr.getTrialExtension * factor);

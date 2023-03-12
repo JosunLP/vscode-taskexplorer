@@ -163,7 +163,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	async show(options?: { column?: ViewColumn; preserveFocus?: boolean }, ...args: any[])
 	{
-		while (this.wrapper.busy && !args.includes("force")) {
+		while (this.wrapper.busy) {
 			await sleep(100);
 		}
 		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);

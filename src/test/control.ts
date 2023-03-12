@@ -145,7 +145,7 @@ export const testControl =
         getTreeTasks: 205,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
-            page: 550,
+            page: 450,
             getTrialExtension: 2175,
             getMaxTasks: 365,
             purchaseLicense: 1840,
@@ -176,10 +176,10 @@ export const testControl =
             verifyByTree: 425,
             verifyFirstCall: 550,
         },
-        viewReleaseNotes: 415,
+        viewReleaseNotes: 375,
         viewTaskDetails: 415,
         viewTaskMonitor: 2300,
-        viewParsingReport: 540,
+        viewParsingReport: 440,
         wsFolder: {
             add: 1650,     // bumped for multi-root ws in utils/initSettings
             addEmpty: 1590,
@@ -219,11 +219,11 @@ export const testControl =
         focusCommand: 210,
         fs: {
             createEvent: 205,
-            createFolderEvent: 230,
+            createFolderEvent: 250,
             createEventTsc: 275,
             deleteEvent: 200,
             deleteEventTsc: 280,
-            deleteFolderEvent: 210,
+            deleteFolderEvent: 220,
             modifyEvent: 190,
             modifyEventTsc: 260,
         },
