@@ -669,12 +669,12 @@
                 {
                     "command": "taskexplorer.run",
                     "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:scriptFiles"
+                    "when": "taskexplorer:enabled && config.taskexplorer.enableExplorerView && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:scriptFiles"
                 },
                 {
                     "command": "taskexplorer.runWithArgs",
                     "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:tasks:scriptFilesWithArgs"
+                    "when": "taskexplorer:enabled && config.taskexplorer.enableExplorerView && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:tasks:scriptFilesWithArgs"
                 }
             ],
             "commandPalette": [

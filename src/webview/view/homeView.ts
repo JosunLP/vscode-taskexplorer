@@ -141,12 +141,4 @@ export class HomeView extends TeWebviewView<State>
 		return [];
 	}
 
-
-	protected override async getState()
-	{
-		return {
-			...(await super.getState())
-		};
-	}
-
 }
