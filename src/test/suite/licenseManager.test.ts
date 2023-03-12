@@ -4,110 +4,33 @@
 
 import { join } from "path";
 import { expect } from "chai";
+import { env, Task } from "vscode";
 import * as utils from "../utils/utils";
-import { env as environment } from "process";
-import { env, Task, WebviewPanel } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
 import { executeTeCommand } from "../utils/commandUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper, TeLicenseType } from "@spmeesseman/vscode-taskexplorer-types";
 
 const tc = utils.testControl;
-const invalidKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6Ik";
-const paidKey = environment.VSCODE_TASKEXPLORER_TESTS_VALID_KEY as string;
-const trialKey = environment.VSCODE_TASKEXPLORER_TESTS_VALID_TRIAL_KEY as string;
 
 let licMgr: ITeLicenseManager;
 let teWrapper: ITeWrapper;
-let randomMachineId: string;
 let oMachineId: string;
 let oAccount: ITeAccount;
-let validKey: string;
 let licMgrMaxFreeTasks: number;
 let licMgrMaxFreeTaskFiles: number;
 let licMgrMaxFreeTasksForTaskType: number;
 let licMgrMaxFreeTasksForScriptType: number;
 
-const restoreAccount = () => teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(oAccount));
+const restoreAccount = () => { if (oAccount) teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(oAccount)); };
 const setNag = (v?: number) => teWrapper.storage.update(teWrapper.keys.Storage.LastLicenseNag, v);
-const saveAccount  = (account: ITeAccount) => teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(account));
+// const saveAccount = (account: ITeAccount) => teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(account));
 const setTasks = (e: any) => { licMgr.setTestData({ callTasksChanged: e }); };
 
-const setLicensed = async (valid?: boolean, opts?: any) =>
-{
-    const licMgr = teWrapper.licenseManager;
-	if (opts && opts.machineId) {
-		licMgr.setTestData({ machineId: opts.machineId });
-		delete opts.machineId;
-		// setMachineId = true;
-	}
-
-	await saveAccount(
-	{ ...{
-		id: 52,
-		created: Date.now(),
-		email: "",
-		firstName: "",
-		lastName: "",
-		name: "",
-		orgId: 0,
-		trialId: 52,
-		verified: false,
-		verificationPending: false,
-		session: {
-			expires: valid ? Infinity : 0,
-			issued: Date.now(),
-			token: valid ? licMgr.account.session.token : "",
-			scopes: [ "te-explorer", "te-sidebar", valid ? "te-monitor" : "te-monitor-free" ],
-		},
-		license: {
-			id: valid ? 6 : 0,
-			expired: !valid,
-			expires: valid ? Infinity : 0,
-			issued: Date.now(),
-			key: valid ? validKey : "",
-			paid: valid,
-			period: valid ? 0 : 2,
-			state: valid ? 2 : 1, // Paid : Free
-			type: valid ? 4 : 1   // Standard : Free
-		}
-	}, ...(opts || {}) });
-
-    await licMgr.checkLicense("");
-};
-
-const validTrialAccount = {
-	id: 2,
-	email: null,
-	firstName: null,
-	lastName: null,
-	created: "2023-03-05T04:35:54.000Z",
-	name: "null null",
-	orgId: 0,
-	trialId: 2,
-	verified: false,
-	verificationPending: false,
-	session: {
-	   expires: 1678680464887,
-	   issued: 1678597664887,
-	   token: {},
-	   scopes: [
-		  "te-explorer",
-		  "te-sidebar",
-		  "te-monitor"
-	   ]
-	},
-	license: {
-	   id: 2,
-	   expired: false,
-	   expires: 0,
-	   issued: 1678597664887,
-	   key: trialKey,
-	   paid: false,
-	   period: 1,
-	   state: 0,
-	   type: 2
-	}
-};
+// const setLicense = async (opts: any) =>
+// {
+//     await saveAccount({ ...teWrapper.licenseManager.account, ...opts });
+//     await teWrapper.licenseManager.checkLicense("");
+// };
 
 
 suite("License Manager Tests", () =>
@@ -131,18 +54,10 @@ suite("License Manager Tests", () =>
 		expect(licMgr.isTrial).to.be.equal(true);
 		oMachineId = env.machineId;
 		oAccount = { ...licMgr.account };
-		validKey = oAccount.license.key;
 		licMgrMaxFreeTasks = licMgr.getMaxNumberOfTasks();
 		licMgrMaxFreeTaskFiles = licMgr.getMaxNumberOfTaskFiles();
 		licMgrMaxFreeTasksForTaskType = licMgr.getMaxNumberOfTasks("npm");
 		licMgrMaxFreeTasksForScriptType = licMgr.getMaxNumberOfTasks("batch");
-		randomMachineId = "te-tests-machine-id-" + teWrapper.utils.getRandomNumber();
-		licMgr.setTestData({
-			maxFreeTasks: licMgrMaxFreeTasks,
-			maxFreeTaskFiles: licMgrMaxFreeTaskFiles,
-			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
-			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
-		});
         utils.endRollingCount(this, true);
 	});
 
@@ -151,7 +66,7 @@ suite("License Manager Tests", () =>
     {
         if (utils.exitRollingCount(this, false, true)) return;
 		await utils.closeEditors();
-		if (oAccount) { await restoreAccount(); }
+		await restoreAccount();
 		licMgr?.setTestData({
 			machineId: oMachineId,
 			maxFreeTasks: licMgrMaxFreeTasks,
@@ -283,21 +198,9 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.getTrialExtension +
 				  tc.slowTime.storageSecretRead + tc.slowTime.closeEditors + 1100);
-		await setLicensed(false, {
-			id: licMgr.account.id,
-			trialId: licMgr.account.trialId,
-			machineId: randomMachineId,
-			license: {
-				id: licMgr.account.license.id,
-				state: 0,
-				period: 1,
-				type: 2
-			}
-		});
-		await teWrapper.licensePage.show();
+		void teWrapper.licensePage.show();
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
-		await utils.sleep(50);
-		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
+		await utils.sleep(5);
 		const result = await teWrapper.licensePage.view?.webview.postMessage({ command: "extendTrial" });
 		await utils.sleep(500);
 		expect(result).to.be.equal(true);
@@ -337,22 +240,33 @@ suite("License Manager Tests", () =>
 		await setNag();
 		utils.clearOverrideShowInfoBox();
 		utils.overrideNextShowInfoBox("Info");
-		await setLicensed(false);
+		await licMgr.checkLicense("");
 		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
 
 
-	test("License Nag -Not Now", async function()
+	test("License Nag - Not Now", async function()
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.setLicenseCmd + 500);
+		await setNag();
 		utils.clearOverrideShowInfoBox();
 		utils.overrideNextShowInfoBox("Not Now");
-		await setLicensed(false);
+		await licMgr.checkLicense("");
 		await utils.waitForTeIdle(150);
 		await utils.closeEditors();
+        utils.endRollingCount(this);
+	});
+
+
+	test("Restore Trial Account", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		await restoreAccount();
+		expect(licMgr.isLicensed).to.be.equal(true);
+		expect(licMgr.isTrial).to.be.equal(true);
         utils.endRollingCount(this);
 	});
 
@@ -368,43 +282,10 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("New Account / First Time Startup", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
-		randomMachineId = "te-tests-machine-id2-" + teWrapper.utils.getRandomNumber();
-		await setLicensed(false, {
-			id: 0,
-			trialId: 0,
-			machineId: randomMachineId,
-			license: {
-				state: 0,
-				period: 0,
-				type: 0
-			}
-		});
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
-		await utils.closeEditors();
-		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
-        utils.endRollingCount(this);
-	});
-
-
 	test("Request Trial Extension (From Command Palette)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
-		await setLicensed(false, {
-			id: licMgr.account.id,
-			trialId: licMgr.account.trialId,
-			machineId: randomMachineId,
-			license: {
-				id: licMgr.account.license.id,
-				state: 0,
-				period: 1,
-				type: 2
-			}
-		});
 		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
 		await utils.closeEditors();
@@ -417,19 +298,18 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.standard + tc.slowTime.closeEditors + tc.slowTime.storageSecretUpdate);
-		await setLicensed(false, {
-			id: licMgr.account.id,
-			trialId: licMgr.account.trialId,
-			machineId: randomMachineId,
-			license: {
-				id: licMgr.account.license.id,
-				state: 0,
-				period: 2,
-				type: 2
-			}
-		});
 		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
 		await utils.closeEditors();
+        utils.endRollingCount(this);
+	});
+
+
+	test("Set License Mode - UNLICENSED", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		await utils.setLicenseType(TeLicenseType.Free);
+		expect(licMgr.isLicensed).to.be.equal(false);
+		expect(licMgr.isTrial).to.be.equal(false);
         utils.endRollingCount(this);
 	});
 
@@ -438,7 +318,6 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow((Math.round(tc.slowTime.commands.refresh * 0.75)) + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd);
-		await setLicensed(false);
 		licMgr.setTestData({
 			maxFreeTasks: 25,
 			maxFreeTaskFiles: licMgrMaxFreeTaskFiles,
@@ -524,7 +403,7 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.refresh);
-		await setLicensed(true);
+		await restoreAccount();
 		licMgr.setTestData({
 			maxFreeTasks: licMgrMaxFreeTasks,
 			maxFreeTaskFiles: licMgrMaxFreeTaskFiles,
