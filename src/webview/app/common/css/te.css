@@ -11,3 +11,41 @@
     color: var(--vscode-button-background);
     text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 2px 1px #777, 1px 1px 0px #666, 0px 2px 0px #555, 1px 2px 0px #444, 0px 2px 0px #333, 0px 3px 1px #001135;
 }
+  
+.te-tooltip {
+    position: relative;
+    display: inline-block;
+}
+    
+.te-tooltip .te-tooltiptext {
+    visibility: hidden;
+    min-width: 120px;
+    background-color: var(--vscode-menu-background);
+    color: var(--vscode-menu-foreground);
+    border: 1px solid var(--vscode-menu-foreground);
+    text-align: center;
+    padding: 5px 3px;
+    border-radius: 6px;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -20px;
+    margin-bottom: 10px;
+    position: absolute;
+    z-index: 1;
+}
+  
+.te-tooltip:hover .te-tooltiptext {
+    visibility: visible;
+}
+  
+.te-tooltip .te-tooltiptext::after {
+    content: " ";
+    position: absolute;
+    left: calc(20% - 5px);
+    margin-bottom: -12px;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    bottom: 0%;
+    border-color: var(--vscode-menu-foreground) transparent transparent transparent;
+}

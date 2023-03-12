@@ -55,13 +55,22 @@
                                                     <table class="homeview-license-status-container margin-top-3" width="100%">
                                                         <tr>
                                                             <td class="homeview-license-status-icon-td">
-                                                                <span class="#{license.statusIconCls} homeview-license-status-icon"></span>
+                                                                <div class="te-tooltip">
+                                                                    <span class="#{license.statusIconCls} homeview-license-status-icon"></span>
+                                                                    <span class="te-tooltiptext">License status</span>
+                                                                </div>
                                                             </td>
                                                             <td class="homeview-session-status-icon-td">
-                                                                <span class="#{license.sessionIconCls} homeview-session-status-icon"></span>
+                                                                <div class="te-tooltip">
+                                                                    <span class="#{license.sessionIconCls} homeview-session-status-icon"></span>
+                                                                    <span class="te-tooltiptext">Session status</span>
+                                                                </div>
                                                             </td>
                                                             <td class="homeview-license-status-days-td">
-                                                                <span class="homeview-license-status-days">#{license.statusDays}</span>
+                                                                <div class="te-tooltip">
+                                                                    <span class="homeview-license-status-days">#{license.statusDays}</span>
+                                                                    <span class="te-tooltiptext"># of days left in trial</span>
+                                                                </div>
                                                             </td>
                                                             <td class="homeview-license-status-label-td">
                                                                 <span class="homeview-license-status-label">#{license.status}</span>
