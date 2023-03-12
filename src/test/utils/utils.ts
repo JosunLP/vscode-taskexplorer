@@ -12,8 +12,8 @@ import { hasExplorerFocused } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
-import { ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseState, TeLicenseType } from "@spmeesseman/vscode-taskexplorer-types";
-import { commands, ConfigurationTarget, Disposable, env, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks, Uri, ViewColumn, window, workspace } from "vscode";
+import { ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType } from "@spmeesseman/vscode-taskexplorer-types";
+import { commands, ConfigurationTarget, Disposable, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks, Uri, ViewColumn, window, workspace } from "vscode";
 
 
 const { symbols } = require("mocha/lib/reporters/base");
@@ -151,6 +151,16 @@ export const activate = async (instance?: Mocha.Context) =>
         // Catch CTRL+C and set hasRollingCountError if caught
         //
         startInput(setFailed);
+        //
+        // Increase slow times for local license server (making remote db requests)
+        //
+        if (teWrapper.server.apiServer === "localhost")
+        {
+            const factor = 2.75;
+            tc.slowTime.licenseMgr.purchaseLicense  = Math.round(tc.slowTime.licenseMgr.purchaseLicense * factor);
+            tc.slowTime.licenseMgr.validateLicense  = Math.round(tc.slowTime.licenseMgr.validateLicense * factor);
+            tc.slowTime.licenseMgr.getTrialExtension  = Math.round(tc.slowTime.licenseMgr.getTrialExtension * factor);
+        }
         //
         // All done
         //
@@ -450,27 +460,23 @@ export const setFailed = (ctrlc = true) =>
 };
 
 
-export const setLicenseType = async (type: TeLicenseType, clearNagDate?: boolean) =>
+export const setLicenseType = async (type: TeLicenseType) =>
 {
     const licMgr = teWrapper.licenseManager,
-          account = await licMgr.getAccount();
+          account = licMgr.account;
     account.license.type = type;
-    if (type === TeLicenseType.Free) {
-        account.license.state = TeLicenseState.Free;
+    if (type === 1) {
+        account.license.state = 1;
     }
-    else if (type === TeLicenseType.None) {
-        account.license.state = TeLicenseState.Trial;
+    else if (type === 0) {
+        account.license.state = 0;
     }
-    else if (type >= TeLicenseType.Standard) {
-        account.license.state = TeLicenseState.Paid;
+    else if (type >= 4) {
+        account.license.state = 2;
     }
     else {
-        account.license.state = TeLicenseState.Trial;
+        account.license.state = 0;
     }
-    if (clearNagDate === true) {
-        await teWrapper.storage.deleteSecret(StorageKeys.LastLicenseNag);
-    }
-    await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(account));
 };
 
 

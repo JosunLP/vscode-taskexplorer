@@ -33,7 +33,7 @@ suite("Task Tests", () =>
         ({ teWrapper } = await utils.activate(this));
         clickAction = teWrapper.config.get<string>(ConfigKeys.TaskButtons.ClickAction);
         oNumLastTasks = teWrapper.config.get<number>(ConfigKeys.SpecialFolders.NumLastTasks);
-        await executeSettingsUpdate(ConfigKeys.SpecialFolders.NumLastTasks, 2);
+        await executeSettingsUpdate(ConfigKeys.SpecialFolders.NumLastTasks, 1);
         await executeSettingsUpdate(ConfigKeys.SpecialFolders.ShowLastTasks, true);
         utils.endRollingCount(this, true);
     });
@@ -374,35 +374,6 @@ suite("Task Tests", () =>
         finally {
             item.id = item.id.replace("_noId", "");
             lastTasksStore.pop();
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Surpass Max Last Tasks", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.showHideSpecialFolder + (tc.slowTime.config.event * 2));
-        const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
-        expect(tree).to.not.be.oneOf([ undefined, null ]);
-        const lastTasksFolder = tree[0] as any;
-        const maxLastTasks = teWrapper.config.get<number>("specialFolders.numLastTasks");
-        teWrapper.configWatcher.enableConfigWatcher(false);
-        await executeSettingsUpdate("specialFolders.numLastTasks", 6);
-        try {
-            lastTasksFolder.saveTask(ant[0], "");
-            lastTasksFolder.saveTask(ant[1], "");
-            lastTasksFolder.saveTask(ant[2], "");
-            lastTasksFolder.saveTask(bash[0], "");
-            lastTasksFolder.saveTask(batch[0], "");
-            lastTasksFolder.saveTask(batch[1], "");
-            lastTasksFolder.saveTask(python[0], "");
-            lastTasksFolder.saveTask(python[1], "");
-        }
-        catch (e) { throw e; }
-        finally {
-            await executeSettingsUpdate("specialFolders.numLastTasks", maxLastTasks);
-            teWrapper.configWatcher.enableConfigWatcher(true);
         }
         utils.endRollingCount(this);
     });

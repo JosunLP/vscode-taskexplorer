@@ -65,6 +65,7 @@ export interface ITeWrapper
 	pathUtils: ITePathUtilities;
 	promiseUtils: ITePromiseUtilities;
 	releaseNotesPage: ITeWebview;
+	server: any;
 	sidebar: ITeTaskTree;
 	sidebarView: TreeView<TreeItem>;
 	sorters: ITeSortUtilities;

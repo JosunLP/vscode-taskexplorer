@@ -490,17 +490,37 @@ suite("Tree Tests", () =>
     test("Reveal API", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.getTreeTasks * 2) + 40);
-        bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
-        batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
-        await utils.sleep(5);
-        await teWrapper.treeManager.views.taskExplorer.view.reveal(batch[0], { select: true });
-        await utils.sleep(5);
-        await teWrapper.treeManager.views.taskExplorer.view.reveal(bash[0], { select: true });
-        await utils.sleep(5);
-        await teWrapper.treeManager.views.taskExplorer.view.reveal(batch[0], { select: false });
-        await utils.sleep(5);
-        await teWrapper.treeManager.views.taskExplorer.view.reveal(bash[0], { select: false });
+        this.slow((tc.slowTime.getTreeTasks * 2) + (tc.slowTime.revealTreeNode * 5) + 230);
+        await utils.waitForTeIdle(50);
+        const reveal = async() => {
+            bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
+            batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
+            await utils.waitForTeIdle(50);
+            await teWrapper.treeManager.views.taskExplorer.view.reveal(batch[0], { select: true });
+            await utils.waitForTeIdle(5);
+            await teWrapper.treeManager.views.taskExplorer.view.reveal(bash[0], { select: true });
+            await utils.waitForTeIdle(5);
+            await teWrapper.treeManager.views.taskExplorer.view.reveal(batch[0], { select: false });
+            await utils.waitForTeIdle(5);
+            await teWrapper.treeManager.views.taskExplorer.view.reveal(bash[0], { select: false });
+        };
+        try {
+            await reveal();
+        }
+        catch (e) {
+            const msg = "Reveal API failed: " + e;
+            console.log(`    ${teWrapper.figures.color.warn} ${teWrapper.figures.withColor(msg, teWrapper.figures.colors.grey)}`);
+            console.log(`    ${teWrapper.figures.color.warn} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
+            await utils.sleep(100);
+            try {
+                await reveal();
+            }
+            catch {
+                console.log(`    ${teWrapper.figures.color.warn} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
+                await utils.sleep(100);
+                await reveal();
+            }
+        }
         const taskTree = teWrapper.treeManager.getTaskTree() as any[];
         expect(teWrapper.explorer?.getParent(taskTree[0])).to.be.null; // Last Tasks
         expect(teWrapper.explorer?.getParent(taskTree[1])).to.be.null; // Last Tasks

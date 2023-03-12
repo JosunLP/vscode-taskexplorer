@@ -46,6 +46,8 @@ suite("Webview Tests", () =>
         await executeSettingsUpdate("enableSideBar", true, tc.waitTime.config.enableEvent);
         await waitForTeIdle(tc.waitTime.config.registerExplorerEvent);
         await focusSidebarView();
+        void teWrapper.homeView.show();
+        await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
         await waitForTeIdle(tc.waitTime.refreshCommand);
         endRollingCount(this);
     });
@@ -56,15 +58,13 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.commands.focusChangeViews * 3) + tc.slowTime.commands.fast + (tc.slowTime.config.enableEvent * 2) + 2000);
         const echoCmd = { method: "echo/command/execute", overwriteable: false };
-        void teWrapper.homeView.show();
-        await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
         await commands.executeCommand("taskexplorer.view.home.focus");
         await executeSettingsUpdate("enabledTasks.bash", false, tc.waitTime.config.enableEvent);
         await sleep(5);
         await executeSettingsUpdate("enabledTasks.bash", true, tc.waitTime.config.enableEvent);
         expect(teWrapper.homeView.description).to.not.be.undefined;
         await focusExplorerView(teWrapper);
-        await sleep(5);
+        await sleep(50);
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
         void commands.executeCommand("taskexplorer.view.home.focus");
         await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
@@ -76,7 +76,8 @@ suite("Webview Tests", () =>
         await sleep(5);
         await commands.executeCommand("taskexplorer.view.home.refresh");
         await sleep(5);
-        await commands.executeCommand("taskexplorer.donate");
+        // await commands.executeCommand("taskexplorer.donate"); for now 'purchaseLicense' is calling 'donate'
+        await commands.executeCommand("taskexplorer.purchaseLicense"); // ^^^ TODO ^^^
         await sleep(5);
         await commands.executeCommand("taskexplorer.openBugReports");
         await sleep(5);

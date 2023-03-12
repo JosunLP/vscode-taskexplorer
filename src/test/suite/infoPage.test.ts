@@ -50,9 +50,9 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (Single Project No User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReport + testControl.slowTime.config.showHideUserTasks + 150);
+		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.config.showHideUserTasks + 150);
 		await executeSettingsUpdate("specialFolders.showUserTasks", false, testControl.waitTime.config.showHideUserTasks);
-		await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri ], testControl.waitTime.viewReport);
+		await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri ], testControl.waitTime.viewParsingReport);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -62,9 +62,9 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (Single Project w/ User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReport + testControl.slowTime.config.showHideUserTasks + 150);
+		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.config.showHideUserTasks + 150);
 		await executeSettingsUpdate("specialFolders.showUserTasks", true, testControl.waitTime.config.showHideUserTasks);
-	    await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri, "", 5 ], testControl.waitTime.viewReport);
+	    await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri, "", 5 ], testControl.waitTime.viewParsingReport);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -74,8 +74,8 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReport + 150);
-	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewReport);
+		this.slow(testControl.slowTime.viewParsingReport + 150);
+	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewParsingReport);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -85,10 +85,10 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (All Projects, Yarn Enabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReport + (testControl.slowTime.config.enableEvent * 2) + 150);
+		this.slow(testControl.slowTime.viewParsingReport + (testControl.slowTime.config.enableEvent * 2) + 150);
         await teWrapper.config.updateVsWs("npm.packageManager", "yarn");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
-	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewReport);
+	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewParsingReport);
 		await sleep(75);
         await teWrapper.config.updateVsWs("npm.packageManager", pkgMgr);
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
@@ -100,8 +100,8 @@ suite("Info Report Tests", () =>
 	test("View License Info from Webview", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReport + testControl.slowTime.licenseMgr.pageWithDetail + 1000);
-	    const panel = await executeTeCommand("taskexplorer.view.licensePage.show", testControl.waitTime.viewReport);
+		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.licenseMgr.page + 1000);
+	    const panel = await executeTeCommand("taskexplorer.view.licensePage.show", testControl.waitTime.viewParsingReport);
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "showLicensePage" });
 		await sleep(500);
 		await closeEditors();
@@ -112,7 +112,7 @@ suite("Info Report Tests", () =>
 	test("Deserialize Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReport + 30);
+		this.slow(testControl.slowTime.viewParsingReport + 30);
 		let panel = createwebviewForRevive("Task Explorer Parsing Report", "parsingReport");
 	    await teWrapper.parsingReportPage.serializer?.deserializeWebviewPanel(panel, null);
 		await sleep(5);

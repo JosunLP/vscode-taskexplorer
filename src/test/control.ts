@@ -85,10 +85,10 @@ export const testControl =
     {
         cache: {
             build: 485,
-            buildCancel: 350,
+            buildCancel: 375,
             persist: 245,
             rebuild: 3825,
-            rebuildCancel: 625,
+            rebuildCancel: 675,
             rebuildNoChanges: 880,
         },
         cleanup: 475,
@@ -100,7 +100,7 @@ export const testControl =
             focusAlreadyFocused: 375,
             focusChangeViews: 775,
             refresh: 6250,
-            refreshNoChanges: 270,
+            refreshNoChanges: 300,
             run: 4750,
             runPause: 3100,
             runStop: 3400,
@@ -145,15 +145,14 @@ export const testControl =
         getTreeTasks: 205,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
-            page: 220,
-            pageWithDetail: 275,
-            checkLicense: 400,
-            enterKey: 840,
-            getTrialExtension: 1575,
+            page: 550,
+            getTrialExtension: 2175,
             getMaxTasks: 365,
-            setLicenseCmd: 210,
+            purchaseLicense: 1840,
+            validateLicense: 2175
         },
         min: 50,
+        revealTreeNode: 55,
         storageRead: 15,
         storageUpdate: 25,
         storageSecretRead: 35,
@@ -180,7 +179,7 @@ export const testControl =
         viewReleaseNotes: 415,
         viewTaskDetails: 415,
         viewTaskMonitor: 2300,
-        viewReport: 380,
+        viewParsingReport: 540,
         wsFolder: {
             add: 1650,     // bumped for multi-root ws in utils/initSettings
             addEmpty: 1590,
@@ -230,7 +229,7 @@ export const testControl =
         },
         getTreeTasks: 50,
         licenseMgr: {
-            getTrialExtension: 275,
+            request: 375,
         },
         max: 12000,
         min: 35,
@@ -242,7 +241,7 @@ export const testControl =
         reorderWorkspaceFolders: 100,
         runCommandMin: 425,
         taskCommand: 375,
-        viewReport: 80,
-        viewTaskMonitor: 200,
+        viewParsingReport: 80,
+        viewTaskMonitor: 200
     },
 };

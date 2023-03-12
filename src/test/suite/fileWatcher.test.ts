@@ -268,7 +268,7 @@ suite("File Watcher Tests", () =>
     test("Add a Non-Empty Folder to Workspace Folder (Un-Licensed Mode)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.taskCount.verify + (tc.slowTime.licenseMgr.setLicenseCmd * 2));
+        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.taskCount.verify);
         await utils.setLicenseType(1); // Set to 'free' type (trial over, non-paid)
 		expect(teWrapper.licenseManager.isTrial).to.be.equal(false);
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(false);
@@ -277,7 +277,7 @@ suite("File Watcher Tests", () =>
             await utils.waitForTeIdle(tc.waitTime.fs.createFolderEvent);
         } catch {}
         finally {
-            await utils.setLicenseType(0); // Set back to trial
+            await utils.setLicenseType(2); // Set back to trial
         }
         await utils.verifyTaskCount("grunt", startTaskCountGrunt + 4);
         utils.endRollingCount(this);

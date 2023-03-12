@@ -4,11 +4,13 @@
 
 import { join } from "path";
 import { expect } from "chai";
-import { env, Task } from "vscode";
+import { Task } from "vscode";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
 import { executeTeCommand } from "../utils/commandUtils";
-import { ITeAccount, ITeLicenseManager, ITeWrapper, TeLicenseType } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+
+const tc = utils.testControl;
 
 let licMgr: ITeLicenseManager;
 let teWrapper: ITeWrapper;
@@ -17,11 +19,6 @@ let licMgrMaxFreeTasks: number;
 let licMgrMaxFreeTaskFiles: number;
 let licMgrMaxFreeTasksForTaskType: number;
 let licMgrMaxFreeTasksForScriptType: number;
-
-const tc = utils.testControl;
-const restoreAccount = () => { if (oAccount) teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(oAccount)); };
-const setNag = (v?: number) => teWrapper.storage.update(teWrapper.keys.Storage.LastLicenseNag, v);
-const setTasks = (e: any) => { licMgr.setTestData({ callTasksChanged: e }); };
 
 
 suite("License Manager Tests", () =>
@@ -43,11 +40,18 @@ suite("License Manager Tests", () =>
 		licMgr = teWrapper.licenseManager;
 		expect(licMgr.isLicensed).to.be.equal(true);
 		expect(licMgr.isTrial).to.be.equal(true);
-		oAccount = { ...licMgr.account };
-		licMgrMaxFreeTasks = licMgr.getMaxNumberOfTasks();
-		licMgrMaxFreeTaskFiles = licMgr.getMaxNumberOfTaskFiles();
-		licMgrMaxFreeTasksForTaskType = licMgr.getMaxNumberOfTasks("npm");
-		licMgrMaxFreeTasksForScriptType = licMgr.getMaxNumberOfTasks("batch");
+		oAccount = JSON.parse(JSON.stringify(licMgr.account));
+		await utils.setLicenseType(1);
+		try {
+			licMgrMaxFreeTasks = licMgr.getMaxNumberOfTasks();
+			licMgrMaxFreeTaskFiles = licMgr.getMaxNumberOfTaskFiles();
+			licMgrMaxFreeTasksForTaskType = licMgr.getMaxNumberOfTasks("npm");
+			licMgrMaxFreeTasksForScriptType = licMgr.getMaxNumberOfTasks("batch");
+		}
+		catch (e) {throw e; }
+		finally {
+			await utils.setLicenseType(2);
+		}
         utils.endRollingCount(this, true);
 	});
 
@@ -75,8 +79,8 @@ suite("License Manager Tests", () =>
 	test("Get Maximum # of Tasks", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getMaxTasks + (tc.slowTime.licenseMgr.setLicenseCmd * 2));
-		await utils.setLicenseType(TeLicenseType.Free);
+		this.slow(tc.slowTime.licenseMgr.getMaxTasks);
+		await utils.setLicenseType(1);
 		expect(licMgr.getMaxNumberOfTasks()).to.be.a("number").that.is.equal(licMgrMaxFreeTasks);
 		await utils.setLicenseType(oAccount.license.type); // reset
 		expect(licMgr.getMaxNumberOfTasks()).to.be.a("number").that.is.equal(Infinity);
@@ -87,8 +91,8 @@ suite("License Manager Tests", () =>
 	test("Get Maximum # of NPM Tasks", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getMaxTasks + (tc.slowTime.licenseMgr.setLicenseCmd * 2));
-		await utils.setLicenseType(TeLicenseType.Free);
+		this.slow(tc.slowTime.licenseMgr.getMaxTasks);
+		await utils.setLicenseType(1);
 		expect(licMgr.getMaxNumberOfTasks("npm")).to.be.a("number").that.is.equal(licMgrMaxFreeTasksForTaskType);
 		await utils.setLicenseType(oAccount.license.type); // reset
 		expect(licMgr.getMaxNumberOfTasks("npm")).to.be.a("number").that.is.equal(Infinity);
@@ -99,8 +103,8 @@ suite("License Manager Tests", () =>
 	test("Get Maximum # of Ant Tasks", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getMaxTasks + (tc.slowTime.licenseMgr.setLicenseCmd * 2));
-		await utils.setLicenseType(TeLicenseType.Free);
+		this.slow(tc.slowTime.licenseMgr.getMaxTasks);
+		await utils.setLicenseType(1);
 		expect(licMgr.getMaxNumberOfTasks("ant")).to.be.a("number").that.is.equal(licMgrMaxFreeTasksForTaskType);
 		await utils.setLicenseType(oAccount.license.type); // reset
 		expect(licMgr.getMaxNumberOfTasks("ant")).to.be.a("number").that.is.equal(Infinity);
@@ -111,8 +115,8 @@ suite("License Manager Tests", () =>
 	test("Get Maximum # of Bash Tasks (Scripts)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getMaxTasks + (tc.slowTime.licenseMgr.setLicenseCmd * 2));
-		await utils.setLicenseType(TeLicenseType.Free);
+		this.slow(tc.slowTime.licenseMgr.getMaxTasks);
+		await utils.setLicenseType(1);
 		expect(licMgr.getMaxNumberOfTasks("bash")).to.be.a("number").that.is.equal(licMgrMaxFreeTasksForScriptType);
 		await utils.setLicenseType(oAccount.license.type); // reset
 		expect(licMgr.getMaxNumberOfTasks("bash")).to.be.a("number").that.is.equal(Infinity);
@@ -123,8 +127,8 @@ suite("License Manager Tests", () =>
 	test("Get Maximum # of Python Tasks (Scripts)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getMaxTasks + (tc.slowTime.licenseMgr.setLicenseCmd * 2));
-		await utils.setLicenseType(TeLicenseType.Free);
+		this.slow(tc.slowTime.licenseMgr.getMaxTasks);
+		await utils.setLicenseType(1);
 		expect(licMgr.getMaxNumberOfTasks("python")).to.be.a("number").that.is.equal(licMgrMaxFreeTasksForScriptType);
 		await utils.setLicenseType(oAccount.license.type); // reset
 		expect(licMgr.getMaxNumberOfTasks("python")).to.be.a("number").that.is.equal(Infinity);
@@ -135,8 +139,8 @@ suite("License Manager Tests", () =>
 	test("Get Maximum # of Task Files", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getMaxTasks + (tc.slowTime.licenseMgr.setLicenseCmd * 2));
-		await utils.setLicenseType(TeLicenseType.Free);
+		this.slow(tc.slowTime.licenseMgr.getMaxTasks);
+		await utils.setLicenseType(1);
 		expect(licMgr.getMaxNumberOfTaskFiles()).to.be.a("number").that.is.equal(licMgrMaxFreeTaskFiles);
 		await utils.setLicenseType(oAccount.license.type); // reset
 		expect(licMgr.getMaxNumberOfTaskFiles()).to.be.a("number").that.is.equal(Infinity);
@@ -144,39 +148,22 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Validate on Session Expired", async function()
-	{   //
-		// In LICENSED MODE - Running on fresh trial license at this point.
-		// Simulate a session expiration and token refresh
-		//
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.checkLicense + 300);
-		expect(licMgr.isLicensed).to.be.equal(true);
-		expect(licMgr.isTrial).to.be.equal(true);
-		try {
-			licMgr.setTestData({ sessionInterval: 1 });
-			await licMgr.checkLicense("");
-		} catch {}
-		finally {
-			licMgr.setTestData({ sessionInterval: undefined });
-		}
-		expect(licMgr.isLicensed).to.be.equal(true);
-		expect(licMgr.isTrial).to.be.equal(true);
+	test("Validate License", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+        await validateLicense(this, true, true);
         utils.endRollingCount(this);
 	});
 
 
 	test("Open License Info Page and View Parsing Report", async function()
-	{   //
-		// Run test in  UNLICENSED MODE - Set license type to TeLicenseType.Free
-		//
+	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.pageWithDetail + 10);
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.viewParsingReport + tc.slowTime.closeEditors);
 		void teWrapper.licensePage.show();
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "showParsingReport" });
         await utils.promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
-		await utils.sleep(5);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -185,15 +172,13 @@ suite("License Manager Tests", () =>
 	test("Request Trial Extension (From Webview)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.getTrialExtension +
-				  tc.slowTime.storageSecretRead + tc.slowTime.closeEditors + 1100);
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.closeEditors + 1000);
 		void teWrapper.licensePage.show();
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
-		await utils.sleep(5);
 		const result = await teWrapper.licensePage.view?.webview.postMessage({ command: "extendTrial" });
 		await utils.sleep(500);
 		expect(result).to.be.equal(true);
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
+		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
 		await utils.closeEditors();
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
         utils.endRollingCount(this);
@@ -203,7 +188,7 @@ suite("License Manager Tests", () =>
 	test("Set License Mode - UNLICENSED", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		await utils.setLicenseType(TeLicenseType.Free);
+		await utils.setLicenseType(1);
 		expect(licMgr.isLicensed).to.be.equal(false);
 		expect(licMgr.isTrial).to.be.equal(false);
         utils.endRollingCount(this);
@@ -211,12 +196,12 @@ suite("License Manager Tests", () =>
 
 
 
-	test("License Page w/ No License Key", async function()
+	test("Open License Page w/ No License Key", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page);
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors);
 		void teWrapper.licensePage.show();
-        await utils.promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
+        await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -225,13 +210,10 @@ suite("License Manager Tests", () =>
 	test("License Nag - Info", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd + 500);
 		await setNag();
 		utils.clearOverrideShowInfoBox();
 		utils.overrideNextShowInfoBox("Info");
 		await licMgr.checkLicense("");
-		await utils.waitForTeIdle(150);
-		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
 
@@ -239,13 +221,9 @@ suite("License Manager Tests", () =>
 	test("License Nag - Not Now", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.licenseMgr.setLicenseCmd + 500);
 		await setNag();
-		utils.clearOverrideShowInfoBox();
 		utils.overrideNextShowInfoBox("Not Now");
 		await licMgr.checkLicense("");
-		await utils.waitForTeIdle(150);
-		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
 
@@ -274,10 +252,9 @@ suite("License Manager Tests", () =>
 	test("Request Trial Extension (From Command Palette)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.closeEditors + tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension);
 		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.getTrialExtension);
-		await utils.closeEditors();
+		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(true);
         utils.endRollingCount(this);
 	});
@@ -286,9 +263,8 @@ suite("License Manager Tests", () =>
 	test("Re-request a Trial Extension (Deny)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.commands.standard + tc.slowTime.closeEditors + tc.slowTime.storageSecretUpdate);
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension);
 		await executeTeCommand<{ panel: any; newKey: any }>("extendTrial");
-		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
 
@@ -296,7 +272,7 @@ suite("License Manager Tests", () =>
 	test("Set License Mode - UNLICENSED", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		await utils.setLicenseType(TeLicenseType.Free);
+		await utils.setLicenseType(1);
 		expect(licMgr.isLicensed).to.be.equal(false);
 		expect(licMgr.isTrial).to.be.equal(false);
         utils.endRollingCount(this);
@@ -306,7 +282,7 @@ suite("License Manager Tests", () =>
 	test("Task Limit Reached (Non-Licensed)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow((Math.round(tc.slowTime.commands.refresh * 0.75)) + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.setLicenseCmd);
+		this.slow(Math.round(tc.slowTime.commands.refresh * 0.75));
 		licMgr.setTestData({
 			maxFreeTasks: 25,
 			maxFreeTaskFiles: licMgrMaxFreeTaskFiles,
@@ -388,7 +364,39 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Reset Max Limits (Non-Licensed)", async function()
+	test("Validate License - Invalid Key", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "some_invalid_key" }});
+		await saveAccount(licMgr.account);
+        await validateLicense(this, true, false);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Validate License - Invalid Account", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		Object.assign(licMgr.account, { ...oAccount, ...{ id: 0 }});
+		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "tests-no-matching-account-key" }});
+		await saveAccount(licMgr.account);
+        await validateLicense(this, true, false);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Validate License - Invalid Account Trial", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		Object.assign(licMgr.account, { ...oAccount, ...{ trialId: 0 }});
+		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "tests-no-matching-trial-key" }});
+		await saveAccount(licMgr.account);
+        await validateLicense(this, true, false);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Restore Trial Account and License Limits", async function()
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.refresh);
@@ -399,6 +407,8 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
+		expect(licMgr.isLicensed).to.be.equal(true);
+		expect(licMgr.isTrial).to.be.equal(true);
 		await utils.treeUtils.refresh();
         utils.endRollingCount(this);
 	});
@@ -407,10 +417,10 @@ suite("License Manager Tests", () =>
     test("Max Task Reached MessageBox", async function()
     {
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.enterKey);
+		this.slow(tc.slowTime.licenseMgr.purchaseLicense);
 		utils.clearOverrideShowInfoBox();
 		utils.clearOverrideShowInputBox();
-		utils.overrideNextShowInfoBox("Enter License Key");
+		utils.overrideNextShowInfoBox("Purchase License");
 		utils.overrideNextShowInputBox(undefined);
 		await licMgr.setMaxTasksReached(undefined, true);
 		utils.overrideNextShowInfoBox("Info");
@@ -430,3 +440,33 @@ suite("License Manager Tests", () =>
 	});
 
 });
+
+const restoreAccount = async() => {
+	if (oAccount) {
+		Object.assign(licMgr.account, oAccount);
+		await teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(oAccount));
+	}
+};
+
+const saveAccount = (account: ITeAccount) => teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(account));
+
+const setNag = (v?: number) => teWrapper.storage.update(teWrapper.keys.Storage.LastLicenseNag, v);
+
+const setTasks = (e: any) => { licMgr.setTestData({ callTasksChanged: e }); };
+
+const validateLicense = async (instance: Mocha.Context, expectNow: boolean, expectAfter: boolean) =>
+{
+	instance.slow(tc.slowTime.licenseMgr.validateLicense);
+	expect(licMgr.isLicensed).to.be.equal(expectNow);
+	expect(licMgr.isTrial).to.be.equal(expectNow);
+	try {
+		licMgr.setTestData({ sessionInterval: 1000 * 60 * 60 * 48 });
+		await licMgr.checkLicense("");
+		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
+	} catch {}
+	finally {
+		licMgr.setTestData({ sessionInterval: undefined });
+	}
+	expect(licMgr.isLicensed).to.be.equal(expectAfter);
+	expect(licMgr.isTrial).to.be.equal(expectAfter);
+};

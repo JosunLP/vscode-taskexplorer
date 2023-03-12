@@ -1,8 +1,8 @@
 
 import { TeWrapper } from "./wrapper";
 import { ITeApiEndpoint } from "./server";
+import { Disposable, Event, EventEmitter, window } from "vscode";
 import { executeCommand, registerCommand, Commands } from "./command/command";
-import { Disposable, Event, EventEmitter, InputBoxOptions, window } from "vscode";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
 	TeLicenseState, IDictionary, TeRuntimeEnvironment
@@ -12,21 +12,23 @@ import {
 export class LicenseManager implements ITeLicenseManager, Disposable
 {
 	private _account: ITeAccount;
+	private _accountChangeNumber = 0;
 	private _busy = false;
+	private _checkLicenseTask: NodeJS.Timeout;
 	private _maxFreeTasks = 500;
 	private _maxFreeTaskFiles = 100;
 	private _maxTasksReached = false;
 	private _maxTasksMessageShown = false;
 	private _maxFreeTasksForTaskType = 100;
 	private _maxFreeTasksForScriptType = 50;
-	private _checkLicenseTask: NodeJS.Timeout;
+	private readonly _defaultSessionInterval = 1000 * 60 * 60 * 4;
 	private readonly _disposables: Disposable[] = [];
 	private readonly _maxTaskTypeMsgShown: IDictionary<boolean> = {};
     private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
 	private readonly _sessionInterval = <{ [id in TeRuntimeEnvironment]: number}>{
-		production: 1000 * 60 * 60 * 24, // 24 hr
-		tests: 1000 * 60 * 60 * 24, // 24 hr
-		dev: 1000 * 60 * 10 // 5 min
+		production: this._defaultSessionInterval, // 4 hr
+		tests: this._defaultSessionInterval, // 4 hr
+		dev: 1000 * 60 * 10 // 10 min
 	};
 
 
@@ -39,7 +41,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._disposables.push(
 			this._onSessionChange,
 			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
-			registerCommand(Commands.PurchaseLicense, this.purchaseLicenseKey, this),
+			registerCommand(Commands.PurchaseLicense, this.purchaseLicense, this),
 			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
 			registerCommand(Commands.Register, this.register, this)
 		);
@@ -54,10 +56,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	get account(): ITeAccount {
 		return this._account;
-	}
-
-	get sessionInterval(): number {
-		return this._sessionInterval[this.wrapper.env];
 	}
 
 	get isBusy(): boolean {
@@ -80,6 +78,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
         return this._onSessionChange.event;
     }
 
+	get sessionInterval(): number {
+		return this._sessionInterval[this.wrapper.env];
+	}
+
 	get statusDays(): string {
 		return this.isTrial ?
 			this.wrapper.utils.getDateDifference(Date.now(), this._account.license.expires, "d").toString() :
@@ -87,7 +89,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	}
 
     get statusDescription(): string {
-        return this.isTrial ? "TRIAL" : (this.isLicensed ? "LICENSED" : "UNLICENSED");
+        return this.isTrial ? (this._account.license.period <= 1 ? "PRE-TRIAL" : "EXT-TRIAL") : (this.isLicensed ? "LICENSED" : "UNLICENSED");
     }
 
 
@@ -310,28 +312,33 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			//
 			this.wrapper.log.value("response body", e.body, 2);
 			this.wrapper.log.error(e.message, [[ "status code", e.status ]]);
-			if (e.status === 402 || e.status === 406 || e.status === 409)
+			/* istanbul ignore else */
+			if (e.status !== 500)
 			{
-				switch (e.message)
+				switch (e.body)
 				{
 					case "Account does not exist":           // 409
 					case "Account trial does not exist":     // 409
 					case "Account license does not exist":   // 409
 						this._account.license.type = TeLicenseType.Free;
 						this._account.license.state = TeLicenseState.Free;
+						await this.saveAccount("   ");
 						this._account.verified = false;
 						break;
 					case "Account trial cannot be extended": // 402
 					case "Invalid license key":              // 406
-					default:
 						this._account.license.type = TeLicenseType.Free;
 						this._account.license.state = TeLicenseState.Free;
+						await this.saveAccount("   ");
+						break;
+					// case "Error - could not update trial":
+					// case "Invalid request parameters":
+					default:
 						break;
 				}
-				await this.saveAccount("   ");
 			}
 			else {
-				this._account.errorState = true; // In error state, licensed mode is ON
+				this._account.errorState = true; // In error state, licensed mode goes ON
 			}
 		}
 
@@ -377,32 +384,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private purchaseLicenseKey = async(): Promise<void> =>
-	{
+	private purchaseLicense = async(): Promise<void> =>
+	{   //
+		// TODO - Purchase license
+		//
 		this.wrapper.log.methodStart("purchase license key", 1);
-		const opts: InputBoxOptions = { prompt: "Enter license key" };
-		try {
-			const input = await window.showInputBox(opts);
-			if (input)
-			{
-				if (input.length > 20)
-				{
-					await this.validateLicense(input, "   ");
-					if (this.isLicensed)
-					{
-						window.showInformationMessage("License key validated, thank you for your support!");
-						if (this._maxTasksReached) {
-							this._maxTasksReached = false;
-							await executeCommand(Commands.Refresh);
-						}
-					}
-				}
-				else {
-					window.showInformationMessage("This does not appear to be a valid license, validation skipped");
-				}
-			}
-		}
-		catch (e) {}
+		await executeCommand(Commands.Donate);
+		window.showInformationMessage("Not implemented yet");
 		this.wrapper.log.methodDone("purchase license key", 1);
 	};
 
@@ -410,17 +398,21 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private register = async(): Promise<void> =>
 	{
 		await this.wrapper.utils.sleep(1);
+		//
 		// TODO - Account registration
 		//        Need webview app to input first/last name, email address
-		await window.showInformationMessage("Not implemented yet");
+		//
+		window.showInformationMessage("Not implemented yet");
 	};
 
 
 	private saveAccount = async (logPad: string): Promise<void> =>
 	{
 		this.wrapper.log.methodStart("save account", 1, logPad);
+		++this._accountChangeNumber;
 		this.wrapper.log.values(1, logPad + "   ", [
 			[ "account id", this._account.id ],
+			[ "account change #", this._accountChangeNumber ],
 			[ "license issued", this.wrapper.utils.formatDate(this._account.session.issued) ],
 			[ "license expires", this.wrapper.utils.formatDate(this._account.session.expires) ]
 		]);
@@ -431,11 +423,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				[ "license id", this._account.license.id ], [ "trial id", this._account.trialId ],
 				[ "access token", this._account.session.token ], [ "license key", this._account.license.key ]
 			]);
-			/* istanbul ignore if */
-			if (this.wrapper.env === "dev") {
-				const rPath = await this.wrapper.pathUtils.getInstallPath() + "\\dist\\account_saved.json";
-				await this.wrapper.fs.writeFile(rPath, JSON.stringify(this._account, null, 3));
-			}
+			const rPath = await this.wrapper.pathUtils.getInstallPath() + `\\dist\\account_saved_${this._accountChangeNumber}.json`;
+			await this.wrapper.fs.writeFile(rPath, JSON.stringify(this._account, null, 3));
 		}
 		await this.wrapper.storage.updateSecret(this.wrapper.keys.Storage.Account, JSON.stringify(this._account));
 		this.onSessionChanged({ added: [ this._account.session ], removed: [], changed: [] });
@@ -449,7 +438,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._maxFreeTaskFiles = data.maxFreeTaskFiles || this._maxFreeTaskFiles;
 		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;
 		this._maxFreeTasksForScriptType = data.maxFreeTasksForScriptType || this._maxFreeTasksForScriptType;
-		this._sessionInterval.tests = data.sessionInterval || (1000 * 60 * 60 * 24);
+		this._sessionInterval.tests = data.sessionInterval || this._defaultSessionInterval;
 		if (data.callTasksChanged) {
 			this.onTasksChanged(data.callTasksChanged);
 		}

@@ -67,7 +67,7 @@ export class TeServer
 		}
 	};
 
-	private get apiServer()
+	get apiServer()
 	{
 		/* istanbul ignore next */
 		switch (this.wrapper.env)
@@ -109,7 +109,7 @@ export class TeServer
 			// TODO - Request timeouts don't work
 			// Timeout don't work worth a s***.  So do a promise race in request() for now.
 			//
-			timeout: server !== "localhost" ? 4000 : /* istanbul ignore next*/1250,
+			timeout: 5000,
 			headers: <{[id: string]: string}>{
 				"token": this.apiClientId,
 				"User-Agent": "vscode-taskexplorer",

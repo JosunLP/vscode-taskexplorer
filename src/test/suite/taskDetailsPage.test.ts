@@ -47,7 +47,7 @@ suite("Task Details Page Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewTaskDetails + 150);
 		batch = await treeUtils.getTreeTasks(teWrapper, "batch", 2);
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ batch[0] ], testControl.waitTime.viewReport);
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ batch[0] ], testControl.waitTime.viewParsingReport);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -60,22 +60,22 @@ suite("Task Details Page Tests", () =>
 		this.slow(testControl.slowTime.viewTaskDetails + 150);
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		antTask = ant.find(t => t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ antTask ], testControl.waitTime.viewReport);
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ antTask ], testControl.waitTime.viewParsingReport);
 		await sleep(75);
         endRollingCount(this);
 	});
 
 
-	test("Run Task With Details page Open", async function()
+	test("Run Task w/ Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
-        this.slow((testControl.slowTime.config.event * 2) + testControl.slowTime.tasks.antTask + 300);
+        this.slow((testControl.slowTime.config.event * 2) + testControl.slowTime.tasks.antTask + 1900);
         await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false); // for coverage
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], testControl.waitTime.runCommandMin) ;
-        await sleep(150);
-        await waitForTaskExecution(exec, 1000);
+        await sleep(50);
+        await waitForTaskExecution(exec, 600);
 		await executeTeCommand2("stop", [ antTask ], testControl.waitTime.taskCommand);
-        await waitForTaskExecution(exec, 500);
+        await waitForTaskExecution(exec, 300);
         await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true); // for coverage ^^^
 		await closeEditors();
         endRollingCount(this);
@@ -87,7 +87,7 @@ suite("Task Details Page Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewTaskDetails + 150);
 		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], testControl.waitTime.viewReport);
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], testControl.waitTime.viewParsingReport);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -100,7 +100,7 @@ suite("Task Details Page Tests", () =>
 		this.slow(testControl.slowTime.viewTaskDetails + 150);
 		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
 		const iTasks = teWrapper.taskUtils.toITask(teWrapper, [ batch[0].task ], "all"); // App uses ITeTask
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", iTasks, testControl.waitTime.viewReport);
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", iTasks, testControl.waitTime.viewParsingReport);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -113,7 +113,7 @@ suite("Task Details Page Tests", () =>
 		this.slow((testControl.slowTime.config.event * 4) + testControl.slowTime.viewTaskDetails + 150);
 		await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
 		await executeSettingsUpdate(ConfigKeys.TrackUsage, false);
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], testControl.waitTime.viewReport);
+		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], testControl.waitTime.viewParsingReport);
 		await teWrapper.taskUsageView.show();
 		await sleep(75);
 		await executeSettingsUpdate(ConfigKeys.TrackUsage, true);
