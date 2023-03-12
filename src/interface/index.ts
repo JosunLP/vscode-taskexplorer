@@ -2,7 +2,6 @@
 export type { ITaskItem } from "./ITaskItem";
 export type { ITaskFile } from "./ITaskFile";
 export type { ITeContext } from "./ITeContext";
-export type { ITeWrapper } from "./ITeWrapper";
 export type { ITeWebview } from "./ITeWebview";
 export type { ITaskFolder } from "./ITaskFolder";
 export type { IDictionary } from "./IDictionary";
@@ -20,6 +19,7 @@ export type { ICacheItem, ITeFileCache } from "./ITeFileCache";
 export type { IStorage, StorageChangeEvent } from "./IStorage";
 export type { ILog, ILogControl, ILogQueueItem } from "./ILog";
 export type { ITeTaskManager, TaskMap } from "./ITeTaskManager";
+export type { ITeWrapper, TeRuntimeEnvironment } from "./ITeWrapper";
 export type { ITaskTreeEvent, ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
 export type { ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionChangeEvent } from "./ITeLicenseManager";

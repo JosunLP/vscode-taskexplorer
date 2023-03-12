@@ -64,10 +64,11 @@ export interface ITeAccount
 
 export interface ITeLicenseManager
 {
+    account: ITeAccount;
     isLicensed: boolean;
     isRegistered: boolean;
-    checkLicense(statusMessage: string| undefined, logPad: string): Promise<void>;
-	getAccount(): Thenable<ITeAccount>;
+    isTrial: boolean;
+    checkLicense(logPad: string): Promise<void>;
     getMaxNumberOfTasks: (taskType?: string | undefined) => number;
     getMaxNumberOfTaskFiles: () => number;
 	setMaxTasksReached(taskType?: string, force?: boolean): Promise<void>;

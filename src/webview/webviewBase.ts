@@ -262,7 +262,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected async getState(): Promise<BaseState>
 	{
 		return {
-			account: await this.wrapper.licenseManager.getAccount(),
+			account: await this.wrapper.licenseManager.account,
 			isEnabled: this.wrapper.views.taskExplorer.enabled || this.wrapper.views.taskExplorerSideBar.enabled,
 			isLicensed: this.wrapper.licenseManager.isLicensed,
 			isRegistered: this.wrapper.licenseManager.isRegistered,

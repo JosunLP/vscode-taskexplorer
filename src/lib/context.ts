@@ -19,7 +19,7 @@ export const enum ContextKeys
 	TreeViewSideBarPrefix = "taskexplorer:treeView:tasktreeSideBar",
 	WebviewPrefix = "taskexplorer:webview:",
 	WebviewViewPrefix = "taskexplorer:webviewView:",
-	Debugging = "taskexplorer:debugging",
+	Dev = "taskexplorer:dev",
 	Disabled = "taskexplorer:disabled",
 	Enabled = "taskexplorer:enabled",
 	Untrusted = "taskexplorer:untrusted",

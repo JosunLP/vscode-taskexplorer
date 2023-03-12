@@ -5,7 +5,6 @@ import * as fs from "./utils/fs";
 import { TeServer } from "./server";
 import { getUuid } from "@env/crypto";
 import { logControl } from "./log/log";
-import { TaskTree } from "../tree/tree";
 import { figures } from "./utils/figures";
 import { TeFileCache } from "./fileCache";
 import { TeStatusBar } from "./statusBar";
@@ -14,7 +13,6 @@ import * as sorters from "./utils/sortTasks";
 import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
 import * as typeUtils from "./utils/typeUtils";
-import { IStorage } from "../interface/IStorage";
 import { TaskManager } from "../tree/taskManager";
 import { TaskWatcher } from "../tree/taskWatcher";
 import { LicenseManager } from "./licenseManager";
@@ -29,7 +27,6 @@ import { MakeTaskProvider } from "../providers/make";
 import { RubyTaskProvider } from "../providers/ruby";
 import { NsisTaskProvider } from "../providers/nsis";
 import { PerlTaskProvider } from "../providers/perl";
-import { ITeWrapper } from "../interface/ITeWrapper";
 import { WelcomePage } from "../webview/page/welcome";
 import { TeFileWatcher } from "./watcher/fileWatcher";
 import { TaskTreeManager } from "../tree/treeManager";
@@ -46,27 +43,26 @@ import { WebpackTaskProvider } from "../providers/webpack";
 import { JenkinsTaskProvider } from "../providers/jenkins";
 import { ComposerTaskProvider } from "../providers/composer";
 import { TaskExplorerProvider } from "../providers/provider";
-import { IConfiguration } from "../interface/IConfiguration";
 import { TaskCountView } from "../webview/view/taskCountView";
 import { TaskUsageView } from "../webview/view/taskUsageView";
 import { Commands, registerCommand } from "./command/command";
 import { AddToExcludesCommand } from "./command/addToExcludes";
-import { ConfigKeys, StorageKeys, Strings } from "./constants";
 import { ReleaseNotesPage } from "../webview/page/releaseNotes";
 import { EnableTaskTypeCommand } from "./command/enableTaskType";
 import { PowershellTaskProvider } from "../providers/powershell";
-import { ITaskExplorerProvider } from "../interface/ITaskProvider";
 import { DisableTaskTypeCommand } from "./command/disableTaskType";
 import { AppPublisherTaskProvider } from "../providers/appPublisher";
 import { ParsingReportPage } from "../webview/page/parsingReportPage";
+import { ConfigKeys, Globs, StorageKeys, Strings } from "./constants";
 import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import {
-	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem,
-	TreeView, Disposable, EventEmitter
+	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView,
+	Disposable, EventEmitter, Event
 } from "vscode";
 import {
-	IDictionary, ILog, ITeFilesystem, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities,
-	ITeStatusBar, ITeTaskTree, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
+	IConfiguration, ITaskExplorerProvider, IStorage, IDictionary, ILog, ITaskTreeView, ITeFilesystem,
+	ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities,
+	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment
 } from "../interface";
 
 
@@ -108,7 +104,6 @@ export class TeWrapper implements ITeWrapper, Disposable
     private readonly _providers: IDictionary<ITaskExplorerProvider>;
 	private readonly _onReady: EventEmitter<void>;
     private readonly _onInitialized: EventEmitter<void>;
-	// private _onWorkCompleted: EventEmitter<void>;
 
 
 	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: ILog)
@@ -154,31 +149,18 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// TODO - Telemetry
 		//
-		// teWrapper.telemetry.setGlobalAttributes({
-		// 	debugging: container.debugging,
-		// 	insiders: insiders,
-		// 	prerelease: prerelease,
-		// 	install: previousVersion == null,
-		// 	upgrade: previousVersion != null && version !== previousVersion,
-		// 	upgradedFrom: previousVersion != null && version !== previousVersion ? previousVersion : undefined,
-		// });
-
+		// Example from GitLens extension:
 		//
-		// TODO - Telemetry
-		//
-		// const startTime = sw.startTime;
-		// const endTime = hrtime();
-		// const elapsed = sw.elapsed();
-		// container.telemetry.sendEvent(
-		// 	"activate",
-		// 	{
-		// 		"activation.elapsed": elapsed,
-		// 		"activation.mode": mode?.name,
-		// 		...flatCfg,
-		// 	},
-		// 	startTime,
-		// 	endTime,
-		// );
+		//     this._telemetry.setGlobalAttributes({
+		//     	   dev: this.dev
+		//     });
+		//     const startTime = sw.startTime,
+		//           endTime = hrtime(),
+		//           elapsed = sw.elapsed();
+		//     this._telemetry.sendEvent("activate", {
+		//     		"activation.elapsed": elapsed,
+		//     		"activation.mode": mode?.name
+		//     }, startTime, endTime);
 
 		this._disposables = [
 			this._teApi,
@@ -220,7 +202,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		if (this._initialized) {
 			throw new Error("TeWrapper is already initialized/ready");
 		}
-		this.log.methodStart("app wrapper init", 1, "", false, [
+		this.log.methodStart("app wrapper - init", 1, "", false, [
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
 		await this.storage.update(StorageKeys.Version, this._version);
@@ -245,7 +227,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// Context
 		//
 		this.registerContextMenuCommands();
-		await this._teContext.setContext(ContextKeys.Debugging, this.debugging);
+		await this._teContext.setContext(ContextKeys.Dev, this.dev);
 		await this._teContext.setContext(ContextKeys.Tests, this.tests);
         await this._teContext.setContext(ContextKeys.Enabled, this.utils.isTeEnabled());
 		this._disposables.push(
@@ -261,27 +243,32 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// we do it now and not wait until the view is first visible/focused/activated.
 		//
 		queueMicrotask(() => this.run());
-		this.log.methodDone("app wrapper init", 1);
+		this.log.methodDone("app wrapper - init", 1);
 	};
 
 
 	private run = async() =>
 	{
 		await utilities.sleep(1);
-		this.log.methodStart("app wrapper run", 1, "", true);
+		this.log.methodStart("app wrapper - run", 1, "", true);
+
 		//
 		// License / Authentication
 		//
 		// await this.storage.deleteSecret(StorageKeys.Account); // For testing
-		await this.licenseManager.checkLicense(undefined, "   ");
+		await this.licenseManager.checkLicense("   ");
 
 		//
 		// Maybe show the 'what's new' or 'welcome' page if the version has changed ot this is
 		// a new installation / first runtime.
 		//
+		this.log.write("   check version change / update", 2);
 		/* istanbul ignore next */
 		if (this.versionchanged)
 		{
+			this.log.write("   version has changed", 1);
+			this.log.value("      previous version", this._previousVersion, 1);
+			this.log.value("      new version", this._version, 1);
 			this._cacheBuster = getUuid();
 			await this._storage.update(StorageKeys.CacheBuster, this._cacheBuster);
 			promiseUtils.oneTimeEvent(this.onReady)(() =>
@@ -332,7 +319,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		/* istanbul ignore next */
 		if (this.env === "dev")
 		{
-			const account = await this._licenseManager.getAccount(),
+			const account = this._licenseManager.account,
 				  rPath = await this.pathUtils.getInstallPath() + "\\dist\\",
 				  taskUsage = this.storage.get<any>(StorageKeys.TaskUsage, {}),
 				  allData = { usage: this._usage.getAll(), taskUsage, account };
@@ -347,21 +334,22 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._treeManager.setMessage(); // clear status bar message
 
 		//
-		// Log the environment
-		//
-		this.log.methodDone("app wrapper run", 1, "", [
-			[ "machine id", env.machineId ], [ "session id", env.sessionId ], [ "app name", env.appName ],
-			[ "remote name", env.remoteName ], [ "is new ap install", env.isNewAppInstall ]
-		]);
-
-		//
 		// Signal that the startup work has completed.  `queueMicrotask` is interesting, I saw it
 		// in the GitLens extension code, seems to sneak into the scheduler between each standard
 		// scheduled task to run itself.  Might give a little boost on startup completion time when
 		// queueMicrotask CPU resources with other extensions when VSCode starts up., i.e. notably
 		// the f'ing Google Cloud Tools and Python interpreter.
 		//
+		this.log.write("   queue wrapper ready event", 2);
 		queueMicrotask(() => { this._ready = true; this._onReady.fire(); });
+
+		//
+		// Log the environment
+		//
+		this.log.methodDone("app wrapper - run", 1, "", [
+			[ "machine id", env.machineId ], [ "session id", env.sessionId ], [ "app name", env.appName ],
+			[ "remote name", env.remoteName ], [ "is new ap install", env.isNewAppInstall ]
+		]);
 	};
 
 
@@ -458,11 +446,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._teContext;
 	}
 
-	get debugging(): boolean {
+	get dev(): boolean {
 		return this._context.extensionMode === ExtensionMode.Development;
 	}
 
-	get env(): "dev" | "tests" | "production" {
+	get env(): TeRuntimeEnvironment {
 		const isDev = this._context.extensionMode === ExtensionMode.Development,
 			  isTests = this._context.extensionMode === ExtensionMode.Test;
 		/* istanbul ignore next */
@@ -497,12 +485,13 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._homeView;
 	}
 
-	get id(): string {
-		return this._context.extension.id;
-	}
-
 	get isNewInstall(): boolean {
 		return this.versionchanged && this._previousVersion === undefined;
+	}
+
+	get keys() {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		return { Storage: StorageKeys, Config: ConfigKeys, Strings, Globs };
 	}
 
 	get log(): ILog {
@@ -517,8 +506,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 	// 	return this._onInitialized.event;
 	// }
 
-	get onReady() {
+	get onReady(): Event<void> {
 		return this._onReady.event;
+	}
+
+	get production(): boolean {
+		return this._context.extensionMode === ExtensionMode.Production;
 	}
 
 	get providers(): IDictionary<ITaskExplorerProvider> {
@@ -625,7 +618,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._version !== this._previousVersion;
 	}
 
-    get views() {
+    get views(): { [id in "taskExplorer" | "taskExplorerSideBar"]: ITaskTreeView } {
         return this.treeManager.views;
     }
 

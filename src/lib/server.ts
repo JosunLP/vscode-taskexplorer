@@ -9,7 +9,7 @@ import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { env } from "vscode";
 
-const USE_LOCAL_SERVER = false;
+const USE_LOCAL_SERVER = true;
 
 export interface ServerError
 {
@@ -30,13 +30,14 @@ export class TeServer
 
     constructor(private readonly wrapper: TeWrapper)
 	{
-		// if (this.wrapper.env !== "production" && USE_LOCAL_SERVER)
-		// {   //
-		// 	// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
-		// 	// Justdisable TLS rejection when using localhost, no big deal.
-		// 	//
-		// 	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-		// }
+		/* istanbul ignore next */
+		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER)
+		{   //
+			// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
+			// Justdisable TLS rejection when using localhost, no big deal.
+			//
+			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+		}
 	}
 
 
@@ -46,9 +47,10 @@ export class TeServer
 
 	get apiClientId()
 	{
-		// if (this.wrapper.env !== "production" && USE_LOCAL_SERVER) {
-		// 	return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
-		// }
+		/* istanbul ignore next */
+		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER) {
+			return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
+		}
 		return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 	};
 
@@ -108,7 +110,7 @@ export class TeServer
 			// Timeout don't work worth a s***.  So do a promise race in request() for now.
 			//
 			timeout: server !== "localhost" ? 4000 : /* istanbul ignore next*/1250,
-			headers: {
+			headers: <{[id: string]: string}>{
 				"token": this.apiClientId,
 				"User-Agent": "vscode-taskexplorer",
 				"Content-Type": "application/json"
@@ -180,11 +182,11 @@ export class TeServer
 	};
 
 
-	request = async <T>(endpoint: ITeApiEndpoint, logPad: string, params: any) =>
+	request = async <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: any) =>
 	{
 		return Promise.race<T>(
 		[
-			this._request<T>(endpoint, logPad, params),
+			this._request<T>(endpoint, token, logPad, params),
 			new Promise<T>((_resolve, reject) => {
 				this._busy = false;
 				setTimeout(reject, this._maxConnectionTime, <ServerError>{ message: "Timed out", status: 408 });
@@ -193,7 +195,7 @@ export class TeServer
 	};
 
 
-    private _request = <T>(endpoint: ITeApiEndpoint, logPad: string, params: any): Promise<T> =>
+    private _request = <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: any): Promise<T> =>
 	{
 		this._busy = true;
 
@@ -201,7 +203,12 @@ export class TeServer
 		{
 			let rspData = "";
 			let errorState = false;
+
 			const options = this.getDefaultServerOptions(endpoint);
+			if (token) {
+				options.headers.authorization = "Bearer: " + token;
+			}
+
 			this.wrapper.log.methodStart("server request", 1, logPad, false, [
 				[ "host", options.hostname ], [ "port", options.port ], [ "endpoint", endpoint ]
 			]);
@@ -211,9 +218,9 @@ export class TeServer
 			const req = request(options, (res) =>
 			{
 				res.on("data", (chunk) => { rspData += chunk; });
-				res.on("end", async() =>
+				res.on("end", () =>
 				{
-					this.log("   response stream read");
+					this.log("   response stream read: eState: " + errorState);
 					try
 					{   if (!res.statusCode || res.statusCode > 299)
 						{
@@ -248,9 +255,12 @@ export class TeServer
 			});
 
 			const payload = JSON.stringify(
-				{ ...{ appName: this.authService, machineId: env.machineId, tests: this.wrapper.tests }, ...params }
-			);
-			this.log("   payload", logPad + "   ", payload);
+			{
+				...{ appName: this.authService, machineId: env.machineId, dev: this.wrapper.env === "dev", tests: this.wrapper.tests },
+				...params
+			});
+			// this.log("   payload", logPad + "   ", payload); // For testing only, logs machineId to user console
+
 			req.write(payload, () =>
             {
 				this.log("   request stream written", logPad);

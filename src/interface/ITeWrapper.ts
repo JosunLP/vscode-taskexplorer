@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import { ILog } from "./ILog";
 import { ITeUsage } from "./ITeUsage";
@@ -22,15 +23,24 @@ import {
 } from "./ITeUtilities";
 import { ITeStatusBar } from "./ITeStatusBar";
 
+export type TeRuntimeEnvironment = "dev" | "tests" | "production";
+
+interface ITeKeys
+{
+	Storage: any;
+	Config: any;
+	Strings: any;
+	Globs: any;
+}
 
 export interface ITeWrapper
 {
 	init(): Promise<void>;
 
+	dev: boolean;
+	production: boolean;
 	tests: boolean;
-	readonly debugging: boolean;
-	readonly env: "dev" | "tests" | "production";
-	readonly id: string;
+	readonly env: TeRuntimeEnvironment;
 	readonly busy: boolean;
 
 	api: ITaskExplorerApi;
@@ -46,6 +56,7 @@ export interface ITeWrapper
 	homeView: ITeWebview;
 	filecache: ITeFileCache;
 	fs: ITeFilesystem;
+	keys: ITeKeys;
 	licenseManager: ITeLicenseManager;
 	licensePage: ITeWebview;
 	log: ILog;
@@ -68,7 +79,7 @@ export interface ITeWrapper
 	typeUtils: ITeTypeUtilities;
 	usage: ITeUsage;
 	utils: ITeUtilities;
-	views: IDictionary<ITaskTreeView>;
+	views: { [id in "taskExplorer" | "taskExplorerSideBar"]: ITaskTreeView };
 	welcomePage: ITeWebview;
 	wsfolder: WorkspaceFolder;
 }

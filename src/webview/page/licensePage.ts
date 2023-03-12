@@ -43,7 +43,7 @@ export class LicensePage extends TeWebviewPanel<State>
 	private getExtraContent = async (newKey?: string) =>
 	{
 		const licMgr = this.wrapper.licenseManager;
-		const key = (await licMgr.getAccount()).license.key;
+		const key = licMgr.account.license.key;
 		const details = !newKey ?
 	(!licMgr.isLicensed ? `
 	<table class="margin-top-15">

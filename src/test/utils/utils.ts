@@ -7,14 +7,13 @@ import * as treeUtils from "./treeUtils";
 import { testControl } from "../control";
 import { deactivate } from "../../extension";
 import { startInput, stopInput } from "./input";
+import { StorageKeys } from "../../lib/constants";
 import { hasExplorerFocused } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
-import { ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseState, TeLicenseType } from "@spmeesseman/vscode-taskexplorer-types";
 import { commands, ConfigurationTarget, Disposable, env, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks, Uri, ViewColumn, window, workspace } from "vscode";
-import { StorageKeys } from "../../lib/constants";
-import { env as environment } from "process";
 
 
 const { symbols } = require("mocha/lib/reporters/base");
@@ -417,38 +416,27 @@ export type PromiseAdapter<T, U> = (
 ) => any;
 
 
+//
+// Bad a** function w/ credits to GitLens extension author
+//
 export const promiseFromEvent = <T, U>(event: Event<T>, adapter: PromiseAdapter<T, U> = passthrough): { promise: Promise<U>; cancel: EventEmitter<void> } =>
 {
     let subscription: Disposable;
     const cancel = new EventEmitter<void>();
-
     return {
         promise: new Promise<U>((resolve, reject) =>
         {
             cancel.event(_ => reject("Cancelled"));
             subscription = event((value: T) =>
             {
-                try
-                {
-                    Promise.resolve(adapter(value, resolve, reject))
-                        .catch(reject);
-                } catch (error)
-                {
-                    reject(error);
+                try {
+                    Promise.resolve(adapter(value, resolve, reject)).catch(reject);
                 }
+                catch (e) { reject(e); }
             });
-        }).then(
-            (result: U) =>
-            {
-                subscription.dispose();
-                return result;
-            },
-            error =>
-            {
-                subscription.dispose();
-                throw error;
-            }
-        ),
+        })
+        .then((result: U) => { subscription.dispose(); return result; },
+        error => { subscription.dispose(); throw error; }),
         cancel
     };
 };
@@ -462,73 +450,27 @@ export const setFailed = (ctrlc = true) =>
 };
 
 
-export const validLicenseKey = environment.VSCODE_TASKEXPLORER_TESTS_VALID_KEY as string;
-
-
-export const setLicensed = async (valid?: boolean, opts?: any) =>
+export const setLicenseType = async (type: TeLicenseType, clearNagDate?: boolean) =>
 {
-    const licMgr = teWrapper.licenseManager;
-    // let setMachineId = false;
-    let checkLicense = true;
-    if (typeof opts?.checkLicense  !== "undefined")  {
-        checkLicense = !!opts.checkLicense;
-        delete opts.checkLicense;
+    const licMgr = teWrapper.licenseManager,
+          account = await licMgr.getAccount();
+    account.license.type = type;
+    if (type === TeLicenseType.Free) {
+        account.license.state = TeLicenseState.Free;
     }
-
-    if (valid === undefined)
-    {
-        await teWrapper.storage.deleteSecret(StorageKeys.Account);
+    else if (type === TeLicenseType.None) {
+        account.license.state = TeLicenseState.Trial;
     }
-    else
-    {
-        if (opts && opts.machineId) {
-            licMgr.setTestData({ machineId: opts.machineId });
-            delete opts.machineId;
-            // setMachineId = true;
-        }
-
-        const account = await licMgr.getAccount();
-
-        await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(
-        { ...{
-            id: 52,
-            created: Date.now(),
-            email: "",
-            firstName: "",
-            lastName: "",
-            name: "",
-            orgId: 0,
-            trialId: 52,
-            verified: false,
-            verificationPending: false,
-            session: {
-                expires: valid ? Infinity : 0,
-                issued: Date.now(),
-                token: valid ? account.session.token : "",
-                scopes: [ "te-explorer", "te-sidebar", valid ? "te-monitor" : "te-monitor-free" ],
-            },
-            license: {
-                id: valid ? 6 : 0,
-                expired: !valid,
-                expires: valid ? Infinity : 0,
-                issued: Date.now(),
-                key: valid ? validLicenseKey : "",
-                paid: valid,
-                period: valid ? 0 : 2,
-                state: valid ? 2 : 1, // Paid : Free
-                type: valid ? 4 : 1   // Standard : Free
-            }
-        }, ...(opts || {}) }));
+    else if (type >= TeLicenseType.Standard) {
+        account.license.state = TeLicenseState.Paid;
     }
-
-    if (checkLicense !== false){
-        await licMgr.checkLicense(undefined, "");
+    else {
+        account.license.state = TeLicenseState.Trial;
     }
-    // if (setMachineId) {
-    //     licMgr.setTestData({
-    //         machineId: env.machineId
-    //     });
-    // }
+    if (clearNagDate === true) {
+        await teWrapper.storage.deleteSecret(StorageKeys.LastLicenseNag);
+    }
+    await teWrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(account));
 };
 
 

@@ -620,6 +620,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 this.wrapper.log.write(`   invalidation is for type '${invalidate}'`, 1, logPad);
                 this.currentInvalidation = invalidate; // 'invalidate' will be taskType if 'opt' is undefined or uri of add/remove resource
             }
+            else if (invalidate === false && opt === undefined) // rebuild tree only, tasks have not changed
+            {
+                this.wrapper.log.write("   no invalidation, rebuild tree only", 1, logPad);
+                this._treeBuilder.invalidate();
+                await this._treeBuilder.createTaskItemTree(logPad + "   ", 2);
+            }
             else //
             {   // Re-ask for all tasks from all providers and rebuild tree
                 //

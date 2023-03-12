@@ -1,13 +1,11 @@
 
 import { TeWrapper } from "./wrapper";
 import { ITeApiEndpoint } from "./server";
-import { StorageKeys } from "./constants";
-import { isScriptType } from "./utils/taskUtils";
 import { executeCommand, registerCommand, Commands } from "./command/command";
 import { Disposable, env, Event, EventEmitter, InputBoxOptions, window } from "vscode";
 import {
-	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeSession,
-	ITeTaskChangeEvent, ITeLicense, TeLicenseState, IDictionary
+	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
+	TeLicenseState, IDictionary, TeRuntimeEnvironment
 } from "../interface";
 
 
@@ -24,9 +22,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _maxFreeTasksForScriptType = 50;
 	private _checkLicenseTask: NodeJS.Timeout;
 	private readonly _disposables: Disposable[] = [];
-	private readonly _checkLicenseInterval = 1000 * 60 * 60 * 4; // 4 hr
 	private readonly _maxTaskTypeMsgShown: IDictionary<boolean> = {};
     private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
+	private readonly _sessionInterval = <{ [id in TeRuntimeEnvironment]: number}>{
+		production: 1000 * 60 * 60 * 24, // 24 hr
+		tests: 1000 * 60 * 60 * 24, // 24 hr
+		dev: 1000 * 60 * 10 // 5 min
+	};
 
 
 	constructor(private readonly wrapper: TeWrapper)
@@ -35,7 +37,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._account = this.getNewAccount();
 		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
 		// eslint-disable-next-line @typescript-eslint/tslint/config
-		this._checkLicenseTask = setInterval(this.checkLicense, this._checkLicenseInterval, "");
+		this._checkLicenseTask = setInterval(this.checkLicense, this.sessionInterval, "");
 		this._disposables.push(
 			this._onSessionChange,
 			// this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged),
@@ -52,6 +54,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._disposables.forEach((d) => d.dispose());
 	};
 
+
+	get account(): ITeAccount {
+		return this._account;
+	}
+
+	get sessionInterval(): number {
+		return this._sessionInterval[this.wrapper.env];
+	}
 
 	get isBusy(): boolean {
 		return this._busy;
@@ -80,7 +90,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad + "   ",
+			this._account = await this.wrapper.server.request<ITeAccount>(ep, undefined, logPad + "   ",
 			{
 				machineId: this._machineId
 			});
@@ -89,46 +99,53 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		}
 		catch (e) {
 			/* istanbul ignore next  */
-			this.handleServerError(e);
+			await this.handleServerError(e);
 		}
 		this.wrapper.log.methodDone("begin trial", 1, logPad);
 	};
 
 
-	checkLicense = async(statusMessage = "Checking license", logPad: string): Promise<void> =>
+	checkLicense = async(logPad: string): Promise<void> =>
 	{
 		this._busy = true;
 		this._account.errorState = false;
-		this.wrapper.statusBar.update(statusMessage);
+		this.wrapper.statusBar.update("Checking license");
 		this.wrapper.log.methodStart("license manager check license", 1, logPad);
 
-		this._account = await this.getAccount();
-
-		if (this._account.license.type !== TeLicenseType.None)
+		try
 		{
-			if (this._account.license.key && this._account.license.type !== TeLicenseType.Free)
+			this._account = await this.getStoredAccount();
+			this.logAccountFields(logPad + "   ");
+			if (this._account.license.type !== TeLicenseType.None)
 			{
-				if (this._account.session.expires + this._checkLicenseInterval >= Date.now() - 60000) {
-					await this.validateLicense(this._account.license.key, logPad + "   ");
+				if (this._account.license.key && this._account.license.type !== TeLicenseType.Free)
+				{
+					if (this._account.session.expires <= Date.now() + this.sessionInterval) {
+						await this.validateLicense(this._account.license.key, logPad + "   ");
+					}
+				}
+				else {
+					await this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", logPad + "   ");
 				}
 			}
 			else {
-				await this.displayPopup(undefined, logPad + "   ");
+				await this.beginTrial(logPad + "   ");
 			}
 		}
-		else {
-			await this.beginTrial(logPad + "   ");
+		finally  {
+			this._busy = false;
+			this.wrapper.statusBar.update("");
 		}
 
-		this._busy = false;
-		this.wrapper.statusBar.update("");
-		this.wrapper.log.methodDone("license manager check license", 1, logPad, [[ "is licensed", this.isLicensed ]]);
+		this.wrapper.log.methodDone("license manager check license", 1, logPad, [
+			[ "trial", this.isTrial ], [ "registered", this.isRegistered ], [ "licensed", this.isLicensed ]
+		]);
 	};
 
 
-	private displayPopup = async (message = "Purchase a license to unlock unlimited parsed tasks.", logPad: string): Promise<void> =>
+	private displayPopup = async (message: string, logPad: string): Promise<void> =>
 	{
-		const lastNag = this.wrapper.storage.get<string>(StorageKeys.LastLicenseNag);
+		const lastNag = this.wrapper.storage.get<string>(this.wrapper.keys.Storage.LastLicenseNag);
 		this.wrapper.log.methodStart("license manager display popup", 1, logPad, false, [[ "last nag", lastNag ]]);
 
 		//
@@ -149,7 +166,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			if (this._account.license.type !== TeLicenseType.TrialExtended && this._account.license.type !== TeLicenseType.Free) {
 				options.push("Extend Trial");
 			}
-			await this.wrapper.storage.update(StorageKeys.LastLicenseNag, Date.now().toString());
+			await this.wrapper.storage.update(this.wrapper.keys.Storage.LastLicenseNag, Date.now().toString());
 			const action = await window.showInformationMessage(message, ...options);
 			if (action === "Enter License Key")
 			{
@@ -201,9 +218,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private extendTrial = async(logPad: string): Promise<void> =>
 	{
-		const ep: ITeApiEndpoint = "register/trial/extend";
-		this._busy = true;
+		const ep: ITeApiEndpoint = "register/trial/extend",
+			  token = this._account.session.token;
 
+		this._busy = true;
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
 
 		if (this._account.license.period === 2)
@@ -227,7 +245,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, logPad,
+			this._account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad,
 			{
 				accountId: this._account.id,
 				email,
@@ -240,7 +258,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		}
 		catch (e) {
 			/* istanbul ignore next */
-			this.handleServerError(e);
+			await this.handleServerError(e);
 		}
 
 		this._busy = false;
@@ -284,31 +302,85 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	getAccount = (): Thenable<ITeAccount> =>
-		this.wrapper.storage.getSecret<ITeAccount>(StorageKeys.Account, this._account);
+	private getStoredAccount = (): Thenable<ITeAccount> =>
+		this.wrapper.storage.getSecret<ITeAccount>(this.wrapper.keys.Storage.Account, this._account);
 
 
 	getMaxNumberOfTasks = (taskType?: string): number =>
 		(this.isLicensed ? Infinity : (!taskType ? this._maxFreeTasks :
-						(isScriptType(taskType) ? this._maxFreeTasksForScriptType : this._maxFreeTasksForTaskType)));
+						(this.wrapper.taskUtils.isScriptType(taskType) ? this._maxFreeTasksForScriptType : this._maxFreeTasksForTaskType)));
 
 
 	getMaxNumberOfTaskFiles = (): number =>  (this.isLicensed ? Infinity : this._maxFreeTaskFiles);
 
 
-	private handleServerError = (e: any): void =>
+	private handleServerError = async(e: any): Promise<void> =>
 	{
 		/* istanbul ignore if  */
-		if (e instanceof Error) {
+		if (e instanceof Error)
+		{
 			this.wrapper.log.error(e);
+			this._account.errorState = true; // In error state, licensed mode is ON
 		}
-		else {
+		else //
+		{   // Possible Status Codes:
+			//
+			//     201  : Success
+			//     400  : Client Error (Invalid Parameters)
+			//     406  : License Key and/or Account Not Found
+			//     408  : Timeout
+			//     500  : Server Error
+			//
 			this.wrapper.log.value("response body", e.body, 2);
 			this.wrapper.log.error(e.message, [[ "status code", e.status ]]);
+			if (e.status === 406)
+			{
+				switch (e.message)
+				{
+					case "Invalid license key":
+						this._account.license.type = TeLicenseType.Free;
+						this._account.license.state = TeLicenseState.Free;
+						this._account.verified = false;
+						await this.saveAccount("   ");
+						break;
+					case "Missing account":
+						this._account.license.type = TeLicenseType.Free;
+						this._account.license.state = TeLicenseState.Free;
+						this._account.verified = false;
+						await this.saveAccount("   ");
+						break;
+					default:
+						this._account.errorState = true; // In error state, licensed mode is ON
+						break;
+				}
+			}
+			else {
+				this._account.errorState = true; // In error state, licensed mode is ON
+			}
 		}
-		this._account.errorState = true;
-		this.wrapper.statusBar.update("Error");
+
+		this.wrapper.statusBar.update("License validation error");
 		setTimeout(() => this.wrapper.statusBar.update(""), 1500);
+	};
+
+
+	private logAccountFields = (logPad: string) =>
+	{
+		const _l = (o: object, p: string) =>
+		{
+			Object.entries(o).forEach((e) =>
+			{
+				if (!this.wrapper.typeUtils.isObject(e[1])) {
+					this.wrapper.log.value(`   ${e[0]}`, !e[0].match(/(?:token|key|machine)/i) ? e[1] : "*****", 1, p);
+				}
+				else {
+					this.wrapper.log.write(`   ${e[0]} details:`,  1, p);
+					_l(e[1], p + "   ");
+				}
+			});
+		};
+		this.wrapper.log.write("Account details:",  1, logPad);
+		_l(this._account, logPad);
 	};
 
 
@@ -320,8 +392,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodOnce("license event", "on tasks changed", 1, "");
 		if (e.tasks.length > this.getMaxNumberOfTasks(e.task?.source)) {
 			this.setMaxTasksReached();
+			this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", "");
 		}
-		this.displayPopup(undefined, "");
 	};
 
 
@@ -355,7 +427,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				await this.wrapper.fs.writeFile(rPath, JSON.stringify(this._account, null, 3));
 			}
 		}
-		await this.wrapper.storage.updateSecret(StorageKeys.Account, JSON.stringify(this._account));
+		await this.wrapper.storage.updateSecret(this.wrapper.keys.Storage.Account, JSON.stringify(this._account));
 		this.onSessionChanged({ added: [ this._account.session ], removed: [], changed: [] });
 		this.wrapper.log.methodDone("save account", 1, logPad);
 	};
@@ -368,6 +440,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._maxFreeTaskFiles = data.maxFreeTaskFiles || this._maxFreeTaskFiles;
 		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;
 		this._maxFreeTasksForScriptType = data.maxFreeTasksForScriptType || this._maxFreeTasksForScriptType;
+		this._sessionInterval.tests = data.sessionInterval || (1000 * 60 * 60 * 24);
 		if (data.callTasksChanged) {
 			this.onTasksChanged(data.callTasksChanged);
 		}
@@ -392,11 +465,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private validateLicense = async(key: string, logPad: string): Promise<void> =>
 	{
-		const ep: ITeApiEndpoint = "license/validate";
+		const ep: ITeApiEndpoint = "license/validate",
+			  token = this._account.session.token;
 		this.wrapper.log.methodStart("validate license", 1, logPad);
 		try
 		{
-			this._account.session = await this.wrapper.server.request<ITeSession>(ep, logPad,
+			this._account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad,
 			{
 				key,
 				machineId: this._machineId
@@ -405,7 +479,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this.wrapper.statusBar.update("");
 		}
 		catch (e) {
-			this.handleServerError(e);
+			await this.handleServerError(e);
 		}
 		this.wrapper.log.methodDone("validate license", 1, logPad);
 	};
