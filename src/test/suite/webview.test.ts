@@ -96,7 +96,7 @@ suite("Webview Tests", () =>
     test("Task Count View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.focusChangeViews);
+        this.slow(tc.slowTime.commands.focusChangeViews * 3);
         await teWrapper.taskCountView.show();
         await promiseFromEvent(teWrapper.taskCountView.onReadyReceived).promise;
         await focusExplorerView(teWrapper);
@@ -119,7 +119,7 @@ suite("Webview Tests", () =>
 	test("Focus open Editors", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.commands.focusChangeViews * 4 + 250);
+		this.slow((tc.slowTime.commands.focusChangeViews * 4) + (tc.slowTime.webview.notify * 2) + 250 + (tc.slowTime.commands.standard * 3));
         const echoCmd = { method: "echo/fake", overwriteable: false };
 	    await teWrapper.parsingReportPage.show();
         await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;

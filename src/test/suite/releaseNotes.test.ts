@@ -38,8 +38,8 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReleaseNotes + 50);
-		void executeTeCommand("taskexplorer.view.releaseNotes.show", testControl.waitTime.viewParsingReport);
+		this.slow(testControl.slowTime.viewReleaseNotes);
+		void executeTeCommand("taskexplorer.view.releaseNotes.show", testControl.waitTime.viewWebviewPage);
         await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
         endRollingCount(this);
 	});
@@ -48,12 +48,12 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes (Error No Version)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReleaseNotes);
+		this.slow(testControl.slowTime.viewReleaseNotes + 50 + testControl.slowTime.closeEditors + testControl.slowTime.webview.notify);
 		await closeEditors();
 		const version = extension.packageJSON.version;
 		extension.packageJSON.version = "17.4444.0";
 		try {
-			await executeTeCommand("taskexplorer.view.releaseNotes.show", testControl.waitTime.viewParsingReport);
+			await executeTeCommand("taskexplorer.view.releaseNotes.show", testControl.waitTime.viewWebviewPage);
 			await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
 			await teWrapper.releaseNotesPage.notify({ method: "echo/fake" }, { command: "taskexplorer.view.parsingReport.show" }); // cover notify() when not visible
 			await sleep(25);

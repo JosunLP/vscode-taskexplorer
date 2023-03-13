@@ -52,7 +52,7 @@ suite("Info Report Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.config.showHideUserTasks + 150);
 		await executeSettingsUpdate("specialFolders.showUserTasks", false, testControl.waitTime.config.showHideUserTasks);
-		await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri ], testControl.waitTime.viewParsingReport);
+		await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri ], testControl.waitTime.viewWebviewPage);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -64,7 +64,7 @@ suite("Info Report Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.config.showHideUserTasks + 150);
 		await executeSettingsUpdate("specialFolders.showUserTasks", true, testControl.waitTime.config.showHideUserTasks);
-	    await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri, "", 5 ], testControl.waitTime.viewParsingReport);
+	    await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri, "", 5 ], testControl.waitTime.viewWebviewPage);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -75,7 +75,7 @@ suite("Info Report Tests", () =>
 	{
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewParsingReport + 150);
-	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewParsingReport);
+	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewWebviewPage);
 		await sleep(75);
 		await closeEditors();
         endRollingCount(this);
@@ -88,7 +88,7 @@ suite("Info Report Tests", () =>
 		this.slow(testControl.slowTime.viewParsingReport + (testControl.slowTime.config.enableEvent * 2) + 150);
         await teWrapper.config.updateVsWs("npm.packageManager", "yarn");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
-	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewParsingReport);
+	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewWebviewPage);
 		await sleep(75);
         await teWrapper.config.updateVsWs("npm.packageManager", pkgMgr);
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
@@ -105,7 +105,7 @@ suite("Info Report Tests", () =>
 		await sleep(10);
 		await teWrapper.licensePage.view?.webview.postMessage({ command: "showLicensePage" });
 		await sleep(500);
-		await executeTeCommand("taskexplorer.view.licensePage.show", testControl.waitTime.viewParsingReport);
+		await executeTeCommand("taskexplorer.view.licensePage.show", testControl.waitTime.viewWebviewPage);
 		await sleep(10);
 		await closeEditors();
         endRollingCount(this);

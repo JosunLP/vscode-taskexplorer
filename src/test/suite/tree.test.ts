@@ -490,7 +490,7 @@ suite("Tree Tests", () =>
     test("Reveal API", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.getTreeTasks * 2) + (tc.slowTime.revealTreeNode * 5) + 230);
+        this.slow((tc.slowTime.getTreeTasks * 2) + (tc.slowTime.revealTreeNode * 6) + 230);
         await utils.waitForTeIdle(50);
         const reveal = async() => {
             bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);

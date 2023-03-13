@@ -722,6 +722,7 @@ suite("Util Tests", () =>
     test("Storage", async function()
     {
         if (exitRollingCount(this)) return;
+		this.slow(275);
         if (teWrapper.storage)
         {
             await teWrapper.storage.update("TEST_KEY", "This is a test");

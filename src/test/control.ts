@@ -145,7 +145,8 @@ export const testControl =
         getTreeTasks: 205,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
-            page: 450,
+            checkLicense: 120,
+            page: 1100,
             getTrialExtension: 2175,
             getMaxTasks: 365,
             purchaseLicense: 1840,
@@ -176,10 +177,15 @@ export const testControl =
             verifyByTree: 425,
             verifyFirstCall: 550,
         },
-        viewReleaseNotes: 375,
+        viewHomeView: 495,
+        viewReleaseNotes: 650,
         viewTaskDetails: 415,
-        viewTaskMonitor: 2300,
+        viewTaskMonitor: 3025,
         viewParsingReport: 440,
+        viewTaskUsageView: 335,
+        webview: {
+            notify: 925
+        },
         wsFolder: {
             add: 1650,     // bumped for multi-root ws in utils/initSettings
             addEmpty: 1590,
@@ -241,7 +247,7 @@ export const testControl =
         reorderWorkspaceFolders: 100,
         runCommandMin: 425,
         taskCommand: 375,
-        viewParsingReport: 80,
+        viewWebviewPage: 80,
         viewTaskMonitor: 200
     },
 };

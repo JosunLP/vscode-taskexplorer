@@ -34,7 +34,7 @@ suite("Welcome Page Tests", () =>
 	{
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.viewReleaseNotes + 200);
-		await executeTeCommand("taskexplorer.view.welcome.show", testControl.waitTime.viewParsingReport);
+		await executeTeCommand("taskexplorer.view.welcome.show", testControl.waitTime.viewWebviewPage);
 		await sleep(75);
 		await teWrapper.welcomePage.show();
 		await sleep(5);

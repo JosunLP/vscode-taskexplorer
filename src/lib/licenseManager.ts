@@ -182,7 +182,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			const action = await window.showInformationMessage(message, ...options);
 			if (action === "Extend Trial")
 			{
-				void executeCommand(Commands.ExtendTrial);
+				await executeCommand(Commands.ExtendTrial);
 			}
 			else if (action === "Info")
 			{
@@ -402,7 +402,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		// TODO - Account registration
 		//        Need webview app to input first/last name, email address
 		//
-		window.showInformationMessage("Not implemented yet");
+		// window.showInformationMessage("Not implemented yet");
 	};
 
 
