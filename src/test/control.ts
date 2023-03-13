@@ -118,7 +118,7 @@ export const testControl =
             excludeTasksEvent: 2750,
             folderState: 800,
             globEvent: 1125,
-            groupingEvent: 990,
+            groupingEvent: 1025,
             pathToProgramsEvent: 710,
             readEvent: 25,
             shellChange: 1325,
@@ -126,6 +126,7 @@ export const testControl =
             showHideUserTasks: 975,
             sortingEvent: 815,
             terminalEvent: 250,
+            trackingEvent: 335
         },
         explorerViewStartup: 9500,
         fetchTasksCommand: 350,
@@ -146,8 +147,9 @@ export const testControl =
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
             checkLicense: 120,
-            page: 1100,
+            page: 1200,
             getTrialExtension: 2175,
+            getTrialExtensionDenied: 775,
             getMaxTasks: 365,
             purchaseLicense: 1840,
             validateLicense: 2175
@@ -180,7 +182,7 @@ export const testControl =
         viewHomeView: 495,
         viewReleaseNotes: 650,
         viewTaskDetails: 415,
-        viewTaskMonitor: 3025,
+        viewTaskMonitor: 3150,
         viewParsingReport: 440,
         viewTaskUsageView: 335,
         webview: {

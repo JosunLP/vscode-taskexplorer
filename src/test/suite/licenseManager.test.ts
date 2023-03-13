@@ -195,10 +195,9 @@ suite("License Manager Tests", () =>
 	test("Open License Page w/ No License Key", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors + tc.slowTime.licenseMgr.checkLicense + 50);
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors + tc.slowTime.licenseMgr.checkLicense);
 		void teWrapper.licensePage.show();
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
-		await utils.sleep(25);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -207,13 +206,12 @@ suite("License Manager Tests", () =>
 	test("License Nag - Info", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.checkLicense + 50);
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.checkLicense);
 		await setNag();
 		utils.clearOverrideShowInfoBox();
 		utils.overrideNextShowInfoBox("Info");
 		void licMgr.checkLicense("");
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
-		await utils.sleep(25);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -279,7 +277,7 @@ suite("License Manager Tests", () =>
 	test("Re-request a Trial Extension (Deny)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.commands.standard);
+		this.slow(tc.slowTime.licenseMgr.getTrialExtensionDenied);
 		utils.overrideNextShowInfoBox(undefined);
 		await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
         utils.endRollingCount(this);

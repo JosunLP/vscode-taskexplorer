@@ -386,7 +386,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		}
 		if (this._view.webview.html === html) {
 			this._isReady = true;
-			this._onReadyReceived.fire();
+			queueMicrotask(() => this._onReadyReceived.fire());
 		}
 		else {
 			this._view.webview.html = html;

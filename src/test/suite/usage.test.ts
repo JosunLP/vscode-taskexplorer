@@ -49,7 +49,7 @@ suite("Usage / Telemetry Tests", () =>
     test("Set Usage Off / On", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.event * 7) + 20);
+        this.slow((tc.slowTime.config.trackingEvent * 7) + 20);
         await executeSettingsUpdate(ConfigKeys.AllowUsageReporting, true);
         await executeSettingsUpdate(ConfigKeys.AllowUsageReporting, false);
         await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);

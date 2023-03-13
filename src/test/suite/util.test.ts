@@ -242,7 +242,7 @@ suite("Util Tests", () =>
 
 	test("Logging (Queue)", async function()
     {
-		this.slow((testControl.slowTime.config.event * 2) + 50);
+		this.slow((testControl.slowTime.config.event * 2) + 75);
 
         if (exitRollingCount(this)) return;
 		teWrapper.log.dequeue("queueTestId");
@@ -722,7 +722,7 @@ suite("Util Tests", () =>
     test("Storage", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(275);
+		this.slow(300);
         if (teWrapper.storage)
         {
             await teWrapper.storage.update("TEST_KEY", "This is a test");
