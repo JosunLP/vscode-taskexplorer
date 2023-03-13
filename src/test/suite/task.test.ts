@@ -6,7 +6,6 @@
 import { expect } from "chai";
 import { TaskExecution } from "vscode";
 import * as utils from "../utils/utils";
-import { ConfigKeys } from "../../lib/constants";
 import {ITaskItem, ITeWrapper, ITaskFolder } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusExplorerView, focusSearchView } from "../utils/commandUtils";
 
@@ -31,10 +30,10 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this, true)) return;
         ({ teWrapper } = await utils.activate(this));
-        clickAction = teWrapper.config.get<string>(ConfigKeys.TaskButtons.ClickAction);
-        oNumLastTasks = teWrapper.config.get<number>(ConfigKeys.SpecialFolders.NumLastTasks);
-        await executeSettingsUpdate(ConfigKeys.SpecialFolders.NumLastTasks, 3);
-        await executeSettingsUpdate(ConfigKeys.SpecialFolders.ShowLastTasks, true);
+        clickAction = teWrapper.config.get<string>(teWrapper.keys.Config.TaskButtons.ClickAction);
+        oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFolders.NumLastTasks);
+        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFolders.NumLastTasks, 3);
+        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFolders.ShowLastTasks, true);
         utils.endRollingCount(this, true);
     });
 
@@ -42,8 +41,8 @@ suite("Task Tests", () =>
     suiteTeardown(async function()
     {
         if (utils.exitRollingCount(this, false, true)) return;
-        await executeSettingsUpdate(ConfigKeys.SpecialFolders.NumLastTasks, oNumLastTasks);
-        await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, clickAction);
+        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFolders.NumLastTasks, oNumLastTasks);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtons.ClickAction, clickAction);
 		await utils.closeEditors(); // close task monitor from previous test suite
         utils.suiteFinished(this);
     });
@@ -91,7 +90,7 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.event + (tc.slowTime.commands.run * 2) + tc.slowTime.commands.runStop + tc.slowTime.commands.runPause + 3000);
-        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.KeepTerminalOnTaskDone, false);
         let exec = await executeTeCommand2<TaskExecution | undefined>("run", [ batch[0] ], tc.waitTime.runCommandMin);
         expect(exec).to.not.be.equal(undefined, "Starting the 'batch0' task did not return a valid TaskExecution");
         await utils.waitForTaskExecution(exec, 1750);
@@ -140,7 +139,7 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runStop + tc.slowTime.config.event + 5000);
-        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.KeepTerminalOnTaskDone, true);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ batch[0] ], tc.waitTime.runCommandMin) ;
         expect(exec).to.not.be.equal(undefined, "Starting the 'batch0' task did not return a valid TaskExecution");
         await utils.waitForTaskExecution(exec, 1500);
@@ -190,7 +189,7 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runPause + tc.slowTime.commands.runStop + tc.slowTime.config.event + 5600);
-        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.KeepTerminalOnTaskDone, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ batch[0] ], tc.waitTime.runCommandMin) ;
         await utils.waitForTaskExecution(exec, 2000);
         await utils.waitForTeIdle(tc.waitTime.runCommandMin);
@@ -228,7 +227,7 @@ suite("Task Tests", () =>
         await executeSettingsUpdate("pathToPrograms.ansicon", utils.getWsPath("..\\tools\\ansicon\\x64\\ansicon.exe"), tc.waitTime.config.enableEvent);
         utils.overrideNextShowInfoBox(undefined);
         await executeSettingsUpdate("enableAnsiconForAnt", true, tc.waitTime.config.enableEvent);
-        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
         await startTask(antTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin) ;
         await utils.sleep(100);
@@ -237,7 +236,7 @@ suite("Task Tests", () =>
         teWrapper.treeManager.runningTasks; // access the getter while there's an actual running task for coverage
         await focusSearchView(); // randomly show/hide view to test refresh event queue in tree/tree.ts
         await utils.waitForTaskExecution(exec);
-        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
         lastTask = antTask;
         utils.endRollingCount(this);
     });
@@ -248,7 +247,7 @@ suite("Task Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow((tc.slowTime.config.event * 2) + tc.slowTime.commands.run + tc.slowTime.tasks.antTask);
         await executeSettingsUpdate("enableAnsiconForAnt", false, tc.waitTime.config.enableEvent);
-        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.KeepTerminalOnTaskDone, true);
         await executeTeCommand2("setPinned", [ bash[0], "last" ]) ;
         await executeTeCommand2("setPinned", [ antTask, "last" ]) ;
         await startTask(antTask, false);
@@ -269,7 +268,7 @@ suite("Task Tests", () =>
         await focusExplorerView(teWrapper); // randomly show/hide view to test refresh event queue in tree/tree.ts
         const batchTask = batch[0];
         await startTask(batchTask, true);
-        await executeSettingsUpdate(ConfigKeys.KeepTerminalOnTaskDone, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.KeepTerminalOnTaskDone, false);
         await executeSettingsUpdate("visual.disableAnimatedIcons", false);
         await executeSettingsUpdate("specialFolders.showLastTasks", false);
         //
@@ -284,7 +283,7 @@ suite("Task Tests", () =>
         //
         // Open task file
         //
-        await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, "Open");
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtons.ClickAction, "Open");
         await executeTeCommand2("open", [ batchTask ], tc.waitTime.command);
         await utils.closeEditors();
         //
@@ -324,7 +323,7 @@ suite("Task Tests", () =>
         const batchTask = batch[1];
         await startTask(batchTask, true);
         await executeSettingsUpdate("visual.disableAnimatedIcons", true);
-        await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, "Execute");
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtons.ClickAction, "Execute");
         await executeSettingsUpdate("specialFolders.showLastTasks", true);
         await executeTeCommand2("setPinned", [ antTask, "last" ]) ;
         await executeTeCommand2("setPinned", [ batchTask, "last" ]) ;
@@ -409,7 +408,7 @@ async function startTask(taskItem: ITaskItem, addToSpecial: boolean)
     }
     if (addToSpecial)
     {
-        await executeSettingsUpdate(ConfigKeys.TaskButtons.ClickAction, "Execute");
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtons.ClickAction, "Execute");
         let removed = await executeTeCommand2("addRemoveFavorite", [ taskItem ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ taskItem ]);

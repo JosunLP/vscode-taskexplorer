@@ -98,6 +98,9 @@ const createDefaultSettings = async() =>
         "taskexplorer.showRunningTask": true,
         "taskexplorer.useGulp": false,
         "taskexplorer.useAnt": false,
+        "taskexplorer.taskMonitor.timerMode": "MM:SS:MS",
+        "taskexplorer.taskMonitor.trackStats": true,
+        "taskexplorer.trackUsage": true
     };
 };
 

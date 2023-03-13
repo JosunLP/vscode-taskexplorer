@@ -5,7 +5,7 @@
 import { expect } from "chai";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand2, focusFileExplorer, focusSidebarView } from "../utils/commandUtils";
-import { activate, closeEditors, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc } from "../utils/utils";
+import { activate, closeEditors, endRollingCount, exitRollingCount, promiseFromEvent, sleep, suiteFinished, testControl as tc } from "../utils/utils";
 
 
 let teWrapper: ITeWrapper;
@@ -58,8 +58,9 @@ suite("Initialization", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.refresh);
-        await focusSidebarView();
-        await sleep(50);
+        void focusSidebarView();
+        await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
+        await sleep(5);
         teWrapper.homeView.title = teWrapper.homeView.title;
         endRollingCount(this);
     });
