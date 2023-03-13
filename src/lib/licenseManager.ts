@@ -135,6 +135,9 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 					if (this._account.session.expires <= Date.now() + this.sessionInterval) {
 						await this.validateLicense(this._account.license.key, logPad + "   ");
 					}
+					else {
+						await this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", logPad + "   ");
+					}
 				}
 				else {
 					await this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", logPad + "   ");
@@ -175,7 +178,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		if (displayPopup)
 		{
 			const options = [ "Info", "Not Now" ];
-			if (this._account.license.type !== TeLicenseType.TrialExtended && this._account.license.type !== TeLicenseType.Free) {
+			if (this._account.license.type !== TeLicenseType.TrialExtended) {
 				options.push("Extend Trial");
 			}
 			await this.wrapper.storage.update(this.wrapper.keys.Storage.LastLicenseNag, Date.now().toString());
@@ -202,10 +205,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._busy = true;
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
 
-		if (this._account.license.period === 2)
+		if (this._account.license.period > 1)
 		{
 			const msg = "an extended trial license has already been allocated to this machine";
-			window.showWarningMessage("Can't proceed - " + msg);
+			window.showInformationMessage("Can't proceed - " + msg);
 			this.wrapper.log.write("   " + msg, 1, logPad);
 			this.wrapper.log.methodDone("request extended trial", 1, logPad);
 			this._busy = false;
@@ -237,9 +240,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			/* istanbul ignore next */
 			await this.handleServerError(e);
 		}
-
-		this._busy = false;
-		this.wrapper.statusBar.update("");
+		finally {
+			this._busy = false;
+			this.wrapper.statusBar.update("");
+		}
 		this.wrapper.log.methodDone("request extended trial", 1, logPad);
 	};
 
@@ -325,7 +329,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 						await this.saveAccount("   ");
 						this._account.verified = false;
 						break;
-					case "Account trial cannot be extended": // 402
+					// case "Account trial cannot be extended": // 402
 					case "Invalid license key":              // 406
 						this._account.license.type = TeLicenseType.Free;
 						this._account.license.state = TeLicenseState.Free;
@@ -333,8 +337,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 						break;
 					// case "Error - could not update trial":
 					// case "Invalid request parameters":
-					default:
-						break;
 				}
 			}
 			else {

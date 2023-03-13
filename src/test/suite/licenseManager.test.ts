@@ -124,10 +124,18 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Validate License", async function()
+	test("Validate License (Refresh Token Needed)", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
         await validateLicense(this, true, true);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Validate License (No Refresh Token Needed)", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+        await validateLicense(this, true, true, 1);
         utils.endRollingCount(this);
 	});
 
@@ -187,9 +195,10 @@ suite("License Manager Tests", () =>
 	test("Open License Page w/ No License Key", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors);
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors + tc.slowTime.licenseMgr.checkLicense + 50);
 		void teWrapper.licensePage.show();
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
+		await utils.sleep(25);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -198,12 +207,13 @@ suite("License Manager Tests", () =>
 	test("License Nag - Info", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors);
+		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.checkLicense + 50);
 		await setNag();
 		utils.clearOverrideShowInfoBox();
 		utils.overrideNextShowInfoBox("Info");
 		void licMgr.checkLicense("");
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
+		await utils.sleep(25);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -270,7 +280,19 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.standard);
+		utils.overrideNextShowInfoBox(undefined);
 		await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
+        utils.endRollingCount(this);
+	});
+
+
+	test("License Nag w/ Current Extended Trial", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		await setNag();
+		utils.clearOverrideShowInfoBox();
+		utils.overrideNextShowInfoBox(undefined);
+		await licMgr.checkLicense("");
         utils.endRollingCount(this);
 	});
 
@@ -487,13 +509,13 @@ const setNag = (v?: number) => teWrapper.storage.update(teWrapper.keys.Storage.L
 
 const setTasks = (e: any) => { licMgr.setTestData({ callTasksChanged: e }); };
 
-const validateLicense = async (instance: Mocha.Context, expectNow: boolean, expectAfter: boolean) =>
+const validateLicense = async (instance: Mocha.Context, expectNow: boolean, expectAfter: boolean, intervalHrs = 48) =>
 {
 	instance.slow(tc.slowTime.licenseMgr.validateLicense);
 	expect(licMgr.isLicensed).to.be.equal(expectNow);
 	expect(licMgr.isTrial).to.be.equal(expectNow);
 	try {
-		licMgr.setTestData({ sessionInterval: 1000 * 60 * 60 * 48 });
+		licMgr.setTestData({ sessionInterval: 1000 * 60 * 60 * intervalHrs });
 		await licMgr.checkLicense("");
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
 	} catch {}

@@ -33,7 +33,7 @@ suite("Task Tests", () =>
         ({ teWrapper } = await utils.activate(this));
         clickAction = teWrapper.config.get<string>(ConfigKeys.TaskButtons.ClickAction);
         oNumLastTasks = teWrapper.config.get<number>(ConfigKeys.SpecialFolders.NumLastTasks);
-        await executeSettingsUpdate(ConfigKeys.SpecialFolders.NumLastTasks, 1);
+        await executeSettingsUpdate(ConfigKeys.SpecialFolders.NumLastTasks, 3);
         await executeSettingsUpdate(ConfigKeys.SpecialFolders.ShowLastTasks, true);
         utils.endRollingCount(this, true);
     });
