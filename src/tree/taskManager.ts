@@ -409,13 +409,13 @@ export class TaskManager implements ITeTaskManager, Disposable
 	};
 
 
-    private showTaskDetailsPage = async (taskItem: TaskItem | ITeTask): Promise<void> =>
+    private showTaskDetailsPage = (taskItem: TaskItem | ITeTask): Promise<TaskDetailsPage> =>
     {
         const iTask = taskItem instanceof TaskItem ?
                       this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], "all")[0] : taskItem,
               taskDetailsPage = new TaskDetailsPage(this.wrapper, iTask);
         this._disposables.push(taskDetailsPage);
-        await taskDetailsPage.show();
+        return taskDetailsPage.show();
     };
 
 

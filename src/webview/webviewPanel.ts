@@ -9,10 +9,7 @@
  */
 
 import { TeWrapper } from "../lib/wrapper";
-import { sleep } from "../lib/utils/utils";
-import { ConfigKeys } from "../lib/constants";
 import { TeWebviewBase } from "./webviewBase";
-import { isObject } from "../lib/utils/typeUtils";
 import { IpcEnabledChangedMsg } from "./common/ipc";
 import { ContextKeys, WebviewIds } from "../lib/context";
 import { Commands, registerCommand } from "../lib/command/command";
@@ -51,7 +48,6 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		);
 	}
 
-
 	override dispose()
 	{
 		this._disposablePanel?.dispose();
@@ -81,7 +77,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	private async onConfigChangedBase(e: ConfigurationChangeEvent)
 	{
-		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.EnableExplorerTree, ConfigKeys.EnableSideBar))
+		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.EnableExplorerTree, this.wrapper.keys.Config.EnableSideBar))
 		{
 			const enabled = this.wrapper.utils.isTeEnabled();
 			if (enabled !== this._teEnabled)
@@ -164,14 +160,14 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	async show(options?: { column?: ViewColumn; preserveFocus?: boolean }, ...args: any[])
 	{
 		while (this.wrapper.busy) {
-			await sleep(100);
+			await this.wrapper.utils.sleep(100);
 		}
 		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
 
 		const column = options?.column ?? ViewColumn.One;
 		if (!this._view)
 		{
-			if (args.length === 2 && isObject(args[0]) && args[0].webview)
+			if (args.length === 2 && this.wrapper.typeUtils.isObject(args[0]) && args[0].webview)
 			{
 				this._view = args[0] as WebviewPanel;
 				// State = args[1],.... Not using VSCode provided state yet...

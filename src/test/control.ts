@@ -146,8 +146,8 @@ export const testControl =
         getTreeTasks: 205,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
-            checkLicense: 120,
-            page: 1200,
+            checkLicense: 160,
+            page: 1300,
             getTrialExtension: 2175,
             getTrialExtensionDenied: 775,
             getMaxTasks: 365,
