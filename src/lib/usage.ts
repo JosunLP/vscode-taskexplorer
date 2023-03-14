@@ -532,7 +532,7 @@ export class Usage implements ITeUsage, Disposable
         //
         taskRtStats.runtimes.slice().reverse().forEach((rt, index, object) =>
         {
-            /* istanbul ignore if */
+            /* istanbul ignore next */
             if (!rt.start || !rt.end)
             {
                 taskRtStats.runtimes.splice(object.length - 1 - index, 1);
@@ -541,9 +541,8 @@ export class Usage implements ITeUsage, Disposable
             // TODO - Add setting for # of days to keep stored stats, and clean runtimes array here
             //
             const keepStatsForDays = 0; // this.wrapper.config.get<boolean>(this.wrapper.keys.Config.);
-            /* istanbul ignore if */
-            if (keepStatsForDays > 0 && rt.end < now - (1000 * 60 * 60 * (keepStatsForDays * 24))) {
-            }
+            /* istanbul ignore next */
+            if (keepStatsForDays > 0 && rt.end < now - (1000 * 60 * 60 * (keepStatsForDays * 24))) {}
         });
         //
         // Remove the temp runtime start time from the startTime dictionary
