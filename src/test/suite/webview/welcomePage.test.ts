@@ -1,10 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { startupFocus } from "../utils/suiteUtils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { closeTeWebview, executeSettingsUpdate, showTeWebview } from "../utils/commandUtils";
-import { activate, testControl as tc, suiteFinished, exitRollingCount, endRollingCount } from "../utils/utils";
+import { closeTeWebview, executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
+import { activate, testControl as tc, suiteFinished, exitRollingCount, endRollingCount } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
 

@@ -99,7 +99,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 3920,
+            focusSideBarFirstTime: 3950,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,

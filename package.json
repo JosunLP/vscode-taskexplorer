@@ -95,7 +95,7 @@
         "test-single-sws-grunt": "npm run test-default_build && node ./dist/test/runTest.js grunt xDeactivate",
         "test-single-sws-gulp": "npm run test-default_build && node ./dist/test/runTest.js gulp xDeactivate",
         "test-single-sws-jenkins": "npm run test-default_build && node ./dist/test/runTest.js jenkins xDeactivate",
-        "test-single-sws-infopage": "npm run test-default_build && node ./dist/test/runTest.js infoPage xDeactivate",
+        "test-single-sws-parsingReport": "npm run test-default_build && node ./dist/test/runTest.js parsingReport xDeactivate",
         "test-single-sws-init": "npm run test-default_build && node ./dist/test/runTest.js _init xDeactivate",
         "test-single-sws-licensemgr": "npm run test-default_build && node ./dist/test/runTest.js licenseManager xDeactivate",
         "test-single-sws-makefile": "npm run test-default_build && node ./dist/test/runTest.js makefile xDeactivate",

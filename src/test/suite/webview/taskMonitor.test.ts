@@ -2,14 +2,16 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { Task, TaskExecution } from "vscode";
-import { startupFocus } from "../utils/suiteUtils";
+import { refresh } from "../../utils/treeUtils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { echoWebviewCommand, executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
+import {
+	echoWebviewCommand, executeSettingsUpdate, executeTeCommand, executeTeCommand2
+} from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount,
-	promiseFromEvent, waitForTaskExecution, treeUtils, waitForTeIdle
-} from "../utils/utils";
-import { refresh } from "../utils/treeUtils";
+	promiseFromEvent, waitForTaskExecution, treeUtils
+} from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
 let ant: ITaskItem[];

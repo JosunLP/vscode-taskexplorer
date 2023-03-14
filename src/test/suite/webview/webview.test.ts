@@ -5,12 +5,15 @@
 
 import { expect } from "chai";
 import { commands, Uri } from "vscode";
-import { startupFocus } from "../utils/suiteUtils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, executeTeCommand, focusExplorerView, focusSidebarView, showTeWebview } from "../utils/commandUtils";
 import {
-    activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep, suiteFinished, testControl as tc, waitForTeIdle
-} from "../utils/utils";
+    executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview
+} from "../../utils/commandUtils";
+import {
+    activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent,
+    sleep, suiteFinished, testControl as tc
+} from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
 

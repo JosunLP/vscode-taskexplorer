@@ -2,13 +2,13 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { Uri, WebviewPanel } from "vscode";
-import { startupFocus } from "../utils/suiteUtils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, showTeWebview } from "../utils/commandUtils";
+import { executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl, suiteFinished, sleep, getWsPath, exitRollingCount,
 	waitForTeIdle, endRollingCount, createwebviewForRevive
-} from "../utils/utils";
+} from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
 let projectUri: Uri;
@@ -16,7 +16,7 @@ let userTasks: boolean;
 let pkgMgr: string;
 
 
-suite("Info Report Tests", () =>
+suite("Parsing Report Tests", () =>
 {
 	suiteSetup(async function()
     {
