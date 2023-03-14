@@ -194,8 +194,8 @@ export const testControl =
                     releaseNotes: 1760,
                     taskDetails: 1825,
                     taskMonitor: 3150,
-                    parsingReport: 1825,
-                    welcome: 1400
+                    parsingReport: 1925,
+                    welcome: 1800
                 }
             }
         },
