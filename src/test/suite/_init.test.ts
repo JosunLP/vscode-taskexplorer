@@ -32,7 +32,7 @@ suite("Initialization", () =>
     test("Show/Hide Output Window", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.commands.showOutput * 3) + 100);
+        this.slow(tc.slowTime.commands.showOutput * 3);
         await executeTeCommand2("showOutput", [ true ]);
         await executeTeCommand2("showOutput", [ false ]);
         await executeTeCommand2("showOutput", [ tc.log.enabled && tc.log.output ]);
@@ -55,10 +55,9 @@ suite("Initialization", () =>
     test("Focus SideBar View Tree", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.refresh);
+        this.slow(tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.show.view.home);
         void focusSidebarView();
         await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
-        await sleep(5);
         teWrapper.homeView.title = teWrapper.homeView.title;
         endRollingCount(this);
     });
@@ -116,7 +115,6 @@ suite("Initialization", () =>
         expect(teWrapper.views.taskExplorerSideBar.enabled).to.be.equal(true);
         endRollingCount(this);
     });
-
 
 
     test("Re-enable Explorer View", async function()

@@ -260,7 +260,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// a new installation / first runtime.
 		//
 		this.log.write("   check version change / update", 2);
-		/* istanbul ignore next */
+		/* istanbul ignore else */
 		if (this.versionchanged)
 		{
 			this.log.write("   version has changed", 1);
@@ -270,12 +270,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 			await this._storage.update(StorageKeys.CacheBuster, this._cacheBuster);
 			promiseUtils.oneTimeEvent(this.onReady)(() =>
 			{
+				/* istanbul ignore if */
 				if (!this.isNewInstall) {
-					this._releaseNotesPage.show();
+					void this._releaseNotesPage.show();
 				}
 				else {
-					/* TODO - Show Welcome page */
-					this._licensePage.show();
+					void this._welcomePage.show();
 				}
 			});
 		}

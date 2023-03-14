@@ -175,13 +175,14 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
 
     getParent(element: TreeItem): TreeItem | null
     {
-        if (element instanceof TaskItem)
+        const e = (<any>element);
+        if (e.taskFile) // (element instanceof TaskItem)
         {
-            return element.taskFile;
+            return e.taskFile as TaskItem;
         }
-        else if (element instanceof TaskFile)
+        else if (e.folder) // (element instanceof TaskFile)
         {
-            return element.folder;
+            return e.folder as TaskFolder;
         }
         return null;
     }

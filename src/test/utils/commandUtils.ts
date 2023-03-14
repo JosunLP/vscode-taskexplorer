@@ -6,6 +6,7 @@ import { waitForTeIdle, testControl as tc, teWrapper, sleep, promiseFromEvent } 
 import { ITeWebview, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 let explorerHasFocused = false;
+const wvShown: string[] = [];
 
 
 export const echoWebviewCommand = async(command: string, teWebview: ITeWebview, waitForServer?: boolean) =>
@@ -90,4 +91,7 @@ export const showTeWebview = async(teView: ITeWebview, ...args: any[]) =>
     void teView.show(undefined, ...args);
     await promiseFromEvent(teView.onReadyReceived).promise;
     expect(teView.visible).to.be.equal(true);
+    if (!wvShown.includes(teView.title)) wvShown.push(teView.title);
 };
+
+// export const showTeWebviewTimeout = (teView: ITeWebview, baseTimeout: number) => baseTimeout + (wvShown.includes(teView.title) ? 0 : 400);

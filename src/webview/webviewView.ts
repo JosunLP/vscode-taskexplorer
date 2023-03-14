@@ -88,8 +88,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 			this._view.webview.onDidReceiveMessage(this.onMessageReceivedBase, this),
 			window.onDidChangeWindowState(this.onWindowStateChanged, this),
 			...(this.onInitializing?.() ?? []),
-			...(this.registerCommands?.() ?? []),
-			registerCommand(`${this.id}.refresh`, () => this.refresh(), this)
+			...(this.registerCommands?.() ?? [])
 		);
 
 		await this.refresh();

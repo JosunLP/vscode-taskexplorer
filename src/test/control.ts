@@ -92,13 +92,13 @@ export const testControl =
             rebuildNoChanges: 880,
         },
         cleanup: 475,
-        closeEditors: 15,
+        closeEditors: 25,
         commands: {
             exclude: 1350,
             fast: 250,
             focus: 2330,
             focusAlreadyFocused: 375,
-            focusChangeViews: 775,
+            focusChangeViews: 795,
             refresh: 6250,
             refreshNoChanges: 310,
             run: 4750,
@@ -182,9 +182,10 @@ export const testControl =
         },
         webview: {
             notify: 955,
+            notifyFakeCommand: 1075,
             show: {
                 view: {
-                    home: 1950,
+                    home: 2040,
                     taskCount: 825,
                     taskUsage: 775
                 },
@@ -192,8 +193,8 @@ export const testControl =
                     releaseNotes: 760,
                     taskDetails: 415,
                     taskMonitor: 3150,
-                    parsingReport: 1525,
-                    welcome: 600
+                    parsingReport: 1825,
+                    welcome: 400
                 }
             }
         },

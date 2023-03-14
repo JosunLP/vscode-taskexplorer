@@ -27,4 +27,7 @@ export class WelcomePage extends TeWebviewPanel<State>
 		this.ignoreTeBusy = true;
 	}
 
+
+	protected override includeBootstrap = (): Promise<State> => this.getState();
+
 }
