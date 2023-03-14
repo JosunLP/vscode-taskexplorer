@@ -4,7 +4,7 @@ import { request } from "https";
 import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
-import { env } from "vscode";
+import { Disposable, env, Event, EventEmitter } from "vscode";
 
 const USE_LOCAL_SERVER = false;
 
@@ -19,14 +19,16 @@ export interface ServerError
 export type ITeApiEndpoint = "license/validate" | "license/payment" | "login" | "register" | "register/trial/start" | "register/trial/extend";
 
 
-export class TeServer
+export class TeServer implements Disposable
 {
 	private _busy = false;
 	private readonly _maxConnectionTime = 7500;
+    private readonly _onRequestComplete: EventEmitter<void>;
 
 
     constructor(private readonly wrapper: TeWrapper)
 	{
+		this._onRequestComplete = new EventEmitter<void>();
 		/* istanbul ignore next */
 		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER)
 		{   //
@@ -36,6 +38,8 @@ export class TeServer
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 		}
 	}
+
+	dispose = () => this._onRequestComplete.dispose();
 
 
 	get isBusy() {
@@ -89,6 +93,10 @@ export class TeServer
 				return "vscode-taskexplorer-prod";
 		}
 	};
+
+    get onDidRequestComplete(): Event<void> {
+        return this._onRequestComplete.event;
+    }
 
 
 	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
@@ -240,7 +248,7 @@ export class TeServer
 						reject(<ServerError>{ message: e.message, status: res.statusCode, body: rspData });
 					}
 					finally {
-						this._busy = false;
+						queueMicrotask(() => { this._busy = false; this._onRequestComplete.fire(); });
 					}
 				});
 			});
@@ -249,8 +257,8 @@ export class TeServer
 			req.on("error", (e) =>
 			{   // Not going to fail unless i birth a bug
 				this.onServerError(e, logPad);
-				this._busy = false;
 				errorState = true;
+				queueMicrotask(() => { this._busy = false; this._onRequestComplete.fire(); });
 				reject(e);
 			});
 

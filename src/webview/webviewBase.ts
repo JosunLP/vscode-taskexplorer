@@ -382,19 +382,19 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	protected async refresh(force?: boolean, ...args: unknown[]): Promise<void>
     {
-		if (!this._view) return;
+		const view = this._view as WebviewView | WebviewPanel;
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 		this._isReady = this.skippedNotify = false;
-		const html = await this.getHtml(this._view.webview, ...args);
+		const html = await this.getHtml(view.webview, ...args);
 		if (force) {
-			this._view.webview.html = "";
+			view.webview.html = "";
 		}
-		if (this._view.webview.html === html) {
+		if (view.webview.html === html) {
 			this._isReady = true;
 			queueMicrotask(() => this._onReadyReceived.fire());
 		}
 		else {
-			this._view.webview.html = html;
+			view.webview.html = html;
 		}
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 	}

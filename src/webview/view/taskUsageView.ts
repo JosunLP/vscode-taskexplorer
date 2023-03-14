@@ -44,7 +44,7 @@ export class TaskUsageView extends TeWebviewView<State>
 				await this.refresh();
 			}
 			else {
-				this.skippedNotify = true;
+				this.skippedNotify = !!this._view;
 			}
 		}
 		await super.onConfigChanged(e);
@@ -69,7 +69,7 @@ export class TaskUsageView extends TeWebviewView<State>
 				await this.refresh();
 			}
 			else {
-				this.skippedNotify = true;
+				this.skippedNotify = !!this._view;
 			}
 		}
 	}

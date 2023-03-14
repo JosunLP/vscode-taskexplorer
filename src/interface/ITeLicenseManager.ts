@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { Event } from "vscode";
+
 export interface TeSessionChangeEvent
 {
 	account: ITeAccount;
@@ -84,6 +86,7 @@ export interface ITeLicenseManager
     isRegistered: boolean;
     isTrial: boolean;
 	isTrialExtended: boolean;
+	onDidSessionChange: Event<TeSessionChangeEvent>;
     checkLicense(logPad: string): Promise<void>;
     getMaxNumberOfTasks: (taskType?: string | undefined) => number;
     getMaxNumberOfTaskFiles: () => number;

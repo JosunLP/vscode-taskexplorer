@@ -130,9 +130,15 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 
     private onTaskStatusChanged = async (e: ITeTaskStatusChangeEvent) =>
 	{
-		if (e.task.treeId === this._task.treeId && !e.task.running) {
-			this._task = { ...e.task };
-			void this.refresh(undefined, this._task);
+		if (this.visible)
+		{
+			if (e.task.treeId === this._task.treeId && !e.task.running) {
+				this._task = { ...e.task };
+				void this.refresh(undefined, this._task);
+			}
+		}
+		else {
+			this.skippedNotify = !!this._view;
 		}
 	};
 

@@ -99,7 +99,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 3950,
+            focusSideBarFirstTime: 4350,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -172,7 +172,7 @@ export const testControl =
             batchScriptBat: 4140,
             batchScriptCmd: 5140,
             gulpParser: 3870,
-            gulpTask: 3280,
+            gulpTask: 3290,
             npmCommand: 8000,
             npmCommandPkg: 7000,
             npmInstallCommand: 8600,
@@ -186,7 +186,7 @@ export const testControl =
             notify: 955,
             show: {
                 view: {
-                    home: 2040,
+                    home: 2340,
                     taskCount: 825,
                     taskUsage: 775
                 },

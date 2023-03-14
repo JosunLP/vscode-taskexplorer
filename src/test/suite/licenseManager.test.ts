@@ -195,8 +195,7 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
-		void teWrapper.homeView.show();
-        await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
+		await showTeWebview(teWrapper.homeView);
 		expect(teWrapper.homeView.view).to.not.be.undefined;
         utils.endRollingCount(this);
 	});
@@ -209,8 +208,11 @@ suite("License Manager Tests", () =>
 		await setNag();
 		utils.overrideNextShowInfoBox("Buy License", true);
 		void licMgr.checkLicense("");
-		await utils.sleep(500);
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
+		//
+		// 3/14/23 - For now, wait for two events, tests run 2 requests to simulate the payment, in succession
+		//
+		await utils.promiseFromEvent(teWrapper.server.onDidRequestComplete).promise;
+		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		expectLicense(true, true, false, false);
 		await utils.sleep(10); // allow license/subscription events to propagate
         utils.endRollingCount(this);
@@ -230,10 +232,7 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home);
-		void teWrapper.homeView.show();
-        await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
-		expect(teWrapper.homeView.view).to.not.be.undefined;
-		expect(teWrapper.homeView.visible).to.be.equal(true);
+		await showTeWebview(teWrapper.homeView);
 		utils.sleep(10);
         utils.endRollingCount(this);
 	});
@@ -263,8 +262,7 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors);
-		void teWrapper.licensePage.show();
-        await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
+        await showTeWebview(teWrapper.licensePage);
 		await utils.closeEditors();
         utils.endRollingCount(this);
 	});
@@ -330,7 +328,9 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.licenseMgr.nag);
 		await setNag();
 		utils.overrideNextShowInfoBox("Extend Trial", true);
-		await licMgr.checkLicense("");
+		void licMgr.checkLicense("");
+		await utils.promiseFromEvent(teWrapper.server.onDidRequestComplete).promise;
+		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		expectLicense(true, false, true, true);
         utils.endRollingCount(this);
 	});
@@ -342,6 +342,7 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.licenseMgr.getTrialExtensionDenied);
 		utils.overrideNextShowInfoBox(undefined, true);
 		await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
+		await utils.sleep(10);
 		expectLicense(true, false, true, true);
         utils.endRollingCount(this);
 	});
@@ -564,6 +565,7 @@ const validateLicense = async (instance: Mocha.Context, expectNow: boolean, expe
 	try {
 		licMgr.setTestData({ sessionInterval: 1000 * 60 * 60 * intervalHrs, setPaid });
 		await licMgr.checkLicense("");
+		await utils.sleep(250);
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
 	} catch {}
 	finally {

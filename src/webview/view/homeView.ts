@@ -124,14 +124,20 @@ export class HomeView extends TeWebviewView<State>
 	protected override async onSessionChanged(e: TeSessionChangeEvent): Promise<void>
 	{
 		this.wrapper.log.methodOnce("homeview event", "session changed", 2, this.wrapper.log.getLogPad());
-		if (e.changeFlags.licenseState || e.changeFlags.licenseType || e.changeFlags.trialPeriod || e.changeFlags.verification || e.changeFlags.license) {
-			await this.refresh(true);
+		if (this.visible)
+		{
+			if (e.changeFlags.licenseState || e.changeFlags.licenseType || e.changeFlags.trialPeriod || e.changeFlags.verification || e.changeFlags.license) {
+				await this.refresh(true);
+			}
+		}
+		else {
+			this.skippedNotify = !!this._view;
 		}
 		await super.onSessionChanged(e);
 	}
 
 
-	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => { if (this.visible) await this.refresh(); this.skippedNotify = !this.visible; };
+	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => { if (this.visible) await this.refresh(); this.skippedNotify = !!this._view; };
 
 
 	protected override onVisibilityChanged(_visible: boolean)

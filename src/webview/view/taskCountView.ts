@@ -48,6 +48,6 @@ export class TaskCountView extends TeWebviewView<State>
 	}
 
 
-	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => { if (this.visible) await this.refresh(); this.skippedNotify = !this.visible; };
+	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => { if (this.visible) await this.refresh(); this.skippedNotify = !!this._view; };
 
 }

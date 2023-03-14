@@ -96,9 +96,13 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
     }
     else {
         teWebview = teView;
-        void teWebview.show(undefined, ...args);
+        if (!teView.visible){
+            void teWebview.show(undefined, ...args);
+        }
     }
-    await promiseFromEvent(teWebview.onReadyReceived).promise;
+    if (!teWebview.visible){
+        await promiseFromEvent(teWebview.onReadyReceived).promise;
+    }
     expect(teWebview.visible).to.be.equal(true);
     if (!wvShown.includes(teWebview.title)) wvShown.push(teWebview.title);
 };

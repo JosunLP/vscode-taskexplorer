@@ -51,6 +51,9 @@
     "activationEvents": [
         "*"
     ],
+    "activationEvents": [
+        "*"
+    ],
     "preview": false,
     "pricing": "Trial",
     "scripts": {
@@ -112,7 +115,7 @@
         "test-single-sws-python": "npm run test-default_build && node ./dist/test/runTest.js python xDeactivate",
         "test-single-sws-release_notes": "npm run test-default_build && node ./dist/test/runTest.js releaseNotes xDeactivate",
         "test-single-sws-ruby": "npm run test-default_build && node ./dist/test/runTest.js ruby xDeactivate",
-        "test-single-sws-tasks": "npm run test-default_build && node ./dist/test/runTest.js tasks xDeactivate",
+        "test-single-sws-task": "npm run test-default_build && node ./dist/test/runTest.js task xDeactivate",
         "test-single-sws-task_details_page": "npm run test-default_build && node ./dist/test/runTest.js taskDetailsPage xDeactivate",
         "test-single-sws-task_monitor": "npm run test-default_build && node ./dist/test/runTest.js taskMonitor xDeactivate",
         "test-single-sws-tree": "npm run test-default_build && node ./dist/test/runTest.js tree xDeactivate",

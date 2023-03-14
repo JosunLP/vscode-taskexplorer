@@ -189,19 +189,22 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				options.push("Extend Trial");
 			}
 			await this.wrapper.storage.update(this.wrapper.keys.Storage.LastLicenseNag, Date.now().toString());
-			const action = await window.showInformationMessage(message, ...options);
-			if (action === "Buy License")
+			window.showInformationMessage(message, ...options)
+			.then((action) =>
 			{
-				await executeCommand(Commands.PurchaseLicense);
-			}
-			else if (action === "Extend Trial")
-			{
-				await executeCommand(Commands.ExtendTrial);
-			}
-			else if (action === "Info")
-			{
-				void executeCommand(Commands.ShowLicensePage);
-			}
+				if (action === "Buy License")
+				{
+					void executeCommand(Commands.PurchaseLicense);
+				}
+				else if (action === "Extend Trial")
+				{
+					void executeCommand(Commands.ExtendTrial);
+				}
+				else if (action === "Info")
+				{
+					void executeCommand(Commands.ShowLicensePage);
+				}
+			});
 		}
 
 		this.wrapper.log.methodDone("license manager display popup", 1, logPad);
