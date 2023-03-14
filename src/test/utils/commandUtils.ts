@@ -9,13 +9,13 @@ let explorerHasFocused = false;
 const wvShown: string[] = [];
 
 
-export const echoWebviewCommand = async(command: string, teWebview: ITeWebview, waitForServer?: boolean) =>
+export const echoWebviewCommand = async(command: string, teWebview: ITeWebview, waitForServer: number, ...args: any[]) =>
 {
     const echoCmd = { method: "echo/command/execute", overwriteable: false };
-	const result = await teWebview.notify(echoCmd, { command });
+	const result = await teWebview.notify(echoCmd, { command, args });
     expect(result).to.be.equal(true);
-    if (waitForServer) {
-		await sleep(500);
+    if (waitForServer > 0) {
+		await sleep(waitForServer);
 		await waitForTeIdle(tc.waitTime.licenseMgr.request);
     }
     return result;

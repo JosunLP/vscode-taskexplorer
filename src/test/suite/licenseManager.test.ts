@@ -158,7 +158,7 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.closeEditors + tc.slowTime.webview.notify);
-		void echoWebviewCommand("taskexplorer.view.parsingReport.show", teWrapper.licensePage);
+		void echoWebviewCommand("taskexplorer.view.parsingReport.show", teWrapper.licensePage, 0);
         await utils.promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
 		expect(teWrapper.licensePage.visible).to.be.equal(false);
 		expect(teWrapper.parsingReportPage.visible).to.be.equal(true);
@@ -172,7 +172,7 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.webview.notify + tc.slowTime.closeEditors + 1000);
 		expect(teWrapper.licensePage.visible).to.be.equal(true);
-		await echoWebviewCommand("taskexplorer.extendTrial", teWrapper.licensePage, true);
+		await echoWebviewCommand("taskexplorer.extendTrial", teWrapper.licensePage, 500);
 		expectLicense(true, false, true, true);
 		await utils.closeEditors();
         utils.endRollingCount(this);

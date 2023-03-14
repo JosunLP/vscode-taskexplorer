@@ -51,7 +51,7 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (Single Project No User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.parsingReport + testControl.slowTime.config.showHideUserTasks);
+		this.slow(testControl.slowTime.webview.show.page.parsingReport + testControl.slowTime.config.showHideUserTasks + testControl.slowTime.closeEditors);
 		await executeSettingsUpdate("specialFolders.showUserTasks", false, testControl.waitTime.config.showHideUserTasks);
 		await showTeWebview(teWrapper.parsingReportPage, projectUri);
 		await closeEditors();
@@ -62,7 +62,7 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (Single Project w/ User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.parsingReport + testControl.slowTime.config.showHideUserTasks);
+		this.slow(testControl.slowTime.webview.show.page.parsingReport + testControl.slowTime.config.showHideUserTasks + testControl.slowTime.closeEditors);
 		await executeSettingsUpdate("specialFolders.showUserTasks", true, testControl.waitTime.config.showHideUserTasks);
 		await showTeWebview(teWrapper.parsingReportPage, projectUri, "", 5);
 		await closeEditors();
@@ -73,7 +73,7 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.parsingReport);
+		this.slow(testControl.slowTime.webview.show.page.parsingReportFull + testControl.slowTime.closeEditors);
 		await showTeWebview(teWrapper.parsingReportPage);
 		await closeEditors();
         endRollingCount(this);

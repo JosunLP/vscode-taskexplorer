@@ -99,7 +99,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 3760,
+            focusSideBarFirstTime: 3920,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -145,7 +145,7 @@ export const testControl =
             modifyEventAnt: 1200,
             modifyEventTsc: 1220,
         },
-        getTreeTasks: 205,
+        getTreeTasks: 215,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
             page: 2030,
@@ -191,11 +191,12 @@ export const testControl =
                     taskUsage: 775
                 },
                 page: {
-                    releaseNotes: 1760,
-                    taskDetails: 1825,
-                    taskMonitor: 3150,
-                    parsingReport: 2125,
-                    welcome: 1800
+                    releaseNotes: 840,
+                    taskDetails: 1765,
+                    taskMonitor: 2150,
+                    parsingReport: 1125,
+                    parsingReportFull: 1890,
+                    welcome: 600
                 }
             }
         },

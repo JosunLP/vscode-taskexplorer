@@ -112,7 +112,7 @@ suite("Task Tests", () =>
         await utils.waitForTaskExecution(exec, 1750);
         await executeTeCommand2("pause", [ batch[0] ], tc.waitTime.taskCommand);
         await utils.sleep(450);
-        await executeTeCommand2<TaskExecution | undefined>("run", [ batch[0] ], tc.waitTime.taskCommand) ;
+        await executeTeCommand2("run", [ batch[0] ], tc.waitTime.taskCommand) ;
         await utils.waitForTaskExecution(exec, 800);
         await executeTeCommand2("stop", [ batch[0] ]);
         await utils.waitForTaskExecution(exec, 500);
