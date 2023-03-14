@@ -114,6 +114,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		this._disposablePanel?.dispose();
 		this._disposablePanel = undefined;
 		this._view = undefined;
+		this.skippedNotify = false;
 	}
 
 

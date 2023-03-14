@@ -29,7 +29,7 @@ export class LicensePage extends TeWebviewPanel<State>
 	}
 
 
-	protected override onHtmlPreview = async (html: string, ...args: any[]) =>
+	protected override onHtmlPreview = async (html: string, ..._args: any[]) =>
 	{
 		// const newKey = args[0] as string | undefined;
 		html = await createTaskCountTable(this.wrapper, undefined, html);

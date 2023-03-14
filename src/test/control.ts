@@ -99,7 +99,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 3660,
+            focusSideBarFirstTime: 3760,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -148,7 +148,7 @@ export const testControl =
         getTreeTasks: 205,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
-            page: 1950,
+            page: 2030,
             getTrialExtension: 2175,
             getTrialExtensionDenied: 775,
             getMaxTasks: 365,
@@ -172,7 +172,7 @@ export const testControl =
             batchScriptBat: 4140,
             batchScriptCmd: 5140,
             gulpParser: 3870,
-            gulpTask: 3260,
+            gulpTask: 3280,
             npmCommand: 8000,
             npmCommandPkg: 7000,
             npmInstallCommand: 8600,
@@ -194,7 +194,7 @@ export const testControl =
                     releaseNotes: 1760,
                     taskDetails: 1825,
                     taskMonitor: 3150,
-                    parsingReport: 1925,
+                    parsingReport: 2125,
                     welcome: 1800
                 }
             }

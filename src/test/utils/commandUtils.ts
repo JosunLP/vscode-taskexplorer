@@ -91,7 +91,7 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
     let teWebview: ITeWebview;
     if (typeof teView === "string" || teView instanceof String)
     {
-        teWebview = await executeTeCommand2<ITeWebview>(`taskexplorer.view.${teView}.show`, args);
+        teWebview = await executeTeCommand2<ITeWebview>(`taskexplorer.view.${teView}.show`, args, tc.waitTime.viewWebviewPage);
     }
     else {
         teWebview = teView;

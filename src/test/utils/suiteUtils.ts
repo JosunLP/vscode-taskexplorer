@@ -1,7 +1,7 @@
 
 import {  refresh } from "./treeUtils";
 import { focusExplorerView, focusSidebarView } from "./commandUtils";
-import { endRollingCount, exitRollingCount, needsTreeBuild, testControl } from "./utils";
+import { endRollingCount, exitRollingCount, needsTreeBuild, sleep, testControl as tc, waitForTeIdle } from "./utils";
 
 
 export const startupBuildTree = async(instance: Mocha.Context) =>
@@ -20,6 +20,10 @@ export const startupFocus = async(instance: Mocha.Context, cb?: () => Promise<vo
     if (needsTreeBuild(true)) {
         await focusExplorerView(undefined, instance);
     }
+    else {
+        await sleep(1);
+        await waitForTeIdle(tc.waitTime.min);
+    }
     if (cb) {
         await cb();
     }
@@ -30,7 +34,7 @@ export const startupFocus = async(instance: Mocha.Context, cb?: () => Promise<vo
 export const sidebarFocus = async(instance: Mocha.Context) =>
 {
     if (exitRollingCount(instance)) return;
-    instance.sleep(testControl.slowTime.commands.focus + testControl.slowTime.commands.refresh);
+    instance.sleep(tc.slowTime.commands.focus + tc.slowTime.commands.refresh);
     await focusSidebarView();
     endRollingCount(instance);
 };

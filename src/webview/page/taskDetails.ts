@@ -125,9 +125,9 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 
     private onTaskStatusChanged = async (e: ITeTaskStatusChangeEvent) =>
 	{
-		if (this._view && e.task.treeId === this._task.treeId && !e.task.running) {
+		if (e.task.treeId === this._task.treeId && !e.task.running) {
 			this._task = { ...e.task };
-			await this.refresh(undefined, this._task);
+			void this.refresh(undefined, this._task);
 		}
 	};
 

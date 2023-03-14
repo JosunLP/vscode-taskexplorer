@@ -33,7 +33,7 @@ suite("Welcome Page Tests", () =>
 	test("Open Welcome Page", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.welcome);
+		this.slow(testControl.slowTime.webview.show.page.welcome + testControl.slowTime.closeEditors);
 		await showTeWebview(teWrapper.welcomePage);
 		await closeEditors();
         endRollingCount(this);

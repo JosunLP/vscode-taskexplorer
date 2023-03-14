@@ -51,9 +51,8 @@ suite("Util Tests", () =>
     test("Hide / Show Output Window", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.commands.showOutput * 2) + 50);
+		this.slow(testControl.slowTime.commands.showOutput * 2);
         await executeTeCommand2("showOutput", [ false ]);
-		await sleep(25);
         await executeTeCommand2("showOutput", [ true ]);
         endRollingCount(this);
     });
@@ -425,9 +424,7 @@ suite("Util Tests", () =>
     test("Utilities", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 2) + 50);
-
-        teWrapper.utils.sleep(10);
+		this.slow((testControl.slowTime.config.event * 2) + 30);
 
         expect(teWrapper.commonUtils.properCase("taskexplorer")).to.be.equal("Taskexplorer");
         expect(teWrapper.commonUtils.properCase(undefined)).to.be.equal("");

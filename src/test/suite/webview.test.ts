@@ -152,6 +152,9 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         teWrapper.homeView.description = teWrapper.homeView.description;
 		await closeEditors();
+        while (teWrapper.licensePage.visible || teWrapper.releaseNotesPage.visible  || teWrapper.parsingReportPage.visible) {
+            await sleep(25);
+        }
         endRollingCount(this);
     });
 

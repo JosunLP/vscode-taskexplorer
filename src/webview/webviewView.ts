@@ -132,6 +132,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 		this._disposableView?.dispose();
 		this._disposableView = undefined;
 		this._view = undefined;
+		this.skippedNotify = false;
 	}
 
 
