@@ -32,17 +32,6 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			`${MonitorPage.viewId}View`,
 			Commands.ShowTaskMonitorPage
 		);
-
-		this.disposables.push(
-			wrapper.treeManager.onReady(this.onTaskTreeManagerReady, this),
-			wrapper.treeManager.onDidAllTasksChange(this.onAllTasksChanged, this),
-			wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this),
-			wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
-			wrapper.usage.onDidFamousTasksChange(this.onFamousTasksChanged, this),
-			wrapper.taskWatcher.onDidRunningTasksChange(this.onRunningTasksChanged, this),
-			wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
-			wrapper.config.onDidChange(e => { this.onConfigChanged(e); }, this)
-		);
 	}
 
 
@@ -107,15 +96,26 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
 
 
-	private onTaskTreeManagerReady = (e: ITeTaskChangeEvent) => this.notify(IpcTasksChangedMsg, { tasks: e.tasks, list: "all" });
-
-
 	private async onConfigChanged(e: ConfigurationChangeEvent)
 	{
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor.TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
 			this.notify(IpcConfigChangedMsg, this.getSettingsState());
 		}
+	}
+
+
+	protected override onInitializing()
+	{
+		return  [
+			this.wrapper.treeManager.onDidAllTasksChange(this.onAllTasksChanged, this),
+			this.wrapper.treeManager.onDidLastTasksChange(this.onLastTasksChanged, this),
+			this.wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
+			this.wrapper.usage.onDidFamousTasksChange(this.onFamousTasksChanged, this),
+			this.wrapper.taskWatcher.onDidRunningTasksChange(this.onRunningTasksChanged, this),
+			this.wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
+			this.wrapper.config.onDidChange(this.onConfigChanged, this)
+		];
 	}
 
 

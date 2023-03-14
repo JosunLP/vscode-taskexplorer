@@ -1,10 +1,10 @@
 
+import { dirname } from "path";
 import type { State } from "../common/ipc";
 import { TeWebviewPanel } from "../webviewPanel";
 import type { TeWrapper } from "../../lib/wrapper";
 import { ContextKeys, WebviewIds  } from "../../lib/context";
 import { ITeTask, ITeTaskStatusChangeEvent } from "../../interface";
-import { dirname, join } from "path";
 
 
 export class TaskDetailsPage extends TeWebviewPanel<State>
@@ -27,9 +27,6 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 			"taskDetails"
 		);
 		this._task = { ...task };
-		this.disposables.push(
-			wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this)
-		);
 	}
 
 
@@ -121,6 +118,14 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 
 
 	protected override includeFontAwesome = () => ({ solid: true, icons: [ "rabbit", "turtle" ] });
+
+
+	protected override onInitializing()
+	{
+		return  [
+			this.wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this)
+		];
+	}
 
 
     private onTaskStatusChanged = async (e: ITeTaskStatusChangeEvent) =>

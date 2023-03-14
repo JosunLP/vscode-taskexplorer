@@ -22,7 +22,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     protected abstract listType: TeTaskListType;
     protected abstract onTaskSave(taskItem: TaskItem, logPad: string): void;
 
-    public treeManager: TaskTreeManager;
     public override taskFiles: TaskItem[];
 
     protected store: string[];
@@ -36,13 +35,12 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
 
 
-    constructor(protected readonly wrapper: TeWrapper, treeManager: TaskTreeManager, label: string, state: TreeItemCollapsibleState)
+    constructor(protected readonly wrapper: TeWrapper, protected readonly treeManager: TaskTreeManager, label: string, state: TreeItemCollapsibleState)
     {
         super(label, state);
         this.log = this.wrapper.log;
         this.taskFiles = [];
         this.disposables = [];
-        this.treeManager = treeManager;
         this.iconPath = ThemeIcon.Folder;
         this.isFavorites = label === Strings.FAV_TASKS_LABEL;
         this.contextValue = label.toLowerCase().replace(/[\W \_\-]/g, "");

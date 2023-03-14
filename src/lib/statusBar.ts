@@ -1,5 +1,5 @@
 
-import { ITeStatusBar } from "src/interface";
+import { ITeStatusBar } from "../interface";
 import { Disposable, StatusBarAlignment, StatusBarItem, window } from "vscode";
 
 
@@ -59,13 +59,13 @@ export class TeStatusBar implements ITeStatusBar, Disposable
     update = (msg: string) =>
     {
         if (!msg)  {
-            msg = "";
+            this.statusBarItem.text = "";
             this.statusBarItem.hide();
         }
         else {
             this.statusBarItem.show();
+            this.statusBarItem.text = this.getStatusString(msg);
         }
-        this.statusBarItem.text = this.getStatusString(msg);
     };
 
 

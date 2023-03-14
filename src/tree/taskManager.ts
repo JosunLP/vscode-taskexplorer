@@ -35,16 +35,16 @@ export class TaskManager implements ITeTaskManager, Disposable
             registerCommand(Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
             registerCommand(Commands.NpmRunAuditFix, (item: TaskFile) => this.runNpmCommand(item, "audit fix"), this),
             registerCommand(Commands.NpmRunUpdatePackage, (item: TaskFile) => this.runNpmCommand(item, "update <packagename>"), this),
-            registerCommand(Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.getTask(item), itemClick), this),
-            registerCommand(Commands.Pause, (item: TaskItem | ITeTask) => this.pause(this.getTask(item)), this),
+            registerCommand(Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.wrapper.treeManager.getTaskItem(item), itemClick), this),
+            registerCommand(Commands.Pause, (item: TaskItem | ITeTask) => this.pause(this.wrapper.treeManager.getTaskItem(item)), this),
             registerCommand(Commands.Restart, (item: TaskItem) => this.restart(item), this),
-            registerCommand(Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.getTask(item)), this),
+            registerCommand(Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.wrapper.treeManager.getTaskItem(item)), this),
             registerCommand(Commands.RunLastTask,  () => this.runLastTask(this.wrapper.treeManager.getTaskMap()), this),
-            registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.getTask(item), false, true, ...args), this),
+            registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.wrapper.treeManager.getTaskItem(item), false, true, ...args), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
 			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask, listType?: TeTaskListType) => this.setPinned(item, listType), this),
             registerCommand(Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
-            registerCommand(Commands.Stop, (item: TaskItem | ITeTask) => this.stop(this.getTask(item)), this)
+            registerCommand(Commands.Stop, (item: TaskItem | ITeTask) => this.stop(this.wrapper.treeManager.getTaskItem(item)), this)
         );
     }
 
@@ -54,23 +54,6 @@ export class TaskManager implements ITeTaskManager, Disposable
         this._disposables.forEach(d => d.dispose());
         this._disposables.splice(0);
     }
-
-
-    getTask =  (taskItem: TaskItem | ITeTask | Uri) =>
-    {
-        if (taskItem instanceof Uri) // FileExplorer Context menu
-        {
-            taskItem = Object.values(this.wrapper.treeManager.getTaskMap()).find(
-                i =>  i && i.resourceUri && i.resourceUri.fsPath === (<Uri>taskItem).fsPath
-            ) as TaskItem;
-            void this.wrapper.treeManager.views.taskExplorer.view.reveal(taskItem, { select: false });
-        }
-        else if (!(taskItem instanceof TaskItem)) // ITeTask (Webview app)
-        {
-            taskItem = this.wrapper.treeManager.getTaskMap()[taskItem.definition.taskItemId as string] as TaskItem;
-        }
-        return taskItem;
-    };
 
 
     private open = async(selection: TaskItem, itemClick = false) =>

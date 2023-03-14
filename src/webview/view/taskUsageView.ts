@@ -26,10 +26,6 @@ export class TaskUsageView extends TeWebviewView<State>
 			`${ContextKeys.WebviewViewPrefix}home`,
 			`${TaskUsageView.viewId}View`
 		);
-		this.disposables.push(
-			wrapper.config.onDidChange(this.onConfigChanged, this),
-			wrapper.storage.onDidChange(this.onStorageChanged, this)
-		);
 	}
 
 
@@ -45,6 +41,15 @@ export class TaskUsageView extends TeWebviewView<State>
 			this.wrapper.log.methodOnce("task usage view event", "onConfigChanged", 2, this.wrapper.log.getLogPad());
 			await this.refresh();
 		}
+	}
+
+
+	protected override onInitializing()
+	{
+		return  [
+			this.wrapper.config.onDidChange(this.onConfigChanged, this),
+			this.wrapper.storage.onDidChange(this.onStorageChanged, this)
+		];
 	}
 
 

@@ -63,7 +63,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._views.taskExplorerSideBar,
             registerCommand(Commands.AddToExcludes, (item: TaskFile | TaskItem) => this.addToExcludes(item), this),
             registerCommand(Commands.AddRemoveCustomLabel, (item: TaskItem) => this.addRemoveSpecialTaskLabel(item), this),
-            registerCommand(Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.wrapper.taskManager.getTask(item)), this),
+            registerCommand(Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.getTaskItem(item)), this),
             registerCommand(Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this)
         );
 
@@ -343,6 +343,23 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             v.tree.fireTreeRefreshEvent(logPad + "   ", logLevel, treeItem);
         });
+    };
+
+
+    getTaskItem =  (taskItem: TaskItem | ITeTask | Uri) =>
+    {
+        if (taskItem instanceof Uri) // FileExplorer Context menu
+        {
+            taskItem = Object.values(this.wrapper.treeManager.getTaskMap()).find(
+                i =>  i && i.resourceUri && i.resourceUri.fsPath === (<Uri>taskItem).fsPath
+            ) as TaskItem;
+            void this.wrapper.treeManager.views.taskExplorer.view.reveal(taskItem, { select: false });
+        }
+        else if (!(taskItem instanceof TaskItem)) // ITeTask (Webview app)
+        {
+            taskItem = this.wrapper.treeManager.getTaskMap()[taskItem.definition.taskItemId as string] as TaskItem;
+        }
+        return taskItem;
     };
 
 

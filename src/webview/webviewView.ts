@@ -24,6 +24,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	private _description: string | undefined;
 	private _disposableView: Disposable | undefined;
 	protected override _view: WebviewView | undefined = undefined;
+	protected abstract override onInitializing(): Disposable[];
 
 
 	constructor(
@@ -87,7 +88,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 			this._view.onDidChangeVisibility(() => this.onViewVisibilityChanged(this.visible), this),
 			this._view.webview.onDidReceiveMessage(this.onMessageReceivedBase, this),
 			window.onDidChangeWindowState(this.onWindowStateChanged, this),
-			...(this.onInitializing?.() ?? []),
+			...this.onInitializing(),
 			...(this.registerCommands?.() ?? [])
 		);
 

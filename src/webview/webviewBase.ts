@@ -64,7 +64,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	private _title: string;
     private _ipcSequence: number;
-	private _isFirstLoadComplete: boolean;
 
 	private readonly _cspNonce: string;
     private readonly _maxSmallIntegerV8 = 2 ** 30;
@@ -78,7 +77,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		this._ipcSequence = 0;
 		this._originalTitle = title;
 		this._cspNonce = getNonce();
-		this._isFirstLoadComplete = false;
 		this._onReadyReceived = new EventEmitter<void>();
 		this.disposables.push(
 			this._onReadyReceived,
@@ -90,11 +88,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	{
 		this.disposables.forEach(d => void d.dispose());
 		this.disposables.splice(0);
-	}
-
-
-	get isFirstLoadComplete(): boolean {
-		return this._isFirstLoadComplete;
 	}
 
 	get onReadyReceived(): Event<void> {
@@ -308,7 +301,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		switch (e.method)
 		{
 			case IpcReadyCommand.method:
-				this._isFirstLoadComplete = true;
 				onIpc(IpcReadyCommand, e, () => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
 				break;
 

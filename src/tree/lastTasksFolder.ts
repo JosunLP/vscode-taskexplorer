@@ -2,12 +2,12 @@
 import { TaskItem } from "./item";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
+import { TeTaskListType } from "../interface";
 import { TaskTreeManager } from "./treeManager";
 import { isPinned } from "../lib/utils/taskUtils";
 import { SpecialTaskFolder } from "./specialFolder";
 import { TreeItemCollapsibleState, window } from "vscode";
 import { Commands, registerCommand } from "../lib/command/command";
-import { TeTaskListType } from "src/interface";
 
 
 /**

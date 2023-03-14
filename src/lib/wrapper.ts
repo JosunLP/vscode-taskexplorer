@@ -323,6 +323,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// Start the first tree build/load
 		//
+		promiseUtils.oneTimeEvent(this._treeManager.onReady)(() => {}); // cover onReady (hv used not used, 10x<->)
 		this._treeManager.setMessage(Strings.RequestingTasks);
 		await this._treeManager.loadTasks("   ");
 		this._treeManager.setMessage(); // clear status bar message

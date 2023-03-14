@@ -74,9 +74,6 @@ export class HomeView extends TeWebviewView<State>
 			`${ContextKeys.WebviewViewPrefix}home`,
 			`${HomeView.viewId}View`
 		);
-		this.disposables.push(
-			wrapper.treeManager.onDidAllTasksChange(e => { this.onTasksChanged(e); }, this)
-		);
 	}
 
 
@@ -89,7 +86,7 @@ export class HomeView extends TeWebviewView<State>
 	private async onTasksChanged(e: ITeTaskChangeEvent)
 	{
 		this.wrapper.log.methodStart("HomeView Event: onTasksChanged", 2, this.wrapper.log.getLogPad());
-		if (this.isFirstLoadComplete && this._taskCount !== e.tasks.length)
+		if (this._taskCount !== e.tasks.length)
 		{
 			await this.refresh();
 			this._taskCount = e.tasks.length;
@@ -126,6 +123,14 @@ export class HomeView extends TeWebviewView<State>
 				   .replace("#{license.statusTip}", isTrial ? `${days} days left in trial` : (isLic ? `${days} days left before renewal` : ""));
 		return html;
 	};
+
+
+	protected override onInitializing()
+	{
+		return  [
+			this.wrapper.treeManager.onDidAllTasksChange(e => { this.onTasksChanged(e); }, this)
+		];
+	}
 
 
 	protected override async onSessionChanged(e: TeSessionChangeEvent): Promise<void>
