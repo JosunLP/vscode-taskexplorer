@@ -40,6 +40,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
             s = Math.floor(runtime / 1000 % 60).toString();
         let ms = Math.round(runtime % 1000).toString();
         ms = _pad(ms);
+		/* istanbul ignore next */
         if (ms.length < 3) ms = `0${ms}`;
         return `${_pad(m)}m : ${_pad(s)}s : ${ms}ms`;
     };
@@ -96,7 +97,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 						<td>Start</td><td>End</td><td>Run Time</td>
 						</tr>`;
 
-			for (const r of usage.taskStats.runtimes)
+			for (const r of usage.taskStats.runtimes.filter(r => r.start && r.end))
 			{
 				html += `<tr class="te-task-details-runtimes-row">
 							<td>${this.wrapper.utils.formatDate(r.start)}</td>

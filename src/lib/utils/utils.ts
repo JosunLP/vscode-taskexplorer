@@ -15,7 +15,7 @@ export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) 
 
 export const formatDate = (epochMs: number, format?: "datetime" | "date" | "time") =>
 {
-    const t = (new Date((epochMs ?? Date.now()) - tzOffset)).toISOString().slice(0, -1).split("T");
+    const t = (new Date(epochMs - tzOffset)).toISOString().slice(0, -1).split("T");
     return (!format || format === "datetime" ? `${t[0]} ${t[1]}` : (format === "date" ? t[0] : t[1]));
 };
 

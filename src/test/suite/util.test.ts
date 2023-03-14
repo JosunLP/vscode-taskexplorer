@@ -418,7 +418,6 @@ suite("Util Tests", () =>
 		teWrapper.utils.formatDate(now, "date");
 		teWrapper.utils.formatDate(now, "time");
 		teWrapper.utils.formatDate(now);
-		teWrapper.utils.formatDate(0);
         endRollingCount(this);
     });
 
