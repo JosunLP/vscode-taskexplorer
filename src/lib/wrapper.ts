@@ -340,7 +340,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		this.log.methodDone("app wrapper - run", 1, "", [
 			[ "machine id", env.machineId ], [ "session id", env.sessionId ], [ "app name", env.appName ],
-			[ "remote name", env.remoteName ], [ "is new ap install", env.isNewAppInstall ]
+			[ "remote name", env.remoteName ], [ "new install", env.isNewAppInstall ]
 		]);
 	};
 

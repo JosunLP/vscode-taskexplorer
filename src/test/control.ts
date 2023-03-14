@@ -99,6 +99,8 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
+            focusSideBarFirstTime: 3660,
+            openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
             run: 4750,
@@ -146,7 +148,7 @@ export const testControl =
         getTreeTasks: 205,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
-            page: 1530,
+            page: 1950,
             getTrialExtension: 2175,
             getTrialExtensionDenied: 775,
             getMaxTasks: 365,
@@ -182,7 +184,6 @@ export const testControl =
         },
         webview: {
             notify: 955,
-            notifyFakeCommand: 1075,
             show: {
                 view: {
                     home: 2040,
@@ -190,11 +191,11 @@ export const testControl =
                     taskUsage: 775
                 },
                 page: {
-                    releaseNotes: 760,
-                    taskDetails: 415,
+                    releaseNotes: 1760,
+                    taskDetails: 1825,
                     taskMonitor: 3150,
                     parsingReport: 1825,
-                    welcome: 400
+                    welcome: 1400
                 }
             }
         },

@@ -86,12 +86,20 @@ export const focusSidebarView = () => commands.executeCommand("taskexplorer.view
 export const hasExplorerFocused = () => explorerHasFocused;
 
 
-export const showTeWebview = async(teView: ITeWebview, ...args: any[]) =>
+export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) =>
 {
-    void teView.show(undefined, ...args);
-    await promiseFromEvent(teView.onReadyReceived).promise;
-    expect(teView.visible).to.be.equal(true);
-    if (!wvShown.includes(teView.title)) wvShown.push(teView.title);
+    let teWebview: ITeWebview;
+    if (typeof teView === "string" || teView instanceof String)
+    {
+        teWebview = await executeTeCommand2<ITeWebview>(`taskexplorer.view.${teView}.show`, args);
+    }
+    else {
+        teWebview = teView;
+        void teWebview.show(undefined, ...args);
+    }
+    await promiseFromEvent(teWebview.onReadyReceived).promise;
+    expect(teWebview.visible).to.be.equal(true);
+    if (!wvShown.includes(teWebview.title)) wvShown.push(teWebview.title);
 };
 
 // export const showTeWebviewTimeout = (teView: ITeWebview, baseTimeout: number) => baseTimeout + (wvShown.includes(teView.title) ? 0 : 400);

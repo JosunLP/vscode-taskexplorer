@@ -38,8 +38,10 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.releaseNotes);
+		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.closeEditors);
 		await showTeWebview(teWrapper.releaseNotesPage);
+		await sleep(5);
+		await closeEditors();
         endRollingCount(this);
 	});
 
@@ -47,8 +49,7 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes (Error No Version)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.releaseNotes + 50 + testControl.slowTime.closeEditors + testControl.slowTime.webview.notifyFakeCommand);
-		await closeEditors();
+		this.slow(testControl.slowTime.webview.show.page.releaseNotes + 50 + testControl.slowTime.closeEditors + testControl.slowTime.webview.notify);
 		const version = extension.packageJSON.version;
 		extension.packageJSON.version = "17.4444.0";
 		try {

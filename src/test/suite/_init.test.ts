@@ -55,7 +55,7 @@ suite("Initialization", () =>
     test("Focus SideBar View Tree", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.show.view.home);
+        this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home);
         void focusSidebarView();
         await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
         teWrapper.homeView.title = teWrapper.homeView.title;

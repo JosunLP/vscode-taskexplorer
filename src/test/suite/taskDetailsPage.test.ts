@@ -4,7 +4,7 @@
 import { TaskExecution } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
+import { executeSettingsUpdate, executeTeCommand2, showTeWebview } from "../utils/commandUtils";
 import {
 	activate, closeEditors, testControl as tc, suiteFinished, sleep, exitRollingCount,
 	endRollingCount, treeUtils, waitForTaskExecution
@@ -46,11 +46,9 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Used Task Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetails + 150);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.getTreeTasks);
 		batch = await treeUtils.getTreeTasks(teWrapper, "batch", 2);
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ batch[0] ], tc.waitTime.viewWebviewPage);
-		await sleep(75);
-		await closeEditors();
+		await showTeWebview("taskDetails", batch[0]);
         endRollingCount(this);
 	});
 
@@ -58,11 +56,10 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Used Task Non-Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetails + 150);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.getTreeTasks);
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		antTask = ant.find(t => t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ antTask ], tc.waitTime.viewWebviewPage);
-		await sleep(75);
+		await showTeWebview("taskDetails", antTask);
         endRollingCount(this);
 	});
 
@@ -71,13 +68,10 @@ suite("Task Details Page Tests", () =>
 	{
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.config.event * 2) + tc.slowTime.tasks.antTask + 1900 + tc.slowTime.commands.run);
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false); // for coverage
-		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin) ;
-        await sleep(50);
+		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin);
         await waitForTaskExecution(exec, 600);
 		await executeTeCommand2("stop", [ antTask ], tc.waitTime.taskCommand);
         await waitForTaskExecution(exec, 300);
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true); // for coverage ^^^
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -86,10 +80,9 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Unused Task Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetails + 150);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.getTreeTasks);
 		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], tc.waitTime.viewWebviewPage);
-		await sleep(75);
+		await showTeWebview("taskDetails", python[0]);
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -98,11 +91,10 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Unused Task Non-Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetails + 10);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.getTreeTasks);
 		gulp = await treeUtils.getTreeTasks(teWrapper, "gulp", 14);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("gulpfile.js") && (<string>t.label).includes("build33")) as ITaskItem;
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ gulpTask ], tc.waitTime.viewWebviewPage);
-		await sleep(5);
+		await showTeWebview("taskDetails", gulpTask);
         endRollingCount(this);
 	});
 
@@ -110,10 +102,9 @@ suite("Task Details Page Tests", () =>
 	test("Run Unused Task w/ Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.tasks.gulpTask + 20 + tc.slowTime.commands.run);
+        this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run);
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
         await waitForTaskExecution(exec);
-		await sleep(10);
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -122,11 +113,10 @@ suite("Task Details Page Tests", () =>
 	test("Run Unused Task w/o Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.tasks.gulpTask + 20 + tc.slowTime.commands.run);
+        this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("GULPFILE.js") && (<string>t.label).includes("test")) as ITaskItem;
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
         await waitForTaskExecution(exec);
-		await sleep(10);
         endRollingCount(this);
 	});
 
@@ -134,11 +124,9 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (From App)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetails + 150);
-		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
-		const iTasks = teWrapper.taskUtils.toITask(teWrapper, [ batch[0].task ], "all"); // App uses ITeTask
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", iTasks, tc.waitTime.viewWebviewPage);
-		await sleep(75);
+		this.slow(tc.slowTime.webview.show.page.taskDetails);
+		const iTask = teWrapper.taskUtils.toITask(teWrapper, [ batch[0].task ], "all")[0]; // App uses ITeTask
+		await showTeWebview("taskDetails", iTask);
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -147,12 +135,10 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Tracking Disabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.config.event * 4) + tc.slowTime.webview.show.view.taskUsage + tc.slowTime.webview.show.page.taskDetails + 150 + tc.slowTime.closeEditors);
+		this.slow((tc.slowTime.config.event * 4) + tc.slowTime.webview.show.page.taskDetails + tc.slowTime.closeEditors);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
-		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], tc.waitTime.viewWebviewPage);
-		await teWrapper.taskUsageView.show();
-		await sleep(75);
+		await showTeWebview("taskDetails", python[0]);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
 		await closeEditors();

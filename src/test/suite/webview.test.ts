@@ -52,7 +52,7 @@ suite("Webview Tests", () =>
     test("Home View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.commands.focusChangeViews * 3) + tc.slowTime.commands.fast + (tc.slowTime.config.enableEvent * 2) + 2000);
+        this.slow((tc.slowTime.commands.focusChangeViews * 3) + tc.slowTime.commands.fast + (tc.slowTime.config.enableEvent * 2));
         const echoCmd = { method: "echo/command/execute", overwriteable: false };
         await executeSettingsUpdate("enabledTasks.bash", false, tc.waitTime.config.enableEvent);
         await executeSettingsUpdate("enabledTasks.bash", true, tc.waitTime.config.enableEvent);
@@ -65,6 +65,14 @@ suite("Webview Tests", () =>
         await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" });
         await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
+        endRollingCount(this);
+    });
+
+
+    test("Home View Header Buttons", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.commands.openUrl * 3);
         await commands.executeCommand("taskexplorer.donate");
         await commands.executeCommand("taskexplorer.openBugReports");
         await commands.executeCommand("taskexplorer.openRepository");
@@ -82,6 +90,18 @@ suite("Webview Tests", () =>
         await showTeWebview(teWrapper.taskUsageView);
         endRollingCount(this);
     });
+
+
+	test("Task Usage View (Tracking Disabled)", async function()
+	{
+        if (exitRollingCount(this)) return;
+		this.slow((tc.slowTime.config.event * 2) + tc.slowTime.webview.show.page.taskDetails + tc.slowTime.commands.focusChangeViews);
+        await focusExplorerView(teWrapper);
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
+		await showTeWebview(teWrapper.taskUsageView);
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
+        endRollingCount(this);
+	});
 
 
     test("Task Count View", async function()
@@ -106,32 +126,20 @@ suite("Webview Tests", () =>
     });
 
 
-	test("Focus open Editors", async function()
+	test("Toggle Active Page", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.commands.focusChangeViews * 4) + (tc.slowTime.webview.notifyFakeCommand * 2) + 250 + (tc.slowTime.commands.fast * 3));
+		this.slow((tc.slowTime.commands.focusChangeViews * 4) + (tc.slowTime.webview.notify * 2) + 250 + (tc.slowTime.commands.fast * 3));
         const echoCmd = { method: "echo/fake", overwriteable: false };
-	    await teWrapper.parsingReportPage.show();
-        await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
-        await sleep(5);
-	    await teWrapper.licensePage.show();
-        await promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
-        await sleep(5);
+	    await showTeWebview(teWrapper.parsingReportPage);
+	    await showTeWebview(teWrapper.licensePage);
         await teWrapper.parsingReportPage.notify(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
         await sleep(50);
-	    await teWrapper.releaseNotesPage.show();
-        await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
-        await sleep(5);
+	    await showTeWebview(teWrapper.releaseNotesPage);
         await teWrapper.licensePage.notify(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
         await sleep(50);
-	    await teWrapper.licensePage.show();
-        await sleep(5);
 	    await teWrapper.parsingReportPage.show();
-        await sleep(5);
-	    await teWrapper.releaseNotesPage.show();
-        await sleep(5);
-	    await teWrapper.parsingReportPage.show();
-        await sleep(5);
+        await sleep(10);
         await commands.executeCommand("workbench.action.nextEditor");
         await commands.executeCommand("workbench.action.nextEditor");
         await commands.executeCommand("workbench.action.previousEditor");
