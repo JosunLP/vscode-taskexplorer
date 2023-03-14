@@ -30,9 +30,12 @@ export class TaskCountView extends TeWebviewView<State>
 
 	protected override includeBody = async() => createTaskCountTable(this.wrapper);
 
+
 	protected override includeHead = async() => "";
 
+
 	protected override includeEndOfBody = async() => "";
+
 
 	protected override includeBootstrap = (): Promise<State> => this.getState();
 
@@ -45,6 +48,6 @@ export class TaskCountView extends TeWebviewView<State>
 	}
 
 
-	private onTaskCountChanged = (_e: ITeTaskChangeEvent): Promise<void> => this.refresh();
+	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => { if (this.visible) await this.refresh(); this.skippedNotify = !this.visible; };
 
 }

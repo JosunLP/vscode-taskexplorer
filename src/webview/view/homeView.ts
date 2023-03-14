@@ -1,10 +1,10 @@
 
+import { Disposable } from "vscode";
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { ITeTaskChangeEvent, TeSessionChangeEvent } from "../../interface";
-import { ConfigurationChangeEvent, Disposable } from "vscode";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
+import { ITeTaskChangeEvent, TeSessionChangeEvent } from "../../interface";
 
 /*
 https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/webview/main.ts
@@ -83,18 +83,6 @@ export class HomeView extends TeWebviewView<State>
 	protected override includeFontAwesome = () => ({ light: true, icons: [ "lock", "unlock", "user", "user-slash" ]});
 
 
-	private async onTasksChanged(e: ITeTaskChangeEvent)
-	{
-		this.wrapper.log.methodStart("HomeView Event: onTasksChanged", 2, this.wrapper.log.getLogPad());
-		if (this._taskCount !== e.tasks.length)
-		{
-			await this.refresh();
-			this._taskCount = e.tasks.length;
-		}
-		this.wrapper.log.methodDone("HomeView Event: onTasksChanged", 2, this.wrapper.log.getLogPad());
-	}
-
-
 	protected override async onReady()
 	{
 		this.wrapper.log.methodOnce("homeview event", "ready", 2, this.wrapper.log.getLogPad());
@@ -128,7 +116,7 @@ export class HomeView extends TeWebviewView<State>
 	protected override onInitializing()
 	{
 		return  [
-			this.wrapper.treeManager.onDidAllTasksChange(e => { this.onTasksChanged(e); }, this)
+			this.wrapper.treeManager.onDidTaskCountChange(e => this.onTaskCountChanged(e), this)
 		];
 	}
 
@@ -141,6 +129,9 @@ export class HomeView extends TeWebviewView<State>
 		}
 		await super.onSessionChanged(e);
 	}
+
+
+	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => { if (this.visible) await this.refresh(); this.skippedNotify = !this.visible; };
 
 
 	protected override onVisibilityChanged(_visible: boolean)

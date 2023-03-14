@@ -38,8 +38,14 @@ export class TaskUsageView extends TeWebviewView<State>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
-			this.wrapper.log.methodOnce("task usage view event", "onConfigChanged", 2, this.wrapper.log.getLogPad());
-			await this.refresh();
+			if (this.visible)
+			{
+				this.wrapper.log.methodOnce("task usage view event", "onConfigChanged", 2, this.wrapper.log.getLogPad());
+				await this.refresh();
+			}
+			else {
+				this.skippedNotify = true;
+			}
 		}
 	}
 
@@ -57,8 +63,14 @@ export class TaskUsageView extends TeWebviewView<State>
 	{
 		if (e.key === StorageKeys.Usage || e.key === StorageKeys.TaskUsage)
 		{
-			this.wrapper.log.methodOnce("task usage view event", "onStorageChanged", 2, this.wrapper.log.getLogPad());
-			await this.refresh();
+			if (this.visible)
+			{
+				this.wrapper.log.methodOnce("task usage view event", "onStorageChanged", 2, this.wrapper.log.getLogPad());
+				await this.refresh();
+			}
+			else {
+				this.skippedNotify = true;
+			}
 		}
 	}
 

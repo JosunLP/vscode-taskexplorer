@@ -43,9 +43,6 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 				window.registerWebviewPanelSerializer(id, this._serializer)
 			);
 		}
-		this.disposables.push(
-			wrapper.config.onDidChange(this.onConfigChangedBase, this)
-		);
 	}
 
 	override dispose()
@@ -197,6 +194,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 				this._view.webview.onDidReceiveMessage(this.onMessageReceivedBase, this),
 				...(this.onInitializing?.() ?? []),
 				...(this.registerCommands?.() ?? []),
+				this.wrapper.config.onDidChange(this.onConfigChangedBase, this),
 				window.onDidChangeWindowState(this.onWindowStateChanged, this),
 				this._view
 			);
