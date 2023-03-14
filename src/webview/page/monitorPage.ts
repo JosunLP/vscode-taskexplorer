@@ -10,7 +10,7 @@ import {
 	ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent
 } from "../../interface";
 import {
-	MonitorAppState, IpcTasksChangedMsg, IpcTaskChangedMsg, IMonitorAppTimerMode, IpcConfigChangedMsg, IpcStateChangedMsg
+	MonitorAppState, IpcTasksChangedMsg, IpcTaskChangedMsg, IMonitorAppTimerMode, IpcConfigChangedMsg
 } from "../common/ipc";
 
 
@@ -101,7 +101,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(IpcTasksChangedMsg, { tasks: e.tasks, list: "running" });
 
 
-    private onAllTasksChanged = async (_e: ITeTaskChangeEvent) => this.notify(IpcStateChangedMsg, await this.getState());
+    private onAllTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(IpcTasksChangedMsg, { tasks: e.tasks, list: "all" });
 
 
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);

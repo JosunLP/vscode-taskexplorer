@@ -1,10 +1,24 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
+import { expect } from "chai";
 import { commands } from "vscode";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { waitForTeIdle, testControl as tc, teWrapper } from "./utils";
+import { waitForTeIdle, testControl as tc, teWrapper, sleep } from "./utils";
+import { ITeWebview, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 let explorerHasFocused = false;
+
+
+export const echoWebviewCommand = async(command: string, teWebview: ITeWebview, waitForServer?: boolean) =>
+{
+    const echoCmd = { method: "echo/command/execute", overwriteable: false };
+	const result = await teWebview.notify(echoCmd, { command });
+    expect(result).to.be.equal(true);
+    if (waitForServer) {
+		await sleep(500);
+		await waitForTeIdle(tc.waitTime.licenseMgr.request);
+    }
+    return result;
+};
 
 
 export const executeSettingsUpdate = async (key: string, value?: any, minWait?: number, maxWait?: number) =>

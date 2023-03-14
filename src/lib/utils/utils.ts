@@ -10,6 +10,9 @@ import { configuration } from "../configuration";
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 
 
+export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
+
+
 export const formatDate = (epochMs: number, format?: "datetime" | "date" | "time") =>
 {
     const t = (new Date((epochMs ?? Date.now()) - tzOffset)).toISOString().slice(0, -1).split("T");

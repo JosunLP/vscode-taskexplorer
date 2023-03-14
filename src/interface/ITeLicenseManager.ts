@@ -2,9 +2,23 @@
 
 export interface TeSessionChangeEvent
 {
-    added: ITeSession[];
-    removed: ITeSession[];
-    changed: ITeSession[];
+	account: ITeAccount;
+	changeNumber: number;
+	changeFlags: {
+		expiration: boolean;
+		license: boolean;
+		licenseState: boolean;
+		licenseType: boolean;
+		paymentDate: boolean;
+		session: boolean;
+		trialPeriod: boolean;
+		verification: boolean;
+	};
+	session: {
+		added: ITeSession[];
+		removed: ITeSession[];
+		changed: ITeSession[];
+	};
 };
 
 export interface ITeSession
@@ -66,8 +80,10 @@ export interface ITeLicenseManager
 {
     account: ITeAccount;
     isLicensed: boolean;
+    isPaid: boolean;
     isRegistered: boolean;
     isTrial: boolean;
+	isTrialExtended: boolean;
     checkLicense(logPad: string): Promise<void>;
     getMaxNumberOfTasks: (taskType?: string | undefined) => number;
     getMaxNumberOfTaskFiles: () => number;

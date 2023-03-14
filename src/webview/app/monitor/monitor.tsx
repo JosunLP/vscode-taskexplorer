@@ -12,8 +12,8 @@ import { TeWebviewApp } from "../webviewApp";
 // eslint-disable-next-line import/extensions
 import { createRoot } from "react-dom/client";
 import {
-	IpcStateChangedParams, IpcStateChangedMsg, IpcTaskChangedMsg, IpcTasksChangedMsg, IIpcMessage,
-	onIpc, MonitorAppState, IpcTaskChangedParams, IpcExecCommand, IpcConfigChangedMsg, IpcUpdateConfigCommand
+	IpcTaskChangedMsg, IpcTasksChangedMsg, IIpcMessage, onIpc, MonitorAppState, IpcTaskChangedParams,
+	IpcExecCommand, IpcConfigChangedMsg, IpcUpdateConfigCommand, IpcLicenseChangedMsg, IpcLicenseChangedParams
 } from "../../common/ipc";
 
 
@@ -108,12 +108,10 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 		const msg = e.data as IIpcMessage;
 		switch (msg.method)
 		{
-			case IpcTasksChangedMsg.method:
-				onIpc(IpcTasksChangedMsg, msg, params => {
-					Object.assign(this.state, { ...params });
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method}`, 1);
-					this.app.setTasks(params.list, this.state.tasks);
-					this.setState(this.state);
+			case IpcLicenseChangedMsg.method:
+				onIpc(IpcLicenseChangedMsg, msg, params => {
+					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, 1, params);
+					this.processLicenseChange(params);
 				});
 				break;
 			case IpcTaskChangedMsg.method:
@@ -122,10 +120,12 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 					this.handleTaskChangeEvent(params);
 				});
 				break;
-			case IpcStateChangedMsg.method:
-				onIpc(IpcStateChangedMsg, msg, params => {
-					this.log(`onMessageReceived(${msg.id}): name=${msg.method} params=`, 1, params);
-					this.processBaseStateChange(params);
+			case IpcTasksChangedMsg.method:
+				onIpc(IpcTasksChangedMsg, msg, params => {
+					Object.assign(this.state, { ...params });
+					this.log(`onMessageReceived(${msg.id}): name=${msg.method}`, 1);
+					this.app.setTasks(params.list, this.state.tasks);
+					this.setState(this.state);
 				});
 				break;
 			case IpcConfigChangedMsg.method:
@@ -143,12 +143,9 @@ class TaskMonitorWebviewApp extends TeWebviewApp<MonitorAppState>
 	private onBodyMouseDown = (e: MouseEvent) => void this.appRef.current?.handleBodyMouseDown(e);
 
 
-	private processBaseStateChange = (params: IpcStateChangedParams): void =>
+	private processLicenseChange = (_params: IpcLicenseChangedParams): void =>
     {
-		this.log("processBaseStateChange", 1);
-		Object.assign(this.state, { ...params  });
-		// this.setState(this.state);
-		// super.setState(state); // TODO - Check out how to use internally provided vscode state
+		this.log("processLicenseChange", 1);
 	};
 
 

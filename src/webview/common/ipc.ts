@@ -10,8 +10,8 @@
  * includes all of the data structures used in the messaging protocol between them.
  */
 
-import { AuthenticationSession } from "vscode";
-import { IDictionary, ITeTask, TeTaskListType, ITeAccount } from "../../interface";
+// import { AuthenticationSession } from "vscode";
+import { IDictionary, ITeTask, TeTaskListType, ITeAccount, TeSessionChangeEvent } from "../../interface";
 
 export interface BaseState
 {
@@ -101,11 +101,7 @@ export interface IpcEnabledChangedParams
 	enabled: boolean;
 }
 
-export interface IpcLicenseChangedParams {
-	account?: ITeAccount;
-	session?: AuthenticationSession;
-	isLicensed: boolean;
-}
+export interface IpcLicenseChangedParams extends TeSessionChangeEvent {};
 
 export interface IpcConfigChangedParams
 {
@@ -117,7 +113,6 @@ export interface IpcConfigChangedParams
 export const IpcEnabledChangedMsg = new IpcNotification<IpcEnabledChangedParams>("enabled/change");
 export const IpcConfigChangedMsg = new IpcNotification<IpcConfigChangedParams>("configuration/change");
 export const IpcLicenseChangedMsg = new IpcNotification<IpcLicenseChangedParams>("license/change");
-export const IpcStateChangedMsg = new IpcNotification<IpcStateChangedParams>("state/change");
 
 //
 // TASK MONITOR APP

@@ -12,9 +12,13 @@ import { hasExplorerFocused } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
-import { ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType } from "@spmeesseman/vscode-taskexplorer-types";
-import { commands, ConfigurationTarget, Disposable, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks, Uri, ViewColumn, window, workspace } from "vscode";
-
+import {
+    ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType
+} from "@spmeesseman/vscode-taskexplorer-types";
+import {
+    commands, ConfigurationTarget, Disposable, Event, EventEmitter, Extension, extensions, Task,
+    TaskExecution, tasks, Uri, ViewColumn, window, workspace
+} from "vscode";
 
 const { symbols } = require("mocha/lib/reporters/base");
 
@@ -262,6 +266,9 @@ export const clearOverrideShowInfoBox = () => { overridesShowInfoBox = []; };
 export const closeEditors = () => commands.executeCommand("openEditors.closeAll");
 
 
+export const closeActiveEditor = () => commands.executeCommand("workbench.action.closeActiveEditor");
+
+
 export const createwebviewForRevive = (viewTitle: string, viewType: string) =>
 {
     const resourceDir = Uri.joinPath(teWrapper.context.extensionUri, "res");
@@ -408,10 +415,10 @@ export const logErrorsAreFine = (willFail = true) =>
 };
 
 
-export const overrideNextShowInputBox = (value: any) => overridesShowInputBox.push(value);
+export const overrideNextShowInputBox = (value: any, clear?: boolean) => { if (clear === true) clearOverrideShowInputBox(); overridesShowInputBox.push(value); };
 
 
-export const overrideNextShowInfoBox = (value: any) => overridesShowInfoBox.push(value);
+export const overrideNextShowInfoBox = (value: any, clear?: boolean) => { if (clear === true) clearOverrideShowInfoBox(); overridesShowInfoBox.push(value); };
 
 
 const passthrough = (value: any, resolve: (value?: any) => void) => resolve(value);

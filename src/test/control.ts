@@ -146,12 +146,12 @@ export const testControl =
         getTreeTasks: 205,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
-            checkLicense: 200,
-            page: 1330,
+            page: 1530,
             getTrialExtension: 2175,
             getTrialExtensionDenied: 775,
             getMaxTasks: 365,
-            purchaseLicense: 1840,
+            nag: 100,
+            purchaseLicense: 1875,
             validateLicense: 2175
         },
         min: 50,
@@ -180,11 +180,11 @@ export const testControl =
             verifyByTree: 425,
             verifyFirstCall: 550,
         },
-        viewHomeView: 495,
+        viewHomeView: 1950,
         viewReleaseNotes: 760,
         viewTaskDetails: 415,
         viewTaskMonitor: 3150,
-        viewParsingReport: 440,
+        viewParsingReport: 1525,
         viewTaskUsageView: 335,
         webview: {
             notify: 955

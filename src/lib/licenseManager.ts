@@ -5,7 +5,7 @@ import { Disposable, Event, EventEmitter, window } from "vscode";
 import { executeCommand, registerCommand, Commands } from "./command/command";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
-	TeLicenseState, IDictionary, TeRuntimeEnvironment
+	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession
 } from "../interface";
 
 
@@ -17,7 +17,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _checkLicenseTask: NodeJS.Timeout;
 	private _maxFreeTasks = 500;
 	private _maxFreeTaskFiles = 100;
-	private _maxTasksReached = false;
 	private _maxTasksMessageShown = false;
 	private _maxFreeTasksForTaskType = 100;
 	private _maxFreeTasksForScriptType = 50;
@@ -66,12 +65,20 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		return this._account.errorState || this.isTrial || this._account.license.type >= TeLicenseType.Standard;
 	}
 
+	get isPaid(): boolean {
+		return this._account.license.type >= TeLicenseType.Standard && this._account.license.state === TeLicenseState.Paid;
+	}
+
 	get isRegistered(): boolean {
 		return this._account.verified;
 	}
 
 	get isTrial(): boolean {
-		return this._account.license.state === TeLicenseState.Trial;
+		return this._account.license.type <= TeLicenseType.TrialExtended && this._account.license.state === TeLicenseState.Trial && this._account.license.period <= 2;
+	}
+
+	get isTrialExtended(): boolean {
+		return this._account.license.type === TeLicenseType.TrialExtended && this._account.license.state === TeLicenseState.Trial && this._account.license.period === 2;
 	}
 
     get onDidSessionChange(): Event<TeSessionChangeEvent> {
@@ -99,8 +106,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, undefined, logPad + "   ", {});
-			await this.saveAccount(logPad + "   ");
+			const account = await this.wrapper.server.request<ITeAccount>(ep, undefined, logPad + "   ", {});
+			await this.saveAccount(account, logPad + "   ");
 			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.", "More Info")
 			.then((action) =>
 			{
@@ -177,13 +184,17 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 		if (displayPopup)
 		{
-			const options = [ "Info", "Not Now" ];
+			const options = [ "Buy License", "Info", "Not Now" ];
 			if (this._account.license.type !== TeLicenseType.TrialExtended) {
 				options.push("Extend Trial");
 			}
 			await this.wrapper.storage.update(this.wrapper.keys.Storage.LastLicenseNag, Date.now().toString());
 			const action = await window.showInformationMessage(message, ...options);
-			if (action === "Extend Trial")
+			if (action === "Buy License")
+			{
+				await executeCommand(Commands.PurchaseLicense);
+			}
+			else if (action === "Extend Trial")
 			{
 				await executeCommand(Commands.ExtendTrial);
 			}
@@ -203,6 +214,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			  token = this._account.session.token;
 
 		this._busy = true;
+		this.wrapper.statusBar.update("Requesting extended trial");
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
 
 		if (this._account.license.period > 1)
@@ -211,6 +223,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			window.showInformationMessage("Can't proceed - " + msg);
 			this.wrapper.log.write("   " + msg, 1, logPad);
 			this.wrapper.log.methodDone("request extended trial", 1, logPad);
+			this.wrapper.statusBar.update("");
 			this._busy = false;
 			return;
 		}
@@ -220,13 +233,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		//
 		const firstName = "Scott",
 			  lastName = "Meesseman",
-			  email = `spm-${this.wrapper.utils.getRandomNumber()}@gmail.com`;
+			  email = `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`;
 
-		this.wrapper.statusBar.update("Requesting extended trial");
 
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad,
+			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad,
 			{
 				accountId: this._account.id,
 				email,
@@ -234,7 +246,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				lastName,
 				tests: this.wrapper.tests
 			});
-			await this.saveAccount("   ");
+			await this.saveAccount(account, "   ");
 		}
 		catch (e) {
 			/* istanbul ignore next */
@@ -326,14 +338,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 					case "Account license does not exist":   // 409
 						this._account.license.type = TeLicenseType.Free;
 						this._account.license.state = TeLicenseState.Free;
-						await this.saveAccount("   ");
+						await this.saveAccount(this._account, "   ");
 						this._account.verified = false;
 						break;
 					// case "Account trial cannot be extended": // 402
 					case "Invalid license key":              // 406
 						this._account.license.type = TeLicenseType.Free;
 						this._account.license.state = TeLicenseState.Free;
-						await this.saveAccount("   ");
+						await this.saveAccount(this._account, "   ");
 						break;
 					// case "Error - could not update trial":
 					// case "Invalid request parameters":
@@ -386,14 +398,47 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private purchaseLicense = async(): Promise<void> =>
-	{   //
-		// TODO - Purchase license
-		//
-		this.wrapper.log.methodStart("purchase license key", 1);
-		await executeCommand(Commands.Donate);
-		window.showInformationMessage("Not implemented yet");
-		this.wrapper.log.methodDone("purchase license key", 1);
+	private purchaseLicense = async(logPad: string): Promise<void> =>
+	{
+		this.wrapper.log.methodStart("purchase license", 1, logPad);
+		/* istanbul ignore else */
+		if (this.wrapper.tests)
+		{   //
+			// For tests, simulate a payment triggered by a PayPal transaction using the
+			// license/payment endpoint, then call the license/validate endpoint to retrieve
+			// the new license state
+			//
+			this.wrapper.statusBar.update("Sending payment request");
+			const ep: ITeApiEndpoint = "license/payment",
+				  token = this._account.session.token,
+				  key = this._account.license.key,
+				  email = `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`,
+				  firstName = "Scott",
+				  lastName = "Meesseman";
+			try
+			{
+				await this.wrapper.server.request<ITeAccount>(ep, token, logPad, {
+					testsPaid: true, firstName, lastName, email, key
+				});
+				await this.validateLicense(this._account.license.key, logPad + "   ");
+			}
+			catch (e) {
+				await this.handleServerError(e);
+			}
+			finally {
+				this.wrapper.statusBar.update("");
+			}
+		}
+		else
+		{   //
+			// TODO
+			// Use Paypal Payments REST API for payment.
+			// PayPal API will send notification to /api/license/payment/v1
+			// Use validateLicense() in an interval-timer to check on payment status after payment is made
+			//
+			window.showInformationMessage("Not implemented yet");
+		}
+		this.wrapper.log.methodDone("purchase license", 1, logPad);
 	};
 
 
@@ -408,29 +453,76 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private saveAccount = async (logPad: string): Promise<void> =>
+	private saveAccount = async (account: ITeAccount, logPad: string): Promise<void> =>
 	{
 		this.wrapper.log.methodStart("save account", 1, logPad);
 		++this._accountChangeNumber;
 		this.wrapper.log.values(1, logPad + "   ", [
-			[ "account id", this._account.id ],
+			[ "account id", account.id ],
 			[ "account change #", this._accountChangeNumber ],
-			[ "license issued", this.wrapper.utils.formatDate(this._account.session.issued) ],
-			[ "license expires", this.wrapper.utils.formatDate(this._account.session.expires) ]
+			[ "license issued", this.wrapper.utils.formatDate(account.session.issued) ],
+			[ "license expires", this.wrapper.utils.formatDate(account.session.expires) ]
 		]);
 		/* istanbul ignore else */
 		if (this.wrapper.env !== "production")
 		{
-			this.wrapper.log.values(1, logPad + "   ", [
-				[ "license id", this._account.license.id ], [ "trial id", this._account.trialId ],
-				[ "access token", this._account.session.token ], [ "license key", this._account.license.key ]
+			this.wrapper.log.values(2, logPad + "   ", [
+				[ "license id", account.license.id ], [ "trial id", account.trialId ],
+				[ "access token", account.session.token ], [ "license key", account.license.key ]
 			]);
 			const rPath = await this.wrapper.pathUtils.getInstallPath() + `\\dist\\account_saved_${this._accountChangeNumber}.json`;
-			await this.wrapper.fs.writeFile(rPath, JSON.stringify(this._account, null, 3));
+			await this.wrapper.fs.writeFile(rPath, JSON.stringify(account, null, 3));
 		}
-		await this.wrapper.storage.updateSecret(this.wrapper.keys.Storage.Account, JSON.stringify(this._account));
-		this.onSessionChanged({ added: [ this._account.session ], removed: [], changed: [] });
+		//
+		// Save and set new account, clone previous account object for change flag comparison
+		//
+		const accountJson = JSON.stringify(account);
+		await this.wrapper.storage.updateSecret(this.wrapper.keys.Storage.Account, accountJson);
+		const pAccount = this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account);
+		this._account = JSON.parse(accountJson);
+		//
+		// Queue task to notify of session changed
+		//
+		this.wrapper.log.write("   queue trigger session change event", 2, logPad);
+		queueMicrotask(() =>
+		{
+			this.onSessionChanged(
+			{
+				account: this.wrapper.utils.cloneJsonObject(this._account),
+				changeNumber: this._accountChangeNumber,
+				changeFlags: {
+					expiration: this._account.license.expired !== pAccount.license.expired,
+					license: this._account.license.paid !== pAccount.license.paid,
+					licenseState: this._account.license.state !== pAccount.license.state,
+					licenseType: this._account.license.type !== pAccount.license.type,
+					paymentDate: this._account.license.paid !== pAccount.license.paid,
+					session: this._account.session.token !== pAccount.session.token,
+					trialPeriod: this._account.license.type < 4 && this._account.license.period !== pAccount.license.period,
+					verification: this._account.verified !== pAccount.verified || this._account.verificationPending !== pAccount.verificationPending
+				},
+				session: {
+					added: [],
+					removed: [ this.wrapper.utils.cloneJsonObject(pAccount.session) ],
+					changed: [ this.wrapper.utils.cloneJsonObject(this._account.session) ]
+				}
+			});
+		});
 		this.wrapper.log.methodDone("save account", 1, logPad);
+	};
+
+
+	setMaxTasksReached = async(taskType?: string, force?: boolean) =>
+	{
+		if (force || ((!this._maxTasksMessageShown && !taskType) || (taskType && !this._maxTaskTypeMsgShown[taskType] && Object.keys(this._maxTaskTypeMsgShown).length < 3)))
+		{
+			this._maxTasksMessageShown = true;
+			if (taskType)
+			{
+				this._maxTaskTypeMsgShown[taskType] = true;
+			}
+			const msg = `The max # of parsed ${taskType ?? ""} tasks in un-licensed mode has been reached`;
+			return this.displayPopup(msg, "");
+		}
 	};
 
 
@@ -447,22 +539,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	setMaxTasksReached = async(taskType?: string, force?: boolean) =>
-	{
-		this._maxTasksReached = true;
-		if (force || ((!this._maxTasksMessageShown && !taskType) || (taskType && !this._maxTaskTypeMsgShown[taskType] && Object.keys(this._maxTaskTypeMsgShown).length < 3)))
-		{
-			this._maxTasksMessageShown = true;
-			if (taskType)
-			{
-				this._maxTaskTypeMsgShown[taskType] = true;
-			}
-			const msg = `The max # of parsed ${taskType ?? ""} tasks in un-licensed mode has been reached`;
-			return this.displayPopup(msg, "");
-		}
-	};
-
-
 	private validateLicense = async(key: string, logPad: string): Promise<void> =>
 	{
 		const ep: ITeApiEndpoint = "license/validate",
@@ -470,9 +546,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("validate license", 1, logPad);
 		try
 		{
-			this._account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, { key });
-			await this.saveAccount("   ");
-			this.wrapper.statusBar.update("");
+			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, { key });
+			await this.saveAccount(account, "   ");
 		}
 		catch (e) {
 			await this.handleServerError(e);

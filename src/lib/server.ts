@@ -16,7 +16,7 @@ export interface ServerError
 	success: false;
 }
 
-export type ITeApiEndpoint = "license/validate" | "login" | "register" | "register/trial/start" | "register/trial/extend";
+export type ITeApiEndpoint = "license/validate" | "license/payment" | "login" | "register" | "register/trial/start" | "register/trial/extend";
 
 
 export class TeServer
@@ -94,10 +94,10 @@ export class TeServer
 	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
 
 
-	private getDefaultServerOptions = (apiEndpoint: ITeApiEndpoint) =>
+	private getServerOptions = (apiEndpoint: ITeApiEndpoint, token?: string) =>
 	{
 		const server = this.apiServer;
-		return {
+		const options = {
 			hostname: server,
 			method: "POST",
 			path: this.getApiPath(apiEndpoint),
@@ -110,9 +110,15 @@ export class TeServer
 			headers: <{[id: string]: string}>{
 				"token": this.apiClientId,
 				// eslint-disable-next-line @typescript-eslint/naming-convention
-				"User-Agent": "vscode-taskexplorer", "Content-Type": "application/json"
+				"User-Agent": "vscode-taskexplorer",
+				// eslint-disable-next-line @typescript-eslint/naming-convention
+				"Content-Type": "application/json"
 			}
 		};
+		if (token) {
+			options.headers.authorization = "Bearer " + token;
+		}
+		return options;
 	};
 
 
@@ -201,10 +207,7 @@ export class TeServer
 			let rspData = "";
 			let errorState = false;
 
-			const options = this.getDefaultServerOptions(endpoint);
-			if (token) {
-				options.headers.authorization = "Bearer: " + token;
-			}
+			const options = this.getServerOptions(endpoint, token);
 
 			this.wrapper.log.methodStart("server request", 1, logPad, false, [
 				[ "host", options.hostname ], [ "port", options.port ], [ "endpoint", endpoint ]

@@ -69,6 +69,7 @@ export interface ITeTypeUtilities
 
 export interface ITeUtilities
 {
+	cloneJsonObject<T>(jso: any): T;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;
