@@ -2,8 +2,11 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { startupFocus } from "../utils/suiteUtils";
-import { closeTeWebview, showTeWebview } from "../utils/commandUtils";
-import { activate, testControl, suiteFinished, exitRollingCount, endRollingCount, teWrapper } from "../utils/utils";
+import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { closeTeWebview, executeSettingsUpdate, showTeWebview } from "../utils/commandUtils";
+import { activate, testControl as tc, suiteFinished, exitRollingCount, endRollingCount } from "../utils/utils";
+
+let teWrapper: ITeWrapper;
 
 
 suite("Welcome Page Tests", () =>
@@ -11,7 +14,7 @@ suite("Welcome Page Tests", () =>
 	suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        await activate(this);
+        ({ teWrapper } = await activate(this));
         endRollingCount(this, true);
 	});
 
@@ -29,10 +32,23 @@ suite("Welcome Page Tests", () =>
 	});
 
 
+    test("Update Relevant Settings", async function()
+    {   //
+		// These settings as of 3/14/23 aren't really relevant, but, if there isn't a break or
+		// a task after startupFOcus() the showWelcome test below will take ~3s instead of 500ms
+		//
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.groupingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false, tc.waitTime.config.groupingEvent);
+        endRollingCount(this);
+    });
+
+
 	test("Open Welcome Page", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.welcome + testControl.slowTime.closeEditors);
+		this.slow(tc.slowTime.webview.show.page.welcome + tc.slowTime.closeEditors);
 		await showTeWebview(teWrapper.welcomePage);
 		await closeTeWebview(teWrapper.welcomePage);
         endRollingCount(this);

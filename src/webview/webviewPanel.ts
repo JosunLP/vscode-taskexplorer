@@ -10,18 +10,16 @@
 
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewBase } from "./webviewBase";
-import { IpcEnabledChangedMsg } from "./common/ipc";
 import { ContextKeys, WebviewIds } from "../lib/context";
 import { Commands, registerCommand } from "../lib/command/command";
 import {
     WebviewOptions, WebviewPanel, WebviewPanelOnDidChangeViewStateEvent, WebviewPanelOptions, WindowState,
-    Disposable, Uri, ViewColumn, window, WebviewPanelSerializer, ConfigurationChangeEvent
+    Disposable, Uri, ViewColumn, window, WebviewPanelSerializer
 } from "vscode";
 
 
 export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> implements Disposable
 {
-	private _teEnabled: boolean;
 	private _disposablePanel: Disposable | undefined;
 	protected override _view: WebviewPanel | undefined = undefined;
 
@@ -70,23 +68,6 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 
 	protected override includeBootstrap = () => this.getState();
-
-
-	private async onConfigChangedBase(e: ConfigurationChangeEvent)
-	{
-		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.EnableExplorerTree, this.wrapper.keys.Config.EnableSideBar))
-		{
-			const enabled = this.wrapper.utils.isTeEnabled();
-			if (enabled !== this._teEnabled)
-			{
-				this._teEnabled = enabled;
-				this.notify(IpcEnabledChangedMsg, { enabled });
-				// if (!enabled) {
-				// 	setTimeout(() => this.dispose(), 500);
-				// }
-			}
-		}
-	}
 
 
 	protected override onHtmlPreviewBase = async(html: string, ...args: unknown[]) =>
@@ -194,7 +175,6 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 				this._view.webview.onDidReceiveMessage(this.onMessageReceivedBase, this),
 				...(this.onInitializing?.() ?? []),
 				...(this.registerCommands?.() ?? []),
-				this.wrapper.config.onDidChange(this.onConfigChangedBase, this),
 				window.onDidChangeWindowState(this.onWindowStateChanged, this),
 				this._view
 			);

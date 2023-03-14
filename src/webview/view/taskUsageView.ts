@@ -34,7 +34,7 @@ export class TaskUsageView extends TeWebviewView<State>
 	protected override includeEndOfBody = async() => "<!-- spm -->"; // For coverage, endOfBody and no bootstrap
 
 
-	private async onConfigChanged(e: ConfigurationChangeEvent)
+	protected override async onConfigChanged(e: ConfigurationChangeEvent)
 	{
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
@@ -47,13 +47,13 @@ export class TaskUsageView extends TeWebviewView<State>
 				this.skippedNotify = true;
 			}
 		}
+		await super.onConfigChanged(e);
 	}
 
 
 	protected override onInitializing()
 	{
 		return  [
-			this.wrapper.config.onDidChange(this.onConfigChanged, this),
 			this.wrapper.storage.onDidChange(this.onStorageChanged, this)
 		];
 	}

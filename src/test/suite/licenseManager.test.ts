@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { Task } from "vscode";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
-import { echoWebviewCommand, executeTeCommand, focusExplorerView } from "../utils/commandUtils";
+import { echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview } from "../utils/commandUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 const tc = utils.testControl;
@@ -79,6 +79,17 @@ suite("License Manager Tests", () =>
 	test("Focus Explorer View", async function() { await startupFocus(this); });
 
 
+    test("Enable SideBar", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.config.registerExplorerEvent + tc.slowTime.commands.focusChangeViews);
+        await executeSettingsUpdate("enableSideBar", true, tc.waitTime.config.registerExplorerEvent);
+        await showTeWebview(teWrapper.homeView);
+		await focusExplorerView(teWrapper);
+        utils.endRollingCount(this);
+    });
+
+
 	test("Get Maximum # of Tasks in Unlicensed Mode)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
@@ -123,12 +134,13 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Open Home View in Trial Mode", async function()
+	test("Open SideBar Views in Trial Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
-		void teWrapper.homeView.show();
-        await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
+		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount + tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
+		await showTeWebview(teWrapper.homeView);
+		await showTeWebview(teWrapper.taskCountView);
+		await showTeWebview(teWrapper.taskUsageView);
         utils.endRollingCount(this);
 	});
 
@@ -281,13 +293,13 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Open Home View in Unlicensed Mode", async function()
+	test("Open SideBar Views in Unlicensed Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow((tc.slowTime.commands.focusChangeViews * 2) + tc.slowTime.webview.show.view.home);
-		void teWrapper.homeView.show();
-        await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
-		await focusExplorerView(teWrapper);
+		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount + tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
+		await showTeWebview(teWrapper.homeView);
+		await showTeWebview(teWrapper.taskCountView);
+		await showTeWebview(teWrapper.taskUsageView);
         utils.endRollingCount(this);
 	});
 
@@ -510,6 +522,15 @@ suite("License Manager Tests", () =>
 		await utils.treeUtils.refresh();
         utils.endRollingCount(this);
 	});
+
+
+    test("Disable SideBar", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.registerExplorerEvent);
+        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.registerExplorerEvent);
+        utils.endRollingCount(this);
+    });
 
 });
 

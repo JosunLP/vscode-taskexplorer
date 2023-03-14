@@ -16,11 +16,12 @@ import { TeWebviewPanel } from "./webviewPanel";
 import { fontawesome } from "./common/fontawesome";
 import { ITeWebview, TeSessionChangeEvent } from "../interface";
 import { Commands, executeCommand } from "../lib/command/command";
-import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
+import { ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
-	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcUpdateConfigCommand, IpcLicenseChangedMsg
+	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcUpdateConfigCommand, IpcLicenseChangedMsg, IpcEnabledChangedMsg
 } from "./common/ipc";
+import { wrap } from "module";
 
 
 export interface FontAwesomeClass
@@ -59,6 +60,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected _isReady = false;
 	protected skippedNotify = false;
 	protected ignoreTeBusy = true;
+	protected _teEnabled: boolean;
 	protected _view: WebviewView | WebviewPanel | undefined;
 	protected readonly disposables: Disposable[] = [];
 
@@ -78,9 +80,11 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		this._originalTitle = title;
 		this._cspNonce = getNonce();
 		this._onReadyReceived = new EventEmitter<void>();
+		this._teEnabled = wrapper.utils.isTeEnabled();
 		this.disposables.push(
 			this._onReadyReceived,
-			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged, this)
+			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged, this),
+			wrapper.config.onDidChange(this.onConfigChanged, this)
 		);
     }
 
@@ -282,6 +286,20 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	notify = <T extends IpcNotification<any>>(type: T, params: IpcMessageParams<T>, completionId?: string): Promise<boolean> =>
 		this.postMessage({ id: this.nextIpcId(), method: type.method, params, completionId });
+
+
+	protected async onConfigChanged(e: ConfigurationChangeEvent)
+	{
+		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.EnableExplorerTree, this.wrapper.keys.Config.EnableSideBar))
+		{
+			const enabled = this.wrapper.utils.isTeEnabled();
+			if (enabled !== this._teEnabled)
+			{
+				this._teEnabled = enabled;
+				await this.notify(IpcEnabledChangedMsg, { enabled });
+			}
+		}
+	}
 
 
 	protected onHtmlPreview = async(html: string, ...args: unknown[]): Promise<string> => html;

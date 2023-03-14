@@ -2,8 +2,7 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { ConfigKeys } from "../../lib/constants";
-import { executeSettingsUpdate, executeTeCommand } from "../utils/commandUtils";
+import { executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview } from "../utils/commandUtils";
 import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc } from "../utils/utils";
 
 let aKey: string;
@@ -25,6 +24,17 @@ suite("Usage / Telemetry Tests", () =>
     {
         if (exitRollingCount(this, false, true)) return;
         suiteFinished(this);
+    });
+
+
+    test("Enable SideBar", async function()
+    {   //
+        // Note: need enabled for Webview Test Suite as well, so leave enabled
+        //
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.config.registerExplorerEvent);
+        await executeSettingsUpdate("enableSideBar", true, tc.waitTime.config.registerExplorerEvent);
+        endRollingCount(this);
     });
 
 
@@ -50,14 +60,14 @@ suite("Usage / Telemetry Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.config.trackingEvent * 7) + 20);
-        await executeSettingsUpdate(ConfigKeys.AllowUsageReporting, true);
-        await executeSettingsUpdate(ConfigKeys.AllowUsageReporting, false);
-        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false);
-        await executeSettingsUpdate(ConfigKeys.TrackUsage, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
         await sleep(10);
         await executeTeCommand("getApi");
-        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true);
-        await executeSettingsUpdate(ConfigKeys.TrackUsage, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
         endRollingCount(this);
     });
 
@@ -68,6 +78,24 @@ suite("Usage / Telemetry Tests", () =>
         teWrapper.usage.getLastRanTaskTime();
         teWrapper.usage.getAvgRunCount ("d", "");
         teWrapper.usage.getAvgRunCount ("w", "");
+        endRollingCount(this);
+    });
+
+
+    test("Open Task Usage View", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
+        await showTeWebview(teWrapper.taskUsageView);
+        endRollingCount(this);
+    });
+
+
+    test("Focus Explorer View", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.commands.focusChangeViews);
+        await focusExplorerView(teWrapper);
         endRollingCount(this);
     });
 

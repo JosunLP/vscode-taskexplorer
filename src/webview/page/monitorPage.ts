@@ -96,12 +96,13 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
 
 
-	private async onConfigChanged(e: ConfigurationChangeEvent)
+	protected override async onConfigChanged(e: ConfigurationChangeEvent)
 	{
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor.TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
 			this.notify(IpcConfigChangedMsg, this.getSettingsState());
 		}
+		await super.onConfigChanged(e);
 	}
 
 
@@ -113,8 +114,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			this.wrapper.treeManager.onDidFavoriteTasksChange(this.onFavoriteTasksChanged, this),
 			this.wrapper.usage.onDidFamousTasksChange(this.onFamousTasksChanged, this),
 			this.wrapper.taskWatcher.onDidRunningTasksChange(this.onRunningTasksChanged, this),
-			this.wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
-			this.wrapper.config.onDidChange(this.onConfigChanged, this)
+			this.wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this)
 		];
 	}
 

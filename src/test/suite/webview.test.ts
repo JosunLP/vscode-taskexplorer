@@ -39,11 +39,13 @@ suite("Webview Tests", () =>
 	});
 
 
-    test("Enable and Focus SideBar", async function()
-    {
+    test("Focus SideBar", async function()
+    {   //
+        // Note: SideBar was enabled for Usage Test Suite, andleft enabled.  Disable when
+        // this test suite has completed
+        //
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.config.registerExplorerEvent);
-        await executeSettingsUpdate("enableSideBar", true, tc.waitTime.config.enableEvent);
         await showTeWebview(teWrapper.homeView);
         endRollingCount(this);
     });
@@ -84,7 +86,7 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.webview.show.view.taskUsage * 2) + tc.slowTime.commands.focusChangeViews);
-        await commands.executeCommand("taskexplorer.view.taskUsage.focus");
+        await showTeWebview(teWrapper.taskUsageView);
         await focusExplorerView(teWrapper);
         await teWrapper.homeView.notify({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover notify() when not visible
         await showTeWebview(teWrapper.taskUsageView);
