@@ -423,6 +423,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				await this.validateLicense(this._account.license.key, logPad + "   ");
 			}
 			catch (e) {
+				/* istanbul ignore next */
 				await this.handleServerError(e);
 			}
 			finally {

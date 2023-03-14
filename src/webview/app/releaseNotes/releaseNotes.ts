@@ -18,12 +18,6 @@ export class ReleaseNotesWebviewApp extends TeWebviewApp<State>
 	}
 
 
-	// protected override onInitialize()
-    // {
-	// 	provideVSCodeDesignSystem().register(vsCodeButton());
-	// }
-
-
     protected override onBind(): Disposable[]
     {
 		const disposables = super.onBind?.() ?? [];
@@ -32,15 +26,6 @@ export class ReleaseNotesWebviewApp extends TeWebviewApp<State>
 		);
 		return disposables;
     }
-
-
-	protected override onDataActionClicked(_e: MouseEvent, target: HTMLElement)
-    {
-		const action = target.dataset.action;
-		if (action) {
-			this.sendCommand(IpcExecCommand, { command: action.slice(8) });
-		}
-	}
 
 
 	private toggle = (element: HTMLElement) =>

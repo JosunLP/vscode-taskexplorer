@@ -72,8 +72,7 @@ suite("Webview Tests", () =>
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" });
         await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
         await commands.executeCommand("taskexplorer.view.home.refresh");
-        // await commands.executeCommand("taskexplorer.donate"); for now 'purchaseLicense' is calling 'donate'
-        await commands.executeCommand("taskexplorer.purchaseLicense"); // ^^^ TODO ^^^
+        await commands.executeCommand("taskexplorer.donate");
         await commands.executeCommand("taskexplorer.openBugReports");
         await commands.executeCommand("taskexplorer.openRepository");
         endRollingCount(this);
@@ -83,7 +82,7 @@ suite("Webview Tests", () =>
     test("Task Usage View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.focusChangeViews + 100);
+        this.slow((tc.slowTime.webview.show.view.taskUsage * 2) + tc.slowTime.commands.focusChangeViews);
         await commands.executeCommand("taskexplorer.view.taskUsage.focus");
         await focusExplorerView(teWrapper);
         await teWrapper.homeView.notify({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover notify() when not visible
@@ -96,7 +95,7 @@ suite("Webview Tests", () =>
     test("Task Count View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.focusChangeViews * 3);
+        this.slow((tc.slowTime.webview.show.view.taskCount * 2) + tc.slowTime.commands.focusChangeViews);
         await teWrapper.taskCountView.show();
         await promiseFromEvent(teWrapper.taskCountView.onReadyReceived).promise;
         await focusExplorerView(teWrapper);
@@ -192,6 +191,7 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusChangeViews);
         await focusExplorerView(teWrapper);
+        await waitForTeIdle(10);
         endRollingCount(this);
     });
 

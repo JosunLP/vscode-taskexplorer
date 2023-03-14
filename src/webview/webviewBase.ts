@@ -14,7 +14,7 @@ import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewView } from "./webviewView";
 import { TeWebviewPanel } from "./webviewPanel";
 import { fontawesome } from "./common/fontawesome";
-import { ITeAccount, ITeWebview, TeSessionChangeEvent } from "../interface";
+import { ITeWebview, TeSessionChangeEvent } from "../interface";
 import { Commands, executeCommand } from "../lib/command/command";
 import { Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
 import {
@@ -58,6 +58,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	protected _isReady = false;
 	protected skippedNotify = false;
+	protected ignoreTeBusy = true;
 	protected _view: WebviewView | WebviewPanel | undefined;
 	protected readonly disposables: Disposable[] = [];
 
@@ -131,7 +132,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			  uri = Uri.joinPath(webRootUri, "page", this.fileName),
 			  content = new TextDecoder("utf8").decode(await workspace.fs.readFile(uri)),
 			  cspSource = webview.cspSource,
-			  webRoot = this.getWebRoot() as string;
+			  webRoot = this.getWebRoot();
 
 		const [ bootstrap, head, body, endOfBody ] = await Promise.all(
 		[
@@ -173,7 +174,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 		html = repl(html);
 
-		this._isFirstLoadComplete = true;
 		return this.onHtmlFinalizeBase(html, ...args);
 	}
 
@@ -261,17 +261,15 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			isRegistered: this.wrapper.licenseManager.isRegistered,
 			isTrial: this.wrapper.licenseManager.isTrial,
 			nonce: this._cspNonce,
-			webroot: this.getWebRoot() as string
+			webroot: this.getWebRoot()
 		};
 	}
 
 
-	protected getWebRoot(): string | undefined
+	private getWebRoot(): string
 	{
-		if (this._view) {
-			const webRootUri = Uri.joinPath(this.wrapper.context.extensionUri, "res");
-			return this._view.webview.asWebviewUri(webRootUri).toString();
-		}
+		const webRootUri = Uri.joinPath(this.wrapper.context.extensionUri, "res");
+		return (this._view as WebviewView | WebviewPanel).webview.asWebviewUri(webRootUri).toString();
 	}
 
 
@@ -310,6 +308,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		switch (e.method)
 		{
 			case IpcReadyCommand.method:
+				this._isFirstLoadComplete = true;
 				onIpc(IpcReadyCommand, e, () => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
 				break;
 
@@ -344,8 +343,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	}
 
 
-	private onSessionChanged = (e: TeSessionChangeEvent): Promise<boolean> =>
-		this.notify(IpcLicenseChangedMsg, this.wrapper.utils.cloneJsonObject<TeSessionChangeEvent>(e));
+	protected async onSessionChanged(e: TeSessionChangeEvent): Promise<void>
+	{
+		await this.notify(IpcLicenseChangedMsg, this.wrapper.utils.cloneJsonObject<TeSessionChangeEvent>(e));
+	}
 
 
 	private postMessage(message: IIpcMessage): Promise<boolean>

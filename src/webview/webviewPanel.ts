@@ -132,7 +132,8 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		const { active, visible } = e.webviewPanel;
 		if (visible)
 		{
-			if (this.skippedNotify) { // || this.wrapper.env === "dev") {
+			/* istanbul ignore if */
+			if (this.skippedNotify) {
 				await this.refresh();
 			}
 			this.setContextKeys(active);
@@ -159,9 +160,11 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	async show(options?: { column?: ViewColumn; preserveFocus?: boolean }, ...args: any[])
 	{
-		while (this.wrapper.busy) {
+		/* istanbul ignore next */
+		while (!this.ignoreTeBusy && this.wrapper.busy) {
 			await this.wrapper.utils.sleep(100);
 		}
+
 		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
 
 		const column = options?.column ?? ViewColumn.One;
@@ -170,7 +173,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 			if (args.length === 2 && this.wrapper.typeUtils.isObject(args[0]) && args[0].webview)
 			{
 				this._view = args[0] as WebviewPanel;
-				// State = args[1],.... Not using VSCode provided state yet...
+				// State = args[1],.... Not using VSCode provided state... yet...
 				args.splice(0, 2);
 			}
 			else

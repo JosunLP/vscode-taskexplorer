@@ -2,7 +2,7 @@
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { ITeTaskChangeEvent } from "../../interface";
+import { ITeTaskChangeEvent, TeSessionChangeEvent } from "../../interface";
 import { ConfigurationChangeEvent, Disposable } from "vscode";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
@@ -61,7 +61,7 @@ export class HomeView extends TeWebviewView<State>
 	static viewTitle = "Home";
 	static viewDescription = "Home";
 	static viewId: WebviewViewIds = "home"; // Must match view id in package.json
-
+	private _taskCount = 0;
 
 	constructor(wrapper: TeWrapper)
 	{
@@ -86,11 +86,13 @@ export class HomeView extends TeWebviewView<State>
 	protected override includeFontAwesome = () => ({ light: true, icons: [ "lock", "unlock", "user", "user-slash" ]});
 
 
-	private async onTasksChanged(_e: ITeTaskChangeEvent)
+	private async onTasksChanged(e: ITeTaskChangeEvent)
 	{
 		this.wrapper.log.methodStart("HomeView Event: onTasksChanged", 2, this.wrapper.log.getLogPad());
-		if (this.isFirstLoadComplete) {
+		if (this.isFirstLoadComplete && this._taskCount !== e.tasks.length)
+		{
 			await this.refresh();
+			this._taskCount = e.tasks.length;
 		}
 		this.wrapper.log.methodDone("HomeView Event: onTasksChanged", 2, this.wrapper.log.getLogPad());
 	}
@@ -124,6 +126,16 @@ export class HomeView extends TeWebviewView<State>
 				   .replace("#{license.statusTip}", isTrial ? `${days} days left in trial` : (isLic ? `${days} days left before renewal` : ""));
 		return html;
 	};
+
+
+	protected override async onSessionChanged(e: TeSessionChangeEvent): Promise<void>
+	{
+		this.wrapper.log.methodOnce("homeview event", "session changed", 2, this.wrapper.log.getLogPad());
+		if (e.changeFlags.licenseState || e.changeFlags.licenseType || e.changeFlags.trialPeriod || e.changeFlags.verification || e.changeFlags.license) {
+			await this.refresh(true);
+		}
+		await super.onSessionChanged(e);
+	}
 
 
 	protected override onVisibilityChanged(_visible: boolean)

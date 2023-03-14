@@ -39,7 +39,7 @@ suite("Task Monitor App Tests", () =>
 	test("Open Task Monitor React App", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewTaskMonitor);
+		this.slow(testControl.slowTime.webview.show.page.taskMonitor);
 		executeTeCommand("taskexplorer.view.taskMonitor.show", 10);
         await promiseFromEvent(teWrapper.taskMonitorPage.onReadyReceived).promise;
         endRollingCount(this);

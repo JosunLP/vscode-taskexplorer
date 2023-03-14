@@ -126,7 +126,7 @@ suite("License Manager Tests", () =>
 	test("Open Home View in Trial Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewHomeView + tc.slowTime.commands.focusChangeViews);
+		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
 		void teWrapper.homeView.show();
         await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
         utils.endRollingCount(this);
@@ -157,7 +157,7 @@ suite("License Manager Tests", () =>
 	test("View and Close Parsing Report from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewParsingReport + tc.slowTime.closeEditors + tc.slowTime.webview.notify);
+		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.closeEditors + tc.slowTime.webview.notify);
 		void echoWebviewCommand("taskexplorer.view.parsingReport.show", teWrapper.licensePage);
         await utils.promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
 		expect(teWrapper.licensePage.visible).to.be.equal(false);
@@ -182,7 +182,7 @@ suite("License Manager Tests", () =>
 	test("Open Home View in Trial Extended Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewHomeView + tc.slowTime.commands.focusChangeViews);
+		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
 		void teWrapper.homeView.show();
         await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
 		expect(teWrapper.homeView.view).to.not.be.undefined;
@@ -194,7 +194,6 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.nag);
-		// await echoWebviewCommand("taskexplorer.purchaseLicense", teWrapper.homeView, true);
 		await setNag();
 		utils.overrideNextShowInfoBox("Buy License", true);
 		void licMgr.checkLicense("");
@@ -218,10 +217,20 @@ suite("License Manager Tests", () =>
 	test("Open Home View in Licensed Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewHomeView + tc.slowTime.commands.focusChangeViews);
+		this.slow(tc.slowTime.webview.show.view.home);
 		void teWrapper.homeView.show();
         await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
 		expect(teWrapper.homeView.view).to.not.be.undefined;
+		expect(teWrapper.homeView.visible).to.be.equal(true);
+		utils.sleep(10);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Re-Open Explorer Tree View", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.commands.focusChangeViews);
 		await focusExplorerView(teWrapper);
         utils.endRollingCount(this);
 	});
@@ -275,7 +284,7 @@ suite("License Manager Tests", () =>
 	test("Open Home View in Unlicensed Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow((tc.slowTime.commands.focusChangeViews * 2) + tc.slowTime.viewHomeView);
+		this.slow((tc.slowTime.commands.focusChangeViews * 2) + tc.slowTime.webview.show.view.home);
 		void teWrapper.homeView.show();
         await utils.promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
 		await focusExplorerView(teWrapper);

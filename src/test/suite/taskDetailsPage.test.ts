@@ -46,7 +46,7 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Used Task Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewTaskDetails + 150);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + 150);
 		batch = await treeUtils.getTreeTasks(teWrapper, "batch", 2);
 		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ batch[0] ], tc.waitTime.viewWebviewPage);
 		await sleep(75);
@@ -58,7 +58,7 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Used Task Non-Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewTaskDetails + 150);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + 150);
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		antTask = ant.find(t => t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
 		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ antTask ], tc.waitTime.viewWebviewPage);
@@ -86,7 +86,7 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Unused Task Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewTaskDetails + 150);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + 150);
 		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
 		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], tc.waitTime.viewWebviewPage);
 		await sleep(75);
@@ -98,7 +98,7 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Unused Task Non-Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewTaskDetails + 10);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + 10);
 		gulp = await treeUtils.getTreeTasks(teWrapper, "gulp", 14);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("gulpfile.js") && (<string>t.label).includes("build33")) as ITaskItem;
 		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ gulpTask ], tc.waitTime.viewWebviewPage);
@@ -134,7 +134,7 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (From App)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.viewTaskDetails + 150);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + 150);
 		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
 		const iTasks = teWrapper.taskUtils.toITask(teWrapper, [ batch[0].task ], "all"); // App uses ITeTask
 		await executeTeCommand2("taskexplorer.view.taskDetails.show", iTasks, tc.waitTime.viewWebviewPage);
@@ -147,7 +147,7 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Tracking Disabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.config.event * 4) + tc.slowTime.viewTaskUsageView + tc.slowTime.viewTaskDetails + 150 + tc.slowTime.closeEditors);
+		this.slow((tc.slowTime.config.event * 4) + tc.slowTime.webview.show.view.taskUsage + tc.slowTime.webview.show.page.taskDetails + 150 + tc.slowTime.closeEditors);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
 		await executeTeCommand2("taskexplorer.view.taskDetails.show", [ python[0] ], tc.waitTime.viewWebviewPage);

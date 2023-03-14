@@ -24,9 +24,7 @@ export class WelcomePage extends TeWebviewPanel<State>
 			"welcome",
 			Commands.ShowWelcomePage
 		);
+		this.ignoreTeBusy = true;
 	}
-
-
-	protected override includeBootstrap = (): Promise<State> => this.getState();
 
 }

@@ -66,8 +66,8 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 
 	async resolveWebviewView(webviewView: WebviewView, _context: WebviewViewResolveContext, _token: CancellationToken): Promise<void>
 	{
-		while (this.wrapper.busy) {
-			/* istanbul ignore next */
+		/* istanbul ignore next */
+		while (!this.ignoreTeBusy && this.wrapper.busy) {
 			await sleep(100);
 		}
 
@@ -113,8 +113,8 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 
 	async show(options?: { preserveFocus?: boolean })
 	{
-		while (this.wrapper.busy) {
-			/* istanbul ignore next */
+		/* istanbul ignore next */
+		while (!this.ignoreTeBusy && this.wrapper.busy) {
 			await sleep(100);
 		}
 		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);

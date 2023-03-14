@@ -381,6 +381,7 @@ export class Usage implements ITeUsage, Disposable
             if (usage.count.total > stats.famous[f].runCount.total)
             {
                 stats.famous.splice(f, 0, { ...iTask, ...{ listType: "famous", running: false }});
+                /* istanbul ignore if */
                 if (stats.famous.length > specTaskListLength) {
                     stats.famous.pop();
                 }

@@ -100,7 +100,7 @@ export const testControl =
             focusAlreadyFocused: 375,
             focusChangeViews: 775,
             refresh: 6250,
-            refreshNoChanges: 300,
+            refreshNoChanges: 310,
             run: 4750,
             runPause: 3100,
             runStop: 3400,
@@ -116,7 +116,7 @@ export const testControl =
             enableEventWorkspace: 1825,
             excludesEvent: 1775,
             excludeTasksEvent: 2750,
-            folderState: 800,
+            folderState: 820,
             globEvent: 1125,
             groupingEvent: 1025,
             pathToProgramsEvent: 710,
@@ -170,7 +170,7 @@ export const testControl =
             batchScriptBat: 4140,
             batchScriptCmd: 5140,
             gulpParser: 3870,
-            gulpTask: 2200,
+            gulpTask: 3260,
             npmCommand: 8000,
             npmCommandPkg: 7000,
             npmInstallCommand: 8600,
@@ -180,21 +180,29 @@ export const testControl =
             verifyByTree: 425,
             verifyFirstCall: 550,
         },
-        viewHomeView: 1950,
-        viewReleaseNotes: 760,
-        viewTaskDetails: 415,
-        viewTaskMonitor: 3150,
-        viewParsingReport: 1525,
-        viewTaskUsageView: 335,
         webview: {
-            notify: 955
+            notify: 955,
+            show: {
+                view: {
+                    home: 1950,
+                    taskCount: 825,
+                    taskUsage: 775
+                },
+                page: {
+                    releaseNotes: 760,
+                    taskDetails: 415,
+                    taskMonitor: 3150,
+                    parsingReport: 1525,
+                    welcome: 600
+                }
+            }
         },
         wsFolder: {
             add: 1650,     // bumped for multi-root ws in utils/initSettings
             addEmpty: 1590,
             remove: 550,
             removeEmpty: 475,
-            reorder: 525,   // bumped for multi-root ws in utils/initSettings
+            reorder: 540,   // bumped for multi-root ws in utils/initSettings
         },
     },
     //

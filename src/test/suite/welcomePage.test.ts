@@ -2,8 +2,9 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { startupFocus } from "../utils/suiteUtils";
-import { executeTeCommand } from "../utils/commandUtils";
-import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, teWrapper } from "../utils/utils";
+import { executeTeCommand, showTeWebview } from "../utils/commandUtils";
+import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, teWrapper, promiseFromEvent } from "../utils/utils";
+import { expect } from "chai";
 
 
 suite("Welcome Page Tests", () =>
@@ -19,7 +20,6 @@ suite("Welcome Page Tests", () =>
 	suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-		await closeEditors();
         suiteFinished(this);
 	});
 
@@ -33,11 +33,9 @@ suite("Welcome Page Tests", () =>
 	test("Open Welcome Page", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewReleaseNotes + 200);
-		await executeTeCommand("taskexplorer.view.welcome.show", testControl.waitTime.viewWebviewPage);
-		await sleep(75);
-		await teWrapper.welcomePage.show();
-		await sleep(5);
+		this.slow(testControl.slowTime.webview.show.page.welcome);
+		await showTeWebview(teWrapper.welcomePage);
+		await closeEditors();
         endRollingCount(this);
 	});
 

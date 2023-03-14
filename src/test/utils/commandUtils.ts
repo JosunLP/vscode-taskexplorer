@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { commands } from "vscode";
-import { waitForTeIdle, testControl as tc, teWrapper, sleep } from "./utils";
+import { waitForTeIdle, testControl as tc, teWrapper, sleep, promiseFromEvent } from "./utils";
 import { ITeWebview, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 let explorerHasFocused = false;
@@ -83,3 +83,11 @@ export const focusSidebarView = () => commands.executeCommand("taskexplorer.view
 
 
 export const hasExplorerFocused = () => explorerHasFocused;
+
+
+export const showTeWebview = async(teView: ITeWebview, ...args: any[]) =>
+{
+    void teView.show(undefined, ...args);
+    await promiseFromEvent(teView.onReadyReceived).promise;
+    expect(teView.visible).to.be.equal(true);
+};

@@ -4,7 +4,7 @@ import "./common/scss/te.scss";
 
 import { Disposable, DOM } from "./common/dom";
 import {
-	IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand, IDictionary
+	IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand, IDictionary, IpcExecCommand
 } from "../common/ipc";
 
 interface VsCodeApi {
@@ -23,7 +23,6 @@ export abstract class TeWebviewApp<State = undefined>
 {
 	protected onInitialize?(): void;
 	protected onBind?(): Disposable[];
-	protected onDataActionClicked?(e: MouseEvent, target: HTMLElement): void;
 	protected onInitialized?(): void;
 	protected onFocusChanged?(focused: boolean): void;
 	protected onMessageReceived?(e: MessageEvent): void;
@@ -118,6 +117,15 @@ export abstract class TeWebviewApp<State = undefined>
 	}
 
 
+	private onDataActionClicked(_e: MouseEvent, target: HTMLElement)
+    {
+		const action = target.dataset.action;
+		if (action) {
+			this.sendCommand(IpcExecCommand, { command: action.slice(8) });
+		}
+	}
+
+
 	private debounce = <T>(fn: (...args: any[]) => T, wait: number, ...args: any[]) => new Promise<T|void>(async(resolve) =>
 	{
 		if (!this._debounceDict[fn.name])
@@ -145,13 +153,8 @@ export abstract class TeWebviewApp<State = undefined>
 		this._bindDisposables?.forEach(d => d.dispose());
 		this._bindDisposables = this.onBind?.() || [];
 
-		if (this.onDataActionClicked) {
-			this._bindDisposables.push(
-				DOM.on("[data-action]", "click", this.onDataActionClicked.bind(this))
-			);
-		}
-
 		this._bindDisposables.push(
+			DOM.on("[data-action]", "click", this.onDataActionClicked.bind(this)),
 			DOM.on(document, "focusin", (e) =>
 			{
 				const inputFocused = e.composedPath().some(el => (el as HTMLElement).tagName === "INPUT");

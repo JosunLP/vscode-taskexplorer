@@ -4,9 +4,10 @@
 import { Uri, WebviewPanel } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
+import { executeSettingsUpdate, showTeWebview } from "../utils/commandUtils";
 import {
-	activate, closeEditors, testControl, suiteFinished, sleep, getWsPath, exitRollingCount, waitForTeIdle, endRollingCount, createwebviewForRevive
+	activate, closeEditors, testControl, suiteFinished, sleep, getWsPath, exitRollingCount,
+	waitForTeIdle, endRollingCount, createwebviewForRevive
 } from "../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -50,10 +51,9 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (Single Project No User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.config.showHideUserTasks + 150);
+		this.slow(testControl.slowTime.webview.show.page.parsingReport + testControl.slowTime.config.showHideUserTasks);
 		await executeSettingsUpdate("specialFolders.showUserTasks", false, testControl.waitTime.config.showHideUserTasks);
-		await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri ], testControl.waitTime.viewWebviewPage);
-		await sleep(75);
+		await showTeWebview(teWrapper.parsingReportPage, projectUri);
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -62,10 +62,9 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (Single Project w/ User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.config.showHideUserTasks + 150);
+		this.slow(testControl.slowTime.webview.show.page.parsingReport + testControl.slowTime.config.showHideUserTasks);
 		await executeSettingsUpdate("specialFolders.showUserTasks", true, testControl.waitTime.config.showHideUserTasks);
-	    await executeTeCommand2("taskexplorer.view.parsingReport.show", [ projectUri, "", 5 ], testControl.waitTime.viewWebviewPage);
-		await sleep(75);
+		await showTeWebview(teWrapper.parsingReportPage, projectUri, "", 5);
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -74,9 +73,8 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewParsingReport + 150);
-	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewWebviewPage);
-		await sleep(75);
+		this.slow(testControl.slowTime.webview.show.page.parsingReport);
+		await showTeWebview(teWrapper.parsingReportPage);
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -85,28 +83,12 @@ suite("Info Report Tests", () =>
 	test("Open Report Page (All Projects, Yarn Enabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewParsingReport + (testControl.slowTime.config.enableEvent * 2) + 150);
+		this.slow(testControl.slowTime.webview.show.page.parsingReport + (testControl.slowTime.config.enableEvent * 2));
         await teWrapper.config.updateVsWs("npm.packageManager", "yarn");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
-	    await executeTeCommand("taskexplorer.view.parsingReport.show", testControl.waitTime.viewWebviewPage);
-		await sleep(75);
+		await showTeWebview(teWrapper.parsingReportPage);
         await teWrapper.config.updateVsWs("npm.packageManager", pkgMgr);
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
-		await closeEditors();
-        endRollingCount(this);
-	});
-
-
-	test("View License Info from Webview", async function()
-	{
-        if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewParsingReport + testControl.slowTime.licenseMgr.page + 1040);
-        await teWrapper.releaseNotesPage.notify({ method: "echo/fake" }, { command: "taskexplorer.view.releaseNotes.show" }); // cover notify() when not visible
-		await sleep(10);
-		await teWrapper.licensePage.view?.webview.postMessage({ command: "showLicensePage" });
-		await sleep(500);
-		await executeTeCommand("taskexplorer.view.licensePage.show", testControl.waitTime.viewWebviewPage);
-		await sleep(10);
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -115,7 +97,7 @@ suite("Info Report Tests", () =>
 	test("Deserialize Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.viewParsingReport + 30);
+		this.slow(testControl.slowTime.webview.show.page.parsingReport + 30);
 		let panel = createwebviewForRevive("Task Explorer Parsing Report", "parsingReport");
 	    await teWrapper.parsingReportPage.serializer?.deserializeWebviewPanel(panel, null);
 		await sleep(5);

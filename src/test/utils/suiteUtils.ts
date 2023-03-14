@@ -1,6 +1,7 @@
+
+import {  refresh } from "./treeUtils";
 import { focusExplorerView, focusSidebarView } from "./commandUtils";
 import { endRollingCount, exitRollingCount, needsTreeBuild, testControl } from "./utils";
-import {  refresh } from "./treeUtils";
 
 
 export const startupBuildTree = async(instance: Mocha.Context) =>
