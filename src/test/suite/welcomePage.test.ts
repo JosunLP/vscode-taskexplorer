@@ -2,9 +2,8 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { startupFocus } from "../utils/suiteUtils";
-import { executeTeCommand, showTeWebview } from "../utils/commandUtils";
-import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, teWrapper, promiseFromEvent } from "../utils/utils";
-import { expect } from "chai";
+import { closeTeWebview, showTeWebview } from "../utils/commandUtils";
+import { activate, testControl, suiteFinished, exitRollingCount, endRollingCount, teWrapper } from "../utils/utils";
 
 
 suite("Welcome Page Tests", () =>
@@ -35,7 +34,7 @@ suite("Welcome Page Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.webview.show.page.welcome + testControl.slowTime.closeEditors);
 		await showTeWebview(teWrapper.welcomePage);
-		await closeEditors();
+		await closeTeWebview(teWrapper.welcomePage);
         endRollingCount(this);
 	});
 

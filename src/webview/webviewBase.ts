@@ -366,8 +366,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
     {
 		if (!this._view) return;
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
-		this._isReady = false;
-		this.skippedNotify = false;
+		this._isReady = this.skippedNotify = false;
 		const html = await this.getHtml(this._view.webview, ...args);
 		if (force) {
 			this._view.webview.html = "";

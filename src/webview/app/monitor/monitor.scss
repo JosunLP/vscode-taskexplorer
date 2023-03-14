@@ -102,7 +102,7 @@ button {
 	z-index: 1000;
 	border-radius: 5px;
 	border: 2px solid var(--vscode-button-background);
-	padding: 7px 15px 7px 15px;
+	padding: 7px 15px;
 }
 
 #te-monitor-flyout-menu-id::before {
@@ -116,9 +116,9 @@ button {
 	opacity: 0.08;
 	mask-size: cover;
 	background-color: #777;
-	-webkit-mask-size: cover;
 	mask: url("../img/dark/react.svg") no-repeat 100% 100%;
 	-webkit-mask: url("../img/dark/react.svg") no-repeat 100% 100%;
+	-webkit-mask-size: cover;
 }
 
 
@@ -303,7 +303,7 @@ button {
 }
 
 .te-monitor-control-button-column {
-    padding: 7px 0px 7px 0px;
+    padding: 7px 0px;
 }
   
 .te-monitor-control-button-column-last {

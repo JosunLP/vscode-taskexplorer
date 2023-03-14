@@ -166,6 +166,9 @@ suite("Webview Tests", () =>
         await executeTeCommand("taskexplorer.view.taskCount.removeView", 5);
         await executeTeCommand("taskexplorer.view.taskUsage.removeView", 5);
         await executeTeCommand("taskexplorer.view.home.removeView", 5);
+        while (teWrapper.homeView.visible || teWrapper.taskCountView.visible  || teWrapper.taskUsageView.visible) {
+            await sleep(10);
+        }
         await executeTeCommand("taskexplorer.view.taskCount.resetViewLocation", 5);
         await executeTeCommand("taskexplorer.view.taskUsage.resetViewLocation", 5);
         await executeTeCommand("taskexplorer.view.home.resetViewLocation", 5);
@@ -193,7 +196,6 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusChangeViews);
         await focusExplorerView(teWrapper);
-        await waitForTeIdle(10);
         endRollingCount(this);
     });
 

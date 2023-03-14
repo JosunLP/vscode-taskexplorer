@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { commands } from "vscode";
-import { waitForTeIdle, testControl as tc, teWrapper, sleep, promiseFromEvent } from "./utils";
+import { waitForTeIdle, testControl as tc, teWrapper, sleep, promiseFromEvent, closeEditors } from "./utils";
 import { ITeWebview, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 let explorerHasFocused = false;
@@ -68,6 +68,7 @@ export const focusExplorerView = async (wrapper: ITeWrapper | undefined, instanc
     }
     else if (instance) {
         instance.slow(tc.slowTime.commands.focusAlreadyFocused);
+        await sleep(1);
         await waitForTeIdle(tc.waitTime.min);
     }
 };
@@ -103,3 +104,18 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
 };
 
 // export const showTeWebviewTimeout = (teView: ITeWebview, baseTimeout: number) => baseTimeout + (wvShown.includes(teView.title) ? 0 : 400);
+
+
+export const closeTeWebview = async(teView: ITeWebview, closeAll = true) =>
+{
+    let waited = 0;
+    const maxWait = 2000;
+    if (closeAll) {
+        await closeEditors();
+    }
+    while (teView.view && teView.visible && waited < maxWait) {
+        await sleep(25);
+        waited += 25;
+    }
+    expect(teView.visible).to.be.equal(false);
+};

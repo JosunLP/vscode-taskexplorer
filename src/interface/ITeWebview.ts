@@ -5,10 +5,10 @@ export interface ITeWebview
     description?: string;
     title: string;
     originalTitle?: string;
-    notify(type: any, params: any, completionId?: string): Promise<boolean>;
     onReadyReceived: Event<void>;
     serializer?: WebviewPanelSerializer;
-    show(options?: any, ...args: any[]): Promise<any>;
     view: WebviewView | WebviewPanel | undefined;
     readonly visible: boolean;
+    notify(type: any, params: any, completionId?: string): Promise<boolean>;
+    show(options?: any, ...args: any[]): Promise<any>;
 }

@@ -3,9 +3,11 @@
 
 import { Extension } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
-import { executeTeCommand, showTeWebview } from "../utils/commandUtils";
+import { closeTeWebview, showTeWebview } from "../utils/commandUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount, promiseFromEvent } from "../utils/utils";
+import {
+	activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount
+} from "../utils/utils";
 
 let teWrapper: ITeWrapper;
 let extension: Extension<any>;
@@ -41,7 +43,7 @@ suite("Release Notes Page Tests", () =>
 		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.closeEditors);
 		await showTeWebview(teWrapper.releaseNotesPage);
 		await sleep(5);
-		await closeEditors();
+		await closeTeWebview(teWrapper.releaseNotesPage);
         endRollingCount(this);
 	});
 
@@ -59,6 +61,7 @@ suite("Release Notes Page Tests", () =>
 		}
 		catch (e) { throw e; }
 		finally { extension.packageJSON.version = version; }
+		await closeTeWebview(teWrapper.releaseNotesPage);
         endRollingCount(this);
 	});
 
