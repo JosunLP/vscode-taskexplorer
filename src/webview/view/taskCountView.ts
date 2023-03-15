@@ -2,6 +2,7 @@
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
+import { debounce } from "../../lib/command/command";
 import { ITeTaskChangeEvent } from "../../interface";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
@@ -48,6 +49,6 @@ export class TaskCountView extends TeWebviewView<State>
 	}
 
 
-	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => this.refresh();
+	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => debounce("taskCount:", this.refresh, 75);
 
 }

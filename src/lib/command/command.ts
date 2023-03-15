@@ -2,8 +2,9 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { IDictionary } from "../../interface";
 import {
-	Command as VsCodeCommand, Disposable, Uri, commands, Command
+	Command as VsCodeCommand, Disposable, commands
 } from "vscode";
 
 type SupportedCommands = Commands | `taskexplorer.view.${string}.focus` | `taskexplorer.view.${string}.resetViewLocation`;
@@ -114,3 +115,25 @@ export function executeCommand<T extends [...unknown[]] = [], U = any>(command: 
 	// this.wrapper.telemetry.sendEvent("command/taskexplorer", { command: command });
 	return commands.executeCommand<U>(command, ...args);
 }
+
+const _debounceDict: IDictionary<IDebounceParams> = {};
+interface IDebounceParams { fn: (...args: any[]) => any; start: number; args: any[] }
+
+export const debounce = <T>(key: string, fn: (...args: any[]) => T, wait: number, ...args: any[]) => new Promise<T|void>(async(resolve) =>
+{
+	const dKey = key + fn.name;
+	if (!_debounceDict[dKey])
+	{
+		_debounceDict[dKey] = { fn, start: Date.now(), args };
+		setTimeout((p: IDebounceParams) =>
+		{
+			resolve(p.fn.call(this, ...p.args));
+			delete _debounceDict[dKey];
+		},
+		wait, _debounceDict[dKey]);
+	}
+	else {
+		Object.assign(_debounceDict[dKey], { args });
+		setTimeout(() => resolve(), Date.now() - _debounceDict[dKey].start);
+	}
+});

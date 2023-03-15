@@ -2,10 +2,11 @@
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { ConfigKeys, StorageKeys } from "../../lib/constants";
-import { StorageChangeEvent } from "../../interface";
-import { ContextKeys, WebviewViewIds } from "../../lib/context";
 import { ConfigurationChangeEvent } from "vscode";
+import { debounce } from "../../lib/command/command";
+import { StorageChangeEvent } from "../../interface";
+import { ConfigKeys, StorageKeys } from "../../lib/constants";
+import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 
 export class TaskUsageView extends TeWebviewView<State>
@@ -39,7 +40,7 @@ export class TaskUsageView extends TeWebviewView<State>
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
 			this.wrapper.log.methodOnce("task usage view event", "onConfigChanged", 2, this.wrapper.log.getLogPad());
-			await this.refresh();
+			await debounce("taskUsage:", this.refresh, 75);
 		}
 		await super.onConfigChanged(e);
 	}
@@ -58,6 +59,7 @@ export class TaskUsageView extends TeWebviewView<State>
 		if (e.key === StorageKeys.Usage || e.key === StorageKeys.TaskUsage)
 		{
 			this.wrapper.log.methodOnce("task usage view event", "onStorageChanged", 2, this.wrapper.log.getLogPad());
+			// await debounce("taskUsage:", this.refresh, 75);
 			await this.refresh();
 		}
 	}
