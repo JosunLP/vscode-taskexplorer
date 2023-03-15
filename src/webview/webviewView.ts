@@ -68,8 +68,8 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	async resolveWebviewView(webviewView: WebviewView, _context: WebviewViewResolveContext, _token: CancellationToken): Promise<void>
 	{
 		/* istanbul ignore next */
-		while (!this.ignoreTeBusy && this.wrapper.busy) {
-			await sleep(100);
+		while (!this._ignoreTeBusy && this.wrapper.busy) {
+			await sleep(50);
 		}
 
 		this._view = webviewView;
@@ -92,7 +92,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 			...(this.registerCommands?.() ?? [])
 		);
 
-		await this.refresh();
+		await this.refresh(true);
 		this.onVisibilityChanged?.(true);
 	}
 
@@ -114,8 +114,8 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	async show(options?: { preserveFocus?: boolean })
 	{
 		/* istanbul ignore next */
-		while (!this.ignoreTeBusy && this.wrapper.busy) {
-			await sleep(100);
+		while (!this._ignoreTeBusy && this.wrapper.busy) {
+			await sleep(50);
 		}
 		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
 		await commands.executeCommand(`${this.id}.focus`, options);
@@ -133,7 +133,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 		this._disposableView?.dispose();
 		this._disposableView = undefined;
 		this._view = undefined;
-		this.skippedNotify = false;
+		this._skippedChangeEvent = false;
 	}
 
 
@@ -148,9 +148,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	{
 		if (visible)
 		{
-			if (this.skippedNotify) { // || this.wrapper.env === "dev") {
-				await this.refresh();
-			}
+			await this.refresh(false, true);
 		}
 		else {
 			this.onFocusChanged?.(false);

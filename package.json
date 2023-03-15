@@ -51,9 +51,6 @@
     "activationEvents": [
         "*"
     ],
-    "activationEvents": [
-        "*"
-    ],
     "preview": false,
     "pricing": "Trial",
     "scripts": {

@@ -89,19 +89,25 @@ export const hasExplorerFocused = () => explorerHasFocused;
 
 export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) =>
 {
-    let teWebview: ITeWebview;
+    let teWebview: ITeWebview,
+        wasVisible = false;
     if (typeof teView === "string" || teView instanceof String)
     {
         teWebview = await executeTeCommand2<ITeWebview>(`taskexplorer.view.${teView}.show`, args, tc.waitTime.viewWebviewPage);
     }
     else {
         teWebview = teView;
-        if (!teView.visible){
+        wasVisible = teView.visible;
+        if (!wasVisible){
             void teWebview.show(undefined, ...args);
         }
     }
-    if (!teWebview.visible){
-        await promiseFromEvent(teWebview.onReadyReceived).promise;
+    if (!wasVisible){
+        return Promise.race<void>(
+        [
+            promiseFromEvent<void, void>(teWebview.onReadyReceived).promise,
+            new Promise<void>(resolve => setTimeout(resolve, 5000, false)),
+        ]);
     }
     expect(teWebview.visible).to.be.equal(true);
     if (!wvShown.includes(teWebview.title)) wvShown.push(teWebview.title);

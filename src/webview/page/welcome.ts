@@ -24,7 +24,7 @@ export class WelcomePage extends TeWebviewPanel<State>
 			"welcome",
 			Commands.ShowWelcomePage
 		);
-		this.ignoreTeBusy = true;
+		this._ignoreTeBusy = true;
 	}
 
 

@@ -92,7 +92,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		this._disposablePanel?.dispose();
 		this._disposablePanel = undefined;
 		this._view = undefined;
-		this.skippedNotify = false;
+		this._skippedChangeEvent = false;
 	}
 
 
@@ -111,10 +111,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		const { active, visible } = e.webviewPanel;
 		if (visible)
 		{
-			/* istanbul ignore if */
-			if (this.skippedNotify) {
-				await this.refresh();
-			}
+			await this.refresh(false, true);
 			this.setContextKeys(active);
 			this.onActiveChanged?.(active);
 			this.onFocusChanged?.(active);
@@ -140,8 +137,8 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	async show(options?: { column?: ViewColumn; preserveFocus?: boolean }, ...args: any[])
 	{
 		/* istanbul ignore next */
-		while (!this.ignoreTeBusy && this.wrapper.busy) {
-			await this.wrapper.utils.sleep(100);
+		while (!this._ignoreTeBusy && this.wrapper.busy) {
+			await this.wrapper.utils.sleep(50);
 		}
 
 		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
@@ -179,10 +176,10 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 				this._view
 			);
 
-			await this.refresh(false, ...args);
+			await this.refresh(true, false, ...args);
 		}
 		else {
-			await this.refresh(true, ...args);
+			await this.refresh(true, false, ...args);
 			this._view.reveal(this._view.viewColumn, !!options?.preserveFocus);
 		}
 

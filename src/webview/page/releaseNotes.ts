@@ -27,7 +27,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 			"releaseNotesPage",
 			Commands.ShowReleaseNotesPage
 		);
-		this.ignoreTeBusy = true;
+		this._ignoreTeBusy = true;
 	}
 
 

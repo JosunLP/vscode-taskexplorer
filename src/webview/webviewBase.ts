@@ -21,7 +21,6 @@ import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
 	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcUpdateConfigCommand, IpcLicenseChangedMsg, IpcEnabledChangedMsg
 } from "./common/ipc";
-import { wrap } from "module";
 
 
 export interface FontAwesomeClass
@@ -58,8 +57,8 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected registerCommands?(): Disposable[];
 
 	protected _isReady = false;
-	protected skippedNotify = false;
-	protected ignoreTeBusy = true;
+	protected _skippedChangeEvent = false;
+	protected _ignoreTeBusy = true;
 	protected _teEnabled: boolean;
 	protected _view: WebviewView | WebviewPanel | undefined;
 	protected readonly disposables: Disposable[] = [];
@@ -362,15 +361,15 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	private postMessage(message: IIpcMessage): Promise<boolean>
 	{
 		if (!this._view || !this._isReady || !this.visible) {
-			this.skippedNotify = !!this._view && !!this._isReady;
+			this._skippedChangeEvent = !!this._view && !!this._isReady;
 			return Promise.resolve(false);
 		}
-		this.skippedNotify = false;
+		this._skippedChangeEvent = false;
 		//
 		// From GitLens extension, noticed this note:
 		//     It looks like there is a bug where `postMessage` can sometimes just hang infinitely.
 		//     Not sure why, but ensure we don't hang
-		// Note sure if it's still valid, but use a promise race just in case
+		// Not sure if it's still valid, but use a promise race just in case
 		//
 		return Promise.race<boolean>(
 		[
@@ -380,21 +379,31 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	}
 
 
-	protected async refresh(force?: boolean, ...args: unknown[]): Promise<void>
+	/**
+	 * @method
+	 * **IMPORTANT NOTE:** Caller must ensure that `this._view` is an initialized `WebviewView | WebviewPanel`
+	 * @param force Force re-render of page
+	 * @param args Optional arguments to pass tp the html rendering callbacks
+	 */
+	protected async refresh(force?: boolean, visibilityChanged?: boolean, ...args: unknown[]): Promise<void>
     {
-		const view = this._view as WebviewView | WebviewPanel;
-		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
-		this._isReady = this.skippedNotify = false;
-		const html = await this.getHtml(view.webview, ...args);
-		if (force) {
-			view.webview.html = "";
+		if (!this._view || (!force && !visibilityChanged && (!this._isReady || !this.visible))) {
+			this._skippedChangeEvent = !!this._view && !this.visible;
+			return;
 		}
-		if (view.webview.html === html) {
+		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
+		const skippedNotify = this._skippedChangeEvent;
+		this._isReady = this._skippedChangeEvent = false;
+		const html = !visibilityChanged || skippedNotify ? await this.getHtml(this._view.webview, ...args) : "";
+		if (force && this._view.webview.html) {
+			this._view.webview.html = "";
+		}
+		if (this._view.webview.html && (this._view.webview.html === html || (visibilityChanged && !skippedNotify))) {
 			this._isReady = true;
 			queueMicrotask(() => this._onReadyReceived.fire());
 		}
 		else {
-			view.webview.html = html;
+			this._view.webview.html = html;
 		}
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 	}

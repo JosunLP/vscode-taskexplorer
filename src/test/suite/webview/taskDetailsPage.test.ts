@@ -104,7 +104,7 @@ suite("Task Details Page Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run);
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
-        await waitForTaskExecution(exec);
+        await waitForTaskExecution(exec, tc.slowTime.tasks.gulpTask);
 		await closeEditors();
         endRollingCount(this);
 	});
@@ -116,7 +116,7 @@ suite("Task Details Page Tests", () =>
         this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("GULPFILE.js") && (<string>t.label).includes("test")) as ITaskItem;
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
-        await waitForTaskExecution(exec);
+        await waitForTaskExecution(exec, tc.slowTime.tasks.gulpTask);
         endRollingCount(this);
 	});
 

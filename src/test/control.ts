@@ -99,7 +99,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 4350,
+            focusSideBarFirstTime: 4390,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -186,7 +186,7 @@ export const testControl =
             notify: 955,
             show: {
                 view: {
-                    home: 2340,
+                    home: 2440,
                     taskCount: 825,
                     taskUsage: 775
                 },
@@ -194,16 +194,16 @@ export const testControl =
                     releaseNotes: 840,
                     taskDetails: 1765,
                     taskMonitor: 2150,
-                    parsingReport: 1125,
-                    parsingReportFull: 1890,
+                    parsingReport: 1140,
+                    parsingReportFull: 1990,
                     welcome: 600
                 }
             }
         },
         wsFolder: {
-            add: 1650,     // bumped for multi-root ws in utils/initSettings
+            add: 1660,     // bumped for multi-root ws in utils/initSettings
             addEmpty: 1590,
-            remove: 550,
+            remove: 560,
             removeEmpty: 475,
             reorder: 540,   // bumped for multi-root ws in utils/initSettings
         },
