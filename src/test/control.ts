@@ -99,7 +99,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 4390,
+            focusSideBarFirstTime: 4610,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -112,7 +112,7 @@ export const testControl =
         config: {
             event: 270,
             eventFast: 90,
-            registerExplorerEvent: 435,
+            registerExplorerEvent: 445,
             disableEvent: 1000,
             enableEvent: 1725,
             enableEventWorkspace: 1825,
@@ -148,9 +148,9 @@ export const testControl =
         getTreeTasks: 215,
         getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
         licenseMgr: {
-            page: 2030,
+            page: 2770,
             getTrialExtension: 2175,
-            getTrialExtensionDenied: 775,
+            getTrialExtensionDenied: 800,
             getMaxTasks: 365,
             nag: 100,
             purchaseLicense: 1875,
@@ -172,7 +172,7 @@ export const testControl =
             batchScriptBat: 4140,
             batchScriptCmd: 5140,
             gulpParser: 3870,
-            gulpTask: 3290,
+            gulpTask: 3310,
             npmCommand: 8000,
             npmCommandPkg: 7000,
             npmInstallCommand: 8600,
@@ -186,22 +186,22 @@ export const testControl =
             notify: 955,
             show: {
                 view: {
-                    home: 2440,
-                    taskCount: 825,
-                    taskUsage: 775
+                    home: 2580,
+                    taskCount: 1320,
+                    taskUsage: 1770
                 },
                 page: {
-                    releaseNotes: 840,
-                    taskDetails: 1765,
-                    taskMonitor: 2150,
-                    parsingReport: 1190,
-                    parsingReportFull: 1990,
-                    welcome: 600
+                    releaseNotes: 1870,
+                    taskDetails: 2265,
+                    taskMonitor: 2610,
+                    parsingReport: 2090,
+                    parsingReportFull: 2560,
+                    welcome: 2000
                 }
             }
         },
         wsFolder: {
-            add: 1660,     // bumped for multi-root ws in utils/initSettings
+            add: 1680,     // bumped for multi-root ws in utils/initSettings
             addEmpty: 1590,
             remove: 560,
             removeEmpty: 475,

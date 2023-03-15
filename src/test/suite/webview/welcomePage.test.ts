@@ -4,7 +4,7 @@
 import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { closeTeWebview, executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
-import { activate, testControl as tc, suiteFinished, exitRollingCount, endRollingCount } from "../../utils/utils";
+import { activate, testControl as tc, suiteFinished, exitRollingCount, endRollingCount, sleep } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
 
@@ -35,12 +35,13 @@ suite("Welcome Page Tests", () =>
     test("Update Relevant Settings", async function()
     {   //
 		// These settings as of 3/14/23 aren't really relevant, but, if there isn't a break or
-		// a task after startupFOcus() the showWelcome test below will take ~3s instead of 500ms
+		// a task after startupFOcus() the showWelcome test below will take ~3s instead of ~7-800ms
 		//
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true, tc.waitTime.config.groupingEvent);
-        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false, tc.waitTime.config.groupingEvent);
+        this.slow((tc.slowTime.config.event * 2) + 6000);
+        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false);
+        await sleep(3000);
         endRollingCount(this);
     });
 

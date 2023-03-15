@@ -90,7 +90,12 @@ export const hasExplorerFocused = () => explorerHasFocused;
 export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) =>
 {
     let teWebview: ITeWebview,
-        wasVisible = false;
+        wasVisible = false,
+        timeout = 5000;
+    const _args = [ ...args ];
+    if (_args[0] && (typeof _args[0] === "string" || _args[0] instanceof String) && _args[0].startsWith("timeout:")) {
+        timeout = parseInt(_args[0].replace("timeout:", ""), 10);
+    }
     if (typeof teView === "string" || teView instanceof String)
     {
         teWebview = await executeTeCommand2<ITeWebview>(`taskexplorer.view.${teView}.show`, args, tc.waitTime.viewWebviewPage);
@@ -102,11 +107,12 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
             void teWebview.show(undefined, ...args);
         }
     }
-    if (!wasVisible){
+    if (!wasVisible)
+    {
         return Promise.race<void>(
         [
             promiseFromEvent<void, void>(teWebview.onReadyReceived).promise,
-            new Promise<void>(resolve => setTimeout(resolve, 5000, false)),
+            new Promise<void>(resolve => setTimeout(resolve, timeout)),
         ]);
     }
     expect(teWebview.visible).to.be.equal(true);

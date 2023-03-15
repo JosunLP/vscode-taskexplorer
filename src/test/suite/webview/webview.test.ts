@@ -106,7 +106,7 @@ suite("Webview Tests", () =>
 		this.slow((tc.slowTime.config.event * 2) + (tc.slowTime.webview.show.view.taskUsage * 2) + tc.slowTime.commands.focusChangeViews);
         await focusExplorerView(teWrapper);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
-		await showTeWebview(teWrapper.taskUsageView);
+		await showTeWebview(teWrapper.taskUsageView, "timeout:2500");
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
         endRollingCount(this);
 	});
