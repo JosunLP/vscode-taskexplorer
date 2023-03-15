@@ -67,10 +67,12 @@ suite("Webview Tests", () =>
         await focusExplorerView(teWrapper);
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
         await showTeWebview(teWrapper.homeView);
+        await showTeWebview(teWrapper.parsingReportPage, Uri.file(getWsPath(".")));
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.parsingReport.show", args: [ Uri.file(getWsPath(".")) ] });
-        await showTeWebview(teWrapper.parsingReportPage);
+        // await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
         await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" });
         await showTeWebview(teWrapper.releaseNotesPage);
+        // await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
         endRollingCount(this);
     });
 

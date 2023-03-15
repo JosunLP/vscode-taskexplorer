@@ -55,15 +55,15 @@ suite("Task Monitor App Tests", () =>
 	test("Run Task", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.commands.run + testControl.slowTime.commands.runStop + testControl.slowTime.getTreeTasks);
+		this.slow(testControl.slowTime.commands.run + testControl.slowTime.commands.runStop + testControl.slowTime.getTreeTasks + 1000);
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		taskItem = ant.find(t => !t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
 		task = taskItem.task;
 		const iTask = teWrapper.taskUtils.toITask(teWrapper, [ task ], "last")[0];
 		const exec = await executeTeCommand2<TaskExecution | undefined>("taskexplorer.run", [ iTask ]);
-        await waitForTaskExecution(exec, 700);
+        await waitForTaskExecution(exec, 900);
 		await executeTeCommand2("taskexplorer.stop", [ iTask ]);
-        await waitForTaskExecution(exec, 50);
+        await waitForTaskExecution(exec, 100);
         endRollingCount(this);
 	});
 
