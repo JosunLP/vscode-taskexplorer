@@ -105,7 +105,7 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
                 timeout = parseInt(_args[0].replace("timeout:", ""), 10);
                 _args.splice(0, 1);
             }
-            else if (_args[0] === "force")
+            if (_args[0] === "force")
             {
                 force = true;
                 _args.splice(0, 1);
@@ -149,6 +149,8 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
     expect(teWebview.visible).to.be.equal(true);
 
     if (!wvShown.includes(teWebview.title)) wvShown.push(teWebview.title);
+
+    return teWebview;
 };
 
 // export const showTeWebviewTimeout = (teView: ITeWebview, baseTimeout: number) => baseTimeout + (wvShown.includes(teView.title) ? 0 : 400);

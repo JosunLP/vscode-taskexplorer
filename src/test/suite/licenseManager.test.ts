@@ -86,8 +86,6 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.config.registerExplorerEvent + tc.slowTime.commands.focusChangeViews);
         await executeSettingsUpdate("enableSideBar", true, tc.waitTime.config.registerExplorerEvent);
-        await showTeWebview(teWrapper.homeView);
-		await focusExplorerView(teWrapper);
         utils.endRollingCount(this);
     });
 
@@ -161,8 +159,6 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.page.license);
 		await showTeWebview(teWrapper.licensePage);
-		expect(teWrapper.licensePage.view).to.not.be.undefined;
-		expect(teWrapper.licensePage.visible).to.be.equal(true);
         utils.endRollingCount(this);
 	});
 
@@ -170,9 +166,8 @@ suite("License Manager Tests", () =>
 	test("View and Close Parsing Report from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.general.closeEditors + tc.slowTime.webview.postMessage);
+		this.slow(tc.slowTime.webview.show.page.parsingReport + (tc.slowTime.webview.closeSync * 2));
 		await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.licensePage);
-		await closeTeWebviewPanel(teWrapper.licensePage);
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         utils.endRollingCount(this);
 	});

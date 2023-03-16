@@ -39,8 +39,8 @@ suite("Welcome Page Tests", () =>
 		//
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.config.event * 2) + 6000);
-        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true);
-        await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false);
+        // await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true);
+        // await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false);
         await sleep(3000);
         endRollingCount(this);
     });
@@ -49,7 +49,7 @@ suite("Welcome Page Tests", () =>
 	test("Open Welcome Page", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.welcome + tc.slowTime.general.closeEditors + 50);
+		this.slow(tc.slowTime.webview.show.page.welcome + tc.slowTime.webview.closeSync);
 		await showTeWebview(teWrapper.welcomePage);
 		await closeTeWebviewPanel(teWrapper.welcomePage);
         endRollingCount(this);

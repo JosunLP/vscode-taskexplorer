@@ -3,8 +3,8 @@
 
 import { TaskExecution } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, executeTeCommand2, showTeWebview } from "../../utils/commandUtils";
+import { ITaskItem, ITeWrapper, ITeWebview } from "@spmeesseman/vscode-taskexplorer-types";
+import { closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand2, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl as tc, suiteFinished, sleep, exitRollingCount,
 	endRollingCount, treeUtils, waitForTaskExecution
@@ -17,6 +17,7 @@ let batch: ITaskItem[];
 let python: ITaskItem[];
 let gulp: ITaskItem[];
 let gulpTask: ITaskItem;
+let teWebview: ITeWebview;
 
 
 suite("Task Details Page Tests", () =>
@@ -49,7 +50,8 @@ suite("Task Details Page Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.tasks.getTreeTasks);
 		batch = await treeUtils.getTreeTasks(teWrapper, "batch", 2);
-		await showTeWebview("taskDetails", batch[0]);
+		teWebview = await showTeWebview("taskDetails", batch[0]);
+		await closeTeWebviewPanel(teWebview);
         endRollingCount(this);
 	});
 
@@ -60,7 +62,7 @@ suite("Task Details Page Tests", () =>
 		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.tasks.getTreeTasks);
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		antTask = ant.find(t => t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
-		await showTeWebview("taskDetails", antTask);
+		teWebview = await showTeWebview("taskDetails", antTask);
         endRollingCount(this);
 	});
 
@@ -68,12 +70,12 @@ suite("Task Details Page Tests", () =>
 	test("Run Task w/ Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runStop + 2300);
+        this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runStop + 2200);
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin);
         await waitForTaskExecution(exec, 800);
 		await executeTeCommand2("stop", [ antTask ], tc.waitTime.taskCommand);
         await waitForTaskExecution(exec, 300);
-		await closeEditors();
+		await closeTeWebviewPanel(teWebview);
         endRollingCount(this);
 	});
 
@@ -81,10 +83,10 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Unused Task Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.tasks.getTreeTasks + tc.slowTime.general.closeEditors);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.tasks.getTreeTasks + tc.slowTime.webview.closeSync);
 		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
-		await showTeWebview("taskDetails", python[0]);
-		await closeEditors();
+		teWebview = await showTeWebview("taskDetails", python[0]);
+		await closeTeWebviewPanel(teWebview);
         endRollingCount(this);
 	});
 
@@ -95,7 +97,7 @@ suite("Task Details Page Tests", () =>
 		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.tasks.getTreeTasks);
 		gulp = await treeUtils.getTreeTasks(teWrapper, "gulp", 14);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("gulpfile.js") && (<string>t.label).includes("build33")) as ITaskItem;
-		await showTeWebview("taskDetails", gulpTask);
+		teWebview = await showTeWebview("taskDetails", gulpTask);
         endRollingCount(this);
 	});
 
@@ -103,10 +105,11 @@ suite("Task Details Page Tests", () =>
 	test("Run Unused Task w/ Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run);
+        this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run + tc.slowTime.webview.closeSync + 20);
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
         await waitForTaskExecution(exec, tc.slowTime.tasks.gulpTask);
-		await closeEditors();
+		await sleep(10); // allow task status event to propagate to webviews via postMessage
+		await closeTeWebviewPanel(teWebview);
         endRollingCount(this);
 	});
 
@@ -125,10 +128,10 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (From App)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetails);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.webview.closeSync);
 		const iTask = teWrapper.taskUtils.toITask(teWrapper, [ batch[0].task ], "all")[0]; // App uses ITeTask
-		await showTeWebview("taskDetails", iTask);
-		await closeEditors();
+		teWebview = await showTeWebview("taskDetails", iTask);
+		await closeTeWebviewPanel(teWebview);
         endRollingCount(this);
 	});
 
@@ -136,13 +139,15 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Tracking Disabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.config.event * 4) + tc.slowTime.webview.show.page.taskDetails + tc.slowTime.general.closeEditors);
+		this.slow((tc.slowTime.config.event * 4) + tc.slowTime.webview.show.page.taskDetails + tc.slowTime.webview.closeSync + 40);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
-		await showTeWebview("taskDetails", python[0]);
+		await sleep(10); // allow config change event to propagate to webviews via postMessage
+		teWebview = await showTeWebview("taskDetails", python[0]);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
-		await closeEditors();
+		await sleep(10); // allow config change event to propagate to webviews via postMessage
+		await closeTeWebviewPanel(teWebview);
         endRollingCount(this);
 	});
 

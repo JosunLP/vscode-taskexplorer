@@ -266,14 +266,7 @@ export const clearOverrideShowInputBox = () => { overridesShowInputBox = []; };
 export const clearOverrideShowInfoBox = () => { overridesShowInfoBox = []; };
 
 
-export const closeEditors = async () =>
-{
-    await closeTeWebviewPanel(teWrapper.licensePage);
-    await closeTeWebviewPanel(teWrapper.parsingReportPage);
-    await closeTeWebviewPanel(teWrapper.releaseNotesPage);
-    await closeTeWebviewPanel(teWrapper.welcomePage);
-    await commands.executeCommand("openEditors.closeAll");
-};
+export const closeEditors = () => commands.executeCommand("openEditors.closeAll");
 
 
 export const closeActiveEditor = () => commands.executeCommand("workbench.action.closeActiveEditor");

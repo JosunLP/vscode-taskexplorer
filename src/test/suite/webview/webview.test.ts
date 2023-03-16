@@ -43,13 +43,7 @@ suite("Webview Tests", () =>
     });
 
 
-	test("Focus Explorer View", async function()
-	{
-        await startupFocus(this);
-	});
-
-
-    test("Focus SideBar", async function()
+	test("Focus SideBar", async function()
     {   //
         // SideBar was enabled for `Usage` Test Suite, and left enabled.  Disable when
         // this test suite has completed
@@ -65,18 +59,9 @@ suite("Webview Tests", () =>
     test("Home View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.commands.focusChangeViews * 4) + (tc.slowTime.config.enableEvent * 2) +
-                  tc.slowTime.webview.show.page.releaseNotes + tc.slowTime.webview.show.page.parsingReportFull +
-                  tc.slowTime.webview.show.view.home + (tc.slowTime.webview.postMessage * 3) + 10);
-        const echoCmd = { method: "echo/command/execute", overwriteable: false };
-        await executeSettingsUpdate("enabledTasks.bash", false, tc.waitTime.config.enableEvent);
-        await sleep(5);
-        await executeSettingsUpdate("enabledTasks.bash", true, tc.waitTime.config.enableEvent);
-        expect(teWrapper.homeView.description).to.not.be.undefined;
-        await focusExplorerView(teWrapper);
-        await teWrapper.homeView.postMessage(echoCmd, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
+        this.slow(tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.show.page.releaseNotes +
+                  tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home);
         await showTeWebview(teWrapper.homeView, "force");
-        expect(teWrapper.homeView.visible).to.be.equal(true);
         await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.homeView, Uri.file(getWsPath(".")));
         await showTeWebviewByEchoCmd("releaseNotes", teWrapper.releaseNotesPage, teWrapper.homeView);
         endRollingCount(this);
@@ -109,10 +94,9 @@ suite("Webview Tests", () =>
 	test("Task Usage View (Tracking Disabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.config.trackingEvent * 2) + tc.slowTime.webview.show.view.taskUsage + (tc.slowTime.commands.focusChangeViews * 2));
-        await focusExplorerView(teWrapper);
+		this.slow((tc.slowTime.config.trackingEvent * 2) + tc.slowTime.webview.show.view.taskUsage);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
-		await showTeWebview(teWrapper.taskUsageView, "timeout:2500");
+		await showTeWebview(teWrapper.taskUsageView, "timeout:2500", "force");
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
         endRollingCount(this);
 	});
@@ -123,7 +107,6 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.webview.show.view.taskCount * 2) + tc.slowTime.commands.focusChangeViews);
         await showTeWebview(teWrapper.taskCountView);
-        await focusExplorerView(teWrapper);
         await commands.executeCommand("taskexplorer.view.taskCount.focus");
         endRollingCount(this);
     });

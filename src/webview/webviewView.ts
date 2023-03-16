@@ -92,7 +92,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 			...(this.registerCommands?.() ?? [])
 		);
 
-		await this.refresh(true);
+		await this.refresh(true, false);
 		this.onVisibilityChanged?.(true);
 	}
 

@@ -102,7 +102,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusTaskTreeFirstTime: 7170,
+            focusTaskTreeFirstTime: 7270,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -115,7 +115,6 @@ export const testControl =
         config: {
             event: 270,
             eventFast: 90,
-            registerExplorerEvent: 445,
             disableEvent: 1000,
             enableEvent: 1725,
             enableEventWorkspace: 1825,
@@ -126,6 +125,7 @@ export const testControl =
             groupingEvent: 1025,
             pathToProgramsEvent: 710,
             readEvent: 25,
+            registerExplorerEvent: 455,
             shellChange: 1325,
             showHideSpecialFolder: 530,
             showHideUserTasks: 1075,
@@ -202,7 +202,7 @@ export const testControl =
                     license: 2970,
                     releaseNotes: 2770,
                     taskDetails: 2845,
-                    taskMonitor: 2770,
+                    taskMonitor: 2970,
                     parsingReport: 2240,
                     parsingReportFull: 2890,
                     welcome: 525

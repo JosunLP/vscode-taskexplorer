@@ -60,7 +60,7 @@ export class TaskUsageView extends TeWebviewView<State>
 		{
 			this.wrapper.log.methodOnce("task usage view event", "onStorageChanged", 2, this.wrapper.log.getLogPad());
 			// await debounce("taskUsage:", this.refresh, 75);
-			await this.refresh();
+			await this.refresh(false, false);
 		}
 	}
 

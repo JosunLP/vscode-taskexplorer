@@ -126,13 +126,13 @@ export class HomeView extends TeWebviewView<State>
 	{
 		this.wrapper.log.methodOnce("homeview event", "session changed", 2, this.wrapper.log.getLogPad());
 		if (e.changeFlags.licenseState || e.changeFlags.licenseType || e.changeFlags.trialPeriod || e.changeFlags.verification || e.changeFlags.license) {
-			await this.refresh(true);
+			await this.refresh(true, false);
 		}
 		await super.onSessionChanged(e);
 	}
 
 
-	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => this.refresh();
+	private onTaskCountChanged = (_e: ITeTaskChangeEvent): Promise<void> => this.refresh(false, false);
 
 
 	protected override onVisibilityChanged(_visible: boolean)

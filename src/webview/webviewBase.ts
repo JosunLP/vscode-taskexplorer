@@ -392,7 +392,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	 * @param force Force re-render of page, or is new instance
 	 * @param args Optional arguments to pass tp the html rendering callbacks
 	 */
-	protected async refresh(force?: boolean, visibilityChanged?: boolean, ...args: unknown[]): Promise<void>
+	protected async refresh(force: boolean, visibilityChanged: boolean, ...args: unknown[]): Promise<void>
     {
 		if (!this._view || (!force && !visibilityChanged && (!this._isReady || !this.visible))) {
 			this._skippedChangeEvent = !!this._view && !this.visible;
