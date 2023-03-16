@@ -2,7 +2,9 @@
 import { dirname } from "path";
 import type { State } from "../common/ipc";
 import { TeWebviewPanel } from "../webviewPanel";
+import { ConfigurationChangeEvent } from "vscode";
 import type { TeWrapper } from "../../lib/wrapper";
+import { debounce } from "../../lib/command/command";
 import { ContextKeys, WebviewIds  } from "../../lib/context";
 import { ITeTask, ITeTaskStatusChangeEvent } from "../../interface";
 
@@ -118,6 +120,16 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 
 
 	protected override includeFontAwesome = () => ({ solid: true, icons: [ "rabbit", "turtle" ] });
+
+
+	protected override onConfigChanged(e: ConfigurationChangeEvent)
+	{
+		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
+		{
+			void debounce<Promise<void>>("taskDetailsCfg:", this.refresh, 75, false, false);
+		}
+		super.onConfigChanged(e);
+	}
 
 
 	protected override onInitializing()

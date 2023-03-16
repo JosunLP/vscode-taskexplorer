@@ -5,7 +5,6 @@ import { TeWebviewView } from "../webviewView";
 import { ConfigurationChangeEvent } from "vscode";
 import { debounce } from "../../lib/command/command";
 import { StorageChangeEvent } from "../../interface";
-import { ConfigKeys, StorageKeys } from "../../lib/constants";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 
@@ -31,44 +30,28 @@ export class TaskUsageView extends TeWebviewView<State>
 
 
 	protected override includeBody = async() => ""; // For coverage, empty body
+
+
 	protected override includeHead = async() => ""; // For coverage, empty head
+
+
 	protected override includeEndOfBody = async() => "<!-- spm -->"; // For coverage, endOfBody and no bootstrap
 
 
 	protected override onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
+		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
 		{
-			this.wrapper.log.methodOnce("task usage view event", "onConfigChanged", 2, this.wrapper.log.getLogPad());
-			void debounce("taskUsageCfg:", this.refresh, 25);
+			void debounce<Promise<void>>("taskUsageCfg:", this.refresh, 75, false, false);
 		}
 		super.onConfigChanged(e);
 	}
 
 
-	protected override onInitializing()
-	{
-		return  [
-			this.wrapper.storage.onDidChange(this.onStorageChanged, this)
-		];
-	}
-
-
-	private onStorageChanged(e: StorageChangeEvent): void
-	{
-		if (e.key === StorageKeys.Usage || e.key === StorageKeys.TaskUsage)
-		{
-			this.wrapper.log.methodOnce("task usage view event", "onStorageChanged", 2, this.wrapper.log.getLogPad());
-			// await debounce("taskUsage:", this.refresh, 75);
-			void this.refresh(false, false);
-		}
-	}
-
-
 	protected override onHtmlFinalize = async (html: string) =>
 	{
-		const trackStats = this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage) &&
-						   this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor.TrackStats);
+		const trackStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage) &&
+						   this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats);
 		if (trackStats)
 		{
 			const lastTime = this.wrapper.usage.getLastRanTaskTime(),
@@ -84,5 +67,23 @@ export class TaskUsageView extends TeWebviewView<State>
 		}
 		return html;
 	};
+
+
+	protected override onInitializing()
+	{
+		return  [
+			this.wrapper.storage.onDidChange(this.onStorageChanged, this)
+		];
+	}
+
+
+	private onStorageChanged(e: StorageChangeEvent): void
+	{
+		if (e.key === this.wrapper.keys.Storage.Usage || e.key === this.wrapper.keys.Storage.TaskUsage)
+		{
+			this.wrapper.log.methodOnce("task usage view event", "onStorageChanged", 2, this.wrapper.log.getLogPad());
+			void this.refresh(false, false);
+		}
+	}
 
 }

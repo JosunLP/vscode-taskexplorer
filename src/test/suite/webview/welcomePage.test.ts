@@ -32,20 +32,6 @@ suite("Welcome Page Tests", () =>
 	});
 
 
-    test("Update Relevant Settings", async function()
-    {   //
-		// These settings as of 3/14/23 aren't really relevant, but, if there isn't a break or
-		// a task after startupFOcus() the showWelcome test below will take ~3s instead of ~7-800ms
-		//
-        if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.event * 2) + 6000);
-        // await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true);
-        // await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false);
-        await sleep(3000);
-        endRollingCount(this);
-    });
-
-
 	test("Open Welcome Page", async function()
 	{
         if (exitRollingCount(this)) return;
@@ -54,4 +40,5 @@ suite("Welcome Page Tests", () =>
 		await closeTeWebviewPanel(teWrapper.welcomePage);
         endRollingCount(this);
 	});
+
 });

@@ -3,12 +3,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { expect } from "chai";
 import { commands, Uri } from "vscode";
-import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd
+    executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd, focusFileExplorer
 } from "../../utils/commandUtils";
 import {
     activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep,
@@ -79,27 +77,27 @@ suite("Webview Tests", () =>
     });
 
 
-    test("Task Usage View", async function()
+    test("Change Views from SideBar", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.webview.show.view.taskUsage * 2) + tc.slowTime.commands.focusChangeViews);
-        await showTeWebview(teWrapper.taskUsageView);
-        await focusExplorerView(teWrapper);
-        await teWrapper.homeView.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover notify() when not visible
-        await showTeWebview(teWrapper.taskUsageView);
+        this.slow(tc.slowTime.webview.postMessage + tc.slowTime.config.trackingEvent + tc.slowTime.commands.focusChangeViews + 200);
+        await focusFileExplorer();
+        await teWrapper.homeView.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover postMessage() when not visible
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
+        await sleep(100);
         endRollingCount(this);
     });
 
 
-	test("Task Usage View (Tracking Disabled)", async function()
-	{
+
+    test("Task Usage View", async function()
+    {
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.config.trackingEvent * 2) + tc.slowTime.webview.show.view.taskUsage);
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
-		await showTeWebview(teWrapper.taskUsageView, "timeout:2500", "force");
+        this.slow(tc.slowTime.webview.show.view.taskUsage + tc.slowTime.config.trackingEvent + tc.slowTime.commands.focusChangeViews);
+        await showTeWebview(teWrapper.taskUsageView, "force");
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
         endRollingCount(this);
-	});
+    });
 
 
     test("Task Count View", async function()
