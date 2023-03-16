@@ -137,7 +137,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	async show(options?: { column?: ViewColumn; preserveFocus?: boolean }, ...args: any[])
 	{
 		/* istanbul ignore next */
-		while (!this._ignoreTeBusy && this.wrapper.busy) {
+		while (!this._ignoreTeBusy && this.wrapper.busy) { // || this.busy)) {
 			await this.wrapper.utils.sleep(50);
 		}
 
@@ -167,13 +167,13 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 			this._view.iconPath = Uri.file(this.wrapper.context.asAbsolutePath(this.iconPath));
 			this._disposablePanel = Disposable.from(
+				this._view,
 				this._view.onDidDispose(this.onPanelDisposed, this),
 				this._view.onDidChangeViewState(this.onViewStateChanged, this),
 				this._view.webview.onDidReceiveMessage(this.onMessageReceivedBase, this),
 				...(this.onInitializing?.() ?? []),
 				...(this.registerCommands?.() ?? []),
-				window.onDidChangeWindowState(this.onWindowStateChanged, this),
-				this._view
+				window.onDidChangeWindowState(this.onWindowStateChanged, this)
 			);
 
 			await this.refresh(true, false, ...args);

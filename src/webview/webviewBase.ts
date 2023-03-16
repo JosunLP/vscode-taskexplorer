@@ -58,7 +58,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	protected _isReady = false;
 	protected _skippedChangeEvent = false;
-	protected _ignoreTeBusy = true;
+	protected _ignoreTeBusy = false;
 	protected _teEnabled: boolean;
 	protected _view: WebviewView | WebviewPanel | undefined;
 	protected readonly disposables: Disposable[] = [];
@@ -67,7 +67,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
     private _ipcSequence: number;
 
 	private readonly _cspNonce: string;
-    private readonly _maxSmallIntegerV8 = 2 ** 30;
+    private readonly _maxSmallIntegerV8 = Math.pow(2, 30);
 	private readonly _originalTitle: string | undefined;
 	private readonly _onReadyReceived: EventEmitter<void>;
 
@@ -91,6 +91,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	{
 		this.disposables.forEach(d => void d.dispose());
 		this.disposables.splice(0);
+	}
+
+	get busy(): boolean {
+		return !!this._view && !this._isReady;
 	}
 
 	get onReadyReceived(): Event<void> {
@@ -283,19 +287,18 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
     };
 
 
-	notify = <T extends IpcNotification<any>>(type: T, params: IpcMessageParams<T>, completionId?: string): Promise<boolean> =>
-		this.postMessage({ id: this.nextIpcId(), method: type.method, params, completionId });
-
-
 	protected async onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.EnableExplorerTree, this.wrapper.keys.Config.EnableSideBar))
+		if (this._view && this._isReady && this.visible)
 		{
-			const enabled = this.wrapper.utils.isTeEnabled();
-			if (enabled !== this._teEnabled)
+			if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.EnableExplorerTree, this.wrapper.keys.Config.EnableSideBar))
 			{
-				this._teEnabled = enabled;
-				await this.notify(IpcEnabledChangedMsg, { enabled });
+				const enabled = this.wrapper.utils.isTeEnabled();
+				if (enabled !== this._teEnabled)
+				{
+					this._teEnabled = enabled;
+					await this.postMessage(IpcEnabledChangedMsg, { enabled });
+				}
 			}
 		}
 	}
@@ -354,29 +357,25 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	protected async onSessionChanged(e: TeSessionChangeEvent): Promise<void>
 	{
-		await this.notify(IpcLicenseChangedMsg, this.wrapper.utils.cloneJsonObject<TeSessionChangeEvent>(e));
+		if (this._view && this._isReady && this.visible) {
+			await this.postMessage(IpcLicenseChangedMsg, this.wrapper.utils.cloneJsonObject<TeSessionChangeEvent>(e));
+		}
 	}
 
 
-	private postMessage(message: IIpcMessage): Promise<boolean>
+	postMessage = <T extends IpcNotification<any>>(type: T, params: IpcMessageParams<T>, completionId?: string): Promise<boolean> =>
 	{
+		const message = { id: this.nextIpcId(), method: type.method, params, completionId };
 		if (!this._view || !this._isReady || !this.visible) {
-			this._skippedChangeEvent = !!this._view && !!this._isReady;
 			return Promise.resolve(false);
 		}
 		this._skippedChangeEvent = false;
-		//
-		// From GitLens extension, noticed this note:
-		//     It looks like there is a bug where `postMessage` can sometimes just hang infinitely.
-		//     Not sure why, but ensure we don't hang
-		// Not sure if it's still valid, but use a promise race just in case
-		//
 		return Promise.race<boolean>(
 		[
 			this._view.webview.postMessage(message),
 			new Promise<boolean>(resolve => setTimeout(resolve, 5000, false)),
 		]);
-	}
+	};
 
 
 	/**
@@ -392,15 +391,16 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			return;
 		}
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
-		const skippedNotify = this._skippedChangeEvent;
+		// const skippedNotify = this._skippedChangeEvent;
 		this._isReady = this._skippedChangeEvent = false;
-		const html = !visibilityChanged || skippedNotify ? await this.getHtml(this._view.webview, ...args) : "";
+		// const html = !visibilityChanged || skippedNotify ? await this.getHtml(this._view.webview, ...args) : "";
+		const html = await this.getHtml(this._view.webview, ...args);
 		if (force && this._view.webview.html) {
 			this._view.webview.html = "";
 		}
-		if (this._view.webview.html && (this._view.webview.html === html || (visibilityChanged && !skippedNotify))) {
-			this._isReady = true;
-			queueMicrotask(() => this._onReadyReceived.fire());
+		if (this._view.webview.html === html) { // || (visibilityChanged && !skippedNotify)) {
+		// if (this._view.webview.html && (this._view.webview.html === html || (visibilityChanged && !skippedNotify))) {
+			queueMicrotask(() => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
 		}
 		else {
 			this._view.webview.html = html;

@@ -40,7 +40,7 @@ export class TaskUsageView extends TeWebviewView<State>
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
 			this.wrapper.log.methodOnce("task usage view event", "onConfigChanged", 2, this.wrapper.log.getLogPad());
-			await debounce("taskUsage:", this.refresh, 75);
+			await debounce("taskUsageCfg:", this.refresh, 75);
 		}
 		await super.onConfigChanged(e);
 	}

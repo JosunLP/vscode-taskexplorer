@@ -75,22 +75,22 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	});
 
 
-	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) => this.notify(IpcTaskChangedMsg, { task: e.task });
+	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) => this.postMessage(IpcTaskChangedMsg, { task: e.task });
 
 
-	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(IpcTasksChangedMsg, { tasks: e.tasks, list: "famous" });
+	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "famous" });
 
 
-	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(IpcTasksChangedMsg, { tasks: e.tasks, list: "favorites" });
+	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "favorites" });
 
 
-	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(IpcTasksChangedMsg, { tasks: e.tasks, list: "last" });
+	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "last" });
 
 
-	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.notify(IpcTasksChangedMsg, { tasks: e.tasks, list: "running" });
+	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "running" });
 
 
-    private onAllTasksChanged = async (e: ITeTaskChangeEvent) => this.notify(IpcTasksChangedMsg, { tasks: e.tasks, list: "all" });
+    private onAllTasksChanged = async (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "all" });
 
 
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
@@ -100,7 +100,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor.TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
-			this.notify(IpcConfigChangedMsg, this.getSettingsState());
+			this.postMessage(IpcConfigChangedMsg, this.getSettingsState());
 		}
 		await super.onConfigChanged(e);
 	}
