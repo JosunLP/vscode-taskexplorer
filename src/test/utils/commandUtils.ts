@@ -193,7 +193,7 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
 export const closeTeWebviewPanel = async(teView: ITeWebview) =>
 {
     let waited = 0;
-    const maxWait = 2000;
+    const maxWait = 2200;
     while (teView.view && teView.busy) {
         await sleep(25);
         waited += 25;
@@ -202,7 +202,11 @@ export const closeTeWebviewPanel = async(teView: ITeWebview) =>
         (teView.view as WebviewPanel).dispose();
     }
     waited = 0;
-    while (teView.view && teView.visible && waited < maxWait) {
+    while (teView.visible && waited < maxWait) {
+        await sleep(25);
+        waited += 25;
+    }
+    while (teView.view && waited < maxWait) {
         await sleep(25);
         waited += 25;
     }

@@ -102,7 +102,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 6970,
+            focusTaskTreeFirstTime: 7170,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -200,11 +200,11 @@ export const testControl =
                 },
                 page: {
                     license: 2970,
-                    releaseNotes: 2470,
+                    releaseNotes: 2770,
                     taskDetails: 2845,
                     taskMonitor: 2770,
-                    parsingReport: 2140,
-                    parsingReportFull: 2860,
+                    parsingReport: 2240,
+                    parsingReportFull: 2890,
                     welcome: 525
                 }
             }

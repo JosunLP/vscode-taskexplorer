@@ -153,11 +153,11 @@ suite("Webview Tests", () =>
         await teWrapper.licensePage.postMessage(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
 	    await showTeWebview(teWrapper.parsingReportPage, "force");
         await commands.executeCommand("workbench.action.nextEditor");
-        await promiseFromEvent(teWrapper.licensePage.onDidReceiveMessage).promise;
+        await promiseFromEvent(teWrapper.licensePage.onDidReceiveReady).promise;
         await commands.executeCommand("workbench.action.nextEditor");
-        await promiseFromEvent(teWrapper.releaseNotesPage.onDidReceiveMessage).promise;
+        await promiseFromEvent(teWrapper.releaseNotesPage.onDidReceiveReady).promise;
         await commands.executeCommand("workbench.action.previousEditor");
-        await promiseFromEvent(teWrapper.licensePage.onDidReceiveMessage).promise;
+        await promiseFromEvent(teWrapper.licensePage.onDidReceiveReady).promise;
         endRollingCount(this);
 	});
 
