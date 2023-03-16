@@ -290,6 +290,8 @@ export const createwebviewForRevive = (viewTitle: string, viewType: string) =>
         {
             enableScripts: true,
             enableCommandUris: true,
+			enableFindWidget: true,
+			retainContextWhenHidden: true,
             localResourceRoots: [ resourceDir ]
         }
     );

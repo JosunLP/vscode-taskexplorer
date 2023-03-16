@@ -236,7 +236,7 @@ export class Usage implements ITeUsage, Disposable
     };
 
 
-    private onConfigChanged = async(e: ConfigurationChangeEvent) =>
+    private onConfigChanged = (e: ConfigurationChangeEvent) =>
     {
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage))
         {
@@ -246,7 +246,7 @@ export class Usage implements ITeUsage, Disposable
         {
             this._trackTaskStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats);
             if (this._trackTaskStats && !this._trackUsage){
-                await this.wrapper.config.update(this.wrapper.keys.Config.TrackUsage, this._trackTaskStats);
+                void this.wrapper.config.update(this.wrapper.keys.Config.TrackUsage, this._trackTaskStats);
             }
         }
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.AllowUsageReporting))
@@ -381,7 +381,6 @@ export class Usage implements ITeUsage, Disposable
             if (usage.count.total > stats.famous[f].runCount.total)
             {
                 stats.famous.splice(f, 0, { ...iTask, ...{ listType: "famous", running: false }});
-                /* istanbul ignore if */
                 if (stats.famous.length > specTaskListLength) {
                     stats.famous.pop();
                 }

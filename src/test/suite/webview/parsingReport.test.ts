@@ -1,13 +1,13 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { Uri, WebviewPanel } from "vscode";
+import { Uri } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
+import { closeTeWebviewPanel, executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
 import {
-	activate, closeEditors, testControl, suiteFinished, sleep, getWsPath, exitRollingCount,
-	waitForTeIdle, endRollingCount, createwebviewForRevive
+	activate, testControl as tc, suiteFinished, getWsPath, exitRollingCount, waitForTeIdle, endRollingCount,
+	createwebviewForRevive, waitForWebviewReadyEvent
 } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -32,11 +32,9 @@ suite("Parsing Report Tests", () =>
 	suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-		// teWrapper.explorer = origExplorer;
-		// teWrapper.sidebar = origSidebar;
-		await closeEditors();
+		await closeTeWebviewPanel(teWrapper.parsingReportPage);
 		await teWrapper.config.updateVsWs("npm.packageManager", pkgMgr);
-        await waitForTeIdle(testControl.waitTime.config.eventFast);
+        await waitForTeIdle(tc.waitTime.config.eventFast);
 		await executeSettingsUpdate("specialFolders.showUserTasks", userTasks);
         suiteFinished(this);
 	});
@@ -51,10 +49,10 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (Single Project No User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.parsingReport + testControl.slowTime.config.showHideUserTasks + testControl.slowTime.general.closeEditors);
-		await executeSettingsUpdate("specialFolders.showUserTasks", false, testControl.waitTime.config.showHideUserTasks);
+		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.config.showHideUserTasks + tc.slowTime.general.closeEditors);
+		await executeSettingsUpdate("specialFolders.showUserTasks", false, tc.waitTime.config.showHideUserTasks);
 		await showTeWebview(teWrapper.parsingReportPage, projectUri);
-		await closeEditors();
+		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         endRollingCount(this);
 	});
 
@@ -62,10 +60,10 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (Single Project w/ User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.parsingReport + testControl.slowTime.config.showHideUserTasks + testControl.slowTime.general.closeEditors);
-		await executeSettingsUpdate("specialFolders.showUserTasks", true, testControl.waitTime.config.showHideUserTasks);
+		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.config.showHideUserTasks + tc.slowTime.general.closeEditors);
+		await executeSettingsUpdate("specialFolders.showUserTasks", true, tc.waitTime.config.showHideUserTasks);
 		await showTeWebview(teWrapper.parsingReportPage, projectUri, "", 5);
-		await closeEditors();
+		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         endRollingCount(this);
 	});
 
@@ -73,9 +71,9 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.parsingReportFull + testControl.slowTime.general.closeEditors);
+		this.slow(tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.general.closeEditors);
 		await showTeWebview(teWrapper.parsingReportPage);
-		await closeEditors();
+		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         endRollingCount(this);
 	});
 
@@ -83,13 +81,13 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (All Projects, Yarn Enabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.parsingReport + (testControl.slowTime.config.enableEvent * 2));
+		this.slow(tc.slowTime.webview.show.page.parsingReport + (tc.slowTime.config.enableEvent * 2));
         await teWrapper.config.updateVsWs("npm.packageManager", "yarn");
-        await waitForTeIdle(testControl.waitTime.config.enableEvent);
+        await waitForTeIdle(tc.waitTime.config.enableEvent);
 		await showTeWebview(teWrapper.parsingReportPage);
         await teWrapper.config.updateVsWs("npm.packageManager", pkgMgr);
-        await waitForTeIdle(testControl.waitTime.config.enableEvent);
-		await closeEditors();
+        await waitForTeIdle(tc.waitTime.config.enableEvent);
+		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         endRollingCount(this);
 	});
 
@@ -97,16 +95,11 @@ suite("Parsing Report Tests", () =>
 	test("Deserialize Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.parsingReport + 30);
-		let panel = createwebviewForRevive("Task Explorer Parsing Report", "parsingReport");
+		this.slow((tc.slowTime.webview.show.page.parsingReport * 2) + 30 + tc.slowTime.general.closeEditors);
+		const panel = createwebviewForRevive("Task Explorer Parsing Report", "parsingReport");
 	    await teWrapper.parsingReportPage.serializer?.deserializeWebviewPanel(panel, null);
-		await sleep(5);
-		(teWrapper.parsingReportPage.view as WebviewPanel)?.dispose();
-		panel = createwebviewForRevive("Task Explorer Parsing Report", "parsingReport");
-		await sleep(5);
-	    await teWrapper.parsingReportPage.serializer?.deserializeWebviewPanel(panel, null);
-		await sleep(5);
-		await closeEditors();
+		await waitForWebviewReadyEvent(teWrapper.parsingReportPage);
+		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         endRollingCount(this);
 	});
 

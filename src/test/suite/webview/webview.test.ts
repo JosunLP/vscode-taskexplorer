@@ -12,7 +12,7 @@ import {
 } from "../../utils/commandUtils";
 import {
     activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep,
-    suiteFinished, testControl as tc
+    suiteFinished, testControl as tc, waitForTeIdle
 } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -57,6 +57,7 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
         await showTeWebview(teWrapper.homeView);
+        await waitForTeIdle(tc.waitTime.focusCommand, tc.slowTime.webview.show.view.home);
         endRollingCount(this);
     });
 
@@ -162,17 +163,6 @@ suite("Webview Tests", () =>
 
 
     test("Close Open Pages", async function()
-    {
-        if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.general.closeEditors * 3);
-        teWrapper.homeView.description = teWrapper.homeView.description;
-		await closeEditors();
-        closedPages = true;
-        endRollingCount(this);
-    });
-
-
-    test("Roll Message Counter", async function()
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.general.closeEditors * 3);

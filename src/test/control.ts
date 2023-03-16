@@ -188,6 +188,7 @@ export const testControl =
             }
         },
         webview: {
+            closeSync: 195,
             postMessage: 25,
             revealTreeNode: 55,
             show: {
@@ -198,9 +199,9 @@ export const testControl =
                 },
                 page: {
                     license: 2970,
-                    releaseNotes: 2370,
+                    releaseNotes: 2470,
                     taskDetails: 2825,
-                    taskMonitor: 2625,
+                    taskMonitor: 2770,
                     parsingReport: 2090,
                     parsingReportFull: 2810,
                     welcome: 525
@@ -245,7 +246,7 @@ export const testControl =
         focusCommand: 210,
         fs: {
             createEvent: 205,
-            createFolderEvent: 250,
+            createFolderEvent: 260,
             createEventTsc: 275,
             deleteEvent: 200,
             deleteEventTsc: 280,

@@ -392,7 +392,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 		const skippedChangeEvent = this._skippedChangeEvent;
 		this._isReady = this._skippedChangeEvent = false;
-		// const html = !visibilityChanged || skippedNotify ? await this.getHtml(this._view.webview, ...args) : "";
 		if (visibilityChanged && !skippedChangeEvent)
 		{
 			setTimeout(() => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); }, 10);
@@ -403,8 +402,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			if (force && this._view.webview.html) {
 				this._view.webview.html = "";
 			}
-			if (this._view.webview.html === html) { // || (visibilityChanged && !skippedNotify)) {
-			// if (this._view.webview.html && (this._view.webview.html === html || (visibilityChanged && !skippedNotify))) {
+			if (this._view.webview.html === html) {
 				setTimeout(() => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); }, 10);
 			}
 			else {

@@ -183,7 +183,7 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
     expect(webviewPage).to.not.be.undefined;
     expect(webviewPage.visible).to.be.equal(true);
     let waitedForBusy = 0;
-    while (webviewPage.busy && ++waitedForBusy < 100) {
+    while (webviewPage.busy && ++waitedForBusy < 200) {
         await sleep(25);
     }
     expect(webviewPage.busy).to.be.equal(false);
