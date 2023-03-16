@@ -39,7 +39,10 @@ class Configuration implements IConfiguration
         this.pkgJsonCfgProps = {};
         const pkgJsonConfiguration = context.extension.packageJSON.contributes.configuration;
         pkgJsonConfiguration.forEach((c: any) => Object.assign(this.pkgJsonCfgProps, c.properties));
-        context.subscriptions.push(workspace.onDidChangeConfiguration(this.onConfigurationChanged, this));
+        context.subscriptions.push(
+            this._onDidChange,
+            workspace.onDidChangeConfiguration(this.onConfigurationChanged, this)
+        );
     }
 
 

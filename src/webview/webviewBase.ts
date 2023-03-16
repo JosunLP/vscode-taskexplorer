@@ -70,6 +70,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
     private readonly _maxSmallIntegerV8 = Math.pow(2, 30);
 	private readonly _originalTitle: string | undefined;
 	private readonly _onReadyReceived: EventEmitter<void>;
+	private readonly _onMessageReceived: EventEmitter<string>;
 
 
     constructor(protected readonly wrapper: TeWrapper, title: string, protected readonly fileName: string)
@@ -79,9 +80,11 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		this._originalTitle = title;
 		this._cspNonce = getNonce();
 		this._onReadyReceived = new EventEmitter<void>();
+		this._onMessageReceived = new EventEmitter<string>();
 		this._teEnabled = wrapper.utils.isTeEnabled();
 		this.disposables.push(
 			this._onReadyReceived,
+			this._onMessageReceived ,
 			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged, this),
 			wrapper.config.onDidChange(this.onConfigChanged, this)
 		);
@@ -97,7 +100,11 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		return !!this._view && !this._isReady;
 	}
 
-	get onReadyReceived(): Event<void> {
+	get onDidReceiveMessage(): Event<string> {
+		return this._onMessageReceived.event;
+	}
+
+	get onDidReceiveReady(): Event<void> {
 		return this._onReadyReceived.event;
 	}
 
@@ -352,6 +359,8 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				this.onMessageReceived?.(e);
 				break;
 		}
+
+		this._onMessageReceived.fire(e.method);
 	}
 
 

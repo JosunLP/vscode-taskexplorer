@@ -66,6 +66,8 @@ Features:
     ☐ Enter external task types
         some way for user to enter an external task provider name w/o using API
 
+    ✔ Add workspace level saving of lasttasks and favorites @done(23-03-15 21:53)
+
     ☐ Context Menu - "GoTo/Select Task Tree Item" from File Explorer
 
     ✔ Context Menu - For scripts i.e. sh bat etc, menu item to 'run' and 'run w arguments' @done(23-03-12 13:21)
@@ -135,6 +137,9 @@ General Todos:
     ✔ License state change events @done(23-03-12 14:11)
 
     ☐ Better integrate special folders (i.e. last tasks and favs) (way things are saved) w/ usage tracker
+
+    ☐ Convert tree items id's to hashes of currently used id strings
+        or something that represents a real id, as opposed to a strung together string
 
 Tests:
 

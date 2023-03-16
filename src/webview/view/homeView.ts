@@ -84,13 +84,13 @@ export class HomeView extends TeWebviewView<State>
 	protected override includeFontAwesome = () => ({ light: true, icons: [ "lock", "unlock", "user", "user-slash" ]});
 
 
-	protected override async onReady()
+	protected override async onReady() // covering
 	{
 		this.wrapper.log.methodOnce("homeview event", "ready", 2, this.wrapper.log.getLogPad());
 	}
 
 
-	protected override onFocusChanged(_focused: boolean): void
+	protected override onFocusChanged(_focused: boolean): void // covering
 	{
 		this.wrapper.log.methodOnce("homeview event", "focus changed", 2, this.wrapper.log.getLogPad());
 	}

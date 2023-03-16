@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import { join } from "path";
-import { IDictionary } from "../interface";
 import { isNumber, isString } from "./utils/typeUtils";
-import { IStorage, StorageChangeEvent } from "../interface/IStorage";
+import { IDictionary, IStorage, StorageChangeEvent, StorageTarget } from "../interface";
 import { createDir, pathExists, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./utils/fs";
 import { Memento, ExtensionContext, SecretStorage, ExtensionMode, SecretStorageChangeEvent, EventEmitter, Event } from "vscode";
 
@@ -21,25 +21,36 @@ export const initStorage = async (context: ExtensionContext) =>
 };
 
 
-class Storage implements IStorage, Memento
+class Storage implements IStorage
 {
     private isDev: boolean;
     private isTests: boolean;
-    private storage: Memento;
+    private storage: Memento[];
+    private storageWs: Memento;
+    private storageGbl: Memento;
     private storageFile: string;
     private secrets: SecretStorage;
     private _onDidChange = new EventEmitter<StorageChangeEvent>();
-	private _onDidChangeSecrets = new EventEmitter<SecretStorageChangeEvent>();
+	private _onDidChangeSecret = new EventEmitter<SecretStorageChangeEvent>();
 
 
     constructor(context: ExtensionContext, storageFile: string)
     {
-        this.storage = context.globalState;
+        this.storageGbl = context.globalState;
+        this.storageWs = context.workspaceState;
+        this.storage = [
+            this.storageGbl,
+            this.storageWs
+        ];
         this.secrets = context.secrets;
         this.isDev = context.extensionMode === ExtensionMode.Development;
         this.isTests = context.extensionMode === ExtensionMode.Test;
         this.storageFile = storageFile;
-        context.subscriptions.push(context.secrets.onDidChange(e => this._onDidChangeSecrets.fire(e), this));
+        context.subscriptions.push(
+            this._onDidChange,
+            this._onDidChangeSecret,
+            context.secrets.onDidChange(e => this._onDidChangeSecret.fire(e), this)
+        );
     }
 
 
@@ -47,14 +58,14 @@ class Storage implements IStorage, Memento
 		return this._onDidChange.event;
 	}
 
-	get onDidChangeSecrets(): Event<SecretStorageChangeEvent> {
-		return this._onDidChangeSecrets.event;
+	get onDidChangeSecret(): Event<SecretStorageChangeEvent> {
+		return this._onDidChangeSecret.event;
 	}
 
 
-    delete = async(key: string) =>
+    delete = async(key: string, storageTarget: StorageTarget = StorageTarget.Global) =>
     {
-        await this.storage.update(this.getKey(key), undefined);
+        await this.storage[storageTarget].update(this.getKey(key), undefined);
         this._onDidChange.fire({ key, workspace: false });
     };
 
@@ -64,8 +75,11 @@ class Storage implements IStorage, Memento
 
     keys(): readonly string[]
     {
-        const keys = Object.keys((this.storage as any)._value);
-        return keys.filter((key) => this.storage.get(key) !== undefined);
+        const keys = [
+            ...Object.keys((this.storage[StorageTarget.Global] as any)._value),
+            ...Object.keys((this.storage[StorageTarget.Workspace] as any)._value).filter(k => !this.storage[StorageTarget.Global].get(k))
+        ];
+        return keys.filter((key) => this.storage[StorageTarget.Global].get(key) !== undefined);
     }
 
 
@@ -87,11 +101,11 @@ class Storage implements IStorage, Memento
     }
 
 
-    get<T>(key: string, defaultValue?: T): T | undefined
+    get<T>(key: string, defaultValue?: T, storageTarget: StorageTarget = StorageTarget.Global): T | undefined
     {
         if (defaultValue || (isString(defaultValue) && defaultValue === "") || (isNumber(defaultValue) && defaultValue === 0))
         {
-            let v = this.storage.get<T>(this.getKey(key), defaultValue);
+            let v = this.storage[storageTarget].get<T>(this.getKey(key), defaultValue);
             //
             // why have to do this?  In one case, passing a default of [] for a non-existent
             // value, the VSCode memento does not return[]. It returns an empty string????
@@ -103,7 +117,7 @@ class Storage implements IStorage, Memento
             }
             return v;
         }
-        return this.storage.get<T>(this.getKey(key));
+        return this.storage[storageTarget].get<T>(this.getKey(key));
     }
 
 
@@ -142,9 +156,9 @@ class Storage implements IStorage, Memento
 
 
     // update = (key: string, value: any) => this.storage.update(key, value);
-    update = async(key: string, value: any) =>
+    update = async(key: string, value: any, storageTarget: StorageTarget = StorageTarget.Global) =>
     {
-        await this.storage.update(this.getKey(key), value);
+        await this.storage[storageTarget].update(this.getKey(key), value);
         this._onDidChange.fire({ key, workspace: false });
     };
 

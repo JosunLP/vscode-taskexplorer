@@ -6,7 +6,8 @@ export interface ITeWebview
     description?: string;
     title: string;
     originalTitle?: string;
-    onReadyReceived: Event<void>;
+    onDidReceiveMessage: Event<string>;
+    onDidReceiveReady: Event<void>;
     serializer?: WebviewPanelSerializer;
     view: WebviewView | WebviewPanel | undefined;
     readonly visible: boolean;
