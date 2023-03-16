@@ -75,7 +75,7 @@ suite("Jenkins Tests", () =>
     test("Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.tasks.count.verify);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
     });
@@ -84,7 +84,7 @@ suite("Jenkins Tests", () =>
     test("Disable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, false, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);
@@ -94,7 +94,7 @@ suite("Jenkins Tests", () =>
     test("Re-enable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, true, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
@@ -104,7 +104,7 @@ suite("Jenkins Tests", () =>
     test("Create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUri.fsPath,
 `
 pipeline {
@@ -137,7 +137,7 @@ pipeline {
     test("Delete File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteFile(fileUri.fsPath);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount);
@@ -148,7 +148,7 @@ pipeline {
     test("Re-create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUri.fsPath,
 `
 pipeline {
@@ -172,7 +172,7 @@ pipeline {
     test("No Jenkins or Curl Path", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.pathToProgramsEvent * 4) + (tc.slowTime.taskCount.verify * 4));
+        this.slow((tc.slowTime.config.pathToProgramsEvent * 4) + (tc.slowTime.tasks.count.verify * 4));
         try {
             await executeSettingsUpdate("pathToPrograms.curl", "", tc.waitTime.config.pathToProgramsEvent);
             await verifyTaskCount(testsName, 0);
@@ -198,7 +198,7 @@ pipeline {
     test("Delete File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteFile(fileUri.fsPath);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount);
@@ -209,7 +209,7 @@ pipeline {
     test("Disable (Default is OFF)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.disableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.disableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, false, tc.waitTime.config.disableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);

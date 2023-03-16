@@ -99,7 +99,7 @@ suite("Makefile Tests", () =>
     test("Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.tasks.count.verify);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
     });
@@ -108,7 +108,7 @@ suite("Makefile Tests", () =>
     test("Disable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks." + testsName, false, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);
@@ -118,7 +118,7 @@ suite("Makefile Tests", () =>
     test("Re-enable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks." + testsName, true, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
@@ -128,7 +128,7 @@ suite("Makefile Tests", () =>
     test("Create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.createDir(dirName);
         await waitForTeIdle(tc.waitTime.fs.createFolderEvent);
         await teWrapper.fs.writeFile(
@@ -165,7 +165,7 @@ suite("Makefile Tests", () =>
     test("Delete File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.waitTime.fs.deleteFolderEvent + tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.waitTime.fs.deleteFolderEvent + tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteFile(fileUri.fsPath);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount);
@@ -178,7 +178,7 @@ suite("Makefile Tests", () =>
     test("Re-create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.createDir(dirName);
         await waitForTeIdle(tc.waitTime.fs.createFolderEvent);
         await teWrapper.fs.writeFile(
@@ -215,7 +215,7 @@ suite("Makefile Tests", () =>
     test("Delete Folder", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteDir(dirName);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount);

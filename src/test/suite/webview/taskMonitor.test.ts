@@ -55,7 +55,7 @@ suite("Task Monitor App Tests", () =>
 	test("Run Task", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.commands.run + testControl.slowTime.commands.runStop + testControl.slowTime.getTreeTasks + 1000);
+		this.slow(testControl.slowTime.commands.run + testControl.slowTime.commands.runStop + testControl.slowTime.tasks.getTreeTasks + 1000);
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		taskItem = ant.find(t => !t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
 		task = taskItem.task;
@@ -122,9 +122,9 @@ suite("Task Monitor App Tests", () =>
 		this.slow((testControl.slowTime.config.eventFast * 2) + 1210);
 		const mType = { method: "echo/config/update", overwriteable: false };
         await sleep(5);
-		await teWrapper.taskMonitorPage.notify(mType, { key: teWrapper.keys.Config.TaskMonitor.TimerMode, value: "MM:SS:MSS" });
+		await teWrapper.taskMonitorPage.postMessage(mType, { key: teWrapper.keys.Config.TaskMonitor.TimerMode, value: "MM:SS:MSS" });
         await sleep(50);
-		await teWrapper.taskMonitorPage.notify(mType, { key: teWrapper.keys.Config.TaskMonitor.TimerMode, value: "MM:SS:MS" });
+		await teWrapper.taskMonitorPage.postMessage(mType, { key: teWrapper.keys.Config.TaskMonitor.TimerMode, value: "MM:SS:MS" });
         await sleep(550); // wait for webworker to respond, takes ~ 400-600ms
 		await closeEditors();
         endRollingCount(this);

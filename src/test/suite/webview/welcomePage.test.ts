@@ -3,7 +3,7 @@
 
 import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { closeTeWebview, executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
+import { closeTeWebviewPanel, executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
 import { activate, testControl as tc, suiteFinished, exitRollingCount, endRollingCount, sleep } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -49,10 +49,9 @@ suite("Welcome Page Tests", () =>
 	test("Open Welcome Page", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.welcome + tc.slowTime.closeEditors);
+		this.slow(tc.slowTime.webview.show.page.welcome + tc.slowTime.general.closeEditors + 50);
 		await showTeWebview(teWrapper.welcomePage);
-		await closeTeWebview(teWrapper.welcomePage);
+		await closeTeWebviewPanel(teWrapper.welcomePage);
         endRollingCount(this);
 	});
-
 });

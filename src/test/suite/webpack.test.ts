@@ -65,7 +65,7 @@ suite("Webpack Tests", () =>
     test("Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.tasks.count.verify);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
     });
@@ -74,7 +74,7 @@ suite("Webpack Tests", () =>
     test("Disable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, false, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);
@@ -84,7 +84,7 @@ suite("Webpack Tests", () =>
     test("Re-enable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, true, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
@@ -94,7 +94,7 @@ suite("Webpack Tests", () =>
     test("Create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUri2.fsPath,
 `
 module.exports = (env) =>
@@ -116,7 +116,7 @@ module.exports = (env) =>
     test("Create File (w/ Folder)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUri.fsPath,
 `
 module.exports = (env) =>
@@ -148,7 +148,7 @@ module.exports = (env) =>
     test("Delete File (in Folder)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteFile(fileUri.fsPath);
         await waitForTeIdle(tc.waitTime.fs.deleteFolderEvent);
         await verifyTaskCount(testsName, startTaskCount + 15);
@@ -159,7 +159,7 @@ module.exports = (env) =>
     test("Delete File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteFile(fileUri2.fsPath);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount);
@@ -170,7 +170,7 @@ module.exports = (env) =>
     test("Re-create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUri.fsPath,
 `
 module.exports = (env) =>
@@ -192,7 +192,7 @@ module.exports = (env) =>
     test("Delete File (w/ Folder)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteDir(dirName);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount);
@@ -203,7 +203,7 @@ module.exports = (env) =>
     test("Disable (Default is OFF)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.disableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.disableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, false, tc.waitTime.config.disableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);

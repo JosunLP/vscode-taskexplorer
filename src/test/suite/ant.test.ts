@@ -13,7 +13,7 @@ import {
 
 const testsName = "ant";
 const startTaskCount = 3;
-const slowTimeforAntRunTasks = (tc.slowTime.fetchTasksCommand * 2) + (tc.slowTime.config.event * 2) + tc.slowTime.tasks.antParser;
+const slowTimeforAntRunTasks = (tc.slowTime.commands.fetchTasks * 2) + (tc.slowTime.config.event * 2) + tc.slowTime.tasks.antParser;
 
 let teWrapper: ITeWrapper;
 let teApi: ITaskExplorerApi;
@@ -65,7 +65,7 @@ suite("Ant Tests", () =>
     test("Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verifyFirstCall);
+        this.slow(tc.slowTime.tasks.count.verifyFirstCall);
         await verifyTaskCount("ant", startTaskCount);
         endRollingCount(this);
     });
@@ -88,7 +88,7 @@ suite("Ant Tests", () =>
     test("Disable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks.ant", false);
         await verifyTaskCount("ant", 0);
         endRollingCount(this);
@@ -98,7 +98,7 @@ suite("Ant Tests", () =>
     test("Re-enable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks.ant", true);
         await verifyTaskCount("ant", startTaskCount);
         endRollingCount(this);
@@ -265,7 +265,7 @@ suite("Ant Tests", () =>
     test("Restore Build.xml File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.modifyEventAnt + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.modifyEventAnt + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(buildXmlFileUri.fsPath, buildFileXml);
         buildFileXmlRestored = true;
         await waitForTeIdle(tc.waitTime.fs.modifyEvent);

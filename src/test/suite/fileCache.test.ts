@@ -63,7 +63,7 @@ suite("File Cache Tests", () =>
     test("Rebuild File Cache (Mimic Startup)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.cache.rebuild + tc.slowTime.min);
+        this.slow(tc.slowTime.cache.rebuild + tc.slowTime.general.min);
         await teWrapper.filecache.rebuildCache("", true);
         await utils.sleep(tc.waitTime.min);
         utils.endRollingCount(this);
@@ -81,7 +81,7 @@ suite("File Cache Tests", () =>
     test("Rebuild File Cache w Empty Persisted Cache (Mimic Startup)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.cache.rebuild + (tc.slowTime.config.event * 3) + (tc.slowTime.taskCount.verify * 6));
+        this.slow(tc.slowTime.cache.rebuild + (tc.slowTime.config.event * 3) + (tc.slowTime.tasks.count.verify * 6));
         await teWrapper.storage.update2("fileCacheTaskFilesMap", undefined);
         await teWrapper.storage.update2("fileCacheProjectFilesMap", undefined);
         await teWrapper.storage.update2("fileCacheProjectFileToFileCountMap", undefined);
@@ -294,7 +294,7 @@ suite("File Cache Tests", () =>
 const checkTaskCounts = async (instance?: Mocha.Context) =>
 {
     if (instance) {
-        instance.slow(tc.slowTime.taskCount.verify * 6);
+        instance.slow(tc.slowTime.tasks.count.verify * 6);
     }
     await utils.verifyTaskCount("bash", 1);
     await utils.verifyTaskCount("batch", 2);

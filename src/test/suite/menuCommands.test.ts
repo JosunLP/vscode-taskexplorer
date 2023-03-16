@@ -54,7 +54,7 @@ suite("Menu Command Tests", () =>
     test("Disable Task Types", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.taskCount.verify * 2) + (tc.slowTime.config.disableEvent * 2));
+        this.slow((tc.slowTime.tasks.count.verify * 2) + (tc.slowTime.config.disableEvent * 2));
         await executeTeCommand2("disableTaskType", [ pythonUri ], tc.waitTime.config.disableEvent);
         await verifyTaskCount("python", 0);
         await executeTeCommand2("disableTaskType", [ antUri ], tc.waitTime.config.disableEvent);
@@ -66,7 +66,7 @@ suite("Menu Command Tests", () =>
     test("Enable Task Types", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.taskCount.verify * 2) + (tc.slowTime.config.enableEvent * 2) + tc.slowTime.config.eventFast);
+        this.slow((tc.slowTime.tasks.count.verify * 2) + (tc.slowTime.config.enableEvent * 2) + tc.slowTime.config.eventFast);
         await executeTeCommand2("enableTaskType", [ pythonUri ], tc.waitTime.config.enableEvent);
         await verifyTaskCount("python", pythonStartCount);
         await executeTeCommand2("enableTaskType", [ antUri ], tc.waitTime.config.enableEvent);
@@ -80,7 +80,7 @@ suite("Menu Command Tests", () =>
     test("Add File to Excludes", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.taskCount.verify * 2) + (tc.slowTime.config.excludesEvent * 2));
+        this.slow((tc.slowTime.tasks.count.verify * 2) + (tc.slowTime.config.excludesEvent * 2));
         await executeTeCommand2("addToExcludesEx", [ pythonUri ], tc.waitTime.config.excludesEvent);
         await verifyTaskCount("python", pythonStartCount - 1);
         await executeTeCommand2("addToExcludesEx", [ antUri ], tc.waitTime.config.excludesEvent);
@@ -92,7 +92,7 @@ suite("Menu Command Tests", () =>
     test("Remove File from Excludes", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.taskCount.verify * 2) + (tc.slowTime.config.excludesEvent * 2));
+        this.slow((tc.slowTime.tasks.count.verify * 2) + (tc.slowTime.config.excludesEvent * 2));
         await executeTeCommand2("removeFromExcludes", [ pythonUri ], tc.waitTime.config.excludesEvent);
         await verifyTaskCount("python", pythonStartCount);
         await executeTeCommand2("removeFromExcludes", [ antUri ], tc.waitTime.config.excludesEvent);
@@ -104,7 +104,7 @@ suite("Menu Command Tests", () =>
     test("Add Folder to Excludes", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify + tc.slowTime.config.excludesEvent);
+        this.slow(tc.slowTime.tasks.count.verify + tc.slowTime.config.excludesEvent);
         await executeTeCommand2("addToExcludesEx", [ gruntFolderUri ], tc.waitTime.config.excludesEvent);
         await verifyTaskCount("grunt", 0);
         overrideNextShowInfoBox(undefined);
@@ -116,7 +116,7 @@ suite("Menu Command Tests", () =>
     test("Remove Folder from Excludes", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify + tc.slowTime.config.excludesEvent);
+        this.slow(tc.slowTime.tasks.count.verify + tc.slowTime.config.excludesEvent);
         await executeTeCommand2("removeFromExcludes", [ gruntFolderUri ], tc.waitTime.config.excludesEvent);
         await verifyTaskCount("grunt", gruntStartCount);
         overrideNextShowInfoBox(undefined);

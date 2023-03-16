@@ -8,9 +8,9 @@ import { testControl } from "../control";
 import { deactivate } from "../../extension";
 import { startInput, stopInput } from "./input";
 import { StorageKeys } from "../../lib/constants";
-import { hasExplorerFocused } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
+import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import {
     ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType
@@ -19,6 +19,7 @@ import {
     commands, ConfigurationTarget, Disposable, Event, EventEmitter, Extension, extensions, Task,
     TaskExecution, tasks, Uri, ViewColumn, window, workspace
 } from "vscode";
+import { ITeWebview } from "../../interface";
 
 const { symbols } = require("mocha/lib/reporters/base");
 
@@ -100,6 +101,9 @@ export const activate = async (instance?: Mocha.Context) =>
                 timeFinished: 0,
                 numTestsFailed: 0
             };
+            if (suite.parent) {
+                tc.isSingleSuiteTest = suite.parent.suites.length <= 2;
+            }
         }
     }
 
@@ -263,7 +267,14 @@ export const clearOverrideShowInputBox = () => { overridesShowInputBox = []; };
 export const clearOverrideShowInfoBox = () => { overridesShowInfoBox = []; };
 
 
-export const closeEditors = () => commands.executeCommand("openEditors.closeAll");
+export const closeEditors = async () =>
+{
+    await closeTeWebviewPanel(teWrapper.licensePage);
+    await closeTeWebviewPanel(teWrapper.parsingReportPage);
+    await closeTeWebviewPanel(teWrapper.releaseNotesPage);
+    await closeTeWebviewPanel(teWrapper.welcomePage);
+    await commands.executeCommand("openEditors.closeAll");
+};
 
 
 export const closeActiveEditor = () => commands.executeCommand("workbench.action.closeActiveEditor");
@@ -433,6 +444,28 @@ export type PromiseAdapter<T, U> = (
 ) => any;
 
 
+export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 5000) => waitForEvent(view.onReadyReceived, timeout);
+
+
+export const waitForEvent = async <T>(event: Event<T>, timeout = 5000) =>
+{
+    const eventPromise = promiseFromEvent(event),
+          to = setTimeout((ep: EventEmitter<void>) => ep.fire(), timeout, eventPromise.cancel);
+    try {
+        await eventPromise.promise;
+        clearTimeout(to);
+        return true;
+    }
+    catch (e) {
+        if (e === "cancelled") {
+            return true;
+        }
+        clearTimeout(to);
+        return false;
+    }
+};
+
+
 //
 // Bad a** function w/ credits to GitLens extension author
 //
@@ -443,7 +476,7 @@ export const promiseFromEvent = <T, U>(event: Event<T>, adapter: PromiseAdapter<
     return {
         promise: new Promise<U>((resolve, reject) =>
         {
-            cancel.event(_ => reject("Cancelled"));
+            cancel.event(_ => reject("cancelled"));
             subscription = event((value: T) =>
             {
                 try {

@@ -63,7 +63,7 @@ suite("Batch Tests", () =>
     test("Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.tasks.count.verify);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
     });
@@ -81,7 +81,7 @@ suite("Batch Tests", () =>
     test("Disable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks." + testsName, false, testControl.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);
@@ -91,7 +91,7 @@ suite("Batch Tests", () =>
     test("Re-enable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks." + testsName, true, testControl.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
@@ -101,7 +101,7 @@ suite("Batch Tests", () =>
     test("Create Files", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.createFolderEvent + testControl.slowTime.fs.createFolderEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.fs.createFolderEvent + testControl.slowTime.fs.createFolderEvent + testControl.slowTime.tasks.count.verify);
         await teWrapper.fs.createDir(dirName);
         await waitForTeIdle(testControl.waitTime.fs.createFolderEvent);
         await teWrapper.fs.writeFile(fileUriBat.fsPath, "echo test 123\r\n\r\n");
@@ -115,7 +115,7 @@ suite("Batch Tests", () =>
     test("Delete Files", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.deleteEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.fs.deleteEvent + testControl.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteFile(fileUriBat.fsPath);
         await teWrapper.fs.deleteFile(fileUriCmd.fsPath);
         await waitForTeIdle(testControl.waitTime.fs.deleteEvent);
@@ -127,7 +127,7 @@ suite("Batch Tests", () =>
     test("Re-create Files", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.createEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.fs.createEvent + testControl.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUriBat.fsPath, "echo test 123\r\n\r\n");
         await teWrapper.fs.writeFile(fileUriCmd.fsPath, "echo test 123\r\n");
         await waitForTeIdle(testControl.waitTime.fs.createEvent + 50);
@@ -139,7 +139,7 @@ suite("Batch Tests", () =>
     test("Delete Folder", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.deleteFolderEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.fs.deleteFolderEvent + testControl.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteDir(dirName);
         await waitForTeIdle(testControl.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount);

@@ -8,15 +8,15 @@ import { commands, Uri } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    echoWebviewCommand,
-    executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview
+    executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd
 } from "../../utils/commandUtils";
 import {
-    activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent,
-    sleep, suiteFinished, testControl as tc
+    activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep,
+    suiteFinished, testControl as tc
 } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
+let closedPages = false;
 
 
 suite("Webview Tests", () =>
@@ -25,6 +25,10 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate(this));
+        if (tc.isSingleSuiteTest) {
+            await closeEditors();
+            await sleep(50);
+        }
         endRollingCount(this, true);
     });
 
@@ -32,7 +36,9 @@ suite("Webview Tests", () =>
     suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-        await closeEditors();
+        if (!closedPages) {
+            await closeEditors();
+        }
         suiteFinished(this);
     });
 
@@ -58,21 +64,20 @@ suite("Webview Tests", () =>
     test("Home View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.commands.focusChangeViews * 3) + (tc.slowTime.config.enableEvent * 2) +
-                  tc.slowTime.webview.show.page.releaseNotes + tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home);
+        this.slow((tc.slowTime.commands.focusChangeViews * 4) + (tc.slowTime.config.enableEvent * 2) +
+                  tc.slowTime.webview.show.page.releaseNotes + tc.slowTime.webview.show.page.parsingReportFull +
+                  tc.slowTime.webview.show.view.home + (tc.slowTime.webview.postMessage * 3) + 10);
         const echoCmd = { method: "echo/command/execute", overwriteable: false };
         await executeSettingsUpdate("enabledTasks.bash", false, tc.waitTime.config.enableEvent);
+        await sleep(5);
         await executeSettingsUpdate("enabledTasks.bash", true, tc.waitTime.config.enableEvent);
         expect(teWrapper.homeView.description).to.not.be.undefined;
         await focusExplorerView(teWrapper);
-        await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
-        await showTeWebview(teWrapper.homeView);
-        await showTeWebview(teWrapper.parsingReportPage, Uri.file(getWsPath(".")));
-        await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.parsingReport.show", args: [ Uri.file(getWsPath(".")) ] });
-        // await promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
-        await teWrapper.homeView.notify(echoCmd, { command: "taskexplorer.view.releaseNotes.show" });
-        await showTeWebview(teWrapper.releaseNotesPage);
-        // await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
+        await teWrapper.homeView.postMessage(echoCmd, { command: "taskexplorer.view.releaseNotes.show" }); // not visible, ignored
+        await showTeWebview(teWrapper.homeView, "force");
+        expect(teWrapper.homeView.visible).to.be.equal(true);
+        await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.homeView, Uri.file(getWsPath(".")));
+        await showTeWebviewByEchoCmd("releaseNotes", teWrapper.releaseNotesPage, teWrapper.homeView);
         endRollingCount(this);
     });
 
@@ -94,7 +99,7 @@ suite("Webview Tests", () =>
         this.slow((tc.slowTime.webview.show.view.taskUsage * 2) + tc.slowTime.commands.focusChangeViews);
         await showTeWebview(teWrapper.taskUsageView);
         await focusExplorerView(teWrapper);
-        await teWrapper.homeView.notify({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover notify() when not visible
+        await teWrapper.homeView.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover notify() when not visible
         await showTeWebview(teWrapper.taskUsageView);
         endRollingCount(this);
     });
@@ -103,7 +108,7 @@ suite("Webview Tests", () =>
 	test("Task Usage View (Tracking Disabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.config.event * 2) + (tc.slowTime.webview.show.view.taskUsage * 2) + tc.slowTime.commands.focusChangeViews);
+		this.slow((tc.slowTime.config.trackingEvent * 2) + tc.slowTime.webview.show.view.taskUsage + (tc.slowTime.commands.focusChangeViews * 2));
         await focusExplorerView(teWrapper);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
 		await showTeWebview(teWrapper.taskUsageView, "timeout:2500");
@@ -126,9 +131,9 @@ suite("Webview Tests", () =>
     test("Post an Unknown Random Message", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.notify + 1100);
+        this.slow(tc.slowTime.webview.postMessage + 1100);
         await commands.executeCommand("taskexplorer.view.home.focus");
-        await teWrapper.homeView.notify({ method: "echo/fake", overwriteable: false }, { command: "taskexplorer.view.releaseNotes.show" });
+        await teWrapper.homeView.postMessage({ method: "echo/fake", overwriteable: false }, { command: "taskexplorer.view.releaseNotes.show" });
         await sleep(550); // wait for webworker to respond, takes ~ 400-600ms
         endRollingCount(this);
     });
@@ -137,32 +142,43 @@ suite("Webview Tests", () =>
 	test("Toggle Active Page", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.commands.focusChangeViews * 4) + (tc.slowTime.webview.notify * 2) + 220 + (tc.slowTime.commands.fast * 3) + tc.slowTime.licenseMgr.page);
+		this.slow((tc.slowTime.commands.focusChangeViews * 4) + (tc.slowTime.webview.postMessage * 2) + 220 + (tc.slowTime.commands.fast * 3) +
+                  tc.slowTime.webview.show.page.license + tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.page.releaseNotes);
         const echoCmd = { method: "echo/fake", overwriteable: false };
-	    await showTeWebview(teWrapper.parsingReportPage);
-	    await showTeWebview(teWrapper.licensePage);
-        await teWrapper.parsingReportPage.notify(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
-        await sleep(50);
-	    await showTeWebview(teWrapper.releaseNotesPage);
-        await teWrapper.licensePage.notify(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
-        await sleep(50);
-	    await teWrapper.parsingReportPage.show();
-        await sleep(10);
+	    await showTeWebview(teWrapper.parsingReportPage, "force");
+	    await showTeWebview(teWrapper.licensePage, "force");
+        await teWrapper.parsingReportPage.postMessage(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
+	    await showTeWebview(teWrapper.releaseNotesPage, "force");
+        await teWrapper.licensePage.postMessage(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
+	    await showTeWebview(teWrapper.parsingReportPage, "force");
         await commands.executeCommand("workbench.action.nextEditor");
+        await promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
         await commands.executeCommand("workbench.action.nextEditor");
+        await promiseFromEvent(teWrapper.releaseNotesPage.onReadyReceived).promise;
         await commands.executeCommand("workbench.action.previousEditor");
+        await promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
         endRollingCount(this);
 	});
 
 
-    test("Cover Webview Properties (Post-Show)", async function()
+    test("Close Open Pages", async function()
     {
         if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.general.closeEditors * 3);
         teWrapper.homeView.description = teWrapper.homeView.description;
 		await closeEditors();
-        while (teWrapper.licensePage.visible || teWrapper.releaseNotesPage.visible  || teWrapper.parsingReportPage.visible) {
-            await sleep(25);
-        }
+        closedPages = true;
+        endRollingCount(this);
+    });
+
+
+    test("Roll Message Counter", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.general.closeEditors * 3);
+        teWrapper.homeView.description = teWrapper.homeView.description;
+		await closeEditors();
+        closedPages = true;
         endRollingCount(this);
     });
 

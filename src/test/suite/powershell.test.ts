@@ -64,7 +64,7 @@ suite("Powershell Tests", () =>
     test("Document Position", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         expect(provider.getDocumentPosition()).to.be.equal(0, "Script type should return position 0");
         endRollingCount(this);
     });
@@ -73,7 +73,7 @@ suite("Powershell Tests", () =>
     test("Invalid Script Provider Type", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         provider.createTask("no_ext", undefined, wsFolder, Uri.file(getWsPath("test.ps1")));
         logErrorsAreFine();
         endRollingCount(this);
@@ -83,7 +83,7 @@ suite("Powershell Tests", () =>
     test("Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify + tc.slowTime.min);
+        this.slow(tc.slowTime.tasks.count.verify + tc.slowTime.general.min);
         await verifyTaskCount(testsName, startTaskCount);
         await waitForTeIdle(tc.waitTime.min);
         endRollingCount(this);
@@ -93,7 +93,7 @@ suite("Powershell Tests", () =>
     test("Disable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks." + testsName, false, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);
@@ -103,7 +103,7 @@ suite("Powershell Tests", () =>
     test("Re-enable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks." + testsName, true, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
@@ -113,7 +113,7 @@ suite("Powershell Tests", () =>
     test("Create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUri.fsPath, "Write-Host 'Hello Code 2'\r\n\r\n");
         await waitForTeIdle(tc.waitTime.fs.createEvent);
         await verifyTaskCount(testsName, startTaskCount + 1);
@@ -124,7 +124,7 @@ suite("Powershell Tests", () =>
     test("Create Empty Directory", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.createDir(dirName);
         await waitForTeIdle(tc.waitTime.fs.createFolderEvent);
         await verifyTaskCount(testsName, startTaskCount + 1);
@@ -135,7 +135,7 @@ suite("Powershell Tests", () =>
     test("Create File 2", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUri2.fsPath, "Write-Host 'Hello Code 2'\r\n\r\n");
         await waitForTeIdle(tc.waitTime.fs.createEvent);
         await verifyTaskCount(testsName, startTaskCount + 2);
@@ -146,7 +146,7 @@ suite("Powershell Tests", () =>
     test("Delete File 2", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteFile(fileUri2.fsPath);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount + 1);
@@ -157,7 +157,7 @@ suite("Powershell Tests", () =>
     test("Re-create File 2", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(fileUri2.fsPath, "Write-Host 'Hello Code 2'\r\n\r\n");
         await waitForTeIdle(tc.waitTime.fs.createEvent);
         await verifyTaskCount(testsName, startTaskCount + 2);
@@ -168,7 +168,7 @@ suite("Powershell Tests", () =>
     test("Delete Folder w/ File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteDir(dirName);
         await waitForTeIdle(tc.waitTime.fs.deleteFolderEvent);
         await verifyTaskCount(testsName, startTaskCount + 1);
@@ -179,7 +179,7 @@ suite("Powershell Tests", () =>
     test("Delete File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteFile(fileUri.fsPath);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent);
         await verifyTaskCount(testsName, startTaskCount);

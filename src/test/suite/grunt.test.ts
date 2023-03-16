@@ -65,7 +65,7 @@ suite("Grunt Tests", () =>
     test("Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.tasks.count.verify);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
     });
@@ -74,7 +74,7 @@ suite("Grunt Tests", () =>
     test("Disable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks.grunt", false, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);
@@ -84,7 +84,7 @@ suite("Grunt Tests", () =>
     test("Re-enable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate("enabledTasks.grunt", true, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
@@ -94,7 +94,7 @@ suite("Grunt Tests", () =>
     test("Create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.fs.createFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.fs.createFolderEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.createFile(
             fileUri.fsPath,
             "module.exports = function(grunt) {\n" +
@@ -110,7 +110,7 @@ suite("Grunt Tests", () =>
     test("Add 4 Tasks to File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.writeFile(
             fileUri.fsPath,
             "module.exports = function(grunt) {\n" +
@@ -130,7 +130,7 @@ suite("Grunt Tests", () =>
     test("Remove 2 Tasks from File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.writeFile(
             fileUri.fsPath,
             "module.exports = function(grunt) {\n" +
@@ -148,7 +148,7 @@ suite("Grunt Tests", () =>
     test("Delete File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.fs.deleteFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.fs.deleteFolderEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.deleteFile(fileUri.fsPath);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);

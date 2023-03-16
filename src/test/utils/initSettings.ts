@@ -115,6 +115,11 @@ export const initSettings = async () =>
         tc.slowTime.wsFolder.reorder = 690;
     }
 
+    //
+    // TODO - isSingleSuiteTest
+    //
+    tc.isSingleSuiteTest = false;
+
     const msg = `The test environment is a '${tc.isMultiRootWorkspace ? "multi-root" : "single-root"}' workspace`;
     console.log(`    ${color.info} ${withColor(msg, colors.grey)}`);
     console.log(`    ${color.info} ${withColor("Settings initialization completed", colors.grey)}`);

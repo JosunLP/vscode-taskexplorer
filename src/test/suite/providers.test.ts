@@ -191,7 +191,7 @@ suite("Provider Tests", () =>
             await focusExplorerView(teWrapper, this);
         }
         else {
-            this.slow(tc.slowTime.commands.focusAlreadyFocused + tc.slowTime.min);
+            this.slow(tc.slowTime.commands.focusAlreadyFocused + tc.slowTime.general.min);
             await waitForTeIdle(tc.waitTime.min);
         }
         endRollingCount(this);
@@ -360,7 +360,7 @@ suite("Provider Tests", () =>
             }
             ++numOpened;
         }
-        this.slow((numFilesOpened * tc.slowTime.findTaskPosition) + ((numOpened - numFilesOpened) * tc.slowTime.findTaskPositionDocOpen));
+        this.slow((numFilesOpened * tc.slowTime.tasks.findPosition) + ((numOpened - numFilesOpened) * tc.slowTime.tasks.findPositionDocOpen));
         endRollingCount(this);
     });
 
@@ -399,7 +399,7 @@ suite("Provider Tests", () =>
     test("Add to Excludes - TaskItem", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fetchTasksCommand + tc.slowTime.taskCount.verify + tc.slowTime.config.excludeTasksEvent);
+        this.slow(tc.slowTime.commands.fetchTasks + tc.slowTime.tasks.count.verify + tc.slowTime.config.excludeTasksEvent);
         const grunt = await treeUtils.getTreeTasks(teWrapper, "grunt", 13),
               taskItems = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri),
               gruntCt = taskItems.length,
@@ -414,7 +414,7 @@ suite("Provider Tests", () =>
     test("Add to Excludes - TaskItem (Script Type)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fetchTasksCommand + tc.slowTime.taskCount.verify + tc.slowTime.commands.exclude);
+        this.slow(tc.slowTime.commands.fetchTasks + tc.slowTime.tasks.count.verify + tc.slowTime.commands.exclude);
         const batch = await treeUtils.getTreeTasks(teWrapper, "batch", 4),
               taskItems = await tasks.fetchTasks({ type: "batch" }),
               scriptCt = taskItems.length,
@@ -429,7 +429,7 @@ suite("Provider Tests", () =>
     test("Add to Excludes - TaskFile", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fetchTasksCommand + tc.slowTime.taskCount.verify + tc.slowTime.config.excludesEvent);
+        this.slow(tc.slowTime.commands.fetchTasks + tc.slowTime.tasks.count.verify + tc.slowTime.config.excludesEvent);
         const taskItems = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri),
               gruntCt = taskItems.length;
         if (taskFile) {
@@ -444,7 +444,7 @@ suite("Provider Tests", () =>
     test("Disable Task Types Off by Default", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.disableEvent * 4) + (tc.slowTime.taskCount.verify * 4));
+        this.slow((tc.slowTime.config.disableEvent * 4) + (tc.slowTime.tasks.count.verify * 4));
         await executeSettingsUpdate("enabledTasks.apppublisher", false);
         await executeSettingsUpdate("enabledTasks.gradle", false);
         await executeSettingsUpdate("enabledTasks.maven", false);
@@ -460,7 +460,7 @@ suite("Provider Tests", () =>
     test("Project Folder Collapsed on Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.cache.build + tc.slowTime.config.event + tc.slowTime.config.eventFast + tc.slowTime.min +
+        this.slow(tc.slowTime.cache.build + tc.slowTime.config.event + tc.slowTime.config.eventFast + tc.slowTime.general.min +
                   (tc.slowTime.commands.refresh* 2) + (tc.waitTime.refreshCommand* 2));
         await executeSettingsUpdate("logging.enable", false); // was hitting tree.logTask()
         await executeSettingsUpdate("specialFolders.folderState.project1", "Collapsed", tc.waitTime.config.event);
@@ -483,7 +483,7 @@ suite("Provider Tests", () =>
     test("Add to Excludes After Grouping", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.event + tc.slowTime.config.globEvent + (tc.slowTime.fetchTasksCommand * 2) + tc.slowTime.min);
+        this.slow(tc.slowTime.config.event + tc.slowTime.config.globEvent + (tc.slowTime.commands.fetchTasks * 2) + tc.slowTime.general.min);
         const taskItemsB4 = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri),
               gruntCt = taskItemsB4.length;
         for (const taskItem of Object.values(taskMap))

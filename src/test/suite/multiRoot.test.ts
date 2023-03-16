@@ -132,7 +132,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Add Workspace Folder 1 (Empty)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.wsFolder.addEmpty + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.wsFolder.addEmpty + tc.slowTime.tasks.count.verify);
         if (!tc.isMultiRootWorkspace)
         {
             await teWrapper.fileWatcher.onWsFoldersChange({
@@ -256,7 +256,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Remove Workspace Folder 4 (Empty)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.wsFolder.removeEmpty + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.wsFolder.removeEmpty + tc.slowTime.tasks.count.verify);
         if (!tc.isMultiRootWorkspace)
         {
             await teWrapper.fileWatcher.onWsFoldersChange({
@@ -276,7 +276,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Add Workspace Folder 1 (w/ File)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.wsFolder.add + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.wsFolder.add + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(
             join(wsf1DirName, "Gruntfile.js"),
             "module.exports = function(grunt) {\n" +
@@ -309,7 +309,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Add Workspace Folder 2, 3, and 4 (w/ File)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.wsFolder.add * 3) + tc.slowTime.taskCount.verify);
+        this.slow((tc.slowTime.wsFolder.add * 3) + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.writeFile(
             join(wsf2DirName, "Gruntfile.js"),
             "module.exports = function(grunt) {\n" +
@@ -344,7 +344,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Remove Workspace Folder 1 (w/ File)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.tasks.count.verify);
         if (!tc.isMultiRootWorkspace)
         {   // Push task and task item, vscode knows they're fake and won't return them in fetchTasks()
             const taskMap = teWrapper.treeManager.getTaskMap(),
@@ -390,7 +390,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Remove Workspace Folder 2 (w/ File)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.tasks.count.verify);
         if (!tc.isMultiRootWorkspace)
         {   // Push task and task item, vscode knows they're fake and won't return them in fetchTasks()
             const taskMap = teWrapper.treeManager.getTaskMap(),
@@ -424,7 +424,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Remove Workspace Folder 3 and 4 (w/ File)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.wsFolder.remove * 2) + tc.slowTime.taskCount.verify);
+        this.slow((tc.slowTime.wsFolder.remove * 2) + tc.slowTime.tasks.count.verify);
         if (!tc.isMultiRootWorkspace)
         {   // Push tasks and task items, vscode knows they're fake and won't return them in fetchTasks()
             const taskMap = teWrapper.treeManager.getTaskMap(),
@@ -476,7 +476,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Add WS Folder 1 (Cache Builder Busy)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.wsFolder.add + tc.slowTime.taskCount.verify + tc.slowTime.cache.rebuildCancel + 200);
+        this.slow(tc.slowTime.wsFolder.add + tc.slowTime.tasks.count.verify + tc.slowTime.cache.rebuildCancel + 200);
         teWrapper.filecache.rebuildCache(""); // Don't 'await'
         await sleep(100);
         if (!tc.isMultiRootWorkspace)
@@ -504,7 +504,7 @@ suite("Multi-Root Workspace Tests", () =>
     test("Remove WS Folder 1 (Cache Builder Busy)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.taskCount.verify + tc.slowTime.cache.rebuildCancel + 200);
+        this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.tasks.count.verify + tc.slowTime.cache.rebuildCancel + 200);
         teWrapper.filecache.rebuildCache(""); // Don't 'await'
         await sleep(100);
         if (!tc.isMultiRootWorkspace)

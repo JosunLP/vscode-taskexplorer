@@ -19,6 +19,10 @@ export const testControl =
     //
     isMultiRootWorkspace: false,
     //
+    // Is single suite test - Populated by utils.activate()
+    //
+    isSingleSuiteTest: false,
+    //
     // KEEP SETTINGS FILE CHANGES (@ test-fixture/project1/.vscode/workspace.json)
     //
     keepSettingsFileChanges: false,
@@ -91,15 +95,14 @@ export const testControl =
             rebuildCancel: 675,
             rebuildNoChanges: 880,
         },
-        cleanup: 475,
-        closeEditors: 25,
         commands: {
             exclude: 1350,
             fast: 250,
+            fetchTasks: 350,
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 4810,
+            focusSideBarFirstTime: 6240,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -128,12 +131,8 @@ export const testControl =
             showHideUserTasks: 975,
             sortingEvent: 815,
             terminalEvent: 250,
-            trackingEvent: 335
+            trackingEvent: 310
         },
-        explorerViewStartup: 9500,
-        fetchTasksCommand: 350,
-        findTaskPosition: 285,
-        findTaskPositionDocOpen: 35,
         fs: {
             createEvent: 1550,
             createEventTsc: 1885,
@@ -145,10 +144,12 @@ export const testControl =
             modifyEventAnt: 1200,
             modifyEventTsc: 1220,
         },
-        getTreeTasks: 215,
-        getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
+        general: {
+            cleanup: 475,
+            closeEditors: 95,
+            min: 50
+        },
         licenseMgr: {
-            page: 2770,
             getTrialExtension: 2175,
             getTrialExtensionDenied: 800,
             getMaxTasks: 365,
@@ -156,14 +157,12 @@ export const testControl =
             purchaseLicense: 1875,
             validateLicense: 2175
         },
-        min: 50,
-        revealTreeNode: 55,
-        storageRead: 15,
-        storageUpdate: 25,
-        storageSecretRead: 35,
-        storageSecretUpdate: 45,
-        taskCommand: 950,
-        taskProviderReadUri: 90,
+        storage: {
+            read: 15,
+            update: 25,
+            secretRead: 35,
+            secretUpdate: 45
+        },
         tasks: {
             antParser: 2135,
             antTask: 3300,
@@ -171,32 +170,40 @@ export const testControl =
             bashScript: 3075,
             batchScriptBat: 4140,
             batchScriptCmd: 5140,
+            command: 950,
+            findPosition: 285,
+            findPositionDocOpen: 35,
+            getTreeTasks: 215,
+            getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
             gulpParser: 3870,
             gulpTask: 3350,
             npmCommand: 8000,
             npmCommandPkg: 7000,
             npmInstallCommand: 8600,
-        },
-        taskCount: {
-            verify: 375,
-            verifyByTree: 425,
-            verifyFirstCall: 550,
+            providerReadUri: 90,
+            count: {
+                verify: 375,
+                verifyByTree: 425,
+                verifyFirstCall: 550
+            }
         },
         webview: {
-            notify: 955,
+            postMessage: 25,
+            revealTreeNode: 55,
             show: {
                 view: {
-                    home: 2580,
-                    taskCount: 1320,
-                    taskUsage: 1770
+                    home: 2560,
+                    taskCount: 1340,
+                    taskUsage: 1990
                 },
                 page: {
-                    releaseNotes: 1870,
-                    taskDetails: 2265,
-                    taskMonitor: 2610,
+                    license: 2970,
+                    releaseNotes: 2370,
+                    taskDetails: 2825,
+                    taskMonitor: 2625,
                     parsingReport: 2090,
-                    parsingReportFull: 2560,
-                    welcome: 2000
+                    parsingReportFull: 2810,
+                    welcome: 525
                 }
             }
         },
@@ -235,7 +242,6 @@ export const testControl =
             showHideUserTasks: 100,
             sortingEvent: 95,
         },
-        explorerViewStartup: 1700,
         focusCommand: 210,
         fs: {
             createEvent: 205,

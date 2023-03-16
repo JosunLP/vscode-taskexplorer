@@ -87,7 +87,7 @@ suite("NPM Tests", () =>
     test("Verify NPM Task Count", async function()
     {   // npm task provider is slower than shit on a turtle
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.tasks.count.verify);
         await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
         utils.endRollingCount(this);
     });
@@ -96,7 +96,7 @@ suite("NPM Tests", () =>
     test("Get NPM Task Items", async function()
     {   // npm task provider is slower than shit on a turtle
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.getTreeTasksNpm);
+        this.slow(tc.slowTime.tasks.getTreeTasksNpm);
         // tagLog("NPM", "Get NPM Task Items [Start]");
         //
         // Get the explorer tree task items (three less task than above, one of them tree
@@ -124,7 +124,7 @@ suite("NPM Tests", () =>
     test("Document Position", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.findTaskPosition + (tc.slowTime.findTaskPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
+        this.slow(tc.slowTime.tasks.findPosition + (tc.slowTime.tasks.findPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
         for (const taskItem of npmTaskItems) {
             await executeTeCommand2("open", [ taskItem ], tc.waitTime.commandFast);
         }

@@ -13,7 +13,7 @@ suite("Deactivate Extension", () =>
 
 	test("Cleanup", async function()
 	{
-		this.slow(testControl.slowTime.cleanup);
+		this.slow(testControl.slowTime.general.cleanup);
 		await cleanup();
 	});
 

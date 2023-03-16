@@ -115,7 +115,7 @@ suite("File Watcher Tests", () =>
     test("Create File", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent +  tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent +  tc.slowTime.tasks.count.verify);
         await fsUtils.createFile(
             join(insideWsDir, "Gruntfile.js"),
             "module.exports = function(grunt) {\n" +
@@ -131,7 +131,7 @@ suite("File Watcher Tests", () =>
     test("Delete File", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.deleteFile(join(insideWsDir, "Gruntfile.js"));
         await utils.verifyTaskCount("grunt", startTaskCountGrunt);
         utils.endRollingCount(this);
@@ -141,7 +141,7 @@ suite("File Watcher Tests", () =>
     test("Create Empty File", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.createFile(join(insideWsDir, "Gruntfile.js"), "");
         await utils.verifyTaskCount("grunt", startTaskCountGrunt);
         utils.endRollingCount(this);
@@ -151,7 +151,7 @@ suite("File Watcher Tests", () =>
     test("Add New Task to File", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.writeFile(
             join(insideWsDir, "Gruntfile.js"),
             "module.exports = function(grunt) {\n" +
@@ -166,7 +166,7 @@ suite("File Watcher Tests", () =>
     test("Delete Folder", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.deleteDir(insideWsDir);
         await utils.verifyTaskCount("grunt", startTaskCountGrunt);
         utils.endRollingCount(this);
@@ -185,7 +185,7 @@ suite("File Watcher Tests", () =>
     test("Add File to Ignored Folder", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.createFile(
             join(insideWsDirIgn, "Gruntfile.js"),
             "module.exports = function(grunt) {\n" +
@@ -201,7 +201,7 @@ suite("File Watcher Tests", () =>
     test("Modify File in Ignored Folder", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.fs.modifyEvent * 2) + (tc.slowTime.taskCount.verify * 2) + 200);
+        this.slow((tc.slowTime.fs.modifyEvent * 2) + (tc.slowTime.tasks.count.verify * 2) + 200);
         await fsUtils.writeFile(
             join(insideWsDirIgn, "Gruntfile.js"),
             "module.exports = function(grunt) {\n" +
@@ -225,7 +225,7 @@ suite("File Watcher Tests", () =>
     test("Delete File in Ignored Folder", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.deleteFile(join(insideWsDirIgn, "Gruntfile.js"));
         await utils.verifyTaskCount("grunt", startTaskCountGrunt);
         utils.endRollingCount(this);
@@ -235,7 +235,7 @@ suite("File Watcher Tests", () =>
     test("Add a Non-Empty Folder to Workspace Folder", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.fs.createFolderEvent * 2) + tc.slowTime.fs.createEvent + (tc.slowTime.taskCount.verify * 2));
+        this.slow((tc.slowTime.fs.createFolderEvent * 2) + tc.slowTime.fs.createEvent + (tc.slowTime.tasks.count.verify * 2));
         await fsUtils.createDir(outsideWsDir);
         await fsUtils.createFile(
             join(outsideWsDir, "Gruntfile.js"),
@@ -258,7 +258,7 @@ suite("File Watcher Tests", () =>
     test("Delete New Non-Empty Folder", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.deleteDir(join(insideWsDir, "testA"));
         await utils.verifyTaskCount("grunt", startTaskCountGrunt + 2);
         utils.endRollingCount(this);
@@ -268,7 +268,7 @@ suite("File Watcher Tests", () =>
     test("Add a Non-Empty Folder to Workspace Folder (Un-Licensed Mode)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.tasks.count.verify);
         await utils.setLicenseType(1); // Set to 'free' type (trial over, non-paid)
 		expect(teWrapper.licenseManager.isTrial).to.be.equal(false);
 		expect(teWrapper.licenseManager.isLicensed).to.be.equal(false);
@@ -287,7 +287,7 @@ suite("File Watcher Tests", () =>
     test("Add/Delete New Files Repetitively", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.fs.createEvent * 2) + tc.slowTime.taskCount.verify + 3850);
+        this.slow((tc.slowTime.fs.createEvent * 2) + tc.slowTime.tasks.count.verify + 3850);
 
         await writeGruntFile("grunt2_0", 1, " ");
         writeGruntFile("grunt2_0", 1, "");
@@ -395,7 +395,7 @@ suite("File Watcher Tests", () =>
     test("Modify Files Repetitively", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.fs.createEvent * 2) + tc.slowTime.taskCount.verify + 3450);
+        this.slow((tc.slowTime.fs.createEvent * 2) + tc.slowTime.tasks.count.verify + 3450);
         await writeGruntFile("grunt2_0", 1, "");
         writeGruntFile("grunt2_0", 1, " ");
         await writeGruntFile("grunt2_0", 1, "  ");
@@ -466,7 +466,7 @@ suite("File Watcher Tests", () =>
     test("Delete Folders", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteFolderEvent + (tc.slowTime.taskCount.verify * 6));
+        this.slow(tc.slowTime.fs.deleteFolderEvent + (tc.slowTime.tasks.count.verify * 6));
         await teWrapper.fs.deleteDir(outsideWsDir);
         await teWrapper.fs.deleteDir(insideWsDir);
         await teWrapper.fs.deleteDir(insideWsDir2);
@@ -481,7 +481,7 @@ suite("File Watcher Tests", () =>
 
 const checkTaskCounts = async (instance: Mocha.Context) =>
 {
-    instance.slow(6 * utils.testControl.slowTime.taskCount.verify);
+    instance.slow(6 * utils.testControl.slowTime.tasks.count.verify);
     await utils.verifyTaskCount("bash", startTaskCountBash);
     await utils.verifyTaskCount("batch", startTaskCountBatch);
     await utils.verifyTaskCount("npm", startTaskCountNpm);

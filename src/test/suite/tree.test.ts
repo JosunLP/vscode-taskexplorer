@@ -53,7 +53,7 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow((tc.slowTime.config.showHideSpecialFolder * 2) + (tc.waitTime.config.event * 2) +
-                  (tc.slowTime.getTreeTasks * 4) + tc.slowTime.storageUpdate);
+                  (tc.slowTime.tasks.getTreeTasks * 4) + tc.slowTime.storage.update);
         ant = await utils.treeUtils.getTreeTasks(teWrapper, "ant", 3);
         bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
         batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
@@ -71,7 +71,7 @@ suite("Tree Tests", () =>
     test("Show Last Tasks", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.showHideSpecialFolder * 2) + (tc.waitTime.config.event * 2) + (tc.slowTime.getTreeTasks * 2));
+        this.slow((tc.slowTime.config.showHideSpecialFolder * 2) + (tc.waitTime.config.event * 2) + (tc.slowTime.tasks.getTreeTasks * 2));
         ant = await utils.treeUtils.getTreeTasks(teWrapper, "ant", 3);
         batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
         await teWrapper.storage.update("lastTasks", [
@@ -490,7 +490,7 @@ suite("Tree Tests", () =>
     test("Reveal API", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.getTreeTasks * 2) + (tc.slowTime.revealTreeNode * 6) + 230);
+        this.slow((tc.slowTime.tasks.getTreeTasks * 2) + (tc.slowTime.webview.revealTreeNode * 6) + 230);
         await utils.waitForTeIdle(50);
         const reveal = async() => {
             bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);

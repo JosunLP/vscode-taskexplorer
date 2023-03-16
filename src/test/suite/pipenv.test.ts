@@ -77,7 +77,7 @@ suite("Pipenv Tests", () =>
     test("Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.tasks.count.verify);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
     });
@@ -86,7 +86,7 @@ suite("Pipenv Tests", () =>
     test("Disable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, false, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);
@@ -96,7 +96,7 @@ suite("Pipenv Tests", () =>
     test("Re-enable", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, true, tc.waitTime.config.enableEvent);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
@@ -106,7 +106,7 @@ suite("Pipenv Tests", () =>
     test("Create File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.createFile(
             fileUri.fsPath,
 `[[source]]
@@ -141,7 +141,7 @@ build-exe2 = "pyinstaller --name='RobPySide6SSHgui' --windowed --onefile ./main.
     test("Add Task to File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.writeFile(
             fileUri.fsPath,
 `[[source]]
@@ -177,7 +177,7 @@ run-dev = "python main.py"
     test("Remove Task from File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.writeFile(
             fileUri.fsPath,
 `[[source]]
@@ -212,7 +212,7 @@ build-exe2 = "pyinstaller --name='RobPySide6SSHgui' --windowed --onefile ./main.
     test("Invalid File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.writeFile(
             fileUri.fsPath,
 `[[src]]
@@ -232,7 +232,7 @@ build-exe2 = "pyinstaller --name='RobPySide6SSHgui' --windowed --onefile ./main.
     test("Delete File", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await fsUtils.deleteFile(fileUri.fsPath);
         await verifyTaskCount(testsName, startTaskCount);
         endRollingCount(this);
@@ -242,7 +242,7 @@ build-exe2 = "pyinstaller --name='RobPySide6SSHgui' --windowed --onefile ./main.
     test("Disable (Default is OFF)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.disableEvent + tc.slowTime.taskCount.verify);
+        this.slow(tc.slowTime.config.disableEvent + tc.slowTime.tasks.count.verify);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, false, tc.waitTime.config.disableEvent);
         await verifyTaskCount(testsName, 0);
         endRollingCount(this);

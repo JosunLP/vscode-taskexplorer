@@ -3,8 +3,8 @@
 
 import { Extension } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
-import { closeTeWebview, showTeWebview } from "../../utils/commandUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { closeTeWebviewPanel, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount
 } from "../../utils/utils";
@@ -40,10 +40,10 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.closeEditors);
+		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.general.closeEditors);
 		await showTeWebview(teWrapper.releaseNotesPage);
 		await sleep(5);
-		await closeTeWebview(teWrapper.releaseNotesPage);
+		await closeTeWebviewPanel(teWrapper.releaseNotesPage);
         endRollingCount(this);
 	});
 
@@ -51,17 +51,16 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes (Error No Version)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.releaseNotes + 50 + testControl.slowTime.closeEditors + testControl.slowTime.webview.notify);
+		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.general.closeEditors + testControl.slowTime.webview.postMessage);
 		const version = extension.packageJSON.version;
 		extension.packageJSON.version = "17.4444.0";
 		try {
 			await showTeWebview(teWrapper.releaseNotesPage);
-			await teWrapper.releaseNotesPage.notify({ method: "echo/fake" }, { command: "taskexplorer.view.parsingReport.show" }); // cover notify() when not visible
-			await sleep(25);
+			await teWrapper.releaseNotesPage.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.parsingReport.show" }); // cover notify() when not visible
 		}
 		catch (e) { throw e; }
 		finally { extension.packageJSON.version = version; }
-		await closeTeWebview(teWrapper.releaseNotesPage);
+		await closeTeWebviewPanel(teWrapper.releaseNotesPage);
         endRollingCount(this);
 	});
 

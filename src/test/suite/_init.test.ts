@@ -34,7 +34,9 @@ suite("Initialization", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.showOutput * 3);
         await executeTeCommand2("showOutput", [ true ]);
+        await sleep(5);
         await executeTeCommand2("showOutput", [ false ]);
+        await sleep(5);
         await executeTeCommand2("showOutput", [ tc.log.enabled && tc.log.output ]);
         endRollingCount(this);
     });

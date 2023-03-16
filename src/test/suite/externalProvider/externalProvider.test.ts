@@ -81,7 +81,7 @@ suite("External Provider Tests", () =>
     test("Register External Task Provider 1", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.enableEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.enableEvent + testControl.slowTime.tasks.count.verify);
         taskProvider.getDocumentPosition("test_1_task_name", "test_1_task_name");
         await teApi.register("external", taskProvider, "");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
@@ -93,7 +93,7 @@ suite("External Provider Tests", () =>
     test("Register External Task Provider 2", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.enableEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.enableEvent + testControl.slowTime.tasks.count.verify);
         await teApi.register("external2", taskProvider2, "");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
         await verifyTaskCount("external2", 2);
@@ -104,7 +104,7 @@ suite("External Provider Tests", () =>
     test("Register External Task Provider 3", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.enableEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.enableEvent + testControl.slowTime.tasks.count.verify);
         await teApi.register("external3", taskProvider3, "");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
         await verifyTaskCount("external3", 2);
@@ -142,7 +142,7 @@ suite("External Provider Tests", () =>
     test("Refresh External Task Provider 1", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.commands.refreshNoChanges + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.commands.refreshNoChanges + testControl.slowTime.tasks.count.verify);
         await teApi.refreshExternalProvider("external", "");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
         await verifyTaskCount("external", 2);
@@ -153,7 +153,7 @@ suite("External Provider Tests", () =>
     test("Refresh External Task Provider 2", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.commands.refreshNoChanges + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.commands.refreshNoChanges + testControl.slowTime.tasks.count.verify);
         await teApi.refreshExternalProvider("external2", "");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
         await verifyTaskCount("external2", 2);
@@ -164,7 +164,7 @@ suite("External Provider Tests", () =>
     test("Refresh External Task Provider 3", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.commands.refreshNoChanges + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.commands.refreshNoChanges + testControl.slowTime.tasks.count.verify);
         await teApi.refreshExternalProvider("external3", "");
         await waitForTeIdle(testControl.waitTime.config.enableEvent);
         await verifyTaskCount("external3", 2);
@@ -175,7 +175,7 @@ suite("External Provider Tests", () =>
     test("Unregister External Task Provider 1", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.event + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.event + testControl.slowTime.tasks.count.verify);
         await teApi.unregister("external", "");
         await waitForTeIdle(testControl.waitTime.config.event);
         await verifyTaskCount("external", 0);
@@ -186,7 +186,7 @@ suite("External Provider Tests", () =>
     test("Unregister External Task Provider 2", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.event + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.event + testControl.slowTime.tasks.count.verify);
         await teApi.unregister("external2", "");
         await waitForTeIdle(testControl.waitTime.config.event);
         await verifyTaskCount("external2", 0);
@@ -197,7 +197,7 @@ suite("External Provider Tests", () =>
     test("Add a Non-Empty Folder to Workspace Folder", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((testControl.slowTime.fs.createFolderEvent * 2) + testControl.slowTime.fs.createEvent + (testControl.slowTime.taskCount.verify * 2));
+        this.slow((testControl.slowTime.fs.createFolderEvent * 2) + testControl.slowTime.fs.createEvent + (testControl.slowTime.tasks.count.verify * 2));
         await fsUtils.createDir(outsideWsDir);
         await fsUtils.createFile(join(outsideWsDir, "Somefile.js"), "a = {\na: b\n};\n");
         await teWrapper.fs.copyDir(outsideWsDir, insideWsDir, /Somefile\.js/, true); // copy folder
@@ -209,7 +209,7 @@ suite("External Provider Tests", () =>
     test("Delete New Non-Empty Folder", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.deleteFolderEvent + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.fs.deleteFolderEvent + testControl.slowTime.tasks.count.verify);
         await fsUtils.deleteDir(join(insideWsDir, "testA"));
         await waitForTeIdle(testControl.waitTime.fs.deleteFolderEvent);
         endRollingCount(this);
@@ -219,7 +219,7 @@ suite("External Provider Tests", () =>
     test("Refresh Tree", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.commands.refresh + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.commands.refresh + testControl.slowTime.tasks.count.verify);
         await refresh();
         await verifyTaskCount("external3", 2);
         endRollingCount(this);
@@ -229,7 +229,7 @@ suite("External Provider Tests", () =>
     test("Unregister External Task Provider 3", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.event + testControl.slowTime.taskCount.verify);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.waitTime.config.event + testControl.slowTime.tasks.count.verify);
         await teApi.unregister("external3", "");
         await waitForTeIdle(testControl.waitTime.config.event);
         await verifyTaskCount("external3", 0);

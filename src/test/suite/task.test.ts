@@ -61,7 +61,7 @@ suite("Task Tests", () =>
     test("Check Task Counts", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.getTreeTasks * 4);
+        this.slow(tc.slowTime.tasks.getTreeTasks * 4);
         bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
         batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
         ant = await utils.treeUtils.getTreeTasks(teWrapper, "ant", 3);
@@ -73,7 +73,7 @@ suite("Task Tests", () =>
     test("Run Non-Existent Last Task", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.run + tc.slowTime.storageUpdate);
+        this.slow(tc.slowTime.commands.run + tc.slowTime.storage.update);
         const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
         expect(tree).to.not.be.oneOf([ undefined, null ]);
         const lastTasksFolder = tree[0] as any;
@@ -263,7 +263,7 @@ suite("Task Tests", () =>
         if (utils.exitRollingCount(this)) return;
         const slowTime = (tc.slowTime.commands.run * 2) + tc.slowTime.commands.runStop + 6500 +
                           startTaskSlowTime + (tc.slowTime.config.event * 5) +
-                          (tc.slowTime.commands.standard * 2) + tc.slowTime.closeEditors + tc.slowTime.tasks.batchScriptCmd;
+                          (tc.slowTime.commands.standard * 2) + tc.slowTime.general.closeEditors + tc.slowTime.tasks.batchScriptCmd;
         this.slow(slowTime);
         await focusExplorerView(teWrapper); // randomly show/hide view to test refresh event queue in tree/tree.ts
         const batchTask = batch[0];
@@ -373,7 +373,7 @@ suite("Task Tests", () =>
     test("Run Non-Existent Last Task 2", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.run + (tc.slowTime.storageUpdate * 2));
+        this.slow(tc.slowTime.commands.run + (tc.slowTime.storage.update * 2));
         const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
         expect(tree).to.not.be.oneOf([ undefined, null ]);
         const lastTasksFolder = tree[0] as any;

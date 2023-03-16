@@ -7,8 +7,10 @@ import { expect } from "chai";
 import { Task } from "vscode";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
-import { echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview } from "../utils/commandUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import {
+	closeTeWebviewPanel, echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd
+} from "../utils/commandUtils";
 
 const tc = utils.testControl;
 
@@ -93,7 +95,7 @@ suite("License Manager Tests", () =>
 	test("Get Maximum # of Tasks in Unlicensed Mode)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow((tc.slowTime.licenseMgr.getMaxTasks * 4) + tc.slowTime.storageSecretUpdate);
+		this.slow((tc.slowTime.licenseMgr.getMaxTasks * 4) + tc.slowTime.storage.secretUpdate);
 		await utils.setLicenseType(1);
 		expectLicense();
 		expect(licMgr.getMaxNumberOfTasks()).to.be.a("number").that.is.equal(licMgrMaxFreeTasks);
@@ -107,7 +109,7 @@ suite("License Manager Tests", () =>
 	test("Get Maximum # of Tasks in Trial / Licensed Mode", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow((tc.slowTime.licenseMgr.getMaxTasks * 4) + tc.slowTime.storageSecretUpdate);
+		this.slow((tc.slowTime.licenseMgr.getMaxTasks * 4) + tc.slowTime.storage.secretUpdate);
 		await utils.setLicenseType(oAccount.license.type);
 		expectLicense(true, false, true, false);
 		expect(licMgr.getMaxNumberOfTasks()).to.be.a("number").that.is.equal(Infinity);
@@ -157,9 +159,8 @@ suite("License Manager Tests", () =>
 	test("Open License Page in Trial Mode", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page);
-		void teWrapper.licensePage.show();
-        await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
+		this.slow(tc.slowTime.webview.show.page.license);
+		await showTeWebview(teWrapper.licensePage);
 		expect(teWrapper.licensePage.view).to.not.be.undefined;
 		expect(teWrapper.licensePage.visible).to.be.equal(true);
         utils.endRollingCount(this);
@@ -169,12 +170,10 @@ suite("License Manager Tests", () =>
 	test("View and Close Parsing Report from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.closeEditors + tc.slowTime.webview.notify);
-		void echoWebviewCommand("taskexplorer.view.parsingReport.show", teWrapper.licensePage, 0);
-        await utils.promiseFromEvent(teWrapper.parsingReportPage.onReadyReceived).promise;
-		expect(teWrapper.licensePage.visible).to.be.equal(false);
-		expect(teWrapper.parsingReportPage.visible).to.be.equal(true);
-		await utils.closeActiveEditor();
+		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.general.closeEditors + tc.slowTime.webview.postMessage);
+		await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.licensePage);
+		await closeTeWebviewPanel(teWrapper.licensePage);
+		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         utils.endRollingCount(this);
 	});
 
@@ -182,11 +181,11 @@ suite("License Manager Tests", () =>
 	test("Request Trial Extension from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.webview.notify + tc.slowTime.closeEditors + 1000);
-		expect(teWrapper.licensePage.visible).to.be.equal(true);
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors + 1000);
+		await showTeWebview(teWrapper.licensePage, "force");
 		await echoWebviewCommand("taskexplorer.extendTrial", teWrapper.licensePage, 500);
 		expectLicense(true, false, true, true);
-		await utils.closeEditors();
+		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
 
@@ -196,7 +195,6 @@ suite("License Manager Tests", () =>
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
 		await showTeWebview(teWrapper.homeView);
-		expect(teWrapper.homeView.view).to.not.be.undefined;
         utils.endRollingCount(this);
 	});
 
@@ -261,9 +259,9 @@ suite("License Manager Tests", () =>
 	test("Open License Page in Unlicensed Mode", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors);
+		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors);
         await showTeWebview(teWrapper.licensePage);
-		await utils.closeEditors();
+		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
 
@@ -271,12 +269,12 @@ suite("License Manager Tests", () =>
 	test("License Nag in Unlicensed Mode - Info", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.page + tc.slowTime.closeEditors + tc.slowTime.storageUpdate + tc.slowTime.licenseMgr.nag);
+		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors + tc.slowTime.storage.update + tc.slowTime.licenseMgr.nag);
 		await setNag();
 		utils.overrideNextShowInfoBox("Info", true);
 		void licMgr.checkLicense("");
         await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
-		await utils.closeEditors();
+		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
 
@@ -361,13 +359,13 @@ suite("License Manager Tests", () =>
 	test("Set License to First Time Startup", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storageSecretUpdate);
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storage.secretUpdate + tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors);
 		utils.overrideNextShowInfoBox("More Info", true);
 		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "", state: 0, period: 0, type: 0 }});
 		await saveAccount(licMgr.account);
         await validateLicense(this, true, true);
 		await utils.sleep(5);
-		await utils.closeEditors();
+		await closeTeWebviewPanel(teWrapper.licensePage);
 		expectLicense(true, false, true, false);
         utils.endRollingCount(this);
 	});

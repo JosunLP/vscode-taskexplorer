@@ -55,7 +55,7 @@ suite("Typescript Tests", () =>
     test("Start", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.tasks.count.verifyByTree);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount);
         utils.endRollingCount(this);
     });
@@ -64,7 +64,7 @@ suite("Typescript Tests", () =>
     test("Create File", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.createEventTsc + testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.fs.createEventTsc + testControl.slowTime.tasks.count.verifyByTree);
         await fsUtils.createFile(
             fileUri.fsPath,
             "{\n" +
@@ -93,7 +93,7 @@ suite("Typescript Tests", () =>
     test("Document Position", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.getTreeTasks + (testControl.slowTime.findTaskPosition * 2) + (testControl.slowTime.closeEditors * 2));
+        this.slow(testControl.slowTime.tasks.getTreeTasks + (testControl.slowTime.findTaskPosition * 2) + (testControl.slowTime.general.closeEditors * 2));
         //
         // Typescript 'open' just opens the document, doesnt find the task position
         //
@@ -109,7 +109,7 @@ suite("Typescript Tests", () =>
     test("Create File 2", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.createEventTsc + testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.fs.createEventTsc + testControl.slowTime.tasks.count.verifyByTree);
         await fsUtils.writeFile(
             fileUri2.fsPath,
             "{\n" +
@@ -138,7 +138,7 @@ suite("Typescript Tests", () =>
     test("Disable", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.tasks.count.verifyByTree);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, false, testControl.waitTime.config.enableEvent);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, 0);
         utils.endRollingCount(this);
@@ -148,7 +148,7 @@ suite("Typescript Tests", () =>
     test("Re-enable", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.tasks.count.verifyByTree);
         await executeSettingsUpdate(`enabledTasks.${testsName}`, true, testControl.waitTime.config.enableEvent);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 4);
         utils.endRollingCount(this);
@@ -161,7 +161,7 @@ suite("Typescript Tests", () =>
         //
         // Note: FileWatcher ignores mod event for this task type since # of tasks never changes
         //
-        this.slow(testControl.slowTime.fs.modifyEventTsc + testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.fs.modifyEventTsc + testControl.slowTime.tasks.count.verifyByTree);
         // let resetLogging = teApi.log.isLoggingEnabled();
         // if (resetLogging) { // turn scary error logging off
         //     this.slow(testControl.slowTime.fs.createEvent + (testControl.slowTime.config.event * 2));
@@ -208,7 +208,7 @@ suite("Typescript Tests", () =>
     test("Fix Invalid JSON", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.modifyEventTsc + testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.fs.modifyEventTsc + testControl.slowTime.tasks.count.verifyByTree);
         await fsUtils.writeFile(
             fileUri.fsPath,
             "{\n" +
@@ -237,7 +237,7 @@ suite("Typescript Tests", () =>
     test("Delete File 1", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.deleteEventTsc + testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.fs.deleteEventTsc + testControl.slowTime.tasks.count.verifyByTree);
         await fsUtils.deleteFile(fileUri.fsPath, testControl.waitTime.fs.deleteEventTsc);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 2);
         utils.endRollingCount(this);
@@ -247,7 +247,7 @@ suite("Typescript Tests", () =>
     test("Delete File 2", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(testControl.slowTime.fs.deleteEventTsc + testControl.slowTime.taskCount.verifyByTree);
+        this.slow(testControl.slowTime.fs.deleteEventTsc + testControl.slowTime.tasks.count.verifyByTree);
         await fsUtils.deleteFile(fileUri2.fsPath, testControl.waitTime.fs.deleteEventTsc);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount);
         utils.endRollingCount(this);
