@@ -32,10 +32,10 @@ export class TaskCountView extends TeWebviewView<State>
 	protected override includeBody = async() => createTaskCountTable(this.wrapper);
 
 
-	protected override includeHead = async() => "";
+	protected override includeHead = async() => ""; // cover empty string in Base.getHtml()
 
 
-	protected override includeEndOfBody = async() => "";
+	protected override includeEndOfBody = async() => ""; // cover empty string in Base.getHtml()
 
 
 	protected override includeBootstrap = (): Promise<State> => this.getState();
@@ -44,11 +44,11 @@ export class TaskCountView extends TeWebviewView<State>
 	protected override onInitializing()
 	{
 		return  [
-			this.wrapper.treeManager.onDidTaskCountChange(e => this.onTaskCountChanged(e), this)
+			this.wrapper.treeManager.onDidTaskCountChange(this.onTaskCountChanged, this)
 		];
 	}
 
 
-	private onTaskCountChanged = async(_e: ITeTaskChangeEvent): Promise<void> => debounce("taskCount:", this.refresh, 75);
+	private onTaskCountChanged = (_e: ITeTaskChangeEvent): void => void debounce("taskCount:", this.refresh, 25);
 
 }

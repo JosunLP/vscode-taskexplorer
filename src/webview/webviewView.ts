@@ -65,65 +65,6 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	protected override includeBootstrap?(): SerializedState | Promise<SerializedState>;
 
 
-	async resolveWebviewView(webviewView: WebviewView, _context: WebviewViewResolveContext, _token: CancellationToken): Promise<void>
-	{
-		/* istanbul ignore next */
-		while (!this._ignoreTeBusy && this.wrapper.busy) {
-			await sleep(50);
-		}
-
-		this._view = webviewView;
-
-		webviewView.webview.options = {
-			enableCommandUris: true,
-			enableScripts: true,
-			localResourceRoots: [ Uri.joinPath(this.wrapper.context.extensionUri, "res") ]
-		};
-
-		webviewView.title = this.title;
-		webviewView.description = this._description;
-
-		this._disposableView = Disposable.from(
-			this._view.onDidDispose(this.onViewDisposed, this),
-			this._view.onDidChangeVisibility(() => this.onViewVisibilityChanged(this.visible), this),
-			this._view.webview.onDidReceiveMessage(this.onMessageReceivedBase, this),
-			window.onDidChangeWindowState(this.onWindowStateChanged, this),
-			...this.onInitializing(),
-			...(this.registerCommands?.() ?? [])
-		);
-
-		await this.refresh(true, false);
-		this.onVisibilityChanged?.(true);
-	}
-
-
-	private resetContextKeys()
-	{
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, false);
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:focus`, false);
-	}
-
-
-	private setContextKeys(focus: boolean, inputFocus: boolean)
-	{
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:focus`, focus);
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, inputFocus);
-	}
-
-
-	async show(options?: { preserveFocus?: boolean })
-	{
-		/* istanbul ignore next */
-		while (!this._ignoreTeBusy && this.wrapper.busy) {
-			await sleep(50);
-		}
-		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
-		await commands.executeCommand(`${this.id}.focus`, options);
-		this.setContextKeys(true, false);
-		return this;
-	}
-
-
 	private onViewDisposed()
 	{
 		this.resetContextKeys();
@@ -163,6 +104,56 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 		if (this.visible) {
 			this.onWindowFocusChanged?.(e.focused);
 		}
+	}
+
+
+	private resetContextKeys()
+	{
+		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, false);
+		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:focus`, false);
+	}
+
+
+	async resolveWebviewView(webviewView: WebviewView, _context: WebviewViewResolveContext, _token: CancellationToken): Promise<void>
+	{
+		this._view = webviewView;
+
+		webviewView.webview.options = {
+			enableCommandUris: true,
+			enableScripts: true,
+			localResourceRoots: [ Uri.joinPath(this.wrapper.context.extensionUri, "res") ]
+		};
+
+		webviewView.title = this.title;
+		webviewView.description = this._description;
+
+		this._disposableView = Disposable.from(
+			this._view.onDidDispose(this.onViewDisposed, this),
+			this._view.onDidChangeVisibility(() => this.onViewVisibilityChanged(this.visible), this),
+			this._view.webview.onDidReceiveMessage(this.onMessageReceivedBase, this),
+			window.onDidChangeWindowState(this.onWindowStateChanged, this),
+			...this.onInitializing(),
+			...(this.registerCommands?.() ?? [])
+		);
+
+		await this.refresh(true, false);
+		this.onVisibilityChanged?.(true);
+	}
+
+
+	private setContextKeys(focus: boolean, inputFocus: boolean)
+	{
+		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:focus`, focus);
+		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, inputFocus);
+	}
+
+
+	async show(options?: { preserveFocus?: boolean })
+	{
+		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
+		await commands.executeCommand(`${this.id}.focus`, options);
+		this.setContextKeys(true, false);
+		return this;
 	}
 
 }

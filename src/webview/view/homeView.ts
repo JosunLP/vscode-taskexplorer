@@ -117,18 +117,18 @@ export class HomeView extends TeWebviewView<State>
 	protected override onInitializing()
 	{
 		return  [
-			this.wrapper.treeManager.onDidTaskCountChange(e => this.onTaskCountChanged(e), this)
+			this.wrapper.licenseManager.onDidSessionChange(this.onSessionChanged, this),
+			this.wrapper.treeManager.onDidTaskCountChange(this.onTaskCountChanged, this)
 		];
 	}
 
 
-	protected override async onSessionChanged(e: TeSessionChangeEvent): Promise<void>
+	private onSessionChanged(e: TeSessionChangeEvent): void
 	{
 		this.wrapper.log.methodOnce("homeview event", "session changed", 2, this.wrapper.log.getLogPad());
 		if (e.changeFlags.licenseState || e.changeFlags.licenseType || e.changeFlags.trialPeriod || e.changeFlags.verification || e.changeFlags.license) {
-			await this.refresh(true, false);
+			void this.refresh(true, false);
 		}
-		await super.onSessionChanged(e);
 	}
 
 

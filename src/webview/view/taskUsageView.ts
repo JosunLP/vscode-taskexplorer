@@ -35,14 +35,14 @@ export class TaskUsageView extends TeWebviewView<State>
 	protected override includeEndOfBody = async() => "<!-- spm -->"; // For coverage, endOfBody and no bootstrap
 
 
-	protected override async onConfigChanged(e: ConfigurationChangeEvent)
+	protected override onConfigChanged(e: ConfigurationChangeEvent)
 	{
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
 			this.wrapper.log.methodOnce("task usage view event", "onConfigChanged", 2, this.wrapper.log.getLogPad());
-			await debounce("taskUsageCfg:", this.refresh, 75);
+			void debounce("taskUsageCfg:", this.refresh, 25);
 		}
-		await super.onConfigChanged(e);
+		super.onConfigChanged(e);
 	}
 
 
@@ -54,13 +54,13 @@ export class TaskUsageView extends TeWebviewView<State>
 	}
 
 
-	private async onStorageChanged(e: StorageChangeEvent)
+	private onStorageChanged(e: StorageChangeEvent): void
 	{
 		if (e.key === StorageKeys.Usage || e.key === StorageKeys.TaskUsage)
 		{
 			this.wrapper.log.methodOnce("task usage view event", "onStorageChanged", 2, this.wrapper.log.getLogPad());
 			// await debounce("taskUsage:", this.refresh, 75);
-			await this.refresh(false, false);
+			void this.refresh(false, false);
 		}
 	}
 

@@ -85,7 +85,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		this.disposables.push(
 			this._onReadyReceived,
 			this._onMessageReceived ,
-			wrapper.licenseManager.onDidSessionChange(this.onSessionChanged, this),
 			wrapper.config.onDidChange(this.onConfigChanged, this)
 		);
     }
@@ -294,7 +293,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
     };
 
 
-	protected async onConfigChanged(e: ConfigurationChangeEvent)
+	protected onConfigChanged(e: ConfigurationChangeEvent): void
 	{
 		if (this._view && this._isReady && this.visible)
 		{
@@ -361,14 +360,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		}
 
 		this._onMessageReceived.fire(e.method);
-	}
-
-
-	protected async onSessionChanged(e: TeSessionChangeEvent): Promise<void>
-	{
-		if (this._view && this._isReady && this.visible) {
-			void this.postMessage(IpcLicenseChangedMsg, this.wrapper.utils.cloneJsonObject<TeSessionChangeEvent>(e));
-		}
 	}
 
 

@@ -34,7 +34,6 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		showCommand?: Commands)
 	{
 		super(wrapper, title, fileName);
-		this._teEnabled = wrapper.utils.isTeEnabled();
 		if (showCommand){
 			this.disposables.push(
 				registerCommand(showCommand, this.onShowCommand, this),
@@ -136,11 +135,6 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	async show(options?: { column?: ViewColumn; preserveFocus?: boolean }, ...args: any[])
 	{
-		/* istanbul ignore next */
-		while (!this._ignoreTeBusy && this.wrapper.busy) { // || this.busy)) {
-			await this.wrapper.utils.sleep(50);
-		}
-
 		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
 
 		const column = options?.column ?? ViewColumn.One;
@@ -207,6 +201,10 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	{
 		deserializeWebviewPanel: async(webviewPanel: WebviewPanel, state: State) =>
 		{
+			/* istanbul ignore next */
+			while (!this._ignoreTeBusy && this.wrapper.busy) { // || this.busy)) {
+				await this.wrapper.utils.sleep(50);
+			}
 			await this.show(undefined, webviewPanel, state);
 		}
 	};
