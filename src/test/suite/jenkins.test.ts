@@ -30,7 +30,7 @@ suite("Jenkins Tests", () =>
         if (exitRollingCount(this, true)) return;
         ({ teApi, teWrapper } = await activate(this));
         startTaskCount = tc.isMultiRootWorkspace ? 1 : 0;
-        provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        provider = teApi.providers[testsName];
         fileUri = Uri.file(path.join(getWsPath("."), "Jenkinsfile"));
         if (!env.JENKINS_API_TOKEN) {
             env.JENKINS_API_TOKEN = "FAKE_TOKEN";

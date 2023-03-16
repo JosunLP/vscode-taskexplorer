@@ -61,7 +61,11 @@ suite("Tree Tests", () =>
         await teWrapper.storage.update("favoriteTasks", [
             utils.getSpecialTaskItemId(batch[0]), utils.getSpecialTaskItemId(batch[1]), utils.getSpecialTaskItemId(ant[0]),
             utils.getSpecialTaskItemId(bash[0]), utils.getSpecialTaskItemId(python[0]), utils.getSpecialTaskItemId(python[1])
-        ]);
+        ], 0);
+        await teWrapper.storage.update("favoriteTasks", [
+            utils.getSpecialTaskItemId(batch[0]), utils.getSpecialTaskItemId(batch[1]), utils.getSpecialTaskItemId(ant[0]),
+            utils.getSpecialTaskItemId(bash[0]), utils.getSpecialTaskItemId(python[0]), utils.getSpecialTaskItemId(python[1])
+        ], 1);
         await executeSettingsUpdate("specialFolders.showFavorites", false, tc.waitTime.config.event);
         await executeSettingsUpdate("specialFolders.showFavorites", true, tc.waitTime.config.event);
         utils.endRollingCount(this);
@@ -77,7 +81,11 @@ suite("Tree Tests", () =>
         await teWrapper.storage.update("lastTasks", [
             utils.getSpecialTaskItemId(batch[0]), utils.getSpecialTaskItemId(batch[1]), utils.getSpecialTaskItemId(ant[0]),
             utils.getSpecialTaskItemId(bash[0]), utils.getSpecialTaskItemId(python[0]), utils.getSpecialTaskItemId(python[1])
-        ]);
+        ], 0);
+        await teWrapper.storage.update("lastTasks", [
+            utils.getSpecialTaskItemId(batch[0]), utils.getSpecialTaskItemId(batch[1]), utils.getSpecialTaskItemId(ant[0]),
+            utils.getSpecialTaskItemId(bash[0]), utils.getSpecialTaskItemId(python[0]), utils.getSpecialTaskItemId(python[1])
+        ], 1);
         await executeSettingsUpdate("specialFolders.showLastTasks", false, tc.waitTime.config.event);
         await executeSettingsUpdate("specialFolders.showLastTasks", true, tc.waitTime.config.event);
         utils.endRollingCount(this);
@@ -473,14 +481,18 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         utils.clearOverrideShowInfoBox();
-        this.slow((tc.slowTime.commands.standard * 4) + 50);
-        utils.overrideNextShowInfoBox("No");
+        this.slow((tc.slowTime.commands.standard * 6) + 50);
+        utils.overrideNextShowInfoBox("Cancel");
         await executeTeCommand("clearLastTasks");
-        utils.overrideNextShowInfoBox("No");
+        utils.overrideNextShowInfoBox("Cancel");
         await executeTeCommand("clearFavorites");
-        utils.overrideNextShowInfoBox("Yes");
+        utils.overrideNextShowInfoBox("Workspace");
         await executeTeCommand("clearLastTasks");
-        utils.overrideNextShowInfoBox("Yes");
+        utils.overrideNextShowInfoBox("Workspace");
+        await executeTeCommand("clearFavorites");
+        utils.overrideNextShowInfoBox("Global");
+        await executeTeCommand("clearLastTasks");
+        utils.overrideNextShowInfoBox("Global");
         await executeTeCommand("clearFavorites");
         await utils.sleep(25);
         utils.endRollingCount(this);

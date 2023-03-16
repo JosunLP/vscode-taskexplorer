@@ -8,6 +8,7 @@ import { closeTeWebviewPanel, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount
 } from "../../utils/utils";
+import { promiseFromEvent } from "../../../lib/utils/promiseUtils";
 
 let teWrapper: ITeWrapper;
 let extension: Extension<any>;
@@ -40,7 +41,7 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.general.closeEditors);
+		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.webview.closeSync + 10);
 		await showTeWebview(teWrapper.releaseNotesPage);
 		await sleep(5);
 		await closeTeWebviewPanel(teWrapper.releaseNotesPage);
@@ -51,12 +52,13 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes (Error No Version)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.general.closeEditors + testControl.slowTime.webview.postMessage);
+		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.webview.closeSync + testControl.slowTime.webview.postMessage);
 		const version = extension.packageJSON.version;
 		extension.packageJSON.version = "17.4444.0";
 		try {
 			await showTeWebview(teWrapper.releaseNotesPage);
-			await teWrapper.releaseNotesPage.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.parsingReport.show" }); // cover notify() when not visible
+			void teWrapper.releaseNotesPage.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.parsingReport.show" }); // cover notify() when not visible
+			await promiseFromEvent(teWrapper.releaseNotesPage.onDidReceiveMessage).promise;
 		}
 		catch (e) { throw e; }
 		finally { extension.packageJSON.version = version; }

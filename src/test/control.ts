@@ -102,7 +102,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 6240,
+            focusSideBarFirstTime: 6970,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -128,7 +128,7 @@ export const testControl =
             readEvent: 25,
             shellChange: 1325,
             showHideSpecialFolder: 530,
-            showHideUserTasks: 975,
+            showHideUserTasks: 1075,
             sortingEvent: 815,
             terminalEvent: 250,
             trackingEvent: 310
@@ -150,6 +150,7 @@ export const testControl =
             min: 50
         },
         licenseMgr: {
+            createNewTrial: 3220,
             getTrialExtension: 2175,
             getTrialExtensionDenied: 800,
             getMaxTasks: 365,
@@ -173,10 +174,10 @@ export const testControl =
             command: 950,
             findPosition: 285,
             findPositionDocOpen: 35,
-            getTreeTasks: 215,
+            getTreeTasks: 245,
             getTreeTasksNpm: 470, // npm task provider is slower than shit on a turtle
             gulpParser: 3870,
-            gulpTask: 3350,
+            gulpTask: 3370,
             npmCommand: 8000,
             npmCommandPkg: 7000,
             npmInstallCommand: 8600,
@@ -189,7 +190,7 @@ export const testControl =
         },
         webview: {
             closeSync: 195,
-            postMessage: 25,
+            postMessage: 300,
             revealTreeNode: 55,
             show: {
                 view: {
@@ -200,20 +201,20 @@ export const testControl =
                 page: {
                     license: 2970,
                     releaseNotes: 2470,
-                    taskDetails: 2825,
+                    taskDetails: 2845,
                     taskMonitor: 2770,
-                    parsingReport: 2090,
-                    parsingReportFull: 2810,
+                    parsingReport: 2140,
+                    parsingReportFull: 2860,
                     welcome: 525
                 }
             }
         },
         wsFolder: {
-            add: 1680,     // bumped for multi-root ws in utils/initSettings
-            addEmpty: 1590,
-            remove: 560,
-            removeEmpty: 475,
-            reorder: 540,   // bumped for multi-root ws in utils/initSettings
+            add: 1685,     // bumped for multi-root ws in utils/initSettings
+            addEmpty: 1595,
+            remove: 570,
+            removeEmpty: 485,
+            reorder: 550,   // bumped for multi-root ws in utils/initSettings
         },
     },
     //

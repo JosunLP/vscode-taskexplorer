@@ -49,8 +49,8 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (Single Project No User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.config.showHideUserTasks + tc.slowTime.general.closeEditors);
-		await executeSettingsUpdate("specialFolders.showUserTasks", false, tc.waitTime.config.showHideUserTasks);
+		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.config.showHideUserTasks + tc.slowTime.webview.closeSync);
+		await executeSettingsUpdate("specialFolders.showUserTasks", false, tc.waitTime.config.showHideUserTasks, tc.slowTime.config.showHideUserTasks);
 		await showTeWebview(teWrapper.parsingReportPage, projectUri);
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         endRollingCount(this);
@@ -60,8 +60,8 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (Single Project w/ User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.config.showHideUserTasks + tc.slowTime.general.closeEditors);
-		await executeSettingsUpdate("specialFolders.showUserTasks", true, tc.waitTime.config.showHideUserTasks);
+		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.config.showHideUserTasks + tc.slowTime.webview.closeSync);
+		await executeSettingsUpdate("specialFolders.showUserTasks", true, tc.waitTime.config.showHideUserTasks, tc.slowTime.config.showHideUserTasks);
 		await showTeWebview(teWrapper.parsingReportPage, projectUri, "", 5);
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         endRollingCount(this);
@@ -71,7 +71,7 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.general.closeEditors);
+		this.slow(tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.closeSync);
 		await showTeWebview(teWrapper.parsingReportPage);
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         endRollingCount(this);
@@ -81,7 +81,7 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (All Projects, Yarn Enabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReport + (tc.slowTime.config.enableEvent * 2));
+		this.slow(tc.slowTime.webview.show.page.parsingReportFull + (tc.slowTime.config.enableEvent * 2) + tc.slowTime.webview.closeSync);
         await teWrapper.config.updateVsWs("npm.packageManager", "yarn");
         await waitForTeIdle(tc.waitTime.config.enableEvent);
 		await showTeWebview(teWrapper.parsingReportPage);
@@ -95,7 +95,7 @@ suite("Parsing Report Tests", () =>
 	test("Deserialize Report Page (All Projects)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.webview.show.page.parsingReport * 2) + 30 + tc.slowTime.general.closeEditors);
+		this.slow((tc.slowTime.webview.show.page.parsingReport * 2) + tc.slowTime.webview.closeSync);
 		const panel = createwebviewForRevive("Task Explorer Parsing Report", "parsingReport");
 	    await teWrapper.parsingReportPage.serializer?.deserializeWebviewPanel(panel, null);
 		await waitForWebviewReadyEvent(teWrapper.parsingReportPage);

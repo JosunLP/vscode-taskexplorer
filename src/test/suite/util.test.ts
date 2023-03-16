@@ -744,7 +744,7 @@ suite("Util Tests", () =>
 
 			await teWrapper.storage.updateSecret("testsecret", "test");
 			expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test");
-			const disposable = teWrapper.storage.onDidChangeSecrets(() => {});
+			const disposable = teWrapper.storage.onDidChangeSecret(() => {});
 			await teWrapper.storage.updateSecret("testsecret", "test222");
 			expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test222");
 			await teWrapper.storage.deleteSecret("testsecret");

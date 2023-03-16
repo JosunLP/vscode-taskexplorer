@@ -25,6 +25,7 @@ suite("Task Details Page Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate(this));
+		await teWrapper.config.update(teWrapper.keys.Config.KeepTerminalOnTaskDone, true);
         endRollingCount(this, true);
 	});
 
@@ -67,9 +68,9 @@ suite("Task Details Page Tests", () =>
 	test("Run Task w/ Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.event * 2) + tc.slowTime.tasks.antTask + 1900 + tc.slowTime.commands.run);
+        this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runStop + 2300);
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin);
-        await waitForTaskExecution(exec, 600);
+        await waitForTaskExecution(exec, 800);
 		await executeTeCommand2("stop", [ antTask ], tc.waitTime.taskCommand);
         await waitForTaskExecution(exec, 300);
 		await closeEditors();
@@ -80,7 +81,7 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Unused Task Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.tasks.getTreeTasks);
+		this.slow(tc.slowTime.webview.show.page.taskDetails + tc.slowTime.tasks.getTreeTasks + tc.slowTime.general.closeEditors);
 		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
 		await showTeWebview("taskDetails", python[0]);
 		await closeEditors();

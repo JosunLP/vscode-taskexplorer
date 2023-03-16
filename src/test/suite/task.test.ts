@@ -77,7 +77,7 @@ suite("Task Tests", () =>
         const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
         expect(tree).to.not.be.oneOf([ undefined, null ]);
         const lastTasksFolder = tree[0] as any;
-        utils.overrideNextShowInfoBox("Yes");
+        utils.overrideNextShowInfoBox("Global");
         await executeTeCommand("taskexplorer.clearLastTasks");
         lastTasksFolder.clearTaskItems();
         await utils.sleep(1);

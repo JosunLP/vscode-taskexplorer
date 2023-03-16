@@ -13,13 +13,12 @@ import { cleanupSettings, initSettings } from "./initSettings";
 import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import {
-    ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType
+    ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType, ITeWebview
 } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     commands, ConfigurationTarget, Disposable, Event, EventEmitter, Extension, extensions, Task,
     TaskExecution, tasks, Uri, ViewColumn, window, workspace
 } from "vscode";
-import { ITeWebview } from "../../interface";
 
 const { symbols } = require("mocha/lib/reporters/base");
 
@@ -446,7 +445,7 @@ export type PromiseAdapter<T, U> = (
 ) => any;
 
 
-export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 5000) => waitForEvent(view.onReadyReceived, timeout);
+export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 5000) => waitForEvent(view.onDidReceiveReady, timeout);
 
 
 export const waitForEvent = async <T>(event: Event<T>, timeout = 5000) =>

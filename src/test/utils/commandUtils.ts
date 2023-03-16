@@ -139,7 +139,7 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
     {
         await Promise.race<void>(
         [
-            promiseFromEvent<void, void>(teWebview.onReadyReceived).promise,
+            promiseFromEvent<void, void>(teWebview.onDidReceiveReady).promise,
             new Promise<void>(resolve => setTimeout(resolve, timeout)),
         ]);
         await sleep(1);

@@ -59,7 +59,7 @@ suite("Initialization", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home);
         void focusSidebarView();
-        await promiseFromEvent(teWrapper.homeView.onReadyReceived).promise;
+        await promiseFromEvent(teWrapper.homeView.onDidReceiveReady).promise;
         teWrapper.homeView.title = teWrapper.homeView.title;
         endRollingCount(this);
     });

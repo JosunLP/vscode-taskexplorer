@@ -259,7 +259,7 @@ suite("License Manager Tests", () =>
 	test("Open License Page in Unlicensed Mode", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors);
+		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync);
         await showTeWebview(teWrapper.licensePage);
 		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
@@ -269,11 +269,11 @@ suite("License Manager Tests", () =>
 	test("License Nag in Unlicensed Mode - Info", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors + tc.slowTime.storage.update + tc.slowTime.licenseMgr.nag);
+		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + tc.slowTime.storage.update + tc.slowTime.licenseMgr.nag);
 		await setNag();
 		utils.overrideNextShowInfoBox("Info", true);
 		void licMgr.checkLicense("");
-        await utils.promiseFromEvent(teWrapper.licensePage.onReadyReceived).promise;
+        await utils.promiseFromEvent(teWrapper.licensePage.onDidReceiveReady).promise;
 		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
@@ -359,11 +359,11 @@ suite("License Manager Tests", () =>
 	test("Set License to First Time Startup", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.storage.secretUpdate + tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors);
+		this.slow(tc.slowTime.licenseMgr.createNewTrial + tc.slowTime.storage.secretUpdate + tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync);
 		utils.overrideNextShowInfoBox("More Info", true);
 		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "", state: 0, period: 0, type: 0 }});
 		await saveAccount(licMgr.account);
-        await validateLicense(this, true, true);
+        await validateLicense(undefined, true, true);
 		await utils.sleep(5);
 		await closeTeWebviewPanel(teWrapper.licensePage);
 		expectLicense(true, false, true, false);
@@ -555,9 +555,9 @@ const setNag = (v?: number) => teWrapper.storage.update(teWrapper.keys.Storage.L
 
 const setTasks = (e: any) => { licMgr.setTestData({ callTasksChanged: e }); };
 
-const validateLicense = async (instance: Mocha.Context, expectNow: boolean, expectAfter: boolean, intervalHrs = 48, setPaid = false) =>
+const validateLicense = async (instance: Mocha.Context | undefined, expectNow: boolean, expectAfter: boolean, intervalHrs = 48, setPaid = false) =>
 {
-	instance.slow(tc.slowTime.licenseMgr.validateLicense);
+	instance?.slow(tc.slowTime.licenseMgr.validateLicense);
 	expect(licMgr.isLicensed).to.be.equal(expectNow);
 	expect(licMgr.isTrial).to.be.equal(expectNow);
 	try {

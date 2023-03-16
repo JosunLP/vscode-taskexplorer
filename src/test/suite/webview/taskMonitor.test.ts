@@ -53,7 +53,7 @@ suite("Task Monitor App Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.page.taskMonitor);
 		executeTeCommand("taskexplorer.view.taskMonitor.show", 10);
-        await promiseFromEvent(teWrapper.taskMonitorPage.onReadyReceived).promise;
+        await promiseFromEvent(teWrapper.taskMonitorPage.onDidReceiveReady).promise;
         endRollingCount(this);
 	});
 
@@ -67,10 +67,11 @@ suite("Task Monitor App Tests", () =>
 		task = taskItem.task;
 		const iTask = teWrapper.taskUtils.toITask(teWrapper, [ task ], "last")[0];
 		const exec = await executeTeCommand2<TaskExecution | undefined>("taskexplorer.run", [ iTask ]);
-		await sleep(200);
+		await sleep(150);
         await waitForTaskExecution(exec, 900);
 		await executeTeCommand2("taskexplorer.stop", [ iTask ]);
         await waitForTaskExecution(exec, 100);
+		await sleep(50);
         endRollingCount(this);
 	});
 
