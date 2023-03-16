@@ -297,7 +297,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				if (enabled !== this._teEnabled)
 				{
 					this._teEnabled = enabled;
-					await this.postMessage(IpcEnabledChangedMsg, { enabled });
+					void this.postMessage(IpcEnabledChangedMsg, { enabled });
 				}
 			}
 		}
@@ -358,7 +358,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected async onSessionChanged(e: TeSessionChangeEvent): Promise<void>
 	{
 		if (this._view && this._isReady && this.visible) {
-			await this.postMessage(IpcLicenseChangedMsg, this.wrapper.utils.cloneJsonObject<TeSessionChangeEvent>(e));
+			void this.postMessage(IpcLicenseChangedMsg, this.wrapper.utils.cloneJsonObject<TeSessionChangeEvent>(e));
 		}
 	}
 
@@ -380,8 +380,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	/**
 	 * @method
-	 * **IMPORTANT NOTE:** Caller must ensure that `this._view` is an initialized `WebviewView | WebviewPanel`
-	 * @param force Force re-render of page
+	 * @param force Force re-render of page, or is new instance
 	 * @param args Optional arguments to pass tp the html rendering callbacks
 	 */
 	protected async refresh(force?: boolean, visibilityChanged?: boolean, ...args: unknown[]): Promise<void>
@@ -391,19 +390,26 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			return;
 		}
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
-		// const skippedNotify = this._skippedChangeEvent;
+		const skippedChangeEvent = this._skippedChangeEvent;
 		this._isReady = this._skippedChangeEvent = false;
 		// const html = !visibilityChanged || skippedNotify ? await this.getHtml(this._view.webview, ...args) : "";
-		const html = await this.getHtml(this._view.webview, ...args);
-		if (force && this._view.webview.html) {
-			this._view.webview.html = "";
+		if (visibilityChanged && !skippedChangeEvent)
+		{
+			setTimeout(() => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); }, 10);
 		}
-		if (this._view.webview.html === html) { // || (visibilityChanged && !skippedNotify)) {
-		// if (this._view.webview.html && (this._view.webview.html === html || (visibilityChanged && !skippedNotify))) {
-			queueMicrotask(() => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
-		}
-		else {
-			this._view.webview.html = html;
+		else
+		{
+			const html = await this.getHtml(this._view.webview, ...args);
+			if (force && this._view.webview.html) {
+				this._view.webview.html = "";
+			}
+			if (this._view.webview.html === html) { // || (visibilityChanged && !skippedNotify)) {
+			// if (this._view.webview.html && (this._view.webview.html === html || (visibilityChanged && !skippedNotify))) {
+				setTimeout(() => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); }, 10);
+			}
+			else {
+				this._view.webview.html = html;
+			}
 		}
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 	}
