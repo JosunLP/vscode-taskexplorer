@@ -9,6 +9,7 @@ import { ContextKeys } from "../lib/context";
 import { TaskTreeBuilder } from "./treeBuilder";
 import { FavoritesFolder } from "./favoritesFolder";
 import { LastTasksFolder } from "./lastTasksFolder";
+import { TeTreeConfigWatcher } from "./configWatcher";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
@@ -25,6 +26,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private firstTreeBuildDone = false;
     private currentInvalidation: string | undefined;
     private readonly disposables: Disposable[] = [];
+	private readonly _configWatcher: TeTreeConfigWatcher;
     private readonly _onReady: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onDidTaskCountChange: EventEmitter<ITeTaskChangeEvent>;
@@ -47,6 +49,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         };
 
         this._treeBuilder = new TaskTreeBuilder(wrapper);
+		this._configWatcher = new TeTreeConfigWatcher(wrapper);
 
         this._views = {
             taskExplorer: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer"),
@@ -55,6 +58,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         this.disposables.push(
             this._onReady,
+			this._configWatcher,
             this._onDidTasksChange,
             this._onDidTaskCountChange,
             this._specialFolders.favorites,
@@ -70,7 +74,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.wrapper.log.methodDone("construct task tree manager", 1, "   ");
     }
 
-
     dispose()
     {
         this.disposables.forEach(d => d.dispose());
@@ -78,6 +81,16 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this._tasks = [];
     }
 
+
+	get configWatcher(): TeTreeConfigWatcher {
+		return this._configWatcher;
+	}
+
+    get isBusy(): boolean {
+        return this.refreshPending || this._treeBuilder.isBusy() || this._configWatcher.isBusy;
+            // this.views.taskExplorer.tree.isBusy() || this.views.taskExplorerSideBar.tree.isBusy() ||
+            // this.refreshPending || this._treeBuilder.isBusy();
+    }
 
 	get onDidAllTasksChange(): Event<ITeTaskChangeEvent> {
 		return this._onDidTasksChange.event;
@@ -246,6 +259,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.wrapper.log.write(`   removed ${ctRmv} ${invalidation} current tasks from cache`, 2, logPad);
         this.wrapper.log.methodDone("do task cache removals", 2, logPad);
     };
+
+
+    enableConfigWatcher = (enable: boolean) => this._configWatcher.enableConfigWatcher(enable);
 
 
     private fetchTasks = async(logPad: string) =>
@@ -490,11 +506,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         this.wrapper.log.methodDone("invalidate tasks cache", 1, logPad);
     };
-
-
-    isBusy = () => this.refreshPending || this._treeBuilder.isBusy();
-    // isBusy = () => this.views.taskExplorer.tree.isBusy() || this.views.taskExplorerSideBar.tree.isBusy() ||
-    //                this.refreshPending || this._treeBuilder.isBusy();
 
 
     private onWorkspaceFolderRemoved = (uri: Uri, logPad: string) =>

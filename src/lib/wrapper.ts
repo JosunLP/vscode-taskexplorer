@@ -36,7 +36,6 @@ import { GruntTaskProvider } from "../providers/grunt";
 import { GradleTaskProvider } from "../providers/gradle";
 import { PipenvTaskProvider } from "../providers/pipenv";
 import { PythonTaskProvider } from "../providers/python";
-import { TeConfigWatcher } from "./watcher/configWatcher";
 import { LicensePage } from "../webview/page/licensePage";
 import { MonitorPage } from "../webview/page/monitorPage";
 import { WebpackTaskProvider } from "../providers/webpack";
@@ -62,7 +61,7 @@ import {
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, IDictionary, ILog, ITaskTreeView, ITeFilesystem,
 	ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities,
-	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment
+	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeTreeConfigWatcher
 } from "../interface";
 
 
@@ -95,7 +94,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _taskCountView: TaskCountView;
 	private readonly _taskMonitorPage: MonitorPage;
 	private readonly _configuration: IConfiguration;
-	private readonly _configWatcher: TeConfigWatcher;
 	// private readonly _telemetry: TelemetryService;
 	private readonly _licenseManager: LicenseManager;
 	private readonly _releaseNotesPage: ReleaseNotesPage;
@@ -124,7 +122,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._statusBar = new TeStatusBar();
 		this._fileCache = new TeFileCache(this);
 		this._fileWatcher = new TeFileWatcher(this);
-		this._configWatcher = new TeConfigWatcher(this);
 
 		this._treeManager = new TaskTreeManager(this);
         this._taskManager = new TaskManager(this);
@@ -176,7 +173,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._taskMonitorPage,
 			this._fileWatcher,
 			this._fileCache,
-			this._configWatcher,
 			this._taskCountView,
 			this._taskUsageView,
 			this._onInitialized,
@@ -301,11 +297,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		else // See comments/notes above
 		{   //
 			const enablePersistentFileCaching = this.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
-			this._configWatcher.enableConfigWatcher(false);
+			this._treeManager.enableConfigWatcher(false);
 			await this.config.update(ConfigKeys.EnablePersistenFileCache, true);
 			await this.filecache.rebuildCache("   ");
 			await this.config.update(ConfigKeys.EnablePersistenFileCache, enablePersistentFileCaching);
-			this._configWatcher.enableConfigWatcher(true);
+			this._treeManager.enableConfigWatcher(true);
 		}
 		await this.storage.update2("lastDeactivated", 0);
 		await this.storage.update2("lastWsRootPathChange", 0);
@@ -412,8 +408,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 	}
 
 	get busy(): boolean {
-		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy() || this._treeManager.isBusy() ||
-			   this._fileWatcher.isBusy() || this._configWatcher.isBusy || this._licenseManager.isBusy || this._server.isBusy;
+		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy || this._treeManager.isBusy ||
+			   this._fileWatcher.isBusy || this._licenseManager.isBusy || this._server.isBusy;
 			   // || this.busyWebviews;
 	}
 
@@ -434,8 +430,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._configuration;
 	}
 
-	get configWatcher(): TeConfigWatcher {
-		return this._configWatcher;
+	get configWatcher(): ITeTreeConfigWatcher {
+		return this._treeManager.configWatcher;
 	}
 
 	get context(): ExtensionContext {

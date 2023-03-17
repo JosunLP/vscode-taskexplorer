@@ -54,7 +54,6 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         this.wrapper.log.methodDone("register file watchers", 1, "");
     }
 
-
     dispose()
     {
         this.disposables.forEach((d) => {
@@ -69,6 +68,11 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         this.watchers = {};
         this.watcherDisposables = {};
         this.disposables = [];
+    }
+
+
+    get isBusy(): boolean {
+        return !!this.currentEvent;
     }
 
 
@@ -161,9 +165,6 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         this.wrapper.log.write(`   ${clsPathGlob}`, 2);
         return clsPathGlob;
     };
-
-
-    isBusy = () => !!this.currentEvent;
 
 
     private isSameEvent = (q: any[], kind: string, uri: Uri) => q.find(e => e.event === kind && e.fsPath === uri.fsPath);

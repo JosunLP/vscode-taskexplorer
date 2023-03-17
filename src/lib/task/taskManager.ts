@@ -48,7 +48,6 @@ export class TaskManager implements ITeTaskManager, Disposable
         );
     }
 
-
     dispose()
     {
         this._disposables.forEach(d => d.dispose());
@@ -89,7 +88,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     private pause = (taskItem: TaskItem) =>
     {
-        if (taskItem.paused || this.wrapper.treeManager.isBusy())
+        if (taskItem.paused || this.wrapper.treeManager.isBusy)
         {
             window.showInformationMessage("Busy, please wait...");
             return;
@@ -124,7 +123,7 @@ export class TaskManager implements ITeTaskManager, Disposable
     {
         let exec: TaskExecution | undefined;
         this.log.methodStart("restart task", 1, "", true);
-        if (this.wrapper.treeManager.isBusy())
+        if (this.wrapper.treeManager.isBusy)
         {
             window.showInformationMessage("Busy, please wait...");
         }
@@ -175,7 +174,7 @@ export class TaskManager implements ITeTaskManager, Disposable
     {
         let exec: TaskExecution | undefined;
 
-        if (this.wrapper.treeManager.isBusy())
+        if (this.wrapper.treeManager.isBusy)
         {
             window.showInformationMessage("Busy, please wait...");
             return exec;
@@ -278,7 +277,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     private runLastTask = async(taskMap: TaskMap) =>
     {
-        if (this.wrapper.treeManager.isBusy())
+        if (this.wrapper.treeManager.isBusy)
         {
             window.showInformationMessage("Busy, please wait...");
             return;
@@ -406,7 +405,7 @@ export class TaskManager implements ITeTaskManager, Disposable
     {
         this.log.methodStart("stop", 1, "", true);
 
-        if (this.wrapper.treeManager.isBusy())
+        if (this.wrapper.treeManager.isBusy)
         {
             window.showInformationMessage("Busy, please wait...");
             return;

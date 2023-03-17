@@ -14,9 +14,9 @@ import { ITeTaskManager } from "./ITeTaskManager";
 import { IConfiguration } from "./IConfiguration";
 import { ITeFileWatcher } from "./ITeFileWatcher";
 import { ITaskExplorerApi } from "./ITaskExplorerApi";
-import { ITeConfigWatcher } from "./ITeConfigWatcher";
 import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
+import { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 import { ExtensionContext, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
 	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
@@ -49,7 +49,7 @@ export interface ITeWrapper
 	config: IConfiguration;
 	context: ExtensionContext;
 	contextTe: ITeContext;
-	configWatcher: ITeConfigWatcher;
+	configWatcher: ITeTreeConfigWatcher;
 	explorer: ITeTaskTree;
 	explorerView: TreeView<TreeItem>;
 	fileWatcher: ITeFileWatcher;

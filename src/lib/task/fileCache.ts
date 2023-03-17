@@ -37,6 +37,11 @@ export class TeFileCache implements ITeFileCache, Disposable
 	dispose = () => this._disposables.forEach((d) => d.dispose());
 
 
+    get isBusy(): boolean {
+        return this.cacheBuilding === true ||  this.cacheBusy === true;
+    }
+
+
     /**
      * @method addFileToCache
      * @since 3.0.0
@@ -456,9 +461,6 @@ export class TeFileCache implements ITeFileCache, Disposable
             this.projectFilesMap[project][taskType] = [];
         }
     };
-
-
-    isBusy = () => this.cacheBuilding === true ||  this.cacheBusy === true;
 
 
     /**
