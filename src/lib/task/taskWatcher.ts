@@ -35,14 +35,7 @@ export class TaskWatcher implements Disposable
         ];
     }
 
-
-    dispose()
-    {
-        this.disposables.forEach((d) => {
-            d.dispose();
-        });
-        this.disposables = [];
-    }
+    dispose = () => this.disposables.forEach(d => d.dispose());
 
 
     get onDidRunningTasksChange(): Event<ITeRunningTaskChangeEvent> {

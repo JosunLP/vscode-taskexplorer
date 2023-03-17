@@ -48,11 +48,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         );
     }
 
-    dispose()
-    {
-        this._disposables.forEach(d => d.dispose());
-        this._disposables.splice(0);
-    }
+    dispose = () => this._disposables.forEach(d => d.dispose());
 
 
     private open = async(selection: TaskItem, itemClick = false) =>
