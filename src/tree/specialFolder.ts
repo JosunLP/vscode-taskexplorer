@@ -320,7 +320,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         }
 
         if (changed) {
-            this.treeManager.fireTreeRefreshEvent(logPad + "   ", 1);
+            this.treeManager.fireTreeRefreshEvent(logPad + "   ", 1, this);
         }
 
         this.log.methodDone("show special tasks", 1, logPad);
