@@ -1,8 +1,8 @@
 
 import { basename, dirname } from "path";
-import { TeWrapper } from "../lib/wrapper";
+import { TeWrapper } from "../../wrapper";
 import { parseStringPromise } from "xml2js";
-import { ITaskDefinition } from "../interface";
+import { ITaskDefinition } from "../../../interface";
 import { TaskExplorerProvider } from "./provider";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 

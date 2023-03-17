@@ -1,9 +1,9 @@
 
-import { Globs } from "../lib/constants";
-import { TeWrapper } from "../lib/wrapper";
+import { Globs } from "../../constants";
+import { TeWrapper } from "../../wrapper";
 import { ScriptTaskProvider } from "./script";
 import { TaskExplorerProvider } from "./provider";
-import { getCombinedGlobPattern } from "../lib/utils/utils";
+import { getCombinedGlobPattern } from "../../utils/utils";
 
 export class BashTaskProvider extends ScriptTaskProvider implements TaskExplorerProvider
 {

@@ -1,7 +1,7 @@
 
 import { basename, dirname } from "path";
-import { TeWrapper } from "../lib/wrapper";
-import { ITaskDefinition } from "../interface";
+import { TeWrapper } from "../../wrapper";
+import { ITaskDefinition } from "../../../interface";
 import { TaskExplorerProvider } from "./provider";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace } from "vscode";
 

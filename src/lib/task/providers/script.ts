@@ -1,7 +1,7 @@
 
-import { Globs } from "../lib/constants";
-import { TeWrapper } from "../lib/wrapper";
-import { ITaskDefinition } from "../interface";
+import { Globs } from "../../constants";
+import { TeWrapper } from "../../wrapper";
+import { ITaskDefinition } from "../../../interface";
 import { TaskExplorerProvider } from "./provider";
 import { basename, dirname, sep, extname, join } from "path";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
