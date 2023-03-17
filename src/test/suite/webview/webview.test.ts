@@ -75,8 +75,8 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.show.page.releaseNotes +
-                  tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home);
-        // await showTeWebview(teWrapper.homeView);
+                  tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home + 20);
+        await sleep(10);
         await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.homeView, Uri.file(getWsPath(".")));
         await showTeWebviewByEchoCmd("releaseNotes", teWrapper.releaseNotesPage, teWrapper.homeView);
         endRollingCount(this);
@@ -101,15 +101,6 @@ suite("Webview Tests", () =>
         await focusFileExplorer();
         await teWrapper.homeView.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover postMessage() when not visible
         await sleep(100);
-        endRollingCount(this);
-    });
-
-
-
-    test("Task Usage View", async function()
-    {
-        if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.taskUsage + tc.slowTime.config.trackingEvent + tc.slowTime.commands.focusChangeViews);
         endRollingCount(this);
     });
 
