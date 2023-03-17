@@ -1,13 +1,12 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { join } from "path";
-import { TeWrapper } from "./wrapper";
-import { ContextKeys } from "./context";
-import * as taskTypeUtils from "./utils/taskUtils";
-import { findFiles, numFilesInDirectory } from "./utils/fs";
-import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
+import { TeWrapper } from "../wrapper";
+import { ContextKeys } from "../context";
+import * as taskTypeUtils from "../utils/taskUtils";
+import { findFiles, numFilesInDirectory } from "../utils/fs";
+import { IDictionary, ICacheItem, ITeFileCache } from "../../interface";
 import { workspace, RelativePattern, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent } from "vscode";
-import { ConfigKeys, StorageKeys } from "./constants";
 
 
 export class TeFileCache implements ITeFileCache, Disposable
@@ -56,9 +55,9 @@ export class TeFileCache implements ITeFileCache, Disposable
     {
         await this.startBuild();
         this.wrapper.statusBar.update("Loading tasks from file cache...");
-        this.taskFilesMap = await this.wrapper.storage.get2<IDictionary<ICacheItem[]>>(StorageKeys.FileCacheTaskFilesMap, {});
-        this.projectFilesMap = await this.wrapper.storage.get2<IDictionary<IDictionary<string[]>>>(StorageKeys.FileCacheProjectFilesMap, {});
-        this.projectToFileCountMap = await this.wrapper.storage.get2<IDictionary<IDictionary<number>>>(StorageKeys.FileCacheProjectFileToFileCountMap, {});
+        this.taskFilesMap = await this.wrapper.storage.get2<IDictionary<ICacheItem[]>>(this.wrapper.keys.Storage.FileCacheTaskFilesMap, {});
+        this.projectFilesMap = await this.wrapper.storage.get2<IDictionary<IDictionary<string[]>>>(this.wrapper.keys.Storage.FileCacheProjectFilesMap, {});
+        this.projectToFileCountMap = await this.wrapper.storage.get2<IDictionary<IDictionary<number>>>(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, {});
         await this.finishBuild(true);
     };
 
@@ -495,10 +494,10 @@ export class TeFileCache implements ITeFileCache, Disposable
 
     private onConfigurationChanged = (e: ConfigurationChangeEvent) =>
     {
-        if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.EnablePersistenFileCache))
+        if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.EnablePersistenFileCache))
         {
-            const newValue = this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
-            this.wrapper.log.write(`   the '${ConfigKeys.EnablePersistenFileCache}' setting has changed`, 1);
+            const newValue = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache);
+            this.wrapper.log.write(`   the '${this.wrapper.keys.Config.EnablePersistenFileCache}' setting has changed`, 1);
             this.wrapper.log.value("      new value", newValue, 1);
             this.persistCache(!newValue);
         }
@@ -520,21 +519,21 @@ export class TeFileCache implements ITeFileCache, Disposable
         // stuff going on when this was all started as async and then added to the
         // deactivate() method.
         //
-        if (clear !== true && (force || this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache)))
-        // if (clear !== true && (!teApi.isTests() || this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache)))
+        if (clear !== true && (force || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache)))
+        // if (clear !== true && (!teApi.isTests() || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache)))
         {
             const text = this.wrapper.statusBar.get();
             this.wrapper.statusBar.update("Persisting file cache...");
-            this.wrapper.storage.update2Sync(StorageKeys.FileCacheTaskFilesMap, this.taskFilesMap);
-            this.wrapper.storage.update2Sync(StorageKeys.FileCacheProjectFilesMap, this.projectFilesMap);
-            this.wrapper.storage.update2Sync(StorageKeys.FileCacheProjectFileToFileCountMap, this.projectToFileCountMap);
+            this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheTaskFilesMap, this.taskFilesMap);
+            this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFilesMap, this.projectFilesMap);
+            this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, this.projectToFileCountMap);
             this.wrapper.statusBar.update(text);
         }
         else if (clear === true)
         {
-            this.wrapper.storage.update2Sync(StorageKeys.FileCacheTaskFilesMap, undefined);
-            this.wrapper.storage.update2Sync(StorageKeys.FileCacheProjectFilesMap, undefined);
-            this.wrapper.storage.update2Sync(StorageKeys.FileCacheProjectFileToFileCountMap, undefined);
+            this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheTaskFilesMap, undefined);
+            this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFilesMap, undefined);
+            this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, undefined);
         }
     };
 
@@ -565,7 +564,7 @@ export class TeFileCache implements ITeFileCache, Disposable
         //
         if (this.firstRun || forceForTests)
         {
-            if (this.wrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache))
+            if (this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache))
             {
                 await this.addFromStorage();
                 numFilesFound = this.getTaskFileCount();

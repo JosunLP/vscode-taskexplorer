@@ -1,8 +1,8 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { TaskItem } from "./item";
-import { TeWrapper } from "../lib/wrapper";
-import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../interface";
+import { TeWrapper } from "../wrapper";
+import { TaskItem } from "../../tree/item";
+import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../../interface";
 import {
     Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
     Task, window, TaskEndEvent, EventEmitter, TaskProcessEndEvent, TaskProcessStartEvent

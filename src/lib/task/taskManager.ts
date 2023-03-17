@@ -1,18 +1,18 @@
 
 import { dirname } from "path";
-import { TaskFile } from "./file";
-import { TaskItem } from "./item";
-import { TeWrapper } from "../lib/wrapper";
-import { pathExists } from "../lib/utils/fs";
-import { isScriptType } from "../lib/utils/taskUtils";
-import { getTerminal } from "../lib/utils/getTerminal";
-import { ScriptTaskProvider } from "../providers/script";
-import { TaskDetailsPage } from "../webview/page/taskDetails";
-import { getPackageManager, sleep } from "../lib/utils/utils";
-import { ConfigKeys, PinnedStorageKey } from "../lib/constants";
-import { Commands, registerCommand } from "../lib/command/command";
-import { ILog, ITeTaskManager, TaskMap, ITeTask, TeTaskListType } from "../interface";
-import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
+import { TaskFile } from "../../tree/file";
+import { TaskItem } from "../../tree/item";
+import { TeWrapper } from "../wrapper";
+import { pathExists } from "../utils/fs";
+import { isScriptType } from "../utils/taskUtils";
+import { getTerminal } from "../utils/getTerminal";
+import { ScriptTaskProvider } from "../../providers/script";
+import { TaskDetailsPage } from "../../webview/page/taskDetails";
+import { getPackageManager, sleep } from "../utils/utils";
+import { ConfigKeys, PinnedStorageKey } from "../constants";
+import { Commands, registerCommand } from "../command/command";
+import { findDocumentPosition } from "../utils/findDocumentPosition";
+import { ILog, ITeTaskManager, TaskMap, ITeTask, TeTaskListType } from "../../interface";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder
