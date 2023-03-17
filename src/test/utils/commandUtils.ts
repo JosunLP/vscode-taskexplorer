@@ -2,9 +2,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { expect } from "chai";
-import { commands, Uri, WebviewPanel } from "vscode";
+import { commands, WebviewPanel } from "vscode";
 import { ITeWebview, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { waitForTeIdle, testControl as tc, teWrapper, sleep, promiseFromEvent, waitForWebviewReadyEvent, getWsPath } from "./utils";
+import { waitForTeIdle, testControl as tc, teWrapper, sleep, promiseFromEvent, waitForWebviewReadyEvent } from "./utils";
 
 let explorerHasFocused = false;
 const wvShown: string[] = [];
@@ -82,7 +82,7 @@ export const focusSearchView = () => commands.executeCommand("workbench.view.sea
 
 
 // export const focusSidebarView = () => commands.executeCommand("taskExplorerSideBar.focus");
-export const focusSidebarView = () => commands.executeCommand("taskexplorer.view.taskTreeSideBar.focus");
+export const focusSidebarView = () => commands.executeCommand("workbench.view.extension.taskExplorerSideBar");
 
 
 export const hasExplorerFocused = () => explorerHasFocused;

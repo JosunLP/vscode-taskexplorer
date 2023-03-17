@@ -4,13 +4,14 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { commands, Uri } from "vscode";
+import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd, focusFileExplorer
+    executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd, focusFileExplorer, focusSidebarView, closeTeWebviewPanel
 } from "../../utils/commandUtils";
 import {
     activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep,
-    suiteFinished, testControl as tc, waitForTeIdle
+    suiteFinished, testControl as tc, waitForWebviewReadyEvent
 } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -24,9 +25,12 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate(this));
         if (tc.isSingleSuiteTest) {
+            await sleep(230);
+            await closeTeWebviewPanel(teWrapper.welcomePage);
             await closeEditors();
-            await sleep(50);
+            await sleep(150);
         }
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
         endRollingCount(this, true);
     });
 
@@ -37,8 +41,15 @@ suite("Webview Tests", () =>
         if (!closedPages) {
             await closeEditors();
         }
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
         suiteFinished(this);
     });
+
+
+	test("Focus Explorer View", async function()
+	{
+        await startupFocus(this);
+	});
 
 
 	test("Focus SideBar", async function()
@@ -47,9 +58,15 @@ suite("Webview Tests", () =>
         // this test suite has completed
         //
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
-        await showTeWebview(teWrapper.homeView);
-        await waitForTeIdle(tc.waitTime.focusCommand, tc.slowTime.webview.show.view.home);
+        if (tc.isSingleSuiteTest) {
+            this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
+        }
+        else {
+            this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
+        }
+        void focusSidebarView();
+        await waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.commands.focusSideBarFirstTime);
+        await sleep(1);
         endRollingCount(this);
     });
 
@@ -59,7 +76,7 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.show.page.releaseNotes +
                   tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home);
-        await showTeWebview(teWrapper.homeView, "force");
+        // await showTeWebview(teWrapper.homeView);
         await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.homeView, Uri.file(getWsPath(".")));
         await showTeWebviewByEchoCmd("releaseNotes", teWrapper.releaseNotesPage, teWrapper.homeView);
         endRollingCount(this);
@@ -83,7 +100,6 @@ suite("Webview Tests", () =>
         this.slow(tc.slowTime.webview.postMessage + tc.slowTime.config.trackingEvent + tc.slowTime.commands.focusChangeViews + 200);
         await focusFileExplorer();
         await teWrapper.homeView.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover postMessage() when not visible
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
         await sleep(100);
         endRollingCount(this);
     });
@@ -94,8 +110,6 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.webview.show.view.taskUsage + tc.slowTime.config.trackingEvent + tc.slowTime.commands.focusChangeViews);
-        await showTeWebview(teWrapper.taskUsageView, "force");
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
         endRollingCount(this);
     });
 
@@ -146,9 +160,12 @@ suite("Webview Tests", () =>
     test("Close Open Pages", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.general.closeEditors * 3);
+        this.slow((tc.slowTime.general.closeEditors * 3) + tc.slowTime.config.trackingEvent);
         teWrapper.homeView.description = teWrapper.homeView.description;
-		await closeEditors();
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
+		await closeTeWebviewPanel(teWrapper.licensePage);
+		await closeTeWebviewPanel(teWrapper.releaseNotesPage);
+		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         closedPages = true;
         endRollingCount(this);
     });

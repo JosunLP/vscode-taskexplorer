@@ -5,7 +5,7 @@
 import { expect } from "chai";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand2, focusFileExplorer, focusSidebarView } from "../utils/commandUtils";
-import { activate, closeEditors, endRollingCount, exitRollingCount, promiseFromEvent, sleep, suiteFinished, testControl as tc } from "../utils/utils";
+import { activate, closeEditors, endRollingCount, exitRollingCount, promiseFromEvent, sleep, suiteFinished, testControl as tc, waitForWebviewReadyEvent } from "../utils/utils";
 
 
 let teWrapper: ITeWrapper;
@@ -57,9 +57,9 @@ suite("Initialization", () =>
     test("Focus SideBar View Tree", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.focusTaskTreeFirstTime + tc.slowTime.webview.show.view.home);
+        this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home);
         void focusSidebarView();
-        await promiseFromEvent(teWrapper.homeView.onDidReceiveReady).promise;
+        await waitForWebviewReadyEvent(teWrapper.homeView);
         teWrapper.homeView.title = teWrapper.homeView.title;
         endRollingCount(this);
     });

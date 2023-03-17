@@ -62,6 +62,7 @@ export const enum Commands
 	ShowLicensePage = "taskexplorer.view.licensePage.show",
 	ShowParsingReportPage = "taskexplorer.view.parsingReport.show",
 	ShowReleaseNotesPage = "taskexplorer.view.releaseNotes.show",
+	ShowSideBar = "workbench.view.extension.taskExplorerSideBar",
 	ShowTaskDetailsPage = "taskexplorer.view.taskDetails.show",
 	ShowTaskMonitorPage = "taskexplorer.view.taskMonitor.show",
 	ShowWelcomePage = "taskexplorer.view.welcome.show",

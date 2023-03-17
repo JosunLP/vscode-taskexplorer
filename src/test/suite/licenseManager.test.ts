@@ -9,7 +9,7 @@ import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-	closeTeWebviewPanel, echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd
+	closeTeWebviewPanel, echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, focusSidebarView, showTeWebview, showTeWebviewByEchoCmd
 } from "../utils/commandUtils";
 
 const tc = utils.testControl;
@@ -291,6 +291,17 @@ suite("License Manager Tests", () =>
 		await showTeWebview(teWrapper.homeView);
 		await showTeWebview(teWrapper.taskCountView);
 		await showTeWebview(teWrapper.taskUsageView);
+		// await focusSidebarView();
+		// await utils.sleep(10);
+		// if (!teWrapper.homeView.visible) {
+		// 	await executeTeCommand("taskexplorer.view.home.toggleVisibility", 5);
+		// }
+		// if (!teWrapper.taskCountView.visible) {
+		// 	await executeTeCommand("taskexplorer.view.taskCount.toggleVisibility", 5);
+		// }
+		// if (!teWrapper.taskUsageView.visible) {
+		// 	await executeTeCommand("taskexplorer.view.taskUsage.toggleVisibility", 5);
+		// }
         utils.endRollingCount(this);
 	});
 
