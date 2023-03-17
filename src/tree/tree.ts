@@ -92,7 +92,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
                     id,
                     delay: 1,
                     fn: this.fireTreeRefreshEvent,
-                    args: [ treeItem ],
+                    args: [ "", logLevel, treeItem ],
                     type: "refresh"
                 });
                 log.write("   refresh event has been queued", logLevel, logPad);
