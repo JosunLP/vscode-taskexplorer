@@ -3,7 +3,7 @@
 
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview } from "../utils/commandUtils";
-import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc } from "../utils/utils";
+import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc, waitForWebviewsIdle } from "../utils/utils";
 
 let aKey: string;
 let teWrapper: ITeWrapper;
@@ -24,17 +24,6 @@ suite("Usage / Telemetry Tests", () =>
     {
         if (exitRollingCount(this, false, true)) return;
         suiteFinished(this);
-    });
-
-
-    test("Enable SideBar", async function()
-    {   //
-        // Note: need enabled for Webview Test Suite as well, so leave enabled
-        //
-        if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.config.registerExplorerEvent);
-        await executeSettingsUpdate("enableSideBar", true, tc.waitTime.config.registerExplorerEvent);
-        endRollingCount(this);
     });
 
 
@@ -68,6 +57,8 @@ suite("Usage / Telemetry Tests", () =>
         await executeTeCommand("getApi");
         await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
         await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
+        await sleep(10);
+        await waitForWebviewsIdle();
         endRollingCount(this);
     });
 
@@ -109,7 +100,8 @@ suite("Usage / Telemetry Tests", () =>
         await teWrapper.usage.reset(aKey as any);
         await teWrapper.usage.reset();
         await teWrapper.usage.reset();
-        await teWrapper.storage.update("usages", usage);
+        await teWrapper.storage.update(teWrapper.keys.Storage.Usage, usage);
+        await waitForWebviewsIdle();
         endRollingCount(this);
     });
 

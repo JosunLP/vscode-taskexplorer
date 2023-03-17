@@ -7,6 +7,7 @@ export interface ITaskTreeEvent
     args: any[];
     type: string;
     delay: number;
+    scope: any;
 }
 
 export interface ITaskTreeView

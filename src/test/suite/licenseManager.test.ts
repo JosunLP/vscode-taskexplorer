@@ -166,7 +166,7 @@ suite("License Manager Tests", () =>
 	test("View and Close Parsing Report from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReport + (tc.slowTime.webview.closeSync * 2));
+		this.slow(tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.closeSync);
 		await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.licensePage);
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         utils.endRollingCount(this);
@@ -527,15 +527,6 @@ suite("License Manager Tests", () =>
 		await utils.treeUtils.refresh();
         utils.endRollingCount(this);
 	});
-
-
-    test("Disable SideBar", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.registerExplorerEvent);
-        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.registerExplorerEvent);
-        utils.endRollingCount(this);
-    });
 
 });
 

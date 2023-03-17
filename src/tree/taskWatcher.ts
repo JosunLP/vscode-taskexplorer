@@ -54,7 +54,7 @@ export class TaskWatcher implements Disposable
     }
 
 
-    private fireTaskChangeEvents(taskItem: TaskItem, isRunning: boolean, logPad: string, logLevel: number): void
+    private fireTaskChangeEvents(taskItem: TaskItem, isRunning: boolean, logPad: string): void
     {
         const taskTree = this.wrapper.treeManager.getTaskTree();
         /* istanbul ignore if */
@@ -69,22 +69,22 @@ export class TaskWatcher implements Disposable
         }
 
         const isTaskItem = taskItem instanceof TaskItem;
-        this.wrapper.log.methodStart("fire task change events", logLevel, logPad, false, [
+        this.wrapper.log.methodStart("fire task change events", 1, logPad, false, [
             [ "task name", taskItem.task.name ], [ "task type", taskItem.task.source ],
             [ "resource path", taskItem.taskFile.resourceUri.fsPath ]
         ]);
 
         /* istanbul ignore if */
         if (!taskTree) {
-            this.wrapper.log.write("   no task tree!!", logLevel, logPad);
-            this.wrapper.log.methodDone("fire task change events", logLevel, logPad);
+            this.wrapper.log.write("   no task tree!!", 1, logPad);
+            this.wrapper.log.methodDone("fire task change events", 1, logPad);
             return;
         }
 
         /* istanbul ignore if */
         if (!isTaskItem) {
-            this.wrapper.log.write("   change event object is not a taskitem!!", logLevel, logPad);
-            this.wrapper.log.methodDone("fire task change events", logLevel, logPad);
+            this.wrapper.log.write("   change event object is not a taskitem!!", 1, logPad);
+            this.wrapper.log.methodDone("fire task change events", 1, logPad);
             return;
         }
 
@@ -95,7 +95,8 @@ export class TaskWatcher implements Disposable
         // tree, so this is still good.  TODO possibly this gets fixed in the future to be able to
         // invalidate just the TaskItem, so check back on this sometime.
         //
-        this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskItem.taskFile);
+        this.wrapper.log.write("   request fire main tree refresh event", 1, logPad);
+        this.wrapper.treeManager.fireTreeRefreshEvent(taskItem.taskFile, logPad + "   ");
 
         //
         // Fire change event for the 'Last Tasks' folder if the task exists there
@@ -104,7 +105,8 @@ export class TaskWatcher implements Disposable
         {   //
             // 'Last Tasks' folder, if enabled, will always be the 1st tree item
             //
-            this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[0]);
+            this.wrapper.log.write("   request fire 'last tasks' folder tree refresh event", 1, logPad);
+            this.wrapper.treeManager.fireTreeRefreshEvent(taskTree[0], logPad + "   ");
         }
 
         //
@@ -115,22 +117,24 @@ export class TaskWatcher implements Disposable
             // 'Favorites' folder, if enabled, can be the 1st tree item or 2d, depending on if
             // the 'Last Tasks' folder is enabled, which is always the 1st item in the tree if enabled
             //
+            this.wrapper.log.write("   request fire 'favorites' folder tree refresh event", 1, logPad);
             if (taskTree[0] && taskTree[0].label === this.wrapper.treeManager.favoritesFolder.label)
             {
-                this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[0]);
+                this.wrapper.treeManager.fireTreeRefreshEvent(taskTree[0], logPad + "   ");
             }
             else {
-                this.wrapper.treeManager.fireTreeRefreshEvent(logPad + "   ", logLevel, taskTree[1]);
+                this.wrapper.treeManager.fireTreeRefreshEvent(taskTree[1], logPad + "   ");
             }
         }
 
+        this.wrapper.log.write("   fire 'task status changed' and 'running tasks changed' events", 1, logPad);
         const iTask = this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], "running")[0];
         // const iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this.wrapper.treeManager.runningTasks, "running");
         this._onTaskStatusChange.fire({ task: iTask, treeId: taskItem.id, isRunning });
         // this._onDidRunningTasksChange.fire({ tasks: iTasks, task: iTask, treeId: taskItem.id, isRunning });
         this._onDidRunningTasksChange.fire({ tasks: [], task: iTask, treeId: taskItem.id, isRunning });
 
-        this.wrapper.log.methodDone("fire task change events", logLevel, logPad);
+        this.wrapper.log.methodDone("fire task change events", 1, logPad);
     }
 
 
@@ -205,7 +209,7 @@ export class TaskWatcher implements Disposable
         {
             const taskItem = taskMap[treeId] as TaskItem;
             this.showStatusMessage(task, "   ");
-            this.fireTaskChangeEvents(taskItem, true, "   ", 1);
+            this.fireTaskChangeEvents(taskItem, true, "   ");
         }
 
         this.wrapper.log.methodDone("task started event", 1);
@@ -251,7 +255,7 @@ export class TaskWatcher implements Disposable
         }
         else {
             const taskItem = taskMap[treeId] as TaskItem;
-            this.fireTaskChangeEvents(taskItem, false, "   ", 1);
+            this.fireTaskChangeEvents(taskItem, false, "   ");
         }
 
         this.wrapper.log.methodDone("task finished event", 1);

@@ -71,22 +71,22 @@ export class LastTasksFolder extends SpecialTaskFolder
         /* istanbul ignore else */
         if (taskItem2)
         {
-            this.removeTaskFile(taskItem2, logPad + "   ", false);
+            this.removeTaskFile(taskItem2, logPad, false);
         }
         else if (this.taskFiles.length >= this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks))
         {
-            this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad + "   ", false);
+            this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad, false);
         }
         if (!taskItem2)
         {
-            taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad + "   ");
+            taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad);
             taskItem2.id = taskId;
             taskItem2.label = this.getRenamedTaskName(taskItem2);
             taskItem2.folder = this;
         }
-        this.wrapper.log.value(logPad + "   add item", taskItem2.id, 2);
+        this.wrapper.log.value("   add item", taskItem2.id, 2, logPad);
         this.insertTaskFile(taskItem2, 0);
-        this.treeManager.fireTreeRefreshEvent("   ", 1, this);
+        this.treeManager.fireTreeRefreshEvent(this, logPad);
     };
 
 

@@ -7,7 +7,7 @@ import { ITaskItem, ITeWrapper, ITeWebview } from "@spmeesseman/vscode-taskexplo
 import { closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand2, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl as tc, suiteFinished, sleep, exitRollingCount,
-	endRollingCount, treeUtils, waitForTaskExecution, waitForWebviewReadyEvent
+	endRollingCount, treeUtils, waitForTaskExecution, waitForWebviewsIdle
 } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -146,6 +146,7 @@ suite("Task Details Page Tests", () =>
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
 		await sleep(100);
+        await waitForWebviewsIdle();
 		await closeTeWebviewPanel(teWebview);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);

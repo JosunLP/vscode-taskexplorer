@@ -42,6 +42,7 @@ export interface ITeWrapper
 	tests: boolean;
 	readonly env: TeRuntimeEnvironment;
 	readonly busy: boolean;
+	readonly busyWebviews: boolean;
 
 	api: ITaskExplorerApi;
 	commonUtils: ITeCommonUtilities;

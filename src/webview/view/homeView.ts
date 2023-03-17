@@ -62,7 +62,7 @@ export class HomeView extends TeWebviewView<State>
 	static viewTitle = "Home";
 	static viewDescription = "Home";
 	static viewId: WebviewViewIds = "home"; // Must match view id in package.json
-	private _taskCount = 0;
+
 
 	constructor(wrapper: TeWrapper)
 	{

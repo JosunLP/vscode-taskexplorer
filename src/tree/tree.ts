@@ -64,12 +64,15 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     }
 
 
-    fireTreeRefreshEvent = (logPad: string, logLevel: number, treeItem?: TreeItem) =>
+    fireTreeRefreshEvent = (treeItem: TreeItem | null, logPad: string) =>
     {
         const id = "pendingFireTreeRefreshEvent-" + (treeItem ? treeItem.id?.replace(/\W/g, "") : "g");
-        log.methodStart("fire tree refresh event", logLevel, logPad, false, [[ "node id", id ]]);
+        log.methodStart("fire tree refresh event", 1, logPad, false, [
+            [ "is global refresh", !treeItem ], [ "item id", id ], [ "is visible", this.visible ], [ "was visible", this.wasVisible ]
+        ]);
         if (this.visible)
         {
+            log.write("   fire tree refresh event", 1, logPad);
             this.refreshPending = true;
             this._onDidChangeTreeData.fire(treeItem);
         }
@@ -92,19 +95,20 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
                     id,
                     delay: 1,
                     fn: this.fireTreeRefreshEvent,
-                    args: [ "", logLevel, treeItem ],
+                    args: [ treeItem, logPad ],
+                    scope: this,
                     type: "refresh"
                 });
-                log.write("   refresh event has been queued", logLevel, logPad);
+                log.write("   refresh event has been queued", 1, logPad);
             }
             else {
-                log.write("   a refresh event for this item is already running or queued, skip", logLevel, logPad);
+                log.write("   a refresh event for this item is already running or queued, skip", 1, logPad);
             }
         }
         else {
-            log.write("   a refresh event will be skipped as the view has not yet been shown", logLevel, logPad);
+            log.write("   a refresh event will be skipped as the view has not yet been shown", 1, logPad);
         }
-        log.methodDone("fire tree refresh event", logLevel, logPad);
+        log.methodDone("fire tree refresh event", 1, logPad);
     };
 
 
@@ -178,7 +182,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         const e = (<any>element);
         if (e.taskFile) // (element instanceof TaskItem)
         {
-            return e.taskFile as TaskItem;
+            return e.taskFile as TaskFile;
         }
         else if (e.folder) // (element instanceof TaskFile)
         {
@@ -276,7 +280,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
             // }
             firedEvent = true;
             setTimeout(async () => {
-                await next.fn.call(this, ...next.args);
+                await next.fn.call(next.scope, ...next.args);
                 // this.refreshPending = this.processEventQueue(logPad);
             }, next.delay);
         }

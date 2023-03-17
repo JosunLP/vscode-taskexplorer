@@ -414,8 +414,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get busy(): boolean {
 		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy() || this._treeManager.isBusy() ||
 			   this._fileWatcher.isBusy() || this._configWatcher.isBusy() || this._licenseManager.isBusy || this._server.isBusy;
-			   // || this._licensePage.busy || this._parsingReportPage.busy || this._releaseNotesPage.busy
-			   // || this._homeView.busy || this._taskUsageView.busy || this._taskCountView.busy;
+			   // || this.busyWebviews;
+	}
+
+	get busyWebviews(): boolean {
+		return this._licensePage.busy || this._parsingReportPage.busy || this._releaseNotesPage.busy || this._homeView.busy ||
+			   this._taskUsageView.busy || this._taskCountView.busy || this._welcomePage.busy;
 	}
 
 	get cacheBuster(): string {

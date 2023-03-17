@@ -665,3 +665,33 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
         }
     }
 };
+
+
+export const waitForWebviewsIdle = async (minWait = 1, maxWait = 15000) =>
+{
+    let waited = 0;
+    const _wait = async (iterationsIdle: number) =>
+    {
+        let iteration = 0;
+        while (((iteration < iterationsIdle && waited < minWait /* && !gotNotIdle */) || teWrapper.busyWebviews) && waited < maxWait)
+        {
+            await sleep(tc.waitForTeIdle.sleep);
+            waited += tc.waitForTeIdle.sleep;
+            ++iteration;
+            if (teWrapper.busyWebviews) {
+                iteration = 0;
+            }
+        }
+    };
+    await _wait(tc.waitForTeIdle.iterations1);
+    await sleep(1);
+    await _wait(tc.waitForTeIdle.iterations2);
+    if (minWait > waited)
+    {
+        const sleepTime = Math.round((minWait - waited) / 3);
+        while (minWait > waited) {
+            await sleep(sleepTime);
+            waited += sleepTime;
+        }
+    }
+};

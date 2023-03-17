@@ -144,7 +144,9 @@ suite("Initialization", () =>
 
 
     test("Disable SideBar View", async function()
-    {
+    {   //
+        // Gets re-enabled in license manager test suite, but lets's keep it off for a few test suites...
+        //
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.registerExplorerEvent);
         await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.registerExplorerEvent);

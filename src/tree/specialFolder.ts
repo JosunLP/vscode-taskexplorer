@@ -125,7 +125,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         // Persist to storage and refresh this tree node
         //
         await this.wrapper.storage.update(Strings.TASKS_RENAME_STORE, renames);
-        this.treeManager.fireTreeRefreshEvent("   ", 1, this);
+        this.treeManager.fireTreeRefreshEvent(this, "   ");
 
         this.log.methodDone("add/remove rename special", 1, "", [[ "new # of items in store", renames.length ]]);
         return rmvIdx !== -1;
@@ -320,7 +320,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         }
 
         if (changed) {
-            this.treeManager.fireTreeRefreshEvent(logPad + "   ", 1, this);
+            this.treeManager.fireTreeRefreshEvent(this, logPad + "   ");
         }
 
         this.log.methodDone("show special tasks", 1, logPad);
@@ -352,7 +352,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
                 await this.wrapper.storage.update(this.storeName, this.store);
                 await this.wrapper.storage.update(this.storeName, this.storeWs, StorageTarget.Workspace);
                 this.fireChangeEvent(taskItem);
-                this.treeManager.fireTreeRefreshEvent(logPad, 1, this);
+                this.treeManager.fireTreeRefreshEvent(this, logPad);
             }
         }
     }

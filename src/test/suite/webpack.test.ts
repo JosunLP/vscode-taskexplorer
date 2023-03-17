@@ -32,7 +32,7 @@ suite("Webpack Tests", () =>
         if (exitRollingCount(this, true)) return;
         ({ teApi, teWrapper } = await activate(this));
         startTaskCount = tc.isMultiRootWorkspace ? 15 : 0;
-        provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        provider = teApi.providers[testsName];
         await teWrapper.fs.createDir(dirName);
         endRollingCount(this, true);
     });

@@ -102,7 +102,7 @@ export const testControl =
             focus: 2330,
             focusAlreadyFocused: 375,
             focusChangeViews: 795,
-            focusSideBarFirstTime: 7770,
+            focusSideBarFirstTime: 7670,
             openUrl: 1680,
             refresh: 6250,
             refreshNoChanges: 310,
@@ -131,7 +131,7 @@ export const testControl =
             showHideUserTasks: 1075,
             sortingEvent: 815,
             terminalEvent: 250,
-            trackingEvent: 350
+            trackingEvent: 410
         },
         fs: {
             createEvent: 1550,
@@ -194,18 +194,18 @@ export const testControl =
             revealTreeNode: 55,
             show: {
                 view: {
-                    home: 2580,
-                    taskCount: 1360,
-                    taskUsage: 2090
+                    home: 2640,
+                    taskCount: 1410,
+                    taskUsage: 2240
                 },
                 page: {
-                    license: 3070,
-                    releaseNotes: 2870,
+                    license: 3240,
+                    releaseNotes: 2970,
                     taskDetailsScript: 2845,
-                    taskDetailsNonScript: 3045,
-                    taskMonitor: 2970,
-                    parsingReport: 2350,
-                    parsingReportFull: 2980,
+                    taskDetailsNonScript: 3305,
+                    taskMonitor: 2980,
+                    parsingReport: 2380,
+                    parsingReportFull: 3180,
                     welcome: 1225
                 }
             }

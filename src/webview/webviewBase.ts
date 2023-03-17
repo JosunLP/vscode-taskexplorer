@@ -96,7 +96,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	}
 
 	get busy(): boolean {
-		return !!this._view && !this._isReady;
+		return !!this._view && !this._isReady && this.visible;
 	}
 
 	get onDidReceiveMessage(): Event<string> {

@@ -336,12 +336,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    fireTreeRefreshEvent = (logPad: string, logLevel: number, treeItem?: TreeItem) =>
+    fireTreeRefreshEvent = (treeItem: TreeItem | null, logPad: string) =>
     {
         // Object.values(this._views).filter(v => v.enabled && v.visible).forEach((v) =>
         Object.values(this._views).filter(v => v.enabled).forEach((v) =>
         {
-            v.tree.fireTreeRefreshEvent(logPad + "   ", logLevel, treeItem);
+            v.tree.fireTreeRefreshEvent(treeItem, logPad);
         });
     };
 
@@ -400,7 +400,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.setMessage(Strings.RequestingTasks);
         await this.fetchTasks(logPad + "   ");
         this.setMessage();
-        this.fireTreeRefreshEvent(logPad + "   ", 1);
+        this.fireTreeRefreshEvent(null, logPad + "   ");
         this.refreshPending = false;
         this.wrapper.log.methodDone("construct task tree manager", 1, logPad);
     };
@@ -534,10 +534,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.wrapper.log.values(1, logPad + "      ", [
             [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskTree.length ]
         ]);
-        this.fireTreeRefreshEvent(logPad + "   ", 1);
         this.refreshPending = false;
         this.wrapper.statusBar.update("");
-        this.wrapper.log.write("   workspace folder event has been processed", 1, logPad);
+        this.wrapper.log.write("   fire tree refresh event", 1, logPad);
+        this.fireTreeRefreshEvent(null, logPad + "   ");
         this.wrapper.log.methodDone("workspace folder removed event", 1, logPad);
     };
 

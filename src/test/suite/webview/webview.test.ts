@@ -59,14 +59,14 @@ suite("Webview Tests", () =>
         //
         if (exitRollingCount(this)) return;
         if (tc.isSingleSuiteTest) {
-            this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
+            this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews + 400);
         }
         else {
             this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
         }
         void focusSidebarView();
         await waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.commands.focusSideBarFirstTime);
-        await sleep(1);
+        await sleep(200);
         endRollingCount(this);
     });
 
@@ -75,9 +75,10 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.show.page.releaseNotes +
-                  tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home + 20);
+                  tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home + 40);
         await sleep(10);
         await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.homeView, Uri.file(getWsPath(".")));
+        await sleep(10);
         await showTeWebviewByEchoCmd("releaseNotes", teWrapper.releaseNotesPage, teWrapper.homeView);
         endRollingCount(this);
     });
@@ -183,24 +184,6 @@ suite("Webview Tests", () =>
         await executeTeCommand("taskexplorer.view.taskUsage.toggleVisibility", 5);
         await executeTeCommand("taskexplorer.view.home.toggleVisibility", 5);
         await sleep(10);
-        endRollingCount(this);
-    });
-
-
-    test("Disable SideBar", async function()
-    {
-        if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.registerExplorerEvent);
-        await executeSettingsUpdate("enableSideBar", false, tc.waitTime.config.registerExplorerEvent);
-        endRollingCount(this);
-    });
-
-
-    test("Focus Explorer View", async function()
-    {
-        if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.focusChangeViews);
-        await focusExplorerView(teWrapper);
         endRollingCount(this);
     });
 
