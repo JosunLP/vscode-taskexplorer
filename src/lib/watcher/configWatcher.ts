@@ -23,24 +23,19 @@ export class TeConfigWatcher implements ITeConfigWatcher, Disposable
         this.enabledTasks = wrapper.config.get<IDictionary<boolean>>("enabledTasks", {});
         this.pathToPrograms = wrapper.config.get<IDictionary<string>>("pathToPrograms", {});
         this.disposables = [
-            workspace.onDidChangeConfiguration(e => this.processConfigChanges(e), this)
+            wrapper.config.onDidChange(this.processConfigChanges, this)
         ];
     }
 
-    dispose()
-    {
-        this.disposables.forEach((d) => {
-            d.dispose();
-        });
-        this.disposables = [];
+    dispose = () => this.disposables.forEach(d => d.dispose());
+
+
+    get isBusy() {
+        return this.processingConfigEvent;
     }
 
-    enableConfigWatcher = (enable: boolean) =>
-    {
-        this.watcherEnabled = enable;
-    };
 
-    isBusy = () => this.processingConfigEvent;
+    enableConfigWatcher = (enable: boolean) => this.watcherEnabled = enable;
 
 
     private processConfigChanges = async(e: ConfigurationChangeEvent) =>

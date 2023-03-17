@@ -413,7 +413,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get busy(): boolean {
 		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy() || this._treeManager.isBusy() ||
-			   this._fileWatcher.isBusy() || this._configWatcher.isBusy() || this._licenseManager.isBusy || this._server.isBusy;
+			   this._fileWatcher.isBusy() || this._configWatcher.isBusy || this._licenseManager.isBusy || this._server.isBusy;
 			   // || this.busyWebviews;
 	}
 
