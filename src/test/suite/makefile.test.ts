@@ -5,7 +5,7 @@
 import { join } from "path";
 import { expect } from "chai";
 import { startupFocus } from "../utils/suiteUtils";
-import { MakeTaskProvider } from "../../providers/make";
+import { MakeTaskProvider } from "../../lib/task/providers/make";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
 import { executeSettingsUpdate } from "../utils/commandUtils";
 import { ITaskExplorerApi, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";

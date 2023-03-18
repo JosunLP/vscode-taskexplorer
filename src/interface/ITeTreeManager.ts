@@ -6,6 +6,7 @@ import { ITaskTreeView } from "./ITeTaskTree";
 
 export interface ITeTreeManager
 {
+	readonly isBusy: boolean;
     getTaskMap(): TaskMap;
     getTasks(): Task[];
     getTaskTree(): void | ITaskFolder[] | null | undefined;

@@ -80,6 +80,8 @@ export interface ITeAccount
 
 export interface ITeLicenseManager
 {
+	readonly isBusy: boolean;
+    readonly onReady: Event<void>;
     account: ITeAccount;
     isLicensed: boolean;
     isPaid: boolean;

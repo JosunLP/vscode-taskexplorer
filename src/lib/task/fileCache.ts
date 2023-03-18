@@ -6,7 +6,9 @@ import { ContextKeys } from "../context";
 import * as taskTypeUtils from "../utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "../utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../../interface";
-import { workspace, RelativePattern, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent } from "vscode";
+import {
+    workspace, RelativePattern, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent, Event, EventEmitter
+} from "vscode";
 
 
 export class TeFileCache implements ITeFileCache, Disposable
@@ -18,6 +20,7 @@ export class TeFileCache implements ITeFileCache, Disposable
     private taskGlobs: any = {};
     private cacheBuilding = false;
     private _disposables: Disposable[] = [];
+    private readonly _onReady: EventEmitter<void>;
     private taskFilesMap: IDictionary<ICacheItem[]>;
     private projectFilesMap: IDictionary<IDictionary<string[]>>;
     private projectToFileCountMap: IDictionary<IDictionary<number>>;
@@ -28,8 +31,10 @@ export class TeFileCache implements ITeFileCache, Disposable
         this.taskFilesMap = {};
         this.projectFilesMap = {};
         this.projectToFileCountMap = {};
+		this._onReady = new EventEmitter<void>();
         void this.setContext();
         this._disposables.push(
+            this._onReady,
             wrapper.config.onDidChange((e) => this.onConfigurationChanged(e), this)
         );
     }
@@ -39,6 +44,10 @@ export class TeFileCache implements ITeFileCache, Disposable
 
     get isBusy(): boolean {
         return this.cacheBuilding === true ||  this.cacheBusy === true;
+    }
+
+    get onReady(): Event<void> {
+        return this._onReady.event;
     }
 
 
@@ -399,6 +408,7 @@ export class TeFileCache implements ITeFileCache, Disposable
         this.wrapper.statusBar.hide();
         this.cacheBuilding = false;
         this.cancel = false;
+        this._onReady.fire();
     };
 
 

@@ -6,7 +6,7 @@ import { ITeFileWatcher } from "../../interface";
 import { Commands, executeCommand } from "../command/command";
 import { getTaskTypes, isScriptType } from "../utils/taskUtils";
 import {
-    Disposable, FileSystemWatcher, workspace, WorkspaceFolder, Uri, WorkspaceFoldersChangeEvent
+    Disposable, FileSystemWatcher, workspace, WorkspaceFolder, Uri, WorkspaceFoldersChangeEvent, Event, EventEmitter
 } from "vscode";
 import { ConfigKeys } from "../constants";
 
@@ -19,6 +19,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     private rootPath: string | undefined;
     private currentNumWorkspaceFolders: number | undefined;
     private eventQueue: any[] = [];
+    private readonly _onReady: EventEmitter<void>;
     private watchers: { [taskType: string]: FileSystemWatcher } = {};
     private watcherDisposables: { [taskType: string]: Disposable } = {};
     private dirWatcher: { watcher?: FileSystemWatcher; onDidCreate?: Disposable; onDidDelete?: Disposable } = {};
@@ -28,6 +29,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         this.wrapper.log.methodStart("register file watchers", 1, "");
         this.disposables = [];
+		this._onReady = new EventEmitter<void>();
 
         //
         // Record ws folder count and `rootPath` (which is deprecated but still causes the dumb extension
@@ -50,7 +52,10 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         // Refresh tree when folders/projects are added/removed from the workspace, in a multi-root ws
         //
-        this.disposables.push(workspace.onDidChangeWorkspaceFolders(this.onWsFoldersChange, this));
+        this.disposables.push(
+            this._onReady,
+            workspace.onDidChangeWorkspaceFolders(this.onWsFoldersChange, this)
+        );
         this.wrapper.log.methodDone("register file watchers", 1, "");
     }
 
@@ -73,6 +78,10 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     get isBusy(): boolean {
         return !!this.currentEvent;
+    }
+
+    get onReady(): Event<void> {
+        return this._onReady.event;
     }
 
 

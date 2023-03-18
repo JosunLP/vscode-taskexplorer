@@ -284,7 +284,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 				else {
 					void this._welcomePage.show();
 				}
-			});
+			}, this);
 		}
 		//
 		// Build the file cache, this kicks off the whole process as refresh cmd will be issued

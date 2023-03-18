@@ -639,6 +639,43 @@ export const waitForTaskExecution = async (exec: TaskExecution | undefined, maxW
 
 export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
 {
+    const now = Date.now();
+    let event: Event<any> | undefined;
+    if (teWrapper.filecache.isBusy) {
+        event = teWrapper.filecache.onReady;
+    }
+    else if (teWrapper.fileWatcher.isBusy) {
+        event = teWrapper.fileWatcher.onReady;
+    }
+    else if (teWrapper.licenseManager.isBusy) {
+        event = teWrapper.licenseManager.onReady;
+    }
+    else if (teWrapper.server.isBusy) {
+        event = teWrapper.server.onDidRequestComplete;
+    }
+    else if (teWrapper.treeManager.isBusy) {
+        event = teWrapper.treeManager.onDidAllTasksChange;
+    }
+    if (event) {
+        await Promise.race<any>([
+            promiseFromEvent<any, any>(event).promise,
+            new Promise<any>(resolve => setTimeout(resolve, maxWait))
+        ]);
+    }
+    let waited = Date.now() - now;
+    if (minWait > Date.now() - now)
+    {
+        const sleepTime = Math.round((minWait - waited) / 3);
+        while (minWait > waited) {
+            await sleep(sleepTime);
+            waited += sleepTime;
+        }
+    }
+};
+
+
+export const waitForTeIdle2 = async (minWait = 1, maxWait = 15000) =>
+{
     let waited = 0;
     const _wait = async (iterationsIdle: number) =>
     {

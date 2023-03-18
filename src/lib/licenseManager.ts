@@ -20,6 +20,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _maxTasksMessageShown = false;
 	private _maxFreeTasksForTaskType = 100;
 	private _maxFreeTasksForScriptType = 50;
+    private readonly _onReady: EventEmitter<void>;
 	private readonly _defaultSessionInterval = 1000 * 60 * 60 * 4;
 	private readonly _disposables: Disposable[] = [];
 	private readonly _maxTaskTypeMsgShown: IDictionary<boolean> = {};
@@ -34,10 +35,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	constructor(private readonly wrapper: TeWrapper)
     {
 		this._account = this.getNewAccount();
+		this._onReady = new EventEmitter<void>();
 		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
 		// eslint-disable-next-line @typescript-eslint/tslint/config
 		this._checkLicenseTask = setInterval(this.checkLicense, this.sessionInterval, "");
 		this._disposables.push(
+			this._onReady,
 			this._onSessionChange,
 			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
 			registerCommand(Commands.PurchaseLicense, this.purchaseLicense, this),
@@ -83,6 +86,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
     get onDidSessionChange(): Event<TeSessionChangeEvent> {
         return this._onSessionChange.event;
+    }
+
+    get onReady(): Event<void> {
+        return this._onReady.event;
     }
 
 	get sessionInterval(): number {
@@ -157,6 +164,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		finally  {
 			this._busy = false;
 			this.wrapper.statusBar.update("");
+			this._onReady.fire();
 		}
 
 		this.wrapper.log.methodDone("license manager check license", 1, logPad, [
@@ -258,6 +266,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		finally {
 			this._busy = false;
 			this.wrapper.statusBar.update("");
+			this._onReady.fire();
 		}
 		this.wrapper.log.methodDone("request extended trial", 1, logPad);
 	};
