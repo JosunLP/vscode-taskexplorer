@@ -1,14 +1,13 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { extname } from "path";
-import { TeWrapper } from "../wrapper";
-import { ITeFileWatcher } from "../../interface";
-import { Commands, executeCommand } from "../command/command";
-import { getTaskTypes, isScriptType } from "../utils/taskUtils";
+import { TeWrapper } from "../lib/wrapper";
+import { ITeFileWatcher } from "../interface";
+import { Commands, executeCommand } from "../lib/command/command";
+import { getTaskTypes, isScriptType } from "../lib/utils/taskUtils";
 import {
     Disposable, FileSystemWatcher, workspace, WorkspaceFolder, Uri, WorkspaceFoldersChangeEvent, Event, EventEmitter
 } from "vscode";
-import { ConfigKeys } from "../constants";
 
 
 export class TeFileWatcher implements ITeFileWatcher, Disposable
@@ -363,7 +362,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         else {
             this.wrapper.log.write("   workspace folder order has changed", 1);
-            if (!this.wrapper.config.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically))
+            if (!this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SortProjectFoldersAlphabetically))
             {   //
                 // Refresh tree only, leave file cache and provider invalidation alone.  Setting
                 // the 2nd param in refresh cmd to `false` accomplishes just that.

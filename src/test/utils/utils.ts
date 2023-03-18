@@ -640,7 +640,14 @@ export const waitForTaskExecution = async (exec: TaskExecution | undefined, maxW
 export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
 {
     const now = Date.now();
+    let waited = 0;
     let event: Event<any> | undefined;
+    if (!teWrapper.busy) {
+        while (waited < minWait && !teWrapper.busy) {
+            await sleep(10);
+            waited += 10;
+        }
+    }
     if (teWrapper.filecache.isBusy) {
         event = teWrapper.filecache.onReady;
     }
@@ -662,7 +669,7 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
             new Promise<any>(resolve => setTimeout(resolve, maxWait))
         ]);
     }
-    let waited = Date.now() - now;
+    waited = Date.now() - now;
     if (minWait > Date.now() - now)
     {
         const sleepTime = Math.round((minWait - waited) / 3);

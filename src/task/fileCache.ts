@@ -1,11 +1,11 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { join } from "path";
-import { TeWrapper } from "../wrapper";
-import { ContextKeys } from "../context";
-import * as taskTypeUtils from "../utils/taskUtils";
-import { findFiles, numFilesInDirectory } from "../utils/fs";
-import { IDictionary, ICacheItem, ITeFileCache } from "../../interface";
+import { TeWrapper } from "../lib/wrapper";
+import { ContextKeys } from "../lib/context";
+import * as taskTypeUtils from "../lib/utils/taskUtils";
+import { findFiles, numFilesInDirectory } from "../lib/utils/fs";
+import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
 import {
     workspace, RelativePattern, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent, Event, EventEmitter
 } from "vscode";
