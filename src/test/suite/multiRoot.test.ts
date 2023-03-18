@@ -191,26 +191,26 @@ suite("Multi-Root Workspace Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.wsFolder.reorder * 3);
-        teWrapper.configWatcher.enableConfigWatcher(false);
+        teWrapper.treeManager.configWatcher.enableConfigWatcher(false);
         await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, true);
-        teWrapper.configWatcher.enableConfigWatcher(true);
+        teWrapper.treeManager.configWatcher.enableConfigWatcher(true);
         await teWrapper.fileWatcher.onWsFoldersChange({
             added: [],
             removed: []
         });
         await waitForTeIdle(tc.waitTime.reorderWorkspaceFolders);
-        teWrapper.configWatcher.enableConfigWatcher(false);
+        teWrapper.treeManager.configWatcher.enableConfigWatcher(false);
         await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, false);
-        teWrapper.configWatcher.enableConfigWatcher(true);
+        teWrapper.treeManager.configWatcher.enableConfigWatcher(true);
         await teWrapper.fileWatcher.onWsFoldersChange({
             added: [],
             removed: []
         });
         await waitForTeIdle(tc.waitTime.reorderWorkspaceFolders);
-        teWrapper.configWatcher.enableConfigWatcher(false);
+        teWrapper.treeManager.configWatcher.enableConfigWatcher(false);
         await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, sortAlpha);
         sortAlphaReset = true;
-        teWrapper.configWatcher.enableConfigWatcher(true);
+        teWrapper.treeManager.configWatcher.enableConfigWatcher(true);
         endRollingCount(this);
     });
 

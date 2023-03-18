@@ -441,6 +441,16 @@ export type PromiseAdapter<T, U> = (
 export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 5000) => waitForEvent(view.onDidReceiveReady, timeout);
 
 
+export const oneTimeEvent = <T>(event: Event<T>): Event<T> =>
+{
+	return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) =>
+    {
+		const result = event(e => { result.dispose(); return listener.call(thisArgs, e); }, null, disposables);
+		return result;
+	};
+};
+
+
 export const waitForEvent = async <T>(event: Event<T>, timeout = 5000) =>
 {
     const eventPromise = promiseFromEvent(event),
@@ -642,7 +652,8 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
     const now = Date.now();
     let waited = 0;
     if (!teWrapper.busy) {
-        while (waited < minWait && !teWrapper.busy) {
+        const preWait = minWait > 30 ? 30 : minWait;
+        while (waited < preWait && !teWrapper.busy) {
             await sleep(10);
             waited += 10;
         }
@@ -665,31 +676,38 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
         else if (teWrapper.server.isBusy) {
             event = teWrapper.server.onDidRequestComplete;
         }
-        else if (teWrapper.configWatcher.isBusy) {
-            event = teWrapper.configWatcher.onReady;
+        else if (teWrapper.treeManager.configWatcher.isBusy) {
+            event = teWrapper.treeManager.configWatcher.onReady;
         }
         else if (teWrapper.treeManager.isBusy) {
             event = teWrapper.treeManager.onDidAllTasksChange;
         }
         return event;
     };
-    let event = _event();
-    while (event) {
-console.log("event: " + event.name);
-        await Promise.race<any>([
-            promiseFromEvent<any, any>(event).promise,
-            new Promise<false>(resolve => setTimeout(resolve, maxWait, false))
-        ]);
-        await sleep(1);
-        event = _event();
-    };
-    waited = Date.now() - now;
-    if (minWait > Date.now() - now)
+    if (teWrapper.busy)
     {
-        const sleepTime = Math.round((minWait - waited) / 3);
-        while (minWait > waited) {
-            await sleep(sleepTime);
-            waited += sleepTime;
+        let event = _event();
+        while (event) {
+            await Promise.race<any>([
+                promiseFromEvent<any, any>(event).promise,
+                new Promise<any>(resolve => setTimeout(resolve, maxWait - waited))
+            ]);
+            waited = Date.now() - now;
+            event = _event();
+        };
+    }
+    if (minWait > waited)
+    {
+        const  toWait = minWait - waited;
+        if (toWait >= 40)
+        {
+            while (minWait > waited) {
+                await sleep(20);
+                waited += 20;
+            }
+        }
+        else {
+            await sleep(toWait);
         }
     }
 };
@@ -716,7 +734,8 @@ export const waitForTeIdle2 = async (minWait = 1, maxWait = 15000) =>
     await _wait(tc.waitForTeIdle.iterations2);
     if (minWait > waited)
     {
-        const sleepTime = Math.round((minWait - waited) / 3);
+        let sleepTime = Math.round((minWait - waited) / 3);
+        if (sleepTime < 10) sleepTime = 10;
         while (minWait > waited) {
             await sleep(sleepTime);
             waited += sleepTime;

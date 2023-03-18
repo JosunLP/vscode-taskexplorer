@@ -4,12 +4,12 @@
 
 import { join } from "path";
 import { expect } from "chai";
-import { Task } from "vscode";
+import { Disposable, Task } from "vscode";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-	closeTeWebviewPanel, echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, focusSidebarView, showTeWebview, showTeWebviewByEchoCmd
+	closeTeWebviewPanel, echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd
 } from "../utils/commandUtils";
 
 const tc = utils.testControl;
@@ -21,6 +21,7 @@ let licMgrMaxFreeTasks: number;
 let licMgrMaxFreeTaskFiles: number;
 let licMgrMaxFreeTasksForTaskType: number;
 let licMgrMaxFreeTasksForScriptType: number;
+let disposable: Disposable | undefined;
 
 
 suite("License Manager Tests", () =>
@@ -57,6 +58,7 @@ suite("License Manager Tests", () =>
 		finally {
 			await utils.setLicenseType(2);
 		}
+		utils.oneTimeEvent(licMgr.onReady)(() => {}); // cover onReady, random hit in waitForTeIdle
         utils.endRollingCount(this, true);
 	});
 

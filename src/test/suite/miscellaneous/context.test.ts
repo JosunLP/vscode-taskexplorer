@@ -52,7 +52,9 @@ suite("Context Tests", () =>
     {
         if (exitRollingCount(this)) return;
         expect(teWrapper.contextTe.getContext<boolean>(ContextKeys.Enabled)).to.be.a("boolean").that.is.equal(true);
-        expect(teWrapper.contextTe.getContext<boolean>(ContextKeys.Enabled,  true)).to.be.a("boolean").that.is.equal(true);
+        expect(teWrapper.contextTe.getContext<boolean>("taskexplorer:dev")).to.be.a("boolean").that.is.equal(false);
+        expect(teWrapper.contextTe.getContext<boolean>("taskexplorer:dev", true)).to.be.a("boolean").that.is.equal(true);
+        expect(teWrapper.contextTe.getContext<boolean>("taskexplorer:dev", false)).to.be.a("boolean").that.is.equal(false);
         expect(teWrapper.contextTe.getContext<string>(ContextKeys.TestsTest)).to.be.undefined;
         expect(teWrapper.contextTe.getContext<string>(ContextKeys.TestsTest, "testing")).to.be.a("string").that.is.equal("testing");
         endRollingCount(this);
