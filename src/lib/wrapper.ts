@@ -307,11 +307,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		else // See comments/notes above
 		{   //
 			const enablePersistentFileCaching = this.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
-			this._treeManager.enableConfigWatcher(false);
+			this._treeManager.configWatcher.enableConfigWatcher(false);
 			await this.config.update(ConfigKeys.EnablePersistenFileCache, true);
 			await this._statusBar.runWithProgress<number>(() => this.filecache.rebuildCache("   "));
 			await this.config.update(ConfigKeys.EnablePersistenFileCache, enablePersistentFileCaching);
-			this._treeManager.enableConfigWatcher(true);
+			this._treeManager.configWatcher.enableConfigWatcher(true);
 		}
 		await this.storage.update2("lastDeactivated", 0);
 		await this.storage.update2("lastWsRootPathChange", 0);
@@ -438,10 +438,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get config(): IConfiguration {
 		return this._configuration;
-	}
-
-	get configWatcher(): ITeTreeConfigWatcher {
-		return this._treeManager.configWatcher;
 	}
 
 	get context(): ExtensionContext {

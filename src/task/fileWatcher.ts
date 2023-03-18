@@ -395,7 +395,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         }
         else {
             this.currentEvent = undefined;
-            this._onReady.fire();
+            queueMicrotask(() => this._onReady.fire());
         }
     };
 

@@ -37,7 +37,7 @@ export class TeStatusBar implements ITeStatusBar, Disposable
     get = () => this._statusBarItem.text;
 
 
-    hide = () => { if (!this._hidden) { this._statusBarItem.text = ""; this._statusBarItem.hide(); this._hidden = true; }};
+    private hide = () => { if (!this._hidden) { this._statusBarItem.text = ""; this._statusBarItem.hide(); this._hidden = true; }};
 
 
     // private onCancel = () => void this.wrapper.filecache.cancelBuildCache();
@@ -66,7 +66,7 @@ export class TeStatusBar implements ITeStatusBar, Disposable
     };
 
 
-    show = async () =>
+    private show = async () =>
     {
         if (this._hidden)
         {

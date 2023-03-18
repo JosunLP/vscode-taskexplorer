@@ -1,8 +1,9 @@
 import { Task, Uri, Event } from "vscode";
-import { ITaskFolder } from "./ITaskFolder";
-import { ITeTaskChangeEvent } from "./ITeTask";
 import { TaskMap } from "./ITeTaskManager";
+import { ITaskFolder } from "./ITaskFolder";
 import { ITaskTreeView } from "./ITeTaskTree";
+import { ITeTaskChangeEvent } from "./ITeTask";
+import { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 
 export interface ITeTreeManager
 {
@@ -16,5 +17,6 @@ export interface ITeTreeManager
     onDidTaskCountChange: Event<ITeTaskChangeEvent>;
     onDidAllTasksChange: Event<ITeTaskChangeEvent>;
     runningTasks: any[];
+	configWatcher: ITeTreeConfigWatcher;
     views: { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView };
 }

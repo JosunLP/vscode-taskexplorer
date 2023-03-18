@@ -30,9 +30,9 @@ export class RemoveFromExcludesCommand implements Disposable
             if (globKey)
             {
                 const taskType = globKey.replace("GLOB_", "").toLowerCase();
-                this.wrapper.configWatcher.enableConfigWatcher(false);
+                this.wrapper.treeManager.configWatcher.enableConfigWatcher(false);
                 await removeFromExcludes([ uri.path ], "exclude", "   ");
-                this.wrapper.configWatcher.enableConfigWatcher(true);
+                this.wrapper.treeManager.configWatcher.enableConfigWatcher(true);
                 await executeCommand(Commands.Refresh, taskType, uri, "   ");
             }
             else{

@@ -13,7 +13,7 @@ import { ConfigKeys } from "../lib/constants";
 import { IDictionary, ITeTreeConfigWatcher } from "../interface";
 import { Commands, executeCommand } from "../lib/command/command";
 import { getScriptTaskTypes, getTaskTypeRealName } from "../lib/utils/taskUtils";
-import { ConfigurationChangeEvent, window, Disposable, Event, EventEmitter } from "vscode";
+import { ConfigurationChangeEvent, window, Disposable, Event, EventEmitter, workspace } from "vscode";
 
 
 export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
@@ -33,7 +33,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         this._pathToPrograms = wrapper.config.get<IDictionary<string>>("pathToPrograms", {});
         this._disposables = [
             this._onReady,
-            wrapper.config.onDidChange(this.processConfigChanges, this)
+            workspace.onDidChangeConfiguration(this.processConfigChanges, this)
         ];
     }
 
@@ -53,24 +53,22 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
 
 
     private processConfigChanges = async(e: ConfigurationChangeEvent) =>
-    {
-        this.wrapper.log.methodStart("Process config changes", 1, "", true);
+    {   //
+        // if the application has called 'enableConfigWatcher' to disable, then there's nothing to do
+        //
+        if (!this._watcherEnabled)
+        {
+            this.wrapper.log.methodOnce("treemgr", "process config changes - disabled", 1, "");
+            return;
+        }
+
+        this.wrapper.log.methodStart("process config changes", 1, "", true);
 
         // context = ctx;
         let refresh = false;
         let refresh2 = false; // Uses 1st param 'false' in refresh(), for cases where task files have not changed
         const refreshTaskTypes: string[] = [];
         const registerChange = (taskType: string) => this.wrapper.utils.pushIfNotExists(refreshTaskTypes, taskType);
-
-        //
-        // if the application has called 'enableConfigWatcher' to disable, then there's nothing to do
-        //
-        if (!this._watcherEnabled)
-        {
-            this.wrapper.log.write("   Config watcher is disabled", 1);
-            this.wrapper.log.methodDone("Process config changes", 1, "");
-            return;
-        }
 
         this._processingConfigEvent = true;
 
@@ -93,10 +91,11 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         }
         if (sidebarEnabled !== undefined || explorerTreeEnabled !== undefined)
         {
-            const enabled  = sidebarEnabled === true || explorerTreeEnabled === true;
-            setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, enabled);
+            const enabled  = this.wrapper.utils.isTeEnabled();
+            setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, enabled); this._processingConfigEvent = false;
             if (!enabled) {
-                queueMicrotask(() => { this._processingConfigEvent = false; this._onReady.fire(); });
+                this._processingConfigEvent = false;
+                queueMicrotask(() => this._onReady.fire());
                 return;
             }
         }
@@ -311,17 +310,19 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
                 await executeCommand(Commands.Refresh, false, undefined, "   ");
             }
             else {
-                this.wrapper.log.write("   Current changes require no processing", 1);
+                this.wrapper.log.write("   current changes require no processing", 1);
             }
         }
         catch (e) {
             /* istanbul ignore next */
             this.wrapper.log.error(e);
         }
+        finally {
+            this._processingConfigEvent = false;
+            queueMicrotask(() => this._onReady.fire());
+        }
 
-        queueMicrotask(() => { this._processingConfigEvent = false; this._onReady.fire(); });
-
-        this.wrapper.log.methodDone("Process config changes", 1);
+        this.wrapper.log.methodDone("process config changes", 1);
     };
 
 }

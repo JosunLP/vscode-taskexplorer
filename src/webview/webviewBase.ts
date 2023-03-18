@@ -327,7 +327,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		switch (e.method)
 		{
 			case IpcReadyCommand.method:
-				onIpc(IpcReadyCommand, e, () => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); });
+				onIpc(IpcReadyCommand, e, () => this.setReady());
 				break;
 
 			// case IpcFocusChangedCommand.method:
@@ -386,7 +386,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected async refresh(force: boolean, visibilityChanged: boolean, ...args: unknown[]): Promise<void>
     {
 		if (!this._view || (!force && !visibilityChanged && (!this._isReady || !this.visible))) {
-			this._skippedChangeEvent = !!this._view && !this.visible;
+			this._skippedChangeEvent = !!this._view && this._isReady && !this.visible;
 			return;
 		}
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
@@ -394,7 +394,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		this._isReady = this._skippedChangeEvent = false;
 		if (visibilityChanged && !skippedChangeEvent)
 		{
-			setTimeout(() => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); }, 10);
+			this.setReady();
 		}
 		else
 		{
@@ -402,8 +402,9 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			if (force && this._view.webview.html) {
 				this._view.webview.html = "";
 			}
-			if (this._view.webview.html === html) {
-				setTimeout(() => { this._isReady = true; this.onReady?.(); this._onReadyReceived.fire(); }, 10);
+			if (this._view.webview.html === html)
+			{
+				this.setReady();
 			}
 			else {
 				this._view.webview.html = html;
@@ -411,5 +412,13 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		}
 		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
 	}
+
+
+	private setReady = () =>
+	{
+		this._isReady = true;
+		this.onReady?.();
+		queueMicrotask(() => this._onReadyReceived.fire());
+	};
 
 }

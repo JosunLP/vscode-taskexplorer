@@ -63,7 +63,8 @@ export class TeContext implements ITeContext, Disposable
 	}
 
 
-	getContext = <T>(key: AllContextKeys, defaultValue?: T) => this.contextStorage[key] as T | undefined || defaultValue;
+	getContext = <T>(key: AllContextKeys, defaultValue?: T) =>
+		this.contextStorage[key] as T | undefined || (!defaultValue && this.contextStorage[key] === false ? false as unknown as T : defaultValue);
 
 
 	setContext = async(key: AllContextKeys, value: unknown): Promise<void> =>

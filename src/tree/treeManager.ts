@@ -192,9 +192,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             }
         }
 
-        this.wrapper.configWatcher.enableConfigWatcher(false);
+        this._configWatcher.enableConfigWatcher(false);
         await addToExcludes(pathValues, excludesList, "   ");
-        this.wrapper.configWatcher.enableConfigWatcher(true);
+        this._configWatcher.enableConfigWatcher(true);
 
         await this.refresh(selection.taskSource, uri, "   ");
 
@@ -259,9 +259,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.wrapper.log.write(`   removed ${ctRmv} ${invalidation} current tasks from cache`, 2, logPad);
         this.wrapper.log.methodDone("treemgr: do task cache removals", 2, logPad);
     };
-
-
-    enableConfigWatcher = (enable: boolean) => this._configWatcher.enableConfigWatcher(enable);
 
 
     private fetchTasks = async(logPad: string) =>
@@ -405,6 +402,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         //
         // Signal that the task list / tree has changed and set flags
         //
+        this.refreshPending = false;
         queueMicrotask(() =>
         {
             const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
@@ -415,7 +413,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             if (!this.firstTreeBuildDone) {
                 this._onReady.fire({ tasks: iTasks, type: "all" });
             }
-            this.refreshPending = false;
             this.firstTreeBuildDone = true;
         });
         this.wrapper.log.methodDone("treemgr: load tasks", 1, logPad);

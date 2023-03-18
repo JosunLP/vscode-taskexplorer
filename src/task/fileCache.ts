@@ -405,10 +405,10 @@ export class TeFileCache implements ITeFileCache, Disposable
             this.persistCache();
         }
         await this.setContext();
-        this.wrapper.statusBar.hide();
+        this.wrapper.statusBar.update("");
         this.cacheBuilding = false;
         this.cancel = false;
-        this._onReady.fire();
+        queueMicrotask(() => this._onReady.fire());
     };
 
 
@@ -783,7 +783,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             await this.wrapper.utils.sleep(100);
         }
         this.cacheBuilding = true;
-        this.wrapper.statusBar.show();
+        this.wrapper.statusBar.update("Starting file cache build");
     };
 
 }

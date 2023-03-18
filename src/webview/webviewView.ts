@@ -9,9 +9,8 @@
  */
 
 import { TeWrapper } from "../lib/wrapper";
-import { sleep } from "../lib/utils/utils";
 import { TeWebviewBase } from "./webviewBase";
-import { registerCommand } from "../lib/command/command";
+import { executeCommand } from "../lib/command/command";
 import { ContextKeys, WebviewViewIds } from "../lib/context";
 import {
 	CancellationToken, WebviewView, WebviewViewProvider, WebviewViewResolveContext,
@@ -151,7 +150,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 	async show(options?: { preserveFocus?: boolean })
 	{
 		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
-		await commands.executeCommand(`${this.id}.focus`, options);
+		await executeCommand(`${this.id}.focus`, options);
 		this.setContextKeys(true, false);
 		return this;
 	}

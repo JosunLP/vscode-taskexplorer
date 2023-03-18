@@ -7,6 +7,7 @@ import { ITeContext } from "./ITeContext";
 import { ITeWebview } from "./ITeWebview";
 import { ITeFigures } from "./ITeFigures";
 import { IDictionary } from "./IDictionary";
+import { ITeStatusBar } from "./ITeStatusBar";
 import { ITeFileCache } from "./ITeFileCache";
 import { ITeFilesystem } from "./ITeFilesystem";
 import { ITeTreeManager } from "./ITeTreeManager";
@@ -16,12 +17,10 @@ import { ITeFileWatcher } from "./ITeFileWatcher";
 import { ITaskExplorerApi } from "./ITaskExplorerApi";
 import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
-import { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 import { ExtensionContext, Event, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
 	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "./ITeUtilities";
-import { ITeStatusBar } from "./ITeStatusBar";
 
 export type TeRuntimeEnvironment = "dev" | "tests" | "production";
 
@@ -52,7 +51,6 @@ export interface ITeWrapper
 	config: IConfiguration;
 	context: ExtensionContext;
 	contextTe: ITeContext;
-	configWatcher: ITeTreeConfigWatcher;
 	explorer: ITeTaskTree;
 	explorerView: TreeView<TreeItem>;
 	fileWatcher: ITeFileWatcher;
