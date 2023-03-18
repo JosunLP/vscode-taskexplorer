@@ -6,7 +6,7 @@ import { TeWrapper } from "../wrapper";
 import { pathExists } from "../utils/fs";
 import { isScriptType } from "../utils/taskUtils";
 import { getTerminal } from "../utils/getTerminal";
-import { ScriptTaskProvider } from "./providers/script";
+import { ScriptTaskProvider } from "./provider/script";
 import { TaskDetailsPage } from "../../webview/page/taskDetails";
 import { getPackageManager, sleep } from "../utils/utils";
 import { ConfigKeys, PinnedStorageKey } from "../constants";
