@@ -133,31 +133,18 @@ suite("Webview Tests", () =>
 		this.slow((tc.slowTime.commands.focusChangeViews * 4) + (tc.slowTime.webview.postMessage * 2) + 220 + (tc.slowTime.commands.fast * 3) +
                   tc.slowTime.webview.show.page.license + tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.page.releaseNotes);
         const echoCmd = { method: "echo/fake", overwriteable: false };
-        console.log("1");
 	    await showTeWebview(teWrapper.parsingReportPage, "force");
-        console.log("1");
 	    await showTeWebview(teWrapper.licensePage, "force");
-        console.log("1");
         await teWrapper.parsingReportPage.postMessage(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
-        console.log("1");
 	    await showTeWebview(teWrapper.releaseNotesPage, "force");
-        console.log("1");
         await teWrapper.licensePage.postMessage(echoCmd, { command: "taskexplorer.fakeCommand" }); // not visible, ignored
-        console.log("1");
 	    await showTeWebview(teWrapper.parsingReportPage, "force");
-        console.log("1");
         void commands.executeCommand("workbench.action.nextEditor");
-        console.log("1");
         await promiseFromEvent(teWrapper.licensePage.onDidReceiveReady).promise;
-        console.log("1");
         void commands.executeCommand("workbench.action.nextEditor");
-        console.log("1");
         await promiseFromEvent(teWrapper.releaseNotesPage.onDidReceiveReady).promise;
-        console.log("1");
         void commands.executeCommand("workbench.action.previousEditor");
-        console.log("1");
         await promiseFromEvent(teWrapper.licensePage.onDidReceiveReady).promise;
-        console.log("1");
         endRollingCount(this);
 	});
 
