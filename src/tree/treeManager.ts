@@ -36,7 +36,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        this.wrapper.log.methodStart("construct task tree manager", 1, "   ");
+        this.wrapper.log.methodStart("treemgr: construct task tree manager", 1, "   ");
 
         this._onReady = new EventEmitter<ITeTaskChangeEvent>();
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
@@ -71,7 +71,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             registerCommand(Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this)
         );
 
-        this.wrapper.log.methodDone("construct task tree manager", 1, "   ");
+        this.wrapper.log.methodDone("treemgr: construct task tree manager", 1, "   ");
     }
 
     dispose()
@@ -87,7 +87,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 	}
 
     get isBusy(): boolean {
-        return this.refreshPending || this._treeBuilder.isBusy() || this._configWatcher.isBusy;
+        return this.refreshPending || this._configWatcher.isBusy;
             // this.views.taskExplorer.tree.isBusy() || this.views.taskExplorerSideBar.tree.isBusy() ||
             // this.refreshPending || this._treeBuilder.isBusy();
     }
@@ -157,7 +157,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         let excludesList = "exclude";
         const pathValues: string[] = [];
 
-        this.wrapper.log.methodStart("add to excludes", 1, "", true, [[ "global", global ]]);
+        this.wrapper.log.methodStart("treemgr: add to excludes", 1, "", true, [[ "global", global ]]);
 
         if (selection instanceof TaskFile)
         {
@@ -198,7 +198,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         await this.refresh(selection.taskSource, uri, "   ");
 
-        this.wrapper.log.methodDone("add to excludes", 1);
+        this.wrapper.log.methodDone("treemgr: add to excludes", 1);
     };
 
 
@@ -230,7 +230,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private doTaskCacheRemovals = (invalidation: string | undefined, logPad: string) =>
     {
         let ctRmv = 0;
-        this.wrapper.log.methodStart("do task cache removals", 2, logPad);
+        this.wrapper.log.methodStart("treemgr: do task cache removals", 2, logPad);
         const showUserTasks = this.wrapper.config.get<boolean>("specialFolders.showUserTasks");
         this._tasks.slice().reverse().forEach((item, index, object) => // niftiest loop ever
         {   //
@@ -257,7 +257,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             }
         });
         this.wrapper.log.write(`   removed ${ctRmv} ${invalidation} current tasks from cache`, 2, logPad);
-        this.wrapper.log.methodDone("do task cache removals", 2, logPad);
+        this.wrapper.log.methodDone("treemgr: do task cache removals", 2, logPad);
     };
 
 
@@ -266,7 +266,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     private fetchTasks = async(logPad: string) =>
     {
-        const count = this._tasks.length;
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
         if (this._tasks.length === 0 || !this.currentInvalidation || this.currentInvalidation  === "Workspace" || this.currentInvalidation === "tsc")
         {
@@ -331,21 +330,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         //
         await this.setContext();
         //
-        // Signal that the task list / tree has changed
-        //
-        queueMicrotask(() =>
-        {
-            const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
-            this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
-            if (this._tasks.length !== count) {
-                this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
-            }
-            if (!this.firstTreeBuildDone) {
-                this._onReady.fire({ tasks: iTasks, type: "all" });
-            }
-            this.firstTreeBuildDone = true;
-        });
-        //
         // Done!
         //
         this.wrapper.log.methodDone("fetch tasks", 1, logPad);
@@ -394,7 +378,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // twice if both the Explorer and Sidebar Views are enabled, do a lil check here to make sure
         // we don't double scan for nothing.
         //
-        this.wrapper.log.methodStart("handle tree rebuild event", 1, logPad);
+        this.wrapper.log.methodStart("treemgr: handle tree rebuild event", 1, logPad);
         if (invalidate === undefined && opt === undefined) // i.e. refresh button was clicked
         {
             this.wrapper.log.write("   handling 'rebuild cache' event", 1, logPad + "   ");
@@ -404,21 +388,37 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         }
         this.wrapper.log.write("   handling 'invalidate tasks cache' event", 1, logPad);
         await this.invalidateTasksCache(invalidate, opt, logPad + "   ");
-        this.wrapper.log.methodDone("   handle tree rebuild event", 1, logPad);
+        this.wrapper.log.methodDone("treemgr: handle tree rebuild event", 1, logPad);
     };
 
 
     loadTasks = async(logPad: string) =>
     {
-        this.wrapper.log.methodStart("construct task tree manager", 1, logPad);
+        const count = this._tasks.length;
+        this.wrapper.log.methodStart("treemgr: load tasks", 1, logPad);
         this.refreshPending = true;
         this._treeBuilder.invalidate();
         this.setMessage(Strings.RequestingTasks);
         await this.fetchTasks(logPad + "   ");
         this.setMessage();
         this.fireTreeRefreshEvent(null, logPad + "   ");
-        this.refreshPending = false;
-        this.wrapper.log.methodDone("construct task tree manager", 1, logPad);
+        //
+        // Signal that the task list / tree has changed and set flags
+        //
+        queueMicrotask(() =>
+        {
+            const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
+            this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
+            if (this._tasks.length !== count) {
+                this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
+            }
+            if (!this.firstTreeBuildDone) {
+                this._onReady.fire({ tasks: iTasks, type: "all" });
+            }
+            this.refreshPending = false;
+            this.firstTreeBuildDone = true;
+        });
+        this.wrapper.log.methodDone("treemgr: load tasks", 1, logPad);
     };
 
 
@@ -510,7 +510,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     private onWorkspaceFolderRemoved = (uri: Uri, logPad: string) =>
     {
-        this.wrapper.log.methodStart("workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
+        this.wrapper.log.methodStart("treemgr: workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
         let ctRmv = 0;
         const tasks = this._tasks,
                 taskMap = this._treeBuilder.getTaskMap(),
@@ -549,7 +549,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.wrapper.statusBar.update("");
         this.wrapper.log.write("   fire tree refresh event", 1, logPad);
         this.fireTreeRefreshEvent(null, logPad + "   ");
-        this.wrapper.log.methodDone("workspace folder removed event", 1, logPad);
+        this.wrapper.log.methodDone("treemgr: workspace folder removed event", 1, logPad);
     };
 
 
@@ -614,7 +614,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      */
     refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string) =>
     {
-        this.wrapper.log.methodStart("refresh task tree", 1, logPad, logPad === "", [
+        this.wrapper.log.methodStart("treemgr: refresh task tree", 1, logPad, logPad === "", [
             [ "invalidate", invalidate ], [ "opt fsPath", this.wrapper.typeUtils.isUri(opt) ? opt.fsPath : "n/a" ]
         ]);
 
@@ -665,7 +665,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             await this.loadTasks(logPad + "   "); // loadTasks invalidates treeBuilder, sets taskMap to {} and taskTree to null
         }
 
-        this.wrapper.log.methodDone("refresh task tree", 1, logPad);
+        this.wrapper.log.methodDone("treemgr: refresh task tree", 1, logPad);
     };
 
 
@@ -699,7 +699,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         let waited = 0;
         if (this.refreshPending) {
-            this.wrapper.log.write("waiting for previous refresh to complete...", 1, logPad);
+            this.wrapper.log.write("treemgr: waiting for previous refresh to complete...", 1, logPad);
         }
         while (this.refreshPending && waited < maxWait) {
             await this.wrapper.utils.sleep(250);

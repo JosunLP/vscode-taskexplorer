@@ -29,17 +29,17 @@ suite("Welcome Page Tests", () =>
 	test("Focus Explorer View", async function()
 	{
         await startupFocus(this);
-		const tmp = teWrapper.welcomePage.visible; // cover wrapper getter until we need tests for welcome page
 	});
 
-/*
+
 	test("Open Welcome Page", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.welcome + tc.slowTime.webview.closeSync);
-		await showTeWebview(teWrapper.welcomePage);
-		await closeTeWebviewPanel(teWrapper.welcomePage);
+		// this.slow(tc.slowTime.webview.show.page.welcome + tc.slowTime.webview.closeSync);
+		// await showTeWebview(teWrapper.welcomePage);
+		// await closeTeWebviewPanel(teWrapper.welcomePage);
+		const tmp = teWrapper.welcomePage.visible; // cover wrapper getter until we need tests for welcome page
         endRollingCount(this);
 	});
-*/
+
 });

@@ -12,7 +12,6 @@ import { Task, TreeItemCollapsibleState } from "vscode";
 
 export class TaskTreeBuilder
 {
-    private treeBuilding = false;
     private taskMap: TaskMap = {};
     private taskTree: TaskFolder[] | undefined | null | void = null;
     private readonly _treeGrouper: TaskTreeGrouper;
@@ -186,12 +185,10 @@ export class TaskTreeBuilder
     createTaskItemTree = async(logPad: string, logLevel: number) =>
     {
         this.wrapper.log.methodStart("create task tree", logLevel, logPad);
-        this.treeBuilding = true;
         this.wrapper.statusBar.show();
         this.taskTree = await this.buildTaskItemTree(logPad + "   ", logLevel + 1);
         this.wrapper.statusBar.update("Building task explorer tree");
         this.wrapper.statusBar.hide();
-        this.treeBuilding = false;
         this.wrapper.log.methodDone("create task tree", logLevel, logPad, [[ "current task count", this.wrapper.treeManager.getTasks().length ]]);
     };
 
@@ -243,9 +240,6 @@ export class TaskTreeBuilder
         this.taskMap = {};
         this.taskTree = null;
     };
-
-
-    isBusy = () => this.treeBuilding;
 
 
     private logTask = (task: Task, scopeName: string, logPad: string) =>

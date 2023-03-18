@@ -17,7 +17,7 @@ import { ITaskExplorerApi } from "./ITaskExplorerApi";
 import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
 import { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
-import { ExtensionContext, TreeItem, TreeView, WorkspaceFolder } from "vscode";
+import { ExtensionContext, Event, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
 	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "./ITeUtilities";
@@ -41,6 +41,8 @@ export interface ITeWrapper
 	dev: boolean;
 	production: boolean;
 	tests: boolean;
+	readonly isReady: boolean;
+    readonly onReady: Event<void>;
 	readonly env: TeRuntimeEnvironment;
 	readonly busy: boolean;
 	readonly busyWebviews: boolean;

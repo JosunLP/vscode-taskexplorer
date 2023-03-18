@@ -641,34 +641,48 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
 {
     const now = Date.now();
     let waited = 0;
-    let event: Event<any> | undefined;
     if (!teWrapper.busy) {
         while (waited < minWait && !teWrapper.busy) {
             await sleep(10);
             waited += 10;
         }
     }
-    if (teWrapper.filecache.isBusy) {
-        event = teWrapper.filecache.onReady;
-    }
-    else if (teWrapper.fileWatcher.isBusy) {
-        event = teWrapper.fileWatcher.onReady;
-    }
-    else if (teWrapper.licenseManager.isBusy) {
-        event = teWrapper.licenseManager.onReady;
-    }
-    else if (teWrapper.server.isBusy) {
-        event = teWrapper.server.onDidRequestComplete;
-    }
-    else if (teWrapper.treeManager.isBusy) {
-        event = teWrapper.treeManager.onDidAllTasksChange;
-    }
-    if (event) {
+    const _event = () =>
+    {
+        let event: Event<any> | undefined;
+        if (!teWrapper.isReady) {
+            event = teWrapper.onReady;
+        }
+        else if (teWrapper.filecache.isBusy) {
+            event = teWrapper.filecache.onReady;
+        }
+        else if (teWrapper.fileWatcher.isBusy) {
+            event = teWrapper.fileWatcher.onReady;
+        }
+        else if (teWrapper.licenseManager.isBusy) {
+            event = teWrapper.licenseManager.onReady;
+        }
+        else if (teWrapper.server.isBusy) {
+            event = teWrapper.server.onDidRequestComplete;
+        }
+        else if (teWrapper.configWatcher.isBusy) {
+            event = teWrapper.configWatcher.onReady;
+        }
+        else if (teWrapper.treeManager.isBusy) {
+            event = teWrapper.treeManager.onDidAllTasksChange;
+        }
+        return event;
+    };
+    let event = _event();
+    while (event) {
+console.log("event: " + event.name);
         await Promise.race<any>([
             promiseFromEvent<any, any>(event).promise,
-            new Promise<any>(resolve => setTimeout(resolve, maxWait))
+            new Promise<false>(resolve => setTimeout(resolve, maxWait, false))
         ]);
-    }
+        await sleep(1);
+        event = _event();
+    };
     waited = Date.now() - now;
     if (minWait > Date.now() - now)
     {

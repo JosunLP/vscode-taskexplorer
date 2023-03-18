@@ -495,6 +495,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this.versionchanged && this._previousVersion === undefined;
 	}
 
+	get isReady(): boolean {
+		return this._ready;
+	}
+
 	get keys() {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		return { Storage: StorageKeys, Config: ConfigKeys, Strings, Globs };

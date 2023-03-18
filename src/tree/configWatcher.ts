@@ -12,8 +12,8 @@ import { ContextKeys } from "../lib/context";
 import { ConfigKeys } from "../lib/constants";
 import { IDictionary, ITeTreeConfigWatcher } from "../interface";
 import { Commands, executeCommand } from "../lib/command/command";
-import { ConfigurationChangeEvent, window, Disposable } from "vscode";
 import { getScriptTaskTypes, getTaskTypeRealName } from "../lib/utils/taskUtils";
+import { ConfigurationChangeEvent, window, Disposable, Event, EventEmitter } from "vscode";
 
 
 export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
@@ -23,13 +23,16 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
     private _processingConfigEvent = false;
     private _enabledTasks: IDictionary<boolean>;
     private _pathToPrograms: IDictionary<string>;
+    private readonly _onReady: EventEmitter<void>;
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
+		this._onReady = new EventEmitter<void>();
         this._enabledTasks = wrapper.config.get<IDictionary<boolean>>("enabledTasks", {});
         this._pathToPrograms = wrapper.config.get<IDictionary<string>>("pathToPrograms", {});
         this._disposables = [
+            this._onReady,
             wrapper.config.onDidChange(this.processConfigChanges, this)
         ];
     }
@@ -37,8 +40,12 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
     dispose = () => this._disposables.forEach(d => d.dispose());
 
 
-    get isBusy() {
+    get isBusy(): boolean {
         return this._processingConfigEvent;
+    }
+
+    get onReady(): Event<void> {
+        return this._onReady.event;
     }
 
 
@@ -50,8 +57,6 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         this.wrapper.log.methodStart("Process config changes", 1, "", true);
 
         // context = ctx;
-        this._processingConfigEvent = true;
-
         let refresh = false;
         let refresh2 = false; // Uses 1st param 'false' in refresh(), for cases where task files have not changed
         const refreshTaskTypes: string[] = [];
@@ -64,9 +69,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         {
             this.wrapper.log.write("   Config watcher is disabled", 1);
             this.wrapper.log.methodDone("Process config changes", 1, "");
-            this._processingConfigEvent = false;
             return;
         }
+
+        this._processingConfigEvent = true;
 
         //
         // Explorer Tree / SideBar View
@@ -89,7 +95,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         {
             const enabled  = sidebarEnabled === true || explorerTreeEnabled === true;
             setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, enabled);
-            return;
+            if (!enabled) {
+                queueMicrotask(() => { this._processingConfigEvent = false; this._onReady.fire(); });
+                return;
+            }
         }
 
         //
@@ -310,7 +319,8 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             this.wrapper.log.error(e);
         }
 
-        this._processingConfigEvent = false;
+        queueMicrotask(() => { this._processingConfigEvent = false; this._onReady.fire(); });
+
         this.wrapper.log.methodDone("Process config changes", 1);
     };
 
