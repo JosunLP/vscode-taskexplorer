@@ -8,9 +8,9 @@ import { testControl } from "../control";
 import { deactivate } from "../../extension";
 import { startInput, stopInput } from "./input";
 import { StorageKeys } from "../../lib/constants";
+import { hasExplorerFocused } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
-import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import {
     ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType, ITeWebview

@@ -262,7 +262,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	{
 		return {
 			account: this.wrapper.licenseManager.account,
-			isEnabled: this.wrapper.views.taskExplorer.enabled || this.wrapper.views.taskExplorerSideBar.enabled,
+			isEnabled: this._teEnabled,
 			isLicensed: this.wrapper.licenseManager.isLicensed,
 			isRegistered: this.wrapper.licenseManager.isRegistered,
 			isTrial: this.wrapper.licenseManager.isTrial,
@@ -295,16 +295,13 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 	protected onConfigChanged(e: ConfigurationChangeEvent): void
 	{
-		if (this._view && this._isReady && this.visible)
+		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.EnableExplorerTree, this.wrapper.keys.Config.EnableSideBar))
 		{
-			if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.EnableExplorerTree, this.wrapper.keys.Config.EnableSideBar))
+			const enabled = this.wrapper.utils.isTeEnabled();
+			if (enabled !== this._teEnabled)
 			{
-				const enabled = this.wrapper.utils.isTeEnabled();
-				if (enabled !== this._teEnabled)
-				{
-					this._teEnabled = enabled;
-					void this.postMessage(IpcEnabledChangedMsg, { enabled });
-				}
+				this._teEnabled = enabled;
+				void this.postMessage(IpcEnabledChangedMsg, { enabled });
 			}
 		}
 	}
