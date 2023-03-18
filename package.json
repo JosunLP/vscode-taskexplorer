@@ -2283,16 +2283,16 @@
                 }
             },
             {
-                "name":"tsc-watch",
-                "label":"Task Explorer Tsc-Alias Watch",
+                "name": "tsc-watch",
+                "label": "Task Explorer Tsc-Alias Watch",
                 "base": "$tsc-watch",
                 "background": {
-                    "activeOnStart":true,
+                    "activeOnStart": true,
                     "beginsPattern": {
-                        "regexp":"^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (Starting compilation in watch mode|File change detected\\. Starting incremental compilation)\\.\\.\\."
+                        "regexp": "^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (Starting compilation in watch mode|File change detected\\. Starting incremental compilation)\\.\\.\\."
                     },
                     "endsPattern": {
-                        "regexp":"^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (?:Compilation complete\\.|Found \\d+ errors?\\.) Watching for file changes\\."
+                        "regexp": "^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (?:Compilation complete\\.|Found \\d+ errors?\\.) Watching for file changes\\."
                     }
                 }
             },

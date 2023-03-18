@@ -55,7 +55,6 @@ export class LicensePage extends TeWebviewPanel<State>
 			This extension is free to use but am considering a small license for an
 			unlimited parsed component type of thing (e.g $10 - $20), as the time spent
 			and functionality have went way beyond what was at first intended.
-			<br><br>Hey Sencha, you can buy it and replace your own product if you want ;).
 		</td></tr>
 	</table>
 	<table class="margin-top-20">

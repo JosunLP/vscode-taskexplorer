@@ -312,17 +312,25 @@ const wpPlugin =
 	{
 		const plugin = new CspHtmlPlugin(
 		{
+			// "connect-src":
+			// wpConfig.mode !== 'production'
+			// 		 ? [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.sandbox.paypal.com", "https://www.paypal.com" ]
+			// 		 : [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.paypal.com" ],
 			"default-src": "'none'",
+			"font-src": [ "#{cspSource}" ],
+			// "frame-src":
+			// wpConfig.mode !== 'production'
+			// 		 ? [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.sandbox.paypal.com", "https://www.paypal.com" ]
+			// 		 : [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.paypal.com" ],
 			"img-src": ["#{cspSource}", "https:", "data:"],
 			"script-src":
 			wpConfig.mode !== 'production'
-					? ["#{cspSource}", "'nonce-#{cspNonce}'", "'unsafe-eval'"]
-					: ["#{cspSource}", "'nonce-#{cspNonce}'"],
+					? [ "#{cspSource}", "'nonce-#{cspNonce}'", "'unsafe-eval'" ]
+					: [ "#{cspSource}", "'nonce-#{cspNonce}'" ],
 			"style-src":
 			wpConfig.mode === 'production'
-					? ["#{cspSource}", "'nonce-#{cspNonce}'", "'unsafe-hashes'" ]
-					: ["#{cspSource}", "'unsafe-hashes'", "'unsafe-inline'" ],
-			"font-src": ["#{cspSource}" ],
+					? [ "#{cspSource}", "'nonce-#{cspNonce}'", "'unsafe-hashes'" ]
+					: [ "#{cspSource}", "'unsafe-hashes'", "'unsafe-inline'" ]
 		},
 		{
 			enabled: true,
@@ -334,7 +342,7 @@ const wpPlugin =
 			nonceEnabled: {
 				'script-src': true,
 				'style-src': wpConfig.mode === 'production',
-			},
+			}
 		});
 		//
 		// Override the nonce creation so it can be dynamically generated at runtime
