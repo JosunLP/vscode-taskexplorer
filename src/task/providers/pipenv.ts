@@ -1,8 +1,8 @@
 
 import { basename, dirname } from "path";
-import { TeWrapper } from "../../wrapper";
+import { TeWrapper } from "../../lib/wrapper";
 import * as bombadil from "@sgarciac/bombadil";
-import { ITaskDefinition } from "../../../interface";
+import { ITaskDefinition } from "../../interface";
 import { TaskExplorerProvider } from "./provider";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 

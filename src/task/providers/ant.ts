@@ -1,11 +1,11 @@
 
-import { Globs } from "../../constants";
+import { Globs } from "../../lib/constants";
 import { execSync } from "child_process";
-import { TeWrapper } from "../../wrapper";
+import { TeWrapper } from "../../lib/wrapper";
 import { parseStringPromise } from "xml2js";
 import { basename, dirname, join } from "path";
 import { TaskExplorerProvider } from "./provider";
-import { IDictionary, ITaskDefinition } from "../../../interface";
+import { IDictionary, ITaskDefinition } from "../../interface";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, window, workspace, ShellExecutionOptions } from "vscode";
 
 interface StringMap { [s: string]: string }

@@ -1,5 +1,5 @@
 
-import { TeWrapper } from "../../wrapper";
+import { TeWrapper } from "../../lib/wrapper";
 import { TaskExplorerProvider } from "./provider";
 import { ScriptTaskProvider } from "./script";
 

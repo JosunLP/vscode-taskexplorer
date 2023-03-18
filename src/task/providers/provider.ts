@@ -1,9 +1,9 @@
 
 import { extname } from "path";
-import { Globs } from "../../constants";
-import { TeWrapper } from "../../wrapper";
-import { ITaskExplorerProvider } from "../../../interface";
-import { isTaskIncluded } from "../../utils/isTaskIncluded";
+import { Globs } from "../../lib/constants";
+import { TeWrapper } from "../../lib/wrapper";
+import { ITaskExplorerProvider } from "../../interface";
+import { isTaskIncluded } from "../../lib/utils/isTaskIncluded";
 import { Uri, Task, WorkspaceFolder, workspace } from "vscode";
 
 

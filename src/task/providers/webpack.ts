@@ -1,8 +1,8 @@
 
 import { basename, dirname } from "path";
-import { TeWrapper } from "../../wrapper";
-import { ConfigKeys } from "../../constants";
-import { ITaskDefinition } from "../../../interface";
+import { TeWrapper } from "../../lib/wrapper";
+import { ConfigKeys } from "../../lib/constants";
+import { ITaskDefinition } from "../../interface";
 import { TaskExplorerProvider } from "./provider";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 
