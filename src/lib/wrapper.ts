@@ -2,6 +2,7 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
+import { loadMessageBundle, LocalizeFunc } from "vscode-nls";
 import { TeServer } from "./server";
 import { getUuid } from "@env/crypto";
 import { logControl } from "./log/log";
@@ -80,6 +81,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _storage: IStorage;
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
+	private readonly _localize: LocalizeFunc;
 	private readonly _fileCache: TeFileCache;
 	private readonly _statusBar: TeStatusBar;
     private readonly _taskWatcher: TaskWatcher;
@@ -111,6 +113,7 @@ export class TeWrapper implements ITeWrapper, Disposable
         this._configuration = configuration;
 		this._log = log;
 		this._providers = {};
+
 		this._onReady = new EventEmitter<void>();
 		this._onInitialized = new EventEmitter<void>();
 
@@ -118,8 +121,15 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
 		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
 
+		this._localize = loadMessageBundle();
+		Object.entries(Strings).filter(s => s[1].includes("|")).forEach(e =>
+		{
+			const lPair = e[1].split("|");
+			(<IDictionary<string>>Strings)[e[0]] = this._localize(lPair[0], lPair[1]);
+		});
+
 		this._teContext = new TeContext();
-		this._statusBar = new TeStatusBar();
+		this._statusBar = new TeStatusBar(this);
 		this._fileCache = new TeFileCache(this);
 		this._fileWatcher = new TeFileWatcher(this);
 
@@ -292,14 +302,14 @@ export class TeWrapper implements ITeWrapper, Disposable
 		/* istanbul ignore else */
 		if (this.tests || /* istanbul ignore next */!rootFolderChanged)
 		{
-			await this.filecache.rebuildCache("   ");
+			await this._statusBar.runWithProgress<number>(() => this.filecache.rebuildCache("   "));
 		}     //
 		else // See comments/notes above
 		{   //
 			const enablePersistentFileCaching = this.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
 			this._treeManager.enableConfigWatcher(false);
 			await this.config.update(ConfigKeys.EnablePersistenFileCache, true);
-			await this.filecache.rebuildCache("   ");
+			await this._statusBar.runWithProgress<number>(() => this.filecache.rebuildCache("   "));
 			await this.config.update(ConfigKeys.EnablePersistenFileCache, enablePersistentFileCaching);
 			this._treeManager.enableConfigWatcher(true);
 		}
@@ -489,6 +499,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		return { Storage: StorageKeys, Config: ConfigKeys, Strings, Globs };
 	}
+
+	localize = (key: string, defaultMessage: string): string => this._localize(key, defaultMessage);
 
 	get log(): ILog {
 		return this._log;

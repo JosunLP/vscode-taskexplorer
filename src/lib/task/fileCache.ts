@@ -59,7 +59,7 @@ export class TeFileCache implements ITeFileCache, Disposable
     private addFromStorage = async() =>
     {
         await this.startBuild();
-        this.wrapper.statusBar.update("Loading tasks from file cache...");
+        void this.wrapper.statusBar.update("Loading tasks from file cache...");
         this.taskFilesMap = await this.wrapper.storage.get2<IDictionary<ICacheItem[]>>(this.wrapper.keys.Storage.FileCacheTaskFilesMap, {});
         this.projectFilesMap = await this.wrapper.storage.get2<IDictionary<IDictionary<string[]>>>(this.wrapper.keys.Storage.FileCacheProjectFilesMap, {});
         this.projectToFileCountMap = await this.wrapper.storage.get2<IDictionary<IDictionary<number>>>(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, {});
@@ -111,7 +111,7 @@ export class TeFileCache implements ITeFileCache, Disposable
                     }
 
                     const dspTaskType = taskTypeUtils.getTaskTypeFriendlyName(providerName);
-                    this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${wsFolder.name}`);
+                    await this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${wsFolder.name}`);
 
                     if (!isExternal)
                     {
@@ -250,7 +250,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             dspTaskType = taskTypeUtils.getTaskTypeFriendlyName(taskType);
 
         this.wrapper.log.methodStart(logMsg, 1, logPad);
-        this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${folder.name}`);
+        await this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${folder.name}`);
 
         this.initMaps(taskType, folder.name);
 
@@ -525,7 +525,7 @@ export class TeFileCache implements ITeFileCache, Disposable
         // if (clear !== true && (!teApi.isTests() || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache)))
         {
             const text = this.wrapper.statusBar.get();
-            this.wrapper.statusBar.update("Persisting file cache...");
+            void this.wrapper.statusBar.update("Persisting file cache...");
             this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheTaskFilesMap, this.taskFilesMap);
             this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFilesMap, this.projectFilesMap);
             this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, this.projectToFileCountMap);

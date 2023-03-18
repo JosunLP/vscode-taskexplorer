@@ -253,7 +253,7 @@
             "activitybar": [
                 {
                     "id": "taskExplorerSideBar",
-                    "title": "%view.name%",
+                    "title": "%name%",
                     "contextualTitle": "TaskExplorer",
                     "when": "config.taskexplorer.enableSideBar",
                     "icon": "res/img/logo.svg"
@@ -265,7 +265,7 @@
                 {
                     "type": "tree",
                     "id": "taskexplorer.view.taskTreeExplorer",
-                    "name": "%view.name%",
+                    "name": "%name%",
                     "when": "config.taskexplorer.enableExplorerView",
                     "contextualTitle": "TaskExplorer",
                     "icon": "res/img/logo.svg",

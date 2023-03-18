@@ -1,5 +1,5 @@
 {
-	"view.name": "Task Explorer",
+	"name": "Task Explorer",
 	"description": "Extension to add support for tasks in VSCode.",
 	"displayName": "Task support for VSCode",
 

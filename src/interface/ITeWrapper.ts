@@ -36,6 +36,7 @@ interface ITeKeys
 export interface ITeWrapper
 {
 	init(): Promise<void>;
+	localize(key: string, defaultMessage: string): string;
 
 	dev: boolean;
 	production: boolean;
