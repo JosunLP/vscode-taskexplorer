@@ -41,7 +41,6 @@ import { PythonTaskProvider } from "../task/provider/python";
 import { loadMessageBundle, LocalizeFunc } from "vscode-nls";
 import { TaskCountView } from "../webview/view/taskCountView";
 import { TaskUsageView } from "../webview/view/taskUsageView";
-import { Commands, registerCommand } from "./command/command";
 import { AddToExcludesCommand } from "./command/addToExcludes";
 import { WebpackTaskProvider } from "../task/provider/webpack";
 import { JenkinsTaskProvider } from "../task/provider/jenkins";
@@ -53,6 +52,7 @@ import { DisableTaskTypeCommand } from "./command/disableTaskType";
 import { PowershellTaskProvider } from "../task/provider/powershell";
 import { ParsingReportPage } from "../webview/page/parsingReportPage";
 import { ConfigKeys, Globs, StorageKeys, Strings } from "./constants";
+import { Commands, debounce, registerCommand } from "./command/command";
 import { AppPublisherTaskProvider } from "../task/provider/appPublisher";
 import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import {
@@ -104,6 +104,7 @@ export class TeWrapper implements ITeWrapper, Disposable
     private readonly _providers: IDictionary<ITaskExplorerProvider>;
 	private readonly _onReady: EventEmitter<void>;
     private readonly _onInitialized: EventEmitter<void>;
+    private readonly _onBusyComplete: EventEmitter<void>;
 
 
 	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: ILog)
@@ -116,6 +117,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 		this._onReady = new EventEmitter<void>();
 		this._onInitialized = new EventEmitter<void>();
+		this._onBusyComplete = new EventEmitter<void>();
 
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
@@ -186,6 +188,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._taskCountView,
 			this._taskUsageView,
 			this._onInitialized,
+			this._onBusyComplete,
 			this._licenseManager,
 			this._server,
 			this._welcomePage,
@@ -212,6 +215,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
 		await this.storage.update(StorageKeys.Version, this._version);
+		//
+		// Register busy complete event
+		//
+		this.registerBusyCompleteEvent();
 		//
 		// Register global commands
 		//
@@ -353,11 +360,28 @@ export class TeWrapper implements ITeWrapper, Disposable
 	};
 
 
+	private registerBusyCompleteEvent = () =>
+	{
+		const _event = () => {
+			void debounce("wrapper.busy.event:", () => { if (!this.busy) this._onBusyComplete.fire(); }, 150, this);
+		};
+		this._disposables.push(
+			// this.onReady(() => _event()),
+			this.filecache.onReady(_event),
+			this.fileWatcher.onReady(_event),
+			this.licenseManager.onReady(_event),
+			this.server.onDidRequestComplete(_event),
+			this.treeManager.configWatcher.onReady(_event),
+			this.treeManager.onDidAllTasksChange(_event)
+		);
+	};
+
+
 	private registerGlobalCommands = () =>
 	{
 		this._disposables.push(
 			registerCommand(Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
-			registerCommand(Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/spmeesseman/${this.context.extension.id}/issues`), this)
+			registerCommand(Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/spmeesseman/${this.extensionName}/issues`), this)
 		);
 	};
 
@@ -466,6 +490,10 @@ export class TeWrapper implements ITeWrapper, Disposable
         return this.treeManager.views.taskExplorer.view;
     }
 
+	get extensionName(): string {
+		return this._context.extension.id.replace("spmeesseman.", "");
+	}
+
 	get figures(): typeof figures {
 		return figures;
 	}
@@ -531,6 +559,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get licensePage(): LicensePage {
 		return this._licensePage;
+	}
+
+	get onDidBusyComplete(): Event<void> {
+		return this._onBusyComplete.event;
 	}
 
 	get parsingReportPage(): ParsingReportPage {

@@ -197,19 +197,19 @@ suite("License Manager Tests", () =>
 
 
 	test("License Nag - Purchase License", async function()
-	{
+	{   //
+		// Tests run 2 server requests to simulate a payment process, in succession
+		//
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.nag);
+		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.nag + 250);
 		await setNag();
 		utils.overrideNextShowInfoBox("Buy License", true);
 		void licMgr.checkLicense("");
-		//
-		// 3/14/23 - For now, wait for two events, tests run 2 requests to simulate the payment, in succession
-		//
 		await utils.promiseFromEvent(teWrapper.server.onDidRequestComplete).promise;
+		await utils.sleep(100);
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		expectLicense(true, true, false, false);
-		await utils.sleep(10); // allow license/subscription events to propagate
+		await utils.sleep(25); // allow license/subscription events to propagate
         utils.endRollingCount(this);
 	});
 

@@ -5,7 +5,6 @@ import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
-import { isObject } from "./utils/typeUtils";
 
 const USE_LOCAL_SERVER = false;
 

@@ -151,7 +151,7 @@ export class HomeView extends TeWebviewView<State>
 	protected override registerCommands(): Disposable[]
 	{
 		return [
-			registerCommand(Commands.OpenRepository, () => this.wrapper.utils.openUrl("https://github.com/spmeesseman/vscode-taskexplorer"), this)
+			registerCommand(Commands.OpenRepository, () => this.wrapper.utils.openUrl(`https://github.com/spmeesseman/${this.wrapper.extensionName}`), this)
 		];
 	}
 

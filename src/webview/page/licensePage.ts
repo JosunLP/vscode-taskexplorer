@@ -25,7 +25,6 @@ export class LicensePage extends TeWebviewPanel<State>
 			"licensePage",
 			Commands.ShowLicensePage
 		);
-		this._ignoreTeBusy = true;
 	}
 
 

@@ -49,6 +49,6 @@ export class TaskCountView extends TeWebviewView<State>
 	}
 
 
-	private onTaskCountChanged = (_e: ITeTaskChangeEvent): void => void debounce("taskCount:", this.refresh, 75);
+	private onTaskCountChanged = (_e: ITeTaskChangeEvent): void => void debounce("taskCount:", this.refresh, 75, this);
 
 }

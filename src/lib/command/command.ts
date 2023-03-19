@@ -117,23 +117,23 @@ export function executeCommand<T extends [...unknown[]] = [], U = any>(command: 
 }
 
 const _debounceDict: IDictionary<IDebounceParams> = {};
-interface IDebounceParams { fn: (...args: any[]) => any; start: number; args: any[] }
+interface IDebounceParams { fn: (...args: any[]) => any; args: any[]; scope: any; timer?: NodeJS.Timeout }
 
-export const debounce = <T>(key: string, fn: (...args: any[]) => T, wait: number, ...args: any[]) => new Promise<T|void>(async(resolve) =>
+export const debounce = (key: string, fn: (...args: any[]) => any, wait: number, thisArg: any, ...args: any[]) =>
 {
-	const dKey = key + fn.name;
+	const dKey = `${key}:${fn.name}`;
 	if (!_debounceDict[dKey])
 	{
-		_debounceDict[dKey] = { fn, start: Date.now(), args };
-		setTimeout((p: IDebounceParams) =>
-		{
-			resolve(p.fn.call(this, ...p.args));
-			delete _debounceDict[dKey];
-		},
-		wait, _debounceDict[dKey]);
+		_debounceDict[dKey] = { fn, scope: thisArg, args: [ ...args ] };
 	}
 	else {
-		Object.assign(_debounceDict[dKey], { args });
-		setTimeout(() => resolve(), Date.now() - _debounceDict[dKey].start);
+		clearTimeout(_debounceDict[dKey].timer as NodeJS.Timeout);
+		Object.assign(_debounceDict[dKey], { args: [ ...args ] });
 	}
-});
+	_debounceDict[dKey].timer = setTimeout((p: IDebounceParams) =>
+	{
+		p.fn.call(p.scope, ...p.args);
+		delete _debounceDict[dKey];
+	},
+	wait, _debounceDict[dKey]);
+};

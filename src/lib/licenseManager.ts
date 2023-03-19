@@ -340,7 +340,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			},
 			payer: {
 				payer_id: "PAYPAL_PAYER_ID",
-				email_address: `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`,
+				email_address: "buyer@example.com",
 				name: {
 					given_name: "John",
 					surname: "Doe"
@@ -373,6 +373,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 					id: "3C679366HH908993F",
 					status: "COMPLETED",
 					final_capture: true,
+					create_time: "2018-04-01T21:20:49Z",
+					update_time: "2018-04-01T21:20:49Z",
 					amount: {
 						currency_code: "USD",
 						value: "100.00"
@@ -380,8 +382,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 					seller_protection: {
 						status: "ELIGIBLE",
 						dispute_categories: [
-						"ITEM_NOT_RECEIVED",
-						"UNAUTHORIZED_TRANSACTION"
+							"ITEM_NOT_RECEIVED",
+							"UNAUTHORIZED_TRANSACTION"
 						]
 					},
 					seller_receivable_breakdown: {
@@ -398,13 +400,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 						   value: "17.00"
 						}
 					 },
-					 create_time: "2018-04-01T21:20:49Z",
-					 update_time: "2018-04-01T21:20:49Z",
-					 links: []
+					 links: [{
+						href: "https://api.paypal.com/v2/checkout/orders/5O190127TN364715T",
+						rel: "self",
+						method: "GET"
+					}]
 				}]
 			},
-			links: [
-			{
+			links: [{
 				href: "https://api.paypal.com/v2/checkout/orders/5O190127TN364715T",
 				rel: "self",
 				method: "GET"
@@ -534,7 +537,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		else
 		{
 			this.wrapper.utils.openUrl(
-				`https://license.spmeesseman.com/payment/paynow/${this.wrapper.context.extension.id}/${this.account.id}/v1`
+				`https://license.spmeesseman.com/payment/paynow/${this.wrapper.extensionName}/${this.account.id}/v1`
 			);
 		}
 		this.wrapper.log.methodDone("purchase license", 1, logPad);
