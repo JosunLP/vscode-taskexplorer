@@ -5,6 +5,7 @@ import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
+import { isObject } from "./utils/typeUtils";
 
 const USE_LOCAL_SERVER = false;
 
@@ -162,18 +163,11 @@ export class TeServer implements Disposable
 	};
 
 
-	private logServerResponse = (res: IncomingMessage, jso: any, rspData: string, logPad: string) =>
+	private logServerResponse = (res: IncomingMessage, jso: any, logPad: string) =>
 	{
 		this.log("   response received start", logPad);
 		this.log("      status code", logPad, res.statusCode);
-		this.log("      length", logPad, rspData.length);
-		if (jso) {
-			this.log("      success", logPad, jso.success);
-			this.log("      message", logPad, jso.message);
-		}
-		else {
-			this.log("      body", logPad, rspData);
-		}
+		this.log("      message", logPad, jso.message);
 		this.log("   response received end", logPad);
 		this.log("server request completed", logPad);
 	};
@@ -229,15 +223,19 @@ export class TeServer implements Disposable
 				res.on("end", () =>
 				{
 					this.log("   response stream read: eState: " + errorState);
+					let jso = null;
+					try {
+						jso = JSON.parse(rspData);
+					}
+					catch { /* istanbul ignore next */ jso = { message: rspData }; }
 					try
-					{   if (!res.statusCode || res.statusCode > 299)
+					{
+						this.logServerResponse(res, jso, logPad);
+						if (!res.statusCode || res.statusCode > 299)
 						{
-							this.logServerResponse(res, null, rspData, logPad);
-							reject(<ServerError>{ message: res.statusMessage, status: res.statusCode, body: rspData });
+							reject(<ServerError>{ message: res.statusMessage, status: res.statusCode, body: jso });
 						}
 						else {
-							const jso = JSON.parse(rspData);
-							this.logServerResponse(res, jso, rspData, logPad);
 							resolve(jso as T);
 						}
 					}
@@ -245,10 +243,11 @@ export class TeServer implements Disposable
 						/* istanbul ignore next */
 						this.log(e);
 						/* istanbul ignore next */
-						reject(<ServerError>{ message: e.message, status: res.statusCode, body: rspData });
+						reject(<ServerError>{ message: e.message, status: res.statusCode, body: jso });
 					}
 					finally {
-						queueMicrotask(() => { this._busy = false; this._onRequestComplete.fire(); });
+						this._busy = false;
+						queueMicrotask(() => this._onRequestComplete.fire());
 					}
 				});
 			});
@@ -258,7 +257,8 @@ export class TeServer implements Disposable
 			{   // Not going to fail unless i birth a bug
 				this.onServerError(e, logPad);
 				errorState = true;
-				queueMicrotask(() => { this._busy = false; this._onRequestComplete.fire(); });
+				this._busy = false;
+				queueMicrotask(() => this._onRequestComplete.fire());
 				reject(e);
 			});
 
