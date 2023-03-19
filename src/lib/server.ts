@@ -16,8 +16,8 @@ export interface ServerError
 	success: false;
 }
 
-export type ITeApiEndpoint = "license/validate" | "license/payment" | "login" | "register" | "register/trial/start" | "register/trial/extend";
-
+export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook/vscode-taskexplorer" |
+							 "login" | "register" | "register/trial/start" | "register/trial/extend";
 
 export class TeServer implements Disposable
 {

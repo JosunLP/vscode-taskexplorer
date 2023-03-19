@@ -3,7 +3,7 @@ import { Disposable } from "vscode";
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { debounce } from "../../lib/command/command";
+import { Commands, debounce, registerCommand } from "../../lib/command/command";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 import { ITeTaskChangeEvent, TeSessionChangeEvent } from "../../interface";
 
@@ -150,7 +150,9 @@ export class HomeView extends TeWebviewView<State>
 
 	protected override registerCommands(): Disposable[]
 	{
-		return [];
+		return [
+			registerCommand(Commands.OpenRepository, () => this.wrapper.utils.openUrl("https://github.com/spmeesseman/vscode-taskexplorer"), this)
+		];
 	}
 
 }

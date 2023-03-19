@@ -41,7 +41,6 @@ export const enum Commands
 	Pause = "taskexplorer.pause",
 	PurchaseLicense = "taskexplorer.purchaseLicense",
 	Refresh = "taskexplorer.refresh",
-	Register = "taskexplorer.register",
 	RemoveFromExcludes = "taskexplorer.removeFromExcludes",
 	RemoveHomeView = "taskexplorer.view.home.removeView",
 	RemoveTaskCountView = "taskexplorer.view.taskCount.removeView",

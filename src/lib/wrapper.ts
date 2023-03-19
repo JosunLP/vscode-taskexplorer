@@ -357,8 +357,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	{
 		this._disposables.push(
 			registerCommand(Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
-			registerCommand(Commands.OpenBugReports, () => this.utils.openUrl("https://github.com/spmeesseman/vscode-taskexplorer/issues"), this),
-			registerCommand(Commands.OpenRepository, () => this.utils.openUrl("https://github.com/spmeesseman/vscode-taskexplorer"), this)
+			registerCommand(Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/spmeesseman/${this.context.extension.id}/issues`), this)
 		);
 	};
 

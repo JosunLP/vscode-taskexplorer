@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import { TeWrapper } from "./wrapper";
 import { ITeApiEndpoint } from "./server";
@@ -5,7 +6,7 @@ import { Disposable, Event, EventEmitter, window } from "vscode";
 import { executeCommand, registerCommand, Commands } from "./command/command";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
-	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession
+	TeLicenseState, IDictionary, TeRuntimeEnvironment
 } from "../interface";
 
 
@@ -44,8 +45,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this._onSessionChange,
 			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
 			registerCommand(Commands.PurchaseLicense, this.purchaseLicense, this),
-			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
-			registerCommand(Commands.Register, this.register, this)
+			registerCommand(Commands.ExtendTrial, this.extendTrial, this)
 		);
     }
 
@@ -421,17 +421,106 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			// the new license state
 			//
 			this.wrapper.statusBar.update("Sending payment request");
-			const ep: ITeApiEndpoint = "license/payment",
+			const ep: ITeApiEndpoint = "payment/paypal/hook/vscode-taskexplorer",
 				  token = this._account.session.token,
-				  key = this._account.license.key,
 				  email = `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`,
 				  firstName = "Scott",
 				  lastName = "Meesseman";
 			try
 			{
-				await this.wrapper.server.request<ITeAccount>(ep, token, logPad, {
-					testsPaid: true, firstName, lastName, email, key
+				await this.wrapper.server.request<any>(ep, token, logPad, {
+					id: "5O190127TN364715T",
+					create_time: "2018-04-16T21:21:49.000Z",
+					event_type: "CHECKOUT.ORDER.COMPLETED",
+					resource_type: "checkout-order",
+					resource_version: "2.0",
+					summary: "Checkout Order Completed",
+					zts: 1494957670,
+					event_version: "1.0",
+					resource: {
+						id: "5O190127TN364715T",
+						intent: "CAPTURE",
+						status: "COMPLETED",
+						create_time: "2018-04-01T21:18:49Z",
+						update_time: "2018-04-01T21:20:49Z",
+						gross_amount: {
+							value: "19.00",
+							currency_code: "USD"
+						},
+						payer: {
+							payer_id: "PAYPAL_PAYER_ID",
+							email_address: email,
+							name: {
+								given_name: firstName,
+								surname: lastName
+							}
+						},
+						purchase_units: [{
+							reference_id: "5",
+							amount: {
+								currency_code: "USD",
+								value: "19.00"
+							 },
+							payee: {
+								email_address: email
+							}
+						}],
+						shipping: {
+							method: "United States Postal Service",
+							address: {
+							   address_line_1: "2211 N First Street",
+							   address_line_2: "Building 17",
+							   admin_area_2: "San Jose",
+							   admin_area_1: "CA",
+							   postal_code: "95131",
+							   country_code: "US"
+							}
+						},
+						payments: {
+							captures: [
+							{
+								id: "3C679366HH908993F",
+								status: "COMPLETED",
+								final_capture: true,
+								amount: {
+									currency_code: "USD",
+									value: "100.00"
+								},
+								seller_protection: {
+									status: "ELIGIBLE",
+									dispute_categories: [
+									"ITEM_NOT_RECEIVED",
+									"UNAUTHORIZED_TRANSACTION"
+									]
+								},
+								seller_receivable_breakdown: {
+									gross_amount: {
+									   currency_code: "USD",
+									   value: "19.00"
+									},
+									paypal_fee: {
+									   currency_code: "USD",
+									   value: "2.00"
+									},
+									net_amount: {
+									   currency_code: "USD",
+									   value: "17.00"
+									}
+								 },
+								 create_time: "2018-04-01T21:20:49Z",
+								 update_time: "2018-04-01T21:20:49Z",
+								 links: []
+							}]
+						},
+						links: [
+						{
+							href: "https://api.paypal.com/v2/checkout/orders/5O190127TN364715T",
+							rel: "self",
+							method: "GET"
+						}]
+					}
 				});
+				await this.wrapper.utils.sleep(500);
 				await this.validateLicense(this._account.license.key, logPad + "   ");
 			}
 			catch (e) {
@@ -443,26 +532,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			}
 		}
 		else
-		{   //
-			// TODO
-			// Use Paypal Payments REST API for payment.
-			// PayPal API will send notification to /api/license/payment/v1
-			// Use validateLicense() in an interval-timer to check on payment status after payment is made
-			//
-			window.showInformationMessage("Not implemented yet");
+		{
+			this.wrapper.utils.openUrl(
+				`https://license.spmeesseman.com/payment/paynow/${this.wrapper.context.extension.id}/${this.account.id}/v1`
+			);
 		}
 		this.wrapper.log.methodDone("purchase license", 1, logPad);
-	};
-
-
-	private register = async(): Promise<void> =>
-	{
-		await this.wrapper.utils.sleep(1);
-		//
-		// TODO - Account registration
-		//        Need webview app to input first/last name, email address
-		//
-		// window.showInformationMessage("Not implemented yet");
 	};
 
 

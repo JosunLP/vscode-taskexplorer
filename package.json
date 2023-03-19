@@ -351,11 +351,6 @@
                 "enablement": "false"
             },
             {
-                "command": "taskexplorer.register",
-                "title": "%command.register%",
-                "when": "taskexplorer:enabled"
-            },
-            {
                 "command": "taskexplorer.purchaseLicense",
                 "title": "%command.purchaseLicense%",
                 "when": "taskexplorer:enabled"
@@ -377,7 +372,7 @@
             {
                 "command": "taskexplorer.openRepository",
                 "title": "%command.openRepository%",
-                "when": "taskexplorer:enabled",
+                "when": "taskexplorer:enabled && config.taskexplorer.enableSideBar",
                 "icon": {
                     "light": "res/img/light/github.svg",
                     "dark": "res/img/dark/github.svg"
@@ -691,10 +686,6 @@
                     "when": "taskexplorer:enabled"
                 },
                 {
-                    "command": "taskexplorer.openRepository",
-                    "when": "taskexplorer:enabled"
-                },
-                {
                     "command": "taskexplorer.refresh",
                     "when": "taskexplorer:enabled"
                 },
@@ -713,6 +704,10 @@
                 {
                     "command": "taskexplorer.clearTaskStats",
                     "when": "taskexplorer:enabled"
+                },
+                {
+                    "command": "taskexplorer.openRepository",
+                    "when": "false"
                 },
                 {
                     "command": "taskexplorer.extendTrial",
