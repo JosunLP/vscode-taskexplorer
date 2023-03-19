@@ -309,14 +309,14 @@ export class TeWrapper implements ITeWrapper, Disposable
 		/* istanbul ignore else */
 		if (this.tests || /* istanbul ignore next */!rootFolderChanged)
 		{
-			await this._statusBar.runWithProgress<number>(() => this.filecache.rebuildCache("   "));
+			await this._statusBar.runWithProgress<number>(() => this.fileCache.rebuildCache("   "));
 		}     //
 		else // See comments/notes above
 		{   //
 			const enablePersistentFileCaching = this.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
 			this._treeManager.configWatcher.enableConfigWatcher(false);
 			await this.config.update(ConfigKeys.EnablePersistenFileCache, true);
-			await this._statusBar.runWithProgress<number>(() => this.filecache.rebuildCache("   "));
+			await this._statusBar.runWithProgress<number>(() => this.fileCache.rebuildCache("   "));
 			await this.config.update(ConfigKeys.EnablePersistenFileCache, enablePersistentFileCaching);
 			this._treeManager.configWatcher.enableConfigWatcher(true);
 		}
@@ -367,7 +367,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		};
 		this._disposables.push(
 			// this.onReady(() => _event()),
-			this.filecache.onReady(_event),
+			this.fileCache.onReady(_event),
 			this.fileWatcher.onReady(_event),
 			this.licenseManager.onReady(_event),
 			this.server.onDidRequestComplete(_event),
@@ -502,7 +502,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return figures;
 	}
 
-	get filecache(): TeFileCache {
+	get fileCache(): TeFileCache {
 		return this._fileCache;
 	}
 

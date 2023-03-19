@@ -87,7 +87,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
     {
         const allTasks: Task[] = [],
               visitedFiles: string[] = [],
-              paths = this.wrapper.filecache.getTaskFiles(this.providerName),
+              paths = this.wrapper.fileCache.getTaskFiles(this.providerName),
               enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName);
 
         this.wrapper.log.methodStart(`read ${this.providerName} tasks`, 2, logPad, false, [[ "enabled", enabled ]], this.logQueueId);

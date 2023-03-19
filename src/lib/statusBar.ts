@@ -40,7 +40,7 @@ export class TeStatusBar implements ITeStatusBar, Disposable
     private hide = () => { if (!this._hidden) { this._statusBarItem.text = ""; this._statusBarItem.hide(); this._hidden = true; }};
 
 
-    // private onCancel = () => void this.wrapper.filecache.cancelBuildCache();
+    // private onCancel = () => void this.wrapper.fileCache.cancelBuildCache();
 
 
     private run = async <T>(progress: TeProgressCallback, token: CancellationToken, task: (progress: TeProgressCallback, token: CancellationToken) => Thenable<T>) =>

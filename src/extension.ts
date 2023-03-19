@@ -79,13 +79,13 @@ export async function deactivate()
     // reload is much quicker, especially in large workspaces.
     //
     /* istanbul ignore next */
-    if (!teWrapper.filecache.isBusy && !teWrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache))
+    if (!teWrapper.fileCache.isBusy && !teWrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache))
     {
         const now = Date.now(),
               lastWsRootPathChange = teWrapper.storage.get2Sync<number>("lastWsRootPathChange", 0);
         if (now < lastWsRootPathChange + 3000)
         {
-            teWrapper.filecache.persistCache(false, true);
+            teWrapper.fileCache.persistCache(false, true);
         }
     }
     teWrapper.storage.update2Sync("lastDeactivated", Date.now());

@@ -56,7 +56,7 @@ export interface ITeWrapper
 	fileWatcher: ITeFileWatcher;
 	figures: ITeFigures;
 	homeView: ITeWebview;
-	filecache: ITeFileCache;
+	fileCache: ITeFileCache;
 	fs: ITeFilesystem;
 	keys: ITeKeys;
 	licenseManager: ITeLicenseManager;

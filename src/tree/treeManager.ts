@@ -380,7 +380,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             this.wrapper.log.write("   handling 'rebuild cache' event", 1, logPad + "   ");
             this.setMessage(Strings.ScanningTaskFiles);
-            await this.wrapper.filecache.rebuildCache(logPad + "   ");
+            await this.wrapper.fileCache.rebuildCache(logPad + "   ");
             this.wrapper.log.write("   handling 'rebuild cache' event complete", 1, logPad + "   ");
         }
         this.wrapper.log.write("   handling 'invalidate tasks cache' event", 1, logPad);

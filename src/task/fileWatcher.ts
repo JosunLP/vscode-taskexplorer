@@ -426,11 +426,11 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         if (!firstRun && workspace.workspaceFolders)
         {
             if (enabled !== false) {
-                const numFilesFound  = await this.wrapper.filecache.buildTaskTypeCache(taskType, undefined, true, logPad + "   ");
+                const numFilesFound  = await this.wrapper.fileCache.buildTaskTypeCache(taskType, undefined, true, logPad + "   ");
                 this.wrapper.log.write(`   ${numFilesFound} files were added to the file cache`, 1, logPad);
             }
             else {
-                const numFilesRemoved = this.wrapper.filecache.removeTaskTypeFromCache(taskType, logPad + "   ");
+                const numFilesRemoved = this.wrapper.fileCache.removeTaskTypeFromCache(taskType, logPad + "   ");
                 this.wrapper.log.write(`   ${numFilesRemoved} files were removed from file cache`, 1, logPad);
             }
         }
@@ -473,7 +473,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         try
         {   this.wrapper.log.methodStart("[event] directory 'create'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
-            const numFilesFound = await this.wrapper.filecache.addFolder(uri, logPad + "   ");
+            const numFilesFound = await this.wrapper.fileCache.addFolder(uri, logPad + "   ");
             if (numFilesFound > 0) {
                 await executeCommand(Commands.Refresh, undefined, uri, logPad + "   ");
             }
@@ -488,7 +488,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         try
         {   this.wrapper.log.methodStart("[event] directory 'delete'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
-            const numFilesRemoved = this.wrapper.filecache.removeFolderFromCache(uri, logPad + "   ");
+            const numFilesRemoved = this.wrapper.fileCache.removeFolderFromCache(uri, logPad + "   ");
             if (numFilesRemoved > 0) {
                 await executeCommand(Commands.Refresh, undefined, uri, logPad + "   ");
             }
@@ -515,7 +515,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         try
         {   this.wrapper.log.methodStart("[event] file 'create'", 1, logPad, true, [[ "file", uri.fsPath ]]);
-            this.wrapper.filecache.addFileToCache(taskType, uri, logPad + "   ");
+            this.wrapper.fileCache.addFileToCache(taskType, uri, logPad + "   ");
             await executeCommand(Commands.Refresh, taskType, uri, logPad + "   ");
             this.wrapper.log.methodDone("[event] file 'create'", 1, logPad);
         }
@@ -528,7 +528,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         try
         {   this.wrapper.log.methodStart("[event] file 'delete'", 1, logPad, true, [[ "file", uri.fsPath ]]);
-            this.wrapper.filecache.removeFileFromCache(taskType, uri, logPad + "   ");
+            this.wrapper.fileCache.removeFileFromCache(taskType, uri, logPad + "   ");
             await executeCommand(Commands.Refresh, taskType, uri, logPad + "   ");
             this.wrapper.log.methodDone("[event] file 'delete'", 1, logPad);
         }
@@ -543,8 +543,8 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         {   this.wrapper.log.methodStart("workspace folder 'add/remove'", 1, logPad, true, [
                 [ "# added", e.added.length ], [ "# removed", e.removed.length ]
             ]);
-            const numFilesFound = await this.wrapper.filecache.addWsFolders(e.added, logPad + "   "),
-                numFilesRemoved = this.wrapper.filecache.removeWsFolders(e.removed, logPad + "   ");
+            const numFilesFound = await this.wrapper.fileCache.addWsFolders(e.added, logPad + "   "),
+                numFilesRemoved = this.wrapper.fileCache.removeWsFolders(e.removed, logPad + "   ");
             this.createDirWatcher();
             if (numFilesFound > 0 || numFilesRemoved > 0)
             {

@@ -29,7 +29,7 @@ export const createTaskCountTable = async(wrapper: TeWrapper, project?: string, 
     let tableTemplate = getHtml();
     getTaskTypes().forEach((tcKey) =>
     {
-        const taskFiles = wrapper.filecache.getTaskFiles(tcKey) || [];
+        const taskFiles = wrapper.fileCache.getTaskFiles(tcKey) || [];
         fileCount += taskFiles.length;
         tableTemplate = tableTemplate.replace(new RegExp(`#{taskCounts.${tcKey}}`, "g"), (taskCounts[tcKey] || 0).toString());
     });
