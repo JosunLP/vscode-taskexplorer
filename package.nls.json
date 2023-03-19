@@ -151,6 +151,8 @@
 	"command.extendTrial" : "Task Explorer: Extend Trial",
 	"command.openBugReports": "Task Explorer: Open Github Bug Reports Page",
 	"command.openRepository": "Open Github Repository Page",
+	"command.register": "Task Explorer: Register",
+	"command.refreshSession": "Task Explorer: Refresh Session",
 	"command.removeFromExcludes": "Task Explorer: Remove from Excludes List",
 	"command.setPinned": "Set task pinned state for current list",
 	"command.showOutput": "Task Explorer: Show Log Output Window",

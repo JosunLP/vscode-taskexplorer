@@ -44,8 +44,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this._onReady,
 			this._onSessionChange,
 			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
+			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
 			registerCommand(Commands.PurchaseLicense, this.purchaseLicense, this),
-			registerCommand(Commands.ExtendTrial, this.extendTrial, this)
+			registerCommand(Commands.RefreshSession, () => this.validateLicense(this._account.license.key, ""), this),
+			registerCommand(Commands.Register, this.register, this)
 		);
     }
 
@@ -541,6 +543,17 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			);
 		}
 		this.wrapper.log.methodDone("purchase license", 1, logPad);
+	};
+
+
+	private register = async(): Promise<void> =>
+	{
+		await this.wrapper.utils.sleep(1);
+		//
+		// TODO - Account registration
+		//        Need webview app to input first/last name, email address
+		//
+		// window.showInformationMessage("Not implemented yet");
 	};
 
 

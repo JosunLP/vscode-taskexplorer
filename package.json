@@ -351,6 +351,20 @@
                 "enablement": "false"
             },
             {
+                "command": "taskexplorer.refreshSession",
+                "title": "%command.refreshSession%",
+                "when": "taskexplorer:enabled",
+                "icon": {
+                    "light": "res/img/light/refresh.svg",
+                    "dark": "res/img/dark/refresh.svg"
+                }
+            },
+            {
+                "command": "taskexplorer.register",
+                "title": "%command.register%",
+                "when": "taskexplorer:enabled"
+            },
+            {
                 "command": "taskexplorer.purchaseLicense",
                 "title": "%command.purchaseLicense%",
                 "when": "taskexplorer:enabled"
@@ -702,6 +716,14 @@
                     "when": "taskexplorer:enabled"
                 },
                 {
+                    "command": "taskexplorer.refreshSession",
+                    "when": "taskexplorer:enabled"
+                },
+                {
+                    "command": "taskexplorer.register",
+                    "when": "taskexplorer:enabled"
+                },
+                {
                     "command": "taskexplorer.clearTaskStats",
                     "when": "taskexplorer:enabled"
                 },
@@ -812,6 +834,11 @@
                 {
                     "command": "taskexplorer.view.taskMonitor.show",
                     "when": "view =~ /^taskexplorer.view.taskTree/",
+                    "group": "navigation"
+                },
+                {
+                    "command": "taskexplorer.refreshSession",
+                    "when": "view == taskexplorer.view.home",
                     "group": "navigation"
                 },
                 {

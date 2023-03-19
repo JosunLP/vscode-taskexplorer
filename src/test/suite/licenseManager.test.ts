@@ -317,6 +317,17 @@ suite("License Manager Tests", () =>
 	});
 
 
+	test("Register (Not Implemented Yet)", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		//
+		// TODO - Register commad is not implemented yet, and may not be used
+		//
+		await executeTeCommand("register");
+        utils.endRollingCount(this);
+	});
+
+
 	test("License Nag in Trial Mode - Extend Trial", async function()
 	{
         if (utils.exitRollingCount(this)) return;

@@ -363,7 +363,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private registerBusyCompleteEvent = () =>
 	{
 		const _event = () => {
-			void debounce("wrapper.busy.event:", () => { if (!this.busy) this._onBusyComplete.fire(); }, 150, this);
+			debounce("wrapper.event.busy:", () => { if (!this.busy) this._onBusyComplete.fire(); }, 150, this);
 		};
 		this._disposables.push(
 			// this.onReady(() => _event()),
