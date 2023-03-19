@@ -19,6 +19,7 @@ export interface BaseState
 	isLicensed: boolean;
 	isRegistered: boolean;
 	isTrial: boolean;
+	isTrialExtended: boolean;
 	account: ITeAccount;
 	nonce: string;
 	webroot: string;

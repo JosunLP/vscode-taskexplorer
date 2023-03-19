@@ -29,7 +29,7 @@ export class LicensePage extends TeWebviewPanel<State>
 	}
 
 
-	private getExtraContent = async (/* newKey?: string */) =>
+	private getExtraContent = async () =>
 	{
 		const licMgr = this.wrapper.licenseManager;
 		const key = licMgr.account.license.key;
@@ -46,42 +46,25 @@ export class LicensePage extends TeWebviewPanel<State>
 		</td></tr>
 	</table>
 	<table class="margin-top-20">
-		<tr><td>You can view a detailed parsing report using the "<i>Task Explorer: View Parsing Report</i>"
+		<tr><td>You can view a detailed parsing report using the "<i>${this.wrapper.extensionName}: View Parsing Report</i>"
 		command in the Explorer context menu for any project.  It can alternatively be ran from the
 		command pallette for "all projects".
 		<tr><td height="20"></td></tr>
 	</table>
 	` : `
 	<table class="margin-top-15">
-		<tr><td class="content-subsection-header te-licmgr-subsection-header">License Key: &nbsp;${key}</td></tr>
+		<tr><td class="content-subsection-header te-licmgr-subsection-header">${!licMgr.isTrial ? "License" : "Trial"} Key: &nbsp;${key}</td></tr>
 		<tr><td>
-			${!licMgr.isTrial ? "Thank you for supporting Task Explorer!" : "Purchase your license today to support Task Explorer development!"}
+			${!licMgr.isTrial ? "Thank you for supporting Task Explorer!" : `Purchase a license today to support ${this.wrapper.extensionName} development!`}
 		</td></tr>
 	</table>
 	<table class="margin-top-20">
-		<tr><td>You can view a detailed parsing report using the "<i>Task Explorer: View Parsing Report</i>"
+		<tr><td>You can view a detailed parsing report using the "<i>${this.wrapper.extensionName}: View Parsing Report</i>"
 		command in the Explorer context menu for any project.  It can alternatively be ran from the
 		command pallette for "all projects" to see how many tasks the extension has parsed.
 		<tr><td height="20"></td></tr>
 	</table>
-	`); /* : `
-	<table class="margin-top-15">
-		<tr><td class="content-subsection-header">
-			30-Day License Key: &nbsp;${key}
-		</td></tr>
-		<tr><td>
-			This license key is valid for30 days from the time it was issued.  Please show your support for
-			the extension and purchase the license <a href="https://license.spmeesseman.com/purchase?key=${encodeURIComponent(`${newKey}&${this.wrapper.server.apiClientId}`)}">here</a>.
-		</td></tr>
-	</table>
-	<table class="margin-top-20">
-		<tr><td>You can view a detailed parsing report using the "<i>Task Explorer: View Parsing Report</i>"
-		command in the Explorer context menu for any project.  It can alternatively be ran from the
-		command pallette for "all projects" to see how many tasks the extension has parsed.
-		<tr><td height="20"></td></tr>
-	</table>
-	`;*/
-
+	`);
 		return `<tr><td>${details}</td></tr>`;
 	};
 
@@ -99,11 +82,10 @@ export class LicensePage extends TeWebviewPanel<State>
 	};
 
 
-	protected override onHtmlPreview = async (html: string, ..._args: any[]) =>
+	protected override onHtmlPreview = async (html: string) =>
 	{
-		// const newKey = args[0] as string | undefined;
 		html = await createTaskCountTable(this.wrapper, undefined, html);
-		let infoContent = await this.getExtraContent(/* newKey */);
+		let infoContent = await this.getExtraContent();
 		html = html.replace("#{licensePageBodyTop}", infoContent);
 		infoContent = this.getExtraContent2();
 		html = html.replace("#{licensePageBodyBottom}", infoContent);

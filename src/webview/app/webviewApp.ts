@@ -85,33 +85,36 @@ export abstract class TeWebviewApp<State = undefined>
 		let btn = document.getElementById("btnPurchaseLicense");
 		if (btn)
 		{
-			const isLicensed = (this.state as any).isLicensed;
-			(btn.parentNode as HTMLElement).hidden = isLicensed;
-			(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
+			const isTrial = (this.state as any).isTrial,
+				  isTrialExt = (this.state as any).isTrialExtended,
+				  isLicensed = (this.state as any).isLicensed,
+				  isRegistered = (this.state as any).isRegistered;
+			(btn.parentNode as HTMLElement).hidden = isLicensed && !isTrial;
+			(btn.parentNode as HTMLElement).style.display = isLicensed && !isTrial ? "none" : "-webkit-inline-flex";
 			btn = document.getElementById("btnExtendTrial");
 			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = isLicensed;
-				(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
+				(btn.parentNode as HTMLElement).hidden = !isTrial || isTrialExt;
+				(btn.parentNode as HTMLElement).style.display = !isTrial || isTrialExt ? "none" : "-webkit-inline-flex";
 			}
 			btn = document.getElementById("btnRegister");
 			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = isLicensed;
-				(btn.parentNode as HTMLElement).style.display = isLicensed ? "none" : "-webkit-inline-flex";
-			}
-			btn = document.getElementById("btnViewReleaseNotes");
-			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = !isLicensed;
-				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
+				(btn.parentNode as HTMLElement).hidden = isRegistered;
+				(btn.parentNode as HTMLElement).style.display = isRegistered ? "none" : "-webkit-inline-flex";
 			}
 			btn = document.getElementById("btnTaskMonitor");
 			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = !isLicensed;
-				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
+				(btn.parentNode as HTMLElement).hidden = !isLicensed || isTrial;
+				(btn.parentNode as HTMLElement).style.display = !isLicensed || isTrial ? "none" : "-webkit-inline-flex";
 			}
 			btn = document.getElementById("btnViewLicense");
 			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = !isLicensed;
-				(btn.parentNode as HTMLElement).style.display = isLicensed ? "-webkit-inline-flex" : "none";
+				(btn.parentNode as HTMLElement).hidden = !isLicensed || isTrial ;
+				(btn.parentNode as HTMLElement).style.display = !isLicensed || isTrial  ? "none" : "-webkit-inline-flex";
+			}
+			btn = document.getElementById("btnViewReleaseNotes");
+			if (btn) {
+				(btn.parentNode as HTMLElement).hidden = !isLicensed || isTrial ;
+				(btn.parentNode as HTMLElement).style.display = !isLicensed || isTrial  ? "none" : "-webkit-inline-flex";
 			}
 		}
 	}
