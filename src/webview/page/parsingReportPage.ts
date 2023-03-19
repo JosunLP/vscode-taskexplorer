@@ -4,7 +4,8 @@ import { State } from "../common/ipc";
 import { dirname, relative } from "path";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { Commands } from "../../lib/command/command";
+import { ITeTaskChangeEvent } from "../../interface";
+import { Commands, debounce } from "../../lib/command/command";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
 import { createTaskCountTable } from "../common/taskCountTable";
@@ -113,5 +114,16 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 
 		return `<tr><td><table class="margin-top-15"><tr><td>${summary}</td></tr></table><table><tr><td>${details}</td></tr></table></td></tr>`;
 	};
+
+
+	protected override onInitializing()
+	{
+		return  [
+			this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged, this)
+		];
+	}
+
+
+	private onTasksChanged = (_e: ITeTaskChangeEvent): void => debounce("parsigReport.event.onTasksChanged", this.refresh, 75, this);
 
 }

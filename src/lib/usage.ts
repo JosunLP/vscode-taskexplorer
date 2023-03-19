@@ -353,8 +353,13 @@ export class Usage implements ITeUsage, Disposable
 
         //
         // Fire usage change event
+        // If the key is the task usage key `task:`, then skip firing the event, as trackTask() will
+        // for the event once finished recording stats
         //
-		this._onDidChange.fire({ key, usage });
+        if (key !== this._taskUsageKey) {
+		    this._onDidChange.fire({ key, usage });
+        }
+
 		return usage;
 	}
 
@@ -442,6 +447,7 @@ export class Usage implements ITeUsage, Disposable
         //
         // Maybe notify any listeners that the `famous tasks` list has changed
         //
+        this._onDidChange.fire({ key: this._taskUsageKey, usage });
         if (famousChanged) {
             this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ listType: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
         }

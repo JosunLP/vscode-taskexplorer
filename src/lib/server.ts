@@ -7,6 +7,7 @@ import { figures } from "./utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
 
 const USE_LOCAL_SERVER = false;
+const SPM_API_VERSION = 1;
 
 export interface ServerError
 {
@@ -16,8 +17,8 @@ export interface ServerError
 	success: false;
 }
 
-export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook/vscode-taskexplorer" |
-							 "login" | "register" | "register/trial/start" | "register/trial/extend";
+export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook" |
+							 "register" | "register/trial/start" | "register/trial/extend";
 
 export class TeServer implements Disposable
 {
@@ -81,16 +82,16 @@ export class TeServer implements Disposable
 		}
 	};
 
-	private get authService()
+	private get appName()
 	{
 		/* istanbul ignore next */
 		switch (this.wrapper.env)
 		{
 			case "dev":
 			case "tests":
-				return USE_LOCAL_SERVER ? "vscode-taskexplorer" : "vscode-taskexplorer-prod";
+				return USE_LOCAL_SERVER ? this.wrapper.extensionId : `vscode-taskexplorer-${this.wrapper.env}`;
 			case "production":
-				return "vscode-taskexplorer-prod";
+				return this.wrapper.extensionId;
 		}
 	};
 
@@ -99,7 +100,7 @@ export class TeServer implements Disposable
     }
 
 
-	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/v1`;
+	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/${this.appName}/v${SPM_API_VERSION}`;
 
 
 	private getServerOptions = (apiEndpoint: ITeApiEndpoint, token?: string) =>
@@ -263,7 +264,7 @@ export class TeServer implements Disposable
 
 			const payload = JSON.stringify(
 			{
-				...{ appName: this.authService, machineId: env.machineId, dev: this.wrapper.env === "dev", tests: this.wrapper.tests },
+				...{ machineId: env.machineId, dev: this.wrapper.env === "dev", tests: this.wrapper.tests },
 				...params
 			});
 			// this.log("   payload", logPad + "   ", payload); // For testing only, logs machineId to user console

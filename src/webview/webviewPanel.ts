@@ -28,12 +28,12 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		fileName: string,
 		title: string,
 		private readonly iconPath: string,
-		public readonly id: `taskexplorer.view.${WebviewIds}`,
+		id: `taskexplorer.view.${WebviewIds}`,
 		private readonly contextKeyPrefix: `${ContextKeys.WebviewPrefix}${WebviewIds}`,
 		private readonly trackingFeature: string,
 		showCommand?: Commands)
 	{
-		super(wrapper, title, fileName);
+		super(wrapper, id, title, fileName);
 		if (showCommand){
 			this.disposables.push(
 				registerCommand(showCommand, this.onShowCommand, this),

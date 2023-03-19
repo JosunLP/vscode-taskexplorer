@@ -25,7 +25,7 @@ export class TeStatusBar implements ITeStatusBar, Disposable
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        this._extName = this.wrapper.localize("taskexplorer.name", "Task Explorer");
+        this._extName = this.wrapper.extensionName;
         this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this._statusBarItem.tooltip = this._extName + " Status";
     }

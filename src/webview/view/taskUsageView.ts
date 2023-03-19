@@ -4,7 +4,7 @@ import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
 import { ConfigurationChangeEvent } from "vscode";
 import { debounce } from "../../lib/command/command";
-import { StorageChangeEvent } from "../../interface";
+import { ITeUsageChangeEvent, StorageChangeEvent } from "../../interface";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 
@@ -42,7 +42,7 @@ export class TaskUsageView extends TeWebviewView<State>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
 		{
-			void debounce<Promise<void>>("taskUsageCfg:", this.refresh, 75, false, false);
+			debounce("taskUsageView.event.onConfigChanged", this.refresh, 75, false, false);
 		}
 		super.onConfigChanged(e);
 	}
@@ -72,16 +72,16 @@ export class TaskUsageView extends TeWebviewView<State>
 	protected override onInitializing()
 	{
 		return  [
-			this.wrapper.storage.onDidChange(this.onStorageChanged, this)
+			this.wrapper.usage.onDidChange(this.onUsageChanged, this)
 		];
 	}
 
 
-	private onStorageChanged(e: StorageChangeEvent): void
+	private onUsageChanged(e: ITeUsageChangeEvent | undefined): void
 	{
-		if (e.key === this.wrapper.keys.Storage.Usage || e.key === this.wrapper.keys.Storage.TaskUsage)
+		if (e && e.key === "task:")
 		{
-			this.wrapper.log.methodOnce("task usage view event", "onStorageChanged", 2, this.wrapper.log.getLogPad());
+			this.wrapper.log.methodOnce("task usage view event", "onUsageChanged", 2, this.wrapper.log.getLogPad());
 			void this.refresh(false, false);
 		}
 	}

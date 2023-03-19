@@ -53,11 +53,9 @@ export class LicensePage extends TeWebviewPanel<State>
 	</table>
 	` : `
 	<table class="margin-top-15">
-		<tr><td class="content-subsection-header">
-			License Key: &nbsp;${key}
-		</td></tr>
+		<tr><td class="content-subsection-header te-licmgr-subsection-header">License Key: &nbsp;${key}</td></tr>
 		<tr><td>
-			Thank you for your support!
+			${!licMgr.isTrial ? "Thank you for supporting Task Explorer!" : "Purchase your license today to support Task Explorer development!"}
 		</td></tr>
 	</table>
 	<table class="margin-top-20">

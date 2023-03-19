@@ -159,6 +159,7 @@ const registerLog = async(context: ExtensionContext, config: IConfiguration, tes
 
     //
     // Set up a log in the Output window (even if enableOutputWindow is off)
+    // TODO - Localize text "Task Explorer" with wrapper.extensionName
     //
     logControl.logOutputChannel = window.createOutputChannel("Task Explorer");
 

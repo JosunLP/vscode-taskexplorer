@@ -117,7 +117,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			const account = await this.wrapper.server.request<ITeAccount>(ep, undefined, logPad + "   ", {});
 			await this.saveAccount(account, logPad + "   ");
-			window.showInformationMessage("Welcome to Task Explorer 3.0.  Your 30 day trial has been activated.", "More Info")
+			window.showInformationMessage(`Welcome to ${this.wrapper.extensionName} 3.0.  Your 30 day trial has been activated.`, "More Info")
 			.then((action) =>
 			{
 				if (action === "More Info") {
@@ -520,7 +520,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			// the new license state
 			//
 			this.wrapper.statusBar.update("Sending payment request");
-			const ep: ITeApiEndpoint = "payment/paypal/hook/vscode-taskexplorer",
+			const ep: ITeApiEndpoint = "payment/paypal/hook",
 				  token = this._account.session.token;
 			try
 			{
@@ -539,7 +539,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		else
 		{
 			this.wrapper.utils.openUrl(
-				`https://license.spmeesseman.com/payment/paynow/${this.wrapper.extensionName}/${this.account.id}/v1`
+				`https://license.spmeesseman.com/payment/paynow/${this.wrapper.extensionId}/${this.account.id}/v1`
 			);
 		}
 		this.wrapper.log.methodDone("purchase license", 1, logPad);

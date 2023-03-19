@@ -126,7 +126,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
 		{
-			void debounce<Promise<void>>("taskDetailsCfg:", this.refresh, 75, false, false);
+			debounce("taskDetailsCfg:", this.refresh, 75, false, false);
 		}
 		super.onConfigChanged(e);
 	}

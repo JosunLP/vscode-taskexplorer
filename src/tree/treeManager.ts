@@ -52,8 +52,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 		this._configWatcher = new TeTreeConfigWatcher(wrapper);
 
         this._views = {
-            taskExplorer: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer"),
-            taskExplorerSideBar: new TeTreeView(wrapper, this, "Task Explorer", "", "taskTreeSideBar", "taskexplorer:treeView:taskTreeSideBar")
+            taskExplorer: new TeTreeView(wrapper, this, wrapper.extensionName, "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer"),
+            taskExplorerSideBar: new TeTreeView(wrapper, this, wrapper.extensionName, "", "taskTreeSideBar", "taskexplorer:treeView:taskTreeSideBar")
         };
 
         this.disposables.push(

@@ -21,6 +21,7 @@ import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
 	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcUpdateConfigCommand, IpcLicenseChangedMsg, IpcEnabledChangedMsg
 } from "./common/ipc";
+import { WebviewIds, WebviewViewIds } from "../lib/context";
 
 
 export interface FontAwesomeClass
@@ -73,7 +74,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	private readonly _onMessageReceived: EventEmitter<string>;
 
 
-    constructor(protected readonly wrapper: TeWrapper, title: string, protected readonly fileName: string)
+    constructor(protected readonly wrapper: TeWrapper, protected id: `taskexplorer.view.${WebviewViewIds|WebviewIds}`, title: string, protected readonly fileName: string)
     {
 		this._title = title;
 		this._ipcSequence = 0;
@@ -153,7 +154,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 		const repl = (h: string) =>
 		{
-			h = h.replace(/#{(head|body|endOfBody|cspSource|cspNonce|title|version|webroot)}/g, (_s: string, token: string) =>
+			h = h.replace(/#{(head|body|endOfBody|cspSource|cspNonce|title|version|webroot|extensionName)}/g, (_s: string, token: string) =>
 			{
 				switch (token)
 				{
@@ -169,6 +170,8 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 						return this._cspNonce;
 					case "title":
 						return this.title;
+					case "extensionName":
+						return this.wrapper.extensionName;
 					case "version":
 						return this.wrapper.version;
 					default: // case "webroot":
@@ -386,7 +389,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			this._skippedChangeEvent = !!this._view && this._isReady && !this.visible;
 			return;
 		}
-		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodStart(`${this.id}:refresh`, 2, this.wrapper.log.getLogPad());
 		const skippedChangeEvent = this._skippedChangeEvent;
 		this._isReady = this._skippedChangeEvent = false;
 		if (visibilityChanged && !skippedChangeEvent)
@@ -407,7 +410,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				this._view.webview.html = html;
 			}
 		}
-		this.wrapper.log.methodStart("WebviewBase: refresh", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodDone(`${this.id}:refresh`, 2, this.wrapper.log.getLogPad());
 	}
 
 
