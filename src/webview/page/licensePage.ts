@@ -2,8 +2,9 @@
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { Commands } from "../../lib/command/command";
+import { ITeTaskChangeEvent } from "../../interface";
 import { ContextKeys, WebviewIds } from "../../lib/context";
+import { Commands, debounce } from "../../lib/command/command";
 import { createTaskCountTable } from "../common/taskCountTable";
 
 
@@ -26,18 +27,6 @@ export class LicensePage extends TeWebviewPanel<State>
 			Commands.ShowLicensePage
 		);
 	}
-
-
-	protected override onHtmlPreview = async (html: string, ..._args: any[]) =>
-	{
-		// const newKey = args[0] as string | undefined;
-		html = await createTaskCountTable(this.wrapper, undefined, html);
-		let infoContent = await this.getExtraContent(/* newKey */);
-		html = html.replace("#{licensePageBodyTop}", infoContent);
-		infoContent = this.getExtraContent2();
-		html = html.replace("#{licensePageBodyBottom}", infoContent);
-		return html;
-	};
 
 
 	private getExtraContent = async (/* newKey?: string */) =>
@@ -110,5 +99,28 @@ export class LicensePage extends TeWebviewPanel<State>
 	</td></tr>`;
 		return `<tr><td>${details}</td></tr>`;
 	};
+
+
+	protected override onHtmlPreview = async (html: string, ..._args: any[]) =>
+	{
+		// const newKey = args[0] as string | undefined;
+		html = await createTaskCountTable(this.wrapper, undefined, html);
+		let infoContent = await this.getExtraContent(/* newKey */);
+		html = html.replace("#{licensePageBodyTop}", infoContent);
+		infoContent = this.getExtraContent2();
+		html = html.replace("#{licensePageBodyBottom}", infoContent);
+		return html;
+	};
+
+
+	protected override onInitializing()
+	{
+		return  [
+			this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged, this)
+		];
+	}
+
+
+	private onTasksChanged = (_e: ITeTaskChangeEvent): void => debounce("licensePage.event.onTasksChanged", this.refresh, 75, this);
 
 }
