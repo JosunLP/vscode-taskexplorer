@@ -261,7 +261,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	 * To initiate state on a webview, implement a includeBootstrap() override in the top
 	 * level webviewView / webviewPanel.
 	 */
-	protected async getState(): Promise<BaseState>
+	protected getState(): BaseState
 	{
 		return {
 			account: this.wrapper.licenseManager.account,

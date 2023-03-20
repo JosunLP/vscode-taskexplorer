@@ -31,7 +31,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	}
 
 
-	protected override includeBootstrap = (): Promise<State> => this.getState();
+	protected override includeBootstrap = (): State => this.getState();
 
 
 	protected override includeFontAwesome = () => (

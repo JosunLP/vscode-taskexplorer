@@ -29,7 +29,7 @@ export class WelcomePage extends TeWebviewPanel<State>
 	}
 
 
-	protected override includeBootstrap = (): Promise<State> => this.getState();
+	protected override includeBootstrap = (): State => this.getState();
 
 
 	protected override onHtmlPreview = async(html: string): Promise<string> => html.replace("#{taskImageTable}", createTaskImageTable());

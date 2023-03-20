@@ -43,10 +43,10 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	});
 
 
-	protected override getState = async(): Promise<MonitorAppState> =>
+	protected override getState = (): MonitorAppState =>
 	{
 		return {
-			...(await super.getState()),
+			...super.getState(),
 			...this.getSettingsState(),
 			famous: this.wrapper.treeManager.famousTasks,
 			favorites: toITask(this.wrapper, this.wrapper.treeManager.favoritesTasks, "favorites"),
@@ -63,7 +63,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	};
 
 
-	protected override includeBootstrap = (): Promise<MonitorAppState> => this.getState();
+	protected override includeBootstrap = (): MonitorAppState => this.getState();
 
 
 	protected override includeFontAwesome = () => ({

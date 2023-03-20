@@ -38,7 +38,7 @@ export class TaskCountView extends TeWebviewView<State>
 	protected override includeEndOfBody = () => ""; // cover empty string in Base.getHtml()
 
 
-	protected override includeBootstrap = (): Promise<State> => this.getState();
+	protected override includeBootstrap = (): State => this.getState();
 
 
 	protected override onInitializing()
