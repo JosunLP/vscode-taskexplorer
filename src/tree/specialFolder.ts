@@ -2,7 +2,7 @@
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
-import { SpecialFolderStorageKey, StorageKeys } from "../lib/constants";
+import { SpecialFolderStorageKey } from "../lib/constants";
 import { IDictionary, ILog, ITeTaskChangeEvent, StorageTarget, TeTaskListType } from "../interface";
 import {
     ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
@@ -15,12 +15,6 @@ interface ITeSpecialTask
     timestamp: number;
 }
 
-interface ITeSpecialFolderStore
-{
-    favorites: ITeSpecialTask[];
-    last: ITeSpecialTask[];
-}
-
 /**
  * @class SpecialTaskFolder
  *
@@ -30,33 +24,34 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 {
 
     protected abstract maxItems: number;
-    protected abstract listType: TeTaskListType;
     protected abstract saveTask(taskItem: TaskItem, logPad: string): Promise<void>;
 
     protected store: ITeSpecialTask[];
     protected storeWs: ITeSpecialTask[];
     protected readonly log: ILog;
+    protected readonly labelLwr: string;
     protected readonly disposables: Disposable[];
 
-    private enabled: boolean;
-    private settingNameEnabled: string;
+    private _enabled: boolean;
+    private readonly _settingNameEnabled: string;
     private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
 
     override taskFiles: TaskItem[];
 
 
-    constructor(protected readonly wrapper: TeWrapper, label: string, state: TreeItemCollapsibleState)
+    constructor(protected readonly wrapper: TeWrapper, protected readonly listType: TeTaskListType, label: string, settingName: string, state: TreeItemCollapsibleState)
     {
         super(label, state);
-        this.log = this.wrapper.log;
         this.taskFiles = [];
         this.disposables = [];
+        this.log = this.wrapper.log;
         this.iconPath = ThemeIcon.Folder;
-        this.contextValue = label.toLowerCase().replace(/[\W \_\-]/g, "");
+        this.labelLwr = this.label.toLowerCase();
+        this.contextValue = this.labelLwr.replace(/[\W \_\-]/g, "");
         [ this.store, this.storeWs ] = this.loadStores();
         this.tooltip = `A tree folder to store '${label}' tasks`;
-        this.settingNameEnabled = "specialFolders.show" + label.replace(/ /g, "");
-        this.enabled = this.wrapper.config.get<boolean>(this.settingNameEnabled);
+        this._settingNameEnabled = settingName;
+        this._enabled = this.wrapper.config.get<boolean>(settingName);
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         this.disposables.push(
             this._onDidTasksChange,
@@ -71,7 +66,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 		return this._onDidTasksChange.event;
 	}
 
-    get storeName(): SpecialFolderStorageKey {
+    private get storeName(): SpecialFolderStorageKey {
         return `taskexplorer.specialFolder.${this.listType}`;
     }
 
@@ -128,33 +123,25 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
      * @param sort Whether or not to sort any existing items in the folder.
      * @param logPad Padding to prepend to log entries.  Should be a string of any # of space characters.
      */
-    build(logPad: string): boolean
+    build(logPad: string): void
     {
-        this.log.methodStart(`build ${this.label.toLowerCase()} folder`, 1, logPad);
-
-        const tree = this.wrapper.treeManager.getTaskTree() as TreeItem[], // Guaranted not to be undefined - checked in .refresh
-              showLastTasks = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SpecialFolders.ShowLastTasks),
-              favIdx = showLastTasks ? 1 : 0,
-              treeIdx = this.listType !== "favorites" ? 0 : favIdx;
-
-        this.log.values(1, logPad + "   ", [[ "tree index", treeIdx ], [ "showLastTasks setting", showLastTasks ]]);
-        this.log.values(2, logPad + "   ", [[ "fav index", favIdx ], [ "list type", this.listType ]]);
-
-        if (tree[treeIdx].label === this.label || !this.enabled)
-        {
-            this.log.write("   folder is already built or not enabled", 1, logPad);
-            this.log.methodDone(`build ${this.label.toLowerCase()} folder`, 1, logPad);
-            return false;
+        if (!this._enabled) {
+            return;
         }
 
-        this.clearTaskItems();
+        this.log.methodStart(`build ${this.labelLwr} folder`, 1, logPad);
 
-        const added: string[] = [];
-        const allItems = [ ...this.storeWs, ...this.store ];
-        for (const t of allItems)
+        const added: string[] = [],
+              allStoreItems = [ ...this.storeWs, ...this.store ],
+              nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(this.wrapper.keys.Config.SpecialFolders.FolderState);
+
+        this.taskFiles = [];
+        this.collapsibleState = TreeItemCollapsibleState[nodeExpandedeMap[this.listType]];
+
+        for (const t of allStoreItems)
         {
             if (added.includes(t.id)) {
-                break;
+                continue;
             }
             const taskItem2 = this.wrapper.treeManager.getTaskMap()[t.id];
             if (taskItem2 instanceof TaskItem && taskItem2.task)
@@ -170,14 +157,16 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
         this.sort();
 
-        if (this.taskFiles.length >= this.maxItems) {
-            this.taskFiles.splice(this.maxItems);
+        const tree = this.wrapper.treeManager.getTaskTree() as TreeItem[]; // Guaranted not to be undefined
+        if (!tree.find(i => i.id === this.id))
+        {
+            const showLastTasks = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SpecialFolders.ShowLastTasks),
+                  favIdx = showLastTasks ? 1 : 0,
+                  treeIdx = this.listType !== "favorites" ? 0 : favIdx;
+            tree.splice(treeIdx, 0, this);
         }
 
-        tree.splice(treeIdx, 0, this);
-
-        this.log.methodDone(`build ${this.label.toLowerCase()} folder`, 1, logPad);
-        return true;
+        this.log.methodDone(`build ${this.labelLwr} folder`, 1, logPad);
     }
 
 
@@ -194,51 +183,28 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         if (choice === "Global" || choice === "Workspace")
         {
             this.storeWs = [];
-            await this.wrapper.storage.update(this.storeName, this.storeWs, StorageTarget.Workspace);
-            if (choice === "Global")
-            {
+            if (choice === "Global") {
                 this.store = [];
-                await this.wrapper.storage.update(this.storeName, this.store, StorageTarget.Global);
             }
+            await this.saveStores();
             this.taskFiles = [];
-            this.refresh(true);
+            this.refresh();
         }
     }
 
 
-    private clearTaskItems(): void
+    protected fireChangeEvent = (taskItem: TaskItem | undefined, logPad: string): void =>
     {
-        const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
-        this.taskFiles = [];
-        //
-        // The 'Last Tasks' folder will be 1st in the tree
-        //
-        if (this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SpecialFolders.ShowLastTasks) === true)
-        {
-            this.collapsibleState =  TreeItemCollapsibleState[nodeExpandedeMap.lastTasks];
-        }
-        //
-        // The 'Favorites' folder will be 2nd in the tree (or 1st if configured to hide
-        // the 'Last Tasks' folder)
-        //
-        if (this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SpecialFolders.ShowFavorites))
-        {
-            this.collapsibleState =  TreeItemCollapsibleState[nodeExpandedeMap.favorites];
-        }
-    }
-
-
-    protected fireChangeEvent = (taskItem: TaskItem): void =>
-    {
-        const iTask = this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], this.listType)[0],
-              iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this.taskFiles.map(f => f.task), this.listType);
+        const iTasks = this._enabled ? this.wrapper.taskUtils.toITask(this.wrapper, this.taskFiles.map(f => f.task), this.listType) : [],
+              iTask = taskItem ? iTasks.find(t => t.treeId === taskItem.id) : taskItem;
         this._onDidTasksChange.fire({ tasks: iTasks, task: iTask, type: this.listType });
+        this.wrapper.treeManager.fireTreeRefreshEvent(this, null, logPad);
     };
 
 
     protected getRenamedTaskName(taskItem: TaskItem): string
     {
-        let label = taskItem.taskFile.folder.label + " - " + taskItem.taskSource;
+        let label = `${taskItem.taskFile.folder.label} - ${taskItem.taskSource}`;
         const renames = this.wrapper.storage.get<string[][]>(this.wrapper.keys.Storage.SpecialFolderRenames, []),
               id = this.getTaskItemId(taskItem.id);
         for (const i in renames)
@@ -249,7 +215,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
                 break;
             }
         }
-        return taskItem.label + " (" + label + ")";
+        return `${taskItem.label} (${label})`;
     }
 
 
@@ -271,39 +237,59 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     protected getTaskItemId = (id: string): string => id.replace(this.label + ":", "");
 
 
-    hasTask = (item: TaskItem) => !!(this.enabled && this.taskFiles.find(t => this.getTaskItemId(t.id) === item.id));
+    hasTask = (item: TaskItem): boolean => !!(this._enabled && this.taskFiles.find(t => this.getTaskItemId(t.id) === item.id));
 
 
     protected onConfigChanged(e: ConfigurationChangeEvent): void
     {
-        if (this.wrapper.config.affectsConfiguration(e, this.settingNameEnabled))
+        if (this.wrapper.config.affectsConfiguration(e, this._settingNameEnabled))
         {
             this.loadStores();
-            this.enabled = this.wrapper.config.get<boolean>(this.settingNameEnabled);
-            this.refresh(this.enabled);
+            this._enabled = this.wrapper.config.get<boolean>(this._settingNameEnabled);
+            this.refresh();
         }
     }
 
 
-    private refresh(show: boolean): void
+    private refresh(): void
     {
-        let changed = false;
         const tree = this.wrapper.treeManager.getTaskTree();
-        this.log.methodStart(`refresh ${this.label.toLowerCase()} folder`, 1, "", false, [[ "show", show ]]);
-        if (!tree || this.wrapper.treeManager.getTasks().length === 0) {
-            this.log.write("   there are no tasks in tree to sort", 1, "");
-        }
-        else {
-            changed = show ? this.build("   ") : !!tree.splice(tree.findIndex(i => i.id === this.id), 1);
-            if (changed) {
-                this.wrapper.treeManager.fireTreeRefreshEvent(this, null, "   ");
+        this.log.methodStart(`refresh ${this.labelLwr} folder`, 1, "", false, [[ "show / enabled", this._enabled ]]);
+        if (tree)
+        {
+            if (this._enabled) {
+                this.build("   ");
             }
+            else {
+                tree.splice(tree.findIndex(i => i.id === this.id), 1);
+            }
+            this.fireChangeEvent(undefined, "   ");
         }
-        this.log.methodDone(`refresh ${this.label.toLowerCase()} folder`, 1, "");
+        this.log.methodDone(`refresh ${this.labelLwr} folder`, 1, "");
     }
 
 
-    override async removeTaskFile(taskItem: TaskItem|string, logPad: string, persist?: boolean)
+    protected removeFromStore = (taskItem: TaskItem): void =>
+    {
+        const taskId = this.getTaskItemId(taskItem.id);
+        let idx = this.store.findIndex(t => t.id === taskId);
+        if (idx !== -1) {
+            this.store.splice(idx, 1);
+        }
+        else if (this.store.length >= this.maxItems) {
+            this.store.splice(this.maxItems);
+        }
+        idx = this.storeWs.findIndex(t => t.id === taskId);
+        if (idx !== -1) {
+            this.storeWs.splice(idx, 1);
+        }
+        else if (this.storeWs.length >= this.maxItems) {
+            this.storeWs.splice(this.maxItems);
+        }
+    };
+
+
+    override async removeTaskFile(taskItem: TaskItem|string, logPad: string, persist?: boolean): Promise<void>
     {
         const id = this.wrapper.typeUtils.isString(taskItem) ? taskItem : taskItem.id, // getTaskItemId(taskFile);
               idx = this.taskFiles.findIndex(f => f.id === id);
@@ -312,47 +298,14 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             taskItem = this.taskFiles.splice(idx, 1)[0];
             if (persist)
             {
-                const storeTaskItemId = this.getTaskItemId(id);
-                this.store.slice().reverse().forEach((t: ITeSpecialTask, idx: number, o: ITeSpecialTask[]) =>
-                {
-                    if (storeTaskItemId === t.id) {
-                        this.store.splice(o.length - 1 - idx, 1);
-                    }
-                });
-                this.storeWs.slice().reverse().forEach((t: ITeSpecialTask, idx: number, o: ITeSpecialTask[]) =>
-                {
-                    if (storeTaskItemId === t.id) {
-                        this.storeWs.splice(o.length - 1 - idx, 1);
-                    }
-                });
-                await this.wrapper.storage.update(this.storeName, this.store);
-                await this.wrapper.storage.update(this.storeName, this.storeWs, StorageTarget.Workspace);
-                this.fireChangeEvent(taskItem);
-                this.wrapper.treeManager.fireTreeRefreshEvent(this, null, logPad);
+                this.removeFromStore(taskItem);
+                await this.saveStores();
+                this.fireChangeEvent(taskItem, logPad);
             }
         }
     }
 
 
-    // protected sort = () => sortTasks(this.taskFiles, this.listType);
-    protected sort = () =>
-    {
-        this.taskFiles.sort((a: TaskItem, b: TaskItem) =>
-        {
-            const aId = this.getTaskItemId(a.id),
-                  bId = this.getTaskItemId(b.id),
-                  aIdx = this.store.findIndex(t => t.id === aId),
-                  bIdx = this.store.findIndex(t => t.id === bId),
-                  aIsPinned = this.wrapper.taskUtils.isPinned(aId,  this.listType),
-                  bIsPinned = this.wrapper.taskUtils.isPinned(bId, this.listType);
-            if (aIsPinned && !bIsPinned) {
-                return -1;
-            }
-            else if (!aIsPinned && bIsPinned) {
-                return 1;
-            }
-            return aIdx < bIdx ? 1 : -1;
-        });
-    };
+    protected sort = (): void => this.wrapper.sorters.sortTasks(this.taskFiles, this.listType);
 
 }

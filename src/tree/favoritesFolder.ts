@@ -1,11 +1,10 @@
 
 import { TaskItem } from "./item";
-import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TreeItemCollapsibleState } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
+import { ITeTask, TeTaskListType } from "../interface";
 import { Commands, registerCommand } from "../lib/command/command";
-import { ITeTask, StorageTarget, TeTaskListType } from "../interface";
 
 
 /**
@@ -16,17 +15,22 @@ import { ITeTask, StorageTarget, TeTaskListType } from "../interface";
 export class FavoritesFolder extends SpecialTaskFolder
 {
 
-    protected maxItems = Infinity;
-    protected listType: TeTaskListType = "favorites";
+    private _maxItems: number;
 
 
     constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
     {
-        super(wrapper, Strings.FAV_TASKS_LABEL, state);
+        super(wrapper, "favorites", wrapper.keys.Strings.FAV_TASKS_LABEL, wrapper.keys.Config.SpecialFolders.ShowFavorites, state);
+        this._maxItems = Infinity; // this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
         this.disposables.push(
             registerCommand(Commands.AddRemoveFavorite, this.addRemoveFavorite, this),
             registerCommand(Commands.ClearFavorites, this.clearSavedTasks, this)
         );
+    }
+
+
+    protected get maxItems(): number {
+        return this._maxItems;
     }
 
 
@@ -52,15 +56,15 @@ export class FavoritesFolder extends SpecialTaskFolder
         //
         // If this task exists in the store, remove it, if it doesnt, then add it
         //
-        let idx = this.store.findIndex(f => f === id);
+        let idx = this.store.findIndex(f => f.id === id);
         if (idx === -1) {
-            idx = this.storeWs.findIndex(f => f === id);
+            idx = this.storeWs.findIndex(f => f.id === id);
         }
         if (idx === -1) {
             await this.saveTask(taskItem, "   ");
         }
         else {
-           await this.removeTaskFile(`${Strings.FAV_TASKS_LABEL}:${id}`, "   ", true);
+           await this.removeTaskFile(`${this.label}:${id}`, "   ", true);
            removed = true;
         }
 
@@ -71,21 +75,21 @@ export class FavoritesFolder extends SpecialTaskFolder
 
     saveTask = async (taskItem: TaskItem, logPad: string) =>
     {
-        const taskId = this.getTaskItemId(taskItem.id);
+        const now = Date.now(),
+              taskId = this.getTaskItemId(taskItem.id);
         this.log.methodStart("save task", 1, logPad, false, [
             [ "treenode label", this.label ], [ "task id", taskId ], [ "current # of saved tasks", this.store.length ]
         ]);
-        this.store.push(taskId);
-        this.storeWs.push(taskId);
-        await this.wrapper.storage.update(this.storeName, this.store, StorageTarget.Global);
-        await this.wrapper.storage.update(this.storeName, this.storeWs, StorageTarget.Workspace);
+        this.store.push({ id: taskId, timestamp: now });
+        this.storeWs.push({ id: taskId, timestamp: now });
+        await this.saveStores();
         const taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad + "   ");
         taskItem2.id = this.label + ":" + taskItem2.id; // note 'label:' + taskItem2.id === id
         taskItem2.label = this.getRenamedTaskName(taskItem2);
         taskItem2.folder = this;
         this.insertTaskFile(taskItem2, 0);
         this.sort();
-        this.fireChangeEvent(taskItem);
+        this.fireChangeEvent(taskItem, logPad);
         this.log.methodDone("save task", 1, logPad, [[ "new # of saved tasks", this.store.length ]]);
     };
 

@@ -151,9 +151,11 @@ const migrateStorage = async () =>
         let ts = Date.now();
         let store = storage.get<string[]>("lastTasks", []).map(id => ({ id, timestamp: ++ts }));
         await storage.update("taskexplorer.specialFolder.last", store);
+        store = storage.get<string[]>("lastTasks", [], StorageTarget.Workspace).map(id => ({ id, timestamp: ++ts }));
         await storage.update("taskexplorer.specialFolder.last", store, StorageTarget.Workspace);
         store = storage.get<string[]>("favoriteTasks", []).map(id => ({ id, timestamp: ++ts }));
         await storage.update("taskexplorer.specialFolder.favorites", store);
+        store = storage.get<string[]>("favoriteTasks", [], StorageTarget.Workspace).map(id => ({ id, timestamp: ++ts }));
         await storage.update("taskexplorer.specialFolder.favorites", store, StorageTarget.Workspace);
         await storage.delete("lastTasks");
         await storage.delete("favoriteTasks");

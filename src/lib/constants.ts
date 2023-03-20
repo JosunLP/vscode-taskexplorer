@@ -29,6 +29,7 @@ export const ConfigKeys =
     ReportGlobalUsage: "taskMonitor.reportUsage",
     SortProjectFoldersAlphabetically: "sortProjectFoldersAlpha",
 	SpecialFolders: {
+        FolderState: "specialFolders.folderState",
         NumLastTasks: "specialFolders.numLastTasks",
         ShowFavorites: "specialFolders.showFavorites",
         ShowLastTasks: "specialFolders.showLastTasks"

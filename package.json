@@ -1503,7 +1503,7 @@
                             "description": ""
                         },
                         "properties": {
-                            "lastTasks": {
+                            "last": {
                                 "enum": [
                                     "Collapsed",
                                     "Expanded"
@@ -1517,7 +1517,7 @@
                                 ],
                                 "description": "%config.taskexplorer.specialFolders.folderState.favorites%"
                             },
-                            "userTasks": {
+                            "user": {
                                 "enum": [
                                     "Collapsed",
                                     "Expanded"
@@ -1526,7 +1526,7 @@
                             }
                         },
                         "default": {
-                            "lastTasks": "Expanded",
+                            "last": "Expanded",
                             "favorites": "Expanded",
                             "userTasks": "Expanded"
                         }

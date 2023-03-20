@@ -1,13 +1,10 @@
 
 import { TaskItem } from "./item";
-import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { StorageTarget, TeTaskListType } from "../interface";
-import { TaskTreeManager } from "./treeManager";
-import { isPinned } from "../lib/utils/taskUtils";
+import { TeTaskListType } from "../interface";
 import { SpecialTaskFolder } from "./specialFolder";
-import { ConfigurationChangeEvent, TreeItemCollapsibleState, window } from "vscode";
 import { Commands, registerCommand } from "../lib/command/command";
+import { ConfigurationChangeEvent, TreeItemCollapsibleState, window } from "vscode";
 
 
 /**
@@ -17,18 +14,19 @@ import { Commands, registerCommand } from "../lib/command/command";
  */
 export class LastTasksFolder extends SpecialTaskFolder
 {
-
-    protected maxItems: number;
-    protected listType: TeTaskListType = "last";
-
+    private _maxItems: number;
 
     constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
     {
-        super(wrapper, Strings.LAST_TASKS_LABEL, state);
-        this.maxItems = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
+        super(wrapper, "last", wrapper.keys.Strings.LAST_TASKS_LABEL, wrapper.keys.Config.SpecialFolders.ShowLastTasks, state);
+        this._maxItems = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
         this.disposables.push(
             registerCommand(Commands.ClearLastTasks, this.clearSavedTasks, this)
         );
+    }
+
+    protected get maxItems(): number {
+        return this._maxItems;
     }
 
 
@@ -51,13 +49,13 @@ export class LastTasksFolder extends SpecialTaskFolder
     {
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.SpecialFolders.NumLastTasks))
         {
-            this.maxItems = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
+            this._maxItems = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
         }
-        await super.onConfigChanged(e);
+        super.onConfigChanged(e);
     }
 
 
-    private pushToTop = (taskItem: TaskItem, logPad: string) =>
+    private pushToTreeTop = (taskItem: TaskItem, logPad: string) =>
     {
         const taskId = this.label + ":" + this.getTaskItemId(taskItem.id);
         let taskItem2 = this.taskFiles.find(t => t instanceof TaskItem && t.id === taskId);
@@ -65,7 +63,7 @@ export class LastTasksFolder extends SpecialTaskFolder
         {
             this.removeTaskFile(taskItem2, logPad, false);
         }
-        else if (this.taskFiles.length >= this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks))
+        else if (this.taskFiles.length >= this.maxItems)
         {
             this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad, false);
         }
@@ -85,22 +83,38 @@ export class LastTasksFolder extends SpecialTaskFolder
     {
         const taskId = this.getTaskItemId(taskItem.id),
               now = Date.now();
-        this.log.methodStart("save task", 1, logPad, false, [
+        this.log.methodStart(`save task to ${this.labelLwr} folder`, 1, logPad, false, [
             [ "treenode label", this.label ], [ "max tasks", this.maxItems ],
-            [ "task id", taskId ], [ "current # of saved tasks", this.store.length ]
+            [ "task id", taskId ], [ "current # of saved tasks", this.taskFiles.length ]
         ]);
-        this.log.value("current saved task ids", this.store.toString() , 3, logPad + "   ");
-        this.wrapper.utils.removeFromArray(this.store, taskId); // Moving it to the top of the list it if it already exists
-        while (this.store.length >= this.maxItems) {
-            this.store.shift();
-        }
+        this.removeFromStore(taskItem);
         this.store.push({ id: taskId, timestamp: now });
         this.storeWs.push({ id: taskId, timestamp: now });
         await this.saveStores();
-        this.pushToTop(taskItem, logPad);
-        this.fireChangeEvent(taskItem);
-        this.wrapper.treeManager.fireTreeRefreshEvent(this, null, logPad);
-        this.log.methodDone("save task", 1, logPad, [[ "new # of saved tasks", this.store.length ]]);
+        this.pushToTreeTop(taskItem, logPad);
+        this.fireChangeEvent(taskItem, logPad);
+        this.log.methodDone(`save task to ${this.labelLwr} folder`, 1, logPad, [[ "new # of saved tasks", this.taskFiles.length ]]);
+    };
+
+
+    protected override sort = () =>
+    {
+        this.taskFiles.sort((a: TaskItem, b: TaskItem) =>
+        {
+            const aId = this.getTaskItemId(a.id),
+                  bId = this.getTaskItemId(b.id),
+                  aIdx = this.store.findIndex(t => t.id === aId),
+                  bIdx = this.store.findIndex(t => t.id === bId),
+                  aIsPinned = this.wrapper.taskUtils.isPinned(aId, this.listType),
+                  bIsPinned = this.wrapper.taskUtils.isPinned(bId, this.listType);
+            if (aIsPinned && !bIsPinned) {
+                return -1;
+            }
+            else if (!aIsPinned && bIsPinned) {
+                return 1;
+            }
+            return aIdx < bIdx ? 1 : -1;
+        });
     };
 
 }
