@@ -11,7 +11,7 @@ export const Strings =
     FAV_TASKS_LABEL: "Favorites",
     USER_TASKS_LABEL: "User Tasks",
     TASKS_RENAME_STORE: "Renames",
-    GetLicense: "Open the Task Explorer checkout page in  an external browser",
+    GetLicense: "appstrings.getLicense|Open the Task Explorer checkout page in an external browser",
 	ScanningTaskFiles: "appstrings.scanningTaskFiles|Scanning task files...",
 	RequestingTasks: "appstrings.requestingTasks|Requesting tasks from providers...",
 	BuildingTaskTree: "appstrings.buildingTaskTree|Building task tree...",

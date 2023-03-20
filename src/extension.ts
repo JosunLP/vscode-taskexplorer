@@ -1,12 +1,13 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
+// import * as nls from "vscode-nls";
 import { log } from "./lib/log/log";
 import { TeWrapper } from "./lib/wrapper";
+import { ConfigKeys } from "./lib/constants";
 import { initStorage, storage } from "./lib/storage";
 import { ExtensionContext, ExtensionMode, workspace } from "vscode";
 import { configuration, registerConfiguration } from "./lib/configuration";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./lib/utils/taskUtils";
-import { ConfigKeys } from "./lib/constants";
 
 let teWrapper: TeWrapper;
 
@@ -29,6 +30,7 @@ export async function activate(context: ExtensionContext)
     //
     // Initialize configuration
     //
+	// nls.config({ locale: "en-us" })();
     registerConfiguration(context);
     //
     // Initialize logging

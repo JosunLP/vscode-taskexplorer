@@ -3,6 +3,8 @@
 	"description": "Extension to add support for tasks in VSCode.",
 	"displayName": "Task support for VSCode",
 
+	"appstrings.getLicense": "Open the Task Explorer checkout page in an external browser",
+
 	"config.taskexplorer.enableExplorerView": "Enable **Task Explorer** in the `Files Explorer` view.",
 	"config.taskexplorer.enableSideBar": "Enable **Task Explorer** in the `side/activity bar`.",
 
