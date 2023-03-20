@@ -22,12 +22,12 @@ export class LastTasksFolder extends SpecialTaskFolder
     protected listType: TeTaskListType = "last";
 
 
-    constructor(wrapper: TeWrapper, treeManager: TaskTreeManager, state: TreeItemCollapsibleState)
+    constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
     {
-        super(wrapper, treeManager, Strings.LAST_TASKS_STORE, Strings.LAST_TASKS_LABEL, state);
+        super(wrapper, Strings.LAST_TASKS_LABEL, state);
         this.maxItems = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
         this.disposables.push(
-            registerCommand(Commands.ClearLastTasks, () => this.clearSavedTasks(), this)
+            registerCommand(Commands.ClearLastTasks, this.clearSavedTasks, this)
         );
     }
 
@@ -37,7 +37,7 @@ export class LastTasksFolder extends SpecialTaskFolder
         let lastTaskId: string | undefined;
         if (this.store.length > 0)
         {
-            lastTaskId = this.store[this.store.length - 1];
+            lastTaskId = this.store[this.store.length - 1].id;
         }
         if (!lastTaskId)
         {
@@ -57,18 +57,10 @@ export class LastTasksFolder extends SpecialTaskFolder
     }
 
 
-    private onTaskSave = (taskItem: TaskItem, logPad: string) =>
+    private pushToTop = (taskItem: TaskItem, logPad: string) =>
     {
-        /* istanbul ignore if */
-        if (!taskItem.task) {
-            return;
-        }
-        //
-        // Push task to top of list
-        //
         const taskId = this.label + ":" + this.getTaskItemId(taskItem.id);
         let taskItem2 = this.taskFiles.find(t => t instanceof TaskItem && t.id === taskId);
-        /* istanbul ignore else */
         if (taskItem2)
         {
             this.removeTaskFile(taskItem2, logPad, false);
@@ -86,13 +78,13 @@ export class LastTasksFolder extends SpecialTaskFolder
         }
         this.wrapper.log.value("   add item", taskItem2.id, 2, logPad);
         this.insertTaskFile(taskItem2, 0);
-        this.treeManager.fireTreeRefreshEvent(this, logPad);
     };
 
 
     saveTask = async (taskItem: TaskItem, logPad: string) =>
     {
-        const taskId = this.getTaskItemId(taskItem.id);
+        const taskId = this.getTaskItemId(taskItem.id),
+              now = Date.now();
         this.log.methodStart("save task", 1, logPad, false, [
             [ "treenode label", this.label ], [ "max tasks", this.maxItems ],
             [ "task id", taskId ], [ "current # of saved tasks", this.store.length ]
@@ -102,34 +94,13 @@ export class LastTasksFolder extends SpecialTaskFolder
         while (this.store.length >= this.maxItems) {
             this.store.shift();
         }
-        this.store.push(taskId);
-        this.storeWs.push(taskId);
-        await this.wrapper.storage.update(this.storeName, this.store);
-        await this.wrapper.storage.update(this.storeName, this.storeWs, StorageTarget.Workspace);
-        this.onTaskSave(taskItem, logPad);
+        this.store.push({ id: taskId, timestamp: now });
+        this.storeWs.push({ id: taskId, timestamp: now });
+        await this.saveStores();
+        this.pushToTop(taskItem, logPad);
         this.fireChangeEvent(taskItem);
+        this.wrapper.treeManager.fireTreeRefreshEvent(this, null, logPad);
         this.log.methodDone("save task", 1, logPad, [[ "new # of saved tasks", this.store.length ]]);
-    };
-
-
-    protected override sort = () =>
-    {
-        this.taskFiles?./* istanbul ignore else */sort((a: TaskItem, b: TaskItem) =>
-        {
-            const aId = this.getTaskItemId(a.id),
-                  bId = this.getTaskItemId(b.id),
-                  aIdx = this.store.indexOf(aId),
-                  bIdx = this.store.indexOf(bId),
-                  aIsPinned = isPinned(aId,  "last"),
-                  bIsPinned = isPinned(bId, "last");
-            if (aIsPinned && !bIsPinned) {
-                return -1;
-            }
-            else if (!aIsPinned && bIsPinned) {
-                return 1;
-            }
-            return aIdx < bIdx ? 1 : -1;
-        });
     };
 
 }

@@ -720,7 +720,7 @@ class DumbFolder implements ITaskFolder
 {
     public label: string;
     constructor(lbl: string) { this.label = lbl; }
-    async addTaskFile(taskFile: ITaskItem | ITaskFile): Promise<void> {}
+    addTaskFile(taskFile: ITaskItem | ITaskFile): Promise<void> {}
     insertTaskFile(taskFile: ITaskItem | ITaskFile, index: number): void {}
     removeTaskFile(taskFile: string | ITaskItem | ITaskFile, logPad: string): void {}
 }

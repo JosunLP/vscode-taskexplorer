@@ -88,37 +88,8 @@ export class TaskWatcher implements Disposable
         // tree, so this is still good.  TODO possibly this gets fixed in the future to be able to
         // invalidate just the TaskItem, so check back on this sometime.
         //
-        this.wrapper.log.write("   request fire main tree refresh event", 1, logPad);
-        this.wrapper.treeManager.fireTreeRefreshEvent(taskItem.taskFile, logPad + "   ");
-
-        //
-        // Fire change event for the 'Last Tasks' folder if the task exists there
-        //
-        if (this.wrapper.treeManager.lastTasksFolder.hasTask(taskItem))
-        {   //
-            // 'Last Tasks' folder, if enabled, will always be the 1st tree item
-            //
-            this.wrapper.log.write("   request fire 'last tasks' folder tree refresh event", 1, logPad);
-            this.wrapper.treeManager.fireTreeRefreshEvent(taskTree[0], logPad + "   ");
-        }
-
-        //
-        // Fire change event for the 'Favorites' folder if the task exists there
-        //
-        if (this.wrapper.treeManager.favoritesFolder.hasTask(taskItem))
-        {   //
-            // 'Favorites' folder, if enabled, can be the 1st tree item or 2d, depending on if
-            // the 'Last Tasks' folder is enabled, which is always the 1st item in the tree if enabled
-            //
-            this.wrapper.log.write("   request fire 'favorites' folder tree refresh event", 1, logPad);
-            if (taskTree[0] && taskTree[0].label === this.wrapper.treeManager.favoritesFolder.label)
-            {
-                this.wrapper.treeManager.fireTreeRefreshEvent(taskTree[0], logPad + "   ");
-            }
-            else {
-                this.wrapper.treeManager.fireTreeRefreshEvent(taskTree[1], logPad + "   ");
-            }
-        }
+        this.wrapper.log.write("   request fire tree refresh event", 1, logPad);
+        this.wrapper.treeManager.fireTreeRefreshEvent(taskItem.taskFile, taskItem, logPad + "   ");
 
         this.wrapper.log.write("   fire 'task status changed' and 'running tasks changed' events", 1, logPad);
         const iTask = this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], "running")[0];

@@ -84,7 +84,7 @@ export class TaskTreeGrouper
                     {
                         subfolder = new TaskFile(folder, node.task.definition, taskFile.taskSource, taskFile.path, 0, id, undefined, "   ");
                         subfolders[id] = subfolder;
-                        await folder.addTaskFile(subfolder);
+                        folder.addTaskFile(subfolder);
                         //
                         // Since we add the grouping when we find two or more equal group names, we are iterating
                         // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the

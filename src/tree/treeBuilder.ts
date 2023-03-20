@@ -34,25 +34,6 @@ export class TaskTreeBuilder
         this.wrapper.log.methodStart("build task tree", logLevel, logPad);
 
         //
-        // The 'Last Tasks' folder will be 1st in the tree
-        //
-        this.wrapper.treeManager.lastTasksFolder.clearTaskItems();
-        if (this.wrapper.treeManager.lastTasksFolder.isEnabled)
-        {
-            folders[this.wrapper.treeManager.lastTasksFolder.label as string] = this.wrapper.treeManager.lastTasksFolder;
-        }
-
-        //
-        // The 'Favorites' folder will be 2nd in the tree (or 1st if configured to hide
-        // the 'Last Tasks' folder)
-        //
-        this.wrapper.treeManager.favoritesFolder.clearTaskItems();
-        if (this.wrapper.treeManager.favoritesFolder.isEnabled)
-        {
-            folders[this.wrapper.treeManager.favoritesFolder.label as string] = this.wrapper.treeManager.favoritesFolder;
-        }
-
-        //
         // Loop through each task provided by the engine and build a task tree
         //
         for (const each of tasks)
@@ -68,7 +49,7 @@ export class TaskTreeBuilder
             //
             await this._treeGrouper.buildGroupings(folders, logPad + "   ", logLevel);
             //
-            // Get sorted root project folders (only project folders are sorted, special folders 'Favorites',
+            // Get sorted root project folders - only project folders are sorted, special folders 'Favorites',
             // 'User Tasks' and 'Last Tasks' are kept at the top of the list.
             //
             sortedFolders = this.wrapper.sorters.sortFolders(folders) as TaskFolder[];
@@ -171,11 +152,6 @@ export class TaskTreeBuilder
             const taskItem = new TaskItem(taskFile, each, logPad + "   ");
             taskFile.addTreeNode(taskItem);
             this.taskMap[taskItem.id] = taskItem;
-            //
-            // Maybe add this task to the 'Favorites' and 'Last Tasks' folders
-            //
-            await this.wrapper.treeManager.lastTasksFolder.addTaskFile(taskItem, logPad + "   ");
-            await this.wrapper.treeManager.favoritesFolder.addTaskFile(taskItem, logPad + "   ");
         }
 
         this.wrapper.log.methodDone("build task tree list", 2, logPad);
@@ -219,7 +195,7 @@ export class TaskTreeBuilder
         {
             this.wrapper.log.value("   Add source file container", task.source, 2, logPad);
             taskFile = new TaskFile(folder, task.definition, task.source, relativePath, 0, undefined, undefined, logPad + "   ");
-            await folder.addTaskFile(taskFile);
+            folder.addTaskFile(taskFile);
             files[id] = taskFile;
         }
 

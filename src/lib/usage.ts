@@ -96,6 +96,26 @@ export class Usage implements ITeUsage, Disposable
 	};
 
 
+    getAvgRunCount = (period: "d" | "w", logPad: string): number =>
+    {
+        const now = Date.now();
+        let avg = 0,
+            lowestTime = now;
+        this.log.methodStart("get average run count", 2, logPad, false, [[ "period", period ]]);
+        const taskStats = this.wrapper.usage.getAll(this._taskUsageKey);
+        Object.keys(taskStats).forEach(k =>
+        {
+            if (taskStats[k].timestamp < lowestTime)  {
+                lowestTime = taskStats[k].timestamp ;
+            }
+        });
+        const daysSinceFirstRunTask = this.wrapper.utils.getDateDifference(lowestTime, now, "d")  || 1;
+        avg = Math.floor(Object.keys(taskStats).length / daysSinceFirstRunTask / (period === "d" ? 1 : 7));
+        this.log.methodDone("get average run count", 2, logPad, [[ "calculated average", avg ]]);
+        return avg;
+    };
+
+
 	private getEmptyITask = (): ITeTask =>
     ({
         name: "N/A",
@@ -138,6 +158,16 @@ export class Usage implements ITeUsage, Disposable
     });
 
 
+    getRuntimeInfo = (treeId: string): ITaskRuntimeInfo =>
+    {
+        const stats = this.getTaskUsageStore();
+        if (stats.runtimes[treeId]) {
+            return this.wrapper.commonUtils.pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
+        }
+        return this.getEmptyITaskRuntimeInfo();
+    };
+
+
     private getTaskUsageStore = (): ITeTaskStats =>
     {
         let store = this.wrapper.storage.get<ITeTaskStats>(this.wrapper.keys.Storage.TaskUsage);
@@ -156,36 +186,6 @@ export class Usage implements ITeUsage, Disposable
             };
         }
         return store;
-    };
-
-
-    getAvgRunCount = (period: "d" | "w", logPad: string): number =>
-    {
-        const now = Date.now();
-        let avg = 0,
-            lowestTime = now;
-        this.log.methodStart("get average run count", 2, logPad, false, [[ "period", period ]]);
-        const taskStats = this.wrapper.usage.getAll(this._taskUsageKey);
-        Object.keys(taskStats).forEach(k =>
-        {
-            if (taskStats[k].timestamp < lowestTime)  {
-                lowestTime = taskStats[k].timestamp ;
-            }
-        });
-        const daysSinceFirstRunTask = this.wrapper.utils.getDateDifference(lowestTime, now, "d")  || 1;
-        avg = Math.floor(Object.keys(taskStats).length / daysSinceFirstRunTask / (period === "d" ? 1 : 7));
-        this.log.methodDone("get average run count", 2, logPad, [[ "calculated average", avg ]]);
-        return avg;
-    };
-
-
-    getRuntimeInfo = (treeId: string): ITaskRuntimeInfo =>
-    {
-        const stats = this.getTaskUsageStore();
-        if (stats.runtimes[treeId]) {
-            return this.wrapper.commonUtils.pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
-        }
-        return this.getEmptyITaskRuntimeInfo();
     };
 
 

@@ -84,22 +84,21 @@ export function getTaskTypeRealName(taskType: string)
 }
 
 
-export function getWatchTaskTypes()
+export const getWatchTaskTypes = () =>  [ "npm", "tsc", "Workspace" ];
+
+
+export const isPinned = (id: string, listType: TeTaskListType): boolean =>
 {
-    return [ "npm", "tsc", "Workspace" ];
-}
+    const storageKey: PinnedStorageKey = `taskexplorer.pinned.${listType}`;
+    const pinnedTaskList = storage.get<ITeTask[]>(storageKey, []);
+    return !!pinnedTaskList.find(t => t.treeId === id);
+};
 
 
-export function isScriptType(source: string)
-{
-    return getScriptTaskTypes().includes(source);
-}
+export const isScriptType = (source: string) => getScriptTaskTypes().includes(source);
 
 
-export function isWatchTask(source: string)
-{
-    return getWatchTaskTypes().includes(source);
-}
+export const isWatchTask = (source: string) => getWatchTaskTypes().includes(source);
 
 
 /**
@@ -147,12 +146,4 @@ export const toITask = (wrapper: TeWrapper, teTasks: Task[], listType: TeTaskLis
             runTime: wrapper.usage.getRuntimeInfo(t.definition.taskItemId)
         };
     });
-};
-
-
-export const isPinned = (id: string, listType: TeTaskListType): boolean =>
-{
-    const storageKey: PinnedStorageKey = `taskexplorer.pinned.${listType}`;
-    const pinnedTaskList = storage.get<ITeTask[]>(storageKey, []);
-    return !!pinnedTaskList.find(t => t.treeId === id);
 };

@@ -5,12 +5,9 @@ import { IDictionary, TeTaskListType } from "../interface";
 export const Strings =
 {
 	DEFAULT_SEPARATOR: "-",
-    LAST_TASKS_STORE: "lastTasks",
     LAST_TASKS_LABEL: "Last Tasks",
-    FAV_TASKS_STORE: "favoriteTasks",
     FAV_TASKS_LABEL: "Favorites",
     USER_TASKS_LABEL: "User Tasks",
-    TASKS_RENAME_STORE: "Renames",
     GetLicense: "appstrings.getLicense|Open the Task Explorer checkout page in an external browser",
 	ScanningTaskFiles: "appstrings.scanningTaskFiles|Scanning task files...",
 	RequestingTasks: "appstrings.requestingTasks|Requesting tasks from providers...",
@@ -74,6 +71,8 @@ export const Globs: IDictionary<string> =
 
 export type PinnedStorageKey = `taskexplorer.pinned.${TeTaskListType}`;
 
+export type SpecialFolderStorageKey = `taskexplorer.specialFolder.${TeTaskListType}`;
+
 export const StorageKeys =
 {
     Account: "taskexplorer.account",
@@ -82,6 +81,7 @@ export const StorageKeys =
     FileCacheProjectFileToFileCountMap: "fileCacheProjectFileToFileCountMap",
     FileCacheTaskFilesMap: "fileCacheTaskFilesMap",
     LastLicenseNag: "taskexplorer.lastLicenseNag",
+    SpecialFolderRenames: "taskexplorer.specialFolder.renames",
 	TaskUsage: "taskexplorer.taskUsage",
 	Usage: "taskexplorer.usage",
     Version: "taskexplorer.version"

@@ -14,6 +14,7 @@ import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "
 export class TaskFolder extends TreeItem
 {
     public override id: string;
+    public override label: string;
     public taskFiles: (TaskFile|TaskItem)[] = [];
     public workspaceFolder: WorkspaceFolder | undefined;
 
@@ -31,6 +32,7 @@ export class TaskFolder extends TreeItem
         }
 
         this.iconPath = ThemeIcon.Folder;
+        this.label = isString(folder) ? folder  : folder.name;
         this.id = "treeFolderId-" + this.label;
         this.tooltip = "A tree folder representing a workspace/project";
     }
@@ -38,9 +40,7 @@ export class TaskFolder extends TreeItem
 
     addTaskFile(taskFile: TaskFile|TaskItem)
     {
-        return new Promise<void>((resolve) => {
-            setTimeout(() => { this.taskFiles.push(taskFile); resolve(); }, 1);
-        });
+        this.taskFiles.push(taskFile);
     }
 
 

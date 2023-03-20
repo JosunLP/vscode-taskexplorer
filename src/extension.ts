@@ -2,6 +2,7 @@
 
 import { log } from "./lib/log/log";
 import { TeWrapper } from "./lib/wrapper";
+import { StorageTarget } from "./interface";
 import { ConfigKeys } from "./lib/constants";
 import { initStorage, storage } from "./lib/storage";
 import { ExtensionContext, ExtensionMode, workspace } from "vscode";
@@ -48,6 +49,7 @@ export async function activate(context: ExtensionContext)
     // !!! Temporary after settings layout redo / rename !!!
     // !!! Remove sometime down the road (from 12/22/22) !!!
     await migrateSettings();
+    await migrateStorage();
     // !!! End temporary !!!
     /* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP */
     //
@@ -138,3 +140,24 @@ const migrateSettings = async () =>
         await storage.update("taskexplorer.v3SettingsUpgrade", true);
     }
 };
+
+
+/* istanbul ignore next */
+const migrateStorage = async () =>
+{
+    const didStorageUpgrade = storage.get<boolean>("taskexplorer.v3StorageUpgrade", false);
+    if (!didStorageUpgrade)
+    {
+        let ts = Date.now();
+        let store = storage.get<string[]>("lastTasks", []).map(id => ({ id, timestamp: ++ts }));
+        await storage.update("taskexplorer.specialFolder.last", store);
+        await storage.update("taskexplorer.specialFolder.last", store, StorageTarget.Workspace);
+        store = storage.get<string[]>("favoriteTasks", []).map(id => ({ id, timestamp: ++ts }));
+        await storage.update("taskexplorer.specialFolder.favorites", store);
+        await storage.update("taskexplorer.specialFolder.favorites", store, StorageTarget.Workspace);
+        await storage.delete("lastTasks");
+        await storage.delete("favoriteTasks");
+        await storage.update("taskexplorer.v3StorageUpgrade", true);
+    }
+};
+

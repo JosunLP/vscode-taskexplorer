@@ -44,8 +44,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
         this._specialFolders = {
-            favorites: new FavoritesFolder(wrapper, this, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
-            lastTasks: new LastTasksFolder(wrapper, this, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
+            favorites: new FavoritesFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
+            lastTasks: new LastTasksFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
         };
 
         this._treeBuilder = new TaskTreeBuilder(wrapper);
@@ -323,6 +323,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         //
         await this._treeBuilder.createTaskItemTree(logPad + "   ", 2);
         //
+        // Build special folders (Last Tasks / Favorites, etc...)
+        //
+        Object.values(this._specialFolders).forEach(f => f.build(logPad + "   "));
+        //
         // Set relevant context keys
         //
         await this.setContext();
@@ -333,12 +337,18 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    fireTreeRefreshEvent = (treeItem: TreeItem | null, logPad: string) =>
+    fireTreeRefreshEvent = (treeItem: TreeItem | null, taskItem: TaskItem | null, logPad: string) =>
     {
-        // Object.values(this._views).filter(v => v.enabled && v.visible).forEach((v) =>
         Object.values(this._views).filter(v => v.enabled).forEach((v) =>
         {
             v.tree.fireTreeRefreshEvent(treeItem, logPad);
+            if (treeItem && taskItem)
+            {
+                Object.values(this._specialFolders).filter(f => f.hasTask(taskItem)).forEach((f) =>
+                {
+                    v.tree.fireTreeRefreshEvent(f, logPad);
+                });
+            }
         });
     };
 
@@ -398,7 +408,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.setMessage(Strings.RequestingTasks);
         await this.fetchTasks(logPad + "   ");
         this.setMessage();
-        this.fireTreeRefreshEvent(null, logPad + "   ");
+        this.fireTreeRefreshEvent(null, null, logPad + "   ");
         //
         // Signal that the task list / tree has changed and set flags
         //
@@ -545,7 +555,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.refreshPending = false;
         this.wrapper.statusBar.update("");
         this.wrapper.log.write("   fire tree refresh event", 1, logPad);
-        this.fireTreeRefreshEvent(null, logPad + "   ");
+        this.fireTreeRefreshEvent(null, null, logPad + "   ");
         this.wrapper.log.methodDone("treemgr: workspace folder removed event", 1, logPad);
     };
 
