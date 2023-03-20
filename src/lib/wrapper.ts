@@ -2,7 +2,6 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
-import * as nls from "vscode-nls";
 import { TeServer } from "./server";
 import { getUuid } from "@env/crypto";
 import { logControl } from "./log/log";
@@ -81,7 +80,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _storage: IStorage;
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
-	private readonly _localize: nls.LocalizeFunc;
+	// private readonly _localize: nls.LocalizeFunc;
 	private readonly _fileCache: TeFileCache;
 	private readonly _statusBar: TeStatusBar;
     private readonly _taskWatcher: TaskWatcher;
@@ -123,16 +122,13 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
 		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
 
-		this._localize = nls.loadMessageBundle();
+		// this._localize = nls.loadMessageBundle();
 		Object.entries(Strings).filter(s => s[1].includes("|")).forEach(e =>
 		{
 			const lPair = e[1].split("|");
-			(<IDictionary<string>>Strings)[e[0]] = this._localize(lPair[0], lPair[1]);
+			(<IDictionary<string>>Strings)[e[0]] = this.localize(lPair[0], lPair[1]);
 		});
-// console.log(this._localize("name", "default 0"));
-// console.log(this._localize("taskexplorer.name", "default 1"));
-// console.log(this._localize("vscode-taskexplorer.description", "default 2"));
-// console.log(this._localize("spmeesseman.vscode-taskexplorer.appstrings.getLicense", "default 3"));
+
 		this._teContext = new TeContext();
 		this._statusBar = new TeStatusBar(this);
 		this._fileCache = new TeFileCache(this);
@@ -534,7 +530,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return { Storage: StorageKeys, Config: ConfigKeys, Strings, Globs };
 	}
 
-	localize = (key: string, defaultMessage: string): string => this._localize(key, defaultMessage);
+	localize = (_key: string, defaultMessage: string): string => defaultMessage; // this._localize(key, defaultMessage);
 
 	get log(): ILog {
 		return this._log;

@@ -1,6 +1,5 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-// import * as nls from "vscode-nls";
 import { log } from "./lib/log/log";
 import { TeWrapper } from "./lib/wrapper";
 import { ConfigKeys } from "./lib/constants";
@@ -30,7 +29,6 @@ export async function activate(context: ExtensionContext)
     //
     // Initialize configuration
     //
-	// nls.config({ locale: "en-us" })();
     registerConfiguration(context);
     //
     // Initialize logging

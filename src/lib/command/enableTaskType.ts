@@ -2,13 +2,11 @@
 import { Globs } from "../constants";
 import { TeWrapper } from "../wrapper";
 import { testPattern } from "../utils/utils";
-import { loadMessageBundle } from "vscode-nls";
 import { Disposable, Uri, window } from "vscode";
 import { Commands, registerCommand } from "./command";
 
 export class EnableTaskTypeCommand implements Disposable
 {
-    private localize = loadMessageBundle();
     private _disposables: Disposable[] = [];
 
     constructor(private readonly wrapper: TeWrapper)
@@ -32,7 +30,7 @@ export class EnableTaskTypeCommand implements Disposable
         else{
             const msg = "This file does not appear to be associated to any known task type";
             this.wrapper.log.write(msg, 1, "");
-            window.showInformationMessage(this.localize("messages.noAssociatedTaskType", msg));
+            window.showInformationMessage(this.wrapper.localize("appstrings.noAssociatedTaskType", msg));
         }
         this.wrapper.log.methodDone("enable task type file explorer command", 1, "");
     };

@@ -1,7 +1,6 @@
 
 import { Globs } from "../constants";
 import { TeWrapper } from "../wrapper";
-import { loadMessageBundle } from "vscode-nls";
 import { Disposable, Uri, window } from "vscode";
 import { removeFromExcludes } from "../utils/addToExcludes";
 import { Commands, executeCommand, registerCommand } from "./command";
@@ -9,7 +8,6 @@ import { Commands, executeCommand, registerCommand } from "./command";
 
 export class RemoveFromExcludesCommand implements Disposable
 {
-    private localize = loadMessageBundle();
     private _disposables: Disposable[] = [];
 
     constructor(private readonly wrapper: TeWrapper)
@@ -38,7 +36,7 @@ export class RemoveFromExcludesCommand implements Disposable
             else{
                 const msg = "This file does not appear to be associated to any known task type";
                 this.wrapper.log.write(msg, 1, "   ");
-                window.showInformationMessage(this.localize("messages.noAssociatedTaskType", msg));
+                window.showInformationMessage(this.wrapper.localize("appstrings.noAssociatedTaskType", msg));
             }
         }
         else {
