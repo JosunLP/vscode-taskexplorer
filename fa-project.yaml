@@ -112,3 +112,15 @@ icons:
       - regular
   - circle-info:
       - regular
+  - xmark:
+      - regular
+  - user-xmark:
+      - light
+  - upload:
+      - regular
+  - cloud-arrow-down:
+      - regular
+      - light
+  - copy:
+      - regular
+      - duotone

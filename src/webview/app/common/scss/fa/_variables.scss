@@ -60,6 +60,8 @@ $fa-var-8: \38;
 $fa-var-9: \39;
 $fa-var-circle-chevron-right: \f138;
 $fa-var-chevron-circle-right: \f138;
+$fa-var-user-xmark: \f235;
+$fa-var-user-times: \f235;
 $fa-var-circle-minus: \f056;
 $fa-var-minus-circle: \f056;
 $fa-var-chevrons-left: \f323;
@@ -79,6 +81,9 @@ $fa-var-unlock: \f09c;
 $fa-var-badger-honey: \f6b4;
 $fa-var-circle-chevron-up: \f139;
 $fa-var-chevron-circle-up: \f139;
+$fa-var-cloud-arrow-down: \f0ed;
+$fa-var-cloud-download: \f0ed;
+$fa-var-cloud-download-alt: \f0ed;
 $fa-var-memo-pad: \e1da;
 $fa-var-arrows-rotate: \f021;
 $fa-var-refresh: \f021;
@@ -97,11 +102,18 @@ $fa-var-gear: \f013;
 $fa-var-cog: \f013;
 $fa-var-clock: \f017;
 $fa-var-clock-four: \f017;
+$fa-var-upload: \f093;
 $fa-var-bug: \f188;
 $fa-var-arrow-down: \f063;
 $fa-var-arrow-up: \f062;
+$fa-var-copy: \f0c5;
 $fa-var-plus: \2b;
 $fa-var-add: \2b;
+$fa-var-xmark: \f00d;
+$fa-var-close: \f00d;
+$fa-var-multiply: \f00d;
+$fa-var-remove: \f00d;
+$fa-var-times: \f00d;
 $fa-var-chevron-left: \f053;
 $fa-var-chevron-right: \f054;
 $fa-var-thumbtack: \f08d;
@@ -137,6 +149,8 @@ $fa-icons: (
   "9": $fa-var-9,
   "circle-chevron-right": $fa-var-circle-chevron-right,
   "chevron-circle-right": $fa-var-chevron-circle-right,
+  "user-xmark": $fa-var-user-xmark,
+  "user-times": $fa-var-user-times,
   "circle-minus": $fa-var-circle-minus,
   "minus-circle": $fa-var-minus-circle,
   "chevrons-left": $fa-var-chevrons-left,
@@ -156,6 +170,9 @@ $fa-icons: (
   "badger-honey": $fa-var-badger-honey,
   "circle-chevron-up": $fa-var-circle-chevron-up,
   "chevron-circle-up": $fa-var-chevron-circle-up,
+  "cloud-arrow-down": $fa-var-cloud-arrow-down,
+  "cloud-download": $fa-var-cloud-download,
+  "cloud-download-alt": $fa-var-cloud-download-alt,
   "memo-pad": $fa-var-memo-pad,
   "arrows-rotate": $fa-var-arrows-rotate,
   "refresh": $fa-var-refresh,
@@ -174,11 +191,18 @@ $fa-icons: (
   "cog": $fa-var-cog,
   "clock": $fa-var-clock,
   "clock-four": $fa-var-clock-four,
+  "upload": $fa-var-upload,
   "bug": $fa-var-bug,
   "arrow-down": $fa-var-arrow-down,
   "arrow-up": $fa-var-arrow-up,
+  "copy": $fa-var-copy,
   "plus": $fa-var-plus,
   "add": $fa-var-add,
+  "xmark": $fa-var-xmark,
+  "close": $fa-var-close,
+  "multiply": $fa-var-multiply,
+  "remove": $fa-var-remove,
+  "times": $fa-var-times,
   "chevron-left": $fa-var-chevron-left,
   "chevron-right": $fa-var-chevron-right,
   "thumbtack": $fa-var-thumbtack,
