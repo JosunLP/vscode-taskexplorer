@@ -68,6 +68,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     private get storeName(): SpecialFolderStorageKey {
         return `taskexplorer.specialFolder.${this.listType}`;
+        // return `${this.wrapper.keys.Config.SpecialFolders.FolderState}.${this.listType}`;
     }
 
 
@@ -132,32 +133,38 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         this.log.methodStart(`build ${this.labelLwr} folder`, 1, logPad);
 
         const added: string[] = [],
-              allStoreItems = [ ...this.storeWs, ...this.store ],
-              nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(this.wrapper.keys.Config.SpecialFolders.FolderState);
+              taskMap = this.wrapper.treeManager.getTaskMap(),
+              allStoreItems = this.getCombinedStore(),
+              expandStateId = this.wrapper.utils.lowerCaseFirstChar(this.label, true),
+              folderStateCfgKey = this.wrapper.keys.Config.SpecialFolders.FolderState,
+              tree = this.wrapper.treeManager.getTaskTree() as TreeItem[], // Guaranted not to be undefined
+              nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(folderStateCfgKey);
 
         this.taskFiles = [];
-        this.collapsibleState = TreeItemCollapsibleState[nodeExpandedeMap[this.wrapper.utils.lowerCaseFirstChar(this.label, true)]];
+        this.collapsibleState = TreeItemCollapsibleState[nodeExpandedeMap[expandStateId]];
 
         for (const t of allStoreItems)
         {
+            if (this.taskFiles.length >= this.maxItems) {
+                break;
+            }
             if (added.includes(t.id)) {
                 continue;
             }
-            const taskItem2 = this.wrapper.treeManager.getTaskMap()[t.id];
-            if (taskItem2 instanceof TaskItem && taskItem2.task)
+            const taskItem = taskMap[t.id];
+            if (taskItem instanceof TaskItem && taskItem.task)
             {
-                const taskItem3 = new TaskItem(taskItem2.taskFile, taskItem2.task, logPad + "   ");
-                taskItem3.id = this.label + ":" + taskItem3.id;
-                taskItem3.label = this.getRenamedTaskName(taskItem3);
-                taskItem3.folder = this;
-                this.insertTaskFile(taskItem3, 0);
+                const taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad + "   ");
+                taskItem2.id = this.label + ":" + taskItem2.id;
+                taskItem2.label = this.getRenamedTaskName(taskItem2);
+                taskItem2.folder = this;
+                this.insertTaskFile(taskItem2, 0);
                 added.push(t.id);
             }
         }
 
         this.sort();
 
-        const tree = this.wrapper.treeManager.getTaskTree() as TreeItem[]; // Guaranted not to be undefined
         if (!tree.find(i => i.id === this.id))
         {
             const showLastTasks = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SpecialFolders.ShowLastTasks),
@@ -192,7 +199,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         }
     }
 
-
     protected fireChangeEvent = (taskItem: TaskItem | undefined, logPad: string): void =>
     {
         const iTasks = this._enabled ? this.wrapper.taskUtils.toITask(this.wrapper, this.taskFiles.map(f => f.task), this.listType) : [],
@@ -200,6 +206,10 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         this._onDidTasksChange.fire({ tasks: iTasks, task: iTask, type: this.listType });
         this.wrapper.treeManager.fireTreeRefreshEvent(this, null, logPad);
     };
+
+
+    private getCombinedStore = () => [ ...this.storeWs, ...this.store ].sort((a, b) => a.timestamp < b.timestamp ? -1 : 1);
+
 
 
     protected getRenamedTaskName(taskItem: TaskItem): string
