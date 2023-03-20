@@ -136,7 +136,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
               nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(this.wrapper.keys.Config.SpecialFolders.FolderState);
 
         this.taskFiles = [];
-        this.collapsibleState = TreeItemCollapsibleState[nodeExpandedeMap[this.listType]];
+        this.collapsibleState = TreeItemCollapsibleState[nodeExpandedeMap[this.wrapper.utils.lowerCaseFirstChar(this.label, true)]];
 
         for (const t of allStoreItems)
         {

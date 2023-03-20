@@ -3,7 +3,6 @@ import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
-import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeGrouper } from "./treeGrouper";
 import { IDictionary, TaskMap } from "../interface";
@@ -105,7 +104,7 @@ export class TaskTreeBuilder
             if (!folder)
             {
                 const key = this.wrapper.utils.lowerCaseFirstChar(scopeName, true),
-                      state = this.wrapper.config.get<"Collapsed"|"Expanded">("specialFolders.folderState." + key, "Expanded");
+                      state = this.wrapper.config.get<"Collapsed"|"Expanded">(`${this.wrapper.keys.Config.SpecialFolders.FolderState}.${key}`, "Expanded");
                 folder = new TaskFolder(each.scope, TreeItemCollapsibleState[state]);
                 folders[scopeName] = folder;
                 this.wrapper.log.value("constructed tree taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
@@ -113,11 +112,11 @@ export class TaskTreeBuilder
         }     //
         else // User Task (not related to a ws or project)
         {   //
-            scopeName = Strings.USER_TASKS_LABEL;
+            scopeName = this.wrapper.keys.Strings.USER_TASKS_LABEL;
             folder = folders[scopeName];
             if (!folder)
             {
-                const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
+                const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(this.wrapper.keys.Config.SpecialFolders.FolderState);
                 folder = new TaskFolder(scopeName, TreeItemCollapsibleState[nodeExpandedeMap[this.wrapper.utils.lowerCaseFirstChar(scopeName, true)]]);
                 folders[scopeName] = folder;
                 this.wrapper.log.value("constructed tree user taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
