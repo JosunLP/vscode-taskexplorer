@@ -64,8 +64,7 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
     {
 		return [
 			DOM.on("[id=btnRegister]", "click", this.toggleRegistrationForm.bind(this)),
-			DOM.on("[id=btnRegisterCancel]", "click", this.toggleRegistrationForm.bind(this)),
-			DOM.on("[id=btnRegisterSubmit]", "click", this.toggleRegistrationForm.bind(this))
+			DOM.on("[id=btnRegisterCancel]", "click", this.toggleRegistrationForm.bind(this))
 		];
     }
 
@@ -73,11 +72,9 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 	private toggleRegistrationForm = () =>
 	{
 		const b = document.getElementById("buttonsPanelDiv") as HTMLElement,
-			  r = document.getElementById("registrationFormDiv") as HTMLElement,
-			  t = document.getElementById("buttonsRegistrationToggleFormTd") as HTMLElement;
+			  r = document.getElementById("registrationFormDiv") as HTMLElement;
 		b.classList.toggle("is-registration");
 		r.classList.toggle("is-registration");
-		t.classList.toggle("is-registration");
 	};
 
 }

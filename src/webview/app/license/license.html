@@ -56,8 +56,8 @@
                         </tbody>
                         </table>
                     </td>
-                    <td id="buttonsRegistrationToggleFormTd" valign="top" class="te-licmgr-buttons-registration-form-td">
-                        <div id="buttonsPanelDiv" class="button-panel">
+                    <td valign="top" class="te-licmgr-buttons-registration-form-td">
+                        <div id="buttonsPanelDiv" class="button-panel te-licmgr-button-panel">
                             <div class="te-button-container">
                                 <button data-action="command:taskexplorer.purchaseLicense" id="btnPurchaseLicense">Get License</button>
                             </div>
@@ -75,24 +75,24 @@
                             </div>
                             <!--<div id="te-paypal-buttons" class="te-paypal-buttons-container te-button-container margin-top-10"></div>-->
                         </div>
-                        <div id="registrationFormDiv" class="button-panel te-licmgr-registration-panel">
+                        <div id="registrationFormDiv" class="button-panel te-licmgr-button-panel te-licmgr-registration-panel">
                             <div class="te-textfield-container">
-                                <vscode-text-field id="firstName" placeholder="First name"></vscode-text-field>
+                                <vscode-text-field id="firstName" placeholder="First name" class="te-textfield"></vscode-text-field>
                             </div>
                             <div class="te-textfield-container margin-top-10">
-                                <vscode-text-field id="lastName" placeholder="Last name"></vscode-text-field>
+                                <vscode-text-field id="lastName" placeholder="Last name" class="te-textfield"></vscode-text-field>
                             </div>
                             <div class="te-textfield-container margin-top-10">
-                                <vscode-text-field id="emailAddress" placeholder="Email address"></vscode-text-field>
+                                <vscode-text-field id="emailAddress" placeholder="Email address" class="te-textfield"></vscode-text-field>
                             </div>
                             <div class="te-textfield-container margin-top-10">
-                                <vscode-text-field id="emailAddressAlt" placeholder="Alt. email address"></vscode-text-field>
+                                <vscode-text-field id="emailAddressAlt" placeholder="Alt. email address" class="te-textfield"></vscode-text-field>
                             </div>
                             <div class="te-button-container margin-top-10">
                                 <button id="btnRegisterCancel" class="te-icon-far-cancel">Cancel</button>
                             </div>
                             <div class="te-button-container margin-top-10">
-                                <button id="btnRegisterSubmit" class="te-icon-far-submit">Submit</button>
+                                <button data-action="command:taskexplorer.register" id="btnRegisterSubmit" class="te-icon-far-submit">Submit</button>
                             </div>
                         </div>
                     </td>
