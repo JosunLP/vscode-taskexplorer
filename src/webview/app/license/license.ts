@@ -4,7 +4,7 @@ import "../common/css/page.css";
 import "../common/scss/page.scss";
 import "./license.css";
 
-import { State } from "../../common/ipc";
+import { IpcExecCommand, State } from "../../common/ipc";
 import { TeWebviewApp } from "../webviewApp";
 import { Disposable, DOM } from "../common/dom";
 // import { loadScript, PayPalNamespace } from "@paypal/paypal-js";
@@ -32,6 +32,13 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 			vsCodeTextField()
 		);
 	}
+
+
+	private copyKey = () =>
+	{
+		// const b = document.getElementById("copyKeySpan") as HTMLElement;
+		this.sendCommand(IpcExecCommand, { command: "taskexplorer.copyKeyToClipboard" });
+	};
 
 	//  protected override onInitialize = (): void =>
 	//  {
@@ -62,10 +69,14 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 
     protected override onBind(): Disposable[]
     {
-		return [
+		const disposables = [
 			DOM.on("[id=btnRegister]", "click", this.toggleRegistrationForm.bind(this)),
-			DOM.on("[id=btnRegisterCancel]", "click", this.toggleRegistrationForm.bind(this))
+			DOM.on("[id=btnRegisterCancel]", "click", this.toggleRegistrationForm.bind(this)),
 		];
+		if (document.getElementById("copyKeySpan")) {
+			disposables.push(DOM.on("[id=copyKeySpan]", "click", this.copyKey.bind(this)));
+		}
+		return disposables;
     }
 
 

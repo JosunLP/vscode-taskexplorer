@@ -10,18 +10,21 @@
 
 import { TextDecoder } from "util";
 import { getNonce } from "@env/crypto";
+import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewView } from "./webviewView";
 import { TeWebviewPanel } from "./webviewPanel";
 import { fontawesome } from "./common/fontawesome";
-import { ITeWebview, TeSessionChangeEvent } from "../interface";
-import { Commands, executeCommand } from "../lib/command/command";
-import { ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace } from "vscode";
-import {
-	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, IpcLogWriteCommand,
-	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcUpdateConfigCommand, IpcLicenseChangedMsg, IpcEnabledChangedMsg
-} from "./common/ipc";
+import { IDictionary, ITeWebview } from "../interface";
 import { WebviewIds, WebviewViewIds } from "../lib/context";
+import { Commands, executeCommand } from "../lib/command/command";
+import {
+	ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace
+} from "vscode";
+import {
+	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification,
+	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcUpdateConfigCommand, IpcEnabledChangedMsg
+} from "./common/ipc";
 
 
 export interface FontAwesomeClass
@@ -182,6 +185,14 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		};
 
 		html = repl(html);
+
+		let rgx: RegExpExecArray | null;
+		const regex = /#{Strings\.([A-Za-z]+)}/g;
+        while ((rgx = regex.exec(html)) !== null)
+		{
+			const [ m, m2 ] = rgx;
+			html = html.replace(m, (<IDictionary<string>>Strings)[m2]);
+		}
 
 		return this.onHtmlFinalizeBase(html, ...args);
 	}

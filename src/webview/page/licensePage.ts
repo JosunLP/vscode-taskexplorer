@@ -33,10 +33,11 @@ export class LicensePage extends TeWebviewPanel<State>
 
 	private getLicenseStateContent = (): string =>
 	{
-		const licMgr = this.wrapper.licenseManager;
-		const key = licMgr.account.license.key;
-		const details =  // !newKey ?
-	(!licMgr.isLicensed ? `
+		const licMgr = this.wrapper.licenseManager,
+			  key = licMgr.account.license.key,
+			  extName = this.wrapper.extensionName;
+
+		const details = !licMgr.isLicensed ? `
 	<table class="margin-top-15">
 		<tr><td class="content-subsection-header">
 			Licensing Note
@@ -48,7 +49,7 @@ export class LicensePage extends TeWebviewPanel<State>
 		</td></tr>
 	</table>
 	<table class="margin-top-20">
-		<tr><td>You can view a detailed parsing report using the "<i>${this.wrapper.extensionName}: View Parsing Report</i>"
+		<tr><td>You can view a detailed parsing report using the "<i>${extName}: View Parsing Report</i>"
 		command in the Explorer context menu for any project.  It can alternatively be ran from the
 		command pallette for "all projects".
 		<tr><td height="20"></td></tr>
@@ -57,21 +58,32 @@ export class LicensePage extends TeWebviewPanel<State>
 	<table class="margin-top-15">
 		<tr><td class="content-subsection-header te-licmgr-subsection-header">${!licMgr.isTrial ? "License" : "Trial"} Key: &nbsp;&nbsp;</td>
 		<td class="te-licmgr-license-key-container">${key}</td>
+		<td valign="middle">
+			<div class="te-tooltip">
+				<span id="copyKeySpan" class="far fa-copy te-licmgr-copy-key"></span>
+				<span class="te-tooltiptext">Copy license key to system clipboard</span>
+			</div>
+		</td>
 		</tr>
-		<tr><td colspan="2" class="padding-top-10">
-			${!licMgr.isTrial ? `Thank you for supporting ${this.wrapper.extensionName}!` :
-								`Purchase a license today to support ${this.wrapper.extensionName} development!`}
+		<tr><td colspan="3" class="padding-top-10">
+			${!licMgr.isTrial ? `Thank you for supporting ${extName}!` :
+								`Purchase a license today to support ${extName} development!`}
 		</td></tr>
 	</table>
 	<table class="margin-top-20">
-		<tr><td>You can view a detailed parsing report using the "<i>${this.wrapper.extensionName}: View Parsing Report</i>"
+		<tr><td>You can view a detailed parsing report using the "<i>${extName}: View Parsing Report</i>"
 		command in the Explorer context menu for any project.  It can alternatively be ran from the
 		command pallette for "all projects" to see how many tasks the extension has parsed.
 		<tr><td height="10"></td></tr>
-	</table>
-	`);
+	</table>`;
+
 		return `<tr><td>${details}</td></tr>`;
 	};
+
+
+	protected override includeFontAwesome = () => (
+		{ duotone: true, regular: true, icons: [ "copy", "upload", "xmark" ] }
+	);
 
 
 	protected override onHtmlPreview = async (html: string): Promise<string> =>

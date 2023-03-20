@@ -8,6 +8,15 @@
     word-break: break-all;
 }
 
+.te-licmgr-copy-key {
+    color: var(--vscode-button-background);
+    --fa-primary-color: var(--vscode-button-background);
+    --fa-secondary-color: var(--vscode-foreground);
+    cursor: pointer;
+    font-size: 28px;
+    line-height: 28px;
+}
+
 .te-licmgr-task-table-top-container {
     display: inline;
 }
