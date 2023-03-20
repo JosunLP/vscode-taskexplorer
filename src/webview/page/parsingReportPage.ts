@@ -10,6 +10,7 @@ import { ContextKeys, WebviewIds } from "../../lib/context";
 import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { getWorkspaceProjectName, pushIfNotExists } from "../../lib/utils/utils";
+import { createTaskImageTable } from "../common/taskImageTable";
 
 
 export class ParsingReportPage extends TeWebviewPanel<State>
@@ -31,17 +32,6 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 			Commands.ShowParsingReportPage
 		);
 	}
-
-
-	// protected override includeBody = async(...args: any[]) => this.getExtraContent(args[0]);
-	protected override onHtmlPreview = async(html: string, ...args: any[]) =>
-	{
-		const uri = args[0] as Uri | undefined;
-		const project = uri ? getWorkspaceProjectName(uri.fsPath || uri.path) : undefined;
-		html = await createTaskCountTable(this.wrapper, project, html);
-		html = html.replace("#{parsingReportTable}", this.getExtraContent(uri));
-		return html;
-	};
 
 
 	private getExtraContent = (uri?: Uri) =>
@@ -113,6 +103,17 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 		const summary = `<table><tr><td class="parsing-report-projects-title">Projects:</td><td class="parsing-report-projects">${projects.join(", &nbsp;")}</td></tr></table>`;
 
 		return `<tr><td><table class="margin-top-15"><tr><td>${summary}</td></tr></table><table><tr><td>${details}</td></tr></table></td></tr>`;
+	};
+
+
+	protected override onHtmlPreview = async(html: string, ...args: any[]) =>
+	{
+		const uri = args[0] as Uri | undefined;
+		const project = uri ? getWorkspaceProjectName(uri.fsPath || uri.path) : undefined;
+		html = createTaskCountTable(this.wrapper, project, html);
+		html = html.replace("#{parsingReportTable}", this.getExtraContent(uri));
+		html = html.replace("#{taskImageTable}", createTaskImageTable());
+		return html;
 	};
 
 

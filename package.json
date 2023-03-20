@@ -162,6 +162,7 @@
         "@opentelemetry/exporter-trace-otlp-http": "^0.35.1",
         "@opentelemetry/sdk-trace-base": "^1.9.1",
         "@sgarciac/bombadil": "^2.3.0",
+        "@vscode/webview-ui-toolkit": "^1.2.2",
         "glob": "^8.1.0",
         "https-proxy-agent": "^5.0.1",
         "json5": "^2.2.2",

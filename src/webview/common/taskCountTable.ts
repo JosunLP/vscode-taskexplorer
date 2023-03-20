@@ -7,14 +7,13 @@ import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
 import { getWorkspaceProjectName } from "../../lib/utils/utils";
 
 
-export const createTaskCountTable = async(wrapper: TeWrapper, project?: string, html?: string) =>
+export const createTaskCountTable = (wrapper: TeWrapper, project?: string, html?: string) =>
 {
     const projects: string[] = [],
           taskCounts: IDictionary<number> = {};
 
     let fileCount = 0;
     const treeMgr = wrapper.treeManager;
-    // let tableTemplate = (await workspace.fs.readFile(tableTemplateFile)).toString();
     const tasks = treeMgr.getTasks() // Filter out 'User' tasks for project/folder reports
                          .filter((t: Task) => !project || (isWorkspaceFolder(t.scope) &&
                                   project === getWorkspaceProjectName(t.scope.uri.fsPath)));

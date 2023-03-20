@@ -13,68 +13,19 @@
         #{body}
 
         <table align="center" width="900">
+        <tbody>
 
             <tr><td>
 
                 <table width="100%">
+                <tbody>
                     <tr><td>
                         #{title}
                     </td></tr>
                     <tr><td>
-                        <table class="margin-top-15"><tr>
-                            <td>
-                                <img src="#{webroot}/img/sources/npm.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/ant.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/yarn.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/grunt.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/gulp.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/gradle.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/workspace.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/make.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/ts.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/bat.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/ruby.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/powershell.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/bash.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/python.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/nsis.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/perl.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/maven.png" />
-                            </td>
-                        </tr></table>
+                        #{taskImageTable}
                     </td></tr>
+                </tbody>
                 </table>
 
             </td></tr>
@@ -82,9 +33,11 @@
             <tr><td>
 
                 <table class="content-table" width="100%">
+                <tbody>
                     <tr>
                     <td>
                         <table width="100%">
+                        <tbody>
                             <tr>
                                 <td class="content-subtitle">
                                     NEW IN THIS RELEASE:
@@ -95,7 +48,9 @@
                                     #{subtitle}
                                 </td>
                             </tr>
-                            <tr><td><table width="100%">
+                            <tr><td>
+                            <table width="100%">
+                            <tbody>
                                 <tr>
                                     <td>#{releasenotes}</td>
                                 </tr>
@@ -110,7 +65,7 @@
                                                 <td width="15" align="center">
                                                     <img id="btnToggleReleaseNotes" class="toggle-button" />
                                                 </td>
-                                            -->
+                                                -->
                                                 <td width="15" align="center">
                                                     <span id="btnToggleReleaseNotes" class="far fa-chevron-circle-up toggle-button"></span>
                                                 </td>
@@ -134,7 +89,9 @@
                                         </table>
                                     </td>
                                 </tr>
+                            </tbody>
                             </table></td></tr>
+                        </tbody>
                         </table>
                     </td>
                     <td valign="top" align="right" class="button-panel">
@@ -151,10 +108,12 @@
                             <button data-action="command:taskexplorer.view.parsingReport.show" id="btnViewReport">View Parsing Report</button>
                         </div>
                     </td></tr>
+                </tbody>
                 </table>
 
             </td></tr>
 
+        </tbody>
         </table>
 
 		#{endOfBody}

@@ -29,13 +29,13 @@ export class TaskUsageView extends TeWebviewView<State>
 	}
 
 
-	protected override includeBody = async() => ""; // For coverage, empty body
+	protected override includeBody = () => ""; // For coverage, empty body
 
 
-	protected override includeHead = async() => ""; // For coverage, empty head
+	protected override includeHead = () => ""; // For coverage, empty head
 
 
-	protected override includeEndOfBody = async() => "<!-- spm -->"; // For coverage, endOfBody and no bootstrap
+	protected override includeEndOfBody = () => "<!-- spm -->"; // For coverage, endOfBody and no bootstrap
 
 
 	protected override onConfigChanged(e: ConfigurationChangeEvent)

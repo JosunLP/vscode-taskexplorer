@@ -6,7 +6,14 @@ import "./license.css";
 
 import { State } from "../../common/ipc";
 import { TeWebviewApp } from "../webviewApp";
+import { Disposable, DOM } from "../common/dom";
 // import { loadScript, PayPalNamespace } from "@paypal/paypal-js";
+/*
+// https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/webview/main.ts
+	provideVSCodeDesignSystem, Button, Dropdown, ProgressRing, TextField,
+  	vsCodeButton, vsCodeDropdown, vsCodeOption, vsCodeTextField, vsCodeProgressRing
+*/
+import { provideVSCodeDesignSystem, vsCodeTextField } from "@vscode/webview-ui-toolkit";
 
 
 export class LicenseWebviewApp extends TeWebviewApp<State>
@@ -17,6 +24,13 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 	constructor()
     {
 		super("LicenseWebviewApp");
+		provideVSCodeDesignSystem().register(
+			// vsCodeButton(),
+			// vsCodeDropdown(),
+			// vsCodeOption(),
+			// vsCodeProgressRing(),
+			vsCodeTextField()
+		);
 	}
 
 	//  protected override onInitialize = (): void =>
@@ -44,6 +58,27 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 	//  		console.error("failed to load the PayPal JS SDK script", 1, error);
 	//  	});
 	//  };
+
+
+    protected override onBind(): Disposable[]
+    {
+		return [
+			DOM.on("[id=btnRegister]", "click", this.toggleRegistrationForm.bind(this)),
+			DOM.on("[id=btnRegisterCancel]", "click", this.toggleRegistrationForm.bind(this)),
+			DOM.on("[id=btnRegisterSubmit]", "click", this.toggleRegistrationForm.bind(this))
+		];
+    }
+
+
+	private toggleRegistrationForm = () =>
+	{
+		const b = document.getElementById("buttonsPanelDiv") as HTMLElement,
+			  r = document.getElementById("registrationFormDiv") as HTMLElement,
+			  t = document.getElementById("buttonsRegistrationToggleFormTd") as HTMLElement;
+		b.classList.toggle("is-registration");
+		r.classList.toggle("is-registration");
+		t.classList.toggle("is-registration");
+	};
 
 }
 

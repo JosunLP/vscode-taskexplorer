@@ -311,10 +311,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	}
 
 
-	protected onHtmlPreview = async(html: string, ...args: unknown[]): Promise<string> => html;
+	protected onHtmlPreview = async(html: string, ..._args: unknown[]): Promise<string> => html;
 
 
-	protected onHtmlFinalize = async(html: string, ...args: unknown[]): Promise<string> => html;
+	protected onHtmlFinalize = async(html: string, ..._args: unknown[]): Promise<string> => html;
 
 
 	protected onHtmlPreviewBase = async(html: string, ...args: unknown[]): Promise<string> => this.onHtmlPreview(html, ...args);

@@ -34,26 +34,15 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	protected override includeBootstrap = (): Promise<State> => this.getState();
 
 
-	protected override includeFontAwesome = () => ({ regular: true, icons: [ "star", "bug", "gear", "asterisk", "chevron-circle-up", "chevron-circle-down" ] });
+	protected override includeFontAwesome = () => (
+		{ regular: true, icons: [ "star", "bug", "gear", "asterisk", "chevron-circle-up", "chevron-circle-down" ] }
+	);
 
 
-	protected override onHtmlFinalize = async(html: string) =>
-	{
-		const changelogUri = Uri.joinPath(this.wrapper.context.extensionUri, "CHANGELOG.md"),
-			  changeLogMd = new TextDecoder("utf8").decode(await workspace.fs.readFile(changelogUri)),
-			  changeLogHtml = await marked(changeLogMd, { async: true }),
-			  version = this.wrapper.context.extension.packageJSON.version;
-		html = html.replace("#{changelog}", changeLogHtml)
-				   .replace("#{subtitle}", this.getNewInThisReleaseShortDsc())
-				   .replace("#{releasenotes}", this.getNewReleaseNotes(version, changeLogMd));
-		return html;
-	};
+	private getNewInThisReleaseShortDsc = (): string => "MAJOR RELEASE - A PLETHORA OF NEW FEATURES, BUG FIXES AzND PERFORMANCE ENHANCEMENTS !!";
 
 
-	private getNewInThisReleaseShortDsc = () => "MAJOR RELEASE - A PLETHORA OF NEW FEATURES, BUG FIXES AzND PERFORMANCE ENHANCEMENTS !!";
-
-
-	private getNewReleaseNotes = (version: string, changeLogMd: string) =>
+	private getNewReleaseNotes = (version: string, changeLogMd: string): string =>
 	{
 	return `
 	<table style="margin-top:15px" width="100%">
@@ -85,7 +74,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	};
 
 
-	private getNewReleaseNotesHdr = (title: string, icon: string) =>
+	private getNewReleaseNotesHdr = (title: string, icon: string): string =>
 	{
 		return `
 		<tr><td width="100%" colspan="2">
@@ -103,7 +92,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 	};
 
 
-	private getReleaseNotes = (section: string, version: string, noChangesDsc: string, changeLogMd: string) =>
+	private getReleaseNotes = (section: string, version: string, noChangesDsc: string, changeLogMd: string): string =>
 	{
 		let html = "<ul>";
 		let match: RegExpExecArray | null;
@@ -132,6 +121,19 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 			html += "<li>error - the release notes for this version cannot be found</li>";
 		}
 		html += "</ul>";
+		return html;
+	};
+
+
+	protected override onHtmlFinalize = async(html: string): Promise<string> =>
+	{
+		const changelogUri = Uri.joinPath(this.wrapper.context.extensionUri, "CHANGELOG.md"),
+			  changeLogMd = new TextDecoder("utf8").decode(await workspace.fs.readFile(changelogUri)),
+			  changeLogHtml = await marked(changeLogMd, { async: true }),
+			  version = this.wrapper.context.extension.packageJSON.version;
+		html = html.replace("#{changelog}", changeLogHtml)
+				   .replace("#{subtitle}", this.getNewInThisReleaseShortDsc())
+				   .replace("#{releasenotes}", this.getNewReleaseNotes(version, changeLogMd));
 		return html;
 	};
 

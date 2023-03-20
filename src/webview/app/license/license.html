@@ -13,80 +13,33 @@
         #{body}
 
         <table align="center" width="900">
+        <tbody>
 
             <tr><td>
 
                 <table>
+                <tbody>
                     <tr><td>
                         #{title}
                     </td></tr>
                     <tr><td>
-                        <table class="margin-top-15"><tr>
-                            <td>
-                                <img src="#{webroot}/img/sources/npm.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/ant.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/yarn.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/grunt.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/gulp.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/gradle.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/workspace.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/make.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/ts.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/bat.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/ruby.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/powershell.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/bash.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/python.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/nsis.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/perl.png" />
-                            </td>
-                            <td>
-                                <img src="#{webroot}/img/sources/maven.png" />
-                            </td>
-                        </tr></table>
+                        #{taskImageTable}
                     </td></tr>
+                </tbody>
                 </table>
 
             </td></tr>
 
-            #{licensePageBodyTop}
+            #{licenseStateContent}
 
             <tr><td>
 
                 <table class="content">
-                    <tr>
-                    <td>
-                        <table width="100%"">
+                <tbody>
+                <tr>
+                    <td valign="top">
+                        <table width="100%" class="te-licmgr-task-table-top-container">
+                        <tbody>
                             <tr>
                                 <td class="content-subtitle">
                                     PARSING BREAKDOWN:
@@ -100,29 +53,72 @@
                             <tr><td>
                                 #{taskCounts.table}
                             </td></tr>
+                        </tbody>
                         </table>
                     </td>
-                    <td valign="top" align="right" class="button-panel">
-                        <div class="te-button-container">
-                            <button data-action="command:taskexplorer.purchaseLicense" id="btnPurchaseLicense">Purchase License</button>
+                    <td id="buttonsRegistrationToggleFormTd" valign="top" class="te-licmgr-buttons-registration-form-td">
+                        <div id="buttonsPanelDiv" class="button-panel">
+                            <div class="te-button-container">
+                                <button data-action="command:taskexplorer.purchaseLicense" id="btnPurchaseLicense">Get License</button>
+                            </div>
+                            <div class="te-button-container margin-top-10">
+                                <button data-action="command:taskexplorer.extendTrial" id="btnExtendTrial">Extend Trial</button>
+                            </div>
+                            <div class="te-button-container margin-top-10">
+                                <button id="btnRegister">Register</button>
+                            </div>
+                            <div class="te-button-container margin-top-10">
+                                <button data-action="command:taskexplorer.view.releaseNotes.show" id="btnViewReleseNotes">View Release Notes</button>
+                            </div>
+                            <div class="te-button-container margin-top-10">
+                                <button data-action="command:taskexplorer.view.parsingReport.show" id="btnViewReport">View Parsing Report</button>
+                            </div>
+                            <!--<div id="te-paypal-buttons" class="te-paypal-buttons-container te-button-container margin-top-10"></div>-->
                         </div>
-                        <div class="te-button-container margin-top-10">
-                            <button data-action="command:taskexplorer.extendTrial" id="btnExtendTrial">Extend Trial</button>
+                        <div id="registrationFormDiv" class="button-panel te-licmgr-registration-panel">
+                            <div class="te-textfield-container">
+                                <vscode-text-field id="firstName" placeholder="First name"></vscode-text-field>
+                            </div>
+                            <div class="te-textfield-container margin-top-10">
+                                <vscode-text-field id="lastName" placeholder="Last name"></vscode-text-field>
+                            </div>
+                            <div class="te-textfield-container margin-top-10">
+                                <vscode-text-field id="emailAddress" placeholder="Email address"></vscode-text-field>
+                            </div>
+                            <div class="te-textfield-container margin-top-10">
+                                <vscode-text-field id="emailAddressAlt" placeholder="Alt. email address"></vscode-text-field>
+                            </div>
+                            <div class="te-button-container margin-top-10">
+                                <button id="btnRegisterCancel" class="te-icon-far-cancel">Cancel</button>
+                            </div>
+                            <div class="te-button-container margin-top-10">
+                                <button id="btnRegisterSubmit" class="te-icon-far-submit">Submit</button>
+                            </div>
                         </div>
-                        <div class="te-button-container margin-top-10">
-                            <button data-action="command:taskexplorer.view.releaseNotes.show" id="btnViewReleseNotes">View Release Notes</button>
-                        </div>
-                        <div class="te-button-container margin-top-10">
-                            <button data-action="command:taskexplorer.view.parsingReport.show" id="btnViewReport">View Parsing Report</button>
-                        </div>
-                        <!--<div id="te-paypal-buttons" class="te-paypal-buttons-container te-button-container margin-top-10"></div>-->
-                    </td></tr>
+                    </td>
+                
+                </tr>
+                </tbody>
                 </table>
 
             </td></tr>
 
-            #{licensePageBodyBottom}
+            <tr><td>
+                <table class="margin-top-15">
+                    <tr>
+                        <td class="content-section-header">
+                            Example Parsing Report:
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="#{webroot}/readme/parsingreport.png">
+                        </td>
+                    </tr>
+                </table>
+            </td></tr>
 
+        </tbody>
         </table>
 
         #{endOfBody}

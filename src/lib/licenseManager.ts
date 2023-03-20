@@ -226,20 +226,20 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		const ep: ITeApiEndpoint = "register/trial/extend",
 			  token = this._account.session.token;
 
-		this._busy = true;
 		this.wrapper.statusBar.update("Requesting extended trial");
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
 
-		if (this._account.license.period > 1)
+		if (this._account.license.period > 1 || !this.isRegistered)
 		{
-			const msg = "an extended trial license has already been allocated to this machine";
+			const msg = "user is not registered or an extended trial license has already been allocated to this machine";
 			window.showInformationMessage("Can't proceed - " + msg);
 			this.wrapper.log.write("   " + msg, 1, logPad);
 			this.wrapper.log.methodDone("request extended trial", 1, logPad);
 			this.wrapper.statusBar.update("");
-			this._busy = false;
 			return;
 		}
+
+		this._busy = true;
 
 		//
 		// TODO - Collect name and email address to allow 2nd trial
@@ -247,8 +247,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		const firstName = "Scott",
 			  lastName = "Meesseman",
 			  email = `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`;
-
-
 		try
 		{
 			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad,
@@ -268,7 +266,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		finally {
 			this._busy = false;
 			this.wrapper.statusBar.update("");
-			this._onReady.fire();
+			queueMicrotask(() => this._onReady.fire());
 		}
 		this.wrapper.log.methodDone("request extended trial", 1, logPad);
 	};

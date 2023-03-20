@@ -3,58 +3,9 @@ import { Disposable } from "vscode";
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { Commands, debounce, registerCommand } from "../../lib/command/command";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
+import { Commands, registerCommand } from "../../lib/command/command";
 import { ITeTaskChangeEvent, TeSessionChangeEvent } from "../../interface";
-
-/*
-https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/webview/main.ts
-import {
-  provideVSCodeDesignSystem,
-  Button,
-  Dropdown,
-  ProgressRing,
-  TextField,
-  vsCodeButton,
-  vsCodeDropdown,
-  vsCodeOption,
-  vsCodeTextField,
-  vsCodeProgressRing,
-} from "@vscode/webview-ui-toolkit";
-<vscode-button id="check-weather-button">Check</vscode-button>
-          <h2>Current Weather</h2>
-          <section id="results-container">
-            <vscode-progress-ring id="loading" class="hidden"></vscode-progress-ring>
-// In order to use the Webview UI Toolkit web components they
-// must be registered with the browser (i.e. webview) using the
-// syntax below.
-provideVSCodeDesignSystem().register(
-  vsCodeButton(),
-  vsCodeDropdown(),
-  vsCodeOption(),
-  vsCodeProgressRing(),
-  vsCodeTextField()
-);
-
-// Get access to the VS Code API from within the webview context
-const vscode = acquireVsCodeApi();
-
-// Just like a regular webpage we need to wait for the webview
-// DOM to load before we can reference any of the HTML elements
-// or toolkit components
-window.addEventListener("load", main);
-
-// Main function that gets executed once the webview DOM loads
-function main() {
-  // To get improved type annotations/IntelliSense the associated class for
-  // a given toolkit component can be imported and used to type cast a reference
-  // to the element (i.e. the `as Button` syntax)
-  const checkWeatherButton = document.getElementById("check-weather-button") as Button;
-  checkWeatherButton.addEventListener("click", checkWeather);
-
-  setVSCodeMessageListener();
-}
-*/
 
 
 export class HomeView extends TeWebviewView<State>

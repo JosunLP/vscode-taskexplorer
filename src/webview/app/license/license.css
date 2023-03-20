@@ -1,6 +1,62 @@
 
 .te-licmgr-subsection-header {
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+.te-licmgr-license-key-container {
     word-break: break-all;
+}
+
+.te-licmgr-task-table-top-container {
+    display: inline;
+}
+
+.te-licmgr-registration-panel {
+    margin: 5px;
+    padding: 5px;
+    background-color: var(--vscode-background);
+    overflow: auto;
+    text-align: justify;
+}
+
+.te-licmgr-buttons-registration-form-td {
+    width: 160px;
+    padding-left: 10px;
+  }
+  
+  #buttonsRegistrationToggleFormTd {
+    width: 160px;
+    padding-left: 10px;
+  }
+  
+  #buttonsRegistrationToggleFormTd.is-registration {
+    width: 160px;
+    padding-left: 10px;
+  }
+  
+  #buttonsPanelDiv.is-registration {
+    display: none;
+    transform: scaleY(0);
+    transition: transform 400ms ease 0ms;
+  }
+  
+  #buttonsPanelDiv {
+    display: block;
+    transform: scaleY(1);
+    transition: transform 400ms ease 0ms;
+  }
+  
+  #registrationFormDiv {
+    transform: scaleY(0);
+    display: none;
+    transition: transform 400ms ease 0ms;
+  }
+  
+  #registrationFormDiv.is-registration {
+    transform: scaleY(1);
+    display: block;
+    transition: transform 400ms ease 0ms;
   }
 
 .task-count {

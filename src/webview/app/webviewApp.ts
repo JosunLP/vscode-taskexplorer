@@ -93,8 +93,8 @@ export abstract class TeWebviewApp<State = undefined>
 			(btn.parentNode as HTMLElement).style.display = isLicensed && !isTrial ? "none" : "-webkit-inline-flex";
 			btn = document.getElementById("btnExtendTrial");
 			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = !isTrial || isTrialExt;
-				(btn.parentNode as HTMLElement).style.display = !isTrial || isTrialExt ? "none" : "-webkit-inline-flex";
+				(btn.parentNode as HTMLElement).hidden = !isTrial || isTrialExt || !isRegistered;
+				(btn.parentNode as HTMLElement).style.display = !isTrial || isTrialExt || !isRegistered ? "none" : "-webkit-inline-flex";
 			}
 			btn = document.getElementById("btnRegister");
 			if (btn) {
@@ -106,11 +106,16 @@ export abstract class TeWebviewApp<State = undefined>
 				(btn.parentNode as HTMLElement).hidden = !isLicensed || isTrial;
 				(btn.parentNode as HTMLElement).style.display = !isLicensed || isTrial ? "none" : "-webkit-inline-flex";
 			}
-			btn = document.getElementById("btnViewLicense");
-			if (btn) {
-				(btn.parentNode as HTMLElement).hidden = !isLicensed || isTrial ;
-				(btn.parentNode as HTMLElement).style.display = !isLicensed || isTrial  ? "none" : "-webkit-inline-flex";
-			}
+			// btn = document.getElementById("btnViewLicense");
+			// if (btn) {
+			// 	(btn.parentNode as HTMLElement).hidden = isLicensed && !isTrial ;
+			// 	(btn.parentNode as HTMLElement).style.display = !isLicensed || isTrial  ? "none" : "-webkit-inline-flex";
+			// }
+			// btn = document.getElementById("btnViewReport");
+			// if (btn) {
+			// 	(btn.parentNode as HTMLElement).hidden = isLicensed && !isTrial ;
+			// 	(btn.parentNode as HTMLElement).style.display = !isLicensed || isTrial  ? "none" : "-webkit-inline-flex";
+			// }
 			btn = document.getElementById("btnViewReleaseNotes");
 			if (btn) {
 				(btn.parentNode as HTMLElement).hidden = !isLicensed || isTrial ;

@@ -4,6 +4,7 @@ import { TeWebviewPanel } from "../webviewPanel";
 import type { TeWrapper } from "../../lib/wrapper";
 import { Commands } from "../../lib/command/command";
 import { ContextKeys, WebviewIds  } from "../../lib/context";
+import { createTaskImageTable } from "../common/taskImageTable";
 
 
 export class WelcomePage extends TeWebviewPanel<State>
@@ -29,5 +30,8 @@ export class WelcomePage extends TeWebviewPanel<State>
 
 
 	protected override includeBootstrap = (): Promise<State> => this.getState();
+
+
+	protected override onHtmlPreview = async(html: string): Promise<string> => html.replace("#{taskImageTable}", createTaskImageTable());
 
 }

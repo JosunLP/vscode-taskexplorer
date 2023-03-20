@@ -1,4 +1,5 @@
 
+import { Disposable } from "vscode";
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
@@ -6,6 +7,7 @@ import { ITeTaskChangeEvent } from "../../interface";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { Commands, debounce } from "../../lib/command/command";
 import { createTaskCountTable } from "../common/taskCountTable";
+import { createTaskImageTable } from "../common/taskImageTable";
 
 
 export class LicensePage extends TeWebviewPanel<State>
@@ -29,7 +31,7 @@ export class LicensePage extends TeWebviewPanel<State>
 	}
 
 
-	private getExtraContent = async () =>
+	private getLicenseStateContent = (): string =>
 	{
 		const licMgr = this.wrapper.licenseManager;
 		const key = licMgr.account.license.key;
@@ -53,47 +55,35 @@ export class LicensePage extends TeWebviewPanel<State>
 	</table>
 	` : `
 	<table class="margin-top-15">
-		<tr><td class="content-subsection-header te-licmgr-subsection-header">${!licMgr.isTrial ? "License" : "Trial"} Key: &nbsp;${key}</td></tr>
-		<tr><td>
-			${!licMgr.isTrial ? "Thank you for supporting Task Explorer!" : `Purchase a license today to support ${this.wrapper.extensionName} development!`}
+		<tr><td class="content-subsection-header te-licmgr-subsection-header">${!licMgr.isTrial ? "License" : "Trial"} Key: &nbsp;&nbsp;</td>
+		<td class="te-licmgr-license-key-container">${key}</td>
+		</tr>
+		<tr><td colspan="2" class="padding-top-10">
+			${!licMgr.isTrial ? `Thank you for supporting ${this.wrapper.extensionName}!` :
+								`Purchase a license today to support ${this.wrapper.extensionName} development!`}
 		</td></tr>
 	</table>
 	<table class="margin-top-20">
 		<tr><td>You can view a detailed parsing report using the "<i>${this.wrapper.extensionName}: View Parsing Report</i>"
 		command in the Explorer context menu for any project.  It can alternatively be ran from the
 		command pallette for "all projects" to see how many tasks the extension has parsed.
-		<tr><td height="20"></td></tr>
+		<tr><td height="10"></td></tr>
 	</table>
 	`);
 		return `<tr><td>${details}</td></tr>`;
 	};
 
 
-	private getExtraContent2 = () =>
-	{;
-		const details = `<tr><td>
-	<table class="margin-top-15">
-		<tr><td class="content-section-header">Example Parsing Report:</td></tr>
-		<tr><td>
-			<img src="#{webroot}/readme/parsingreport.png">
-		</td></tr>
-	</td></tr>`;
-		return `<tr><td>${details}</td></tr>`;
-	};
-
-
-	protected override onHtmlPreview = async (html: string) =>
+	protected override onHtmlPreview = async (html: string): Promise<string> =>
 	{
-		html = await createTaskCountTable(this.wrapper, undefined, html);
-		let infoContent = await this.getExtraContent();
-		html = html.replace("#{licensePageBodyTop}", infoContent);
-		infoContent = this.getExtraContent2();
-		html = html.replace("#{licensePageBodyBottom}", infoContent);
+		html = createTaskCountTable(this.wrapper, undefined, html);
+		html = html.replace("#{licenseStateContent}", this.getLicenseStateContent())
+			       .replace("#{taskImageTable}", createTaskImageTable());
 		return html;
 	};
 
 
-	protected override onInitializing()
+	protected override onInitializing(): Disposable[]
 	{
 		return  [
 			this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged, this)

@@ -1,5 +1,6 @@
 
 import "../common/css/vscode.css";
+import "../common/css/view.css";
 import "./task-usage.css";
 
 import { State } from "../../common/ipc";

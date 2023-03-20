@@ -51,7 +51,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 	private getPath = (task: ITeTask): string => !task.definition.scriptFile ? task.fsPath : dirname(task.fsPath);
 
 
-    protected override includeBody = async(task: ITeTask) =>
+    protected override includeBody = (task: ITeTask) =>
     {
 		let html = `<div class=\"te-task-details-container\"><table align=\"center\" width=\"900\"<tr><td>
 					<table class="te-task-details-header-table" width="100%"><tbody><tr>
