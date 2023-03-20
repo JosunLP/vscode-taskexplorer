@@ -15,11 +15,12 @@ export class TaskFolder extends TreeItem
 {
     public override id: string;
     public override label: string;
+    public isSpecial: boolean;
     public taskFiles: (TaskFile|TaskItem)[] = [];
     public workspaceFolder: WorkspaceFolder | undefined;
 
 
-    constructor(folder: WorkspaceFolder | string, state: TreeItemCollapsibleState)
+    constructor(folder: WorkspaceFolder | string, state: TreeItemCollapsibleState, isSpecial?: boolean)
     {
         super(isString(folder) ? folder  : folder.name, state);
 
@@ -31,6 +32,7 @@ export class TaskFolder extends TreeItem
             this.resourceUri = folder.uri;
         }
 
+        this.isSpecial = !!isSpecial;
         this.iconPath = ThemeIcon.Folder;
         this.label = isString(folder) ? folder  : folder.name;
         this.id = "treeFolderId-" + this.label;

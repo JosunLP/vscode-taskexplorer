@@ -23,6 +23,7 @@ interface ITeSpecialTask
 export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 {
 
+    protected abstract order: number;
     protected abstract maxItems: number;
     protected abstract saveTask(taskItem: TaskItem, logPad: string): Promise<void>;
 
@@ -41,7 +42,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     constructor(protected readonly wrapper: TeWrapper, protected readonly listType: TeTaskListType, label: string, settingName: string, state: TreeItemCollapsibleState)
     {
-        super(label, state);
+        super(label, state, true);
         this.taskFiles = [];
         this.disposables = [];
         this.log = this.wrapper.log;
@@ -137,7 +138,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
               allStoreItems = this.getCombinedStore(),
               expandStateId = this.wrapper.utils.lowerCaseFirstChar(this.label, true),
               folderStateCfgKey = this.wrapper.keys.Config.SpecialFolders.FolderState,
-              tree = this.wrapper.treeManager.getTaskTree() as TreeItem[], // Guaranted not to be undefined
+              tree = this.wrapper.treeManager.getTaskTree() as TaskFolder[], // Guaranted not to be undefined
               nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(folderStateCfgKey);
 
         this.taskFiles = [];
@@ -165,12 +166,11 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
         this.sort();
 
-        if (!tree.find(i => i.id === this.id))
+        const sFolders = tree.filter(i => i.isSpecial) as SpecialTaskFolder[];
+        if (!sFolders.find(i => i.id === this.id))
         {
-            const showLastTasks = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SpecialFolders.ShowLastTasks),
-                  favIdx = showLastTasks ? 1 : 0,
-                  treeIdx = this.listType !== "favorites" ? 0 : favIdx;
-            tree.splice(treeIdx, 0, this);
+            const idx = sFolders.findIndex(i => i.order > this.order);
+            tree.splice(idx !== -1 ? idx : sFolders.length, 0, this);
         }
 
         this.log.methodDone(`build ${this.labelLwr} folder`, 1, logPad);
@@ -208,7 +208,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    private getCombinedStore = () => [ ...this.storeWs, ...this.store ].sort((a, b) => a.timestamp < b.timestamp ? -1 : 1);
+    private getCombinedStore = () => [ ...this.storeWs, ...this.store ].sort((a, b) => a.timestamp < b.timestamp ? 1 : -1);
 
 
 

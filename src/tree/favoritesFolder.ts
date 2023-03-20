@@ -14,14 +14,14 @@ import { Commands, registerCommand } from "../lib/command/command";
  */
 export class FavoritesFolder extends SpecialTaskFolder
 {
-
+    protected order = 1;
     private _maxItems: number;
 
 
     constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
     {
         super(wrapper, "favorites", wrapper.keys.Strings.FAV_TASKS_LABEL, wrapper.keys.Config.SpecialFolders.ShowFavorites, state);
-        this._maxItems = Infinity; // this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
+        this._maxItems = 100; // this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
         this.disposables.push(
             registerCommand(Commands.AddRemoveFavorite, this.addRemoveFavorite, this),
             registerCommand(Commands.ClearFavorites, this.clearSavedTasks, this)

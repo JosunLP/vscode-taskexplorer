@@ -14,6 +14,7 @@ import { ConfigurationChangeEvent, TreeItemCollapsibleState, window } from "vsco
  */
 export class LastTasksFolder extends SpecialTaskFolder
 {
+    protected order = 0;
     private _maxItems: number;
 
     constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
