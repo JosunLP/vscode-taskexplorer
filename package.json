@@ -361,17 +361,17 @@
             {
                 "command": "taskexplorer.register",
                 "title": "%command.register%",
-                "when": "taskexplorer:enabled"
+                "when": "taskexplorer:enabled && !taskexplorer:account:registered"
             },
             {
                 "command": "taskexplorer.purchaseLicense",
                 "title": "%command.purchaseLicense%",
-                "when": "taskexplorer:enabled"
+                "when": "taskexplorer:enabled && taskexplorer:account:license:type < 4"
             },
             {
                 "command": "taskexplorer.extendTrial",
                 "title": "%command.extendTrial%",
-                "when": "taskexplorer:enabled"
+                "when": "taskexplorer:enabled && taskexplorer:account:registered && taskexplorer:account:trial.period < 2 && taskexplorer:account:license:type < 4"
             },
             {
                 "command": "taskexplorer.openBugReports",
@@ -428,7 +428,7 @@
             {
                 "command": "taskexplorer.view.taskMonitor.show",
                 "title": "%command.view.taskMonitor.show%",
-                "when": "taskexplorer:enabled",
+                "when": "taskexplorer:enabled && taskexplorer:account:licensed",
                 "icon": {
                     "light": "res/img/light/react.svg",
                     "dark": "res/img/dark/react.svg"
@@ -437,7 +437,7 @@
             {
                 "command": "taskexplorer.view.taskDetails.show",
                 "title": "%command.view.taskDetails.show%",
-                "when": "taskexplorer:enabled && config.taskexplorer.taskMonitor.trackStats",
+                "when": "taskexplorer:enabled && config.taskexplorer.taskMonitor.trackStats && taskexplorer:account:licensed",
                 "icon": {
                     "light": "res/img/light/open.svg",
                     "dark": "res/img/dark/open.svg"
@@ -692,7 +692,7 @@
                 },
                 {
                     "command": "taskexplorer.view.taskMonitor.show",
-                    "when": "taskexplorer:enabled"
+                    "when": "taskexplorer:enabled && taskexplorer:account:licensed"
                 },
                 {
                     "command": "taskexplorer.openBugReports",
@@ -832,7 +832,7 @@
                 },
                 {
                     "command": "taskexplorer.view.taskMonitor.show",
-                    "when": "view =~ /^taskexplorer.view.taskTree/",
+                    "when": "view =~ /^taskexplorer.view.taskTree/ && taskexplorer:account:licensed",
                     "group": "navigation"
                 },
                 {
@@ -857,7 +857,7 @@
                 },
                 {
                     "command": "taskexplorer.view.taskMonitor.show",
-                    "when": "view == taskexplorer.view.home",
+                    "when": "view == taskexplorer.view.home && taskexplorer:account:licensed",
                     "group": "navigation"
                 },
                 {
@@ -905,7 +905,7 @@
                 },
                 {
                     "command": "taskexplorer.view.taskDetails.show",
-                    "when": "config.taskexplorer.taskMonitor.trackStats && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/"
+                    "when": "config.taskexplorer.taskMonitor.trackStats && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/ && taskexplorer:account:licensed"
                 },
                 {
                     "command": "taskexplorer.addToExcludes",

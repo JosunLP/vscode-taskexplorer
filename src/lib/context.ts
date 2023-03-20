@@ -11,6 +11,7 @@ export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
 
 export const enum ContextKeys
 {
+	AccountPrefix = "taskexplorer:account:",
 	FileCachePrefix = "taskexplorer:fileCache:",
 	KeyPrefix = "taskexplorer:key:",
 	TasksPrefix = "taskexplorer:tasks:",
@@ -33,6 +34,7 @@ export const enum ContextKeys
 
 type AllContextKeys =
 	ContextKeys
+	| `${ContextKeys.AccountPrefix}${string}`
 	| `${ContextKeys.KeyPrefix}${string}`
 	| `${ContextKeys.FileCachePrefix}${string}`
 	| `${ContextKeys.TasksPrefix}${string}`
@@ -69,9 +71,12 @@ export class TeContext implements ITeContext, Disposable
 
 	setContext = async(key: AllContextKeys, value: unknown): Promise<void> =>
 	{
-		this.contextStorage[key] = value;
-		void (await commands.executeCommand(VsCodeCommands.SetContext, key, value));
-		this._onDidChangeContext.fire(key);
+		if (this.contextStorage[key] !== value)
+		{
+			this.contextStorage[key] = value;
+			void (await commands.executeCommand(VsCodeCommands.SetContext, key, value));
+			this._onDidChangeContext.fire(key);
+		}
 	};
 
 }

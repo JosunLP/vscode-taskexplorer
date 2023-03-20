@@ -58,7 +58,7 @@ export class LicensePage extends TeWebviewPanel<State>
 	<table class="margin-top-15">
 		<tr><td class="content-subsection-header te-licmgr-subsection-header">${!licMgr.isTrial ? "License" : "Trial"} Key: &nbsp;&nbsp;</td>
 		<td class="te-licmgr-license-key-container">${key}</td>
-		<td valign="middle">
+		<td class="te-licmgr-copy-key-td">
 			<div class="te-tooltip">
 				<span id="copyKeySpan" class="far fa-copy te-licmgr-copy-key"></span>
 				<span class="te-tooltiptext">Copy license key to system clipboard</span>

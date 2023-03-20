@@ -8,6 +8,7 @@ import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
 	TeLicenseState, IDictionary, TeRuntimeEnvironment
 } from "../interface";
+import { ContextKeys } from "./context";
 
 
 export class LicenseManager implements ITeLicenseManager, Disposable
@@ -163,10 +164,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				await this.beginTrial(logPad + "   ");
 			}
 		}
-		finally  {
+		finally
+		{
+			this.setContext();
 			this._busy = false;
 			this.wrapper.statusBar.update("");
-			this._onReady.fire();
+			queueMicrotask(() => this._onReady.fire());
 		}
 
 		this.wrapper.log.methodDone("license manager check license", 1, logPad, [
@@ -494,9 +497,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private onSessionChanged = (e: TeSessionChangeEvent) => this._onSessionChange.fire(e);
-
-
 	private onTasksChanged = (e: ITeTaskChangeEvent) =>
 	{
 		this.wrapper.log.methodOnce("license event", "on tasks changed", 1, "");
@@ -582,13 +582,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		await this.wrapper.storage.updateSecret(this.wrapper.keys.Storage.Account, accountJson);
 		const pAccount = this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account);
 		this._account = JSON.parse(accountJson);
+		this.setContext();
 		//
 		// Queue task to notify of session changed
 		//
 		this.wrapper.log.write("   queue trigger session change event", 2, logPad);
 		queueMicrotask(() =>
 		{
-			this.onSessionChanged(
+			this._onSessionChange.fire(
 			{
 				account: this.wrapper.utils.cloneJsonObject(this._account),
 				changeNumber: this._accountChangeNumber,
@@ -610,6 +611,17 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			});
 		});
 		this.wrapper.log.methodDone("save account", 1, logPad);
+	};
+
+
+	private setContext = () =>
+	{
+		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}licensed`, this.isLicensed);
+		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}registered`, this.isRegistered);
+		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trial`, this.isTrial);
+		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trialext`, this.isTrialExtended);
+		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}license:type`, this._account.license.type);
+		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trial:period`, this._account.license.period);
 	};
 
 

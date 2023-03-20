@@ -509,13 +509,14 @@ export const fontawesome = {
     fontFace: (faCls: "regular-400" | "light-300" | "duotone-900" | "solid-900" | "brands-400", webRoot: string, cacheBuster: string) =>
     {
         const woff2 = faCls.split("-");
+        const family = woff2[0] === "duotone" ? "Duotone" : (woff2[0] === "brands" ? "Brands" : "Pro");
         return `
         :root, :host {
-            --fa-style-family-classic: \"Font Awesome 6 Pro\";
-            --fa-font-${woff2[0]}: normal ${woff2[1]} 1em/1 \"Font Awesome 6 Pro\";
+            --fa-style-family-classic: \"Font Awesome 6 ${family}\";
+            --fa-font-${woff2[0]}: normal ${woff2[1]} 1em/1 \"Font Awesome 6 ${family}\";
         }
         @font-face {
-            font-family: \"Font Awesome 6 Pro\";
+            font-family: \"Font Awesome 6 ${family}\";
             font-display: block;
             font-style: normal;
             font-weight: ${woff2[1]};

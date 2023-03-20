@@ -38,6 +38,7 @@ export const enum TeLicenseType
     Trial,
     TrialExtended,
     Standard,
+    Pro,
     Enterprise
 }
 
