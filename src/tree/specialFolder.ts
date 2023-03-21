@@ -156,7 +156,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             if (taskItem instanceof TaskItem && taskItem.task)
             {
                 const taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad + "   ");
-                taskItem2.id = this.label + ":" + taskItem2.id;
+                taskItem2.id = this.getTaskSpecialId(taskItem2.id);
                 taskItem2.label = this.getRenamedTaskName(taskItem2);
                 taskItem2.folder = this;
                 this.insertTaskFile(taskItem2, 0);
@@ -244,10 +244,13 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    protected getTaskItemId = (id: string): string => id.replace(this.label + ":", "");
+    protected getTaskItemId = (id: string): string => id.replace(`${this.label}:`, "");
 
 
-    hasTask = (item: TaskItem): boolean => !!(this._enabled && this.taskFiles.find(t => this.getTaskItemId(t.id) === item.id));
+    protected getTaskSpecialId = (id: string): string => `${this.label}:${this.getTaskItemId(id)}`;
+
+
+    hasTask = (item: TaskItem): boolean => !!(this._enabled && this.taskFiles.find(t => this.getTaskItemId(t.id) === this.getTaskItemId(item.id)));
 
 
     protected onConfigChanged(e: ConfigurationChangeEvent): void

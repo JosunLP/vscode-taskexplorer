@@ -64,7 +64,7 @@ export class FavoritesFolder extends SpecialTaskFolder
             await this.saveTask(taskItem, "   ");
         }
         else {
-           await this.removeTaskFile(`${this.label}:${id}`, "   ", true);
+           await this.removeTaskFile(this.getTaskSpecialId(id), "   ", true);
            removed = true;
         }
 
@@ -78,13 +78,13 @@ export class FavoritesFolder extends SpecialTaskFolder
         const now = Date.now(),
               taskId = this.getTaskItemId(taskItem.id);
         this.log.methodStart("save task", 1, logPad, false, [
-            [ "treenode label", this.label ], [ "task id", taskId ], [ "current # of saved tasks", this.store.length ]
+            [ "treenode label", this.label ], [ "task id", taskId ], [ "current # of store tasks", this.store.length + this.storeWs.length ]
         ]);
         this.store.push({ id: taskId, timestamp: now });
         this.storeWs.push({ id: taskId, timestamp: now });
         await this.saveStores();
         const taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad + "   ");
-        taskItem2.id = this.label + ":" + taskItem2.id; // note 'label:' + taskItem2.id === id
+        taskItem2.id = this.getTaskSpecialId(taskItem2.id);
         taskItem2.label = this.getRenamedTaskName(taskItem2);
         taskItem2.folder = this;
         this.insertTaskFile(taskItem2, 0);
