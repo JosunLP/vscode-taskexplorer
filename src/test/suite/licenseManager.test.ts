@@ -155,11 +155,15 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Open License Page in Trial Mode", async function()
+	test("Register from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.license);
-		await showTeWebview(teWrapper.licensePage);
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors + 1000);
+		await showTeWebview(teWrapper.licensePage, { register: true });
+		const echoCmd = { method: "echo/account/register", overwriteable: false };
+		void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "john@doe.com", emailAlt: "" });
+		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
+		expectLicense(true, false, true, false, true);
         utils.endRollingCount(this);
 	});
 
@@ -179,8 +183,9 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors + 1000);
 		await showTeWebview(teWrapper.licensePage, "force");
-		await echoWebviewCommand("taskexplorer.extendTrial", teWrapper.licensePage, 500);
-		expectLicense(true, false, true, true);
+		void echoWebviewCommand("taskexplorer.extendTrial", teWrapper.licensePage, 0);
+		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
+		expectLicense(true, false, true, true, true);
 		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
@@ -532,12 +537,15 @@ suite("License Manager Tests", () =>
 });
 
 
-const expectLicense = (isLic?: boolean, isPaid?: boolean, isTrial?: boolean, isTrialExt?: boolean) =>
+const expectLicense = (isLic?: boolean, isPaid?: boolean, isTrial?: boolean, isTrialExt?: boolean, isRegistered?: boolean) =>
 {
 	expect(licMgr.isLicensed).to.be.equal(!!isLic);
 	expect(licMgr.isPaid).to.be.equal(!!isPaid);
 	expect(licMgr.isTrial).to.be.equal(!!isTrial);
 	expect(licMgr.isTrialExtended).to.be.equal(!!isTrialExt);
+	if (isRegistered !== undefined) {
+		expect(licMgr.isRegistered).to.be.equal(!!isRegistered);
+	}
 };
 
 const restoreAccount = async() => {

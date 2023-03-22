@@ -664,8 +664,8 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
         if (!teWrapper.isReady) {
             event = teWrapper.onReady;
         }
-        else if (teWrapper.filecache.isBusy) {
-            event = teWrapper.filecache.onReady;
+        else if (teWrapper.fileCache.isBusy) {
+            event = teWrapper.fileCache.onReady;
         }
         else if (teWrapper.fileWatcher.isBusy) {
             event = teWrapper.fileWatcher.onReady;

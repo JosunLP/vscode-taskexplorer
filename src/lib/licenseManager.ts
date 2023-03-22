@@ -224,7 +224,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._busy = true;
 		try
 		{
-			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, params);
+			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, { accountId: this._account.id,  ...params });
 			await this.saveAccount(account, logPad);
 			this.wrapper.statusBar.update("");
 			return true;

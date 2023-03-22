@@ -5,7 +5,7 @@ import "../common/scss/page.scss";
 import "./license.css";
 
 import copy from "copy-text-to-clipboard";
-import { IpcRegisterAccountMsg, IpcShowMessageCommand, State } from "../../common/ipc";
+import { IIpcMessage, IpcRegisterAccountMsg, IpcShowMessageCommand, State } from "../../common/ipc";
 import { TeWebviewApp } from "../webviewApp";
 import { Disposable, DOM } from "../common/dom";
 
@@ -91,6 +91,19 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 			this.timeout = undefined;
 		}
     }
+
+
+	protected override onMessageReceived(e: MessageEvent): void
+    {
+		const msg = e.data as IIpcMessage;
+        switch (msg.method)
+        {
+			case "echo/account/register": // Standard echo service for testing web->host commands in mocha tests
+				this.log(`onMessageReceived(${msg.id}): method=${msg.method}`, 1);
+				this.sendCommand({ method: "account/register", overwriteable: false }, msg.params);
+				break;
+		}
+	};
 
 
 	private submitRegistration = () =>

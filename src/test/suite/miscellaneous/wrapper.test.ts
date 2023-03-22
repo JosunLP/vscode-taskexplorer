@@ -87,15 +87,13 @@ suite("Wrapper Tests", () =>
     test("Status Bar", async function()
     {
         if (exitRollingCount(this)) return;
-        teWrapper.statusBar.show();
         teWrapper.statusBar.update("test");
-        teWrapper.statusBar.show();
         teWrapper.statusBar.update("test2");
-        teWrapper.statusBar.hide();
-        teWrapper.statusBar.hide();
-        teWrapper.statusBar.show();
-        teWrapper.statusBar.show();
-        teWrapper.statusBar.hide();
+        teWrapper.statusBar.update("");
+        teWrapper.statusBar.update("");
+        teWrapper.statusBar.update("test");
+        teWrapper.statusBar.update("test");
+        teWrapper.statusBar.update("");
         endRollingCount(this);
     });
 

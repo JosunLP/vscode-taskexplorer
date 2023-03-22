@@ -123,7 +123,7 @@ suite("Multi-Root Workspace Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard);
-        await teWrapper.filecache.addWsFolders(undefined);
+        await teWrapper.fileCache.addWsFolders(undefined);
         await waitForTeIdle(tc.waitTime.command);
         endRollingCount(this);
     });
@@ -477,7 +477,7 @@ suite("Multi-Root Workspace Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.wsFolder.add + tc.slowTime.tasks.count.verify + tc.slowTime.cache.rebuildCancel + 200);
-        teWrapper.filecache.rebuildCache(""); // Don't 'await'
+        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
         await sleep(100);
         if (!tc.isMultiRootWorkspace)
         {
@@ -505,7 +505,7 @@ suite("Multi-Root Workspace Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.tasks.count.verify + tc.slowTime.cache.rebuildCancel + 200);
-        teWrapper.filecache.rebuildCache(""); // Don't 'await'
+        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
         await sleep(100);
         if (!tc.isMultiRootWorkspace)
         {

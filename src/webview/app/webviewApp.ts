@@ -57,10 +57,9 @@ export abstract class TeWebviewApp<State = undefined>
 			this.log(`${this.appName}.initializing`, 1);
 			this.onInitialize?.();
 			this.initialize();
-			if (this.onMessageReceived) {
-				disposables.push(DOM.on(window, "message", this.onMessageReceived.bind(this)));
-			}
-			disposables.push(DOM.on(window, "message", this._onMessageReceived.bind(this)));
+			disposables.push(
+				DOM.on(window, "message", this._onMessageReceived.bind(this))
+			);
 			this.sendCommand(IpcReadyCommand, undefined);
 			this.onInitialized?.();
 		});
@@ -241,6 +240,7 @@ export abstract class TeWebviewApp<State = undefined>
 				this.sendCommand({ method: "config/update", overwriteable: false }, msg.params);
 				break;
 			default:
+				this.onMessageReceived?.(e);
                 break;
 		}
 	};
