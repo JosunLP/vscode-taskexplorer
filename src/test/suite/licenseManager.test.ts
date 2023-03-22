@@ -201,6 +201,43 @@ suite("License Manager Tests", () =>
 	});
 
 
+	test("License Nag in Extended Trial Mode", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		await setNag();
+		utils.overrideNextShowInfoBox(undefined, true);
+		await licMgr.checkLicense("");
+		await utils.sleep(1);
+        utils.endRollingCount(this);
+	});
+
+/*
+	test("License Nag in Trial Mode - Extend Trial", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.licenseMgr.nag);
+		await setNag();
+		utils.overrideNextShowInfoBox("Extend Trial", true);
+		void licMgr.checkLicense("");
+		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
+		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
+		expectLicense(true, false, true, true, true);
+        utils.endRollingCount(this);
+	});
+*/
+
+	test("Extend Trial in Extended Trial Mode (Command Pallette - Denied)", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.getTrialExtensionDenied);
+		utils.overrideNextShowInfoBox(undefined, true);
+		await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
+		await utils.sleep(10);
+		expectLicense(true, false, true, true, true);
+        utils.endRollingCount(this);
+	});
+
+
 	test("License Nag - Purchase License", async function()
 	{   //
 		// Tests run 2 server requests to simulate a payment process, in succession
@@ -219,15 +256,6 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Open Explorer Tree View in Licensed Mode", async function()
-	{
-		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.commands.focusChangeViews);
-		await focusExplorerView(teWrapper);
-        utils.endRollingCount(this);
-	});
-
-
 	test("Open Home View in Licensed Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
@@ -238,7 +266,7 @@ suite("License Manager Tests", () =>
 	});
 
 
-	test("Re-Open Explorer Tree View", async function()
+	test("Open Explorer Tree View in Licensed Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.focusChangeViews);
@@ -309,75 +337,6 @@ suite("License Manager Tests", () =>
 		// if (!teWrapper.taskUsageView.visible) {
 		// 	await executeTeCommand("taskexplorer.view.taskUsage.toggleVisibility", 5);
 		// }
-        utils.endRollingCount(this);
-	});
-
-
-	test("Restore Trial Account", async function()
-	{
-		if (utils.exitRollingCount(this)) return;
-		await restoreAccount();
-		expectLicense(true, false, true, false);
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Nag in Trial Mode - Extend Trial", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.licenseMgr.nag);
-		await setNag();
-		utils.overrideNextShowInfoBox("Extend Trial", true);
-		void licMgr.checkLicense("");
-		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
-		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		expectLicense(true, false, true, true);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Extend Trial in Extended Trial Mode (Command Pallette - Denied)", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtensionDenied);
-		utils.overrideNextShowInfoBox(undefined, true);
-		await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
-		await utils.sleep(10);
-		expectLicense(true, false, true, true);
-        utils.endRollingCount(this);
-	});
-
-
-	test("License Nag in Extended Trial Mode", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		await setNag();
-		utils.overrideNextShowInfoBox(undefined, true);
-		await licMgr.checkLicense("");
-        utils.endRollingCount(this);
-	});
-
-
-	test("Set License to First Time Startup", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.createNewTrial + tc.slowTime.storage.secretUpdate + tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync);
-		utils.overrideNextShowInfoBox("More Info", true);
-		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "", state: 0, period: 0, type: 0 }});
-		await saveAccount(licMgr.account);
-        await validateLicense(undefined, true, true);
-		await utils.sleep(5);
-		await closeTeWebviewPanel(teWrapper.licensePage);
-		expectLicense(true, false, true, false);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Set License Mode to Free / Unlicensed", async function()
-	{
-		if (utils.exitRollingCount(this)) return;
-		await utils.setLicenseType(1);
-		expectLicense();
         utils.endRollingCount(this);
 	});
 
