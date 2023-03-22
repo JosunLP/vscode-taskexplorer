@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { TeWrapper } from "./wrapper";
+import { ContextKeys } from "./context";
 import { ITeApiEndpoint } from "./server";
+import { LicensePage } from "../webview/page/licensePage";
 import { Disposable, Event, EventEmitter, window } from "vscode";
+import { IpcAccountRegistrationParams } from "../webview/common/ipc";
 import { executeCommand, registerCommand, Commands } from "./command/command";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
 	TeLicenseState, IDictionary, TeRuntimeEnvironment
 } from "../interface";
-import { ContextKeys } from "./context";
-import { LicensePage } from "src/webview/page/licensePage";
 
 
 export class LicenseManager implements ITeLicenseManager, Disposable
@@ -143,7 +144,9 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			{
 				if (this._account.license.key && this._account.license.type !== TeLicenseType.Free)
 				{
-					if (this._account.session.expires <= Date.now() + this.sessionInterval) {
+					if (this._account.session.expires <= Date.now() + this.sessionInterval)
+					{
+						this._busy = true;
 						await this.validateLicense(this._account.license.key, logPad + "   ");
 					}
 					else {
@@ -155,6 +158,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				}
 			}
 			else {
+				this._busy = true;
 				await this.beginTrial(logPad + "   ");
 			}
 		}
@@ -228,9 +232,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		catch (e)
 		{
 			await this.handleServerError(e);
-			this._busy = false;
 			queueMicrotask(() => this._onReady.fire());
 			return false;
+		}
+		finally {
+			this._busy = false;
 		}
 	};
 
@@ -259,6 +265,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			  lastName = "Meesseman",
 			  email = `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`;
 
+		this._busy = true;
 		await this.executeRequest(ep, logPad + "   ", {
 			accountId: this._account.id,
 			email,
@@ -513,6 +520,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			// license/payment endpoint, then call the license/validate endpoint to retrieve
 			// the new license state
 			//
+			this._busy = true;
 			this.wrapper.statusBar.update("Sending payment request");
 			const ep: ITeApiEndpoint = "payment/paypal/hook",
 				  token = this._account.session.token;
@@ -527,6 +535,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				await this.handleServerError(e);
 			}
 			finally {
+				this._busy = false;
 				this.wrapper.statusBar.update("");
 			}
 		}
@@ -641,7 +650,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	submitRegistration = async (params: { firstName: string; lastName: string; email: string; emailAlt?: string }): Promise<void> =>
+	submitRegistration = async (params: IpcAccountRegistrationParams): Promise<void> =>
 	{
 		this.wrapper.log.methodStart("submit registration", 1, "", true, [
 			[ "first", params.firstName ], [ "last", params.lastName ], [ "email", params.email ], [ "alt. email", params.emailAlt ]
