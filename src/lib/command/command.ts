@@ -17,6 +17,7 @@ export const enum Commands
 	AddRemoveFavorite = "taskexplorer.addRemoveFavorite",
 	ClearFavorites = "taskexplorer.clearFavorites",
 	ClearLastTasks = "taskexplorer.clearLastTasks",
+	CopyKeyToClipboard = "taskexplorer.copyKeyToClipboard",
 	Donate = "taskexplorer.donate",
 	DisableTaskType = "taskexplorer.disableTaskType",
 	EnableTaskType = "taskexplorer.enableTaskType",

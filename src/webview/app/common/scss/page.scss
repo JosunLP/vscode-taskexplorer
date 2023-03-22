@@ -27,3 +27,45 @@ button {
 		transition-duration: 0s !important;
 	}
 }
+
+.fa-icon-button {
+	background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    // color: var(--vscode-button-background);
+    --fa-primary-color: var(--vscode-button-background);
+    --fa-secondary-color: var(--vscode-button-foreground);
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 32px;
+    line-height: 32px;
+    border-radius: 5px;
+    border: gray 1px solid;
+	.vscode-light & {
+        border: rgb(58, 56, 56) 1px solid;
+	}
+	.vscode-dark & {
+        border: gray 1px solid;
+	}
+	transition: background-color 250ms, border-color 250ms, color 250ms;
+	&:not([disabled]):hover,
+	&:not([disabled]):focus {
+		.vscode-light & {
+            border: rgb(58, 56, 56) 1px solid;
+		}
+		.vscode-dark & {
+            border: gray 1px solid;
+		}
+	}
+	.preload & {
+		transition-duration: 0s !important;
+	}
+}
+
+.fa-icon-button:hover {
+	cursor: pointer;
+	background: var(--vscode-button-hoverBackground);
+}
+
+.fa-icon-button:focus {
+	outline-color: var(--vscode-focusBorder);
+}

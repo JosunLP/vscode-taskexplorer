@@ -155,6 +155,9 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		let html = content;
 		html = await this.onHtmlPreviewBase(content, ...args);
 
+		//
+		// Replacement of main tags, i.e. #{head}, #{body}, etc
+		//
 		const repl = (h: string) =>
 		{
 			h = h.replace(/#{(head|body|endOfBody|cspSource|cspNonce|title|version|webroot|extensionName)}/g, (_s: string, token: string) =>
@@ -186,6 +189,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 
 		html = repl(html);
 
+		//
+		// Replacement of language strings defined in Constants, i.e. #{Strings.GetLicense}.
+		// TODO - Strings to be processed with language processor in TeWrapper
+		//
 		let rgx: RegExpExecArray | null;
 		const regex = /#{Strings\.([A-Za-z]+)}/g;
         while ((rgx = regex.exec(html)) !== null)

@@ -199,7 +199,7 @@ export abstract class TeWebviewApp<State = undefined>
 		if (level <= this.logLevel)
 		{
 			const timeTags = (new Date(Date.now() - this._tzOffset)).toISOString().slice(0, -1).split("T");
-			message = `${this.appName}.${message}`;
+			message = !message.startsWith(this.appName) ? `${this.appName}.${message}` : message;
 			// setTimeout(() => {
 			// 	this.postMessage({ id: this.nextIpcId(), method: IpcLogWriteCommand.method, params: { message, value: undefined }});
 			// },  1);
@@ -251,7 +251,9 @@ export abstract class TeWebviewApp<State = undefined>
 	{
 		const id = this.nextIpcId();
 		this.log(`Base.sendCommand(${id}): command=${command.method}`, 1);
-		this.log(`                       : message=${JSON.stringify(params)}`, 2);
+		if (params) {
+			this.log(`Base.sendCommand(${id}): params=${JSON.stringify(params)}`, 2);
+		}
 		this.postMessage({ id, method: command.method, params });
 	}
 

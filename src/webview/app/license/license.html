@@ -30,7 +30,28 @@
 
             </td></tr>
 
-            #{licenseStateContent}
+            <tr><td>
+                <table class="margin-top-15">
+                    <tr><td class="content-subsection-header te-licmgr-subsection-header">#{licensePage.keyType} Key: &nbsp;&nbsp;</td>
+                    <td class="te-licmgr-license-key-container">#{licensePage.key}</td>
+                    <td class="te-licmgr-copy-key-td">
+                        <div class="te-tooltip">
+                            <span id="copyKeySpan" class="far fa-copy te-licmgr-copy-key fa-icon-button"></span>
+                            <span class="te-tooltiptext">Copy license key to system clipboard</span>
+                        </div>
+                    </td>
+                    </tr>
+                    <tr><td colspan="3" class="padding-top-10">
+                        #{licensePage.stateMessage}
+                    </td></tr>
+                </table>
+                <table class="margin-top-20">
+                    <tr><td>You can view a detailed parsing report using the &quot;<i>#{extName}: View Parsing Report</i>&quot;
+                    command in the Explorer context menu for any project.  It can alternatively be ran from the
+                    command pallette for &quot;all projects&quot; to see how many tasks the extension has parsed.
+                    <tr><td height="10"></td></tr>
+                </table>
+            </td></tr>
 
             <tr><td>
 

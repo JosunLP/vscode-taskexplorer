@@ -13,11 +13,7 @@
     padding-left: 12px;
 }
 
-.te-licmgr-copy-key {
-    color: var(--vscode-button-background);
-    --fa-primary-color: var(--vscode-button-background);
-    --fa-secondary-color: var(--vscode-button-foreground);
-    cursor: pointer;
+.te-licmgr-copy-key.fa-icon-button  {
     font-size: 32px;
     line-height: 32px;
 }

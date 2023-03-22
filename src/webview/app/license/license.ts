@@ -4,9 +4,12 @@ import "../common/css/page.css";
 import "../common/scss/page.scss";
 import "./license.css";
 
-import { IpcExecCommand, State } from "../../common/ipc";
+import copy from "copy-text-to-clipboard";
+import { State } from "../../common/ipc";
 import { TeWebviewApp } from "../webviewApp";
 import { Disposable, DOM } from "../common/dom";
+
+
 // import { loadScript, PayPalNamespace } from "@paypal/paypal-js";
 /*
 // https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/webview/main.ts
@@ -34,11 +37,8 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 	}
 
 
-	private copyKey = () =>
-	{
-		// const b = document.getElementById("copyKeySpan") as HTMLElement;
-		this.sendCommand(IpcExecCommand, { command: "taskexplorer.copyKeyToClipboard" });
-	};
+	private copyKey = () => copy(this.state.account.license.key);
+
 
 	//  protected override onInitialize = (): void =>
 	//  {
@@ -72,10 +72,8 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 		const disposables = [
 			DOM.on("[id=btnRegister]", "click", this.toggleRegistrationForm.bind(this)),
 			DOM.on("[id=btnRegisterCancel]", "click", this.toggleRegistrationForm.bind(this)),
+			DOM.on("[id=copyKeySpan]", "click", this.copyKey.bind(this))
 		];
-		if (document.getElementById("copyKeySpan")) {
-			disposables.push(DOM.on("[id=copyKeySpan]", "click", this.copyKey.bind(this)));
-		}
 		return disposables;
     }
 
