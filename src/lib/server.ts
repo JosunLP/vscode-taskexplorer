@@ -100,7 +100,7 @@ export class TeServer implements Disposable
     }
 
 
-	private getApiPath = (ep: ITeApiEndpoint) => `/api/${ep}/${this.appName}/v${SPM_API_VERSION}`;
+	private getApiPath = (ep: ITeApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.appName}/v${SPM_API_VERSION}`;
 
 
 	private getServerOptions = (apiEndpoint: ITeApiEndpoint, token?: string) =>

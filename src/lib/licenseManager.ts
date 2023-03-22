@@ -353,7 +353,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				}
 			},
 			purchase_units: [{
-				reference_id: "5",
+				reference_id: `${this._account.id}`,
 				amount: {
 					currency_code: "USD",
 					value: "19.00"
@@ -383,7 +383,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 					update_time: "2018-04-01T21:20:49Z",
 					amount: {
 						currency_code: "USD",
-						value: "100.00"
+						value: "19.00"
 					},
 					seller_protection: {
 						status: "ELIGIBLE",

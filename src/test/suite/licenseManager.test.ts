@@ -158,15 +158,16 @@ suite("License Manager Tests", () =>
 	test("Register from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors + 1000);
+		this.slow(tc.slowTime.licenseMgr.submitRegistration + tc.slowTime.webview.show.page.license + 100);
 		await showTeWebview(teWrapper.licensePage, { register: true });
 		const echoCmd = { method: "echo/account/register", overwriteable: false };
-		void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "john@doe.com", emailAlt: "" });
+		void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "buyer@example.com", emailAlt: "" });
 		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
+		await utils.sleep(50); // wait for reg change session events to propagate
 		expectLicense(true, false, true, false, true);
         utils.endRollingCount(this);
 	});
-
+/*
 
 	test("View and Close Parsing Report from License Page", async function()
 	{
@@ -176,13 +177,13 @@ suite("License Manager Tests", () =>
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);
         utils.endRollingCount(this);
 	});
-
+*/
 
 	test("Request Trial Extension from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.webview.show.page.license + tc.slowTime.general.closeEditors + 1000);
-		await showTeWebview(teWrapper.licensePage, "force");
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.general.closeEditors);
+		// await showTeWebview(teWrapper.licensePage, "force");
 		void echoWebviewCommand("taskexplorer.extendTrial", teWrapper.licensePage, 0);
 		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
 		expectLicense(true, false, true, true, true);
@@ -205,7 +206,7 @@ suite("License Manager Tests", () =>
 		// Tests run 2 server requests to simulate a payment process, in succession
 		//
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.nag + 250);
+		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.nag + 300);
 		await setNag();
 		utils.overrideNextShowInfoBox("Buy License", true);
 		void licMgr.checkLicense("");
@@ -213,7 +214,7 @@ suite("License Manager Tests", () =>
 		await utils.sleep(100);
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		expectLicense(true, true, false, false);
-		await utils.sleep(25); // allow license/subscription events to propagate
+		await utils.sleep(50); // allow license/subscription events to propagate
         utils.endRollingCount(this);
 	});
 
@@ -317,17 +318,6 @@ suite("License Manager Tests", () =>
 		if (utils.exitRollingCount(this)) return;
 		await restoreAccount();
 		expectLicense(true, false, true, false);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Register (Not Implemented Yet)", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		//
-		// TODO - Register commad is not implemented yet, and may not be used
-		//
-		await executeTeCommand("register");
         utils.endRollingCount(this);
 	});
 

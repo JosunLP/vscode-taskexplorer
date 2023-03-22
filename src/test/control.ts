@@ -156,6 +156,7 @@ export const testControl =
             getMaxTasks: 365,
             nag: 100,
             purchaseLicense: 1875,
+            submitRegistration: 1775,
             validateLicense: 2175
         },
         storage: {
