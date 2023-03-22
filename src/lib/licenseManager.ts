@@ -232,11 +232,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		catch (e)
 		{
 			await this.handleServerError(e);
-			queueMicrotask(() => this._onReady.fire());
 			return false;
 		}
 		finally {
 			this._busy = false;
+			queueMicrotask(() => this._onReady.fire());
 		}
 	};
 
