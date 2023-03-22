@@ -61,6 +61,16 @@
     transition: transform 400ms ease 0ms;
 }
 
+.te-licmgr-reg-error-text {
+    visibility: hidden;
+    display: none;
+}
+
+.had-registration-error .te-licmgr-reg-error-text {
+    visibility: visible;
+    display: block;
+}
+
 .task-count {
     font-size: 42px;
     padding-left: 10px;

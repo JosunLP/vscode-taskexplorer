@@ -19,11 +19,11 @@ import { IDictionary, ITeWebview } from "../interface";
 import { WebviewIds, WebviewViewIds } from "../lib/context";
 import { Commands, executeCommand } from "../lib/command/command";
 import {
-	ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, workspace
+	ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, window, workspace
 } from "vscode";
 import {
-	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification,
-	onIpc, IpcFocusChangedParams, IpcReadyCommand, IpcUpdateConfigCommand, IpcEnabledChangedMsg
+	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, onIpc, IpcFocusChangedParams,
+	IpcReadyCommand, IpcUpdateConfigCommand, IpcEnabledChangedMsg, IpcShowMessageCommand
 } from "./common/ipc";
 
 
@@ -369,6 +369,10 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				onIpc(IpcUpdateConfigCommand, e, params => void this.wrapper.config.update(params.key, params.value));
 				break;
 
+			case IpcShowMessageCommand.method:
+				onIpc(IpcShowMessageCommand, e, params => window.showInformationMessage(params.message, { detail: params.detail, modal: !!params.modal }));
+				break;
+
 			// case IpcLogWriteCommand.method:
 			// 	onIpc(IpcLogWriteCommand, e, params => void this.wrapper.log.write("[WEBVIEW]: " + params.message, 1));
 			// 	break;
@@ -378,7 +382,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				break;
 		}
 
-		this._onMessageReceived.fire(e.method);
+		queueMicrotask(() => this._onMessageReceived.fire(e.method));
 	}
 
 

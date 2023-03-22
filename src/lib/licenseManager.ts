@@ -9,6 +9,7 @@ import {
 	TeLicenseState, IDictionary, TeRuntimeEnvironment
 } from "../interface";
 import { ContextKeys } from "./context";
+import { LicensePage } from "src/webview/page/licensePage";
 
 
 export class LicenseManager implements ITeLicenseManager, Disposable
@@ -112,12 +113,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private beginTrial = async(logPad: string): Promise<void> =>
 	{
-		const ep: ITeApiEndpoint = "register/trial/start";
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
-		try
+		this._busy = true;
+		const result = await this.executeRequest("register/trial/start", logPad + "   ", {});
+		if (result)
 		{
-			const account = await this.wrapper.server.request<ITeAccount>(ep, undefined, logPad + "   ", {});
-			await this.saveAccount(account, logPad + "   ");
 			window.showInformationMessage(`Welcome to ${this.wrapper.extensionName} 3.0.  Your 30 day trial has been activated.`, "More Info")
 			.then((action) =>
 			{
@@ -126,19 +126,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				}
 			});
 		}
-		catch (e) {
-			/* istanbul ignore next  */
-			await this.handleServerError(e);
-		}
 		this.wrapper.log.methodDone("begin trial", 1, logPad);
 	};
 
 
 	checkLicense = async(logPad: string): Promise<void> =>
 	{
-		this._busy = true;
 		this._account.errorState = false;
-		this.wrapper.statusBar.update("Checking license");
 		this.wrapper.log.methodStart("license manager check license", 1, logPad);
 
 		try
@@ -164,12 +158,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				await this.beginTrial(logPad + "   ");
 			}
 		}
-		finally
-		{
+		finally {
 			this.setContext();
-			this._busy = false;
-			this.wrapper.statusBar.update("");
-			queueMicrotask(() => this._onReady.fire());
 		}
 
 		this.wrapper.log.methodDone("license manager check license", 1, logPad, [
@@ -224,10 +214,30 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private extendTrial = async(logPad: string): Promise<void> =>
+	private executeRequest = async (ep: ITeApiEndpoint, logPad: string, params?: any): Promise<boolean> =>
 	{
-		const ep: ITeApiEndpoint = "register/trial/extend",
-			  token = this._account.session.token;
+		const token = this._account.session.token;
+		this._busy = true;
+		try
+		{
+			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, params);
+			await this.saveAccount(account, logPad);
+			this.wrapper.statusBar.update("");
+			return true;
+		}
+		catch (e)
+		{
+			await this.handleServerError(e);
+			this._busy = false;
+			queueMicrotask(() => this._onReady.fire());
+			return false;
+		}
+	};
+
+
+	private extendTrial = async (logPad: string): Promise<void> =>
+	{
+		const ep: ITeApiEndpoint = "register/trial/extend";
 
 		this.wrapper.statusBar.update("Requesting extended trial");
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
@@ -242,35 +252,21 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			return;
 		}
 
-		this._busy = true;
-
 		//
 		// TODO - Collect name and email address to allow 2nd trial
 		//
 		const firstName = "Scott",
 			  lastName = "Meesseman",
 			  email = `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`;
-		try
-		{
-			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad,
-			{
-				accountId: this._account.id,
-				email,
-				firstName,
-				lastName,
-				tests: this.wrapper.tests
-			});
-			await this.saveAccount(account, "   ");
-		}
-		catch (e) {
-			/* istanbul ignore next */
-			await this.handleServerError(e);
-		}
-		finally {
-			this._busy = false;
-			this.wrapper.statusBar.update("");
-			queueMicrotask(() => this._onReady.fire());
-		}
+
+		await this.executeRequest(ep, logPad + "   ", {
+			accountId: this._account.id,
+			email,
+			firstName,
+			lastName,
+			tests: this.wrapper.tests
+		});
+
 		this.wrapper.log.methodDone("request extended trial", 1, logPad);
 	};
 
@@ -419,7 +415,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	});
 
 
-	private handleServerError = async(e: any): Promise<void> =>
+	private handleServerError = async (e: any): Promise<void> =>
 	{
 		/* istanbul ignore if  */
 		if (e instanceof Error)
@@ -507,7 +503,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private purchaseLicense = async(logPad: string): Promise<void> =>
+	private purchaseLicense = async (logPad: string): Promise<void> =>
 	{
 		this.wrapper.log.methodStart("purchase license", 1, logPad);
 		/* istanbul ignore else */
@@ -544,15 +540,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private register = async(): Promise<void> =>
-	{
-		await this.wrapper.utils.sleep(1);
-		//
-		// TODO - Account registration
-		//        Need webview app to input first/last name, email address
-		//
-		// window.showInformationMessage("Not implemented yet");
-	};
+	private register = (): Promise<LicensePage> => this.wrapper.licensePage.show(undefined, { register: true });
 
 
 	private saveAccount = async (account: ITeAccount, logPad: string): Promise<void> =>
@@ -625,7 +613,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	setMaxTasksReached = async(taskType?: string, force?: boolean) =>
+	setMaxTasksReached = async (taskType?: string, force?: boolean) =>
 	{
 		if (force || ((!this._maxTasksMessageShown && !taskType) || (taskType && !this._maxTaskTypeMsgShown[taskType] && Object.keys(this._maxTaskTypeMsgShown).length < 3)))
 		{
@@ -653,19 +641,24 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private validateLicense = async(key: string, logPad: string): Promise<void> =>
+	submitRegistration = async (params: { firstName: string; lastName: string; email: string; emailAlt?: string }): Promise<void> =>
 	{
-		const ep: ITeApiEndpoint = "license/validate",
-			  token = this._account.session.token;
+		this.wrapper.log.methodStart("submit registration", 1, "", true, [
+			[ "first", params.firstName ], [ "last", params.lastName ], [ "email", params.email ], [ "alt. email", params.emailAlt ]
+		]);
+		this._busy = true;
+		this.wrapper.statusBar.update("Submitting resgistration");
+		await this.executeRequest("register/account", "   ", params);
+		this.wrapper.log.methodDone("submit registration", 1, "");
+	};
+
+
+	private validateLicense = async (key: string, logPad: string): Promise<void> =>
+	{
 		this.wrapper.log.methodStart("validate license", 1, logPad);
-		try
-		{
-			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, { key });
-			await this.saveAccount(account, "   ");
-		}
-		catch (e) {
-			await this.handleServerError(e);
-		}
+		this._busy = true;
+		this.wrapper.statusBar.update("Validating license");
+		await this.executeRequest("license/validate", logPad + "   ", { key });
 		this.wrapper.log.methodDone("validate license", 1, logPad);
 	};
 

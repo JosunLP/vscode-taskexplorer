@@ -718,19 +718,25 @@ suite("Util Tests", () =>
     test("Storage", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(300);
+		this.slow(325);
         if (teWrapper.storage)
         {
-            await teWrapper.storage.update("TEST_KEY", "This is a test");
-            expect(teWrapper.storage.get<string>("TEST_KEY")).to.be.equal("This is a test");
-            expect(teWrapper.storage.get<string>("TEST_KEY_DOESNT_EXIST", "defValue")).to.be.equal("defValue");
-            await teWrapper.storage.update("TEST_KEY", "");
-            expect(teWrapper.storage.get<string>("TEST_KEY_DOESNT_EXIST", "defValue")).to.be.equal("defValue");
-            await teWrapper.storage.update("TEST_KEY", undefined);
-			expect(teWrapper.storage.get<string>("TEST_KEY2_DOESNT_EXIST")).to.be.equal(undefined);
-			expect(teWrapper.storage.get<number>("TEST_KEY2_DOESNT_EXIST", 0)).to.be.equal(0);
-			expect(teWrapper.storage.get<string>("TEST_KEY2_DOESNT_EXIST", "")).to.be.equal("");
-
+			const disposable1 = teWrapper.storage.onDidChange(() => {});
+			try {
+				await teWrapper.storage.update("TEST_KEY", "This is a test");
+				expect(teWrapper.storage.get<string>("TEST_KEY")).to.be.equal("This is a test");
+				expect(teWrapper.storage.get<string>("TEST_KEY_DOESNT_EXIST", "defValue")).to.be.equal("defValue");
+				await teWrapper.storage.update("TEST_KEY", "");
+				expect(teWrapper.storage.get<string>("TEST_KEY_DOESNT_EXIST", "defValue")).to.be.equal("defValue");
+				await teWrapper.storage.update("TEST_KEY", undefined);
+				expect(teWrapper.storage.get<string>("TEST_KEY2_DOESNT_EXIST")).to.be.equal(undefined);
+				expect(teWrapper.storage.get<number>("TEST_KEY2_DOESNT_EXIST", 0)).to.be.equal(0);
+				expect(teWrapper.storage.get<string>("TEST_KEY2_DOESNT_EXIST", "")).to.be.equal("");
+				await sleep(1);
+			}
+			finally {
+				disposable1.dispose();
+			}
             await teWrapper.storage.update2("TEST_KEY", "This is a test");
             expect(await teWrapper.storage.get2<string>("TEST_KEY")).to.be.equal("This is a test");
             expect(await teWrapper.storage.get2<string>("TEST_KEY", "some other value")).to.be.equal("This is a test");
@@ -741,19 +747,21 @@ suite("Util Tests", () =>
 			expect(await teWrapper.storage.get2<string>("TEST_KEY2_DOESNT_EXIST")).to.be.equal(undefined);
 			expect(await teWrapper.storage.get2<number>("TEST_KEY2_DOESNT_EXIST", 0)).to.be.equal(0);
 			expect(await teWrapper.storage.get2<string>("TEST_KEY2_DOESNT_EXIST", "")).to.be.equal("");
-
 			await teWrapper.storage.updateSecret("testsecret", "test");
 			expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test");
-			const disposable = teWrapper.storage.onDidChangeSecret(() => {});
-			await teWrapper.storage.updateSecret("testsecret", "test222");
-			expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test222");
-			await teWrapper.storage.deleteSecret("testsecret");
-			expect(await teWrapper.storage.getSecret("testsecret")).to.be.undefined;
-			await teWrapper.storage.updateSecret("testsecret", "test333");
-			await teWrapper.storage.updateSecret("testsecret", undefined);
-			await sleep(1);
-			disposable.dispose();
-
+			const disposable2 = teWrapper.storage.onDidChangeSecret(() => {});
+			try {
+				await teWrapper.storage.updateSecret("testsecret", "test222");
+				expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test222");
+				await teWrapper.storage.deleteSecret("testsecret");
+				expect(await teWrapper.storage.getSecret("testsecret")).to.be.undefined;
+				await teWrapper.storage.updateSecret("testsecret", "test333");
+				await teWrapper.storage.updateSecret("testsecret", undefined);
+				await sleep(1);
+			}
+			finally {
+				disposable2.dispose();
+			}
 			teWrapper.log.write("STORAGE KEYS: " + teWrapper.storage.keys().join(", "));
         }
         endRollingCount(this);

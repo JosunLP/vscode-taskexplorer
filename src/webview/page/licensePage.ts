@@ -1,13 +1,13 @@
 
-import { Disposable } from "vscode";
-import { State } from "../common/ipc";
+import { Disposable, window } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { ITeTaskChangeEvent } from "../../interface";
 import { ContextKeys, WebviewIds } from "../../lib/context";
-import { Commands, debounce } from "../../lib/command/command";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { createTaskImageTable } from "../common/taskImageTable";
+import { ITeAccount, ITeTaskChangeEvent } from "../../interface";
+import { Commands, debounce, executeCommand } from "../../lib/command/command";
+import { IIpcMessage, IpcAccountRegistrationParams, IpcRegisterAccountMsg, onIpc, State } from "../common/ipc";
 
 
 export class LicensePage extends TeWebviewPanel<State>
@@ -64,6 +64,18 @@ export class LicensePage extends TeWebviewPanel<State>
 		return  [
 			this.wrapper.treeManager.onDidAllTasksChange(this.onTasksChanged, this)
 		];
+	}
+
+	protected override onMessageReceived(e: IIpcMessage): void
+	{
+		switch (e.method)
+		{
+			case IpcRegisterAccountMsg.method:
+				onIpc(IpcRegisterAccountMsg, e, params => this.wrapper.licenseManager.submitRegistration(params));
+				break;
+			// default: // ** NOTE ** Uncomment if an onMessageReceived() method is added to TeWebviewPanel
+			// 	super.onMessageReceived(e);
+		}
 	}
 
 

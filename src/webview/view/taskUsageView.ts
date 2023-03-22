@@ -4,7 +4,7 @@ import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
 import { ConfigurationChangeEvent } from "vscode";
 import { debounce } from "../../lib/command/command";
-import { ITeUsageChangeEvent, StorageChangeEvent } from "../../interface";
+import { ITeUsageChangeEvent } from "../../interface";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 

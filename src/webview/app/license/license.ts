@@ -5,7 +5,7 @@ import "../common/scss/page.scss";
 import "./license.css";
 
 import copy from "copy-text-to-clipboard";
-import { State } from "../../common/ipc";
+import { IpcRegisterAccountMsg, IpcShowMessageCommand, State } from "../../common/ipc";
 import { TeWebviewApp } from "../webviewApp";
 import { Disposable, DOM } from "../common/dom";
 
@@ -21,6 +21,7 @@ import { provideVSCodeDesignSystem, vsCodeTextField } from "@vscode/webview-ui-t
 
 export class LicenseWebviewApp extends TeWebviewApp<State>
 {
+	private timeout: number | undefined;
 	// private  _paypal: PayPalNamespace | null = null;
 	// private _clientId = "";
 
@@ -37,7 +38,11 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 	}
 
 
-	private copyKey = () => copy(this.state.account.license.key);
+	private copyKey = () =>
+	{
+		copy(this.state.account.license.key);
+		this.sendCommand(IpcShowMessageCommand, { message: "Key successfully copied to clipboard" });
+	};
 
 
 	//  protected override onInitialize = (): void =>
@@ -71,11 +76,53 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
     {
 		const disposables = [
 			DOM.on("[id=btnRegister]", "click", this.toggleRegistrationForm.bind(this)),
+			DOM.on("[id=btnRegisterSubmit]", "click", this.submitRegistration.bind(this)),
 			DOM.on("[id=btnRegisterCancel]", "click", this.toggleRegistrationForm.bind(this)),
 			DOM.on("[id=copyKeySpan]", "click", this.copyKey.bind(this))
 		];
 		return disposables;
     }
+
+
+    protected override onDispose(): void
+    {
+		if (this.timeout) {
+			clearTimeout(this.timeout);
+			this.timeout = undefined;
+		}
+    }
+
+
+	private submitRegistration = () =>
+	{
+		const f = document.getElementById("firstName") as HTMLInputElement,
+			  l = document.getElementById("lastName") as HTMLInputElement,
+			  e = document.getElementById("emailAddress") as HTMLInputElement,
+			  ea = document.getElementById("emailAddressAlt") as HTMLInputElement;
+		if (f && l && e && f.value && l.value && this.valdateEmailAddress(e.value))
+		{
+			this.sendCommand(IpcRegisterAccountMsg, {
+				firstName: f.value.trim(),
+				lastName: l.value.trim(),
+				email: e.value.trim(),
+				emailAlt: ea.value.trim()
+			});
+			this.toggleRegistrationForm();
+		}
+		else
+		{
+			const r = document.getElementById("registrationFormDiv") as HTMLElement;
+			if (!r.classList.contains("had-registration-error")) {
+				r.classList.add("had-registration-error");
+			}
+			this.timeout = setTimeout((_r: HTMLElement) => {
+				this.timeout = undefined;
+				if (_r.classList.contains("had-registration-error")) {
+					_r.classList.remove("had-registration-error");
+				}
+			}, 4000, r);
+		}
+	};
 
 
 	private toggleRegistrationForm = () =>
@@ -84,7 +131,13 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 			  r = document.getElementById("registrationFormDiv") as HTMLElement;
 		b.classList.toggle("is-registration");
 		r.classList.toggle("is-registration");
+		if (r.classList.contains("had-registration-error")) {
+			r.classList.remove("had-registration-error");
+		}
 	};
+
+
+	private valdateEmailAddress = (e: string) => e && e.length <= 64 && /[a-z0-9_\-\.]+\@[a-z0-9_\-\.]+\.[a-z]{2,5}/i.test(e);
 
 }
 

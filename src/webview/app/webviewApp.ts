@@ -23,6 +23,7 @@ export abstract class TeWebviewApp<State = undefined>
 {
 	protected onInitialize?(): void;
 	protected onBind?(): Disposable[];
+	protected onDispose?(): void;
 	protected onInitialized?(): void;
 	protected onFocusChanged?(focused: boolean): void;
 	protected onMessageReceived?(e: MessageEvent): void;
@@ -67,6 +68,7 @@ export abstract class TeWebviewApp<State = undefined>
 		disposables.push(
 			DOM.on(window, "pagehide", () =>
 			{
+				this.onDispose?.();
 				disposables?.forEach(d => d.dispose());
 				this._bindDisposables?.forEach(d => d.dispose());
 				this._bindDisposables = undefined;

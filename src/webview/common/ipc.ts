@@ -27,7 +27,8 @@ export interface BaseState
 
 export interface State extends BaseState {};
 
-export interface IIpcMessage {
+export interface IIpcMessage
+{
 	id: string;
 	method: string;
 	params?: unknown;
@@ -61,59 +62,38 @@ export const onIpc = <T extends IpcMessage<any>>(type: T, msg: IIpcMessage, fn: 
  * IPC COMMAND TYPES : Webview -> Extension
  */
 
-export interface IpcFocusChangedParams
-{
-	focused: boolean;
-	inputFocused: boolean;
-}
-
-export interface IpcExecCommandParams
-{
-	command: string;
-	args?: any[];
-}
-
-export interface IpcUpdateConfigCommandParams
-{
-	key: string;
-	value?: any;
-}
-
-export interface IpcLogWriteCommandParams
-{
-	message: string;
-	value?: any;
-}
+export interface IpcFocusChangedParams { focused: boolean; inputFocused: boolean }
+export interface IpcExecCommandParams { command: string; args?: any[] }
+export interface IpcUpdateConfigCommandParams { key: string; value?: any }
+export interface IpcLogWriteCommandParams { message: string; value?: any }
+export interface IpcShowMessageCommandParams { message: string; detail?: string; modal?: boolean }
 
 export const IpcReadyCommand = new IpcCommand("webview/ready");
 export const IpcFocusChangedCommand = new IpcCommand<IpcFocusChangedParams>("webview/focus");
 export const IpcExecCommand = new IpcCommand<IpcExecCommandParams>("command/execute");
 export const IpcUpdateConfigCommand = new IpcCommand<IpcUpdateConfigCommandParams>("config/update");
 export const IpcLogWriteCommand = new IpcCommand<IpcLogWriteCommandParams>("log/write");
+export const IpcShowMessageCommand = new IpcCommand<IpcShowMessageCommandParams>("message/show");
 
 /**
  * IPC NOTIFICATION TYPES : Extension -> Webview
  */
 
 export interface IpcStateChangedParams extends State {};
-
-export interface IpcEnabledChangedParams
-{
-	enabled: boolean;
-}
-
+export interface IpcEnabledChangedParams { enabled: boolean }
 export interface IpcLicenseChangedParams extends TeSessionChangeEvent {};
-
-export interface IpcConfigChangedParams
-{
-	timerMode: IMonitorAppTimerMode;
-	trackUsage: boolean;
-	trackStats: boolean;
-}
+export interface IpcConfigChangedParams { timerMode: IMonitorAppTimerMode; trackUsage: boolean; trackStats: boolean }
 
 export const IpcEnabledChangedMsg = new IpcNotification<IpcEnabledChangedParams>("enabled/change");
 export const IpcConfigChangedMsg = new IpcNotification<IpcConfigChangedParams>("configuration/change");
 export const IpcLicenseChangedMsg = new IpcNotification<IpcLicenseChangedParams>("license/change");
+
+//
+// LICENSE APP
+//
+
+export interface IpcAccountRegistrationParams { firstName: string; lastName: string; email: string; emailAlt: string };
+export const IpcRegisterAccountMsg = new IpcNotification<IpcAccountRegistrationParams>("account/register");
 
 //
 // TASK MONITOR APP

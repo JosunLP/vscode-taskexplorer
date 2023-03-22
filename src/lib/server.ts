@@ -18,7 +18,7 @@ export interface ServerError
 }
 
 export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook" |
-							 "register" | "register/trial/start" | "register/trial/extend";
+							 "register/account" | "register/trial/start" | "register/trial/extend";
 
 export class TeServer implements Disposable
 {
