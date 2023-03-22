@@ -58,7 +58,6 @@ suite("License Manager Tests", () =>
 		finally {
 			await utils.setLicenseType(2);
 		}
-		utils.oneTimeEvent(licMgr.onReady)(() => {}); // cover onReady, random hit in waitForTeIdle
         utils.endRollingCount(this, true);
 	});
 
@@ -335,7 +334,7 @@ suite("License Manager Tests", () =>
 		await setNag();
 		utils.overrideNextShowInfoBox("Extend Trial", true);
 		void licMgr.checkLicense("");
-		await utils.promiseFromEvent(teWrapper.server.onDidRequestComplete).promise;
+		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		expectLicense(true, false, true, true);
         utils.endRollingCount(this);
