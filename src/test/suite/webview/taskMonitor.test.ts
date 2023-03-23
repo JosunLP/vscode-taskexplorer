@@ -108,8 +108,8 @@ suite("Task Monitor App Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.standard * 2);
 		const iTask = teWrapper.taskUtils.toITask(teWrapper, [ task ], "last")[0];
-		await executeTeCommand2("taskexplorer.setPinned", [ iTask ]);
-		await executeTeCommand2("taskexplorer.setPinned", [ iTask ]);
+		await executeTeCommand2("taskexplorer.setPinned", [ iTask, "all" ]);
+		await executeTeCommand2("taskexplorer.setPinned", [ iTask, "all" ]);
         endRollingCount(this);
 	});
 

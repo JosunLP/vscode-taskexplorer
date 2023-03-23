@@ -355,7 +355,7 @@ suite("Task Tests", () =>
         await executeTeCommand2("setPinned", [ batch[0], "all" ]) ;
         await executeTeCommand2("setPinned", [ antTask, "all" ]) ;
         await executeTeCommand2("setPinned", [ python[0], "all" ]) ;
-        await executeTeCommand2("setPinned", [ antTask, "runing" ]) ;
+        await executeTeCommand2("setPinned", [ antTask, "running" ]) ;
         utils.endRollingCount(this);
     });
 

@@ -100,10 +100,10 @@ export class LastTasksFolder extends SpecialTaskFolder
 
     protected override sort = () =>
     {
+        const cStore = this.getCombinedStore();
         this.taskFiles.sort((a: TaskItem, b: TaskItem) =>
         {
-            const cStore = this.getCombinedStore(),
-                  aId = this.getTaskItemId(a.id),
+            const aId = this.getTaskItemId(a.id),
                   bId = this.getTaskItemId(b.id),
                   aIdx = cStore.findIndex(t => t.id === aId),
                   bIdx = cStore.findIndex(t => t.id === bId),

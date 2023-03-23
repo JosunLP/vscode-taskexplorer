@@ -82,7 +82,7 @@ suite("Task Details Page Tests", () =>
         await waitForTaskExecution(exec, 300);
 		await sleep(100); // allow task status event to propagate to webviews via postMessage
 		await closeTeWebviewPanel(teWebview);
-		await executeTeCommand2("taskexplorer.setPinned", [ antTask ]);
+		await executeTeCommand2("taskexplorer.setPinned", [ antTask, "last" ]);
         endRollingCount(this);
 	});
 
@@ -105,7 +105,7 @@ suite("Task Details Page Tests", () =>
 		gulp = await treeUtils.getTreeTasks(teWrapper, "gulp", 14);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("gulpfile.js") && (<string>t.label).includes("build33")) as ITaskItem;
 		teWebview = await showTeWebview("taskDetails", gulpTask);
-		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask ]);
+		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask, "last" ]);
         endRollingCount(this);
 	});
 
@@ -125,11 +125,11 @@ suite("Task Details Page Tests", () =>
 	{
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run + tc.slowTime.commands.standard);
-		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask ]);
+		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask, "last" ]);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("GULPFILE.js") && (<string>t.label).includes("test")) as ITaskItem;
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
         await waitForTaskExecution(exec, tc.slowTime.tasks.gulpTask);
-		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask ]);
+		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask, "last" ]);
         endRollingCount(this);
 	});
 
