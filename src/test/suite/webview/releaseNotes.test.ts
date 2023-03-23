@@ -52,7 +52,7 @@ suite("Release Notes Page Tests", () =>
 	test("Open Release Notes (Error No Version)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.webview.closeSync + testControl.slowTime.webview.postMessage + 300);
+		this.slow(testControl.slowTime.webview.show.page.releaseNotes + testControl.slowTime.webview.closeSync + testControl.slowTime.webview.roundTripMessage);
 		const version = extension.packageJSON.version;
 		extension.packageJSON.version = "17.4444.0";
 		try {

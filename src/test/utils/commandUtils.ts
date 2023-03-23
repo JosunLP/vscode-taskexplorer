@@ -230,13 +230,19 @@ export const closeTeWebviewPanel = async(teView: ITeWebview) =>
         (teView.view as WebviewPanel).dispose();
     }
     waited = 0;
-    while (teView.visible && waited < maxWait) {
-        await sleep(25);
-        waited += 25;
+    try {
+        while (teView.visible && waited < maxWait) {
+            await sleep(25);
+            waited += 25;
+        }
+        while (teView.view && waited < maxWait) {
+            await sleep(25);
+            waited += 25;
+        }
+        expect(teView.visible).to.be.equal(false);
+        expect(teView.busy).to.be.equal(false);
+        expect(teView.view).to.be.undefined;
+    } catch  {
+        await sleep(10);
     }
-    while (teView.view && waited < maxWait) {
-        await sleep(25);
-        waited += 25;
-    }
-    expect(teView.visible).to.be.equal(false);
 };

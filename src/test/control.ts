@@ -190,7 +190,7 @@ export const testControl =
             }
         },
         webview: {
-            closeSync: 195,
+            closeSync: 390,
             postMessage: 300,
             revealTreeNode: 55,
             roundTripMessage: 2625,
@@ -204,7 +204,7 @@ export const testControl =
                     license: 3240,
                     releaseNotes: 2990,
                     taskDetailsScript: 2865,
-                    taskDetailsNonScript: 3325,
+                    taskDetailsNonScript: 3375,
                     taskMonitor: 2990,
                     parsingReport: 2580,
                     parsingReportFull: 3480,

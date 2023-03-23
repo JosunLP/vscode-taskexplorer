@@ -31,7 +31,7 @@ suite("Pipenv Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teApi, teWrapper } = await activate(this));
-        provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        provider = teApi.providers[testsName];
         dirName = getWsPath("tasks_test_");
         fileUri = Uri.file(path.join(dirName, "Pipfile"));
         await fsUtils.createDir(dirName);

@@ -4,7 +4,7 @@
 
 import { expect } from "chai";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, executeTeCommand2, focusFileExplorer, focusSidebarView, showTeWebview } from "../utils/commandUtils";
+import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusFileExplorer, focusSidebarView, showTeWebview } from "../utils/commandUtils";
 import { activate, closeEditors, endRollingCount, exitRollingCount, promiseFromEvent, sleep, suiteFinished, testControl as tc, waitForEvent, waitForWebviewReadyEvent } from "../utils/utils";
 
 
@@ -17,6 +17,7 @@ suite("Initialization", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate(this));
+        await waitForWebviewReadyEvent(teWrapper.welcomePage, tc.slowTime.webview.show.page.welcome),
         endRollingCount(this, true);
     });
 
@@ -59,10 +60,9 @@ suite("Initialization", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home);
         void focusSidebarView();
-        // teWrapper.homeView.show();
         await Promise.all([
-            waitForWebviewReadyEvent(teWrapper.homeView),
-            waitForEvent(teWrapper.treeManager.onDidAllTasksChange, tc.slowTime.commands.refresh)
+            waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home),
+            waitForEvent(teWrapper.treeManager.views.taskExplorerSideBar.tree.onDidLoadTreeData, tc.slowTime.commands.refresh)
         ]);
         teWrapper.homeView.title = teWrapper.homeView.title;
         endRollingCount(this);
@@ -74,6 +74,9 @@ suite("Initialization", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.webview.show.view.taskUsage);
         await showTeWebview(teWrapper.taskUsageView);
+        // void executeTeCommand("taskexplorer.view.taskUsage.toggleVisibility", 5);
+        // waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage);
+        expect(teWrapper.taskUsageView.visible).to.be.equal(true);
         endRollingCount(this);
     });
 
@@ -83,6 +86,9 @@ suite("Initialization", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.webview.show.view.taskCount);
         await showTeWebview(teWrapper.taskCountView);
+        // void executeTeCommand("taskexplorer.view.taskCount.toggleVisibility", 5);
+        // waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount);
+        expect(teWrapper.taskCountView.visible).to.be.equal(true);
         endRollingCount(this);
     });
 

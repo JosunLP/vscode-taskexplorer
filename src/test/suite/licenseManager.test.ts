@@ -179,30 +179,7 @@ suite("License Manager Tests", () =>
 		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
-/*
 
-	test("View and Close Parsing Report from License Page", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.closeSync);
-		await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.licensePage);
-		await closeTeWebviewPanel(teWrapper.parsingReportPage);
-        utils.endRollingCount(this);
-	});
-*/
-/*
-	test("Request Trial Extension from License Page", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.general.closeEditors);
-		// await showTeWebview(teWrapper.licensePage, "force");
-		void echoWebviewCommand("taskexplorer.extendTrial", teWrapper.licensePage, 0);
-		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
-		expectLicense(true, false, true, true, true);
-		await closeTeWebviewPanel(teWrapper.licensePage);
-        utils.endRollingCount(this);
-	});
-*/
 
 	test("License Nag in Trial Mode - Extend Trial", async function()
 	{

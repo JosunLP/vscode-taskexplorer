@@ -68,7 +68,7 @@ suite("Python Tests", () =>
     test("Document Position", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         expect(provider.getDocumentPosition()).to.be.equal(0);
         endRollingCount(this);
     });
@@ -77,7 +77,7 @@ suite("Python Tests", () =>
     test("Invalid ScriptProvider Type", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         expect(!provider.createTask("no_ext", undefined, wsFolder,
                Uri.file(getWsPath("test.py")))).to.not.be.equal(undefined, "ScriptProvider returnned undefined task");
         logErrorsAreFine(true);

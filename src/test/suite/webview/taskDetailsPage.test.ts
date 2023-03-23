@@ -4,7 +4,7 @@
 import { TaskExecution } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
 import { ITaskItem, ITeWrapper, ITeWebview } from "@spmeesseman/vscode-taskexplorer-types";
-import { closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand2, showTeWebview } from "../../utils/commandUtils";
+import { closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand, executeTeCommand2, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl as tc, suiteFinished, sleep, exitRollingCount,
 	endRollingCount, treeUtils, waitForTaskExecution, waitForWebviewsIdle
@@ -48,10 +48,11 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Used Task Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetailsScript + tc.slowTime.tasks.getTreeTasks);
+		this.slow(tc.slowTime.webview.show.page.taskDetailsScript + tc.slowTime.tasks.getTreeTasks + tc.slowTime.webview.closeSync + 50);
 		batch = await treeUtils.getTreeTasks(teWrapper, "batch", 2);
 		teWebview = await showTeWebview("taskDetails", batch[0]);
 		await closeTeWebviewPanel(teWebview);
+		await sleep(25);
         endRollingCount(this);
 	});
 
@@ -59,10 +60,14 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Used Task Non-Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetailsNonScript + tc.slowTime.tasks.getTreeTasks);
+		this.slow(tc.slowTime.webview.show.page.taskDetailsNonScript + tc.slowTime.tasks.getTreeTasks + tc.slowTime.commands.standard + tc.slowTime.commands.fast);
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		antTask = ant.find(t => t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
 		teWebview = await showTeWebview("taskDetails", antTask);
+		const curLogLvl = teWrapper.config.get<number>("teWrapper.keys.Config.LogLevel", 1);
+		await executeSettingsUpdate(teWrapper.keys.Config.LogLevel, curLogLvl + 1, tc.slowTime.commands.standard); // cover taskEDetails onConfigChange else path
+        void executeSettingsUpdate(teWrapper.keys.Config.LogLevel, curLogLvl, tc.slowTime.commands.standard);     // cover taskEDetails onConfigChange else path
+		await sleep(1);
         endRollingCount(this);
 	});
 
@@ -70,13 +75,14 @@ suite("Task Details Page Tests", () =>
 	test("Run Task w/ Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runStop + 2400);
+        this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runStop + tc.slowTime.commands.standard + 2400);
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin);
         await waitForTaskExecution(exec, 800);
 		await executeTeCommand2("stop", [ antTask ], tc.waitTime.taskCommand);
         await waitForTaskExecution(exec, 300);
 		await sleep(100); // allow task status event to propagate to webviews via postMessage
 		await closeTeWebviewPanel(teWebview);
+		await executeTeCommand2("taskexplorer.setPinned", [ antTask ]);
         endRollingCount(this);
 	});
 
@@ -95,10 +101,11 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Unused Task Non-Script Type)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.taskDetailsNonScript + tc.slowTime.tasks.getTreeTasks);
+		this.slow(tc.slowTime.webview.show.page.taskDetailsNonScript + tc.slowTime.tasks.getTreeTasks + tc.slowTime.commands.standard);
 		gulp = await treeUtils.getTreeTasks(teWrapper, "gulp", 14);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("gulpfile.js") && (<string>t.label).includes("build33")) as ITaskItem;
 		teWebview = await showTeWebview("taskDetails", gulpTask);
+		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask ]);
         endRollingCount(this);
 	});
 
@@ -117,10 +124,12 @@ suite("Task Details Page Tests", () =>
 	test("Run Unused Task 2 w/o Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run);
+        this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run + tc.slowTime.commands.standard);
+		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask ]);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("GULPFILE.js") && (<string>t.label).includes("test")) as ITaskItem;
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
         await waitForTaskExecution(exec, tc.slowTime.tasks.gulpTask);
+		await executeTeCommand2("taskexplorer.setPinned", [ gulpTask ]);
         endRollingCount(this);
 	});
 
