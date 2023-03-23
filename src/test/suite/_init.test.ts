@@ -70,7 +70,7 @@ suite("Initialization", () =>
     test("Expand SideBar Task Usage View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
+        this.slow(tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.expandView);
         await showTeWebview(teWrapper.taskUsageView);
         expect(teWrapper.taskUsageView.visible).to.be.equal(true);
         endRollingCount(this);
@@ -80,7 +80,7 @@ suite("Initialization", () =>
     test("Expand SideBar Task Count View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.taskCount + tc.slowTime.commands.focusChangeViews);
+        this.slow(tc.slowTime.webview.show.view.taskCount + tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.expandView);
         await showTeWebview(teWrapper.taskCountView);
         expect(teWrapper.taskCountView.visible).to.be.equal(true);
         endRollingCount(this);

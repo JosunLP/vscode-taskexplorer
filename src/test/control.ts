@@ -191,6 +191,7 @@ export const testControl =
         },
         webview: {
             closeSync: 390,
+            expandView: 1325,
             postMessage: 300,
             revealTreeNode: 55,
             roundTripMessage: 2625,

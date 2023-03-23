@@ -552,6 +552,7 @@ suite("Tree Tests", () =>
         this.slow((tc.slowTime.config.folderState * 2) + tc.slowTime.commands.refreshNoChanges);
         await executeSettingsUpdate("specialFolders.folderState.project1", "Collapsed");
         teWrapper.treeManager.lastTasksFolder.removeTaskFile("invalid_id", "");
+		await teWrapper.storage.delete("taskexplorer.pinned.last");
         await teWrapper.treeManager.refresh(undefined, undefined, "");
         await executeSettingsUpdate("specialFolders.folderState.project1", "Expanded");
         utils.endRollingCount(this);
@@ -568,6 +569,7 @@ suite("Tree Tests", () =>
         await executeTeCommand2("setPinned", [ ant[1] ]);
         await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, false, tc.waitTime.config.sortingEvent);
         await executeTeCommand2("setPinned", [ batch[0] ]);
+		await executeTeCommand2("setPinned", [ batch[0], "last" ]);
         await executeTeCommand2("setPinned", [ batch[1] ]);
         await executeTeCommand2("setPinned", [ bash[0] ]);
         await executeTeCommand2("setPinned", [ ant[1] ]);
