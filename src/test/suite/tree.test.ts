@@ -551,6 +551,7 @@ suite("Tree Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow((tc.slowTime.config.folderState * 2) + tc.slowTime.commands.refreshNoChanges);
         await executeSettingsUpdate("specialFolders.folderState.project1", "Collapsed");
+        teWrapper.treeManager.lastTasksFolder.removeTaskFile("invalid_id", "");
         await teWrapper.treeManager.refresh(undefined, undefined, "");
         await executeSettingsUpdate("specialFolders.folderState.project1", "Expanded");
         utils.endRollingCount(this);

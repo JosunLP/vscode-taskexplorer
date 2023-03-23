@@ -26,12 +26,8 @@ export class TaskTreeGrouper
         // After the initial sort, create any task groupings based on the task group separator.
         // 'folders' are the project/workspace folders.
         //
-        for (const [ key, folder ] of Object.entries(folders))
+        for (const folder of Object.values(folders).filter(f => !(f instanceof SpecialTaskFolder)))
         {
-            if (folder instanceof SpecialTaskFolder) {
-                this.wrapper.log.write(`   skipping ${folder.label} folder for grouping`, logLevel, logPad);
-                continue;
-            }
             this.wrapper.sorters.sortTaskFolder(folder, "all");
             //
             // Create groupings by task type

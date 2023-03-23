@@ -116,10 +116,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         return this.wrapper.usage.famousTasks;
     }
 
-    get favoritesFolder(): FavoritesFolder {
-        return this._specialFolders.favorites;
-    }
-
     get favoritesTasks(): Task[] {
         return this._specialFolders.favorites.taskFiles.map(f => f.task);
     }
@@ -145,7 +141,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         /* istanbul ignore else */
         if (taskItem.folder)
         {
-            const folderName = this.wrapper.utils.lowerCaseFirstChar(taskItem.folder.label as string, true) as "favorites"|"lastTasks";
+            const folderName = this.wrapper.utils.lowerCaseFirstChar(taskItem.folder.label, true) as "favorites"|"lastTasks";
             return this._specialFolders[folderName].addRemoveRenamedLabel(taskItem);
         }
     };

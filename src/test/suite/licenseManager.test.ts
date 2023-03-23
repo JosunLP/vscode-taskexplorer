@@ -229,7 +229,7 @@ suite("License Manager Tests", () =>
 	test("Extend Trial in Extended Trial Mode (Command Pallette - Denied)", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtensionDenied);
+		this.slow(tc.slowTime.licenseMgr.getTrialExtensionDenied + 20);
 		utils.overrideNextShowInfoBox(undefined, true);
 		await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
 		await utils.sleep(10);
@@ -243,7 +243,7 @@ suite("License Manager Tests", () =>
 		// Tests run 2 server requests to simulate a payment process, in succession
 		//
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.nag + 300);
+		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.validateLicense + tc.slowTime.licenseMgr.nag + 300);
 		await setNag();
 		utils.overrideNextShowInfoBox("Buy License", true);
 		void licMgr.checkLicense("");
@@ -281,17 +281,23 @@ suite("License Manager Tests", () =>
 		await restoreAccount();
 		await utils.setLicenseType(1);
 		await saveAccount({ ...licMgr.account});
+		await utils.sleep(50); // allow session change event to propagate
 		expectLicense();
         utils.endRollingCount(this);
 	});
 
 
-	test("Open License Page in Unlicensed Mode", async function()
+	test("Open License Page in Unlicensed Mode and Copy Key", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync);
+		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + tc.slowTime.commands.focusChangeViews + 200);
         await showTeWebview(teWrapper.licensePage);
+		await utils.sleep(50);
+		utils.overrideNextShowInfoBox(undefined);
+		void teWrapper.licensePage.postMessage({ method: "echo/message/show", overwriteable: false }, {});
+		await utils.promiseFromEvent(teWrapper.licensePage.onDidReceiveMessage).promise;
 		await closeTeWebviewPanel(teWrapper.licensePage);
+		await utils.sleep(50);
         utils.endRollingCount(this);
 	});
 

@@ -442,6 +442,7 @@ suite("Util Tests", () =>
         const arr = [ 1, 2, 3, 4, 5 ];
         teWrapper.utils.removeFromArray(arr, 3);
         teWrapper.utils.removeFromArray(arr, 1);
+        teWrapper.utils.removeFromArray(arr, 6);
         expect(arr.length).to.be.equal(3);
 
         expect(teWrapper.pathUtils.getCwd(rootUri)).to.not.be.equal(undefined);

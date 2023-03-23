@@ -152,7 +152,7 @@ export const testControl =
         licenseMgr: {
             createNewTrial: 3220,
             getTrialExtension: 2175,
-            getTrialExtensionDenied: 800,
+            getTrialExtensionDenied: 815,
             getMaxTasks: 365,
             nag: 100,
             purchaseLicense: 1875,
@@ -205,8 +205,8 @@ export const testControl =
                     taskDetailsScript: 2845,
                     taskDetailsNonScript: 3305,
                     taskMonitor: 2980,
-                    parsingReport: 2380,
-                    parsingReportFull: 3180,
+                    parsingReport: 2480,
+                    parsingReportFull: 3280,
                     welcome: 1225
                 }
             }

@@ -39,7 +39,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             registerCommand(Commands.Pause, (item: TaskItem | ITeTask) => this.pause(this.wrapper.treeManager.getTaskItem(item)), this),
             registerCommand(Commands.Restart, (item: TaskItem) => this.restart(item), this),
             registerCommand(Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.wrapper.treeManager.getTaskItem(item)), this),
-            registerCommand(Commands.RunLastTask,  () => this.runLastTask(this.wrapper.treeManager.getTaskMap()), this),
+            registerCommand(Commands.RunLastTask,  () => this.runLastTask(), this),
             registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.wrapper.treeManager.getTaskItem(item), false, true, ...args), this),
             registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
 			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask, listType?: TeTaskListType) => this.setPinned(item, listType), this),
@@ -271,7 +271,7 @@ export class TaskManager implements ITeTaskManager, Disposable
     };
 
 
-    private runLastTask = async(taskMap: TaskMap) =>
+    private runLastTask = async() =>
     {
         if (this.wrapper.treeManager.isBusy)
         {
@@ -279,13 +279,14 @@ export class TaskManager implements ITeTaskManager, Disposable
             return;
         }
 
-        const lastTasks = this.wrapper.treeManager.lastTasksFolder;
-        const lastTaskId = lastTasks.getLastRanId();
+        const lastTasks = this.wrapper.treeManager.lastTasksFolder,
+              lastTaskId = lastTasks.getLastRanId();
         if (!lastTaskId) { return; }
 
         this.log.methodStart("run last task", 1, "", true, [[ "last task id", lastTaskId ]]);
 
-        const taskItem = taskMap[lastTaskId];
+        const taskMap = this.wrapper.treeManager.getTaskMap(),
+              taskItem = taskMap[lastTaskId];
         let exec: TaskExecution | undefined;
 
         if (taskItem && taskItem instanceof TaskItem)
@@ -293,7 +294,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             exec = await this.run(taskItem);
         }
         else {
-            window.showInformationMessage("Task not found!  Check log for details");
+            window.showInformationMessage("Task not found! Check log for details");
             await lastTasks.removeTaskFile(lastTaskId, "   ", true);
         }
 

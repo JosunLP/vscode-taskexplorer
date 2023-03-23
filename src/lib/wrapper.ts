@@ -530,6 +530,14 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return { Storage: StorageKeys, Config: ConfigKeys, Strings, Globs };
 	}
 
+	get licenseManager(): LicenseManager {
+		return this._licenseManager;
+	}
+
+	get licensePage(): LicensePage {
+		return this._licensePage;
+	}
+
 	localize = (_key: string, defaultMessage: string): string => defaultMessage; // this._localize(key, defaultMessage);
 
 	get log(): ILog {
@@ -544,6 +552,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 	// 	return this._onInitialized.event;
 	// }
 
+	get onDidBusyComplete(): Event<void> {
+		/* istanbul ignore next */
+		return this._onBusyComplete.event;
+	}
+
 	get onReady(): Event<void> {
 		return this._onReady.event;
 	}
@@ -554,18 +567,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get providers(): IDictionary<ITaskExplorerProvider> {
 		return this._providers;
-	}
-
-	get licenseManager(): LicenseManager {
-		return this._licenseManager;
-	}
-
-	get licensePage(): LicensePage {
-		return this._licensePage;
-	}
-
-	get onDidBusyComplete(): Event<void> {
-		return this._onBusyComplete.event;
 	}
 
 	get parsingReportPage(): ParsingReportPage {

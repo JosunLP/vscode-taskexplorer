@@ -127,10 +127,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
      */
     build(logPad: string): void
     {
-        if (!this._enabled) {
-            return;
-        }
-
         this.log.methodStart(`build ${this.labelLwr} folder`, 1, logPad);
 
         const added: string[] = [],
@@ -166,11 +162,14 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
         this.sort();
 
-        const sFolders = tree.filter(i => i.isSpecial) as SpecialTaskFolder[];
-        if (!sFolders.find(i => i.id === this.id))
+        if (this._enabled)
         {
-            const idx = sFolders.findIndex(i => i.order > this.order);
-            tree.splice(idx !== -1 ? idx : sFolders.length, 0, this);
+            const sFolders = tree.filter(i => i.isSpecial) as SpecialTaskFolder[];
+            if (!sFolders.find(i => i.id === this.id))
+            {
+                const idx = sFolders.findIndex(i => i.order > this.order);
+                tree.splice(idx !== -1 ? idx : sFolders.length, 0, this);
+            }
         }
 
         this.log.methodDone(`build ${this.labelLwr} folder`, 1, logPad);
@@ -187,7 +186,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     protected async clearSavedTasks(): Promise<void>
     {
         const choice = await window.showInformationMessage(`Clear all tasks from the \`${this.label}\` folder?`, "Global", "Workspace", "Cancel");
-        if (choice === "Global" || choice === "Workspace")
+        if (choice === "Workspace" || choice === "Global")
         {
             this.storeWs = [];
             if (choice === "Global") {

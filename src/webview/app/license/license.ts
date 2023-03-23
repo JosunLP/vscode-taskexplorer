@@ -102,6 +102,10 @@ export class LicenseWebviewApp extends TeWebviewApp<State>
 				this.log(`onMessageReceived(${msg.id}): method=${msg.method}`, 1);
 				this.sendCommand({ method: "account/register", overwriteable: false }, msg.params);
 				break;
+			case "echo/message/show": // Standard echo service for testing web->host commands in mocha tests
+				this.log(`onMessageReceived(${msg.id}): method=${msg.method}`, 1);
+				this.copyKey();
+				break;
 		}
 	};
 

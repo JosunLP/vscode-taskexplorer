@@ -3,6 +3,7 @@ import { TaskItem } from "./item";
 import { TaskFile } from "./file";
 import { isString } from "../lib/utils/typeUtils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "vscode";
+import { ITaskFolder } from "src/interface";
 
 
 /**
@@ -11,7 +12,7 @@ import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "
  * A tree node that represents a workspace folder.
  * An item of this type is a "root folder" in the tree, it contains various TaskItem and TaskItem nodes.
  */
-export class TaskFolder extends TreeItem
+export class TaskFolder extends TreeItem implements ITaskFolder
 {
     public override id: string;
     public override label: string;

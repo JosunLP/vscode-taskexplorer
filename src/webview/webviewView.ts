@@ -13,8 +13,7 @@ import { TeWebviewBase } from "./webviewBase";
 import { executeCommand } from "../lib/command/command";
 import { ContextKeys, WebviewViewIds } from "../lib/context";
 import {
-	CancellationToken, WebviewView, WebviewViewProvider, WebviewViewResolveContext,
-	WindowState, Disposable, window, commands, Uri
+	CancellationToken, WebviewView, WebviewViewProvider, WebviewViewResolveContext, WindowState, Disposable, window, Uri
 } from "vscode";
 
 

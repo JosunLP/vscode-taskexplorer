@@ -12,6 +12,7 @@ export interface ITeTreeManager
     getTasks(): Task[];
     getTaskTree(): void | ITaskFolder[] | null | undefined;
     refresh(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void>;
+    lastTasksFolder: ITaskFolder;
     onDidFavoriteTasksChange: Event<ITeTaskChangeEvent>;
     onDidLastTasksChange: Event<ITeTaskChangeEvent>;
     onDidTaskCountChange: Event<ITeTaskChangeEvent>;

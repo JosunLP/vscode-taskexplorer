@@ -42,7 +42,7 @@ export class TaskUsageView extends TeWebviewView<State>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
 		{
-			debounce("taskUsageView.event.onConfigChanged", this.refresh, 75, false, false);
+			void debounce("taskUsageView.event.onConfigChanged", this.refresh, 75, this, false, false);
 		}
 		super.onConfigChanged(e);
 	}
