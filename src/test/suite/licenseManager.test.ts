@@ -269,8 +269,9 @@ suite("License Manager Tests", () =>
 	test("Open Explorer Tree View in Licensed Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.commands.focusChangeViews);
+		this.slow(tc.slowTime.commands.focusChangeViews + 200);
 		await focusExplorerView(teWrapper);
+		await utils.sleep(100);
         utils.endRollingCount(this);
 	});
 
