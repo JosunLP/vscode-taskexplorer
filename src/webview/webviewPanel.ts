@@ -20,6 +20,7 @@ import {
 
 export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> implements Disposable
 {
+	private _isMultiInstance: boolean;
 	private _disposablePanel: Disposable | undefined;
 	protected override _view: WebviewPanel | undefined = undefined;
 
@@ -34,6 +35,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		showCommand?: Commands)
 	{
 		super(wrapper, id, title, fileName);
+		this._isMultiInstance = !showCommand;
 		if (showCommand){
 			this.disposables.push(
 				registerCommand(showCommand, this.onShowCommand, this),
@@ -83,15 +85,20 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	private onPanelDisposed()
     {
-		this.resetContextKeys();
-		this.onActiveChanged?.(false);
-		this.onFocusChanged?.(false);
-		this.onVisibilityChanged?.(false);
-		this._isReady = false;
-		this._disposablePanel?.dispose();
-		this._disposablePanel = undefined;
-		this._view = undefined;
-		this._skippedChangeEvent = false;
+		if (this._isMultiInstance) {
+			this.dispose();
+		}
+		else {
+			this.resetContextKeys();
+			this.onActiveChanged?.(false);
+			this.onFocusChanged?.(false);
+			this.onVisibilityChanged?.(false);
+			this._isReady = false;
+			this._disposablePanel?.dispose();
+			this._disposablePanel = undefined;
+			this._view = undefined;
+			this._skippedChangeEvent = false;
+		}
 	}
 
 

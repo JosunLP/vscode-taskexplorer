@@ -47,20 +47,29 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     private getChildrenLogPad = this.defaultGetChildrenLogPad;
     private getChildrenLogLevel = this.defaultGetChildrenLogLevel;
     private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void>;
+    private _onDidLoadTreeData: EventEmitter<void>;
 
 
     constructor(public readonly name: TreeViewIds, treeManager: TaskTreeManager)
     {
         this.treeManager = treeManager;
+        this._onDidLoadTreeData = new EventEmitter<void>();
         this._onDidChangeTreeData = new EventEmitter<TreeItem | undefined | null | void>();
-        this._disposables.push(this._onDidChangeTreeData);
+        this._disposables.push(
+            this._onDidLoadTreeData ,
+            this._onDidChangeTreeData
+        );
     }
 
-	dispose = () => this._disposables.forEach((d) => d.dispose());
+	dispose = () => this._disposables.forEach(d => d.dispose());
 
 
     get onDidChangeTreeData(): Event<TreeItem | undefined | null | void> {
         return this._onDidChangeTreeData.event;
+    }
+
+    get onDidLoadTreeData(): Event<void> {
+        return this._onDidLoadTreeData.event;
     }
 
 
@@ -283,6 +292,9 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
                 await next.fn.call(next.scope, ...next.args);
                 // this.refreshPending = this.processEventQueue(logPad);
             }, next.delay);
+        }
+        else {
+            queueMicrotask(() => this._onDidLoadTreeData.fire());
         }
 
         log.methodDone("process task explorer main event queue", 1, logPad);

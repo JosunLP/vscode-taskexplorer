@@ -393,7 +393,6 @@ export class TaskManager implements ITeTaskManager, Disposable
         const iTask = taskItem instanceof TaskItem ?
                       this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], "all")[0] : taskItem,
               taskDetailsPage = new TaskDetailsPage(this.wrapper, iTask);
-        this._disposables.push(taskDetailsPage);
         return taskDetailsPage.show();
     };
 

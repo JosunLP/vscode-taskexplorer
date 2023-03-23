@@ -1,4 +1,4 @@
-import { TreeItem, TreeView } from "vscode";
+import { TreeItem, TreeView, Event } from "vscode";
 
 export interface ITaskTreeEvent
 {
@@ -24,4 +24,5 @@ export interface ITeTaskTree
     getChildren(element?: TreeItem): Promise<TreeItem[]>;
     getName(): string;
     getParent(element: TreeItem): TreeItem | null;
+    onDidLoadTreeData: Event<void>;
 }

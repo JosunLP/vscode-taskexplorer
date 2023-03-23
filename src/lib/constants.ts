@@ -19,6 +19,7 @@ export const ConfigKeys =
 {
     AllowUsageReporting: "allowUsageReporting",
     EnableExplorerTree: "enableExplorerView",
+    EnabledLogging: "taskexplorer.logging.enable",
     EnableSideBar: "enableSideBar",
     EnablePersistenFileCache: "enablePersistentFileCaching",
     GroupMaxLevel: "groupMaxLevel",
@@ -26,6 +27,10 @@ export const ConfigKeys =
     GroupStripTaskLabel: "groupStripTaskLabel",
     GroupWithSeperator: "groupWithSeparator",
     KeepTerminalOnTaskDone: "keepTermOnStop",
+    LogLevel: "taskexplorer.logging.level",
+    LogEnableOutputWindow: "taskexplorer.logging.enableOutputWindow",
+    LogEnableFileSymbols: "taskexplorer.logging.enableFileSymbols",
+    LogEnableFile: "taskexplorer.logging.enableFile",
     ReportGlobalUsage: "taskMonitor.reportUsage",
     SortProjectFoldersAlphabetically: "sortProjectFoldersAlpha",
 	SpecialFolders: {
