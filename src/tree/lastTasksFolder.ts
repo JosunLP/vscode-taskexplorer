@@ -34,7 +34,7 @@ export class LastTasksFolder extends SpecialTaskFolder
     getLastRanId = () =>
     {
         let lastTaskId: string | undefined;
-        if (this.store.length > 0)
+        if (this.storeWs.length > 0)
         {
             lastTaskId = this.storeWs[this.storeWs.length - 1].id;
         }

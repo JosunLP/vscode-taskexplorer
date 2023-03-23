@@ -366,18 +366,26 @@ suite("Task Tests", () =>
         this.slow(tc.slowTime.commands.run + (tc.slowTime.storage.update * 2));
         const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
         expect(tree).to.not.be.oneOf([ undefined, null ]);
-        const lastTasksFolder = tree[0] as any;
+        const lastTasksFolder = teWrapper.treeManager.lastTasksFolder as any;
+        expect(lastTasksFolder).to.not.equal(undefined, "The 'Last Tasks' folder is undefined");
         const item = lastTasksFolder.taskFiles[0];
         expect(item).to.not.equal(undefined, "The 'Last Tasks' folder has no taskitems");
-        await lastTasksFolder.removeTaskFile("invalid_id");
         const taskMap = teWrapper.treeManager.getTaskMap();
-        const tmp = taskMap[item.id];
-        delete taskMap[item.id];
-        utils.overrideNextShowInfoBox(undefined);
-        await utils.sleep(1);
-        const r = await executeTeCommand("runLastTask", tc.waitTime.runCommandMin);
-        taskMap[item.id] = tmp;
-        await lastTasksFolder.saveTask(item, "");
+        const tmp = { ...taskMap };
+        await lastTasksFolder.removeTaskFile("invalid_id");
+        let r: any = 0;
+        try {
+            Object.keys(tmp).forEach(k => {
+                delete taskMap[k];
+            });
+            utils.overrideNextShowInfoBox(undefined);
+            await utils.sleep(1);
+            r = await executeTeCommand("runLastTask", tc.waitTime.runCommandMin);
+        }
+        finally {
+            Object.assign(taskMap, tmp);
+            await lastTasksFolder.saveTask(item, "");
+        }
         expect(r).to.be.equal(undefined, "Return TaskExecution should be undefined");
         utils.endRollingCount(this);
     });
