@@ -128,7 +128,7 @@ export const testControl =
             registerExplorerEvent: 475,
             shellChange: 1325,
             showHideSpecialFolder: 530,
-            showHideUserTasks: 1075,
+            showHideUserTasks: 1085,
             sortingEvent: 815,
             terminalEvent: 250,
             trackingEvent: 490
@@ -155,8 +155,8 @@ export const testControl =
             getTrialExtensionDenied: 815,
             getMaxTasks: 365,
             nag: 100,
-            purchaseLicense: 1875,
-            submitRegistration: 1775,
+            purchaseLicense: 1925,
+            submitRegistration: 1995,
             validateLicense: 2175
         },
         storage: {
@@ -206,15 +206,15 @@ export const testControl =
                     taskDetailsScript: 2865,
                     taskDetailsNonScript: 3375,
                     taskMonitor: 2990,
-                    parsingReport: 2580,
-                    parsingReportFull: 3480,
+                    parsingReport: 2680,
+                    parsingReportFull: 3580,
                     welcome: 1225
                 }
             }
         },
         wsFolder: {
-            add: 1685,     // bumped for multi-root ws in utils/initSettings
-            addEmpty: 1595,
+            add: 1695,     // bumped for multi-root ws in utils/initSettings
+            addEmpty: 1605,
             remove: 570,
             removeEmpty: 485,
             reorder: 550,   // bumped for multi-root ws in utils/initSettings

@@ -25,22 +25,11 @@ export const echoWebviewCommand = async(command: string, teWebview: ITeWebview, 
 
 export const executeSettingsUpdate = async (key: string, value?: any, minWait?: number, maxWait?: number) =>
 {
-    const rc = await teWrapper.config.updateWs(key, value);
+    const rc = await teWrapper.config.updateWs(key.replace("taskexplorer.", ""), value);
     await waitForTeIdle(minWait === 0 ? minWait : (minWait || tc.waitTime.config.event),
                         maxWait === 0 ? maxWait : (maxWait || tc.waitTime.max));
     return rc;
 };
-
-
-export const executeTeCommandAsync = async (command: string, minWait?: number, maxWait?: number, ...args: any[]) =>
-{
-    commands.executeCommand(`taskexplorer.${command}`, ...args);
-    await waitForTeIdle(minWait === 0 ? minWait : (minWait || tc.waitTime.command),
-                        maxWait === 0 ? maxWait : (maxWait || tc.waitTime.max));
-};
-
-
-export const executeTeCommand2Async = (command: string, args: any[], minWait?: number, maxWait?: number) => executeTeCommandAsync(command, minWait, maxWait, ...args);
 
 
 export const executeTeCommand = async <T>(command: string, minWait?: number, maxWait?: number, ...args: any[]) =>

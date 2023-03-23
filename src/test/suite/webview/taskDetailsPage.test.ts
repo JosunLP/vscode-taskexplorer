@@ -64,7 +64,7 @@ suite("Task Details Page Tests", () =>
 		ant = await treeUtils.getTreeTasks(teWrapper, "ant", 3);
 		antTask = ant.find(t => t.taskFile.fileName.includes("hello.xml")) as ITaskItem;
 		teWebview = await showTeWebview("taskDetails", antTask);
-		const curLogLvl = teWrapper.config.get<number>("teWrapper.keys.Config.LogLevel", 1);
+		const curLogLvl = teWrapper.config.get<number>(teWrapper.keys.Config.LogLevel, 1);
 		await executeSettingsUpdate(teWrapper.keys.Config.LogLevel, curLogLvl + 1, tc.slowTime.commands.standard); // cover taskEDetails onConfigChange else path
         void executeSettingsUpdate(teWrapper.keys.Config.LogLevel, curLogLvl, tc.slowTime.commands.standard);     // cover taskEDetails onConfigChange else path
 		await sleep(1);
