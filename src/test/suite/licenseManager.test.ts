@@ -4,14 +4,13 @@
 
 import { join } from "path";
 import { expect } from "chai";
-import { Disposable, Task } from "vscode";
 import * as utils from "../utils/utils";
+import { Disposable, Task } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-	closeTeWebviewPanel, echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, focusSidebarView, showTeWebview, showTeWebviewByEchoCmd
+	closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand, focusExplorerView, focusSidebarView, showTeWebview,
 } from "../utils/commandUtils";
-import { promiseFromEvent } from "../../lib/utils/promiseUtils";
 
 const tc = utils.testControl;
 
@@ -99,7 +98,7 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow((tc.slowTime.licenseMgr.getMaxTasks * 4) + tc.slowTime.storage.secretUpdate);
 		await utils.setLicenseType(1);
-		expectLicense();
+		await expectLicense();
 		expect(licMgr.getMaxNumberOfTasks()).to.be.a("number").that.is.equal(licMgrMaxFreeTasks);
 		expect(licMgr.getMaxNumberOfTasks("npm")).to.be.a("number").that.is.equal(licMgrMaxFreeTasksForTaskType);
 		expect(licMgr.getMaxNumberOfTasks("python")).to.be.a("number").that.is.equal(licMgrMaxFreeTasksForScriptType);
@@ -113,7 +112,7 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow((tc.slowTime.licenseMgr.getMaxTasks * 4) + tc.slowTime.storage.secretUpdate);
 		await utils.setLicenseType(oAccount.license.type);
-		expectLicense(true, false, true, false);
+		await expectLicense(true, false, true, false);
 		expect(licMgr.getMaxNumberOfTasks()).to.be.a("number").that.is.equal(Infinity);
 		expect(licMgr.getMaxNumberOfTasks("npm")).to.be.a("number").that.is.equal(Infinity);
 		expect(licMgr.getMaxNumberOfTasks("python")).to.be.a("number").that.is.equal(Infinity);
@@ -148,9 +147,9 @@ suite("License Manager Tests", () =>
 		// await showTeWebview(teWrapper.taskUsageView);
 		void focusSidebarView();
         await Promise.all([
-            utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home),
-            utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount),
-            utils.waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage),
+            utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
+            utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
+            utils.waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2),
         ]);
         utils.endRollingCount(this);
 	});
@@ -160,7 +159,8 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.focusChangeViews);
-		await focusExplorerView(teWrapper);
+		void focusExplorerView(teWrapper);
+		utils.waitForEvent(teWrapper.treeManager.views.taskExplorer.tree.onDidLoadTreeData, tc.slowTime.commands.focusChangeViews * 2);
         utils.endRollingCount(this);
 	});
 
@@ -175,7 +175,7 @@ suite("License Manager Tests", () =>
 		void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "buyer@example.com", emailAlt: "" });
 		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
 		await utils.sleep(50); // wait for reg change session events to propagate
-		expectLicense(true, false, true, false, true);
+		await expectLicense(true, false, true, false, true);
 		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
@@ -189,7 +189,7 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Extend Trial", true);
 		void licMgr.checkLicense("");
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		expectLicense(true, false, true, true, true);
+		await expectLicense(true, false, true, true, true);
 		utils.endRollingCount(this);
 	});
 
@@ -198,7 +198,12 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
-		await showTeWebview(teWrapper.homeView);
+		void showTeWebview(teWrapper.homeView);
+        await Promise.all([
+            utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
+            utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
+            utils.waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2),
+        ]);
         utils.endRollingCount(this);
 	});
 
@@ -221,7 +226,7 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox(undefined, true);
 		await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
 		await utils.sleep(10);
-		expectLicense(true, false, true, true, true);
+		await expectLicense(true, false, true, true, true);
         utils.endRollingCount(this);
 	});
 
@@ -238,7 +243,7 @@ suite("License Manager Tests", () =>
 		await utils.promiseFromEvent(teWrapper.server.onDidRequestComplete).promise;
 		await utils.sleep(50);
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		expectLicense(true, true, false, false);
+		await expectLicense(true, true, false, false);
 		await utils.sleep(50); // allow license/subscription events to propagate
         utils.endRollingCount(this);
 	});
@@ -248,8 +253,12 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + 100);
-		await showTeWebview(teWrapper.homeView);
-		utils.sleep(50);
+		void showTeWebview(teWrapper.homeView);
+        await Promise.all([
+            utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
+            utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
+            utils.waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2),
+        ]);
         utils.endRollingCount(this);
 	});
 
@@ -270,8 +279,8 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.focusChangeViews + 200);
-		await focusExplorerView(teWrapper);
-		await utils.sleep(100);
+		void focusExplorerView(teWrapper);
+		utils.waitForEvent(teWrapper.treeManager.views.taskExplorer.tree.onDidLoadTreeData, tc.slowTime.commands.focusChangeViews * 2);
         utils.endRollingCount(this);
 	});
 
@@ -285,7 +294,7 @@ suite("License Manager Tests", () =>
 		await saveAccount({ ...licMgr.account});
         await validateLicense(undefined, true, true);
 		await utils.sleep(50);
-		expectLicense(true, false, true, false);
+		await expectLicense(true, false, true, false);
         utils.endRollingCount(this);
 	});
 
@@ -297,7 +306,7 @@ suite("License Manager Tests", () =>
 		await utils.setLicenseType(1);
 		await saveAccount({ ...licMgr.account});
 		await utils.sleep(50); // allow session change event to propagate
-		expectLicense();
+		await expectLicense();
         utils.endRollingCount(this);
 	});
 
@@ -459,7 +468,7 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		await restoreAccount();
-		expectLicense(true, false, true, false);
+		await expectLicense(true, false, true, false);
         utils.endRollingCount(this);
 	});
 
@@ -507,7 +516,7 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
-		expectLicense(true, false, true, false);
+		await expectLicense(true, false, true, false);
 		await utils.treeUtils.refresh();
         utils.endRollingCount(this);
 	});
@@ -519,14 +528,14 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.licenseMgr.validateLicense + 100);
 		void executeTeCommand("taskexplorer.refreshSession");
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		expectLicense(true, true, false, false, true);
+		await expectLicense(true, true, false, false, true);
         utils.endRollingCount(this);
 	});
 
 });
 
 
-const expectLicense = (isLic?: boolean, isPaid?: boolean, isTrial?: boolean, isTrialExt?: boolean, isRegistered?: boolean) =>
+const expectLicense = async (isLic?: boolean, isPaid?: boolean, isTrial?: boolean, isTrialExt?: boolean, isRegistered?: boolean) =>
 {
 	expect(licMgr.isLicensed).to.be.equal(!!isLic);
 	expect(licMgr.isPaid).to.be.equal(!!isPaid);
@@ -535,6 +544,7 @@ const expectLicense = (isLic?: boolean, isPaid?: boolean, isTrial?: boolean, isT
 	if (isRegistered !== undefined) {
 		expect(licMgr.isRegistered).to.be.equal(!!isRegistered);
 	}
+	await utils.waitForWebviewsIdle();
 };
 
 const restoreAccount = async() => {

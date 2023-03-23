@@ -8,7 +8,7 @@ import { testControl } from "../control";
 import { deactivate } from "../../extension";
 import { startInput, stopInput } from "./input";
 import { StorageKeys } from "../../lib/constants";
-import { hasExplorerFocused } from "./commandUtils";
+import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
@@ -149,6 +149,12 @@ export const activate = async (instance?: Mocha.Context) =>
         // waitForIdle() added 1/2/03 - Tree loads in delay 'after' activate()
         //
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Waiting for extension to initialize", teWrapper.figures.colors.grey)}`);
+        await waitForTeIdle();
+        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Waiting for welcome page display", teWrapper.figures.colors.grey)}`);
+        await waitForWebviewReadyEvent(teWrapper.welcomePage, 7500);
+        await waitForWebviewsIdle();
+        await closeTeWebviewPanel(teWrapper.welcomePage);
+        await waitForWebviewsIdle();
         await waitForTeIdle();
         //
         // Write to console is just a tests feature, it's not controlled by settings, set it here if needed

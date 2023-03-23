@@ -7,7 +7,8 @@ import { commands, Uri } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd, focusFileExplorer, focusSidebarView, closeTeWebviewPanel
+    executeSettingsUpdate, executeTeCommand, showTeWebview, showTeWebviewByEchoCmd, focusFileExplorer,
+    focusSidebarView, closeTeWebviewPanel
 } from "../../utils/commandUtils";
 import {
     activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep,

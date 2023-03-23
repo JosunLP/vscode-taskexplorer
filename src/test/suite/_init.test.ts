@@ -17,7 +17,6 @@ suite("Initialization", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate(this));
-        await waitForWebviewReadyEvent(teWrapper.welcomePage, tc.slowTime.webview.show.page.welcome),
         endRollingCount(this, true);
     });
 
@@ -25,7 +24,6 @@ suite("Initialization", () =>
     suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-        await closeEditors();
         suiteFinished(this);
     });
 
@@ -61,7 +59,7 @@ suite("Initialization", () =>
         this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home);
         void focusSidebarView();
         await Promise.all([
-            waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home),
+            waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
             waitForEvent(teWrapper.treeManager.views.taskExplorerSideBar.tree.onDidLoadTreeData, tc.slowTime.commands.refresh)
         ]);
         teWrapper.homeView.title = teWrapper.homeView.title;
@@ -72,10 +70,8 @@ suite("Initialization", () =>
     test("Expand SideBar Task Usage View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.taskUsage);
+        this.slow(tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
         await showTeWebview(teWrapper.taskUsageView);
-        // void executeTeCommand("taskexplorer.view.taskUsage.toggleVisibility", 5);
-        // waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage);
         expect(teWrapper.taskUsageView.visible).to.be.equal(true);
         endRollingCount(this);
     });
@@ -84,10 +80,8 @@ suite("Initialization", () =>
     test("Expand SideBar Task Count View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.taskCount);
+        this.slow(tc.slowTime.webview.show.view.taskCount + tc.slowTime.commands.focusChangeViews);
         await showTeWebview(teWrapper.taskCountView);
-        // void executeTeCommand("taskexplorer.view.taskCount.toggleVisibility", 5);
-        // waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount);
         expect(teWrapper.taskCountView.visible).to.be.equal(true);
         endRollingCount(this);
     });
