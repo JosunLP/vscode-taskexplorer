@@ -103,25 +103,33 @@ suite("Task Details Page Tests", () =>
 	});
 
 
-	test("Run Unused Task w/ Details Page Open", async function()
+	test("Run Unused Task 1 w/ Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run + tc.slowTime.webview.closeSync + 200);
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
         await waitForTaskExecution(exec, tc.slowTime.tasks.gulpTask);
 		await sleep(100); // allow task status event to propagate to webviews via postMessage
-		await closeTeWebviewPanel(teWebview);
         endRollingCount(this);
 	});
 
 
-	test("Run Unused Task w/o Details Page Open", async function()
+	test("Run Unused Task 2 w/o Details Page Open", async function()
 	{
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.tasks.gulpTask + tc.slowTime.commands.run);
 		gulpTask = gulp.find(t => t.taskFile.fileName.includes("GULPFILE.js") && (<string>t.label).includes("test")) as ITaskItem;
 		const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ gulpTask ], tc.waitTime.runCommandMin) ;
         await waitForTaskExecution(exec, tc.slowTime.tasks.gulpTask);
+        endRollingCount(this);
+	});
+
+
+	test("Close Open Pages", async function()
+	{
+        if (exitRollingCount(this)) return;
+		await closeTeWebviewPanel(teWebview);
+		await closeEditors();
         endRollingCount(this);
 	});
 

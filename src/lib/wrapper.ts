@@ -552,8 +552,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 	// 	return this._onInitialized.event;
 	// }
 
+	/* istanbul ignore next */
 	get onDidBusyComplete(): Event<void> {
-		/* istanbul ignore next */
 		return this._onBusyComplete.event;
 	}
 

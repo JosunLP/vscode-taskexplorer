@@ -207,8 +207,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    private getCombinedStore = () => [ ...this.storeWs, ...this.store ].sort((a, b) => a.timestamp < b.timestamp ? 1 : -1);
-
+    protected getCombinedStore = () => [ ...this.storeWs, ...this.store ].sort((a, b) => a.timestamp < b.timestamp ? 1 : -1);
 
 
     protected getRenamedTaskName(taskItem: TaskItem): string
@@ -254,7 +253,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     protected onConfigChanged(e: ConfigurationChangeEvent): void
     {
-        if (this.wrapper.config.affectsConfiguration(e, this._settingNameEnabled))
+        if (this.wrapper.config.affectsConfiguration(e, this._settingNameEnabled) && this.wrapper.treeManager.getTaskTree())
         {
             this.loadStores();
             this._enabled = this.wrapper.config.get<boolean>(this._settingNameEnabled);
@@ -265,18 +264,15 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     private refresh(): void
     {
-        const tree = this.wrapper.treeManager.getTaskTree();
+        const tree = this.wrapper.treeManager.getTaskTree() as TaskFolder[];
         this.log.methodStart(`refresh ${this.labelLwr} folder`, 1, "", false, [[ "show / enabled", this._enabled ]]);
-        if (tree)
-        {
-            if (this._enabled) {
-                this.build("   ");
-            }
-            else {
-                tree.splice(tree.findIndex(i => i.id === this.id), 1);
-            }
-            this.fireChangeEvent(undefined, "   ");
+        if (this._enabled) {
+            this.build("   ");
         }
+        else {
+            tree.splice(tree.findIndex(i => i.id === this.id), 1);
+        }
+        this.fireChangeEvent(undefined, "   ");
         this.log.methodDone(`refresh ${this.labelLwr} folder`, 1, "");
     }
 

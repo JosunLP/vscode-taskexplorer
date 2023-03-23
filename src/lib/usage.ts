@@ -356,7 +356,7 @@ export class Usage implements ITeUsage, Disposable
         // If the key is the task usage key `task:`, then skip firing the event, as trackTask() will
         // for the event once finished recording stats
         //
-        if (key !== this._taskUsageKey) {
+        if (!key.startsWith(this._taskUsageKey)) {
 		    this._onDidChange.fire({ key, usage });
         }
 

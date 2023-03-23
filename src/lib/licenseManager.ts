@@ -9,7 +9,7 @@ import { IpcAccountRegistrationParams } from "../webview/common/ipc";
 import { executeCommand, registerCommand, Commands } from "./command/command";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
-	TeLicenseState, IDictionary, TeRuntimeEnvironment
+	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession
 } from "../interface";
 
 
@@ -117,6 +117,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		this._busy = true;
 		const result = await this.executeRequest("register/trial/start", logPad + "   ", {});
+		/* istanbul ignore else */
 		if (result)
 		{
 			window.showInformationMessage(`Welcome to ${this.wrapper.extensionName} 3.0.  Your 30 day trial has been activated.`, "More Info")
@@ -554,6 +555,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private saveAccount = async (account: ITeAccount, logPad: string): Promise<void> =>
 	{
+		const compareCurrent = { ...this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account), ...{ session: {}}};
+		const compareNew = { ...this.wrapper.utils.cloneJsonObject<ITeAccount>(account), ...{ session: {}}};
+		if (JSON.stringify(compareNew) === JSON.stringify(compareCurrent)) {
+			return;
+		}
 		this.wrapper.log.methodStart("save account", 1, logPad);
 		++this._accountChangeNumber;
 		this.wrapper.log.values(1, logPad + "   ", [
@@ -588,7 +594,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			this._onSessionChange.fire(
 			{
-				account: this.wrapper.utils.cloneJsonObject(this._account),
+				account: this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account),
 				changeNumber: this._accountChangeNumber,
 				changeFlags: {
 					expiration: this._account.license.expired !== pAccount.license.expired,
@@ -602,8 +608,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				},
 				session: {
 					added: [],
-					removed: [ this.wrapper.utils.cloneJsonObject(pAccount.session) ],
-					changed: [ this.wrapper.utils.cloneJsonObject(this._account.session) ]
+					removed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(pAccount.session) ],
+					changed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(this._account.session) ]
 				}
 			});
 		});

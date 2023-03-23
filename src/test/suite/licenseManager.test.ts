@@ -17,6 +17,7 @@ const tc = utils.testControl;
 let licMgr: ITeLicenseManager;
 let teWrapper: ITeWrapper;
 let oAccount: ITeAccount;
+let oAccount2: ITeAccount;
 let licMgrMaxFreeTasks: number;
 let licMgrMaxFreeTaskFiles: number;
 let licMgrMaxFreeTasksForTaskType: number;
@@ -47,6 +48,7 @@ suite("License Manager Tests", () =>
 		expect(licMgr.isTrial).to.be.equal(true);
 		expect(licMgr.isTrialExtended).to.be.equal(false);
 		oAccount = JSON.parse(JSON.stringify(licMgr.account));
+		oAccount2 = JSON.parse(JSON.stringify(licMgr.account));
 		await utils.setLicenseType(1);
 		try {
 			licMgrMaxFreeTasks = licMgr.getMaxNumberOfTasks();
@@ -122,6 +124,7 @@ suite("License Manager Tests", () =>
 	test("Validate License in Trial Mode (Refresh Token Needed)", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.validateLicense);
         await validateLicense(this, true, true);
         utils.endRollingCount(this);
 	});
@@ -159,12 +162,14 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.submitRegistration + tc.slowTime.webview.show.page.license + 100);
-		await showTeWebview(teWrapper.licensePage, { register: true });
+		void executeTeCommand("taskexplorer.register", 1);
+        await showTeWebview(teWrapper.licensePage, "waitOnly");
 		const echoCmd = { method: "echo/account/register", overwriteable: false };
 		void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "buyer@example.com", emailAlt: "" });
 		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
 		await utils.sleep(50); // wait for reg change session events to propagate
 		expectLicense(true, false, true, false, true);
+		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
 /*
@@ -178,7 +183,7 @@ suite("License Manager Tests", () =>
         utils.endRollingCount(this);
 	});
 */
-
+/*
 	test("Request Trial Extension from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
@@ -189,6 +194,19 @@ suite("License Manager Tests", () =>
 		expectLicense(true, false, true, true, true);
 		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
+	});
+*/
+
+	test("License Nag in Trial Mode - Extend Trial", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.licenseMgr.nag);
+		await setNag();
+		utils.overrideNextShowInfoBox("Extend Trial", true);
+		void licMgr.checkLicense("");
+		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
+		expectLicense(true, false, true, true, true);
+		utils.endRollingCount(this);
 	});
 
 
@@ -211,20 +229,6 @@ suite("License Manager Tests", () =>
         utils.endRollingCount(this);
 	});
 
-/*
-	test("License Nag in Trial Mode - Extend Trial", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.licenseMgr.nag);
-		await setNag();
-		utils.overrideNextShowInfoBox("Extend Trial", true);
-		void licMgr.checkLicense("");
-		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
-		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		expectLicense(true, false, true, true, true);
-        utils.endRollingCount(this);
-	});
-*/
 
 	test("Extend Trial in Extended Trial Mode (Command Pallette - Denied)", async function()
 	{
@@ -259,9 +263,21 @@ suite("License Manager Tests", () =>
 	test("Open Home View in Licensed Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.view.home);
+		this.slow(tc.slowTime.webview.show.view.home + 100);
 		await showTeWebview(teWrapper.homeView);
-		utils.sleep(10);
+		utils.sleep(50);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Open License Page in Licensed Mode", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + 200);
+        await showTeWebview(teWrapper.licensePage);
+		await utils.sleep(50);
+		await closeTeWebviewPanel(teWrapper.licensePage);
+		await utils.sleep(50);
         utils.endRollingCount(this);
 	});
 
@@ -271,6 +287,20 @@ suite("License Manager Tests", () =>
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.focusChangeViews);
 		await focusExplorerView(teWrapper);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Set License to First Time Startup", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.createNewTrial + tc.slowTime.storage.secretUpdate + tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + 100);
+		utils.overrideNextShowInfoBox("More Info", true);
+		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "", state: 0, period: 0, type: 0 }});
+		await saveAccount({ ...licMgr.account});
+        await validateLicense(undefined, true, true);
+		await utils.sleep(50);
+		expectLicense(true, false, true, false);
         utils.endRollingCount(this);
 	});
 
@@ -290,14 +320,15 @@ suite("License Manager Tests", () =>
 	test("Open License Page in Unlicensed Mode and Copy Key", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + tc.slowTime.commands.focusChangeViews + 200);
+		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + tc.slowTime.webview.postMessage + 200);
         await showTeWebview(teWrapper.licensePage);
 		await utils.sleep(50);
 		utils.overrideNextShowInfoBox(undefined);
-		void teWrapper.licensePage.postMessage({ method: "echo/message/show", overwriteable: false }, {});
-		await utils.promiseFromEvent(teWrapper.licensePage.onDidReceiveMessage).promise;
-		await closeTeWebviewPanel(teWrapper.licensePage);
-		await utils.sleep(50);
+		if (!(await teWrapper.licensePage.postMessage({ method: "echo/message/show", overwriteable: false }, {}))) {
+			await utils.sleep(50);
+			void teWrapper.licensePage.postMessage({ method: "echo/message/show", overwriteable: false }, {});
+		}
+		await utils.promiseFromEvent<string, string>(teWrapper.licensePage.onDidReceiveMessage).promise;
         utils.endRollingCount(this);
 	});
 
@@ -310,7 +341,6 @@ suite("License Manager Tests", () =>
 		utils.overrideNextShowInfoBox("Info", true);
 		void licMgr.checkLicense("");
         await utils.promiseFromEvent(teWrapper.licensePage.onDidReceiveReady).promise;
-		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
 
@@ -432,6 +462,14 @@ suite("License Manager Tests", () =>
 	});
 
 
+	test("Close License Page", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+        await closeTeWebviewPanel(teWrapper.licensePage);
+        utils.endRollingCount(this);
+	});
+
+
 	test("Restore Trial Account", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
@@ -489,6 +527,17 @@ suite("License Manager Tests", () =>
         utils.endRollingCount(this);
 	});
 
+
+	test("Refresh Session", async function()
+	{
+		if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.validateLicense + 100);
+		void executeTeCommand("taskexplorer.refreshSession");
+		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
+		expectLicense(true, true, false, false, true);
+        utils.endRollingCount(this);
+	});
+
 });
 
 
@@ -504,9 +553,9 @@ const expectLicense = (isLic?: boolean, isPaid?: boolean, isTrial?: boolean, isT
 };
 
 const restoreAccount = async() => {
-	if (oAccount) {
-		Object.assign(licMgr.account, JSON.parse(JSON.stringify(oAccount)));
-		await teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(oAccount));
+	if (oAccount2) {
+		Object.assign(licMgr.account, JSON.parse(JSON.stringify(oAccount2)));
+		await teWrapper.storage.updateSecret(teWrapper.keys.Storage.Account, JSON.stringify(oAccount2));
 	}
 };
 

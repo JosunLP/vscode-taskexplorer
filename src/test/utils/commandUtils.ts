@@ -93,7 +93,8 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
     let teWebview: ITeWebview,
         wasVisible = false,
         force = false,
-        timeout = 5000;
+        timeout = 5000,
+        waitOnly = false;
     const _args = [ ...args ];
 
     if (_args[0])
@@ -110,8 +111,15 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
                 force = true;
                 _args.splice(0, 1);
             }
+            if (_args[0] === "waitOnly")
+            {
+                waitOnly = true;
+                _args.splice(0, 1);
+            }
         }
     }
+
+    const start = Date.now();
 
     if (typeof teView === "string" || teView instanceof String)
     {
@@ -125,7 +133,7 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
     else {
         teWebview = teView;
         wasVisible = teView.visible;
-        if (!wasVisible || force){
+        if (!waitOnly && (!wasVisible || force)) {
             if (_args.length > 0) {
                 void teWebview.show(undefined, ..._args);
             }
@@ -143,6 +151,13 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
             new Promise<void>(resolve => setTimeout(resolve, timeout)),
         ]);
         await sleep(1);
+    }
+
+    let waited = Date.now() - start;
+    while (teWebview.busy && waited < timeout)
+    {
+        await sleep(25);
+        waited += 25;
     }
 
     expect(teWebview.view).to.not.be.undefined;

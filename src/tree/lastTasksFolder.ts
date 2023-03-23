@@ -102,10 +102,11 @@ export class LastTasksFolder extends SpecialTaskFolder
     {
         this.taskFiles.sort((a: TaskItem, b: TaskItem) =>
         {
-            const aId = this.getTaskItemId(a.id),
+            const cStore = this.getCombinedStore(),
+                  aId = this.getTaskItemId(a.id),
                   bId = this.getTaskItemId(b.id),
-                  aIdx = this.store.findIndex(t => t.id === aId),
-                  bIdx = this.store.findIndex(t => t.id === bId),
+                  aIdx = cStore.findIndex(t => t.id === aId),
+                  bIdx = cStore.findIndex(t => t.id === bId),
                   aIsPinned = this.wrapper.taskUtils.isPinned(aId, this.listType),
                   bIsPinned = this.wrapper.taskUtils.isPinned(bId, this.listType);
             if (aIsPinned && !bIsPinned) {
@@ -114,6 +115,7 @@ export class LastTasksFolder extends SpecialTaskFolder
             else if (!aIsPinned && bIsPinned) {
                 return 1;
             }
+            /* istanbul ignore next */
             return aIdx < bIdx ? 1 : -1;
         });
     };
