@@ -79,7 +79,7 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	private onUsageChanged(e: ITeUsageChangeEvent | undefined): void
 	{
-		if (e && e.key === "task:")
+		if (e && e.key.startsWith("task:"))
 		{
 			this.wrapper.log.methodOnce("task usage view event", "onUsageChanged", 2, this.wrapper.log.getLogPad());
 			void this.refresh(false, false);
