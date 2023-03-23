@@ -7,9 +7,12 @@ import { figures } from "./utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
 
 // const USE_LOCAL_SERVER = true;
+const TLS_REJECT = "1"; // "0" to turn off tls rejection
 const SPM_API_VERSION = 1;
 const SPM_API_PORT = 443;
 const SPM_API_SERVER = "license.spmeesseman.com";
+const SPM_API_CLIENTID = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
+// const SPM_API_CLIENTID = "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
 
 export interface ServerError
 {
@@ -32,13 +35,7 @@ export class TeServer implements Disposable
     constructor(private readonly wrapper: TeWrapper)
 	{
 		this._onRequestComplete = new EventEmitter<void>();
-		// if (USE_LOCAL_SERVER)
-		// {   //
-		// 	// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
-		// 	// Justdisable TLS rejection when using localhost, no big deal.
-		// 	//
-		// 	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-		// }
+		// process.env.NODE_TLS_REJECT_UNAUTHORIZED = TLS_REJECT;
 	}
 
 	dispose = () => this._onRequestComplete.dispose();
@@ -48,15 +45,8 @@ export class TeServer implements Disposable
 		return this._busy;
 	}
 
-	get apiClientId()
-	{
-		// USE_LOCAL_SERVER
-		// return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
-		return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
-	};
-
 	private get productName() {
-		return `vscode-taskexplorer-${this.wrapper.env}`.replace("-production", "");
+		return `${this.wrapper.extensionId}-${this.wrapper.env}`.replace("-production", "");
 	};
 
     get onDidRequestComplete(): Event<void> {
@@ -81,9 +71,9 @@ export class TeServer implements Disposable
 			//
 			timeout: 5000,
 			headers: <{[id: string]: string}>{
-				"token": this.apiClientId,
+				"token": SPM_API_CLIENTID,
 				// eslint-disable-next-line @typescript-eslint/naming-convention
-				"User-Agent": "vscode-taskexplorer",
+				"User-Agent": this.wrapper.extensionId,
 				// eslint-disable-next-line @typescript-eslint/naming-convention
 				"Content-Type": "application/json"
 			}
