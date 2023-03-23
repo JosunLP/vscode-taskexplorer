@@ -9,8 +9,9 @@ import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-	closeTeWebviewPanel, echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview, showTeWebviewByEchoCmd
+	closeTeWebviewPanel, echoWebviewCommand, executeSettingsUpdate, executeTeCommand, focusExplorerView, focusSidebarView, showTeWebview, showTeWebviewByEchoCmd
 } from "../utils/commandUtils";
+import { promiseFromEvent } from "../../lib/utils/promiseUtils";
 
 const tc = utils.testControl;
 
@@ -142,9 +143,15 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount + tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
-		await showTeWebview(teWrapper.homeView);
-		await showTeWebview(teWrapper.taskCountView);
-		await showTeWebview(teWrapper.taskUsageView);
+		// await showTeWebview(teWrapper.homeView);
+		// await showTeWebview(teWrapper.taskCountView);
+		// await showTeWebview(teWrapper.taskUsageView);
+		void focusSidebarView();
+        await Promise.all([
+            utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home),
+            utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount),
+            utils.waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage),
+        ]);
         utils.endRollingCount(this);
 	});
 

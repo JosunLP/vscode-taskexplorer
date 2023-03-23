@@ -4,8 +4,8 @@
 
 import { expect } from "chai";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, executeTeCommand2, focusFileExplorer, focusSidebarView } from "../utils/commandUtils";
-import { activate, closeEditors, endRollingCount, exitRollingCount, promiseFromEvent, sleep, suiteFinished, testControl as tc, waitForWebviewReadyEvent } from "../utils/utils";
+import { executeSettingsUpdate, executeTeCommand2, focusFileExplorer, focusSidebarView, showTeWebview } from "../utils/commandUtils";
+import { activate, closeEditors, endRollingCount, exitRollingCount, promiseFromEvent, sleep, suiteFinished, testControl as tc, waitForEvent, waitForWebviewReadyEvent } from "../utils/utils";
 
 
 let teWrapper: ITeWrapper;
@@ -54,13 +54,35 @@ suite("Initialization", () =>
     });
 
 
-    test("Focus SideBar View Tree", async function()
+    test("Focus SideBar", async function()
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home);
         void focusSidebarView();
-        await waitForWebviewReadyEvent(teWrapper.homeView);
+        // teWrapper.homeView.show();
+        await Promise.all([
+            waitForWebviewReadyEvent(teWrapper.homeView),
+            waitForEvent(teWrapper.treeManager.onDidAllTasksChange, tc.slowTime.commands.refresh)
+        ]);
         teWrapper.homeView.title = teWrapper.homeView.title;
+        endRollingCount(this);
+    });
+
+
+    test("Expand SideBar Task Usage View", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.webview.show.view.taskUsage);
+        await showTeWebview(teWrapper.taskUsageView);
+        endRollingCount(this);
+    });
+
+
+    test("Expand SideBar Task Count View", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.webview.show.view.taskCount);
+        await showTeWebview(teWrapper.taskCountView);
         endRollingCount(this);
     });
 

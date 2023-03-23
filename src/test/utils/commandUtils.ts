@@ -172,12 +172,20 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
 
 export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: ITeWebview, webviewPageSender: ITeWebview, ...args: any[]) =>
 {
+    const start = Date.now();
     const echoCmd = { method: "echo/command/execute", overwriteable: false };
     void webviewPageSender.postMessage(echoCmd, { command: `taskexplorer.view.${showCmdName}.show`, args: args.length > 0 ? args : undefined });
     await waitForWebviewReadyEvent(webviewPage, 3000);
     await sleep(1);
+    let waited = Date.now() - start;
+    while (webviewPage.busy && waited < 5000)
+    {
+        await sleep(25);
+        waited += 25;
+    }
     const msg = `Failed to show ${showCmdName} with echo command`;
-    if (!webviewPage.visible) {
+    if (!webviewPage.visible)
+    {
         console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor(msg, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
         await sleep(100);
@@ -185,7 +193,8 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
         await waitForWebviewReadyEvent(webviewPage, 3000);
         await sleep(1);
     }
-    if (!webviewPage.visible) {
+    if (!webviewPage.visible)
+    {
         console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor(msg, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor("Trying again in 100ms with showTeWebview...", teWrapper.figures.colors.grey)}`);
         await sleep(100);
@@ -199,9 +208,11 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
     }
     expect(webviewPage).to.not.be.undefined;
     expect(webviewPage.visible).to.be.equal(true);
-    let waitedForBusy = 0;
-    while (webviewPage.busy && ++waitedForBusy < 200) {
+    waited = Date.now() - start;
+    while (webviewPage.busy && waited < 5000)
+    {
         await sleep(25);
+        waited += 25;
     }
     expect(webviewPage.busy).to.be.equal(false);
 };

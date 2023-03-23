@@ -131,7 +131,7 @@ export const testControl =
             showHideUserTasks: 1075,
             sortingEvent: 815,
             terminalEvent: 250,
-            trackingEvent: 410
+            trackingEvent: 490
         },
         fs: {
             createEvent: 1550,
@@ -193,6 +193,7 @@ export const testControl =
             closeSync: 195,
             postMessage: 300,
             revealTreeNode: 55,
+            roundTripMessage: 2625,
             show: {
                 view: {
                     home: 2640,
@@ -201,12 +202,12 @@ export const testControl =
                 },
                 page: {
                     license: 3240,
-                    releaseNotes: 2970,
-                    taskDetailsScript: 2845,
-                    taskDetailsNonScript: 3305,
-                    taskMonitor: 2980,
-                    parsingReport: 2480,
-                    parsingReportFull: 3280,
+                    releaseNotes: 2990,
+                    taskDetailsScript: 2865,
+                    taskDetailsNonScript: 3325,
+                    taskMonitor: 2990,
+                    parsingReport: 2580,
+                    parsingReportFull: 3480,
                     welcome: 1225
                 }
             }

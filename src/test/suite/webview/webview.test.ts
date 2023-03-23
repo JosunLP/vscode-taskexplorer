@@ -59,14 +59,19 @@ suite("Webview Tests", () =>
         //
         if (exitRollingCount(this)) return;
         if (tc.isSingleSuiteTest) {
-            this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews + 400);
+            this.slow(tc.slowTime.commands.focusSideBarFirstTime + tc.slowTime.webview.show.view.home +
+                      tc.slowTime.commands.focusChangeViews);
         }
         else {
-            this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
+            this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskUsage +
+                      tc.slowTime.webview.show.view.taskCount + tc.slowTime.commands.focusChangeViews);
         }
         void focusSidebarView();
-        await waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.commands.focusSideBarFirstTime);
-        await sleep(200);
+        await Promise.all([
+            waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage),
+            waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount),
+            waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home),
+        ]);
         endRollingCount(this);
     });
 
@@ -75,8 +80,7 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.focusChangeViews + tc.slowTime.webview.show.page.releaseNotes +
-                  tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home + 40);
-        await sleep(10);
+                  tc.slowTime.webview.show.page.parsingReportFull + tc.slowTime.webview.show.view.home + 20);
         await showTeWebviewByEchoCmd("parsingReport", teWrapper.parsingReportPage, teWrapper.homeView, Uri.file(getWsPath(".")));
         await sleep(10);
         await showTeWebviewByEchoCmd("releaseNotes", teWrapper.releaseNotesPage, teWrapper.homeView);
@@ -98,10 +102,10 @@ suite("Webview Tests", () =>
     test("Change Views from SideBar", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.postMessage + tc.slowTime.config.trackingEvent + tc.slowTime.commands.focusChangeViews + 200);
+        this.slow(tc.slowTime.webview.postMessage + tc.slowTime.config.trackingEvent + tc.slowTime.commands.focusChangeViews + 100);
         await focusFileExplorer();
         await teWrapper.homeView.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.taskUsage.focus" }); // cover postMessage() when not visible
-        await sleep(100);
+        await sleep(50);
         endRollingCount(this);
     });
 
@@ -119,10 +123,10 @@ suite("Webview Tests", () =>
     test("Post an Unknown Random Message", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.postMessage + 1100);
+        this.slow(tc.slowTime.webview.roundTripMessage + tc.slowTime.webview.show.view.home);
         await commands.executeCommand("taskexplorer.view.home.focus");
-        await teWrapper.homeView.postMessage({ method: "echo/fake", overwriteable: false }, { command: "taskexplorer.view.releaseNotes.show" });
-        await sleep(550); // wait for webworker to respond, takes ~ 400-600ms
+        void teWrapper.homeView.postMessage({ method: "echo/fake", overwriteable: false }, { command: "taskexplorer.view.releaseNotes.show" });
+        await promiseFromEvent(teWrapper.homeView.onDidReceiveMessage).promise;
         endRollingCount(this);
     });
 

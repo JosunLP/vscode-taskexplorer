@@ -721,7 +721,7 @@ suite("Util Tests", () =>
     test("Storage", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(325);
+		this.slow(350);
         if (teWrapper.storage)
         {
 			const disposable1 = teWrapper.storage.onDidChange(() => {});
