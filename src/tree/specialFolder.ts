@@ -242,10 +242,10 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    protected getTaskItemId = (id: string): string => id.replace(`${this.label}:`, "");
+    protected getTaskItemId = (id: string): string => (id.includes("::") ? id.replace(id.substring(0, id.indexOf("::") + 2), "") : id);
 
 
-    protected getTaskSpecialId = (id: string): string => `${this.label}:${this.getTaskItemId(id)}`;
+    protected getTaskSpecialId = (id: string): string => `${this.label}::${this.getTaskItemId(id)}`;
 
 
     hasTask = (item: TaskItem): boolean => !!(this._enabled && this.taskFiles.find(t => this.getTaskItemId(t.id) === this.getTaskItemId(item.id)));
