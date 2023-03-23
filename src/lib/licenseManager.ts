@@ -528,7 +528,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			try
 			{
 				await this.wrapper.server.request<any>(ep, token, logPad, this.getPaypalWebhookPayload());
-				await this.wrapper.utils.sleep(500);
+				await this.wrapper.utils.sleep(50);
 				await this.validateLicense(this._account.license.key, logPad + "   ");
 			}
 			catch (e) {
@@ -568,16 +568,15 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			[ "license issued", this.wrapper.utils.formatDate(account.session.issued) ],
 			[ "license expires", this.wrapper.utils.formatDate(account.session.expires) ]
 		]);
-		/* istanbul ignore else */
-		if (this.wrapper.env !== "production")
-		{
-			this.wrapper.log.values(2, logPad + "   ", [
-				[ "license id", account.license.id ], [ "trial id", account.trialId ],
-				[ "access token", account.session.token ], [ "license key", account.license.key ]
-			]);
-			const rPath = await this.wrapper.pathUtils.getInstallPath() + `\\dist\\account_saved_${this._accountChangeNumber}.json`;
-			await this.wrapper.fs.writeFile(rPath, JSON.stringify(account, null, 3));
-		}
+		// if (this.wrapper.env !== "production")
+		// {
+		// 	this.wrapper.log.values(2, logPad + "   ", [
+		// 		[ "license id", account.license.id ], [ "trial id", account.trialId ],
+		// 		[ "access token", account.session.token ], [ "license key", account.license.key ]
+		// 	]);
+		// 	const rPath = await this.wrapper.pathUtils.getInstallPath() + `\\dist\\account_saved_${this._accountChangeNumber}.json`;
+		// 	await this.wrapper.fs.writeFile(rPath, JSON.stringify(account, null, 3));
+		// }
 		//
 		// Save and set new account, clone previous account object for change flag comparison
 		//

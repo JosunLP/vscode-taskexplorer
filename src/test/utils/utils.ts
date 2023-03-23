@@ -13,7 +13,7 @@ import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import {
-    ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType, ITeWebview
+    ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
 } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     commands, ConfigurationTarget, Disposable, Event, EventEmitter, Extension, extensions, Task,
@@ -429,31 +429,15 @@ export const overrideNextShowInfoBox = (value: any, clear?: boolean) => { if (cl
 const passthrough = (value: any, resolve: (value?: any) => void) => resolve(value);
 
 
-export type PromiseAdapter<T, U> = (
-    value: T,
-    resolve:
-        (value: U | PromiseLike<U>) => void,
-    reject:
-        (reason: any) => void
-) => any;
-
-
 export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 5000) => waitForEvent(view.onDidReceiveReady, timeout);
 
 
-export const oneTimeEvent = <T>(event: Event<T>): Event<T> =>
-{
-	return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) =>
-    {
-		const result = event(e => { result.dispose(); return listener.call(thisArgs, e); }, null, disposables);
-		return result;
-	};
-};
+export const oneTimeEvent = <T>(event: Event<T>): Event<T> => teWrapper.promiseUtils.oneTimeEvent(event);
 
 
 export const waitForEvent = async <T>(event: Event<T>, timeout = 5000) =>
 {
-    const eventPromise = promiseFromEvent(event),
+    const eventPromise = teWrapper.promiseUtils.promiseFromEvent(event),
           to = setTimeout((ep: EventEmitter<void>) => ep.fire(), timeout, eventPromise.cancel);
     try {
         await eventPromise.promise;
@@ -470,30 +454,7 @@ export const waitForEvent = async <T>(event: Event<T>, timeout = 5000) =>
 };
 
 
-//
-// Bad a** function w/ credits to GitLens extension author
-//
-export const promiseFromEvent = <T, U>(event: Event<T>, adapter: PromiseAdapter<T, U> = passthrough): { promise: Promise<U>; cancel: EventEmitter<void> } =>
-{
-    let subscription: Disposable;
-    const cancel = new EventEmitter<void>();
-    return {
-        promise: new Promise<U>((resolve, reject) =>
-        {
-            cancel.event(_ => reject("cancelled"));
-            subscription = event((value: T) =>
-            {
-                try {
-                    Promise.resolve(adapter(value, resolve, reject)).catch(reject);
-                }
-                catch (e) { reject(e); }
-            });
-        })
-        .then((result: U) => { subscription.dispose(); return result; },
-        error => { subscription.dispose(); throw error; }),
-        cancel
-    };
-};
+export const promiseFromEvent = <T, U>(e: Event<T>, adapter: PromiseAdapter<T, U> = passthrough) => teWrapper.promiseUtils.promiseFromEvent(e, adapter);
 
 
 export const setFailed = (ctrlc = true) =>

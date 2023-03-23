@@ -322,17 +322,17 @@ export class TeWrapper implements ITeWrapper, Disposable
 		await this.storage.update2("lastDeactivated", 0);
 		await this.storage.update2("lastWsRootPathChange", 0);
 		//
+		// For Testing
 		// Write all usage stores to disk for examination, if we're in development mode
 		//
-		/* istanbul ignore next */
-		if (this.env === "dev")
-		{
-			const account = this._licenseManager.account,
-				  rPath = await this.pathUtils.getInstallPath() + "\\dist\\",
-				  taskUsage = this.storage.get<any>(StorageKeys.TaskUsage, {}),
-				  allData = { usage: this._usage.getAll(), taskUsage, account };
-			await this.fs.writeFile(rPath + "te_data.json", JSON.stringify(allData, null, 3));
-		}
+		// if (this.env === "dev")
+		// {
+		// 	const account = this._licenseManager.account,
+		// 		  rPath = await this.pathUtils.getInstallPath() + "\\dist\\",
+		// 		  taskUsage = this.storage.get<any>(StorageKeys.TaskUsage, {}),
+		// 		  allData = { usage: this._usage.getAll(), taskUsage, account };
+		// 	await this.fs.writeFile(rPath + "te_data.json", JSON.stringify(allData, null, 3));
+		// }
 		//
 		// Start the first tree build/load
 		//

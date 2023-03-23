@@ -2,16 +2,10 @@
 import { Disposable, Event, EventEmitter } from "vscode";
 import { PromiseAdapter } from "../../interface/ITeUtilities";
 
-//
-//  TODO - Remove istanbul tags when sessions are implemented
-//
-/* istanbul ignore next */
+
 const passthrough = (value: any, resolve: (value?: any) => void) => resolve(value);
 
-//
-//  TODO - Remove istanbul tags when sessions are implemented
-//
-/* istanbul ignore next */
+
 export const oneTimeEvent = <T>(event: Event<T>): Event<T> =>
 {
 	return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) =>
@@ -36,12 +30,6 @@ export const oneTimeEvent = <T>(event: Event<T>): Event<T> =>
  * @param adapter controls resolution of the returned promise
  * @returns a promise that resolves or rejects as specified by the adapter
  */
-
-//
-//  TODO - Remove istanbul tags when sessions are implemented
-//
-
-/* istanbul ignore next */
 export const promiseFromEvent = <T, U>(event: Event<T>, adapter: PromiseAdapter<T, U> = passthrough): { promise: Promise<U>; cancel: EventEmitter<void> } =>
 {
     let subscription: Disposable;
@@ -53,27 +41,22 @@ export const promiseFromEvent = <T, U>(event: Event<T>, adapter: PromiseAdapter<
             cancel.event(_ => reject("Cancelled"));
             subscription = event((value: T) =>
             {
-                try
-                {
-                    Promise.resolve(adapter(value, resolve, reject))
-                        .catch(reject);
-                } catch (error)
-                {
-                    reject(error);
+                try {
+                    Promise.resolve(adapter(value, resolve, reject)).catch(reject);
                 }
+                catch (error) { /* istanbul ignore next */reject(error); }
             });
-        }).then(
-            (result: U) =>
-            {
-                subscription.dispose();
-                return result;
-            },
-            error =>
-            {
-                subscription.dispose();
-                throw error;
-            }
-        ),
+        })
+        .then((result: U) =>
+        {
+            subscription.dispose();
+            return result;
+        },
+        error =>
+        {
+            subscription.dispose();
+            throw error;
+        }),
         cancel
     };
 };

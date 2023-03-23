@@ -132,7 +132,7 @@ const errorWriteLogs = (lMsg: string, fileOn: boolean, symbols: [ string, string
 
 const errorParse = (err: any, symbols: [ string, string ], queueId?: string, callCount = 0, accumulated: string[] = []) =>
 {
-    let eMsg: string | undefined;
+    let eMsg = "";
     if (!err) {
         return accumulated;
     }
@@ -172,10 +172,6 @@ const errorParse = (err: any, symbols: [ string, string ], queueId?: string, cal
     else if (err && isFunction(err.toString)) {
         eMsg = err.toString();
     }
-    /* istanbul ignore else */
-    if (eMsg)
-    {
-        accumulated.push(eMsg);
-    }
+    accumulated.push(eMsg);
     return accumulated;
 };

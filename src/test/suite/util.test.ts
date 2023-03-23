@@ -448,6 +448,7 @@ suite("Util Tests", () =>
         expect(teWrapper.pathUtils.getCwd(rootUri)).to.not.be.equal(undefined);
         expect (teWrapper.utils.getGroupSeparator()).to.be.equal("-");
 
+		expect(teWrapper.utils.lowerCaseFirstChar("", true)).to.be.equal("");
 		expect(teWrapper.utils.lowerCaseFirstChar("s", true)).to.be.equal("s");
 		expect(teWrapper.utils.lowerCaseFirstChar("s", false)).to.be.equal("s");
 		expect(teWrapper.utils.lowerCaseFirstChar("S", true)).to.be.equal("s");
@@ -457,6 +458,7 @@ suite("Util Tests", () =>
 		expect(teWrapper.utils.lowerCaseFirstChar("TestApp", true)).to.be.equal("testApp");
 		expect(teWrapper.utils.lowerCaseFirstChar("testApp", false)).to.be.equal("testApp");
 		expect(teWrapper.utils.lowerCaseFirstChar("test App", true)).to.be.equal("testApp");
+		expect(teWrapper.utils.lowerCaseFirstChar(undefined as unknown as string, true)).to.be.equal("");
 
 		teWrapper.taskUtils.getTaskTypeFriendlyName("Workspace");
 		teWrapper.taskUtils.getTaskTypeFriendlyName("Workspace", true);

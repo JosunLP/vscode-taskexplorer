@@ -247,12 +247,12 @@ suite("License Manager Tests", () =>
 		// Tests run 2 server requests to simulate a payment process, in succession
 		//
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.validateLicense + tc.slowTime.licenseMgr.nag + 300);
+		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.validateLicense + tc.slowTime.licenseMgr.nag + 200);
 		await setNag();
 		utils.overrideNextShowInfoBox("Buy License", true);
 		void licMgr.checkLicense("");
 		await utils.promiseFromEvent(teWrapper.server.onDidRequestComplete).promise;
-		await utils.sleep(100);
+		await utils.sleep(50);
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		expectLicense(true, true, false, false);
 		await utils.sleep(50); // allow license/subscription events to propagate

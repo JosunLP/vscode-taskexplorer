@@ -1,7 +1,7 @@
 
 import { log } from "../log/log";
 import minimatch = require("minimatch");
-import { Uri, workspace, env } from "vscode";
+import { Uri, workspace, env, WorkspaceFolder } from "vscode";
 import { basename, extname, sep } from "path";
 import { ConfigKeys, Globs, Strings } from "../constants";
 import { configuration } from "../configuration";
@@ -102,13 +102,8 @@ export const getRandomNumber = (max = 100000, min = 0) =>
 
 export const getWorkspaceProjectName = (fsPath: string) =>
 {
-    let project = basename(fsPath);
     const wsf = workspace.getWorkspaceFolder(Uri.file(fsPath));
-    /* istanbul ignore else */
-    if (wsf) {
-        project = basename(wsf.uri.fsPath);
-    }
-    return project;
+    return basename((wsf as WorkspaceFolder).uri.fsPath);
 };
 
 
@@ -159,7 +154,6 @@ export const isTaskTypeEnabled = (taskType: string) =>
 export const lowerCaseFirstChar = (s: string, removeSpaces: boolean) =>
 {
     let fs = "";
-    /* istanbul ignore else */
     if (s)
     {
         fs = s[0].toString().toLowerCase();

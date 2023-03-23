@@ -34,7 +34,7 @@ export interface ITePathUtilities
 export interface ITePromiseUtilities
 {
 	oneTimeEvent<T>(event: Event<T>): Event<T>;
-	promiseFromEvent<T, U>(event: Event<T>, adapter: PromiseAdapter<T, U>): { promise: Promise<U>; cancel: EventEmitter<void> };
+	promiseFromEvent<T, U>(event: Event<T>, adapter?: PromiseAdapter<T, U>): { promise: Promise<U>; cancel: EventEmitter<void> };
 }
 
 export interface ITeSortUtilities

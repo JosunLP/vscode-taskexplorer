@@ -16,6 +16,7 @@ import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { Commands, registerCommand } from "../lib/command/command";
 import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition, ITaskTreeView } from "../interface";
 import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
+import { SpecialTaskFolder } from "./specialFolder";
 
 
 export class TaskTreeManager implements ITeTreeManager, Disposable
@@ -136,15 +137,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         return this._views;
     }
 
-    private addRemoveSpecialTaskLabel = async(taskItem: TaskItem) =>
-    {
-        /* istanbul ignore else */
-        if (taskItem.folder)
-        {
-            const folderName = this.wrapper.utils.lowerCaseFirstChar(taskItem.folder.label, true) as "favorites"|"lastTasks";
-            return this._specialFolders[folderName].addRemoveRenamedLabel(taskItem);
-        }
-    };
+
+    private addRemoveSpecialTaskLabel = async(item: TaskItem) => (<SpecialTaskFolder>item.folder).addRemoveRenamedLabel(item);
 
 
     private addToExcludes = async(selection: TaskFile | TaskItem) =>

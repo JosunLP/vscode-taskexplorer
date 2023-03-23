@@ -6,8 +6,10 @@ import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
 
-const USE_LOCAL_SERVER = false;
+// const USE_LOCAL_SERVER = true;
 const SPM_API_VERSION = 1;
+const SPM_API_PORT = 443;
+const SPM_API_SERVER = "license.spmeesseman.com";
 
 export interface ServerError
 {
@@ -30,14 +32,13 @@ export class TeServer implements Disposable
     constructor(private readonly wrapper: TeWrapper)
 	{
 		this._onRequestComplete = new EventEmitter<void>();
-		/* istanbul ignore next */
-		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER)
-		{   //
-			// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
-			// Justdisable TLS rejection when using localhost, no big deal.
-			//
-			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-		}
+		// if (USE_LOCAL_SERVER)
+		// {   //
+		// 	// The IIS Express localhost certificate is rejected by VScode / NodeJS HTTPS
+		// 	// Justdisable TLS rejection when using localhost, no big deal.
+		// 	//
+		// 	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+		// }
 	}
 
 	dispose = () => this._onRequestComplete.dispose();
@@ -49,50 +50,13 @@ export class TeServer implements Disposable
 
 	get apiClientId()
 	{
-		/* istanbul ignore next */
-		if (this.wrapper.env !== "production" && USE_LOCAL_SERVER) {
-			return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
-		}
+		// USE_LOCAL_SERVER
+		// return "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
 		return "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
 	};
 
-	private get apiPort()
-	{
-		/* istanbul ignore next */
-		switch (this.wrapper.env)
-		{
-			case "dev":
-			case "tests":
-				return USE_LOCAL_SERVER ? 485 : 443;
-			case "production":
-				return 443;
-		}
-	};
-
-	get apiServer()
-	{
-		/* istanbul ignore next */
-		switch (this.wrapper.env)
-		{
-			case "dev":
-			case "tests":
-				return USE_LOCAL_SERVER ? "localhost" : "license.spmeesseman.com";
-			case "production":
-				return "license.spmeesseman.com"; // "app1.spmeesseman.com"
-		}
-	};
-
-	private get appName()
-	{
-		/* istanbul ignore next */
-		switch (this.wrapper.env)
-		{
-			case "dev":
-			case "tests":
-				return USE_LOCAL_SERVER ? this.wrapper.extensionId : `vscode-taskexplorer-${this.wrapper.env}`;
-			case "production":
-				return this.wrapper.extensionId;
-		}
+	private get productName() {
+		return `vscode-taskexplorer-${this.wrapper.env}`.replace("-production", "");
 	};
 
     get onDidRequestComplete(): Event<void> {
@@ -100,17 +64,17 @@ export class TeServer implements Disposable
     }
 
 
-	private getApiPath = (ep: ITeApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.appName}/v${SPM_API_VERSION}`;
+	private getApiPath = (ep: ITeApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${SPM_API_VERSION}`;
 
 
 	private getServerOptions = (apiEndpoint: ITeApiEndpoint, token?: string) =>
 	{
-		const server = this.apiServer;
+		const server = SPM_API_SERVER;
 		const options = {
 			hostname: server,
 			method: "POST",
 			path: this.getApiPath(apiEndpoint),
-			port: this.apiPort,
+			port: SPM_API_PORT,
 			//
 			// TODO - Request timeouts don't work
 			// Timeout don't work worth a s***.  So do a promise race in request() for now.
@@ -131,34 +95,23 @@ export class TeServer implements Disposable
 	};
 
 
-	private log = (msg: any, logPad?: string, value?: any, symbol?: string) =>
+	private log = (msg: string, logPad?: string, value?: any, symbol?: string) =>
 	{
-		/* istanbul ignore next */
-		if (this.wrapper.tests)
-		{
-			if (!value && value !== false) {
-				console.log(`       ${symbol || figures.color.infoTask} ${figures.withColor(msg.toString(), figures.colors.grey)}`);
-			}
-			else {
-				const valuePad = 18, diff = valuePad - msg.length;
-				for (let i = 0; i < diff; i++) {
-					msg += " ";
-				}
-				console.log(`       ${symbol || figures.color.infoTask} ${figures.withColor(msg + " : " + value, figures.colors.grey)}`);
-			}
-		}
-		/* istanbul ignore else */
-		if (this.wrapper.typeUtils.isString(msg))
-		{
-			if (!value) {
-				this.wrapper.log.write(msg, 1, logPad);
-			}
-			else {
-				this.wrapper.log.value(msg, value, 1, logPad);
-			}
+		if (!value && value !== false) {
+			console.log(`       ${symbol || figures.color.infoTask} ${figures.withColor(msg.toString(), figures.colors.grey)}`);
 		}
 		else {
-			this.wrapper.log.error(msg);
+			const valuePad = 18, diff = valuePad - msg.length;
+			for (let i = 0; i < diff; i++) {
+				msg += " ";
+			}
+			console.log(`       ${symbol || figures.color.infoTask} ${figures.withColor(msg + " : " + value, figures.colors.grey)}`);
+		}
+		if (!value) {
+			this.wrapper.log.write(msg, 1, logPad);
+		}
+		else {
+			this.wrapper.log.value(msg, value, 1, logPad);
 		}
 	};
 
@@ -177,8 +130,9 @@ export class TeServer implements Disposable
 	private onServerError = (e: any, logPad: string, rspData?: string) =>
 	{
 		this.log(e, "", undefined, figures.color.errorTests);
+		this.wrapper.log.error(e);
 		if (rspData) {
-			this.log(rspData, "", undefined, figures.color.errorTests);
+			console.log(`       ${figures.color.errorTests} ${figures.withColor(rspData, figures.colors.grey)}`);
 		}
 		this.log("   the license server is down, offline, or there is a connection issue", logPad, undefined, figures.color.errorTests);
 		this.log("   licensed mode will be automatically enabled", logPad, undefined, figures.color.errorTests);
@@ -202,7 +156,6 @@ export class TeServer implements Disposable
 
     private _request = <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: any): Promise<T> =>
 	{
-		this._busy = true;
 
 		return new Promise<T>((resolve, reject) =>
 		{
@@ -240,8 +193,6 @@ export class TeServer implements Disposable
 						}
 					}
 					catch (e) {
-						/* istanbul ignore next */
-						this.log(e);
 						/* istanbul ignore next */
 						reject(<ServerError>{ message: e.message, status: res.statusCode, body: jso });
 					}
@@ -281,12 +232,11 @@ export class TeServer implements Disposable
     // 'Fetch' examples, in case I ever decide to go to fetch, which will also be built in in Node 18
     //
 
-    // /* istanbul ignore next */
+    //
     // private async getUserInfo(_token: string): Promise<{ name: string; email: string }>
     // {
-    //     const response = await fetch(`https://${TEAUTH_DOMAIN}/userinfo`, {
+    //     const response = await fetch(`https://license.spmeesseman.com/...`, {
     //         headers: {
-    //             // eslint-disable-next-line @typescript-eslint/naming-convention
     //             Authorization: `Bearer ${token}`
     //         }
     //     });
@@ -301,7 +251,6 @@ export class TeServer implements Disposable
 	// 		method: "POST",
 	// 		agent: getProxyAgent(),
 	// 		headers: {
-	// 			// "Authorization": `Bearer ${session.token}`,
 	// 			"Authorization": `Bearer ${this.token}`,
 	// 			"User-Agent": "vscode-taskexplorer",
 	// 			"Content-Type": "application/json",
@@ -314,23 +263,6 @@ export class TeServer implements Disposable
 	// 			ip: "*"
 	// 		}),
 	// 	});
-
-	// 	let licensed = true;
-	// 	try
-	// 	{   const jso = JSON.parse(res.body);
-	// 		licensed = res.ok && jso.success && jso.message === "Success";
-	// 		this.logServerResponse(res, jso, res.data, logPad);
-	// 		jso.token = licenseKey;
-	// 		await this.setLicenseKeyFromRsp(licensed, jso, logPad);
-	// 	}
-	// 	catch (e) {
-	// 		/* istanbul ignore next*/
-	// 		this.onServerError(e, logPad, res.data);
-	// 	}
-	// 	finally {
-	// 		this.busy = false;
-	// 	}
-	// 	log.methodDone("validate license", 1, logPad, [[ "is valid license", licensed ]]);
 	// };
 
 }

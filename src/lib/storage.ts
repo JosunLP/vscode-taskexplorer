@@ -91,13 +91,9 @@ class Storage implements IStorage
     {
         if (defaultValue || (isString(defaultValue) && defaultValue === "") || (isNumber(defaultValue) && defaultValue === 0))
         {
-            let v = store[this.getKey(key)];
-            if (!v) {
-                v = defaultValue;
-            }
-            return v;
+            return store[this.getKey(key)] || defaultValue;
         }
-        return store[(!this.isTests ? /* istanbul ignore next */"" : "tests") + key];
+        return store[this.getKey(key)];
     }
 
 
@@ -105,17 +101,8 @@ class Storage implements IStorage
     {
         if (defaultValue || (isString(defaultValue) && defaultValue === "") || (isNumber(defaultValue) && defaultValue === 0))
         {
-            let v = this.storage[storageTarget].get<T>(this.getKey(key), defaultValue);
-            //
-            // why have to do this?  In one case, passing a default of [] for a non-existent
-            // value, the VSCode memento does not return[]. It returns an empty string????
-            // So perform a double check if the value is falsy.
-            //
-            /* istanbul ignore if */
-            if (!v) {
-                v = defaultValue;
-            }
-            return v;
+            const v = this.storage[storageTarget].get<T>(this.getKey(key), defaultValue);
+            return v || defaultValue;
         }
         return this.storage[storageTarget].get<T>(this.getKey(key));
     }
@@ -123,22 +110,22 @@ class Storage implements IStorage
 
     async get2<T>(key: string, defaultValue?: T): Promise<T | undefined>
     {
-        let store: IDictionary<any>;
+        let store: IDictionary<any> = {};
         try {
             store = await readJsonAsync<IDictionary<any>>(this.storageFile);
         }
-        catch { /* istanbul ignore next */store = {}; }
+        catch {}
         return this._get2(key, store, defaultValue);
     }
 
 
     get2Sync<T>(key: string, defaultValue?: T): T | undefined
     {
-        let store: IDictionary<any>;
+        let store: IDictionary<any> = {};
         try {
             store = readJsonSync<IDictionary<any>>(this.storageFile);
         }
-        catch { /* istanbul ignore next */store = {}; }
+        catch {}
         return this._get2(key, store, defaultValue);
     }
 
@@ -165,11 +152,11 @@ class Storage implements IStorage
 
     async update2(key: string, value: any)
     {
-        let store: IDictionary<any>;
+        let store: IDictionary<any> = {};
         try {
             store = await readJsonAsync<IDictionary<any>>(this.storageFile);
         }
-        catch  { /* istanbul ignore next */store = {}; }
+        catch  {}
         try {
             JSON.stringify(value); // Ensure json compatible value
             store[this.getKey(key)] = value;
@@ -183,11 +170,11 @@ class Storage implements IStorage
 
     update2Sync(key: string, value: any)
     {
-        let store: IDictionary<any>;
+        let store: IDictionary<any> = {};
         try {
             store = readJsonSync<IDictionary<any>>(this.storageFile);
         }
-        catch { /* istanbul ignore next */store = {}; }
+        catch {}
         try {
             JSON.stringify(value); // Ensure json compatible value
             store[this.getKey(key)] = value;

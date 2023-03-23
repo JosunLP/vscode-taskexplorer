@@ -26,7 +26,7 @@ export function getScriptTaskTypes(): string[]
  */
 /* istanbul ignore next */
 export function getTaskTypeSettingName(taskType: string, settingPart: string)
-{   /* istanbul ignore next */
+{
     return settingPart + (!settingPart.endsWith(".") ? properCase(taskType) : taskType.toLowerCase());
 }
 
@@ -39,7 +39,7 @@ export function getTaskTypeSettingName(taskType: string, settingPart: string)
  */
 /* istanbul ignore next */
 export function getTaskTypeEnabledSettingName(taskType: string)
-{   /* istanbul ignore next */
+{
     return getTaskTypeSettingName(taskType, "enabledTasks.");
 }
 

@@ -42,20 +42,16 @@ export const getPortableDataPath = (logPad = "") =>
     if (process.env.VSCODE_PORTABLE)
     {
         const uri = Uri.parse(process.env.VSCODE_PORTABLE);
-        /* istanbul ignore else */
-        if (uri)
+        if (pathExistsSync(uri.fsPath))
         {
-            if (pathExistsSync(uri.fsPath))
-            {
-                try {
-                    const fullPath = join(uri.fsPath, "user-data", "User");
-                    log.value(logPad + "found portable user data path", fullPath, 4);
-                    return fullPath;
-                }
-                catch (e: any)
-                {   /* istanbul ignore next */
-                    log.error(e);
-                }
+            try {
+                const fullPath = join(uri.fsPath, "user-data", "User");
+                log.value(logPad + "found portable user data path", fullPath, 4);
+                return fullPath;
+            }
+            catch (e: any)
+            {   /* istanbul ignore next */
+                log.error(e);
             }
         }
     }
