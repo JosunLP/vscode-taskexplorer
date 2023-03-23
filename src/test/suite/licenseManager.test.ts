@@ -244,7 +244,6 @@ suite("License Manager Tests", () =>
 		await utils.sleep(50);
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		await expectLicense(true, true, false, false);
-		await utils.sleep(50); // allow license/subscription events to propagate
         utils.endRollingCount(this);
 	});
 
@@ -252,7 +251,8 @@ suite("License Manager Tests", () =>
 	test("Open Home View in Licensed Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.view.home + 100);
+		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount +
+			      tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
 		void showTeWebview(teWrapper.homeView);
         await Promise.all([
             utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
@@ -268,9 +268,9 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + 200);
         await showTeWebview(teWrapper.licensePage);
-		await utils.sleep(50);
+		await utils.waitForWebviewsIdle();
 		await closeTeWebviewPanel(teWrapper.licensePage);
-		await utils.sleep(50);
+		await utils.waitForWebviewsIdle();
         utils.endRollingCount(this);
 	});
 
@@ -293,7 +293,6 @@ suite("License Manager Tests", () =>
 		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "", state: 0, period: 0, type: 0 }});
 		await saveAccount({ ...licMgr.account});
         await validateLicense(undefined, true, true);
-		await utils.sleep(50);
 		await expectLicense(true, false, true, false);
         utils.endRollingCount(this);
 	});
@@ -305,7 +304,7 @@ suite("License Manager Tests", () =>
 		await restoreAccount();
 		await utils.setLicenseType(1);
 		await saveAccount({ ...licMgr.account});
-		await utils.sleep(50); // allow session change event to propagate
+		await utils.waitForWebviewsIdle();
 		await expectLicense();
         utils.endRollingCount(this);
 	});
@@ -316,7 +315,7 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + tc.slowTime.webview.postMessage + 200);
         await showTeWebview(teWrapper.licensePage);
-		await utils.sleep(50);
+		await utils.waitForWebviewsIdle();
 		utils.overrideNextShowInfoBox(undefined);
 		if (!(await teWrapper.licensePage.postMessage({ method: "echo/message/show", overwriteable: false }, {}))) {
 			await utils.sleep(50);

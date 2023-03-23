@@ -115,8 +115,12 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.webview.show.view.taskCount * 2) + tc.slowTime.commands.focusChangeViews);
-        await showTeWebview(teWrapper.taskCountView);
-        await commands.executeCommand("taskexplorer.view.taskCount.focus");
+        void showTeWebview(teWrapper.taskCountView);
+        await Promise.all([
+            waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
+            waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
+            waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2),
+        ]);
         endRollingCount(this);
     });
 

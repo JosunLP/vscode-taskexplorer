@@ -197,7 +197,7 @@ export const testControl =
             show: {
                 view: {
                     home: 2640,
-                    taskCount: 1410,
+                    taskCount: 1910,
                     taskUsage: 2240
                 },
                 page: {
