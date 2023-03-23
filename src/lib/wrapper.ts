@@ -122,7 +122,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
 		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
 
-		// this._localize = nls.loadMessageBundle();
+		//
+		// TODO - Localization
+		//
 		Object.entries(Strings).filter(s => s[1].includes("|")).forEach(e =>
 		{
 			const lPair = e[1].split("|");
@@ -538,6 +540,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._licensePage;
 	}
 
+	//
+	// TODO - Localization
+	//
 	localize = (_key: string, defaultMessage: string): string => defaultMessage; // this._localize(key, defaultMessage);
 
 	get log(): ILog {

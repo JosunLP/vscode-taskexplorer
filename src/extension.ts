@@ -2,12 +2,11 @@
 
 import { log } from "./lib/log/log";
 import { TeWrapper } from "./lib/wrapper";
-import { StorageTarget } from "./interface";
 import { ConfigKeys } from "./lib/constants";
+import { TeMigration } from "./lib/migration";
 import { initStorage, storage } from "./lib/storage";
-import { ExtensionContext, ExtensionMode, workspace } from "vscode";
+import { ExtensionContext, ExtensionMode } from "vscode";
 import { configuration, registerConfiguration } from "./lib/configuration";
-import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./lib/utils/taskUtils";
 
 let teWrapper: TeWrapper;
 
@@ -41,17 +40,12 @@ export async function activate(context: ExtensionContext)
     // Initialize persistent storage
     //
     await initStorage(context);
-    // await storage.update("lastTasks", []);          // For testing / dev
-    // await storage.delete("taskexplorer.taskUsage"); // For testing / dev
-    // await storage.delete("taskexplorer.usage");     // For testing / dev
     //
-    /* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP *//* TEMP */
-    // !!! Temporary after settings layout redo / rename !!!
-    // !!! Remove sometime down the road (from 12/22/22) !!!
-    await migrateSettings();
-    await migrateStorage();
-    // !!! End temporary !!!
-    /* TEMP *//* ^^^ TEMP ^^^^ *//* TEMP *//* TEMP *//* TEMP */
+    // Perform any necessary migration to configuration and storage, pre-wrapper initialization
+    //
+    const migration = new TeMigration(storage, configuration);
+    await migration.migrateSettings();
+    await migration.migrateStorage();
     //
     // Instantiate application container (beautiful concept from GitLens project)
     //
@@ -100,66 +94,3 @@ export async function deactivate()
     });
     teWrapper.context.subscriptions.splice(0);
 }
-
-
-/* istanbul ignore next */
-const migrateSettings = async () =>
-{
-    const didSettingUpgrade = storage.get<boolean>("taskexplorer.v3SettingsUpgrade", false);
-    if (!didSettingUpgrade)
-    {
-        const oldConfig = workspace.getConfiguration("taskExplorer");
-
-        const groupSep = oldConfig.get<string>(ConfigKeys.GroupSeparator, "-");
-        if (groupSep !== "-" && groupSep !== "_" && groupSep !== ":" && groupSep !== "|") {
-            await configuration.update(ConfigKeys.GroupSeparator, "-");
-        }
-
-        const taskTypes = getTaskTypes();
-        taskTypes.push("ansicon");
-        for (const taskType of taskTypes)
-        {
-            let oldEnabledSetting = getTaskTypeSettingName(taskType, "enable"),
-                newEnabledSetting = getTaskTypeEnabledSettingName(taskType);
-            const oldSettingValue1 = oldConfig.get<boolean | undefined>(oldEnabledSetting, undefined) ||
-                                     oldConfig.get<boolean | undefined>(newEnabledSetting, undefined);
-            if (oldSettingValue1 !== undefined)
-            {
-                await configuration.update(newEnabledSetting, oldSettingValue1);
-            }
-
-            oldEnabledSetting = getTaskTypeSettingName(taskType, "pathTo");
-            newEnabledSetting = getTaskTypeSettingName(taskType, "pathToPrograms.");
-            const oldSettingValue2 = oldConfig.get<string | undefined>(oldEnabledSetting, undefined) ||
-                                     oldConfig.get<string | undefined>(newEnabledSetting, undefined);
-            if (oldSettingValue2 !== undefined)
-            {
-                await configuration.update(newEnabledSetting, oldSettingValue2);
-            }
-        }
-        await storage.update("taskexplorer.v3SettingsUpgrade", true);
-    }
-};
-
-
-/* istanbul ignore next */
-const migrateStorage = async () =>
-{
-    const didStorageUpgrade = storage.get<boolean>("taskexplorer.v3StorageUpgrade", false);
-    if (!didStorageUpgrade)
-    {
-        let ts = Date.now();
-        let store = storage.get<string[]>("lastTasks", []).map(id => ({ id, timestamp: ++ts }));
-        await storage.update("taskexplorer.specialFolder.last", store);
-        store = storage.get<string[]>("lastTasks", [], StorageTarget.Workspace).map(id => ({ id, timestamp: ++ts }));
-        await storage.update("taskexplorer.specialFolder.last", store, StorageTarget.Workspace);
-        store = storage.get<string[]>("favoriteTasks", []).map(id => ({ id, timestamp: ++ts }));
-        await storage.update("taskexplorer.specialFolder.favorites", store);
-        store = storage.get<string[]>("favoriteTasks", [], StorageTarget.Workspace).map(id => ({ id, timestamp: ++ts }));
-        await storage.update("taskexplorer.specialFolder.favorites", store, StorageTarget.Workspace);
-        await storage.delete("lastTasks");
-        await storage.delete("favoriteTasks");
-        await storage.update("taskexplorer.v3StorageUpgrade", true);
-    }
-};
-
