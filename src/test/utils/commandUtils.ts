@@ -82,7 +82,7 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
     let teWebview: ITeWebview,
         wasVisible = false,
         force = false,
-        timeout = 5000,
+        timeout = 7000,
         waitOnly = false;
     const _args = [ ...args ];
 

@@ -7,7 +7,7 @@ import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { closeTeWebviewPanel, executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, testControl as tc, suiteFinished, getWsPath, exitRollingCount, waitForTeIdle, endRollingCount,
-	createwebviewForRevive, waitForWebviewReadyEvent
+	createwebviewForRevive, waitForWebviewReadyEvent, waitForWebviewsIdle
 } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -49,10 +49,12 @@ suite("Parsing Report Tests", () =>
 	test("Open Report Page (Single Project No User Tasks)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.config.showHideUserTasks + tc.slowTime.webview.closeSync);
+		this.slow(tc.slowTime.webview.show.page.parsingReport + tc.slowTime.config.event + tc.slowTime.webview.closeSync);
+		 // specialFolders.showUserTasks is already false
 		await executeSettingsUpdate("specialFolders.showUserTasks", false, tc.waitTime.config.showHideUserTasks, tc.slowTime.config.showHideUserTasks);
 		await showTeWebview(teWrapper.parsingReportPage, projectUri);
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);
+		await waitForWebviewsIdle();
         endRollingCount(this);
 	});
 
@@ -64,6 +66,7 @@ suite("Parsing Report Tests", () =>
 		await executeSettingsUpdate("specialFolders.showUserTasks", true, tc.waitTime.config.showHideUserTasks, tc.slowTime.config.showHideUserTasks);
 		await showTeWebview(teWrapper.parsingReportPage, projectUri, "", 5);
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);
+		await waitForWebviewsIdle();
         endRollingCount(this);
 	});
 

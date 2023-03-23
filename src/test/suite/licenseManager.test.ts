@@ -141,10 +141,8 @@ suite("License Manager Tests", () =>
 	test("Open SideBar Views in Trial Mode", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount + tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
-		// await showTeWebview(teWrapper.homeView);
-		// await showTeWebview(teWrapper.taskCountView);
-		// await showTeWebview(teWrapper.taskUsageView);
+		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount +
+				  tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
 		void focusSidebarView();
         await Promise.all([
             utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
@@ -198,7 +196,7 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
-		void showTeWebview(teWrapper.homeView);
+		void  executeTeCommand("taskexplorer.view.home.show", 1);
         await Promise.all([
             utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
             utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
@@ -253,7 +251,7 @@ suite("License Manager Tests", () =>
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount +
 			      tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
-		void showTeWebview(teWrapper.homeView);
+		void teWrapper.homeView.show();
         await Promise.all([
             utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
             utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),

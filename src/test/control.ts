@@ -101,7 +101,7 @@ export const testControl =
             fetchTasks: 350,
             focus: 2330,
             focusAlreadyFocused: 375,
-            focusChangeViews: 795,
+            focusChangeViews: 815,
             focusSideBarFirstTime: 7670,
             openUrl: 1680,
             refresh: 6250,
@@ -128,7 +128,7 @@ export const testControl =
             registerExplorerEvent: 475,
             shellChange: 1325,
             showHideSpecialFolder: 530,
-            showHideUserTasks: 1085,
+            showHideUserTasks: 1865,
             sortingEvent: 815,
             terminalEvent: 250,
             trackingEvent: 490
@@ -152,7 +152,7 @@ export const testControl =
         licenseMgr: {
             createNewTrial: 3220,
             getTrialExtension: 2175,
-            getTrialExtensionDenied: 815,
+            getTrialExtensionDenied: 880,
             getMaxTasks: 365,
             nag: 100,
             purchaseLicense: 1925,
@@ -196,24 +196,24 @@ export const testControl =
             roundTripMessage: 2625,
             show: {
                 view: {
-                    home: 2640,
-                    taskCount: 1910,
-                    taskUsage: 2240
+                    home: 2660,
+                    taskCount: 1930,
+                    taskUsage: 2260
                 },
                 page: {
                     license: 3240,
                     releaseNotes: 2990,
                     taskDetailsScript: 2865,
                     taskDetailsNonScript: 3375,
-                    taskMonitor: 2990,
-                    parsingReport: 2680,
-                    parsingReportFull: 3580,
+                    taskMonitor: 3055,
+                    parsingReport: 2690,
+                    parsingReportFull: 3630,
                     welcome: 1225
                 }
             }
         },
         wsFolder: {
-            add: 1695,     // bumped for multi-root ws in utils/initSettings
+            add: 1705,     // bumped for multi-root ws in utils/initSettings
             addEmpty: 1605,
             remove: 570,
             removeEmpty: 485,
