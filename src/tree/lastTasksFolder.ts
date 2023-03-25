@@ -77,6 +77,7 @@ export class LastTasksFolder extends SpecialTaskFolder
         }
         this.wrapper.log.value("   add item", taskItem2.id, 2, logPad);
         this.insertTaskFile(taskItem2, 0);
+        this.fireChangeEvent(taskItem2, logPad + "   ");
     };
 
 
@@ -93,7 +94,6 @@ export class LastTasksFolder extends SpecialTaskFolder
         this.storeWs.push({ id: taskId, timestamp: now });
         await this.saveStores();
         this.pushToTreeTop(taskItem, logPad + "   ");
-        this.fireChangeEvent(taskItem, logPad + "   ");
         this.log.methodDone(`save task to ${this.labelLwr} folder`, 1, logPad, [[ "new # of saved tasks", this.taskFiles.length ]]);
     };
 
