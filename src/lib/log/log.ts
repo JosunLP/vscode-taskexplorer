@@ -165,7 +165,7 @@ const registerLog = async(context: ExtensionContext, config: IConfiguration, tes
     context.subscriptions.push(...[
         logControl.logOutputChannel,
         commands.registerCommand("taskexplorer.showOutput", (show: boolean) => showLogOutput(show)),
-        workspace.onDidChangeConfiguration(e => processConfigChanges(config, e))
+        config.onDidChange(e => processConfigChanges(config, e), this)
     ]);
 
     //

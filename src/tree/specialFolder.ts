@@ -56,7 +56,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         this.disposables.push(
             this._onDidTasksChange,
-            workspace.onDidChangeConfiguration(this.onConfigChanged, this)
+            wrapper.config.onDidChange(this.onConfigChanged, this)
         );
     }
 
