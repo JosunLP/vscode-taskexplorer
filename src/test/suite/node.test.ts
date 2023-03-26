@@ -18,7 +18,7 @@ let dirName: string;
 let fileUri: Uri;
 
 
-suite("Nullsoft NSIS Tests", () =>
+suite("NodeJS Tests", () =>
 {
 
     suiteSetup(async function()
@@ -26,7 +26,7 @@ suite("Nullsoft NSIS Tests", () =>
         if (exitRollingCount(this, true)) return;
         ({ teApi, teWrapper } = await activate(this));
         provider = teApi.providers[testsName];
-        dirName = getWsPath("tasks_test_");
+        dirName = getWsPath("bin");
         fileUri = Uri.file(path.join(dirName, "node-script.js"));
         endRollingCount(this, true);
     });
