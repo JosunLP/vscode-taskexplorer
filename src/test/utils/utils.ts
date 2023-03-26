@@ -145,13 +145,11 @@ export const activate = async (instance?: Mocha.Context) =>
         expect(teApi).to.not.be.empty;
         expect(teWrapper.explorer).to.not.be.empty;
         expect(isReady()).to.be.equal(true, `    ${teWrapper.figures.color.error} TeApi not ready`);
-        //
-        // waitForIdle() added 1/2/03 - Tree loads in delay 'after' activate()
-        //
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Waiting for extension to initialize", teWrapper.figures.colors.grey)}`);
-        await waitForTeIdle();
-        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Waiting for welcome page display", teWrapper.figures.colors.grey)}`);
-        await waitForWebviewReadyEvent(teWrapper.welcomePage, 7500);
+        await Promise.all([
+            promiseFromEvent(teWrapper.onReady),
+            waitForWebviewReadyEvent(teWrapper.welcomePage, 15000)
+        ]);
         await waitForWebviewsIdle();
         await closeTeWebviewPanel(teWrapper.welcomePage);
         await waitForWebviewsIdle();
@@ -435,13 +433,13 @@ export const overrideNextShowInfoBox = (value: any, clear?: boolean) => { if (cl
 const passthrough = (value: any, resolve: (value?: any) => void) => resolve(value);
 
 
-export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 5000) => waitForEvent(view.onDidReceiveReady, timeout);
+export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 10000) => waitForEvent(view.onDidReceiveReady, timeout);
 
 
 export const oneTimeEvent = <T>(event: Event<T>): Event<T> => teWrapper.promiseUtils.oneTimeEvent(event);
 
 
-export const waitForEvent = async <T>(event: Event<T>, timeout = 5000) =>
+export const waitForEvent = async <T>(event: Event<T>, timeout = 10000) =>
 {
     const eventPromise = teWrapper.promiseUtils.promiseFromEvent(event),
           to = setTimeout((ep: EventEmitter<void>) => ep.fire(), timeout, eventPromise.cancel);

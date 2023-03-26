@@ -47,12 +47,10 @@ export async function activate(context: ExtensionContext)
     await migration.migrateSettings();
     await migration.migrateStorage();
     //
-    // Instantiate application container (beautiful concept from GitLens project)
+    // Instantiate application wrapper (beautiful old school c project concept that I never knew
+    // anyone used anymore.  The GitLens project uses it, so, love his work so i guess it's ok ;)
     //
     teWrapper = new TeWrapper(context, storage, configuration, log);
-    //
-    // Wait for `onInitialized` event from application container
-    //
 	await teWrapper.init();
     //
     // Activation complete. For tests return the app wrapper, otherwise return the api

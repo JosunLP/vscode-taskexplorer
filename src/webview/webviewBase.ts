@@ -54,7 +54,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected onInitializing?(): Disposable[] | undefined;
 	protected onFocusChanged?(focused: boolean): void;
 	protected onMessageReceived?(e: IIpcMessage): void;
-	protected onReady?(): void;
     protected onViewFocusChanged?(e: IpcFocusChangedParams): void;
 	protected onVisibilityChanged?(visible: boolean): void;
 	protected onWindowFocusChanged?(focused: boolean): void;
@@ -440,7 +439,6 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	private setReady = () =>
 	{
 		this._isReady = true;
-		this.onReady?.();
 		this._onReadyReceived.fire();
 	};
 

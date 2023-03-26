@@ -553,10 +553,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return logControl;
 	}
 
-	// get onInitialized() {
-	// 	return this._onInitialized.event;
-	// }
-
 	/* istanbul ignore next */
 	get onDidBusyComplete(): Event<void> {
 		return this._onBusyComplete.event;

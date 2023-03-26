@@ -403,18 +403,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // Signal that the task list / tree has changed and set flags
         //
         this.refreshPending = false;
-        queueMicrotask(() =>
-        {
-            const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
-            this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
-            if (this._tasks.length !== count) {
-                this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
-            }
-            if (!this.firstTreeBuildDone) {
-                this._onReady.fire({ tasks: iTasks, type: "all" });
-            }
-            this.firstTreeBuildDone = true;
-        });
+        const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
+        this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
+        if (this._tasks.length !== count) {
+            this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
+        }
+        if (!this.firstTreeBuildDone) {
+            this._onReady.fire({ tasks: iTasks, type: "all" });
+        }
+        this.firstTreeBuildDone = true;
         this.wrapper.log.methodDone("treemgr: load tasks", 1, logPad);
     };
 

@@ -237,7 +237,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		}
 		finally {
 			this._busy = false;
-			queueMicrotask(() => this._onReady.fire());
+			this._onReady.fire();
 		}
 	};
 
@@ -589,28 +589,25 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		// Queue task to notify of session changed
 		//
 		this.wrapper.log.write("   queue trigger session change event", 2, logPad);
-		queueMicrotask(() =>
+		this._onSessionChange.fire(
 		{
-			this._onSessionChange.fire(
-			{
-				account: this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account),
-				changeNumber: this._accountChangeNumber,
-				changeFlags: {
-					expiration: this._account.license.expired !== pAccount.license.expired,
-					license: this._account.license.paid !== pAccount.license.paid,
-					licenseState: this._account.license.state !== pAccount.license.state,
-					licenseType: this._account.license.type !== pAccount.license.type,
-					paymentDate: this._account.license.paid !== pAccount.license.paid,
-					session: this._account.session.token !== pAccount.session.token,
-					trialPeriod: this._account.license.type < 4 && this._account.license.period !== pAccount.license.period,
-					verification: this._account.verified !== pAccount.verified || this._account.verificationPending !== pAccount.verificationPending
-				},
-				session: {
-					added: [],
-					removed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(pAccount.session) ],
-					changed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(this._account.session) ]
-				}
-			});
+			account: this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account),
+			changeNumber: this._accountChangeNumber,
+			changeFlags: {
+				expiration: this._account.license.expired !== pAccount.license.expired,
+				license: this._account.license.paid !== pAccount.license.paid,
+				licenseState: this._account.license.state !== pAccount.license.state,
+				licenseType: this._account.license.type !== pAccount.license.type,
+				paymentDate: this._account.license.paid !== pAccount.license.paid,
+				session: this._account.session.token !== pAccount.session.token,
+				trialPeriod: this._account.license.type < 4 && this._account.license.period !== pAccount.license.period,
+				verification: this._account.verified !== pAccount.verified || this._account.verificationPending !== pAccount.verificationPending
+			},
+			session: {
+				added: [],
+				removed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(pAccount.session) ],
+				changed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(this._account.session) ]
+			}
 		});
 		this.wrapper.log.methodDone("save account", 1, logPad);
 	};

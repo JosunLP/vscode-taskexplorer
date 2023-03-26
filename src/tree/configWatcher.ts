@@ -95,7 +95,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, enabled); this._processingConfigEvent = false;
             if (!enabled) {
                 this._processingConfigEvent = false;
-                queueMicrotask(() => this._onReady.fire());
+                this._onReady.fire();
                 return;
             }
         }
@@ -319,7 +319,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         }
         finally {
             this._processingConfigEvent = false;
-            queueMicrotask(() => this._onReady.fire());
+            this._onReady.fire();
         }
 
         this.wrapper.log.methodDone("process config changes", 1);
