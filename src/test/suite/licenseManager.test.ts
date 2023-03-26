@@ -166,7 +166,8 @@ suite("License Manager Tests", () =>
 	test("Register from License Page", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.submitRegistration + tc.slowTime.webview.show.page.license + 100);
+		this.slow(tc.slowTime.licenseMgr.submitRegistration + tc.slowTime.webview.show.page.license +
+				  tc.slowTime.webview.roundTripMessage + tc.slowTime.webview.closeSync + 100);
 		void executeTeCommand("taskexplorer.register", 1);
         await showTeWebview(teWrapper.licensePage, "waitOnly");
 		const echoCmd = { method: "echo/account/register", overwriteable: false };

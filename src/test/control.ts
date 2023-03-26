@@ -92,7 +92,7 @@ export const testControl =
             buildCancel: 375,
             persist: 245,
             rebuild: 3825,
-            rebuildCancel: 675,
+            rebuildCancel: 695,
             rebuildNoChanges: 880,
         },
         commands: {
@@ -131,7 +131,7 @@ export const testControl =
             showHideUserTasks: 1865,
             sortingEvent: 815,
             terminalEvent: 250,
-            trackingEvent: 490
+            trackingEvent: 510
         },
         fs: {
             createEvent: 1550,
@@ -191,22 +191,22 @@ export const testControl =
         },
         webview: {
             closeSync: 390,
-            expandView: 1345,
+            expandView: 1370,
             postMessage: 300,
             revealTreeNode: 55,
             roundTripMessage: 2625,
             show: {
                 view: {
                     home: 2610,
-                    taskCount: 2410,
+                    taskCount: 2460,
                     taskUsage: 2270
                 },
                 page: {
                     license: 3240,
                     releaseNotes: 2990,
                     taskDetailsScript: 2865,
-                    taskDetailsNonScript: 3425,
-                    taskMonitor: 3055,
+                    taskDetailsNonScript: 3525,
+                    taskMonitor: 3115,
                     parsingReport: 2690,
                     parsingReportFull: 3670,
                     welcome: 1225
