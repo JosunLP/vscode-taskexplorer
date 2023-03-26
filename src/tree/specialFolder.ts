@@ -50,7 +50,8 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         this._settingNameEnabled = settingName;
         this._enabled = this.wrapper.config.get<boolean>(settingName);
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
-        this.loadStores();
+        this.store = this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Global);
+        this.storeWs = this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Workspace);
         this.disposables.push(
             this._onDidTasksChange,
             wrapper.config.onDidChange(this.onConfigChanged, this)
@@ -247,15 +248,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    private loadStores = (): void =>
-    {
-        this.store.splice(0);
-        this.storeWs.splice(0);
-        this.store.push(...this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Global));
-        this.storeWs.push(...this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Workspace));
-    };
-
-
     protected saveStores = async(): Promise<void> =>
     {
         await this.wrapper.storage.update(this.storeName, this.store);
@@ -276,7 +268,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     {
         if (this.wrapper.config.affectsConfiguration(e, this._settingNameEnabled) && this.wrapper.treeManager.getTaskTree())
         {
-            // this.loadStores();
             this._enabled = this.wrapper.config.get<boolean>(this._settingNameEnabled);
             this.refresh();
         }
