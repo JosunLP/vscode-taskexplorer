@@ -78,19 +78,19 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	private handleTaskStateChangeEvent = (e: ITeTaskStatusChangeEvent) => this.postMessage(IpcTaskChangedMsg, { task: e.task });
 
 
-	private onFamousTasksChanged = async (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "famous" });
+	private onFamousTasksChanged = (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "famous" });
 
 
-	private onFavoriteTasksChanged = async (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "favorites" });
+	private onFavoriteTasksChanged = (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "favorites" });
 
 
-	private onLastTasksChanged = async (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "last" });
+	private onLastTasksChanged = (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "last" });
 
 
-	private onRunningTasksChanged = async (e: ITeRunningTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "running" });
+	private onRunningTasksChanged = (e: ITeRunningTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "running" });
 
 
-    private onAllTasksChanged = async (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "all" });
+    private onAllTasksChanged = (e: ITeTaskChangeEvent) => this.postMessage(IpcTasksChangedMsg, { tasks: e.tasks, list: "all" });
 
 
 	private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.handleTaskStateChangeEvent(e);
@@ -100,9 +100,9 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor.TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
 		{
-			this.postMessage(IpcConfigChangedMsg, this.getSettingsState());
+			await this.postMessage(IpcConfigChangedMsg, this.getSettingsState());
 		}
-		await super.onConfigChanged(e);
+		super.onConfigChanged(e);
 	}
 
 
