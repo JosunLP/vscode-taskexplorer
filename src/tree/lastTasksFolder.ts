@@ -94,22 +94,11 @@ export class LastTasksFolder extends SpecialTaskFolder
 
     protected override sort = () =>
     {
-        const cStore = this.getCombinedStore();
         this.taskFiles.sort((a: TaskItem, b: TaskItem) =>
         {
-            const aId = this.getTaskItemId(a.id),
-                  bId = this.getTaskItemId(b.id),
-                  aIdx = cStore.findIndex(t => t.id === aId),
-                  bIdx = cStore.findIndex(t => t.id === bId),
-                  aIsPinned = this.wrapper.taskUtils.isPinned(aId, this.listType),
-                  bIsPinned = this.wrapper.taskUtils.isPinned(bId, this.listType);
-            if (aIsPinned && !bIsPinned) {
-                return -1;
-            }
-            else if (!aIsPinned && bIsPinned) {
-                return 1;
-            }
-            return aIdx < bIdx ? 1 : /* istanbul ignore next */-1;
+            const aIsPinned = this.wrapper.taskUtils.isPinned(this.getTaskItemId(a.id), this.listType),
+                  bIsPinned = this.wrapper.taskUtils.isPinned(this.getTaskItemId(b.id), this.listType);
+            return bIsPinned && !aIsPinned ? 1 : -1;
         });
     };
 
