@@ -180,6 +180,7 @@ export const activate = async (instance?: Mocha.Context) =>
         console.log(`    ${teWrapper.figures.color.info}`);
 		console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor(disableSSLMsg, teWrapper.figures.colors.grey)}`);
     }
+
     return {
         teApi,
         teWrapper,
@@ -728,12 +729,11 @@ export const waitForWebviewsIdle = async (minWait = 1, maxWait = 15000) =>
     await _wait(tc.waitForTeIdle.iterations1);
     await sleep(1);
     await _wait(tc.waitForTeIdle.iterations2);
-    if (minWait > waited)
+    if (minWait > waited && minWait > 1)
     {
-        const sleepTime = Math.round((minWait - waited) / 3);
         while (minWait > waited) {
-            await sleep(sleepTime);
-            waited += sleepTime;
+            await sleep(25);
+            waited += 25;
         }
     }
 };

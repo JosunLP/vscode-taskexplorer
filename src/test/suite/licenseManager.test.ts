@@ -2,10 +2,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
+import { Task } from "vscode";
 import { join } from "path";
 import { expect } from "chai";
 import * as utils from "../utils/utils";
-import { Disposable, Task } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
 import { ITeAccount, ITeLicenseManager, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
@@ -22,7 +22,6 @@ let licMgrMaxFreeTasks: number;
 let licMgrMaxFreeTaskFiles: number;
 let licMgrMaxFreeTasksForTaskType: number;
 let licMgrMaxFreeTasksForScriptType: number;
-let disposable: Disposable | undefined;
 
 
 suite("License Manager Tests", () =>
@@ -170,6 +169,7 @@ suite("License Manager Tests", () =>
 				  tc.slowTime.webview.roundTripMessage + tc.slowTime.webview.closeSync + 100);
 		void executeTeCommand("taskexplorer.register", 1);
         await showTeWebview(teWrapper.licensePage, "waitOnly");
+		await utils.sleep(10);
 		const echoCmd = { method: "echo/account/register", overwriteable: false };
 		void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "buyer@example.com", emailAlt: "" });
 		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
@@ -235,29 +235,16 @@ suite("License Manager Tests", () =>
 		// Tests run 2 server requests to simulate a payment process, in succession
 		//
 		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.validateLicense + tc.slowTime.licenseMgr.nag + 200);
+		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.validateLicense +
+				  tc.slowTime.licenseMgr.nag + tc.slowTime.webview.show.view.home);
 		await setNag();
 		utils.overrideNextShowInfoBox("Buy License", true);
 		void licMgr.checkLicense("");
-		await utils.promiseFromEvent(teWrapper.server.onDidRequestComplete).promise;
-		await utils.sleep(50);
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
+		// License change will refresh home view
+		await utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2);
+		await utils.waitForWebviewsIdle();
 		await expectLicense(true, true, false, false);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Open Home View in Licensed Mode", async function()
-	{
-		if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount +
-			      tc.slowTime.webview.show.view.taskUsage + (tc.slowTime.commands.focusChangeViews * 3));
-		void teWrapper.homeView.show();
-        await Promise.all([
-            utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
-            utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
-            utils.waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2),
-        ]);
         utils.endRollingCount(this);
 	});
 

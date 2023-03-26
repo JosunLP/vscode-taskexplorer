@@ -114,6 +114,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     /**
      * @method build
+     * @since 3.0.0
      *
      * Create and add a special folder the the tree.  As of v2.0 these are the "Last Tasks" and
      * "Favorites" folders.
@@ -185,11 +186,11 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
 
     /**
-     * @method clearSpecialFolder
+     * @method clearSavedTasks
+     * @since 2.0.0
      *
      * @param folder The TaskFolder representing either the "Last Tasks" or the "Favorites" folders.
      *
-     * @since 2.0.0
      */
     protected async clearSavedTasks(): Promise<void>
     {
