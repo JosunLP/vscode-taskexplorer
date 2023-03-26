@@ -1082,6 +1082,10 @@
                                 "type": "boolean",
                                 "description": "%config.taskexplorer.enableMaven%"
                             },
+                            "node": {
+                                "type": "boolean",
+                                "description": "%config.taskexplorer.enableNode%"
+                            },
                             "npm": {
                                 "type": "boolean",
                                 "description": "%config.taskexplorer.enableNpm%"
@@ -1135,6 +1139,7 @@
                             "jenkins": false,
                             "make": true,
                             "maven": false,
+                            "node": false,
                             "npm": true,
                             "nsis": false,
                             "perl": false,
@@ -1249,6 +1254,19 @@
                         "default": [],
                         "order": 40,
                         "markdownDescription": "%config.taskexplorer.globPatternsBash%"
+                    },
+                    "taskexplorer.globPatternsNode": {
+                        "type": [
+                            "array"
+                        ],
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": [
+                            "**/bin/*.js"
+                        ],
+                        "order": 45,
+                        "markdownDescription": "%config.taskexplorer.globPatternsNode%"
                     }
                 }
             },

@@ -62,6 +62,7 @@ export const Globs: IDictionary<string> =
     GLOB_GRUNT: "**/[Gg][Rr][Uu][Nn][Tt][Ff][Ii][Ll][Ee].[Jj][Ss]",
     GLOB_JENKINS: "**/[Jj]enkinsfile",
     GLOB_MAKE: "**/[Mm]akefile",
+    GLOB_NODE: "**/bin/*.js",
     GLOB_NPM: "**/package.json",
     GLOB_NSIS: "**/*.[Nn][Ss][Ii]",
     GLOB_PERL: "**/*.[Pp][Ll]",

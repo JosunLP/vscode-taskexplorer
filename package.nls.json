@@ -23,6 +23,7 @@
 	"config.taskexplorer.enableMake": "Make",
 	"config.taskexplorer.enableMaven": "Maven",
 	"config.taskexplorer.enableNsis": "Nullsoft Installer",
+	"config.taskexplorer.enableNode": "Node",
 	"config.taskexplorer.enableNpm": "NPM",
 	"config.taskexplorer.enablePerl": "Perl",
 	"config.taskexplorer.enablePipenv": "Pipenv",
@@ -38,8 +39,9 @@
 	"config.taskexplorer.exclude": "Configure `glob` patterns for folders and files that should be excluded from script detection.",
 	"config.taskexplorer.excludeTask": "Configure `regex` patterns for individual tasks that should be excluded from task tree inclusion.",
 
-	"config.taskexplorer.globPatternsAnt": "Configure glob patterns for locating Apache Ant files not named b(B)uild.xml.",
-	"config.taskexplorer.globPatternsBash": "Configure the glob patterns for locating bash scripts, can be used to locate scripts with no extension.",
+	"config.taskexplorer.globPatternsAnt": "Configure glob patterns for locating Apache `Ant` files not named *b(B)uild.xml*.",
+	"config.taskexplorer.globPatternsBash": "Configure the glob patterns for locating `Bash` scripts without an *.sh* extension.",
+	"config.taskexplorer.globPatternsNode": "Configure the glob patterns for locating `Node` scripts (js files marked with *#!/usr/bin/env node*)",
 	
 	"config.taskexplorer.groupWithSeparator": "If script names contain the configured separator, break them into grouped nodes according to similar fist parts.",
 	"config.taskexplorer.groupSeparator": "The separator to use when grouping tasks.",

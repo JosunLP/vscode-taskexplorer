@@ -12,7 +12,7 @@ import { PinnedStorageKey } from "../constants";
 export function getScriptTaskTypes(): string[]
 {
     return [
-        "bash", "batch", "nsis", "perl", "powershell", "python", "ruby"
+        "bash", "batch", "node", "nsis", "perl", "powershell", "python", "ruby"
     ];
 }
 
@@ -48,7 +48,7 @@ export function getTaskTypes()
 {
     return [
         "ant", "apppublisher", "bash", "batch", "composer",  "gradle", "grunt", "gulp", "jenkins", "make",
-        "maven", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
+        "maven", "node", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
     ];
 }
 // Will bomb because we reference the fn in runTest. Just keep a static list i guess.  leaving commented for now...
@@ -69,6 +69,9 @@ export function getTaskTypeFriendlyName(taskType: string, lowerCase = false)
     }
     else if (taskType === "tsc") {
         return lowerCase ? "typescript" : "Typescript";
+    }
+    else if (taskType === "node") {
+        return lowerCase ? "nodejs" : "NodeJS";
     }
     return lowerCase ? taskType : properCase(taskType);
 }
