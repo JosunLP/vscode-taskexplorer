@@ -105,7 +105,7 @@ export class TaskWatcher implements Disposable
 
 
     private taskProcessFinishedEvent = (e: TaskProcessEndEvent) =>
-        this.wrapper.log.methodOnce("task watcher", "process start", 2, "", [[ "exit code", e.exitCode ], [ "task name", e.execution.task.name ]]);
+        this.wrapper.log.methodOnce("task watcher", "process finished", 2, "", [[ "exit code", e.exitCode ], [ "task name", e.execution.task.name ]]);
 
 
     private async taskStartEvent(e: TaskStartEvent): Promise<void>

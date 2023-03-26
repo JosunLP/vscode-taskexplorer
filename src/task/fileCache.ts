@@ -407,7 +407,7 @@ export class TeFileCache implements ITeFileCache, Disposable
         this.wrapper.statusBar.update("");
         this.cacheBuilding = false;
         this.cancel = false;
-        queueMicrotask(() => this._onReady.fire());
+        this._onReady.fire();
     };
 
 

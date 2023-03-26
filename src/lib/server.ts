@@ -6,7 +6,7 @@ import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
 
-const TLS_REJECT = "1"; // "0" to turn off tls rejection
+// const TLS_REJECT = "0"; // "0" to turn off tls rejection
 const REQUEST_TIMEOUT = 7500;
 const SPM_API_VERSION = 1;
 const SPM_API_PORT = 443;
@@ -34,7 +34,7 @@ export class TeServer implements Disposable
     constructor(private readonly wrapper: TeWrapper)
 	{
 		this._onRequestComplete = new EventEmitter<void>();
-		process.env.NODE_TLS_REJECT_UNAUTHORIZED = TLS_REJECT;
+		// process.env.NODE_TLS_REJECT_UNAUTHORIZED = TLS_REJECT;
 	}
 
 	dispose = () => this._onRequestComplete.dispose();
@@ -185,7 +185,7 @@ export class TeServer implements Disposable
 					}
 					finally {
 						this._busy = false;
-						queueMicrotask(() => this._onRequestComplete.fire());
+						this._onRequestComplete.fire();
 					}
 				});
 			});
@@ -196,7 +196,7 @@ export class TeServer implements Disposable
 				this.onServerError(e, logPad);
 				errorState = true;
 				this._busy = false;
-				queueMicrotask(() => this._onRequestComplete.fire());
+				this._onRequestComplete.fire();
 				reject(e);
 			});
 

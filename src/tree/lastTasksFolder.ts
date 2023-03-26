@@ -1,7 +1,6 @@
 
 import { TaskItem } from "./item";
 import { TeWrapper } from "../lib/wrapper";
-import { TeTaskListType } from "../interface";
 import { SpecialTaskFolder } from "./specialFolder";
 import { Commands, registerCommand } from "../lib/command/command";
 import { ConfigurationChangeEvent, TreeItemCollapsibleState, window } from "vscode";

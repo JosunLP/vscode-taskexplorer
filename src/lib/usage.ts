@@ -450,13 +450,10 @@ export class Usage implements ITeUsage, Disposable
         //
         // Fire usage  change event and maybe the `famous tasks` list change event
         //
-        queueMicrotask(() =>
-        {
-            this._onDidChange.fire({ key: this._taskUsageKey, usage });
-            if (famousChanged) {
-                this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ listType: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
-            }
-        });
+        this._onDidChange.fire({ key: this._taskUsageKey, usage });
+        if (famousChanged) {
+            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ listType: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
+        }
         this.log.methodDone("track task usage details", 2, logPad);
     };
 
