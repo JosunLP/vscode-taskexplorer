@@ -138,7 +138,7 @@ General Todos:
 
     ☐ Better integrate special folders (i.e. last tasks and favs) (way things are saved) w/ usage tracker
 
-    ☐ Convert tree items id's to hashes of currently used id strings
+    ✔ Convert tree items id's to hashes of currently used id strings @done(23-03-26 12:43)
         or something that represents a real id, as opposed to a strung together string
 
 Tests:

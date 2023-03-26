@@ -15,7 +15,8 @@ let didSetGroupLevel = false;
 export const hasRefreshed = () => didRefresh;
 
 
-export const findIdInTaskMap = (id: string, tMap: TaskMap) => Object.values(tMap).filter((t) => t && t.id?.includes(id) && !t.isUser).length;
+export const findTaskTypeInTaskMap = (taskType: string, tMap: TaskMap) =>
+    Object.values(tMap).filter((t) => t && t.taskSource === taskType && !t.isUser).length;
 
 
 export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expectedCount: number) =>
@@ -26,13 +27,13 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
     {
         let taskMap = teWrapper.treeManager.getTaskMap();
 
-        if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findIdInTaskMap(`:${taskType}:`, taskMap))
+        if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findTaskTypeInTaskMap(taskType, taskMap))
         {
             await waitForTeIdle(150, 1600);
             taskMap = teWrapper.treeManager.getTaskMap();
         }
 
-        if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findIdInTaskMap(`:${taskType}:`, taskMap))
+        if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findTaskTypeInTaskMap(taskType, taskMap))
         {
             if (retries === 0) {
                 console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor("Task map is empty, retry", teWrapper.figures.colors.grey)}`);
@@ -58,7 +59,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
     };
 
     const taskMap = await _getTaskMap(0);
-    const taskCount = taskMap ? findIdInTaskMap(`:${taskType}:`, taskMap) : 0;
+    const taskCount = taskMap ? findTaskTypeInTaskMap(taskType, taskMap) : 0;
     if (taskCount !== expectedCount)
     {
         console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor("Task map is empty.", teWrapper.figures.colors.grey)}`);
@@ -118,7 +119,7 @@ export const verifyTaskCountByTree = async(teWrapper: ITeWrapper, taskType: stri
             await refresh();
             taskMap = teWrapper.treeManager.getTaskMap();
         }
-        return findIdInTaskMap(`:${taskType}:`, taskMap);
+        return findTaskTypeInTaskMap(taskType, taskMap);
     };
     let retry = 0;
     let taskCount = await _getCount();

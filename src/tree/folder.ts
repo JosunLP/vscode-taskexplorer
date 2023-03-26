@@ -1,6 +1,7 @@
 
 import { TaskItem } from "./item";
 import { TaskFile } from "./file";
+import { getMd5 } from "@env/crypto";
 import { ITaskFolder } from "../interface";
 import { isString } from "../lib/utils/typeUtils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "vscode";
@@ -35,8 +36,8 @@ export class TaskFolder extends TreeItem implements ITaskFolder
 
         this.isSpecial = !!isSpecial;
         this.iconPath = ThemeIcon.Folder;
-        this.label = isString(folder) ? folder  : folder.name;
-        this.id = "treeFolderId-" + this.label;
+        this.label = isString(folder) ? folder : folder.name;
+        this.id = getMd5(this.label, "hex");
         this.tooltip = "A tree folder representing a workspace/project";
     }
 

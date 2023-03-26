@@ -2,6 +2,7 @@
 import * as path from "path";
 import { TaskFile } from "./file";
 import { log } from "../lib/log/log";
+import { getMd5 } from "@env/crypto";
 import { TaskFolder } from "./folder";
 import { ITaskItem } from "../interface";
 import { Strings } from "../lib/constants";
@@ -10,8 +11,7 @@ import { getInstallPathSync } from "../lib/utils/pathUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import {
     Task, TaskExecution, TreeItem, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command, Uri
-}
-from "vscode";
+} from "vscode";
 
 
 /**
@@ -78,7 +78,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         if (task.definition.scriptFile) {
             this.resourceUri = Uri.file(fsPath);
         }
-        this.id = fsPath + ":" + task.source + ":" + task.name + ":"; // <- leave trailing ':' for backwards compat
+        this.id = getMd5(fsPath + ":" + task.source + ":" + task.name + ":", "hex"); // <- leave trailing ':' for backwards compat
         this.paused = false;                // paused flag used by start/stop/pause task functionality
         this.taskFile = taskFile;           // Save a reference to the TaskFile that this TaskItem belongs to
         this.task = task;                   // Save a reference to the Task that this TaskItem represents
@@ -129,10 +129,7 @@ export class TaskItem extends TreeItem implements ITaskItem
     }
 
 
-    getFolder(): WorkspaceFolder | undefined
-    {
-        return this.taskFile.folder.workspaceFolder;
-    }
+    getFolder(): WorkspaceFolder | undefined { return this.taskFile.folder.workspaceFolder; }
 
 
     isExecuting(logPad = "   ")
@@ -154,13 +151,7 @@ export class TaskItem extends TreeItem implements ITaskItem
     }
 
 
-    private isSpecial(taskItem: TaskItem)
-    {
-        return taskItem && taskItem.id &&
-               (taskItem.id.includes(Strings.LAST_TASKS_LABEL + ":") ||
-                taskItem.id.includes(Strings.FAV_TASKS_LABEL + ":") ||
-                taskItem.id.includes(Strings.USER_TASKS_LABEL + ":"));
-    }
+    private isSpecial() { return this.id.includes("::") || this.id.includes(Strings.USER_TASKS_LABEL + ":"); }
 
 
     refreshState(logPad: string, logLevel: number)
@@ -190,7 +181,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         // Note that TaskItems of type 'scriptFile' can be ran with arguments and this will have an additional
         // entry added to it's context menu - "Run with arguments"
         //
-        if (this.isSpecial(this))
+        if (this.isSpecial())
         {
             if (task.definition.scriptFile || this.taskSource === "gradle") {
                 this.contextValue = running ? "scriptRunningS" : "scriptFileS";

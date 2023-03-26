@@ -356,9 +356,6 @@ export const getPackageManager = () =>
     return pkgMgr;
 };
 
-export const getSpecialTaskItemId = (taskItem: ITaskItem) =>
-    taskItem.id.replace("Last Tasks:", "").replace("Favorites:", "").replace("User Tasks:", "");
-
 
 export const getTeApi = () => teApi;
 

@@ -70,7 +70,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
 
     fireTreeRefreshEvent = (treeItem: TreeItem | null, logPad: string, fromQueue?: boolean) =>
     {
-        const id = "pendingFireTreeRefreshEvent-" + (treeItem ? treeItem.id?.replace(/\W/g, "") : "g");
+        const id = "pendingFireTreeRefreshEvent-" + (treeItem ? treeItem.id : "g");
         logPad = !fromQueue ? logPad : log.getLogPad();
 
         log.methodStart("fire tree refresh event", 1, logPad, false, [

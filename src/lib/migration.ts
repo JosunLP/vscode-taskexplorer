@@ -1,5 +1,6 @@
 
 import { workspace } from "vscode";
+import { getMd5 } from "@env/crypto";
 import { ConfigKeys } from "./constants";
 import { IConfiguration, IStorage, StorageTarget } from "../interface";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./utils/taskUtils";
@@ -51,7 +52,7 @@ export class TeMigration
 
     migrateStorage = async () =>
     {
-        const didStorageUpgrade = this.storage.get<boolean>("taskexplorer.v3StorageUpgrade", false);
+        let didStorageUpgrade = this.storage.get<boolean>("taskexplorer.v3StorageUpgrade", false);
         /* istanbul ignore next */
         if (!didStorageUpgrade)
         {
@@ -67,6 +68,24 @@ export class TeMigration
             await this.storage.delete("lastTasks");
             await this.storage.delete("favoriteTasks");
             await this.storage.update("taskexplorer.v3StorageUpgrade", true);
+        }
+        didStorageUpgrade = this.storage.get<boolean>("taskexplorer.v3StorageUpgrade2", false);
+        /* istanbul ignore next */
+        if (!didStorageUpgrade)
+        {
+            let store = this.storage.get<{ id: string; timestamp: number }[]>("taskexplorer.specialFolder.last", []);
+            store.forEach(t => { t.id = getMd5(t.id, "hex"); });
+            await this.storage.update("taskexplorer.specialFolder.last", store);
+            store = this.storage.get<{ id: string; timestamp: number }[]>("taskexplorer.specialFolder.last", [], StorageTarget.Workspace);
+            store.forEach(t => { t.id = getMd5(t.id, "hex"); });
+            await this.storage.update("taskexplorer.specialFolder.last", store, StorageTarget.Workspace);
+            store = this.storage.get<{ id: string; timestamp: number }[]>("taskexplorer.specialFolder.favorites", []);
+            store.forEach(t => { t.id = getMd5(t.id, "hex"); });
+            await this.storage.update("taskexplorer.specialFolder.favorites", store);
+            store = this.storage.get<{ id: string; timestamp: number }[]>("taskexplorer.specialFolder.favorites", [], StorageTarget.Workspace);
+            store.forEach(t => { t.id = getMd5(t.id, "hex"); });
+            await this.storage.update("taskexplorer.specialFolder.favorites", store, StorageTarget.Workspace);
+            await this.storage.update("taskexplorer.v3StorageUpgrade2", true);
         }
     };
 
