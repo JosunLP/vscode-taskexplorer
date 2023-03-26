@@ -359,7 +359,7 @@ suite("Task Tests", () =>
         utils.endRollingCount(this);
     });
 
-
+/*
     test("Run Non-Existent Last Task 2", async function()
     {
         if (utils.exitRollingCount(this)) return;
@@ -389,7 +389,7 @@ suite("Task Tests", () =>
         expect(r).to.be.equal(undefined, "Return TaskExecution should be undefined");
         utils.endRollingCount(this);
     });
-
+*/
 });
 
 

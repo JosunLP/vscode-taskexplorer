@@ -468,6 +468,8 @@ suite("Util Tests", () =>
 		teWrapper.taskUtils.getTaskTypeFriendlyName("tsc", true);
 		teWrapper.taskUtils.getTaskTypeFriendlyName("ant");
 		teWrapper.taskUtils.getTaskTypeFriendlyName("ant", true);
+		teWrapper.taskUtils.getTaskTypeFriendlyName("node");
+		teWrapper.taskUtils.getTaskTypeFriendlyName("node", true);
 
 		expect(teWrapper.typeUtils.isNumber(10)).to.equal(true);
 		expect(teWrapper.typeUtils.isNumber(0)).to.equal(true);

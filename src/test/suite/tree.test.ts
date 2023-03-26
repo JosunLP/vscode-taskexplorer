@@ -551,7 +551,6 @@ suite("Tree Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow((tc.slowTime.config.folderState * 2) + tc.slowTime.commands.refreshNoChanges);
         await executeSettingsUpdate("specialFolders.folderState.project1", "Collapsed");
-        teWrapper.treeManager.lastTasksFolder.removeTaskFile("invalid_id", "");
 		await teWrapper.storage.delete("taskexplorer.pinned.last");
         await teWrapper.treeManager.refresh(undefined, undefined, "");
         await executeSettingsUpdate("specialFolders.folderState.project1", "Expanded");
@@ -725,5 +724,5 @@ class DumbFolder implements ITaskFolder
     constructor(lbl: string) { this.label = lbl; }
     addTaskFile(taskFile: ITaskItem | ITaskFile): void {}
     insertTaskFile(taskFile: ITaskItem | ITaskFile, index: number): void {}
-    removeTaskFile(taskFile: string | ITaskItem | ITaskFile, logPad: string): void {}
+    removeTaskFile(taskFile: ITaskItem | ITaskFile, logPad: string): void {}
 }

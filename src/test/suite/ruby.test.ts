@@ -29,7 +29,7 @@ suite("Ruby Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teApi, teWrapper } = await activate(this));
-        provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        provider = teApi.providers[testsName];
         fileUri = Uri.file(path.join(getWsPath("."), "ruby_script.rb"));
         endRollingCount(this, true);
     });
