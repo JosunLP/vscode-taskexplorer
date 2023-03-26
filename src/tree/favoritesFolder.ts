@@ -1,9 +1,9 @@
 
 import { TaskItem } from "./item";
+import { ITeTask } from "../interface";
 import { TeWrapper } from "../lib/wrapper";
 import { TreeItemCollapsibleState } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
-import { ITeTask, TeTaskListType } from "../interface";
 import { Commands, registerCommand } from "../lib/command/command";
 
 
@@ -45,7 +45,6 @@ export class FavoritesFolder extends SpecialTaskFolder
      */
     private async addRemoveFavorite(item: TaskItem | ITeTask)
     {
-        let removed = false;
         const taskItem = this.wrapper.treeManager.getTaskItem(item),
               id = this.getTaskItemId(taskItem.id);
 
@@ -64,12 +63,11 @@ export class FavoritesFolder extends SpecialTaskFolder
             await this.saveTask(taskItem, "   ");
         }
         else {
-           await this.removeTaskFile(this.getTaskSpecialId(id), "   ", true);
-           removed = true;
+           await this.removeTaskFile(taskItem, "   ", true);
         }
 
         this.wrapper.log.methodDone("add/remove favorite", 1);
-        return removed;
+        return idx !== -1;
     }
 
 
@@ -86,7 +84,7 @@ export class FavoritesFolder extends SpecialTaskFolder
         const taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
         this.insertTaskFile(taskItem2, 0);
         this.sort();
-        this.fireChangeEvent(taskItem, logPad);
+        this.fireChangeEvent(taskItem, true, logPad);
         this.log.methodDone("save task", 1, logPad, [[ "new # of saved tasks", this.store.length ]]);
     };
 

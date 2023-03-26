@@ -41,22 +41,15 @@ export class TaskFolder extends TreeItem implements ITaskFolder
     }
 
 
-    addTaskFile(taskFile: TaskFile|TaskItem)
+    addTaskFile(taskFile: TaskFile|TaskItem) { this.taskFiles.push(taskFile); }
+
+
+    insertTaskFile(taskFile: TaskFile|TaskItem, index: number) { this.taskFiles.splice(index, 0, taskFile); }
+
+
+    removeTaskFile(taskFile: TaskFile|TaskItem, _logPad: string)
     {
-        this.taskFiles.push(taskFile);
-    }
-
-
-    insertTaskFile(taskFile: TaskFile|TaskItem, index: number)
-    {
-        this.taskFiles.splice(index, 0, taskFile);
-    }
-
-
-    removeTaskFile(taskFile: TaskFile|TaskItem|string, logPad: string)
-    {
-        const id = isString(taskFile) ? /* istanbul ignore next */ taskFile : taskFile.id;
-        const idx = this.taskFiles.findIndex(f => f.id === id);
+        const idx = this.taskFiles.findIndex(f => f.id === taskFile.id);
         this.taskFiles.splice(idx, 1);
     }
 }

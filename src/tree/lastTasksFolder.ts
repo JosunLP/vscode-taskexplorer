@@ -55,23 +55,23 @@ export class LastTasksFolder extends SpecialTaskFolder
     }
 
 
-    private pushToTreeTop = (taskItem: TaskItem, logPad: string) =>
+    private pushToTreeTop = async (taskItem: TaskItem, logPad: string) =>
     {
         const taskId = this.getTaskSpecialId(taskItem.id);
         let taskItem2 = this.taskFiles.find(t => t instanceof TaskItem && t.id === taskId);
         if (taskItem2)
         {
-            this.removeTaskFile(taskItem2, logPad, false);
+            await this.removeTaskFile(taskItem2, logPad, false);
         }
         else if (this.taskFiles.length >= this.maxItems)
         {
-            this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad, false);
+            await this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad, false);
         }
         if (!taskItem2) {
             taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
         }
         this.insertTaskFile(taskItem2, 0);
-        // this.fireChangeEvent(taskItem2, logPad + "   ");
+        this.fireChangeEvent(taskItem2, false, logPad + "   "); // running task watcher will fire tree refresh
     };
 
 
@@ -87,7 +87,7 @@ export class LastTasksFolder extends SpecialTaskFolder
         this.store.push({ id: taskId, timestamp: now });
         this.storeWs.push({ id: taskId, timestamp: now });
         await this.saveStores();
-        this.pushToTreeTop(taskItem, logPad + "   ");
+        await this.pushToTreeTop(taskItem, logPad + "   ");
         this.log.methodDone(`save task to ${this.labelLwr} folder`, 1, logPad, [[ "new # of saved tasks", this.taskFiles.length ]]);
     };
 

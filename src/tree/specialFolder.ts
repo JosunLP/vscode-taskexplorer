@@ -22,29 +22,26 @@ interface ITeSpecialTask
  */
 export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 {
+    private _enabled: boolean;
+    private readonly _settingNameEnabled: string;
+    private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
 
     protected abstract order: number;
     protected abstract maxItems: number;
     protected abstract saveTask(taskItem: TaskItem, logPad: string): Promise<void>;
 
-    protected store: ITeSpecialTask[];
-    protected storeWs: ITeSpecialTask[];
     protected readonly log: ILog;
     protected readonly labelLwr: string;
-    protected readonly disposables: Disposable[];
+    protected readonly store: ITeSpecialTask[] = [];
+    protected readonly storeWs: ITeSpecialTask[] = [];
+    protected readonly disposables: Disposable[] = [];
 
-    private _enabled: boolean;
-    private readonly _settingNameEnabled: string;
-    private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
-
-    override taskFiles: TaskItem[];
+    override taskFiles: TaskItem[] = [];
 
 
     constructor(protected readonly wrapper: TeWrapper, protected readonly listType: TeTaskListType, label: string, settingName: string, state: TreeItemCollapsibleState)
     {
         super(label, state, true);
-        this.taskFiles = [];
-        this.disposables = [];
         this.log = this.wrapper.log;
         this.iconPath = ThemeIcon.Folder;
         this.labelLwr = this.label.toLowerCase();
@@ -131,15 +128,16 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
         const added: string[] = [],
               taskMap = this.wrapper.treeManager.getTaskMap(),
-              allStoreItems = this.getCombinedStore(),
               expandStateId = this.wrapper.utils.lowerCaseFirstChar(this.label, true),
               folderStateCfgKey = this.wrapper.keys.Config.SpecialFolders.FolderState,
               tree = this.wrapper.treeManager.getTaskTree() as TaskFolder[], // Guaranted not to be undefined
               nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(folderStateCfgKey);
 
-        this.taskFiles = [];
+        this.cleanStores();   // <- build() is called only after a taskMap build, and cleanStores() should
+        this.taskFiles = [];  //    only be called when the taskMap is completed.
         this.collapsibleState = TreeItemCollapsibleState[nodeExpandedeMap[expandStateId]];
 
+        const allStoreItems = this.getCombinedStore();
         for (const t of allStoreItems)
         {
             if (this.taskFiles.length >= this.maxItems) {
@@ -148,13 +146,10 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             if (added.includes(t.id)) {
                 continue;
             }
-            const taskItem = taskMap[t.id];
-            if (taskItem instanceof TaskItem && taskItem.task)
-            {
-                const taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
-                this.insertTaskFile(taskItem2, 0);
-                added.push(t.id);
-            }
+            const taskItem = taskMap[t.id] as TaskItem; // Guaranteed to be TaskItem from cleanStores()
+            const taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
+            this.insertTaskFile(taskItem2, 0);
+            added.push(t.id);
         }
 
         this.sort();
@@ -173,6 +168,22 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
+    private cleanStores = () =>
+    {
+        const taskMap = this.wrapper.treeManager.getTaskMap();
+        this.store.slice().reverse().forEach((t, idx, arr) => {
+            if (!taskMap[t.id]) {
+                this.store.splice(arr.length - 1 - idx, 1);
+            }
+        });
+        this.storeWs.slice().reverse().forEach((t, idx, arr) => {
+            if (!taskMap[t.id]) {
+                this.storeWs.splice(arr.length - 1 - idx, 1);
+            }
+        });
+    };
+
+
     /**
      * @method clearSpecialFolder
      *
@@ -185,9 +196,9 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         const choice = await window.showInformationMessage(`Clear all tasks from the \`${this.label}\` folder?`, "Global", "Workspace", "Cancel");
         if (choice === "Workspace" || choice === "Global")
         {
-            this.storeWs = [];
+            this.storeWs.splice(0);
             if (choice === "Global") {
-                this.store = [];
+                this.store.splice(0);
             }
             await this.saveStores();
             this.taskFiles = [];
@@ -206,12 +217,14 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    protected fireChangeEvent = (taskItem: TaskItem | undefined, logPad: string): void =>
+    protected fireChangeEvent = (taskItem: TaskItem | undefined, fireTreeRefresh: boolean, logPad: string): void =>
     {
         const iTasks = this._enabled ? this.wrapper.taskUtils.toITask(this.wrapper, this.taskFiles.map(f => f.task), this.listType) : [],
               iTask = taskItem ? iTasks.find(t => t.treeId === taskItem.id) : taskItem;
         this._onDidTasksChange.fire({ tasks: iTasks, task: iTask, type: this.listType });
-        this.wrapper.treeManager.fireTreeRefreshEvent(this, null, logPad);
+        if (fireTreeRefresh) {
+            this.wrapper.treeManager.fireTreeRefreshEvent(this, null, logPad);
+        }
     };
 
 
@@ -237,8 +250,10 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     private loadStores = (): ITeSpecialTask[][] =>
     {
-        this.store = this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Global);
-        this.storeWs = this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Workspace);
+        this.store.splice(0);
+        this.storeWs.splice(0);
+        this.store.push(...this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Global));
+        this.storeWs.push(...this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Workspace));
         return [ this.store, this.storeWs ];
     };
 
@@ -280,7 +295,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         else {
             tree.splice(tree.findIndex(i => i.id === this.id), 1);
         }
-        this.fireChangeEvent(undefined, "   ");
+        this.fireChangeEvent(undefined, true, "   ");
         this.log.methodDone(`refresh ${this.labelLwr} folder`, 1, "");
     }
 
@@ -305,19 +320,15 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    override async removeTaskFile(taskItem: TaskItem|string, logPad: string, persist?: boolean): Promise<void>
+    override async removeTaskFile(taskItem: TaskItem, logPad: string, persist?: boolean): Promise<void>
     {
-        const id = this.wrapper.typeUtils.isString(taskItem) ? taskItem : taskItem.id, // getTaskItemId(taskFile);
-              idx = this.taskFiles.findIndex(f => f.id === id);
-        if (idx !== -1)
+        const idx = this.taskFiles.findIndex(f => f.id === this.getTaskSpecialId(taskItem.id));
+        taskItem = this.taskFiles.splice(idx, 1)[0]; // idx guaranteed not to be -1 by caller
+        if (persist)
         {
-            taskItem = this.taskFiles.splice(idx, 1)[0];
-            if (persist)
-            {
-                this.removeFromStore(taskItem);
-                await this.saveStores();
-                this.fireChangeEvent(taskItem, logPad);
-            }
+            this.removeFromStore(taskItem);
+            await this.saveStores();
+            this.fireChangeEvent(taskItem, true, logPad);
         }
     }
 
