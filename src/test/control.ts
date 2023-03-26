@@ -199,16 +199,16 @@ export const testControl =
                 view: {
                     home: 2610,
                     taskCount: 2460,
-                    taskUsage: 2320
+                    taskUsage: 2370
                 },
                 page: {
                     license: 3240,
                     releaseNotes: 2990,
                     taskDetailsScript: 2865,
-                    taskDetailsNonScript: 3545,
+                    taskDetailsNonScript: 3575,
                     taskMonitor: 3115,
                     parsingReport: 2690,
-                    parsingReportFull: 3690,
+                    parsingReportFull: 3720,
                     welcome: 1225
                 }
             }
@@ -251,7 +251,7 @@ export const testControl =
         focusCommand: 210,
         fs: {
             createEvent: 205,
-            createFolderEvent: 260,
+            createFolderEvent: 270,
             createEventTsc: 275,
             deleteEvent: 200,
             deleteEventTsc: 280,

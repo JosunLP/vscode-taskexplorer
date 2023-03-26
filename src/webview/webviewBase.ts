@@ -74,6 +74,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	private readonly _originalTitle: string | undefined;
 	private readonly _onReadyReceived: EventEmitter<void>;
 	private readonly _onMessageReceived: EventEmitter<string>;
+	// private readonly htmlCache: { [id in `taskexplorer.view.${WebviewViewIds|WebviewIds}`]?: string; } = {};
 
 
     constructor(protected readonly wrapper: TeWrapper, protected id: `taskexplorer.view.${WebviewViewIds|WebviewIds}`, title: string, protected readonly fileName: string)
@@ -200,6 +201,8 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			html = html.replace(m, (<IDictionary<string>>Strings)[m2]);
 		}
 
+		// this.htmlCache[this.id] = await this.onHtmlFinalizeBase(html, ...args);
+		// return this.htmlCache[this.id] as string;
 		return this.onHtmlFinalizeBase(html, ...args);
 	}
 
@@ -421,6 +424,8 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		else
 		{
 			const html = await this.getHtml(this._view.webview, ...args);
+			// const html = !skippedChangeEvent && this.htmlCache[this.id] ? this.htmlCache[this.id] as string :
+			// 															  await this.getHtml(this._view.webview, ...args);
 			if (force && this._view.webview.html) {
 				this._view.webview.html = "";
 			}
