@@ -157,7 +157,7 @@ suite("Task Details Page Tests", () =>
 	test("Open Details Page (Tracking Disabled)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.config.trackingEvent * 4) + tc.slowTime.webview.show.page.taskDetailsScript + tc.slowTime.webview.closeSync + 200);
+		this.slow((tc.slowTime.config.trackingEvent * 4) + tc.slowTime.webview.show.page.taskDetailsScript + tc.slowTime.webview.closeSync + 202);
 		teWebview = await showTeWebview("taskDetails", python[0]);
 		await sleep(1);
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
@@ -165,8 +165,7 @@ suite("Task Details Page Tests", () =>
 		await sleep(100);
         await waitForWebviewsIdle();
 		await closeTeWebviewPanel(teWebview);
-		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true); // will also auto-set TrackUsage = true (usage.onConfigChanged)
         endRollingCount(this);
 	});
 

@@ -45,7 +45,7 @@ export class LastTasksFolder extends SpecialTaskFolder
     };
 
 
-    protected override async onConfigChanged(e: ConfigurationChangeEvent)
+    protected override onConfigChanged(e: ConfigurationChangeEvent)
     {
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.SpecialFolders.NumLastTasks))
         {

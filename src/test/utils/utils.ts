@@ -111,7 +111,6 @@ export const activate = async (instance?: Mocha.Context) =>
 
     if (!activated)
     {
-        timeStarted = Date.now();
         const tzOffset = (new Date()).getTimezoneOffset() * 60000,
               locISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, -1).replace("T", " ").replace(/[\-]/g, "/");
         //
@@ -147,7 +146,7 @@ export const activate = async (instance?: Mocha.Context) =>
         expect(isReady()).to.be.equal(true, `    ${teWrapper.figures.color.error} TeApi not ready`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Waiting for extension to initialize", teWrapper.figures.colors.grey)}`);
         await Promise.all([
-            promiseFromEvent(teWrapper.onReady),
+            promiseFromEvent(teWrapper.onReady).promise,
             waitForWebviewReadyEvent(teWrapper.welcomePage, 15000)
         ]);
         await waitForWebviewsIdle();
@@ -176,6 +175,7 @@ export const activate = async (instance?: Mocha.Context) =>
         // All done
         //
         activated = true;
+        timeStarted = Date.now();
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Tests initialization completed, ready", teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info}`);
 		console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor(disableSSLMsg, teWrapper.figures.colors.grey)}`);

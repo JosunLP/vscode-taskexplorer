@@ -250,7 +250,7 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.webview.show.view.taskCount +
-			      tc.slowTime.webview.show.view.taskUsage + tc.slowTime.commands.focusChangeViews);
+			      tc.slowTime.webview.show.view.taskUsage + (tc.slowTime.commands.focusChangeViews * 3));
 		void teWrapper.homeView.show();
         await Promise.all([
             utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),

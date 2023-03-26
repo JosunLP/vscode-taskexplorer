@@ -2,7 +2,7 @@
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
-import { SpecialFolderStorageKey } from "../lib/constants";
+import { ConfigPrefix, SpecialFolderStorageKey } from "../lib/constants";
 import { IDictionary, ILog, ITeTaskChangeEvent, StorageTarget, TeTaskListType } from "../interface";
 import {
     ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
@@ -46,11 +46,11 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         this.iconPath = ThemeIcon.Folder;
         this.labelLwr = this.label.toLowerCase();
         this.contextValue = this.labelLwr.replace(/[\W \_\-]/g, "");
-        [ this.store, this.storeWs ] = this.loadStores();
         this.tooltip = `A tree folder to store '${label}' tasks`;
         this._settingNameEnabled = settingName;
         this._enabled = this.wrapper.config.get<boolean>(settingName);
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
+        this.loadStores();
         this.disposables.push(
             this._onDidTasksChange,
             wrapper.config.onDidChange(this.onConfigChanged, this)
@@ -65,8 +65,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 	}
 
     private get storeName(): SpecialFolderStorageKey {
-        return `taskexplorer.specialFolder.${this.listType}`;
-        // return `${this.wrapper.keys.Config.SpecialFolders.FolderState}.${this.listType}`;
+        return `${ConfigPrefix.SpecialFolder}${this.listType}`;
     }
 
 
@@ -248,13 +247,12 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    private loadStores = (): ITeSpecialTask[][] =>
+    private loadStores = (): void =>
     {
         this.store.splice(0);
         this.storeWs.splice(0);
         this.store.push(...this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Global));
         this.storeWs.push(...this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Workspace));
-        return [ this.store, this.storeWs ];
     };
 
 
@@ -278,7 +276,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     {
         if (this.wrapper.config.affectsConfiguration(e, this._settingNameEnabled) && this.wrapper.treeManager.getTaskTree())
         {
-            this.loadStores();
+            // this.loadStores();
             this._enabled = this.wrapper.config.get<boolean>(this._settingNameEnabled);
             this.refresh();
         }

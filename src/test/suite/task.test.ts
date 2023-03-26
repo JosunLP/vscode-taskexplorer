@@ -359,37 +359,6 @@ suite("Task Tests", () =>
         utils.endRollingCount(this);
     });
 
-/*
-    test("Run Non-Existent Last Task 2", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.run + (tc.slowTime.storage.update * 2));
-        const tree = teWrapper.treeManager.getTaskTree() as ITaskFolder[];
-        expect(tree).to.not.be.oneOf([ undefined, null ]);
-        const lastTasksFolder = teWrapper.treeManager.lastTasksFolder as any;
-        expect(lastTasksFolder).to.not.equal(undefined, "The 'Last Tasks' folder is undefined");
-        const item = lastTasksFolder.taskFiles[0];
-        expect(item).to.not.equal(undefined, "The 'Last Tasks' folder has no taskitems");
-        const taskMap = teWrapper.treeManager.getTaskMap();
-        const tmp = { ...taskMap };
-        await lastTasksFolder.removeTaskFile("invalid_id");
-        let r: any = 0;
-        try {
-            Object.keys(tmp).forEach(k => {
-                delete taskMap[k];
-            });
-            utils.overrideNextShowInfoBox(undefined);
-            await utils.sleep(1);
-            r = await executeTeCommand("runLastTask", tc.waitTime.runCommandMin);
-        }
-        finally {
-            Object.assign(taskMap, tmp);
-            await lastTasksFolder.saveTask(item, "");
-        }
-        expect(r).to.be.equal(undefined, "Return TaskExecution should be undefined");
-        utils.endRollingCount(this);
-    });
-*/
 });
 
 

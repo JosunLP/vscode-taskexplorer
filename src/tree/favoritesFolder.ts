@@ -85,7 +85,7 @@ export class FavoritesFolder extends SpecialTaskFolder
         this.insertTaskFile(taskItem2, 0);
         this.sort();
         this.fireChangeEvent(taskItem, true, logPad);
-        this.log.methodDone("save task", 1, logPad, [[ "new # of saved tasks", this.store.length ]]);
+        this.log.methodDone("save task", 1, logPad, [[ "new # of saved tasks", this.store.length + this.storeWs.length ]]);
     };
 
 }

@@ -49,67 +49,45 @@ suite("Tree Tests", () =>
 	});
 
 
-    test("Show Favorites", async function()
+    test("Show Last Tasks w/ Missing Stored Task", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.showHideSpecialFolder * 2) + (tc.waitTime.config.event * 2) +
-                  (tc.slowTime.tasks.getTreeTasks * 4) + tc.slowTime.storage.update);
+        if (teWrapper.config.get<boolean>("specialFolders.showLastTasks")) {
+            this.slow(tc.slowTime.config.showHideSpecialFolder * 2);
+            void teWrapper.config.updateWs("specialFolders.showLastTasks", false); // Reload last tasks folder
+            await utils.promiseFromEvent(teWrapper.treeManager.onDidLastTasksChange).promise;
+        }
+        else {
+            this.slow(tc.slowTime.config.showHideSpecialFolder);
+        }
+        const taskMap = teWrapper.treeManager.getTaskMap();
+        const tmp = { ...taskMap };
+        try {
+            Object.keys(tmp).forEach(k => {
+                delete taskMap[k];
+            });
+            void teWrapper.config.updateWs("specialFolders.showLastTasks", true);
+            await utils.promiseFromEvent(teWrapper.treeManager.onDidLastTasksChange).promise;
+        }
+        finally //
+        {      // Last tasks folder will get reloaded on hide / show tests below
+            Object.assign(taskMap, tmp);
+        }
+        utils.endRollingCount(this);
+    });
+
+
+    test("Add/Remove from Favorites", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.showHideSpecialFolder + (tc.slowTime.commands.standard * 8) + (tc.slowTime.tasks.getTreeTasks * 4));
+        await executeSettingsUpdate("specialFolders.showFavorites", true);
         ant = await utils.treeUtils.getTreeTasks(teWrapper, "ant", 3);
         bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
         batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
         python = await utils.treeUtils.getTreeTasks(teWrapper, "python", 2);
-        await teWrapper.storage.update("favoriteTasks", [
-            utils.getSpecialTaskItemId(batch[0]), utils.getSpecialTaskItemId(batch[1]), utils.getSpecialTaskItemId(ant[0]),
-            utils.getSpecialTaskItemId(bash[0]), utils.getSpecialTaskItemId(python[0]), utils.getSpecialTaskItemId(python[1])
-        ], 0);
-        await teWrapper.storage.update("favoriteTasks", [
-            utils.getSpecialTaskItemId(batch[0]), utils.getSpecialTaskItemId(batch[1]), utils.getSpecialTaskItemId(ant[0]),
-            utils.getSpecialTaskItemId(bash[0]), utils.getSpecialTaskItemId(python[0]), utils.getSpecialTaskItemId(python[1])
-        ], 1);
-        await executeSettingsUpdate("specialFolders.showFavorites", false, tc.waitTime.config.event);
-        await executeSettingsUpdate("specialFolders.showFavorites", true, tc.waitTime.config.event);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Show Last Tasks", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.showHideSpecialFolder * 2) + (tc.waitTime.config.event * 2) + (tc.slowTime.tasks.getTreeTasks * 2));
-        ant = await utils.treeUtils.getTreeTasks(teWrapper, "ant", 3);
-        batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
-        await teWrapper.storage.update("lastTasks", [
-            utils.getSpecialTaskItemId(batch[0]), utils.getSpecialTaskItemId(batch[1]), utils.getSpecialTaskItemId(ant[0]),
-            utils.getSpecialTaskItemId(bash[0]), utils.getSpecialTaskItemId(python[0]), utils.getSpecialTaskItemId(python[1])
-        ], 0);
-        await teWrapper.storage.update("lastTasks", [
-            utils.getSpecialTaskItemId(batch[0]), utils.getSpecialTaskItemId(batch[1]), utils.getSpecialTaskItemId(ant[0]),
-            utils.getSpecialTaskItemId(bash[0]), utils.getSpecialTaskItemId(python[0]), utils.getSpecialTaskItemId(python[1])
-        ], 1);
-        await executeSettingsUpdate("specialFolders.showLastTasks", false, tc.waitTime.config.event);
-        await executeSettingsUpdate("specialFolders.showLastTasks", true, tc.waitTime.config.event);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Remove from Favorites", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.standard * 6);
         await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
-        await executeTeCommand2("addRemoveFavorite", [ batch[1] ]);
         await executeTeCommand2("addRemoveFavorite", [ ant[0] ]);
-        await executeTeCommand2("addRemoveFavorite", [ bash[0] ]);
-        await executeTeCommand2("addRemoveFavorite", [ python[0] ]);
-        await executeTeCommand2("addRemoveFavorite", [ python[1] ]);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Add to Favorites", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.standard * 13);
         let removed = await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);

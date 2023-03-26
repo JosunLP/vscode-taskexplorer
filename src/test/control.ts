@@ -191,24 +191,24 @@ export const testControl =
         },
         webview: {
             closeSync: 390,
-            expandView: 1325,
+            expandView: 1345,
             postMessage: 300,
             revealTreeNode: 55,
             roundTripMessage: 2625,
             show: {
                 view: {
-                    home: 2660,
-                    taskCount: 2060,
-                    taskUsage: 2260
+                    home: 2610,
+                    taskCount: 2410,
+                    taskUsage: 2270
                 },
                 page: {
                     license: 3240,
                     releaseNotes: 2990,
                     taskDetailsScript: 2865,
-                    taskDetailsNonScript: 3375,
+                    taskDetailsNonScript: 3425,
                     taskMonitor: 3055,
                     parsingReport: 2690,
-                    parsingReportFull: 3630,
+                    parsingReportFull: 3670,
                     welcome: 1225
                 }
             }
