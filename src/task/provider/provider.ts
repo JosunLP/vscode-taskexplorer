@@ -58,8 +58,9 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
     public async provideTasks()
     {
         let rmvCount;
+        const logPad = this.wrapper.log.getLogPad();
         this.logQueueId = this.providerName + (++this.callCount);
-        this.wrapper.log.methodStart(`provide ${this.providerName} tasks`, 1, TaskExplorerProvider.logPad, true, [[ "call count", ++this.callCount ]], this.logQueueId);
+        this.wrapper.log.methodStart(`provide ${this.providerName} tasks`, 1, logPad, true, [[ "call count", ++this.callCount ]], this.logQueueId);
         if (!this.cachedTasks)
         {
             const licMgr = this.wrapper.licenseManager;
@@ -76,7 +77,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
                 }
             }
         }
-        this.wrapper.log.methodDone(`provide ${this.providerName} tasks`, 1, TaskExplorerProvider.logPad, [[ "# of tasks found", this.cachedTasks.length ]], this.logQueueId);
+        this.wrapper.log.methodDone(`provide ${this.providerName} tasks`, 1, logPad, [[ "# of tasks found", this.cachedTasks.length ]], this.logQueueId);
         this.wrapper.log.dequeue(this.logQueueId);
         this.logQueueId = undefined;
         return this.cachedTasks;

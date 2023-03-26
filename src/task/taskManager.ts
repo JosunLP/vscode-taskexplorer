@@ -304,11 +304,11 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     private runTask = async (task: Task, taskItem: TaskItem, noTerminal?: boolean, logPad = "   ") =>
     {
-        this.log.methodStart("run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
+        this.log.methodStart("internal run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
         task.presentationOptions.reveal = noTerminal !== true ? TaskRevealKind.Always : TaskRevealKind.Silent;
         const exec = await tasks.executeTask(task);
         await this.wrapper.treeManager.lastTasksFolder.saveTask(taskItem, logPad);
-        this.log.methodDone("run task", 1, logPad, [[ "success", !!exec ]]);
+        this.log.methodDone("internal run task", 1, logPad, [[ "success", !!exec ]]);
         return exec;
     };
 

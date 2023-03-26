@@ -627,7 +627,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             this.wrapper.log.write(`   Processing files cached for ${taskType} tasks`, 2, logPad);
             numFilesRemoved += this.removeFromMappings(taskType, uri, true, logPad + "   ");
         });
-        this.wrapper.log.methodDone("remove folder from cache", 1, logPad);
+        this.wrapper.log.methodDone("remove folder from cache", 1, logPad, [[ "# of files removed", numFilesRemoved ]]);
         return numFilesRemoved;
     };
 
@@ -752,7 +752,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             delete this.projectFilesMap[f.name];
             this.wrapper.log.write(`   removed ${numFilesRemoved} total files`, 1, logPad);
         }
-        this.wrapper.log.methodDone("remove workspace folder", 1, logPad);
+        this.wrapper.log.methodDone("remove workspace folder", 1, logPad, [[ "# of files removed", numFilesRemoved ]]);
         return numFilesRemoved;
     };
 
