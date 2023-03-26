@@ -236,27 +236,14 @@ suite("License Manager Tests", () =>
 		//
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.validateLicense +
-				  tc.slowTime.licenseMgr.nag + tc.slowTime.webview.show.view.home);
+				  tc.slowTime.licenseMgr.nag + tc.slowTime.webview.show.view.home + 200);
 		await setNag();
 		utils.overrideNextShowInfoBox("Buy License", true);
 		void licMgr.checkLicense("");
 		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		// License change will refresh home view
 		await utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2);
-		await utils.waitForWebviewsIdle();
 		await expectLicense(true, true, false, false);
-        utils.endRollingCount(this);
-	});
-
-
-	test("Open License Page in Licensed Mode", async function()
-	{
-        if (utils.exitRollingCount(this)) return;
-		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + 200);
-        await showTeWebview(teWrapper.licensePage);
-		await utils.waitForWebviewsIdle();
-		await closeTeWebviewPanel(teWrapper.licensePage);
-		await utils.waitForWebviewsIdle();
         utils.endRollingCount(this);
 	});
 
@@ -267,6 +254,17 @@ suite("License Manager Tests", () =>
 		this.slow(tc.slowTime.commands.focusChangeViews + 200);
 		void focusExplorerView(teWrapper);
 		utils.waitForEvent(teWrapper.treeManager.views.taskExplorer.tree.onDidLoadTreeData, tc.slowTime.commands.focusChangeViews * 2);
+        utils.endRollingCount(this);
+	});
+
+
+	test("Open License Page in Licensed Mode", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + 50);
+        await showTeWebview(teWrapper.licensePage);
+		await utils.sleep(25);
+		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);
 	});
 

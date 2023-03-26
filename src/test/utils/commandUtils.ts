@@ -164,7 +164,7 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
     const start = Date.now();
     const echoCmd = { method: "echo/command/execute", overwriteable: false };
     void webviewPageSender.postMessage(echoCmd, { command: `taskexplorer.view.${showCmdName}.show`, args: args.length > 0 ? args : undefined });
-    await waitForWebviewReadyEvent(webviewPage, 3000);
+    await waitForWebviewReadyEvent(webviewPage, 4000);
     await sleep(1);
     let waited = Date.now() - start;
     while (webviewPage.busy && waited < 5000)
