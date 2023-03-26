@@ -109,7 +109,7 @@ export class LastTasksFolder extends SpecialTaskFolder
             else if (!aIsPinned && bIsPinned) {
                 return 1;
             }
-            return aIdx < bIdx ? -1 : /* istanbul ignore next */1;
+            return aIdx < bIdx ? 1 : /* istanbul ignore next */-1;
         });
     };
 

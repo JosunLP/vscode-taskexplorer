@@ -228,7 +228,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    protected getCombinedStore = () => [ ...this.storeWs, ...this.store ].sort((a, b) => a.timestamp < b.timestamp ? 1 : -1);
+    protected getCombinedStore = () => [ ...this.storeWs, ...this.store ].sort((a, b) => a.timestamp < b.timestamp ? -1 : 1);
 
 
     protected getRenamedTaskName(taskItem: TaskItem): string
@@ -297,14 +297,14 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             this.store.splice(idx, 1);
         }
         else if (this.store.length >= this.maxItems) {
-            this.store.splice(this.maxItems);
+            this.store.splice(0, this.storeWs.length - this.maxItems + 1);
         }
         idx = this.storeWs.findIndex(t => t.id === taskId);
         if (idx !== -1) {
             this.storeWs.splice(idx, 1);
         }
         else if (this.storeWs.length >= this.maxItems) {
-            this.storeWs.splice(this.maxItems);
+            this.storeWs.splice(0, this.storeWs.length - this.maxItems + 1);
         }
     };
 
