@@ -64,6 +64,7 @@
         "tsbuildinfo",
         "tscheck",
         "uild",
+        "venv",
         "vsix",
         "vslauncher",
         "webpackte",
