@@ -1205,6 +1205,7 @@
                             "**/test/**",
                             "**/test-fixture/**",
                             "**/third_party/**",
+                            "**/.venv/**",
                             "**/vendor/**",
                             "**/work/**"
                         ]
