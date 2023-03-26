@@ -1,9 +1,9 @@
 
 import { TaskItem } from "./item";
 import { TaskFile } from "./file";
+import { ITaskFolder } from "../interface";
 import { isString } from "../lib/utils/typeUtils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "vscode";
-import { ITaskFolder } from "src/interface";
 
 
 /**

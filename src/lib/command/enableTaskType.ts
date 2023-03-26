@@ -5,6 +5,7 @@ import { testPattern } from "../utils/utils";
 import { Disposable, Uri, window } from "vscode";
 import { Commands, registerCommand } from "./command";
 
+
 export class EnableTaskTypeCommand implements Disposable
 {
     private _disposables: Disposable[] = [];
@@ -16,7 +17,7 @@ export class EnableTaskTypeCommand implements Disposable
         );
     }
 
-    dispose = () => this._disposables.forEach((d) => d.dispose());
+    dispose = () => this._disposables.forEach(d => d.dispose());
 
     private enableTaskType = async(uri: Uri) =>
     {
@@ -34,5 +35,4 @@ export class EnableTaskTypeCommand implements Disposable
         }
         this.wrapper.log.methodDone("enable task type file explorer command", 1, "");
     };
-
 }

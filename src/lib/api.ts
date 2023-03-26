@@ -1,9 +1,9 @@
 
+import { Disposable } from "vscode";
 import { TeWrapper } from "./wrapper";
 import { ContextKeys } from "./context";
 import { IExternalProvider, ITaskExplorerApi } from "../interface";
 import { executeCommand, registerCommand, Commands } from "./command/command";
-import { Disposable } from "vscode";
 
 
 export class TeApi implements ITaskExplorerApi, Disposable
@@ -18,7 +18,7 @@ export class TeApi implements ITaskExplorerApi, Disposable
         if (this._tests) {
             void wrapper.contextTe.setContext(ContextKeys.Tests, true);
         }
-        this._disposables.push(registerCommand("taskexplorer.getApi", () => this, this));
+        this._disposables.push(registerCommand(Commands.GetApi, () => this, this));
     }
 
 

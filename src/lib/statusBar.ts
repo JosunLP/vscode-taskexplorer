@@ -1,4 +1,3 @@
-
 /**
  * @class TeStatusBar
  * @since 3.0.0
@@ -29,7 +28,6 @@ export class TeStatusBar implements ITeStatusBar, Disposable
         this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this._statusBarItem.tooltip = this._extName + " Status";
     }
-
 
     dispose = () => this._statusBarItem.dispose();
 

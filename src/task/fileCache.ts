@@ -13,17 +13,16 @@ import {
 
 export class TeFileCache implements ITeFileCache, Disposable
 {
-
     private cancel = false;
     private firstRun = true;
     private cacheBusy = false;
     private taskGlobs: any = {};
     private cacheBuilding = false;
-    private _disposables: Disposable[] = [];
-    private readonly _onReady: EventEmitter<void>;
     private taskFilesMap: IDictionary<ICacheItem[]>;
     private projectFilesMap: IDictionary<IDictionary<string[]>>;
     private projectToFileCountMap: IDictionary<IDictionary<number>>;
+    private readonly _onReady: EventEmitter<void>;
+    private readonly _disposables: Disposable[] = [];
 
 
     constructor(private readonly wrapper: TeWrapper)
@@ -116,7 +115,7 @@ export class TeFileCache implements ITeFileCache, Disposable
                         glob = provider?.getGlobPattern();
                     }
                     if (!glob) {
-                        glob = this.wrapper.utils.getGlobPattern(providerName);
+                        glob = this.wrapper.taskUtils.getGlobPattern(providerName);
                     }
 
                     const dspTaskType = taskTypeUtils.getTaskTypeFriendlyName(providerName);
@@ -338,7 +337,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             glob = providers[taskType].getGlobPattern();
         }
         if (!glob) {
-            glob = this.wrapper.utils.getGlobPattern(taskType);
+            glob = this.wrapper.taskUtils.getGlobPattern(taskType);
         }
         this.wrapper.log.value("   glob", glob, 1, logPad);
 

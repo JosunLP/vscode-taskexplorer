@@ -17,7 +17,7 @@ export class DisableTaskTypeCommand implements Disposable
         );
     }
 
-    dispose = () => this._disposables.forEach((d) => d.dispose());
+    dispose = () => this._disposables.forEach(d => d.dispose());
 
     private disableTaskType = async(uri: Uri) =>
     {
@@ -27,5 +27,4 @@ export class DisableTaskTypeCommand implements Disposable
         await this.wrapper.config.update("enabledTasks." + taskType, false);
         this.wrapper.log.methodDone("disable task type file explorer command", 1, "");
     };
-
 }

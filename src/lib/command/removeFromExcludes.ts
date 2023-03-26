@@ -17,7 +17,7 @@ export class RemoveFromExcludesCommand implements Disposable
         );
     }
 
-    dispose = () => this._disposables.forEach((d) => d.dispose());
+    dispose = () => this._disposables.forEach(d => d.dispose());
 
     private removeUriFromExcludes = async(uri: Uri) =>
     {
@@ -44,5 +44,4 @@ export class RemoveFromExcludesCommand implements Disposable
         }
         this.wrapper.log.methodDone("remove from excludes file explorer command", 1, "");
     };
-
 }

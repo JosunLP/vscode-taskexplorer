@@ -1,5 +1,6 @@
 import { Uri, WorkspaceFolder } from "vscode";
 
+
 export const isArray = <T>(value: any): value is T[] => !!value && Array.isArray(value);
 
 

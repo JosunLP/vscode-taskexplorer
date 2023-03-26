@@ -1,9 +1,8 @@
 
 import { workspace } from "vscode";
-import { IConfiguration, IStorage, StorageTarget } from "../interface";
 import { ConfigKeys } from "./constants";
+import { IConfiguration, IStorage, StorageTarget } from "../interface";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./utils/taskUtils";
-import { TeWrapper } from "./wrapper";
 
 
 export class TeMigration

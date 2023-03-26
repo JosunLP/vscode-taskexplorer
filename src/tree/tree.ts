@@ -38,21 +38,21 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     private visible = false;
     private wasVisible = false;
     private refreshPending = false;
-    private eventQueue: ITaskTreeEvent[] = [];
-    private treeManager: TaskTreeManager;
     private defaultGetChildrenLogPad = "";
     private defaultGetChildrenLogLevel = 1;
-    private _disposables: Disposable[] = [];
     private currentRefreshEvent: string | undefined;
     private getChildrenLogPad = this.defaultGetChildrenLogPad;
     private getChildrenLogLevel = this.defaultGetChildrenLogLevel;
-    private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void>;
-    private _onDidLoadTreeData: EventEmitter<void>;
+    private readonly _treeManager: TaskTreeManager;
+    private readonly _disposables: Disposable[] = [];
+    private readonly _eventQueue: ITaskTreeEvent[] = [];
+    private readonly _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void>;
+    private readonly _onDidLoadTreeData: EventEmitter<void>;
 
 
     constructor(public readonly name: TreeViewIds, treeManager: TaskTreeManager)
     {
-        this.treeManager = treeManager;
+        this._treeManager = treeManager;
         this._onDidLoadTreeData = new EventEmitter<void>();
         this._onDidChangeTreeData = new EventEmitter<TreeItem | undefined | null | void>();
         this._disposables.push(
@@ -87,7 +87,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         }
         else if (this.wasVisible)
         {   // if (!this.eventQueue.find((e => e.type === "refresh" && e.id === id)))
-            if (id !== this.currentRefreshEvent && !this.eventQueue.find((e => e.type === "refresh" && e.id === id)))
+            if (id !== this.currentRefreshEvent && !this._eventQueue.find((e => e.type === "refresh" && e.id === id)))
             {
                 if (!treeItem)
                 {   // if this is a global refresh, remove all other refresh events from the q
@@ -97,9 +97,9 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
                     //          this.eventQueue.splice(obj.length - 1 - index, 1);
                     //      // }
                     //  });
-                    this.eventQueue.splice(0);
+                    this._eventQueue.splice(0);
                 }
-                this.eventQueue.push(
+                this._eventQueue.push(
                 {
                     id,
                     delay: 1,
@@ -132,8 +132,8 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     {
         const logPad = this.getChildrenLogPad,
               logLevel = this.getChildrenLogLevel,
-              tasks = this.treeManager.getTasks(),
-              taskItemTree = this.treeManager.getTaskTree();
+              tasks = this._treeManager.getTasks(),
+              taskItemTree = this._treeManager.getTaskTree();
 
         if (!taskItemTree)  {
             return [];
@@ -227,7 +227,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     {
         log.methodStart("get tree children", logLevel, logPad, false, [
             [ "task folder", element?.label ], [ "all tasks need to be retrieved", !tasks ],
-            [ "needs rebuild", !this.treeManager.getTaskTree() ], [ "instance name", this.name ]
+            [ "needs rebuild", !this._treeManager.getTaskTree() ], [ "instance name", this.name ]
         ]);
 
         if (element instanceof TaskFile)
@@ -274,11 +274,11 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     private processEventQueue = (logPad: string) =>
     {
         let firedEvent = false;
-        log.methodStart("process task explorer event queue", 1, logPad, true, [[ "# of queued events", this.eventQueue.length ]]);
+        log.methodStart("process task explorer event queue", 1, logPad, true, [[ "# of queued events", this._eventQueue.length ]]);
 
-        if (this.eventQueue.length > 0)
+        if (this._eventQueue.length > 0)
         {
-            const next = this.eventQueue.shift() as ITaskTreeEvent; // get the next event
+            const next = this._eventQueue.shift() as ITaskTreeEvent; // get the next event
             log.write("   loaded next queued event", 2, logPad);
             log.value("      id", next.id, 1, logPad);
             log.value("      type", next.type, 1, logPad);

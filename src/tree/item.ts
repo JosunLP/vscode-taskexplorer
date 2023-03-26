@@ -3,6 +3,7 @@ import * as path from "path";
 import { TaskFile } from "./file";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
+import { ITaskItem } from "../interface";
 import { Strings } from "../lib/constants";
 import { configuration } from "../lib/configuration";
 import { getInstallPathSync } from "../lib/utils/pathUtils";
@@ -16,10 +17,12 @@ from "vscode";
 /**
  * @class TaskItem
  *
+ * The "O.G." Task Explorer source file.
+ *
  * A tree node that represents a task.
  * An item of this type is always a child of type TaskFile in the tree.
  */
-export class TaskItem extends TreeItem
+export class TaskItem extends TreeItem implements ITaskItem
 {
     public readonly taskSource: string;
     public readonly isUser: boolean;
@@ -30,7 +33,7 @@ export class TaskItem extends TreeItem
     public execution: TaskExecution | undefined;
     public paused: boolean;
     /**
-     * @property Equivalent to `task.definition.path`
+     * @property nodePath Equivalent to `task.definition.path`
      */
     public nodePath: string;
     public groupLevel: number;

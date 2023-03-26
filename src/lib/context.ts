@@ -3,11 +3,11 @@
 
 import { VsCodeCommands } from "./command/command";
 import { ITeContext, IDictionary } from "../interface";
-import { commands, Disposable, Event, EventEmitter } from "vscode";
+import { commands, Disposable, EventEmitter } from "vscode";
 
+export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
 export type TreeViewIds = "taskTreeExplorer" | "taskTreeSideBar";
 export type WebviewIds = "parsingReport" | "licensePage" | "releaseNotes" | "taskDetails" | "taskMonitor" | "welcome";
-export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
 
 export const enum ContextKeys
 {

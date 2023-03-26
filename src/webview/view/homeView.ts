@@ -21,9 +21,9 @@ export class HomeView extends TeWebviewView<State>
 			wrapper,
 			HomeView.viewTitle,
 			HomeView.viewDescription,
-			"home.html",
+			`${HomeView.viewId}.html`,
 			`taskexplorer.view.${HomeView.viewId}`,
-			`${ContextKeys.WebviewViewPrefix}home`,
+			`${ContextKeys.WebviewViewPrefix}${HomeView.viewId}`,
 			`${HomeView.viewId}View`
 		);
 	}

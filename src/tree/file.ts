@@ -1,13 +1,13 @@
 
-import * as path from "path";
 import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder }  from "./folder";
-import * as util from "../lib/utils/utils";
-import { ITaskDefinition } from "../interface";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
+import { basename, extname, join, resolve } from "path";
+import { ITaskDefinition, ITaskFile } from "../interface";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
+import { getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { getInstallPathSync, getUserDataPath } from "../lib/utils/pathUtils";
 
@@ -23,7 +23,7 @@ import { getInstallPathSync, getUserDataPath } from "../lib/utils/pathUtils";
  * The last TaskFile in a grouping will contain items of type TaskItem.  If not grouped,
  * the TaskFile node for each task type within each TaskFolder will contain items of type TaskItem.
  */
-export class TaskFile extends TreeItem implements TaskFile
+export class TaskFile extends TreeItem implements ITaskFile
 {
     public path: string;
     /**
@@ -124,12 +124,12 @@ export class TaskFile extends TreeItem implements TaskFile
         this.nodePath = this.label !== "vscode" ? relativePath : "vscode"; // <---- ??? TODO - Why vscode and not .vscode.  same as .path?
 
         if (groupId && this.label) {
-            this.nodePath = path.join(this.nodePath, this.label.toString());
+            this.nodePath = join(this.nodePath, this.label.toString());
         }
 
         /* istanbul ignore if */
         if (!this.nodePath && this.label === "vscode") {
-            this.nodePath = path.join(".vscode", this.label);
+            this.nodePath = join(".vscode", this.label);
         }
 
         if (!this.nodePath) { // force null or undefined to empty string
@@ -137,21 +137,21 @@ export class TaskFile extends TreeItem implements TaskFile
         }
 
         this.fileName = this.getFileNameFromSource(source, folder, taskDef, true);
-        this.resourceUri = Uri.file(path.resolve(this.fileName));
+        this.resourceUri = Uri.file(resolve(this.fileName));
         /* istanbul ignore else */
         if (folder.resourceUri)
         {
             if (relativePath && source !== "Workspace") {
-                this.resourceUri = Uri.file(path.join(folder.resourceUri.fsPath, relativePath, this.fileName));
+                this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, relativePath, this.fileName));
             }
             else {
-                this.resourceUri = Uri.file(path.join(folder.resourceUri.fsPath, this.fileName));
+                this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this.fileName));
             }
         } //
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder
         //
         else {
-            this.resourceUri = Uri.file(path.join(getUserDataPath(undefined, logPad), this.fileName));
+            this.resourceUri = Uri.file(join(getUserDataPath(undefined, logPad), this.fileName));
             this.isUser = true;
         }
 
@@ -182,7 +182,7 @@ export class TaskFile extends TreeItem implements TaskFile
         //
         let src = this.taskSource;
         if (src === "npm") {
-            src = util.getPackageManager();
+            src = getPackageManager();
         }
 
         //
@@ -192,25 +192,25 @@ export class TaskFile extends TreeItem implements TaskFile
         if (!taskDef.icon)
         {
             const installPath = getInstallPathSync(),
-                  icon = path.join(installPath, "res", "img", "sources", src + ".svg");
+                  icon = join(installPath, "res", "img", "sources", src + ".svg");
             if (pathExistsSync(icon))
             {
                 this.iconPath = { light: icon, dark: icon };
             }
             else
             {
-                const iconDark = path.join(installPath, "res", "img", "sources", "light", src + ".svg");
-                const iconLight = path.join(installPath, "res", "img", "sources", "light", src + ".svg");
+                const iconDark = join(installPath, "res", "img", "sources", "light", src + ".svg");
+                const iconLight = join(installPath, "res", "img", "sources", "light", src + ".svg");
                 if (pathExistsSync(iconDark) && pathExistsSync(iconDark))
                 {
                     this.iconPath = { light: iconLight, dark: iconDark };
                 }
             }
         }
-        else if (pathExistsSync(taskDef.icon) && path.extname(taskDef.icon) === ".svg")
+        else if (pathExistsSync(taskDef.icon) && extname(taskDef.icon) === ".svg")
         {
             const iconLight = taskDef.icon;
-            const iconDark = taskDef.iconDark && pathExistsSync(taskDef.iconDark) && path.extname(taskDef.iconDark) === ".svg" ?
+            const iconDark = taskDef.iconDark && pathExistsSync(taskDef.iconDark) && extname(taskDef.iconDark) === ".svg" ?
                              taskDef.iconDark : taskDef.icon;
             this.iconPath = { light: iconLight, dark: iconDark };
         }
@@ -241,7 +241,7 @@ export class TaskFile extends TreeItem implements TaskFile
 
     static getGroupedId = (folder: TaskFolder, file: TaskFile, label: string, treeLevel: number) =>
     {
-        const groupSeparator = util.getGroupSeparator();
+        const groupSeparator = getGroupSeparator();
         const labelSplit = label.split(groupSeparator);
         let id = "";
         for (let i = 0; i <= treeLevel; i++)
@@ -348,7 +348,7 @@ export class TaskFile extends TreeItem implements TaskFile
         //
         if (taskDef.fileName)
         {
-            return path.basename(taskDef.fileName);
+            return basename(taskDef.fileName);
         }
 
         //

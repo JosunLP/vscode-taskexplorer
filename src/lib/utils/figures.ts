@@ -1,3 +1,4 @@
+
 import { ILogColors, LogColor, LogStyle } from "../../interface";
 
 

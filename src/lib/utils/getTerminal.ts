@@ -1,3 +1,8 @@
+/**
+ * @module getTerminal
+ *
+ * A despised export put together from various user inputs that I can't for the life of me cover
+ */
 
 import { basename } from "path";
 import { log } from "../log/log";

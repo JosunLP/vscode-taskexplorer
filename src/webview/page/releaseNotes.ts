@@ -23,8 +23,8 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 			ReleaseNotesPage.viewTitle.replace("#{version}", wrapper.context.extension.packageJSON.version),
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${ReleaseNotesPage.viewId}`,
-			`${ContextKeys.WebviewPrefix}releaseNotes`,
-			"releaseNotesPage",
+			`${ContextKeys.WebviewPrefix}${ReleaseNotesPage.viewId}`,
+			`${ReleaseNotesPage.viewId}Page`,
 			Commands.ShowReleaseNotesPage
 		);
 		this._ignoreTeBusy = true;

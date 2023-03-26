@@ -18,7 +18,8 @@ export class AddToExcludesCommand implements Disposable
         );
     }
 
-    dispose = () => this._disposables.forEach((d) => d.dispose());
+    dispose = () => this._disposables.forEach(d => d.dispose());
+
 
     private addUriToExcludes = async(uri: Uri) =>
     {

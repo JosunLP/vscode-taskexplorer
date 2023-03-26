@@ -12,24 +12,22 @@ import {
 
 export class TeFileWatcher implements ITeFileWatcher, Disposable
 {
-
-    private disposables: Disposable[];
     private currentEvent: any;
+    private eventQueue: any[] = [];
     private rootPath: string | undefined;
     private currentNumWorkspaceFolders: number | undefined;
-    private eventQueue: any[] = [];
+    private readonly _disposables: Disposable[];
     private readonly _onReady: EventEmitter<void>;
-    private watchers: { [taskType: string]: FileSystemWatcher } = {};
-    private watcherDisposables: { [taskType: string]: Disposable } = {};
-    private dirWatcher: { watcher?: FileSystemWatcher; onDidCreate?: Disposable; onDidDelete?: Disposable } = {};
+    private readonly _watchers: { [taskType: string]: FileSystemWatcher } = {};
+    private readonly _watcherDisposables: { [taskType: string]: Disposable } = {};
+    private readonly _dirWatcher: { watcher?: FileSystemWatcher; onDidCreate?: Disposable; onDidDelete?: Disposable } = {};
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
         this.wrapper.log.methodStart("register file watchers", 1, "");
-        this.disposables = [];
+        this._disposables = [];
 		this._onReady = new EventEmitter<void>();
-
         //
         // Record ws folder count and `rootPath` (which is deprecated but still causes the dumb extension
         // restart when changed?) so that we can detect when a workspace is opened/closed, when a single
@@ -51,7 +49,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         // Refresh tree when folders/projects are added/removed from the workspace, in a multi-root ws
         //
-        this.disposables.push(
+        this._disposables.push(
             this._onReady,
             workspace.onDidChangeWorkspaceFolders(this.onWsFoldersChange, this)
         );
@@ -60,18 +58,9 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     dispose()
     {
-        this.disposables.forEach((d) => {
-            d.dispose();
-        });
-        Object.values(this.watcherDisposables).forEach((d) => {
-            d.dispose();
-        });
-        Object.values(this.watchers).filter(w => !!w).forEach((w) => {
-            w.dispose();
-        });
-        this.watchers = {};
-        this.watcherDisposables = {};
-        this.disposables = [];
+        this._disposables.forEach(d => d.dispose());
+        Object.values(this._watcherDisposables).forEach(d => d.dispose());
+        Object.values(this._watchers).filter(w => !!w).forEach(w => w.dispose());
     }
 
 
@@ -94,19 +83,19 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     private createDirWatcher = () =>
     {
-        this.dirWatcher.onDidCreate?.dispose();
-        this.dirWatcher.onDidDelete?.dispose();
-        this.dirWatcher.watcher?.dispose();
+        this._dirWatcher.onDidCreate?.dispose();
+        this._dirWatcher.onDidDelete?.dispose();
+        this._dirWatcher.watcher?.dispose();
         /* istanbul ignore else */
         if (workspace.workspaceFolders)
         {
-            this.dirWatcher.watcher = workspace.createFileSystemWatcher(this.getDirWatchGlob(workspace.workspaceFolders));
-            this.dirWatcher.onDidCreate = this.dirWatcher.watcher.onDidCreate(async (e) => { await this.onDirCreate(e); }, this);
-            this.dirWatcher.onDidDelete = this.dirWatcher.watcher.onDidDelete(async (e) => { await this.onDirDelete(e); }, this);
-            this.disposables.push(
-                this.dirWatcher.onDidCreate,
-                this.dirWatcher.onDidDelete,
-                this.dirWatcher.watcher
+            this._dirWatcher.watcher = workspace.createFileSystemWatcher(this.getDirWatchGlob(workspace.workspaceFolders));
+            this._dirWatcher.onDidCreate = this._dirWatcher.watcher.onDidCreate(async (e) => { await this.onDirCreate(e); }, this);
+            this._dirWatcher.onDidDelete = this._dirWatcher.watcher.onDidDelete(async (e) => { await this.onDirDelete(e); }, this);
+            this._disposables.push(
+                this._dirWatcher.onDidCreate,
+                this._dirWatcher.onDidDelete,
+                this._dirWatcher.watcher
             );
         }
     };
@@ -435,14 +424,14 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             }
         }
 
-        let watcher = this.watchers[taskType];
+        let watcher = this._watchers[taskType];
         if (watcher)
         {
-            const watcherDisposable = this.watcherDisposables[taskType];
+            const watcherDisposable = this._watcherDisposables[taskType];
             if (watcherDisposable)
             {
                 watcherDisposable.dispose();
-                delete this.watcherDisposables[taskType];
+                delete this._watcherDisposables[taskType];
             }
         }
 
@@ -454,14 +443,14 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             const ignoreModify = isScriptType(taskType) || taskType === "apppublisher" || taskType === "maven" ||
                                 taskType === "tsc" || taskType === "jenkins" || taskType === "webpack";
             if (!watcher) {
-                watcher = workspace.createFileSystemWatcher(this.wrapper.utils.getGlobPattern(taskType));
-                this.watchers[taskType] = watcher;
-                this.disposables.push(watcher);
+                watcher = workspace.createFileSystemWatcher(this.wrapper.taskUtils.getGlobPattern(taskType));
+                this._watchers[taskType] = watcher;
+                this._disposables.push(watcher);
             }
-            this.watcherDisposables[taskType] = watcher.onDidDelete(async uri => this.onFileDelete(taskType, uri));
-            this.watcherDisposables[taskType] = watcher.onDidCreate(async uri => this.onFileCreate(taskType, uri));
+            this._watcherDisposables[taskType] = watcher.onDidDelete(async uri => this.onFileDelete(taskType, uri));
+            this._watcherDisposables[taskType] = watcher.onDidCreate(async uri => this.onFileCreate(taskType, uri));
             if (!ignoreModify) {
-                this.watcherDisposables[taskType] = watcher.onDidChange(async uri => this.onFileChange(taskType, uri));
+                this._watcherDisposables[taskType] = watcher.onDidChange(async uri => this.onFileChange(taskType, uri));
             }
         }
 

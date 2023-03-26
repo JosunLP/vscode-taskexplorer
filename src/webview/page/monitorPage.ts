@@ -28,7 +28,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			MonitorPage.viewTitle,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${MonitorPage.viewId}`,
-			`${ContextKeys.WebviewPrefix}taskMonitor`,
+			`${ContextKeys.WebviewPrefix}${MonitorPage.viewId}`,
 			`${MonitorPage.viewId}View`,
 			Commands.ShowTaskMonitorPage
 		);

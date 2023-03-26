@@ -83,10 +83,7 @@ export class FavoritesFolder extends SpecialTaskFolder
         this.store.push({ id: taskId, timestamp: now });
         this.storeWs.push({ id: taskId, timestamp: now });
         await this.saveStores();
-        const taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad + "   ");
-        taskItem2.id = this.getTaskSpecialId(taskItem2.id);
-        taskItem2.label = this.getRenamedTaskName(taskItem2);
-        taskItem2.folder = this;
+        const taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
         this.insertTaskFile(taskItem2, 0);
         this.sort();
         this.fireChangeEvent(taskItem, logPad);

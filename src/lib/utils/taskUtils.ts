@@ -1,12 +1,29 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { Usage } from "../usage";
 import { storage } from "../storage";
 import { Task, tasks } from "vscode";
 import { TeWrapper } from "../wrapper";
+import { getCombinedGlobPattern } from "./utils";
+import { configuration } from "../configuration";
 import { pickBy, properCase } from "./commonUtils";
+import { ConfigPrefix, Globs, PinnedStorageKey } from "../constants";
 import { ITaskDefinition, ITeTask, TeTaskListType } from "../../interface";
-import { PinnedStorageKey } from "../constants";
+
+
+
+export const getGlobPattern = (taskType: string) =>
+{
+    if (taskType === "ant") { // TODO - 'includeAnt' is deprecated, remove sometime after v3 release
+        return getCombinedGlobPattern(Globs.GLOB_ANT,
+                [ ...configuration.get<string[]>("includeAnt", []), ...configuration.get<string[]>("globPatternsAnt", []) ]);
+    }
+    else if (hasExtraGlob(taskType)) {
+        return getCombinedGlobPattern(Globs[`GLOB_${taskType.toUpperCase()}`], configuration.get<string[]>(`globPatterns${properCase(taskType)}`, []));
+    }
+    else {
+        return Globs["GLOB_" + taskType.toUpperCase()];
+    }
+};
 
 
 export function getScriptTaskTypes(): string[]
@@ -19,7 +36,7 @@ export function getScriptTaskTypes(): string[]
 
 /**
  * @deprecated Use `isTaskTypeEnabled` and `getPathToProgram`
- * To be removed after the temp extension.tempRemapSettingsToNewLayout() method is removed.
+ * To be removed sometime after the v3 release and  settings migration.
  * @param taskType Task type, e.g. `npm`, `apppublisher`, `grunt`, `bash`, etc
  * @param settingPart String prependature for  commonly named setting name
  * @returns The task type's unique setting name
@@ -33,7 +50,7 @@ export function getTaskTypeSettingName(taskType: string, settingPart: string)
 
 /**
  * @deprecated Use `isTaskTypeEnabled`
- * To be removed after the temp extension.tempRemapSettingsToNewLayout() method is removed.
+ * To be removed sometime after the v3 release and  settings migration.
  * @param taskType Task type, e.g. `npm`, `apppublisher`, `grunt`, `bash`, etc
  * @returns The task type's unique setting name
  */
@@ -90,9 +107,12 @@ export function getTaskTypeRealName(taskType: string)
 export const getWatchTaskTypes = () =>  [ "npm", "tsc", "Workspace" ];
 
 
+const hasExtraGlob = (taskType: string) =>  [ "ant", "bash", "node" ].includes(taskType);
+
+
 export const isPinned = (id: string, listType: TeTaskListType): boolean =>
 {
-    const storageKey: PinnedStorageKey = `taskexplorer.pinned.${listType}`;
+    const storageKey: PinnedStorageKey = `${ConfigPrefix.Pinned}${listType}`;
     const pinnedTaskList = storage.get<ITeTask[]>(storageKey, []);
     return !!pinnedTaskList.find(t => t.treeId === id);
 };

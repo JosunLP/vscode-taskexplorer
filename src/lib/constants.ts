@@ -15,6 +15,12 @@ export const Strings =
 	NoTasks: "appstrings.noTasks|No tasks found"
 };
 
+export const enum ConfigPrefix
+{
+	Pinned = "taskexplorer.pinned.",
+	SpecialFolder = "taskexplorer.specialFolder."
+}
+
 export const ConfigKeys =
 {
     AllowUsageReporting: "allowUsageReporting",
@@ -76,9 +82,9 @@ export const Globs: IDictionary<string> =
     GLOB_WORKSPACE: "**/.vscode/tasks.json"
 };
 
-export type PinnedStorageKey = `taskexplorer.pinned.${TeTaskListType}`;
+export type PinnedStorageKey = `${ConfigPrefix.Pinned}${TeTaskListType}`;
 
-export type SpecialFolderStorageKey = `taskexplorer.specialFolder.${TeTaskListType}`;
+export type SpecialFolderStorageKey = `${ConfigPrefix.SpecialFolder}${TeTaskListType}`;
 
 export const StorageKeys =
 {

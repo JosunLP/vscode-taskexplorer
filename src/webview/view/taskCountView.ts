@@ -2,8 +2,8 @@
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { debounce } from "../../lib/command/command";
 import { ITeTaskChangeEvent } from "../../interface";
+import { debounceCommand } from "../../lib/command/command";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
@@ -23,7 +23,7 @@ export class TaskCountView extends TeWebviewView<State>
 			TaskCountView.viewDescription,
 			"task-count.html",
 			`taskexplorer.view.${TaskCountView.viewId}`,
-			`${ContextKeys.WebviewViewPrefix}home`,
+			`${ContextKeys.WebviewViewPrefix}${TaskCountView.viewId}`,
 			`${TaskCountView.viewId}View`
 		);
 	}
@@ -49,6 +49,6 @@ export class TaskCountView extends TeWebviewView<State>
 	}
 
 
-	private onTaskCountChanged = (_e: ITeTaskChangeEvent): void => debounce("taskCountView.event.onTaskCountChanged", this.refresh, 75, this);
+	private onTaskCountChanged = (_e: ITeTaskChangeEvent): void => debounceCommand("taskCountView.event.onTaskCountChanged", this.refresh, 75, this);
 
 }

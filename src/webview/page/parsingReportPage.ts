@@ -7,9 +7,9 @@ import { TeWebviewPanel } from "../webviewPanel";
 import { ITeTaskChangeEvent } from "../../interface";
 import { ContextKeys, WebviewIds } from "../../lib/context";
 import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
-import { Commands, debounce } from "../../lib/command/command";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { createTaskImageTable } from "../common/taskImageTable";
+import { Commands, debounceCommand } from "../../lib/command/command";
 import { getWorkspaceProjectName, pushIfNotExists } from "../../lib/utils/utils";
 
 
@@ -27,8 +27,8 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 			ParsingReportPage.viewTitle,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${ParsingReportPage.viewId}`,
-			`${ContextKeys.WebviewPrefix}parsingReport`,
-			"parsingReportPage",
+			`${ContextKeys.WebviewPrefix}${ParsingReportPage.viewId}`,
+			`${ParsingReportPage.viewId}Page`,
 			Commands.ShowParsingReportPage
 		);
 	}
@@ -125,6 +125,6 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 	}
 
 
-	private onTasksChanged = (_e: ITeTaskChangeEvent): void => debounce("parsigReport.event.onTasksChanged", this.refresh, 75, this);
+	private onTasksChanged = (_e: ITeTaskChangeEvent): void => debounceCommand("parsigReport.event.onTasksChanged", this.refresh, 75, this);
 
 }

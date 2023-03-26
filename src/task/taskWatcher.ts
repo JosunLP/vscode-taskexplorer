@@ -11,21 +11,20 @@ import {
 
 export class TaskWatcher implements Disposable
 {
-
-    private statusBarSpace: StatusBarItem;
-    private disposables: Disposable[];
+    private readonly _statusBarSpace: StatusBarItem;
+    private readonly _disposables: Disposable[];
     private readonly _onTaskStatusChange: EventEmitter<ITeTaskStatusChangeEvent>;
     private readonly _onDidRunningTasksChange: EventEmitter<ITeRunningTaskChangeEvent>;
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        this.statusBarSpace = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
-        this.statusBarSpace.tooltip = `${wrapper.extensionName} Running Task`;
+        this._statusBarSpace = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
+        this._statusBarSpace.tooltip = `${wrapper.extensionName} Running Task`;
         this._onTaskStatusChange = new EventEmitter<ITeTaskStatusChangeEvent>();
         this._onDidRunningTasksChange = new EventEmitter<ITeRunningTaskChangeEvent>();
-        this.disposables = [
-            this.statusBarSpace,
+        this._disposables = [
+            this._statusBarSpace,
             this._onTaskStatusChange,
             this._onDidRunningTasksChange,
             tasks.onDidStartTask((e) => this.taskStartEvent(e), this),
@@ -35,7 +34,7 @@ export class TaskWatcher implements Disposable
         ];
     }
 
-    dispose = () => this.disposables.forEach(d => d.dispose());
+    dispose = () => this._disposables.forEach(d => d.dispose());
 
 
     get onDidRunningTasksChange(): Event<ITeRunningTaskChangeEvent> {
@@ -89,12 +88,12 @@ export class TaskWatcher implements Disposable
                 if ((task.scope as WorkspaceFolder).name) {
                     statusMsg += " (" + (task.scope as WorkspaceFolder).name + ")";
                 }
-                this.statusBarSpace.text = "$(loading~spin) " + statusMsg;
-                this.statusBarSpace.show();
+                this._statusBarSpace.text = "$(loading~spin) " + statusMsg;
+                this._statusBarSpace.show();
             }
             else {
                 this.wrapper.log.methodStart("   found idle/stopped task, hide status message", 2, logPad);
-                this.statusBarSpace.hide();
+                this._statusBarSpace.hide();
             }
         }
         this.wrapper.log.methodDone("task start/stop show/hide message", 2, logPad);

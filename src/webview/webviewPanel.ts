@@ -29,7 +29,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		fileName: string,
 		title: string,
 		private readonly iconPath: string,
-		id: `taskexplorer.view.${WebviewIds}`,
+		protected override id: `taskexplorer.view.${WebviewIds}`,
 		private readonly contextKeyPrefix: `${ContextKeys.WebviewPrefix}${WebviewIds}`,
 		private readonly trackingFeature: string,
 		showCommand?: Commands)

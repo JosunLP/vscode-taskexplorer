@@ -151,10 +151,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             const taskItem = taskMap[t.id];
             if (taskItem instanceof TaskItem && taskItem.task)
             {
-                const taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad + "   ");
-                taskItem2.id = this.getTaskSpecialId(taskItem2.id);
-                taskItem2.label = this.getRenamedTaskName(taskItem2);
-                taskItem2.folder = this;
+                const taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
                 this.insertTaskFile(taskItem2, 0);
                 added.push(t.id);
             }
@@ -197,6 +194,17 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             this.refresh();
         }
     }
+
+
+    protected createTaskItem(srcTaskItem: TaskItem, logPad: string):  TaskItem
+    {
+        const taskItem = new TaskItem(srcTaskItem.taskFile, srcTaskItem.task, logPad);
+        taskItem.id = this.getTaskSpecialId(taskItem.id);
+        taskItem.label = this.getRenamedTaskName(taskItem);
+        taskItem.folder = this;
+        return taskItem;
+    }
+
 
     protected fireChangeEvent = (taskItem: TaskItem | undefined, logPad: string): void =>
     {

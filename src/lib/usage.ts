@@ -245,7 +245,9 @@ export class Usage implements ITeUsage, Disposable
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TaskMonitor.TrackStats))
         {
             this._trackTaskStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats);
-            if (this._trackTaskStats && !this._trackUsage){
+            if (this._trackTaskStats && !this._trackUsage)
+            {
+                this._trackUsage = this._trackTaskStats;
                 void this.wrapper.config.update(this.wrapper.keys.Config.TrackUsage, this._trackTaskStats);
             }
         }
@@ -282,7 +284,8 @@ export class Usage implements ITeUsage, Disposable
 	{
 		const usages =  this.wrapper.storage.get<UsageStore>(this.wrapper.keys.Storage.Usage);
 		if (!usages) return;
-		if (!key) {
+		if (!key)
+        {
 			await this.wrapper.storage.delete(this.wrapper.keys.Storage.Usage);
             await this.wrapper.storage.delete(this.wrapper.keys.Storage.TaskUsage);
 			this._onDidChange.fire(undefined);
@@ -445,12 +448,15 @@ export class Usage implements ITeUsage, Disposable
         //
         await this.saveTaskUsageStore(stats);
         //
-        // Maybe notify any listeners that the `famous tasks` list has changed
+        // Fire usage  change event and maybe the `famous tasks` list change event
         //
-        this._onDidChange.fire({ key: this._taskUsageKey, usage });
-        if (famousChanged) {
-            this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ listType: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
-        }
+        queueMicrotask(() =>
+        {
+            this._onDidChange.fire({ key: this._taskUsageKey, usage });
+            if (famousChanged) {
+                this._onDidFamousTasksChange.fire({ task: { ...iTask, ...{ listType: "famous" }}, tasks: [ ...stats.famous ], type: "famous" });
+            }
+        });
         this.log.methodDone("track task usage details", 2, logPad);
     };
 

@@ -21,8 +21,7 @@ import {
 
 export class TaskManager implements ITeTaskManager, Disposable
 {
-
-    private log: ILog;
+    private readonly log: ILog;
     private readonly _disposables: Disposable[] = [];
 
 

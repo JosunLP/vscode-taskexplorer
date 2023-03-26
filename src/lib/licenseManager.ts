@@ -15,15 +15,15 @@ import {
 
 export class LicenseManager implements ITeLicenseManager, Disposable
 {
-	private _account: ITeAccount;
-	private _accountChangeNumber = 0;
 	private _busy = false;
-	private _checkLicenseTask: NodeJS.Timeout;
 	private _maxFreeTasks = 500;
+	private _account: ITeAccount;
 	private _maxFreeTaskFiles = 100;
+	private _accountChangeNumber = 0;
 	private _maxTasksMessageShown = false;
 	private _maxFreeTasksForTaskType = 100;
 	private _maxFreeTasksForScriptType = 50;
+	private _checkLicenseTask: NodeJS.Timeout;
     private readonly _onReady: EventEmitter<void>;
 	private readonly _defaultSessionInterval = 1000 * 60 * 60 * 4;
 	private readonly _disposables: Disposable[] = [];

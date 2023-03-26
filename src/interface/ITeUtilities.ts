@@ -46,6 +46,7 @@ export interface ITeSortUtilities
 
 export interface ITeTaskUtilities
 {
+	getGlobPattern(taskType: string): string;
 	getScriptTaskTypes(): string[];
 	getTaskTypes(): string[];
 	getTaskTypeFriendlyName(taskType: string, lowerCase?: boolean): string;
@@ -74,7 +75,6 @@ export interface ITeUtilities
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;
-	getGlobPattern(taskType: string): string;
 	getGroupSeparator(): string;
 	getPackageManager(): string;
 	getRandomNumber(max?: number, min?: number): number;

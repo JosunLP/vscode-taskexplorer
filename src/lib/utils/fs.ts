@@ -1,3 +1,11 @@
+/**
+ * @module fs
+ *
+ * @since 3.0.0
+ *
+ * Promisified set of base fs module functions
+ *
+ */
 
 import * as fs from "fs";
 import { glob } from "glob";

@@ -3,8 +3,8 @@ import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
 import { ConfigurationChangeEvent } from "vscode";
-import { debounce } from "../../lib/command/command";
 import { ITeUsageChangeEvent } from "../../interface";
+import { debounceCommand } from "../../lib/command/command";
 import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 
@@ -23,7 +23,7 @@ export class TaskUsageView extends TeWebviewView<State>
 			TaskUsageView.viewDescription,
 			"task-usage.html",
 			`taskexplorer.view.${TaskUsageView.viewId}`,
-			`${ContextKeys.WebviewViewPrefix}home`,
+			`${ContextKeys.WebviewViewPrefix}${TaskUsageView.viewId}`,
 			`${TaskUsageView.viewId}View`
 		);
 	}
@@ -42,7 +42,7 @@ export class TaskUsageView extends TeWebviewView<State>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
 		{
-			void debounce("taskUsageView.event.onConfigChanged", this.refresh, 75, this, false, false);
+			void debounceCommand("taskUsageView.event.onConfigChanged", this.refresh, 75, this, false, false);
 		}
 		super.onConfigChanged(e);
 	}

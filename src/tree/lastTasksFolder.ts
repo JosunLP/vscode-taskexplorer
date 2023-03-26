@@ -68,12 +68,8 @@ export class LastTasksFolder extends SpecialTaskFolder
         {
             this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad, false);
         }
-        if (!taskItem2)
-        {
-            taskItem2 = new TaskItem(taskItem.taskFile, taskItem.task, logPad);
-            taskItem2.id = taskId;
-            taskItem2.label = this.getRenamedTaskName(taskItem2);
-            taskItem2.folder = this;
+        if (!taskItem2) {
+            taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
         }
         this.wrapper.log.value("   add item", taskItem2.id, 2, logPad);
         this.insertTaskFile(taskItem2, 0);

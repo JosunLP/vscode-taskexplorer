@@ -2,7 +2,8 @@
 import { isObject } from "./utils/typeUtils";
 import { IConfiguration } from "../interface/IConfiguration";
 import {
-    ConfigurationChangeEvent, workspace, WorkspaceConfiguration, ConfigurationTarget, ExtensionContext, ExtensionMode, Event, EventEmitter
+    ConfigurationChangeEvent, workspace, WorkspaceConfiguration, ConfigurationTarget,
+    ExtensionContext, ExtensionMode, Event, EventEmitter
 } from "vscode";
 
 
@@ -24,8 +25,7 @@ class Configuration implements IConfiguration
     }
 
 
-	public get onDidChange(): Event<ConfigurationChangeEvent>
-    {
+	public get onDidChange(): Event<ConfigurationChangeEvent> {
 		return this._onDidChange.event;
 	}
 

@@ -58,22 +58,6 @@ export const getDateDifference = (date1: Date | number, date2: Date | number, ty
 export const getGroupSeparator = () => configuration.get<string>(ConfigKeys.GroupSeparator, Strings.DEFAULT_SEPARATOR);
 
 
-export const getGlobPattern = (taskType: string) =>
-{
-    taskType = taskType.replace(/\W*\-/, "");
-    if (taskType === "ant") {
-        return getCombinedGlobPattern(Globs.GLOB_ANT,
-                [ ...configuration.get<string[]>("includeAnt", []), ...configuration.get<string[]>("globPatternsAnt", []) ]);
-    }
-    else if (taskType === "bash") {
-        return getCombinedGlobPattern(Globs.GLOB_BASH, configuration.get<string[]>("globPatternsBash", []));
-    }
-    else {
-        return Globs["GLOB_" + taskType.toUpperCase()];
-    }
-};
-
-
 export const getPackageManager = () =>
 {
     let pkgMgr = workspace.getConfiguration("npm", null).get<string>("packageManager") || "npm";
@@ -175,10 +159,7 @@ export const openUrl = (url: string) =>
 };
 
 
-export const pushIfNotExists = (arr: any[], item: any) =>
-{
-    if (!arr.includes(item)) { arr.push(item); }
-};
+export const pushIfNotExists = (arr: any[], item: any) => { if (!arr.includes(item)) { arr.push(item); } };
 
 
 // export const pluralize = (s: string, count: number) => `${count} ${s}${count === 1 ? "" : "s"}`;

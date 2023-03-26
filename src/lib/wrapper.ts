@@ -51,9 +51,9 @@ import { DisableTaskTypeCommand } from "./command/disableTaskType";
 import { PowershellTaskProvider } from "../task/provider/powershell";
 import { ParsingReportPage } from "../webview/page/parsingReportPage";
 import { ConfigKeys, Globs, StorageKeys, Strings } from "./constants";
-import { Commands, debounce, registerCommand } from "./command/command";
 import { AppPublisherTaskProvider } from "../task/provider/appPublisher";
 import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
+import { Commands, debounceCommand, registerCommand } from "./command/command";
 import {
 	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView,
 	Disposable, EventEmitter, Event
@@ -364,7 +364,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private registerBusyCompleteEvent = () =>
 	{
 		const _event = () => {
-			debounce("wrapper.event.busy", () => { if (!this.busy) this._onBusyComplete.fire(); }, 150, this);
+			debounceCommand("wrapper.event.busy", () => { if (!this.busy) this._onBusyComplete.fire(); }, 150, this);
 		};
 		this._disposables.push(
 			// this.onReady(() => _event()),

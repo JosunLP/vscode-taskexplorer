@@ -2,12 +2,15 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { WebviewViewIds } from "../context";
 import { IDictionary } from "../../interface";
-import {
-	Command as VsCodeCommand, Disposable, commands
-} from "vscode";
+import { Disposable, commands } from "vscode";
 
-type SupportedCommands = Commands | `taskexplorer.view.${string}.focus` | `taskexplorer.view.${string}.resetViewLocation`;
+export const enum CommandPrefix
+{
+	Base = "taskexplorer.",
+	View = "taskexplorer.view."
+}
 
 export const enum Commands
 {
@@ -95,7 +98,11 @@ export const enum VsCodeCommands
 	ShowExplorer = "workbench.view.explorer"
 }
 
-export const registerCommand = (command: string, callback: (...args: any[]) => any, thisArg?: any): Disposable =>
+type SupportedCommands = Commands | // VsCodeCommands |
+						 `${CommandPrefix.View}${WebviewViewIds}.focus` |
+						 `${CommandPrefix.View}${WebviewViewIds}.resetViewLocation`;
+
+export const registerCommand = (command: SupportedCommands, callback: (...args: any[]) => any, thisArg?: any): Disposable =>
 {
 	return commands.registerCommand(
 		command,
@@ -106,7 +113,6 @@ export const registerCommand = (command: string, callback: (...args: any[]) => a
 		thisArg
 	);
 };
-
 
 export function executeCommand<U = any>(command: SupportedCommands): Thenable<U>;
 export function executeCommand<T = unknown, U = any>(command: SupportedCommands, arg: T): Thenable<U>;
@@ -122,7 +128,7 @@ export function executeCommand<T extends [...unknown[]] = [], U = any>(command: 
 const _debounceDict: IDictionary<IDebounceParams> = {};
 interface IDebounceParams { fn: (...args: any[]) => any; args: any[]; scope: any; timer?: NodeJS.Timeout }
 
-export const debounce = (key: string, fn: (...args: any[]) => any, wait: number, thisArg: any, ...args: any[]) =>
+export const debounceCommand = (key: string, fn: (...args: any[]) => any, wait: number, thisArg: any, ...args: any[]) =>
 {
 	const dKey = `${key}:${fn.name}`;
 	if (!_debounceDict[dKey])

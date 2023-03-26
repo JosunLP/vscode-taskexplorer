@@ -17,12 +17,12 @@ export class WelcomePage extends TeWebviewPanel<State>
 	{
 		super(
 			wrapper,
-			"welcome.html",
+			`${WelcomePage.viewId}.html`,
 			WelcomePage.viewTitle.replace("#{version}", wrapper.context.extension.packageJSON.version),
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${WelcomePage.viewId}`,
-			`${ContextKeys.WebviewPrefix}welcome`,
-			"welcome",
+			`${ContextKeys.WebviewPrefix}${WelcomePage.viewId}`,
+			WelcomePage.viewId,
 			Commands.ShowWelcomePage
 		);
 		this._ignoreTeBusy = true;

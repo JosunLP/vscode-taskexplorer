@@ -1,10 +1,10 @@
 
 import { dirname } from "path";
-import type { State } from "../common/ipc";
+import { State } from "../common/ipc";
 import { TeWebviewPanel } from "../webviewPanel";
 import { ConfigurationChangeEvent } from "vscode";
-import type { TeWrapper } from "../../lib/wrapper";
-import { debounce } from "../../lib/command/command";
+import { TeWrapper } from "../../lib/wrapper";
+import { debounceCommand } from "../../lib/command/command";
 import { ContextKeys, WebviewIds  } from "../../lib/context";
 import { ITeTask, ITeTaskStatusChangeEvent } from "../../interface";
 
@@ -25,8 +25,8 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 			TaskDetailsPage.viewTitle.replace("#{task_name}", task.name),
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${TaskDetailsPage.viewId}`,
-			`${ContextKeys.WebviewPrefix}taskDetails`,
-			"taskDetails"
+			`${ContextKeys.WebviewPrefix}${TaskDetailsPage.viewId}`,
+			TaskDetailsPage.viewId
 		);
 		this._task = { ...task };
 	}
@@ -126,7 +126,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 	{
 		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
 		{
-			void debounce("taskDetailsCfg:", this.refresh, 75, this, false, false, this._task);
+			void debounceCommand("taskDetailsCfg:", this.refresh, 75, this, false, false, this._task);
 		}
 		super.onConfigChanged(e);
 	}

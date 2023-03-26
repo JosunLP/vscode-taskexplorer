@@ -6,8 +6,8 @@ import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
 
-// const USE_LOCAL_SERVER = true;
 const TLS_REJECT = "1"; // "0" to turn off tls rejection
+const REQUEST_TIMEOUT = 7500;
 const SPM_API_VERSION = 1;
 const SPM_API_PORT = 443;
 const SPM_API_SERVER = "license.spmeesseman.com";
@@ -28,14 +28,13 @@ export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook" |
 export class TeServer implements Disposable
 {
 	private _busy = false;
-	private readonly _maxConnectionTime = 7500;
     private readonly _onRequestComplete: EventEmitter<void>;
 
 
     constructor(private readonly wrapper: TeWrapper)
 	{
 		this._onRequestComplete = new EventEmitter<void>();
-		// process.env.NODE_TLS_REJECT_UNAUTHORIZED = TLS_REJECT;
+		process.env.NODE_TLS_REJECT_UNAUTHORIZED = TLS_REJECT;
 	}
 
 	dispose = () => this._onRequestComplete.dispose();
@@ -72,10 +71,8 @@ export class TeServer implements Disposable
 			timeout: 5000,
 			headers: <{[id: string]: string}>{
 				"token": SPM_API_CLIENTID,
-				// eslint-disable-next-line @typescript-eslint/naming-convention
-				"User-Agent": this.wrapper.extensionId,
-				// eslint-disable-next-line @typescript-eslint/naming-convention
-				"Content-Type": "application/json"
+				"user-agent": this.wrapper.extensionId,
+				"content-type": "application/json"
 			}
 		};
 		if (token) {
@@ -138,7 +135,7 @@ export class TeServer implements Disposable
 			this._request<T>(endpoint, token, logPad, params),
 			new Promise<T>((_resolve, reject) => {
 				this._busy = false;
-				setTimeout(reject, this._maxConnectionTime, <ServerError>{ message: "Timed out", status: 408 });
+				setTimeout(reject, REQUEST_TIMEOUT, <ServerError>{ message: "Timed out", status: 408 });
 			})
 		]);
 	};
@@ -218,10 +215,7 @@ export class TeServer implements Disposable
 		});
 	};
 
-    //
     // 'Fetch' examples, in case I ever decide to go to fetch, which will also be built in in Node 18
-    //
-
     //
     // private async getUserInfo(_token: string): Promise<{ name: string; email: string }>
     // {
@@ -233,7 +227,7 @@ export class TeServer implements Disposable
     //     return response.json() as Promise<{ name: string; email: string }>;
     //     return { name: "Test", email: "test@spmeesseman.com" };
     // }
-
+	//
 	// private validateLicenseFetch = async(licenseKey: string, logPad: string) =>
 	// {
 	// 	const res = await fetch(Uri.joinPath(this.host, this.authApiEndpoint).toString(),
