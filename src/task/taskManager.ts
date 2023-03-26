@@ -272,31 +272,23 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     private runLastTask = async() =>
     {
-        if (this.wrapper.treeManager.isBusy)
-        {
+        if (this.wrapper.treeManager.isBusy) {
             window.showInformationMessage("Busy, please wait...");
             return;
         }
 
-        const lastTasks = this.wrapper.treeManager.lastTasksFolder,
-              lastTaskId = lastTasks.getLastRanId();
-        if (!lastTaskId) { return; }
+        const taskMap = this.wrapper.treeManager.getTaskMap(),
+              lastTasks = this.wrapper.treeManager.lastTasksFolder,
+              lastTaskId = lastTasks.getLastRanId(),
+              taskItem = lastTaskId ? taskMap[lastTaskId] as TaskItem : null;
+
+        if (!taskItem) {
+            window.showInformationMessage("Task not found! Check log for details");
+            return;
+        }
 
         this.log.methodStart("run last task", 1, "", true, [[ "last task id", lastTaskId ]]);
-
-        const taskMap = this.wrapper.treeManager.getTaskMap(),
-              taskItem = taskMap[lastTaskId];
-        let exec: TaskExecution | undefined;
-
-        if (taskItem && taskItem instanceof TaskItem)
-        {
-            exec = await this.run(taskItem);
-        }
-        else {
-            window.showInformationMessage("Task not found! Check log for details");
-            await lastTasks.removeTaskFile(lastTaskId, "   ", true);
-        }
-
+        const exec = await this.run(taskItem);
         this.log.methodDone("run last task", 1);
         return exec;
     };
