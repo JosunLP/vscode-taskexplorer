@@ -48,16 +48,15 @@ suite("Usage / Telemetry Tests", () =>
     test("Set Usage Off / On", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.trackingEvent * 7) + 20);
+        this.slow((tc.slowTime.config.trackingEvent * 7) + 100);
         await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true);
         await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false);
         await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
         await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
-        await sleep(10);
+        await sleep(50);
         await executeTeCommand("getApi");
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
-        await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
-        await sleep(10);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true); // will auto-set TrackUsage
+        await sleep(50);
         await waitForWebviewsIdle();
         endRollingCount(this);
     });

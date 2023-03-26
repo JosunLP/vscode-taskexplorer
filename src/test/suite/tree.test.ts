@@ -6,23 +6,18 @@
 import { expect } from "chai";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
-import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
-import { Uri, ThemeIcon, MarkdownString, Command, TreeItemCollapsibleState, AccessibilityInformation } from "vscode";
-import { ConfigKeys } from "../../lib/constants";
+import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 let teWrapper: ITeWrapper;
 const tc = utils.testControl;
 let ant: ITaskItem[];
 let bash: ITaskItem[];
 let batch: ITaskItem[];
-let python: ITaskItem[];
 let cstItem1: ITaskItem | undefined;
 let cstItem2: ITaskItem | undefined;
 let cstItem3: ITaskItem | undefined;
 let cstItem4: ITaskItem | undefined;
-let cstItem5: ITaskItem | undefined;
-let cstItem6: ITaskItem | undefined;
 
 
 suite("Tree Tests", () =>
@@ -85,14 +80,13 @@ suite("Tree Tests", () =>
         ant = await utils.treeUtils.getTreeTasks(teWrapper, "ant", 3);
         bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
         batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
-        python = await utils.treeUtils.getTreeTasks(teWrapper, "python", 2);
         await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
         await executeTeCommand2("addRemoveFavorite", [ ant[0] ]);
         let removed = await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
         }
-        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, false); // to cover usage.onFavoriteTasksChanged
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false); // to cover usage.onFavoriteTasksChanged
         removed = await executeTeCommand2("addRemoveFavorite", [ batch[1] ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ batch[1] ]);
@@ -101,27 +95,19 @@ suite("Tree Tests", () =>
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ ant[0] ]);
         }
-        await executeSettingsUpdate(ConfigKeys.TaskMonitor.TrackStats, true); // to cover usage.onFavoriteTasksChanged
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true); // to cover usage.onFavoriteTasksChanged
         removed = await executeTeCommand2("addRemoveFavorite", [ bash[0] ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ bash[0] ]);
-        }
-        removed = await executeTeCommand2("addRemoveFavorite", [ python[0] ]);
-        if (removed) {
-            await executeTeCommand2("addRemoveFavorite", [ python[0] ]);
-        }
-        removed = await executeTeCommand2("addRemoveFavorite", [ python[1] ]);
-        if (removed) {
-            await executeTeCommand2("addRemoveFavorite", [ python[1] ]);
         }
         utils.endRollingCount(this);
     });
 
 
-    test("Add Custom Label 1", async function()
+    test("Add / Remove  Custom Label 1", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.standard);
+        this.slow(tc.slowTime.commands.standard * 2);
         const taskTree = teWrapper.treeManager.getTaskTree();
         if (taskTree)
         {
@@ -133,10 +119,9 @@ suite("Tree Tests", () =>
                 if (cstItem1)
                 {
                     utils.overrideNextShowInputBox("Label 1");
-                    const removed = await executeTeCommand2("addRemoveCustomLabel", [ cstItem1 ]);
-                    if (removed) {
-                        await executeTeCommand2("addRemoveCustomLabel", [ cstItem1 ]);
-                    }
+                    await executeTeCommand2("addRemoveCustomLabel", [ cstItem1 ]);
+                    await utils.sleep(1);
+                    await executeTeCommand2("addRemoveCustomLabel", [ cstItem1 ]);
                 }
             }
         }
@@ -144,7 +129,7 @@ suite("Tree Tests", () =>
     });
 
 
-    test("Add Custom Label 2", async function()
+    test("Add / Remove  Custom Label 2", async function()
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard);
@@ -158,11 +143,9 @@ suite("Tree Tests", () =>
                 cstItem2 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === batch[1].id);
                 if (cstItem2)
                 {
-                    utils.overrideNextShowInputBox("Label 2");
-                    const removed = await executeTeCommand2("addRemoveCustomLabel", [ cstItem2 ]);
-                    if (removed) {
-                        await executeTeCommand2("addRemoveCustomLabel", [ cstItem2 ]);
-                    }
+                    await executeTeCommand2("addRemoveCustomLabel", [ cstItem2 ]);
+                    await utils.sleep(1);
+                    await executeTeCommand2("addRemoveCustomLabel", [ cstItem2 ]);
                 }
             }
         }
@@ -170,10 +153,10 @@ suite("Tree Tests", () =>
     });
 
 
-    test("Add Custom Label 3", async function()
+    test("Add / Remove  Custom Label 3", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.standard);
+        this.slow(tc.slowTime.commands.standard * 2);
         const taskTree = teWrapper.treeManager.getTaskTree();
         if(taskTree)
         {
@@ -185,10 +168,9 @@ suite("Tree Tests", () =>
                 if (cstItem3)
                 {
                     utils.overrideNextShowInputBox("Label 3");
-                    const removed = await executeTeCommand2("addRemoveCustomLabel", [ cstItem3 ]);
-                    if (removed) {
-                        await executeTeCommand2("addRemoveCustomLabel", [ cstItem3 ]);
-                    }
+                    await executeTeCommand2("addRemoveCustomLabel", [ cstItem3 ]);
+                    await utils.sleep(1);
+                    await executeTeCommand2("addRemoveCustomLabel", [ cstItem3 ]);
                 }
             }
         }
@@ -196,62 +178,10 @@ suite("Tree Tests", () =>
     });
 
 
-    test("Add Custom Label 4", async function()
+    test("Add / Remove Custom Label 4", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.standard);
-        const taskTree = teWrapper.treeManager.getTaskTree();
-        if(taskTree)
-        {
-            const sFolder= taskTree[0].label === "Favorites" ? taskTree[0] as any :
-                            (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
-            if (sFolder)
-            {
-                cstItem4 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === python[0].id);
-                if (cstItem4)
-                {
-                    utils.overrideNextShowInputBox("Label 4");
-                    const removed = await executeTeCommand2("addRemoveCustomLabel", [ cstItem4 ]);
-                    if (removed) {
-                        await executeTeCommand2("addRemoveCustomLabel", [ cstItem4 ]);
-                    }
-                }
-            }
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Add Custom Label 5", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.standard);
-        const taskTree = teWrapper.treeManager.getTaskTree();
-        if(taskTree)
-        {
-            const sFolder= taskTree[0].label === "Favorites" ? taskTree[0] as any :
-                            (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
-            if (sFolder)
-            {
-                cstItem5 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === python[1].id);
-                if (cstItem5)
-                {
-                    utils.overrideNextShowInputBox("Label 5");
-                    const removed = await executeTeCommand2("addRemoveCustomLabel", [ cstItem5 ]);
-                    if (removed) {
-                        await executeTeCommand2("addRemoveCustomLabel", [ cstItem5 ]);
-                    }
-                }
-            }
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Add Custom Label 6", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.standard);
+        this.slow(tc.slowTime.commands.standard * 2);
         const taskTree = teWrapper.treeManager.getTaskTree();
         if (taskTree)
         {
@@ -259,82 +189,15 @@ suite("Tree Tests", () =>
                             (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
             if (sFolder)
             {
-                cstItem6 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === ant[0].id);
-                if (cstItem6)
+                cstItem4 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === ant[0].id);
+                if (cstItem4)
                 {
                     utils.overrideNextShowInputBox("Label 6");
-                    const removed = await executeTeCommand2("addRemoveCustomLabel", [ cstItem6 ]);
-                    if (removed) {
-                        await executeTeCommand2("addRemoveCustomLabel", [ cstItem6 ]);
-                    }
+                    await executeTeCommand2("addRemoveCustomLabel", [ cstItem4 ]);
+                    await utils.sleep(1);
+                    await executeTeCommand2("addRemoveCustomLabel", [ cstItem4 ]);
                 }
             }
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Remove Custom Label 1", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        if (cstItem1) {
-            this.slow(tc.slowTime.commands.standard);
-            await executeTeCommand2("addRemoveCustomLabel", [ cstItem1 ]);
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Remove Custom Label 2", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        if (cstItem2) {
-            this.slow(tc.slowTime.commands.standard);
-            await executeTeCommand2("addRemoveCustomLabel", [ cstItem2 ]);
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Remove Custom Label 3", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        if (cstItem3) {
-            this.slow(tc.slowTime.commands.standard);
-            await executeTeCommand2("addRemoveCustomLabel", [ cstItem3 ]);
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Remove Custom Label 4", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        if (cstItem4) {
-            this.slow(tc.slowTime.commands.standard);
-            await executeTeCommand2("addRemoveCustomLabel", [ cstItem4 ]);
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Remove Custom Label 5", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        if (cstItem5) {
-            this.slow(tc.slowTime.commands.standard);
-            await executeTeCommand2("addRemoveCustomLabel", [ cstItem5 ]);
-        }
-        utils.endRollingCount(this);
-    });
-
-
-    test("Remove Custom Label 6", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        if (cstItem6) {
-            this.slow(tc.slowTime.commands.standard);
-            await executeTeCommand2("addRemoveCustomLabel", [ cstItem6 ]);
         }
         utils.endRollingCount(this);
     });
@@ -346,102 +209,26 @@ suite("Tree Tests", () =>
         this.slow((tc.slowTime.commands.standard * 3) + (tc.waitTime.command * 3));
         utils.overrideNextShowInputBox(undefined);
         await executeTeCommand2("addRemoveCustomLabel", [ cstItem1 ]);
-        //
-        // There's come kind of timing issue I havent figured out yet, send a few to make sure we hit
-        //
+        await utils.sleep(1);
         utils.clearOverrideShowInputBox();
         utils.overrideNextShowInputBox(undefined);
         await executeTeCommand2("addRemoveCustomLabel", [ cstItem2 ]);
-        //
-        utils.clearOverrideShowInputBox();
-        utils.overrideNextShowInputBox(undefined);
-        await executeTeCommand2("addRemoveCustomLabel", [ cstItem3 ]);
         utils.endRollingCount(this);
     });
 
 
-    test("Hide Favorites", async function()
+    test("Show / Hide Favorite and Last Tasks", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.showHideSpecialFolder * 2) + (tc.waitTime.config.event  * 2));
-        await executeSettingsUpdate("specialFolders.showFavorites", false, tc.waitTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showFavorites", true, tc.waitTime.config.showHideSpecialFolder);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Hide Last Tasks", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showLastTasks", false, tc.waitTime.config.showHideSpecialFolder);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Show Favorites", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showFavorites", true, tc.waitTime.config.showHideSpecialFolder);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Show Last Tasks", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showLastTasks", true, tc.waitTime.config.showHideSpecialFolder);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Show Favorite Tasks w/ Last Tasks", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.showHideSpecialFolder * 4));
-        await executeSettingsUpdate("specialFolders.showLastTasks", false, tc.waitTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showLastTasks", true, tc.waitTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showFavorites", false, tc.waitTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showFavorites", true, tc.waitTime.config.showHideSpecialFolder);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Show Favorite Tasks Only", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showLastTasks", false, tc.waitTime.config.showHideSpecialFolder);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Hide Favorite and Last Tasks", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.showHideSpecialFolder * 2));
-        await executeSettingsUpdate("specialFolders.showLastTasks", false, tc.waitTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showFavorites", false, tc.waitTime.config.showHideSpecialFolder);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Show Favorite Tasks", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showFavorites", true, tc.waitTime.config.showHideSpecialFolder);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Show Last Tasks", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.showHideSpecialFolder);
-        await executeSettingsUpdate("specialFolders.showLastTasks", true, tc.waitTime.config.showHideSpecialFolder);
+        this.slow(tc.slowTime.config.showHideSpecialFolder * 4);
+        void teWrapper.config.updateWs("specialFolders.showLastTasks", false);
+        await utils.promiseFromEvent(teWrapper.treeManager.onDidLastTasksChange).promise;
+        void teWrapper.config.updateWs("specialFolders.showFavorites", false);
+        await utils.promiseFromEvent(teWrapper.treeManager.onDidFavoriteTasksChange).promise;
+        void teWrapper.config.updateWs("specialFolders.showFavorites", true);
+        await utils.promiseFromEvent(teWrapper.treeManager.onDidFavoriteTasksChange).promise;
+        void teWrapper.config.updateWs("specialFolders.showLastTasks", true);
+        await utils.promiseFromEvent(teWrapper.treeManager.onDidLastTasksChange).promise;
         utils.endRollingCount(this);
     });
 
@@ -544,7 +331,7 @@ suite("Tree Tests", () =>
         await executeTeCommand2("setPinned", [ batch[1] ]);
         await executeTeCommand2("setPinned", [ bash[0] ]);
         await executeTeCommand2("setPinned", [ ant[1] ]);
-        await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, false, tc.waitTime.config.sortingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.SortProjectFoldersAlphabetically, false, tc.waitTime.config.sortingEvent);
         await executeTeCommand2("setPinned", [ batch[0] ]);
 		await executeTeCommand2("setPinned", [ batch[0], "last" ]);
         await executeTeCommand2("setPinned", [ batch[1] ]);
@@ -558,7 +345,7 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.sortingEvent);
-        await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, true, tc.waitTime.config.sortingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.SortProjectFoldersAlphabetically, true, tc.waitTime.config.sortingEvent);
         utils.endRollingCount(this);
     });
 

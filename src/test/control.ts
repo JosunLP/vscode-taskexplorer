@@ -155,8 +155,8 @@ export const testControl =
             getTrialExtensionDenied: 880,
             getMaxTasks: 365,
             nag: 100,
-            purchaseLicense: 1925,
-            submitRegistration: 1995,
+            purchaseLicense: 2075,
+            submitRegistration: 2085,
             validateLicense: 2175
         },
         storage: {
@@ -205,10 +205,10 @@ export const testControl =
                     license: 3240,
                     releaseNotes: 2990,
                     taskDetailsScript: 2865,
-                    taskDetailsNonScript: 3525,
+                    taskDetailsNonScript: 3545,
                     taskMonitor: 3115,
                     parsingReport: 2690,
-                    parsingReportFull: 3670,
+                    parsingReportFull: 3690,
                     welcome: 1225
                 }
             }
