@@ -382,7 +382,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				break;
 		}
 
-		queueMicrotask(() => this._onMessageReceived.fire(e.method));
+		this._onMessageReceived.fire(e.method);
 	}
 
 
@@ -441,7 +441,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	{
 		this._isReady = true;
 		this.onReady?.();
-		queueMicrotask(() => this._onReadyReceived.fire());
+		this._onReadyReceived.fire();
 	};
 
 }
