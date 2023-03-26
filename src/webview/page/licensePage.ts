@@ -34,10 +34,10 @@ export class LicensePage extends TeWebviewPanel<State>
 	private populateStateContent = (html: string): string =>
 	{
 		const licMgr = this.wrapper.licenseManager,
-			  extName = this.wrapper.extensionName,
+			   extensionName = this.wrapper.extensionName,
 			  isPaid = !!licMgr.account.license.paid,
-			  msg = isPaid ? `Thank you for supporting ${extName}!` :
-						     `Purchase a license today to support ${extName} development!`;
+			  msg = isPaid ? `Thank you for supporting ${extensionName}!` :
+						     `Purchase a license today to support ${extensionName} development!`;
 		html = html.replace(/#{licensePage.keyType}/g, isPaid ? "License" : "Trial")
 				   .replace(/#{licensePage.key}/g, licMgr.account.license.key)
 				   .replace(/#{licensePage.stateMessage}/g, msg);

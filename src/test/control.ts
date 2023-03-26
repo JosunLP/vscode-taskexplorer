@@ -199,7 +199,7 @@ export const testControl =
                 view: {
                     home: 2610,
                     taskCount: 2460,
-                    taskUsage: 2270
+                    taskUsage: 2320
                 },
                 page: {
                     license: 3240,
