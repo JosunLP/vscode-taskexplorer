@@ -71,9 +71,8 @@ export class LastTasksFolder extends SpecialTaskFolder
         if (!taskItem2) {
             taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
         }
-        this.wrapper.log.value("   add item", taskItem2.id, 2, logPad);
         this.insertTaskFile(taskItem2, 0);
-        this.fireChangeEvent(taskItem2, logPad + "   ");
+        // this.fireChangeEvent(taskItem2, logPad + "   ");
     };
 
 

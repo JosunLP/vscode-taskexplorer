@@ -37,12 +37,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
 {
     private visible = false;
     private wasVisible = false;
-    private refreshPending = false;
-    private defaultGetChildrenLogPad = "";
-    private defaultGetChildrenLogLevel = 1;
     private currentRefreshEvent: string | undefined;
-    private getChildrenLogPad = this.defaultGetChildrenLogPad;
-    private getChildrenLogLevel = this.defaultGetChildrenLogLevel;
     private readonly _treeManager: TaskTreeManager;
     private readonly _disposables: Disposable[] = [];
     private readonly _eventQueue: ITaskTreeEvent[] = [];
@@ -73,30 +68,29 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     }
 
 
-    fireTreeRefreshEvent = (treeItem: TreeItem | null, logPad: string) =>
+    fireTreeRefreshEvent = (treeItem: TreeItem | null, logPad: string, fromQueue?: boolean) =>
     {
         const id = "pendingFireTreeRefreshEvent-" + (treeItem ? treeItem.id?.replace(/\W/g, "") : "g");
+        logPad = !fromQueue ? logPad : log.getLogPad();
+
         log.methodStart("fire tree refresh event", 1, logPad, false, [
-            [ "is global refresh", !treeItem ], [ "item id", id ], [ "is visible", this.visible ], [ "was visible", this.wasVisible ]
+            [ "tree", this.name ], [ "is global refresh", !treeItem ], [ "item id", id ], [ "from queue", !!fromQueue ],
+            [ "is visible", this.visible ], [ "was visible", this.wasVisible ]
         ]);
+
         if (this.visible)
         {
             log.write("   fire tree refresh event", 1, logPad);
-            this.refreshPending = true;
             this._onDidChangeTreeData.fire(treeItem);
         }
         else if (this.wasVisible)
-        {   // if (!this.eventQueue.find((e => e.type === "refresh" && e.id === id)))
+        {
             if (id !== this.currentRefreshEvent && !this._eventQueue.find((e => e.type === "refresh" && e.id === id)))
             {
                 if (!treeItem)
-                {   // if this is a global refresh, remove all other refresh events from the q
-                    //  this.eventQueue.slice().reverse().forEach((value, index, obj) => {
-                    //      // As of v3.0, there's only one event type, "refresh"
-                    //      // if (value.type === "wsFolderRemove" || value.type === "refresh") {
-                    //          this.eventQueue.splice(obj.length - 1 - index, 1);
-                    //      // }
-                    //  });
+                {   //
+                    // If this is a global refresh, remove all other refresh events from the q
+                    //
                     this._eventQueue.splice(0);
                 }
                 this._eventQueue.push(
@@ -104,7 +98,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
                     id,
                     delay: 1,
                     fn: this.fireTreeRefreshEvent,
-                    args: [ treeItem, logPad ],
+                    args: [ treeItem, logPad, true ],
                     scope: this,
                     type: "refresh"
                 });
@@ -130,53 +124,36 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
      */
     getChildren = async(element?: TreeItem): Promise<TreeItem[]> =>
     {
-        const logPad = this.getChildrenLogPad,
-              logLevel = this.getChildrenLogLevel,
+        let items: TreeItem[] = [];
+        const logPad = log.getLogPad(),
               tasks = this._treeManager.getTasks(),
               taskItemTree = this._treeManager.getTaskTree();
 
-        if (!taskItemTree)  {
-            return [];
-        }
+        this.logGetChildrenStart(element, tasks, logPad, 1);
 
-        this.refreshPending = true;
-
-        this.getChildrenLogPad = "";  // just can't see a nice way to ever line this up unless we use the log queue
-        this.getChildrenLogLevel = 1; // just can't see a nice way to ever line this up unless we use the log queue
-
-        this.logGetChildrenStart(element, tasks, logPad, logLevel);
-
-        //
-        // Set return tree items that were requested
-        //
-        let items: TreeItem[] = [];
-        if (element instanceof TaskFolder)
+        if (taskItemTree)
         {
-            log.write("   Return task folder (task files)", logLevel + 1, logPad);
-            items = element.taskFiles;
-        }
-        else if (element instanceof TaskFile)
-        {
-            log.write("   Return taskfile (tasks/scripts)", logLevel + 1, logPad);
-            items = element.treeNodes;
-        }
-        else
-        {
-            log.write("   Return full task tree", logLevel + 1, logPad);
-            items = taskItemTree;
+            if (element instanceof TaskFolder)
+            {
+                log.write("   Return task folder (task files)", 1, logPad);
+                items = element.taskFiles;
+            }
+            else if (element instanceof TaskFile)
+            {
+                log.write("   Return taskfile (tasks/scripts)", 1, logPad);
+                items = element.treeNodes;
+            }
+            else
+            {
+                log.write("   Return full task tree", 1, logPad);
+                items = taskItemTree;
+            }
         }
 
-        this.getChildrenLogPad = this.defaultGetChildrenLogPad;
-        this.getChildrenLogLevel = this.defaultGetChildrenLogLevel;
+        this.processEventQueue(logPad + "   ");
 
-        //
-        // Process event queue
-        //
-        this.refreshPending = this.processEventQueue(logPad + "   ");
-
-        log.methodDone("get tree children", logLevel, logPad, [
-            [ "# of tasks total", tasks.length ], [ "# of tree task items returned", items.length ],
-            [ "pending event", this.refreshPending ]
+        log.methodDone("get tree children", 1, logPad, [
+            [ "# of tasks total", tasks.length ], [ "# of tree task items returned", items.length ]
         ]);
 
         return items;
@@ -215,9 +192,6 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         log.methodDone("get tree item", 4);
         return element;
     };
-
-
-    // isBusy = () => this.refreshPending;
 
 
     isVisible = () => this.visible;
@@ -273,9 +247,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
 
     private processEventQueue = (logPad: string) =>
     {
-        let firedEvent = false;
         log.methodStart("process task explorer event queue", 1, logPad, true, [[ "# of queued events", this._eventQueue.length ]]);
-
         if (this._eventQueue.length > 0)
         {
             const next = this._eventQueue.shift() as ITaskTreeEvent; // get the next event
@@ -283,22 +255,15 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
             log.value("      id", next.id, 1, logPad);
             log.value("      type", next.type, 1, logPad);
             log.write(`   firing queued event with ${next.args.length} args and ${next.delay}ms delay`, 2, logPad);
-            // if (next.type === "wsFolderRemove" || next.type === "refresh") { // as of 1/29/23, only these two events exist
-                this.refreshPending = true;
-                this.currentRefreshEvent = next.id;
-            // }
-            firedEvent = true;
-            setTimeout(async () => {
-                await next.fn.call(next.scope, ...next.args);
-                // this.refreshPending = this.processEventQueue(logPad);
-            }, next.delay);
+            log.value("   # of queued events remaining", this._eventQueue.length, 1, logPad);
+            this.currentRefreshEvent = next.id;
+            setTimeout((n) => n.fn.call(n.scope, ...n.args), next.delay, next);
         }
         else {
-            queueMicrotask(() => this._onDidLoadTreeData.fire());
+            this.currentRefreshEvent = undefined;
+            this._onDidLoadTreeData.fire();
         }
-
         log.methodDone("process task explorer main event queue", 1, logPad);
-        return firedEvent;
     };
 
 }
