@@ -7,5 +7,5 @@ export interface ITaskFolder extends TreeItem
 {
     addTaskFile(taskFile: ITaskFile|ITaskItem): void;
     insertTaskFile(taskFile: ITaskFile|ITaskItem, index: number): void;
-    removeTaskFile(taskFile: ITaskFile | ITaskItem | string, logPad: string): void;
+    removeTaskFile(taskFile: ITaskFile | ITaskItem, logPad: string): void | Promise<void>;
 }
