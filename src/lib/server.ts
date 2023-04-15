@@ -21,6 +21,29 @@ export interface ServerError
 	status: number | undefined;
 	success: false;
 }
+/*
+class ServerError2 extends Error
+{
+	date: Date;
+	timestamp: number;
+
+	constructor(readonly status: number | undefined, readonly body: string | undefined, ...params: any[])
+	{	//
+		// Pass remaining arguments (including vendor specific ones) to parent constructor
+		//
+		super(...params);
+		//
+		// Maintains proper stack trace for where our error was thrown (only available on V8)
+		//
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this, ServerError2);
+		}
+		this.name = "ServerError2";
+	  	this.date = new Date();
+	  	this.timestamp = Date.now();
+	}
+}
+*/
 
 export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook" |
 							 "register/account" | "register/trial/start" | "register/trial/extend";
