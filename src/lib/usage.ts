@@ -102,7 +102,7 @@ export class Usage implements ITeUsage, Disposable
         let avg = 0,
             lowestTime = now;
         this.log.methodStart("get average run count", 2, logPad, false, [[ "period", period ]]);
-        const taskStats = this.wrapper.usage.getAll(this._taskUsageKey);
+        const taskStats = this.getAll(this._taskUsageKey);
         Object.keys(taskStats).forEach(k =>
         {
             if (taskStats[k].timestamp < lowestTime)  {
@@ -193,7 +193,7 @@ export class Usage implements ITeUsage, Disposable
     {
         let count = 0;
         this.log.methodStart("get today run count", 2, logPad);
-        const taskStats = this.wrapper.usage.getAll();
+        const taskStats = this.getAll();
         Object.keys(taskStats).filter(k => k.startsWith(this._taskUsageKey)).forEach(k =>
         {
             count += taskStats[k].count.today;
@@ -424,7 +424,7 @@ export class Usage implements ITeUsage, Disposable
         //
         // Process with Usage Tracker and copy usage stats to task usage tracking state
         //
-        const usage = await this.wrapper.usage.track(`${this._taskUsageKey}${iTask.treeId}`) as ITeTrackedUsage;
+        const usage = await this.track(`${this._taskUsageKey}${iTask.treeId}`) as ITeTrackedUsage;
         Object.assign(iTask.runCount, usage.count);
         // Object.assign(iTask.runTime, {
         //     avgDown: false,
