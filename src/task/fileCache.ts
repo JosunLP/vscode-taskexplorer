@@ -38,7 +38,7 @@ export class TeFileCache implements ITeFileCache, Disposable
         );
     }
 
-	dispose = () => this._disposables.forEach(d => d.dispose());
+	dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
 
 
     get isBusy(): boolean {

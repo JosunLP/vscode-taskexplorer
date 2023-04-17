@@ -11,6 +11,7 @@ export class TeApi implements ITaskExplorerApi, Disposable
     private _tests: boolean;
     private _disposables: Disposable[] = [];
 
+
     constructor(private readonly wrapper: TeWrapper)
     {
         this._tests = this.wrapper.tests;
@@ -21,12 +22,7 @@ export class TeApi implements ITaskExplorerApi, Disposable
         this._disposables.push(registerCommand(Commands.GetApi, () => this, this));
     }
 
-
-    dispose()
-    {
-        this._disposables.forEach(d => d.dispose());
-        this._disposables.splice(0);
-    }
+    dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
 
 
     get providers() {

@@ -2,14 +2,13 @@ node_modules
 dist
 out
 *.vsix
+.vscode
 *.vscode-test
 *.buildinfo
 *.tsbuildinfo
 coverage
 .coverage
 .nyc_output
-install_extensions.bat
-res/release-notes.html
 types/lib
 types/types
 tsconfig.tsbuildinfo

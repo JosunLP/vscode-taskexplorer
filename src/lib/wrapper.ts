@@ -562,16 +562,16 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._onReady.event;
 	}
 
+	get parsingReportPage(): ParsingReportPage {
+		return this._parsingReportPage;
+	}
+
 	get production(): boolean {
 		return this._context.extensionMode === ExtensionMode.Production;
 	}
 
 	get providers(): IDictionary<ITaskExplorerProvider> {
 		return this._providers;
-	}
-
-	get parsingReportPage(): ParsingReportPage {
-		return this._parsingReportPage;
 	}
 
 	get pathUtils(): ITePathUtilities {
