@@ -688,6 +688,10 @@
             ],
             "commandPalette": [
                 {
+                    "command": "taskexplorer.getApi",
+                    "when": "false"
+                },
+                {
                     "command": "taskexplorer.view.parsingReport.show",
                     "when": "taskexplorer:enabled"
                 },
