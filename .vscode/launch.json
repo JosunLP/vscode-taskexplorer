@@ -56,10 +56,10 @@
                 "<node_internals>/**", "**/node_modules/**", "**/resources/app/out/vs/**"
             ],
             "args": [
+                "${workspaceFolder}",
                 "--disable-extensions",
                 "--disable-workspace-trust",
-                "--extensionDevelopmentPath=${workspaceFolder}",
-                "${workspaceRoot}"
+                "--extensionDevelopmentPath=${workspaceFolder}"
             ]
         },
         {
@@ -116,7 +116,7 @@
                 "<node_internals>/**", "**/node_modules/**", "**/resources/app/out/vs/**"
             ],
             "args": [
-                "${workspaceRoot}/../GEMS2",
+                "${workspaceFolder}/../GEMS2",
                 "--disable-extensions",
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}"

@@ -7,7 +7,8 @@
         // "problemMatcher": "$tsc-watch",
         "isBackground": true,
         "presentation": {
-            "reveal": "never"
+            "reveal": "never",
+            "panel": "dedicated"
         },
         "group": {
             "kind": "build",
@@ -25,7 +26,7 @@
                     "regexp":"^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (?:Compilation complete\\.|Found \\d+ errors?\\.) Watching for file changes\\."
                 }
             }
-    }
+        }
     },
     {
         "type": "npm",
@@ -33,11 +34,11 @@
         "problemMatcher": "$webpackTe",
         "isBackground": true,
         "presentation": {
-            "reveal": "always"
+            "reveal": "always",
+            "panel": "dedicated"
         },
         "group": {
-            "kind": "build",
-            "isDefault": true
+            "kind": "build"
         }
     },
     {
