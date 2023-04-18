@@ -189,9 +189,8 @@ module.exports = {
         ],
         "id-match": "warn",
         "import/no-extraneous-dependencies": [
-            "warn",
-            {
-                "devDependencies": false
+            "warn", {
+                "devDependencies": ["**/*.test.ts", "**/*.spec.ts"]
             }
         ],
         "import/no-internal-modules": "off",
