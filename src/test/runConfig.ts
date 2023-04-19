@@ -50,6 +50,7 @@ export default async() =>
             hookRequire: true,
             hookRunInContext: true,
             hookRunInThisContext: true,
+            noClean: process.env.testArgs && process.env.testArgs.includes("--nyc-no-clean"),
             // useSpawnWrap: true,
             include: [ "dist/**/*.js" ],
             exclude: [ "dist/test/**", "**/external*.*", "external*" ],

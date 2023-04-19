@@ -58,7 +58,8 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     dispose()
     {
-        this._disposables.forEach(d => d.dispose());
+        this._disposables.splice(0).forEach(d => d.dispose());
+        this._dirWatcher.watcher?.dispose();
         Object.values(this._watcherDisposables).forEach(d => d.dispose());
         Object.values(this._watchers).filter(w => !!w).forEach(w => w.dispose());
     }
