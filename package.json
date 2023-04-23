@@ -127,7 +127,7 @@
         "test:before": "npm run test-default_build && npm run test:before_2",
         "test:before_2": "script\\enable-full-coverage.sh",
         "test:codecov-publish": "node_modules/.bin/codecov --disable=gcov --disable=detect",
-        "test:openreport": "cmd /c \"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\" file://c:/Projects/vscode-taskexplorer/.coverage/index.html",
+        "test:openreport": "cmd /c \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" file://c:/Projects/vscode-taskexplorer/.coverage/index.html",
         "test:clean": "rimraf .nyc_output && rimraf .coverage && rimraf tsconfig.test.tsbuildinfo",
         "test:clean_cache_data": "rimraf c:\\code\\data\\user-data\\cacheddata",
         "test:clean_cache_all": "rimraf .vscode-test\\user-data",
