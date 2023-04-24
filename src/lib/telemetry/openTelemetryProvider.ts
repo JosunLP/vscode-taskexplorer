@@ -57,7 +57,7 @@ export default {};
 // 			debugging ? new SimpleSpanProcessor(exporter) : new BatchSpanProcessor(exporter),
 // 		);
 //
-// 		this.tracer = this.provider.getTracer(context.extensionId);
+// 		this.tracer = this.provider.getTracer(context.extensionName);
 // 	}
 //
 //

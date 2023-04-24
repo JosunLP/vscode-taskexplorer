@@ -543,7 +543,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		else
 		{
 			this.wrapper.utils.openUrl(
-				`https://license.spmeesseman.com/payment/paynow/${this.wrapper.extensionId}/${this.account.id}/v1`
+				`https://license.spmeesseman.com/payment/paynow/${this.wrapper.extensionName}/${this.account.id}/v1`
 			);
 		}
 		this.wrapper.log.methodDone("purchase license", 1, logPad);

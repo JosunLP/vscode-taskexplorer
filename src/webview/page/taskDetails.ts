@@ -1,9 +1,9 @@
 
 import { dirname } from "path";
 import { State } from "../common/ipc";
+import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { ConfigurationChangeEvent } from "vscode";
-import { TeWrapper } from "../../lib/wrapper";
 import { debounceCommand } from "../../lib/command/command";
 import { ContextKeys, WebviewIds  } from "../../lib/context";
 import { ITeTask, ITeTaskStatusChangeEvent } from "../../interface";
@@ -11,9 +11,7 @@ import { ITeTask, ITeTaskStatusChangeEvent } from "../../interface";
 
 export class TaskDetailsPage extends TeWebviewPanel<State>
 {
-	static viewTitle = "Task Details - #{task_name}";
 	static viewId: WebviewIds = "taskDetails";
-
 	private _task: ITeTask;
 
 
@@ -22,7 +20,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 		super(
 			wrapper,
 			"task-details.html",
-			TaskDetailsPage.viewTitle.replace("#{task_name}", task.name),
+			`Task Details - ${task.name}`,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${TaskDetailsPage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${TaskDetailsPage.viewId}`,

@@ -382,7 +382,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	{
 		this._disposables.push(
 			registerCommand(Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
-			registerCommand(Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/spmeesseman/${this.extensionId}/issues`), this)
+			registerCommand(Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/spmeesseman/${this.extensionName}/issues`), this)
 		);
 	};
 
@@ -492,10 +492,14 @@ export class TeWrapper implements ITeWrapper, Disposable
     }
 
 	get extensionId(): string {
-		return this._context.extension.id.replace("spmeesseman.", "");
+		return this._context.extension.id;
 	}
 
 	get extensionName(): string {
+		return this._context.extension.id.replace("spmeesseman.", "");
+	}
+
+	get extensionTitle(): string {
 		return this.localize("name", "Task Explorer");
 	}
 

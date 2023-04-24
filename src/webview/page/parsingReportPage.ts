@@ -15,7 +15,6 @@ import { getWorkspaceProjectName, pushIfNotExists } from "../../lib/utils/utils"
 
 export class ParsingReportPage extends TeWebviewPanel<State>
 {
-	static viewTitle = "Task Explorer Parsing Report";
 	static viewId: WebviewIds = "parsingReport";
 
 
@@ -24,7 +23,7 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 		super(
 			wrapper,
 			"parsing-report.html",
-			ParsingReportPage.viewTitle,
+			`${wrapper.extensionName} Parsing Report`,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${ParsingReportPage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${ParsingReportPage.viewId}`,

@@ -11,7 +11,6 @@ import { ContextKeys, WebviewIds  } from "../../lib/context";
 
 export class ReleaseNotesPage extends TeWebviewPanel<State>
 {
-	static viewTitle = "Task Explorer #{version} Release Notes";
 	static viewId: WebviewIds = "releaseNotes";
 
 
@@ -20,7 +19,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 		super(
 			wrapper,
 			"release-notes.html",
-			ReleaseNotesPage.viewTitle.replace("#{version}", wrapper.context.extension.packageJSON.version),
+			`${wrapper.extensionName} ${wrapper.context.extension.packageJSON.version} Release Notes`,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${ReleaseNotesPage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${ReleaseNotesPage.viewId}`,

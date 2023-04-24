@@ -12,7 +12,6 @@ import { IIpcMessage, IpcRegisterAccountMsg, onIpc, State } from "../common/ipc"
 
 export class LicensePage extends TeWebviewPanel<State>
 {
-	static viewTitle = "Task Explorer Licensing";
 	static viewId: WebviewIds = "licensePage";
 
 
@@ -21,7 +20,7 @@ export class LicensePage extends TeWebviewPanel<State>
 		super(
 			wrapper,
 			"license.html",
-			LicensePage.viewTitle,
+			`${wrapper.extensionName} Licensing`,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${LicensePage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${LicensePage.viewId}`,

@@ -9,7 +9,6 @@ import { createTaskImageTable } from "../common/taskImageTable";
 
 export class WelcomePage extends TeWebviewPanel<State>
 {
-	static viewTitle = "Task Explorer Tutorial";
 	static viewId: WebviewIds = "welcome";
 
 
@@ -18,7 +17,7 @@ export class WelcomePage extends TeWebviewPanel<State>
 		super(
 			wrapper,
 			`${WelcomePage.viewId}.html`,
-			WelcomePage.viewTitle.replace("#{version}", wrapper.context.extension.packageJSON.version),
+			`${wrapper.extensionName} Tutorial`,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${WelcomePage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${WelcomePage.viewId}`,

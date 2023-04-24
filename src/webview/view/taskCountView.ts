@@ -10,8 +10,6 @@ import { ContextKeys, WebviewViewIds } from "../../lib/context";
 
 export class TaskCountView extends TeWebviewView<State>
 {
-	static viewTitle = "Task Count";
-	static viewDescription = "Task Counts by Type";
 	static viewId: WebviewViewIds = "taskCount"; // Must match view id in package.jso
 
 
@@ -19,8 +17,8 @@ export class TaskCountView extends TeWebviewView<State>
 	{
 		super(
 			wrapper,
-			TaskCountView.viewTitle,
-			TaskCountView.viewDescription,
+			"Task Count",
+			"Task Counts by Type",
 			"task-count.html",
 			`taskexplorer.view.${TaskCountView.viewId}`,
 			`${ContextKeys.WebviewViewPrefix}${TaskCountView.viewId}`,

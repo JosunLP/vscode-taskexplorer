@@ -68,7 +68,7 @@ export class TeServer implements Disposable
 	}
 
 	private get productName() {
-		return `${this.wrapper.extensionId}-${this.wrapper.env}`.replace("-production", "");
+		return `${this.wrapper.extensionName}-${this.wrapper.env}`.replace("-production", "");
 	};
 
     get onDidRequestComplete(): Event<void> {

@@ -63,10 +63,10 @@ suite("Util Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 2) + 175);
 
-        teWrapper.log.error(`        ${creator}.${extension}`);
-        teWrapper.log.error([ `        ${creator}.${extension}`,
-                    `        ${creator}.${extension}`,
-                    `        ${creator}.${extension}` ]);
+        teWrapper.log.error(`        ${teWrapper.extensionId}`);
+        teWrapper.log.error([ `        ${teWrapper.extensionId}`,
+                    `        ${teWrapper.extensionId}`,
+                    `        ${teWrapper.extensionId}` ]);
 
 		teWrapper.log.error("Test5 error");
 		teWrapper.log.error(new Error("Test error object"));
@@ -276,8 +276,8 @@ suite("Util Tests", () =>
     {
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 4) + 75);
-        teWrapper.log.value(`        ${creator}.${extension}`, null);
-        teWrapper.log.value(`        ${creator}.${extension}`, undefined);
+        teWrapper.log.value(`        ${teWrapper.extensionId}`, null);
+        teWrapper.log.value(`        ${teWrapper.extensionId}`, undefined);
 		teWrapper.log.value(null as unknown as string, 1);
 		teWrapper.log.value(undefined as unknown as string, 1);
 		teWrapper.log.value("null value", null);

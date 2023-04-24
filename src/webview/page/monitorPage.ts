@@ -16,7 +16,6 @@ import {
 
 export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 {
-	static viewTitle = "Task Monitor";
 	static viewId: WebviewIds = "taskMonitor"; // Must match view id in package.json
 
 
@@ -25,7 +24,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 		super(
 			wrapper,
 			"monitor.html",
-			MonitorPage.viewTitle,
+			"Task Monitor",
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${MonitorPage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${MonitorPage.viewId}`,

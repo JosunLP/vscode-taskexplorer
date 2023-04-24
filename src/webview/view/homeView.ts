@@ -10,8 +10,6 @@ import { ITeTaskChangeEvent, TeSessionChangeEvent } from "../../interface";
 
 export class HomeView extends TeWebviewView<State>
 {
-	static viewTitle = "Home";
-	static viewDescription = "Home";
 	static viewId: WebviewViewIds = "home"; // Must match view id in package.json
 
 
@@ -19,8 +17,8 @@ export class HomeView extends TeWebviewView<State>
 	{
 		super(
 			wrapper,
-			HomeView.viewTitle,
-			HomeView.viewDescription,
+			"Home",
+			"Home",
 			`${HomeView.viewId}.html`,
 			`taskexplorer.view.${HomeView.viewId}`,
 			`${ContextKeys.WebviewViewPrefix}${HomeView.viewId}`,
@@ -97,7 +95,7 @@ export class HomeView extends TeWebviewView<State>
 	{
 		return [
 			registerCommand(Commands.OpenRepository,
-				() => this.wrapper.utils.openUrl(`https://github.com/spmeesseman/${this.wrapper.extensionId}`),
+				() => this.wrapper.utils.openUrl(`https://github.com/spmeesseman/${this.wrapper.extensionName}`),
 			this)
 		];
 	}
