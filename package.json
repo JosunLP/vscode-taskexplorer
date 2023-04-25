@@ -61,7 +61,7 @@
         "copy-build-to-code": "cmd /c xcopy .\\dist\\*.js ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\dist /s /i /y",
         "copy-res-to-code": "cmd /c xcopy .\\res\\*.* ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\res /s /i /y",
         "copy-pkgjson-to-code": "cmd /c copy /Y .\\package*.json ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2",
-        "copy-precopy-backup": "cmd /c xcopy ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\* ..\\..\\Users\\SMEESSEMAN.PERRYJOHNSON01\\spmeesseman.vscode-taskexplorer-2.13.2\\ /s /i /y",
+        "copy-precopy-backup": "cmd /c xcopy ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\* ..\\..\\Users\\smeesseman\\spmeesseman.vscode-taskexplorer-2.13.2\\ /s /i /y",
         "lint": "eslint -c .eslintrc.js --ext .ts .",
         "vsce-package": "vsce package",
         "vsce-publish": "vsce publish",
