@@ -87,13 +87,13 @@ suite("Wrapper Tests", () =>
     test("Status Bar", async function()
     {
         if (exitRollingCount(this)) return;
-        teWrapper.statusBar.update("test");
-        teWrapper.statusBar.update("test2");
-        teWrapper.statusBar.update("");
-        teWrapper.statusBar.update("");
-        teWrapper.statusBar.update("test");
-        teWrapper.statusBar.update("test");
-        teWrapper.statusBar.update("");
+        await teWrapper.statusBar.update("test");
+        await teWrapper.statusBar.update("test2");
+        await teWrapper.statusBar.update("");
+        await teWrapper.statusBar.update("");
+        await teWrapper.statusBar.update("test");
+        await teWrapper.statusBar.update("test");
+        await teWrapper.statusBar.update("");
         endRollingCount(this);
     });
 

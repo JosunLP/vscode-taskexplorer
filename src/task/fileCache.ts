@@ -67,7 +67,7 @@ export class TeFileCache implements ITeFileCache, Disposable
     private addFromStorage = async() =>
     {
         await this.startBuild();
-        void this.wrapper.statusBar.update("Loading tasks from file cache...");
+        await this.wrapper.statusBar.update("Loading tasks from file cache...");
         this.taskFilesMap = await this.wrapper.storage.get2<IDictionary<ICacheItem[]>>(this.wrapper.keys.Storage.FileCacheTaskFilesMap, {});
         this.projectFilesMap = await this.wrapper.storage.get2<IDictionary<IDictionary<string[]>>>(this.wrapper.keys.Storage.FileCacheProjectFilesMap, {});
         this.projectToFileCountMap = await this.wrapper.storage.get2<IDictionary<IDictionary<number>>>(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, {});
@@ -119,7 +119,7 @@ export class TeFileCache implements ITeFileCache, Disposable
                     }
 
                     const dspTaskType = taskTypeUtils.getTaskTypeFriendlyName(providerName);
-                    this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${wsFolder.name}`);
+                    await this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${wsFolder.name}`);
 
                     if (!isExternal)
                     {
@@ -404,7 +404,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             this.persistCache();
         }
         await this.setContext();
-        this.wrapper.statusBar.update("");
+        await this.wrapper.statusBar.update("");
         this.cacheBuilding = false;
         this.cancel = false;
         this._onReady.fire();
@@ -538,7 +538,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheTaskFilesMap, this.taskFilesMap);
             this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFilesMap, this.projectFilesMap);
             this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, this.projectToFileCountMap);
-            this.wrapper.statusBar.update(text);
+            void this.wrapper.statusBar.update(text);
         }
         else if (clear === true)
         {

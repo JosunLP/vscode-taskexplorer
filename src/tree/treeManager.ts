@@ -257,7 +257,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         if (this._tasks.length === 0 || !this.currentInvalidation || this.currentInvalidation  === "Workspace" || this.currentInvalidation === "tsc")
         {
             this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
-            this.wrapper.statusBar.update("Requesting all tasks from all providers");
+            await this.wrapper.statusBar.update("Requesting all tasks from all providers");
             this._tasks = await tasks.fetchTasks();
             //
             // Process the tasks cache array for any removals that might need to be made
@@ -268,7 +268,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {   //
             const taskName = this.wrapper.taskUtils.getTaskTypeFriendlyName(this.currentInvalidation);
             this.wrapper.log.write(`   fetching ${taskName} tasks via VSCode fetchTasks call`, 1, logPad);
-            this.wrapper.statusBar.update("Requesting  tasks from " + taskName + " task provider");
+            await this.wrapper.statusBar.update("Requesting  tasks from " + taskName + " task provider");
             //
             // Get all tasks of the type defined in 'currentInvalidation' from VSCode, remove
             // all tasks of the type defined in 'currentInvalidation' from the tasks list cache,
@@ -502,7 +502,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private onWorkspaceFolderRemoved = (uri: Uri, logPad: string) =>
+    private onWorkspaceFolderRemoved = async (uri: Uri, logPad: string) =>
     {
         this.wrapper.log.methodStart("treemgr: workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
         let ctRmv = 0;
@@ -515,7 +515,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             [ "current # of tasks", tasks.length ], [ "current # of tree folders", taskTree.length ],
             [ "project path removed", uri.fsPath ]
         ]);
-        this.wrapper.statusBar.update("Deleting all tasks from removed project folder");
+        await this.wrapper.statusBar.update("Deleting all tasks from removed project folder");
         tasks.reverse().forEach((item, index, object) =>
         {
             if (item.definition.uri && item.definition.uri.fsPath.startsWith(uri.fsPath))
@@ -540,7 +540,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskTree.length ]
         ]);
         this.refreshPending = false;
-        this.wrapper.statusBar.update("");
+        await this.wrapper.statusBar.update("");
         this.wrapper.log.write("   fire tree refresh event", 1, logPad);
         this.fireTreeRefreshEvent(null, null, logPad + "   ");
         this.wrapper.log.methodDone("treemgr: workspace folder removed event", 1, logPad);
@@ -625,7 +625,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             // break out this case with a different handler since we can improve the performance pretty
             // significantly for this specific event.
             //
-            this.onWorkspaceFolderRemoved(opt, logPad);
+            await this.onWorkspaceFolderRemoved(opt, logPad);
         }
         // else if (this.wrapper.utils.isString(invalidate, true) && this.wrapper.utils.isUri(opt))
         // {

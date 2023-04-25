@@ -34,6 +34,7 @@ let hasRollingCountError = false;
 let timeStarted: number;
 let overridesShowInputBox: any[] = [];
 let overridesShowInfoBox: any[] = [];
+let overridesShowWarningBox: any[] = [];
 let NODE_TLS_REJECT_UNAUTHORIZED: string | undefined;
 
 const tc = testControl;
@@ -79,6 +80,17 @@ window.showInformationMessage = (str: string, ...args: any[]) =>
         // return originalShowInfoBox(str, args as any);
     }
     return new Promise<string | undefined>((resolve, reject) => { resolve(next); });
+};
+
+
+window.showWarningMessage = (_str: string, ..._args: any[]) =>
+{
+    let next = overridesShowWarningBox.shift();
+    if (typeof next === "undefined") {
+        next = undefined;
+        // return originalShowInfoBox(str, args as any);
+    }
+    return new Promise<string | undefined>((resolve) => { resolve(next); });
 };
 
 
@@ -275,6 +287,9 @@ export const clearOverrideShowInputBox = () => { overridesShowInputBox = []; };
 export const clearOverrideShowInfoBox = () => { overridesShowInfoBox = []; };
 
 
+export const clearOverrideShowWarningBox = () => { overridesShowWarningBox = []; };
+
+
 export const closeEditors = () => commands.executeCommand("openEditors.closeAll");
 
 
@@ -430,6 +445,9 @@ export const overrideNextShowInputBox = (value: any, clear?: boolean) => { if (c
 
 
 export const overrideNextShowInfoBox = (value: any, clear?: boolean) => { if (clear === true) clearOverrideShowInfoBox(); overridesShowInfoBox.push(value); };
+
+
+export const overrideNextShowWarningBox = (value: any, clear?: boolean) => { if (clear === true) clearOverrideShowWarningBox(); overridesShowWarningBox.push(value); };
 
 
 const passthrough = (value: any, resolve: (value?: any) => void) => resolve(value);

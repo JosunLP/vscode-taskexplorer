@@ -507,6 +507,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this.localize("name", this._context.extension.packageJSON.displayName);
 	}
 
+	get extensionTitleShort(): string {
+		return this.extensionTitle;
+	}
+
 	get figures(): typeof figures {
 		return figures;
 	}

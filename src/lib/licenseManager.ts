@@ -227,7 +227,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, { accountId: this._account.id,  ...params });
 			await this.saveAccount(account, logPad);
-			this.wrapper.statusBar.update("");
+			await this.wrapper.statusBar.update("");
 			return true;
 		}
 		catch (e)
@@ -246,7 +246,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	{
 		const ep: ITeApiEndpoint = "register/trial/extend";
 
-		this.wrapper.statusBar.update("Requesting extended trial");
+		await this.wrapper.statusBar.update("Requesting extended trial");
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
 
 		if (this._account.license.period > 1 || !this.isRegistered)
@@ -255,7 +255,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			window.showInformationMessage("Can't proceed - " + msg);
 			this.wrapper.log.write("   " + msg, 1, logPad);
 			this.wrapper.log.methodDone("request extended trial", 1, logPad);
-			this.wrapper.statusBar.update("");
+			await this.wrapper.statusBar.update("");
 			return;
 		}
 
@@ -472,7 +472,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			}
 		}
 
-		this.wrapper.statusBar.update("Server error");
+		await this.wrapper.statusBar.update("Server error");
 		setTimeout(() => this.wrapper.statusBar.update(""), 1500);
 	};
 
@@ -522,7 +522,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			// the new license state
 			//
 			this._busy = true;
-			this.wrapper.statusBar.update("Sending payment request");
+			await this.wrapper.statusBar.update("Sending payment request");
 			const ep: ITeApiEndpoint = "payment/paypal/hook",
 				  token = this._account.session.token;
 			try
@@ -537,7 +537,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			}
 			finally {
 				this._busy = false;
-				this.wrapper.statusBar.update("");
+				await this.wrapper.statusBar.update("");
 			}
 		}
 		else
@@ -658,7 +658,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			[ "first", params.firstName ], [ "last", params.lastName ], [ "email", params.email ], [ "alt. email", params.emailAlt ]
 		]);
 		this._busy = true;
-		this.wrapper.statusBar.update("Submitting resgistration");
+		await this.wrapper.statusBar.update("Submitting resgistration");
 		await this.executeRequest("register/account", "   ", params);
 		this.wrapper.log.methodDone("submit registration", 1, "");
 	};
@@ -668,7 +668,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	{
 		this.wrapper.log.methodStart("validate license", 1, logPad);
 		this._busy = true;
-		this.wrapper.statusBar.update("Validating license");
+		await this.wrapper.statusBar.update("Validating license");
 		await this.executeRequest("license/validate", logPad + "   ", { key });
 		this.wrapper.log.methodDone("validate license", 1, logPad);
 	};

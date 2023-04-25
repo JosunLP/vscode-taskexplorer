@@ -1,8 +1,8 @@
-import { CancellationToken, Progress } from "vscode";
 
-export interface ITeStatusBar
+export interface IStatusBar
 {
-	get(): string;
+	hide(reset?: boolean): void;
 	runWithProgress<T>(task: () => Thenable<T>): Thenable<T>;
-    update(msg: string): void;
+	show(text?: string, toolTip?: string, command?: string): void;
+    update(text: string): Promise<void>;
 }
