@@ -8,15 +8,15 @@ import { testControl } from "../control";
 import { deactivate } from "../../extension";
 import { startInput, stopInput } from "./input";
 import { StorageKeys } from "../../lib/constants";
-import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
+import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import {
-    ITaskExplorerApi, ITaskExplorerProvider, ITaskItem, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
+    ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
 } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    commands, ConfigurationTarget, Disposable, Event, EventEmitter, Extension, extensions, Task,
+    commands, ConfigurationTarget, Event, EventEmitter, Extension, extensions, Task,
     TaskExecution, tasks, Uri, ViewColumn, window, workspace
 } from "vscode";
 
@@ -135,7 +135,11 @@ export const activate = async (instance?: Mocha.Context) =>
         teWrapper = await (ext as any).activate();
         console.log(`    ${teWrapper.figures.color.info}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Tests startup", teWrapper.figures.colors.grey)}`);
-        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Time started: " + locISOTime, teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Time started     : ${locISOTime}`, teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension AUthor : ${teWrapper.extensionName}`, teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension Name   : ${teWrapper.extensionName}`, teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension ID     : ${teWrapper.extensionId}`, teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension Title  : ${teWrapper.extensionTitle}`, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Extension successfully activated", teWrapper.figures.colors.grey)}`);
         //
         // Ensure extension initialized successfully

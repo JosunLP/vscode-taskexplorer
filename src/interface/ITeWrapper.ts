@@ -53,6 +53,7 @@ export interface ITeWrapper
 	readonly contextTe: ITeContext;
 	readonly explorer: ITeTaskTree;
 	readonly explorerView: TreeView<TreeItem>;
+	readonly extensionAuthor: string;
 	readonly extensionId: string;
 	readonly extensionName: string;
 	readonly extensionTitle: string;
