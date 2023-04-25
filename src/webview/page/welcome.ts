@@ -17,7 +17,7 @@ export class WelcomePage extends TeWebviewPanel<State>
 		super(
 			wrapper,
 			`${WelcomePage.viewId}.html`,
-			`${wrapper.extensionName} Tutorial`,
+			`${wrapper.extensionTitle} Tutorial`,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${WelcomePage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${WelcomePage.viewId}`,

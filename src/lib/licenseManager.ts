@@ -120,7 +120,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		/* istanbul ignore else */
 		if (result)
 		{
-			window.showInformationMessage(`Welcome to ${this.wrapper.extensionName} 3.0.  Your 30 day trial has been activated.`, "More Info")
+			window.showInformationMessage(`Welcome to ${this.wrapper.extensionTitle} 3.0.  Your 30 day trial has been activated.`, "More Info")
 			.then((action) =>
 			{
 				if (action === "More Info") {

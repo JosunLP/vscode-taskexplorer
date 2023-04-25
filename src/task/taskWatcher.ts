@@ -20,7 +20,7 @@ export class TaskWatcher implements Disposable
     constructor(private readonly wrapper: TeWrapper)
     {
         this._statusBarSpace = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
-        this._statusBarSpace.tooltip = `${wrapper.extensionName} Running Task`;
+        this._statusBarSpace.tooltip = `${wrapper.extensionTitle} Running Task`;
         this._onTaskStatusChange = new EventEmitter<ITeTaskStatusChangeEvent>();
         this._onDidRunningTasksChange = new EventEmitter<ITeRunningTaskChangeEvent>();
         this._disposables = [

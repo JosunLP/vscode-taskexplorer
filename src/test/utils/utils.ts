@@ -152,6 +152,7 @@ export const activate = async (instance?: Mocha.Context) =>
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension Name   : ${teWrapper.extensionName}`, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension ID     : ${teWrapper.extensionId}`, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension Title  : ${teWrapper.extensionTitle}`, teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension Short  : ${teWrapper.extensionTitleShort}`, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Extension successfully activated", teWrapper.figures.colors.grey)}`);
         //
         // Ensure extension initialized successfully

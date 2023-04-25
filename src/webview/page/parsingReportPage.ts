@@ -23,7 +23,7 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 		super(
 			wrapper,
 			"parsing-report.html",
-			`${wrapper.extensionName} Parsing Report`,
+			`${wrapper.extensionTitle} Parsing Report`,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${ParsingReportPage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${ParsingReportPage.viewId}`,

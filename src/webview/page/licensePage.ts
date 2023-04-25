@@ -20,7 +20,7 @@ export class LicensePage extends TeWebviewPanel<State>
 		super(
 			wrapper,
 			"license.html",
-			`${wrapper.extensionName} Licensing`,
+			`${wrapper.extensionTitle} Licensing`,
 			"res/img/logo-bl.png",
 			`taskexplorer.view.${LicensePage.viewId}`,
 			`${ContextKeys.WebviewPrefix}${LicensePage.viewId}`,
@@ -33,7 +33,7 @@ export class LicensePage extends TeWebviewPanel<State>
 	private populateStateContent = (html: string): string =>
 	{
 		const licMgr = this.wrapper.licenseManager,
-			   extensionName = this.wrapper.extensionName,
+			  extensionName = this.wrapper.extensionTitle,
 			  isPaid = !!licMgr.account.license.paid,
 			  msg = isPaid ? `Thank you for supporting ${extensionName}!` :
 						     `Purchase a license today to support ${extensionName} development!`;
