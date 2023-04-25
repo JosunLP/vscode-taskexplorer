@@ -119,7 +119,7 @@ export class TeFileCache implements ITeFileCache, Disposable
                     }
 
                     const dspTaskType = taskTypeUtils.getTaskTypeFriendlyName(providerName);
-                    await this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${wsFolder.name}`);
+                    this.wrapper.statusBar.update(`Scanning for ${dspTaskType} tasks in project ${wsFolder.name}`);
 
                     if (!isExternal)
                     {

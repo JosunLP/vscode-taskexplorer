@@ -470,7 +470,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             this.wrapper.log.methodDone("[event] directory 'create'", 1, logPad);
         }
         catch (e) {}
-        finally { /* don't await */ this.processQueue(); }
+        finally { void this.processQueue(); }
     };
 
 
@@ -485,7 +485,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             this.wrapper.log.methodDone("[event] directory 'delete'", 1, logPad);
         }
         catch (e) { /* istanbul ignore next */ this.wrapper.log.error([ "Filesystem watcher 'dir change' event error", e ]); }
-        finally { /* don't await */ this.processQueue(); }
+        finally { void this.processQueue(); }
     };
 
 
@@ -497,7 +497,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             this.wrapper.log.methodDone("[event] file 'change'", 1, logPad);
         }
         catch (e) { /* istanbul ignore next */ this.wrapper.log.error([ "Filesystem watcher 'file change' event error", e ]); }
-        finally { /* don't await */ this.processQueue(); }
+        finally { void this.processQueue(); }
     };
 
 
@@ -510,7 +510,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             this.wrapper.log.methodDone("[event] file 'create'", 1, logPad);
         }
         catch (e) { /* istanbul ignore next */ this.wrapper.log.error([ "Filesystem watcher 'file create' event error", e ]); }
-        finally { /* don't await */ this.processQueue(); }
+        finally { void this.processQueue(); }
     };
 
 
@@ -523,7 +523,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             this.wrapper.log.methodDone("[event] file 'delete'", 1, logPad);
         }
         catch (e) { /* istanbul ignore next */ this.wrapper.log.error([ "Filesystem watcher 'file delete' event error", e ]); }
-        finally { /* don't await */ this.processQueue(); }
+        finally { void this.processQueue(); }
     };
 
 
@@ -546,7 +546,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             ]);
         }
         catch (e) {}
-        finally { /* don't await */ this.processQueue(); }
+        finally { void this.processQueue(); }
     };
 
 }

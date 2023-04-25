@@ -491,16 +491,20 @@ export class TeWrapper implements ITeWrapper, Disposable
         return this.treeManager.views.taskExplorer.view;
     }
 
+	get extensionAuthor(): string {
+		return this.extensionId.substring(0, this.extensionId.indexOf("."));
+	}
+
 	get extensionId(): string {
 		return this._context.extension.id;
 	}
 
 	get extensionName(): string {
-		return this._context.extension.id.replace("spmeesseman.", "");
+		return this.extensionId.replace(`${this.extensionAuthor}.`, "");
 	}
 
 	get extensionTitle(): string {
-		return this.localize("name", "Task Explorer");
+		return this.localize("name", this._context.extension.packageJSON.displayName);
 	}
 
 	get figures(): typeof figures {
