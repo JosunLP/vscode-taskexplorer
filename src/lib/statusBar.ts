@@ -31,6 +31,11 @@ export class TeStatusBar implements ITeStatusBar, Disposable
     dispose = () => this._statusBarItem.dispose();
 
 
+    get text() {
+        return this._statusBarItem.text;
+    }
+
+
     hide = (reset?: boolean) =>
     {
         if (!this._progress)

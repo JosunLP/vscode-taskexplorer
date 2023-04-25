@@ -54,7 +54,8 @@
     "preview": false,
     "pricing": "Trial",
     "scripts": {
-        "clean": "npm run clean:extension && npm run clean:webviews && npm run test:clean",
+        "clean": "npm run clean:build && npm run test:clean",
+        "clean:build": "rimraf dist && rimraf tsconfig.tsbuildinfo",
         "clean:extension": "rimraf dist && rimraf tsconfig.tsbuildinfo",
         "clean:webviews": "rimraf res/css && rimraf res/js && rimraf res/page",
         "copy-all-to-code": "npm run copy-precopy-backup && npm run copy-res-to-code && npm run copy-pkgjson-to-code && npm run copy-build-to-code",

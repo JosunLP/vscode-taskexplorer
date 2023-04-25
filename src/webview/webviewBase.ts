@@ -177,7 +177,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 					case "title":
 						return this.title;
 					case "extensionName":
-						return this.wrapper.extensionName;
+						return this.wrapper.extensionTitle;
 					case "version":
 						return this.wrapper.version;
 					default: // case "webroot":

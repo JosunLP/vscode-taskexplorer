@@ -533,7 +533,7 @@ export class TeFileCache implements ITeFileCache, Disposable
         if (clear !== true && (force || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache)))
         // if (clear !== true && (!teApi.isTests() || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache)))
         {
-            const text = this.wrapper.statusBar.get();
+            const text = this.wrapper.statusBar.text;
             void this.wrapper.statusBar.update("Persisting file cache...");
             this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheTaskFilesMap, this.taskFilesMap);
             this.wrapper.storage.update2Sync(this.wrapper.keys.Storage.FileCacheProjectFilesMap, this.projectFilesMap);
