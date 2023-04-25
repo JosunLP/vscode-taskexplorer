@@ -136,7 +136,7 @@ export const activate = async (instance?: Mocha.Context) =>
         console.log(`    ${teWrapper.figures.color.info}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor("Tests startup", teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Time started     : ${locISOTime}`, teWrapper.figures.colors.grey)}`);
-        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension AUthor : ${teWrapper.extensionName}`, teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension Author : ${teWrapper.extensionAuthor}`, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension Name   : ${teWrapper.extensionName}`, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension ID     : ${teWrapper.extensionId}`, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(`   Extension Title  : ${teWrapper.extensionTitle}`, teWrapper.figures.colors.grey)}`);
