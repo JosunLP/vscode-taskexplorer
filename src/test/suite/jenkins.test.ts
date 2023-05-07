@@ -37,7 +37,7 @@ suite("Jenkins Tests", () =>
             setEnvJenkinsToken = true;
         }
         teWrapper.treeManager.configWatcher.enableConfigWatcher(false);
-        await executeSettingsUpdate("pathToPrograms.jenkins", "https://jenkins.pjats.com");
+        await executeSettingsUpdate("pathToPrograms.jenkins", "https://jenkins.spmeesseman.com");
         teWrapper.treeManager.configWatcher.enableConfigWatcher(true);
         endRollingCount(this, true);
     });
@@ -188,7 +188,7 @@ pipeline {
         }
         catch (e) { throw e; }
         finally {
-            await executeSettingsUpdate("pathToPrograms.jenkins", "https://jenkins.pjats.com", tc.waitTime.config.pathToProgramsEvent);
+            await executeSettingsUpdate("pathToPrograms.jenkins", "https://jenkins.spmeesseman.com", tc.waitTime.config.pathToProgramsEvent);
             await verifyTaskCount(testsName, startTaskCount + 1);
         }
         endRollingCount(this);

@@ -45,7 +45,7 @@
             "composer": "composer",
             "curl": "curl",
             "gradle": "c:\\Code\\gradle\\bin\\gradle.bat",
-            "jenkins": "https://jenkins.pjats.com",
+            "jenkins": "https://jenkins.spmeesseman.com",
             "make": "C:\\Code\\compilers\\c_c++\\9.0\\VC\\bin\\nmake.exe",
             "maven": "mvn",
             "nsis": "c:\\Code\\nsis\\makensis.exe",
