@@ -5,5 +5,5 @@ export interface ITeStatusBar
 	hide(reset?: boolean): void;
 	runWithProgress<T>(task: () => Thenable<T>): Thenable<T>;
 	show(text?: string, toolTip?: string, command?: string): void;
-    update(text: string): Promise<void>;
+    update(text: string, increment?: number): void;
 }

@@ -1,24 +1,27 @@
+
+import { TeWrapper } from "./wrapper";
+import { ITeStatusBar } from "../interface";
+import { Disposable, Progress, ProgressLocation, StatusBarAlignment, StatusBarItem, window } from "vscode";
+
+type ProgressTask = () => Thenable<any>;
+interface IProgressParam { message?: string; increment?: number };
+
+
 /**
  * @class TeStatusBar
  * @since 3.0.0
  */
-
-import { TeWrapper } from "./wrapper";
-import { ITeStatusBar } from "../interface";
-import {
-    CancellationToken, Disposable, Progress, ProgressLocation, StatusBarAlignment, StatusBarItem, window
-} from "vscode";
-
-type StatusProgressCallback = Progress<{ message?: string; increment?: number }>;
-
-
 export class TeStatusBar implements ITeStatusBar, Disposable
 {
-    private _hidden = true;
-    private _title: string;
-    private _statusBarNumChars = 65;
-    private _statusBarItem: StatusBarItem;
-    private _progress: Progress<{ message?: string; increment?: number }> | undefined;
+    private _currentStatusText = "";
+    private _currentStatusTooltip = "";
+    private _currentStatusIncrement: number | undefined;
+    private _progress: Progress<IProgressParam> | undefined;
+
+    private readonly _title: string;
+    private readonly _statusBarNumChars = 65;
+    private readonly _statusBarItem: StatusBarItem;
+    private readonly _disposables: Disposable[] = [];
 
 
     constructor(private readonly wrapper: TeWrapper)
@@ -26,56 +29,40 @@ export class TeStatusBar implements ITeStatusBar, Disposable
         this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this._title = this.wrapper.extensionTitleShort;
         this.reset();
+        this._disposables.push(
+            this._statusBarItem // ,
+            // window.onDidChangeWindowState(this.onnWindowStateChange, this)
+        );
     }
 
-    dispose = () => this._statusBarItem.dispose();
+    dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
 
 
     get text() {
-        return this._statusBarItem.text;
+        return this._currentStatusText;
     }
 
 
     hide = (reset?: boolean) =>
     {
-        if (!this._progress)
-        {
-            if (!this._hidden) {
-                this._statusBarItem.text = "";
-                this._statusBarItem.hide();
-                this._hidden = true;
-            }
-            if (reset) {
-                this.reset();
-            }
+        this._statusBarItem.text = "";
+        this._statusBarItem.hide();
+        if (reset && !this._progress) {
+            this.reset();
         }
     };
 
 
     private reset = () =>
     {
-        this._title = this.wrapper.extensionTitleShort;
-        this._statusBarItem.tooltip = this._title + " Status";
-        this._statusBarItem.text = "";
         this._statusBarItem.command = undefined;
+        this._currentStatusIncrement = undefined;
+        this._statusBarItem.tooltip = this._title + " Status";
+        this._statusBarItem.text = this._currentStatusText = this._currentStatusTooltip = "";
     };
 
 
-    // private onCancel = () => void this.wrapper.fileCache.cancelBuildCache();
-
-
-    private run = async <T>(progress: StatusProgressCallback, token: CancellationToken, task: (progress: StatusProgressCallback, token: CancellationToken) => Thenable<T>) =>
-    {
-        // const d = token.onCancellationRequested(() => this.onCancel());
-        this._progress = progress;
-        const t = await task(progress, token);
-        this._progress = undefined;
-        // d.dispose();
-        return t;
-    };
-
-
-    runWithProgress = <T>(task: () => Thenable<T>, location = ProgressLocation.Window) =>
+    runWithProgress = <T>(task: ProgressTask, location = ProgressLocation.Window) =>
     {
         return window.withProgress<T>(
         {
@@ -83,51 +70,47 @@ export class TeStatusBar implements ITeStatusBar, Disposable
             cancellable: false,
             title: this._title
         },
-        (progress, token) => this.run<T>(progress, token, task));
+        async (progress) => { // , token) => {
+            // const d = token.onCancellationRequested(() => void this.wrapper.langManager.stopIndexer());
+            this._progress = progress;
+            const result = await task();
+            this._progress = undefined;
+            // d.dispose();
+            return result;
+        });
     };
 
 
-    show = (text?: string, toolTip?: string, command?: string) =>
+    show = (text: string, toolTip: string, command?: string) =>
     {
-        if (!this._progress)
-        {
-            if (this._hidden)
-            {
-                this._statusBarItem.show();
-                this._hidden = false;
-            }
-            this._statusBarItem.text = text || this._statusBarItem.text;
-            this._statusBarItem.tooltip = toolTip || this._statusBarItem.tooltip;
-            this._statusBarItem.command = command || this._statusBarItem.command;
-        }
+        this._statusBarItem.show();
+        this._statusBarItem.text = this._currentStatusText = text;
+        this._statusBarItem.tooltip = this._currentStatusTooltip = toolTip;
+        this._statusBarItem.command = command;
     };
 
 
-    // tooltip = (msg: string) => this.statusBarItem.tooltip = msg;
-
-
-    update = async (text: string, increment?: number) =>
+    update = (text: string, increment?: number) =>
     {
-        if (!text)
+        if (text !== this._currentStatusText || increment !== this._currentStatusIncrement)
         {
-            this.hide();
-            if (this._progress)
+            if (!text)
             {
-                this._progress.report({});
-                await this.wrapper.utils.sleep(1);
+                this.hide();
             }
-        }
-        else
-        {
-            const statusText = this.getStatusString(text);
-            if (this._progress)
+            else
             {
-                this._progress.report({ message: statusText, increment });
-                await this.wrapper.utils.sleep(1);
+                const statusText = this.getStatusString(text);
+                if (this._progress)
+                {
+                    this._progress.report({ message: statusText, increment });
+                }
+                else {
+                    this.show(`$(loading~spin) ${this._title}: ${statusText}`, this._currentStatusTooltip);
+                }
             }
-            else {
-                this.show(`$(loading~spin) ${this._title}: ${statusText}`);
-            }
+            this._currentStatusText = text;
+            this._currentStatusIncrement = increment;
         }
     };
 

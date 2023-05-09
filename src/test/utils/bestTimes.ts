@@ -125,7 +125,7 @@ const processBestTime = async (logTitle: string, storageKey: string, timeElapsed
     }
 
     const timeElapsedFmt = getTimeElapsedFmt(timeElapsed);
-    if (timeElapsed < bestTimeElapsed)
+    if (timeElapsed > 0 && timeElapsed < bestTimeElapsed)
     {
         await logBestTime(logTitle, storageKey, timeElapsedFmt);
         await saveProcessTimeToStorage(storageKey, timeElapsed, timeElapsedFmt, numTests);
@@ -134,7 +134,8 @@ const processBestTime = async (logTitle: string, storageKey: string, timeElapsed
         const wsTypeMsg = tc.isMultiRootWorkspace ? "multi-root" : "single-root";
         const bestTimeElapsedFmt = await teWrapper.storage.get2<string>(storageKey + "Fmt", ""),
               msg1 = `The time elapsed was ${timeElapsedFmt}`,
-              msg2 = `The fastest time recorded for a ${wsTypeMsg} workspace is ${bestTimeElapsedFmt}`;
+              msg2 = timeElapsed > 0 ? `The fastest time recorded for a ${wsTypeMsg} workspace is ${bestTimeElapsedFmt}` :
+                                       "Best time tracking not available for tests running at 0 ms";
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(msg1, teWrapper.figures.colors.grey)}`);
         console.log(`    ${teWrapper.figures.color.info} ${teWrapper.figures.withColor(msg2, teWrapper.figures.colors.grey)}`);
     }
