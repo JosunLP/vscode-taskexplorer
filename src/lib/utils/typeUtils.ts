@@ -1,31 +1,34 @@
 import { Uri, WorkspaceFolder } from "vscode";
 
 
-export const isArray = <T>(value: any): value is T[] => !!value && Array.isArray(value);
+export const isArray = <T>(v: any): v is T[] => !!v && Array.isArray(v);
 
 
-export const isBoolean = (value: any): value is boolean => (value === false || value === true) && typeof value === "boolean";
+export const isBoolean = (v: any): v is boolean => (v === false || v === true) && typeof v === "boolean";
+
+
+// export const isDefined = (v: any) => typeof v !== "undefined";
 
 
 export const isError = (e: any): e is Error => e instanceof Error;
 
 
-export const isFunction = (value: any) => !!value && typeof value === "function";
+export const isFunction = (v: any) => !!v && typeof v === "function";
 
 
-export const isNumber = (n: any): n is number => (n || n === 0) && typeof n === "number" && isFinite(n);
+export const isNumber = (v: any): v is number => (v || v === 0) && typeof v === "number" && isFinite(v);
 
 
-export const isObject = (value: any): value is { [key: string]: any } => !!value && (value instanceof Object || typeof value === "object") && !isArray(value);
+export const isObject = (v: any): v is { [key: string]: any } => !!v && (v instanceof Object || typeof v === "object") && !isArray(v);
 
 
-export const isObjectEmpty = (value: any) =>
+export const isObjectEmpty = (v: any) =>
 {
-    if (value)
+    if (v)
     {
-        for (const key in value)
+        for (const key in v)
         {
-            if ({}.hasOwnProperty.call(value, key)) {
+            if ({}.hasOwnProperty.call(v, key)) {
                 return false;
             }
         }
@@ -34,11 +37,11 @@ export const isObjectEmpty = (value: any) =>
 };
 
 
-export const isString = (value: any, notEmpty = false): value is string =>
-    (!!value || (value === "" && !notEmpty)) && (value instanceof String || typeof value === "string");
+export const isString = (v: any, notEmpty = false): v is string =>
+    (!!v || (v === "" && !notEmpty)) && (v instanceof String || typeof v === "string");
 
 
-export const isUri = (u: any): u is Uri => !!u && u instanceof Uri;
+export const isUri = (v: any): v is Uri => !!v && v instanceof Uri;
 
 
-export const isWorkspaceFolder = (value: any): value is WorkspaceFolder => value && typeof value !== "number";
+export const isWorkspaceFolder = (v: any): v is WorkspaceFolder => v && typeof v !== "number";

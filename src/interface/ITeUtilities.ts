@@ -9,9 +9,9 @@ import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
 
 
 export type PromiseAdapter<T, U> = (
-    value: T,
+    v: T,
     resolve:
-        (value: U | PromiseLike<U>) => void,
+        (v: U | PromiseLike<U>) => void,
     reject:
         (reason: any) => void
 ) => any;
@@ -59,14 +59,15 @@ export interface ITeTaskUtilities
 
 export interface ITeTypeUtilities
 {
-	isArray<T>(value: any): value is T[];
-	isBoolean(value: any): value is boolean;
-	isNumber(n: any): n is number;
-	isObject(value: any): value is { [key: string]: any };
-	isObjectEmpty(value: any): boolean;
-	isString(value: any, notEmpty?: boolean): value is string;
-	isUri(u: any): u is Uri;
-	isWorkspaceFolder(value: any): value is WorkspaceFolder;
+	isArray<T>(v: any): v is T[];
+	isBoolean(v: any): v is boolean;
+	isDefined(v: any): boolean;
+	isNumber(v: any): v is number;
+	isObject(v: any): v is { [key: string]: any };
+	isObjectEmpty(v: any): boolean;
+	isString(v: any, notEmpty?: boolean): v is string;
+	isUri(v: any): v is Uri;
+	isWorkspaceFolder(v: any): v is WorkspaceFolder;
 }
 
 export interface ITeUtilities

@@ -1,3 +1,7 @@
+/**
+ * @class TeStatusBar
+ * @since 3.0.0
+ */
 
 import { TeWrapper } from "./wrapper";
 import { ITeStatusBar } from "../interface";
@@ -6,26 +10,26 @@ import { Disposable, Progress, ProgressLocation, StatusBarAlignment, StatusBarIt
 type ProgressTask = () => Thenable<any>;
 interface IProgressParam { message?: string; increment?: number };
 
+const STATUS_BAR_SIZE = 65;
 
-/**
- * @class TeStatusBar
- * @since 3.0.0
- */
+
 export class TeStatusBar implements ITeStatusBar, Disposable
 {
+    // private _focused: boolean;
     private _currentStatusText = "";
-    private _currentStatusTooltip = "";
+    private _currentStatusTooltip: string | undefined;
+    private _currentStatusCommand: string | undefined;
     private _currentStatusIncrement: number | undefined;
     private _progress: Progress<IProgressParam> | undefined;
 
     private readonly _title: string;
-    private readonly _statusBarNumChars = 65;
     private readonly _statusBarItem: StatusBarItem;
     private readonly _disposables: Disposable[] = [];
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
+        // this._focused = window.state.focused;
         this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
         this._title = this.wrapper.extensionTitleShort;
         this.reset();
@@ -43,22 +47,31 @@ export class TeStatusBar implements ITeStatusBar, Disposable
     }
 
 
-    hide = (reset?: boolean) =>
-    {
-        this._statusBarItem.text = "";
-        this._statusBarItem.hide();
-        if (reset && !this._progress) {
-            this.reset();
-        }
-    };
+    private getStatusString = (msg: string): string =>
+        (msg.length <= STATUS_BAR_SIZE ? msg.padEnd(STATUS_BAR_SIZE, " ") : msg.substring(0, STATUS_BAR_SIZE - 3) + "...");
+
+
+    hide = () => { this.reset(); this._statusBarItem.hide(); };
+
+
+    // private onnWindowStateChange = (state: WindowState) =>
+    // {
+    //     this._focused = state.focused;
+    //     if (this._focused && this._progress) {
+    //         this.update(this._currentStatusText, this._currentStatusIncrement);
+    //     }
+    // };
 
 
     private reset = () =>
     {
-        this._statusBarItem.command = undefined;
-        this._currentStatusIncrement = undefined;
-        this._statusBarItem.tooltip = this._title + " Status";
-        this._statusBarItem.text = this._currentStatusText = this._currentStatusTooltip = "";
+        this._statusBarItem.text = "";
+        this._statusBarItem.command = this._currentStatusCommand = undefined;
+        this._statusBarItem.tooltip = this._currentStatusTooltip = undefined;
+        if (!this._progress) {
+            this._currentStatusText = "";
+            this._currentStatusIncrement = undefined;
+        }
     };
 
 
@@ -70,26 +83,41 @@ export class TeStatusBar implements ITeStatusBar, Disposable
             cancellable: false,
             title: this._title
         },
-        async (progress) => { // , token) => {
-            // const d = token.onCancellationRequested(() => void this.wrapper.langManager.stopIndexer());
+        async (progress) =>  // token)
+        {   // const d = token.onCancellationRequested(() => void this.wrapper.langManager.stopIndexer());
             this._progress = progress;
             const result = await task();
             this._progress = undefined;
+            this._currentStatusText = "";
+            this._currentStatusIncrement = undefined;
             // d.dispose();
             return result;
         });
     };
 
 
-    show = (text: string, toolTip: string, command?: string) =>
+    show = (text: string, toolTip?: string, command?: string) =>
     {
-        this._statusBarItem.show();
-        this._statusBarItem.text = this._currentStatusText = text;
-        this._statusBarItem.tooltip = this._currentStatusTooltip = toolTip;
-        this._statusBarItem.command = command;
+        this._currentStatusText = text;
+        this._show(text, toolTip, command);
     };
 
 
+    private _show = (text: string, toolTip?: string, command?: string) =>
+    {
+        this._statusBarItem.show();
+        this._statusBarItem.text = text;
+        this._statusBarItem.tooltip = this._currentStatusTooltip = toolTip;
+        this._statusBarItem.command = this._currentStatusCommand = command;
+    };
+
+
+    // tooltip = (msg: string) => this.statusBarItem.tooltip = msg;
+
+    /**
+     * Updates a progress status.  StatusBarItem is displated with loading icon or the
+     * _progress instance if a task was started with runWithProgress()
+     */
     update = (text: string, increment?: number) =>
     {
         if (text !== this._currentStatusText || increment !== this._currentStatusIncrement)
@@ -106,27 +134,12 @@ export class TeStatusBar implements ITeStatusBar, Disposable
                     this._progress.report({ message: statusText, increment });
                 }
                 else {
-                    this.show(`$(loading~spin) ${this._title}: ${statusText}`, this._currentStatusTooltip);
+                    this._show(`$(loading~spin) ${this._title}: ${statusText}`, this._currentStatusTooltip, this._currentStatusCommand);
                 }
             }
             this._currentStatusText = text;
             this._currentStatusIncrement = increment;
         }
-    };
-
-
-    private getStatusString = (msg: string) =>
-    {
-        if (msg.length < this._statusBarNumChars)
-        {
-            for (let i = msg.length; i < this._statusBarNumChars; i++) {
-                msg += " ";
-            }
-        }
-        else {
-            msg = msg.substring(0, this._statusBarNumChars - 3) + "...";
-        }
-        return msg;
     };
 
 }
