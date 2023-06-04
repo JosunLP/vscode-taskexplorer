@@ -696,6 +696,12 @@
                     "command": "taskexplorer.view.parsingReport.show",
                     "when": "taskexplorer:enabled"
                 },
+				{
+					"command": "taskexplorer.view.licensePage.show"
+				},
+				{
+					"command": "taskexplorers.view.releaseNotes.show"
+				},
                 {
                     "command": "taskexplorer.view.taskMonitor.show",
                     "when": "taskexplorer:enabled && taskexplorer:account:licensed"
@@ -726,7 +732,7 @@
                 },
                 {
                     "command": "taskexplorer.register",
-                    "when": "taskexplorer:enabled"
+                    "when": "taskexplorer:enabled && !taskexplorer:account:registered"
                 },
                 {
                     "command": "taskexplorer.clearTaskStats",

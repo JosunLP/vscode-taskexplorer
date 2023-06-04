@@ -61,7 +61,7 @@ export interface ITeTypeUtilities
 {
 	isArray<T>(v: any): v is T[];
 	isBoolean(v: any): v is boolean;
-	isDefined(v: any): boolean;
+	// isDefined(v: any): boolean;
 	isNumber(v: any): v is number;
 	isObject(v: any): v is { [key: string]: any };
 	isObjectEmpty(v: any): boolean;

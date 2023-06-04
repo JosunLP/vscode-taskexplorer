@@ -42,11 +42,7 @@ export class TeTreeView implements ITaskTreeView, Disposable
         );
 	}
 
-	dispose()
-	{
-		this._disposables.forEach((d) => d.dispose());
-        this._disposables.splice(0);
-	}
+	dispose = () => this._disposables.splice(0).forEach((d) => d.dispose());
 
 
     get tree(): TaskTree {
