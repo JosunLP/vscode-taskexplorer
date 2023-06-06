@@ -11,6 +11,8 @@ import { ContextKeys, WebviewViewIds } from "../../lib/context";
 export class TaskUsageView extends TeWebviewView<State>
 {
 	static viewId: WebviewViewIds = "taskUsage"; // Must match view id in package.jso
+	private _trackStats = false;
+	private _trackUsage = false;
 
 
 	constructor(wrapper: TeWrapper)
@@ -24,6 +26,8 @@ export class TaskUsageView extends TeWebviewView<State>
 			`${ContextKeys.WebviewViewPrefix}${TaskUsageView.viewId}`,
 			`${TaskUsageView.viewId}View`
 		);
+		this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage, false);
+		this._trackStats = this._trackUsage && this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats, false);
 	}
 
 
@@ -33,13 +37,15 @@ export class TaskUsageView extends TeWebviewView<State>
 	protected override includeHead = () => ""; // For coverage, empty head
 
 
-	protected override includeEndOfBody = () => "<!-- spm -->"; // For coverage, endOfBody and no bootstrap
+	protected override includeEndOfBody = () => { if (!this._trackUsage) { return "<center><br /><br />Task stat tracking is disabled</center>"; } return ""; };
 
 
 	protected override onConfigChanged(e: ConfigurationChangeEvent)
 	{
 		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
 		{
+			this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage, false);
+			this._trackStats = this._trackUsage && this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats, false);
 			void debounceCommand("taskUsageView.event.onConfigChanged", this.refresh, 75, this, false, false);
 		}
 		super.onConfigChanged(e);
@@ -48,9 +54,7 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	protected override onHtmlFinalize = async (html: string) =>
 	{
-		const trackStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage) &&
-						   this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats);
-		if (trackStats)
+		if (this._trackStats)
 		{
 			const lastTime = this.wrapper.usage.getLastRanTaskTime(),
 				  mostUsedTask = this.wrapper.usage.mostUsedTask;
@@ -61,7 +65,9 @@ export class TaskUsageView extends TeWebviewView<State>
 					   .replace(/\#\{taskUsage\.lastTaskRanAt\}/g, lastTime);
 		}
 		else {
-			html = "<center><br /><br />Task stat tracking is disabled</center>";
+			const statsStartIdx = html.indexOf("<table"),
+				  statsEndIdx = html.lastIndexOf("</table>") + 8;
+			html = (html.substring(0, statsStartIdx) + html.substring(statsEndIdx));
 		}
 		return html;
 	};
