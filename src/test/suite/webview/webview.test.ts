@@ -12,7 +12,7 @@ import {
 } from "../../utils/commandUtils";
 import {
     activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep,
-    suiteFinished, testControl as tc, waitForWebviewReadyEvent
+    suiteFinished, testControl as tc, waitForWebviewReadyEvent, waitForWebviewsIdle
 } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -179,16 +179,20 @@ suite("Webview Tests", () =>
         await executeTeCommand("taskexplorer.view.taskCount.removeView", 5);
         await executeTeCommand("taskexplorer.view.taskUsage.removeView", 5);
         await executeTeCommand("taskexplorer.view.home.removeView", 5);
-        while (teWrapper.homeView.visible || teWrapper.taskCountView.visible  || teWrapper.taskUsageView.visible) {
+        while (teWrapper.homeView.view || teWrapper.taskCountView.view  || teWrapper.taskUsageView.view) {
             await sleep(10);
         }
+        await waitForWebviewsIdle(10);
         await executeTeCommand("taskexplorer.view.taskCount.resetViewLocation", 5);
         await executeTeCommand("taskexplorer.view.taskUsage.resetViewLocation", 5);
         await executeTeCommand("taskexplorer.view.home.resetViewLocation", 5);
         await sleep(10);
+        await waitForWebviewsIdle(10);
         await executeTeCommand("taskexplorer.view.taskCount.toggleVisibility", 5);
         await executeTeCommand("taskexplorer.view.taskUsage.toggleVisibility", 5);
         await executeTeCommand("taskexplorer.view.home.toggleVisibility", 5);
+        await sleep(10);
+        await waitForWebviewsIdle(10);
         await executeTeCommand("taskexplorer.view.taskCount.toggleVisibility", 5);
         await executeTeCommand("taskexplorer.view.taskUsage.toggleVisibility", 5);
         await executeTeCommand("taskexplorer.view.home.toggleVisibility", 5);
