@@ -2,9 +2,9 @@
 
 import { join } from "path";
 import { isNumber, isString } from "./utils/typeUtils";
-import { IDictionary, IStorage, StorageChangeEvent, StorageTarget } from "../interface";
+import { IDictionary, ISecretStorageChangeEvent, IStorage, IStorageChangeEvent, StorageTarget } from "../interface";
 import { createDir, pathExists, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./utils/fs";
-import { Memento, ExtensionContext, SecretStorage, ExtensionMode, SecretStorageChangeEvent, EventEmitter, Event } from "vscode";
+import { Memento, ExtensionContext, SecretStorage, ExtensionMode, EventEmitter, Event } from "vscode";
 
 export let storage: IStorage;
 
@@ -30,8 +30,8 @@ class Storage implements IStorage
     private storageGbl: Memento;
     private storageFile: string;
     private secrets: SecretStorage;
-    private _onDidChange = new EventEmitter<StorageChangeEvent>();
-	private _onDidChangeSecret = new EventEmitter<SecretStorageChangeEvent>();
+    private _onDidChange = new EventEmitter<IStorageChangeEvent>();
+	private _onDidChangeSecret = new EventEmitter<ISecretStorageChangeEvent>();
 
 
     constructor(context: ExtensionContext, storageFile: string)
@@ -48,17 +48,17 @@ class Storage implements IStorage
         this.storageFile = storageFile;
         context.subscriptions.push(
             this._onDidChange,
-            this._onDidChangeSecret,
-            context.secrets.onDidChange(e => this._onDidChangeSecret.fire(e), this)
+            this._onDidChangeSecret // ,
+            // context.secrets.onDidChange(e => this._onDidChangeSecret.fire(e), this)
         );
     }
 
 
-	get onDidChange(): Event<StorageChangeEvent> {
+	get onDidChange(): Event<IStorageChangeEvent> {
 		return this._onDidChange.event;
 	}
 
-	get onDidChangeSecret(): Event<SecretStorageChangeEvent> {
+	get onDidChangeSecret(): Event<ISecretStorageChangeEvent> {
 		return this._onDidChangeSecret.event;
 	}
 
@@ -66,7 +66,7 @@ class Storage implements IStorage
     delete = async(key: string, storageTarget: StorageTarget = StorageTarget.Global) =>
     {
         await this.storage[storageTarget].update(this.getKey(key), undefined);
-        this._onDidChange.fire({ key, workspace: false });
+        this._onDidChange.fire({ key, value: undefined, workspace: false });
     };
 
 
@@ -146,7 +146,7 @@ class Storage implements IStorage
     update = async(key: string, value: any, storageTarget: StorageTarget = StorageTarget.Global) =>
     {
         await this.storage[storageTarget].update(this.getKey(key), value);
-        this._onDidChange.fire({ key, workspace: false });
+        this._onDidChange.fire({ key, value, workspace: false });
     };
 
 
@@ -162,7 +162,7 @@ class Storage implements IStorage
             store[this.getKey(key)] = value;
             const newJson = JSON.stringify(store);
             await writeFile(this.storageFile, newJson);
-            this._onDidChange.fire({ key, workspace: false });
+            this._onDidChange.fire({ key, value, workspace: false });
         }
         catch {}
     }
@@ -180,18 +180,24 @@ class Storage implements IStorage
             store[this.getKey(key)] = value;
             const newJson = JSON.stringify(store);
             writeFileSync(this.storageFile, newJson);
-            this._onDidChange.fire({ key, workspace: false });
+            this._onDidChange.fire({ key, value, workspace: false });
         }
         catch {}
     }
 
 
-    updateSecret = (key: string, value: string | undefined): Thenable<void> =>
+    updateSecret = async (key: string, value: string | undefined): Promise<void> =>
     {
-        if (value !== undefined) {
-            return this.secrets.store(this.getKey(key), value);
+        let v = value;
+        if (value !== undefined)
+        {
+            await this.secrets.store(this.getKey(key), value);
+            try { v = JSON.parse(value); } catch {}
         }
-        return this.secrets.delete(this.getKey(key));
+        else {
+            await this.secrets.delete(this.getKey(key));
+        }
+        this._onDidChangeSecret.fire({ key, value: v });
     };
 
 }
