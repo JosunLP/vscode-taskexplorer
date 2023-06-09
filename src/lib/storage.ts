@@ -23,15 +23,14 @@ export const initStorage = async (context: ExtensionContext) =>
 
 class Storage implements IStorage
 {
-    private isDev: boolean;
-    private isTests: boolean;
-    private storage: Memento[];
-    private storageWs: Memento;
-    private storageGbl: Memento;
-    private storageFile: string;
-    private secrets: SecretStorage;
-    private _onDidChange = new EventEmitter<IStorageChangeEvent>();
-	private _onDidChangeSecret = new EventEmitter<ISecretStorageChangeEvent>();
+    private readonly _keyPrefix: string;
+    private readonly storage: Memento[];
+    private readonly storageWs: Memento;
+    private readonly storageGbl: Memento;
+    private readonly storageFile: string;
+    private readonly secrets: SecretStorage;
+    private readonly _onDidChange = new EventEmitter<IStorageChangeEvent>();
+	private readonly _onDidChangeSecret = new EventEmitter<ISecretStorageChangeEvent>();
 
 
     constructor(context: ExtensionContext, storageFile: string)
@@ -43,9 +42,9 @@ class Storage implements IStorage
             this.storageWs
         ];
         this.secrets = context.secrets;
-        this.isDev = context.extensionMode === ExtensionMode.Development;
-        this.isTests = context.extensionMode === ExtensionMode.Test;
         this.storageFile = storageFile;
+        this._keyPrefix = ExtensionMode[context.extensionMode].toLowerCase()
+                          .replace("production", "").replace("test", "tests").replace("development", "dev");
         context.subscriptions.push(
             this._onDidChange,
             this._onDidChangeSecret // ,
@@ -83,8 +82,7 @@ class Storage implements IStorage
     }
 
 
-    private getKey = (key: string) => (!this.isDev && !this.isTests ? /* istanbul ignore next */"" :
-                                      (this.isDev ? /* istanbul ignore next */"dev" : "tests")) + key;
+    private getKey = (key: string) => this._keyPrefix + key;
 
 
     private _get2<T>(key: string, store: IDictionary<T>, defaultValue?: T): T | undefined
