@@ -565,7 +565,6 @@ const plugins = (env, wpConfig) =>
 	}
 
 	wpConfig.plugins.push(
-		// @ts-ignore
 		wpPlugin.analyze.bundle(env, wpConfig),
 		wpPlugin.analyze.circular(env, wpConfig),
 		wpPlugin.banner(env, wpConfig),
