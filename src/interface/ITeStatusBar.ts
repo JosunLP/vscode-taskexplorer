@@ -17,5 +17,5 @@ export interface ITeStatusBar
 	show(info: IStatusBarInfo): void;
 	showTimed(info: IStatusBarInfo, resetInfo?: IStatusBarInfo, delayMs?: number): void;
     update(text: string, incrementOrReset?: number): void;
-	updateRunProgress(task: string, project: string, pct: number): number;
+	// updateRunProgress(task: string, project: string, pct: number): number;
 }

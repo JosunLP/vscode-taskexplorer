@@ -311,6 +311,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		if (this.tests || /* istanbul ignore next */!rootFolderChanged)
 		{
 			await this._statusBar.runWithProgress<number>(() => this.fileCache.rebuildCache("   "));
+			// await this.fileCache.rebuildCache("   "); // ^^^ Cover runWithProgress() for now
 		}     //
 		else // See comments/notes above
 		{   //
@@ -318,6 +319,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._treeManager.configWatcher.enableConfigWatcher(false);
 			await this.config.update(AllConstants.Config.EnablePersistenFileCache, true);
 			await this._statusBar.runWithProgress<number>(() => this.fileCache.rebuildCache("   "));
+			// await this.fileCache.rebuildCache("   "); // ^^^ Cover runWithProgress() for now
 			await this.config.update(AllConstants.Config.EnablePersistenFileCache, enablePersistentFileCaching);
 			this._treeManager.configWatcher.enableConfigWatcher(true);
 		}

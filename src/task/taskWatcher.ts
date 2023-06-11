@@ -1,17 +1,16 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { TeWrapper } from "../lib/wrapper";
 import { TaskItem } from "../tree/item";
+import { TeWrapper } from "../lib/wrapper";
 import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../interface";
 import {
-    Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, StatusBarItem, StatusBarAlignment,
-    Task, window, TaskEndEvent, EventEmitter, TaskProcessEndEvent, TaskProcessStartEvent
+    Disposable, Event, WorkspaceFolder, tasks, TaskStartEvent, Task, TaskEndEvent, EventEmitter,
+    TaskProcessEndEvent, TaskProcessStartEvent
 } from "vscode";
 
 
 export class TaskWatcher implements Disposable
 {
-    private readonly _statusBarSpace: StatusBarItem;
     private readonly _disposables: Disposable[];
     private readonly _onTaskStatusChange: EventEmitter<ITeTaskStatusChangeEvent>;
     private readonly _onDidRunningTasksChange: EventEmitter<ITeRunningTaskChangeEvent>;
@@ -19,22 +18,19 @@ export class TaskWatcher implements Disposable
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        this._statusBarSpace = window.createStatusBarItem(StatusBarAlignment.Left, -10000);
-        this._statusBarSpace.tooltip = `${wrapper.extensionTitle} Running Task`;
         this._onTaskStatusChange = new EventEmitter<ITeTaskStatusChangeEvent>();
         this._onDidRunningTasksChange = new EventEmitter<ITeRunningTaskChangeEvent>();
         this._disposables = [
-            this._statusBarSpace,
             this._onTaskStatusChange,
             this._onDidRunningTasksChange,
-            tasks.onDidStartTask((e) => this.taskStartEvent(e), this),
-            tasks.onDidEndTask((e) => this.taskFinishedEvent(e), this),
-            tasks.onDidStartTaskProcess((e) => this.taskProcessStartEvent(e), this),
-            tasks.onDidEndTaskProcess((e) => this.taskProcessFinishedEvent(e), this)
+            tasks.onDidStartTask(this.taskStartEvent, this),
+            tasks.onDidEndTask(this.taskFinishedEvent, this),
+            tasks.onDidStartTaskProcess(this.taskProcessStartEvent, this),
+            tasks.onDidEndTaskProcess(this.taskProcessFinishedEvent, this)
         ];
     }
 
-    dispose = () => this._disposables.forEach(d => d.dispose());
+    dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
 
 
     get onDidRunningTasksChange(): Event<ITeRunningTaskChangeEvent> {
@@ -83,17 +79,11 @@ export class TaskWatcher implements Disposable
             if (exec)
             {
                 this.wrapper.log.methodStart("   found running task, show status message", 2, logPad);
-                let statusMsg = task.name;
-                /* istanbul ignore else */
-                if ((task.scope as WorkspaceFolder).name) {
-                    statusMsg += " (" + (task.scope as WorkspaceFolder).name + ")";
-                }
-                this._statusBarSpace.text = "$(loading~spin) " + statusMsg;
-                this._statusBarSpace.show();
+                this.wrapper.statusBar.update(`${task.name} (${(task.scope as WorkspaceFolder).name})`);
             }
             else {
                 this.wrapper.log.methodStart("   found idle/stopped task, hide status message", 2, logPad);
-                this._statusBarSpace.hide();
+                this.wrapper.statusBar.update("");
             }
         }
         this.wrapper.log.methodDone("task start/stop show/hide message", 2, logPad);

@@ -161,11 +161,11 @@ export class TeStatusBar implements ITeStatusBar, Disposable
     };
 
 
-    updateRunProgress = (task: string, project: string, pct: number): number =>
-    {
-        const rPct = Math.round(pct);
-        this.update(`${task} ${project} ${rPct}%`, rPct);
-        return pct;
-    };
+    // updateRunProgress = (task: string, project: string, pct: number): number =>
+    // {
+    //     const rPct = Math.round(pct);
+    //     this.update(`${task} ${project} ${rPct}%`, rPct);
+    //     return pct;
+    // };
 
 }

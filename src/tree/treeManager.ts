@@ -65,10 +65,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._specialFolders.lastTasks,
             this._views.taskExplorer,
             this._views.taskExplorerSideBar,
-            registerCommand(wrapper.keys.Commands.AddToExcludes, (item: TaskFile | TaskItem) => this.addToExcludes(item), this),
-            registerCommand(wrapper.keys.Commands.AddRemoveCustomLabel, (item: TaskItem) => this.addRemoveSpecialTaskLabel(item), this),
+            registerCommand(wrapper.keys.Commands.AddToExcludes, this.addToExcludes, this),
+            registerCommand(wrapper.keys.Commands.AddRemoveCustomLabel, this.addRemoveSpecialTaskLabel, this),
             registerCommand(wrapper.keys.Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.getTaskItem(item)), this),
-            registerCommand(wrapper.keys.Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this)
+            registerCommand(wrapper.keys.Commands.Refresh, this.refresh, this)
         );
 
         this.wrapper.log.methodDone("treemgr: construct task tree manager", 1, "   ");
@@ -142,8 +142,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     private addToExcludes = async(selection: TaskFile | TaskItem) =>
     {
-        let uri: Uri | false;
-        let excludesList = "exclude";
+        let uri: Uri | false,
+            excludesList = "exclude";
         const pathValues: string[] = [];
 
         this.wrapper.log.methodStart("treemgr: add to excludes", 1, "", true, [[ "global", global ]]);
@@ -326,6 +326,19 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
+    private fireTasksLoadedEvents = (prevTaskCount: number) =>
+    {
+        const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
+        this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
+        if (this._tasks.length !== prevTaskCount) {
+            this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
+        }
+        if (!this.firstTreeBuildDone) {
+            this._onReady.fire({ tasks: iTasks, type: "all" });
+        }
+    };
+
+
     fireTreeRefreshEvent = (treeItem: TreeItem | null, taskItem: TaskItem | null, logPad: string) =>
     {
         Object.values(this._views).filter(v => v.enabled).forEach((v) =>
@@ -393,25 +406,17 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         const count = this._tasks.length;
         this.wrapper.log.methodStart("treemgr: load tasks", 1, logPad);
         this.refreshPending = true;
-        this._treeBuilder.invalidate();
-        this.setMessage(Strings.RequestingTasks);
-        await this.fetchTasks(logPad + "   ");
-        this.setMessage();
-        this.fireTreeRefreshEvent(null, null, logPad + "   ");
-        //
-        // Signal that the task list / tree has changed and set flags
-        //
-        this.refreshPending = false;
-        const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
-        this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
-        if (this._tasks.length !== count) {
-            this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
+        try {
+            this._treeBuilder.invalidate();
+            await this.fetchTasks(logPad + "   ");
+            this.fireTreeRefreshEvent(null, null, logPad + "   ");
+            this.fireTasksLoadedEvents(count);
+            this.firstTreeBuildDone = true;
+            this.wrapper.log.methodDone("treemgr: load tasks", 1, logPad);
         }
-        if (!this.firstTreeBuildDone) {
-            this._onReady.fire({ tasks: iTasks, type: "all" });
+        finally {
+            this.refreshPending = false;
         }
-        this.firstTreeBuildDone = true;
-        this.wrapper.log.methodDone("treemgr: load tasks", 1, logPad);
     };
 
 
