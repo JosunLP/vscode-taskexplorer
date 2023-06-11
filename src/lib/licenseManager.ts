@@ -8,7 +8,7 @@ import { executeCommand, registerCommand } from "./command/command";
 import { IpcAccountRegistrationParams } from "../webview/common/ipc";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent, ContextKeys,
-	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent
+	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo
 } from "../interface";
 
 
@@ -116,7 +116,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	{
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		this._busy = true;
-		const result = await this.executeRequest("register/trial/start", logPad + "   ", {});
+		const result = await this.executeRequest("register/trial/start", this.wrapper.statusBar.info, logPad + "   ", {});
 		/* istanbul ignore else */
 		if (result)
 		{
@@ -219,7 +219,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private executeRequest = async (ep: ITeApiEndpoint, logPad: string, params?: any): Promise<boolean> =>
+	private executeRequest = async (ep: ITeApiEndpoint, resetSbInfo: IStatusBarInfo, logPad: string, params?: any): Promise<boolean> =>
 	{
 		const token = this._account.session.token;
 		this._busy = true;
@@ -227,12 +227,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, { accountId: this._account.id,  ...params });
 			await this.saveAccount(account, logPad);
-			await this.wrapper.statusBar.update("");
+			this.wrapper.statusBar.update("");
 			return true;
 		}
 		catch (e)
 		{
-			await this.handleServerError(e);
+			await this.handleServerError(e, resetSbInfo);
 			return false;
 		}
 		finally {
@@ -244,9 +244,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private extendTrial = async (logPad: string): Promise<void> =>
 	{
-		const ep: ITeApiEndpoint = "register/trial/extend";
+		const ep: ITeApiEndpoint = "register/trial/extend",
+			  sbInfo = this.wrapper.statusBar.info;
 
-		await this.wrapper.statusBar.update("Requesting extended trial");
+		this.wrapper.statusBar.update("Requesting extended trial");
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
 
 		if (this._account.license.period > 1 || !this.isRegistered)
@@ -255,7 +256,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			window.showInformationMessage("Can't proceed - " + msg);
 			this.wrapper.log.write("   " + msg, 1, logPad);
 			this.wrapper.log.methodDone("request extended trial", 1, logPad);
-			await this.wrapper.statusBar.update("");
+			this.wrapper.statusBar.show(sbInfo);
 			return;
 		}
 
@@ -267,7 +268,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			  email = `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`;
 
 		this._busy = true;
-		await this.executeRequest(ep, logPad + "   ", {
+		await this.executeRequest(ep, sbInfo, logPad + "   ", {
 			accountId: this._account.id,
 			email,
 			firstName,
@@ -423,7 +424,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	});
 
 
-	private handleServerError = async (e: any): Promise<void> =>
+	private handleServerError = async (e: any, resetSbInfo: IStatusBarInfo): Promise<void> =>
 	{
 		/* istanbul ignore if  */
 		if (e instanceof Error)
@@ -473,8 +474,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			}
 		}
 
-		await this.wrapper.statusBar.update("Server error");
-		setTimeout(() => this.wrapper.statusBar.update(""), 1500);
+		this.wrapper.statusBar.showTimed({ text: "Server error" }, resetSbInfo);
 	};
 
 
@@ -554,7 +554,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			// the new license state
 			//
 			this._busy = true;
-			await this.wrapper.statusBar.update("Sending payment request");
+			const sbInfo = this.wrapper.statusBar.info;
+			this.wrapper.statusBar.update("Sending payment request");
 			const ep: ITeApiEndpoint = "payment/paypal/hook",
 				  token = this._account.session.token;
 			try
@@ -565,11 +566,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			}
 			catch (e) {
 				/* istanbul ignore next */
-				await this.handleServerError(e);
+				await this.handleServerError(e, sbInfo);
 			}
 			finally {
 				this._busy = false;
-				await this.wrapper.statusBar.update("");
+				this.wrapper.statusBar.show(sbInfo);
 			}
 		}
 		else
@@ -648,8 +649,9 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			[ "first", params.firstName ], [ "last", params.lastName ], [ "email", params.email ], [ "alt. email", params.emailAlt ]
 		]);
 		this._busy = true;
-		await this.wrapper.statusBar.update("Submitting resgistration");
-		await this.executeRequest("register/account", "   ", params);
+		const sbInfo = this.wrapper.statusBar.info;
+		this.wrapper.statusBar.update("Submitting resgistration");
+		await this.executeRequest("register/account", sbInfo, "   ", params);
 		this.wrapper.log.methodDone("submit registration", 1, "");
 	};
 
@@ -658,8 +660,9 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	{
 		this.wrapper.log.methodStart("validate license", 1, logPad);
 		this._busy = true;
-		await this.wrapper.statusBar.update("Validating license");
-		await this.executeRequest("license/validate", logPad + "   ", { key });
+		const sbInfo = this.wrapper.statusBar.info;
+		this.wrapper.statusBar.update("Validating license");
+		await this.executeRequest("license/validate", sbInfo, logPad + "   ", { key });
 		this.wrapper.log.methodDone("validate license", 1, logPad);
 	};
 

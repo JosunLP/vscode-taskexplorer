@@ -160,9 +160,9 @@ export class TaskTreeBuilder
     createTaskItemTree = async(logPad: string, logLevel: number) =>
     {
         this.wrapper.log.methodStart("create task tree", logLevel, logPad);
-        await this.wrapper.statusBar.update("Building task explorer tree");
+        this.wrapper.statusBar.update("Building task explorer tree");
         this.taskTree = await this.buildTaskItemTree(logPad + "   ", logLevel + 1);
-        await this.wrapper.statusBar.update("");
+        this.wrapper.statusBar.update("");
         this.wrapper.log.methodDone("create task tree", logLevel, logPad, [[ "current task count", this.wrapper.treeManager.getTasks().length ]]);
     };
 

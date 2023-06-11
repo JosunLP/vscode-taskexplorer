@@ -172,8 +172,7 @@ suite("License Manager Tests", () =>
 		await utils.sleep(10);
 		const echoCmd = { method: "echo/account/register", overwriteable: false };
 		void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "buyer@example.com", emailAlt: "" });
-		await utils.promiseFromEvent(teWrapper.licenseManager.onReady).promise;
-		await utils.sleep(50); // wait for reg change session events to propagate
+		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
 		await expectLicense(true, false, true, false, true);
 		await closeTeWebviewPanel(teWrapper.licensePage);
         utils.endRollingCount(this);

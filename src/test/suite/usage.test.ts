@@ -51,11 +51,11 @@ suite("Usage / Telemetry Tests", () =>
         this.slow((tc.slowTime.config.trackingEvent * 7) + 100);
         await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true);
         await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, false);
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, false);
         await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
         await sleep(50);
         await executeTeCommand("getApi");
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true); // will auto-set TrackUsage
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, true); // will auto-set TrackUsage
         await sleep(50);
         await waitForWebviewsIdle();
         endRollingCount(this);

@@ -31,7 +31,7 @@ suite("Webview Tests", () =>
             await closeEditors();
             await sleep(150);
         }
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, false);
         endRollingCount(this, true);
     });
 
@@ -42,7 +42,7 @@ suite("Webview Tests", () =>
         if (!closedPages) {
             await closeEditors();
         }
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, true);
         suiteFinished(this);
     });
 
@@ -163,7 +163,7 @@ suite("Webview Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow((tc.slowTime.general.closeEditors * 3) + tc.slowTime.config.trackingEvent);
         teWrapper.homeView.description = teWrapper.homeView.description;
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, true);
 		await closeTeWebviewPanel(teWrapper.licensePage);
 		await closeTeWebviewPanel(teWrapper.releaseNotesPage);
 		await closeTeWebviewPanel(teWrapper.parsingReportPage);

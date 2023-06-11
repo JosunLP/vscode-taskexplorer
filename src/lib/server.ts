@@ -5,14 +5,9 @@ import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
+import { IDictionary, TeRuntimeEnvironment } from "../interface";
 
 // const TLS_REJECT = "0"; // "0" to turn off tls rejection
-const REQUEST_TIMEOUT = 7500;
-const SPM_API_VERSION = 1;
-const SPM_API_PORT = 443;
-const SPM_API_SERVER = "license.spmeesseman.com";
-const SPM_API_CLIENTID = "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY=";
-// const SPM_API_CLIENTID = "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1";
 
 export interface ServerError
 {
@@ -51,7 +46,17 @@ export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook" |
 export class TeServer implements Disposable
 {
 	private _busy = false;
+	private readonly _requestTimeout = 7500;
     private readonly _onRequestComplete: EventEmitter<void>;
+	private readonly _spmApiVersion = 1;
+	private readonly _spmApiPort = 443;
+	private readonly _spmApiServer = "license.spmeesseman.com";
+	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
+		dev: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcpO14r6dmkYwk9mN3qwbdbF8ty8DUWKqJO5JKR5FqQbOFuYYI0FrdIlsleAuvmaq/aeYhKbBxDfTKLZRTVx2TfA==",
+		// dev: "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1",
+		tests: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcOBrbGCpyITCp0Wm19f8gdI1hNJttkARO5Unac4LA2g7RmT/kdXSsz64zNjB9FrvrzHe97tLBHRGorwcOx/K/hQ==",
+		production: "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY="
+	};
 
 
     constructor(private readonly wrapper: TeWrapper)
@@ -71,29 +76,33 @@ export class TeServer implements Disposable
 		return `${this.wrapper.extensionName}-${this.wrapper.env}`.replace("-production", "");
 	};
 
+	private get publicToken(): string {
+		return this._publicToken[this.wrapper.env];
+	}
+
     get onDidRequestComplete(): Event<void> {
         return this._onRequestComplete.event;
     }
 
 
-	private getApiPath = (ep: ITeApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${SPM_API_VERSION}`;
+	private getApiPath = (ep: ITeApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
 
 
 	private getServerOptions = (apiEndpoint: ITeApiEndpoint, token?: string) =>
 	{
-		const server = SPM_API_SERVER;
+		const server = this._spmApiServer;
 		const options = {
 			hostname: server,
 			method: "POST",
 			path: this.getApiPath(apiEndpoint),
-			port: SPM_API_PORT,
+			port: this._spmApiPort,
 			//
 			// TODO - Request timeouts don't work
 			// Timeout don't work worth a s***.  So do a promise race in request() for now.
 			//
-			timeout: 5000,
+			timeout: this._requestTimeout,
 			headers: <{[id: string]: string}>{
-				"token": SPM_API_CLIENTID,
+				"token": this.publicToken,
 				"user-agent": this.wrapper.extensionId,
 				"content-type": "application/json"
 			}
@@ -158,7 +167,7 @@ export class TeServer implements Disposable
 			this._request<T>(endpoint, token, logPad, params),
 			new Promise<T>((_resolve, reject) => {
 				this._busy = false;
-				setTimeout(reject, REQUEST_TIMEOUT, <ServerError>{ message: "Timed out", status: 408 });
+				setTimeout(reject, this._requestTimeout, <ServerError>{ message: "Timed out", status: 408 });
 			})
 		]);
 	};
@@ -223,12 +232,8 @@ export class TeServer implements Disposable
 				reject(e);
 			});
 
-			const payload = JSON.stringify(
-			{
-				...{ machineId: env.machineId, dev: this.wrapper.env === "dev", tests: this.wrapper.tests },
-				...params
-			});
-			// this.log("   payload", logPad + "   ", payload); // For testing only, logs machineId to user console
+			const machineId = !this.wrapper.tests ? /* istanbul ignore next */env.machineId : process.env.testsMachineId,
+				  payload = JSON.stringify({ ...{ machineId, dev: this.wrapper.dev, tests: this.wrapper.tests }, ...params });
 
 			req.write(payload, () =>
             {

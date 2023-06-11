@@ -86,7 +86,7 @@ suite("Tree Tests", () =>
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ batch[0] ]);
         }
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false); // to cover usage.onFavoriteTasksChanged
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, false); // to cover usage.onFavoriteTasksChanged
         removed = await executeTeCommand2("addRemoveFavorite", [ batch[1] ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ batch[1] ]);
@@ -95,7 +95,7 @@ suite("Tree Tests", () =>
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ ant[0] ]);
         }
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true); // to cover usage.onFavoriteTasksChanged
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, true); // to cover usage.onFavoriteTasksChanged
         removed = await executeTeCommand2("addRemoveFavorite", [ bash[0] ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ bash[0] ]);

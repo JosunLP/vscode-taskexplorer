@@ -21,7 +21,7 @@ export class FavoritesFolder extends SpecialTaskFolder
     constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
     {
         super(wrapper, "favorites", wrapper.keys.Strings.FAV_TASKS_LABEL, wrapper.keys.Config.SpecialFoldersShowFavorites, state);
-        this._maxItems = 100; // this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
+        this._maxItems = 100; // this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFoldersNumLastTasks);
         this.disposables.push(
             registerCommand(wrapper.keys.Commands.AddRemoveFavorite, this.addRemoveFavorite, this),
             registerCommand(wrapper.keys.Commands.ClearFavorites, this.clearSavedTasks, this)

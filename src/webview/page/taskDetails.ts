@@ -21,8 +21,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 			"task-details.html",
 			`Task Details - ${task.name}`,
 			TaskDetailsPage.viewId,
-			"res/img/logo-bl.png",
-			wrapper.keys.Commands.ShowTaskDetailsPage
+			"res/img/logo-bl.png"
 		);
 		this._task = { ...task };
 	}

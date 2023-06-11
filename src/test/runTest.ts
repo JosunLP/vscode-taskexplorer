@@ -221,8 +221,17 @@ const main = async(args: string[]) =>
             version: VSCODE_TEST_VERSION,
             extensionDevelopmentPath,
             extensionTestsPath,
-            launchArgs: [ testsWorkspace, "--disable-extensions", "--disable-workspace-trust" ],
-            extensionTestsEnv: { xArgs: JSON.stringify(xArgs), testArgs: JSON.stringify(testsArgs), vsCodeTestVersion: VSCODE_TEST_VERSION }
+            launchArgs: [
+                testsWorkspace,
+                "--disable-extensions",
+                "--disable-workspace-trust"
+            ],
+            extensionTestsEnv: {
+                xArgs: JSON.stringify(xArgs),
+                testArgs: JSON.stringify(testsArgs),
+                vsCodeTestVersion: VSCODE_TEST_VERSION,
+                testsMachineId: process.env.VSC_TESTS_MACHINEID
+            }
         }); // --upload-logs could be interesting (for prod).  look at it sometime.
     }
     catch (err: any) {

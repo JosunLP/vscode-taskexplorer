@@ -30,10 +30,10 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this, true)) return;
         ({ teWrapper } = await utils.activate(this));
-        clickAction = teWrapper.config.get<string>(teWrapper.keys.Config.TaskButtons.ClickAction);
-        oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFolders.NumLastTasks);
-        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFolders.NumLastTasks, 3);
-        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFolders.ShowLastTasks, true);
+        clickAction = teWrapper.config.get<string>(teWrapper.keys.Config.TaskButtonsClickAction);
+        oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFoldersNumLastTasks);
+        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersNumLastTasks, 3);
+        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersShowLastTasks, true);
         utils.endRollingCount(this, true);
     });
 
@@ -41,8 +41,8 @@ suite("Task Tests", () =>
     suiteTeardown(async function()
     {
         if (utils.exitRollingCount(this, false, true)) return;
-        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFolders.NumLastTasks, oNumLastTasks);
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtons.ClickAction, clickAction);
+        await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersNumLastTasks, oNumLastTasks);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtonsClickAction, clickAction);
 		await utils.closeEditors(); // close task monitor from previous test suite
         utils.suiteFinished(this);
     });
@@ -226,7 +226,7 @@ suite("Task Tests", () =>
         await executeSettingsUpdate("pathToPrograms.ansicon", utils.getWsPath("..\\tools\\ansicon\\x64\\ansicon.exe"), tc.waitTime.config.enableEvent);
         utils.overrideNextShowInfoBox(undefined);
         await executeSettingsUpdate("enableAnsiconForAnt", true, tc.waitTime.config.enableEvent);
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, false);
         await startTask(antTask, false);
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin) ;
         await utils.sleep(100);
@@ -235,7 +235,7 @@ suite("Task Tests", () =>
         teWrapper.treeManager.runningTasks; // access the getter while there's an actual running task for coverage
         await focusSearchView(); // randomly show/hide view to test refresh event queue in tree/tree.ts
         await utils.waitForTaskExecution(exec);
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, true);
         lastTask = antTask;
         utils.endRollingCount(this);
     });
@@ -282,7 +282,7 @@ suite("Task Tests", () =>
         //
         // Open task file
         //
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtons.ClickAction, "Open");
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtonsClickAction, "Open");
         await executeTeCommand2("open", [ batchTask ], tc.waitTime.command);
         await utils.closeEditors();
         //
@@ -322,7 +322,7 @@ suite("Task Tests", () =>
         const batchTask = batch[1];
         await startTask(batchTask, true);
         await executeSettingsUpdate("visual.disableAnimatedIcons", true);
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtons.ClickAction, "Execute");
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtonsClickAction, "Execute");
         await executeSettingsUpdate("specialFolders.showLastTasks", true);
         await executeTeCommand2("setPinned", [ antTask, "last" ]) ;
         await executeTeCommand2("setPinned", [ batchTask, "last" ]) ;
@@ -369,7 +369,7 @@ async function startTask(taskItem: ITaskItem, addToSpecial: boolean)
     }
     if (addToSpecial)
     {
-        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtons.ClickAction, "Execute");
+        await executeSettingsUpdate(teWrapper.keys.Config.TaskButtonsClickAction, "Execute");
         let removed = await executeTeCommand2("addRemoveFavorite", [ taskItem ]);
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ taskItem ]);

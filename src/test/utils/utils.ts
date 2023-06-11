@@ -123,10 +123,7 @@ export const activate = async (instance?: Mocha.Context) =>
     expect(ext).to.not.be.undefined;
 
     if (!activated)
-    {
-        const tzOffset = (new Date()).getTimezoneOffset() * 60000,
-              locISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, -1).replace("T", " ").replace(/[\-]/g, "/");
-        //
+    {   //
         // Set startup settings for this tests run using workspace settings scope.
         // The initSettings() functions does it's own logging to the console.
         //
@@ -146,15 +143,9 @@ export const activate = async (instance?: Mocha.Context) =>
         // Note that the '*' is removed from package.json[activationEvents] before the runTest() call
         //
         teWrapper = await (ext as any).activate();
-        console.log(`    ${figures.color.info}`);
-        console.log(`    ${figures.color.info} ${figures.withColor("Tests startup", figures.colors.grey)}`);
-        console.log(`    ${figures.color.info} ${figures.withColor(`   Time started     : ${locISOTime}`, figures.colors.grey)}`);
-        console.log(`    ${figures.color.info} ${figures.withColor(`   Extension Author : ${teWrapper.extensionAuthor}`, figures.colors.grey)}`);
-        console.log(`    ${figures.color.info} ${figures.withColor(`   Extension Name   : ${teWrapper.extensionName}`, figures.colors.grey)}`);
-        console.log(`    ${figures.color.info} ${figures.withColor(`   Extension ID     : ${teWrapper.extensionId}`, figures.colors.grey)}`);
-        console.log(`    ${figures.color.info} ${figures.withColor(`   Extension Title  : ${teWrapper.extensionTitle}`, figures.colors.grey)}`);
-        console.log(`    ${figures.color.info} ${figures.withColor(`   Extension Short  : ${teWrapper.extensionTitleShort}`, figures.colors.grey)}`);
+		// await sleep(serverActivationDelay); // Wait for server activation
         console.log(`    ${figures.color.info} ${figures.withColor("Extension successfully activated", figures.colors.grey)}`);
+		activated = true;
         //
         // Ensure extension initialized successfully
         //
@@ -192,6 +183,17 @@ export const activate = async (instance?: Mocha.Context) =>
         //
         // All done
         //
+        const tzOffset = (new Date()).getTimezoneOffset() * 60000,
+              locISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, -1).replace("T", " ").replace(/[\-]/g, "/");
+        consoleWrite("Tests initialization completed, ready");
+        consoleWrite(`   Time started     : ${locISOTime}`);
+        consoleWrite(`   Tests Machine ID : ${process.env.testsMachineId}`);
+        consoleWrite(`   Extension Author : ${teWrapper.extensionAuthor}`);
+        consoleWrite(`   Extension Name   : ${teWrapper.extensionName}`);
+        consoleWrite(`   Extension ID     : ${teWrapper.extensionId}`);
+        consoleWrite(`   Extension Title  : ${teWrapper.extensionTitle}`);
+        consoleWrite(`   Extension Short  : ${teWrapper.extensionTitleShort}`);
+        consoleWrite(disableSSLMsg, figures.color.warningTests);
         activated = true;
         timeStarted = Date.now();
         console.log(`    ${figures.color.info} ${figures.withColor("Tests initialization completed, ready", figures.colors.grey)}`);
@@ -296,6 +298,10 @@ export const closeEditors = () => commands.executeCommand("openEditors.closeAll"
 
 
 export const closeActiveEditor = () => commands.executeCommand("workbench.action.closeActiveEditor");
+
+
+export const consoleWrite = (msg?: string, icon?: string, pad = "") =>
+    console.log(`    ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
 
 
 export const createwebviewForRevive = (viewTitle: string, viewType: string) =>

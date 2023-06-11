@@ -27,7 +27,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	protected override _view: WebviewPanel | undefined = undefined;
 
 
-	constructor(wrapper: TeWrapper, fileName: string, title: string,  viewId: WebviewIds, private readonly iconPath: string, showCommand: Commands)
+	constructor(wrapper: TeWrapper, fileName: string, title: string,  viewId: WebviewIds, private readonly iconPath: string, showCommand?: Commands)
 	{
 		super(wrapper, `${WebviewPrefix.View}${viewId}`, title, fileName);
 		this._isMultiInstance = !showCommand;

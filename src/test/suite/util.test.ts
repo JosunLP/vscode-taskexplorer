@@ -588,7 +588,7 @@ suite("Util Tests", () =>
 		process.env.APPDATA = dataPath2;
 		process.env.USERPROFILE = dataPath3;
 		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
-		expect(dataPath).to.be.equal("C:\\Users\\smeesseman\\AppData\\Roaming\\vscode");
+		expect(dataPath).to.be.equal(`C:\\Users\\${env.USERNAME}\\AppData\\Roaming\\vscode`);
 		//
 		// Set environment variables for specific test
 		//
@@ -596,7 +596,7 @@ suite("Util Tests", () =>
 		process.env.APPDATA = dataPath2;
 		process.env.USERPROFILE = dataPath3;
 		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
-		expect(dataPath).to.be.equal("C:\\Users\\smeesseman\\AppData\\Roaming\\vscode");
+		expect(dataPath).to.be.equal(`C:\\Users\\${env.USERNAME}\\AppData\\Roaming\\vscode`);
 		//
 		// Set environment variables for specific test
 		//

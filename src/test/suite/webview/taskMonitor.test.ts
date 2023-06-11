@@ -26,8 +26,8 @@ suite("Task Monitor App Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate(this));
-		oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFolders.NumLastTasks);
-		await executeSettingsUpdate(teWrapper.keys.Config.SpecialFolders.NumLastTasks, 2); // covering usage.trackFamousTasks
+		oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFoldersNumLastTasks);
+		await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersNumLastTasks, 2); // covering usage.trackFamousTasks
         await executeSettingsUpdate(teWrapper.keys.Config.KeepTerminalOnTaskDone, true);
         endRollingCount(this, true);
 	});
@@ -37,7 +37,7 @@ suite("Task Monitor App Tests", () =>
     {
         if (exitRollingCount(this, false, true)) return;
 		if (oNumLastTasks) {  // covering usage.trackFamousTasks stats.famous.pop()
-			await executeSettingsUpdate(teWrapper.keys.Config.SpecialFolders.NumLastTasks, oNumLastTasks);
+			await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersNumLastTasks, oNumLastTasks);
 		}
         suiteFinished(this);
 	});
@@ -128,10 +128,10 @@ suite("Task Monitor App Tests", () =>
 	{
         if (exitRollingCount(this)) return;
 		this.slow(tc.slowTime.config.event * 8);
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TimerMode, "MM:SS:MSS");
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TimerMode, "MM:SS:MS");
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, false);
-		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitor.TrackStats, true);
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTimerMode, "MM:SS:MSS");
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTimerMode, "MM:SS:MS");
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, false);
+		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, true);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
 		await executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
 		await executeSettingsUpdate(teWrapper.keys.Config.AllowUsageReporting, true);  // cover non-taskmonitor config change
@@ -146,9 +146,9 @@ suite("Task Monitor App Tests", () =>
 		this.slow((tc.slowTime.config.eventFast * 2) + 1210);
 		const mType = { method: "echo/config/update", overwriteable: false };
         await sleep(5);
-		await teWrapper.taskMonitorPage.postMessage(mType, { key: teWrapper.keys.Config.TaskMonitor.TimerMode, value: "MM:SS:MSS" });
+		await teWrapper.taskMonitorPage.postMessage(mType, { key: teWrapper.keys.Config.TaskMonitorTimerMode, value: "MM:SS:MSS" });
         await sleep(50);
-		await teWrapper.taskMonitorPage.postMessage(mType, { key: teWrapper.keys.Config.TaskMonitor.TimerMode, value: "MM:SS:MS" });
+		await teWrapper.taskMonitorPage.postMessage(mType, { key: teWrapper.keys.Config.TaskMonitorTimerMode, value: "MM:SS:MS" });
         await sleep(550); // wait for webworker to respond, takes ~ 400-600ms
 		await closeEditors();
         endRollingCount(this);
