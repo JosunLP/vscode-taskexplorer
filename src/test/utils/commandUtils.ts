@@ -118,6 +118,8 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
         else {
             teWebview = await executeTeCommand<ITeWebview>(`taskexplorer.view.${teView}.show`, tc.waitTime.viewWebviewPage);
         }
+        wasVisible = true; // ?
+        await sleep(25);
     }
     else {
         teWebview = teView;
@@ -132,7 +134,7 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
         }
     }
 
-    if (!wasVisible || force)
+    if (!wasVisible || force || teWebview.busy)
     {
         await Promise.race<void>(
         [
