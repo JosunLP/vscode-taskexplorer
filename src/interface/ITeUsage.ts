@@ -1,6 +1,24 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { Event } from "vscode";
 import { ITeTask } from "./ITeTask";
 import { IDictionary } from "./IDictionary";
+import { TreeviewIds, WebviewIds, WebviewViewIds } from "./ITeWebview";
+
+export type WebviewUsageKey = `${UsageKeys.WebviewPrefix}${WebviewIds}${string}`;
+export type WebviewViewUsageKey = `${UsageKeys.WebviewViewPrefix}${WebviewViewIds}${string}`;
+export type TreeviewUsageKey = `${UsageKeys.TreeviewPrefix}${TreeviewIds}${string}`;
+
+export type AllUsageKeys = UsageKeys | WebviewUsageKey | WebviewViewUsageKey
+			            | `${UsageKeys.ProviderPrefix}${string}`;
+
+export enum UsageKeys
+{
+	ProviderPrefix = "taskexplorer:provider:",
+	TreeviewPrefix = "taskexplorer:treeview:",
+	WebviewPrefix = "taskexplorer:webview:",
+	WebviewViewPrefix = "taskexplorer:webviewView:"
+}
 
 export interface ITeTrackedUsageCount
 {

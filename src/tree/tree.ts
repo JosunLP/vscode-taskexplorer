@@ -3,9 +3,8 @@ import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
-import { TreeViewIds } from "../lib/context";
 import { TaskTreeManager } from "./treeManager";
-import { ITaskTreeEvent, ITeTaskTree } from "../interface";
+import { ITaskTreeEvent, ITeTaskTree, TreeviewIds } from "../interface";
 import { Event, EventEmitter, Task, TreeItem, TreeDataProvider, Disposable } from "vscode";
 
 
@@ -45,7 +44,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     private readonly _onDidLoadTreeData: EventEmitter<void>;
 
 
-    constructor(public readonly name: TreeViewIds, treeManager: TaskTreeManager)
+    constructor(public readonly name: TreeviewIds, treeManager: TaskTreeManager)
     {
         this._treeManager = treeManager;
         this._onDidLoadTreeData = new EventEmitter<void>();

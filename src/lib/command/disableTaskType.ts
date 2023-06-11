@@ -3,7 +3,7 @@ import { Globs } from "../constants";
 import { TeWrapper } from "../wrapper";
 import { Disposable, Uri } from "vscode";
 import { testPattern } from "../utils/utils";
-import { Commands, registerCommand } from "./command";
+import { registerCommand } from "./command";
 
 
 export class DisableTaskTypeCommand implements Disposable
@@ -13,7 +13,7 @@ export class DisableTaskTypeCommand implements Disposable
     constructor(private readonly wrapper: TeWrapper)
     {
         this._disposables.push(
-            registerCommand(Commands.DisableTaskType, (uri: Uri) => this.disableTaskType(uri), this)
+            registerCommand(wrapper.keys.Commands.DisableTaskType, (uri: Uri) => this.disableTaskType(uri), this)
         );
     }
 

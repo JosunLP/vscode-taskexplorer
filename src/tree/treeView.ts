@@ -1,9 +1,8 @@
 
 import { TaskTree } from "./tree";
 import { TeWrapper } from "../lib/wrapper";
-import { ITaskTreeView } from "../interface";
 import { TaskTreeManager } from "./treeManager";
-import { ContextKeys, TreeViewIds } from "../lib/context";
+import { ITaskTreeView, TreeviewContextKey, TreeviewIds, TreeviewUsageKey, WebviewPrefix } from "../interface";
 import {
     Disposable, TreeItem, TreeView, TreeViewExpansionEvent, TreeViewSelectionChangeEvent,
     TreeViewVisibilityChangeEvent, window
@@ -13,33 +12,33 @@ import {
 
 export class TeTreeView implements ITaskTreeView, Disposable
 {
+    protected id: string;
     private _visible = false;
-	private readonly _disposables: Disposable[] = [];
+	private readonly _disposables: Disposable[];
 	private readonly _tree: TaskTree;
     private readonly _view: TreeView<TreeItem>;
+	private _usageKey: TreeviewUsageKey;
+	private _contextKeyPrefix: TreeviewContextKey;
 
 
-	constructor(
-		private readonly wrapper: TeWrapper,
-        treeManager: TaskTreeManager,
-		title: string,
-		description: string,
-		private readonly id: TreeViewIds,
-		private readonly contextKeyPrefix: `${ContextKeys.TreeViewPrefix}${TreeViewIds}`)
+	constructor(private readonly wrapper: TeWrapper, treeManager: TaskTreeManager, title: string, description: string, viewId: TreeviewIds)
 	{
-        this._tree = new TaskTree(id, treeManager);
-        this._view = window.createTreeView("taskexplorer.view." + id, { treeDataProvider: this._tree, showCollapseAll: true });
+
+        this.id = `${WebviewPrefix.View}${viewId}`;
+        this._tree = new TaskTree(viewId, treeManager);
+        this._view = window.createTreeView(this.id, { treeDataProvider: this._tree, showCollapseAll: true });
         this._view.title = title;
         this._view.description = description;
-
-		this._disposables.push(
+		this._usageKey = `${wrapper.keys.Usage.TreeviewPrefix}${viewId}View`;
+		this._contextKeyPrefix = `${wrapper.keys.Context.TreeViewPrefix}${viewId}`;
+		this._disposables = [
             this._view.onDidChangeVisibility(this.onVisibilityChanged, this),
             // this._view.onDidCollapseElement(this.onElementCollapsed, this),
             this._view.onDidExpandElement(this.onElementExpanded, this),
             this._view.onDidChangeSelection(this.onElementSelectionChanged, this),
             this._tree,
             this._view
-        );
+        ];
 	}
 
 	dispose = () => this._disposables.splice(0).forEach((d) => d.dispose());
@@ -54,7 +53,7 @@ export class TeTreeView implements ITaskTreeView, Disposable
     }
 
     get enabled(): boolean {
-        return this.wrapper.config.get<boolean>(this.id === "taskTreeExplorer" ? "enableExplorerView" : "enableSideBar");
+        return this.wrapper.config.get<boolean>(this.id === `${WebviewPrefix.View}taskTreeExplorer` ? "enableExplorerView" : "enableSideBar");
     }
 
     get visible(): boolean {
@@ -90,13 +89,13 @@ export class TeTreeView implements ITaskTreeView, Disposable
 
 	private resetContextKeys()
 	{
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:active`, false);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:active`, false);
 	}
 
 
 	private setContextKeys(active: boolean | undefined)
 	{
-        void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:active`, !!active);
+        void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:active`, !!active);
 	}
 
 }

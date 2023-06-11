@@ -1,10 +1,11 @@
 
 import { log } from "../log/log";
 import minimatch = require("minimatch");
-import { Uri, workspace, env, WorkspaceFolder } from "vscode";
+import { Strings } from "../constants";
+import { ConfigKeys } from "../../interface";
 import { basename, extname, sep } from "path";
-import { ConfigKeys, Globs, Strings } from "../constants";
 import { configuration } from "../configuration";
+import { Uri, workspace, env, WorkspaceFolder } from "vscode";
 
 
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;

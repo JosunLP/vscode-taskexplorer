@@ -1,4 +1,16 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { Event, WebviewPanel, WebviewPanelSerializer, WebviewView } from "vscode";
+
+export type WebviewViewIds = "home" | "taskCount" | "taskUsage";
+export type TreeviewIds = "taskTreeExplorer" | "taskTreeSideBar";
+export type WebviewIds = "parsingReport" | "licensePage" | "releaseNotes" | "taskDetails" | "taskMonitor" | "welcome";
+
+export const enum WebviewPrefix
+{
+	Base = "taskexplorer.",
+	View = "taskexplorer.view."
+}
 
 export interface ITeWebview
 {

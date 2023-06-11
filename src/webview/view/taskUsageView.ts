@@ -3,9 +3,8 @@ import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
 import { ConfigurationChangeEvent } from "vscode";
-import { ITeUsageChangeEvent } from "../../interface";
 import { debounceCommand } from "../../lib/command/command";
-import { ContextKeys, WebviewViewIds } from "../../lib/context";
+import { ITeUsageChangeEvent, WebviewViewIds } from "../../interface";
 
 
 export class TaskUsageView extends TeWebviewView<State>
@@ -22,12 +21,10 @@ export class TaskUsageView extends TeWebviewView<State>
 			"Task Usage",
 			"Task Usage Details",
 			"task-usage.html",
-			`taskexplorer.view.${TaskUsageView.viewId}`,
-			`${ContextKeys.WebviewViewPrefix}${TaskUsageView.viewId}`,
-			`${TaskUsageView.viewId}View`
+			TaskUsageView.viewId
 		);
 		this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage, false);
-		this._trackStats = this._trackUsage && this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats, false);
+		this._trackStats = this._trackUsage && this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats, false);
 	}
 
 
@@ -42,10 +39,10 @@ export class TaskUsageView extends TeWebviewView<State>
 
 	protected override onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
+		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitorTrackStats))
 		{
 			this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage, false);
-			this._trackStats = this._trackUsage && this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats, false);
+			this._trackStats = this._trackUsage && this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats, false);
 			void debounceCommand("taskUsageView.event.onConfigChanged", this.refresh, 75, this, false, false);
 		}
 		super.onConfigChanged(e);

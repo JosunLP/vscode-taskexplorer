@@ -6,8 +6,8 @@ import { TeWrapper } from "../wrapper";
 import { getCombinedGlobPattern } from "./utils";
 import { configuration } from "../configuration";
 import { pickBy, properCase } from "./commonUtils";
-import { ConfigPrefix, Globs, PinnedStorageKey } from "../constants";
-import { ITaskDefinition, ITeTask, TeTaskListType } from "../../interface";
+import { Globs, PinnedStorageKey } from "../constants";
+import { ConfigPrefix, ITaskDefinition, ITeTask, TeTaskListType } from "../../interface";
 
 
 

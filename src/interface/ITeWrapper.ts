@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { ILog } from "./ILog";
-import { ITeUsage } from "./ITeUsage";
-import { IStorage } from "./IStorage";
-import { ITeContext } from "./ITeContext";
+import { ITeUsage, UsageKeys } from "./ITeUsage";
+import { IStorage, StorageKeys } from "./IStorage";
+import { ContextKeys, ITeContext } from "./ITeContext";
 import { ITeWebview } from "./ITeWebview";
 import { ITeFigures } from "./ITeFigures";
 import { IDictionary } from "./IDictionary";
@@ -12,11 +12,12 @@ import { ITeFileCache } from "./ITeFileCache";
 import { ITeFilesystem } from "./ITeFilesystem";
 import { ITeTreeManager } from "./ITeTreeManager";
 import { ITeTaskManager } from "./ITeTaskManager";
-import { IConfiguration } from "./IConfiguration";
 import { ITeFileWatcher } from "./ITeFileWatcher";
+import { Commands, VsCodeCommands } from "./ICommand";
 import { ITaskExplorerApi } from "./ITaskExplorerApi";
 import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
+import { ConfigKeys, IConfiguration } from "./IConfiguration";
 import { ExtensionContext, Event, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
 	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
@@ -24,12 +25,16 @@ import {
 
 export type TeRuntimeEnvironment = "dev" | "tests" | "production";
 
-interface ITeKeys
+export interface ITeKeys
 {
-	Storage: any;
-	Config: any;
-	Strings: any;
+	Commands: typeof Commands;
+	Config: typeof ConfigKeys;
+	Context: typeof ContextKeys;
 	Globs: any;
+	Strings: any;
+	Storage: typeof StorageKeys;
+	Usage: typeof UsageKeys;
+	VsCodeCommands: typeof VsCodeCommands;
 }
 
 export interface ITeWrapper

@@ -3,10 +3,9 @@ import { marked } from "marked";
 import { TextDecoder } from "util";
 import { State } from "../common/ipc";
 import { Uri, workspace } from "vscode";
+import { WebviewIds } from "../../interface";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { Commands } from "../../lib/command/command";
-import { ContextKeys, WebviewIds  } from "../../lib/context";
 
 
 export class ReleaseNotesPage extends TeWebviewPanel<State>
@@ -20,11 +19,9 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 			wrapper,
 			"release-notes.html",
 			`${wrapper.extensionName} ${wrapper.context.extension.packageJSON.version} Release Notes`,
+			ReleaseNotesPage.viewId,
 			"res/img/logo-bl.png",
-			`taskexplorer.view.${ReleaseNotesPage.viewId}`,
-			`${ContextKeys.WebviewPrefix}${ReleaseNotesPage.viewId}`,
-			`${ReleaseNotesPage.viewId}Page`,
-			Commands.ShowReleaseNotesPage
+			wrapper.keys.Commands.ShowReleaseNotesPage
 		);
 		this._ignoreTeBusy = true;
 	}

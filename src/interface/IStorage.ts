@@ -3,6 +3,20 @@
 import { Event, SecretStorageChangeEvent } from "vscode";
 
 
+export enum StorageKeys
+{
+    Account = "taskexplorer.account",
+    CacheBuster = "taskexplorer.cacheBuster",
+    FileCacheProjectFilesMap = "fileCacheProjectFilesMap",
+    FileCacheProjectFileToFileCountMap = "fileCacheProjectFileToFileCountMap",
+    FileCacheTaskFilesMap = "fileCacheTaskFilesMap",
+    LastLicenseNag = "taskexplorer.lastLicenseNag",
+    SpecialFolderRenames = "taskexplorer.specialFolder.renames",
+	TaskUsage = "taskexplorer.taskUsage",
+	Usage = "taskexplorer.usage",
+    Version = "taskexplorer.version"
+};
+
 export interface IStorageChangeEvent
 {
     readonly key: string;

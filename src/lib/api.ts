@@ -1,9 +1,8 @@
 
 import { Disposable } from "vscode";
 import { TeWrapper } from "./wrapper";
-import { ContextKeys } from "./context";
 import { IExternalProvider, ITaskExplorerApi } from "../interface";
-import { executeCommand, registerCommand, Commands } from "./command/command";
+import { executeCommand, registerCommand } from "./command/command";
 
 
 export class TeApi implements ITaskExplorerApi, Disposable
@@ -17,9 +16,9 @@ export class TeApi implements ITaskExplorerApi, Disposable
         this._tests = this.wrapper.tests;
         /* istanbul ignore else */
         if (this._tests) {
-            void wrapper.contextTe.setContext(ContextKeys.Tests, true);
+            void wrapper.contextTe.setContext(wrapper.keys.Context.Tests, true);
         }
-        this._disposables.push(registerCommand(Commands.GetApi, () => this, this));
+        this._disposables.push(registerCommand(wrapper.keys.Commands.GetApi, () => this, this));
     }
 
     dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
@@ -34,7 +33,7 @@ export class TeApi implements ITaskExplorerApi, Disposable
     {
         if (this.providers[providerName])
         {
-            await executeCommand(Commands.Refresh, providerName);
+            await executeCommand(this.wrapper.keys.Commands.Refresh, providerName);
         }
     };
 
@@ -42,14 +41,14 @@ export class TeApi implements ITaskExplorerApi, Disposable
     register = async(providerName: string, provider: IExternalProvider, logPad: string) =>
     {
         this.providers[providerName] = provider;
-        await executeCommand(Commands.Refresh, providerName, undefined, logPad);
+        await executeCommand(this.wrapper.keys.Commands.Refresh, providerName, undefined, logPad);
     };
 
 
     unregister = async(providerName: string, logPad: string) =>
     {
         delete this.providers[providerName];
-        await executeCommand(Commands.Refresh, providerName, undefined, logPad);
+        await executeCommand(this.wrapper.keys.Commands.Refresh, providerName, undefined, logPad);
     };
 
 }

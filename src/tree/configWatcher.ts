@@ -8,10 +8,8 @@
  */
 
 import { TeWrapper } from "../lib/wrapper";
-import { ContextKeys } from "../lib/context";
-import { ConfigKeys } from "../lib/constants";
+import { executeCommand } from "../lib/command/command";
 import { IDictionary, ITeTreeConfigWatcher } from "../interface";
-import { Commands, executeCommand } from "../lib/command/command";
 import { getScriptTaskTypes, getTaskTypeRealName } from "../lib/utils/taskUtils";
 import { ConfigurationChangeEvent, window, Disposable, Event, EventEmitter, workspace } from "vscode";
 
@@ -92,7 +90,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         if (sidebarEnabled !== undefined || explorerTreeEnabled !== undefined)
         {
             const enabled  = this.wrapper.utils.isTeEnabled();
-            setTimeout((e) => void this.wrapper.contextTe.setContext(ContextKeys.Enabled, e), 50, enabled); this._processingConfigEvent = false;
+            setTimeout((e) => void this.wrapper.contextTe.setContext(this.wrapper.keys.Context.Enabled, e), 50, enabled); this._processingConfigEvent = false;
             if (!enabled) {
                 this._processingConfigEvent = false;
                 this._onReady.fire();
@@ -151,23 +149,23 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             // Groupings changes require global refresh
             //
-            if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.GroupWithSeperator, ConfigKeys.GroupSeparator, ConfigKeys.GroupMaxLevel, ConfigKeys.GroupStripTaskLabel))
+            if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.GroupWithSeperator, this.wrapper.keys.Config.GroupSeparator, this.wrapper.keys.Config.GroupMaxLevel, this.wrapper.keys.Config.GroupStripTaskLabel))
             {
                 this.wrapper.log.write("   A tree grouping setting has changed", 1);
-                this.wrapper.log.value(`      ${ConfigKeys.GroupWithSeperator} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupWithSeperator), 1);
-                this.wrapper.log.value(`      ${ConfigKeys.GroupSeparator} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupSeparator), 1);
-                this.wrapper.log.value(`      ${ConfigKeys.GroupMaxLevel} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupMaxLevel), 1);
-                this.wrapper.log.value(`      ${ConfigKeys.GroupStripTaskLabel} changed`, this.wrapper.config.get<boolean>(ConfigKeys.GroupStripTaskLabel), 1);
+                this.wrapper.log.value(`      ${this.wrapper.keys.Config.GroupWithSeperator} changed`, this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupWithSeperator), 1);
+                this.wrapper.log.value(`      ${this.wrapper.keys.Config.GroupSeparator} changed`, this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupSeparator), 1);
+                this.wrapper.log.value(`      ${this.wrapper.keys.Config.GroupMaxLevel} changed`, this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupMaxLevel), 1);
+                this.wrapper.log.value(`      ${this.wrapper.keys.Config.GroupStripTaskLabel} changed`, this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupStripTaskLabel), 1);
                 refresh2 = true; // refresh2 will rebuild the tree but won't trigger a file cache build and/or task provider invalidation
             }
 
             //
             // Workspace/project folder sorting
             //
-            if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.SortProjectFoldersAlphabetically))
+            if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.SortProjectFoldersAlphabetically))
             {
-                this.wrapper.log.write(`   the '${ConfigKeys.SortProjectFoldersAlphabetically}' setting has changed`, 1);
-                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically), 1);
+                this.wrapper.log.write(`   the '${this.wrapper.keys.Config.SortProjectFoldersAlphabetically}' setting has changed`, 1);
+                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SortProjectFoldersAlphabetically), 1);
                 refresh2 = true; // refresh2 will rebuild the tree but won't trigger a file cache build and/or task provider invalidation
             }
 
@@ -298,16 +296,16 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         try
         {   if (refresh || refreshTaskTypes.length > 3)
             {
-                await executeCommand(Commands.Refresh, undefined, false, "   ");
+                await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, false, "   ");
             }
             else if (refreshTaskTypes.length > 0)
             {
                 for (const t of refreshTaskTypes) {
-                    await executeCommand(Commands.Refresh, t, undefined, "   ");
+                    await executeCommand(this.wrapper.keys.Commands.Refresh, t, undefined, "   ");
                 }
             }
             else if (refresh2) {
-                await executeCommand(Commands.Refresh, false, undefined, "   ");
+                await executeCommand(this.wrapper.keys.Commands.Refresh, false, undefined, "   ");
             }
             else {
                 this.wrapper.log.write("   current changes require no processing", 1);

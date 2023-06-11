@@ -703,7 +703,7 @@
                     "command": "taskexplorer.view.licensePage.show"
                 },
                 {
-                    "command": "taskexplorers.view.releaseNotes.show"
+                    "command": "taskexplorer.view.releaseNotes.show"
                 },
                 {
                     "command": "taskexplorer.view.taskMonitor.show",

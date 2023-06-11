@@ -5,8 +5,7 @@ import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { ConfigurationChangeEvent } from "vscode";
 import { debounceCommand } from "../../lib/command/command";
-import { ContextKeys, WebviewIds  } from "../../lib/context";
-import { ITeTask, ITeTaskStatusChangeEvent } from "../../interface";
+import { ITeTask, ITeTaskStatusChangeEvent, WebviewIds } from "../../interface";
 
 
 export class TaskDetailsPage extends TeWebviewPanel<State>
@@ -21,10 +20,9 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 			wrapper,
 			"task-details.html",
 			`Task Details - ${task.name}`,
+			TaskDetailsPage.viewId,
 			"res/img/logo-bl.png",
-			`taskexplorer.view.${TaskDetailsPage.viewId}`,
-			`${ContextKeys.WebviewPrefix}${TaskDetailsPage.viewId}`,
-			TaskDetailsPage.viewId
+			wrapper.keys.Commands.ShowTaskDetailsPage
 		);
 		this._task = { ...task };
 	}
@@ -122,7 +120,7 @@ export class TaskDetailsPage extends TeWebviewPanel<State>
 
 	protected override onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitor.TrackStats))
+		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitorTrackStats))
 		{
 			void debounceCommand("taskDetailsCfg:", this.refresh, 75, this, false, false, this._task);
 		}

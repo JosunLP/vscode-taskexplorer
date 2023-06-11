@@ -5,15 +5,14 @@ import { TaskFolder } from "./folder";
 import { TeTreeView } from "./treeView";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { ContextKeys } from "../lib/context";
 import { TaskTreeBuilder } from "./treeBuilder";
 import { FavoritesFolder } from "./favoritesFolder";
 import { LastTasksFolder } from "./lastTasksFolder";
 import { TeTreeConfigWatcher } from "./configWatcher";
 import { getTerminal } from "../lib/utils/getTerminal";
+import { registerCommand } from "../lib/command/command";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
-import { Commands, registerCommand } from "../lib/command/command";
 import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition, ITaskTreeView } from "../interface";
 import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
@@ -53,8 +52,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 		this._configWatcher = new TeTreeConfigWatcher(wrapper);
 
         this._views = {
-            taskExplorer: new TeTreeView(wrapper, this, wrapper.extensionTitle, "", "taskTreeExplorer", "taskexplorer:treeView:taskTreeExplorer"),
-            taskExplorerSideBar: new TeTreeView(wrapper, this, wrapper.extensionTitle, "", "taskTreeSideBar", "taskexplorer:treeView:taskTreeSideBar")
+            taskExplorer: new TeTreeView(wrapper, this, wrapper.extensionTitle, "", "taskTreeExplorer"),
+            taskExplorerSideBar: new TeTreeView(wrapper, this, wrapper.extensionTitle, "", "taskTreeSideBar")
         };
 
         this.disposables.push(
@@ -66,10 +65,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._specialFolders.lastTasks,
             this._views.taskExplorer,
             this._views.taskExplorerSideBar,
-            registerCommand(Commands.AddToExcludes, (item: TaskFile | TaskItem) => this.addToExcludes(item), this),
-            registerCommand(Commands.AddRemoveCustomLabel, (item: TaskItem) => this.addRemoveSpecialTaskLabel(item), this),
-            registerCommand(Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.getTaskItem(item)), this),
-            registerCommand(Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this)
+            registerCommand(wrapper.keys.Commands.AddToExcludes, (item: TaskFile | TaskItem) => this.addToExcludes(item), this),
+            registerCommand(wrapper.keys.Commands.AddRemoveCustomLabel, (item: TaskItem) => this.addRemoveSpecialTaskLabel(item), this),
+            registerCommand(wrapper.keys.Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.getTaskItem(item)), this),
+            registerCommand(wrapper.keys.Commands.Refresh, (taskType?: string | false | undefined, uri?: Uri | false | undefined, logPad = "") => this.refresh(taskType, uri, logPad), this)
         );
 
         this.wrapper.log.methodDone("treemgr: construct task tree manager", 1, "   ");
@@ -677,7 +676,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             if (!taskTypeProcessed.includes(task.source)) { taskTypeProcessed.push(task.source); /* TODO */ }
         }
         scriptFilesWithArgs.sort();
-        await this.wrapper.contextTe.setContext(`${ContextKeys.TasksPrefix}scriptFilesWithArgs`, scriptFilesWithArgs);
+        await this.wrapper.contextTe.setContext(`${this.wrapper.keys.Context.TasksPrefix}scriptFilesWithArgs`, scriptFilesWithArgs);
     };
 
 

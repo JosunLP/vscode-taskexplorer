@@ -1,9 +1,9 @@
 
 import { Globs } from "../constants";
 import { TeWrapper } from "../wrapper";
+import { registerCommand } from "./command";
 import { testPattern } from "../utils/utils";
 import { Disposable, Uri, window } from "vscode";
-import { Commands, registerCommand } from "./command";
 
 
 export class EnableTaskTypeCommand implements Disposable
@@ -13,7 +13,7 @@ export class EnableTaskTypeCommand implements Disposable
     constructor(private readonly wrapper: TeWrapper)
     {
         this._disposables.push(
-            registerCommand(Commands.EnableTaskType, (uri: Uri) => this.enableTaskType(uri), this)
+            registerCommand(wrapper.keys.Commands.EnableTaskType, (uri: Uri) => this.enableTaskType(uri), this)
         );
     }
 

@@ -104,7 +104,7 @@ export class TaskTreeBuilder
             if (!folder)
             {
                 const key = this.wrapper.utils.lowerCaseFirstChar(scopeName, true),
-                      state = this.wrapper.config.get<"Collapsed"|"Expanded">(`${this.wrapper.keys.Config.SpecialFolders.FolderState}.${key}`, "Expanded");
+                      state = this.wrapper.config.get<"Collapsed"|"Expanded">(`${this.wrapper.keys.Config.SpecialFoldersFolderState}.${key}`, "Expanded");
                 folder = new TaskFolder(each.scope, TreeItemCollapsibleState[state]);
                 folders[scopeName] = folder;
                 this.wrapper.log.value("constructed tree taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
@@ -116,7 +116,7 @@ export class TaskTreeBuilder
             folder = folders[scopeName];
             if (!folder)
             {
-                const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(this.wrapper.keys.Config.SpecialFolders.FolderState);
+                const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(this.wrapper.keys.Config.SpecialFoldersFolderState);
                 folder = new TaskFolder(scopeName, TreeItemCollapsibleState[nodeExpandedeMap[this.wrapper.utils.lowerCaseFirstChar(scopeName, true)]]);
                 folders[scopeName] = folder;
                 this.wrapper.log.value("constructed tree user taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");

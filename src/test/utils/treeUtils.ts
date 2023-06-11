@@ -1,9 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { expect } from "chai";
-import { ConfigKeys } from "../../lib/constants";
-import { executeSettingsUpdate, executeTeCommand } from "./commandUtils";
+import { ConfigKeys } from "../../interface";
 import { sleep, testControl as tc, waitForTeIdle } from "./utils";
+import { executeSettingsUpdate, executeTeCommand } from "./commandUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 interface TaskMap { [id: string]: ITaskItem | undefined };

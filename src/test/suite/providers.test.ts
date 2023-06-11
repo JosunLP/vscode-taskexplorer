@@ -5,6 +5,7 @@
 import { join } from "path";
 import { expect } from "chai";
 import { refresh } from "../utils/treeUtils";
+import { ConfigKeys } from "../../interface";
 import { tasks, TreeItemCollapsibleState } from "vscode";
 import { ITaskFile, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand2, focusExplorerView } from "../utils/commandUtils";
@@ -12,7 +13,6 @@ import {
     activate, endRollingCount, exitRollingCount, getWsPath, needsTreeBuild, suiteFinished, testControl as tc,
     treeUtils, verifyTaskCount, waitForTeIdle
 } from "../utils/utils";
-import { ConfigKeys } from "../../lib/constants";
 
 interface TaskMap { [id: string]: ITaskItem | undefined };
 

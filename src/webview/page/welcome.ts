@@ -1,9 +1,8 @@
 
 import type { State } from "../common/ipc";
+import { WebviewIds  } from "../../interface";
 import { TeWebviewPanel } from "../webviewPanel";
 import type { TeWrapper } from "../../lib/wrapper";
-import { Commands } from "../../lib/command/command";
-import { ContextKeys, WebviewIds  } from "../../lib/context";
 import { createTaskImageTable } from "../common/taskImageTable";
 
 
@@ -18,11 +17,9 @@ export class WelcomePage extends TeWebviewPanel<State>
 			wrapper,
 			`${WelcomePage.viewId}.html`,
 			`${wrapper.extensionTitle} Tutorial`,
-			"res/img/logo-bl.png",
-			`taskexplorer.view.${WelcomePage.viewId}`,
-			`${ContextKeys.WebviewPrefix}${WelcomePage.viewId}`,
 			WelcomePage.viewId,
-			Commands.ShowWelcomePage
+			"res/img/logo-bl.png",
+			wrapper.keys.Commands.ShowWelcomePage
 		);
 		this._ignoreTeBusy = true;
 	}

@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { TeWrapper } from "./wrapper";
-import { ContextKeys } from "./context";
 import { ITeApiEndpoint } from "./server";
 import { LicensePage } from "../webview/page/licensePage";
 import { Disposable, Event, EventEmitter, window } from "vscode";
+import { executeCommand, registerCommand } from "./command/command";
 import { IpcAccountRegistrationParams } from "../webview/common/ipc";
-import { executeCommand, registerCommand, Commands } from "./command/command";
 import {
-	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
-	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession
+	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent, ContextKeys,
+	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent
 } from "../interface";
 
 
@@ -46,11 +45,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._disposables.push(
 			this._onReady,
 			this._onSessionChange,
-			this.wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
-			registerCommand(Commands.ExtendTrial, this.extendTrial, this),
-			registerCommand(Commands.PurchaseLicense, this.purchaseLicense, this),
-			registerCommand(Commands.RefreshSession, () => this.validateLicense(this._account.license.key, ""), this),
-			registerCommand(Commands.Register, this.register, this)
+			wrapper.storage.onDidChangeSecret(this.onSecretStorageChange, this),
+			wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
+			registerCommand(wrapper.keys.Commands.ExtendTrial, this.extendTrial, this),
+			registerCommand(wrapper.keys.Commands.PurchaseLicense, this.purchaseLicense, this),
+			registerCommand(wrapper.keys.Commands.RefreshSession, () => this.validateLicense(this._account.license.key, ""), this),
+			registerCommand(wrapper.keys.Commands.Register, this.register, this)
 		);
     }
 
@@ -124,7 +124,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			.then((action) =>
 			{
 				if (action === "More Info") {
-					void executeCommand(Commands.ShowLicensePage);
+					void executeCommand(this.wrapper.keys.Commands.ShowLicensePage);
 				}
 			});
 		}
@@ -202,15 +202,15 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			{
 				if (action === "Buy License")
 				{
-					void executeCommand(Commands.PurchaseLicense);
+					void executeCommand(this.wrapper.keys.Commands.PurchaseLicense);
 				}
 				else if (action === "Extend Trial")
 				{
-					void executeCommand(Commands.ExtendTrial);
+					void executeCommand(this.wrapper.keys.Commands.ExtendTrial);
 				}
 				else if (action === "Info")
 				{
-					void executeCommand(Commands.ShowLicensePage);
+					void executeCommand(this.wrapper.keys.Commands.ShowLicensePage);
 				}
 			});
 		}
@@ -447,7 +447,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			/* istanbul ignore else */
 			if (e.status !== 500)
 			{
-				switch (e.body.message)
+				const message = e.body ? e.body.message : /* istanbul ignore next */e.message;
+				switch (message)
 				{
 					case "Account does not exist":           // 409
 					case "Account trial does not exist":     // 409
@@ -498,6 +499,37 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		};
 		this.wrapper.log.write("Account details:",  1, logPad);
 		_l(this._account, logPad);
+	};
+
+
+	private onSecretStorageChange = async (e: ISecretStorageChangeEvent) =>
+	{
+		if (e.key === this.wrapper.keys.Storage.Account)
+		{
+			const pAccount = this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account);
+			this._account = this.wrapper.utils.cloneJsonObject<ITeAccount>(e.value);
+			this.setContext();
+			this._onSessionChange.fire(
+			{
+				account: this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account),
+				changeNumber: this._accountChangeNumber,
+				changeFlags: {
+					expiration: this._account.license.expired !== pAccount.license.expired,
+					license: this._account.license.paid !== pAccount.license.paid,
+					licenseState: this._account.license.state !== pAccount.license.state,
+					licenseType: this._account.license.type !== pAccount.license.type,
+					paymentDate: this._account.license.paid !== pAccount.license.paid,
+					session: this._account.session.token !== pAccount.session.token,
+					trialPeriod: this._account.license.type < 4 && this._account.license.period !== pAccount.license.period,
+					verification: this._account.verified !== pAccount.verified || this._account.verificationPending !== pAccount.verificationPending
+				},
+				session: {
+					added: [],
+					removed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(pAccount.session) ],
+					changed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(this._account.session) ]
+				}
+			});
+		}
 	};
 
 
@@ -560,55 +592,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		if (JSON.stringify(compareNew) === JSON.stringify(compareCurrent)) {
 			return;
 		}
-		this.wrapper.log.methodStart("save account", 1, logPad);
-		++this._accountChangeNumber;
-		this.wrapper.log.values(1, logPad + "   ", [
+		this.wrapper.log.methodStart("save account", 1, logPad, false, [
 			[ "account id", account.id ],
-			[ "account change #", this._accountChangeNumber ],
+			[ "account change #", ++this._accountChangeNumber ],
 			[ "license issued", this.wrapper.utils.formatDate(account.session.issued) ],
 			[ "license expires", this.wrapper.utils.formatDate(account.session.expires) ]
 		]);
-		// if (this.wrapper.env !== "production")
-		// {
-		// 	this.wrapper.log.values(2, logPad + "   ", [
-		// 		[ "license id", account.license.id ], [ "trial id", account.trialId ],
-		// 		[ "access token", account.session.token ], [ "license key", account.license.key ]
-		// 	]);
-		// 	const rPath = await this.wrapper.pathUtils.getInstallPath() + `\\dist\\account_saved_${this._accountChangeNumber}.json`;
-		// 	await this.wrapper.fs.writeFile(rPath, JSON.stringify(account, null, 3));
-		// }
-		//
-		// Save and set new account, clone previous account object for change flag comparison
-		//
-		const accountJson = JSON.stringify(account);
-		await this.wrapper.storage.updateSecret(this.wrapper.keys.Storage.Account, accountJson);
-		const pAccount = this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account);
-		this._account = JSON.parse(accountJson);
-		this.setContext();
-		//
-		// Queue task to notify of session changed
-		//
-		this.wrapper.log.write("   queue trigger session change event", 2, logPad);
-		this._onSessionChange.fire(
-		{
-			account: this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account),
-			changeNumber: this._accountChangeNumber,
-			changeFlags: {
-				expiration: this._account.license.expired !== pAccount.license.expired,
-				license: this._account.license.paid !== pAccount.license.paid,
-				licenseState: this._account.license.state !== pAccount.license.state,
-				licenseType: this._account.license.type !== pAccount.license.type,
-				paymentDate: this._account.license.paid !== pAccount.license.paid,
-				session: this._account.session.token !== pAccount.session.token,
-				trialPeriod: this._account.license.type < 4 && this._account.license.period !== pAccount.license.period,
-				verification: this._account.verified !== pAccount.verified || this._account.verificationPending !== pAccount.verificationPending
-			},
-			session: {
-				added: [],
-				removed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(pAccount.session) ],
-				changed: [ this.wrapper.utils.cloneJsonObject<ITeSession>(this._account.session) ]
-			}
-		});
+		await this.wrapper.storage.updateSecret(this.wrapper.keys.Storage.Account, JSON.stringify(account));
 		this.wrapper.log.methodDone("save account", 1, logPad);
 	};
 

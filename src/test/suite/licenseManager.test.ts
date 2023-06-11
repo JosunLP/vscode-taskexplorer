@@ -132,7 +132,7 @@ suite("License Manager Tests", () =>
 	test("Validate License in Trial Mode (No Refresh Token Needed)", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
-        await validateLicense(this, true, true, 1);
+        await validateLicense(this, true, true);
         utils.endRollingCount(this);
 	});
 
@@ -460,6 +460,7 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "some_invalid_key" }});
+		Object.assign(licMgr.account.session, { ...oAccount.session, ...{ expires: Date.now() - (1000 * 60 * 60 * 4) - 1000 }});
 		await saveAccount(licMgr.account);
         await validateLicense(this, true, false);
         utils.endRollingCount(this);
@@ -471,6 +472,7 @@ suite("License Manager Tests", () =>
 		if (utils.exitRollingCount(this)) return;
 		Object.assign(licMgr.account, { ...oAccount, ...{ id: 0 }});
 		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "tests-no-matching-account-key" }});
+		Object.assign(licMgr.account.session, { ...oAccount.session, ...{ expires: Date.now() - (1000 * 60 * 60 * 4) - 1000 }});
 		await saveAccount(licMgr.account);
         await validateLicense(this, true, false);
         utils.endRollingCount(this);
@@ -482,6 +484,7 @@ suite("License Manager Tests", () =>
 		if (utils.exitRollingCount(this)) return;
 		Object.assign(licMgr.account, { ...oAccount, ...{ trialId: 0 }});
 		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "tests-no-matching-trial-key" }});
+		Object.assign(licMgr.account.session, { ...oAccount.session, ...{ expires: Date.now() - (1000 * 60 * 60 * 4) - 1000 }});
 		await saveAccount(licMgr.account);
         await validateLicense(this, true, false);
         utils.endRollingCount(this);
@@ -543,13 +546,12 @@ const setNag = (v?: number) => teWrapper.storage.update(teWrapper.keys.Storage.L
 
 const setTasks = (e: any) => { licMgr.setTestData({ callTasksChanged: e }); };
 
-const validateLicense = async (instance: Mocha.Context | undefined, expectNow: boolean, expectAfter: boolean, intervalHrs = 48, setPaid = false) =>
+const validateLicense = async (instance: Mocha.Context | undefined, expectNow: boolean, expectAfter: boolean) =>
 {
 	instance?.slow(tc.slowTime.licenseMgr.validateLicense);
 	expect(licMgr.isLicensed).to.be.equal(expectNow);
 	expect(licMgr.isTrial).to.be.equal(expectNow);
 	try {
-		licMgr.setTestData({ sessionInterval: 1000 * 60 * 60 * intervalHrs, setPaid });
 		await licMgr.checkLicense("");
 		await utils.sleep(250);
 		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);

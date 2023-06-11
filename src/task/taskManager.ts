@@ -4,15 +4,15 @@ import { TaskFile } from "../tree/file";
 import { TaskItem } from "../tree/item";
 import { TeWrapper } from "../lib/wrapper";
 import { pathExists } from "../lib/utils/fs";
+import { PinnedStorageKey } from "../lib/constants";
 import { isScriptType } from "../lib/utils/taskUtils";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "./provider/script";
+import { registerCommand } from "../lib/command/command";
 import { TaskDetailsPage } from "../webview/page/taskDetails";
 import { getPackageManager, sleep } from "../lib/utils/utils";
-import { ConfigKeys, PinnedStorageKey } from "../lib/constants";
-import { Commands, registerCommand } from "../lib/command/command";
 import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
-import { ILog, ITeTaskManager, TaskMap, ITeTask, TeTaskListType } from "../interface";
+import { ILog, ITeTaskManager, ITeTask, TeTaskListType } from "../interface";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder
@@ -29,21 +29,21 @@ export class TaskManager implements ITeTaskManager, Disposable
     {
         this.log = wrapper.log;
         this._disposables.push(
-            registerCommand(Commands.NpmRunInstall, (item: TaskFile) => this.runNpmCommand(item, "install"), this),
-            registerCommand(Commands.NpmRunUpdate, (item: TaskFile) => this.runNpmCommand(item, "update"), this),
-            registerCommand(Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
-            registerCommand(Commands.NpmRunAuditFix, (item: TaskFile) => this.runNpmCommand(item, "audit fix"), this),
-            registerCommand(Commands.NpmRunUpdatePackage, (item: TaskFile) => this.runNpmCommand(item, "update <packagename>"), this),
-            registerCommand(Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.wrapper.treeManager.getTaskItem(item), itemClick), this),
-            registerCommand(Commands.Pause, (item: TaskItem | ITeTask) => this.pause(this.wrapper.treeManager.getTaskItem(item)), this),
-            registerCommand(Commands.Restart, (item: TaskItem) => this.restart(item), this),
-            registerCommand(Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.wrapper.treeManager.getTaskItem(item)), this),
-            registerCommand(Commands.RunLastTask,  () => this.runLastTask(), this),
-            registerCommand(Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.wrapper.treeManager.getTaskItem(item), false, true, ...args), this),
-            registerCommand(Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
-			registerCommand(Commands.SetPinned, (item: TaskItem | ITeTask, listType?: TeTaskListType) => this.setPinned(item, listType), this),
-            registerCommand(Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
-            registerCommand(Commands.Stop, (item: TaskItem | ITeTask) => this.stop(this.wrapper.treeManager.getTaskItem(item)), this)
+            registerCommand(wrapper.keys.Commands.NpmRunInstall, (item: TaskFile) => this.runNpmCommand(item, "install"), this),
+            registerCommand(wrapper.keys.Commands.NpmRunUpdate, (item: TaskFile) => this.runNpmCommand(item, "update"), this),
+            registerCommand(wrapper.keys.Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
+            registerCommand(wrapper.keys.Commands.NpmRunAuditFix, (item: TaskFile) => this.runNpmCommand(item, "audit fix"), this),
+            registerCommand(wrapper.keys.Commands.NpmRunUpdatePackage, (item: TaskFile) => this.runNpmCommand(item, "update <packagename>"), this),
+            registerCommand(wrapper.keys.Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.wrapper.treeManager.getTaskItem(item), itemClick), this),
+            registerCommand(wrapper.keys.Commands.Pause, (item: TaskItem | ITeTask) => this.pause(this.wrapper.treeManager.getTaskItem(item)), this),
+            registerCommand(wrapper.keys.Commands.Restart, (item: TaskItem) => this.restart(item), this),
+            registerCommand(wrapper.keys.Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.wrapper.treeManager.getTaskItem(item)), this),
+            registerCommand(wrapper.keys.Commands.RunLastTask,  () => this.runLastTask(), this),
+            registerCommand(wrapper.keys.Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.wrapper.treeManager.getTaskItem(item), false, true, ...args), this),
+            registerCommand(wrapper.keys.Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
+			registerCommand(wrapper.keys.Commands.SetPinned, (item: TaskItem | ITeTask, listType?: TeTaskListType) => this.setPinned(item, listType), this),
+            registerCommand(wrapper.keys.Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
+            registerCommand(wrapper.keys.Commands.Stop, (item: TaskItem | ITeTask) => this.stop(this.wrapper.treeManager.getTaskItem(item)), this)
         );
     }
 
@@ -52,7 +52,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     private open = async(selection: TaskItem, itemClick = false) =>
     {
-        const clickAction = this.wrapper.config.get<string>(ConfigKeys.TaskButtons.ClickAction, "Open");
+        const clickAction = this.wrapper.config.get<string>(this.wrapper.keys.Config.TaskButtonsClickAction, "Open");
 
         //
         // As of v1.30.0, added option to change the entry item click to execute.  In order to avoid having
@@ -401,13 +401,13 @@ export class TaskManager implements ITeTaskManager, Disposable
         const exec = taskItem.isExecuting();
         if (exec)
         {
-            if (this.wrapper.config.get<boolean>(ConfigKeys.KeepTerminalOnTaskDone) === true && !taskItem.taskDetached)
+            if (this.wrapper.config.get<boolean>(this.wrapper.keys.Config.KeepTerminalOnTaskDone) === true && !taskItem.taskDetached)
             {
                 const terminal = getTerminal(taskItem, "   ");
                 /* istanbul ignore else */
                 if (terminal)
                 {
-                    const ctrlChar = this.wrapper.config.get<string>(ConfigKeys.TaskButtons.ControlCharacter, "Y");
+                    const ctrlChar = this.wrapper.config.get<string>(this.wrapper.keys.Config.TaskButtonsControlCharacter, "Y");
                     this.log.write("   keep terminal open", 1);
                     if (taskItem.paused)
                     {

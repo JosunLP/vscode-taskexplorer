@@ -1,13 +1,10 @@
 
 import { TeWrapper } from "../../lib/wrapper";
-import { ConfigKeys } from "../../lib/constants";
 import { TeWebviewPanel } from "../webviewPanel";
 import { ConfigurationChangeEvent } from "vscode";
 import { toITask } from "../../lib/utils/taskUtils";
-import { Commands } from "../../lib/command/command";
-import { ContextKeys, WebviewIds } from "../../lib/context";
 import {
-	ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent
+	ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, WebviewIds
 } from "../../interface";
 import {
 	MonitorAppState, IpcTasksChangedMsg, IpcTaskChangedMsg, IMonitorAppTimerMode, IpcConfigChangedMsg
@@ -25,20 +22,18 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 			wrapper,
 			"monitor.html",
 			"Task Monitor",
+			MonitorPage.viewId,
 			"res/img/logo-bl.png",
-			`taskexplorer.view.${MonitorPage.viewId}`,
-			`${ContextKeys.WebviewPrefix}${MonitorPage.viewId}`,
-			`${MonitorPage.viewId}View`,
-			Commands.ShowTaskMonitorPage
+			wrapper.keys.Commands.ShowTaskMonitorPage
 		);
 	}
 
 
 	private getSettingsState = () =>
 	({
-		timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(ConfigKeys.TaskMonitor.TimerMode),
-		trackStats: this.wrapper.config.get<boolean>(ConfigKeys.TaskMonitor.TrackStats),
-		trackUsage: this.wrapper.config.get<boolean>(ConfigKeys.TrackUsage),
+		timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(this.wrapper.keys.Config.TaskMonitorTimerMode),
+		trackStats: this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats),
+		trackUsage: this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage),
 	});
 
 
@@ -97,7 +92,7 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 	protected override async onConfigChanged(e: ConfigurationChangeEvent)
 	{
-		if (this.wrapper.config.affectsConfiguration(e, ConfigKeys.TaskMonitor.TimerMode, ConfigKeys.TrackUsage, ConfigKeys.TaskMonitor.TrackStats))
+		if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TaskMonitorTimerMode, this.wrapper.keys.Config.TrackUsage, this.wrapper.keys.Config.TaskMonitorTrackStats))
 		{
 			await this.postMessage(IpcConfigChangedMsg, this.getSettingsState());
 		}

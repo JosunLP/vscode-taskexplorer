@@ -2,10 +2,9 @@
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { ITeTaskChangeEvent } from "../../interface";
 import { debounceCommand } from "../../lib/command/command";
 import { createTaskCountTable } from "../common/taskCountTable";
-import { ContextKeys, WebviewViewIds } from "../../lib/context";
+import { ITeTaskChangeEvent, WebviewViewIds } from "../../interface";
 
 
 export class TaskCountView extends TeWebviewView<State>
@@ -20,9 +19,7 @@ export class TaskCountView extends TeWebviewView<State>
 			"Task Count",
 			"Task Counts by Type",
 			"task-count.html",
-			`taskexplorer.view.${TaskCountView.viewId}`,
-			`${ContextKeys.WebviewViewPrefix}${TaskCountView.viewId}`,
-			`${TaskCountView.viewId}View`
+			TaskCountView.viewId
 		);
 	}
 

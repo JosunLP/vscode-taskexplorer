@@ -3,7 +3,7 @@
 import { extname } from "path";
 import { TeWrapper } from "../lib/wrapper";
 import { ITeFileWatcher } from "../interface";
-import { Commands, executeCommand } from "../lib/command/command";
+import { executeCommand } from "../lib/command/command";
 import { getTaskTypes, isScriptType } from "../lib/utils/taskUtils";
 import {
     Disposable, FileSystemWatcher, workspace, WorkspaceFolder, Uri, WorkspaceFoldersChangeEvent, Event, EventEmitter
@@ -358,7 +358,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
                 // the 2nd param in refresh cmd to `false` accomplishes just that.
                 //
                 this.wrapper.log.write("   refresh tree order", 1);
-                await executeCommand(Commands.Refresh, false, undefined, "   ");
+                await executeCommand(this.wrapper.keys.Commands.Refresh, false, undefined, "   ");
             }
             else {
                 this.wrapper.log.write("   nothing to do", 1);
@@ -465,7 +465,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         {   this.wrapper.log.methodStart("[event] directory 'create'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
             const numFilesFound = await this.wrapper.fileCache.addFolder(uri, logPad + "   ");
             if (numFilesFound > 0) {
-                await executeCommand(Commands.Refresh, undefined, uri, logPad + "   ");
+                await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, uri, logPad + "   ");
             }
             this.wrapper.log.methodDone("[event] directory 'create'", 1, logPad);
         }
@@ -480,7 +480,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         {   this.wrapper.log.methodStart("[event] directory 'delete'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
             const numFilesRemoved = this.wrapper.fileCache.removeFolderFromCache(uri, logPad + "   ");
             if (numFilesRemoved > 0) {
-                await executeCommand(Commands.Refresh, undefined, uri, logPad + "   ");
+                await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, uri, logPad + "   ");
             }
             this.wrapper.log.methodDone("[event] directory 'delete'", 1, logPad);
         }
@@ -493,7 +493,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         try
         {   this.wrapper.log.methodStart("[event] file 'change'", 1, logPad, true, [[ "file", uri.fsPath ]]);
-            await executeCommand(Commands.Refresh, taskType, uri, logPad + "   ");
+            await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, logPad + "   ");
             this.wrapper.log.methodDone("[event] file 'change'", 1, logPad);
         }
         catch (e) { /* istanbul ignore next */ this.wrapper.log.error([ "Filesystem watcher 'file change' event error", e ]); }
@@ -506,7 +506,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         try
         {   this.wrapper.log.methodStart("[event] file 'create'", 1, logPad, true, [[ "file", uri.fsPath ]]);
             this.wrapper.fileCache.addFileToCache(taskType, uri, logPad + "   ");
-            await executeCommand(Commands.Refresh, taskType, uri, logPad + "   ");
+            await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, logPad + "   ");
             this.wrapper.log.methodDone("[event] file 'create'", 1, logPad);
         }
         catch (e) { /* istanbul ignore next */ this.wrapper.log.error([ "Filesystem watcher 'file create' event error", e ]); }
@@ -519,7 +519,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         try
         {   this.wrapper.log.methodStart("[event] file 'delete'", 1, logPad, true, [[ "file", uri.fsPath ]]);
             this.wrapper.fileCache.removeFileFromCache(taskType, uri, logPad + "   ");
-            await executeCommand(Commands.Refresh, taskType, uri, logPad + "   ");
+            await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, logPad + "   ");
             this.wrapper.log.methodDone("[event] file 'delete'", 1, logPad);
         }
         catch (e) { /* istanbul ignore next */ this.wrapper.log.error([ "Filesystem watcher 'file delete' event error", e ]); }
@@ -539,7 +539,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             if (numFilesFound > 0 || numFilesRemoved > 0)
             {
                 const all =  [ ...e.added, ...e.removed ];
-                await executeCommand(Commands.Refresh, undefined, all.length === 1 ? all[0].uri : false, logPad + "   ");
+                await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, all.length === 1 ? all[0].uri : false, logPad + "   ");
             }
             this.wrapper.log.methodDone("workspace folder 'add/remove'", 1, logPad, [
                 [ "# of files found", numFilesFound ], [ "# of files removed", numFilesRemoved ]

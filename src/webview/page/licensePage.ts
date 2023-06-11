@@ -2,11 +2,10 @@
 import { Disposable } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { ITeTaskChangeEvent } from "../../interface";
-import { ContextKeys, WebviewIds } from "../../lib/context";
+import { debounceCommand } from "../../lib/command/command";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { createTaskImageTable } from "../common/taskImageTable";
-import { Commands, debounceCommand } from "../../lib/command/command";
+import { ITeTaskChangeEvent, WebviewIds } from "../../interface";
 import { IIpcMessage, IpcRegisterAccountMsg, onIpc, State } from "../common/ipc";
 
 
@@ -21,11 +20,9 @@ export class LicensePage extends TeWebviewPanel<State>
 			wrapper,
 			"license.html",
 			`${wrapper.extensionTitle} Licensing`,
-			"res/img/logo-bl.png",
-			`taskexplorer.view.${LicensePage.viewId}`,
-			`${ContextKeys.WebviewPrefix}${LicensePage.viewId}`,
 			LicensePage.viewId,
-			Commands.ShowLicensePage
+			"res/img/logo-bl.png",
+			wrapper.keys.Commands.ShowLicensePage
 		);
 	}
 

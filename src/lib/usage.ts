@@ -28,7 +28,7 @@ export class Usage implements ITeUsage, Disposable
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
 		this._onDidChange = new EventEmitter<ITeUsageChangeEvent | undefined>();
         this._trackUsage = this.wrapper.config.get<boolean>(wrapper.keys.Config.TrackUsage);
-        this._trackTaskStats = this.wrapper.config.get<boolean>(wrapper.keys.Config.TaskMonitor.TrackStats);
+        this._trackTaskStats = this.wrapper.config.get<boolean>(wrapper.keys.Config.TaskMonitorTrackStats);
         this._allowUsageReporting = this.wrapper.config.get<boolean>(wrapper.keys.Config.AllowUsageReporting);
 		this._disposables.push(
 			this._onDidChange,
@@ -243,9 +243,9 @@ export class Usage implements ITeUsage, Disposable
         {
             this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage);
         }
-        if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TaskMonitor.TrackStats))
+        if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TaskMonitorTrackStats))
         {
-            this._trackTaskStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitor.TrackStats);
+            this._trackTaskStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats);
             if (this._trackTaskStats && !this._trackUsage)
             {
                 this._trackUsage = this._trackTaskStats;
@@ -372,7 +372,7 @@ export class Usage implements ITeUsage, Disposable
     {
         let added = false,
             changed = false;
-        const specTaskListLength = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
+        const specTaskListLength = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFoldersNumLastTasks);
         //
         // First remove this task from the list of it is present, it'll be put back
         // in the following steps

@@ -4,7 +4,7 @@ import { Globs } from "../constants";
 import { TeWrapper } from "../wrapper";
 import { Disposable, Uri, window } from "vscode";
 import { addToExcludes } from "../utils/addToExcludes";
-import { Commands, executeCommand, registerCommand } from "./command";
+import { executeCommand, registerCommand } from "./command";
 
 
 export class AddToExcludesCommand implements Disposable
@@ -14,7 +14,7 @@ export class AddToExcludesCommand implements Disposable
     constructor(private readonly wrapper: TeWrapper)
     {
         this._disposables.push(
-            registerCommand(Commands.AddToExcludesMenu, (uri: Uri) => this.addUriToExcludes(uri), this)
+            registerCommand(wrapper.keys.Commands.AddToExcludesMenu, (uri: Uri) => this.addUriToExcludes(uri), this)
         );
     }
 
@@ -33,7 +33,7 @@ export class AddToExcludesCommand implements Disposable
                 this.wrapper.treeManager.configWatcher.enableConfigWatcher(false);
                 await addToExcludes([ uri.path ], "exclude", "   ");
                 this.wrapper.treeManager.configWatcher.enableConfigWatcher(true);
-                await executeCommand(Commands.Refresh, taskType, uri, "   ");
+                await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, "   ");
             }
             else{
                 const msg = "This file does not appear to be associated to any known task type";

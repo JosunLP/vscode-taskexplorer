@@ -2,7 +2,6 @@
 
 import { join } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { ContextKeys } from "../lib/context";
 import * as taskTypeUtils from "../lib/utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "../lib/utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
@@ -771,8 +770,8 @@ export class TeFileCache implements ITeFileCache, Disposable
         }
         taskFiles.sort();
         scriptFiles.sort();
-        await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}taskFiles`, taskFiles);
-        await this.wrapper.contextTe.setContext(`${ContextKeys.FileCachePrefix}scriptFiles`, scriptFiles);
+        await this.wrapper.contextTe.setContext(`${this.wrapper.keys.Context.FileCachePrefix}taskFiles`, taskFiles);
+        await this.wrapper.contextTe.setContext(`${this.wrapper.keys.Context.FileCachePrefix}scriptFiles`, scriptFiles);
     };
 
 

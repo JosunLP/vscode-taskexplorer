@@ -24,7 +24,6 @@ import {
     activate, endRollingCount, exitRollingCount, getProjectsPath, sleep, suiteFinished,
     testControl as tc, verifyTaskCount, waitForTeIdle
 } from "../utils/utils";
-import { ConfigKeys } from "../../lib/constants";
 
 const gruntCt = 7;
 const originalGetWorkspaceFolder = workspace.getWorkspaceFolder;
@@ -48,7 +47,7 @@ suite("Multi-Root Workspace Tests", () =>
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate(this));
 
-        sortAlpha = teWrapper.config.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically);
+        sortAlpha = teWrapper.config.get<boolean>(teWrapper.keys.Config.SortProjectFoldersAlphabetically);
         await teWrapper.config.updateVs("grunt.autoDetect", false); // we ignore internally provided grunt tasks when building the tree
                                                                 // so make sure they're off for the verifyTaskCount() calls
         testsPath = getProjectsPath(".");
@@ -103,7 +102,7 @@ suite("Multi-Root Workspace Tests", () =>
             workspace.getWorkspaceFolder = originalGetWorkspaceFolder;
         }
         if (!sortAlphaReset){
-            await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, sortAlpha);
+            await executeSettingsUpdate(teWrapper.keys.Config.SortProjectFoldersAlphabetically, sortAlpha);
         }
         await teWrapper.fs.deleteDir(wsf1DirName);
         await teWrapper.fs.deleteDir(wsf2DirName);
@@ -192,7 +191,7 @@ suite("Multi-Root Workspace Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.wsFolder.reorder * 3);
         teWrapper.treeManager.configWatcher.enableConfigWatcher(false);
-        await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.SortProjectFoldersAlphabetically, true);
         teWrapper.treeManager.configWatcher.enableConfigWatcher(true);
         await teWrapper.fileWatcher.onWsFoldersChange({
             added: [],
@@ -200,7 +199,7 @@ suite("Multi-Root Workspace Tests", () =>
         });
         await waitForTeIdle(tc.waitTime.reorderWorkspaceFolders);
         teWrapper.treeManager.configWatcher.enableConfigWatcher(false);
-        await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, false);
+        await executeSettingsUpdate(teWrapper.keys.Config.SortProjectFoldersAlphabetically, false);
         teWrapper.treeManager.configWatcher.enableConfigWatcher(true);
         await teWrapper.fileWatcher.onWsFoldersChange({
             added: [],
@@ -208,7 +207,7 @@ suite("Multi-Root Workspace Tests", () =>
         });
         await waitForTeIdle(tc.waitTime.reorderWorkspaceFolders);
         teWrapper.treeManager.configWatcher.enableConfigWatcher(false);
-        await executeSettingsUpdate(ConfigKeys.SortProjectFoldersAlphabetically, sortAlpha);
+        await executeSettingsUpdate(teWrapper.keys.Config.SortProjectFoldersAlphabetically, sortAlpha);
         sortAlphaReset = true;
         teWrapper.treeManager.configWatcher.enableConfigWatcher(true);
         endRollingCount(this);

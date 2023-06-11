@@ -5,7 +5,6 @@ import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
 import { IDictionary } from "../interface";
-import { ConfigKeys } from "../lib/constants";
 import { SpecialTaskFolder } from "./specialFolder";
 
 
@@ -16,7 +15,7 @@ export class TaskTreeGrouper
 
     buildGroupings = async(folders: IDictionary<TaskFolder|SpecialTaskFolder>, logPad: string, logLevel: number) =>
     {
-        const groupWithSep = this.wrapper.config.get<boolean>(ConfigKeys.GroupWithSeperator);
+        const groupWithSep = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupWithSeperator);
         this.wrapper.log.methodStart("build tree node groupings", logLevel, logPad, false, [[ "group withseparator", groupWithSep ]]);
         //
         // Sort nodes.  By default the project folders are sorted in the same order as that
@@ -171,7 +170,7 @@ export class TaskTreeGrouper
         let prevTaskItem: TaskItem | undefined;
         const newNodes: TaskFile[] = [];
         const groupSeparator = this.wrapper.utils.getGroupSeparator();
-        const atMaxLevel: boolean = this.wrapper.config.get<number>(ConfigKeys.GroupMaxLevel) <= treeLevel + 1;
+        const atMaxLevel: boolean = this.wrapper.config.get<number>(this.wrapper.keys.Config.GroupMaxLevel) <= treeLevel + 1;
 
         this.wrapper.log.methodStart("create task groupings by separator", logLevel, logPad, true, [
             [ "folder", folder.label ], [ "label (node name)", taskFile.label ], [ "grouping level", treeLevel ], [ "is group", taskFile.isGroup ],
@@ -435,7 +434,7 @@ export class TaskTreeGrouper
 
     private renameGroupedTasks = async(taskFile: TaskFile) =>
     {
-        const groupStripTaskLabel = this.wrapper.config.get<boolean>(ConfigKeys.GroupStripTaskLabel, true);
+        const groupStripTaskLabel = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupStripTaskLabel, true);
         if (!groupStripTaskLabel || !taskFile.label) {
             return;
         }

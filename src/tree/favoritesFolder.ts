@@ -4,7 +4,7 @@ import { ITeTask } from "../interface";
 import { TeWrapper } from "../lib/wrapper";
 import { TreeItemCollapsibleState } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
-import { Commands, registerCommand } from "../lib/command/command";
+import { registerCommand } from "../lib/command/command";
 
 
 /**
@@ -20,11 +20,11 @@ export class FavoritesFolder extends SpecialTaskFolder
 
     constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
     {
-        super(wrapper, "favorites", wrapper.keys.Strings.FAV_TASKS_LABEL, wrapper.keys.Config.SpecialFolders.ShowFavorites, state);
+        super(wrapper, "favorites", wrapper.keys.Strings.FAV_TASKS_LABEL, wrapper.keys.Config.SpecialFoldersShowFavorites, state);
         this._maxItems = 100; // this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFolders.NumLastTasks);
         this.disposables.push(
-            registerCommand(Commands.AddRemoveFavorite, this.addRemoveFavorite, this),
-            registerCommand(Commands.ClearFavorites, this.clearSavedTasks, this)
+            registerCommand(wrapper.keys.Commands.AddRemoveFavorite, this.addRemoveFavorite, this),
+            registerCommand(wrapper.keys.Commands.ClearFavorites, this.clearSavedTasks, this)
         );
     }
 

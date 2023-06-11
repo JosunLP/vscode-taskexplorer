@@ -10,8 +10,8 @@
 
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewBase } from "./webviewBase";
-import { ContextKeys, WebviewIds } from "../lib/context";
-import { Commands, registerCommand } from "../lib/command/command";
+import { registerCommand } from "../lib/command/command";
+import { WebviewPrefix, WebviewIds, WebviewContextKey, WebviewUsageKey, Commands } from "../interface";
 import {
     WebviewOptions, WebviewPanel, WebviewPanelOnDidChangeViewStateEvent, WebviewPanelOptions, WindowState,
     Disposable, Uri, ViewColumn, window, WebviewPanelSerializer
@@ -21,27 +21,24 @@ import {
 export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> implements Disposable
 {
 	private _isMultiInstance: boolean;
+	private _usageKey: WebviewUsageKey;
+	private _contextKeyPrefix: WebviewContextKey;
 	private _disposablePanel: Disposable | undefined;
 	protected override _view: WebviewPanel | undefined = undefined;
 
 
-	constructor(wrapper: TeWrapper,
-		fileName: string,
-		title: string,
-		private readonly iconPath: string,
-		protected override id: `taskexplorer.view.${WebviewIds}`,
-		private readonly contextKeyPrefix: `${ContextKeys.WebviewPrefix}${WebviewIds}`,
-		private readonly trackingFeature: string,
-		showCommand?: Commands)
+	constructor(wrapper: TeWrapper, fileName: string, title: string,  viewId: WebviewIds, private readonly iconPath: string, showCommand: Commands)
 	{
-		super(wrapper, id, title, fileName);
+		super(wrapper, `${WebviewPrefix.View}${viewId}`, title, fileName);
 		this._isMultiInstance = !showCommand;
 		if (showCommand){
 			this.disposables.push(
 				registerCommand(showCommand, this.onShowCommand, this),
-				window.registerWebviewPanelSerializer(id, this._serializer)
+				window.registerWebviewPanelSerializer(this.id, this._serializer)
 			);
 		}
+		this._usageKey = `${wrapper.keys.Usage.WebviewPrefix}${viewId}Page`;
+		this._contextKeyPrefix = `${wrapper.keys.Context.WebviewPrefix}${viewId}`;
 	}
 
 	override dispose()
@@ -142,7 +139,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	async show(options?: { column?: ViewColumn; preserveFocus?: boolean }, ...args: any[])
 	{
-		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
+		await this.wrapper.usage.track(`${this._usageKey}:shown`);
 
 		const column = options?.column ?? ViewColumn.One;
 		if (!this._view)
@@ -190,17 +187,17 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	private resetContextKeys()
 	{
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, false);
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:focus`, false);
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:active`, false);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:inputFocus`, false);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:focus`, false);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:active`, false);
 	}
 
 
 	private setContextKeys(active: boolean | undefined, focus?: boolean, inputFocus?: boolean)
 	{
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:active`, !!active);
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:focus`, !!active && !!focus);
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, !!active && !!inputFocus);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:active`, !!active);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:focus`, !!active && !!focus);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:inputFocus`, !!active && !!inputFocus);
 	}
 
 

@@ -11,7 +11,7 @@
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewBase } from "./webviewBase";
 import { executeCommand } from "../lib/command/command";
-import { ContextKeys, WebviewViewIds } from "../lib/context";
+import { WebviewPrefix, WebviewViewContextKey, WebviewViewIds, WebviewViewUsageKey } from "../interface";
 import {
 	CancellationToken, WebviewView, WebviewViewProvider, WebviewViewResolveContext, WindowState, Disposable, window, Uri
 } from "vscode";
@@ -20,23 +20,21 @@ import {
 export abstract class TeWebviewView<State, SerializedState = State> extends TeWebviewBase<State, SerializedState> implements WebviewViewProvider, Disposable
 {
 	private _description: string | undefined;
+	private _usageKey: WebviewViewUsageKey;
+	private _contextKeyPrefix: WebviewViewContextKey;
 	private _disposableView: Disposable | undefined;
 	protected override _view: WebviewView | undefined = undefined;
 	protected abstract override onInitializing(): Disposable[];
 
 
-	constructor(
-		wrapper: TeWrapper,
-		title: string,
-		description: string,
-		fileName: string,
-		protected override id: `taskexplorer.view.${WebviewViewIds}`,
-		private readonly contextKeyPrefix: `${ContextKeys.WebviewViewPrefix}${WebviewViewIds}`,
-		private readonly trackingFeature: string)
+
+	constructor(wrapper: TeWrapper, title: string, description: string, fileName: string, viewId: WebviewViewIds)
 	{
-		super(wrapper, id, title, fileName);
+		super(wrapper, `${WebviewPrefix.View}${viewId}`, title, fileName);
 		this.description = description;
-		this.disposables.push(window.registerWebviewViewProvider(id, this));
+		this._usageKey = `${wrapper.keys.Usage.WebviewViewPrefix}${viewId}View`;
+		this._contextKeyPrefix = `${wrapper.keys.Context.WebviewViewPrefix}${viewId}`;
+		this.disposables.push(window.registerWebviewViewProvider(this.id, this));
 	}
 
 
@@ -107,8 +105,8 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 
 	private resetContextKeys()
 	{
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, false);
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:focus`, false);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:inputFocus`, false);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:focus`, false);
 	}
 
 
@@ -141,14 +139,14 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 
 	private setContextKeys(focus: boolean, inputFocus: boolean)
 	{
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:focus`, focus);
-		void this.wrapper.contextTe.setContext(`${this.contextKeyPrefix}:inputFocus`, inputFocus);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:focus`, focus);
+		void this.wrapper.contextTe.setContext(`${this._contextKeyPrefix}:inputFocus`, inputFocus);
 	}
 
 
 	async show(options?: { preserveFocus?: boolean })
 	{
-		await this.wrapper.usage.track(`${this.trackingFeature}:shown`);
+		await this.wrapper.usage.track(`${this._usageKey}:shown`);
 		await executeCommand(`${this.id}.focus`, options);
 		this.setContextKeys(true, false);
 		return this;

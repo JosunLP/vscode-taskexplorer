@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { IDictionary, TeTaskListType } from "../interface";
+import { IDictionary, TeTaskListType, ConfigPrefix, ITeKeys, ConfigKeys, ContextKeys, StorageKeys, UsageKeys, VsCodeCommands, Commands } from "../interface";
 
 export const Strings =
 {
@@ -13,47 +13,6 @@ export const Strings =
 	RequestingTasks: "appstrings.requestingTasks|Requesting tasks from providers...",
 	BuildingTaskTree: "appstrings.buildingTaskTree|Building task tree...",
 	NoTasks: "appstrings.noTasks|No tasks found"
-};
-
-export const enum ConfigPrefix
-{
-	Pinned = "taskexplorer.pinned.",
-	SpecialFolder = "taskexplorer.specialFolder."
-}
-
-export const ConfigKeys =
-{
-    AllowUsageReporting: "allowUsageReporting",
-    EnableExplorerTree: "enableExplorerView",
-    EnabledLogging: "taskexplorer.logging.enable",
-    EnableSideBar: "enableSideBar",
-    EnablePersistenFileCache: "enablePersistentFileCaching",
-    GroupMaxLevel: "groupMaxLevel",
-    GroupSeparator: "groupSeparator",
-    GroupStripTaskLabel: "groupStripTaskLabel",
-    GroupWithSeperator: "groupWithSeparator",
-    KeepTerminalOnTaskDone: "keepTermOnStop",
-    LogLevel: "taskexplorer.logging.level",
-    LogEnableOutputWindow: "taskexplorer.logging.enableOutputWindow",
-    LogEnableFileSymbols: "taskexplorer.logging.enableFileSymbols",
-    LogEnableFile: "taskexplorer.logging.enableFile",
-    ReportGlobalUsage: "taskMonitor.reportUsage",
-    SortProjectFoldersAlphabetically: "sortProjectFoldersAlpha",
-	SpecialFolders: {
-        FolderState: "specialFolders.folderState",
-        NumLastTasks: "specialFolders.numLastTasks",
-        ShowFavorites: "specialFolders.showFavorites",
-        ShowLastTasks: "specialFolders.showLastTasks"
-    },
-    TaskButtons: {
-        ClickAction: "taskButtons.clickAction",
-        ControlCharacter: "taskButtons.controlCharacter"
-    },
-    TaskMonitor: {
-        TimerMode: "taskMonitor.timerMode",
-        TrackStats: "taskMonitor.trackStats"
-    },
-    TrackUsage: "trackUsage"
 };
 
 export const Globs: IDictionary<string> =
@@ -86,16 +45,15 @@ export type PinnedStorageKey = `${ConfigPrefix.Pinned}${TeTaskListType}`;
 
 export type SpecialFolderStorageKey = `${ConfigPrefix.SpecialFolder}${TeTaskListType}`;
 
-export const StorageKeys =
+
+export const All: ITeKeys =
 {
-    Account: "taskexplorer.account",
-    CacheBuster: "taskexplorer.cacheBuster",
-    FileCacheProjectFilesMap: "fileCacheProjectFilesMap",
-    FileCacheProjectFileToFileCountMap: "fileCacheProjectFileToFileCountMap",
-    FileCacheTaskFilesMap: "fileCacheTaskFilesMap",
-    LastLicenseNag: "taskexplorer.lastLicenseNag",
-    SpecialFolderRenames: "taskexplorer.specialFolder.renames",
-	TaskUsage: "taskexplorer.taskUsage",
-	Usage: "taskexplorer.usage",
-    Version: "taskexplorer.version"
+    Commands,
+    Config: ConfigKeys,
+    Context: ContextKeys,
+    Globs,
+    Storage: StorageKeys,
+    Strings,
+    Usage: UsageKeys,
+    VsCodeCommands
 };

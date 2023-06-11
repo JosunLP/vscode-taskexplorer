@@ -2,7 +2,6 @@
 
 import { log } from "./lib/log/log";
 import { TeWrapper } from "./lib/wrapper";
-import { ConfigKeys } from "./lib/constants";
 import { TeMigration } from "./lib/migration";
 import { initStorage, storage } from "./lib/storage";
 import { ExtensionContext, ExtensionMode } from "vscode";
@@ -73,7 +72,7 @@ export async function deactivate()
     // reload is much quicker, especially in large workspaces.
     //
     /* istanbul ignore next */
-    if (!teWrapper.fileCache.isBusy && !teWrapper.config.get<boolean>(ConfigKeys.EnablePersistenFileCache))
+    if (!teWrapper.fileCache.isBusy && !teWrapper.config.get<boolean>(teWrapper.keys.Config.EnablePersistenFileCache))
     {
         const now = Date.now(),
               lastWsRootPathChange = teWrapper.storage.get2Sync<number>("lastWsRootPathChange", 0);

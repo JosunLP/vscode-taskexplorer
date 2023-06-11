@@ -1,8 +1,7 @@
 
 import { workspace } from "vscode";
 import { getMd5 } from "@env/crypto";
-import { ConfigKeys } from "./constants";
-import { IConfiguration, IStorage, StorageTarget } from "../interface";
+import { ConfigKeys, IConfiguration, IStorage, StorageTarget } from "../interface";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./utils/taskUtils";
 
 

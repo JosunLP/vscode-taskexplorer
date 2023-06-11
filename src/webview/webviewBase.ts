@@ -15,9 +15,8 @@ import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewView } from "./webviewView";
 import { TeWebviewPanel } from "./webviewPanel";
 import { fontawesome } from "./common/fontawesome";
-import { IDictionary, ITeWebview } from "../interface";
-import { WebviewIds, WebviewViewIds } from "../lib/context";
-import { Commands, executeCommand } from "../lib/command/command";
+import { executeCommand } from "../lib/command/command";
+import { Commands, IDictionary, ITeWebview, WebviewIds, WebviewPrefix, WebviewViewIds } from "../interface";
 import {
 	ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, window, workspace
 } from "vscode";
@@ -25,6 +24,8 @@ import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, onIpc, IpcFocusChangedParams,
 	IpcReadyCommand, IpcUpdateConfigCommand, IpcEnabledChangedMsg, IpcShowMessageCommand
 } from "./common/ipc";
+
+type WebviewId = `${WebviewPrefix.View}${WebviewViewIds|WebviewIds}`;
 
 
 export interface FontAwesomeClass
@@ -77,7 +78,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	// private readonly htmlCache: { [id in `taskexplorer.view.${WebviewViewIds|WebviewIds}`]?: string; } = {};
 
 
-    constructor(protected readonly wrapper: TeWrapper, protected id: `taskexplorer.view.${WebviewViewIds|WebviewIds}`, title: string, protected readonly fileName: string)
+    constructor(protected readonly wrapper: TeWrapper, protected id: WebviewId, title: string, protected readonly fileName: string)
     {
 		this._title = title;
 		this._ipcSequence = 0;

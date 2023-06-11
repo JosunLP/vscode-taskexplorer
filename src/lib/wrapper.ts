@@ -13,11 +13,12 @@ import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
 import * as typeUtils from "./utils/typeUtils";
 import { TeFileCache } from "../task/fileCache";
+import { All as AllConstants } from "./constants";
 import { TaskManager } from "../task/taskManager";
 import { TaskWatcher } from "../task/taskWatcher";
 import { LicenseManager } from "./licenseManager";
 import * as commonUtils from "./utils/commonUtils";
-import { ContextKeys, TeContext } from "./context";
+import { TeContext } from "./context";
 import { HomeView } from "../webview/view/homeView";
 import { TeFileWatcher } from "../task/fileWatcher";
 import * as promiseUtils from "./utils/promiseUtils";
@@ -49,11 +50,10 @@ import { ComposerTaskProvider } from "../task/provider/composer";
 import { TaskExplorerProvider } from "../task/provider/provider";
 import { DisableTaskTypeCommand } from "./command/disableTaskType";
 import { PowershellTaskProvider } from "../task/provider/powershell";
+import { debounceCommand, registerCommand } from "./command/command";
 import { ParsingReportPage } from "../webview/page/parsingReportPage";
-import { ConfigKeys, Globs, StorageKeys, Strings } from "./constants";
 import { AppPublisherTaskProvider } from "../task/provider/appPublisher";
 import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
-import { Commands, debounceCommand, registerCommand } from "./command/command";
 import {
 	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView,
 	Disposable, EventEmitter, Event
@@ -61,7 +61,7 @@ import {
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, IDictionary, ILog, ITaskTreeView, ITeFilesystem,
 	ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities,
-	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeTreeConfigWatcher
+	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeTreeConfigWatcher, ITeKeys
 } from "../interface";
 
 
@@ -125,10 +125,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// TODO - Localization
 		//
-		Object.entries(Strings).filter(s => s[1].includes("|")).forEach(e =>
+		Object.entries<string>(AllConstants.Strings).filter(s => s[1].includes("|")).forEach(e =>
 		{
 			const lPair = e[1].split("|");
-			(<IDictionary<string>>Strings)[e[0]] = this.localize(lPair[0], lPair[1]);
+			(<IDictionary<string>>AllConstants.Strings)[e[0]] = this.localize(lPair[0], lPair[1]);
 		});
 
 		this._teContext = new TeContext();
@@ -215,7 +215,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this.log.methodStart("app wrapper - init", 1, "", false, [
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
-		await this.storage.update(StorageKeys.Version, this._version);
+		await this.storage.update(AllConstants.Storage.Version, this._version);
 		//
 		// Register busy complete event
 		//
@@ -241,9 +241,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// Context
 		//
 		this.registerContextMenuCommands();
-		await this._teContext.setContext(ContextKeys.Dev, this.dev);
-		await this._teContext.setContext(ContextKeys.Tests, this.tests);
-        await this._teContext.setContext(ContextKeys.Enabled, this.utils.isTeEnabled());
+		await this._teContext.setContext(AllConstants.Context.Dev, this.dev);
+		await this._teContext.setContext(AllConstants.Context.Tests, this.tests);
+        await this._teContext.setContext(AllConstants.Context.Enabled, this.utils.isTeEnabled());
 		this._disposables.push(
 			this._teContext.onDidChangeContext(() => {}, this) // cover until used somewhere
 		);
@@ -282,7 +282,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this.log.value("      previous version", this._previousVersion, 1);
 			this.log.value("      new version", this._version, 1);
 			this._cacheBuster = getUuid();
-			await this._storage.update(StorageKeys.CacheBuster, this._cacheBuster);
+			await this._storage.update(AllConstants.Storage.CacheBuster, this._cacheBuster);
 			promiseUtils.oneTimeEvent(this.onReady)(() =>
 			{
 				/* istanbul ignore if */
@@ -306,7 +306,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			  lastDeactivated = await this.storage.get2<number>("lastDeactivated", 0),
 			  lastWsRootPathChange = await this.storage.get2<number>("lastWsRootPathChange", 0),
 			  rootFolderChanged  = now < lastDeactivated + 5000 && /* istanbul ignore next */now < lastWsRootPathChange + 5000;
-		this._treeManager.setMessage(Strings.ScanningTaskFiles);
+		this._treeManager.setMessage(AllConstants.Strings.ScanningTaskFiles);
 		/* istanbul ignore else */
 		if (this.tests || /* istanbul ignore next */!rootFolderChanged)
 		{
@@ -314,11 +314,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		}     //
 		else // See comments/notes above
 		{   //
-			const enablePersistentFileCaching = this.config.get<boolean>(ConfigKeys.EnablePersistenFileCache);
+			const enablePersistentFileCaching = this.config.get<boolean>(AllConstants.Config.EnablePersistenFileCache);
 			this._treeManager.configWatcher.enableConfigWatcher(false);
-			await this.config.update(ConfigKeys.EnablePersistenFileCache, true);
+			await this.config.update(AllConstants.Config.EnablePersistenFileCache, true);
 			await this._statusBar.runWithProgress<number>(() => this.fileCache.rebuildCache("   "));
-			await this.config.update(ConfigKeys.EnablePersistenFileCache, enablePersistentFileCaching);
+			await this.config.update(AllConstants.Config.EnablePersistenFileCache, enablePersistentFileCaching);
 			this._treeManager.configWatcher.enableConfigWatcher(true);
 		}
 		await this.storage.update2("lastDeactivated", 0);
@@ -339,7 +339,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// Start the first tree build/load
 		//
 		promiseUtils.oneTimeEvent(this._treeManager.onReady)(() => {}); // cover onReady (hv used not used, 10x<->)
-		this._treeManager.setMessage(Strings.RequestingTasks);
+		this._treeManager.setMessage(AllConstants.Strings.RequestingTasks);
 		await this._treeManager.loadTasks("   ");
 		this._treeManager.setMessage(); // clear status bar message
 		//
@@ -381,8 +381,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private registerGlobalCommands = () =>
 	{
 		this._disposables.push(
-			registerCommand(Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
-			registerCommand(Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/spmeesseman/${this.extensionName}/issues`), this)
+			registerCommand(AllConstants.Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
+			registerCommand(AllConstants.Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/spmeesseman/${this.extensionName}/issues`), this)
 		);
 	};
 
@@ -539,9 +539,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._ready;
 	}
 
-	get keys() {
-		// eslint-disable-next-line @typescript-eslint/naming-convention
-		return { Storage: StorageKeys, Config: ConfigKeys, Strings, Globs };
+	get keys(): ITeKeys {
+		return AllConstants;
 	}
 
 	get licenseManager(): LicenseManager {

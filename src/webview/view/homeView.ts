@@ -3,9 +3,8 @@ import { Disposable } from "vscode";
 import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
-import { ContextKeys, WebviewViewIds } from "../../lib/context";
-import { Commands, registerCommand } from "../../lib/command/command";
-import { ITeTaskChangeEvent, TeSessionChangeEvent } from "../../interface";
+import { registerCommand } from "../../lib/command/command";
+import { ITeTaskChangeEvent, TeSessionChangeEvent, WebviewViewIds } from "../../interface";
 
 
 export class HomeView extends TeWebviewView<State>
@@ -20,9 +19,7 @@ export class HomeView extends TeWebviewView<State>
 			"Home",
 			"Home",
 			`${HomeView.viewId}.html`,
-			`taskexplorer.view.${HomeView.viewId}`,
-			`${ContextKeys.WebviewViewPrefix}${HomeView.viewId}`,
-			`${HomeView.viewId}View`
+			HomeView.viewId
 		);
 	}
 
@@ -94,7 +91,7 @@ export class HomeView extends TeWebviewView<State>
 	protected override registerCommands(): Disposable[]
 	{
 		return [
-			registerCommand(Commands.OpenRepository,
+			registerCommand(this.wrapper.keys.Commands.OpenRepository,
 				() => this.wrapper.utils.openUrl(`https://github.com/spmeesseman/${this.wrapper.extensionName}`),
 			this)
 		];

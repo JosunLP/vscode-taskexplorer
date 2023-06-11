@@ -2,11 +2,10 @@
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
-import { ConfigPrefix, SpecialFolderStorageKey } from "../lib/constants";
-import { IDictionary, ILog, ITeTaskChangeEvent, StorageTarget, TeTaskListType } from "../interface";
+import { SpecialFolderStorageKey } from "../lib/constants";
+import { IDictionary, ILog, ITeTaskChangeEvent, StorageTarget, TeTaskListType, ConfigPrefix } from "../interface";
 import {
-    ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon,
-    TreeItem, TreeItemCollapsibleState, window, workspace
+    ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon, TreeItemCollapsibleState, window
 } from "vscode";
 
 interface ITeSpecialTask
@@ -130,7 +129,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         const added: string[] = [],
               taskMap = this.wrapper.treeManager.getTaskMap(),
               expandStateId = this.wrapper.utils.lowerCaseFirstChar(this.label, true),
-              folderStateCfgKey = this.wrapper.keys.Config.SpecialFolders.FolderState,
+              folderStateCfgKey = this.wrapper.keys.Config.SpecialFoldersFolderState,
               tree = this.wrapper.treeManager.getTaskTree() as TaskFolder[], // Guaranted not to be undefined
               nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(folderStateCfgKey);
 

@@ -4,12 +4,11 @@ import { State } from "../common/ipc";
 import { dirname, relative } from "path";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
-import { ITeTaskChangeEvent } from "../../interface";
-import { ContextKeys, WebviewIds } from "../../lib/context";
+import { debounceCommand } from "../../lib/command/command";
 import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { createTaskImageTable } from "../common/taskImageTable";
-import { Commands, debounceCommand } from "../../lib/command/command";
+import { ITeTaskChangeEvent, WebviewIds } from "../../interface";
 import { getWorkspaceProjectName, pushIfNotExists } from "../../lib/utils/utils";
 
 
@@ -24,11 +23,9 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 			wrapper,
 			"parsing-report.html",
 			`${wrapper.extensionTitle} Parsing Report`,
+			ParsingReportPage.viewId,
 			"res/img/logo-bl.png",
-			`taskexplorer.view.${ParsingReportPage.viewId}`,
-			`${ContextKeys.WebviewPrefix}${ParsingReportPage.viewId}`,
-			`${ParsingReportPage.viewId}Page`,
-			Commands.ShowParsingReportPage
+			wrapper.keys.Commands.ShowParsingReportPage
 		);
 	}
 
