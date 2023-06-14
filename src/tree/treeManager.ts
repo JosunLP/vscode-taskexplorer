@@ -15,8 +15,8 @@ import { getTerminal } from "../lib/utils/getTerminal";
 import { registerCommand } from "../lib/command/command";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
-import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition, ITaskTreeView } from "../interface";
-import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event, WorkspaceFolder } from "vscode";
+import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition, ITaskTreeView, TaskMap } from "../interface";
+import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event, WorkspaceFolder, ProviderResult } from "vscode";
 
 
 export class TaskTreeManager implements ITeTreeManager, Disposable
@@ -35,6 +35,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private readonly _onDidTaskCountChange: EventEmitter<ITeTaskChangeEvent>;
     private readonly _views: { taskExplorer: TeTreeView; taskExplorerSideBar: TeTreeView };
     private readonly _specialFolders: { favorites: FavoritesFolder; lastTasks: LastTasksFolder };
+
 
     constructor(private readonly wrapper: TeWrapper)
     {
@@ -135,10 +136,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     }
 
 
-    private addRemoveSpecialTaskLabel = async(item: TaskItem) => (<SpecialTaskFolder>item.folder).addRemoveRenamedLabel(item);
+    private addRemoveSpecialTaskLabel = async (item: TaskItem): Promise<boolean> => (<SpecialTaskFolder>item.folder).addRemoveRenamedLabel(item);
 
 
-    private addToExcludes = async(selection: TaskFile | TaskItem) =>
+    private addToExcludes = async (selection: TaskFile | TaskItem): Promise<void> =>
     {
         let uri: Uri | false,
             excludesList = "exclude";
@@ -189,7 +190,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private cleanFetchedTasks = (logPad: string) =>
+    private cleanFetchedTasks = (logPad: string): void =>
     {
         let ctRmv = 0;
         const tasksCache = this._tasks;
@@ -214,7 +215,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private doTaskCacheRemovals = (invalidation: string | undefined, logPad: string) =>
+    private doTaskCacheRemovals = (invalidation: string | undefined, logPad: string): void =>
     {
         let ctRmv = 0;
         this.wrapper.log.methodStart("treemgr: do task cache removals", 2, logPad);
@@ -248,7 +249,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private fetchTasks = async(logPad: string) =>
+    private fetchTasks = async(logPad: string): Promise<void> =>
     {
         const zeroTasksToStart = this._tasks.length === 0;
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
@@ -334,7 +335,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private fireTasksLoadedEvents = (prevTaskCount: number) =>
+    private fireTasksLoadedEvents = (prevTaskCount: number): void =>
     {
         const iTasks = this.wrapper.taskUtils.toITask(this.wrapper, this._tasks, "all");
         this._onDidTasksChange.fire({ tasks: iTasks, type: "all" });
@@ -347,7 +348,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    fireTreeRefreshEvent = (treeItem: TreeItem | null, taskItem: TaskItem | null, logPad: string) =>
+    fireTreeRefreshEvent = (treeItem: TreeItem | null, taskItem: TaskItem | null, logPad: string): void =>
     {
         Object.values(this._views).filter(v => v.enabled).forEach((v) =>
         {
@@ -363,7 +364,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    getTaskItem =  (taskItem: TaskItem | ITeTask | Uri) =>
+    getTaskItem =  (taskItem: TaskItem | ITeTask | Uri): TaskItem =>
     {
         if (taskItem instanceof Uri) // FileExplorer Context menu
         {
@@ -380,16 +381,16 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    getTaskMap = () => this._treeBuilder.getTaskMap();
+    getTaskMap = (): TaskMap => this._treeBuilder.getTaskMap();
 
 
-    getTasks = () => this._tasks;
+    getTasks = (): Task[] => this._tasks;
 
 
-    getTaskTree = () => this._treeBuilder.getTaskTree();
+    getTaskTree = (): TaskFolder[] | void | null | undefined => this._treeBuilder.getTaskTree();
 
 
-    private handleRebuildEvent = async(invalidate: string | undefined, opt: Uri | false | undefined, logPad: string) =>
+    private handleRebuildEvent = async(invalidate: string | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
     {   //
         // The file cache only needs to update once on any change, since this will get called through
         // twice if both the Explorer and Sidebar Views are enabled, do a lil check here to make sure
@@ -409,7 +410,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private hashNpmScripts = () =>
+    private hashNpmScripts = (): void =>
     {
         this._npmScriptsHash = {};
         this._tasks.filter(t => t.source === "npm" && this.wrapper.typeUtils.isWorkspaceFolder(t.scope)).forEach((t) =>
@@ -423,7 +424,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    loadTasks = async(logPad: string) =>
+    loadTasks = async(logPad: string): Promise<void> =>
     {
         const count = this._tasks.length;
         this.wrapper.log.methodStart("treemgr: load tasks", 1, logPad);
@@ -528,7 +529,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private onWorkspaceFolderRemoved = async (uri: Uri, logPad: string) =>
+    private onWorkspaceFolderRemoved = async (uri: Uri, logPad: string): Promise<void> =>
     {
         this.wrapper.log.methodStart("treemgr: workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
         let ctRmv = 0;
@@ -573,7 +574,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private openTerminal = (taskItem: TaskItem) =>
+    private openTerminal = (taskItem: TaskItem): void =>
     {
         const term = getTerminal(taskItem);
         if (term) {
@@ -632,7 +633,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      *
      * @param opt Uri of the invalidated resource
      */
-    refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string) =>
+    refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
     {
         const isOptUri = this.wrapper.typeUtils.isUri(opt);
         this.wrapper.log.methodStart("treemgr: refresh task tree", 1, logPad, logPad === "", [
@@ -704,7 +705,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private setContext = async() =>
+    private setContext = async (): Promise<void> =>
     {
         const taskTypeProcessed: string[] = [],
               scriptFilesWithArgs: string[] = [],
@@ -722,15 +723,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    setMessage = (message?: string) =>
-    {
-        Object.values(this._views).filter(v => v.enabled && v.visible).forEach((v) => {
-            v.view.message =  message;
-        });
-    };
+    setMessage = (m?: string): void => Object.values(this._views).filter(v => v.enabled && v.visible).forEach(v => { v.view.message =  m; });
 
 
-    waitForRefreshComplete = async(maxWait = 15000, logPad = "   ") =>
+    waitForRefreshComplete = async (maxWait = 15000, logPad = "   "): Promise<void> =>
     {
         let waited = 0;
         if (this._refreshPending) {
