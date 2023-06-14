@@ -4,6 +4,7 @@ import { Usage } from "./usage";
 import * as fs from "./utils/fs";
 import { TeServer } from "./server";
 import { getUuid } from "@env/crypto";
+import { TeContext } from "./context";
 import { logControl } from "./log/log";
 import { figures } from "./utils/figures";
 import { TeStatusBar } from "./statusBar";
@@ -18,13 +19,13 @@ import { TaskManager } from "../task/taskManager";
 import { TaskWatcher } from "../task/taskWatcher";
 import { LicenseManager } from "./licenseManager";
 import * as commonUtils from "./utils/commonUtils";
-import { TeContext } from "./context";
 import { HomeView } from "../webview/view/homeView";
 import { TeFileWatcher } from "../task/fileWatcher";
 import * as promiseUtils from "./utils/promiseUtils";
 import { WelcomePage } from "../webview/page/welcome";
 import { TaskTreeManager } from "../tree/treeManager";
 import { AntTaskProvider } from "../task/provider/ant";
+import { NpmTaskProvider } from "../task/provider/npm";
 import { BashTaskProvider } from "../task/provider/bash";
 import { GulpTaskProvider } from "../task/provider/gulp";
 import { MakeTaskProvider } from "../task/provider/make";
@@ -426,6 +427,7 @@ export class TeWrapper implements ITeWrapper, Disposable
         this.registerTaskProvider("jenkins", new JenkinsTaskProvider(this));            // Jenkinsfile validation task
         this.registerTaskProvider("make", new MakeTaskProvider(this));                  // C/C++ Makefile
         this.registerTaskProvider("maven", new MavenTaskProvider(this));                // Apache Maven Toolset
+        // this.registerTaskProvider("npm", new NpmTaskProvider(this));                    // Node Package Manager
         this.registerTaskProvider("pipenv", new PipenvTaskProvider(this));              // Pipfile for Python pipenv package manager
         this.registerTaskProvider("webpack", new WebpackTaskProvider(this));
         // Script type tasks
