@@ -24,8 +24,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private refreshPending = false;
     private _treeBuilder: TaskTreeBuilder;
     private firstTreeBuildDone = false;
-    private currentInvalidation: string | undefined;
-    private readonly disposables: Disposable[] = [];
+    private _currentInvalidation: string | undefined;
+    private readonly _disposables: Disposable[] = [];
 	private readonly _configWatcher: TeTreeConfigWatcher;
     private readonly _onReady: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
@@ -56,7 +56,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             taskExplorerSideBar: new TeTreeView(wrapper, this, wrapper.extensionTitle, "", "taskTreeSideBar")
         };
 
-        this.disposables.push(
+        this._disposables = [
             this._onReady,
 			this._configWatcher,
             this._onDidTasksChange,
@@ -69,17 +69,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             registerCommand(wrapper.keys.Commands.AddRemoveCustomLabel, this.addRemoveSpecialTaskLabel, this),
             registerCommand(wrapper.keys.Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.getTaskItem(item)), this),
             registerCommand(wrapper.keys.Commands.Refresh, this.refresh, this)
-        );
+        ];
 
         this.wrapper.log.methodDone("treemgr: construct task tree manager", 1, "   ");
     }
 
-    dispose()
-    {
-        this.disposables.forEach(d => d.dispose());
-        this.disposables.splice(0);
-        this._tasks = [];
-    }
+    dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
 
 
 	get configWatcher(): TeTreeConfigWatcher {
@@ -212,7 +207,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 this.wrapper.log.value("   ignoring task", item.name, 3, logPad);
             }
         });
-        this.wrapper.log.write(`ignored ${ctRmv} ${this.currentInvalidation} tasks from new fetch`, 3, logPad);
+        this.wrapper.log.write(`ignored ${ctRmv} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
     };
 
 
@@ -224,9 +219,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this._tasks.slice().reverse().forEach((item, index, object) => // niftiest loop ever
         {   //
             // Note that requesting a task type can return Workspace tasks (tasks.json/vscode)
-            // if the script type set for the task in tasks.json is of type 'currentInvalidation'.
+            // if the script type set for the task in tasks.json is of type '_currentInvalidation'.
             // Remove any Workspace type tasks returned as well, in this case the source type is
-            // != currentInvalidation, but the definition type == currentInvalidation
+            // != _currentInvalidation, but the definition type == _currentInvalidation
             //
             if (invalidation && item.source === invalidation || item.source === "Workspace")
             {
@@ -253,7 +248,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private fetchTasks = async(logPad: string) =>
     {
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
-        if (this._tasks.length === 0 || !this.currentInvalidation || this.currentInvalidation  === "Workspace" || this.currentInvalidation === "tsc")
+        if (this._tasks.length === 0 || !this._currentInvalidation || this._currentInvalidation  === "Workspace" || this._currentInvalidation === "tsc")
         {
             this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
             this.wrapper.statusBar.update("Requesting all tasks from all providers");
@@ -263,22 +258,22 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             //
             this.doTaskCacheRemovals(undefined, logPad + "   "); // removes user tasks
         }     //
-        else // this.currentInvalidation guaranteed to be a string (task type) here
+        else // this._currentInvalidation guaranteed to be a string (task type) here
         {   //
-            const taskName = this.wrapper.taskUtils.getTaskTypeFriendlyName(this.currentInvalidation);
+            const taskName = this.wrapper.taskUtils.getTaskTypeFriendlyName(this._currentInvalidation);
             this.wrapper.log.write(`   fetching ${taskName} tasks via VSCode fetchTasks call`, 1, logPad);
             this.wrapper.statusBar.update("Requesting  tasks from " + taskName + " task provider");
             //
-            // Get all tasks of the type defined in 'currentInvalidation' from VSCode, remove
-            // all tasks of the type defined in 'currentInvalidation' from the tasks list cache,
+            // Get all tasks of the type defined in '_currentInvalidation' from VSCode, remove
+            // all tasks of the type defined in '_currentInvalidation' from the tasks list cache,
             // and add the new tasks from VSCode into the tasks list.
             //
-            const taskItems = await tasks.fetchTasks({ type: this.currentInvalidation });
+            const taskItems = await tasks.fetchTasks({ type: this._currentInvalidation });
             //
             // Process the tasks cache array for any removals that might need to be made
             //                                                          // removes tasks that already existed that were just re-parsed
-            this.doTaskCacheRemovals(this.currentInvalidation, logPad); // of the same task type (this.currentInvalidation)
-            this.wrapper.log.write(`   adding ${taskItems.length} new ${this.currentInvalidation} tasks`, 2, logPad);
+            this.doTaskCacheRemovals(this._currentInvalidation, logPad); // of the same task type (this._currentInvalidation)
+            this.wrapper.log.write(`   adding ${taskItems.length} new ${this._currentInvalidation} tasks`, 2, logPad);
             this._tasks.push(...taskItems);
         }
         //
@@ -644,7 +639,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             if (opt !== false && this.wrapper.typeUtils.isString(invalidate, true))
             {
                 this.wrapper.log.write(`   invalidation is for type '${invalidate}'`, 1, logPad);
-                this.currentInvalidation = invalidate; // 'invalidate' will be taskType if 'opt' is undefined or uri of add/remove resource
+                this._currentInvalidation = invalidate; // 'invalidate' will be taskType if 'opt' is undefined or uri of add/remove resource
             }
             else if (invalidate === false && opt === undefined) // rebuild tree only, tasks have not changed
             {
@@ -656,7 +651,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             {   // Re-ask for all tasks from all providers and rebuild tree
                 //
                 this.wrapper.log.write("   invalidation is for all types", 1, logPad);
-                this.currentInvalidation = undefined;
+                this._currentInvalidation = undefined;
                 this._tasks = [];
             }
             this.wrapper.log.write("   fire tree data change event", 2, logPad);
