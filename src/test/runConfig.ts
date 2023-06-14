@@ -100,7 +100,7 @@ export default async() =>
         retries: 0, // ,
         slow: 250,
         require: [
-        //     "ts-node/register",
+            "ts-node/register",
             "source-map-support/register"
         ]
         // reporter: "mocha-multi-reporters",
