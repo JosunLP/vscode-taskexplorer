@@ -443,12 +443,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			//     409  : License/Account/Trial Record Not Found
 			//     500  : Server Error
 			//
+			const message = e.body ? e.body.message : /* istanbul ignore next */e.message;
 			this.wrapper.log.value("response body", JSON.stringify(e.body), 3);
-			this.wrapper.log.error(e.message, [[ "status code", e.status ], [ "server message", e.body.message ]]);
+			this.wrapper.log.error(e, [[ "status code", e.status ], [ "server message", message ]]);
 			/* istanbul ignore else */
 			if (e.status !== 500)
 			{
-				const message = e.body ? e.body.message : /* istanbul ignore next */e.message;
 				switch (message)
 				{
 					case "Account does not exist":           // 409
