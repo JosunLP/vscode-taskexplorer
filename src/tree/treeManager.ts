@@ -1,4 +1,5 @@
 
+import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
@@ -8,6 +9,7 @@ import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeBuilder } from "./treeBuilder";
 import { FavoritesFolder } from "./favoritesFolder";
 import { LastTasksFolder } from "./lastTasksFolder";
+import { SpecialTaskFolder } from "./specialFolder";
 import { TeTreeConfigWatcher } from "./configWatcher";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { registerCommand } from "../lib/command/command";
@@ -15,7 +17,6 @@ import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition, ITaskTreeView } from "../interface";
 import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event, WorkspaceFolder } from "vscode";
-import { SpecialTaskFolder } from "./specialFolder";
 
 
 export class TaskTreeManager implements ITeTreeManager, Disposable
@@ -24,6 +25,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private _refreshPending = false;
     private _firstTreeBuildDone = false;
     private _treeBuilder: TaskTreeBuilder;
+    private _npmScriptsHash: IDictionary<string>;
     private _currentInvalidation: string | undefined;
 
     private readonly _disposables: Disposable[];
@@ -38,6 +40,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         this.wrapper.log.methodStart("treemgr: construct task tree manager", 1, "   ");
 
+        this._npmScriptsHash = {};
         this._onReady = new EventEmitter<ITeTaskChangeEvent>();
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         this._onDidTaskCountChange = new EventEmitter<ITeTaskChangeEvent>();
@@ -247,8 +250,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     private fetchTasks = async(logPad: string) =>
     {
+        const zeroTasksToStart = this._tasks.length === 0;
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
-        if (this._tasks.length === 0 || !this._currentInvalidation || this._currentInvalidation  === "Workspace" || this._currentInvalidation === "tsc")
+        if (zeroTasksToStart || !this._currentInvalidation || this._currentInvalidation  === "Workspace" || this._currentInvalidation === "tsc")
         {
             this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
             this.wrapper.statusBar.update("Requesting all tasks from all providers");
@@ -282,10 +286,19 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // control over the provider returning them.  Internally provided Grunt and Gulp tasks
         // are differentiable from TE provided Gulp and Grunt tasks in that the VSCode provided
         // tasks do no not have task.definition.uri set.
-        //                                      //
-        this.cleanFetchedTasks(logPad + "   "); // good byte shitty ass Grunt and Gulp providers, whoever
-                                                // coded you should hang it up and retire, what a damn joke.
-
+        //
+        this.cleanFetchedTasks(logPad + "   ");
+        //
+        // Hash NPM script blocks, to ignore edits to package.json when scripts have not changed, since
+        // we have to query the entire workspace for npm tasks to get changes.  TODO is srtill to write
+        // an internal NPM task provider like I did for Grunt and Gulp.
+        //
+        if (zeroTasksToStart || !this._currentInvalidation || this._currentInvalidation === "npm") {
+            this.hashNpmScripts();
+        }
+        //
+        // Update statusbar
+        //
         if (!this._firstTreeBuildDone) {
             this.setMessage(Strings.BuildingTaskTree);
         }
@@ -393,6 +406,20 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.wrapper.log.write("   handling 'invalidate tasks cache' event", 1, logPad);
         await this.invalidateTasksCache(invalidate, opt, logPad + "   ");
         this.wrapper.log.methodDone("treemgr: handle tree rebuild event", 1, logPad);
+    };
+
+
+    private hashNpmScripts = () =>
+    {
+        this._npmScriptsHash = {};
+        this._tasks.filter(t => t.source === "npm" && this.wrapper.typeUtils.isWorkspaceFolder(t.scope)).forEach((t) =>
+        {
+            const relativePath = this.wrapper.pathUtils.getTaskRelativePath(t),
+                  fsPath = join((<WorkspaceFolder>t.scope).uri.fsPath, relativePath),
+                  npmPkgJso = this.wrapper.fs.readJsonSync<any>(fsPath),
+                  scriptsBlock = JSON.stringify(npmPkgJso.scripts);
+            this._npmScriptsHash[fsPath] = scriptsBlock;
+        });
     };
 
 
@@ -607,14 +634,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      */
     refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string) =>
     {
+        const isOptUri = this.wrapper.typeUtils.isUri(opt);
         this.wrapper.log.methodStart("treemgr: refresh task tree", 1, logPad, logPad === "", [
-            [ "invalidate", invalidate ], [ "opt fsPath", this.wrapper.typeUtils.isUri(opt) ? opt.fsPath : "n/a" ]
+            [ "invalidate", invalidate ], [ "opt fsPath", isOptUri ? opt.fsPath : "n/a" ]
         ]);
 
         await this.waitForRefreshComplete();
         this._refreshPending = true;
 
-        if (this.wrapper.typeUtils.isUri(opt) && this.wrapper.fs.isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
+        if (isOptUri && this.wrapper.fs.isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
         {   //
             // A workspace folder was removed.  We know it's a workspace folder because isDirectory()
             // returned true and getWorkspaceFolder() returned false.  If it was a regular directory
@@ -636,7 +664,21 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             if (invalidate !== false) {
                 await this.handleRebuildEvent(invalidate, opt, logPad + "   ");
             }
-            if (opt !== false && this.wrapper.typeUtils.isString(invalidate, true))
+            if (isOptUri && invalidate === "npm" && this.wrapper.fs.pathExistsSync(opt.fsPath)) // package.json file change/add event
+            {
+                this.wrapper.log.write("   invalidation is for type 'npm', check hash", 1, logPad);
+                const npmPkgJso = this.wrapper.fs.readJsonSync<any>(opt.fsPath),
+                      scriptsBlock = JSON.stringify(npmPkgJso.scripts);
+                if (scriptsBlock === this._npmScriptsHash[opt.fsPath])
+                {
+                    this.wrapper.log.write("   no change to scripts block", 1, logPad);
+                    this.wrapper.log.methodDone("treemgr: refresh task tree", 1, logPad);
+                    return;
+                }
+                this._npmScriptsHash[opt.fsPath] = scriptsBlock;
+                this._currentInvalidation = invalidate; // 'invalidate' will be taskType if 'opt' is undefined or uri of add/remove resource
+            }
+            else if (opt !== false && this.wrapper.typeUtils.isString(invalidate, true))
             {
                 this.wrapper.log.write(`   invalidation is for type '${invalidate}'`, 1, logPad);
                 this._currentInvalidation = invalidate; // 'invalidate' will be taskType if 'opt' is undefined or uri of add/remove resource
