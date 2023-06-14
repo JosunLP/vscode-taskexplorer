@@ -20,11 +20,9 @@ const JSON5 = require("json5/dist/index.js");
 export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: string, logPad = "", logQueueId?: string) =>
 {
     const isScopeWsFolder = isWorkspaceFolder(task.scope);
-
     log.methodStart(`Check task inclusion for '${task.source}/${task.name}'`, 4, logPad, false, [
         [ "scope is ws folder", isScopeWsFolder ], [ "relative path", relativePath ]
     ], logQueueId);
-
     //
     // We have our own provider for Gulp and Grunt tasks...
     // Ignore VSCode provided gulp and grunt tasks, which are always and only from a gulp/gruntfile
@@ -36,7 +34,6 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
         log.write(`   skipping vscode provided ${task.source} task`, 4, logPad, logQueueId);
         return false;
     }
-
     //
     // External tasks registered via Task Explorer API
     //
@@ -44,8 +41,6 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
     if (providers[task.source] && providers[task.source].isExternal) {
         return !!task.definition && !!task.name && !!task.execution;
     }
-
-
     //
     // Check enabled and npm install task
     // This will ignore tasks from other providers as well, unless it has registered
@@ -58,7 +53,6 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
         log.write(`   skipping this task (${task.source} disabled in settings)`, 4, logPad, logQueueId);
         return false;
     }
-
     //
     // Check task excludes array
     //
@@ -73,7 +67,6 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
             return false;
         }
     }
-
     //
     // Check VSCode /workspace tasks for 'hide' property
     //
@@ -100,7 +93,6 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
             catch (e: any) { /* istanbul ignore next */ log.error(e); }
         }
     }
-
     log.write("   task is included", 4, logPad, logQueueId);
     log.methodDone("Check task inclusion", 4, logPad, undefined, logQueueId);
     return true;
