@@ -14,25 +14,25 @@ import { registerCommand } from "../lib/command/command";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskDefinition, ITaskTreeView } from "../interface";
-import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event } from "vscode";
+import { TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event, WorkspaceFolder } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
 
 
 export class TaskTreeManager implements ITeTreeManager, Disposable
 {
     private _tasks: Task[] = [];
-    private refreshPending = false;
+    private _refreshPending = false;
+    private _firstTreeBuildDone = false;
     private _treeBuilder: TaskTreeBuilder;
-    private firstTreeBuildDone = false;
     private _currentInvalidation: string | undefined;
-    private readonly _disposables: Disposable[] = [];
+
+    private readonly _disposables: Disposable[];
 	private readonly _configWatcher: TeTreeConfigWatcher;
     private readonly _onReady: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onDidTasksChange: EventEmitter<ITeTaskChangeEvent>;
     private readonly _onDidTaskCountChange: EventEmitter<ITeTaskChangeEvent>;
     private readonly _views: { taskExplorer: TeTreeView; taskExplorerSideBar: TeTreeView };
     private readonly _specialFolders: { favorites: FavoritesFolder; lastTasks: LastTasksFolder };
-
 
     constructor(private readonly wrapper: TeWrapper)
     {
@@ -82,9 +82,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 	}
 
     get isBusy(): boolean {
-        return this.refreshPending || this._configWatcher.isBusy;
+        return this._refreshPending || this._configWatcher.isBusy;
             // this.views.taskExplorer.tree.isBusy() || this.views.taskExplorerSideBar.tree.isBusy() ||
-            // this.refreshPending || this._treeBuilder.isBusy();
+            // this._refreshPending || this._treeBuilder.isBusy();
     }
 
 	get onDidAllTasksChange(): Event<ITeTaskChangeEvent> {
@@ -286,7 +286,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.cleanFetchedTasks(logPad + "   "); // good byte shitty ass Grunt and Gulp providers, whoever
                                                 // coded you should hang it up and retire, what a damn joke.
 
-        if (!this.firstTreeBuildDone) {
+        if (!this._firstTreeBuildDone) {
             this.setMessage(Strings.BuildingTaskTree);
         }
         //
@@ -328,7 +328,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         if (this._tasks.length !== prevTaskCount) {
             this._onDidTaskCountChange.fire({ tasks: iTasks, type: "all" });
         }
-        if (!this.firstTreeBuildDone) {
+        if (!this._firstTreeBuildDone) {
             this._onReady.fire({ tasks: iTasks, type: "all" });
         }
     };
@@ -400,17 +400,17 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         const count = this._tasks.length;
         this.wrapper.log.methodStart("treemgr: load tasks", 1, logPad);
-        this.refreshPending = true;
+        this._refreshPending = true;
         try {
             this._treeBuilder.invalidate();
             await this.fetchTasks(logPad + "   ");
             this.fireTreeRefreshEvent(null, null, logPad + "   ");
             this.fireTasksLoadedEvents(count);
-            this.firstTreeBuildDone = true;
+            this._firstTreeBuildDone = true;
             this.wrapper.log.methodDone("treemgr: load tasks", 1, logPad);
         }
         finally {
-            this.refreshPending = false;
+            this._refreshPending = false;
         }
     };
 
@@ -538,7 +538,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this.wrapper.log.values(1, logPad + "      ", [
             [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskTree.length ]
         ]);
-        this.refreshPending = false;
+        this._refreshPending = false;
         this.wrapper.statusBar.update("");
         this.wrapper.log.write("   fire tree refresh event", 1, logPad);
         this.fireTreeRefreshEvent(null, null, logPad + "   ");
@@ -612,7 +612,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         ]);
 
         await this.waitForRefreshComplete();
-        this.refreshPending = true;
+        this._refreshPending = true;
 
         if (this.wrapper.typeUtils.isUri(opt) && this.wrapper.fs.isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
         {   //
@@ -691,10 +691,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     waitForRefreshComplete = async(maxWait = 15000, logPad = "   ") =>
     {
         let waited = 0;
-        if (this.refreshPending) {
+        if (this._refreshPending) {
             this.wrapper.log.write("treemgr: waiting for previous refresh to complete...", 1, logPad);
         }
-        while (this.refreshPending && waited < maxWait) {
+        while (this._refreshPending && waited < maxWait) {
             await this.wrapper.utils.sleep(250);
             waited += 250;
         }
