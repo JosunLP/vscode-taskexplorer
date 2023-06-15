@@ -26,6 +26,9 @@ doc
 test-files
 test-fixture
 testFixture
+**/test-files
+**/test-fixture
+**/testFixture
 *.yml
 *.vsix
 *.sh
@@ -40,6 +43,9 @@ webpack.*.js
 **/.todo
 fa-project.yaml
 node_modules
+**/node_modules
+**/node_modules/**
 script
+scripts
 tools
 types
