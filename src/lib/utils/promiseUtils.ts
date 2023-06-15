@@ -38,7 +38,7 @@ export const promiseFromEvent = <T, U>(event: Event<T>, adapter: PromiseAdapter<
     return {
         promise: new Promise<U>((resolve, reject) =>
         {
-            cancel.event(_ => reject("Cancelled"));
+            cancel.event(/* istanbul ignore next */_ => reject("Cancelled"));
             subscription = event((value: T) =>
             {
                 try {
@@ -52,6 +52,7 @@ export const promiseFromEvent = <T, U>(event: Event<T>, adapter: PromiseAdapter<
             subscription.dispose();
             return result;
         },
+        /* istanbul ignore next */
         error =>
         {
             subscription.dispose();

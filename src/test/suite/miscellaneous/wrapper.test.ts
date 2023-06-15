@@ -87,13 +87,29 @@ suite("Wrapper Tests", () =>
     test("Status Bar", async function()
     {
         if (exitRollingCount(this)) return;
-        await teWrapper.statusBar.update("test");
-        await teWrapper.statusBar.update("test2");
-        await teWrapper.statusBar.update("");
-        await teWrapper.statusBar.update("");
-        await teWrapper.statusBar.update("test");
-        await teWrapper.statusBar.update("test");
-        await teWrapper.statusBar.update("");
+        this.slow(255);
+        teWrapper.statusBar.update("test");
+        teWrapper.statusBar.update("test2");
+        expect(teWrapper.statusBar.text).to.be.a("string").that.includes("test2");
+        teWrapper.statusBar.update("");
+        teWrapper.statusBar.update("");
+        teWrapper.statusBar.update("test");
+        teWrapper.statusBar.update("test");
+        teWrapper.statusBar.update("test test test with text longer than max characters and will get truncated");
+        teWrapper.statusBar.update("");
+        teWrapper.statusBar.showTimed({ text: "Test" });
+        await teWrapper.utils.sleep(5);
+        teWrapper.statusBar.show({ text: "Test2" });
+        await teWrapper.utils.sleep(5);
+        teWrapper.statusBar.showTimed({ text: "Test" });
+        await teWrapper.utils.sleep(5);
+        teWrapper.statusBar.show({ text: "Test2" });
+        teWrapper.statusBar.showTimed({ text: "Test" }, undefined, 15);
+        await teWrapper.utils.sleep(35);
+        teWrapper.statusBar.update("");
+        teWrapper.statusBar.hide();
+        teWrapper.statusBar.showTimed({ text: "Test" }, undefined, 15);
+        await teWrapper.utils.sleep(35);
         endRollingCount(this);
     });
 

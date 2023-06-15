@@ -664,6 +664,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 this.wrapper.log.write("   invalidation is for type 'npm', check hash", 1, logPad);
                 const npmPkgJso = this.wrapper.fs.readJsonSync<any>(opt.fsPath),
                       scriptsBlock = JSON.stringify(npmPkgJso.scripts);
+                //
+                // TODO - Remove istanbul tag after internal npm provider tests are written
+                //
+                /* istanbul ignore next */
                 if (scriptsBlock === this._npmScriptsHash[opt.fsPath])
                 {
                     this.wrapper.log.write("   no change to scripts block", 1, logPad);

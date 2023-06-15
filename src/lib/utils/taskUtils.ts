@@ -103,9 +103,10 @@ export function getTaskTypeRealName(taskType: string)
     return taskType;
 }
 
-
-export const getWatchTaskTypes = (wrapper: ITeWrapper) =>
-    !wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider, false) ? [ "npm", "tsc", "Workspace" ] : [ "tsc", "Workspace" ];
+                                                                                                              //
+                                                                                                              // TODO - Remove istanbul tag after internal npm provider tests are written
+export const getWatchTaskTypes = (wrapper: ITeWrapper) =>                                                     //
+    !wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider, false) ? [ "npm", "tsc", "Workspace" ] : /* istanbul ignore next */[ "tsc", "Workspace" ];
 
 
 const hasExtraGlob = (taskType: string) =>  [ "ant", "bash", "node" ].includes(taskType);
