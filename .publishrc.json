@@ -12,7 +12,6 @@
     ],
     "changelogFile":            "CHANGELOG.md",
     "deployCommand":            "npx vsce publish",
-    "deployPostCommand":        "${CODE_HOME}\\git\\bin\\bash.exe tools/codecov.sh -t ${CODECOV_TOKEN}",
     "githubAssets": [
         "CHANGELOG.md|Changelog File",
         "vscode-taskexplorer-$(VERSION).vsix|VSIX Installer"

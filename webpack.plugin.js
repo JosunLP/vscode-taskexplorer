@@ -70,7 +70,7 @@ const wpPlugin =
 			});
 		}
 		if (!plugin) {
-			plugin = /** @type {webpack.BannerPlugin} */(/** @type {unknown} */(undefined));
+			plugin = /** @type {WebpackPluginInstance} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
 	},

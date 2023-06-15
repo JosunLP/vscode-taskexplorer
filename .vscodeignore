@@ -1,5 +1,4 @@
 .*
-.codecov.yml
 .dcignore
 .eslint.js
 .eslint.json
