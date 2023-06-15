@@ -165,9 +165,10 @@ export const deleteDir = (dir: string): Promise<void> =>
 {
     return new Promise<void>(async (resolve, reject) =>
     {
-        if (pathExistsSync(dir))
+        const absPath = path.resolve(cwd, dir);
+        if (pathExistsSync(absPath))
         {
-            fs.rm(path.resolve(cwd, dir), { recursive: true }, (e) => handleTResult<void>(resolve, reject, e));
+            fs.rmdir(absPath, { recursive: true }, (e) => handleTResult<void>(resolve, reject, e));
         }
         else {
             resolve();
@@ -218,7 +219,7 @@ export const getDateModified = (file: string) =>
 {
     return new Promise<Date|undefined>(async (resolve, reject) =>
     {
-        if (await pathExists(file))
+        if (file && await pathExists(file))
         {
             fs.stat(path.resolve(cwd, file), { bigint: true }, (e, stats) =>
             {
@@ -263,13 +264,18 @@ export const numFilesInDirectory = (dirPath: string) =>
 };
 
 
-export const pathExists = (file: string) => new Promise<boolean>((r) => fs.access(path.resolve(cwd, file), e => handleBooleanResult(r, e)));
-
+export const pathExists = (file: string) =>
+{
+    return new Promise<boolean>((resolve) =>
+    {
+        fs.access(path.resolve(cwd, file), e => handleBooleanResult(resolve, e));
+    });
+};
 
 export const pathExistsSync = (file: string) =>
 {
     try {
-        fs.accessSync(path.resolve(process.cwd(), file));
+        fs.accessSync(path.resolve(cwd, file));
     }
     catch {
         return false;

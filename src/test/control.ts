@@ -265,6 +265,7 @@ export const testControl =
         },
         max: 12000,
         min: 35,
+        npmCommandMax: 10000,
         npmCommandMin: 1000,
         refreshCommand: 135,
         refreshCommandNoChanges: 75,

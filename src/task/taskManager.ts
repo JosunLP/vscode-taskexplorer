@@ -258,9 +258,9 @@ export class TaskManager implements ITeTaskManager, Disposable
             {
                 this.wrapper.utils.execIf(!!(str !== undefined && taskFile.folder.workspaceFolder), (_v, wsf: WorkspaceFolder, s: string) =>
                 {
-                    kind.script = command.replace("<packagename>", "").trim();
-                    const execution = new ShellExecution(pkgMgr + " " + kind.script + " " + s.trim(), options);
-                    const task = new Task(kind, wsf, kind.script + s.trim(), "npm", execution, undefined);
+                    kind.script = command.replace("<packagename>", s).trim();
+                    const execution = new ShellExecution(pkgMgr + " " + kind.script, options);
+                    const task = new Task(kind, wsf, kind.script, "npm", execution, undefined);
                     return tasks.executeTask(task);
                 }, this, taskFile.folder.workspaceFolder, str);
             });
