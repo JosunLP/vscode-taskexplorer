@@ -427,7 +427,7 @@ export class TeWrapper implements ITeWrapper, Disposable
         this.registerTaskProvider("jenkins", new JenkinsTaskProvider(this));            // Jenkinsfile validation task
         this.registerTaskProvider("make", new MakeTaskProvider(this));                  // C/C++ Makefile
         this.registerTaskProvider("maven", new MavenTaskProvider(this));                // Apache Maven Toolset
-        // this.registerTaskProvider("npm", new NpmTaskProvider(this));                    // Node Package Manager
+        this.registerTaskProvider("npm", new NpmTaskProvider(this));                    // Node Package Manager
         this.registerTaskProvider("pipenv", new PipenvTaskProvider(this));              // Pipfile for Python pipenv package manager
         this.registerTaskProvider("webpack", new WebpackTaskProvider(this));
         // Script type tasks

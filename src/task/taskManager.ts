@@ -240,7 +240,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
         const kind: TaskDefinition = {
             type: "npm",
-            script: "install",
+            script: command,
             path: dirname(uri.fsPath)
         };
 
@@ -261,8 +261,9 @@ export class TaskManager implements ITeTaskManager, Disposable
                 /* istanbul ignore else */
                 if (str !== undefined && taskFile.folder.workspaceFolder)
                 {
-                    const execution = new ShellExecution(pkgMgr + " " + command.replace("<packagename>", "").trim() + " " + str.trim(), options);
-                    const task = new Task(kind, taskFile.folder.workspaceFolder, command.replace("<packagename>", "").trim() + str.trim(), "npm", execution, undefined);
+                    kind.script = command.replace("<packagename>", "").trim();
+                    const execution = new ShellExecution(pkgMgr + " " + kind.script + " " + str.trim(), options);
+                    const task = new Task(kind, taskFile.folder.workspaceFolder, kind.script + str.trim(), "npm", execution, undefined);
                     return tasks.executeTask(task);
                 }
             });

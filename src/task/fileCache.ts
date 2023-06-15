@@ -98,7 +98,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             await this.startBuild();
 
             const providers = this.wrapper.providers;
-            const taskProviders = ([ ...Object.keys(providers), ...taskTypeUtils.getWatchTaskTypes() ]).sort((a, b) => {
+            const taskProviders = ([ ...Object.keys(providers), ...taskTypeUtils.getWatchTaskTypes(this.wrapper) ]).sort((a, b) => {
                 return taskTypeUtils.getTaskTypeFriendlyName(a).localeCompare(taskTypeUtils.getTaskTypeFriendlyName(b));
             });
 
@@ -108,7 +108,7 @@ export class TeFileCache implements ITeFileCache, Disposable
                 if (!this.cancel && numFilesFound < numFiles && (isExternal || this.wrapper.utils.isTaskTypeEnabled(providerName)))
                 {
                     let glob;
-                    if (!taskTypeUtils.isWatchTask(providerName))
+                    if (!taskTypeUtils.isWatchTask(providerName, this.wrapper))
                     {
                         const provider = providers[providerName];
                         glob = provider?.getGlobPattern();
@@ -199,7 +199,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             if (!this.cancel)
             {
                 const providers = this.wrapper.providers;
-                const taskProviders = ([ ...Object.keys(providers), ...taskTypeUtils.getWatchTaskTypes() ]).sort((a, b) => {
+                const taskProviders = ([ ...Object.keys(providers), ...taskTypeUtils.getWatchTaskTypes(this.wrapper) ]).sort((a, b) => {
                     return taskTypeUtils.getTaskTypeFriendlyName(a).localeCompare(taskTypeUtils.getTaskTypeFriendlyName(b));
                 });
 
@@ -330,7 +330,7 @@ export class TeFileCache implements ITeFileCache, Disposable
 
         // const glob = this.wrapper.utils.getGlobPattern(taskType);
         let glob;
-        if (!taskTypeUtils.isWatchTask(taskType))
+        if (!taskTypeUtils.isWatchTask(taskType, this.wrapper))
         {
             const providers = this.wrapper.providers;
             glob = providers[taskType].getGlobPattern();

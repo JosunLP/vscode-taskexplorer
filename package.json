@@ -59,8 +59,8 @@
         "clean:extension": "rimraf dist && rimraf tsconfig.tsbuildinfo",
         "clean:webviews": "rimraf res/css && rimraf res/js && rimraf res/page",
         "copy-all-to-code": "npm run copy-precopy-backup && npm run copy-res-to-code && npm run copy-pkgjson-to-code && npm run copy-build-to-code",
-        "copy-precopy-backup": "cmd /c xcopy ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\* ..\\..\\Users\\smeesseman\\spmeesseman.vscode-taskexplorer-2.13.2\\ /s /i /y","copy-all-to-code": "npm run copy-precopy-backup && npm run copy-res-to-code && npm run copy-pkgjson-to-code && npm run copy-build-to-code",
-		"copy-build-to-code": "cmd /c xcopy .\\dist\\*.js ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2\\dist /s /i /y && cmd /c xcopy .\\dist\\*.js \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2\\dist /s /i /y",
+        "copy-precopy-backup": "cmd /c xcopy ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\* ..\\..\\Users\\smeesseman\\spmeesseman.vscode-taskexplorer-2.13.2\\ /s /i /y",
+        "copy-build-to-code": "cmd /c xcopy .\\dist\\*.js ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2\\dist /s /i /y && cmd /c xcopy .\\dist\\*.js \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2\\dist /s /i /y",
 		"copy-res-to-code": "cmd /c xcopy .\\res\\*.* ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2\\res /s /i /y && cmd /c xcopy .\\res\\*.* \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2\\res /s /i /y",
 		"copy-pkgjson-to-code": "cmd /c copy /Y .\\package*.json ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2 && cmd /c copy /Y .\\package*.json \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2",
         "lint": "eslint -c .eslintrc.js --ext .ts .",
@@ -1166,6 +1166,11 @@
                             "workspace": true
                         }
                     },
+                    "taskexplorer.useNpmProvider": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%config.taskexplorer.useNpmProvider%"
+                    },
                     "taskexplorer.useAnt": {
                         "type": "boolean",
                         "default": false,
@@ -1943,6 +1948,36 @@
             },
             {
                 "type": "jenkins",
+                "required": [],
+                "properties": {
+                    "script": {
+                        "type": "string",
+                        "description": "%taskdef.task.script%"
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "%taskdef.task.target%"
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "%taskdef.task.path%"
+                    },
+                    "fileName": {
+                        "type": "string",
+                        "description": "%taskdef.task.fileName%"
+                    },
+                    "uri": {
+                        "type": "object",
+                        "description": "%taskdef.task.fileUri%"
+                    },
+                    "taskItemId": {
+                        "type": "string",
+                        "description": "%taskdef.task.taskItemId%"
+                    }
+                }
+            },
+            {
+                "type": "npm",
                 "required": [],
                 "properties": {
                     "script": {

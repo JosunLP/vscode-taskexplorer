@@ -16,13 +16,12 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
 
     public createTask(target: string, cmd: string, folder: WorkspaceFolder, uri: Uri): Task
     {
-        const def = this.getDefaultDefinition(target, folder, uri);
-        const cwd = dirname(uri.fsPath);
-        const args = [ "gulp", target ];
-        const options = { cwd };
-        const execution = new ShellExecution("npx", args, options);
-
-        return new Task(def, folder, target, "gulp", execution, "$msCompile");
+        const def = this.getDefaultDefinition(target, folder, uri),
+              cwd = dirname(uri.fsPath),
+              args = [ "gulp", target ],
+              options = { cwd },
+              execution = new ShellExecution("npx", args, options);
+        return new Task(def, folder, target, "gulp", execution, "$eslint-stylish");
     }
 
 
@@ -31,7 +30,6 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
         if (!scriptName || !documentText) {
             return 0;
         }
-
         let idx = this.getDocumentPositionLine("gulp.task(", scriptName, documentText);
         if (idx === 0) {
             idx = this.getDocumentPositionLine("exports[", scriptName, documentText);
@@ -47,7 +45,6 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
     {
         let gulpTasks: string[] = [];
         this.wrapper.log.methodStart("find gulp targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
-
         if (this.wrapper.config.get<boolean>("useGulp") === true)
         {
             try
@@ -70,7 +67,6 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
         else {
             gulpTasks = await this.parseGulpTasks(fsPath, logPad + "   ");
         }
-
         this.wrapper.log.methodDone("find gulp targets", 4, logPad, undefined, this.logQueueId);
         return gulpTasks;
     }

@@ -182,9 +182,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         // which icon to display
         //
         let src = this.taskSource;
-        if (src === "npm") {
-            src = getPackageManager();
-        }
+        if (src === "npm") { src = getPackageManager(); }
 
         //
         // Set context icons

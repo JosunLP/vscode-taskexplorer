@@ -20,7 +20,7 @@ export class GruntTaskProvider extends TaskExplorerProvider implements TaskExplo
               options = { cwd },
               execution = new ShellExecution("npx", args, options);
 
-        return new Task(def, folder, target, "grunt", execution, "$msCompile");
+        return new Task(def, folder, target, "grunt", execution, "$eslint-stylish");
     }
 
 

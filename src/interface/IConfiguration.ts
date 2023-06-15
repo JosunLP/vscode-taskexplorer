@@ -12,7 +12,7 @@ export enum ConfigKeys
 {
     AllowUsageReporting = "allowUsageReporting",
     EnableExplorerTree = "enableExplorerView",
-    EnabledLogging = "taskexplorer.logging.enable",
+    EnabledLogging = "logging.enable",
     EnableSideBar = "enableSideBar",
     EnablePersistenFileCache = "enablePersistentFileCaching",
     GroupMaxLevel = "groupMaxLevel",
@@ -20,10 +20,10 @@ export enum ConfigKeys
     GroupStripTaskLabel = "groupStripTaskLabel",
     GroupWithSeperator = "groupWithSeparator",
     KeepTerminalOnTaskDone = "keepTermOnStop",
-    LogLevel = "taskexplorer.logging.level",
-    LogEnableOutputWindow = "taskexplorer.logging.enableOutputWindow",
-    LogEnableFileSymbols = "taskexplorer.logging.enableFileSymbols",
-    LogEnableFile = "taskexplorer.logging.enableFile",
+    LogLevel = "logging.level",
+    LogEnableOutputWindow = "logging.enableOutputWindow",
+    LogEnableFileSymbols = "logging.enableFileSymbols",
+    LogEnableFile = "logging.enableFile",
     ReportGlobalUsage = "taskMonitor.reportUsage",
     SortProjectFoldersAlphabetically = "sortProjectFoldersAlpha",
     SpecialFoldersFolderState = "specialFolders.folderState",
@@ -34,8 +34,10 @@ export enum ConfigKeys
     TaskButtonsControlCharacter = "taskButtons.controlCharacter",
     TaskMonitorTimerMode = "taskMonitor.timerMode",
     TaskMonitorTrackStats = "taskMonitor.trackStats",
-    TrackUsage = "trackUsage"
+    TrackUsage = "trackUsage",
+    UseNpmProvider = "useNpmProvider"
 };
+
 export interface IConfiguration
 {
     onDidChange: Event<ConfigurationChangeEvent>;

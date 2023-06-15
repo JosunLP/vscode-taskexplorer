@@ -83,7 +83,9 @@
 	"config.taskexplorer.sortProjectFoldersAlpha": "Sort project folders alphabetically.  If not set, folders appear in the same order as the File Explorer View.",
 
 	"config.taskexplorer.useAnt": "Use the `ant` program itself to find it's tasks.",
-	"config.taskexplorer.useGulp": "Use the `gulp` program itself to find it's tasks.  Note this is **extremely slow** as npx/gulp takes ~0.5-1s to parse a single file.",
+	"config.taskexplorer.useGulp": "Use the `gulp` program itself to find it's tasks.  Note this can be **extremely slow** as npx/gulp can take ~0.5 to 1s to parse a single file.",
+
+	"config.taskexplorer.useNpmProvider": "Use the internal `npm` task provider.  *For better performance, disable the VSCode NPM task provider when using the internal provider*",
 
 	"config.taskexplorer.specialFolders.folderState": "Specify tree node expansion states on startup for special folders and project folders.  Property names of new items should be **camel cased** with **no spaces**.  A value of `true` indicates the folder should be expanded on startup, `false` indicates the folder should be collapsed.",
 	"config.taskexplorer.specialFolders.folderState.lastTasks": "`Last Tasks` folder",

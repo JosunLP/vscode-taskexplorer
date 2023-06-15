@@ -29,7 +29,8 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
     // in a workspace folder root directory.  All internally provided tasks will have the 'uri' property
     // set in its task definition, VSCode provided Grunt/Gulp tasks will not
     //
-    if (!task.definition.uri && (task.source === "grunt" || task.source === "gulp"))
+    if (!task.definition.uri && (task.source === "grunt" || task.source === "gulp" ||
+        (task.source === "npm" && wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider, false))))
     {
         log.write(`   skipping vscode provided ${task.source} task`, 4, logPad, logQueueId);
         return false;

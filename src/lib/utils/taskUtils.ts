@@ -7,7 +7,7 @@ import { getCombinedGlobPattern } from "./utils";
 import { configuration } from "../configuration";
 import { pickBy, properCase } from "./commonUtils";
 import { Globs, PinnedStorageKey } from "../constants";
-import { ConfigPrefix, ITaskDefinition, ITeTask, TeTaskListType } from "../../interface";
+import { ConfigPrefix, IConfiguration, ITaskDefinition, ITeTask, ITeWrapper, TeTaskListType } from "../../interface";
 
 
 
@@ -104,7 +104,8 @@ export function getTaskTypeRealName(taskType: string)
 }
 
 
-export const getWatchTaskTypes = () =>  [ "npm", "tsc", "Workspace" ];
+export const getWatchTaskTypes = (wrapper: ITeWrapper) =>
+    !wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider, false) ? [ "npm", "tsc", "Workspace" ] : [ "tsc", "Workspace" ];
 
 
 const hasExtraGlob = (taskType: string) =>  [ "ant", "bash", "node" ].includes(taskType);
@@ -121,7 +122,7 @@ export const isPinned = (id: string, listType: TeTaskListType): boolean =>
 export const isScriptType = (source: string) => getScriptTaskTypes().includes(source);
 
 
-export const isWatchTask = (source: string) => getWatchTaskTypes().includes(source);
+export const isWatchTask = (source: string, wrapper: ITeWrapper) => getWatchTaskTypes(wrapper).includes(source);
 
 
 /**

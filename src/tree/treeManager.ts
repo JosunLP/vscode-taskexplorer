@@ -71,7 +71,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this._views.taskExplorerSideBar,
             registerCommand(wrapper.keys.Commands.AddToExcludes, this.addToExcludes, this),
             registerCommand(wrapper.keys.Commands.AddRemoveCustomLabel, this.addRemoveSpecialTaskLabel, this),
-            registerCommand(wrapper.keys.Commands.OpenTerminal, (item: TaskItem | ITeTask) => this.openTerminal(this.getTaskItem(item)), this),
+            registerCommand(wrapper.keys.Commands.OpenTerminal, this.openTerminal, this),
             registerCommand(wrapper.keys.Commands.Refresh, this.refresh, this)
         ];
 
@@ -574,13 +574,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private openTerminal = (taskItem: TaskItem): void =>
-    {
-        const term = getTerminal(taskItem);
-        if (term) {
-            term.show();
-        }
-    };
+    private openTerminal = (item: TaskItem | ITeTask): void => { getTerminal(this.getTaskItem(item))?.show(); };
 
 
     /**

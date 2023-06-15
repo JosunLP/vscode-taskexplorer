@@ -21,15 +21,15 @@ const jsonMap: IDictionary<{object: string; preKey: string; postKey: string}> = 
 };
 
 
-const findJsonDocumentPosition = (documentText: string, taskItem: TaskItem): number =>
+export const findJsonDocumentPosition = (documentText: string, taskName: string, taskSource: string): number =>
 {
     log.methodStart("find json document position", 2, "   ", false, [
-        [ "task name", taskItem.task.name ], [ "task type", taskItem.task.source ]
+        [ "task name", taskName ], [ "task type", taskSource ]
     ]);
 
-    const props = jsonMap[taskItem.taskSource.toLowerCase()],
+    const props = jsonMap[taskSource.toLowerCase()],
           blockOffset = documentText.indexOf(props.object),
-          regex = new RegExp("(" + props.preKey + taskItem.task.name + props.postKey + ")", "gm");
+          regex = new RegExp("(" + props.preKey + taskName + props.postKey + ")", "gm");
 
     let scriptOffset = blockOffset,
         match: RegExpExecArray | null,
@@ -38,7 +38,7 @@ const findJsonDocumentPosition = (documentText: string, taskItem: TaskItem): num
     while ((match = regex.exec(documentText.substring(blockOffset))) !== null)
     {
         ++matches;
-        scriptOffset = match.index + match[0].indexOf(taskItem.task.name) + blockOffset;
+        scriptOffset = match.index + match[0].indexOf(taskName) + blockOffset;
     }
 
     log.methodDone("find json document position", 2, "   ", [[ "position", scriptOffset ], [ "# of matches", matches ]]);
@@ -59,9 +59,9 @@ export const findDocumentPosition = (wrapper: TeWrapper, document: TextDocument,
     if (taskItem.taskSource === "npm" || taskItem.taskSource === "Workspace") // JSON
     {
         log.write("   find json position", 2);
-        scriptOffset = findJsonDocumentPosition(documentText, taskItem);
+        scriptOffset = findJsonDocumentPosition(documentText, taskItem.task.name, taskItem.taskSource);
     }
-    else if (!isWatchTask(taskItem.taskSource))
+    else if (!isWatchTask(taskItem.taskSource, wrapper))
     {
         log.write("   find custom provider position", 2);
         const provider = wrapper.providers[def.type];

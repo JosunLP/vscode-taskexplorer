@@ -53,7 +53,7 @@ export interface ITeTaskUtilities
 	getTaskTypeRealName(taskType: string): string;
 	isPinned(id: string, listType: TeTaskListType): boolean;
 	isScriptType(source: string): boolean;
-	isWatchTask(source: string): boolean;
+	isWatchTask(source: string, wrapper: ITeWrapper): boolean;
 	toITask(wrapper: ITeWrapper, teTasks: Task[], listType: TeTaskListType): ITeTask[];
 }
 
