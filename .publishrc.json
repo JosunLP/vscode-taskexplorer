@@ -12,6 +12,9 @@
     ],
     "changelogFile":            "CHANGELOG.md",
     "deployCommand":            "npx vsce publish",
+    "deployPostCommand": [
+        "${CODE_HOME}\\git\\bin\\bash.exe script/publish-info-project.sh $(VERSION)"
+    ],
     "githubAssets": [
         "CHANGELOG.md|Changelog File",
         "vscode-taskexplorer-$(VERSION).vsix|VSIX Installer"
