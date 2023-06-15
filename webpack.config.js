@@ -566,9 +566,11 @@ const plugins = (env, wpConfig) =>
 	}
 
 	wpConfig.plugins.push(
+		wpPlugin.optimize.noEmitOnError(env, wpConfig),
 		wpPlugin.analyze.bundle(env, wpConfig),
 		wpPlugin.analyze.circular(env, wpConfig),
 		wpPlugin.banner(env, wpConfig),
+		wpPlugin.replace(env, wpConfig),
 		wpPlugin.afterdone(env, wpConfig)
 	);
 

@@ -7,6 +7,7 @@ const { renameSync } = require("fs");
 const { spawnSync } = require("child_process");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlPlugin = require("html-webpack-plugin");
+const ReplacePlugin = require("webpack-plugin-replace");
 const CspHtmlPlugin = require("csp-html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -15,10 +16,8 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
-// const { IgnorePlugin } = require("webpack");
 // const TerserPlugin = require("terser-webpack-plugin");
 // const ShebangPlugin = require("webpack-shebang-plugin");
-// const CopyWebpackPlugin = require("copy-webpack-plugin");
 // const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 // const FilterWarningsPlugin = require("webpack-filter-warnings-plugin");
 
@@ -252,6 +251,16 @@ const wpPlugin =
 				context: psxBaseCtxPath
 			},
 			{
+				from: path.posix.join(psxBasePath, "doc", ".todo"),
+				to: path.posix.join(psx__dirname_info, "doc"),
+				context: psxBaseCtxPath
+			},
+			{
+				from: path.posix.join(psxBasePath, "res", "walkthrough", "welcome", "*.md"),
+				to: path.posix.join(psx__dirname_info, "doc", "walkthrough", "welcome"),
+				context: psxBaseCtxPath
+			},
+			{
 				from: path.posix.join(psxBasePath, "*.md"),
 				to: path.posix.join(psx__dirname_info),
 				context: psxBaseCtxPath
@@ -434,6 +443,71 @@ const wpPlugin =
 		}
 		if (!plugin) {
 			plugin = /** @type {webpack.optimize.LimitChunkCountPlugin} */(/** @type {unknown} */(undefined));
+		}
+		return plugin;
+	},
+
+
+	optimize:
+	{
+		/**
+		 * @param {WebpackEnvironment} env
+		 * @param {WebpackConfig} wpConfig Webpack config object
+		 * @returns {webpack.NoEmitOnErrorsPlugin}
+		 */
+		noEmitOnError: (env, wpConfig) =>
+		{
+			/** @type {webpack.NoEmitOnErrorsPlugin | undefined} */
+			let plugin;
+			if (env.build !== "webview") // && wpConfig.mode === "production")
+			{
+				plugin = new webpack.NoEmitOnErrorsPlugin();
+			}
+			if (!plugin) {
+				plugin = /** @type {webpack.NoEmitOnErrorsPlugin} */(/** @type {unknown} */(undefined));
+			}
+			return plugin;
+		}
+	},
+
+
+	/**
+	 * @param {WebpackEnvironment} env
+	 * @param {WebpackConfig} wpConfig Webpack config object
+	 * @returns {ReplacePlugin}
+	 */
+	replace: (env, wpConfig) =>
+	{
+		/** @type {ReplacePlugin | undefined} */
+		let plugin;
+		const patterns = [];
+		if (env.build !== "webview" && wpConfig.mode === "production")
+		{
+			patterns.push(
+			{
+				regex: /(?: |\t)*(?:[a-z\.]+|^)log\.[a-zA-Z]+\([^]*?\);(?: |\t)*/g,
+				value: ""
+			});
+		}
+		if (patterns.length > 0)
+		{
+			plugin = new ReplacePlugin(
+			{
+				patterns: patterns,
+				include: [ /\.tsx?$/ ],
+				exclude: [
+					/node_modules/, /test/, /\.d\.ts$/,
+					// (/** @type {String} */filepath) => filepath.includes('.')
+				]
+				// values: {
+				// 	'process.env.NODE_ENV': JSON.stringify('production'),
+				// 	'FOO_BAR': '"hello world"',
+				// 	'DEV_MODE': false,
+				// }
+			});
+		}
+		if (!plugin) {
+			plugin = /** @type {ReplacePlugin} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
 	},

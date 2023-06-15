@@ -56,7 +56,7 @@
     "scripts": {
         "clean": "npm run clean:build && npm run test:clean",
         "clean:build": "npm run clean:extension && npm run clean:webviews",
-		"clean:extension": "rimraf dist",
+        "clean:extension": "rimraf dist",
         "clean:webviews": "rimraf res/css && rimraf res/js && rimraf res/page",
         "copy-all-to-code": "npm run copy-precopy-backup && npm run copy-res-to-code && npm run copy-pkgjson-to-code && npm run copy-build-to-code",
         "copy-precopy-backup": "cmd /c xcopy ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\* ..\\..\\Users\\smeesseman\\spmeesseman.vscode-taskexplorer-2.13.2\\ /s /i /y",
@@ -245,7 +245,8 @@
         "webpack": "^5.68.0",
         "webpack-bundle-analyzer": "^4.7.0",
         "webpack-cli": "^4.9.2",
-        "webpack-node-externals": "^3.0.0"
+        "webpack-node-externals": "^3.0.0",
+        "webpack-plugin-replace": "^1.2.0"
     },
     "publishConfig": {
         "access": "public"
