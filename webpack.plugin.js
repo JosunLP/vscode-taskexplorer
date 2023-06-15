@@ -241,13 +241,13 @@ const wpPlugin =
 			const psx__dirname_info = path.posix.normalize(path.posix.join(psx__dirname, "..", "vscode-taskexplorer-info"));
 			patterns.push(
 			{
-				from: path.posix.join(psxBasePath, "res", "img", "*"),
-				to: path.posix.join(psx__dirname_info, "res", "img"),
+				from: path.posix.join(psxBasePath, "res", "img", "**"),
+				to: path.posix.join(psx__dirname_info, "res"),
 				context: psxBaseCtxPath
 			},
 			{
 				from: path.posix.join(psxBasePath, "res", "readme", "*.png"),
-				to: path.posix.join(psx__dirname_info, "res", "readme"),
+				to: path.posix.join(psx__dirname_info, "res"),
 				context: psxBaseCtxPath
 			},
 			{
@@ -257,7 +257,7 @@ const wpPlugin =
 			},
 			{
 				from: path.posix.join(psxBasePath, "res", "walkthrough", "welcome", "*.md"),
-				to: path.posix.join(psx__dirname_info, "doc", "walkthrough", "welcome"),
+				to: path.posix.join(psx__dirname_info, "doc"),
 				context: psxBaseCtxPath
 			},
 			{
