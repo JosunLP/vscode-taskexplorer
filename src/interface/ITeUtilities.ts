@@ -73,6 +73,8 @@ export interface ITeTypeUtilities
 export interface ITeUtilities
 {
 	cloneJsonObject<T>(jso: any): T;
+	execIf<T, R = any>(checkValue: T | undefined, runFn: (arg: T, ...args: unknown[]) => R | PromiseLike<R>, thisArg?: any, ...args: unknown[]): R | PromiseLike<R> | undefined | void;
+	execIfElse<T, R = any, ER = R>(checkValue: T | undefined, runIfFn: (arg: T, ...args: unknown[]) => R | PromiseLike<R>, runElseFn: (...args: unknown[]) => ER | PromiseLike<ER>, thisArg?: any, ...args: unknown[]): R | PromiseLike<R> | ER | PromiseLike<ER> | undefined | void;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;
