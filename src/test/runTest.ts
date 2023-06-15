@@ -5,8 +5,6 @@ import { execSync } from "child_process";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { runTests } from "@vscode/test-electron";
 
-const VSCODE_TEST_VERSION = "1.63.0";
-
 interface IDictionary<TValue>
 {
     [id: string]: TValue;
@@ -108,28 +106,24 @@ const main = async(args: string[]) =>
 {
     let failed = false;
     let multiRoot = false;
-    //
-    // The folder containing the Extension Manifest package.json
-    // Passed to '--extensionDevelopmentPath'
-    //
-    const extensionDevelopmentPath = path.resolve(__dirname, "../../");
-    //
-    // The path to test runner
-    // Passed to --extensionTestsPath
-    //
-    const extensionTestsPath = path.resolve(__dirname, "./suite");
-    const testWorkspaceSingleRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture", "project1"));
-    const testWorkspaceMultiRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture"));
-    const vscodeTestUserDataPath = path.join(extensionDevelopmentPath, ".vscode-test", "user-data");
-    //
-    // Setting file to clear and restore
-    //
-    const project1Path = testWorkspaceSingleRoot;
-    // const project2Path = path.join(testWorkspaceMultiRoot, "project2");
-    const projectSettingsFile = path.join(project1Path, ".vscode", "settings.json");
-    const multiRootWsFile = path.join(testWorkspaceMultiRoot, "tests.code-workspace");
 
-    const defaultSettings = await createDefaultSettings();
+    const extensionDevelopmentPath = path.resolve(__dirname, "../../"), // The folder containing the Extension Manifest package.json
+          extensionTestsPath = path.resolve(__dirname, "./suite"),        // The path to test runner - Passed to --extensionTestsPath
+          distPath = path.join(extensionDevelopmentPath, "dist"),
+          testWorkspaceSingleRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture", "project1")),
+          testWorkspaceMultiRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture")),
+          vscodeTestUserDataPath = path.join(extensionDevelopmentPath, ".vscode-test", "user-data"),
+          project1Path = testWorkspaceSingleRoot,
+          // project2Path = path.join(testWorkspaceMultiRoot, "project2"),
+          pkgJsonPath = path.resolve(__dirname, path.join(extensionDevelopmentPath, "package.json")),
+          pkgJson = fs.readFileSync(pkgJsonPath, "utf8"),
+          pkgJso = JSON.parse(pkgJson),
+          vsCodeTestVersion = pkgJso.engines.vscode.replace(/[^0-9a-z\-\.]/g, ""),
+          projectSettingsFile = path.join(project1Path, ".vscode", "settings.json"),
+          multiRootWsFile = path.join(testWorkspaceMultiRoot, "tests.code-workspace"),
+          isWebpackBuild = fs.existsSync(path.join(distPath, "vendor.js")),
+          defaultSettings = await createDefaultSettings();
+
     const mwsConfig: IDictionary<any> = {
         folders: [
         {
@@ -170,6 +164,9 @@ const main = async(args: string[]) =>
 
         console.log("clear package.json activation event");
         execSync("sh ./enable-full-coverage.sh", { cwd: "script" });
+        if (!isWebpackBuild) {
+            // execSync("sh ./set-main-entry.sh", { cwd: "script" });
+        }
 
         //
         // Clear workspace settings file if it exists
@@ -218,7 +215,7 @@ const main = async(args: string[]) =>
         const testsWorkspace = !multiRoot ? testWorkspaceSingleRoot : multiRootWsFile;
         await runTests(
         {
-            version: VSCODE_TEST_VERSION,
+            version: vsCodeTestVersion,
             extensionDevelopmentPath,
             extensionTestsPath,
             launchArgs: [
@@ -229,7 +226,7 @@ const main = async(args: string[]) =>
             extensionTestsEnv: {
                 xArgs: JSON.stringify(xArgs),
                 testArgs: JSON.stringify(testsArgs),
-                vsCodeTestVersion: VSCODE_TEST_VERSION,
+                vsCodeTestVersion,
                 testsMachineId: process.env.VSC_TESTS_MACHINEID
             }
         }); // --upload-logs could be interesting (for prod).  look at it sometime.
@@ -276,6 +273,9 @@ const main = async(args: string[]) =>
             console.log("restore package.json activation event");
             // execSync(`enable-full-coverage.sh --off${logFile ? ` --logfile "${logFile}` : ""}"`, { cwd: "script" });
             execSync("sh ./enable-full-coverage.sh --off", { cwd: "script" });
+            if (!isWebpackBuild) {
+                // execSync("sh ./set-main-entry.sh --off", { cwd: "script" });
+            }
             // if (settingsJsonOrig && !testControl.keepSettingsFileChanges) {
             // if (!testControl.keepSettingsFileChanges)
             // {
