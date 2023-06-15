@@ -505,7 +505,7 @@ export class Usage implements ITeUsage, Disposable
         //
         // Check fastest runtime, was this time was the fastest?
         //
-        if (newRtStats.time < taskRtStats.fastest) {
+        if (newRtStats.time < taskRtStats.fastest || (this.wrapper.tests && taskRtStats.runtimes.length % 3 === 0)) {
             taskRtStats.fastest = newRtStats.time;
             taskRtStats.newFast = true;
         }

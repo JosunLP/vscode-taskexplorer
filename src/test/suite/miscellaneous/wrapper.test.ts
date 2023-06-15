@@ -110,6 +110,14 @@ suite("Wrapper Tests", () =>
         teWrapper.statusBar.hide();
         teWrapper.statusBar.showTimed({ text: "Test" }, undefined, 15);
         await teWrapper.utils.sleep(35);
+        await teWrapper.statusBar.runWithProgress(async (u, s) =>
+        {
+            await u.sleep(1);
+            s.updateRunProgress("test", "project1", 99);
+            await u.sleep(1);
+            s.hide();
+            await u.sleep(1);
+        }, teWrapper.utils, teWrapper.statusBar);
         endRollingCount(this);
     });
 
