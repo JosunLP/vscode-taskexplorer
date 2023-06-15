@@ -246,7 +246,7 @@ const wpPlugin =
 				context: psxBaseCtxPath
 			},
 			{
-				from: path.posix.join(psxBasePath, "res", "readme", "*.*"),
+				from: path.posix.join(psxBasePath, "res", "readme", "*.png"),
 				to: path.posix.join(psx__dirname_info, "res", "readme"),
 				context: psxBaseCtxPath
 			},

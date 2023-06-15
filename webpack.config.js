@@ -4,6 +4,7 @@ const glob = require('glob');
 const path = require("path");
 const JSON5 = require("json5");
 const esbuild = require("esbuild");
+// const figures = require("./common").figures;
 const { spawnSync } = require("child_process");
 const { wpPlugin } = require("./webpack.plugin");
 const nodeExternals = require("webpack-node-externals");
@@ -56,11 +57,33 @@ module.exports = (env, argv) =>
 	if (typeof env.esbuild === "string") { env.esbuild = String(env.esbuild).toLowerCase() == "true"; }
 	if (typeof env.imageOpt === "string") { env.imageOpt = String(env.imageOpt).toLowerCase() == "true"; }
 
+	// consoleWrite("Start Webpack build");
+	// consoleWrite("Environment:");
+	// consoleWrite(`   build         : ${env.build}`);
+	// consoleWrite(`   clean         : ${env.clean}`);
+	// consoleWrite(`   environment   : ${env.environment}`);
+	// consoleWrite(`   esbuild       : ${env.esbuild}`);
+	// consoleWrite(`   target        : ${env.target}`);
+	// if (argv) {
+	// 	consoleWrite("Arguments:");
+	// 	if (argv.env) {
+	// 		consoleWrite(`   environment   : ${argv.env}`);
+	// 	}
+	// 	if (argv.mode) {
+	// 		consoleWrite(`   mode          : ${argv.mode}`);
+	// 	}
+	// 	if (argv.config) {
+	// 		consoleWrite(`   config        : ${argv.config.join(", ")}`);
+	// 	}
+	// }
+
 	if (env.build){
+		// consoleWrite(`Running environment specified build '${env.build}'`);
 		return getWebpackConfig(env.build, env, argv);
 	}
 
 	if (env.environment === "test") {
+		// consoleWrite("Build test files");
 		// env.esbuild = true;
 		return [
 			getWebpackConfig("extension", env, argv),
@@ -69,18 +92,24 @@ module.exports = (env, argv) =>
 	}
 
 	if (env.environment === "testprod") {
+		// consoleWrite("Build test files (production compiled)");
 		return [
 			getWebpackConfig("extension", env, argv),
 			getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, argv)
 		];
 	}
 
+	// consoleWrite("Build extension and webviews");
 	return [
 		getWebpackConfig("extension", env, argv),
 		// getWebpackConfig("extension_web", env, argv),
 		getWebpackConfig("webview", env, argv),
 	];
 };
+
+
+// const consoleWrite = (msg, icon, pad = "") =>
+//     console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
 
 
 /**
