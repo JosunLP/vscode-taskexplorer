@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import * as path from "path";
 import { Uri } from "vscode";
@@ -30,7 +27,7 @@ suite("Grunt Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teApi, teWrapper } = await activate(this));
-        provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        provider = teApi.providers[testsName];
         fileUri = Uri.file(path.join(getWsPath("."), "gruntfile.js"));
         endRollingCount(this, true);
     });

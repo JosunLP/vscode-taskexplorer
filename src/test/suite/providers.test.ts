@@ -1,6 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import { join } from "path";
 import { expect } from "chai";
@@ -459,7 +458,7 @@ suite("Provider Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.cache.build + tc.slowTime.config.event + tc.slowTime.config.eventFast + tc.slowTime.general.min +
-                  (tc.slowTime.commands.refresh* 2) + (tc.waitTime.refreshCommand* 2));
+                  (tc.slowTime.commands.refresh * 2) + (tc.waitTime.refreshCommand * 2));
         await executeSettingsUpdate("logging.enable", false); // was hitting tree.logTask()
         await executeSettingsUpdate("specialFolders.folderState.project1", "Collapsed", tc.waitTime.config.event);
         await refresh();

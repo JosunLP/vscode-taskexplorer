@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import { expect } from "chai";
 import { TaskExecution } from "vscode";
 import * as utils from "../utils/utils";
-import {ITaskItem, ITeWrapper, ITaskFolder } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITaskItem, ITeWrapper, ITaskFolder } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusExplorerView, focusSearchView } from "../utils/commandUtils";
 
 const tc = utils.testControl;
@@ -362,7 +359,7 @@ suite("Task Tests", () =>
 });
 
 
-async function startTask(taskItem: ITaskItem, addToSpecial: boolean)
+const startTask = async (taskItem: ITaskItem, addToSpecial: boolean) =>
 {
     if (tc.log.taskExecutionSteps) {
         console.log(`    ${teWrapper.figures.color.info} Run ${taskItem.taskSource} task | ${taskItem.label} | ${taskItem.getFolder()?.name}`);
@@ -377,7 +374,7 @@ async function startTask(taskItem: ITaskItem, addToSpecial: boolean)
         const taskTree = teWrapper.treeManager.getTaskTree();
         if (taskTree)
         {
-            const sFolder= taskTree[0].label === "Favorites" ? taskTree[0] as any :
+            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
                            (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
             if (sFolder)
             {
@@ -396,4 +393,4 @@ async function startTask(taskItem: ITaskItem, addToSpecial: boolean)
             }
         }
     }
-}
+};

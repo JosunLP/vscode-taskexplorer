@@ -1,2426 +1,2431 @@
 {
-    "name": "vscode-taskexplorer",
-    "version": "2.13.2",
-    "displayName": "Task Explorer",
-    "description": "Tasks management for npm, vscode, yarn, ant, gradle, grunt, gulp, batch, bash,php composer, make, maven, python, perl, powershell, ruby, pipenv, nsis, jenkins.  Supports external task providers via API.",
-    "icon": "res/img/logo-clr.png",
-    "publisher": "spmeesseman",
-    "license": "See LICENSE",
-    "homepage": "https://github.com/spmeesseman/vscode-taskexplorer-info/blob/master/README.md",
-    "author": {
-        "name": "Scott Meesseman",
-        "email": "spmeesseman@gmail.com"
-    },
-    "bugs": {
-        "url": "https://github.com/spmeesseman/vscode-taskexplorer-info/issues"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/spmeesseman/vscode-taskexplorer-info.git"
-    },
-    "engines": {
-        "vscode": "^1.63.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "galleryBanner": {
-        "color": "#EEEEEE",
-        "theme": "light"
-    },
-    "keywords": [
-        "tasks",
-        "task",
-        "npm",
-        "grunt",
-        "gulp",
-        "yarn",
-        "ant",
-        "makefile",
-        "composer",
-        "php",
-        "multi-root ready",
-        "c c++",
-        "gradle",
-        "tsc",
-        "nsis",
-        "batch",
-        "bash"
-    ],
-    "main": "./dist/extension",
-    "activationEvents": [
+	"name": "vscode-taskexplorer",
+	"version": "2.13.2",
+	"displayName": "Task Explorer",
+	"description": "Tasks management for npm, vscode, yarn, ant, gradle, grunt, gulp, batch, bash,php composer, make, maven, python, perl, powershell, ruby, pipenv, nsis, jenkins.  Supports external task providers via API.",
+	"icon": "res/img/logo-clr.png",
+	"publisher": "spmeesseman",
+	"license": "See LICENSE",
+	"homepage": "https://github.com/spmeesseman/vscode-taskexplorer-info/blob/master/README.md",
+	"author": {
+		"name": "Scott Meesseman",
+		"email": "spmeesseman@gmail.com"
+	},
+	"bugs": {
+		"url": "https://github.com/spmeesseman/vscode-taskexplorer-info/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/spmeesseman/vscode-taskexplorer-info.git"
+	},
+	"engines": {
+		"vscode": "^1.68.1"
+	},
+	"categories": [
+		"Other"
+	],
+	"galleryBanner": {
+		"color": "#EEEEEE",
+		"theme": "light"
+	},
+	"keywords": [
+		"tasks",
+		"task",
+		"npm",
+		"grunt",
+		"gulp",
+		"yarn",
+		"ant",
+		"makefile",
+		"composer",
+		"php",
+		"multi-root ready",
+		"c c++",
+		"gradle",
+		"tsc",
+		"nsis",
+		"batch",
+		"bash"
+	],
+	"main": "./dist/extension",
+	"activationEvents": [
         "*"
     ],
-    "preview": false,
-    "pricing": "Trial",
-    "scripts": {
-        "clean": "npm run clean:build && npm run test:clean",
-        "clean:build": "npm run clean:extension && npm run clean:webviews",
-        "clean:extension": "rimraf dist",
-        "clean:webviews": "rimraf res/css && rimraf res/js && rimraf res/page",
-        "copy-all-to-code": "npm run copy-precopy-backup && npm run copy-res-to-code && npm run copy-pkgjson-to-code && npm run copy-build-to-code",
-        "copy-precopy-backup": "cmd /c xcopy ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\* ..\\..\\Users\\smeesseman\\spmeesseman.vscode-taskexplorer-2.13.2\\ /s /i /y",
-        "copy-build-to-code": "cmd /c xcopy .\\dist\\*.js ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2\\dist /s /i /y && cmd /c xcopy .\\dist\\*.js \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2\\dist /s /i /y",
-        "copy-res-to-code": "cmd /c xcopy .\\res\\*.* ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2\\res /s /i /y && cmd /c xcopy .\\res\\*.* \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2\\res /s /i /y",
-        "copy-pkgjson-to-code": "cmd /c copy /Y .\\package*.json ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2 && cmd /c copy /Y .\\package*.json \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2",
-        "lint": "eslint -c .eslintrc.js --ext .ts .",
-        "vsce-package": "vsce package --ignoreFile .vscode\\.vscodeignore",
-        "vsce-publish": "vsce publish --ignoreFile .vscode\\.vscodeignore",
-        "vsce-publish_types": "npm publish",
-        "install_extensions.bat": "cmd /c .\\install_extensions.bat",
-        "test-all": "npm run test-default_build && node ./dist/test/runTest.js",
-        "test-all_no_build": "node ./dist/test/runTest.js",
-        "test-all_mws": "npm run test-default_build && node ./dist/test/runTest.js --multi-root",
-        "test-all_mws_no_build": "node ./dist/test/runTest.js --multi-root",
-        "test-all_smws_combined": "npm run test-all && node ./dist/test/runTest.js --no-clean --multi-root",
-        "test-default_build": "npm run tsc-build:test",
-        "test-default_build2": "npm run webpack-build:test",
-        "test-default_build3": "npm run webpack-build:test:prod",
-        "test-transpile_tests": "babel ./src/test --out-dir ./dist/test --extensions \".ts\" --presets=@babel/preset-env,@babel/preset-typescript",
-        "test-single-mws-ant": "npm run test-default_build && node ./dist/test/runTest.js ant xDeactivate --multi-root",
-        "test-single-mws-file_cache": "npm run test-default_build && node ./dist/test/runTest.js fileCache xDeactivate --multi-root",
-        "test-single-mws-file_watcher": "npm run test-default_build && node ./dist/test/runTest.js fileWatcher xDeactivate --multi-root",
-        "test-single-mws-task_monitor": "npm run test-default_build && node ./dist/test/runTest.js taskMonitor xDeactivate --multi-root",
-        "test-single-mws-multi_root": "npm run test-default_build && node ./dist/test/runTest.js multiRoot xDeactivate --multi-root",
-        "test-single-mws-tasks": "npm run test-default_build && node ./dist/test/runTest.js tasks xDeactivate --multi-root",
-        "test-single-sws-ant": "npm run test-default_build && node ./dist/test/runTest.js ant xDeactivate",
-        "test-single-sws-app_publisher": "npm run test-default_build && node ./dist/test/runTest.js appPublisher xDeactivate",
-        "test-single-sws-bash": "npm run test-default_build && node ./dist/test/runTest.js bash xDeactivate",
-        "test-single-sws-batch": "npm run test-default_build && node ./dist/test/runTest.js batch xDeactivate",
-        "test-single-sws-composer": "npm run test-default_build && node ./dist/test/runTest.js composer xDeactivate",
-        "test-single-sws-configuration": "npm run test-default_build && node ./dist/test/runTest.js configuration xDeactivate",
-        "test-single-sws-external_provider": "npm run test-default_build && node ./dist/test/runTest.js externalProvider xDeactivate",
-        "test-single-sws-file_cache": "npm run test-default_build && node ./dist/test/runTest.js fileCache xDeactivate",
-        "test-single-sws-file_watcher": "npm run test-default_build && node ./dist/test/runTest.js fileWatcher xDeactivate",
-        "test-single-sws-gradle": "npm run test-default_build && node ./dist/test/runTest.js gradle xDeactivate",
-        "test-single-sws-grunt": "npm run test-default_build && node ./dist/test/runTest.js grunt xDeactivate",
-        "test-single-sws-gulp": "npm run test-default_build && node ./dist/test/runTest.js gulp xDeactivate",
-        "test-single-sws-jenkins": "npm run test-default_build && node ./dist/test/runTest.js jenkins xDeactivate",
-        "test-single-sws-parsingReport": "npm run test-default_build && node ./dist/test/runTest.js parsingReport xDeactivate",
-        "test-single-sws-init": "npm run test-default_build && node ./dist/test/runTest.js _init xDeactivate",
-        "test-single-sws-licensemgr": "npm run test-default_build && node ./dist/test/runTest.js licenseManager xDeactivate",
-        "test-single-sws-makefile": "npm run test-default_build && node ./dist/test/runTest.js makefile xDeactivate",
-        "test-single-sws-maven": "npm run test-default_build && node ./dist/test/runTest.js maven xDeactivate",
-        "test-single-sws-menu_commands": "npm run test-default_build && node ./dist/test/runTest.js menuCommands xDeactivate",
-        "test-single-sws-multi_root": "npm run test-default_build && node ./dist/test/runTest.js multiRoot xDeactivate",
-        "test-single-sws-no_scripts": "npm run test-default_build && node ./dist/test/runTest.js noScripts xDeactivate",
-        "test-single-sws-npm": "npm run test-default_build && node ./dist/test/runTest.js npm xDeactivate",
-        "test-single-sws-nsis": "npm run test-default_build && node ./dist/test/runTest.js nsis xDeactivate",
-        "test-single-sws-perl": "npm run test-default_build && node ./dist/test/runTest.js perl xDeactivate",
-        "test-single-sws-pipenv": "npm run test-default_build && node ./dist/test/runTest.js pipenv xDeactivate",
-        "test-single-sws-powershell": "npm run test-default_build && node ./dist/test/runTest.js powershell xDeactivate",
-        "test-single-sws-providers": "npm run test-default_build && node ./dist/test/runTest.js providers xDeactivate",
-        "test-single-sws-python": "npm run test-default_build && node ./dist/test/runTest.js python xDeactivate",
-        "test-single-sws-release_notes": "npm run test-default_build && node ./dist/test/runTest.js releaseNotes xDeactivate",
-        "test-single-sws-ruby": "npm run test-default_build && node ./dist/test/runTest.js ruby xDeactivate",
-        "test-single-sws-task": "npm run test-default_build && node ./dist/test/runTest.js task xDeactivate",
-        "test-single-sws-task_details_page": "npm run test-default_build && node ./dist/test/runTest.js taskDetailsPage xDeactivate",
-        "test-single-sws-task_monitor": "npm run test-default_build && node ./dist/test/runTest.js taskMonitor xDeactivate",
-        "test-single-sws-tree": "npm run test-default_build && node ./dist/test/runTest.js tree xDeactivate",
-        "test-single-sws-tree_grouping": "npm run test-default_build && node ./dist/test/runTest.js treeGrouping xDeactivate",
-        "test-single-sws-typescript": "npm run test-default_build && node ./dist/test/runTest.js typescript xDeactivate",
-        "test-single-sws-webpack": "npm run test-default_build && node ./dist/test/runTest.js webpack xDeactivate",
-        "test-single-sws-webview": "npm run test-default_build && node ./dist/test/runTest.js webview xDeactivate",
-        "test-single-sws-workspace": "npm run test-default_build && node ./dist/test/runTest.js workspace xDeactivate",
-        "test-single-sws-wrapper": "npm run test-default_build && node ./dist/test/runTest.js wrapper xDeactivate",
-        "test-single-sws-util": "npm run test-default_build && node ./dist/test/runTest.js util xDeactivate",
-        "test:after": "script\\enable-full-coverage.sh --off",
-        "test:before": "npm run test-default_build && npm run test:before_2",
-        "test:before_2": "script\\enable-full-coverage.sh",
-        "test:openreport": "cmd /c \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" file://c:/Projects/vscode-taskexplorer/.coverage/index.html",
-        "test:clean": "rimraf .nyc_output && rimraf .coverage && rimraf tsconfig.test.tsbuildinfo",
-        "test:clean_cache_data": "rimraf c:\\code\\data\\user-data\\cacheddata",
-        "test:clean_cache_all": "rimraf .vscode-test\\user-data",
-        "tsc-build": "npx tsc -p ./ && tsc-alias && npm run webpack-build:webviews:dev",
-        "tsc-build:test": "npx tsc -p tsconfig.test.json && tsc-alias && npm run webpack-build:webviews:dev",
-        "tsc-build:types": "tsc -p ./types && cmd /c xcopy .\\types\\lib\\* .\\node_modules\\@spmeesseman\\vscode-taskexplorer-types\\lib /s /i /y",
-        "tsc-rebuild": "npm run clean && npm run tsc-build && npm run tsc-build:types",
-        "tsc-rebuild:test": "npm run clean && && npm run tsc-rebuild:types && npm run test-default_build",
-        "tsc-rebuild:types": "rimraf types/tsconfig.tsbuildinfo && rimraf types/lib && rimraf node_modules/@spmeesseman/vscode-taskexplorer-types/lib && npm run tsc-build:types",
-        "tsc-watch": "(concurrently \"tsc -watch -p ./\" \"tsc-alias -w\")",
-        "update-fa-icon-module": "node script\\update-fa-module.js",
-        "build-fa-icon-module": "node script\\update-fa-module.js --extract",
-        "webpack-watch": "webpack -w --mode development --config ./webpack.config.js",
-        "webpack-build": "webpack --mode production --config ./webpack.config.js",
-        "webpack-build:analyze": "webpack --mode production --env analyze=true --config ./webpack.config.js",
-        "webpack-build:extension": "webpack --mode production --env build=extension --config ./webpack.config.js",
-        "webpack-build:extension:analyze": "webpack --mode production --env build=extension --env analyze=true --config ./webpack.config.js",
-        "webpack-build:extension:dev": "webpack --mode development --env build=extension --config ./webpack.config.js",
-        "webpack-build:extension_web": "webpack --mode production --env build=extension_web --config ./webpack.config.js",
-        "webpack-build:webviews": "webpack --mode production --env v=webview --config ./webpack.config.js",
-        "webpack-build:webviews:dev": "webpack --mode development --env build=webview --config ./webpack.config.js",
-        "webpack-rebuild": "webpack --mode production --env clean=true --config ./webpack.config.js",
-        "webpack-rebuild:extension_web": "webpack --mode production --env clean=true --env build=extension_web --config ./webpack.config.js",
-        "webpack-build:verbose": "webpack --stats verbose --mode production --config ./webpack.config.js",
-        "webpack-build:dev": "webpack --mode development --config ./webpack.config.js",
-        "webpack-rebuild:dev": "webpack --mode development --env clean=true --config ./webpack.config.js",
-        "webpack-build:test": "webpack --env environment=test --config ./webpack.config.js",
-        "webpack-build:test:prod": "webpack --env environment=testprod --config ./webpack.config.js"
-    },
-    "dependencies": {
-        "@opentelemetry/api": "^1.4.0",
-        "@opentelemetry/exporter-trace-otlp-http": "^0.35.1",
-        "@opentelemetry/sdk-trace-base": "^1.9.1",
-        "@sgarciac/bombadil": "^2.3.0",
-        "@vscode/webview-ui-toolkit": "^1.2.2",
-        "copy-text-to-clipboard": "^3.1.0",
-        "glob": "^8.1.0",
-        "https-proxy-agent": "^5.0.1",
-        "json5": "^2.2.2",
-        "marked": "^4.2.12",
-        "minimatch": "^5.1.2",
-        "node-fetch": "^2.6.9",
-        "path-browserify": "^1.0.1",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "react-tabs": "^6.0.0",
-        "uuid": "^9.0.0",
-        "xml2js": "^0.4.23"
-    },
-    "devDependencies": {
-        "@babel/cli": "^7.20.7",
-        "@babel/core": "^7.20.12",
-        "@babel/preset-env": "^7.20.2",
-        "@babel/preset-typescript": "^7.18.6",
-        "@istanbuljs/nyc-config-typescript": "^1.0.1",
-        "@spmeesseman/eslint-plugin": "^1.0.0",
-        "@spmeesseman/vscode-taskexplorer-types": "^2.13.1",
-        "@types/chai": "^4.3.4",
-        "@types/circular-dependency-plugin": "^5.0.5",
-        "@types/glob": "^8.0.1",
-        "@types/marked": "^4.0.8",
-        "@types/minimatch": "^5.1.2",
-        "@types/mocha": "^9.1.1",
-        "@types/node": "^14.17.1",
-        "@types/node-fetch": "^2.6.0",
-        "@types/react": "^18.0.28",
-        "@types/react-dom": "^18.0.11",
-        "@types/uuid": "^9.0.0",
-        "@types/vscode": "^1.63.0",
-        "@types/webpack": "^5.28.1",
-        "@types/webpack-bundle-analyzer": "^4.6.0",
-        "@types/xml2js": "^0.4.8",
-        "@typescript-eslint/eslint-plugin": "^5.11.0",
-        "@typescript-eslint/eslint-plugin-tslint": "^5.11.0",
-        "@typescript-eslint/parser": "^5.11.0",
-        "@vscode/test-electron": "^2.2.2",
-        "@vscode/vsce": "^2.17.0",
-        "babel-loader": "^9.1.2",
-        "chai": "^4.3.7",
-        "circular-dependency-plugin": "^5.2.2",
-        "clean-webpack-plugin": "^4.0.0",
-        "concurrently": "^7.6.0",
-        "copy-webpack-plugin": "^11.0.0",
-        "coverage-istanbul-loader": "^3.0.5",
-        "cross-env": "^7.0.3",
-        "csp-html-webpack-plugin": "^5.1.0",
-        "css-loader": "^6.7.3",
-        "css-minimizer-webpack-plugin": "^4.2.2",
-        "esbuild": "^0.17.8",
-        "esbuild-loader": "^2.21.0",
-        "eslint": "^7.32.0",
-        "eslint-plugin-anti-trojan-source": "^1.1.1",
-        "eslint-plugin-import": "^2.22.1",
-        "eslint-plugin-jsdoc": "^31.6.0",
-        "eslint-plugin-no-null": "^1.0.2",
-        "eslint-plugin-prefer-arrow": "^1.2.3",
-        "eslint-plugin-prettier": "^3.3.1",
-        "fork-ts-checker-webpack-plugin": "^7.3.0",
-        "grunt": "^1.5.3",
-        "gulp": "^4.0.2",
-        "image-minimizer-webpack-plugin": "^3.8.1",
-        "mini-css-extract-plugin": "^2.7.2",
-        "mocha": "^9.2.0",
-        "nyc": "^15.1.0",
-        "rimraf": "^3.0.2",
-        "sass": "^1.58.0",
-        "sass-loader": "^13.2.0",
-        "source-map-support": "^0.5.21",
-        "ts-loader": "^8.0.17",
-        "ts-node": "^8.10.2",
-        "tsc-alias": "^1.8.2",
-        "tsconfig-paths": "^4.1.2",
-        "tslint": "^6.1.3",
-        "typescript": "^4.5.5",
-        "webpack": "^5.68.0",
-        "webpack-bundle-analyzer": "^4.7.0",
-        "webpack-cli": "^4.9.2",
-        "webpack-node-externals": "^3.0.0",
-        "webpack-plugin-replace": "^1.2.0"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "contributes": {
-        "viewsContainers": {
-            "activitybar": [
-                {
-                    "id": "taskExplorerSideBar",
-                    "title": "%name%",
-                    "contextualTitle": "TaskExplorer",
-                    "when": "config.taskexplorer.enableSideBar",
-                    "icon": "res/img/logo.svg"
-                }
-            ]
-        },
-        "views": {
-            "explorer": [
-                {
-                    "type": "tree",
-                    "id": "taskexplorer.view.taskTreeExplorer",
-                    "name": "%name%",
-                    "when": "config.taskexplorer.enableExplorerView",
-                    "contextualTitle": "TaskExplorer",
-                    "icon": "res/img/logo.svg",
-                    "visibility": "visible"
-                }
-            ],
-            "taskExplorerSideBar": [
-                {
-                    "type": "webview",
-                    "id": "taskexplorer.view.home",
-                    "name": "Home",
-                    "contextualTitle": "TaskExplorer",
-                    "icon": "res/img/logo.svg",
-                    "initialSize": 1,
-                    "visibility": "visible"
-                },
-                {
-                    "type": "tree",
-                    "id": "taskexplorer.view.taskTreeSideBar",
-                    "name": "Explorer",
-                    "initialSize": 10,
-                    "contextualTitle": "TaskExplorer",
-                    "icon": "res/img/logo.svg",
-                    "visibility": "visible"
-                },
-                {
-                    "type": "webview",
-                    "id": "taskexplorer.view.taskUsage",
-                    "name": "Task Usage",
-                    "contextualTitle": "TaskExplorer",
-                    "icon": "res/img/logo.svg",
-                    "initialSize": 1,
-                    "visibility": "collapsed"
-                },
-                {
-                    "type": "webview",
-                    "id": "taskexplorer.view.taskCount",
-                    "name": "Task Count",
-                    "contextualTitle": "TaskExplorer",
-                    "icon": "res/img/logo.svg",
-                    "initialSize": 1,
-                    "visibility": "collapsed"
-                }
-            ]
-        },
-        "walkthroughs": [
-            {
-                "id": "taskexplorer.welcome",
-                "title": "Get Started with Task Explorer",
-                "description": "Run, track, view and organize all of your project scripts and tasks",
-                "steps": [
-                    {
-                        "id": "taskexplorer.welcome.tutorial",
-                        "title": "Read Tutorial",
-                        "description": "Read the Welcome Tutorial.\n\n[Open Tutorial](command:taskexplorer.view.welcome.show?false \"Read the Welcome Tutorial\")",
-                        "media": {
-                            "markdown": "res/walkthrough/welcome/0-welcome.md"
-                        }
-                    },
-                    {
-                        "id": "taskexplorer.welcome.settings",
-                        "title": "Customize your experience with a variety of settings",
-                        "description": "An organized settings section to easily customize the way Task Explorer works.\n\n[Open Settings](command:taskexplorer.openSettings \"Open the Task Explorer Extension Settings\")",
-                        "media": {
-                            "markdown": "res/walkthrough/welcome/1-settings.md"
-                        }
-                    },
-                    {
-                        "id": "taskexplorer.welcome.licensing",
-                        "title": "Support development by purchasing a license",
-                        "description": "Support ongoing development by purchasing a license.\n\n[Learn about Task Explorer licensing](command:taskexplorer.view.licensePage.show?false \"Open the Licensing details page\")",
-                        "media": {
-                            "markdown": "res/walkthrough/welcome/2-licensing.md"
-                        }
-                    }
-                ]
-            }
-        ],
-        "commands": [
-            {
-                "command": "taskexplorer.getApi",
-                "title": "%command.getApi%",
-                "enablement": "false"
-            },
-            {
-                "command": "taskexplorer.refreshSession",
-                "title": "%command.refreshSession%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/refresh.svg",
-                    "dark": "res/img/dark/refresh.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.register",
-                "title": "%command.register%",
-                "when": "taskexplorer:enabled && !taskexplorer:account:registered"
-            },
-            {
-                "command": "taskexplorer.purchaseLicense",
-                "title": "%command.purchaseLicense%",
-                "when": "taskexplorer:enabled && taskexplorer:account:license:type < 4"
-            },
-            {
-                "command": "taskexplorer.extendTrial",
-                "title": "%command.extendTrial%",
-                "when": "taskexplorer:enabled && taskexplorer:account:registered && taskexplorer:account:trial.period < 2 && taskexplorer:account:license:type < 4"
-            },
-            {
-                "command": "taskexplorer.openBugReports",
-                "title": "%command.openBugReports%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/bug.svg",
-                    "dark": "res/img/dark/bug.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.openRepository",
-                "title": "%command.openRepository%",
-                "when": "taskexplorer:enabled && config.taskexplorer.enableSideBar",
-                "icon": {
-                    "light": "res/img/light/github.svg",
-                    "dark": "res/img/dark/github.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.showOutput",
-                "title": "Task Explorer: Show Log in Output Window",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.donate",
-                "title": "%command.donate%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/paypal.svg",
-                    "dark": "res/img/dark/paypal.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.view.licensePage.show",
-                "title": "%command.view.licensePage.show%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.view.welcome.show",
-                "title": "%command.view.welcome.show%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.view.releaseNotes.show",
-                "title": "%command.view.releaseNotes.show%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.view.parsingReport.show",
-                "title": "%command.view.parsingReport.show%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.view.taskMonitor.show",
-                "title": "%command.view.taskMonitor.show%",
-                "when": "taskexplorer:enabled && taskexplorer:account:licensed",
-                "icon": {
-                    "light": "res/img/light/react.svg",
-                    "dark": "res/img/dark/react.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.view.taskDetails.show",
-                "title": "%command.view.taskDetails.show%",
-                "when": "taskexplorer:enabled && config.taskexplorer.taskMonitor.trackStats && taskexplorer:account:licensed",
-                "icon": {
-                    "light": "res/img/light/open.svg",
-                    "dark": "res/img/dark/open.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.enableTaskType",
-                "title": "%command.enableTaskType%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.disableTaskType",
-                "title": "%command.disableTaskType%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.clearTaskStats",
-                "title": "%command.clearTaskStats%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/clear.svg",
-                    "dark": "res/img/dark/clear.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.addToExcludesEx",
-                "title": "%command.addToExcludesEx%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.removeFromExcludes",
-                "title": "%command.removeFromExcludes%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.refresh",
-                "title": "%command.refresh%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/refresh.svg",
-                    "dark": "res/img/dark/refresh.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.clearFavorites",
-                "title": "%command.clearFavorites%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/clear.svg",
-                    "dark": "res/img/dark/clear.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.clearLastTasks",
-                "title": "%command.clearLastTasks%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/clear.svg",
-                    "dark": "res/img/dark/clear.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.addRemoveCustomLabel",
-                "title": "%command.addRemoveCustomLabel%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.addToExcludes",
-                "title": "Add to Excludes List",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.run",
-                "title": "%command.run%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/continue.svg",
-                    "dark": "res/img/dark/continue.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.runNoTerm",
-                "title": "%command.runNoTerm%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/continue.svg",
-                    "dark": "res/img/dark/continue.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.runWithArgs",
-                "title": "%command.runWithArgs%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/continue.svg",
-                    "dark": "res/img/dark/continue.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.runLastTask",
-                "title": "Task Explorer: Run Last Task",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "light": "res/img/light/continue.svg",
-                    "dark": "res/img/dark/continue.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.addRemoveFavorite",
-                "title": "%command.addRemoveFavorite%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "dark": "res/img/dark/favorite.svg",
-                    "light": "res/img/light/favorite.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.pause",
-                "title": "%command.pause%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "dark": "res/img/dark/pause.svg",
-                    "light": "res/img/light/pause.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.restart",
-                "title": "%command.restart%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "dark": "res/img/dark/restart.svg",
-                    "light": "res/img/light/restart.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.stop",
-                "title": "%command.stop%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "dark": "res/img/dark/stop.svg",
-                    "light": "res/img/light/stop.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.open",
-                "title": "%command.open%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "dark": "res/img/dark/file.svg",
-                    "light": "res/img/light/file.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.openTerminal",
-                "title": "%command.openTerminal%",
-                "when": "taskexplorer:enabled",
-                "icon": {
-                    "dark": "res/img/dark/terminal.svg",
-                    "light": "res/img/light/terminal.svg"
-                }
-            },
-            {
-                "command": "taskexplorer.setPinned",
-                "title": "%command.setPinned%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.runInstall",
-                "title": "%command.runInstall%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.runUpdate",
-                "title": "%command.runUpdate%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.runUpdatePackage",
-                "title": "%command.runUpdatePackage%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.runAudit",
-                "title": "%command.runAudit%",
-                "when": "taskexplorer:enabled"
-            },
-            {
-                "command": "taskexplorer.runAuditFix",
-                "title": "%command.runAuditFix%",
-                "when": "taskexplorer:enabled"
-            }
-        ],
-        "keybindings": [
-            {
-                "command": "taskexplorer.runLastTask",
-                "key": "alt+r t",
-                "when": "taskexplorer:enabled"
-            }
-        ],
-        "menus": {
-            "explorer/context": [
-                {
-                    "command": "taskexplorer.disableTaskType",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:taskFiles"
-                },
-                {
-                    "command": "taskexplorer.enableTaskType",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in taskexplorer:fileCache:taskFiles"
-                },
-                {
-                    "command": "taskexplorer.addToExcludesEx",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:taskFiles"
-                },
-                {
-                    "command": "taskexplorer.addToExcludesEx",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourcePath && resourceScheme == folder"
-                },
-                {
-                    "command": "taskexplorer.removeFromExcludes",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in taskexplorer:fileCache:taskFiles"
-                },
-                {
-                    "command": "taskexplorer.removeFromExcludes",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourcePath && resourceScheme == folder"
-                },
-                {
-                    "command": "taskexplorer.view.parsingReport.show",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && explorerResourceIsRoot && !inputFocus && resourcePath"
-                },
-                {
-                    "command": "taskexplorer.run",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && config.taskexplorer.enableExplorerView && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:scriptFiles"
-                },
-                {
-                    "command": "taskexplorer.runWithArgs",
-                    "group": "9_taskexplorer",
-                    "when": "taskexplorer:enabled && config.taskexplorer.enableExplorerView && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:tasks:scriptFilesWithArgs"
-                }
-            ],
-            "commandPalette": [
-                {
-                    "command": "taskexplorer.getApi",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.view.parsingReport.show",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.view.licensePage.show"
-                },
-                {
-                    "command": "taskexplorer.view.releaseNotes.show"
-                },
-                {
-                    "command": "taskexplorer.view.taskMonitor.show",
-                    "when": "taskexplorer:enabled && taskexplorer:account:licensed"
-                },
-                {
-                    "command": "taskexplorer.openBugReports",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.refresh",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.clearFavorites",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.clearLastTasks",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.donate",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.refreshSession",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.register",
-                    "when": "taskexplorer:enabled && !taskexplorer:account:registered"
-                },
-                {
-                    "command": "taskexplorer.clearTaskStats",
-                    "when": "taskexplorer:enabled"
-                },
-                {
-                    "command": "taskexplorer.openRepository",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.extendTrial",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.disableTaskType",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.enableTaskType",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.addToExcludesEx",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.removeFromExcludes",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.addRemoveFavorite",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.run",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.runNoTerm",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.runWithArgs",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.addToExcludes",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.addRemoveCustomLabel",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.pause",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.restart",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.stop",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.open",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.openTerminal",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.setPinned",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.runInstall",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.runUpdate",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.runUpdatePackage",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.runAudit",
-                    "when": "false"
-                },
-                {
-                    "command": "taskexplorer.runAuditFix",
-                    "when": "false"
-                }
-            ],
-            "view/title": [
-                {
-                    "command": "taskexplorer.runLastTask",
-                    "when": "view =~ /^taskexplorer.view.taskTree/",
-                    "group": "navigation"
-                },
-                {
-                    "command": "taskexplorer.refresh",
-                    "when": "view =~ /^taskexplorer.view.taskTree/",
-                    "group": "navigation"
-                },
-                {
-                    "command": "taskexplorer.view.taskMonitor.show",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && taskexplorer:account:licensed",
-                    "group": "navigation"
-                },
-                {
-                    "command": "taskexplorer.refreshSession",
-                    "when": "view == taskexplorer.view.home",
-                    "group": "navigation"
-                },
-                {
-                    "command": "taskexplorer.openBugReports",
-                    "when": "view == taskexplorer.view.home",
-                    "group": "navigation"
-                },
-                {
-                    "command": "taskexplorer.openRepository",
-                    "when": "view == taskexplorer.view.home",
-                    "group": "navigation"
-                },
-                {
-                    "command": "taskexplorer.donate",
-                    "when": "view == taskexplorer.view.home",
-                    "group": "navigation"
-                },
-                {
-                    "command": "taskexplorer.view.taskMonitor.show",
-                    "when": "view == taskexplorer.view.home && taskexplorer:account:licensed",
-                    "group": "navigation"
-                },
-                {
-                    "command": "taskexplorer.clearTaskStats",
-                    "when": "view == taskexplorer.view.taskUsage",
-                    "group": "navigation"
-                }
-            ],
-            "view/item/context": [
-                {
-                    "command": "taskexplorer.runAudit",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
-                },
-                {
-                    "command": "taskexplorer.runAuditFix",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
-                },
-                {
-                    "command": "taskexplorer.runInstall",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
-                },
-                {
-                    "command": "taskexplorer.runUpdate",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
-                },
-                {
-                    "command": "taskexplorer.runUpdatePackage",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
-                },
-                {
-                    "command": "taskexplorer.open",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/"
-                },
-                {
-                    "command": "taskexplorer.run",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/"
-                },
-                {
-                    "command": "taskexplorer.runWithArgs",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/"
-                },
-                {
-                    "command": "taskexplorer.runNoTerm",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/"
-                },
-                {
-                    "command": "taskexplorer.view.taskDetails.show",
-                    "when": "config.taskexplorer.taskMonitor.trackStats && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/ && taskexplorer:account:licensed"
-                },
-                {
-                    "command": "taskexplorer.addToExcludes",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^(task(File|Group)[A-Z][a-z]+|script(|File))/"
-                },
-                {
-                    "command": "taskexplorer.addRemoveFavorite",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/"
-                },
-                {
-                    "command": "taskexplorer.addRemoveCustomLabel",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S/"
-                },
-                {
-                    "command": "taskexplorer.clearFavorites",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == favorites"
-                },
-                {
-                    "command": "taskexplorer.clearLastTasks",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == lasttasks"
-                },
-                {
-                    "command": "taskexplorer.runNoTerm",
-                    "when": "config.taskexplorer.taskButtons.showExecuteWithNoTerminalButton && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.runWithArgs",
-                    "when": "config.taskexplorer.taskButtons.showExecuteWithArgumentsButton && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.run",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.open",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.openTerminal",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^scriptRunningS?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.restart",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^scriptRunningS?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.pause",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^scriptRunningS?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.stop",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^scriptRunningS?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.addRemoveFavorite",
-                    "when": "config.taskexplorer.specialFolders.showFavorites && config.taskexplorer.taskButtons.showFavoritesButton && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.clearFavorites",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == favorites",
-                    "group": "inline"
-                },
-                {
-                    "command": "taskexplorer.clearLastTasks",
-                    "when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == lasttasks",
-                    "group": "inline"
-                }
-            ]
-        },
-        "configuration": [
-            {
-                "id": "general",
-                "order": 0,
-                "title": "General",
-                "properties": {
-                    "taskexplorer.enableExplorerView": {
-                        "type": "boolean",
-                        "default": true,
-                        "order": 0,
-                        "markdownDescription": "%config.taskexplorer.enableExplorerView%"
-                    },
-                    "taskexplorer.enableSideBar": {
-                        "type": "boolean",
-                        "default": true,
-                        "order": 1,
-                        "markdownDescription": "%config.taskexplorer.enableSideBar%"
-                    },
-                    "taskexplorer.enablePersistentFileCaching": {
-                        "type": "boolean",
-                        "default": false,
-                        "order": 2,
-                        "markdownDescription": "%config.taskexplorer.enablePersistentFileCaching%"
-                    },
-                    "taskexplorer.keepTermOnStop": {
-                        "type": "boolean",
-                        "default": true,
-                        "order": 3,
-                        "description": "%config.taskexplorer.keepTermOnStop%"
-                    },
-                    "taskexplorer.trackUsage": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%config.taskexplorer.trackUsage%"
-                    },
-                    "taskexplorer.allowUsageReporting": {
-                        "type": "boolean",
-                        "default": false,
-                        "description": "%config.taskexplorer.allowUsageReporting%"
-                    }
-                }
-            },
-            {
-                "id": "taskproviders",
-                "order": 20,
-                "title": "Task Providers",
-                "properties": {
-                    "taskexplorer.enabledTasks": {
-                        "type": "object",
-                        "order": 15,
-                        "additionalProperties": false,
-                        "description": "%config.taskexplorer.enabledTaskTypes%",
-                        "properties": {
-                            "ant": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableAnt%"
-                            },
-                            "apppublisher": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableAppPublisher%"
-                            },
-                            "bash": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableBash%"
-                            },
-                            "batch": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableBatch%"
-                            },
-                            "composer": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableComposer%"
-                            },
-                            "gradle": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableGradle%"
-                            },
-                            "grunt": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableGrunt%"
-                            },
-                            "gulp": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableGulp%"
-                            },
-                            "jenkins": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableJenkins%"
-                            },
-                            "make": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableMake%"
-                            },
-                            "maven": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableMaven%"
-                            },
-                            "node": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableNode%"
-                            },
-                            "npm": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableNpm%"
-                            },
-                            "nsis": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableNsis%"
-                            },
-                            "perl": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enablePerl%"
-                            },
-                            "pipenv": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enablePipenv%"
-                            },
-                            "powershell": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enablePowershell%"
-                            },
-                            "python": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enablePython%"
-                            },
-                            "ruby": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableRuby%"
-                            },
-                            "tsc": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableTsc%"
-                            },
-                            "webpack": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableWebpack%"
-                            },
-                            "workspace": {
-                                "type": "boolean",
-                                "description": "%config.taskexplorer.enableWorkspace%"
-                            }
-                        },
-                        "default": {
-                            "ant": true,
-                            "apppublisher": false,
-                            "bash": true,
-                            "batch": true,
-                            "composer": false,
-                            "gradle": false,
-                            "grunt": true,
-                            "gulp": true,
-                            "jenkins": false,
-                            "make": true,
-                            "maven": false,
-                            "node": false,
-                            "npm": true,
-                            "nsis": false,
-                            "perl": false,
-                            "pipenv": false,
-                            "powershell": false,
-                            "python": true,
-                            "ruby": false,
-                            "tsc": true,
-                            "webpack": false,
-                            "workspace": true
-                        }
-                    },
-                    "taskexplorer.useNpmProvider": {
-                        "type": "boolean",
-                        "default": false,
-                        "markdownDescription": "%config.taskexplorer.useNpmProvider%"
-                    },
-                    "taskexplorer.useAnt": {
-                        "type": "boolean",
-                        "default": false,
-                        "markdownDescription": "%config.taskexplorer.useAnt%"
-                    },
-                    "taskexplorer.useGulp": {
-                        "type": "boolean",
-                        "default": false,
-                        "markdownDescription": "%config.taskexplorer.useGulp%"
-                    }
-                }
-            },
-            {
-                "id": "excludeinclude",
-                "order": 40,
-                "title": "Exclude / Include",
-                "properties": {
-                    "taskexplorer.exclude": {
-                        "type": "array",
-                        "order": 20,
-                        "items": {
-                            "type": "string"
-                        },
-                        "markdownDescription": "%config.taskexplorer.exclude%",
-                        "default": [
-                            "**/.bin/**",
-                            "**/.coverage/**",
-                            "**/.nuget/**",
-                            "**/.nyc_output/**",
-                            "**/.venv/**",
-                            "**/.vscode-test/**",
-                            "**/Assets/**",
-                            "**/bin/**",
-                            "**/build/**",
-                            "**/CompiledOutput/**",
-                            "**/coverage/**",
-                            "**/css/**",
-                            "**/dbg/**",
-                            "**/debug/**",
-                            "**/Debug/**",
-                            "**/dep/**",
-                            "**/dependency/**",
-                            "**/dist/**",
-                            "**/doc/**",
-                            "**/docs/**",
-                            "**/documentation/**",
-                            "**/example/**",
-                            "**/examples/**",
-                            "**/ext/**",
-                            "**/img*/**",
-                            "**/image*/**",
-                            "**/node_modules/**",
-                            "**/obj/**",
-                            "**/Obj/**",
-                            "**/out/**",
-                            "**/output/**",
-                            "**/packages/**",
-                            "**/release/**",
-                            "**/Release/**",
-                            "**/res/**",
-                            "**/resource/**",
-                            "**/resources/**",
-                            "**/sample*/**",
-                            "**/scss/**",
-                            "**/sdks/**",
-                            "**/spec/**",
-                            "**/static/**",
-                            "**/target/**",
-                            "**/test/**",
-                            "**/tests/**",
-                            "**/type/**",
-                            "**/types/**",
-                            "**/third_party/**",
-                            "**/vendor/**",
-                            "**/work/**"
-                        ]
-                    },
-                    "taskexplorer.excludeTask": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "default": [
-                            "pre-launch[0-9]{2}\\.r(?:b|c)"
-                        ],
-                        "order": 25,
-                        "markdownDescription": "%config.taskexplorer.excludeTask%"
-                    },
-                    "taskexplorer.includeAnt": {
-                        "type": [
-                            "string",
-                            "array"
-                        ],
-                        "items": {
-                            "type": "string"
-                        },
-                        "default": [],
-                        "order": 30,
-                        "markdownDeprecationMessage": "%config.taskexplorer.includeAntDeprecated%",
-                        "markdownDescription": "%config.taskexplorer.includeAntDsc%"
-                    },
-                    "taskexplorer.globPatternsAnt": {
-                        "type": [
-                            "array"
-                        ],
-                        "items": {
-                            "type": "string"
-                        },
-                        "default": [],
-                        "order": 35,
-                        "markdownDescription": "%config.taskexplorer.globPatternsAnt%"
-                    },
-                    "taskexplorer.globPatternsBash": {
-                        "type": [
-                            "array"
-                        ],
-                        "items": {
-                            "type": "string"
-                        },
-                        "default": [],
-                        "order": 40,
-                        "markdownDescription": "%config.taskexplorer.globPatternsBash%"
-                    },
-                    "taskexplorer.globPatternsNode": {
-                        "type": [
-                            "array"
-                        ],
-                        "items": {
-                            "type": "string"
-                        },
-                        "default": [
-                            "**/bin/*.js"
-                        ],
-                        "order": 45,
-                        "markdownDescription": "%config.taskexplorer.globPatternsNode%"
-                    }
-                }
-            },
-            {
-                "id": "grouping",
-                "order": 60,
-                "title": "Grouping",
-                "properties": {
-                    "taskexplorer.groupWithSeparator": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "%config.taskexplorer.groupWithSeparator%"
-                    },
-                    "taskexplorer.groupSeparator": {
-                        "type": "string",
-                        "enum": [
-                            "-",
-                            "_",
-                            ":",
-                            "|"
-                        ],
-                        "default": "-",
-                        "description": "%config.taskexplorer.groupSeparator%"
-                    },
-                    "taskexplorer.groupStripTaskLabel": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "%config.taskexplorer.groupStripTaskLabel%"
-                    },
-                    "taskexplorer.groupMaxLevel": {
-                        "type": "number",
-                        "enum": [
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6,
-                            7,
-                            8,
-                            9,
-                            10
-                        ],
-                        "default": 5,
-                        "description": "%config.taskexplorer.groupMaxLevel%"
-                    }
-                }
-            },
-            {
-                "id": "logging",
-                "order": 80,
-                "title": "Logging",
-                "properties": {
-                    "taskexplorer.logging.enable": {
-                        "type": "boolean",
-                        "default": false,
-                        "order": 50,
-                        "markdownDescription": "%config.taskexplorer.logging.enable%"
-                    },
-                    "taskexplorer.logging.enableFile": {
-                        "type": "boolean",
-                        "default": false,
-                        "order": 53,
-                        "markdownDescription": "%config.taskexplorer.logging.enableFile%"
-                    },
-                    "taskexplorer.logging.enableFileSymbols": {
-                        "type": "boolean",
-                        "default": true,
-                        "order": 56,
-                        "markdownDescription": "%config.taskexplorer.logging.enableFileSymbols%"
-                    },
-                    "taskexplorer.logging.enableOutputWindow": {
-                        "type": "boolean",
-                        "default": true,
-                        "order": 60,
-                        "markdownDescription": "%config.taskexplorer.logging.enableOutputWindow%"
-                    },
-                    "taskexplorer.logging.level": {
-                        "type": "number",
-                        "enum": [
-                            1,
-                            2,
-                            3,
-                            4,
-                            5
-                        ],
-                        "default": 1,
-                        "order": 55,
-                        "markdownDescription": "%config.taskexplorer.logging.level%"
-                    }
-                }
-            },
-            {
-                "id": "programs",
-                "order": 80,
-                "title": "Programs",
-                "properties": {
-                    "taskexplorer.pathToPrograms": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "description": "%config.taskexplorer.pathToPrograms%",
-                        "properties": {
-                            "ant": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToAnt%"
-                            },
-                            "ansicon": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToAnsicon%"
-                            },
-                            "composer": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToComposer%"
-                            },
-                            "curl": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToCurl%"
-                            },
-                            "gradle": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToGradle%"
-                            },
-                            "jenkins": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToJenkins%"
-                            },
-                            "make": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToMake%"
-                            },
-                            "maven": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToMaven%"
-                            },
-                            "nsis": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToNsis%"
-                            },
-                            "perl": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToPerl%"
-                            },
-                            "pipenv": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToPipenv%"
-                            },
-                            "powershell": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToPowershell%"
-                            },
-                            "python": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToPython%"
-                            },
-                            "ruby": {
-                                "type": "string",
-                                "description": "%config.taskexplorer.pathToRuby%"
-                            }
-                        },
-                        "default": {
-                            "ant": "ant.bat",
-                            "ansicon": "ansicon",
-                            "composer": "composer",
-                            "curl": "curl",
-                            "gradle": "gradle.bat",
-                            "jenkins": "",
-                            "make": "nmake",
-                            "maven": "mvn",
-                            "nsis": "makensis",
-                            "perl": "perl",
-                            "pipenv": "pipenv",
-                            "powershell": "powershell",
-                            "python": "python",
-                            "ruby": "ruby"
-                        }
-                    },
-                    "taskexplorer.enableAnsiconForAnt": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%config.taskexplorer.visual.enableAnsiconForAnt%"
-                    },
-                    "taskexplorer.environment": {
-                        "type": "object",
-                        "order": 18,
-                        "additionalProperties": false,
-                        "markdownDescription": "%config.taskexplorer.environment%",
-                        "properties": {
-                            "jenkinsApiToken": "JENKINS_API_TOKEN"
-                        }
-                    }
-                }
-            },
-            {
-                "id": "specialfolders",
-                "order": 100,
-                "title": "Special Folders",
-                "properties": {
-                    "taskexplorer.specialFolders.showFavorites": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%config.taskexplorer.specialFolders.showFavorites%"
-                    },
-                    "taskexplorer.specialFolders.showLastTasks": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%config.taskexplorer.specialFolders.showLastTasks%"
-                    },
-                    "taskexplorer.specialFolders.showUserTasks": {
-                        "type": "boolean",
-                        "default": false,
-                        "description": "%config.taskexplorer.specialFolders.showUserTasks%"
-                    },
-                    "taskexplorer.specialFolders.numLastTasks": {
-                        "type": "number",
-                        "enum": [
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6,
-                            7,
-                            8,
-                            9,
-                            10,
-                            11,
-                            12,
-                            13,
-                            14,
-                            15,
-                            16,
-                            17,
-                            18,
-                            19,
-                            20,
-                            21,
-                            22,
-                            23,
-                            24,
-                            25
-                        ],
-                        "default": 10,
-                        "markdownDescription": "%config.taskexplorer.specialFolders.numLastTasks%"
-                    },
-                    "taskexplorer.specialFolders.folderState": {
-                        "type": "object",
-                        "markdownDescription": "%config.taskexplorer.specialFolders.folderState%",
-                        "additionalProperties": {
-                            "enum": [
-                                "Collapsed",
-                                "Expanded"
-                            ],
-                            "description": ""
-                        },
-                        "properties": {
-                            "lastTasks": {
-                                "enum": [
-                                    "Collapsed",
-                                    "Expanded"
-                                ],
-                                "description": "%config.taskexplorer.specialFolders.folderState.lastTasks%"
-                            },
-                            "favorites": {
-                                "enum": [
-                                    "Collapsed",
-                                    "Expanded"
-                                ],
-                                "description": "%config.taskexplorer.specialFolders.folderState.favorites%"
-                            },
-                            "userTasks": {
-                                "enum": [
-                                    "Collapsed",
-                                    "Expanded"
-                                ],
-                                "description": "%config.taskexplorer.specialFolders.folderState.userTasks%"
-                            }
-                        },
-                        "default": {
-                            "lastTasks": "Expanded",
-                            "favorites": "Expanded",
-                            "userTasks": "Expanded"
-                        }
-                    }
-                }
-            },
-            {
-                "id": "taskbuttons",
-                "order": 120,
-                "title": "Task Buttons",
-                "properties": {
-                    "taskexplorer.taskButtons.clickAction": {
-                        "type": "string",
-                        "enum": [
-                            "Execute",
-                            "Open"
-                        ],
-                        "default": "Open",
-                        "description": "%config.taskexplorer.taskButtons.clickAction%"
-                    },
-                    "taskexplorer.taskButtons.controlCharacter": {
-                        "type": "string",
-                        "default": "Y",
-                        "pattern": "[A-Z]{1}",
-                        "description": "%config.taskexplorer.taskButtons.controlCharacter%"
-                    },
-                    "taskexplorer.taskButtons.showExecuteWithArgumentsButton": {
-                        "type": "boolean",
-                        "default": false,
-                        "markdownDescription": "%config.taskexplorer.taskButtons.showExecuteWithArgumentsButton%"
-                    },
-                    "taskexplorer.taskButtons.showFavoritesButton": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%config.taskexplorer.taskButtons.showFavoritesButton%"
-                    },
-                    "taskexplorer.taskButtons.showExecuteWithNoTerminalButton": {
-                        "type": "boolean",
-                        "default": false,
-                        "markdownDescription": "%config.taskexplorer.taskButtons.showExecuteWithNoTerminalButton%"
-                    }
-                }
-            },
-            {
-                "id": "taskMonitor",
-                "order": 110,
-                "title": "Task Monitor",
-                "properties": {
-                    "taskexplorer.taskMonitor.trackStats": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%config.taskexplorer.taskMonitor.trackStats%"
-                    },
-                    "taskexplorer.taskMonitor.timerMode": {
-                        "type": "string",
-                        "enum": [
-                            "Hide",
-                            "MM:SS",
-                            "MM:SS:MS",
-                            "MM:SS:MSS"
-                        ],
-                        "default": "MM:SS",
-                        "description": "%config.taskexplorer.taskMonitor.timerMode%"
-                    }
-                }
-            },
-            {
-                "id": "visual",
-                "order": 120,
-                "title": "Visual",
-                "properties": {
-                    "taskexplorer.visual.disableAnimatedIcons": {
-                        "type": "boolean",
-                        "default": false,
-                        "description": "%config.taskexplorer.visual.disableAnimatedIcons%"
-                    },
-                    "taskexplorer.showHiddenWsTasks": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%config.taskexplorer.showHiddenWsTasks%"
-                    },
-                    "taskexplorer.showRunningTask": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "%config.taskexplorer.showRunningTask%"
-                    },
-                    "taskexplorer.sortProjectFoldersAlpha": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "%config.taskexplorer.sortProjectFoldersAlpha%"
-                    }
-                }
-            }
-        ],
-        "taskDefinitions": [
-            {
-                "type": "ant",
-                "required": [],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "isDefault": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.isDefault%"
-                    }
-                }
-            },
-            {
-                "type": "gradle",
-                "required": [
-                    "script"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    }
-                }
-            },
-            {
-                "type": "grunt",
-                "required": [],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    }
-                }
-            },
-            {
-                "type": "gulp",
-                "required": [],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    }
-                }
-            },
-            {
-                "type": "apppublisher",
-                "required": [
-                    "cmdLine"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    },
-                    "cmdLine": {
-                        "type": "string",
-                        "description": "%taskdef.task.cmdLine%"
-                    }
-                }
-            },
-            {
-                "type": "maven",
-                "required": [
-                    "cmdLine"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    },
-                    "cmdLine": {
-                        "type": "string",
-                        "description": "%taskdef.task.cmdLine%"
-                    }
-                }
-            },
-            {
-                "type": "make",
-                "required": [],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    }
-                }
-            },
-            {
-                "type": "composer",
-                "required": [],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    }
-                }
-            },
-            {
-                "type": "jenkins",
-                "required": [],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    }
-                }
-            },
-            {
-                "type": "pipenv",
-                "required": [],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    }
-                }
-            },
-            {
-                "type": "bash",
-                "required": [
-                    "fileName"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "scriptFile": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.scriptFile%",
-                        "default": true
-                    },
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    }
-                }
-            },
-            {
-                "type": "batch",
-                "required": [
-                    "fileName"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "scriptFile": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.scriptFile%",
-                        "default": true
-                    },
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    }
-                }
-            },
-            {
-                "type": "nsis",
-                "required": [
-                    "fileName"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "scriptFile": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.scriptFile%",
-                        "default": true
-                    },
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    }
-                }
-            },
-            {
-                "type": "perl",
-                "required": [
-                    "fileName"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "scriptFile": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.scriptFile%",
-                        "default": true
-                    },
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    }
-                }
-            },
-            {
-                "type": "powershell",
-                "required": [
-                    "fileName"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "scriptFile": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.scriptFile%",
-                        "default": true
-                    },
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    }
-                }
-            },
-            {
-                "type": "python",
-                "required": [
-                    "fileName"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "scriptFile": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.scriptFile%",
-                        "default": true
-                    },
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    }
-                }
-            },
-            {
-                "type": "ruby",
-                "required": [
-                    "fileName"
-                ],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "scriptFile": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.scriptFile%",
-                        "default": true
-                    },
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    },
-                    "takesArgs": {
-                        "type": "boolean",
-                        "description": "%taskdef.task.takesArgs%"
-                    }
-                }
-            },
-            {
-                "type": "webpack",
-                "required": [],
-                "when": "taskexplorer:enabled",
-                "properties": {
-                    "script": {
-                        "type": "string",
-                        "description": "%taskdef.task.script%"
-                    },
-                    "target": {
-                        "type": "string",
-                        "description": "%taskdef.task.target%"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "%taskdef.task.path%"
-                    },
-                    "fileName": {
-                        "type": "string",
-                        "description": "%taskdef.task.fileName%"
-                    },
-                    "uri": {
-                        "type": "object",
-                        "description": "%taskdef.task.fileUri%"
-                    },
-                    "taskItemId": {
-                        "type": "string",
-                        "description": "%taskdef.task.taskItemId%"
-                    }
-                }
-            }
-        ],
-        "problemMatchers": [
-            {
-                "name": "gccTe",
-                "owner": "cpp",
-                "label": "Task Explorer GCC",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceRoot}"
-                ],
-                "pattern": {
-                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "severity": 4,
-                    "message": 5
-                }
-            },
-            {
-                "name": "webpackTe",
-                "owner": "javascript",
-                "source": "javascript",
-                "label": "Task Explorer WebPack Watch",
-                "pattern": [
-                    {
-                        "regexp": "\\[tsl\\] ERROR",
-                        "file": 1,
-                        "location": 2,
-                        "message": 3
-                    }
-                ],
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "Entrypoint\\s+extension",
-                    "endsPattern": "compiled\\s+successfully\\s+in\\s+[0-9]+\\s+ms"
-                }
-            },
-            {
-                "name": "tsc-watch",
-                "label": "Task Explorer Tsc-Alias Watch",
-                "base": "$tsc-watch",
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": {
-                        "regexp": "^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (Starting compilation in watch mode|File change detected\\. Starting incremental compilation)\\.\\.\\."
-                    },
-                    "endsPattern": {
-                        "regexp": "^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (?:Compilation complete\\.|Found \\d+ errors?\\.) Watching for file changes\\."
-                    }
-                }
-            },
-            {
-                "name": "bashTe",
-                "owner": "bash",
-                "source": "bash",
-                "label": "Task Explorer Bash",
-                "pattern": [
-                    {
-                        "code": 3,
-                        "file": 2,
-                        "message": 1,
-                        "kind": "file",
-                        "regexp": "^The terminal process *[\"']?([A-Za-z\\.0-9\\/\\-_\\\\]+) +([A-Za-z \\.0-9\\/\\-_\\\\\"']+) +(?:failed to launch \\(|terminated with )exit code\\:? *([0-9]+)\\s*(?:\\.|\\))[\r\n]{2,3}^(.+)"
-                    }
-                ]
-            },
-            {
-                "name": "batTe",
-                "owner": "batch",
-                "source": "batch",
-                "label": "Task Explorer Batch",
-                "pattern": [
-                    {
-                        "file": 2,
-                        "message": 1,
-                        "kind": "file",
-                        "regexp": "^('(.+)' is not recognized as an internal or external command)"
-                    }
-                ]
-            }
-        ]
-    }
+	"preview": false,
+	"pricing": "Trial",
+	"scripts": {
+		"clean": "npm run clean:build && npm run test:clean",
+		"clean:build": "npm run clean:extension && npm run clean:webviews",
+		"clean:extension": "rimraf dist",
+		"clean:webviews": "rimraf res/css && rimraf res/js && rimraf res/page",
+		"copy-all-to-code": "npm run copy-precopy-backup && npm run copy-res-to-code && npm run copy-pkgjson-to-code && npm run copy-build-to-code",
+		"copy-precopy-backup": "cmd /c xcopy ..\\..\\Code\\data\\extensions\\spmeesseman.vscode-taskexplorer-2.13.2\\* ..\\..\\Users\\smeesseman\\spmeesseman.vscode-taskexplorer-2.13.2\\ /s /i /y",
+		"copy-build-to-code": "cmd /c xcopy .\\dist\\*.js ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2\\dist /s /i /y && cmd /c xcopy .\\dist\\*.js \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2\\dist /s /i /y",
+		"copy-res-to-code": "cmd /c xcopy .\\res\\*.* ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2\\res /s /i /y && cmd /c xcopy .\\res\\*.* \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2\\res /s /i /y",
+		"copy-pkgjson-to-code": "cmd /c copy /Y .\\package*.json ..\\..\\Code\\data\\extensions\\spmeesseman.taskexplorer-2.13.2 && cmd /c copy /Y .\\package*.json \\\\miazlap001\\Code_Extensions\\spmeesseman.taskexplorer-2.13.2",
+		"lint": "eslint -c .eslintrc.js --ext .ts .",
+		"vsce-package": "vsce package --ignoreFile .vscode\\.vscodeignore",
+		"vsce-publish": "vsce publish --ignoreFile .vscode\\.vscodeignore",
+		"vsce-publish_types": "npm publish",
+		"install_extensions.bat": "cmd /c .\\install_extensions.bat",
+		"test-all": "npm run test-default_build && node ./dist/test/runTest.js",
+		"test-all_no_build": "node ./dist/test/runTest.js",
+		"test-all_mws": "npm run test-default_build && node ./dist/test/runTest.js --multi-root",
+		"test-all_mws_no_build": "node ./dist/test/runTest.js --multi-root",
+		"test-all_smws_combined": "npm run test-all && node ./dist/test/runTest.js --no-clean --multi-root",
+		"test-default_build": "npm run tsc-build:test",
+		"test-default_build2": "npm run webpack-build:test",
+		"test-default_build3": "npm run webpack-build:test:prod",
+		"test-transpile_tests": "babel ./src/test --out-dir ./dist/test --extensions \".ts\" --presets=@babel/preset-env,@babel/preset-typescript",
+		"test-single-mws-ant": "npm run test-default_build && node ./dist/test/runTest.js ant xDeactivate --multi-root",
+		"test-single-mws-file_cache": "npm run test-default_build && node ./dist/test/runTest.js fileCache xDeactivate --multi-root",
+		"test-single-mws-file_watcher": "npm run test-default_build && node ./dist/test/runTest.js fileWatcher xDeactivate --multi-root",
+		"test-single-mws-task_monitor": "npm run test-default_build && node ./dist/test/runTest.js taskMonitor xDeactivate --multi-root",
+		"test-single-mws-multi_root": "npm run test-default_build && node ./dist/test/runTest.js multiRoot xDeactivate --multi-root",
+		"test-single-mws-tasks": "npm run test-default_build && node ./dist/test/runTest.js tasks xDeactivate --multi-root",
+		"test-single-sws-ant": "npm run test-default_build && node ./dist/test/runTest.js ant xDeactivate",
+		"test-single-sws-app_publisher": "npm run test-default_build && node ./dist/test/runTest.js appPublisher xDeactivate",
+		"test-single-sws-bash": "npm run test-default_build && node ./dist/test/runTest.js bash xDeactivate",
+		"test-single-sws-batch": "npm run test-default_build && node ./dist/test/runTest.js batch xDeactivate",
+		"test-single-sws-composer": "npm run test-default_build && node ./dist/test/runTest.js composer xDeactivate",
+		"test-single-sws-configuration": "npm run test-default_build && node ./dist/test/runTest.js configuration xDeactivate",
+		"test-single-sws-external_provider": "npm run test-default_build && node ./dist/test/runTest.js externalProvider xDeactivate",
+		"test-single-sws-file_cache": "npm run test-default_build && node ./dist/test/runTest.js fileCache xDeactivate",
+		"test-single-sws-file_watcher": "npm run test-default_build && node ./dist/test/runTest.js fileWatcher xDeactivate",
+		"test-single-sws-gradle": "npm run test-default_build && node ./dist/test/runTest.js gradle xDeactivate",
+		"test-single-sws-grunt": "npm run test-default_build && node ./dist/test/runTest.js grunt xDeactivate",
+		"test-single-sws-gulp": "npm run test-default_build && node ./dist/test/runTest.js gulp xDeactivate",
+		"test-single-sws-jenkins": "npm run test-default_build && node ./dist/test/runTest.js jenkins xDeactivate",
+		"test-single-sws-parsingReport": "npm run test-default_build && node ./dist/test/runTest.js parsingReport xDeactivate",
+		"test-single-sws-init": "npm run test-default_build && node ./dist/test/runTest.js _init xDeactivate",
+		"test-single-sws-licensemgr": "npm run test-default_build && node ./dist/test/runTest.js licenseManager xDeactivate",
+		"test-single-sws-makefile": "npm run test-default_build && node ./dist/test/runTest.js makefile xDeactivate",
+		"test-single-sws-maven": "npm run test-default_build && node ./dist/test/runTest.js maven xDeactivate",
+		"test-single-sws-menu_commands": "npm run test-default_build && node ./dist/test/runTest.js menuCommands xDeactivate",
+		"test-single-sws-multi_root": "npm run test-default_build && node ./dist/test/runTest.js multiRoot xDeactivate",
+		"test-single-sws-no_scripts": "npm run test-default_build && node ./dist/test/runTest.js noScripts xDeactivate",
+		"test-single-sws-npm": "npm run test-default_build && node ./dist/test/runTest.js npm xDeactivate",
+		"test-single-sws-nsis": "npm run test-default_build && node ./dist/test/runTest.js nsis xDeactivate",
+		"test-single-sws-perl": "npm run test-default_build && node ./dist/test/runTest.js perl xDeactivate",
+		"test-single-sws-pipenv": "npm run test-default_build && node ./dist/test/runTest.js pipenv xDeactivate",
+		"test-single-sws-powershell": "npm run test-default_build && node ./dist/test/runTest.js powershell xDeactivate",
+		"test-single-sws-providers": "npm run test-default_build && node ./dist/test/runTest.js providers xDeactivate",
+		"test-single-sws-python": "npm run test-default_build && node ./dist/test/runTest.js python xDeactivate",
+		"test-single-sws-release_notes": "npm run test-default_build && node ./dist/test/runTest.js releaseNotes xDeactivate",
+		"test-single-sws-ruby": "npm run test-default_build && node ./dist/test/runTest.js ruby xDeactivate",
+		"test-single-sws-task": "npm run test-default_build && node ./dist/test/runTest.js task xDeactivate",
+		"test-single-sws-task_details_page": "npm run test-default_build && node ./dist/test/runTest.js taskDetailsPage xDeactivate",
+		"test-single-sws-task_monitor": "npm run test-default_build && node ./dist/test/runTest.js taskMonitor xDeactivate",
+		"test-single-sws-tree": "npm run test-default_build && node ./dist/test/runTest.js tree xDeactivate",
+		"test-single-sws-tree_grouping": "npm run test-default_build && node ./dist/test/runTest.js treeGrouping xDeactivate",
+		"test-single-sws-typescript": "npm run test-default_build && node ./dist/test/runTest.js typescript xDeactivate",
+		"test-single-sws-webpack": "npm run test-default_build && node ./dist/test/runTest.js webpack xDeactivate",
+		"test-single-sws-webview": "npm run test-default_build && node ./dist/test/runTest.js webview xDeactivate",
+		"test-single-sws-workspace": "npm run test-default_build && node ./dist/test/runTest.js workspace xDeactivate",
+		"test-single-sws-wrapper": "npm run test-default_build && node ./dist/test/runTest.js wrapper xDeactivate",
+		"test-single-sws-util": "npm run test-default_build && node ./dist/test/runTest.js util xDeactivate",
+		"test:after": "script\\enable-full-coverage.sh --off",
+		"test:before": "npm run test-default_build && npm run test:before_2",
+		"test:before_2": "script\\enable-full-coverage.sh",
+		"test:openreport": "cmd /c \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" file://c:/Projects/vscode-taskexplorer/.coverage/index.html",
+		"test:clean": "rimraf .nyc_output && rimraf .coverage && rimraf tsconfig.test.tsbuildinfo",
+		"test:clean_cache_data": "rimraf c:\\code\\data\\user-data\\cacheddata",
+		"test:clean_cache_all": "rimraf .vscode-test\\user-data",
+		"tsc-build": "npx tsc -p ./ && tsc-alias && npm run webpack-build:webviews:dev",
+		"tsc-build:test": "npx tsc -p tsconfig.test.json && tsc-alias && npm run webpack-build:webviews:dev",
+		"tsc-build:types": "tsc -p ./types && cmd /c xcopy .\\types\\lib\\* .\\node_modules\\@spmeesseman\\vscode-taskexplorer-types\\lib /s /i /y",
+		"tsc-rebuild": "npm run clean && npm run tsc-build && npm run tsc-build:types",
+		"tsc-rebuild:test": "npm run clean && npm run tsc-rebuild:types && npm run test-default_build",
+		"tsc-rebuild:types": "rimraf types/tsconfig.tsbuildinfo && rimraf types/lib && rimraf node_modules/@spmeesseman/vscode-taskexplorer-types/lib && npm run tsc-build:types",
+		"tsc-watch": "(concurrently \"tsc -watch -p ./\" \"tsc-alias -w\")",
+		"update-fa-icon-module": "node script\\update-fa-module.js",
+		"build-fa-icon-module": "node script\\update-fa-module.js --extract",
+		"webpack-watch": "webpack -w --mode development --config ./webpack.config.js",
+		"webpack-build": "webpack --mode production --config ./webpack.config.js",
+		"webpack-build:analyze": "webpack --mode production --env analyze=true --config ./webpack.config.js",
+		"webpack-build:extension": "webpack --mode production --env build=extension --config ./webpack.config.js",
+		"webpack-build:extension:analyze": "webpack --mode production --env build=extension --env analyze=true --config ./webpack.config.js",
+		"webpack-build:extension:dev": "webpack --mode development --env build=extension --config ./webpack.config.js",
+		"webpack-build:extension_web": "webpack --mode production --env build=extension_web --config ./webpack.config.js",
+		"webpack-build:webviews": "webpack --mode production --env v=webview --config ./webpack.config.js",
+		"webpack-build:webviews:dev": "webpack --mode development --env build=webview --config ./webpack.config.js",
+		"webpack-rebuild": "webpack --mode production --env clean=true --config ./webpack.config.js",
+		"webpack-rebuild:extension_web": "webpack --mode production --env clean=true --env build=extension_web --config ./webpack.config.js",
+		"webpack-build:verbose": "webpack --stats verbose --mode production --config ./webpack.config.js",
+		"webpack-build:dev": "webpack --mode development --config ./webpack.config.js",
+		"webpack-rebuild:dev": "webpack --mode development --env clean=true --config ./webpack.config.js",
+		"webpack-build:test": "webpack --env environment=test --config ./webpack.config.js",
+		"webpack-build:test:prod": "webpack --env environment=testprod --config ./webpack.config.js"
+	},
+	"dependencies": {
+		"@opentelemetry/api": "^1.4.0",
+		"@opentelemetry/exporter-trace-otlp-http": "^0.35.1",
+		"@opentelemetry/sdk-trace-base": "^1.9.1",
+		"@sgarciac/bombadil": "^2.3.0",
+		"@vscode/webview-ui-toolkit": "^1.2.2",
+		"copy-text-to-clipboard": "^3.1.0",
+		"glob": "^8.1.0",
+		"https-proxy-agent": "^5.0.1",
+		"json5": "^2.2.2",
+		"marked": "^4.2.12",
+		"minimatch": "^5.1.2",
+		"node-fetch": "^2.6.9",
+		"path-browserify": "^1.0.1",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"react-tabs": "^6.0.0",
+		"uuid": "^9.0.0",
+		"xml2js": "^0.4.23"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.20.7",
+		"@babel/core": "^7.20.12",
+		"@babel/preset-env": "^7.20.2",
+		"@babel/preset-typescript": "^7.18.6",
+		"@istanbuljs/nyc-config-typescript": "^1.0.1",
+		"@spmeesseman/eslint-plugin": "^1.0.0",
+		"@spmeesseman/vscode-taskexplorer-types": "^2.13.1",
+		"@types/chai": "^4.3.4",
+		"@types/circular-dependency-plugin": "^5.0.5",
+		"@types/glob": "^8.0.1",
+		"@types/marked": "^4.0.8",
+		"@types/minimatch": "^5.1.2",
+		"@types/mocha": "^9.1.1",
+		"@types/node": "^14.17.1",
+		"@types/node-fetch": "^2.6.0",
+		"@types/react": "^18.0.28",
+		"@types/react-dom": "^18.0.11",
+		"@types/uuid": "^9.0.0",
+		"@types/vscode": "^1.68.1",
+		"@types/webpack": "^5.28.1",
+		"@types/webpack-bundle-analyzer": "^4.6.0",
+		"@types/xml2js": "^0.4.8",
+		"@typescript-eslint/eslint-plugin": "^5.11.0",
+		"@typescript-eslint/eslint-plugin-tslint": "^5.11.0",
+		"@typescript-eslint/parser": "^5.11.0",
+		"@vscode/test-electron": "^2.2.2",
+		"@vscode/vsce": "^2.17.0",
+		"babel-loader": "^9.1.2",
+		"chai": "^4.3.7",
+		"circular-dependency-plugin": "^5.2.2",
+		"clean-webpack-plugin": "^4.0.0",
+		"concurrently": "^7.6.0",
+		"copy-webpack-plugin": "^11.0.0",
+		"coverage-istanbul-loader": "^3.0.5",
+		"cross-env": "^7.0.3",
+		"csp-html-webpack-plugin": "^5.1.0",
+		"css-loader": "^6.7.3",
+		"css-minimizer-webpack-plugin": "^4.2.2",
+		"esbuild": "^0.17.8",
+		"esbuild-loader": "^2.21.0",
+		"eslint": "^7.32.0",
+		"eslint-plugin-anti-trojan-source": "^1.1.1",
+		"eslint-plugin-import": "^2.22.1",
+		"eslint-plugin-jsdoc": "^31.6.0",
+		"eslint-plugin-no-null": "^1.0.2",
+		"eslint-plugin-prefer-arrow": "^1.2.3",
+		"eslint-plugin-prettier": "^3.3.1",
+		"fork-ts-checker-webpack-plugin": "^7.3.0",
+		"grunt": "^1.5.3",
+		"gulp": "^4.0.2",
+		"image-minimizer-webpack-plugin": "^3.8.1",
+		"mini-css-extract-plugin": "^2.7.2",
+		"mocha": "^9.2.0",
+		"nyc": "^15.1.0",
+		"rimraf": "^3.0.2",
+		"sass": "^1.58.0",
+		"sass-loader": "^13.2.0",
+		"source-map-support": "^0.5.21",
+		"ts-loader": "^8.0.17",
+		"ts-node": "^8.10.2",
+		"tsc-alias": "^1.8.2",
+		"tsconfig-paths": "^4.1.2",
+		"typescript": "^4.5.5",
+		"webpack": "^5.68.0",
+		"webpack-bundle-analyzer": "^4.7.0",
+		"webpack-cli": "^4.9.2",
+		"webpack-node-externals": "^3.0.0",
+		"webpack-plugin-replace": "^1.2.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "taskExplorerSideBar",
+					"title": "%name%",
+					"contextualTitle": "TaskExplorer",
+					"when": "config.taskexplorer.enableSideBar",
+					"icon": "res/img/logo.svg"
+				}
+			]
+		},
+		"views": {
+			"explorer": [
+				{
+					"type": "tree",
+					"id": "taskexplorer.view.taskTreeExplorer",
+					"name": "%name%",
+					"when": "config.taskexplorer.enableExplorerView",
+					"contextualTitle": "TaskExplorer",
+					"icon": "res/img/logo.svg",
+					"visibility": "visible"
+				}
+			],
+			"taskExplorerSideBar": [
+				{
+					"type": "webview",
+					"id": "taskexplorer.view.home",
+					"name": "Home",
+					"contextualTitle": "TaskExplorer",
+					"icon": "res/img/logo.svg",
+					"initialSize": 1,
+					"visibility": "visible"
+				},
+				{
+					"type": "tree",
+					"id": "taskexplorer.view.taskTreeSideBar",
+					"name": "Explorer",
+					"initialSize": 10,
+					"contextualTitle": "TaskExplorer",
+					"icon": "res/img/logo.svg",
+					"visibility": "visible"
+				},
+				{
+					"type": "webview",
+					"id": "taskexplorer.view.taskUsage",
+					"name": "Task Usage",
+					"contextualTitle": "TaskExplorer",
+					"icon": "res/img/logo.svg",
+					"initialSize": 1,
+					"visibility": "collapsed"
+				},
+				{
+					"type": "webview",
+					"id": "taskexplorer.view.taskCount",
+					"name": "Task Count",
+					"contextualTitle": "TaskExplorer",
+					"icon": "res/img/logo.svg",
+					"initialSize": 1,
+					"visibility": "collapsed"
+				}
+			]
+		},
+		"walkthroughs": [
+			{
+				"id": "taskexplorer.welcome",
+				"title": "Get Started with Task Explorer",
+				"description": "Run, track, view and organize all of your project scripts and tasks",
+				"steps": [
+					{
+						"id": "taskexplorer.welcome.tutorial",
+						"title": "Read Tutorial",
+						"description": "Read the Welcome Tutorial.\n\n[Open Tutorial](command:taskexplorer.view.welcome.show?false \"Read the Welcome Tutorial\")",
+						"media": {
+							"markdown": "res/walkthrough/welcome/0-welcome.md"
+						}
+					},
+					{
+						"id": "taskexplorer.welcome.settings",
+						"title": "Customize your experience with a variety of settings",
+						"description": "An organized settings section to easily customize the way Task Explorer works.\n\n[Open Settings](command:taskexplorer.openSettings \"Open the Task Explorer Extension Settings\")",
+						"media": {
+							"markdown": "res/walkthrough/welcome/1-settings.md"
+						}
+					},
+					{
+						"id": "taskexplorer.welcome.licensing",
+						"title": "Support development by purchasing a license",
+						"description": "Support ongoing development by purchasing a license.\n\n[Learn about Task Explorer licensing](command:taskexplorer.view.licensePage.show?false \"Open the Licensing details page\")",
+						"media": {
+							"markdown": "res/walkthrough/welcome/2-licensing.md"
+						}
+					}
+				]
+			}
+		],
+		"commands": [
+			{
+				"command": "taskexplorer.getApi",
+				"title": "%command.getApi%",
+				"enablement": "false"
+			},
+			{
+				"command": "taskexplorer.refreshSession",
+				"title": "%command.refreshSession%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/refresh.svg",
+					"dark": "res/img/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.register",
+				"title": "%command.register%",
+				"when": "taskexplorer:enabled && !taskexplorer:account:registered"
+			},
+			{
+				"command": "taskexplorer.purchaseLicense",
+				"title": "%command.purchaseLicense%",
+				"when": "taskexplorer:enabled && taskexplorer:account:license:type < 4"
+			},
+			{
+				"command": "taskexplorer.extendTrial",
+				"title": "%command.extendTrial%",
+				"when": "taskexplorer:enabled && taskexplorer:account:registered && taskexplorer:account:trial.period < 2 && taskexplorer:account:license:type < 4"
+			},
+			{
+				"command": "taskexplorer.openBugReports",
+				"title": "%command.openBugReports%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/bug.svg",
+					"dark": "res/img/dark/bug.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.openRepository",
+				"title": "%command.openRepository%",
+				"when": "taskexplorer:enabled && config.taskexplorer.enableSideBar",
+				"icon": {
+					"light": "res/img/light/github.svg",
+					"dark": "res/img/dark/github.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.showOutput",
+				"title": "Task Explorer: Show Log in Output Window",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.donate",
+				"title": "%command.donate%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/paypal.svg",
+					"dark": "res/img/dark/paypal.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.view.licensePage.show",
+				"title": "%command.view.licensePage.show%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.view.welcome.show",
+				"title": "%command.view.welcome.show%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.view.releaseNotes.show",
+				"title": "%command.view.releaseNotes.show%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.view.parsingReport.show",
+				"title": "%command.view.parsingReport.show%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.view.taskMonitor.show",
+				"title": "%command.view.taskMonitor.show%",
+				"when": "taskexplorer:enabled && taskexplorer:account:licensed",
+				"icon": {
+					"light": "res/img/light/react.svg",
+					"dark": "res/img/dark/react.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.view.taskDetails.show",
+				"title": "%command.view.taskDetails.show%",
+				"when": "taskexplorer:enabled && config.taskexplorer.taskMonitor.trackStats && taskexplorer:account:licensed",
+				"icon": {
+					"light": "res/img/light/open.svg",
+					"dark": "res/img/dark/open.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.enableTaskType",
+				"title": "%command.enableTaskType%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.disableTaskType",
+				"title": "%command.disableTaskType%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.clearTaskStats",
+				"title": "%command.clearTaskStats%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/clear.svg",
+					"dark": "res/img/dark/clear.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.addToExcludesEx",
+				"title": "%command.addToExcludesEx%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.removeFromExcludes",
+				"title": "%command.removeFromExcludes%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.refresh",
+				"title": "%command.refresh%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/refresh.svg",
+					"dark": "res/img/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.clearFavorites",
+				"title": "%command.clearFavorites%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/clear.svg",
+					"dark": "res/img/dark/clear.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.clearLastTasks",
+				"title": "%command.clearLastTasks%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/clear.svg",
+					"dark": "res/img/dark/clear.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.addRemoveCustomLabel",
+				"title": "%command.addRemoveCustomLabel%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.addToExcludes",
+				"title": "Add to Excludes List",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.run",
+				"title": "%command.run%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/continue.svg",
+					"dark": "res/img/dark/continue.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.runNoTerm",
+				"title": "%command.runNoTerm%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/continue.svg",
+					"dark": "res/img/dark/continue.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.runWithArgs",
+				"title": "%command.runWithArgs%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/continue.svg",
+					"dark": "res/img/dark/continue.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.runLastTask",
+				"title": "Task Explorer: Run Last Task",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"light": "res/img/light/continue.svg",
+					"dark": "res/img/dark/continue.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.addRemoveFavorite",
+				"title": "%command.addRemoveFavorite%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"dark": "res/img/dark/favorite.svg",
+					"light": "res/img/light/favorite.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.pause",
+				"title": "%command.pause%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"dark": "res/img/dark/pause.svg",
+					"light": "res/img/light/pause.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.restart",
+				"title": "%command.restart%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"dark": "res/img/dark/restart.svg",
+					"light": "res/img/light/restart.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.stop",
+				"title": "%command.stop%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"dark": "res/img/dark/stop.svg",
+					"light": "res/img/light/stop.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.open",
+				"title": "%command.open%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"dark": "res/img/dark/file.svg",
+					"light": "res/img/light/file.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.openTerminal",
+				"title": "%command.openTerminal%",
+				"when": "taskexplorer:enabled",
+				"icon": {
+					"dark": "res/img/dark/terminal.svg",
+					"light": "res/img/light/terminal.svg"
+				}
+			},
+			{
+				"command": "taskexplorer.setPinned",
+				"title": "%command.setPinned%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.runInstall",
+				"title": "%command.runInstall%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.runUpdate",
+				"title": "%command.runUpdate%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.runUpdatePackage",
+				"title": "%command.runUpdatePackage%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.runAudit",
+				"title": "%command.runAudit%",
+				"when": "taskexplorer:enabled"
+			},
+			{
+				"command": "taskexplorer.runAuditFix",
+				"title": "%command.runAuditFix%",
+				"when": "taskexplorer:enabled"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "taskexplorer.runLastTask",
+				"key": "alt+r t",
+				"when": "taskexplorer:enabled"
+			}
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "taskexplorer.disableTaskType",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:taskFiles"
+				},
+				{
+					"command": "taskexplorer.enableTaskType",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in taskexplorer:fileCache:taskFiles"
+				},
+				{
+					"command": "taskexplorer.addToExcludesEx",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:taskFiles"
+				},
+				{
+					"command": "taskexplorer.addToExcludesEx",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourcePath && resourceScheme == folder"
+				},
+				{
+					"command": "taskexplorer.removeFromExcludes",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath not in taskexplorer:fileCache:taskFiles"
+				},
+				{
+					"command": "taskexplorer.removeFromExcludes",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourcePath && resourceScheme == folder"
+				},
+				{
+					"command": "taskexplorer.view.parsingReport.show",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && explorerViewletVisible && filesExplorerFocus && explorerResourceIsRoot && !inputFocus && resourcePath"
+				},
+				{
+					"command": "taskexplorer.run",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && config.taskexplorer.enableExplorerView && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:fileCache:scriptFiles"
+				},
+				{
+					"command": "taskexplorer.runWithArgs",
+					"group": "9_taskexplorer",
+					"when": "taskexplorer:enabled && config.taskexplorer.enableExplorerView && explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus && resourceScheme == file && resourcePath in taskexplorer:tasks:scriptFilesWithArgs"
+				}
+			],
+			"commandPalette": [
+				{
+					"command": "taskexplorer.getApi",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.view.parsingReport.show",
+					"when": "taskexplorer:enabled"
+				},
+				{
+					"command": "taskexplorer.view.licensePage.show"
+				},
+				{
+					"command": "taskexplorer.view.releaseNotes.show"
+				},
+				{
+					"command": "taskexplorer.view.taskMonitor.show",
+					"when": "taskexplorer:enabled && taskexplorer:account:licensed"
+				},
+				{
+					"command": "taskexplorer.openBugReports",
+					"when": "taskexplorer:enabled"
+				},
+				{
+					"command": "taskexplorer.refresh",
+					"when": "taskexplorer:enabled"
+				},
+				{
+					"command": "taskexplorer.clearFavorites",
+					"when": "taskexplorer:enabled"
+				},
+				{
+					"command": "taskexplorer.clearLastTasks",
+					"when": "taskexplorer:enabled"
+				},
+				{
+					"command": "taskexplorer.donate",
+					"when": "taskexplorer:enabled"
+				},
+				{
+					"command": "taskexplorer.refreshSession",
+					"when": "taskexplorer:enabled"
+				},
+				{
+					"command": "taskexplorer.register",
+					"when": "taskexplorer:enabled && !taskexplorer:account:registered"
+				},
+				{
+					"command": "taskexplorer.clearTaskStats",
+					"when": "taskexplorer:enabled"
+				},
+				{
+					"command": "taskexplorer.openRepository",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.extendTrial",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.disableTaskType",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.enableTaskType",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.addToExcludesEx",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.removeFromExcludes",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.addRemoveFavorite",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.run",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.runNoTerm",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.runWithArgs",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.addToExcludes",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.addRemoveCustomLabel",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.pause",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.restart",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.stop",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.open",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.openTerminal",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.setPinned",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.runInstall",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.runUpdate",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.runUpdatePackage",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.runAudit",
+					"when": "false"
+				},
+				{
+					"command": "taskexplorer.runAuditFix",
+					"when": "false"
+				}
+			],
+			"view/title": [
+				{
+					"command": "taskexplorer.runLastTask",
+					"when": "view =~ /^taskexplorer.view.taskTree/",
+					"group": "navigation"
+				},
+				{
+					"command": "taskexplorer.refresh",
+					"when": "view =~ /^taskexplorer.view.taskTree/",
+					"group": "navigation"
+				},
+				{
+					"command": "taskexplorer.view.taskMonitor.show",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && taskexplorer:account:licensed",
+					"group": "navigation"
+				},
+				{
+					"command": "taskexplorer.refreshSession",
+					"when": "view == taskexplorer.view.home",
+					"group": "navigation"
+				},
+				{
+					"command": "taskexplorer.openBugReports",
+					"when": "view == taskexplorer.view.home",
+					"group": "navigation"
+				},
+				{
+					"command": "taskexplorer.openRepository",
+					"when": "view == taskexplorer.view.home",
+					"group": "navigation"
+				},
+				{
+					"command": "taskexplorer.donate",
+					"when": "view == taskexplorer.view.home",
+					"group": "navigation"
+				},
+				{
+					"command": "taskexplorer.view.taskMonitor.show",
+					"when": "view == taskexplorer.view.home && taskexplorer:account:licensed",
+					"group": "navigation"
+				},
+				{
+					"command": "taskexplorer.clearTaskStats",
+					"when": "view == taskexplorer.view.taskUsage",
+					"group": "navigation"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "taskexplorer.runAudit",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
+				},
+				{
+					"command": "taskexplorer.runAuditFix",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
+				},
+				{
+					"command": "taskexplorer.runInstall",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
+				},
+				{
+					"command": "taskexplorer.runUpdate",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
+				},
+				{
+					"command": "taskexplorer.runUpdatePackage",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == taskFileNpm"
+				},
+				{
+					"command": "taskexplorer.open",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/"
+				},
+				{
+					"command": "taskexplorer.run",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/"
+				},
+				{
+					"command": "taskexplorer.runWithArgs",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/"
+				},
+				{
+					"command": "taskexplorer.runNoTerm",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/"
+				},
+				{
+					"command": "taskexplorer.view.taskDetails.show",
+					"when": "config.taskexplorer.taskMonitor.trackStats && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/ && taskexplorer:account:licensed"
+				},
+				{
+					"command": "taskexplorer.addToExcludes",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^(task(File|Group)[A-Z][a-z]+|script(|File))/"
+				},
+				{
+					"command": "taskexplorer.addRemoveFavorite",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/"
+				},
+				{
+					"command": "taskexplorer.addRemoveCustomLabel",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S/"
+				},
+				{
+					"command": "taskexplorer.clearFavorites",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == favorites"
+				},
+				{
+					"command": "taskexplorer.clearLastTasks",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == lasttasks"
+				},
+				{
+					"command": "taskexplorer.runNoTerm",
+					"when": "config.taskexplorer.taskButtons.showExecuteWithNoTerminalButton && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.runWithArgs",
+					"when": "config.taskexplorer.taskButtons.showExecuteWithArgumentsButton && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.run",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File)S?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.open",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.openTerminal",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^scriptRunningS?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.restart",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^scriptRunningS?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.pause",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^scriptRunningS?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.stop",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^scriptRunningS?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.addRemoveFavorite",
+					"when": "config.taskexplorer.specialFolders.showFavorites && config.taskexplorer.taskButtons.showFavoritesButton && view =~ /^taskexplorer.view.taskTree/ && viewItem =~ /^script(|File|Running)S?/",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.clearFavorites",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == favorites",
+					"group": "inline"
+				},
+				{
+					"command": "taskexplorer.clearLastTasks",
+					"when": "view =~ /^taskexplorer.view.taskTree/ && viewItem == lasttasks",
+					"group": "inline"
+				}
+			]
+		},
+		"configuration": [
+			{
+				"id": "general",
+				"order": 0,
+				"title": "General",
+				"properties": {
+					"taskexplorer.enableExplorerView": {
+						"type": "boolean",
+						"default": true,
+						"order": 0,
+						"markdownDescription": "%config.taskexplorer.enableExplorerView%"
+					},
+					"taskexplorer.enableSideBar": {
+						"type": "boolean",
+						"default": true,
+						"order": 1,
+						"markdownDescription": "%config.taskexplorer.enableSideBar%"
+					},
+					"taskexplorer.enablePersistentFileCaching": {
+						"type": "boolean",
+						"default": false,
+						"order": 2,
+						"markdownDescription": "%config.taskexplorer.enablePersistentFileCaching%"
+					},
+					"taskexplorer.keepTermOnStop": {
+						"type": "boolean",
+						"default": true,
+						"order": 3,
+						"description": "%config.taskexplorer.keepTermOnStop%"
+					},
+					"taskexplorer.trackUsage": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "%config.taskexplorer.trackUsage%"
+					},
+					"taskexplorer.allowUsageReporting": {
+						"type": "boolean",
+						"default": false,
+						"description": "%config.taskexplorer.allowUsageReporting%"
+					}
+				}
+			},
+			{
+				"id": "taskproviders",
+				"order": 20,
+				"title": "Task Providers",
+				"properties": {
+					"taskexplorer.enabledTasks": {
+						"type": "object",
+						"order": 15,
+						"additionalProperties": false,
+						"description": "%config.taskexplorer.enabledTaskTypes%",
+						"properties": {
+							"ant": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableAnt%"
+							},
+							"apppublisher": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableAppPublisher%"
+							},
+							"bash": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableBash%"
+							},
+							"batch": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableBatch%"
+							},
+							"composer": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableComposer%"
+							},
+							"gradle": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableGradle%"
+							},
+							"grunt": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableGrunt%"
+							},
+							"gulp": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableGulp%"
+							},
+							"jenkins": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableJenkins%"
+							},
+							"make": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableMake%"
+							},
+							"maven": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableMaven%"
+							},
+							"node": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableNode%"
+							},
+							"npm": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableNpm%"
+							},
+							"nsis": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableNsis%"
+							},
+							"perl": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enablePerl%"
+							},
+							"pipenv": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enablePipenv%"
+							},
+							"powershell": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enablePowershell%"
+							},
+							"python": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enablePython%"
+							},
+							"ruby": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableRuby%"
+							},
+							"tsc": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableTsc%"
+							},
+							"webpack": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableWebpack%"
+							},
+							"workspace": {
+								"type": "boolean",
+								"description": "%config.taskexplorer.enableWorkspace%"
+							}
+						},
+						"default": {
+							"ant": true,
+							"apppublisher": false,
+							"bash": true,
+							"batch": true,
+							"composer": false,
+							"gradle": false,
+							"grunt": true,
+							"gulp": true,
+							"jenkins": false,
+							"make": true,
+							"maven": false,
+							"node": false,
+							"npm": true,
+							"nsis": false,
+							"perl": false,
+							"pipenv": false,
+							"powershell": false,
+							"python": true,
+							"ruby": false,
+							"tsc": true,
+							"webpack": false,
+							"workspace": true
+						}
+					},
+					"taskexplorer.useNpmProvider": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "%config.taskexplorer.useNpmProvider%"
+					},
+					"taskexplorer.useAnt": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "%config.taskexplorer.useAnt%"
+					},
+					"taskexplorer.useGulp": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "%config.taskexplorer.useGulp%"
+					}
+				}
+			},
+			{
+				"id": "excludeinclude",
+				"order": 40,
+				"title": "Exclude / Include",
+				"properties": {
+					"taskexplorer.exclude": {
+						"type": "array",
+						"order": 20,
+						"items": {
+							"type": "string"
+						},
+						"markdownDescription": "%config.taskexplorer.exclude%",
+						"default": [
+							"**/.bin/**",
+							"**/.coverage/**",
+							"**/.nuget/**",
+							"**/.nyc_output/**",
+							"**/.venv/**",
+							"**/.vscode-test/**",
+							"**/Assets/**",
+							"**/bin/**",
+							"**/build/**",
+							"**/CompiledOutput/**",
+							"**/coverage/**",
+							"**/css/**",
+							"**/dbg/**",
+							"**/debug/**",
+							"**/Debug/**",
+							"**/dep/**",
+							"**/dependency/**",
+							"**/dist/**",
+							"**/doc/**",
+							"**/docs/**",
+							"**/documentation/**",
+							"**/example/**",
+							"**/examples/**",
+							"**/ext/**",
+							"**/img*/**",
+							"**/image*/**",
+							"**/node_modules/**",
+							"**/obj/**",
+							"**/Obj/**",
+							"**/out/**",
+							"**/output/**",
+							"**/packages/**",
+							"**/release/**",
+							"**/Release/**",
+							"**/res/**",
+							"**/resource/**",
+							"**/resources/**",
+							"**/sample*/**",
+							"**/scss/**",
+							"**/sdks/**",
+							"**/spec/**",
+							"**/static/**",
+							"**/target/**",
+							"**/test/**",
+							"**/tests/**",
+							"**/type/**",
+							"**/types/**",
+							"**/third_party/**",
+							"**/vendor/**",
+							"**/work/**"
+						]
+					},
+					"taskexplorer.excludeTask": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"default": [
+							"pre-launch[0-9]{2}\\.r(?:b|c)"
+						],
+						"order": 25,
+						"markdownDescription": "%config.taskexplorer.excludeTask%"
+					},
+					"taskexplorer.includeAnt": {
+						"type": [
+							"string",
+							"array"
+						],
+						"items": {
+							"type": "string"
+						},
+						"default": [],
+						"order": 30,
+						"markdownDeprecationMessage": "%config.taskexplorer.includeAntDeprecated%",
+						"markdownDescription": "%config.taskexplorer.includeAntDsc%"
+					},
+					"taskexplorer.globPatternsAnt": {
+						"type": [
+							"array"
+						],
+						"items": {
+							"type": "string"
+						},
+						"default": [],
+						"order": 35,
+						"markdownDescription": "%config.taskexplorer.globPatternsAnt%"
+					},
+					"taskexplorer.globPatternsBash": {
+						"type": [
+							"array"
+						],
+						"items": {
+							"type": "string"
+						},
+						"default": [],
+						"order": 40,
+						"markdownDescription": "%config.taskexplorer.globPatternsBash%"
+					},
+					"taskexplorer.globPatternsNode": {
+						"type": [
+							"array"
+						],
+						"items": {
+							"type": "string"
+						},
+						"default": [
+							"**/bin/*.js"
+						],
+						"order": 45,
+						"markdownDescription": "%config.taskexplorer.globPatternsNode%"
+					}
+				}
+			},
+			{
+				"id": "grouping",
+				"order": 60,
+				"title": "Grouping",
+				"properties": {
+					"taskexplorer.groupWithSeparator": {
+						"type": "boolean",
+						"default": true,
+						"description": "%config.taskexplorer.groupWithSeparator%"
+					},
+					"taskexplorer.groupSeparator": {
+						"type": "string",
+						"enum": [
+							"-",
+							"_",
+							":",
+							"|"
+						],
+						"default": "-",
+						"description": "%config.taskexplorer.groupSeparator%"
+					},
+					"taskexplorer.groupStripTaskLabel": {
+						"type": "boolean",
+						"default": true,
+						"description": "%config.taskexplorer.groupStripTaskLabel%"
+					},
+					"taskexplorer.groupMaxLevel": {
+						"type": "number",
+						"enum": [
+							1,
+							2,
+							3,
+							4,
+							5,
+							6,
+							7,
+							8,
+							9,
+							10
+						],
+						"default": 5,
+						"description": "%config.taskexplorer.groupMaxLevel%"
+					}
+				}
+			},
+			{
+				"id": "logging",
+				"order": 80,
+				"title": "Logging",
+				"properties": {
+					"taskexplorer.logging.enable": {
+						"type": "boolean",
+						"default": false,
+						"order": 50,
+						"markdownDescription": "%config.taskexplorer.logging.enable%"
+					},
+					"taskexplorer.logging.enableFile": {
+						"type": "boolean",
+						"default": false,
+						"order": 53,
+						"markdownDescription": "%config.taskexplorer.logging.enableFile%"
+					},
+					"taskexplorer.logging.enableFileSymbols": {
+						"type": "boolean",
+						"default": true,
+						"order": 56,
+						"markdownDescription": "%config.taskexplorer.logging.enableFileSymbols%"
+					},
+					"taskexplorer.logging.enableOutputWindow": {
+						"type": "boolean",
+						"default": true,
+						"order": 60,
+						"markdownDescription": "%config.taskexplorer.logging.enableOutputWindow%"
+					},
+					"taskexplorer.logging.level": {
+						"type": "number",
+						"enum": [
+							1,
+							2,
+							3,
+							4,
+							5
+						],
+						"default": 1,
+						"order": 55,
+						"markdownDescription": "%config.taskexplorer.logging.level%"
+					}
+				}
+			},
+			{
+				"id": "programs",
+				"order": 80,
+				"title": "Programs",
+				"properties": {
+					"taskexplorer.pathToPrograms": {
+						"type": "object",
+						"additionalProperties": false,
+						"description": "%config.taskexplorer.pathToPrograms%",
+						"properties": {
+							"ant": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToAnt%"
+							},
+							"ansicon": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToAnsicon%"
+							},
+							"composer": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToComposer%"
+							},
+							"curl": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToCurl%"
+							},
+							"gradle": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToGradle%"
+							},
+							"jenkins": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToJenkins%"
+							},
+							"make": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToMake%"
+							},
+							"maven": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToMaven%"
+							},
+							"nsis": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToNsis%"
+							},
+							"perl": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToPerl%"
+							},
+							"pipenv": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToPipenv%"
+							},
+							"powershell": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToPowershell%"
+							},
+							"python": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToPython%"
+							},
+							"ruby": {
+								"type": "string",
+								"description": "%config.taskexplorer.pathToRuby%"
+							}
+						},
+						"default": {
+							"ant": "ant.bat",
+							"ansicon": "ansicon",
+							"composer": "composer",
+							"curl": "curl",
+							"gradle": "gradle.bat",
+							"jenkins": "",
+							"make": "nmake",
+							"maven": "mvn",
+							"nsis": "makensis",
+							"perl": "perl",
+							"pipenv": "pipenv",
+							"powershell": "powershell",
+							"python": "python",
+							"ruby": "ruby"
+						}
+					},
+					"taskexplorer.enableAnsiconForAnt": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "%config.taskexplorer.visual.enableAnsiconForAnt%"
+					},
+					"taskexplorer.environment": {
+						"type": "object",
+						"order": 18,
+						"additionalProperties": false,
+						"markdownDescription": "%config.taskexplorer.environment%",
+						"properties": {
+							"jenkinsApiToken": "JENKINS_API_TOKEN"
+						}
+					}
+				}
+			},
+			{
+				"id": "specialfolders",
+				"order": 100,
+				"title": "Special Folders",
+				"properties": {
+					"taskexplorer.specialFolders.showFavorites": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "%config.taskexplorer.specialFolders.showFavorites%"
+					},
+					"taskexplorer.specialFolders.showLastTasks": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "%config.taskexplorer.specialFolders.showLastTasks%"
+					},
+					"taskexplorer.specialFolders.showUserTasks": {
+						"type": "boolean",
+						"default": false,
+						"description": "%config.taskexplorer.specialFolders.showUserTasks%"
+					},
+					"taskexplorer.specialFolders.numLastTasks": {
+						"type": "number",
+						"enum": [
+							1,
+							2,
+							3,
+							4,
+							5,
+							6,
+							7,
+							8,
+							9,
+							10,
+							11,
+							12,
+							13,
+							14,
+							15,
+							16,
+							17,
+							18,
+							19,
+							20,
+							21,
+							22,
+							23,
+							24,
+							25
+						],
+						"default": 10,
+						"markdownDescription": "%config.taskexplorer.specialFolders.numLastTasks%"
+					},
+					"taskexplorer.specialFolders.folderState": {
+						"type": "object",
+						"markdownDescription": "%config.taskexplorer.specialFolders.folderState%",
+						"additionalProperties": {
+							"enum": [
+								"Collapsed",
+								"Expanded"
+							],
+							"description": ""
+						},
+						"properties": {
+							"lastTasks": {
+								"enum": [
+									"Collapsed",
+									"Expanded"
+								],
+								"description": "%config.taskexplorer.specialFolders.folderState.lastTasks%"
+							},
+							"favorites": {
+								"enum": [
+									"Collapsed",
+									"Expanded"
+								],
+								"description": "%config.taskexplorer.specialFolders.folderState.favorites%"
+							},
+							"userTasks": {
+								"enum": [
+									"Collapsed",
+									"Expanded"
+								],
+								"description": "%config.taskexplorer.specialFolders.folderState.userTasks%"
+							}
+						},
+						"default": {
+							"lastTasks": "Expanded",
+							"favorites": "Expanded",
+							"userTasks": "Expanded"
+						}
+					}
+				}
+			},
+			{
+				"id": "taskbuttons",
+				"order": 120,
+				"title": "Task Buttons",
+				"properties": {
+					"taskexplorer.taskButtons.clickAction": {
+						"type": "string",
+						"enum": [
+							"Execute",
+							"Open"
+						],
+						"default": "Open",
+						"description": "%config.taskexplorer.taskButtons.clickAction%"
+					},
+					"taskexplorer.taskButtons.controlCharacter": {
+						"type": "string",
+						"default": "Y",
+						"pattern": "[A-Z]{1}",
+						"description": "%config.taskexplorer.taskButtons.controlCharacter%"
+					},
+					"taskexplorer.taskButtons.showExecuteWithArgumentsButton": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "%config.taskexplorer.taskButtons.showExecuteWithArgumentsButton%"
+					},
+					"taskexplorer.taskButtons.showFavoritesButton": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "%config.taskexplorer.taskButtons.showFavoritesButton%"
+					},
+					"taskexplorer.taskButtons.showExecuteWithNoTerminalButton": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "%config.taskexplorer.taskButtons.showExecuteWithNoTerminalButton%"
+					}
+				}
+			},
+			{
+				"id": "taskMonitor",
+				"order": 110,
+				"title": "Task Monitor",
+				"properties": {
+					"taskexplorer.taskMonitor.trackStats": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "%config.taskexplorer.taskMonitor.trackStats%"
+					},
+					"taskexplorer.taskMonitor.timerMode": {
+						"type": "string",
+						"enum": [
+							"Hide",
+							"MM:SS",
+							"MM:SS:MS",
+							"MM:SS:MSS"
+						],
+						"default": "MM:SS",
+						"description": "%config.taskexplorer.taskMonitor.timerMode%"
+					}
+				}
+			},
+			{
+				"id": "visual",
+				"order": 120,
+				"title": "Visual",
+				"properties": {
+					"taskexplorer.visual.disableAnimatedIcons": {
+						"type": "boolean",
+						"default": false,
+						"description": "%config.taskexplorer.visual.disableAnimatedIcons%"
+					},
+					"taskexplorer.showHiddenWsTasks": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "%config.taskexplorer.showHiddenWsTasks%"
+					},
+					"taskexplorer.showRunningTask": {
+						"type": "boolean",
+						"default": true,
+						"description": "%config.taskexplorer.showRunningTask%"
+					},
+					"taskexplorer.sortProjectFoldersAlpha": {
+						"type": "boolean",
+						"default": true,
+						"description": "%config.taskexplorer.sortProjectFoldersAlpha%"
+					}
+				}
+			}
+		],
+		"taskDefinitions": [
+			{
+				"type": "ant",
+				"required": [],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"isDefault": {
+						"type": "boolean",
+						"description": "%taskdef.task.isDefault%"
+					}
+				}
+			},
+			{
+				"type": "gradle",
+				"required": [
+					"script"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					}
+				}
+			},
+			{
+				"type": "grunt",
+				"required": [],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					}
+				}
+			},
+			{
+				"type": "gulp",
+				"required": [],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					}
+				}
+			},
+			{
+				"type": "apppublisher",
+				"required": [
+					"cmdLine"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					},
+					"cmdLine": {
+						"type": "string",
+						"description": "%taskdef.task.cmdLine%"
+					}
+				}
+			},
+			{
+				"type": "maven",
+				"required": [
+					"cmdLine"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					},
+					"cmdLine": {
+						"type": "string",
+						"description": "%taskdef.task.cmdLine%"
+					}
+				}
+			},
+			{
+				"type": "make",
+				"required": [],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					}
+				}
+			},
+			{
+				"type": "composer",
+				"required": [],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					}
+				}
+			},
+			{
+				"type": "jenkins",
+				"required": [],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					}
+				}
+			},
+			{
+				"type": "pipenv",
+				"required": [],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					}
+				}
+			},
+			{
+				"type": "bash",
+				"required": [
+					"fileName"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"scriptFile": {
+						"type": "boolean",
+						"description": "%taskdef.task.scriptFile%",
+						"default": true
+					},
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					}
+				}
+			},
+			{
+				"type": "batch",
+				"required": [
+					"fileName"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"scriptFile": {
+						"type": "boolean",
+						"description": "%taskdef.task.scriptFile%",
+						"default": true
+					},
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					}
+				}
+			},
+			{
+				"type": "nsis",
+				"required": [
+					"fileName"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"scriptFile": {
+						"type": "boolean",
+						"description": "%taskdef.task.scriptFile%",
+						"default": true
+					},
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					}
+				}
+			},
+			{
+				"type": "perl",
+				"required": [
+					"fileName"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"scriptFile": {
+						"type": "boolean",
+						"description": "%taskdef.task.scriptFile%",
+						"default": true
+					},
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					}
+				}
+			},
+			{
+				"type": "powershell",
+				"required": [
+					"fileName"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"scriptFile": {
+						"type": "boolean",
+						"description": "%taskdef.task.scriptFile%",
+						"default": true
+					},
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					}
+				}
+			},
+			{
+				"type": "python",
+				"required": [
+					"fileName"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"scriptFile": {
+						"type": "boolean",
+						"description": "%taskdef.task.scriptFile%",
+						"default": true
+					},
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					}
+				}
+			},
+			{
+				"type": "ruby",
+				"required": [
+					"fileName"
+				],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"scriptFile": {
+						"type": "boolean",
+						"description": "%taskdef.task.scriptFile%",
+						"default": true
+					},
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					},
+					"takesArgs": {
+						"type": "boolean",
+						"description": "%taskdef.task.takesArgs%"
+					}
+				}
+			},
+			{
+				"type": "webpack",
+				"required": [],
+				"when": "taskexplorer:enabled",
+				"properties": {
+					"script": {
+						"type": "string",
+						"description": "%taskdef.task.script%"
+					},
+					"target": {
+						"type": "string",
+						"description": "%taskdef.task.target%"
+					},
+					"path": {
+						"type": "string",
+						"description": "%taskdef.task.path%"
+					},
+					"fileName": {
+						"type": "string",
+						"description": "%taskdef.task.fileName%"
+					},
+					"uri": {
+						"type": "object",
+						"description": "%taskdef.task.fileUri%"
+					},
+					"taskItemId": {
+						"type": "string",
+						"description": "%taskdef.task.taskItemId%"
+					}
+				}
+			}
+		],
+		"problemMatchers": [
+			{
+				"name": "gccTe",
+				"owner": "cpp",
+				"label": "Task Explorer GCC",
+				"fileLocation": [
+					"relative",
+					"${workspaceRoot}"
+				],
+				"pattern": {
+					"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"message": 5
+				}
+			},
+			{
+				"name": "webpackTe",
+				"owner": "javascript",
+				"source": "javascript",
+				"label": "Task Explorer WebPack Watch",
+				"pattern": [
+					{
+						"regexp": "\\[tsl\\] ERROR",
+						"file": 1,
+						"location": 2,
+						"message": 3
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Entrypoint\\s+extension",
+					"endsPattern": "compiled\\s+successfully\\s+in\\s+[0-9]+\\s+ms"
+				}
+			},
+			{
+				"name": "tsc-watch",
+				"label": "Task Explorer Tsc-Alias Watch",
+				"base": "$tsc-watch",
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": {
+						"regexp": "^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (Starting compilation in watch mode|File change detected\\. Starting incremental compilation)\\.\\.\\."
+					},
+					"endsPattern": {
+						"regexp": "^\\[(?:0|1)\\] \\d{1,2}\\:\\d{1,2}\\:\\d{1,2} (?:AM|PM) \\- (?:Compilation complete\\.|Found \\d+ errors?\\.) Watching for file changes\\."
+					}
+				}
+			},
+			{
+				"name": "bashTe",
+				"owner": "bash",
+				"source": "bash",
+				"label": "Task Explorer Bash",
+				"pattern": [
+					{
+						"code": 3,
+						"file": 2,
+						"message": 1,
+						"kind": "file",
+						"regexp": "^The terminal process *[\"']?([A-Za-z\\.0-9\\/\\-_\\\\]+) +([A-Za-z \\.0-9\\/\\-_\\\\\"']+) +(?:failed to launch \\(|terminated with )exit code\\:? *([0-9]+)\\s*(?:\\.|\\))[\r\n]{2,3}^(.+)"
+					}
+				]
+			},
+			{
+				"name": "batTe",
+				"owner": "batch",
+				"source": "batch",
+				"label": "Task Explorer Batch",
+				"pattern": [
+					{
+						"file": 2,
+						"message": 1,
+						"kind": "file",
+						"regexp": "^('(.+)' is not recognized as an internal or external command)"
+					}
+				]
+			}
+		]
+	},
+	"__metadata": {
+		"id": "afc7b7f6-486c-4560-94cb-6130ea88cdb8",
+		"publisherDisplayName": "Scott Meesseman",
+		"publisherId": "d85f8b27-53d9-4b98-bcf4-92d20587bf33",
+		"isPreReleaseVersion": false
+	}
 }

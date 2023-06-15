@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import { expect } from "chai";
 import { startupFocus } from "../../utils/suiteUtils";

@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import * as path from "path";
 import { Uri } from "vscode";
@@ -80,7 +77,7 @@ suite("Maven Tests", () =>
     test("Document Position", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         testInvDocPositions(provider);
         provider.createTask("publish", "publish", teWrapper.wsfolder, Uri.file(getWsPath(".")), []);
         endRollingCount(this);

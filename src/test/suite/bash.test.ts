@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import { join } from "path";
 import { expect } from "chai";
@@ -55,7 +52,7 @@ suite("Bash Tests", () =>
     test("Document Position", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         expect(provider.getDocumentPosition()).to.be.equal(0, "Script type should return position 0");
         endRollingCount(this);
     });
@@ -64,7 +61,7 @@ suite("Bash Tests", () =>
     test("Invalid ScriptProvider Type", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         provider.createTask("no_ext", undefined, wsFolder, Uri.file(getWsPath("hello.sh")));
         logErrorsAreFine(true);
         endRollingCount(this);

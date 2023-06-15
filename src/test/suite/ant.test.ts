@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import { expect } from "chai";
 import { executeSettingsUpdate } from "../utils/commandUtils";
@@ -126,7 +123,7 @@ suite("Ant Tests", () =>
     test("Disable Ansicon", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.enableEvent + (tc.slowTime.config.pathToProgramsEvent* 2));
+        this.slow(tc.slowTime.config.enableEvent + (tc.slowTime.config.pathToProgramsEvent * 2));
         await executeSettingsUpdate("pathToPrograms.ansicon", getWsPath("..\\tools\\ansicon\\x64\\ansicon.exe"));
         await executeSettingsUpdate("enableAnsiconForAnt", false);
         provider.createTask("test", "test", rootWorkspace, buildXmlFileUri, []);
@@ -139,7 +136,7 @@ suite("Ant Tests", () =>
     test("Ansicon Path", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.config.pathToProgramsEvent* 2);
+        this.slow(tc.slowTime.config.pathToProgramsEvent * 2);
         await executeSettingsUpdate("pathToPrograms.ansicon", undefined);
         provider.createTask("test", "test", rootWorkspace, buildXmlFileUri, []);
         await executeSettingsUpdate("pathToPrograms.ansicon", getWsPath("..\\tools\\ansicon\\x64\\ansicon.exe"));
@@ -283,7 +280,7 @@ suite("Ant Tests", () =>
  * @param withAnt1 # of tasks in fetchTasks() using ant parser
  * @param withAnt2 # of tasks in readUriTasks() using ant parser
  */
-async function runCheck(expectedCountNoAnt: number, expectedCountWithAnt: number, antWillFail: boolean, xml2jsWillFail: boolean)
+const runCheck = async (expectedCountNoAnt: number, expectedCountWithAnt: number, antWillFail: boolean, xml2jsWillFail: boolean) =>
 {   //
     // Don't use Ant
     //
@@ -298,4 +295,4 @@ async function runCheck(expectedCountNoAnt: number, expectedCountWithAnt: number
     antTasks = await tasks.fetchTasks({ type: "ant" });
     expect(antTasks.length).to.be.equal(expectedCountWithAnt, `Did not read ${expectedCountWithAnt} ant tasks (3)(actual ${antTasks ? antTasks.length : 0})`);
     logErrorsAreFine(antWillFail);
-}
+};

@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import * as path from "path";
 import { Uri } from "vscode";
@@ -30,7 +27,7 @@ suite("Gradle Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teApi, teWrapper } = await activate(this));
-        provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        provider = teApi.providers[testsName];
         dirName = getWsPath(".");
         fileUri = Uri.file(path.join(dirName, "test2.gradle"));
         endRollingCount(this, true);

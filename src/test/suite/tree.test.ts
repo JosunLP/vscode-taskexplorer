@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import { expect } from "chai";
 import * as utils from "../utils/utils";
@@ -111,7 +108,7 @@ suite("Tree Tests", () =>
         const taskTree = teWrapper.treeManager.getTaskTree();
         if (taskTree)
         {
-            const sFolder= taskTree[0].label === "Favorites" ? taskTree[0] as any :
+            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
                             (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
             if (sFolder)
             {
@@ -134,9 +131,9 @@ suite("Tree Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard);
         const taskTree = teWrapper.treeManager.getTaskTree();
-        if(taskTree)
+        if (taskTree)
         {
-            const sFolder= taskTree[0].label === "Favorites" ? taskTree[0] as any :
+            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
                             (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
             if (sFolder)
             {
@@ -158,9 +155,9 @@ suite("Tree Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard * 2);
         const taskTree = teWrapper.treeManager.getTaskTree();
-        if(taskTree)
+        if (taskTree)
         {
-            const sFolder= taskTree[0].label === "Favorites" ? taskTree[0] as any :
+            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
                             (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
             if (sFolder)
             {
@@ -185,7 +182,7 @@ suite("Tree Tests", () =>
         const taskTree = teWrapper.treeManager.getTaskTree();
         if (taskTree)
         {
-            const sFolder= taskTree[0].label === "Favorites" ? taskTree[0] as any :
+            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
                             (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
             if (sFolder)
             {
@@ -352,7 +349,7 @@ suite("Tree Tests", () =>
     test("Misc Sort Folders", function()
     {
         if (utils.exitRollingCount(this)) return;
-        let map: IDictionary<DumbFolder>= {};
+        let map: IDictionary<DumbFolder> = {};
         map.frank = new DumbFolder("frank");
         map["richard face"] = new DumbFolder("richard face");
         map.bob = new DumbFolder("bob");

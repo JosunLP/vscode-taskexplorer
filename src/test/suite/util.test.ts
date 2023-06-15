@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import { join } from "path";
 import { env } from "process";
@@ -78,7 +74,7 @@ suite("Util Tests", () =>
 		teWrapper.log.error([ "Test error 7", "", "Test error 8", "" ]);
 		teWrapper.log.error([ "Test error 9",  new Error("Test error object 10") ]);
 		teWrapper.log.error([ "Test error 11", "Test error 12" ], [[ "Test param error 13", "Test param value 14" ]]);
-		teWrapper.log.error("this is a test4", [[ "test6", true ],[ "test6", false ],[ "test7", "1111" ],[ "test8", [ 1, 2, 3 ]]]);
+		teWrapper.log.error("this is a test4", [[ "test6", true ], [ "test6", false ], [ "test7", "1111" ], [ "test8", [ 1, 2, 3 ]]]);
 		teWrapper.logControl.useTags = true;
 		const err = new Error("Test error object");
 		err.stack = undefined;
@@ -122,7 +118,7 @@ suite("Util Tests", () =>
 		teWrapper.log.error([ "Test error 1", undefined, "Test error 2" ]);
 		teWrapper.log.error([ "Test error 1",  new Error("Test error object") ]);
 		teWrapper.log.error([ "Test error 1", "Test error 2" ], [[ "Test param error", "Test param value" ]]);
-		teWrapper.log.error("this is a test4", [[ "test6", true ],[ "test6", false ],[ "test7", "1111" ],[ "test8", [ 1, 2, 3 ]]]);
+		teWrapper.log.error("this is a test4", [[ "test6", true ], [ "test6", false ], [ "test7", "1111" ], [ "test8", [ 1, 2, 3 ]]]);
 		const err2 = new Error("Test error object");
 		err2.stack = undefined;
 		teWrapper.log.error(err2);
@@ -759,6 +755,7 @@ suite("Util Tests", () =>
 				await teWrapper.storage.updateSecret("testsecret", "test222");
 				expect(await teWrapper.storage.getSecret("testsecret")).to.be.equal("test222");
 				await teWrapper.storage.deleteSecret("testsecret");
+				// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 				expect(await teWrapper.storage.getSecret("testsecret")).to.be.undefined;
 				await teWrapper.storage.updateSecret("testsecret", "test333");
 				await teWrapper.storage.updateSecret("testsecret", undefined);

@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import { expect } from "chai";
 import { executeSettingsUpdate } from "../utils/commandUtils";
@@ -52,12 +49,12 @@ suite("Configuration / Settings Tests", () =>
             {
                 await teWrapper.config.updateVsWs("npm.packageManager", pkgMgr);
             }
-            if(successCount >= 13)
+            if (successCount >= 13)
             {
                 await teWrapper.config.updateVsWs("terminal.integrated.shell.windows", shellW32);
                 await teWrapper.config.updateVsWs("terminal.integrated.shell.linux", shellLnx);
                 await teWrapper.config.updateVsWs("terminal.integrated.shell.osx", shellOsx);
-                if(successCount >= 16) {
+                if (successCount >= 16) {
                     await executeSettingsUpdate("enabledTasks", enabledTasks);
                     await executeSettingsUpdate("pathToPrograms", pathToPrograms);
                 }

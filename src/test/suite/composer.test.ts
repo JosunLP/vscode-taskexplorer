@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* tslint:disable */
 
 import * as path from "path";
 import { Uri } from "vscode";
@@ -72,7 +69,7 @@ suite("Composer Tests", () =>
     test("Document Position", async function()
     {
         if (exitRollingCount(this)) return;
-        const provider = teApi.providers[testsName] as ITaskExplorerProvider;
+        const provider = teApi.providers[testsName];
         // provider.readTasks();
         testInvDocPositions(provider);
         const docText = await teWrapper.fs.readFileAsync(path.join(getWsPath("."), "composer.json"));
