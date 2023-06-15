@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
