@@ -1683,6 +1683,7 @@
             {
                 "type": "ant",
                 "required": [],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1719,6 +1720,7 @@
                 "required": [
                     "script"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1749,6 +1751,7 @@
             {
                 "type": "grunt",
                 "required": [],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1779,6 +1782,7 @@
             {
                 "type": "gulp",
                 "required": [],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1811,6 +1815,7 @@
                 "required": [
                     "cmdLine"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1851,6 +1856,7 @@
                 "required": [
                     "cmdLine"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1889,6 +1895,7 @@
             {
                 "type": "make",
                 "required": [],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1919,6 +1926,7 @@
             {
                 "type": "composer",
                 "required": [],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1949,6 +1957,7 @@
             {
                 "type": "jenkins",
                 "required": [],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -1978,7 +1987,7 @@
             },
             {
                 "type": "npm",
-                "required": [],
+                "when": "taskexplorer:enabled && config.taskexplorer.useNpmProvider",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -2009,6 +2018,7 @@
             {
                 "type": "pipenv",
                 "required": [],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
@@ -2041,6 +2051,7 @@
                 "required": [
                     "fileName"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "path": {
                         "type": "string",
@@ -2082,6 +2093,7 @@
                 "required": [
                     "fileName"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "path": {
                         "type": "string",
@@ -2123,6 +2135,7 @@
                 "required": [
                     "fileName"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "path": {
                         "type": "string",
@@ -2164,6 +2177,7 @@
                 "required": [
                     "fileName"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "path": {
                         "type": "string",
@@ -2205,6 +2219,7 @@
                 "required": [
                     "fileName"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "path": {
                         "type": "string",
@@ -2246,6 +2261,7 @@
                 "required": [
                     "fileName"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "path": {
                         "type": "string",
@@ -2287,6 +2303,7 @@
                 "required": [
                     "fileName"
                 ],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "path": {
                         "type": "string",
@@ -2326,6 +2343,7 @@
             {
                 "type": "webpack",
                 "required": [],
+                "when": "taskexplorer:enabled",
                 "properties": {
                     "script": {
                         "type": "string",
