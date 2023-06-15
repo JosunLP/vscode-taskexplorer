@@ -73,9 +73,9 @@ export class TaskManager implements ITeTaskManager, Disposable
         /* istanbul ignore else */
         if (await pathExists(uri.fsPath))
         {
-            const document: TextDocument = await workspace.openTextDocument(uri);
-            const offset = findDocumentPosition(this.wrapper, document, selection);
-            const position = document.positionAt(offset);
+            const document: TextDocument = await workspace.openTextDocument(uri),
+                  offset = findDocumentPosition(this.wrapper, document, selection),
+                  position = document.positionAt(offset);
             await window.showTextDocument(document, { selection: new Selection(position, position) });
         }
     };
