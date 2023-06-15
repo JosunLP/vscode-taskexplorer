@@ -165,16 +165,9 @@ export const deleteDir = (dir: string): Promise<void> =>
 {
     return new Promise<void>(async (resolve, reject) =>
     {
-        if (await pathExists(dir))
+        if (pathExistsSync(dir))
         {
-            fs.rmdir(path.resolve(cwd, dir), { recursive: true }, (e) =>
-            {
-                /* istanbul ignore if */
-                if (e) {
-                    reject(e);
-                }
-                resolve();
-            });
+            fs.rm(path.resolve(cwd, dir), { recursive: true }, (e) => handleTResult<void>(resolve, reject, e));
         }
         else {
             resolve();
@@ -187,16 +180,9 @@ export const deleteFile = (file: string): Promise<void> =>
 {
     return new Promise<void>(async (resolve, reject) =>
     {
-        if (await pathExists(file))
+        if (pathExistsSync(file))
         {
-            fs.unlink(path.resolve(cwd, file), (e) =>
-            {
-                /* istanbul ignore if */
-                if (e) {
-                    reject(e);
-                }
-                resolve();
-            });
+            fs.unlink(path.resolve(cwd, file), (e) => handleTResult<void>(resolve, reject, e));
         }
         else {
             resolve();
@@ -250,6 +236,10 @@ export const getDateModified = (file: string) =>
 };
 
 
+const handleBooleanResult = (res: (res: boolean) => void, e: any) => { if (!e) res(true); else res(false); };
+const handleTResult = <T>(res: (res: T | PromiseLike<T>) => void, rej: (e: any) => void, e: any, data?: T) => { if (!e) res(data as T); else rej(e); };
+
+
 export const isDirectory = (dirPath: string) => pathExistsSync(dirPath) && fs.lstatSync(dirPath).isDirectory();
 
 
@@ -273,23 +263,7 @@ export const numFilesInDirectory = (dirPath: string) =>
 };
 
 
-export const pathExists = (file: string) =>
-{
-    return new Promise<boolean>((resolve) =>
-    {
-        if (file)
-        {
-            fs.access(path.resolve(cwd, file), (e) =>
-            {
-                if (e) {
-                    resolve(false);
-                }
-                resolve(true);
-            });
-        }
-        else { resolve(false); }
-    });
-};
+export const pathExists = (file: string) => new Promise<boolean>((r) => fs.access(path.resolve(cwd, file), e => handleBooleanResult(r, e)));
 
 
 export const pathExistsSync = (file: string) =>
@@ -355,38 +329,24 @@ const readFileBufAsync = (file: string): Promise<Buffer> =>
 {
     return new Promise<Buffer>(async (resolve, reject) =>
     {
-        fs.readFile(path.resolve(cwd, file), (e, data) =>
-        {
-            if (!e) {
-                resolve(data);
-            }
-            else {
-                reject(e);
-            }
-        });
+        fs.readFile(path.resolve(cwd, file), (e, data) => handleTResult<Buffer>(resolve, reject, e, data));
     });
 };
 
 /*
-export function renameFile(fileCurrent: string, fileNew: string): Promise<void>
+export const renameFile = (fileCurrent: string, fileNew: string): Promise<void> =>
 {
     return new Promise<void>(async (resolve, reject) =>
     {
         if (await pathExists(fileCurrent))
         {
-            fs.rename(path.resolve(cwd, fileCurrent), path.resolve(cwd, fileNew), (e) =>
-            {
-                if (e) {
-                    reject(e);
-                }
-                resolve();
-            });
+            fs.rename(path.resolve(cwd, fileCurrent), path.resolve(cwd, fileNew), (e) => handleTResult<void>(resolve, reject, e));
         }
         else {
             reject(new Error("Invalid source file path"));
         }
     });
-}
+};
 */
 
 // /**
@@ -451,14 +411,7 @@ export const writeFile = (file: string, data: string): Promise<void> =>
     {
         if (!isDirectory(file))
         {
-            fs.writeFile(path.resolve(cwd, file), data, (err) =>
-            {
-                /* istanbul ignore if */
-                if (err) {
-                    reject(err);
-                }
-                resolve();
-            });
+            fs.writeFile(path.resolve(cwd, file), data, (e) => handleTResult<void>(resolve, reject, e));
         }
         else {
             reject(new Error("Specified path is a directory"));
@@ -467,16 +420,7 @@ export const writeFile = (file: string, data: string): Promise<void> =>
 };
 
 
-export const writeFileSync = (file: string, data: string): void =>
-{
-    if (!isDirectory(file))
-    {
-        fs.writeFileSync(path.resolve(cwd, file), data);
-    }
-    else {
-        throw new Error("Specified path is a directory");
-    }
-};
+export const writeFileSync = (file: string, data: string): void => { if (!isDirectory(file)) fs.writeFileSync(path.resolve(cwd, file), data); };
 
 /*
 export const afs: ITeFilesystem =
