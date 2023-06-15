@@ -5,7 +5,7 @@
         "paths": {
 			"@env/*": [ "src/lib/env/node/*" ]
 		},
-		"tsBuildInfoFile": "tsconfig.test.tsbuildinfo"
+		"tsBuildInfoFile": "dist/tsconfig.test.tsbuildinfo"
     },
     "exclude": [
         "node_modules",
