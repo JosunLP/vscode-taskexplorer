@@ -1,14 +1,21 @@
 
 import * as fs from "fs";
 import * as path from "path";
+
+const extensionDevelopmentPath = path.resolve(__dirname, "../../../");
+if (process.cwd() !== extensionDevelopmentPath) {
+    process.chdir(extensionDevelopmentPath);
+}
+
 import { execSync } from "child_process";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { runTests } from "@vscode/test-electron";
 
-interface IDictionary<TValue>
-{
-    [id: string]: TValue;
-}
+interface IDictionary<TValue> { [id: string]: TValue }
+
+
+const figures = require("../lib/utils/figures").figures;
+
 
 const getTaskTypes = () =>
 {
@@ -28,6 +35,10 @@ const getTaskTypeRealName = (taskType: string) =>
 };
 
 const getWsPath = (p: string) => path.normalize(path.resolve(__dirname, "..", "..", "test-fixture", "project1", p));
+
+
+const consoleWrite = (msg: string, icon?: string, pad = "") =>
+    console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
 
 
 const createDefaultSettings = async() =>
@@ -104,8 +115,8 @@ const createDefaultSettings = async() =>
 
 const main = async(args: string[]) =>
 {
-    let failed = false;
-    let multiRoot = false;
+    let failed = false,
+        multiRoot = false;
 
     const extensionDevelopmentPath = path.resolve(__dirname, "../../"), // The folder containing the Extension Manifest package.json
           extensionTestsPath = path.resolve(__dirname, "./suite"),        // The path to test runner - Passed to --extensionTestsPath
@@ -124,6 +135,18 @@ const main = async(args: string[]) =>
           isWebpackBuild = fs.existsSync(path.join(distPath, "vendor.js")),
           defaultSettings = await createDefaultSettings();
 
+    consoleWrite("Path parameters");
+    consoleWrite(`   current working directory : ${process.cwd()}`);
+    consoleWrite(`   extensionDevelopmentPath  : ${extensionDevelopmentPath}`);
+    consoleWrite(`   extensionTestsPath        : ${extensionTestsPath}`);
+    consoleWrite(`   distPath                  : ${distPath}`);
+    consoleWrite(`   testWorkspaceSingleRoot   : ${testWorkspaceSingleRoot}`);
+    consoleWrite(`   testWorkspaceMultiRoot    : ${testWorkspaceMultiRoot}`);
+    consoleWrite(`   project1Path              : ${project1Path}`);
+    consoleWrite(`   vsCodeTestVersion         : ${vsCodeTestVersion}`);
+    consoleWrite(`   projectSettingsFile       : ${projectSettingsFile}`);
+    consoleWrite(`   multiRootWsFile           : ${multiRootWsFile}`);
+
     const mwsConfig: IDictionary<any> = {
         folders: [
         {
@@ -137,13 +160,22 @@ const main = async(args: string[]) =>
         settings: defaultSettings
     };
 
+    if (!process.env.VSC_TESTS_MACHINEID)
+    {
+        consoleWrite("The environment variable VSC_TESTS_MACHINEID was not found", figures.color.warning);
+        consoleWrite("   Ensure it is set in the System Environment to the development machine's VSCode.machineID", figures.color.warning);
+        consoleWrite("   All instances of VSCode must be closed and then re-opened to pick up any new or changed env var", figures.color.warning);
+        consoleWrite("Exiting", figures.color.warning);
+        process.exit(1);
+    }
+
     try
     {
         const xArgs: string[] = [],
               testsArgs: string[] = [];
         if (args && args.length > 0)
         {
-            console.log("Arguments: " + args.toString());
+            consoleWrite("Arguments: " + args.toString());
             args.forEach((a) =>
             {
                 if (a.startsWith("-"))
@@ -159,10 +191,10 @@ const main = async(args: string[]) =>
             });
         }
         else {
-            console.log("Arguments: None");
+            consoleWrite("Arguments: None");
         }
 
-        console.log("clear package.json activation event");
+        consoleWrite("clear package.json activation event");
         execSync("sh ./enable-full-coverage.sh", { cwd: "script" });
         if (!isWebpackBuild) {
             // execSync("sh ./set-main-entry.sh", { cwd: "script" });
@@ -232,7 +264,7 @@ const main = async(args: string[]) =>
         }); // --upload-logs could be interesting (for prod).  look at it sometime.
     }
     catch (err: any) {
-        console.error(`Failed to run tests: ${err}\n${err.stack ?? "No call stack details found"}`);
+        consoleWrite(`Failed to run tests: ${err}\n${err.stack ?? "No call stack details found"}`, figures.color.error);
         failed = true;
     }
     finally
@@ -270,7 +302,7 @@ const main = async(args: string[]) =>
             //
             // Restore
             //
-            console.log("restore package.json activation event");
+            consoleWrite("restore package.json activation event");
             // execSync(`enable-full-coverage.sh --off${logFile ? ` --logfile "${logFile}` : ""}"`, { cwd: "script" });
             execSync("sh ./enable-full-coverage.sh --off", { cwd: "script" });
             if (!isWebpackBuild) {
@@ -279,7 +311,7 @@ const main = async(args: string[]) =>
             // if (settingsJsonOrig && !testControl.keepSettingsFileChanges) {
             // if (!testControl.keepSettingsFileChanges)
             // {
-                console.log("restore tests workspace settings file settings.json");
+                consoleWrite("restore tests workspace settings file settings.json");
                 if (!multiRoot)
                 {
                     fs.writeFileSync(projectSettingsFile, JSON.stringify(
@@ -305,7 +337,7 @@ const main = async(args: string[]) =>
                     fs.writeFileSync(multiRootWsFile, JSON.stringify(mwsConfig, null, 4));
                 }
             // }
-            console.log("delete any leftover temporary files and/or directories");
+            consoleWrite("delete any leftover temporary files and/or directories");
             fs.rmSync(path.join(project1Path, "tasks_test_"), { recursive: true });
             fs.rmSync(path.join(project1Path, "tasks_test_ignore_"), { recursive: true });
         }
