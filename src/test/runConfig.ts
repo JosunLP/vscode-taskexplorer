@@ -28,7 +28,8 @@ export default async() =>
           testsRoot = path.resolve(__dirname),           // <- TS
           nycRoot = path.resolve(__dirname, "..", ".."), // <- TS
           projectRoot = path.resolve(testsRoot, ".."),
-          cover = fs.existsSync(path.join(projectRoot, "extension.js.map"));
+          cover = fs.existsSync(path.join(projectRoot, "extension.js.map")),
+          noClean = xArgs.includes("--nyc-no-clean");
 
     let nyc: any;
     if (cover)
@@ -36,25 +37,27 @@ export default async() =>
         // Setup coverage pre-test, including post-test hook to report
         nyc = new NYC({
             extends: "@istanbuljs/nyc-config-typescript",
-            cwd: nycRoot,
-            reportDir: "./.coverage",
-            tempDir: "./.nyc_output",
-            reporter: [ "text-summary", "html", "lcov", "cobertura" ],
-            all: true,
+            all: false,
             // cache: false,
-            silent: false,
-            instrument: true,
-            // sourceMap: true,
-            // instrument: false,
-            // sourceMap: false,
+            cwd: nycRoot,
             hookRequire: true,
             hookRunInContext: true,
             hookRunInThisContext: true,
-            noClean: process.env.testArgs && process.env.testArgs.includes("--nyc-no-clean"),
+            // instrument: false,
+            instrument: true,
+            noClean,
+            reportDir: "./.coverage",
+            tempDir: "./.nyc_output",
+            silent: false,
+            // sourceMap: true,
+            // sourceMap: false,
             // useSpawnWrap: true,
-            include: [ "dist/**/*.js" ],
             exclude: [ "dist/test/**", "**/external*.*", "external*" ],
+            ignoreClassMethod: [ "error", "catch", "log.error" ],
+            include: [ "dist/**/*.js" ],
+            reporter: [ "text-summary", "html", "lcov", "cobertura" ]
         });
+
         await nyc.wrap();
 
         //
@@ -76,7 +79,7 @@ export default async() =>
         // Debug which files will be included/excluded
         // console.log('Glob verification', await nyc.exclude.glob(nyc.cwd));
         //
-        if (xArgs.includes("--no-clean"))
+        if (noClean)
         {
             await nyc.createTempDirectory();
         }
