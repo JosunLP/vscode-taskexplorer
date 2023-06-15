@@ -239,10 +239,10 @@ const wpPlugin =
 		}
 		else if (wpConfig.mode === "production")
 		{
-			const psx__dirname_info = path.posix.normalize(path.posix.resolve(psx__dirname, "..", "vscode-taskexplorer-info"));
+			const psx__dirname_info = path.posix.normalize(path.posix.join(psx__dirname, "..", "vscode-taskexplorer-info"));
 			patterns.push(
 			{
-				from: path.posix.join(psxBasePath, "res", "img", "*.*"),
+				from: path.posix.join(psxBasePath, "res", "img", "*"),
 				to: path.posix.join(psx__dirname_info, "res", "img"),
 				context: psxBaseCtxPath
 			},

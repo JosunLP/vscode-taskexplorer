@@ -560,7 +560,8 @@ const plugins = (env, wpConfig) =>
 		wpConfig.plugins.push(
 			wpPlugin.clean(env, wpConfig),
 			wpPlugin.tscheck(env, wpConfig),
-			wpPlugin.limitchunks(env, wpConfig)
+			wpPlugin.limitchunks(env, wpConfig),
+			wpPlugin.copy([], env, wpConfig)
 		);
 	}
 
