@@ -3,7 +3,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { commands, Uri } from "vscode";
+import { commands, env, Uri } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
@@ -14,9 +14,11 @@ import {
     activate, closeEditors, endRollingCount, exitRollingCount, getWsPath, promiseFromEvent, sleep,
     suiteFinished, testControl as tc, waitForWebviewReadyEvent, waitForWebviewsIdle
 } from "../../utils/utils";
+import { expect } from "chai";
 
 let teWrapper: ITeWrapper;
 let closedPages = false;
+const originalOpenExternal = env.openExternal;
 
 
 suite("Webview Tests", () =>
@@ -39,6 +41,7 @@ suite("Webview Tests", () =>
     suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
+        env.openExternal = originalOpenExternal;
         if (!closedPages) {
             await closeEditors();
         }
@@ -93,9 +96,15 @@ suite("Webview Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.openUrl * 3);
-        await commands.executeCommand("taskexplorer.donate");
-        await commands.executeCommand("taskexplorer.openBugReports");
-        await commands.executeCommand("taskexplorer.openRepository");
+        env.openExternal = async (_uri: Uri) => { return true; };
+        try {
+            await commands.executeCommand("taskexplorer.donate");
+            await commands.executeCommand("taskexplorer.openBugReports");
+            await commands.executeCommand("taskexplorer.openRepository");
+        }
+        finally {
+            env.openExternal = originalOpenExternal;
+        }
         endRollingCount(this);
     });
 
@@ -121,6 +130,7 @@ suite("Webview Tests", () =>
             waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
             waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2),
         ]);
+        expect(teWrapper.taskCountView.visible).to.be.equal(true);
         endRollingCount(this);
     });
 
@@ -128,15 +138,21 @@ suite("Webview Tests", () =>
     test("Task Usage View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.taskUsage + 160);
+        this.slow(tc.slowTime.webview.show.view.taskUsage + 350);
         await waitForWebviewsIdle(25, 5000);
-        await showTeWebview(teWrapper.taskUsageView);
-        await waitForWebviewsIdle(1, 5000);
+        if (!teWrapper.taskUsageView.visible) {
+            await showTeWebview(teWrapper.taskUsageView);
+            await waitForWebviewsIdle(1, 5000);
+        }
+        expect(teWrapper.taskUsageView.visible).to.be.equal(true);
         void executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
-        await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage);
-        await sleep(80);
+        await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage, 50);
+        await waitForWebviewsIdle(25, 5000);
+        expect(teWrapper.taskUsageView.view?.webview.html).to.be.a("string").and.to.include("tracking is disabled");
         void executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
-        await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage);
+        await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage, 50);
+        await waitForWebviewsIdle(25, 5000);
+        expect(teWrapper.taskUsageView.view?.webview.html).to.be.a("string").and.to.not.include("tracking is disabled");
         endRollingCount(this);
     });
 

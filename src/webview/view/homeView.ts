@@ -4,23 +4,15 @@ import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
 import { registerCommand } from "../../lib/command/command";
-import { ITeTaskChangeEvent, TeSessionChangeEvent, WebviewViewIds } from "../../interface";
+import { ITeTaskChangeEvent, TeSessionChangeEvent } from "../../interface";
 
 
 export class HomeView extends TeWebviewView<State>
 {
-	static viewId: WebviewViewIds = "home"; // Must match view id in package.json
-
 
 	constructor(wrapper: TeWrapper)
 	{
-		super(
-			wrapper,
-			"Home",
-			"Home",
-			`${HomeView.viewId}.html`,
-			HomeView.viewId
-		);
+		super(wrapper, "Home", "Home", "home.html", "home");
 	}
 
 

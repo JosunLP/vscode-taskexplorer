@@ -478,11 +478,10 @@ export class TeFileCache implements ITeFileCache, Disposable
     private isFsChanged = (taskType: string, project: string) =>
     {
         let fsChanged = true;
-        /* istanbul ignore else */
-        if (this.projectFilesMap[project] && this.projectFilesMap[project][taskType])
+        this.wrapper.utils.execIf(this.projectFilesMap[project] && this.projectFilesMap[project][taskType], () =>
         {
             fsChanged = this.projectToFileCountMap[project][taskType] !== this.projectFilesMap[project][taskType].length;
-        }
+        }, this);
         return fsChanged;
     };
 
@@ -690,13 +689,13 @@ export class TeFileCache implements ITeFileCache, Disposable
                     }
                 }
                 else
-                {   /* istanbul ignore else */
-                    if (fsPath.startsWith(wsf.uri.fsPath))
+                {
+                    this.wrapper.utils.execIf(fsPath.startsWith(wsf.uri.fsPath), () =>
                     {
                         this.wrapper.log.value(`   remove from project files map (${index})`, fsPath, 3, logPad);
                         this.projectFilesMap[wsf.name][taskType].splice(object.length - 1 - index, 1);
                         ++removed.c1;
-                    }
+                    }, this);
                 }
             });
 
@@ -712,13 +711,13 @@ export class TeFileCache implements ITeFileCache, Disposable
                     }
                 }
                 else
-                {   /* istanbul ignore else */
-                    if (item.project === wsf.name)
+                {
+                    this.wrapper.utils.execIf(item.project === wsf.name, () =>
                     {
                         this.wrapper.log.value(`   remove from task files map (${index})`, item.uri.fsPath, 3, logPad);
                         this.taskFilesMap[taskType].splice(object.length - 1 - index, 1);
                         ++removed.c2;
-                    }
+                    }, this);
                 }
             });
         }

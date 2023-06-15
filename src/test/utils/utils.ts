@@ -461,26 +461,33 @@ export const overrideNextShowWarningBox = (value: any, clear?: boolean) => { if 
 const passthrough = (value: any, resolve: (value?: any) => void) => resolve(value);
 
 
-export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 10000) => waitForEvent(view.onDidReceiveReady, timeout);
+export const waitForWebviewReadyEvent = async (view: ITeWebview, timeout = 10000, followUpDelay?: number) => waitForEvent(view.onDidReceiveReady, timeout, followUpDelay);
 
 
 export const oneTimeEvent = <T>(event: Event<T>): Event<T> => teWrapper.promiseUtils.oneTimeEvent(event);
 
 
-export const waitForEvent = async <T>(event: Event<T>, timeout = 10000) =>
+export const waitForEvent = async <T>(event: Event<T>, timeout = 10000, followUpDelay = 2) =>
 {
     const eventPromise = teWrapper.promiseUtils.promiseFromEvent(event),
-          to = setTimeout((ep: EventEmitter<void>) => ep.fire(), timeout, eventPromise.cancel);
+          to = setTimeout((ep: EventEmitter<void>) => ep.fire(), timeout, eventPromise.cancel),
+          fuSleepMs = Math.ceil(followUpDelay / 2);
     try {
         await eventPromise.promise;
         clearTimeout(to);
+        await sleep(fuSleepMs);
+        await sleep(fuSleepMs);
         return true;
     }
     catch (e) {
         if (e === "cancelled") {
+            await sleep(fuSleepMs);
+            await sleep(fuSleepMs);
             return true;
         }
         clearTimeout(to);
+        await sleep(fuSleepMs);
+        await sleep(fuSleepMs);
         return false;
     }
 };

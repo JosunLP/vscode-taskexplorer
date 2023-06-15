@@ -148,12 +148,16 @@ export class TeStatusBar implements ITeStatusBar, Disposable
             {
                 this._progress.report({ message: text, increment });
             }
-            else {
+            else if (text)
+            {
                 this._show({
                     text: `$(loading~spin) ${this._title}: ${this.padStatusMessage(text)}`,
                     toolTip: this._currentStatusTooltip,
                     command: this._currentStatusCommand
                 });
+            }
+            else {
+                this.hide();
             }
             this._currentStatusText = text;
             this._currentStatusIncrement = increment;

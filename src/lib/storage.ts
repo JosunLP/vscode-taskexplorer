@@ -3,8 +3,9 @@
 import { join } from "path";
 import { isNumber, isString } from "./utils/typeUtils";
 import { IDictionary, ISecretStorageChangeEvent, IStorage, IStorageChangeEvent, StorageTarget } from "../interface";
-import { createDir, pathExists, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./utils/fs";
+import { createDir, pathExistsSync, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./utils/fs";
 import { Memento, ExtensionContext, SecretStorage, ExtensionMode, EventEmitter, Event } from "vscode";
+import { execIf } from "./utils/utils";
 
 export let storage: IStorage;
 
@@ -14,7 +15,7 @@ export const initStorage = async (context: ExtensionContext) =>
     const storageFile = join(context.globalStorageUri.fsPath, "storage.json");
     await createDir(context.globalStorageUri.fsPath);
     /* istanbul ignore if */
-    if (!(await pathExists(storageFile))) {
+    if (!pathExistsSync(storageFile)) {
         await writeFile(storageFile, "{}");
     }
     storage = new Storage(context, storageFile);

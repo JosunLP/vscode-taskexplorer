@@ -400,7 +400,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         if (invalidate === undefined && opt === undefined) // i.e. refresh button was clicked
         {
             this.wrapper.log.write("   handling 'rebuild cache' event", 1, logPad + "   ");
-            this.setMessage(Strings.ScanningTaskFiles);
             await this.wrapper.fileCache.rebuildCache(logPad + "   ");
             this.wrapper.log.write("   handling 'rebuild cache' event complete", 1, logPad + "   ");
         }
@@ -438,6 +437,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this.wrapper.log.methodDone("treemgr: load tasks", 1, logPad);
         }
         finally {
+            this.setMessage(); // clear any status bar message
             this._refreshPending = false;
         }
     };
