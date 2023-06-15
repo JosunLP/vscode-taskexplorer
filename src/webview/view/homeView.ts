@@ -84,7 +84,7 @@ export class HomeView extends TeWebviewView<State>
 	{
 		return [
 			registerCommand(this.wrapper.keys.Commands.OpenRepository,
-				() => this.wrapper.utils.openUrl(`https://github.com/spmeesseman/${this.wrapper.extensionName}`),
+				() => this.wrapper.utils.openUrl(`https://github.com/${this.wrapper.extensionAuthor}/${this.wrapper.extensionName}`),
 			this)
 		];
 	}

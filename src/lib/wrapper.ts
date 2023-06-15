@@ -276,8 +276,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// a new installation / first runtime.
 		//
 		this.log.write("   check version change / update", 2);
-		/* istanbul ignore else */
-		if (this.versionchanged)
+		await utilities.execIf(this.versionchanged, async () =>
 		{
 			this.log.write("   version has changed", 1);
 			this.log.value("      previous version", this._previousVersion, 1);
@@ -294,7 +293,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 					void this._welcomePage.show();
 				}
 			}, this);
-		}
+		}, this);
 		//
 		// Build the file cache, this kicks off the whole process as refresh cmd will be issued
 		// down the line in the initialization process.
@@ -385,7 +384,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	{
 		this._disposables.push(
 			registerCommand(AllConstants.Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
-			registerCommand(AllConstants.Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/spmeesseman/${this.extensionName}/issues`), this)
+			registerCommand(AllConstants.Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/${this.extensionAuthor}/${this.extensionName}/issues`), this)
 		);
 	};
 
