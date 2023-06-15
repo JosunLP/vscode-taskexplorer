@@ -3,18 +3,18 @@
 **The most downloaded task related extension on the Marketplace**
 
 [![authors](https://img.shields.io/badge/authors-scott%20meesseman-6F02B5.svg?logo=visual%20studio%20code)](https://www.littlesm.com)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/spmeesseman.vscode-taskexplorer.svg)](https://marketplace.visualstudio.com/items?itemName=spmeesseman.vscode-extjs)
-[![Downloads](https://img.shields.io/visual-studio-marketplace/d/spmeesseman.vscode-taskexplorer.svg)](https://marketplace.visualstudio.com/items?itemName=spmeesseman.vscode-extjs)
-[![Ratings](https://img.shields.io/visual-studio-marketplace/r/spmeesseman.vscode-taskexplorer.svg)](https://marketplace.visualstudio.com/items?itemName=spmeesseman.vscode-extjs&ssr=false#review-details)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/spmeesseman.vscode-taskexplorer.svg)](https://marketplace.visualstudio.com/items?itemName=spmeesseman.taskexplorer-info)
+[![Downloads](https://img.shields.io/visual-studio-marketplace/d/spmeesseman.vscode-taskexplorer.svg)](https://marketplace.visualstudio.com/items?itemName=spmeesseman.taskexplorer-info)
+[![Ratings](https://img.shields.io/visual-studio-marketplace/r/spmeesseman.vscode-taskexplorer.svg)](https://marketplace.visualstudio.com/items?itemName=spmeesseman.taskexplorer-info&ssr=false#review-details)
 
 [![PayPalDonate](https://img.shields.io/badge/paypal-donate-green.svg)](https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8)
-[![CodeFactor](https://www.codefactor.io/repository/github/spmeesseman/vscode-taskexplorer/badge)](https://www.codefactor.io/repository/github/spmeesseman/vscode-taskexplorer)
+[![CodeFactor](https://www.codefactor.io/repository/github/spmeesseman/vscode-taskexplorer/badge)](https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8)
 [![app-publisher](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-app--publisher-e10000.svg)](https://github.com/spmeesseman/app-publisher)
 
-[![GitHub issues open](https://img.shields.io/github/issues-raw/spmeesseman/vscode%2dtaskexplorer.svg?logo=github)](https://github.com/spmeesseman/vscode-taskexplorer/issues)
-[![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/spmeesseman/vscode%2dtaskexplorer.svg?logo=github)](https://github.com/spmeesseman/vscode-taskexplorer/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/spmeesseman/vscode%2dtaskexplorer.svg?logo=github)](https://github.com/spmeesseman/vscode-taskexplorer/pulls)
-[![GitHub last commit](https://img.shields.io/github/last-commit/spmeesseman/vscode%2dtaskexplorer.svg?logo=github)](https://github.com/spmeesseman/vscode-taskexplorer)
+[![GitHub issues open](https://img.shields.io/github/issues-raw/spmeesseman/vscode%2dtaskexplorer.svg?logo=github)](https://github.com/spmeesseman/vscode-taskexplorer-info/issues)
+[![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/spmeesseman/vscode%2dtaskexplorer.svg?logo=github)](https://github.com/spmeesseman/vscode-taskexplorer-info/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/spmeesseman/vscode%2dtaskexplorer.svg?logo=github)](https://github.com/spmeesseman/vscode-taskexplorer-info/pulls)
+[![GitHub last commit](https://img.shields.io/github/last-commit/spmeesseman/vscode%2dtaskexplorer.svg?logo=github)](https://github.com/spmeesseman/vscode-taskexplorer-info)
 
 ![src0](res/img/sources/npm.png?raw=true) ![src1](res/img/sources/ant.png?raw=true) ![src0y](res/img/sources/yarn.png?raw=true) ![src2](res/img/sources/grunt.png?raw=true) ![src3](res/img/sources/gulp.png?raw=true) ![src13](res/img/sources/gradle.png?raw=true) ![src4](res/img/sources/workspace.png?raw=true) ![src5](res/img/sources/make.png?raw=true) ![src6](res/img/sources/ts.png?raw=true) ![src7](res/img/sources/bat.png?raw=true) ![src8](res/img/sources/ruby.png?raw=true) ![src9](res/img/sources/powershell.png?raw=true) ![src10](res/img/sources/bash.png?raw=true) ![src11](res/img/sources/python.png?raw=true) ![src12](res/img/sources/nsis.png?raw=true) ![src13](res/img/sources/maven.png?raw=true)
 

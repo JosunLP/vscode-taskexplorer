@@ -6,17 +6,17 @@
     "icon": "res/img/logo-clr.png",
     "publisher": "spmeesseman",
     "license": "See LICENSE",
-    "homepage": "https://github.com/spmeesseman/vscode-taskexplorer/blob/master/README.md",
+    "homepage": "https://github.com/spmeesseman/vscode-taskexplorer-info/blob/master/README.md",
     "author": {
         "name": "Scott Meesseman",
         "email": "spmeesseman@gmail.com"
     },
     "bugs": {
-        "url": "https://github.com/spmeesseman/vscode-taskexplorer/issues"
+        "url": "https://github.com/spmeesseman/vscode-taskexplorer-info/issues"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/spmeesseman/taskexplorer.git"
+        "url": "https://github.com/spmeesseman/vscode-taskexplorer-info.git"
     },
     "engines": {
         "vscode": "^1.63.0"
