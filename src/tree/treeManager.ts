@@ -499,7 +499,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             {
                 this.wrapper.log.write("   invalidate '" + opt1 + "' task provider file ", 1, logPad);
                 this.wrapper.log.value("      file", opt2.fsPath, 1, logPad);
-                // NPM/Workspace/TSC tasks don't implement TaskExplorerProvider
+                // NPM(optional)/Workspace/TSC tasks don't implement TaskExplorerProvider
                 await this.wrapper.providers[opt1]?.invalidate(opt2, logPad + "   ");
             }
             else //
@@ -514,7 +514,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                         await p.invalidate(undefined, logPad + "   ");
                     }
                 }
-                else { // NPM/Workspace/TSC tasks don't implement TaskExplorerProvider
+                else { // NPM(optional)/Workspace/TSC tasks don't implement TaskExplorerProvider
                     this.wrapper.log.write("   invalidate '" + opt1 + "' task provider", 1, logPad);
                     this.wrapper.providers[opt1]?.invalidate(undefined, logPad + "   ");
                 }

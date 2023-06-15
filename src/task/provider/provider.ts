@@ -90,7 +90,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
         const allTasks: Task[] = [],
               visitedFiles: string[] = [],
               paths = this.wrapper.fileCache.getTaskFiles(this.providerName),
-              enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName);
+              enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName) && (this.providerName !== "npm" || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.UseNpmProvider));
 
         this.wrapper.log.methodStart(`read ${this.providerName} tasks`, 2, logPad, false, [[ "enabled", enabled ]], this.logQueueId);
 
@@ -133,7 +133,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             [ "uri", uri?.path ], [ "current # of cached tasks", cachedTasks.length ]
         ]);
 
-        const enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName);
+        const enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName) && (this.providerName !== "npm" || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.UseNpmProvider));
         if (enabled && uri)
         {
             const pathExists = this.wrapper.fs.pathExistsSync(uri.fsPath) && !!workspace.getWorkspaceFolder(uri) ;
