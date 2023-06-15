@@ -128,12 +128,15 @@ suite("Webview Tests", () =>
     test("Task Usage View", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.webview.show.view.taskUsage + 10);
+        this.slow(tc.slowTime.webview.show.view.taskUsage + 160);
+        await waitForWebviewsIdle(25, 5000);
+        await showTeWebview(teWrapper.taskUsageView);
+        await waitForWebviewsIdle(1, 5000);
         void executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
-        await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2);
-        await sleep(5);
+        await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage);
+        await sleep(80);
         void executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
-        await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2);
+        await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage);
         endRollingCount(this);
     });
 

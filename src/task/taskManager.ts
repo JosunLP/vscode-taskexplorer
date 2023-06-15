@@ -70,14 +70,13 @@ export class TaskManager implements ITeTaskManager, Disposable
             [ "uri path", uri.path ], [ "fs path", uri.fsPath ]
         ]);
 
-        /* istanbul ignore else */
-        if (await pathExists(uri.fsPath))
+        await this.wrapper.utils.execIf(await pathExists(uri.fsPath), async () =>
         {
             const document: TextDocument = await workspace.openTextDocument(uri),
                   offset = findDocumentPosition(this.wrapper, document, selection),
                   position = document.positionAt(offset);
             await window.showTextDocument(document, { selection: new Selection(position, position) });
-        }
+        }, this);
     };
 
 
@@ -203,10 +202,9 @@ export class TaskManager implements ITeTaskManager, Disposable
                 const def = newTask.definition,
                     folder = taskItem.getFolder(),
                     p = this.wrapper.providers[def.type];
-                /* istanbul ignore else */
-                if (folder && p)
+                this.wrapper.utils.execIf(!!folder && !!p, (_v: boolean, f: WorkspaceFolder) =>
                 {
-                    newTask = p.createTask(def.target, undefined, folder, def.uri, undefined, "   ") as Task;
+                    newTask = p.createTask(def.target, undefined, f, def.uri, undefined, "   ") as Task;
                     //
                     // Since this task doesnt belong to a treeItem, then set the treeItem id that represents
                     // an instance of this task.
@@ -219,7 +217,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                     else {
                         newTask = taskItem.task;
                     }
-                }
+                }, this, folder);
             }
             exec = await this.runTask(newTask, taskItem, noTerminal);
         }
@@ -245,27 +243,26 @@ export class TaskManager implements ITeTaskManager, Disposable
         };
 
         if (command.indexOf("<packagename>") === -1)
-        {   /* istanbul ignore else */
-            if (taskFile.folder.workspaceFolder)
+        {
+            this.wrapper.utils.execIf(taskFile.folder.workspaceFolder, (wsf) =>
             {
                 const execution = new ShellExecution(pkgMgr + " " + command, options);
-                const task = new Task(kind, taskFile.folder.workspaceFolder, command, "npm", execution, undefined);
+                const task = new Task(kind, wsf, command, "npm", execution, undefined);
                 return tasks.executeTask(task);
-            }
+            }, this);
         }
         else
         {
             const opts: InputBoxOptions = { prompt: "Enter package name to " + command };
             await window.showInputBox(opts).then(async (str) =>
             {
-                /* istanbul ignore else */
-                if (str !== undefined && taskFile.folder.workspaceFolder)
+                this.wrapper.utils.execIf(!!(str !== undefined && taskFile.folder.workspaceFolder), (_v, wsf: WorkspaceFolder, s: string) =>
                 {
                     kind.script = command.replace("<packagename>", "").trim();
-                    const execution = new ShellExecution(pkgMgr + " " + kind.script + " " + str.trim(), options);
-                    const task = new Task(kind, taskFile.folder.workspaceFolder, kind.script + str.trim(), "npm", execution, undefined);
+                    const execution = new ShellExecution(pkgMgr + " " + kind.script + " " + s.trim(), options);
+                    const task = new Task(kind, wsf, kind.script + s.trim(), "npm", execution, undefined);
                     return tasks.executeTask(task);
-                }
+                }, this, taskFile.folder.workspaceFolder, str);
             });
         }
     };
@@ -423,7 +420,9 @@ export class TaskManager implements ITeTaskManager, Disposable
                         await sleep(50);
                         this.log.value("   send to terminal", ctrlChar, 1);
                         // terminal = getTerminal(taskItem, "   ");
-                        try { /* istanbul ignore else */if (getTerminal(taskItem, "   ")) terminal.sendText(ctrlChar, true); } catch {}
+                        try {
+                            this.wrapper.utils.execIf(getTerminal(taskItem, "   "), () => terminal.sendText(ctrlChar, true), this);
+                        } catch {}
                     }
                 }
                 else {
