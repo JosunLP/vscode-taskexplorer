@@ -22,6 +22,7 @@ src
 coverage
 .coverage
 doc
+docs
 test-files
 test-fixture
 testFixture
