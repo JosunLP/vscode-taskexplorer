@@ -22,15 +22,6 @@ export const execIf = <T, R = any>(checkValue: T | undefined, runFn: (arg: T, ..
 };
 
 
-export const execIfElse = <T, R = any, ER = R>(checkValue: T | undefined, runIfFn: (arg: T, ...args: unknown[]) => R | PromiseLike<R>, runElseFn: (...args: unknown[]) => ER | PromiseLike<ER>, thisArg?: any, ...args: unknown[]): R | PromiseLike<R> | ER | PromiseLike<ER> | undefined | void =>
-{
-    if (checkValue) {
-        return runIfFn.call(thisArg, checkValue, ...args);
-    }
-    return runElseFn.call(thisArg, ...args);
-};
-
-
 export const formatDate = (epochMs: number, format?: "datetime" | "date" | "time") =>
 {
     const t = (new Date(epochMs - tzOffset)).toISOString().slice(0, -1).split("T");
