@@ -469,6 +469,7 @@ suite("License Manager Tests", () =>
 	test("Validate License - Invalid Account", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.validateLicense + 100);
 		Object.assign(licMgr.account, { ...oAccount, ...{ id: 0 }});
 		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "tests-no-matching-account-key" }});
 		Object.assign(licMgr.account.session, { ...oAccount.session, ...{ expires: Date.now() - (1000 * 60 * 60 * 4) - 1000 }});
@@ -481,6 +482,7 @@ suite("License Manager Tests", () =>
 	test("Validate License - Invalid Account Trial", async function()
 	{
 		if (utils.exitRollingCount(this)) return;
+		this.slow(tc.slowTime.licenseMgr.validateLicense + 100);
 		Object.assign(licMgr.account, { ...oAccount, ...{ trialId: 0 }});
 		Object.assign(licMgr.account.license, { ...oAccount.license, ...{ key: "tests-no-matching-trial-key" }});
 		Object.assign(licMgr.account.session, { ...oAccount.session, ...{ expires: Date.now() - (1000 * 60 * 60 * 4) - 1000 }});

@@ -84,7 +84,7 @@ suite("Wrapper Tests", () =>
     test("Status Bar", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(255);
+        this.slow(290);
         teWrapper.statusBar.update("test");
         teWrapper.statusBar.update("test2");
         expect(teWrapper.statusBar.text).to.be.a("string").that.includes("test2");

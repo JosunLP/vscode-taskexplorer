@@ -395,7 +395,7 @@ suite("File Watcher Tests", () =>
     test("Modify Files Repetitively", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow((tc.slowTime.fs.createEvent * 2) + tc.slowTime.tasks.count.verify + 3450);
+        this.slow((tc.slowTime.fs.createEvent * 2) + tc.slowTime.tasks.count.verify + 3550);
         await writeGruntFile("grunt2_0", 1, "");
         writeGruntFile("grunt2_0", 1, " ");
         await writeGruntFile("grunt2_0", 1, "  ");

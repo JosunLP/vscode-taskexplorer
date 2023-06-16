@@ -298,7 +298,7 @@ suite("Provider Tests", () =>
     test("Show Last Tasks Collapsed and Favorites Disabled", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow((tc.slowTime.config.eventFast * 4) + (tc.slowTime.config.showHideSpecialFolder * 5) + (tc.slowTime.config.readEvent * 2));
+        this.slow((tc.slowTime.config.event * 4) + (tc.slowTime.config.showHideSpecialFolder * 5) + (tc.slowTime.config.readEvent * 2));
         const showFavorites = teWrapper.config.get<boolean>("specialFolders.showFavorites");
         const showLastTasks = teWrapper.config.get<boolean>("specialFolders.showLastTasks");
         await executeSettingsUpdate("specialFolders.showLastTasks", false, tc.waitTime.config.showHideSpecialFolder);

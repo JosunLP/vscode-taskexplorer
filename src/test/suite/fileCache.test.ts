@@ -65,7 +65,7 @@ suite("File Cache Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.cache.rebuild + tc.slowTime.general.min);
         await teWrapper.fileCache.rebuildCache("", true);
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -86,7 +86,7 @@ suite("File Cache Tests", () =>
         await teWrapper.storage.update2("fileCacheProjectFilesMap", undefined);
         await teWrapper.storage.update2("fileCacheProjectFileToFileCountMap", undefined);
         await teWrapper.fileCache.rebuildCache("", true);
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         await checkTaskCounts();
         utils.endRollingCount(this);
     });
@@ -125,7 +125,7 @@ suite("File Cache Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.cache.rebuildCancel + tc.waitTime.min);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -136,21 +136,58 @@ suite("File Cache Tests", () =>
         this.slow(tc.slowTime.cache.rebuildCancel + tc.waitTime.min);
         teWrapper.fileCache.rebuildCache(""); // Don't 'await'
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
 
-    test("Cancel Rebuild Cache (Busy 40ms Delay)", async function()
+    test("Cancel Rebuild Cache (Busy 10ms Delay)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.cache.rebuildCancel + 80);
+        this.slow(tc.slowTime.cache.rebuildCancel + 20);
         teWrapper.fileCache.rebuildCache(""); // Don't 'await'
-        await utils.sleep(40);
+        await utils.sleep(10);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
+
+
+    test("Cancel Rebuild Cache (Busy 20ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.rebuildCancel + 40);
+        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        await utils.sleep(20);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Cancel Rebuild Cache (Busy 35ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.rebuildCancel + 70);
+        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        await utils.sleep(35);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Cancel Rebuild Cache (Busy 50ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.rebuildCancel + 100);
+        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        await utils.sleep(50);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
 
 
     test("Cancel Rebuild Cache (Busy 75ms Delay)", async function()
@@ -160,19 +197,55 @@ suite("File Cache Tests", () =>
         teWrapper.fileCache.rebuildCache(""); // Don't 'await'
         await utils.sleep(75);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
 
-    test("Cancel Rebuild Cache (Busy 250ms Delay)", async function()
+    test("Cancel Rebuild Cache (Busy 100ms Delay)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.cache.rebuildCancel + 500);
+        this.slow(tc.slowTime.cache.rebuildCancel + 200);
         teWrapper.fileCache.rebuildCache(""); // Don't 'await'
-        await utils.sleep(250);
+        await utils.sleep(100);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Cancel Rebuild Cache (Busy 150ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.rebuildCancel + 200);
+        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        await utils.sleep(150);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Cancel Rebuild Cache (Busy 200ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.rebuildCancel + 400);
+        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        await utils.sleep(200);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Cancel Rebuild Cache (Busy 300ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.rebuildCancel + 1000);
+        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        await utils.sleep(300);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -180,23 +253,17 @@ suite("File Cache Tests", () =>
     test("Cancel Rebuild Cache (Busy 500ms Delay)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.cache.rebuildCancel + 1000);
-        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
-        await utils.sleep(500);
-        await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
-        utils.endRollingCount(this);
-    });
-
-
-    test("Cancel Rebuild Cache (Busy 1s Delay)", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.cache.rebuildCancel + 2000);
-        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
-        await utils.sleep(1000);
+        void teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        void teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        void teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        void teWrapper.fileCache.cancelBuildCache();
+        void teWrapper.fileCache.cancelBuildCache();
+        for (let i = 1; i <= 5 && teWrapper.fileCache.isBusy; i++) {
+            await utils.sleep(100);
+        }
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -207,7 +274,7 @@ suite("File Cache Tests", () =>
         this.slow(tc.slowTime.cache.buildCancel);
         teWrapper.fileCache.buildTaskTypeCache("gulp", undefined, true, ""); // Don't 'await'
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -219,7 +286,7 @@ suite("File Cache Tests", () =>
         teWrapper.fileCache.buildTaskTypeCache("gulp", undefined, true, ""); // Don't 'await'
         await utils.sleep(10);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -231,7 +298,7 @@ suite("File Cache Tests", () =>
         teWrapper.fileCache.buildTaskTypeCache("python", undefined, true, ""); // Don't 'await'
         await utils.sleep(20);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -243,7 +310,31 @@ suite("File Cache Tests", () =>
         teWrapper.fileCache.buildTaskTypeCache("batch", undefined, true, ""); // Don't 'await'
         await utils.sleep(50);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Cancel Build Cache (FileWatcher Build) (Busy 75ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.buildCancel + 150);
+        teWrapper.fileCache.buildTaskTypeCache("batch", undefined, true, ""); // Don't 'await'
+        await utils.sleep(75);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Cancel Build Cache (FileWatcher Build) (Busy 100ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.buildCancel + 200);
+        teWrapper.fileCache.buildTaskTypeCache("ant", undefined, true, ""); // Don't 'await'
+        await utils.sleep(100);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -255,7 +346,19 @@ suite("File Cache Tests", () =>
         teWrapper.fileCache.buildTaskTypeCache("ant", undefined, true, ""); // Don't 'await'
         await utils.sleep(150);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Cancel Build Cache (FileWatcher Build) (Busy 200ms Delay)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.cache.buildCancel + 400);
+        teWrapper.fileCache.buildTaskTypeCache("grunt", undefined, true, ""); // Don't 'await'
+        await utils.sleep(200);
+        await teWrapper.fileCache.cancelBuildCache();
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 
@@ -267,7 +370,7 @@ suite("File Cache Tests", () =>
         teWrapper.fileCache.buildTaskTypeCache("grunt", undefined, true, ""); // Don't 'await'
         await utils.sleep(500);
         await teWrapper.fileCache.cancelBuildCache();
-        await utils.sleep(tc.waitTime.min);
+        await utils.sleep(5);
         utils.endRollingCount(this);
     });
 

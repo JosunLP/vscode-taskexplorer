@@ -125,16 +125,16 @@ export const testControl =
             groupingEvent: 1025,
             pathToProgramsEvent: 710,
             readEvent: 25,
-            registerExplorerEvent: 475,
+            registerExplorerEvent: 535,
             shellChange: 1325,
-            showHideSpecialFolder: 530,
-            showHideUserTasks: 1865,
+            showHideSpecialFolder: 550,
+            showHideUserTasks: 1855,
             sortingEvent: 815,
             terminalEvent: 250,
             trackingEvent: 510
         },
         fs: {
-            createEvent: 1550,
+            createEvent: 1560,
             createEventTsc: 1885,
             createFolderEvent: 1600,
             deleteEvent: 1325,
@@ -152,7 +152,7 @@ export const testControl =
         licenseMgr: {
             createNewTrial: 3220,
             getTrialExtension: 2175,
-            getTrialExtensionDenied: 880,
+            getTrialExtensionDenied: 910,
             getMaxTasks: 365,
             nag: 100,
             purchaseLicense: 2075,
@@ -170,8 +170,8 @@ export const testControl =
             antTask: 3300,
             antTaskWithAnsicon: 3375,
             bashScript: 3075,
-            batchScriptBat: 4140,
-            batchScriptCmd: 5140,
+            batchScriptBat: 4180,
+            batchScriptCmd: 5180,
             command: 950,
             findPosition: 285,
             findPositionDocOpen: 35,
@@ -184,10 +184,15 @@ export const testControl =
             npmInstallCommand: 8600,
             providerReadUri: 90,
             count: {
-                verify: 375,
+                verify: 385,
+                verifyNpmVsCodeProvided: 710,
                 verifyByTree: 425,
                 verifyFirstCall: 550
             }
+        },
+        usage: {
+            query: 100,
+            reset: 385
         },
         webview: {
             closeSync: 390,
@@ -214,11 +219,11 @@ export const testControl =
             }
         },
         wsFolder: {
-            add: 1705,     // bumped for multi-root ws in utils/initSettings
-            addEmpty: 1605,
-            remove: 570,
-            removeEmpty: 485,
-            reorder: 550,   // bumped for multi-root ws in utils/initSettings
+            add: 1710,      // bumped for multi-root ws in utils/initSettings
+            addEmpty: 1610,
+            remove: 600,
+            removeEmpty: 525,
+            reorder: 590,   // bumped for multi-root ws in utils/initSettings
         },
     },
     //

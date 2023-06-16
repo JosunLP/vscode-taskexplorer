@@ -93,6 +93,7 @@ suite("Usage / Telemetry Tests", () =>
     test("Reset Usage", async function()
     {
         if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.usage.reset);
         const usage = teWrapper.usage.getAll();
         const d = teWrapper.usage.onDidChange(() => {});
         d.dispose();
@@ -108,6 +109,7 @@ suite("Usage / Telemetry Tests", () =>
     test("Usage Calls After Reset", async function()
     {
         if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.usage.query * 2);
         teWrapper.usage.getLastRanTaskTime();
         teWrapper.usage.getAvgRunCount ("d", "");
         teWrapper.usage.getAvgRunCount ("w", "");

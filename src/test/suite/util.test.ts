@@ -57,7 +57,7 @@ suite("Util Tests", () =>
     test("Logging (Error)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 2) + 175);
+		this.slow(785);
 
         teWrapper.log.error(`        ${teWrapper.extensionId}`);
         teWrapper.log.error([ `        ${teWrapper.extensionId}`,
@@ -133,7 +133,7 @@ suite("Util Tests", () =>
 	test("Logging (File)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 7) + 150);
+		this.slow(2525);
 		await executeSettingsUpdate("logging.enableFile", false);
 		await executeSettingsUpdate("logging.enableFile", true);
 		teWrapper.log.write("Test1", 1);
@@ -178,7 +178,7 @@ suite("Util Tests", () =>
     test("Logging (Method)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 2) + 75);
+		this.slow(725);
 
 		teWrapper.log.methodStart("methodName");
 		teWrapper.log.methodDone("methodName");
@@ -213,7 +213,7 @@ suite("Util Tests", () =>
 	test("Logging (Output Window)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 2) + 50);
+		this.slow(665);
 		await executeSettingsUpdate("logging.enableOutputWindow", true);
 		teWrapper.log.write("Test1", 1);
 		teWrapper.log.value("Test2", "value", 1);
@@ -237,7 +237,7 @@ suite("Util Tests", () =>
 
 	test("Logging (Queue)", async function()
     {
-		this.slow((testControl.slowTime.config.event * 2) + 75);
+		this.slow(725);
 
         if (exitRollingCount(this)) return;
 		teWrapper.log.dequeue("queueTestId");
@@ -271,7 +271,7 @@ suite("Util Tests", () =>
     test("Logging (Value)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 4) + 75);
+		this.slow(1475);
         teWrapper.log.value(`        ${teWrapper.extensionId}`, null);
         teWrapper.log.value(`        ${teWrapper.extensionId}`, undefined);
 		teWrapper.log.value(null as unknown as string, 1);
@@ -330,7 +330,7 @@ suite("Util Tests", () =>
     test("Logging (Warn)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 2) + 50);
+		this.slow(750);
 		teWrapper.log.warn("test1");
 		teWrapper.log.warn("test2");
 		const scaryOff = teWrapper.logControl.isTestsBlockScaryColors;
@@ -356,7 +356,7 @@ suite("Util Tests", () =>
     test("Logging (Write)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 2) + 65);
+		this.slow(780);
 
         teWrapper.log.blank();
         teWrapper.log.blank(1);
