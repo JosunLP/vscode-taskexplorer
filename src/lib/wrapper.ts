@@ -105,6 +105,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _onReady: EventEmitter<void>;
     private readonly _onInitialized: EventEmitter<void>;
     private readonly _onBusyComplete: EventEmitter<void>;
+	private readonly _envMap: IDictionary<TeRuntimeEnvironment> = { production: "production", development: "dev", test: "tests" };
 
 
 	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: ILog)
@@ -480,10 +481,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	}
 
 	get env(): TeRuntimeEnvironment {
-		const isDev = this._context.extensionMode === ExtensionMode.Development,
-			  isTests = this._context.extensionMode === ExtensionMode.Test;
-		/* istanbul ignore next */
-		return !isDev && !isTests ? "production" : (isDev ? "dev" : "tests");
+		return this._envMap[ExtensionMode[this._context.extensionMode].toLowerCase()];
 	}
 
     get explorer(): ITeTaskTree {
