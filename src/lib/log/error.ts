@@ -169,9 +169,6 @@ const errorParse = (err: any, symbols: [ string, string ], queueId?: string, cal
             eMsg = err.toString();
         }
     }
-    else if (err && isFunction(err.toString)) {
-        eMsg = err.toString();
-    }
     accumulated.push(eMsg);
     return accumulated;
 };

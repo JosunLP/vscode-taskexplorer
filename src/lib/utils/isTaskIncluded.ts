@@ -92,14 +92,14 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
             // the tasks.json file to see if the hideproperty is set.
             //
             const tasksFile = join(task.scope.uri.fsPath, ".vscode", "tasks.json");
-            result = wrapper.utils.wrap<boolean>((): boolean =>
+            result = !!wrapper.utils.wrap<boolean>((): boolean =>
             {
                 const jsonc = wrapper.fs.readFileSync(tasksFile).toString(),
                       tasksJso = JSON5.parse(jsonc), // damn mjs module json5 needed for comments allowed in tasks.json
                       wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
                 return !(wsTask && wsTask.hide === true);
             },
-            wrapper.log, this);
+            wrapper.log.error, this);
         }
     }
     wrapper.log.write("   task is included", 4, logPad, logQueueId);

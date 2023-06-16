@@ -41,7 +41,7 @@ export const isFunction = (v: any) => !!v && typeof v === "function";
 export const isNumber = (v: any): v is number => (v || v === 0) && typeof v === "number" && isFinite(v);
 
 
-export const isObject = <T>(v: any, allowArray?: boolean): v is IDictionary<T> => !!v && (v instanceof Object || typeof v === "object") && (allowArray || !isArray<any>(v));
+export const isObject = <T = IDictionary<any>>(v: any, allowArray?: boolean): v is T => !!v && (v instanceof Object || typeof v === "object") && (allowArray || !isArray<any>(v));
 
 
 export const isObjectEmpty = (v: IDictionary<any>): boolean => { if (v) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };

@@ -70,7 +70,8 @@ export interface ITeTypeUtilities
     // isDate(v: any): v is Date;
 	// isDefined(v: any): boolean;
 	isNumber(v: any): v is number;
-    isObject<T>(v: any, allowArray?: boolean): v is IDictionary<T>;
+    // isObject<T>(v: any, allowArray?: boolean): v is { [key: string]: T } ;
+    isObject<T = IDictionary<any>>(v: any, allowArray?: boolean): v is T;
     isObjectEmpty(v: any): boolean;
     // isPrimitive(v: any): v is boolean | number | string;
 	isPromise<T>(v: any): v is PromiseLike<T>;
@@ -100,6 +101,6 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap<T>(fn: (...args: any[]) => T, catchFn?: (e: any, ...args: any[]) => any, thisArg?: any, ...args: any[]): T | undefined;
-    wrapAsync<T>(fn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any, ...args: any[]) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined>;
+	wrap <T>(fn: (...args: any[]) => T, catchFn?: (e: any) => any, thisArg?: any, ...args: any[]): T | undefined;
+	wrapAsync<T>(fn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined>;
 }

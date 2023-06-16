@@ -443,7 +443,7 @@ suite("Util Tests", () =>
 		teWrapper.utils.wrap((_n1: number, _n2: number) => { throw new Error("Test error"); }, teWrapper.log.error, this, 1, 2);
         await teWrapper.utils.wrapAsync(async () => { await teWrapper.utils.sleep(1); return 1 / 0; });
         expect(await teWrapper.utils.wrapAsync(async () => { await teWrapper.utils.sleep(1); return 1; })).to.be.equal(1);
-		await teWrapper.utils.wrapAsync(() => { return new Promise<any>((r) => { throw new Error("Test async error 2"); }); });
+		await teWrapper.utils.wrapAsync(() => { return new Promise<any>((r, rej) => { rej(new Error("Test async error 2")); }); });
 		await teWrapper.utils.wrapAsync(async () => { throw new Error("Test async error 2"); });
 		await teWrapper.utils.wrapAsync(async () => { await teWrapper.utils.sleep(1); throw new Error("Test async error 3"); }, teWrapper.log.error);
 		await teWrapper.utils.wrapAsync(() => { return new Promise<any>((r) => { throw new Error("Test async error 4"); }); }, async () => { await teWrapper.utils.sleep(1); });

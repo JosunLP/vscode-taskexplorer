@@ -144,9 +144,9 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 		const column = options?.column ?? ViewColumn.One;
 		if (!this._view)
 		{
-			if (args.length === 2 && this.wrapper.typeUtils.isObject(args[0]) && args[0].webview)
+			if (args.length === 2 && this.wrapper.typeUtils.isObject<WebviewPanel>(args[0]) && args[0].webview)
 			{
-				this._view = args[0] as WebviewPanel;
+				this._view = args[0];
 				// State = args[1],.... Not using VSCode provided state... yet...
 				args.splice(0, 2);
 			}
