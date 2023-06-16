@@ -510,6 +510,8 @@ suite("Util Tests", () =>
 		expect(teWrapper.typeUtils.isPromise(null)).to.be.equal(false);
 		expect(teWrapper.typeUtils.isPromise(new Promise((r, j) => r(true)))).to.be.equal(true);
 		expect(teWrapper.typeUtils.isPromise(teWrapper.utils.sleep(5))).to.be.equal(true);
+		expect(teWrapper.typeUtils.isPromise({ dispose: () => {} })).to.be.equal(false);
+		expect(teWrapper.typeUtils.isPromise({ then: () => {} })).to.be.equal(true);
 
 		const d1 = Date.now() - 6400000;
 		const d2 = Date.now();

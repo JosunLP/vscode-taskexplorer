@@ -232,24 +232,19 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
-export const wrap = <T>(fn: (...args: any[]) => T, catchFn?: (e: any) => any, thisArg?: any, ...args: any[]): T | undefined =>
+export const wrap = <T>(runFn: (...args: any[]) => T, catchFn?: (e: unknown) => any, thisArg?: any, ...args: any[]): T | undefined =>
 {
-    try {
-        return fn.call(thisArg, ...args);
-    }
-    catch (e) { catchFn?.call(thisArg, e); }
+    try { return runFn.call(thisArg, ...args); } catch (e) { catchFn?.call(thisArg, e); }
 };
 
 
-export const wrapAsync = async <T>(fn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined> =>
+export const wrapAsync = async <T>(runFn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined> =>
 {
     try {
-        const result = await fn.call(thisArg, ...args);
-        return result;
+        return await runFn.call(thisArg, ...args);
     }
     catch (e)
-    {
-        if (catchFn)
+    {   if (catchFn)
         {
             const catchRes = catchFn.call(thisArg, e);
             if (isPromise(catchRes)) {

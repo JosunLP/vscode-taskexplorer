@@ -50,7 +50,7 @@ export const isObjectEmpty = (v: IDictionary<any>): boolean => { if (v) { return
 // export const isPrimitive = (v: any): v is Primitive => [ "boolean", "number", "string" ].includes(typeof v);
 
 
-export const isPromise = <T>(v: any): v is PromiseLike<T> => !!v && (v instanceof Promise || (isObject(v) && isFunction(v.resolve)));
+export const isPromise = <T>(v: any): v is PromiseLike<T> => !!v && (v instanceof Promise || (isObject(v) && isFunction(v.then)));
 
 
 export const isString = (v: any, notEmpty = false): v is string => (!!v || (v === "" && !notEmpty)) && (v instanceof String || typeof v === "string");

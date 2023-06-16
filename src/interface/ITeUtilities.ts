@@ -101,6 +101,6 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap <T>(fn: (...args: any[]) => T, catchFn?: (e: any) => any, thisArg?: any, ...args: any[]): T | undefined;
-	wrapAsync<T>(fn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined>;
+	wrap <T>(runFn: (...args: any[]) => T, catchFn?: (e: unknown) => any, thisArg?: any, ...args: any[]): T | undefined;
+	wrapAsync<T>(runFn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: unknown) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined>;
 }
