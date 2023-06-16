@@ -102,10 +102,6 @@ export default async() =>
         timeout: 30000, // default timeout: 10 seconds
         retries: 0, // ,
         slow: 250,
-        require: [
-            "ts-node/register",
-            "source-map-support/register"
-        ]
         // reporter: "mocha-multi-reporters",
         // reporterOptions: {
         //     reporterEnabled: "spec, mocha-junit-reporter",

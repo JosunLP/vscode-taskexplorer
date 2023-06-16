@@ -1,4 +1,11 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
+//
+// Recommended modules, loading them here to speed up NYC init
+// and minimize risk of race condition
+//
+import "ts-node/register";
+import "source-map-support/register";
 
 import runConfig from "../runConfig";
 
