@@ -7,8 +7,7 @@ import { getCombinedGlobPattern } from "./utils";
 import { configuration } from "../configuration";
 import { pickBy, properCase } from "./commonUtils";
 import { Globs, PinnedStorageKey } from "../constants";
-import { ConfigPrefix, IConfiguration, ITaskDefinition, ITeTask, ITeWrapper, TeTaskListType } from "../../interface";
-
+import { ConfigPrefix, ITaskDefinition, ITeTask, ITeWrapper, TeTaskListType } from "../../interface";
 
 
 export const getGlobPattern = (taskType: string) =>

@@ -16,7 +16,7 @@ export const getCwd = (uri: Uri): string =>
 /**
  * Gets the base/root/install path of the extension
  */
-export const getInstallPath = async() =>
+export const getInstallPath = async(): Promise<string> =>
 {
     let dir = __dirname;
     while (dir.length > 3 && !(await pathExists(join(dir, "package.json")))) {
@@ -26,7 +26,7 @@ export const getInstallPath = async() =>
 };
 
 
-export const getInstallPathSync = () =>
+export const getInstallPathSync = (): string =>
 {
     let dir = __dirname;
     while (dir.length > 3 && !(pathExistsSync(join(dir, "package.json")))) {
@@ -36,7 +36,7 @@ export const getInstallPathSync = () =>
 };
 
 
-export const getPortableDataPath = (logPad = "") =>
+export const getPortableDataPath = (logPad = ""): string | undefined =>
 {
     /* istanbul ignore else */
     if (process.env.VSCODE_PORTABLE)
@@ -67,7 +67,10 @@ export const getRelativePath = (folder: WorkspaceFolder, uri: Uri): string =>
 };
 
 
-export const getTaskRelativePath = (task: Task) =>
+export const getTaskAbsolutePath = (task: Task): string => join((<WorkspaceFolder>task.scope).uri.fsPath, getTaskRelativePath(task));
+
+
+export const getTaskRelativePath = (task: Task): string =>
 {
     let relativePath = task.definition.path ?? "";
     if (task.source === "tsc" && isWorkspaceFolder(task.scope))
@@ -81,7 +84,7 @@ export const getTaskRelativePath = (task: Task) =>
 };
 
 
-export const getUserDataPath = (platform?: string, logPad = "") =>
+export const getUserDataPath = (platform?: string, logPad = ""): string =>
 {
     let userPath: string | undefined = "";
 
@@ -113,7 +116,7 @@ export const getUserDataPath = (platform?: string, logPad = "") =>
 };
 
 
-const getDefaultUserDataPath = (platform?: string) =>
+const getDefaultUserDataPath = (platform?: string): string =>
 {   //
     // Support global VSCODE_APPDATA environment variable
     //
@@ -146,7 +149,7 @@ const getDefaultUserDataPath = (platform?: string) =>
 };
 
 
-const logUserDataEnv = (padding: string) =>
+const logUserDataEnv = (padding: string): void =>
 {
     if (log.isLoggingEnabled())
     {

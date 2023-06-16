@@ -411,12 +411,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     private hashNpmScripts = (): void =>
     {
+        const w = this.wrapper;
         this._npmScriptsHash = {};
-        this._tasks.filter(t => t.source === "npm" && this.wrapper.typeUtils.isWorkspaceFolder(t.scope)).forEach((t) =>
+        this._tasks.filter(t => t.source === "npm" && t.definition.type === "npm" && w.typeUtils.isWorkspaceFolder(t.scope)).forEach((t) =>
         {
-            const relativePath = this.wrapper.pathUtils.getTaskRelativePath(t),
-                  fsPath = join((<WorkspaceFolder>t.scope).uri.fsPath, relativePath),
-                  npmPkgJso = this.wrapper.fs.readJsonSync<any>(fsPath),
+            const fsPath = w.pathUtils.getTaskAbsolutePath(t),
+                  npmPkgJso = w.fs.readJsonSync<any>(fsPath),
                   scriptsBlock = JSON.stringify(npmPkgJso.scripts);
             this._npmScriptsHash[fsPath] = scriptsBlock;
         });
@@ -490,68 +490,72 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      */
     private invalidateTasksCache = async(opt1?: string, opt2?: Uri | boolean, logPad?: string) =>
     {
-        this.wrapper.log.methodStart("invalidate tasks cache", 1, logPad, false, [
+        const w = this.wrapper;
+        w.log.methodStart("invalidate tasks cache", 1, logPad, false, [
             [ "opt1", opt1 ], [ "opt2", opt2 && opt2 instanceof Uri ? opt2.fsPath : opt2 ]
         ]);
 
         try {
             if (opt1 && opt2 instanceof Uri)
             {
-                this.wrapper.log.write("   invalidate '" + opt1 + "' task provider file ", 1, logPad);
-                this.wrapper.log.value("      file", opt2.fsPath, 1, logPad);
+                w.log.write("   invalidate '" + opt1 + "' task provider file ", 1, logPad);
+                w.log.value("      file", opt2.fsPath, 1, logPad);
                 // NPM(optional)/Workspace/TSC tasks don't implement TaskExplorerProvider
-                await this.wrapper.providers[opt1]?.invalidate(opt2, logPad + "   ");
+                await w.providers[opt1]?.invalidate(opt2, logPad + "   ");
             }
             else //
             {   // If opt1 is undefined, refresh all providers
                 //
                 if (!opt1)
                 {
-                    this.wrapper.log.write("   invalidate all providers", 1, logPad);
-                    for (const [ key, p ] of Object.entries(this.wrapper.providers))
+                    w.log.write("   invalidate all providers", 1, logPad);
+                    for (const [ key, p ] of Object.entries(w.providers))
                     {
-                        this.wrapper.log.write("   invalidate '" + key + "' task provider", 1, logPad);
+                        w.log.write("   invalidate '" + key + "' task provider", 1, logPad);
                         await p.invalidate(undefined, logPad + "   ");
                     }
                 }
                 else { // NPM(optional)/Workspace/TSC tasks don't implement TaskExplorerProvider
-                    this.wrapper.log.write("   invalidate '" + opt1 + "' task provider", 1, logPad);
-                    this.wrapper.providers[opt1]?.invalidate(undefined, logPad + "   ");
+                    w.log.write("   invalidate '" + opt1 + "' task provider", 1, logPad);
+                    w.providers[opt1]?.invalidate(undefined, logPad + "   ");
                 }
             }
         }
         catch (e: any) {
             /* istanbul ignore next */
-            this.wrapper.log.error([ "Error invalidating task cache", e ]);
+            w.log.error([ "Error invalidating task cache", e ]);
         }
 
-        this.wrapper.log.methodDone("invalidate tasks cache", 1, logPad);
+        w.log.methodDone("invalidate tasks cache", 1, logPad);
     };
 
 
     private onWorkspaceFolderRemoved = async (uri: Uri, logPad: string): Promise<void> =>
     {
-        this.wrapper.log.methodStart("treemgr: workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
         let ctRmv = 0;
-        const tasks = this._tasks,
-                taskMap = this._treeBuilder.getTaskMap(),
-                taskTree = this._treeBuilder.getTaskTree() as TaskFolder[];
+        const w = this.wrapper,
+              tasks = this._tasks,
+              taskMap = this._treeBuilder.getTaskMap(),
+              taskTree = this._treeBuilder.getTaskTree() as TaskFolder[];
 
-        this.wrapper.log.write("   removing project tasks from cache", 1, logPad);
-        this.wrapper.log.values(1, logPad + "      ", [
+        w.log.methodStart("treemgr: workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
+        w.log.write("   removing project tasks from cache", 1, logPad);
+        w.log.values(1, logPad + "      ", [
             [ "current # of tasks", tasks.length ], [ "current # of tree folders", taskTree.length ],
             [ "project path removed", uri.fsPath ]
         ]);
-        this.wrapper.statusBar.update("Deleting all tasks from removed project folder");
+
+        w.statusBar.update("Deleting all tasks from removed project folder");
         tasks.reverse().forEach((item, index, object) =>
         {
             if (item.definition.uri && item.definition.uri.fsPath.startsWith(uri.fsPath))
             {
-                this.wrapper.log.write(`      removing task '${item.source}/${item.name}' from task cache`, 2, logPad);
+                w.log.write(`      removing task '${item.source}/${item.name}' from task cache`, 2, logPad);
                 tasks.splice(object.length - 1 - index, 1);
                 ++ctRmv;
             }
         });
+
         for (const tId of Object.keys(taskMap))
         {
             const item = taskMap[tId] as TaskItem;
@@ -560,17 +564,19 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 delete taskMap[tId];
             }
         }
+
         const folderIdx = taskTree.findIndex((f: TaskFolder) => f.resourceUri?.fsPath === uri.fsPath);
         taskTree.splice(folderIdx, 1);
-        this.wrapper.log.write(`      removed ${ctRmv} tasks from task cache`, 1, logPad);
-        this.wrapper.log.values(1, logPad + "      ", [
+
+        w.log.write(`      removed ${ctRmv} tasks from task cache`, 1, logPad);
+        w.log.values(1, logPad + "      ", [
             [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskTree.length ]
         ]);
+
+        w.statusBar.update("");
         this._refreshPending = false;
-        this.wrapper.statusBar.update("");
-        this.wrapper.log.write("   fire tree refresh event", 1, logPad);
         this.fireTreeRefreshEvent(null, null, logPad + "   ");
-        this.wrapper.log.methodDone("treemgr: workspace folder removed event", 1, logPad);
+        w.log.methodDone("treemgr: workspace folder removed event", 1, logPad);
     };
 
 
@@ -629,15 +635,17 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      */
     refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
     {
-        const isOptUri = this.wrapper.typeUtils.isUri(opt);
-        this.wrapper.log.methodStart("treemgr: refresh task tree", 1, logPad, logPad === "", [
+        const w = this.wrapper,
+              isOptUri = w.typeUtils.isUri(opt);
+
+        w.log.methodStart("treemgr: refresh task tree", 1, logPad, logPad === "", [
             [ "invalidate", invalidate ], [ "opt fsPath", isOptUri ? opt.fsPath : "n/a" ]
         ]);
 
         await this.waitForRefreshComplete();
         this._refreshPending = true;
 
-        if (isOptUri && this.wrapper.fs.isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
+        if (isOptUri && w.fs.isDirectory(opt.fsPath) && !workspace.getWorkspaceFolder(opt))
         {   //
             // A workspace folder was removed.  We know it's a workspace folder because isDirectory()
             // returned true and getWorkspaceFolder() returned false.  If it was a regular directory
@@ -649,7 +657,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             //
             await this.onWorkspaceFolderRemoved(opt, logPad);
         }
-        // else if (this.wrapper.utils.isString(invalidate, true) && this.wrapper.utils.isUri(opt))
+        // else if (w.utils.isString(invalidate, true) && w.utils.isUri(opt))
         // {
         //     // TODO = Performance enhancement.  Handle a file deletejust like we do a workspace folder
         //     //        delete above.  And we can avoid the task refresh/fetch and tree rebuild.
@@ -659,10 +667,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             if (invalidate !== false) {
                 await this.handleRebuildEvent(invalidate, opt, logPad + "   ");
             }
-            if (isOptUri && invalidate === "npm" && this.wrapper.fs.pathExistsSync(opt.fsPath)) // package.json file change/add event
+            if (isOptUri && invalidate === "npm" && w.fs.pathExistsSync(opt.fsPath)) // package.json file change/add event
             {
-                this.wrapper.log.write("   invalidation is for type 'npm', check hash", 1, logPad);
-                const npmPkgJso = this.wrapper.fs.readJsonSync<any>(opt.fsPath),
+                w.log.write("   invalidation is for type 'npm', check hash", 1, logPad);
+                const npmPkgJso = w.fs.readJsonSync<any>(opt.fsPath),
                       scriptsBlock = JSON.stringify(npmPkgJso.scripts);
                 //
                 // TODO - Remove istanbul tag after internal npm provider tests are written
@@ -670,36 +678,36 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 /* istanbul ignore next */
                 if (scriptsBlock === this._npmScriptsHash[opt.fsPath])
                 {
-                    this.wrapper.log.write("   no change to scripts block", 1, logPad);
-                    this.wrapper.log.methodDone("treemgr: refresh task tree", 1, logPad);
+                    w.log.write("   no change to scripts block", 1, logPad);
+                    w.log.methodDone("treemgr: refresh task tree", 1, logPad);
                     return;
                 }
                 this._npmScriptsHash[opt.fsPath] = scriptsBlock;
                 this._currentInvalidation = invalidate; // 'invalidate' will be taskType if 'opt' is undefined or uri of add/remove resource
             }
-            else if (opt !== false && this.wrapper.typeUtils.isString(invalidate, true))
+            else if (opt !== false && w.typeUtils.isString(invalidate, true))
             {
-                this.wrapper.log.write(`   invalidation is for type '${invalidate}'`, 1, logPad);
+                w.log.write(`   invalidation is for type '${invalidate}'`, 1, logPad);
                 this._currentInvalidation = invalidate; // 'invalidate' will be taskType if 'opt' is undefined or uri of add/remove resource
             }
             else if (invalidate === false && opt === undefined) // rebuild tree only, tasks have not changed
             {
-                this.wrapper.log.write("   no invalidation, rebuild tree only", 1, logPad);
+                w.log.write("   no invalidation, rebuild tree only", 1, logPad);
                 this._treeBuilder.invalidate();
                 await this._treeBuilder.createTaskItemTree(logPad + "   ", 2);
             }
             else //
             {   // Re-ask for all tasks from all providers and rebuild tree
                 //
-                this.wrapper.log.write("   invalidation is for all types", 1, logPad);
+                w.log.write("   invalidation is for all types", 1, logPad);
                 this._currentInvalidation = undefined;
                 this._tasks = [];
             }
-            this.wrapper.log.write("   fire tree data change event", 2, logPad);
+            w.log.write("   fire tree data change event", 2, logPad);
             await this.loadTasks(logPad + "   "); // loadTasks invalidates treeBuilder, sets taskMap to {} and taskTree to null
         }
 
-        this.wrapper.log.methodDone("treemgr: refresh task tree", 1, logPad);
+        w.log.methodDone("treemgr: refresh task tree", 1, logPad);
     };
 
 

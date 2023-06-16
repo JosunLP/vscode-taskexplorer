@@ -1,12 +1,7 @@
 
 import { join } from "path";
 import { Task } from "vscode";
-import { log } from "../log/log";
-import { readFileSync } from "./fs";
 import { TeWrapper } from "../wrapper";
-import { isTaskTypeEnabled } from "./utils";
-import { configuration } from "../configuration";
-import { isString, isWorkspaceFolder } from "./typeUtils";
 //
 // For JSON5, if I don't specifically import index.js with 'require', then the
 // damn mjs module file is included by webpack.  I'm sure there's a way to have
@@ -19,27 +14,27 @@ const JSON5 = require("json5/dist/index.js");
 
 export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: string, logPad = "", logQueueId?: string) =>
 {
-    const isScopeWsFolder = isWorkspaceFolder(task.scope);
-    log.methodStart(`Check task inclusion for '${task.source}/${task.name}'`, 4, logPad, false, [
-        [ "scope is ws folder", isScopeWsFolder ], [ "relative path", relativePath ]
-    ], logQueueId);
+    wrapper.log.methodStart(`Check task '${task.source}/${task.name}' against excludes`, 4, logPad, false, [[ "relative path", relativePath ]], logQueueId);
     //
     // We have our own provider for Gulp and Grunt tasks...
     // Ignore VSCode provided gulp and grunt tasks, which are always and only from a gulp/gruntfile
     // in a workspace folder root directory.  All internally provided tasks will have the 'uri' property
     // set in its task definition, VSCode provided Grunt/Gulp tasks will not
     //
-    if (!task.definition.uri && (task.source === "grunt" || task.source === "gulp" ||
-        (task.source === "npm" && wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider, false))))
+    const isScopeWsFolder = wrapper.typeUtils.isWorkspaceFolder(task.scope),
+          isNpmTaskSource = task.source === "npm" && task.definition.type === "npm",
+          isVsCodeGruntOrGulpTaskSource = !task.definition.uri && (task.source === "grunt" || task.source === "gulp");
+    if (isVsCodeGruntOrGulpTaskSource || (isNpmTaskSource && isScopeWsFolder && wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider)))
     {
-        log.write(`   skipping vscode provided ${task.source} task`, 4, logPad, logQueueId);
+        wrapper.log.write(`   skipping vscode provided ${task.source} task`, 4, logPad, logQueueId);
         return false;
     }
     //
     // External tasks registered via Task Explorer API
     //
     const providers = wrapper.providers;
-    if (providers[task.source] && providers[task.source].isExternal) {
+    if (providers[task.source] && providers[task.source].isExternal)
+    {
         return !!task.definition && !!task.name && !!task.execution;
     }
     //
@@ -47,24 +42,32 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
     // This will ignore tasks from other providers as well, unless it has registered
     // as an external provider via Task Explorer API
     //
-    const srcEnabled = isTaskTypeEnabled(task.source);
-    log.value("   enabled in settings", srcEnabled, 3, logPad, logQueueId);
+    const srcEnabled = wrapper.utils.isTaskTypeEnabled(task.source);
+    wrapper.log.value("   enabled in settings", srcEnabled, 3, logPad, logQueueId);
     if (!srcEnabled)
     {
-        log.write(`   skipping this task (${task.source} disabled in settings)`, 4, logPad, logQueueId);
+        wrapper.log.write(`   skipping this task (${task.source} disabled in settings)`, 4, logPad, logQueueId);
         return false;
     }
     //
-    // Check task excludes array
+    // For VSCode provided NPM tasks, run through the exclude globs
     //
-    const excludeTask = configuration.get<string[]>("excludeTask", []),
-          fExcludeTasks = excludeTask.filter(et => !!et && isString(et) && et.length > 1);
+    if (isScopeWsFolder && isNpmTaskSource && !wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider) && wrapper.utils.isExcluded(wrapper.pathUtils.getTaskAbsolutePath(task)))
+    {
+        wrapper.log.write(`   skipping vscode provided ${task.source} task (excludes)`, 4, logPad, logQueueId);
+        return false;
+    }
+    //
+    // Check task excludes array.  Uses REGEX, not GLOB
+    //
+    const excludeTask = wrapper.config.get<string[]>("excludeTask", []),
+          fExcludeTasks = excludeTask.filter(et => !!et && wrapper.typeUtils.isString(et) && et.length > 1);
     for (const rgxPattern of fExcludeTasks)
     {
         if ((new RegExp(rgxPattern)).test(task.name))
         {
-            log.write("   skipping this task (by 'excludeTask' setting)", 4, logPad, logQueueId);
-            log.methodDone("Check task inclusion", 4, logPad, undefined, logQueueId);
+            wrapper.log.write("   skipping this task (by 'excludeTask' setting)", 4, logPad, logQueueId);
+            wrapper.log.methodDone("Check task exclusion", 4, logPad, undefined, logQueueId);
             return false;
         }
     }
@@ -73,7 +76,7 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
     //
     if (task.source === "Workspace" && isScopeWsFolder)
     {
-        const showHiddenWsTasks = configuration.get<boolean>("showHiddenWsTasks", true);
+        const showHiddenWsTasks = wrapper.config.get<boolean>("showHiddenWsTasks", true);
         if (!showHiddenWsTasks) // && task.definition.hide === true)
         {   //
             // Note: VSCode workspace task provider does not publish the 'hide' property anywhere
@@ -81,20 +84,20 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
             // the tasks.json file to see if the hideproperty is set.
             //
             const tasksFile = join(task.scope.uri.fsPath, ".vscode", "tasks.json");
-            try
-            {   const json = readFileSync(tasksFile).toString();
-                const tasksJso = JSON5.parse(json); // damn mjs module json5 needed for comments allowed in tasks.json
-                const wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
+            wrapper.utils.wrap(() =>
+            {
+                const json = wrapper.fs.readFileSync(tasksFile).toString(),
+                      tasksJso = JSON5.parse(json), // damn mjs module json5 needed for comments allowed in tasks.json
+                      wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
                 if (wsTask && wsTask.hide === true) {
-                    log.write("   skipping this task (by 'showHiddenWsTasks' setting)", 4, logPad, logQueueId);
-                    log.methodDone("Check task inclusion", 4, logPad, undefined, logQueueId);
+                    wrapper.log.write("   skipping this task (by 'showHiddenWsTasks' setting)", 4, logPad, logQueueId);
+                    wrapper.log.methodDone("Check task exclusion", 4, logPad, undefined, logQueueId);
                     return false;
                 }
-            }
-            catch (e: any) { /* istanbul ignore next */ log.error(e); }
+            }, wrapper.log, this);
         }
     }
-    log.write("   task is included", 4, logPad, logQueueId);
-    log.methodDone("Check task inclusion", 4, logPad, undefined, logQueueId);
+    wrapper.log.write("   task is included", 4, logPad, logQueueId);
+    wrapper.log.methodDone("Check task exclusion", 4, logPad, undefined, logQueueId);
     return true;
 };
