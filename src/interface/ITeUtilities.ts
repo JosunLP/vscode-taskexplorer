@@ -6,6 +6,7 @@ import { ITaskFolder } from "./ITaskFolder";
 import { IDictionary } from "./IDictionary";
 import { ITeTask, TeTaskListType } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
+import { ILog } from "./ILog";
 
 
 export type PromiseAdapter<T, U> = (
@@ -27,6 +28,7 @@ export interface ITePathUtilities
 	getInstallPath(): Promise<string>;
 	getPortableDataPath(logPad?: string): string | undefined;
 	getRelativePath(folder: WorkspaceFolder, uri: Uri): string;
+	getTaskAbsolutePath(task: Task): string;
 	getTaskRelativePath(task: Task): string;
 	getUserDataPath(platform?: string, logPad?: string): string;
 }
@@ -60,6 +62,7 @@ export interface ITeTaskUtilities
 export interface ITeTypeUtilities
 {
 	isArray<T>(v: any): v is T[];
+	isAsyncFunction<T = any>(fn: any): fn is PromiseLike<T>;
 	isBoolean(v: any): v is boolean;
 	// isDefined(v: any): boolean;
 	isNumber(v: any): v is number;
@@ -90,4 +93,5 @@ export interface ITeUtilities
 	sleep(ms: number): Promise<void>;
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
+	wrap<T = any>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T | PromiseLike<T> | undefined;
 }

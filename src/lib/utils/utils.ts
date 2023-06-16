@@ -1,10 +1,11 @@
 
 import { log } from "../log/log";
-import minimatch = require("minimatch");
 import { Strings } from "../constants";
-import { ConfigKeys } from "../../interface";
+import minimatch = require("minimatch");
+import { isAsyncFunction } from "./typeUtils";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
+import { ConfigKeys, ILog } from "../../interface";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
 
 
@@ -229,3 +230,28 @@ export const testPattern = (path: string, pattern: string) => minimatch(path, pa
 
 
 export const textWithElipsis = (text: string, maxLength: number) => text.length > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
+
+
+export const wrap = <T = any>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T | PromiseLike<T> | undefined =>
+{
+    let result: T | PromiseLike<T> | undefined;
+    try {
+        if (isAsyncFunction(fn))
+        {
+            result = new Promise(async (resolve) =>
+            {
+                let aResult;
+                try {
+                    aResult = await fn.call<PromiseLike<T>, any, any>(thisArg, ...args);
+                }
+                catch (e) { log.error(e); }
+                resolve(aResult);
+            });
+        }
+        else {
+            result = fn.call(thisArg, ...args);
+        }
+    }
+    catch (e) { log.error(e); }
+    return result;
+};

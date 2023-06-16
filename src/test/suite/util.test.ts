@@ -432,6 +432,12 @@ suite("Util Tests", () =>
 		expect(teWrapper.commonUtils.properCase(undefined)).to.equal("");
 		expect(teWrapper.commonUtils.properCase("")).to.equal("");
 
+		teWrapper.utils.wrap(() => {}, teWrapper.log);
+		teWrapper.utils.wrap((a: number, b: number, c: number) => {}, teWrapper.log, undefined, 1, 2, 3);
+		await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); }, teWrapper.log);
+		teWrapper.utils.wrap(() => { throw new Error("Test error"); }, teWrapper.log);
+		await teWrapper.utils.wrap(async () => { throw new Error("Test async error"); }, teWrapper.log);
+
         expect(teWrapper.taskUtils.isScriptType("batch"));
         expect(teWrapper.taskUtils.getScriptTaskTypes().length > 0);
 

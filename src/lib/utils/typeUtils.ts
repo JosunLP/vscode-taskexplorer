@@ -1,7 +1,12 @@
+
+import { types } from "util";
 import { Uri, WorkspaceFolder } from "vscode";
 
 
 export const isArray = <T>(v: any): v is T[] => !!v && Array.isArray(v);
+
+
+export const isAsyncFunction = <T = any>(fn: any): fn is PromiseLike<T> => types.isAsyncFunction(fn);
 
 
 export const isBoolean = (v: any): v is boolean => (v === false || v === true) && typeof v === "boolean";

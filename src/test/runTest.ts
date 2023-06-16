@@ -2,7 +2,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const extensionDevelopmentPath = path.resolve(__dirname, "../../../");
+const extensionDevelopmentPath = path.resolve(__dirname, "../../");
 if (process.cwd() !== extensionDevelopmentPath) {
     process.chdir(extensionDevelopmentPath);
 }
