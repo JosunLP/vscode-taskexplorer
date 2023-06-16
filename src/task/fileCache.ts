@@ -5,9 +5,7 @@ import { TeWrapper } from "../lib/wrapper";
 import * as taskTypeUtils from "../lib/utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "../lib/utils/fs";
 import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
-import {
-    workspace, RelativePattern, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent, Event, EventEmitter
-} from "vscode";
+import { workspace, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent, Event, EventEmitter } from "vscode";
 
 
 export class TeFileCache implements ITeFileCache, Disposable
@@ -140,7 +138,7 @@ export class TeFileCache implements ITeFileCache, Disposable
                                 }
                                 this.wrapper.log.write(`      Set max files to scan at ${maxFiles} files (no license)`, 2, logPad);
                             }
-                            const paths = await findFiles(glob, { nocase: true, ignore: this.getExcludesPatternGlob(), cwd: folder.fsPath  });
+                            const paths = await findFiles(glob, { nocase: true, ignore: this.getExcludesGlobs(), cwd: folder.fsPath  });
                             for (const fPath of paths)
                             {
                                 const uriFile = Uri.file(join(folder.fsPath, fPath));
@@ -286,7 +284,7 @@ export class TeFileCache implements ITeFileCache, Disposable
                     }
                     this.wrapper.log.write(`   Set max files to scan at ${maxFiles} files (no license)`, 3, logPad);
                 }
-                const paths = await findFiles(fileGlob, { nocase: true, ignore: this.getExcludesPatternGlob(), cwd: folder.uri.fsPath  });
+                const paths = await findFiles(fileGlob, { nocase: true, ignore: this.getExcludesGlobs(), cwd: folder.uri.fsPath  });
                 for (const fPath of paths)
                 {
                     const uri = Uri.file(join(folder.uri.fsPath, fPath));
@@ -412,11 +410,8 @@ export class TeFileCache implements ITeFileCache, Disposable
      * @method getExcludesPatternGlob
      * @since 3.0.0
      */
-    private getExcludesPatternGlob = () =>
-    {
-        const excludes: string[] = this.wrapper.config.get("exclude");
-        return [ "**/node_modules/**", "**/work/**", ...excludes ];
-    };
+    private getExcludesGlobs = () =>
+        this.wrapper.utils.uniq([ "**/node_modules/**", "**/work/**", ...this.wrapper.config.get("exclude", []) ]);
 
 
     getTaskFiles = (taskType: string) => this.taskFilesMap[taskType];

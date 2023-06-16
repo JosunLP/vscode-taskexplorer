@@ -107,10 +107,8 @@ export const isTeEnabled = () => configuration.get<boolean>(ConfigKeys.EnableSid
 
 export const isExcluded = (uriPath: string, logPad = "") =>
 {
-    const exclude = configuration.get<string[]>("exclude", []);
-
+    const exclude = uniq(configuration.get<string[]>("exclude", []));
     log.methodStart("Check exclusion", 4, logPad, false, [[ "path", uriPath ]]);
-
     for (const pattern of exclude)
     {
         log.value("   checking pattern", pattern, 5);
@@ -128,7 +126,6 @@ export const isExcluded = (uriPath: string, logPad = "") =>
             }
         }
     }
-
     log.methodDone("Check exclusion", 4, logPad, [[ "excluded", "no" ]]);
     return false;
 };
@@ -232,7 +229,7 @@ export const testPattern = (path: string, pattern: string) => minimatch(path, pa
 export const textWithElipsis = (text: string, maxLength: number) => text.length > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
 
 
-export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, ary) => !pos || item !== ary[pos - 1]);
+export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
 export const wrap = <T extends any | PromiseLike<any> | undefined>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T =>
