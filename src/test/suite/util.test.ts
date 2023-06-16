@@ -432,11 +432,21 @@ suite("Util Tests", () =>
 		expect(teWrapper.commonUtils.properCase(undefined)).to.equal("");
 		expect(teWrapper.commonUtils.properCase("")).to.equal("");
 
-		teWrapper.utils.wrap(() => {}, teWrapper.log);
-		teWrapper.utils.wrap((a: number, b: number, c: number) => {}, teWrapper.log, undefined, 1, 2, 3);
-		await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); }, teWrapper.log);
-		teWrapper.utils.wrap(() => { throw new Error("Test error"); }, teWrapper.log);
-		await teWrapper.utils.wrap(async () => { throw new Error("Test async error"); }, teWrapper.log);
+		teWrapper.utils.wrap(() => {});
+		expect(teWrapper.utils.wrap(() => "testWrap", teWrapper.log.error)).to.be.equal("testWrap");
+		expect(teWrapper.utils.wrap(() => { return 4; }, teWrapper.log.error, this)).to.be.equal(4);
+		teWrapper.utils.wrap((..._args: string[]) => {}, teWrapper.log.error, this, "A", "B", "C", "D");
+		expect(teWrapper.utils.wrap((a: number, b: number, c: number) => a + b + c, teWrapper.log.error, undefined, 1, 2, 3)).to.be.equal(6);
+		expect(await teWrapper.utils.wrapAsync(async () => { await teWrapper.utils.sleep(1); return "done"; }, teWrapper.log.error)).to.be.equal("done");
+		teWrapper.utils.wrap(() => { throw new Error("Test error A"); });
+		teWrapper.utils.wrap(() => { throw new Error("Test error B"); }, teWrapper.log.error);
+		teWrapper.utils.wrap((_n1: number, _n2: number) => { throw new Error("Test error"); }, teWrapper.log.error, this, 1, 2);
+        await teWrapper.utils.wrapAsync(async () => { await teWrapper.utils.sleep(1); return 1 / 0; });
+        expect(await teWrapper.utils.wrapAsync(async () => { await teWrapper.utils.sleep(1); return 1; })).to.be.equal(1);
+		await teWrapper.utils.wrapAsync(() => { return new Promise<any>((r) => { throw new Error("Test async error 2"); }); });
+		await teWrapper.utils.wrapAsync(async () => { throw new Error("Test async error 2"); });
+		await teWrapper.utils.wrapAsync(async () => { await teWrapper.utils.sleep(1); throw new Error("Test async error 3"); }, teWrapper.log.error);
+		await teWrapper.utils.wrapAsync(() => { return new Promise<any>((r) => { throw new Error("Test async error 4"); }); }, async () => { await teWrapper.utils.sleep(1); });
 
         expect(teWrapper.taskUtils.isScriptType("batch"));
         expect(teWrapper.taskUtils.getScriptTaskTypes().length > 0);
@@ -497,6 +507,9 @@ suite("Util Tests", () =>
 		teWrapper.typeUtils.isObjectEmpty("aaa" as unknown as object);
 		teWrapper.typeUtils.isObjectEmpty("" as unknown as object);
 		teWrapper.typeUtils.isObjectEmpty(undefined as unknown as object);
+		expect(teWrapper.typeUtils.isPromise(null)).to.be.equal(false);
+		expect(teWrapper.typeUtils.isPromise(new Promise((r, j) => r(true)))).to.be.equal(true);
+		expect(teWrapper.typeUtils.isPromise(teWrapper.utils.sleep(5))).to.be.equal(true);
 
 		const d1 = Date.now() - 6400000;
 		const d2 = Date.now();

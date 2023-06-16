@@ -2,8 +2,8 @@
 import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
-import { isAsyncFunction } from "./typeUtils";
-import { ConfigKeys, ILog } from "../../interface";
+import { isPromise } from "./typeUtils";
+import { ConfigKeys } from "../../interface";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
@@ -232,26 +232,29 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
-export const wrap = <T extends any | PromiseLike<any> | undefined>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T =>
+export const wrap = <T>(fn: (...args: any[]) => T, catchFn?: (e: any, ...args: any[]) => any, thisArg?: any, ...args: any[]): T | undefined =>
 {
-    let result;
     try {
-        if (isAsyncFunction(fn))
+        return fn.call(thisArg, ...args);
+    }
+    catch (e) { catchFn?.call(thisArg, e, ...args); }
+};
+
+
+export const wrapAsync = async <T>(fn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any, ...args: any[]) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined> =>
+{
+    try {
+        const result = await fn.call(thisArg, ...args);
+        return result;
+    }
+    catch (e)
+    {
+        if (catchFn)
         {
-            result = new Promise<T>(async (resolve) =>
-            {
-                let aResult;
-                try {
-                    aResult = await fn.call<PromiseLike<T>, any, any>(thisArg, ...args);
-                }
-                catch (e) { log.error(e); }
-                resolve(aResult);
-            });
-        }
-        else {
-            result = fn.call(thisArg, ...args);
+            const catchRes = catchFn.call(thisArg, e, ...args);
+            if (isPromise(catchRes)) {
+                try { await catchRes; } catch {}
+            }
         }
     }
-    catch (e) { log.error(e); }
-    return result as T;
 };

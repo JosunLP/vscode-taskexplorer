@@ -61,13 +61,19 @@ export interface ITeTaskUtilities
 
 export interface ITeTypeUtilities
 {
+    // asArray<T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[];
+	// asObject<T>(v: T | undefined | null): T;
+    // asString(v: string | undefined | null, defaultValue?: string): string;
 	isArray<T>(v: any): v is T[];
-	isAsyncFunction<T = any>(fn: any): fn is PromiseLike<T>;
+	// isAsyncFunction<T = any>(fn: any): fn is () => PromiseLike<T>;
 	isBoolean(v: any): v is boolean;
+    // isDate(v: any): v is Date;
 	// isDefined(v: any): boolean;
 	isNumber(v: any): v is number;
-	isObject(v: any): v is { [key: string]: any };
-	isObjectEmpty(v: any): boolean;
+    isObject<T>(v: any, allowArray?: boolean): v is IDictionary<T>;
+    isObjectEmpty(v: any): boolean;
+    // isPrimitive(v: any): v is boolean | number | string;
+	isPromise<T>(v: any): v is PromiseLike<T>;
 	isString(v: any, notEmpty?: boolean): v is string;
 	isUri(v: any): v is Uri;
 	isWorkspaceFolder(v: any): v is WorkspaceFolder;
@@ -94,5 +100,6 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap<T extends any | PromiseLike<any> | undefined>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T;
+	wrap<T>(fn: (...args: any[]) => T, catchFn?: (e: any, ...args: any[]) => any, thisArg?: any, ...args: any[]): T | undefined;
+    wrapAsync<T>(fn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any, ...args: any[]) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined>;
 }
