@@ -29,7 +29,9 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
         return false;
     }
     //
-    // NPM tasks might be provided by VSCode or internally.  Check type, and excludes if VSCode provided
+    // NPM tasks might be provided by VSCode or internally.  Check type, and excludes if VSCode provided.
+    // We would want the user to turn off the VSCode NPM provider if using the internal provider, but we
+    // should assume that they haven't, and we'll still be receiving them on fetch()
     //
     const isNpmTaskSource = isScopeWsFolder && task.source === "npm" && task.definition.type === "npm",
           isVsCodeNpmTaskSource = !task.definition.uri && isNpmTaskSource;
@@ -38,7 +40,7 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
         const usesIntNpmProvider = wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider);
         if (usesIntNpmProvider || wrapper.utils.isExcluded(wrapper.pathUtils.getTaskAbsolutePath(task)))
         {
-            wrapper.log.write(`   skipping vscode provided ${task.source} task`, 4, logPad, logQueueId);
+            wrapper.log.write("   skipping vscode provided npm task", 4, logPad, logQueueId);
             return false;
         }
     }
@@ -60,14 +62,6 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
     if (!srcEnabled)
     {
         wrapper.log.write(`   skipping this task (${task.source} disabled in settings)`, 4, logPad, logQueueId);
-        return false;
-    }
-    //
-    // For VSCode provided NPM tasks, run through the exclude globs
-    //
-    if (isVsCodeNpmTaskSource && !wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider) && wrapper.utils.isExcluded(wrapper.pathUtils.getTaskAbsolutePath(task)))
-    {
-        wrapper.log.write(`   skipping vscode provided ${task.source} task (excludes)`, 4, logPad, logQueueId);
         return false;
     }
     //

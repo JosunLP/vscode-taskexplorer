@@ -286,13 +286,11 @@ export class TeFileCache implements ITeFileCache, Disposable
                     }
                     this.wrapper.log.write(`   Set max files to scan at ${maxFiles} files (no license)`, 3, logPad);
                 }
-                const relativePattern = new RelativePattern(folder, fileGlob),
-                    paths = await workspace.findFiles(relativePattern, this.getExcludesPatternVsc(folder), maxFiles); // ,
-                    // USE_GLOB: paths = await globAsync(fileGlob, { cwd: folder.uri.fsPath, ignore: getExcludesPatternsGlob() });
+                const paths = await findFiles(fileGlob, { nocase: true, ignore: this.getExcludesPatternGlob(), cwd: folder.uri.fsPath  });
                 for (const fPath of paths)
                 {
-                    // USE_GLOB: const uriFile = Uri.file(join(folder.uri.fsPath, fPath));
-                    this.addToMappings(taskType, { uri: fPath /* USE_GLOB:uriFile */, project: folder.name }, logPad + "   ");
+                    const uri = Uri.file(join(folder.uri.fsPath, fPath));
+                    this.addToMappings(taskType, { uri, project: folder.name }, logPad + "   ");
                     if (++numFilesFound === maxFiles) {
                         this.wrapper.log.write(`   Max files to scan reached at ${licMgr.getMaxNumberOfTaskFiles()} files (no license)`, 3, logPad);
                         break;
@@ -418,14 +416,6 @@ export class TeFileCache implements ITeFileCache, Disposable
     {
         const excludes: string[] = this.wrapper.config.get("exclude");
         return [ "**/node_modules/**", "**/work/**", ...excludes ];
-    };
-
-
-    private getExcludesPatternVsc = (folder: string | WorkspaceFolder): RelativePattern =>
-    {
-        const excludes: string[] = this.wrapper.config.get("exclude"),
-            multiFilePattern = this.wrapper.utils.getCombinedGlobPattern("**/node_modules/**,**/work/**", excludes);
-        return new RelativePattern(folder, multiFilePattern);
     };
 
 

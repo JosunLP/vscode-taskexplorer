@@ -93,5 +93,6 @@ export interface ITeUtilities
 	sleep(ms: number): Promise<void>;
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
+	uniq<T>(a: T[]): T[];
 	wrap<T extends any | PromiseLike<any> | undefined>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T;
 }

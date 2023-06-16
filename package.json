@@ -54,8 +54,8 @@
 	"preview": false,
 	"pricing": "Trial",
 	"scripts": {
-		"clean-all": "npm run clean:build && npm run clean-test",
-		"clean-build": "npm run clean:extension && npm run clean:webviews",
+		"clean-all": "npm run clean-build && npm run clean-test",
+		"clean-build": "npm run clean-extension && npm run clean-webviews",
 		"clean-extension": "rimraf dist",
 		"clean-test": "rimraf .nyc_output && rimraf .coverage && rimraf tsconfig.test.tsbuildinfo",
 		"clean-test_cache_data": "rimraf c:\\code\\data\\user-data\\cacheddata",

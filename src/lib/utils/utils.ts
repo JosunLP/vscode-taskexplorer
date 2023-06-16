@@ -232,6 +232,9 @@ export const testPattern = (path: string, pattern: string) => minimatch(path, pa
 export const textWithElipsis = (text: string, maxLength: number) => text.length > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
 
 
+export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, ary) => !pos || item !== ary[pos - 1]);
+
+
 export const wrap = <T extends any | PromiseLike<any> | undefined>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T =>
 {
     let result;

@@ -25,6 +25,7 @@ let dirNameL2: string;
 let dirNameIgn: string;
 let taskMap: TaskMap;
 let tempDirsDeleted = false;
+let excludes: string[];
 
 
 suite("Provider Tests", () =>
@@ -38,7 +39,8 @@ suite("Provider Tests", () =>
         dirName = join(rootPath, "tasks_test_");
         dirNameL2 = join(dirName, "subfolder");
         dirNameIgn = join(rootPath, "tasks_test_ignore_");
-        await executeSettingsUpdate("exclude", [ "**/tasks_test_ignore_/**", "**/ant/**" ], tc.waitTime.config.globEvent);
+        excludes = teWrapper.config.get<string[]>("exclude");
+        await executeSettingsUpdate("exclude", [ ...excludes, "**/tasks_test_ignore_/**", "**/ant/**" ], tc.waitTime.config.globEvent);
         endRollingCount(this, true);
     });
 
@@ -48,6 +50,7 @@ suite("Provider Tests", () =>
         if (exitRollingCount(this, false, true)) return;
         await teWrapper.config.updateVsWs("terminal.integrated.shell.windows", tc.defaultWindowsShell);
         await waitForTeIdle(tc.waitTime.refreshCommand);
+        await executeSettingsUpdate("exclude", excludes, tc.waitTime.config.globEvent);
         await executeSettingsUpdate("logging.enable", tc.log.enabled, tc.waitTime.config.event);
         await executeSettingsUpdate("enabledTasks", {
             apppublisher: false, // off by default

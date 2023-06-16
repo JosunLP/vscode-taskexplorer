@@ -41,16 +41,22 @@ const consoleWrite = (msg: string, icon?: string, pad = "") =>
     console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
 
 
-const createDefaultSettings = async() =>
+const createDefaultSettings = async(packageJson: any) =>
 {   //
     // Enabled / disabled task defaults
     //
-    const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..",  ".." , "package.json")).toString());
     const enabledTasks: IDictionary<boolean> = {};
     getTaskTypes().map(t => getTaskTypeRealName(t)).forEach(t => {
         enabledTasks[t] = packageJson.contributes.configuration[1].properties["taskexplorer.enabledTasks"].default[t];
     });
 
+    const exclude = [ ...packageJson.contributes.configuration[2].properties["taskexplorer.exclude"].default ];
+    exclude.slice().reverse().forEach((item, index, object) =>
+    {
+        if (item.includes("test")) {
+            exclude.splice(object.length - 1 - index, 1);
+        }
+    });
     return {
         "terminal.integrated.shell.windows": undefined,
         "taskexplorer.enableExplorerView": true,
@@ -99,7 +105,7 @@ const createDefaultSettings = async() =>
         "taskexplorer.groupSeparator": "-",
         "taskexplorer.groupWithSeparator": true,
         "taskexplorer.groupStripTaskLabel": true,
-        "taskexplorer.exclude": [],
+        "taskexplorer.exclude": exclude,
         "taskexplorer.includeAnt": [], // Deprecated, use `globPatternsAnt`
         "taskexplorer.globPatternsAnt": [ "**/test.xml", "**/emptytarget.xml", "**/emptyproject.xml", "**/hello.xml" ],
         "taskexplorer.keepTermOnStop": false,
@@ -133,7 +139,7 @@ const main = async(args: string[]) =>
           projectSettingsFile = path.join(project1Path, ".vscode", "settings.json"),
           multiRootWsFile = path.join(testWorkspaceMultiRoot, "tests.code-workspace"),
           isWebpackBuild = fs.existsSync(path.join(distPath, "vendor.js")),
-          defaultSettings = await createDefaultSettings();
+          defaultSettings = await createDefaultSettings(pkgJso);
 
     consoleWrite("Path parameters");
     consoleWrite(`   current working directory : ${process.cwd()}`);
@@ -318,6 +324,7 @@ const main = async(args: string[]) =>
                     {
                         "taskexplorer.exclude": [
                             "**/tasks_test_ignore_/**",
+                            "**/dbg/**"
                         ],
                         "taskexplorer.globPatternsAnt": [
                             "**/hello.xml"
@@ -329,6 +336,7 @@ const main = async(args: string[]) =>
                     mwsConfig.settings = {
                         "taskexplorer.exclude": [
                             "**/tasks_test_ignore_/**",
+                            "**/dbg/**"
                         ],
                         "taskexplorer.globPatternsAnt": [
                             "**/hello.xml"

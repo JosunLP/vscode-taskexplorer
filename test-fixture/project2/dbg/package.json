@@ -1,0 +1,15 @@
+{
+    "name": "project2_dbg_ignored",
+    "version": "0.0.1",
+    "description": "Project 2 Dbg - Ignored",
+    "license": "MIT",
+    "author": {
+        "name": "Scott Meesseman",
+        "email": "spmeesseman@gmail.com"
+    },
+    "scripts": {
+        "dbg-build": "webpack --mode production --progress",
+        "dbg-build:dev": "webpack --env environment=dev --progress"
+    },
+    "main": "./project2_dbg.js"
+}
