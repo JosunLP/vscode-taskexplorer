@@ -421,7 +421,9 @@ suite("Util Tests", () =>
     {
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 2) + 30);
-
+		//
+		// properCase
+		//
         expect(teWrapper.commonUtils.properCase("taskexplorer")).to.be.equal("Taskexplorer");
         expect(teWrapper.commonUtils.properCase(undefined)).to.be.equal("");
 		expect(teWrapper.commonUtils.properCase("dc is here", true)).to.be.equal("DcIsHere");
@@ -431,7 +433,9 @@ suite("Util Tests", () =>
 		expect(teWrapper.commonUtils.properCase("dc was here", false)).to.be.equal("Dc Was Here");
 		expect(teWrapper.commonUtils.properCase(undefined)).to.equal("");
 		expect(teWrapper.commonUtils.properCase("")).to.equal("");
-
+		//
+		// wrap
+		//
 		teWrapper.utils.wrap(() => {});
 		expect(teWrapper.utils.wrap(() => "testWrap", teWrapper.log.error)).to.be.equal("testWrap");
 		expect(teWrapper.utils.wrap(() => { return 4; }, teWrapper.log.error, this)).to.be.equal(4);
@@ -447,6 +451,15 @@ suite("Util Tests", () =>
 		await teWrapper.utils.wrapAsync(async () => { throw new Error("Test async error 2"); });
 		await teWrapper.utils.wrapAsync(async () => { await teWrapper.utils.sleep(1); throw new Error("Test async error 3"); }, teWrapper.log.error);
 		await teWrapper.utils.wrapAsync(() => { return new Promise<any>((r) => { throw new Error("Test async error 4"); }); }, async () => { await teWrapper.utils.sleep(1); });
+		//
+		// execIf
+		//
+		teWrapper.utils.execIf(false, () => {});
+		teWrapper.utils.execIf(true, () => {});
+		teWrapper.utils.execIf(null, () => {}, this);
+		teWrapper.utils.execIf(false, () => {}, this);
+		teWrapper.utils.execIf(true, () => {}, this);
+		teWrapper.utils.execIf(true, () => {}, this, 1, 2, 3);
 
         expect(teWrapper.taskUtils.isScriptType("batch"));
         expect(teWrapper.taskUtils.getScriptTaskTypes().length > 0);
@@ -459,7 +472,9 @@ suite("Util Tests", () =>
 
         expect(teWrapper.pathUtils.getCwd(rootUri)).to.not.be.equal(undefined);
         expect (teWrapper.utils.getGroupSeparator()).to.be.equal("-");
-
+		//
+		// lowerCaseFirstChar
+		//
 		expect(teWrapper.utils.lowerCaseFirstChar("", true)).to.be.equal("");
 		expect(teWrapper.utils.lowerCaseFirstChar("s", true)).to.be.equal("s");
 		expect(teWrapper.utils.lowerCaseFirstChar("s", false)).to.be.equal("s");
@@ -471,7 +486,9 @@ suite("Util Tests", () =>
 		expect(teWrapper.utils.lowerCaseFirstChar("testApp", false)).to.be.equal("testApp");
 		expect(teWrapper.utils.lowerCaseFirstChar("test App", true)).to.be.equal("testApp");
 		expect(teWrapper.utils.lowerCaseFirstChar(undefined as unknown as string, true)).to.be.equal("");
-
+		//
+		// getTaskTypeFriendlyName
+		//
 		teWrapper.taskUtils.getTaskTypeFriendlyName("Workspace");
 		teWrapper.taskUtils.getTaskTypeFriendlyName("Workspace", true);
 		teWrapper.taskUtils.getTaskTypeFriendlyName("apppublisher");
@@ -482,14 +499,18 @@ suite("Util Tests", () =>
 		teWrapper.taskUtils.getTaskTypeFriendlyName("ant", true);
 		teWrapper.taskUtils.getTaskTypeFriendlyName("node");
 		teWrapper.taskUtils.getTaskTypeFriendlyName("node", true);
-
+		//
+		// isNumber
+		//
 		expect(teWrapper.typeUtils.isNumber(10)).to.equal(true);
 		expect(teWrapper.typeUtils.isNumber(0)).to.equal(true);
 		expect(teWrapper.typeUtils.isNumber(undefined)).to.equal(false);
 		expect(teWrapper.typeUtils.isNumber("not a number")).to.equal(false);
 		expect(teWrapper.typeUtils.isNumber({ test: true })).to.equal(false);
 		expect(teWrapper.typeUtils.isNumber([ 1, 2 ])).to.equal(false);
-
+		//
+		// isObject
+		//
 		expect(teWrapper.typeUtils.isObject("1")).to.equal(false);
 		expect(teWrapper.typeUtils.isObject(1)).to.equal(false);
 		expect(teWrapper.typeUtils.isObject([])).to.equal(false);
@@ -497,6 +518,9 @@ suite("Util Tests", () =>
 		expect(teWrapper.typeUtils.isObject({ a: 1 })).to.equal(true);
 		expect(teWrapper.typeUtils.isObjectEmpty({})).to.equal(true);
 		expect(teWrapper.typeUtils.isObjectEmpty({ a: 1 })).to.equal(false);
+		//
+		// isObjectEmpty
+		//
 		teWrapper.typeUtils.isObjectEmpty([]);
 		teWrapper.typeUtils.isObjectEmpty([ 1, 2 ]);
 		teWrapper.typeUtils.isObjectEmpty(this);
@@ -507,12 +531,17 @@ suite("Util Tests", () =>
 		teWrapper.typeUtils.isObjectEmpty("aaa" as unknown as object);
 		teWrapper.typeUtils.isObjectEmpty("" as unknown as object);
 		teWrapper.typeUtils.isObjectEmpty(undefined as unknown as object);
+		//
+		// isPromise
+		//
 		expect(teWrapper.typeUtils.isPromise(null)).to.be.equal(false);
 		expect(teWrapper.typeUtils.isPromise(new Promise((r, j) => r(true)))).to.be.equal(true);
 		expect(teWrapper.typeUtils.isPromise(teWrapper.utils.sleep(5))).to.be.equal(true);
 		expect(teWrapper.typeUtils.isPromise({ dispose: () => {} })).to.be.equal(false);
 		expect(teWrapper.typeUtils.isPromise({ then: () => {} })).to.be.equal(true);
-
+		//
+		// getDateDifference
+		//
 		const d1 = Date.now() - 6400000;
 		const d2 = Date.now();
 		const dt1 = new Date();
@@ -536,7 +565,9 @@ suite("Util Tests", () =>
 		teWrapper.utils.getDateDifference(d2, dt1, "m");
 		teWrapper.utils.getDateDifference(d2, dt1, "s");
 		teWrapper.utils.getDateDifference(d2, dt1);
-
+		//
+		// textWithElipsis
+		//
 		teWrapper.utils.textWithElipsis("Shorten this text and append an elipsis", 16);
 		teWrapper.utils.textWithElipsis("Don't shorten this text or append an elipsis", 64);
 
