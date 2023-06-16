@@ -3,9 +3,9 @@ import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
 import { isAsyncFunction } from "./typeUtils";
+import { ConfigKeys, ILog } from "../../interface";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
-import { ConfigKeys, ILog } from "../../interface";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
 
 
@@ -232,13 +232,13 @@ export const testPattern = (path: string, pattern: string) => minimatch(path, pa
 export const textWithElipsis = (text: string, maxLength: number) => text.length > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
 
 
-export const wrap = <T = any>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T | PromiseLike<T> | undefined =>
+export const wrap = <T extends any | PromiseLike<any> | undefined>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T =>
 {
-    let result: T | PromiseLike<T> | undefined;
+    let result;
     try {
         if (isAsyncFunction(fn))
         {
-            result = new Promise(async (resolve) =>
+            result = new Promise<T>(async (resolve) =>
             {
                 let aResult;
                 try {
@@ -253,5 +253,5 @@ export const wrap = <T = any>(fn: (...args: any[]) => T | PromiseLike<T>, log: I
         }
     }
     catch (e) { log.error(e); }
-    return result;
+    return result as T;
 };

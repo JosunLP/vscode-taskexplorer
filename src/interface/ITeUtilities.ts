@@ -93,5 +93,5 @@ export interface ITeUtilities
 	sleep(ms: number): Promise<void>;
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
-	wrap<T = any>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T | PromiseLike<T> | undefined;
+	wrap<T extends any | PromiseLike<any> | undefined>(fn: (...args: any[]) => T | PromiseLike<T>, log: ILog, thisArg?: any, ...args: any[]): T;
 }
