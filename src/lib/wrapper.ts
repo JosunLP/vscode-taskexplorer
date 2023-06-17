@@ -2,7 +2,6 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
-import { TeServer } from "./server";
 import { getUuid } from "@env/crypto";
 import { TeContext } from "./context";
 import { logControl } from "./log/log";
@@ -17,7 +16,6 @@ import { TeFileCache } from "../task/fileCache";
 import { All as AllConstants } from "./constants";
 import { TaskManager } from "../task/taskManager";
 import { TaskWatcher } from "../task/taskWatcher";
-import { LicenseManager } from "./licenseManager";
 import * as commonUtils from "./utils/commonUtils";
 import { HomeView } from "../webview/view/homeView";
 import { TeFileWatcher } from "../task/fileWatcher";
@@ -34,6 +32,7 @@ import { NsisTaskProvider } from "../task/provider/nsis";
 import { PerlTaskProvider } from "../task/provider/perl";
 import { LicensePage } from "../webview/page/licensePage";
 import { MonitorPage } from "../webview/page/monitorPage";
+import { LicenseManager } from "./license/licenseManager";
 import { BatchTaskProvider } from "../task/provider/batch";
 import { MavenTaskProvider } from "../task/provider/maven";
 import { GruntTaskProvider } from "../task/provider/grunt";
@@ -77,7 +76,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _usage: Usage;
 	private readonly _teApi: TeApi;
 	private readonly _version: string;
-	private readonly _server: TeServer;
 	private readonly _storage: IStorage;
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
@@ -142,7 +140,6 @@ export class TeWrapper implements ITeWrapper, Disposable
         this._taskManager = new TaskManager(this);
         this._taskWatcher = new TaskWatcher(this);
 
-		this._server = new TeServer(this);
 		this._licenseManager = new LicenseManager(this);
 		this._usage = new Usage(this);
 
@@ -193,7 +190,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._onInitialized,
 			this._onBusyComplete,
 			this._licenseManager,
-			this._server,
 			this._welcomePage,
 			this._releaseNotesPage,
 			this._parsingReportPage
@@ -374,7 +370,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this.fileCache.onReady(_event),
 			this.fileWatcher.onReady(_event),
 			this.licenseManager.onReady(_event),
-			this.server.onDidRequestComplete(_event),
 			this.treeManager.configWatcher.onReady(_event),
 			this.treeManager.onDidAllTasksChange(_event)
 		);
@@ -447,8 +442,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get busy(): boolean {
 		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy || this._treeManager.isBusy ||
-			   this._fileWatcher.isBusy || this._licenseManager.isBusy || this._server.isBusy;
-			   // || this.busyWebviews;
+			   this._fileWatcher.isBusy || this._licenseManager.isBusy;
 	}
 
 	get busyWebviews(): boolean {
@@ -596,10 +590,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get releaseNotesPage(): ReleaseNotesPage {
 		return this._releaseNotesPage;
-	}
-
-	get server(): TeServer {
-		return this._server;
 	}
 
     get sidebar(): ITeTaskTree {

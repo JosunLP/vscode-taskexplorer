@@ -277,10 +277,10 @@ module.exports = {
             "error",
             {
                 "rules": {
-                    "ban": [
-                        true,
-                        "setInterval"
-                    ],
+                    // "ban": [
+                    //     true,
+                    //     "setInterval"
+                    // ],
                     "whitespace": [
                         true,
                         "check-branch",

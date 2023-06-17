@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { TeWrapper } from "./wrapper";
-import { ITeApiEndpoint } from "./server";
-import { LicensePage } from "../webview/page/licensePage";
+import { TeWrapper } from "../wrapper";
+import { ITeApiEndpoint, TeServer } from "./server";
+import { LicensePage } from "../../webview/page/licensePage";
 import { Disposable, Event, EventEmitter, window } from "vscode";
-import { executeCommand, registerCommand } from "./command/command";
-import { IpcAccountRegistrationParams } from "../webview/common/ipc";
+import { executeCommand, registerCommand } from "../command/command";
+import { IpcAccountRegistrationParams } from "../../webview/common/ipc";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent, ContextKeys,
 	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo
-} from "../interface";
+} from "../../interface";
 
 
 export class LicenseManager implements ITeLicenseManager, Disposable
@@ -23,11 +23,15 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _maxFreeTasksForTaskType = 100;
 	private _maxFreeTasksForScriptType = 50;
 	private _checkLicenseTask: NodeJS.Timeout;
+	private _sbInfo: IStatusBarInfo | undefined;
+
+	private readonly _server: TeServer;
     private readonly _onReady: EventEmitter<void>;
 	private readonly _defaultSessionInterval = 1000 * 60 * 60 * 4;
 	private readonly _disposables: Disposable[] = [];
 	private readonly _maxTaskTypeMsgShown: IDictionary<boolean> = {};
     private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
+
 	private readonly _sessionInterval = <{ [id in TeRuntimeEnvironment]: number}>{
 		production: this._defaultSessionInterval, // 4 hr
 		tests: this._defaultSessionInterval, // 4 hr
@@ -40,9 +44,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._account = this.getNewAccount();
 		this._onReady = new EventEmitter<void>();
 		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
-		// eslint-disable-next-line @typescript-eslint/tslint/config
+		this._server = new TeServer(wrapper);
 		this._checkLicenseTask = setInterval(this.checkLicense, this.sessionInterval, "");
 		this._disposables.push(
+			this._server,
 			this._onReady,
 			this._onSessionChange,
 			wrapper.storage.onDidChangeSecret(this.onSecretStorageChange, this),
@@ -101,6 +106,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		return this._sessionInterval[this.wrapper.env];
 	}
 
+	get server(): TeServer {
+		return this._server;
+	}
+
 	get statusDays(): string {
 		return this.isTrial ?
 			this.wrapper.utils.getDateDifference(Date.now(), this._account.license.expires, "d").toString() :
@@ -116,6 +125,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	{
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		this._busy = true;
+		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 		const result = await this.executeRequest("register/trial/start", this.wrapper.statusBar.info, logPad + "   ", {});
 		/* istanbul ignore else */
 		if (result)
@@ -128,6 +138,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				}
 			});
 		}
+		this.restoreStatusBar(sbInfo);
 		this.wrapper.log.methodDone("begin trial", 1, logPad);
 	};
 
@@ -225,14 +236,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._busy = true;
 		try
 		{
-			const account = await this.wrapper.server.request<ITeAccount>(ep, token, logPad, { accountId: this._account.id,  ...params });
+			const account = await this._server.request<ITeAccount>(ep, token, logPad, { accountId: this._account.id,  ...params });
 			await this.saveAccount(account, logPad);
 			this.wrapper.statusBar.update("");
 			return true;
 		}
 		catch (e)
 		{
-			await this.handleServerError(e, resetSbInfo);
+			await this.handleServerError(e);
 			return false;
 		}
 		finally {
@@ -244,8 +255,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private extendTrial = async (logPad: string): Promise<void> =>
 	{
-		const ep: ITeApiEndpoint = "register/trial/extend",
-			  sbInfo = this.wrapper.statusBar.info;
+		const ep: ITeApiEndpoint = "register/trial/extend";
+		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 
 		this.wrapper.statusBar.update("Requesting extended trial");
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
@@ -276,6 +287,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			tests: this.wrapper.tests
 		});
 
+		this.restoreStatusBar(sbInfo);
 		this.wrapper.log.methodDone("request extended trial", 1, logPad);
 	};
 
@@ -424,7 +436,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	});
 
 
-	private handleServerError = async (e: any, resetSbInfo: IStatusBarInfo): Promise<void> =>
+	private handleServerError = async (e: any): Promise<void> =>
 	{
 		/* istanbul ignore if  */
 		if (e instanceof Error)
@@ -474,7 +486,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			}
 		}
 
-		this.wrapper.statusBar.showTimed({ text: "Server error" }, resetSbInfo);
+		this.wrapper.statusBar.showTimed({ text: "Server error" }, this._sbInfo);
+		this._sbInfo = undefined;
 	};
 
 
@@ -554,24 +567,22 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			// the new license state
 			//
 			this._busy = true;
-			const sbInfo = this.wrapper.statusBar.info;
+			const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 			this.wrapper.statusBar.update("Sending payment request");
 			const ep: ITeApiEndpoint = "payment/paypal/hook",
 				  token = this._account.session.token;
-			try
-			{
-				await this.wrapper.server.request<any>(ep, token, logPad, this.getPaypalWebhookPayload());
-				await this.wrapper.utils.sleep(50);
-				await this.validateLicense(this._account.license.key, logPad + "   ");
-			}
-			catch (e) {
-				/* istanbul ignore next */
-				await this.handleServerError(e, sbInfo);
-			}
-			finally {
-				this._busy = false;
-				this.wrapper.statusBar.show(sbInfo);
-			}
+			await this.wrapper.utils.wrap<Promise<void>>(
+				async () =>
+				{
+					await this._server.request<any>(ep, token, logPad, this.getPaypalWebhookPayload());
+					await this.wrapper.utils.sleep(50);
+					await this.validateLicense(this._account.license.key, logPad + "   ");
+				},
+				this.handleServerError, this
+			);
+			this.restoreStatusBar(sbInfo);
+			this._busy = false;
+			this._onReady.fire();
 		}
 		else
 		{
@@ -584,6 +595,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 
 	private register = (): Promise<LicensePage> => this.wrapper.licensePage.show(undefined, { register: true });
+
+
+	private restoreStatusBar = (sbInfo: IStatusBarInfo) =>
+	{
+		this.wrapper.statusBar.show(sbInfo);
+		this._sbInfo = undefined;
+	};
 
 
 	private saveAccount = async (account: ITeAccount, logPad: string): Promise<void> =>
@@ -649,9 +667,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			[ "first", params.firstName ], [ "last", params.lastName ], [ "email", params.email ], [ "alt. email", params.emailAlt ]
 		]);
 		this._busy = true;
-		const sbInfo = this.wrapper.statusBar.info;
+		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 		this.wrapper.statusBar.update("Submitting resgistration");
 		await this.executeRequest("register/account", sbInfo, "   ", params);
+		this.restoreStatusBar(sbInfo);
 		this.wrapper.log.methodDone("submit registration", 1, "");
 	};
 
@@ -660,9 +679,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	{
 		this.wrapper.log.methodStart("validate license", 1, logPad);
 		this._busy = true;
-		const sbInfo = this.wrapper.statusBar.info;
+		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 		this.wrapper.statusBar.update("Validating license");
 		await this.executeRequest("license/validate", sbInfo, logPad + "   ", { key });
+		this.restoreStatusBar(sbInfo);
 		this.wrapper.log.methodDone("validate license", 1, logPad);
 	};
 

@@ -1,11 +1,11 @@
 
 import { request } from "https";
 // import fetch from "@env/fetch";
-import { TeWrapper } from "./wrapper";
+import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
-import { figures } from "./utils/figures";
+import { figures } from "../utils/figures";
 import { Disposable, env, Event, EventEmitter } from "vscode";
-import { IDictionary, TeRuntimeEnvironment } from "../interface";
+import { IDictionary, TeRuntimeEnvironment } from "../../interface";
 
 // const TLS_REJECT = "0"; // "0" to turn off tls rejection
 
@@ -45,11 +45,10 @@ export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook" |
 
 export class TeServer implements Disposable
 {
-	private _busy = false;
+	private readonly _spmApiPort = 443;
+	private readonly _spmApiVersion = 1;
 	private readonly _requestTimeout = 7500;
     private readonly _onRequestComplete: EventEmitter<void>;
-	private readonly _spmApiVersion = 1;
-	private readonly _spmApiPort = 443;
 	private readonly _spmApiServer = "license.spmeesseman.com";
 	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
 		dev: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcpO14r6dmkYwk9mN3qwbdbF8ty8DUWKqJO5JKR5FqQbOFuYYI0FrdIlsleAuvmaq/aeYhKbBxDfTKLZRTVx2TfA==",
@@ -67,10 +66,6 @@ export class TeServer implements Disposable
 
 	dispose = () => this._onRequestComplete.dispose();
 
-
-	get isBusy() {
-		return this._busy;
-	}
 
 	private get productName() {
 		return `${this.wrapper.extensionName}-${this.wrapper.env}`.replace("-production", "");
@@ -101,7 +96,7 @@ export class TeServer implements Disposable
 			// Timeout don't work worth a s***.  So do a promise race in request() for now.
 			//
 			timeout: this._requestTimeout,
-			headers: <{[id: string]: string}>{
+			headers: <IDictionary<string>> {
 				"token": this.publicToken,
 				"user-agent": this.wrapper.extensionId,
 				"content-type": "application/json"
@@ -166,7 +161,6 @@ export class TeServer implements Disposable
 		[
 			this._request<T>(endpoint, token, logPad, params),
 			new Promise<T>((_resolve, reject) => {
-				this._busy = false;
 				setTimeout(reject, this._requestTimeout, <ServerError>{ message: "Timed out", status: 408 });
 			})
 		]);
@@ -216,7 +210,6 @@ export class TeServer implements Disposable
 						reject(<ServerError>{ message: e.message, status: res.statusCode, body: jso });
 					}
 					finally {
-						this._busy = false;
 						this._onRequestComplete.fire();
 					}
 				});
@@ -227,7 +220,6 @@ export class TeServer implements Disposable
 			{   // Not going to fail unless i birth a bug
 				this.onServerError(e, logPad);
 				errorState = true;
-				this._busy = false;
 				this._onRequestComplete.fire();
 				reject(e);
 			});

@@ -77,7 +77,6 @@ export interface ITeWrapper
 	readonly pathUtils: ITePathUtilities;
 	readonly promiseUtils: ITePromiseUtilities;
 	readonly releaseNotesPage: ITeWebview;
-	readonly server: any;
 	readonly sidebar: ITeTaskTree;
 	readonly sidebarView: TreeView<TreeItem>;
 	readonly sorters: ITeSortUtilities;
