@@ -41,7 +41,7 @@ let NODE_TLS_REJECT_UNAUTHORIZED: string | undefined;
 const tc = testControl;
 const originalShowInputBox = window.showInputBox;
 const originalShowInfoBox = window.showInformationMessage;
-const disableSSLMsg = "Disabling certificate validation due to Electron Main Process Issue w/ LetsEncrypt DST Root CA X3 Expiry";
+const disableSSLMsg = "Disabled ssl cert validation due to Electron/LetsEncrypt DST Root CA X3 Expiry";
 
 //
 // Suppress some stderr messages.  It's just tests.
@@ -193,12 +193,11 @@ export const activate = async (instance?: Mocha.Context) =>
         consoleWrite(`   Extension ID     : ${teWrapper.extensionId}`);
         consoleWrite(`   Extension Title  : ${teWrapper.extensionTitle}`);
         consoleWrite(`   Extension Short  : ${teWrapper.extensionTitleShort}`);
-        consoleWrite(disableSSLMsg, figures.color.warningTests);
+        consoleWrite(`   ${disableSSLMsg}`, figures.color.warningTests);
         activated = true;
         timeStarted = Date.now();
         console.log(`    ${figures.color.info} ${figures.withColor("Tests initialization completed, ready", figures.colors.grey)}`);
         console.log(`    ${figures.color.info}`);
-		console.log(`    ${figures.color.warningTests} ${figures.withColor(disableSSLMsg, figures.colors.grey)}`);
     }
 
     return {
