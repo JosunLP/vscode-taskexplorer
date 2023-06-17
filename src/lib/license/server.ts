@@ -43,12 +43,11 @@ class ServerError2 extends Error
 export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook" |
 							 "register/account" | "register/trial/start" | "register/trial/extend";
 
-export class TeServer implements Disposable
+export class TeServer
 {
 	private readonly _spmApiPort = 443;
 	private readonly _spmApiVersion = 1;
 	private readonly _requestTimeout = 7500;
-    private readonly _onRequestComplete: EventEmitter<void>;
 	private readonly _spmApiServer = "license.spmeesseman.com";
 	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
 		dev: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcpO14r6dmkYwk9mN3qwbdbF8ty8DUWKqJO5JKR5FqQbOFuYYI0FrdIlsleAuvmaq/aeYhKbBxDfTKLZRTVx2TfA==",
@@ -58,13 +57,7 @@ export class TeServer implements Disposable
 	};
 
 
-    constructor(private readonly wrapper: TeWrapper)
-	{
-		this._onRequestComplete = new EventEmitter<void>();
-		// process.env.NODE_TLS_REJECT_UNAUTHORIZED = TLS_REJECT;
-	}
-
-	dispose = () => this._onRequestComplete.dispose();
+    constructor(private readonly wrapper: TeWrapper) {}
 
 
 	private get productName() {
@@ -74,10 +67,6 @@ export class TeServer implements Disposable
 	private get publicToken(): string {
 		return this._publicToken[this.wrapper.env];
 	}
-
-    get onDidRequestComplete(): Event<void> {
-        return this._onRequestComplete.event;
-    }
 
 
 	private getApiPath = (ep: ITeApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
@@ -209,9 +198,6 @@ export class TeServer implements Disposable
 						/* istanbul ignore next */
 						reject(<ServerError>{ message: e.message, status: res.statusCode, body: jso });
 					}
-					finally {
-						this._onRequestComplete.fire();
-					}
 				});
 			});
 
@@ -220,7 +206,6 @@ export class TeServer implements Disposable
 			{   // Not going to fail unless i birth a bug
 				this.onServerError(e, logPad);
 				errorState = true;
-				this._onRequestComplete.fire();
 				reject(e);
 			});
 

@@ -47,7 +47,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._server = new TeServer(wrapper);
 		this._checkLicenseTask = setInterval(this.checkLicense, this.sessionInterval, "");
 		this._disposables.push(
-			this._server,
 			this._onReady,
 			this._onSessionChange,
 			wrapper.storage.onDidChangeSecret(this.onSecretStorageChange, this),
