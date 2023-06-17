@@ -14,7 +14,10 @@ interface ISuiteResults extends IDictionary<any>
 }
 
 export const testControl =
-{   //
+{
+    // apiServer: "localhost",
+    apiServer: "license.spmeesseman.com",
+    //
     // Is multi-root workspace - Populated by initSettings() on startup
     //
     isMultiRootWorkspace: false,

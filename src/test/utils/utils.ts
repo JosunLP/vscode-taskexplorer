@@ -173,7 +173,7 @@ export const activate = async (instance?: Mocha.Context) =>
         //
         // Increase slow times for local license server (making remote db requests)
         //
-        if (teWrapper.server.apiServer === "localhost")
+        if (testControl.apiServer === "localhost")
         {
             const factor = 2.85;
             tc.slowTime.licenseMgr.purchaseLicense  = Math.round(tc.slowTime.licenseMgr.purchaseLicense * factor);
@@ -675,9 +675,6 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
         }
         else if (teWrapper.licenseManager.isBusy) {
             event = teWrapper.licenseManager.onReady;
-        }
-        else if (teWrapper.server.isBusy) {
-            event = teWrapper.server.onDidRequestComplete;
         }
         else if (teWrapper.treeManager.configWatcher.isBusy) {
             event = teWrapper.treeManager.configWatcher.onReady;

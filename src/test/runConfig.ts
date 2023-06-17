@@ -53,7 +53,7 @@ export default async() =>
             // sourceMap: false,
             // useSpawnWrap: true,
             exclude: [ "dist/test/**", "**/external*.*", "external*" ],
-            ignoreClassMethod: [ "error", "catch", "log.error" ],
+            // ignoreClassMethod: [ "error", "catch", "log.error" ],
             include: [ "dist/**/*.js" ],
             reporter: [ "text-summary", "html", "lcov", "cobertura" ]
         });
