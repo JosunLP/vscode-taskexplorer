@@ -36,18 +36,15 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
         //
         // Ansicon for Windows
         //
-        if (process.platform === "win32" && this.wrapper.config.get("enableAnsiconForAnt") === true)
+        if (process.platform === "win32" && this.wrapper.config.get(this.wrapper.keys.Config.EnableAnsiconForAnt) === true)
         {
             let ansicon = "ansicon.exe";
-            const ansiPath: string = this.wrapper.config.get("pathToPrograms.ansicon");
+            const ansiPath: string = this.wrapper.config.get(`${this.wrapper.keys.Config.PathToPrograms}.ansicon`);
             if (ansiPath && this.wrapper.fs.pathExistsSync(ansiPath))
             {
                 ansicon = ansiPath;
-                if (!ansicon.endsWith("ansicon.exe") && !ansicon.endsWith("\\")) {
+                if (!ansicon.endsWith("ansicon.exe")) {
                     ansicon = join(ansicon, "ansicon.exe");
-                }
-                else if (!ansicon.endsWith("ansicon.exe")) {
-                    ansicon += "ansicon.exe";
                 }
             }
 
@@ -72,11 +69,9 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
 
     private async findAllAntScripts(path: string, logPad: string): Promise<StringMap>
     {
-        const scripts: StringMap = {};
-        const useAnt = this.wrapper.config.get<boolean>("useAnt");
-
+        const scripts: StringMap = {},
+              useAnt = this.wrapper.config.get<boolean>("useAnt");
         this.wrapper.log.methodStart("find ant targets", 4, logPad, false, [[ "use ant", useAnt ], [ "path", path ]], this.logQueueId);
-
         //
         // Try running 'ant' itself to get the targets.  If fail, just custom parse
         //
@@ -92,8 +87,6 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
         catch (ex) {
             this.logException(ex, useAnt ? "ant" : "xml2js");
         }
-
-
         this.wrapper.log.methodDone("find ant targets complete", 4, logPad, undefined, this.logQueueId);
         return scripts;
     }
@@ -141,7 +134,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
         //
         //     Default target: G64
         //
-        const  stdout = execSync(this.getCommand() + " -f " + path + " -p");
+        const stdout = execSync(this.getCommand() + " -f " + path + " -p", { stdio: [ "pipe", "pipe", "ignore" ] });
         let text: any = stdout.toString();
         //
         // First get the default, use 2nd capturing group (returned arr-idx 2):
