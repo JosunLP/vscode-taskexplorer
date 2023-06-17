@@ -2,38 +2,7 @@
 {
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "Launch (TSC)",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "smartStep": true,
-			"sourceMaps": true,
-			"sourceMapRenames": true,
-			"trace": true,
-            "preLaunchTask": "npm: tsc-watch",
-            "debugWebviews": true,
-			"rendererDebugOptions": {
-				"pauseForSourceMap": true,
-				"sourceMapRenames": true,
-				"sourceMaps": true,
-				// "urlFilter": "*eamodio.gitlens*",
-				"webRoot": "${workspaceFolder}/res"
-			},
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "skipFiles": [
-                "<node_internals>/**", "**/node_modules/**", "**/resources/app/out/vs/**"
-            ],
-			"args": [
-                "--profile=Debugging (TaskExplorer)",
-                "--disable-extensions",
-                "--disable-workspace-trust",
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ]
-        },
-        {
+         {
             "name": "Launch (TSC)(Project Root)",
             "type": "extensionHost",
             "request": "launch",
@@ -47,7 +16,7 @@
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
-				"webRoot": "${workspaceFolder}/src/webviews/apps"
+				"webRoot": "${workspaceFolder}/res"
 			},
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
@@ -57,13 +26,14 @@
             ],
             "args": [
                 "${workspaceFolder}",
+                "--profile=Debug (TaskExplorer | TSC)",
                 "--disable-extensions",
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}"
             ]
         },
         {
-            "name": "Launch (TSC)(TestFixture Root)",
+            "name": "Launch (TSC)(Test Fixture)",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
@@ -77,7 +47,7 @@
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
-				"webRoot": "${workspaceFolder}/src/webviews/apps"
+				"webRoot": "${workspaceFolder}/res"
 			},
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
@@ -87,13 +57,14 @@
             ],
             "args": [
                 "${workspaceFolder}/test-fixture/tests.code-workspace",
+                "--profile=Debug (TaskExplorer | TSC)",
 				"--disable-extensions",
                 "--disable-workspace-trust",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			]
         },
         {
-            "name": "Launch (TSC)(GEMS2 Root)",
+            "name": "Launch (TSC)(G2)",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
@@ -107,7 +78,7 @@
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
-				"webRoot": "${workspaceFolder}/src/webviews/apps"
+				"webRoot": "${workspaceFolder}/res"
 			},
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
@@ -116,7 +87,8 @@
                 "<node_internals>/**", "**/node_modules/**", "**/resources/app/out/vs/**"
             ],
             "args": [
-                "${workspaceFolder}/../GEMS2",
+                "${workspaceFolder}/../pja/GEMS2",
+                "--profile=Debug (TaskExplorer | TSC)",
                 "--disable-extensions",
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}"
@@ -138,7 +110,7 @@
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
-				"webRoot": "${workspaceFolder}/src/webviews/apps"
+				"webRoot": "${workspaceFolder}/res"
 			},
 			"outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
@@ -148,6 +120,7 @@
             ],
 			"args": [
                 "${workspaceFolder}/test-fixture/tests.code-workspace",
+                "--profile=Debug (TaskExplorer | WP)",
 				"--disable-extensions",
                 "--disable-workspace-trust",
 				"--extensionDevelopmentPath=${workspaceFolder}"
@@ -179,10 +152,11 @@
             ],
             "args": [
                 "${workspaceFolder}/test-fixture/project1",
-                "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/dist/test/suite",
+                "--profile=Tests (TaskExplorer | TSC)",
                 "--disable-extensions",
-                "--disable-workspace-trust"
+                "--disable-workspace-trust",
+                "--extensionTestsPath=${workspaceFolder}/dist/test/suite",
+                "--extensionDevelopmentPath=${workspaceFolder}"
             ]
         }
     ]
