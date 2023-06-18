@@ -196,23 +196,6 @@ suite("Task Tests", () =>
     });
 
 
-    test("Run Task (No Terminal)", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.run + tc.slowTime.tasks.bashScript + tc.slowTime.commands.runStop  + 5200);
-        const bashTask = bash[0];
-        await executeTeCommand2("setPinned", [ bashTask, "last" ]) ;
-        await startTask(bashTask, false);
-        const exec = await executeTeCommand2<TaskExecution | undefined>("runNoTerm", [ bashTask ], tc.waitTime.runCommandMin) ;
-        await utils.sleep(100);
-        await utils.waitForTaskExecution(exec, 2000);
-        await executeTeCommand2("stop", [ bash[0] ], tc.waitTime.taskCommand);
-        await utils.waitForTaskExecution(exec, 500);
-        lastTask = bashTask;
-        utils.endRollingCount(this);
-    });
-
-
     test("Run Ant Task (w/ Ansicon)", async function()
     {
         if (utils.exitRollingCount(this)) return;
@@ -254,7 +237,24 @@ suite("Task Tests", () =>
     });
 
 
-    test("Run Batch Task", async function()
+    test("Run Task (No Terminal)", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.commands.run + tc.slowTime.tasks.bashScript + tc.slowTime.commands.runStop  + 5200);
+        const bashTask = bash[0];
+        await executeTeCommand2("setPinned", [ bashTask, "last" ]) ;
+        await startTask(bashTask, false);
+        const exec = await executeTeCommand2<TaskExecution | undefined>("runNoTerm", [ bashTask ], tc.waitTime.runCommandMin) ;
+        await utils.sleep(100);
+        await utils.waitForTaskExecution(exec, 2000);
+        await executeTeCommand2("stop", [ bash[0] ], tc.waitTime.taskCommand);
+        await utils.waitForTaskExecution(exec, 500);
+        lastTask = bashTask;
+        utils.endRollingCount(this);
+    });
+
+
+    test("Run Batch Task and Pound Task Controls", async function()
     {
         if (utils.exitRollingCount(this)) return;
         const slowTime = (tc.slowTime.commands.run * 2) + (tc.slowTime.commands.runStop * 2) + 6500 +
@@ -308,7 +308,7 @@ suite("Task Tests", () =>
     });
 
 
-    test("Run Batch Task (With Args)", async function()
+    test("Run Batch Task (With Args) and Pound Task Controls", async function()
     {   //
         // There are 2 batch file "tasks" - they both utils.sleep for 7 seconds, 1 second at a time
         //
