@@ -250,9 +250,9 @@ const entry = (env, wpConfig) =>
 		{
 			wpConfig.entry =
 			{
-				"extension": {
-					import: "./src/extension.ts",
-					filename: "extension.js"
+				"taskexplorer": {
+					import: "./src/taskexplorer.ts",
+					filename: "taskexplorer.js"
 				}
 			};
 		}

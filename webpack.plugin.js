@@ -49,7 +49,7 @@ const wpPlugin =
 					{
 						try {
 							renameSync(path.join(__dirname, "dist", "vendor.js.LICENSE.txt"), path.join(__dirname, "dist", "vendor.LICENSE"));
-							renameSync(path.join(__dirname, "dist", "extension.js.LICENSE.txt"), path.join(__dirname, "dist", "extension.LICENSE"));
+							renameSync(path.join(__dirname, "dist", "taskexplorer.js.LICENSE.txt"), path.join(__dirname, "dist", "taskexplorer.LICENSE"));
 						} catch {}
 					});
 				}
@@ -141,7 +141,7 @@ const wpPlugin =
 			{
 				banner: `Copyright ${(new Date()).getFullYear()} Scott Meesseman`,
 				entryOnly: true,
-				test: /extension\.js/ //s,
+				test: /taskexplorer\.js/ //s,
 				// raw: true
 			});
 		}
