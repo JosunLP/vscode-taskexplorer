@@ -166,21 +166,31 @@ export class TaskTreeGrouper
      */
     private createTaskGroupingsBySep = async(folder: TaskFolder, taskFile: TaskFile, subfolders: IDictionary<TaskFile>, treeLevel: number, logPad: string, logLevel: number) =>
     {
-        let prevName: string[] | undefined;
-        let prevTaskItem: TaskItem | undefined;
-        const newNodes: TaskFile[] = [];
-        const groupSeparator = this.wrapper.utils.getGroupSeparator();
-        const atMaxLevel: boolean = this.wrapper.config.get<number>(this.wrapper.keys.Config.GroupMaxLevel) <= treeLevel + 1;
+        let prevName: string[] | undefined,
+            prevTaskItem: TaskItem | undefined;
+        const newNodes: TaskFile[] = [],
+              groupSeparator = this.wrapper.utils.getGroupSeparator(),
+              atMaxLevel: boolean = this.wrapper.config.get<number>(this.wrapper.keys.Config.GroupMaxLevel) <= treeLevel + 1;
+
+        const _splitLabel = (lbl: string, item: TaskItem) =>
+        {
+            const lblParts = lbl.split(groupSeparator);
+            if (lblParts.length >= 2 && item.taskSource === "tsc" && (/ \- tsconfig\.[a-z\.\-_]+json$/i).test(lbl))
+            {
+                const lastPart = <string>lblParts.pop();
+                lblParts[lblParts.length - 1] = `${lblParts[lblParts.length - 1].trimEnd()} (${lastPart.trimStart()})`;
+            }
+            return lblParts;
+        };
 
         this.wrapper.log.methodStart("create task groupings by separator", logLevel, logPad, true, [
             [ "folder", folder.label ], [ "label (node name)", taskFile.label ], [ "grouping level", treeLevel ], [ "is group", taskFile.isGroup ],
             [ "file name", taskFile.fileName ], [ "folder", folder.label ], [ "path", taskFile.path ], [ "tree level", treeLevel ]
         ]);
 
-        const _setNodePath = (t: TaskItem | undefined, cPath: string) =>
+        const _setNodePath = (ti: TaskItem | undefined, cPath: string) =>
         {
-            /* istanbul ignore else */
-            if (t && !atMaxLevel && prevName)
+            this.wrapper.utils.execIf(!!ti && !atMaxLevel && !!prevName, (_v, t, p) =>
             {
                 this.wrapper.log.write("   setting node path", logLevel + 2, logPad);
                 this.wrapper.log.value("      current", t.nodePath, logLevel + 2, logPad);
@@ -189,16 +199,16 @@ export class TaskTreeGrouper
                 {   //
                     // Reference Ticket #?. Fixes never ending loop with specific case VSCode tasks.
                     //
-                    t.nodePath = join(".vscode", prevName[treeLevel]);
+                    t.nodePath = join(".vscode", p[treeLevel]);
                 }
                 else if (!t.nodePath) {
-                    t.nodePath = prevName[treeLevel];
+                    t.nodePath = p[treeLevel];
                 }
                 else {
-                    t.nodePath = join(cPath, prevName[treeLevel]);
+                    t.nodePath = join(cPath, p[treeLevel]);
                 }
                 this.wrapper.log.value("      new", t.nodePath, logLevel + 2, logPad);
-            }
+            }, this, ti, prevName);
         };
 
         for (const each of taskFile.treeNodes)
@@ -206,10 +216,10 @@ export class TaskTreeGrouper
             if (!each || !(each instanceof TaskItem) || !each.task || !each.label) {
                 continue;
             }
-            const label = each.label.toString();
             let subfolder: TaskFile | undefined;
-            const prevNameThis = label.split(groupSeparator);
-            const prevNameOk = prevName && prevName.length > treeLevel && prevName[treeLevel];
+            const label = each.label.toString(),
+                  prevNameThis = _splitLabel(label, each),
+                  prevNameOk = prevName && prevName.length > treeLevel && prevName[treeLevel];
 
             this.wrapper.log.write("   process task item", logLevel + 1, logPad);
             this.wrapper.log.values(logLevel + 2, logPad + "      ", [
@@ -217,7 +227,6 @@ export class TaskTreeGrouper
                 [ "previous name [tree level]", prevName && prevNameOk ? prevName[treeLevel] : "undefined" ],
                 [ "this previous name", prevNameThis ]
             ]);
-
             //
             // Check if we're in a state to create a new group.
             // If 'prevName' length > 1, then this task was grouped using the group separator, for

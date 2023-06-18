@@ -17,6 +17,8 @@ let rootPath: string;
 let dirName: string;
 let fileUri: Uri;
 let fileUri2: Uri;
+let fileUriBrowser: Uri;
+let fileUriTest: Uri;
 
 
 suite("Typescript Tests", () =>
@@ -30,6 +32,8 @@ suite("Typescript Tests", () =>
         rootPath = utils.getWsPath(".");
         dirName = join(rootPath, "tasks_test_ts_");
         fileUri = Uri.file(join(rootPath, "tsconfig.json"));
+        fileUriBrowser = Uri.file(join(rootPath, "tsconfig.browser.json"));
+        fileUriTest = Uri.file(join(rootPath, "tsconfig.test.json"));
         fileUri2 = Uri.file(join(dirName, "tsconfig.json"));
         await fsUtils.createDir(dirName);
         utils.endRollingCount(this, true);
@@ -40,8 +44,10 @@ suite("Typescript Tests", () =>
     {
         if (utils.exitRollingCount(this, false, true)) return;
         await utils.closeEditors();
-        await fsUtils.deleteFile(fileUri.fsPath);
-        await fsUtils.deleteDir(dirName);
+        try { await fsUtils.deleteFile(fileUri.fsPath); } catch {}
+        try { await fsUtils.deleteFile(fileUriBrowser.fsPath); } catch {}
+        try { await fsUtils.deleteFile(fileUriTest.fsPath); } catch {}
+        try { await fsUtils.deleteDir(dirName); } catch {}
         utils.suiteFinished(this);
     });
 
@@ -65,7 +71,7 @@ suite("Typescript Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(testControl.slowTime.fs.createEventTsc + testControl.slowTime.tasks.count.verifyByTree);
-        await fsUtils.createFile(
+        await utils.writeAndWait(
             fileUri.fsPath,
             "{\n" +
             '  "compilerOptions":\n' +
@@ -110,7 +116,7 @@ suite("Typescript Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(testControl.slowTime.fs.createEventTsc + testControl.slowTime.tasks.count.verifyByTree);
-        await fsUtils.writeFile(
+        await utils.writeAndWait(
             fileUri2.fsPath,
             "{\n" +
             '  "compilerOptions":\n' +
@@ -126,10 +132,59 @@ suite("Typescript Tests", () =>
             '    "noImplicitThis": false\n' +
             "  },\n" +
             '  "include": ["**/*"],\n' +
-            '  "exclude": ["node_modules"]\n' +
+        '  "exclude": ["node_modules","**/test/**","**/dom/**"]\n' +
             "}\n",
             testControl.waitTime.fs.createEventTsc
         );
+        await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 4);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Multiple Build Specific Files", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow((testControl.slowTime.fs.createEventTsc * 2) + (testControl.slowTime.fs.deleteEventTsc * 2) +
+                  (testControl.slowTime.tasks.count.verifyByTree * 2) + 50);
+        await utils.writeAndWait(
+            fileUriBrowser.fsPath,
+            "{\n" +
+            '  "compilerOptions":\n' +
+            "  {\n" +
+            '    "target": "es6",\n' +
+            '    "lib": ["es2016"],\n' +
+            '    "module": "commonjs",\n' +
+            '    "outDir": "./out",\n' +
+            '    "sourceMap": true,\n' +
+            "  },\n" +
+            '  "include": ["**/*"],\n' +
+            '  "exclude": ["node_modules","**/test/**","**/node/**"]\n' +
+            "}\n",
+            testControl.waitTime.fs.createEventTsc
+        );
+        await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 6);
+        await utils.sleep(25);
+        await utils.writeAndWait(
+            fileUriTest.fsPath,
+            "{\n" +
+            '  "compilerOptions":\n' +
+            "  {\n" +
+            '    "target": "es6",\n' +
+            '    "lib": ["es2016"],\n' +
+            '    "module": "commonjs",\n' +
+            '    "outDir": "./out",\n' +
+            '    "sourceMap": true,\n' +
+            "  },\n" +
+            '  "include": ["**/*"],\n' +
+            '  "exclude": ["node_modules","**/dom/**"]\n' +
+            "}\n",
+            testControl.waitTime.fs.createEventTsc
+        );
+        await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 8);
+        await fsUtils.deleteFile(fileUriBrowser.fsPath);
+        await utils.waitForTeIdle2(1);
+        await fsUtils.deleteFile(fileUriTest.fsPath);
+        await utils.waitForTeIdle2(1);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 4);
         utils.endRollingCount(this);
     });
@@ -171,7 +226,7 @@ suite("Typescript Tests", () =>
         // else {
         //     this.slow(testControl.slowTime.fs.createEvent);
         // }
-        await fsUtils.writeFile(
+        await utils.writeAndWait(
             fileUri.fsPath,
             "{\n" +
             '    "compilerOptions":\n' +
@@ -209,7 +264,7 @@ suite("Typescript Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(testControl.slowTime.fs.modifyEventTsc + testControl.slowTime.tasks.count.verifyByTree);
-        await fsUtils.writeFile(
+        await utils.writeAndWait(
             fileUri.fsPath,
             "{\n" +
             '    "compilerOptions":\n' +
@@ -239,6 +294,7 @@ suite("Typescript Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(testControl.slowTime.fs.deleteEventTsc + testControl.slowTime.tasks.count.verifyByTree);
         await fsUtils.deleteFile(fileUri.fsPath, testControl.waitTime.fs.deleteEventTsc);
+        await utils.waitForTeIdle2(1);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 2);
         utils.endRollingCount(this);
     });
@@ -249,6 +305,7 @@ suite("Typescript Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(testControl.slowTime.fs.deleteEventTsc + testControl.slowTime.tasks.count.verifyByTree);
         await fsUtils.deleteFile(fileUri2.fsPath, testControl.waitTime.fs.deleteEventTsc);
+        await utils.waitForTeIdle2(1);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount);
         utils.endRollingCount(this);
     });
