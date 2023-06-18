@@ -1,6 +1,6 @@
 
 import { workspace } from "vscode";
-import { getMd5 } from "@env/crypto";
+import { encodeUtf8Hex } from "@env/hex";
 import { ConfigKeys, IConfiguration, IStorage, StorageTarget } from "../interface";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./utils/taskUtils";
 
@@ -73,16 +73,16 @@ export class TeMigration
         if (!didStorageUpgrade)
         {
             let store = this.storage.get<{ id: string; timestamp: number }[]>("taskexplorer.specialFolder.last", []);
-            store.forEach(t => { t.id = getMd5(t.id, "hex"); });
+            store.forEach(t => { t.id = encodeUtf8Hex(t.id); });
             await this.storage.update("taskexplorer.specialFolder.last", store);
             store = this.storage.get<{ id: string; timestamp: number }[]>("taskexplorer.specialFolder.last", [], StorageTarget.Workspace);
-            store.forEach(t => { t.id = getMd5(t.id, "hex"); });
+            store.forEach(t => { t.id = encodeUtf8Hex(t.id); });
             await this.storage.update("taskexplorer.specialFolder.last", store, StorageTarget.Workspace);
             store = this.storage.get<{ id: string; timestamp: number }[]>("taskexplorer.specialFolder.favorites", []);
-            store.forEach(t => { t.id = getMd5(t.id, "hex"); });
+            store.forEach(t => { t.id = encodeUtf8Hex(t.id); });
             await this.storage.update("taskexplorer.specialFolder.favorites", store);
             store = this.storage.get<{ id: string; timestamp: number }[]>("taskexplorer.specialFolder.favorites", [], StorageTarget.Workspace);
-            store.forEach(t => { t.id = getMd5(t.id, "hex"); });
+            store.forEach(t => { t.id = encodeUtf8Hex(t.id); });
             await this.storage.update("taskexplorer.specialFolder.favorites", store, StorageTarget.Workspace);
             await this.storage.update("taskexplorer.v3StorageUpgrade2", true);
         }

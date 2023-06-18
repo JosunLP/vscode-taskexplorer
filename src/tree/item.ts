@@ -2,9 +2,9 @@
 import * as path from "path";
 import { TaskFile } from "./file";
 import { log } from "../lib/log/log";
-import { getMd5 } from "@env/crypto";
 import { TaskFolder } from "./folder";
 import { ITaskItem } from "../interface";
+import { encodeUtf8Hex } from "@env/hex";
 import { Strings } from "../lib/constants";
 import { configuration } from "../lib/configuration";
 import { getInstallPathSync } from "../lib/utils/pathUtils";
@@ -78,7 +78,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         if (task.definition.scriptFile) {
             this.resourceUri = Uri.file(fsPath);
         }
-        this.id = getMd5(fsPath + ":" + task.source + ":" + task.name + ":", "hex"); // <- leave trailing ':' for backwards compat
+        this.id = encodeUtf8Hex(fsPath + ":" + task.source + ":" + task.name + ":"); // <- leave trailing ':' for backwards compat
         this.paused = false;                // paused flag used by start/stop/pause task functionality
         this.taskFile = taskFile;           // Save a reference to the TaskFile that this TaskItem belongs to
         this.task = task;                   // Save a reference to the Task that this TaskItem represents

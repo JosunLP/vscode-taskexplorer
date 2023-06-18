@@ -1,8 +1,8 @@
 
 import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
-import { getMd5 } from "@env/crypto";
 import { TaskFolder }  from "./folder";
+import { encodeUtf8Hex } from "@env/hex";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
 import { basename, extname, join, resolve } from "path";
@@ -174,8 +174,8 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         // Set unique id
         //
-        this.id = folder.id + ":" + getMd5(this.nodePath + ":" + this.fileName +
-                  ":" + this.groupLevel + ":" + groupId + ":" + this.label + ":" + source, "hex");
+        this.id = folder.id + ":" + encodeUtf8Hex(this.nodePath + ":" + this.fileName +
+                  ":" + this.groupLevel + ":" + groupId + ":" + this.label + ":" + source);
 
         //
         // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
