@@ -371,25 +371,25 @@ suite("Provider Tests", () =>
     {
         if (exitRollingCount(this)) return;
         taskMap = teWrapper.treeManager.getTaskMap();
-        let taskCount = treeUtils.findTaskTypeInTaskMap("ant", taskMap);
+        let taskCount = treeUtils.findTaskTypeInTaskMap("ant", taskMap).length;
         expect(taskCount).to.be.equal(7, `Unexpected Ant task count (Found ${taskCount} of 7)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("apppublisher", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("apppublisher", taskMap).length;
         expect(taskCount).to.be.equal(42, `Unexpected App-Publisher task count (Found ${taskCount} of 42)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("bash", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("bash", taskMap).length;
         expect(taskCount).to.be.equal(3, `Unexpected Bash task count (Found ${taskCount} of 3)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("batch", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("batch", taskMap).length;
         expect(taskCount).to.be.equal(4, `Unexpected Batch task count (Found ${taskCount} of 4)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("gradle", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("gradle", taskMap).length;
         expect(taskCount).to.be.equal(4, `Unexpected Gradle task count (Found ${taskCount} of 4)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("grunt", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("grunt", taskMap).length;
         expect(taskCount).to.be.equal(13, `Unexpected Grunt task count (Found ${taskCount} of 13)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("gulp", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("gulp", taskMap).length;
         expect(taskCount).to.be.equal(32, `Unexpected Gulp task count (Found ${taskCount} of 32)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("python", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("python", taskMap).length;
         expect(taskCount).to.be.equal(2, `Unexpected Python task count (Found ${taskCount} of 2)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("tsc", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("tsc", taskMap).length;
         expect(taskCount).to.be.equal(4, `Unexpected Typescript task count (Found ${taskCount} of 4)`);
-        taskCount = treeUtils.findTaskTypeInTaskMap("Workspace", taskMap);
+        taskCount = treeUtils.findTaskTypeInTaskMap("Workspace", taskMap).length;
         // There are 3 'User' Workspace/VSCode Tasks but they won't be in the count returned from findTaskTypeInTaskMap
         expect(taskCount).to.be.equal(10, `Unexpected VSCode task count (Found ${taskCount} of 10)`);
         endRollingCount(this);

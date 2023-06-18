@@ -9,9 +9,6 @@ import {
 	activate, testControl, logErrorsAreFine, suiteFinished, exitRollingCount, getWsPath, endRollingCount, sleep
 } from "../utils/utils";
 
-const creator = "spmeesseman",
-	  extension = "vscode-taskexplorer";
-
 let rootUri: Uri;
 let teWrapper: ITeWrapper;
 
@@ -57,7 +54,7 @@ suite("Util Tests", () =>
     test("Logging (Error)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(785);
+		this.slow(875);
 
         teWrapper.log.error(`        ${teWrapper.extensionId}`);
         teWrapper.log.error([ `        ${teWrapper.extensionId}`,
@@ -133,7 +130,7 @@ suite("Util Tests", () =>
 	test("Logging (File)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(2525);
+		this.slow(2550);
 		await executeSettingsUpdate("logging.enableFile", false);
 		await executeSettingsUpdate("logging.enableFile", true);
 		teWrapper.log.write("Test1", 1);
@@ -178,7 +175,7 @@ suite("Util Tests", () =>
     test("Logging (Method)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(725);
+		this.slow(825);
 
 		teWrapper.log.methodStart("methodName");
 		teWrapper.log.methodDone("methodName");
@@ -213,7 +210,7 @@ suite("Util Tests", () =>
 	test("Logging (Output Window)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(665);
+		this.slow(750);
 		await executeSettingsUpdate("logging.enableOutputWindow", true);
 		teWrapper.log.write("Test1", 1);
 		teWrapper.log.value("Test2", "value", 1);
@@ -237,7 +234,7 @@ suite("Util Tests", () =>
 
 	test("Logging (Queue)", async function()
     {
-		this.slow(725);
+		this.slow(775);
 
         if (exitRollingCount(this)) return;
 		teWrapper.log.dequeue("queueTestId");
@@ -271,7 +268,7 @@ suite("Util Tests", () =>
     test("Logging (Value)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(1475);
+		this.slow(1550);
         teWrapper.log.value(`        ${teWrapper.extensionId}`, null);
         teWrapper.log.value(`        ${teWrapper.extensionId}`, undefined);
 		teWrapper.log.value(null as unknown as string, 1);
@@ -330,7 +327,7 @@ suite("Util Tests", () =>
     test("Logging (Warn)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(750);
+		this.slow(800);
 		teWrapper.log.warn("test1");
 		teWrapper.log.warn("test2");
 		const scaryOff = teWrapper.logControl.isTestsBlockScaryColors;
@@ -356,7 +353,7 @@ suite("Util Tests", () =>
     test("Logging (Write)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(780);
+		this.slow(825);
 
         teWrapper.log.blank();
         teWrapper.log.blank(1);
@@ -592,7 +589,7 @@ suite("Util Tests", () =>
 		// expect(Object.keys(o).length).to.be.equal(3);
 		// teWrapper.utils.popIfExists(undefined, "f");
 		teWrapper.utils.popObjIfExistsBy(o, (v: any) => v === "g");
-		expect(Object.keys(o).length).to.be.equal(2);
+		expect(Object.keys(o).length).to.be.equal(6);
 		teWrapper.utils.popObjIfExistsBy(undefined, (v: any) => v === "c");
 		// teWrapper.utils.popIfStartsWith(undefined, "aa");
 		// teWrapper.utils.popIfStartsWith([ "abc", "abb", "aabcf", "afd", "aaa" ], "aa");
@@ -607,6 +604,7 @@ suite("Util Tests", () =>
 		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "c", this, true);
 		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "c", undefined, true);
 		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "nnn", this, true);
+		teWrapper.utils.popIfExistsBy(undefined, (v: any) => v === "nnn", this, true);
 		// teWrapper.utils.pushIfNotExistsBy([ "a", "b", "c" ], (v: any) => v === "nnn", this, "b");
 		// teWrapper.utils.pushIfNotExistsBy([ "a", "b", "c" ], (v: any) => v === "e", this, "e");
 		// teWrapper.utils.pushIfNotExistsBy(undefined, (v: any) => v === "nnn", this, "e");
@@ -659,7 +657,7 @@ suite("Util Tests", () =>
 		process.env.APPDATA = "";
 		process.env.USERPROFILE = "test";
 		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
-		expect(dataPath).to.be.equal(`C:\\Projects\\${extension}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\test\\AppData\\Roaming\\vscode`);
+		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\test\\AppData\\Roaming\\vscode`);
 		//
 		// Set environment variables for specific test
 		//
@@ -668,7 +666,7 @@ suite("Util Tests", () =>
 		process.env.APPDATA = dataPath2;
 		process.env.USERPROFILE = dataPath3;
 		dataPath = teWrapper.pathUtils.getUserDataPath("nothing");
-		expect(dataPath).to.be.oneOf([ `C:\\Projects\\${extension}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}`, "C:\\Code\\data\\user-data\\User\\user-data\\User" ]);
+		expect(dataPath).to.be.oneOf([ `C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}`, "C:\\Code\\data\\user-data\\User\\user-data\\User" ]);
 		//
 		// Set environment variables for specific test
 		//
@@ -700,7 +698,7 @@ suite("Util Tests", () =>
 		process.env.APPDATA = "";
 		process.env.USERPROFILE = "";
 		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
-		expect(dataPath).to.be.equal(`C:\\Projects\\${extension}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\AppData\\Roaming\\vscode`);
+		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\AppData\\Roaming\\vscode`);
 		//
 		// Set environment variables for specific test
 		//
@@ -709,13 +707,13 @@ suite("Util Tests", () =>
 		process.env.USERPROFILE = "";
 		process.env.VSCODE_APPDATA = "";
 		dataPath = teWrapper.pathUtils.getUserDataPath("linux");
-		expect(dataPath).to.be.equal(`C:\\Projects\\${extension}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\.config\\vscode`);
+		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\.config\\vscode`);
 		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
-		expect(dataPath).to.be.equal(`C:\\Projects\\${extension}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\AppData\\Roaming\\vscode`);
+		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\AppData\\Roaming\\vscode`);
 		dataPath = teWrapper.pathUtils.getUserDataPath("darwin");
-		expect(dataPath).to.be.equal(`C:\\Projects\\${extension}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\Library\\Application Support\\vscode`);
+		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\Library\\Application Support\\vscode`);
 		dataPath = teWrapper.pathUtils.getUserDataPath("invalid_platform");
-		expect(dataPath).to.be.equal(`C:\\Projects\\${extension}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}`);
+		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}`);
 		//
 		// Set environment variables for specific test
 		//

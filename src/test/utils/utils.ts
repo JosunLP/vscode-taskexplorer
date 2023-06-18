@@ -719,26 +719,32 @@ export const waitForTeIdle2 = async (minWait = 1, maxWait = 15000) =>
     const _wait = async (iterationsIdle: number) =>
     {
         let iteration = 0;
+        const sleepTime = 20;
         while (((iteration < iterationsIdle && waited < minWait /* && !gotNotIdle */) || teWrapper.busy) && waited < maxWait)
         {
-            await sleep(tc.waitForTeIdle.sleep);
-            waited += tc.waitForTeIdle.sleep;
+            await sleep(sleepTime);
+            waited += sleepTime;
             ++iteration;
             if (teWrapper.busy) {
                 iteration = 0;
             }
         }
     };
-    await _wait(tc.waitForTeIdle.iterations1);
+    await _wait(2);
     await sleep(1);
-    await _wait(tc.waitForTeIdle.iterations2);
-    if (minWait > waited)
+    await _wait(1);
+    if (minWait > waited && minWait > 1)
     {
-        let sleepTime = Math.round((minWait - waited) / 3);
-        if (sleepTime < 10) sleepTime = 10;
-        while (minWait > waited) {
-            await sleep(sleepTime);
-            waited += sleepTime;
+        if (minWait - waited >= 30)
+        {
+            const sleepTime = Math.ceil((minWait - waited) / 3);
+            while (minWait > waited) {
+                await sleep(sleepTime);
+                waited += sleepTime;
+            }
+        }
+        else {
+            await sleep(minWait - waited);
         }
     }
 };
@@ -750,24 +756,32 @@ export const waitForWebviewsIdle = async (minWait = 1, maxWait = 15000) =>
     const _wait = async (iterationsIdle: number) =>
     {
         let iteration = 0;
+        const sleepTime = 20;
         while (((iteration < iterationsIdle && waited < minWait /* && !gotNotIdle */) || teWrapper.busyWebviews) && waited < maxWait)
         {
-            await sleep(tc.waitForTeIdle.sleep);
-            waited += tc.waitForTeIdle.sleep;
+            await sleep(sleepTime);
+            waited += sleepTime;
             ++iteration;
             if (teWrapper.busyWebviews) {
                 iteration = 0;
             }
         }
     };
-    await _wait(tc.waitForTeIdle.iterations1);
+    await _wait(2);
     await sleep(1);
-    await _wait(tc.waitForTeIdle.iterations2);
+    await _wait(1);
     if (minWait > waited && minWait > 1)
     {
-        while (minWait > waited) {
-            await sleep(25);
-            waited += 25;
+        if (minWait - waited >= 30)
+        {
+            const sleepTime = Math.ceil((minWait - waited) / 3);
+            while (minWait > waited) {
+                await sleep(sleepTime);
+                waited += sleepTime;
+            }
+        }
+        else {
+            await sleep(minWait - waited);
         }
     }
 };
@@ -775,14 +789,7 @@ export const waitForWebviewsIdle = async (minWait = 1, maxWait = 15000) =>
 
 export const writeAndWait = async (path: string, content: string, maxWait = 30000) =>
 {
-    await writeFile(path, content); // sleep 250+ms before starting wait, vscode fs event takes 225-250ms to fire
-    await sleep(tc.waitTime.fs.modifyEvent);
-    await waitForTeIdle2(50, maxWait);
+    await waitForTeIdle2(1);
+    void writeFile(path, content);
+    await waitForEvent(teWrapper.treeManager.onDidAllTasksChange, maxWait);
 };
-
-
-// export const writeAndWaitWrapperReady = async (path: string, content: string, maxWait = 30000) =>
-// {
-//     void writeFile(path, content); // sleep 250+ms before starting wait, vscode fs event takes 225-250ms to fire
-//     await waitForEvent(teWrapper.onReady, maxWait);
-// };

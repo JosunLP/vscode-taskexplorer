@@ -127,7 +127,7 @@ suite("Task Monitor App Tests", () =>
 	test("Toggle App Settings (From Extension)", async function()
 	{
         if (exitRollingCount(this)) return;
-		this.slow((tc.slowTime.config.event * 4) + (tc.slowTime.config.trackingEvent * 4));
+		this.slow((tc.slowTime.config.event * 6) + (tc.slowTime.config.trackingEvent * 2));
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTimerMode, "MM:SS:MSS");
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTimerMode, "MM:SS:MS");
 		await executeSettingsUpdate(teWrapper.keys.Config.TaskMonitorTrackStats, false);

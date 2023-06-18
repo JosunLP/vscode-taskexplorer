@@ -5,6 +5,7 @@ import { ConfigKeys } from "../../interface";
 import { sleep, testControl as tc, waitForTeIdle } from "./utils";
 import { executeSettingsUpdate, executeTeCommand } from "./commandUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { TaskItem } from "../../tree/item";
 
 interface TaskMap { [id: string]: ITaskItem | undefined };
 
@@ -16,13 +17,11 @@ export const hasRefreshed = () => didRefresh;
 
 
 export const findTaskTypeInTaskMap = (taskType: string, tMap: TaskMap) =>
-    Object.values(tMap).filter((t) => t && t.taskSource === taskType && !t.isUser).length;
+    Object.values(tMap).filter((t): t is ITaskItem => !!t && t.taskSource === taskType && !t.isUser);
 
 
 export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expectedCount: number) =>
 {
-    const taskItems: ITaskItem[] = [];
-
     const _getTaskMap = async(retries: number): Promise<TaskMap> =>
     {
         let taskMap = teWrapper.treeManager.getTaskMap();
@@ -58,24 +57,24 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
         return taskMap || {} as TaskMap;
     };
 
-    const taskMap = await _getTaskMap(0);
-    const taskCount = taskMap ? findTaskTypeInTaskMap(taskType, taskMap) : 0;
-    if (taskCount !== expectedCount)
+    const taskMap = await _getTaskMap(0),
+          tasks = taskMap ? findTaskTypeInTaskMap(taskType, taskMap) : [];
+    if (tasks.length !== expectedCount)
     {
-        console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor("Task map is empty.", teWrapper.figures.colors.grey)}`);
-        console.log(teWrapper.figures.withColor(`    ${teWrapper.figures.color.warning} TaskMap files:\n    ${teWrapper.figures.color.warning}    ` +
-                    Object.keys(taskMap).join(`\n    ${teWrapper.figures.color.warning}    `), teWrapper.figures.colors.grey));
-        expect.fail(`${teWrapper.figures.color.error} Unexpected ${taskType} task count (Found ${taskCount} of ${expectedCount})`);
+        if (Object.keys(taskMap).length === 0) {
+            console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor("Task map is empty.", teWrapper.figures.colors.grey)}`);
+        }
+        else {
+            console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor(`Unexpected ${taskType} task count (Found ${tasks.length} of ${expectedCount})`, teWrapper.figures.colors.grey)}`);
+            console.log(teWrapper.figures.withColor(`    Task items found:\n    ${teWrapper.figures.color.warning}    ` +
+                        tasks.map(i => i.label).join(`\n    ${teWrapper.figures.color.warning}    `), teWrapper.figures.colors.grey));
+        }
+        console.log(teWrapper.figures.withColor(`    ${teWrapper.figures.color.warning} All TaskMap items:\n    ${teWrapper.figures.color.warning}    ` +
+                    Object.keys(taskMap).map(k => Buffer.from(k, "hex").toString("utf8")).join(`\n    ${teWrapper.figures.color.warning}    `), teWrapper.figures.colors.grey));
+        expect.fail(`${teWrapper.figures.color.error} Unexpected ${taskType} task count (Found ${tasks.length} of ${expectedCount})`);
     }
 
-    Object.values(taskMap).forEach((taskItem) =>
-    {
-        if (taskItem && taskItem.taskSource === taskType) {
-            taskItems.push(taskItem);
-        }
-    });
-
-    return taskItems;
+    return [ ...Object.values(taskMap).filter((t): t is TaskItem => !!t && t.taskSource === taskType) ];
 };
 
 
@@ -119,7 +118,7 @@ export const verifyTaskCountByTree = async(teWrapper: ITeWrapper, taskType: stri
             await refresh();
             taskMap = teWrapper.treeManager.getTaskMap();
         }
-        return findTaskTypeInTaskMap(taskType, taskMap);
+        return findTaskTypeInTaskMap(taskType, taskMap).length;
     };
     let retry = 0;
     let taskCount = await _getCount();

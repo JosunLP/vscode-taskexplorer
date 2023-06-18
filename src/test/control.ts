@@ -30,14 +30,6 @@ export const testControl =
     //
     keepSettingsFileChanges: false,
     //
-    // Control for waitForTeIdle
-    //
-    waitForTeIdle: {
-        iterations1: 3,
-        iterations2: 2,
-        sleep: 20,
-    },
-    //
     // LOGGING DEFAULTS
     //
     log: {
@@ -137,7 +129,7 @@ export const testControl =
             trackingEvent: 510
         },
         fs: {
-            createEvent: 1560,
+            createEvent: 1590,
             createEventTsc: 1885,
             createFolderEvent: 1600,
             deleteEvent: 1325,
@@ -173,8 +165,8 @@ export const testControl =
             antTask: 3300,
             antTaskWithAnsicon: 3375,
             bashScript: 3075,
-            batchScriptBat: 4180,
-            batchScriptCmd: 5180,
+            batchScriptBat: 4290,
+            batchScriptCmd: 5280,
             command: 950,
             findPosition: 285,
             findPositionDocOpen: 35,

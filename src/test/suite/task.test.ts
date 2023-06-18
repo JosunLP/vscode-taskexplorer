@@ -257,8 +257,8 @@ suite("Task Tests", () =>
     test("Run Batch Task", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        const slowTime = (tc.slowTime.commands.run * 2) + tc.slowTime.commands.runStop + 6500 +
-                          startTaskSlowTime + (tc.slowTime.config.event * 5) +
+        const slowTime = (tc.slowTime.commands.run * 2) + (tc.slowTime.commands.runStop * 2) + 6500 +
+                          startTaskSlowTime + (tc.slowTime.config.event * 5) + tc.slowTime.commands.focus +
                           (tc.slowTime.commands.standard * 2) + tc.slowTime.general.closeEditors + tc.slowTime.tasks.batchScriptCmd;
         this.slow(slowTime);
         await focusExplorerView(teWrapper); // randomly show/hide view to test refresh event queue in tree/tree.ts
@@ -313,8 +313,9 @@ suite("Task Tests", () =>
         // There are 2 batch file "tasks" - they both utils.sleep for 7 seconds, 1 second at a time
         //
         if (utils.exitRollingCount(this)) return;
-        const slowTime = (tc.slowTime.commands.run * 1) + 5000 /* 7500 */ + startTaskSlowTime + (tc.slowTime.commands.runStop * 1 /* 2 */) +
-                         (tc.slowTime.commands.standard * 3) + (tc.slowTime.config.event * 4) + tc.slowTime.tasks.batchScriptBat + tc.slowTime.config.showHideSpecialFolder;
+        const slowTime = (tc.slowTime.commands.run * 1) + 5500 /* 7500 */ + startTaskSlowTime + (tc.slowTime.commands.runStop * 2) +
+                         (tc.slowTime.commands.standard * 5) + (tc.slowTime.config.event * 4) + tc.slowTime.tasks.batchScriptBat +
+                         tc.slowTime.config.showHideSpecialFolder;
         this.slow(slowTime);
         const batchTask = batch[1];
         await startTask(batchTask, true);
@@ -323,7 +324,7 @@ suite("Task Tests", () =>
         await executeSettingsUpdate("specialFolders.showLastTasks", true);
         await executeTeCommand2("setPinned", [ antTask, "last" ]) ;
         await executeTeCommand2("setPinned", [ batchTask, "last" ]) ;
-        utils.overrideNextShowInputBox(undefined);
+        utils.overrideNextShowInputBox(undefined, true);
         let exec = await executeTeCommand2<TaskExecution | undefined>("runWithArgs", [ batchTask ], tc.waitTime.runCommandMin) ;
         expect(exec).to.be.undefined;
         exec = await executeTeCommand2<TaskExecution | undefined>("runWithArgs", [ batchTask, "--test --test2" ], tc.waitTime.runCommandMin) ;
