@@ -21,7 +21,7 @@ import { provideVSCodeDesignSystem, vsCodeTextField } from "@vscode/webview-ui-t
 
 export class LicenseWebviewApp extends TeWebviewApp<State>
 {
-	private timeout: number | undefined;
+	private timeout: NodeJS.Timeout | undefined;
 	// private  _paypal: PayPalNamespace | null = null;
 	// private _clientId = "";
 

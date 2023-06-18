@@ -339,7 +339,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		promiseUtils.oneTimeEvent(this._treeManager.onReady)(() => {}); // cover onReady (hv used not used, 10x<->)
 		this._treeManager.setMessage(AllConstants.Strings.RequestingTasks);
-		await this._treeManager.loadTasks("   ");
+		await this._treeManager.refresh(undefined, undefined, "   ");
 		this._treeManager.setMessage(); // clear status bar message
 		//
 		// Signal that the startup work has completed.  `queueMicrotask` is interesting, I saw it

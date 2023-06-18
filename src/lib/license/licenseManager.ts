@@ -105,10 +105,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		return this._sessionInterval[this.wrapper.env];
 	}
 
-	get server(): TeServer {
-		return this._server;
-	}
-
 	get statusDays(): string {
 		return this.isTrial ?
 			this.wrapper.utils.getDateDifference(Date.now(), this._account.license.expires, "d").toString() :
