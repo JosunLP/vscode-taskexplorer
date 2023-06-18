@@ -169,6 +169,37 @@ export const openUrl = (url: string) =>
 export const pushIfNotExists = (arr: any[], item: any) => { if (!arr.includes(item)) { arr.push(item); } };
 
 
+export const popIfExistsBy = <T>(arr: T[] | undefined, fn: (v1: T) => boolean, thisArg?: any, single = false): T[] =>
+{
+    const popped: T[] = [];
+    if (arr)
+    {
+        if (!single)
+        {
+            arr.slice().reverse().forEach((v, i, a) => { if (fn.call(thisArg, v)) { popped.push(...arr.splice(a.length - 1 - i, 1)); } });
+        }
+        else {
+            const idx = arr.findIndex(v => fn.call(thisArg, v));
+            if (idx !== -1) {
+                popped.push(arr.splice(idx, 1)[0]);
+            }
+        }
+    }
+    return popped;
+};
+
+
+export const popObjIfExistsBy = <T>(rec: Record<string, T> | undefined, fn: (k: string, v: T) => boolean, thisArg?: any, single = false): T[] =>
+{
+    const popped: T[] = [];
+    if (rec)
+    {
+        Object.entries<T>(rec).every(e => { if (fn.call(thisArg, e[0], e[1])) { popped.push(e[1]); delete rec[e[0]]; return !single; } return true; });
+    }
+    return popped;
+};
+
+
 // export const pluralize = (s: string, count: number) => `${count} ${s}${count === 1 ? "" : "s"}`;
 
 

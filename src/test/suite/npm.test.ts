@@ -4,6 +4,7 @@ import { TaskExecution } from "vscode";
 import { startupFocus } from "../utils/suiteUtils";
 import { executeTeCommand2 } from "../utils/commandUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { writeAndWait } from "../utils/utils";
 
 const testsName = "npm";
 let teWrapper: ITeWrapper;
@@ -55,13 +56,9 @@ suite("NPM Tests", () =>
     test("Create Package File (package.json)", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + (tc.waitTime.fs.createEvent * 2));
-        // tagLog("NPM", "Create Package File (1: package.json)");
-        //
-        // Create NPM package.json
-        //
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         packageJsonPath = utils.getWsPath("package.json");
-        await teWrapper.fs.writeFile(
+        await writeAndWait(
             packageJsonPath,
             "{\r\n" +
             '    "name": "vscode-taskexplorer",\r\n' +
@@ -74,27 +71,17 @@ suite("NPM Tests", () =>
             "    }\r\n" +
             "}\r\n"
         );
-        // tagLog("NPM", "Create Package File (2: package.json)");
-        await utils.waitForTeIdle(tc.waitTime.fs.createEvent * 2);
-        // tagLog("NPM", "Create Package File (3: package.json)");
-        utils.endRollingCount(this);
-    });
-
-
-    test("Verify NPM Task Count", async function()
-    {   // npm task provider is slower than shit on a turtle
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.tasks.count.verifyNpmVsCodeProvided);
         await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
         utils.endRollingCount(this);
     });
 
 
     test("Get NPM Task Items", async function()
-    {   // npm task provider is slower than shit on a turtle
+    {   //
+        // vscode npm task provider is slower than a turtle's s***
+        //
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.tasks.getTreeTasksNpm);
-        // tagLog("NPM", "Get NPM Task Items [Start]");
         //
         // Get the explorer tree task items (three less task than above, one of them tree
         // does not display the 'install' task with the other tasks found, and two of them
@@ -104,6 +91,108 @@ suite("NPM Tests", () =>
         // tagLog("NPM", "Get NPM Task Items [DoWorkSon]"); / -1 for install task not in tree for multi-root ws
         npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount - (tc.isMultiRootWorkspace ? 1 : 0) + 2);
         // tagLog("NPM", "Get NPM Task Items [Complete]");
+        utils.endRollingCount(this);
+    });
+
+
+    test("Modify Package File - Scripts Object", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow((tc.slowTime.fs.modifyEvent * 2) + (tc.slowTime.tasks.count.verify * 2) + 50);
+        await writeAndWait(
+            packageJsonPath as string,
+            "{\r\n" +
+            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "version": "0.0.1",\r\n' +
+            '    "scripts": {\r\n' +
+            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
+            '        "test2": "node ./node_modules/vscode/bin/test",\r\n' +
+            '        "compile": "cmd.exe /c test.bat",\r\n' +
+            '        "watch": "tsc -watch -p ./",\r\n' +
+            '        "build": "npx tsc -p ./"\r\n' +
+            "    }\r\n" +
+            "}\r\n"
+        );
+        await utils.verifyTaskCount(testsName, startTaskCount + 6, 2);
+        await utils.sleep(25);
+        await writeAndWait(
+            packageJsonPath as string,
+            "{\r\n" +
+            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "version": "0.0.1",\r\n' +
+            '    "scripts": {\r\n' +
+            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
+            '        "compile": "cmd.exe /c test.bat",\r\n' +
+            '        "watch": "tsc -watch -p ./",\r\n' +
+            '        "build": "npx tsc -p ./"\r\n' +
+            "    }\r\n" +
+            "}\r\n"
+        );
+        await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Modify Package File - Outside Scripts Oject", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
+        await writeAndWait(
+            packageJsonPath as string,
+            "{\r\n" +
+            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "version": "0.0.1",\r\n' +
+            '    "author": "Scott Meesseman",\r\n' +
+            '    "scripts": {\r\n' +
+            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
+            '        "compile": "cmd.exe /c test.bat",\r\n' +
+            '        "watch": "tsc -watch -p ./",\r\n' +
+            '        "build": "npx tsc -p ./"\r\n' +
+            "    }\r\n" +
+            "}\r\n"
+        );
+        await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Modify Package File - Delete Scripts Oject", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
+        await writeAndWait(
+            packageJsonPath as string,
+            "{\r\n" +
+            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "version": "0.0.1",\r\n' +
+            '    "author": "Scott Meesseman",\r\n' +
+            "}\r\n"
+        );
+        // + 1 because tasks.json still points to the build script (+ install task)
+        await utils.verifyTaskCount(testsName, startTaskCount + 2, 2);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Modify Package File - Add Scripts Object", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
+        await writeAndWait(
+            packageJsonPath as string,
+            "{\r\n" +
+            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "version": "0.0.1",\r\n' +
+            '    "author": "Scott Meesseman",\r\n' +
+            '    "scripts": {\r\n' +
+            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
+            '        "compile": "cmd.exe /c test.bat",\r\n' +
+            '        "watch": "tsc -watch -p ./",\r\n' +
+            '        "build": "npx tsc -p ./"\r\n' +
+            "    }\r\n" +
+            "}\r\n"
+        );
+        await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
         utils.endRollingCount(this);
     });
 

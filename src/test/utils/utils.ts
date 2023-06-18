@@ -7,6 +7,7 @@ import * as treeUtils from "./treeUtils";
 import { testControl } from "../control";
 import { deactivate } from "../../extension";
 import { StorageKeys } from "../../interface";
+import { writeFile } from "../../lib/utils/fs";
 import { startInput, stopInput } from "./input";
 import { figures } from "../../lib/utils/figures";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
@@ -770,3 +771,18 @@ export const waitForWebviewsIdle = async (minWait = 1, maxWait = 15000) =>
         }
     }
 };
+
+
+export const writeAndWait = async (path: string, content: string, maxWait = 30000) =>
+{
+    await writeFile(path, content); // sleep 250+ms before starting wait, vscode fs event takes 225-250ms to fire
+    await sleep(tc.waitTime.fs.modifyEvent);
+    await waitForTeIdle2(50, maxWait);
+};
+
+
+// export const writeAndWaitWrapperReady = async (path: string, content: string, maxWait = 30000) =>
+// {
+//     void writeFile(path, content); // sleep 250+ms before starting wait, vscode fs event takes 225-250ms to fire
+//     await waitForEvent(teWrapper.onReady, maxWait);
+// };

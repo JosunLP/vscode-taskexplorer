@@ -570,7 +570,47 @@ suite("Util Tests", () =>
 		//
 		teWrapper.utils.textWithElipsis("Shorten this text and append an elipsis", 16);
 		teWrapper.utils.textWithElipsis("Don't shorten this text or append an elipsis", 64);
-
+		//
+		// Pop / Push fn
+		//
+		const // a = [ "a", "b", "c", "d", "e", "f", "g" ],
+			  o = { a: "a", b: "b", c: "c", d: "d", e: "e", f: "f", g: "g" };
+		// teWrapper.utils.popIfExists(a, "a");
+		// teWrapper.utils.popIfExists(a, "z");
+		// teWrapper.utils.popIfExists(a, "a");
+		// teWrapper.utils.popIfExists(a, "b", "d");
+		// teWrapper.utils.popIfExists(a, "x", "y", "z");
+		// teWrapper.utils.popIfExists(a, "f", "q");
+		// teWrapper.utils.pushIfNotExists(undefined, "w");
+		// expect(a.length).to.be.equal(3);
+		// teWrapper.utils.popIfExists(o, "a");
+		// teWrapper.utils.popIfExists(o, "z");
+		// teWrapper.utils.popIfExists(o, "a");
+		// teWrapper.utils.popIfExists(o, "b", "e");
+		// teWrapper.utils.popIfExists(o, "x", "y", "z");
+		// teWrapper.utils.popIfExists(o, "f", "q");
+		// expect(Object.keys(o).length).to.be.equal(3);
+		// teWrapper.utils.popIfExists(undefined, "f");
+		teWrapper.utils.popObjIfExistsBy(o, (v: any) => v === "g");
+		expect(Object.keys(o).length).to.be.equal(2);
+		teWrapper.utils.popObjIfExistsBy(undefined, (v: any) => v === "c");
+		// teWrapper.utils.popIfStartsWith(undefined, "aa");
+		// teWrapper.utils.popIfStartsWith([ "abc", "abb", "aabcf", "afd", "aaa" ], "aa");
+		teWrapper.utils.popObjIfExistsBy({ a: "b", c: "d", e: "f" }, (v: any) => v === "c", this);
+		teWrapper.utils.popObjIfExistsBy({ a: "b", c: "d", e: "f" }, (v: any) => v === "c", this, false);
+		teWrapper.utils.popObjIfExistsBy({ a: "b", c: "d", e: "f" }, (v: any) => v === "c", this, true);
+		teWrapper.utils.popObjIfExistsBy({ a: "b", c: "d", e: "f" }, (v: any) => v === "c", undefined, true);
+		teWrapper.utils.popObjIfExistsBy({ a: "b", c: "d", e: "f" }, (v: any) => v === "nnn", this, true);
+		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "c", this);
+		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "c", undefined, false);
+		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "c", this, false);
+		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "c", this, true);
+		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "c", undefined, true);
+		teWrapper.utils.popIfExistsBy([ "a", "b", "c" ], (v: any) => v === "nnn", this, true);
+		// teWrapper.utils.pushIfNotExistsBy([ "a", "b", "c" ], (v: any) => v === "nnn", this, "b");
+		// teWrapper.utils.pushIfNotExistsBy([ "a", "b", "c" ], (v: any) => v === "e", this, "e");
+		// teWrapper.utils.pushIfNotExistsBy(undefined, (v: any) => v === "nnn", this, "e");
+		//
         endRollingCount(this);
 	});
 
@@ -771,7 +811,7 @@ suite("Util Tests", () =>
     test("Storage", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow(350);
+		this.slow(500);
         if (teWrapper.storage)
         {
 			const disposable1 = teWrapper.storage.onDidChange(() => {});

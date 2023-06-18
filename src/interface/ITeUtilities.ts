@@ -95,6 +95,8 @@ export interface ITeUtilities
 	isTaskTypeEnabled(taskType: string): boolean;
 	isTeEnabled(): boolean;
 	openUrl(url: string): void;
+	popIfExistsBy<T>(arr: T[] | undefined, fn: (v1: T) => boolean, thisArg?: any, single?: boolean): T[];
+	popObjIfExistsBy<T>(rec: Record<string, T> | undefined, fn: (k: string, v: T) => boolean, thisArg?: any, single?: boolean): T[];
 	pushIfNotExists(arr: any[], item: any): void;
 	removeFromArray(arr: any[], item: any): void;
 	sleep(ms: number): Promise<void>;
