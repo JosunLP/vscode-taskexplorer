@@ -2,12 +2,12 @@
 import { join } from "path";
 import { Uri } from "vscode";
 import { expect } from "chai";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, getWsPath, testControl, treeUtils, verifyTaskCount, suiteFinished, exitRollingCount,
     waitForTeIdle, endRollingCount, needsTreeBuild
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "batch";
 const startTaskCount = 2;

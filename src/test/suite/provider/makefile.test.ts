@@ -1,22 +1,21 @@
 
 import { join } from "path";
 import { expect } from "chai";
-import { startupFocus } from "../utils/suiteUtils";
-import { MakeTaskProvider } from "../../task/provider/make";
+import { startupFocus } from "../../utils/suiteUtils";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
-import { executeSettingsUpdate } from "../utils/commandUtils";
-import { ITaskExplorerApi, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
+import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
     testInvDocPositions, verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "make";
 const startTaskCount = 8;
 
 let teWrapper: ITeWrapper;
 let teApi: ITaskExplorerApi;
-let provider: MakeTaskProvider;
+let provider: ITaskExplorerProvider;
 let dirName: string;
 let fileUri: Uri;
 
@@ -28,7 +27,7 @@ suite("Makefile Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teApi, teWrapper } = await activate(this));
-        provider = teApi.providers[testsName] as MakeTaskProvider;
+        provider = teApi.providers[testsName];
         dirName = getWsPath("tasks_test_");
         fileUri = Uri.file(join(dirName, "makefile"));
         endRollingCount(this, true);

@@ -2,12 +2,12 @@
 import { join } from "path";
 import { expect } from "chai";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, getWsPath, testControl, treeUtils, verifyTaskCount, logErrorsAreFine, suiteFinished,
     exitRollingCount, waitForTeIdle, endRollingCount, needsTreeBuild
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "bash";
 const startTaskCount = 1;

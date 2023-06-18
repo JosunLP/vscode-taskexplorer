@@ -2,13 +2,13 @@
 import * as path from "path";
 import { Uri } from "vscode";
 import { expect } from "chai";
-import { startupBuildTree } from "../utils/suiteUtils";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { startupBuildTree } from "../../utils/suiteUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
     testInvDocPositions, verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "gradle";
 const startTaskCount = 2;

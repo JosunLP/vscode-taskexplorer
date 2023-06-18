@@ -2,14 +2,14 @@
 
 import * as path from "path";
 import { expect } from "chai";
-import { startupFocus } from "../utils/suiteUtils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, logErrorsAreFine, suiteFinished,
     testControl as tc, verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "python";
 const startTaskCount = 2;

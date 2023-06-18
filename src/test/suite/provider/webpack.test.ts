@@ -2,13 +2,13 @@
 import * as path from "path";
 import { Uri } from "vscode";
 import { expect } from "chai";
-import { startupFocus } from "../utils/suiteUtils";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { startupFocus } from "../../utils/suiteUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
     testInvDocPositions, verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "webpack";
 let startTaskCount = 0; // set in suiteSetup() as it will change depending on single or multi root ws

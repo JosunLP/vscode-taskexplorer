@@ -2,12 +2,12 @@
 import * as path from "path";
 import { Uri } from "vscode";
 import { expect } from "chai";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, needsTreeBuild,
     suiteFinished, testControl as tc, testInvDocPositions, treeUtils, verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "composer";
 const startTaskCount = 2;

@@ -1,10 +1,10 @@
 
-import * as utils from "../utils/utils";
+import * as utils from "../../utils/utils";
 import { TaskExecution } from "vscode";
-import { startupFocus } from "../utils/suiteUtils";
-import { executeTeCommand2 } from "../utils/commandUtils";
+import { startupFocus } from "../../utils/suiteUtils";
+import { executeTeCommand2 } from "../../utils/commandUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { writeAndWait } from "../utils/utils";
+import { writeAndWait } from "../../utils/utils";
 
 const testsName = "npm";
 let teWrapper: ITeWrapper;

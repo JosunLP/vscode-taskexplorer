@@ -1,12 +1,12 @@
 
 import { expect } from "chai";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { tasks, Uri, workspace, WorkspaceFolder } from "vscode";
 import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, getWsPath, testControl as tc, verifyTaskCount, logErrorsAreFine, suiteFinished,
     exitRollingCount, waitForTeIdle, treeUtils, overrideNextShowInfoBox, endRollingCount, needsTreeBuild, testInvDocPositions
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "ant";
 const startTaskCount = 3;

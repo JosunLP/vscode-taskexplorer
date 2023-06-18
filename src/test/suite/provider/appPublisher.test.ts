@@ -1,12 +1,12 @@
 
 import { join } from "path";
 import { Uri } from "vscode";
-import { executeSettingsUpdate, executeTeCommand } from "../utils/commandUtils";
+import { executeSettingsUpdate, executeTeCommand } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath,
     needsTreeBuild, suiteFinished, testControl as tc, treeUtils, verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "apppublisher";
 const startTaskCount = 21;

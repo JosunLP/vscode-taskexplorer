@@ -1,13 +1,13 @@
 
 import * as path from "path";
 import { Uri } from "vscode";
-import { startupFocus } from "../utils/suiteUtils";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { startupFocus } from "../../utils/suiteUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
     testInvDocPositions, updateInternalProviderAutoDetect, verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "gulp";
 const startTaskCount = 17;

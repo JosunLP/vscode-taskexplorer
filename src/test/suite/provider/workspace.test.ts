@@ -1,11 +1,11 @@
 
-import { startupFocus } from "../utils/suiteUtils";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import { startupFocus } from "../../utils/suiteUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, needsTreeBuild, suiteFinished, testControl,
     treeUtils
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "Workspace";
 const startTaskCount = 10; // 10 + 3 'User' Tasks, but getTaskCountByTree() will not return the User tasks

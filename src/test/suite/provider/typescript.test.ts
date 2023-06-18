@@ -3,11 +3,11 @@
 
 import { join } from "path";
 import { Uri } from "vscode";
-import fsUtils from "../utils/fsUtils";
-import * as utils from "../utils/utils";
-import { startupFocus } from "../utils/suiteUtils";
+import fsUtils from "../../utils/fsUtils";
+import * as utils from "../../utils/utils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
+import { executeSettingsUpdate, executeTeCommand2 } from "../../utils/commandUtils";
 
 const testsName = "tsc";
 const startTaskCount = 0;

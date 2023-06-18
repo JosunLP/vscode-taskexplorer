@@ -2,14 +2,14 @@
 import * as path from "path";
 import { Uri } from "vscode";
 import { expect } from "chai";
-import fsUtils from "../utils/fsUtils";
-import { startupFocus } from "../utils/suiteUtils";
-import { executeSettingsUpdate } from "../utils/commandUtils";
+import fsUtils from "../../utils/fsUtils";
+import { startupFocus } from "../../utils/suiteUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
     testInvDocPositions, updateInternalProviderAutoDetect, verifyTaskCount
-} from "../utils/utils";
+} from "../../utils/utils";
 
 const testsName = "grunt";
 const startTaskCount = 7;
