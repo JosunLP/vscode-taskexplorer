@@ -29,7 +29,13 @@ export async function run(): Promise<void>
 {
     const runCfg = await runConfig();
 
-    const failures: number = await new Promise(resolve => runCfg.mocha.run(resolve));
+    let mochaError: Error | undefined,
+        failures = 0;
+
+    try {
+        failures = await new Promise(resolve => runCfg.mocha.run(resolve));
+    }
+    catch (e) { mochaError = e; }
 
     if (runCfg.nyc)
     {
@@ -45,14 +51,14 @@ export async function run(): Promise<void>
             console.log("!!! Error writing coverage file:");
             try {
                 console.log("!!!    " + e.toString());
-            }catch {}
+            } catch {}
             console.log("!!!");
         }
     }
 
-    if (failures > 0)
+    if (failures > 0 || mochaError)
     {
-        throw new Error(`${failures} tests failed.`);
+        throw new Error(!mochaError ? `${failures} tests failed.` : mochaError.message);
     }
 }
 

@@ -365,7 +365,7 @@ suite("License Manager Tests", () =>
 		});
 		setTasks({ tasks: teWrapper.treeManager.getTasks() });
 		utils.overrideNextShowInfoBox(undefined, true);
-		await utils.treeUtils.refresh();
+		await utils.treeUtils.refresh(teWrapper, );
 		expect(teWrapper.treeManager.getTasks().length).to.be.equal(25);
         utils.endRollingCount(this);
 	});
@@ -383,7 +383,7 @@ suite("License Manager Tests", () =>
 		});
 		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "gulp" }});
 		utils.overrideNextShowInfoBox(undefined, true);
-		await utils.treeUtils.refresh();
+		await utils.treeUtils.refresh(teWrapper, );
 		expect(teWrapper.treeManager.getTasks().filter((t: Task) => t.source === "gulp").length).to.be.equal(10);
         utils.endRollingCount(this);
 	});
@@ -401,7 +401,7 @@ suite("License Manager Tests", () =>
 		});
 		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "batch" }});
 		utils.overrideNextShowInfoBox(undefined, true);
-		await utils.treeUtils.refresh();
+		await utils.treeUtils.refresh(teWrapper, );
 		expect(teWrapper.treeManager.getTasks().filter((t: Task) => t.source === "batch").length).to.be.equal(1);
         utils.endRollingCount(this);
 	});
@@ -428,7 +428,7 @@ suite("License Manager Tests", () =>
 		});
 		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "grunt" }});
 		utils.overrideNextShowInfoBox(undefined, true);
-		await utils.treeUtils.refresh();
+		await utils.treeUtils.refresh(teWrapper, );
 		await teWrapper.fs.copyDir(outsideWsDir, utils.getWsPath("."), undefined, true); // Cover fileCache.addFolder()
         await utils.waitForTeIdle(tc.waitTime.fs.createFolderEvent);
 		await teWrapper.fs.deleteDir(join(utils.getWsPath("."), "testA"));
@@ -504,7 +504,7 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
 		await expectLicense(true, false, true, false);
-		await utils.treeUtils.refresh();
+		await utils.treeUtils.refresh(teWrapper, );
         utils.endRollingCount(this);
 	});
 

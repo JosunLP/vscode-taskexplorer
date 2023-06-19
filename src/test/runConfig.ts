@@ -1,49 +1,32 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-"use strict";
-//
+
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
 import Mocha from "mocha";
 const NYC = require("nyc");
 
-//
-// Simulates the recommended config option
-// extends: "@istanbuljs/nyc-config-typescript",
-// import * as baseConfig from "@istanbuljs/nyc-config-typescript";
-
-// const sleep = (ms: number) =>
-// {
-//     return new Promise(resolve => setTimeout(resolve, ms));
-// };
-
 
 export default async() =>
 {
+    let nyc: any;
     const xArgs = JSON.parse(process.env.xArgs || "[]"),
           testArgs = JSON.parse(process.env.testArgs || "[]"),
-          // testsRoot = path.resolve(__dirname, ".."),  // <- WP
-          // nycRoot = path.resolve(__dirname, "..", "..", ".."),
-          testsRoot = path.resolve(__dirname),           // <- TS
-          nycRoot = path.resolve(__dirname, "..", ".."), // <- TS
-          projectRoot = path.resolve(testsRoot, ".."),
-          cover = fs.existsSync(path.join(projectRoot, "extension.js.map")),
+          projectRoot = path.resolve(__dirname, "..", ".."),
+          isWebpackBuild = fs.existsSync(path.join(projectRoot, "dist", "vendor.js")),
+          cover = !xArgs.includes("--no-coverage"),
           noClean = xArgs.includes("--nyc-no-clean");
 
-    let nyc: any;
     if (cover)
     {
-        // Setup coverage pre-test, including post-test hook to report
         nyc = new NYC({
             extends: "@istanbuljs/nyc-config-typescript",
             all: false,
-            // cache: false,
-            cwd: nycRoot,
+            // cache: true, // enabling cache breaks storage tests??? @istanbuljs/nyc-config-typescript sets to false explicitly
+            cwd: projectRoot,
             hookRequire: true,
             hookRunInContext: true,
             hookRunInThisContext: true,
-            // instrument: false,
             instrument: true,
             noClean,
             reportDir: "./.coverage",
@@ -52,9 +35,12 @@ export default async() =>
             // sourceMap: true,
             // sourceMap: false,
             // useSpawnWrap: true,
-            exclude: [ "dist/test/**", "**/external*.*", "external*" ],
+            exclude: [
+                "dist/test/**", "dist/webpack/**", "<node_internals>/**", "<node_externals>/**", "<externals>/**",
+                "<vscode>/**", "<vscode_externals>/**", "<externals_vscode>/**", "dist/vendor.js"
+            ],
             // ignoreClassMethod: [ "error", "catch", "log.error" ],
-            include: [ "dist/**/*.js" ],
+            include: !isWebpackBuild ? [ "dist/**/*.js" ] : [ "dist/taskexplorer.js" ],
             reporter: [ "text-summary", "html", "lcov", "cobertura" ]
         });
 
@@ -68,8 +54,8 @@ export default async() =>
         // Object.keys(require.cache).forEach((reqKey) => {
         //     console.log("   " + reqKey);
         // });
-        const myFilesRegex = /vscode-taskexplorer\/dist/;
-        const filterFn = myFilesRegex.test.bind(myFilesRegex);
+        const myFilesRegex = /vscode-taskexplorer\/dist/,
+              filterFn = myFilesRegex.test.bind(myFilesRegex);
         if (Object.keys(require.cache).filter(filterFn).length > 1)
         {
             console.warn("NYC initialized after modules were loaded", Object.keys(require.cache).filter(filterFn));
@@ -133,12 +119,10 @@ export default async() =>
     //
     // Add all files to the test suite
     //
-    const files = glob.sync(filesToTest, { cwd: testsRoot });
-    files.sort((a: string, b: string) => {
-        return path.basename(a) < path.basename(b) ? -1 : 1;
-    });
-    // const files = glob.sync(`{**/_api.test.js,**/${fileToTest}.test.js}`, { cwd: testsRoot });
-    files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+    const testsRoot = path.resolve(__dirname),
+          files = glob.sync(filesToTest, { cwd: testsRoot });
+    files.sort((a: string, b: string) => path.basename(a) < path.basename(b) ? -1 : 1)
+         .forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
     return {
         nyc,

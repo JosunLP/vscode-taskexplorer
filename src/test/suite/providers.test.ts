@@ -4,7 +4,6 @@
 import { join } from "path";
 import { expect } from "chai";
 import { refresh } from "../utils/treeUtils";
-import { ConfigKeys } from "../../interface";
 import { tasks, TreeItemCollapsibleState } from "vscode";
 import { ITaskFile, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand2, focusExplorerView } from "../utils/commandUtils";
@@ -89,7 +88,7 @@ suite("Provider Tests", () =>
     {
         if (exitRollingCount(this)) return;
         if (needsTreeBuild()) {
-            await treeUtils.refresh(this);
+            await treeUtils.refresh(teWrapper, this);
         }
         endRollingCount(this);
     });
@@ -464,7 +463,7 @@ suite("Provider Tests", () =>
                   (tc.slowTime.commands.refresh * 2) + (tc.waitTime.refreshCommand * 2));
         await executeSettingsUpdate("logging.enable", false); // was hitting tree.logTask()
         await executeSettingsUpdate("specialFolders.folderState.project1", "Collapsed", tc.waitTime.config.event);
-        await refresh();
+        await refresh(teWrapper);
         endRollingCount(this);
     });
 
@@ -473,9 +472,9 @@ suite("Provider Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent * 3);
-        await executeSettingsUpdate(ConfigKeys.GroupWithSeperator, true);
-        await executeSettingsUpdate(ConfigKeys.GroupSeparator, "-");
-        await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 5);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeperator, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupSeparator, "-");
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupMaxLevel, 5);
         endRollingCount(this);
     });
 

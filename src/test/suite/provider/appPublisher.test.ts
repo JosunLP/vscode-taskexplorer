@@ -50,7 +50,7 @@ suite("App-Publisher Tests", () =>
     {
         if (exitRollingCount(this)) return;
         if (needsTreeBuild()) {
-            await treeUtils.refresh(this);
+            await treeUtils.refresh(teWrapper, this);
         }
         endRollingCount(this);
     });

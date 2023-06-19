@@ -1,11 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { expect } from "chai";
-import { ConfigKeys } from "../../interface";
 import { sleep, testControl as tc, waitForTeIdle } from "./utils";
 import { executeSettingsUpdate, executeTeCommand } from "./commandUtils";
 import { ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { TaskItem } from "../../tree/item";
 
 interface TaskMap { [id: string]: ITaskItem | undefined };
 
@@ -39,7 +37,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
             }
             if (retries % 10 === 0)
             {
-                await refresh();
+                await refresh(teWrapper);
                 taskMap = teWrapper.treeManager.getTaskMap();
             }
             if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap))
@@ -74,7 +72,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
         expect.fail(`${teWrapper.figures.color.error} Unexpected ${taskType} task count (Found ${tasks.length} of ${expectedCount})`);
     }
 
-    return [ ...Object.values(taskMap).filter((t): t is TaskItem => !!t && t.taskSource === taskType) ];
+    return [ ...Object.values(taskMap).filter((t): t is ITaskItem => !!t && t.taskSource === taskType) ];
 };
 
 
@@ -86,7 +84,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
  *
  * @param instance The test instance to set the timeout and slow time on.
  */
-export const refresh = async(instance?: any) =>
+export const refresh = async(teWrapper: ITeWrapper, instance?: any) =>
 {
     if (instance)
     {
@@ -97,8 +95,8 @@ export const refresh = async(instance?: any) =>
         if (!didSetGroupLevel)
         {
             // utils.getTeApi().testsApi.enableConfigWatcher(false);
-            await executeSettingsUpdate(ConfigKeys.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
-            await executeSettingsUpdate(ConfigKeys.GroupMaxLevel, 5, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(teWrapper.keys.Config.GroupMaxLevel, 5, tc.waitTime.config.groupingEvent);
             // utils.getTeApi().testsApi.enableConfigWatcher(true);
             didSetGroupLevel = true;
         }
@@ -115,7 +113,7 @@ export const verifyTaskCountByTree = async(teWrapper: ITeWrapper, taskType: stri
     const _getCount = async() =>
     {
         if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap)) {
-            await refresh();
+            await refresh(teWrapper);
             taskMap = teWrapper.treeManager.getTaskMap();
         }
         return findTaskTypeInTaskMap(taskType, taskMap).length;

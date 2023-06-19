@@ -87,7 +87,7 @@ suite("File Watcher Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         if (utils.needsTreeBuild()) {
-            await utils.treeUtils.refresh(this);
+            await utils.treeUtils.refresh(teWrapper, this);
         }
         utils.endRollingCount(this);
     });

@@ -8,7 +8,6 @@ import { closeTeWebviewPanel, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount
 } from "../../utils/utils";
-import { promiseFromEvent } from "../../../lib/utils/promiseUtils";
 
 let teWrapper: ITeWrapper;
 let extension: Extension<any>;
@@ -58,7 +57,7 @@ suite("Release Notes Page Tests", () =>
 		try {
 			await showTeWebview(teWrapper.releaseNotesPage);
 			void teWrapper.releaseNotesPage.postMessage({ method: "echo/fake" }, { command: "taskexplorer.view.parsingReport.show" }); // cover notify() when not visible
-			await promiseFromEvent(teWrapper.releaseNotesPage.onDidReceiveMessage).promise;
+			await teWrapper.promiseUtils.promiseFromEvent(teWrapper.releaseNotesPage.onDidReceiveMessage).promise;
 		}
 		catch (e) { throw e; }
 		finally { extension.packageJSON.version = version; }

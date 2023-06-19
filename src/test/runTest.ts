@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import * as fs from "fs";
 import * as path from "path";
@@ -13,15 +14,46 @@ import { runTests } from "@vscode/test-electron";
 
 interface IDictionary<TValue> { [id: string]: TValue }
 
+const colors = {
+    white: [ 37, 39 ],
+    grey: [ 90, 39 ],
+    blue: [ 34, 39 ],
+    cyan: [ 36, 39 ],
+    green: [ 32, 39 ],
+    magenta: [ 35, 39 ],
+    red: [ 31, 39 ],
+    yellow: [ 33, 39 ]
+};
 
-const figures = require("../lib/utils/figures").figures;
+const withColor = (msg: string, color: number[]) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
 
+const figures =
+{
+    withColor,
+    success: "✔",
+    info: "ℹ",
+	warning: "⚠",
+	error: "✘",
+    color:
+    {
+        success: withColor("✔", colors.green),
+        successBlue: withColor("✔", colors.blue),
+        info: withColor("ℹ", colors.magenta),
+        infoTask: withColor("ℹ", colors.blue),
+        warning: withColor("⚠", colors.yellow),
+        warningTests: withColor("⚠", colors.blue),
+        error: withColor("✘", colors.red),
+        errorTests: withColor("✘", colors.blue)
+    }
+};
+
+const logSep = "----------------------------------------------------------------------------------------------------";
 
 const getTaskTypes = () =>
 {
     return [
         "ant", "apppublisher", "bash", "batch", "composer",  "gradle", "grunt", "gulp", "jenkins", "make",
-        "maven", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
+        "maven", "node", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
     ];
 };
 
@@ -35,11 +67,6 @@ const getTaskTypeRealName = (taskType: string) =>
 };
 
 const getWsPath = (p: string) => path.normalize(path.resolve(__dirname, "..", "..", "test-fixture", "project1", p));
-
-
-const consoleWrite = (msg: string, icon?: string, pad = "") =>
-    console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
-
 
 const createDefaultSettings = async(packageJson: any) =>
 {   //
@@ -119,6 +146,10 @@ const createDefaultSettings = async(packageJson: any) =>
     };
 };
 
+const consoleWrite = (msg: string, icon?: string, pad = "") =>
+    console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, colors.grey) : ""}`);
+
+
 const main = async(args: string[]) =>
 {
     let failed = false,
@@ -141,8 +172,11 @@ const main = async(args: string[]) =>
           isWebpackBuild = fs.existsSync(path.join(distPath, "vendor.js")),
           defaultSettings = await createDefaultSettings(pkgJso);
 
-    consoleWrite("Path parameters");
+    consoleWrite(logSep);
+    consoleWrite("Test Runner Initializing");
     consoleWrite(`   current working directory : ${process.cwd()}`);
+    consoleWrite(logSep);
+    consoleWrite("Runtime parameters");
     consoleWrite(`   extensionDevelopmentPath  : ${extensionDevelopmentPath}`);
     consoleWrite(`   extensionTestsPath        : ${extensionTestsPath}`);
     consoleWrite(`   distPath                  : ${distPath}`);
@@ -181,7 +215,7 @@ const main = async(args: string[]) =>
               testsArgs: string[] = [];
         if (args && args.length > 0)
         {
-            consoleWrite("Arguments: " + args.toString());
+            consoleWrite("   arguments                   : " + args.join(", "));
             args.forEach((a) =>
             {
                 if (a.startsWith("-"))
@@ -195,9 +229,11 @@ const main = async(args: string[]) =>
                     testsArgs.push(a);
                 }
             });
+            consoleWrite("   xargs                       : " + xArgs.join(", "));
+            consoleWrite("   testargs                    : " + testsArgs.join(", "));
         }
         else {
-            consoleWrite("Arguments: None");
+            consoleWrite("   arguments                   : none");
         }
 
         consoleWrite("clear package.json activation event");
@@ -246,6 +282,8 @@ const main = async(args: string[]) =>
 		// 		platform: "win32-x64-archive"
 		// 	});
 		// }
+
+        consoleWrite(logSep);
 
         //
         // Download VS Code, unzip it and run the integration test

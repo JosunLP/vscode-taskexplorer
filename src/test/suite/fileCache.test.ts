@@ -37,7 +37,7 @@ suite("File Cache Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         if (utils.needsTreeBuild()) {
-            await utils.treeUtils.refresh(this);
+            await utils.treeUtils.refresh(teWrapper, this);
         }
         utils.endRollingCount(this);
     });
@@ -105,7 +105,7 @@ suite("File Cache Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.cache.rebuild + tc.slowTime.commands.fast);
-        // await treeUtils.refresh(this);
+        // await treeUtils.refresh(teWrapper, this);
         await teWrapper.fileCache.rebuildCache("", true);
         await utils.waitForTeIdle(tc.waitTime.commandFast);
         utils.endRollingCount(this);

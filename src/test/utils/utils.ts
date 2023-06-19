@@ -5,21 +5,18 @@ import * as path from "path";
 import { expect } from "chai";
 import * as treeUtils from "./treeUtils";
 import { testControl } from "../control";
-import { deactivate } from "../../extension";
-import { StorageKeys } from "../../interface";
-import { writeFile } from "../../lib/utils/fs";
+import { deactivate } from "../../taskexplorer";
 import { startInput, stopInput } from "./input";
-import { figures } from "../../lib/utils/figures";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import {
-    ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
+    ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter, ITeFigures
 } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    commands, ConfigurationTarget, Event, EventEmitter, Extension, extensions, Task,
-    TaskExecution, tasks, Uri, ViewColumn, window, workspace
+    commands, ConfigurationTarget, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks,
+    Uri, ViewColumn, window, workspace
 } from "vscode";
 
 const { symbols } = require("mocha/lib/reporters/base");
@@ -30,6 +27,7 @@ export { getWsPath, getProjectsPath };
 export let teApi: ITaskExplorerApi;
 export let teWrapper: ITeWrapper;
 
+let figures: ITeFigures;
 let activated = false;
 let caughtControlC = false;
 let hasRollingCountError = false;
@@ -144,6 +142,7 @@ export const activate = async (instance?: Mocha.Context) =>
         // Note that the '*' is removed from package.json[activationEvents] before the runTest() call
         //
         teWrapper = await (ext as any).activate();
+        figures = teWrapper.figures;
 		// await sleep(serverActivationDelay); // Wait for server activation
         console.log(`    ${figures.color.info} ${figures.withColor("Extension successfully activated", figures.colors.grey)}`);
 		activated = true;
@@ -234,7 +233,7 @@ export const cleanup = async () =>
     // Cleanup or reset any settings, and clear license/account from tests storage
     //
     await cleanupSettings();
-    await teWrapper.storage.deleteSecret(StorageKeys.Account);
+    await teWrapper.storage.deleteSecret(teWrapper.keys.Storage.Account);
 
     console.log(`    ${figures.color.info} ${figures.withColor("Deactivating extension", figures.colors.grey)}`);
     try { await deactivate(); } catch {}
@@ -790,6 +789,6 @@ export const waitForWebviewsIdle = async (minWait = 1, maxWait = 15000) =>
 export const writeAndWait = async (path: string, content: string, maxWait = 30000) =>
 {
     await waitForTeIdle2(1);
-    void writeFile(path, content);
+    void teWrapper.fs.writeFile(path, content);
     await waitForEvent(teWrapper.treeManager.onDidAllTasksChange, maxWait);
 };
