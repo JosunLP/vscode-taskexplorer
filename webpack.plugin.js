@@ -26,6 +26,19 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 /** @typedef {import("./types/webpack").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("./types/webpack").WebpackPluginInstance} WebpackPluginInstance */
 
+const colors = {
+	white: [ 37, 39 ],
+	grey: [ 90, 39 ],
+	blue: [ 34, 39 ],
+	cyan: [ 36, 39 ],
+	green: [ 32, 39 ],
+	magenta: [ 35, 39 ],
+	red: [ 31, 39 ],
+	yellow: [ 33, 39 ]
+};
+
+function withColor(msg, color) { return "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m" };
+
 
 const wpPlugin =
 {
@@ -302,6 +315,28 @@ const wpPlugin =
 	},
 
 
+	figures:
+	{
+		colors,
+		error: "✘",
+		info: "ℹ",
+		success: "✔",
+		warning: "⚠",
+		withColor,
+		color:
+		{
+			success: withColor("✔", colors.green),
+			successBlue: withColor("✔", colors.blue),
+			info: withColor("ℹ", colors.magenta),
+			infoTask: withColor("ℹ", colors.blue),
+			warning: withColor("⚠", colors.yellow),
+			warningTests: withColor("⚠", colors.blue),
+			error: withColor("✘", colors.red),
+			errorTests: withColor("✘", colors.blue)
+		}
+	},
+
+
 	/**
 	 * @param { string } name
 	 * @param {WebpackEnvironment} env
@@ -516,6 +551,30 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
+	 * @returns {webpack.SourceMapDevToolPlugin}
+	 */
+	sourcemaps: (env, wpConfig) =>
+	{
+		/** @type {webpack.SourceMapDevToolPlugin | undefined} */
+		let plugin;
+		if (env.sourcemapsPlugin && env.build !== "webview" && env.environment === "test" && wpConfig.mode !== "production")
+		{
+			plugin = new webpack.SourceMapDevToolPlugin(
+			{
+				//include: /\.js/,
+  				exclude: [ 'vendor.js' ],
+			})
+		}
+		if (!plugin) {
+			plugin = /** @type {webpack.SourceMapDevToolPlugin} */(/** @type {unknown} */(undefined));
+		}
+		return plugin;
+	},
+
+
+	/**
+	 * @param {WebpackEnvironment} env
+	 * @param {WebpackConfig} wpConfig Webpack config object
 	 * @returns {ForkTsCheckerPlugin}
 	 */
 	tscheck: (env, wpConfig) =>
@@ -663,6 +722,7 @@ class InlineChunkHtmlPlugin
 		});
 	}
 }
+
 
 module.exports = {
 	wpPlugin

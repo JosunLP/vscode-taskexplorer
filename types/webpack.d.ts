@@ -19,6 +19,7 @@ declare interface WebpackEnvironment
     environment: "dev"|"prod"|"test"|"testprod";
     esbuild: boolean; // Is ES build
     imageOpt: boolean; // Perform image optimization
+    sourcemapsPlugin: boolean;
     target: "webworker"|"node"|"web";
 }
 

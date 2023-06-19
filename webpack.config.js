@@ -49,41 +49,42 @@ module.exports = (env, argv) =>
 		fa: "custom",
 		imageOpt: true,
 		environment: "prod",
+		sourcemapsPlugin: false,
 		target: "node"
 	}, env);
 	
-	if (typeof env.analyze === "string") { env.analyze = String(env.analyze).toLowerCase() == "true"; }
-	if (typeof env.clean === "string") { env.clean = String(env.clean).toLowerCase() == "true"; }
-	if (typeof env.esbuild === "string") { env.esbuild = String(env.esbuild).toLowerCase() == "true"; }
-	if (typeof env.imageOpt === "string") { env.imageOpt = String(env.imageOpt).toLowerCase() == "true"; }
+	Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(k)).forEach((k) =>
+	{
+		env[k] = String(env[k]).toLowerCase() == "true";
+	});
 
-	// consoleWrite("Start Webpack build");
-	// consoleWrite("Environment:");
-	// consoleWrite(`   build         : ${env.build}`);
-	// consoleWrite(`   clean         : ${env.clean}`);
-	// consoleWrite(`   environment   : ${env.environment}`);
-	// consoleWrite(`   esbuild       : ${env.esbuild}`);
-	// consoleWrite(`   target        : ${env.target}`);
-	// if (argv) {
-	// 	consoleWrite("Arguments:");
-	// 	if (argv.env) {
-	// 		consoleWrite(`   environment   : ${argv.env}`);
-	// 	}
-	// 	if (argv.mode) {
-	// 		consoleWrite(`   mode          : ${argv.mode}`);
-	// 	}
-	// 	if (argv.config) {
-	// 		consoleWrite(`   config        : ${argv.config.join(", ")}`);
-	// 	}
-	// }
+	consoleWrite("Start Webpack build");
+	consoleWrite("Environment:");
+	consoleWrite(`   build         : ${env.build}`);
+	consoleWrite(`   clean         : ${env.clean}`);
+	consoleWrite(`   environment   : ${env.environment}`);
+	consoleWrite(`   esbuild       : ${env.esbuild}`);
+	consoleWrite(`   target        : ${env.target}`);
+	if (argv) {
+		consoleWrite("Arguments:");
+		if (argv.env) {
+			consoleWrite(`   environment   : ${argv.env}`);
+		}
+		if (argv.mode) {
+			consoleWrite(`   mode          : ${argv.mode}`);
+		}
+		if (argv.config) {
+			consoleWrite(`   config        : ${argv.config.join(", ")}`);
+		}
+	}
 
 	if (env.build){
-		// consoleWrite(`Running environment specified build '${env.build}'`);
+		consoleWrite(`Running environment specified build '${env.build}'`);
 		return getWebpackConfig(env.build, env, argv);
 	}
 
 	if (env.environment === "test") {
-		// consoleWrite("Build test files");
+		consoleWrite("Build test files");
 		// env.esbuild = true;
 		return [
 			getWebpackConfig("extension", env, argv),
@@ -92,14 +93,14 @@ module.exports = (env, argv) =>
 	}
 
 	if (env.environment === "testprod") {
-		// consoleWrite("Build test files (production compiled)");
+		consoleWrite("Build test files (production compiled)");
 		return [
 			getWebpackConfig("extension", env, argv),
 			getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, argv)
 		];
 	}
 
-	// consoleWrite("Build extension and webviews");
+	consoleWrite("Build extension and webviews");
 	return [
 		getWebpackConfig("extension", env, argv),
 		// getWebpackConfig("extension_web", env, argv),
@@ -108,8 +109,8 @@ module.exports = (env, argv) =>
 };
 
 
-// const consoleWrite = (msg, icon, pad = "") =>
-//     console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
+const consoleWrite = (msg, icon, pad = "") =>
+    console.log(`     ${pad}${icon || wpPlugin.figures.color.info}${msg ? " " + wpPlugin.figures.withColor(msg, wpPlugin.figures.colors.grey) : ""}`);
 
 
 /**
@@ -192,38 +193,33 @@ const context = (env, wpConfig) =>
 const devTool = (env, wpConfig) =>
 {
 	wpConfig.devtool = false;
-	if (env.environment === "dev" || wpConfig.mode === "development")
-	{
-		wpConfig.devtool = "source-map";
-		// wpConfig.devtool = "eval";
-	}
-	else if (env.environment === "test")
-	{
-		wpConfig.devtool = "source-map";
-		wpConfig.devtool = "inline-cheap-module-source-map";
-	}
 	if (!wpConfig.output) {
 		wpConfig.output = {};
 	}
-	if (env.environment === "test") {
-		wpConfig.output.devtoolModuleFilenameTemplate = '[absolute-resource-path]';
-    	wpConfig.output.devtoolFallbackModuleFilenameTemplate = '[absolute-resource-path]?[hash]';
-		// wpConfig.output.devtoolModuleFilenameTemplate = "../[resource-path]";
-		// wpConfig.output.devtoolModuleFilenameTemplate = (info) => {
-		// 	console.log("--------------------------------------------");
-		// 	console.log("1: " + info.absoluteResourcePath);
-		// 	console.log("2: " + info.resourcePath);
-		// 	console.log("3: " + info.resource);
-		// 	console.log("4: " + info.namespace);
-		// 	console.log("5: " + info.loaders);
-		// 	// if(info.resourcePath.includes("external")) {
-		// 	// 	return null;
-		// 	// }
-		// 	return `${info.absoluteResourcePath}`;
-		// };
-	}
-	else {
+	if (env.environment === "dev" || wpConfig.mode === "development")
+	{
+		wpConfig.devtool = "source-map";
 		wpConfig.output.devtoolModuleFilenameTemplate = "../[resource-path]";
+	}
+	else if (env.environment === "test")
+	{
+		wpConfig.devtool = !env.sourcemapsPlugin ? "inline-source-map" : false;
+		// wpConfig.output.devtoolModuleFilenameTemplate = '[absolute-resource-path]';
+    	// wpConfig.output.devtoolFallbackModuleFilenameTemplate = '[absolute-resource-path]?[hash]';
+		// wpConfig.output.devtoolModuleFilenameTemplate = "../[resource-path]";
+		wpConfig.output.devtoolModuleFilenameTemplate = (info) => {
+			console.log("--------------------------------------------");
+			console.log("1: " + info.absoluteResourcePath);
+			console.log("2: " + info.resourcePath);
+			console.log("3: " + info.resource);
+			console.log("4: " + info.namespace);
+			console.log("5: " + info.loaders);
+			if (info.resourcePath.includes("external")) {
+				return undefined;
+			}
+			// return `${info.absoluteResourcePath}`;
+			return `${info.resourcePath}`;
+		};
 	}
 };
 
@@ -401,8 +397,11 @@ const mode = (env, argv, wpConfig) =>
 {
 	if (!argv.mode)
 	{
-		if (env.environment === "dev" || env.environment === "test") {
+		if (env.environment === "dev") {
 			wpConfig.mode = "development";
+		}
+		else if (env.environment === "test") {
+			wpConfig.mode = "none";
 		}
 		else {
 			wpConfig.mode = "production";
@@ -433,11 +432,27 @@ const mode = (env, argv, wpConfig) =>
  */
 const optimization = (env, wpConfig) =>
 {
-	if (env.build !== "webview" && env.environment !== "test")
+	if (env.build !== "webview") // && env.environment !== "test")
 	{
+		/*
 		wpConfig.optimization =
 		{
 			runtimeChunk: env.environment !== "dev" ? "single" : undefined,
+			splitChunks: env.build === "extension_web" ? false : {
+				cacheGroups: {
+					vendor: {
+						test: /[\\/]node_modules[\\/]((?!(node-windows)).*)[\\/]/,
+						name: "vendor",
+						chunks: "all"
+					}
+				}
+			}
+		};
+		*/
+		wpConfig.optimization =
+		{
+			 runtimeChunk: env.environment === "prod" || env.environment === "test" ? "single" : undefined,
+			// runtimeChunk: env.environment === "prod" ? "single" : undefined,
 			splitChunks: env.build === "extension_web" ? false : {
 				cacheGroups: {
 					vendor: {
@@ -458,20 +473,20 @@ const optimization = (env, wpConfig) =>
 			}
 		*/
 	}
-	else if (env.environment === "test")
-	{
-		// wpConfig.optimization = {
-		// 	runtimeChunk: true
-		// };
-		// wpConfig.optimization = {
-		// 	usedExports: true,
-		// 	concatenateModules: true
-		// };
-		// wpConfig.experiments = {
-		// 	outputModule: true
-		// };
-		wpConfig.optimization = {};
-	}
+	// else if (env.environment === "test")
+	// {
+	// 	// wpConfig.optimization = {
+	// 	// 	runtimeChunk: true
+	// 	// };
+	// 	// wpConfig.optimization = {
+	// 	// 	usedExports: true,
+	// 	// 	concatenateModules: true
+	// 	// };
+	// 	// wpConfig.experiments = {
+	// 	// 	outputModule: true
+	// 	// };
+	// 	wpConfig.optimization = {};
+	// }
 	else {
 		wpConfig.optimization = {};
 	}
@@ -509,8 +524,8 @@ const output = (env, wpConfig) =>
 	{
 		if (env.environment === "test")
 		{
-			if (env.build === "extension")
-			{
+			// if (env.build === "extension")
+			// {
 				wpConfig.output = {
 					globalObject: "this",
 					//libraryTarget: 'commonjs2',
@@ -525,20 +540,20 @@ const output = (env, wpConfig) =>
 						type: "commonjs2"
 					}
 				};
-			}
-			else {
-				wpConfig.output = {
-					path: env.build === "extension_web" ? path.join(__dirname, 'dist', 'test', 'browser') : path.join(__dirname, 'dist', 'test'),
-					filename: '[name].js',
-					libraryTarget: 'commonjs2',
-					sourceMapFilename: '[name].js.map',
-					chunkFormat: "commonjs",
-					// module: true,
-					library: {
-						type: "commonjs2"
-					}
-				};
-			}
+			// }
+			// else {
+			// 	wpConfig.output = {
+			// 		path: env.build === "extension_web" ? path.join(__dirname, 'dist', 'test', 'browser') : path.join(__dirname, 'dist', 'test'),
+			// 		filename: '[name].js',
+			// 		libraryTarget: 'commonjs2',
+			// 		sourceMapFilename: '[name].js.map',
+			// 		chunkFormat: "commonjs",
+			// 		// module: true,
+			// 		library: {
+			// 			type: "commonjs2"
+			// 		}
+			// 	};
+			// }
 		}
 		else
 		{
@@ -588,6 +603,7 @@ const plugins = (env, wpConfig) =>
 	{
 		wpConfig.plugins.push(
 			wpPlugin.clean(env, wpConfig),
+			wpPlugin.sourcemaps(env, wpConfig),
 			wpPlugin.tscheck(env, wpConfig),
 			wpPlugin.limitchunks(env, wpConfig),
 			wpPlugin.copy([], env, wpConfig)

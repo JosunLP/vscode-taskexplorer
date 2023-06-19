@@ -19,6 +19,7 @@
 		"url": "https://github.com/spmeesseman/vscode-taskexplorer-info.git"
 	},
 	"engines": {
+		"node": ">=14.0.0",
 		"vscode": "^1.68.1"
 	},
 	"categories": [
@@ -75,6 +76,9 @@
 		"test-all_mws": "npm run test-default_build && node ./dist/test/runTest.js --multi-root",
 		"test-all_mws_no_build": "node ./dist/test/runTest.js --multi-root",
 		"test-all_smws_combined": "npm run test-all && node ./dist/test/runTest.js --no-clean --multi-root",
+		"test-all_tsc": "npm run tsc-build:test && node ./dist/test/runTest.js",
+		"test-all_wp": "npm run clean-test && npm run webpack-build:test && node ./dist/test/runTest.js",
+		"test-all_wp:prod": "npm run clean-test && npm run webpack-build:test:prod && node ./dist/server/test/runTest.js --no-coverage",
 		"test-default_build": "npm run tsc-build:test",
 		"test-default_build2": "npm run webpack-build:test",
 		"test-default_build3": "npm run webpack-build:test:prod",
@@ -85,9 +89,11 @@
 		"test-single-mws-multi_root": "npm run test-default_build && node ./dist/test/runTest.js multiRoot xDeactivate --multi-root",
 		"test-single-mws-tasks": "npm run test-default_build && node ./dist/test/runTest.js tasks xDeactivate --multi-root",
 		"test-single-sws-ant": "npm run test-default_build && node ./dist/test/runTest.js ant xDeactivate",
+		"test-single-sws-ant_wp": "npm run webpack-build:test && node ./dist/test/runTest.js ant xDeactivate",
 		"test-single-sws-app_publisher": "npm run test-default_build && node ./dist/test/runTest.js appPublisher xDeactivate",
 		"test-single-sws-bash": "npm run test-default_build && node ./dist/test/runTest.js bash xDeactivate",
 		"test-single-sws-batch": "npm run test-default_build && node ./dist/test/runTest.js batch xDeactivate",
+		"test-single-sws-batch_wp": "npm run webpack-build:test && node ./dist/test/runTest.js batch xDeactivate",
 		"test-single-sws-composer": "npm run test-default_build && node ./dist/test/runTest.js composer xDeactivate",
 		"test-single-sws-configuration": "npm run test-default_build && node ./dist/test/runTest.js configuration xDeactivate",
 		"test-single-sws-external_provider": "npm run test-default_build && node ./dist/test/runTest.js externalProvider xDeactivate",
