@@ -18,7 +18,9 @@ export default async() =>
           noClean = xArgs.includes("--nyc-no-clean");
 
     if (cover)
-    {
+    {   //
+        // This block of code is basically a modified version of nyc/bin/nyc.js
+        //
         nyc = new NYC({
             extends: "@istanbuljs/nyc-config-typescript",
             all: false,
