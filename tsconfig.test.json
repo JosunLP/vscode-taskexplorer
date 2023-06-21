@@ -2,10 +2,14 @@
     "extends": "./tsconfig.base.json",
     // "ts-node": {"require": ["tsconfig-paths/register"]},
     "compilerOptions": {
+		"baseUrl": ".",
+		"isolatedModules": false,
+		"rootDir": "src",
+		"tsBuildInfoFile": "dist/tsconfig.test.tsbuildinfo",
         "paths": {
-			"@env/*": [ "src/lib/env/node/*" ]
-		},
-		"tsBuildInfoFile": "dist/tsconfig.test.tsbuildinfo"
+			"@env/*": [ "src/lib/env/node/*" ],
+			"@types": [ "types" ]
+		}
     },
     "exclude": [
         "node_modules",
@@ -15,8 +19,10 @@
         "script",
         "types",
         "res",
+        "doc",
+        "dist",
         ".nyc_output",
-        "coverage",
+        ".coverage",
         "src/webview/app/**/*",
         "src/lib/env/browser/**/*"
     ]

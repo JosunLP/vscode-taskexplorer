@@ -1,16 +1,32 @@
 {
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"lib": ["dom", "dom.iterable", "es2020"],
+		"baseUrl": ".",
+		"rootDir": "src",
+		"outDir": "../dist/browser",
+		"tsBuildInfoFile": "dist/browser/tsconfig.browser.tsbuildinfo",
+		"lib": [
+			"dom", "dom.iterable", "es2020"
+		],
 		"paths": {
 			"@env/*": ["src/lib/env/browser/*"],
 			"path": ["node_modules/path-browserify"]
-		},
-		"tsBuildInfoFile": "tsconfig.browser.tsbuildinfo"
+		}
 	},
-	"exclude": [
-		"src/test/**/*",
-		"src/webview/app/**/*",
-		"src/lib/env/node/**/*"
-	]
+    "exclude": [
+        "node_modules",
+        ".vscode-test",
+        ".vscode",
+        "test-fixture",
+        "script",
+        "types",
+        "res",
+        "dist",
+        "doc",
+        ".nyc_output",
+        ".coverage",
+        "src/test/**/*",
+        "src/webview/app/**/*",
+        "src/lib/env/node/**/*"
+    ]
 }

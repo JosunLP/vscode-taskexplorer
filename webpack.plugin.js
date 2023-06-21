@@ -152,7 +152,7 @@ const wpPlugin =
 		{
 			plugin = new webpack.BannerPlugin(
 			{
-				banner: `Copyright ${(new Date()).getFullYear()} Scott Meesseman`,
+				banner: `Copyright ${(new Date()).getFullYear()} Scott P Meesseman`,
 				entryOnly: true,
 				test: /taskexplorer\.js/ //s,
 				// raw: true
@@ -186,8 +186,7 @@ const wpPlugin =
 					cleanOnceBeforeBuildPatterns: [
 						path.posix.join(basePath, "css", "**"),
 						path.posix.join(basePath, "js", "**"),
-						path.posix.join(basePath, "page", "**"),
-						path.posix.join(basePath, "webview", "**")
+						path.posix.join(basePath, "page", "**")
 					]
 				});
 			}
@@ -199,7 +198,7 @@ const wpPlugin =
 					dangerouslyAllowCleanPatternsOutsideProject: true,
 					cleanOnceBeforeBuildPatterns: wpConfig.mode === "production" ? [
 						path.posix.join(__dirname.replace(/\\/g, "/"), "dist", "**"),
-						path.posix.join(__dirname.replace(/\\/g, "/"), "coverage", "**"),
+						path.posix.join(__dirname.replace(/\\/g, "/"), ".coverage", "**"),
 						path.posix.join(__dirname.replace(/\\/g, "/"), ".nyc-output", "**"),
 						"!dist/webview/app/**"
 					] : [
@@ -472,7 +471,7 @@ const wpPlugin =
 	{
 		/** @type {webpack.optimize.LimitChunkCountPlugin | undefined} */
 		let plugin;
-		if (env.build === "extension_web")
+		if (env.build === "browser")
 		{
 			plugin = new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 });
 		}
@@ -562,15 +561,17 @@ const wpPlugin =
 			const options = {
 				test: /\.(js|jsx)($|\?)/i,
 				exclude: /(vendor|runtime)\.js/,
-				// exclude: /(vendor|runtime|common)\.js/,
+				filename: "[name].js.map",
 				moduleFilenameTemplate: '[absolute-resource-path]',
 				fallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
+				// moduleFilenameTemplate: ".[resource-path]",
+				// fallbackModuleFilenameTemplate: '[resource-path]?[hash]'
 			};
 			if (env.environment === "dev" || wpConfig.mode === "development")
 			{
 				// options.type = "source-map";
 				options.filename = "[name].js.map";
-				options.moduleFilenameTemplate = "../[resource-path]";
+				options.moduleFilenameTemplate = ".[resource-path]";
 				options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
 			}
 			plugin = new webpack.SourceMapDevToolPlugin(options);
@@ -609,7 +610,8 @@ const wpPlugin =
 				async: false,
 				formatter: "basic",
 				typescript: {
-					configFile: path.join(env.basePath, env.build === "extension_web" ? "tsconfig.browser.json" : "tsconfig.json"),
+					mode: 'write-tsbuildinfo',
+					configFile: path.join(__dirname, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
 				}
 			})
 		}
@@ -634,53 +636,49 @@ const wpPlugin =
 		{
 			apps.forEach(k => plugins.push(wpPlugin.html(k, env, wpConfig)));
 		}
-		else
-		{
-
-		}
 		return plugins;
 	}
 
 };
 
 
-/**
- * @param {WebpackEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
- * @returns { ImageMinimizerPlugin.Generator<any> }
- */
-const imgConfig = (env, wpConfig) =>
-{
-	// @ts-ignore
-	return env.imageOpt ?
-	{
-		type: "asset",
-		implementation: ImageMinimizerPlugin.sharpGenerate,
-		options: {
-			encodeOptions: {
-				webp: {
-					lossless: true,
-				},
-			},
-		},
-	} :
-	{
-		type: "asset",
-		implementation: ImageMinimizerPlugin.imageminGenerate,
-		options: {
-			plugins: [
-			[
-				"imagemin-webp",
-				{
-					lossless: true,
-					nearLossless: 0,
-					quality: 100,
-					method: wpConfig.mode === "production" ? 4 : 0,
-				}
-			]]
-		}
-	};
-};
+// /**
+//  * @param {WebpackEnvironment} env
+//  * @param {WebpackConfig} wpConfig Webpack config object
+//  * @returns { ImageMinimizerPlugin.Generator<any> }
+//  */
+// const imgConfig = (env, wpConfig) =>
+// {
+// 	// @ts-ignore
+// 	return env.imageOpt ?
+// 	{
+// 		type: "asset",
+// 		implementation: ImageMinimizerPlugin.sharpGenerate,
+// 		options: {
+// 			encodeOptions: {
+// 				webp: {
+// 					lossless: true,
+// 				},
+// 			},
+// 		},
+// 	} :
+// 	{
+// 		type: "asset",
+// 		implementation: ImageMinimizerPlugin.imageminGenerate,
+// 		options: {
+// 			plugins: [
+// 			[
+// 				"imagemin-webp",
+// 				{
+// 					lossless: true,
+// 					nearLossless: 0,
+// 					quality: 100,
+// 					method: wpConfig.mode === "production" ? 4 : 0,
+// 				}
+// 			]]
+// 		}
+// 	};
+// };
 
 class InlineChunkHtmlPlugin
 {

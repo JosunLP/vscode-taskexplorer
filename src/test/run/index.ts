@@ -8,14 +8,13 @@
 import "ts-node/register";
 import "source-map-support/register";
 
-import { resolve } from "path";
 import runConfig from "./config";
 import foreground from "foreground-child";
 
 
 export async function run(): Promise<void>
 {
-    const runCfg = await runConfig(resolve(__dirname, ".."));
+    const runCfg = await runConfig();
     preparePlatform();
 /*
     foreground(childArgs, async () =>
@@ -96,7 +95,7 @@ async function captureStdout(fn: any)
 }
 
 
-function suppressEPIPE (error)
+function suppressEPIPE (error: any)
 {   //
     // Prevent dumping error when `nyc npm t|head` causes stdout to be closed when reporting runs
     //

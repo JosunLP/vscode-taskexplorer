@@ -1,13 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import Mocha from "mocha";
 import * as glob from "glob";
-import { basename, resolve } from "path";
-
-const Mocha = require("mocha");
+import { basename, join, normalize, resolve } from "path";
 
 
-export default (testsRoot: string) =>
+export default () =>
 {
     const testArgs = JSON.parse(process.env.testArgs || "[]");
 	//
@@ -50,7 +49,8 @@ export default (testsRoot: string) =>
 	//
 	// Add all files to the test suite
 	//
-	const files = glob.sync(filesToTest, { cwd: testsRoot });
+	const testsRoot = normalize(join(__dirname, "..", "suite")),
+		  files = glob.sync(filesToTest, { cwd: testsRoot });
 	files.sort((a: string, b: string) => basename(a) < basename(b) ? -1 : 1)
 			.forEach(f => mocha.addFile(resolve(testsRoot, f)));
 

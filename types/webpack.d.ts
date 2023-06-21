@@ -1,6 +1,6 @@
 
 //@ts-check
-declare type WebpackBuild = "extension"|"extension_web"|"extension_tests"|"webview";
+declare type WebpackBuild = "extension"|"browser"|"extension_tests"|"webview";
 declare type WebpackBuildOrUndefined = WebpackBuild|undefined;
 declare type WebpackConfig = import("webpack").Configuration;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
@@ -19,7 +19,6 @@ declare interface WebpackEnvironment
     environment: "dev"|"prod"|"test"|"testprod";
     esbuild: boolean; // Is ES build
     imageOpt: boolean; // Perform image optimization
-    sourcemapsPlugin: boolean;
     target: "webworker"|"node"|"web";
 }
 
