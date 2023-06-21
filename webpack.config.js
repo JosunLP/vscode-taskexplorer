@@ -13,6 +13,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 /** @typedef {import("./types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("./types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("./types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("./types/webpack").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {"true"|"false"} BooleanString */
 /** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: String[] }} WebpackArgs */
 
@@ -519,14 +520,15 @@ const output = (env, wpConfig) =>
  */
 const plugins = (env, wpConfig) =>
 {
-	wpConfig.plugins = [];
+	wpConfig.plugins = [
+		wpPlugin.clean(env, wpConfig),
+		...wpPlugin.tscheck(env, wpConfig)
+	];
 
 	if (env.build === "webview")
 	{
 		const apps = Object.keys(webviewApps);
 		wpConfig.plugins.push(
-			wpPlugin.clean(env, wpConfig),
-			wpPlugin.tscheck(env, wpConfig),
 			wpPlugin.cssextract(env, wpConfig),
 			...wpPlugin.webviewapps(apps, env, wpConfig),
 			// @ts-ignore
@@ -539,9 +541,7 @@ const plugins = (env, wpConfig) =>
 	else
 	{
 		wpConfig.plugins.push(
-			wpPlugin.clean(env, wpConfig),
 			wpPlugin.sourcemaps(env, wpConfig),
-			wpPlugin.tscheck(env, wpConfig),
 			wpPlugin.limitchunks(env, wpConfig),
 			wpPlugin.copy([], env, wpConfig)
 		);
@@ -559,7 +559,7 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins.slice().reverse().forEach((p, index, object) =>
 	{
 		if (!p) {
-			/** @type {*} */(wpConfig.plugins).splice(object.length - 1 - index, 1);
+			/** @type {(WebpackPluginInstance|undefined)[]} */(wpConfig.plugins).splice(object.length - 1 - index, 1);
 		}
 	});
 };

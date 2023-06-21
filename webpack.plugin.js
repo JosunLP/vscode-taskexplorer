@@ -14,6 +14,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
+const ForkTsCheckerNotifierWebpackPlugin = require("fork-ts-checker-notifier-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 // const TerserPlugin = require("terser-webpack-plugin");
@@ -586,39 +587,46 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {ForkTsCheckerPlugin}
+	 * @returns {(ForkTsCheckerPlugin|ForkTsCheckerNotifierWebpackPlugin)[]}
 	 */
 	tscheck: (env, wpConfig) =>
 	{
-		/** @type {ForkTsCheckerPlugin | undefined} */
-		let plugin;
+		/** @type {(ForkTsCheckerPlugin|ForkTsCheckerNotifierWebpackPlugin)[]} */
+		let plugins = [];
 		if (env.build === "webview")
 		{
-			plugin = new ForkTsCheckerPlugin(
-			{
-				async: false,
-				formatter: "basic",
-				typescript: {
-					configFile: path.join(env.basePath, "tsconfig.json"),
-				}
-			})
+			plugins.push(
+				new ForkTsCheckerPlugin(
+				{
+					async: false,
+					formatter: "basic",
+					typescript: {
+						configFile: path.join(env.basePath, "tsconfig.json"),
+					}
+				})
+			);
 		}
 		else
 		{
-			plugin = new ForkTsCheckerPlugin(
-			{
-				async: false,
-				formatter: "basic",
-				typescript: {
-					mode: 'write-tsbuildinfo',
-					configFile: path.join(__dirname, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
-				}
-			})
+			plugins.push(
+				new ForkTsCheckerPlugin(
+				{
+					async: false,
+					formatter: "basic",
+					typescript: {
+						mode: 'write-tsbuildinfo',
+						configFile: path.join(__dirname, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
+					}
+				})
+			);
 		}
-		if (!plugin) {
-			plugin = /** @type {ForkTsCheckerPlugin} */(/** @type {unknown} */(undefined));
-		}
-		return plugin;
+		plugins.push(
+			new ForkTsCheckerNotifierWebpackPlugin({
+				title: 'TypeScript',
+				excludeWarnings: false,
+			  }),
+		);
+		return plugins;
 	},
 
 
