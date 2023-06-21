@@ -297,7 +297,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         this.log.methodStart("internal run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
         task.presentationOptions.reveal = noTerminal !== true ? TaskRevealKind.Always : TaskRevealKind.Silent;
         const exec = await tasks.executeTask(task);
-        await this.wrapper.treeManager.lastTasksFolder.saveTask(taskItem, logPad);
+        await this.wrapper.treeManager.lastTasksFolder.saveTask(taskItem, logPad + "   ");
         this.log.methodDone("internal run task", 1, logPad, [[ "success", !!exec ]]);
         return exec;
     };

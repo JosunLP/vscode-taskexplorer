@@ -53,18 +53,19 @@ export default async(nycConfig: any) =>
 
 	if (!nycConfig.useSpawnWrap)
 	{
-		const requireModules = [
-			require.resolve("../../../node_modules/nyc/lib/register-env.js"),
-			...nyc.require.map((mod: any) => resolveFrom.silent(nyc.cwd, mod) || mod)
-		];
-		// eslint-disable-next-line import/no-extraneous-dependencies
-		const preloadList = require("node-preload");
-		preloadList.push(
-			...requireModules,
-			require.resolve("./wrap.js")
-		);
-		Object.assign(process.env, env);
-		requireModules.forEach(mod => { require(mod); });
+		/* TEMP */ nyc.wrap(); /* TEMP */
+		// const requireModules = [
+		// 	require.resolve("../../../node_modules/nyc/lib/register-env.js"),
+		// 	...nyc.require.map((mod: any) => resolveFrom.silent(nyc.cwd, mod) || mod)
+		// ];
+		// // eslint-disable-next-line import/no-extraneous-dependencies
+		// const preloadList = require("node-preload");
+		// preloadList.push(
+		// 	...requireModules,
+		// 	require.resolve("../../../node_modules/nyc/lib/wrap.js")
+		// );
+		// Object.assign(process.env, env);
+		// requireModules.forEach(mod => { require(mod); });
 	}
 
 	if (nycConfig.all)
@@ -85,7 +86,7 @@ export default async(nycConfig: any) =>
 		//
 		/* TEMP */ nyc.wrap(); /* TEMP */
 		// const sw = require("spawn-wrap"),
-		//       wrapper = require.resolve("./wrap.js");
+		//       wrapper = require.resolve("../../../node_modules/nyc/bin/wrap.js");
 		// sw.runMain();
 		// env.SPAWN_WRAP_SHIM_ROOT = process.env.SPAWN_WRAP_SHIM_ROOT || process.env.XDG_CACHE_HOME || require("os").homedir();
 		// sw([ wrapper ], env);
