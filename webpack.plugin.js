@@ -557,15 +557,25 @@ const wpPlugin =
 	{
 		/** @type {webpack.SourceMapDevToolPlugin | undefined} */
 		let plugin;
-		if (env.sourcemapsPlugin && env.build !== "webview" && env.environment === "test" && wpConfig.mode !== "production")
+		if (env.build !== "webview" && wpConfig.mode !== "production")
 		{
-			plugin = new webpack.SourceMapDevToolPlugin(
+			const options = {
+				test: /\.(js|jsx)($|\?)/i,
+				exclude: /(vendor|runtime)\.js/,
+				// exclude: /(vendor|runtime|common)\.js/,
+				moduleFilenameTemplate: '[absolute-resource-path]',
+				fallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
+			};
+			if (env.environment === "dev" || wpConfig.mode === "development")
 			{
-				//include: /\.js/,
-  				exclude: [ 'vendor.js' ],
-			})
+				// options.type = "source-map";
+				options.filename = "[name].js.map";
+				options.moduleFilenameTemplate = "../[resource-path]";
+				options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
+			}
+			plugin = new webpack.SourceMapDevToolPlugin(options);
 		}
-		if (!plugin) {
+		else {
 			plugin = /** @type {webpack.SourceMapDevToolPlugin} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
