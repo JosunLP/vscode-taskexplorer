@@ -1,162 +1,42 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as fs from "fs";
 import * as path from "path";
 
+let cd: string | undefined;
 const extensionDevelopmentPath = path.resolve(__dirname, "../../");
 if (process.cwd() !== extensionDevelopmentPath) {
+    cd = process.cwd();
     process.chdir(extensionDevelopmentPath);
 }
 
 import { execSync } from "child_process";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { runTests } from "@vscode/test-electron";
 
-interface IDictionary<TValue> { [id: string]: TValue }
 
-const colors = {
-    white: [ 37, 39 ],
-    grey: [ 90, 39 ],
-    blue: [ 34, 39 ],
-    cyan: [ 36, 39 ],
-    green: [ 32, 39 ],
-    magenta: [ 35, 39 ],
-    red: [ 31, 39 ],
-    yellow: [ 33, 39 ]
-};
-
-const withColor = (msg: string, color: number[]) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
-
-const figures =
+const main = async () =>
 {
-    withColor,
-    success: "✔",
-    info: "ℹ",
-	warning: "⚠",
-	error: "✘",
-    color:
+    if (!process.env.VSC_TESTS_MACHINEID)
     {
-        success: withColor("✔", colors.green),
-        successBlue: withColor("✔", colors.blue),
-        info: withColor("ℹ", colors.magenta),
-        infoTask: withColor("ℹ", colors.blue),
-        warning: withColor("⚠", colors.yellow),
-        warningTests: withColor("⚠", colors.blue),
-        error: withColor("✘", colors.red),
-        errorTests: withColor("✘", colors.blue)
+        consoleWrite("The environment variable VSC_TESTS_MACHINEID was not found", figures.color.warning);
+        consoleWrite("   Ensure it is set in the System Environment to the development machine's VSCode.machineID", figures.color.warning);
+        consoleWrite("   All instances of VSCode must be closed and then re-opened to pick up any new or changed env var", figures.color.warning);
+        consoleWrite("Exiting", figures.color.warning);
+        process.exit(1);
     }
-};
 
-const logSep = "----------------------------------------------------------------------------------------------------";
-
-const getTaskTypes = () =>
-{
-    return [
-        "ant", "apppublisher", "bash", "batch", "composer",  "gradle", "grunt", "gulp", "jenkins", "make",
-        "maven", "node", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
-    ];
-};
-
-const getTaskTypeRealName = (taskType: string) =>
-{
-    taskType = taskType.toLowerCase();
-    if (taskType === "workspace") {
-        return "Workspace";
+    consoleWrite(logSep);
+    consoleWrite("Test Runner Initializing");
+    consoleWrite(`   extension development path  : ${extensionDevelopmentPath}`);
+    if (cd) {
+        consoleWrite(`   previous working directory  : ${process.cwd()}`);
     }
-    return taskType;
-};
 
-const getWsPath = (p: string) => path.normalize(path.resolve(__dirname, "..", "..", "test-fixture", "project1", p));
-
-const createDefaultSettings = async(packageJson: any) =>
-{   //
-    // Enabled / disabled task defaults
-    //
-    const enabledTasks: IDictionary<boolean> = {};
-    getTaskTypes().map(t => getTaskTypeRealName(t)).forEach(t => {
-        enabledTasks[t] = packageJson.contributes.configuration[1].properties["taskexplorer.enabledTasks"].default[t];
-    });
-
-    const exclude = [ ...packageJson.contributes.configuration[2].properties["taskexplorer.exclude"].default ];
-    exclude.slice().reverse().forEach((item, index, object) =>
-    {
-        if (item.includes("test")) {
-            exclude.splice(object.length - 1 - index, 1);
-        }
-    });
-    return {
-        "terminal.integrated.shell.windows": undefined,
-        "taskexplorer.enableExplorerView": true,
-        "taskexplorer.enableSideBar": true,
-        "taskexplorer.enablePersistentFileCaching": false,
-        "taskexplorer.enabledTasks": enabledTasks,
-        "taskexplorer.pathToPrograms":
-        {
-            ant: getWsPath("..\\tools\\ant\\bin\\ant.bat"),
-            ansicon: getWsPath("..\\tools\\ansicon\\x64\\ansicon.exe"),
-            bash: "bash",
-            composer: "composer",
-            curl: "curl",
-            gradle: "c:\\Code\\gradle\\bin\\gradle.bat",
-            jenkins: "",
-            make: "C:\\Code\\compilers\\c_c++\\9.0\\VC\\bin\\nmake.exe",
-            maven: "mvn",
-            nsis: "c:\\Code\\nsis\\makensis.exe",
-            perl: "perl",
-            pipenv: "pipenv",
-            powershell: "powershell",
-            python: "c:\\Code\\python\\python.exe",
-            ruby: "ruby"
-        },
-        "taskexplorer.logging.enable": false,
-        "taskexplorer.logging.level": 1,
-        "taskexplorer.logging.enableFile": false,
-        "taskexplorer.logging.enableFileSymbols": false,
-        "taskexplorer.logging.enableOutputWindow": false,
-        "taskexplorer.specialFolders.numLastTasks": 10,
-        "taskexplorer.specialFolders.showFavorites": true,
-        "taskexplorer.specialFolders.showLastTasks": true,
-        "taskexplorer.specialFolders.showUserTasks": true,
-        "taskexplorer.specialFolders.folderState": {
-            favorites: "Expanded",
-            lastTasks: "Expanded",
-            userTasks: "Expanded"
-        },
-        "taskexplorer.taskButtons.clickAction": "Open",
-        "taskexplorer.taskButtons.showFavoritesButton": true,
-        "taskexplorer.taskButtons.showExecuteWithArgumentsButton": false,
-        "taskexplorer.taskButtons.showExecuteWithNoTerminalButton": false,
-        "taskexplorer.visual.disableAnimatedIcons": true,
-        "taskexplorer.enableAnsiconForAnt": false,
-        "taskexplorer.groupMaxLevel": 1,
-        "taskexplorer.groupSeparator": "-",
-        "taskexplorer.groupWithSeparator": true,
-        "taskexplorer.groupStripTaskLabel": true,
-        "taskexplorer.exclude": exclude,
-        "taskexplorer.includeAnt": [], // Deprecated, use `globPatternsAnt`
-        "taskexplorer.globPatternsAnt": [ "**/test.xml", "**/emptytarget.xml", "**/emptyproject.xml", "**/hello.xml" ],
-        "taskexplorer.keepTermOnStop": false,
-        "taskexplorer.showHiddenWsTasks": true,
-        "taskexplorer.showRunningTask": true,
-        "taskexplorer.useGulp": false,
-        "taskexplorer.useAnt": false,
-        "taskexplorer.taskMonitor.timerMode": "MM:SS:MS",
-        "taskexplorer.taskMonitor.trackStats": true,
-        "taskexplorer.trackUsage": true
-    };
-};
-
-const consoleWrite = (msg: string, icon?: string, pad = "") =>
-    console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, colors.grey) : ""}`);
-
-
-const main = async(args: string[]) =>
-{
     let failed = false,
         multiRoot = false;
 
-    const extensionDevelopmentPath = path.resolve(__dirname, "../../"), // The folder containing the Extension Manifest package.json
-          extensionTestsPath = path.resolve(__dirname, "./suite"),        // The path to test runner - Passed to --extensionTestsPath
+    const extensionTestsPath = path.resolve(__dirname, "./run"),
           distPath = path.join(extensionDevelopmentPath, "dist"),
           testWorkspaceSingleRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture", "project1")),
           testWorkspaceMultiRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture")),
@@ -172,22 +52,22 @@ const main = async(args: string[]) =>
           isWebpackBuild = fs.existsSync(path.join(distPath, "vendor.js")),
           defaultSettings = await createDefaultSettings(pkgJso);
 
-    consoleWrite(logSep);
-    consoleWrite("Test Runner Initializing");
-    consoleWrite(`   current working directory : ${process.cwd()}`);
+
     consoleWrite(logSep);
     consoleWrite("Runtime parameters");
-    consoleWrite(`   extensionDevelopmentPath  : ${extensionDevelopmentPath}`);
-    consoleWrite(`   extensionTestsPath        : ${extensionTestsPath}`);
-    consoleWrite(`   distPath                  : ${distPath}`);
-    consoleWrite(`   testWorkspaceSingleRoot   : ${testWorkspaceSingleRoot}`);
-    consoleWrite(`   testWorkspaceMultiRoot    : ${testWorkspaceMultiRoot}`);
-    consoleWrite(`   project1Path              : ${project1Path}`);
-    consoleWrite(`   vsCodeTestVersion         : ${vsCodeTestVersion}`);
-    consoleWrite(`   projectSettingsFile       : ${projectSettingsFile}`);
-    consoleWrite(`   multiRootWsFile           : ${multiRootWsFile}`);
+    consoleWrite(`   vscode test version     : ${vsCodeTestVersion}`);
+    consoleWrite(`   single root             : ${testWorkspaceSingleRoot}`);
+    consoleWrite(`   multi root              : ${testWorkspaceMultiRoot}`);
+    consoleWrite(`   extension tests path    : ${extensionTestsPath}`);
+    consoleWrite(`   user data path          : ${vscodeTestUserDataPath}`);
+    consoleWrite(`   project 1 path          : ${project1Path}`);
+    consoleWrite(`   dist path               : ${distPath}`);
+    consoleWrite(`   project settings file   : ${projectSettingsFile}`);
+    consoleWrite(`   multi-root ws file      : ${multiRootWsFile}`);
+    consoleWrite(logSep);
 
-    const mwsConfig: IDictionary<any> = {
+    const mwsConfig: Record<string, any> =
+    {
         folders: [
         {
             name: "project1",
@@ -200,18 +80,10 @@ const main = async(args: string[]) =>
         settings: defaultSettings
     };
 
-    if (!process.env.VSC_TESTS_MACHINEID)
-    {
-        consoleWrite("The environment variable VSC_TESTS_MACHINEID was not found", figures.color.warning);
-        consoleWrite("   Ensure it is set in the System Environment to the development machine's VSCode.machineID", figures.color.warning);
-        consoleWrite("   All instances of VSCode must be closed and then re-opened to pick up any new or changed env var", figures.color.warning);
-        consoleWrite("Exiting", figures.color.warning);
-        process.exit(1);
-    }
-
     try
     {
-        const xArgs: string[] = [],
+        const args = process.argv.slice(2),
+              xArgs: string[] = [],
               testsArgs: string[] = [];
         if (args && args.length > 0)
         {
@@ -395,4 +267,139 @@ const main = async(args: string[]) =>
     }
 };
 
-main(process.argv.slice(2));
+const colors = {
+    white: [ 37, 39 ],
+    grey: [ 90, 39 ],
+    blue: [ 34, 39 ],
+    cyan: [ 36, 39 ],
+    green: [ 32, 39 ],
+    magenta: [ 35, 39 ],
+    red: [ 31, 39 ],
+    yellow: [ 33, 39 ]
+};
+
+const withColor = (msg: string, color: number[]) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
+
+const figures =
+{
+    withColor,
+    success: "✔",
+    info: "ℹ",
+	warning: "⚠",
+	error: "✘",
+    color:
+    {
+        success: withColor("✔", colors.green),
+        successBlue: withColor("✔", colors.blue),
+        info: withColor("ℹ", colors.magenta),
+        infoTask: withColor("ℹ", colors.blue),
+        warning: withColor("⚠", colors.yellow),
+        warningTests: withColor("⚠", colors.blue),
+        error: withColor("✘", colors.red),
+        errorTests: withColor("✘", colors.blue)
+    }
+};
+
+const logSep = "----------------------------------------------------------------------------------------------------";
+
+const consoleWrite = (msg: string, icon?: string, pad = "") =>
+    console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, colors.grey) : ""}`);
+
+const getTaskTypes = () =>
+{
+    return [
+        "ant", "apppublisher", "bash", "batch", "composer",  "gradle", "grunt", "gulp", "jenkins", "make",
+        "maven", "node", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
+    ];
+};
+
+const getTaskTypeRealName = (taskType: string) =>
+{
+    taskType = taskType.toLowerCase();
+    if (taskType === "workspace") {
+        return "Workspace";
+    }
+    return taskType;
+};
+
+const getWsPath = (p: string) => path.normalize(path.resolve(__dirname, "..", "..", "test-fixture", "project1", p));
+
+const createDefaultSettings = async(packageJson: any) =>
+{   //
+    // Enabled / disabled task defaults
+    //
+    const enabledTasks: Record<string, boolean> = {};
+    getTaskTypes().map(t => getTaskTypeRealName(t)).forEach(t => {
+        enabledTasks[t] = packageJson.contributes.configuration[1].properties["taskexplorer.enabledTasks"].default[t];
+    });
+
+    const exclude = [ ...packageJson.contributes.configuration[2].properties["taskexplorer.exclude"].default ];
+    exclude.slice().reverse().forEach((item, index, object) =>
+    {
+        if (item.includes("test")) {
+            exclude.splice(object.length - 1 - index, 1);
+        }
+    });
+    return {
+        "terminal.integrated.shell.windows": undefined,
+        "taskexplorer.enableExplorerView": true,
+        "taskexplorer.enableSideBar": true,
+        "taskexplorer.enablePersistentFileCaching": false,
+        "taskexplorer.enabledTasks": enabledTasks,
+        "taskexplorer.pathToPrograms":
+        {
+            ant: getWsPath("..\\tools\\ant\\bin\\ant.bat"),
+            ansicon: getWsPath("..\\tools\\ansicon\\x64\\ansicon.exe"),
+            bash: "bash",
+            composer: "composer",
+            curl: "curl",
+            gradle: "c:\\Code\\gradle\\bin\\gradle.bat",
+            jenkins: "",
+            make: "C:\\Code\\compilers\\c_c++\\9.0\\VC\\bin\\nmake.exe",
+            maven: "mvn",
+            nsis: "c:\\Code\\nsis\\makensis.exe",
+            perl: "perl",
+            pipenv: "pipenv",
+            powershell: "powershell",
+            python: "c:\\Code\\python\\python.exe",
+            ruby: "ruby"
+        },
+        "taskexplorer.logging.enable": false,
+        "taskexplorer.logging.level": 1,
+        "taskexplorer.logging.enableFile": false,
+        "taskexplorer.logging.enableFileSymbols": false,
+        "taskexplorer.logging.enableOutputWindow": false,
+        "taskexplorer.specialFolders.numLastTasks": 10,
+        "taskexplorer.specialFolders.showFavorites": true,
+        "taskexplorer.specialFolders.showLastTasks": true,
+        "taskexplorer.specialFolders.showUserTasks": true,
+        "taskexplorer.specialFolders.folderState": {
+            favorites: "Expanded",
+            lastTasks: "Expanded",
+            userTasks: "Expanded"
+        },
+        "taskexplorer.taskButtons.clickAction": "Open",
+        "taskexplorer.taskButtons.showFavoritesButton": true,
+        "taskexplorer.taskButtons.showExecuteWithArgumentsButton": false,
+        "taskexplorer.taskButtons.showExecuteWithNoTerminalButton": false,
+        "taskexplorer.visual.disableAnimatedIcons": true,
+        "taskexplorer.enableAnsiconForAnt": false,
+        "taskexplorer.groupMaxLevel": 1,
+        "taskexplorer.groupSeparator": "-",
+        "taskexplorer.groupWithSeparator": true,
+        "taskexplorer.groupStripTaskLabel": true,
+        "taskexplorer.exclude": exclude,
+        "taskexplorer.includeAnt": [], // Deprecated, use `globPatternsAnt`
+        "taskexplorer.globPatternsAnt": [ "**/test.xml", "**/emptytarget.xml", "**/emptyproject.xml", "**/hello.xml" ],
+        "taskexplorer.keepTermOnStop": false,
+        "taskexplorer.showHiddenWsTasks": true,
+        "taskexplorer.showRunningTask": true,
+        "taskexplorer.useGulp": false,
+        "taskexplorer.useAnt": false,
+        "taskexplorer.taskMonitor.timerMode": "MM:SS:MS",
+        "taskexplorer.taskMonitor.trackStats": true,
+        "taskexplorer.trackUsage": true
+    };
+};
+
+main().catch((e: any) => { try { console.error(e.message); } catch (_) {}  process.exit(1); });
