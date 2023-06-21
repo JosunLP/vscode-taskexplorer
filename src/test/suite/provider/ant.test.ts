@@ -7,6 +7,7 @@ import {
     activate, getWsPath, testControl as tc, verifyTaskCount, logErrorsAreFine, suiteFinished,
     exitRollingCount, waitForTeIdle, treeUtils, overrideNextShowInfoBox, endRollingCount, needsTreeBuild, testInvDocPositions
 } from "../../utils/utils";
+import { startupBuildTree } from "../../utils/suiteUtils";
 
 const testsName = "ant";
 const startTaskCount = 3;
@@ -51,11 +52,7 @@ suite("Ant Tests", () =>
 
     test("Build Tree", async function()
     {
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild()) {
-            await treeUtils.refresh(teWrapper, this);
-        }
-        endRollingCount(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 

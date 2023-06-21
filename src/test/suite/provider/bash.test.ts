@@ -2,11 +2,12 @@
 import { join } from "path";
 import { expect } from "chai";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
+import { startupBuildTree } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITaskExplorerApi, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    activate, getWsPath, testControl, treeUtils, verifyTaskCount, logErrorsAreFine, suiteFinished,
-    exitRollingCount, waitForTeIdle, endRollingCount, needsTreeBuild
+    activate, getWsPath, testControl, verifyTaskCount, logErrorsAreFine, suiteFinished, exitRollingCount,
+    waitForTeIdle, endRollingCount
 } from "../../utils/utils";
 
 const testsName = "bash";
@@ -41,11 +42,7 @@ suite("Bash Tests", () =>
 
     test("Build Tree", async function()
     {
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild()) {
-            await treeUtils.refresh(teWrapper, this);
-        }
-        endRollingCount(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 

@@ -6,8 +6,8 @@ import { startupBuildTree } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
-    testInvDocPositions, verifyTaskCount, waitForTeIdle
+    activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc, testInvDocPositions,
+    verifyTaskCount, waitForTeIdle
 } from "../../utils/utils";
 
 const testsName = "gradle";
@@ -52,7 +52,7 @@ suite("Gradle Tests", () =>
 
     test("Build Tree", async function()
     {
-        await startupBuildTree(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 

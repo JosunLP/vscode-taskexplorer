@@ -2,11 +2,11 @@
 import { join } from "path";
 import { Uri } from "vscode";
 import { expect } from "chai";
+import { startupBuildTree } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    activate, getWsPath, testControl, treeUtils, verifyTaskCount, suiteFinished, exitRollingCount,
-    waitForTeIdle, endRollingCount, needsTreeBuild
+    activate, getWsPath, testControl, verifyTaskCount, suiteFinished, exitRollingCount, waitForTeIdle, endRollingCount
 } from "../../utils/utils";
 
 const testsName = "batch";
@@ -40,11 +40,7 @@ suite("Batch Tests", () =>
 
     test("Build Tree", async function()
     {
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild()) {
-            await treeUtils.refresh(teWrapper, this);
-        }
-        endRollingCount(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 

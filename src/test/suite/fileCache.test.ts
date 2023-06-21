@@ -2,6 +2,7 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import * as utils from "../utils/utils";
+import { startupBuildTree } from "../utils/suiteUtils";
 import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand } from "../utils/commandUtils";
 
@@ -35,11 +36,7 @@ suite("File Cache Tests", () =>
 
     test("Build Tree", async function()
     {
-        if (utils.exitRollingCount(this)) return;
-        if (utils.needsTreeBuild()) {
-            await utils.treeUtils.refresh(teWrapper, this);
-        }
-        utils.endRollingCount(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 

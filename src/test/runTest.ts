@@ -42,7 +42,7 @@ const main = async () =>
           testWorkspaceMultiRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture")),
           vscodeTestUserDataPath = path.join(extensionDevelopmentPath, ".vscode-test", "user-data"),
           project1Path = testWorkspaceSingleRoot,
-          // project2Path = path.join(testWorkspaceMultiRoot, "project2"),
+          project2Path = path.join(testWorkspaceMultiRoot, "project2"),
           pkgJsonPath = path.resolve(__dirname, path.join(extensionDevelopmentPath, "package.json")),
           pkgJson = fs.readFileSync(pkgJsonPath, "utf8"),
           pkgJso = JSON.parse(pkgJson),
@@ -61,6 +61,7 @@ const main = async () =>
     consoleWrite(`   extension tests path    : ${extensionTestsPath}`);
     consoleWrite(`   user data path          : ${vscodeTestUserDataPath}`);
     consoleWrite(`   project 1 path          : ${project1Path}`);
+    consoleWrite(`   project 2 path          : ${project2Path}`);
     consoleWrite(`   dist path               : ${distPath}`);
     consoleWrite(`   project settings file   : ${projectSettingsFile}`);
     consoleWrite(`   multi-root ws file      : ${multiRootWsFile}`);

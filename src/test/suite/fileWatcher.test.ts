@@ -6,6 +6,7 @@ import { join } from "path";
 import { expect } from "chai";
 import fsUtils from "../utils/fsUtils";
 import * as utils from "../utils/utils";
+import { startupBuildTree } from "../utils/suiteUtils";
 import { executeSettingsUpdate } from "../utils/commandUtils";
 import { IDictionary, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
@@ -85,11 +86,7 @@ suite("File Watcher Tests", () =>
 
     test("Build Tree", async function()
     {
-        if (utils.exitRollingCount(this)) return;
-        if (utils.needsTreeBuild()) {
-            await utils.treeUtils.refresh(teWrapper, this);
-        }
-        utils.endRollingCount(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 

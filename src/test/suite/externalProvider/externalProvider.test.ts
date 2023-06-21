@@ -217,7 +217,7 @@ suite("External Provider Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(testControl.slowTime.commands.refresh + testControl.slowTime.tasks.count.verify);
-        await refresh();
+        await refresh(teWrapper);
         await verifyTaskCount("external3", 2);
         endRollingCount(this);
     });

@@ -4,11 +4,11 @@ import { focusExplorerView, focusSidebarView } from "./commandUtils";
 import { endRollingCount, exitRollingCount, needsTreeBuild, sleep, testControl as tc, waitForTeIdle } from "./utils";
 
 
-export const startupBuildTree = async(instance: Mocha.Context) =>
+export const startupBuildTree = async(teWrapper: any, instance: Mocha.Context) =>
 {
     if (exitRollingCount(instance)) return;
     if (needsTreeBuild()) {
-        await refresh(instance);
+        await refresh(teWrapper, instance);
     }
     endRollingCount(instance);
 };

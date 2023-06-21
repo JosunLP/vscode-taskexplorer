@@ -2,11 +2,12 @@
 import * as path from "path";
 import { Uri } from "vscode";
 import { expect } from "chai";
+import { startupBuildTree } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITaskExplorerApi, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    activate, endRollingCount, exitRollingCount, getWsPath, needsTreeBuild,
-    suiteFinished, testControl as tc, testInvDocPositions, treeUtils, verifyTaskCount, waitForTeIdle
+    activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc, testInvDocPositions,
+    verifyTaskCount, waitForTeIdle
 } from "../../utils/utils";
 
 const testsName = "composer";
@@ -50,11 +51,7 @@ suite("Composer Tests", () =>
 
     test("Build Tree", async function()
     {
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild()) {
-            await treeUtils.refresh(teWrapper, this);
-        }
-        endRollingCount(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 

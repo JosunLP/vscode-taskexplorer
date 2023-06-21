@@ -1,11 +1,12 @@
 
 import { join } from "path";
 import { Uri } from "vscode";
+import { startupBuildTree } from "../../utils/suiteUtils";
 import { executeSettingsUpdate, executeTeCommand } from "../../utils/commandUtils";
-import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITaskExplorerApi, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
-    activate, endRollingCount, exitRollingCount, getWsPath,
-    needsTreeBuild, suiteFinished, testControl as tc, treeUtils, verifyTaskCount, waitForTeIdle
+    activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
+    verifyTaskCount, waitForTeIdle
 } from "../../utils/utils";
 
 const testsName = "apppublisher";
@@ -48,11 +49,7 @@ suite("App-Publisher Tests", () =>
 
     test("Build Tree", async function()
     {
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild()) {
-            await treeUtils.refresh(teWrapper, this);
-        }
-        endRollingCount(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 

@@ -119,7 +119,7 @@ suite("Task Monitor App Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.refresh);
-        await refresh();
+        await refresh(teWrapper);
         endRollingCount(this);
     });
 
