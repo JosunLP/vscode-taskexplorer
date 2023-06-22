@@ -69,19 +69,6 @@ const wpPlugin =
 				}
 			};
 		}
-		if (env.build === "extension" && env.environment.startsWith("test"))
-		{
-			const babel = [
-				"babel", "./src/test", "--out-dir", "./dist/test", "--extensions", ".ts",
-				"--presets=@babel/preset-env,@babel/preset-typescript",
-			];
-			spawnSync("npx", babel,
-			{
-				cwd: __dirname,
-				encoding: "utf8",
-				shell: true
-			});
-		}
 		if (!plugin) {
 			plugin = /** @type {WebpackPluginInstance} */(/** @type {unknown} */(undefined));
 		}
@@ -140,6 +127,31 @@ const wpPlugin =
 	},
 
 
+	babel:
+	{
+		/**
+		* @param {WebpackEnvironment} env
+		* @returns {void}
+		*/
+		buildTests: (env) =>
+		{
+			if (env.build === "extension" && env.environment.startsWith("test"))
+			{
+				const babel = [
+					"babel", "./src/test", "--out-dir", "./dist/test", "--extensions", ".ts",
+					"--presets=@babel/preset-env,@babel/preset-typescript",
+				];
+				spawnSync("npx", babel,
+				{
+					cwd: __dirname,
+					encoding: "utf8",
+					shell: true
+				});
+			}
+		}
+	},
+
+
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
@@ -161,6 +173,39 @@ const wpPlugin =
 		}
 		if (!plugin) {
 			plugin = /** @type {webpack.BannerPlugin} */(/** @type {unknown} */(undefined));
+		}
+		return plugin;
+	},
+
+
+	/**
+	* @param {WebpackEnvironment} env
+	* @param {WebpackConfig} wpConfig Webpack config object
+	* @returns {WebpackPluginInstance}
+	*/
+	beforecompile: (env, wpConfig) =>
+	{
+		/** @type {WebpackPluginInstance | undefined} */
+		let plugin;
+		if (env.build === "extension")
+		{
+			const _env = { ...env };
+			plugin =
+			{   /** @param {import("webpack").Compiler} compiler Compiler */
+				apply: (compiler) =>
+				{
+					compiler.hooks.beforeCompile.tap("BeforeCompilePlugin", () =>
+					{
+						try {
+							wpPlugin.tsc.buildTypes(_env);
+							wpPlugin.babel.buildTests(_env);
+						} catch {}
+					});
+				}
+			};
+		}
+		if (!plugin) {
+			plugin = /** @type {WebpackPluginInstance} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
 	},
@@ -581,6 +626,37 @@ const wpPlugin =
 			plugin = /** @type {webpack.SourceMapDevToolPlugin} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
+	},
+
+
+	tsc:
+	{
+		/**
+		* @param {WebpackEnvironment} env
+		* @returns {void}
+		*/
+		buildTests: (env) =>
+		{
+			if (env.build === "extension" && env.environment.startsWith("test"))
+			{
+				const tscTests = [ "tsc", "-p", "./tsconfig.test.json" ];
+				spawnSync("npx", tscTests, { cwd: __dirname, encoding: "utf8", shell: true });
+			}
+		},
+
+		/**
+		* @param {WebpackEnvironment} env
+		* @returns {void}
+		*/
+		buildTypes: (env) =>
+		{
+			if (env.build === "extension")
+			{
+				const tscTypes = [  "tsc", "-p", "./types" ];
+				spawnSync("npx", tscTypes, { cwd: __dirname, encoding: "utf8", shell: true });
+			}
+		}
+
 	},
 
 

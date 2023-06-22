@@ -522,6 +522,7 @@ const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [
 		wpPlugin.clean(env, wpConfig),
+		wpPlugin.beforecompile(env, wpConfig),
 		...wpPlugin.tscheck(env, wpConfig)
 	];
 
