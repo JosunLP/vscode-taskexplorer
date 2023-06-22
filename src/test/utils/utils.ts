@@ -5,7 +5,6 @@ import * as path from "path";
 import { expect } from "chai";
 import * as treeUtils from "./treeUtils";
 import { testControl } from "../control";
-import { deactivate } from "../../taskexplorer";
 import { startInput, stopInput } from "./input";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
@@ -27,20 +26,58 @@ export { getWsPath, getProjectsPath };
 export let teApi: ITaskExplorerApi;
 export let teWrapper: ITeWrapper;
 
-let figures: ITeFigures;
 let activated = false;
 let caughtControlC = false;
 let hasRollingCountError = false;
 let timeStarted: number;
+let extension: Extension<any>;
 let overridesShowInputBox: any[] = [];
 let overridesShowInfoBox: any[] = [];
 let overridesShowWarningBox: any[] = [];
 let NODE_TLS_REJECT_UNAUTHORIZED: string | undefined;
 
 const tc = testControl;
+const overridesGetExtension: any[] = [];
 const originalShowInputBox = window.showInputBox;
 const originalShowInfoBox = window.showInformationMessage;
+const originalGetExtension = extensions.getExtension;
 const disableSSLMsg = "Disabled ssl cert validation due to Electron/LetsEncrypt DST Root CA X3 Expiry";
+
+const withColor = (msg: string, color: number[]) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
+
+const colors = {
+    white: [ 37, 39 ],
+    grey: [ 90, 39 ],
+    blue: [ 34, 39 ],
+    cyan: [ 36, 39 ],
+    green: [ 32, 39 ],
+    magenta: [ 35, 39 ],
+    red: [ 31, 39 ],
+    yellow: [ 33, 39 ]
+};
+
+const figures =
+{
+    withColor,
+    success: "✔",
+    info: "ℹ",
+	warning: "⚠",
+	error: "✘",
+    up: "△",
+	pointer: "❯",
+    color:
+    {
+        success: withColor("✔", colors.green),
+        successBlue: withColor("✔", colors.blue),
+        info: withColor("ℹ", colors.magenta),
+        infoTask: withColor("ℹ", colors.blue),
+        warning: withColor("⚠", colors.yellow),
+        warningTests: withColor("⚠", colors.blue),
+        error: withColor("✘", colors.red),
+        errorTests: withColor("✘", colors.blue),
+        up: withColor("△", colors.green)
+    }
+};
 
 //
 // Suppress some stderr messages.  It's just tests.
@@ -93,33 +130,21 @@ window.showWarningMessage = (_str: string, ..._args: any[]) =>
     return new Promise<string | undefined>((resolve) => { resolve(next); });
 };
 
-
-export const activate = async (instance?: Mocha.Context) =>
+extensions.getExtension = (str: string) =>
 {
-    if (instance)
+    const next = overridesGetExtension.shift();
+    if (typeof next === "undefined")
     {
-        instance.timeout(60 * 1000);
-        const suite = instance.currentTest?.parent;
-        if (suite)
-        {
-            const suiteKey = getSuiteKey(suite.title);
-            tc.tests.suiteResults[suiteKey] = {
-                timeStarted: Date.now(),
-                numTests: suite.tests.length,
-                success: false,
-                successCount: -1,
-                suiteName: getSuiteFriendlyName(suite.title),
-                timeFinished: 0,
-                numTestsFailed: 0
-            };
-            if (suite.parent) {
-                tc.isSingleSuiteTest = suite.parent.suites.length <= 2;
-            }
-        }
+        return originalGetExtension(str);
     }
+    return next;
+};
 
-    const ext = extensions.getExtension("spmeesseman.vscode-taskexplorer");
-    expect(ext).to.not.be.undefined;
+
+export const activate = async (instance: Mocha.Context) =>
+{
+    extension = <Extension<any>>extensions.getExtension("spmeesseman.vscode-taskexplorer");
+    expect(extension).to.not.be.undefined;
 
     if (!activated)
     {   //
@@ -141,10 +166,9 @@ export const activate = async (instance?: Mocha.Context) =>
         // Activate extension
         // Note that the '*' is removed from package.json[activationEvents] before the runTest() call
         //
-        teWrapper = await (ext as any).activate();
-        figures = teWrapper.figures;
+        teWrapper = await extension.activate();
 		// await sleep(serverActivationDelay); // Wait for server activation
-        console.log(`    ${figures.color.info} ${figures.withColor("Extension successfully activated", figures.colors.grey)}`);
+        console.log(`    ${figures.color.info} ${figures.withColor("Extension successfully activated", colors.grey)}`);
 		activated = true;
         //
         // Ensure extension initialized successfully
@@ -153,12 +177,14 @@ export const activate = async (instance?: Mocha.Context) =>
         expect(teApi).to.not.be.empty;
         expect(teWrapper.explorer).to.not.be.empty;
         expect(isReady()).to.be.equal(true, `    ${figures.color.error} TeApi not ready`);
-        console.log(`    ${figures.color.info} ${figures.withColor("Waiting for extension to initialize", figures.colors.grey)}`);
+        console.log(`    ${figures.color.info} ${figures.withColor("Waiting for extension to initialize", colors.grey)}`);
         await Promise.all([
-            promiseFromEvent(teWrapper.onReady).promise,
-            waitForWebviewReadyEvent(teWrapper.welcomePage, 15000)
+            teWrapper.isReady || promiseFromEvent(teWrapper.onReady).promise,
+            teWrapper.welcomePage.visible || waitForWebviewReadyEvent(teWrapper.welcomePage, 15000)
         ]);
         await waitForWebviewsIdle();
+        teWrapper.welcomePage.title = `${teWrapper.extensionTitle} Tutorial (Tests)`;
+        teWrapper.welcomePage.title = teWrapper.welcomePage.originalTitle || "";
         await closeTeWebviewPanel(teWrapper.welcomePage);
         await waitForWebviewsIdle();
         await waitForTeIdle();
@@ -194,16 +220,33 @@ export const activate = async (instance?: Mocha.Context) =>
         consoleWrite(`   Extension Title  : ${teWrapper.extensionTitle}`);
         consoleWrite(`   Extension Short  : ${teWrapper.extensionTitleShort}`);
         consoleWrite(`   ${disableSSLMsg}`, figures.color.warningTests);
-        activated = true;
+
         timeStarted = Date.now();
-        console.log(`    ${figures.color.info} ${figures.withColor("Tests initialization completed, ready", figures.colors.grey)}`);
-        console.log(`    ${figures.color.info}`);
+        activated = true;
+    }
+
+    const suite = instance.currentTest?.parent;
+    if (suite)
+    {
+        const suiteKey = getSuiteKey(suite.title);
+        tc.tests.suiteResults[suiteKey] = {
+            timeStarted: Date.now(),
+            numTests: suite.tests.length,
+            success: false,
+            successCount: -1,
+            suiteName: getSuiteFriendlyName(suite.title),
+            timeFinished: 0,
+            numTestsFailed: 0
+        };
+        if (suite.parent) {
+            tc.isSingleSuiteTest = suite.parent.suites.length <= 2;
+        }
     }
 
     return {
         teApi,
         teWrapper,
-        extension: ext as Extension<any>
+        extension
     };
 };
 
@@ -211,76 +254,89 @@ export const activate = async (instance?: Mocha.Context) =>
 export const cleanup = async () =>
 {
     console.log(`    ${figures.color.info}`);
-    console.log(`    ${figures.color.info} ${figures.withColor("Tests complete, clean up", figures.colors.grey)}`);
+    console.log(`    ${figures.color.info} ${figures.withColor("Tests complete, clean up", colors.grey)}`);
     if (caughtControlC) {
-        console.log(`    ${figures.color.info} ${figures.withColor("User cancelled (caught CTRL+C)", figures.colors.grey)}`);
+        console.log(`    ${figures.color.info} ${figures.withColor("User cancelled (caught CTRL+C)", colors.grey)}`);
     }
-
-    if (tc.log.enabled && tc.log.file && tc.log.openFileOnFinish)
+    if (teWrapper)
     {
-        console.log(`    ${figures.color.info}`);
-        console.log(`    ${figures.color.info} ${figures.withColor("Log File Location:", figures.colors.grey)}`);
-        console.log(`    ${figures.color.info} ${figures.withColor("   " + teWrapper.log.getLogFileName(), figures.colors.grey)}`);
-        console.log(`    ${figures.color.info}`);
-    }
-
-    //
-    // Stop CTRL+C and set hasRollingCountError
-    //
-    stopInput();
-
-    //
-    // Cleanup or reset any settings, and clear license/account from tests storage
-    //
-    await cleanupSettings();
-    await teWrapper.storage.deleteSecret(teWrapper.keys.Storage.Account);
-
-    console.log(`    ${figures.color.info} ${figures.withColor("Deactivating extension", figures.colors.grey)}`);
-    try { await deactivate(); } catch {}
-    console.log(`    ${figures.color.info} ${figures.withColor("Extension successfully deactivated", figures.colors.grey)}`);
-
-    window.showInputBox = originalShowInputBox;
-    window.showInformationMessage = originalShowInfoBox;
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = NODE_TLS_REJECT_UNAUTHORIZED;
-
-    console.log(`    ${figures.color.info} ${figures.withColor("Removing any leftover temporary files", figures.colors.grey)}`);
-    try {
-        const packageLockFile = path.join(getWsPath("."), "package-lock.json");
-        if (await teWrapper.fs.pathExists(packageLockFile)) {
-            await teWrapper.fs.deleteFile(packageLockFile);
+        if (tc.log.enabled && tc.log.file && tc.log.openFileOnFinish)
+        {
+            console.log(`    ${figures.color.info}`);
+            console.log(`    ${figures.color.info} ${figures.withColor("Log File Location:", colors.grey)}`);
+            console.log(`    ${figures.color.info} ${figures.withColor("   " + teWrapper.log.getLogFileName(), colors.grey)}`);
+            console.log(`    ${figures.color.info}`);
         }
-    } catch (e) { console.error(e); }
-
-    //
-    // Reset Grunt and Gulp VSCode internal task providers, which we enabled b4 extension activation.
-    // These get reset at the end of the Gulp suite's tests, but just in case we do it again here...
-    //
-    console.log(`    ${figures.color.info} ${figures.withColor("Resetting modified global settings", figures.colors.grey)}`);
-    await teWrapper.config.updateVs("grunt.autoDetect", tc.vsCodeAutoDetectGrunt);
-    await teWrapper.config.updateVs("gulp.autoDetect", tc.vsCodeAutoDetectGulp);
-    // await workspace.getConfiguration("grunt").update("autoDetect", tc.vsCodeAutoDetectGrunt, ConfigurationTarget.Global);
-    // await workspace.getConfiguration("gulp").update("autoDetect", tc.vsCodeAutoDetectGulp, ConfigurationTarget.Global);
-
-    console.log(`    ${figures.color.info} ${figures.withColor("Cleanup complete", figures.colors.grey)}`);
-
+        //
+        // Stop CTRL+C and set hasRollingCountError
+        //
+        stopInput();
+        //
+        // Cleanup or reset any settings, and clear license/account from tests storage
+        //
+        await cleanupSettings();
+        extensions.getExtension = originalGetExtension;
+        window.showInputBox = originalShowInputBox;
+        window.showInformationMessage = originalShowInfoBox;
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = NODE_TLS_REJECT_UNAUTHORIZED;
+        //
+        // File cleanup
+        //
+        console.log(`    ${figures.color.info} ${figures.withColor("Removing any leftover temporary files", colors.grey)}`);
+        // teWrapper.fileWatcher.skipEvent({ files: [ "*" ], type: "all" });
+        try {
+            const packageLockFile = path.join(getWsPath("."), "package-lock.json");
+            if (await teWrapper.fs.pathExists(packageLockFile)) {
+                await teWrapper.fs.deleteFile(packageLockFile);
+            }
+        } catch (e) { console.error(e); }
+        // extjsWrapper.fileWatcher.skipEvent({ files: [], type: "all" });
+        //
+        // Reset Grunt and Gulp VSCode internal task providers, which we enabled b4 extension activation.
+        // These get reset at the end of the Gulp suite's tests, but just in case we do it again here...
+        //
+        console.log(`    ${figures.color.info} ${figures.withColor("Resetting modified global settings", colors.grey)}`);
+        await teWrapper.config.updateVs("grunt.autoDetect", tc.vsCodeAutoDetectGrunt);
+        await teWrapper.config.updateVs("gulp.autoDetect", tc.vsCodeAutoDetectGulp);
+        // await workspace.getConfiguration("grunt").update("autoDetect", tc.vsCodeAutoDetectGrunt, ConfigurationTarget.Global);
+        // await workspace.getConfiguration("gulp").update("autoDetect", tc.vsCodeAutoDetectGulp, ConfigurationTarget.Global);
+        console.log(`    ${figures.color.info} ${figures.withColor("Cleanup complete", colors.grey)}`);
+    }
+    else {
+        console.log(`    ${figures.color.warning} ${figures.withColor("App wrapper was not initializeds", colors.grey)}`);
+    }
     //
     // Process execution timesand do the dorky best time thing that I forsome reason spent a whole
     // day of my life coding.
     //
-    try { await processTimes(timeStarted, hasRollingCountError); } catch (e) { console.error(e); }
-
-    //
-    // Exit
-    //
-    console.log(`    ${figures.color.info} ${figures.withColor("Exiting", figures.colors.grey)}`);
-    console.log(`    ${figures.color.info}`);
-
+    try {
+        await processTimes(timeStarted, hasRollingCountError);
+    } catch {}
     //
     // If rolling count error is set, reset the mocha success icon for "cleanup" final test/step
     //
-    if (hasRollingCountError) {
-        symbols.ok = figures.color.success;
-    }
+    if (hasRollingCountError) { symbols.ok = figures.color.success; }
+    //
+    // Delete stored user account
+    //
+    await teWrapper.storage.deleteSecret(teWrapper.keys.Storage.Account);
+    //
+    // Deactivate extension / Dispose disposable resources
+    //
+    console.log(`    ${figures.color.info} ${figures.withColor("Deactivating extension", colors.grey)}`);
+    // try {
+    //     await  (extension as any).deactivate();
+    // } catch {}
+    const disposables = teWrapper.context.subscriptions.splice(0);
+    try {
+        for (const d of disposables) { const r = d.dispose(); if (teWrapper.typeUtils.isPromise(r)) { await r; }}
+    } catch {}
+    console.log(`    ${figures.color.info} ${figures.withColor("Extension successfully deactivated", colors.grey)}`);
+    //
+    // Exit
+    //
+    console.log(`    ${figures.color.info} ${figures.withColor("Exiting", colors.grey)}`);
+    console.log(`    ${figures.color.info}`);
 };
 
 
@@ -300,7 +356,7 @@ export const closeActiveEditor = () => commands.executeCommand("workbench.action
 
 
 export const consoleWrite = (msg?: string, icon?: string, pad = "") =>
-    console.log(`    ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
+    console.log(`    ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, colors.grey) : ""}`);
 
 
 export const createwebviewForRevive = (viewTitle: string, viewType: string) =>
@@ -362,7 +418,7 @@ export const exitRollingCount = (instance: Mocha.Context, isSetup?: boolean, isT
     {
         if (!hasRollingCountError) {
             const msg = `rolling success count failure @ test ${(testIdx || -1) + 1}, all further tests will be skipped`;
-            console.log(`    ${figures.color.info} ${figures.withColor(msg, figures.colors.grey)}`);
+            console.log(`    ${figures.color.info} ${figures.withColor(msg, colors.grey)}`);
         }
         setFailed(false);
         if (suite.tests.filter(t => t.isFailed).length === 0) {
@@ -405,20 +461,20 @@ export const needsTreeBuild = (isFocus?: boolean) => (isFocus || !treeUtils.hasR
 const isReady = (taskType?: string) =>
 {
     let err: string | undefined;
-    if (!teApi)                                 err = `    ${figures.color.error} ${figures.withColor("TeApi null", figures.colors.grey)}`;
+    if (!teApi)                                 err = `    ${figures.color.error} ${figures.withColor("TeApi null", colors.grey)}`;
     else {
-        if (!teWrapper.explorer)                err = `    ${figures.color.error} ${figures.withColor("TeApi Explorer provider == null", figures.colors.grey)}`;
-        // /else if (!teApi.sidebar)            err = `    ${figures.color.error} ${figures.withColor("TeApi Sidebar Provider == null", figures.colors.grey)}`;
-        else if (!teApi.providers)              err = `    ${figures.color.error} ${figures.withColor("Providers null", figures.colors.grey)}`;
+        if (!teWrapper.explorer)                err = `    ${figures.color.error} ${figures.withColor("TeApi Explorer provider == null", colors.grey)}`;
+        // /else if (!teApi.sidebar)            err = `    ${figures.color.error} ${figures.withColor("TeApi Sidebar Provider == null", colors.grey)}`;
+        else if (!teApi.providers)              err = `    ${figures.color.error} ${figures.withColor("Providers null", colors.grey)}`;
     }
     if (!err && taskType) {
-        if (!teApi.providers[taskType])         err = `    ${figures.color.error} ${taskType} ${figures.withColor("Provider == null", figures.colors.grey)}`;
+        if (!teApi.providers[taskType])         err = `    ${figures.color.error} ${taskType} ${figures.withColor("Provider == null", colors.grey)}`;
     }
     if (!err && !(workspace.workspaceFolders ? workspace.workspaceFolders[0] : undefined)) {
-                                                err = `    ${figures.color.error} ${figures.withColor("Workspace folder does not exist", figures.colors.grey)}`;
+                                                err = `    ${figures.color.error} ${figures.withColor("Workspace folder does not exist", colors.grey)}`;
     }
     if (!err && !extensions.getExtension("spmeesseman.vscode-taskexplorer")) {
-                                                err = `    ${figures.color.error} ${figures.withColor("Extension not found", figures.colors.grey)}`;
+                                                err = `    ${figures.color.error} ${figures.withColor("Extension not found", colors.grey)}`;
     }
     if (err) {
         console.log(err);
@@ -437,7 +493,7 @@ export const logErrorsAreFine = (willFail = true) =>
                     `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
                     `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}`);
         console.log(`    ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.up}  ${figures.withColor("  THESE ERRORS WERE SUPPOSED TO HAPPEN!!!  ", figures.colors.green)}  ` +
+                    `${figures.color.up}  ${figures.withColor("  THESE ERRORS WERE SUPPOSED TO HAPPEN!!!  ", colors.green)}  ` +
                     `${figures.color.up}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}`);
         console.log(`    ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
                     `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
@@ -499,7 +555,7 @@ export const setFailed = (ctrlc = true) =>
 {
     caughtControlC = ctrlc;
     hasRollingCountError = true;
-    symbols.ok = figures.withColor(figures.pointer, figures.colors.blue);
+    symbols.ok = figures.withColor(figures.pointer, colors.blue);
 };
 
 
@@ -627,7 +683,7 @@ export const waitForTaskExecution = async (exec: TaskExecution | undefined, maxW
             hasExec = false,
             isExec = !!isExecuting(exec.task);
         if (tc.log.taskExecutionSteps) {
-            console.log(`    ${figures.color.infoTask}   ${figures.withColor(`Waiting for '${taskName}' task execution`, figures.colors.grey)}`);
+            console.log(`    ${figures.color.infoTask}   ${figures.withColor(`Waiting for '${taskName}' task execution`, colors.grey)}`);
         }
         while ((isExec && (maxWait === undefined || waitedAfterStarted < maxWait)) || (!isExec && !hasExec && waitedHasNotStarted < 3000))
         {
@@ -635,7 +691,7 @@ export const waitForTaskExecution = async (exec: TaskExecution | undefined, maxW
             isExec = !!isExecuting(exec.task);
             if (isExec) {
                 if (!hasExec && tc.log.taskExecutionSteps) {
-                    console.log(`    ${figures.color.infoTask}     ${figures.withColor(`Task execution started, waited ${waitedAfterStarted + waitedHasNotStarted} ms`, figures.colors.grey)}`);
+                    console.log(`    ${figures.color.infoTask}     ${figures.withColor(`Task execution started, waited ${waitedAfterStarted + waitedHasNotStarted} ms`, colors.grey)}`);
                 }
                 hasExec = isExec;
                 waitedAfterStarted += 50;
@@ -643,7 +699,7 @@ export const waitForTaskExecution = async (exec: TaskExecution | undefined, maxW
             else if (!hasExec) { waitedHasNotStarted += 50; }
         }
         if (tc.log.taskExecutionSteps) {
-            console.log(`    ${figures.color.infoTask}     ${figures.withColor(`Task execution wait finished, waited ${waitedAfterStarted + waitedHasNotStarted} ms`, figures.colors.grey)}`);
+            console.log(`    ${figures.color.infoTask}     ${figures.withColor(`Task execution wait finished, waited ${waitedAfterStarted + waitedHasNotStarted} ms`, colors.grey)}`);
         }
     }
 };
