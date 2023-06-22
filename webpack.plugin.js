@@ -71,17 +71,17 @@ const wpPlugin =
 							} catch {}
 						});
 					}
-					if (_env.environment === "test")
-					{
-						const istanbulFileWriter = path.join(__dirname, "node_modules", "istanbul-lib-report", "lib", "file-writer.js");
-						if (fs.existsSync(istanbulFileWriter))
-						{
-							const regex = /new FileContentWriter\(fs\.openSync\(file, 'w'\)\);/mg,
-							      value = `new FileContentWriter(fs.openSync(file.replace(/[\\" ]/g, ""), 'w'));`,
-							      content = fs.readFileSync(istanbulFileWriter, "utf8").replace(regex,value);
-							fs.writeFileSync(istanbulFileWriter, content);
-						}
-					}
+					// if (_env.environment === "test")
+					// {
+					// 	const istanbulFileWriter = path.join(__dirname, "node_modules", "istanbul-lib-report", "lib", "file-writer.js");
+					// 	if (fs.existsSync(istanbulFileWriter))
+					// 	{
+					// 		const regex = /new FileContentWriter\(fs\.openSync\(file, 'w'\)\);/mg,
+					// 		      value = `new FileContentWriter(fs.openSync(file.replace(/[\\" ]/g, ""), 'w'));`,
+					// 		      content = fs.readFileSync(istanbulFileWriter, "utf8").replace(regex,value);
+					// 		fs.writeFileSync(istanbulFileWriter, content);
+					// 	}
+					// }
 				}
 			};
 		}
@@ -624,17 +624,23 @@ const wpPlugin =
 				test: /\.(js|jsx)($|\?)/i,
 				exclude: /(vendor|runtime)\.js/,
 				filename: "[name].js.map",
-				moduleFilenameTemplate: '[absolute-resource-path]',
-				fallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
 				// moduleFilenameTemplate: ".[resource-path]",
-				// fallbackModuleFilenameTemplate: '[resource-path]?[hash]'
+				// moduleFilenameTemplate: '[absolute-resource-path]',
+				fallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]',
+				/** @type {any} */moduleFilenameTemplate: (/** @type {any} */info) =>
+				{
+					if ((/[\" ]/).test(info.absoluteResourcePath)) {
+						return info.absoluteResourcePath.replace(/\"/g, "").replace(/ /g, "_");
+					}
+					return `${info.absoluteResourcePath}`;
+				}
 			};
 			if (env.environment === "dev" || wpConfig.mode === "development")
 			{
-				// options.type = "source-map";
 				options.filename = "[name].js.map";
-				options.moduleFilenameTemplate = ".[resource-path]";
-				options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
+				options.moduleFilenameTemplate = '[absolute-resource-path]';
+				// options.moduleFilenameTemplate = "../[resource-path]";
+				// options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
 			}
 			plugin = new webpack.SourceMapDevToolPlugin(options);
 		}
