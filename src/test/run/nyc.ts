@@ -7,9 +7,13 @@ const NYC = require("nyc");
 
 export default async(nycConfig: any) =>
 {
-    const nyc = new NYC(nycConfig),
-		  xArgs = JSON.parse(process.env.xArgs || "[]"),
+    const xArgs = JSON.parse(process.env.xArgs || "[]"),
           noClean = xArgs.includes("--nyc-no-clean");
+	//
+	// Inmstantiate an NYC instance and wrap the current running extension host process
+	//
+	const nyc = new NYC(nycConfig);
+	nyc.wrap();
 	//
 	// Check the modules already loaded and warn in case of race condition
 	// (ideally, at this point the require cache should only contain one file - this module)
@@ -20,7 +24,6 @@ export default async(nycConfig: any) =>
 	{
 		console.warn("NYC initialized after modules were loaded", Object.keys(require.cache).filter(filterFn));
 	}
-
 	//
 	// Debug which files will be included/excluded
 	// console.log('Glob verification', await nyc.exclude.glob(nyc.cwd));
@@ -37,42 +40,49 @@ export default async(nycConfig: any) =>
 			await nyc.createTempDirectory();
 		}
 	}
-
+	//
+	// Prepare environment for spawned processes
+	//
 	const env: any = {
 		NYC_CONFIG: JSON.stringify(nycConfig),
-		NYC_CWD: nycConfig.cwd // process.cwd()
+		NYC_CWD: nycConfig.cwd
 	};
-
+   	//
+	// babel's cache interferes with some configurations, so is
+	// disabled by default. opt in by setting babel-cache=true.
+	//
 	if (nycConfig.babelCache === false)
-	{   //
-		// babel's cache interferes with some configurations, so is
-		// disabled by default. opt in by setting babel-cache=true.
-		//
+	{
 		env.BABEL_DISABLE_CACHE = process.env.BABEL_DISABLE_CACHE = "1";
 	}
-
+	//
+	// Initialize nyc environment vars and process wrap if not using the spawn-wrap module/option
+	//
 	if (!nycConfig.useSpawnWrap)
 	{
-		/* TEMP */ nyc.wrap(); /* TEMP */
-		// const requireModules = [
-		// 	require.resolve("../../../node_modules/nyc/lib/register-env.js"),
-		// 	...nyc.require.map((mod: any) => resolveFrom.silent(nyc.cwd, mod) || mod)
-		// ];
-		// // eslint-disable-next-line import/no-extraneous-dependencies
-		// const preloadList = require("node-preload");
-		// preloadList.push(
-		// 	...requireModules,
-		// 	require.resolve("../../../node_modules/nyc/lib/wrap.js")
-		// );
-		// Object.assign(process.env, env);
-		// requireModules.forEach(mod => { require(mod); });
+		const requireModules = [
+			require.resolve("../../../node_modules/nyc/lib/register-env.js"),
+			...nyc.require.map((mod: string) => resolveFrom.silent(nyc.cwd, mod) || mod)
+		];
+		// eslint-disable-next-line import/no-extraneous-dependencies
+		const preloadList = require("node-preload");
+		preloadList.push(
+			...requireModules,
+			require.resolve("../../../node_modules/nyc/lib/wrap.js")
+		);
+		Object.assign(process.env, env);
+		requireModules.forEach(mod => { require(mod); });
 	}
-
+	//
+	// Call addAllFiles() AFTER importing register-env module (if (!nycConfig.useSpawnWrap))
+	//
 	if (nycConfig.all)
 	{
 		await nyc.addAllFiles();
 	}
-
+	//
+	// Initialize spawn-wrap module if required
+	//
 	if (nycConfig.useSpawnWrap)
 	{   //
 		// This is where we are failing now in our efforts to wrap the server spawn for coverage.
@@ -84,7 +94,10 @@ export default async(nycConfig: any) =>
 		//        programatically, and use foreground() in indext.ts to launch it.  THis would pretty
 		//        much replicate how nyc/bin/nyc.js works.
 		//
-		/* TEMP */ nyc.wrap(); /* TEMP */
+		// UPDATE 6/22/23 - Have language server srapped FINALLY without using useSpawnWrap.  Key was
+		//                  to use a node runtime to directly spawn the server, as opposed to the
+		//                  default fork.
+		//
 		// const sw = require("spawn-wrap"),
 		//       wrapper = require.resolve("../../../node_modules/nyc/bin/wrap.js");
 		// sw.runMain();

@@ -1,6 +1,6 @@
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
 //
 // Recommended modules, loading them here to speed up NYC init
 // and minimize risk of race condition
@@ -8,13 +8,14 @@
 import "ts-node/register";
 import "source-map-support/register";
 
+import { resolve } from "path";
 import runConfig from "./config";
-import foreground from "foreground-child";
+// import foreground from "foreground-child";
 
 
 export async function run(): Promise<void>
 {
-    const runCfg = await runConfig();
+    const runCfg = await runConfig(resolve(__dirname, ".."));
     preparePlatform();
 /*
     foreground(childArgs, async () =>
@@ -49,8 +50,7 @@ export async function run(): Promise<void>
             console.error(error.message);
         }
     });
-*/
-    let mochaError: Error | undefined,
+*/   let mochaError: Error | undefined,
         failures = 0;
 
     try {
@@ -61,19 +61,19 @@ export async function run(): Promise<void>
     if (runCfg.nyc)
     {
         try {
-            await runCfg.nyc.writeCoverageFile();
-            //
-            // Capture text-summary reporter's output and log it in console
-            //
+            await sleep(runCfg.mocha.files.length * 5);
+            runCfg.nyc.writeCoverageFile();
+            await sleep(runCfg.mocha.files.length * 20);
+            await runCfg.nyc.writeProcessIndex();
+            runCfg.nyc.maybePurgeSourceMapCache();
             console.log(await captureStdout(runCfg.nyc.report.bind(runCfg.nyc)));
         }
         catch (e) {
             console.log("!!!");
             console.log("!!! Error writing coverage file:");
-            try {
-                console.log("!!!    " + e.toString());
-            } catch {}
+            console.log("!!!    " + e);
             console.log("!!!");
+            try { await runCfg.nyc.showProcessTree(); } catch {}
         }
     }
 
@@ -84,18 +84,28 @@ export async function run(): Promise<void>
 }
 
 
+async function sleep(ms: number) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+
 async function captureStdout(fn: any)
 {
     // eslint-disable-next-line prefer-const
     let w = process.stdout.write, buffer = "";
     process.stdout.write = (s: string) => { buffer = buffer + s; return true; };
-    await fn();
-    process.stdout.write = w;
+    try {
+        await fn();
+    }
+    catch (e) {
+        suppressEPIPE(e);
+    }
+    finally {
+        process.stdout.write = w;
+    }
     return buffer;
 }
 
 
-function suppressEPIPE (error: any)
+function suppressEPIPE (error)
 {   //
     // Prevent dumping error when `nyc npm t|head` causes stdout to be closed when reporting runs
     //

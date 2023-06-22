@@ -53,19 +53,35 @@ const wpPlugin =
 		// "AfterDonePlugin" MUST BE LAST IN THE PLUGINS ARRAY!!
 		/** @type {WebpackPluginInstance | undefined} */
 		let plugin;
-		if (env.build !== "webview" && wpConfig.mode === "production")
+		if (env.build !== "webview")
 		{
+			const _env = { ...env },
+				  _wpConfig = { ...wpConfig };
 			plugin =
 			{   /** @param {import("webpack").Compiler} compiler Compiler */
 				apply: (compiler) =>
 				{
-					compiler.hooks.done.tap("AfterDonePlugin", () =>
+					if (_wpConfig.mode === "production")
 					{
-						try {
-							renameSync(path.join(__dirname, "dist", "vendor.js.LICENSE.txt"), path.join(__dirname, "dist", "vendor.LICENSE"));
-							renameSync(path.join(__dirname, "dist", "taskexplorer.js.LICENSE.txt"), path.join(__dirname, "dist", "taskexplorer.LICENSE"));
-						} catch {}
-					});
+						compiler.hooks.done.tap("AfterDonePlugin", () =>
+						{
+							try {
+								renameSync(path.join(__dirname, "dist", "vendor.js.LICENSE.txt"), path.join(__dirname, "dist", "vendor.LICENSE"));
+								renameSync(path.join(__dirname, "dist", "taskexplorer.js.LICENSE.txt"), path.join(__dirname, "dist", "taskexplorer.LICENSE"));
+							} catch {}
+						});
+					}
+					if (_env.environment === "test")
+					{
+						const istanbulFileWriter = path.join(__dirname, "node_modules", "istanbul-lib-report", "lib", "file-writer.js");
+						if (fs.existsSync(istanbulFileWriter))
+						{
+							const regex = /new FileContentWriter\(fs\.openSync\(file, 'w'\)\);/mg,
+							      value = `new FileContentWriter(fs.openSync(file.replace(/[\\" ]/g, ""), 'w'));`,
+							      content = fs.readFileSync(istanbulFileWriter, "utf8").replace(regex,value);
+							fs.writeFileSync(istanbulFileWriter, content);
+						}
+					}
 				}
 			};
 		}
