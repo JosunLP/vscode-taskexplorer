@@ -1,8 +1,6 @@
 
 import { Uri, WorkspaceFolder } from "vscode";
-import { IDictionary } from "../../interface/IDictionary";
-
-// export type Primitive = boolean | number | string;
+import { IDictionary, Primitive } from "../../interface";
 
 // /**
 //  * @param v Variable to check to see if it's an array
@@ -47,7 +45,7 @@ export const isObject = <T = IDictionary<any>>(v: any, allowArray?: boolean): v 
 export const isObjectEmpty = (v: IDictionary<any>): boolean => { if (v) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };
 
 
-// export const isPrimitive = (v: any): v is Primitive => [ "boolean", "number", "string" ].includes(typeof v);
+export const isPrimitive = (v: any): v is Primitive => [ "boolean", "number", "string" ].includes(typeof v);
 
 
 export const isPromise = <T>(v: any): v is PromiseLike<T> => !!v && (v instanceof Promise || (isObject(v) && isFunction(v.then)));

@@ -12,6 +12,7 @@ import * as sorters from "./utils/sortTasks";
 import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
 import * as typeUtils from "./utils/typeUtils";
+import { EventQueue } from "./utils/eventQueue";
 import { TeFileCache } from "../task/fileCache";
 import { All as AllConstants } from "./constants";
 import { TaskManager } from "../task/taskManager";
@@ -61,7 +62,7 @@ import {
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, IDictionary, ILog, ITaskTreeView, ITeFilesystem,
 	ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities,
-	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeTreeConfigWatcher, ITeKeys
+	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeKeys
 } from "../interface";
 
 
@@ -82,6 +83,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	// private readonly _localize: nls.LocalizeFunc;
 	private readonly _fileCache: TeFileCache;
 	private readonly _statusBar: TeStatusBar;
+    private readonly _eventQueue: EventQueue;
     private readonly _taskWatcher: TaskWatcher;
 	private readonly _licensePage: LicensePage;
 	private readonly _welcomePage: WelcomePage;
@@ -114,6 +116,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._log = log;
 		this._providers = {};
 
+		this._eventQueue = new EventQueue(this);
 		this._onReady = new EventEmitter<void>();
 		this._onInitialized = new EventEmitter<void>();
 		this._onBusyComplete = new EventEmitter<void>();
@@ -172,6 +175,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//     }, startTime, endTime);
 
 		this._disposables = [
+			this._eventQueue,
 			this._teApi,
 			this._usage,
 			this._onReady,
@@ -436,6 +440,9 @@ export class TeWrapper implements ITeWrapper, Disposable
     };
 
 
+	waitReady = async (ignoreModule: any[] = [], minWait = 1, maxWait = 15000) => {}; // this._waitUtils.waitReady(ignoreModule, minWait, maxWait);
+
+
 	get api(): TeApi {
 		return this._teApi;
 	}
@@ -476,6 +483,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get env(): TeRuntimeEnvironment {
 		return this._envMap[ExtensionMode[this._context.extensionMode].toLowerCase()];
+	}
+
+	get eventQueue(): EventQueue {
+		return this._eventQueue;
 	}
 
     get explorer(): ITeTaskTree {

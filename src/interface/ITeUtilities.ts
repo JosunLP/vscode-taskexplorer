@@ -59,6 +59,8 @@ export interface ITeTaskUtilities
 	toITask(wrapper: ITeWrapper, teTasks: Task[], listType: TeTaskListType): ITeTask[];
 }
 
+export type Primitive = boolean | number | string;
+
 export interface ITeTypeUtilities
 {
     // asArray<T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[];
@@ -73,7 +75,7 @@ export interface ITeTypeUtilities
     // isObject<T>(v: any, allowArray?: boolean): v is { [key: string]: T } ;
     isObject<T = IDictionary<any>>(v: any, allowArray?: boolean): v is T;
     isObjectEmpty(v: any): boolean;
-    // isPrimitive(v: any): v is boolean | number | string;
+    isPrimitive(v: any): v is Primitive;
 	isPromise<T>(v: any): v is PromiseLike<T>;
 	isString(v: any, notEmpty?: boolean): v is string;
 	isUri(v: any): v is Uri;
@@ -95,6 +97,7 @@ export interface ITeUtilities
 	isTaskTypeEnabled(taskType: string): boolean;
 	isTeEnabled(): boolean;
 	openUrl(url: string): void;
+	popIfExists(arrOrRec: string[] | Record<string, string> | undefined, ...item: string[]): string[];
 	popIfExistsBy<T>(arr: T[] | undefined, fn: (v1: T) => boolean, thisArg?: any, single?: boolean): T[];
 	popObjIfExistsBy<T>(rec: Record<string, T> | undefined, fn: (k: string, v: T) => boolean, thisArg?: any, single?: boolean): T[];
 	pushIfNotExists(arr: any[], item: any): void;

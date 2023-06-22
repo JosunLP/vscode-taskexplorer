@@ -2,7 +2,7 @@
 import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
-import { isPromise } from "./typeUtils";
+import { isArray, isPromise, isString } from "./typeUtils";
 import { ConfigKeys } from "../../interface";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
@@ -167,6 +167,43 @@ export const openUrl = (url: string) =>
 
 
 export const pushIfNotExists = (arr: any[], item: any) => { if (!arr.includes(item)) { arr.push(item); } };
+
+
+export const popIfExists = (arrOrRec: string[] | Record<string, string> | undefined, ...item: string[]): string[] =>
+{
+    const popped: string[] = [];
+    if (arrOrRec)
+    {
+        if (item.length > 1)
+        {
+            if (isArray(arrOrRec)) {
+                arrOrRec.slice().reverse().forEach((v, i, a) => { if (item.includes(v)) { popped.push(...arrOrRec.splice(a.length - 1 - i, 1)); } });
+            }
+            else {
+                Object.entries(arrOrRec).filter(e => item.find(i => i === e[0] || i === e[1])).forEach(e => { popped.push(e[1]); delete arrOrRec[e[0]]; });
+            }
+        }
+        else
+        {
+            if (isArray(arrOrRec))
+            {
+                const idx = arrOrRec.findIndex(v => v === item[0]);
+                if (idx !== -1) {
+                    popped.push(arrOrRec.splice(idx, 1)[0]);
+                }
+            }
+            else
+            {
+                if (isString(arrOrRec[item[0]]))
+                {
+                    popped.push(arrOrRec[item[0]]);
+                    delete arrOrRec[item[0]];
+                }
+            }
+        }
+    }
+    return popped;
+};
 
 
 export const popIfExistsBy = <T>(arr: T[] | undefined, fn: (v1: T) => boolean, thisArg?: any, single = false): T[] =>
