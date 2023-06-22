@@ -1,10 +1,9 @@
 {
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"baseUrl": ".",
 		"rootDir": "src",
-		"outDir": "../dist/browser",
-		"tsBuildInfoFile": "dist/browser/tsconfig.browser.tsbuildinfo",
+		"outDir": "dist/browser",
+		"tsBuildInfoFile": "tsconfig.browser.tsbuildinfo",
 		"lib": [
 			"dom", "dom.iterable", "es2020"
 		],

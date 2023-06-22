@@ -8,11 +8,14 @@
 			"@env/*": [ "src/lib/env/browser/*" ]
 		},
 		// "rootDir": "../..",
-		"useDefineForClassFields": false,
-		"skipLibCheck": true
+		"rootDirs": [
+			".",
+			"../common"
+		],
+		"useDefineForClassFields": false
 	},
 	"include": [
-		"**/*",
+		"./**/*",
 		"../../../types/lib/**/*",
 		"../common/ipc.ts"
 	],

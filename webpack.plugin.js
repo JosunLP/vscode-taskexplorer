@@ -690,6 +690,7 @@ const wpPlugin =
 					async: false,
 					formatter: "basic",
 					typescript: {
+						// build: true,
 						mode: 'write-tsbuildinfo',
 						configFile: path.join(__dirname, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
 					}
@@ -698,9 +699,9 @@ const wpPlugin =
 		}
 		plugins.push(
 			new ForkTsCheckerNotifierWebpackPlugin({
-				title: 'TypeScript',
-				excludeWarnings: false,
-			  }),
+				title: "vscode-taskexplorer",
+				excludeWarnings: false
+			}),
 		);
 		return plugins;
 	},

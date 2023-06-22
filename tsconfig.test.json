@@ -2,10 +2,9 @@
     "extends": "./tsconfig.base.json",
     // "ts-node": {"require": ["tsconfig-paths/register"]},
     "compilerOptions": {
-		"baseUrl": ".",
 		"isolatedModules": false,
 		"rootDir": "src",
-		"tsBuildInfoFile": "dist/tsconfig.test.tsbuildinfo",
+		"tsBuildInfoFile": "tsconfig.test.tsbuildinfo",
         "paths": {
 			"@env/*": [ "src/lib/env/node/*" ],
 			"@types": [ "types" ]

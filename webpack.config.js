@@ -680,7 +680,7 @@ const rules = (env, wpConfig) =>
 				options: {
 					implementation: esbuild,
 					loader: "tsx",
-					target: ["es2020", "chrome91", "node14.16"],
+					target: ["es2020", "chrome91", "node16.20"],
 					tsconfigRaw: resolveTSConfig(
 						path.join(__dirname, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
 					)

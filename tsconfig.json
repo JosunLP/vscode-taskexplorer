@@ -1,16 +1,12 @@
 {
     "extends": "./tsconfig.base.json",
     "compilerOptions": {
-		"baseUrl": ".",
 		"rootDir": "src",
 		"tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
         "paths": {
 			"@env/*": [ "src/lib/env/node/*" ]
 		}
     },
-	"include": [
-		"src"
-	],
     "exclude": [
         "node_modules",
         ".vscode-test",
