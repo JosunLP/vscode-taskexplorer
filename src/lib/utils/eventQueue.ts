@@ -73,7 +73,11 @@ export class EventQueue implements IEventQueue, Disposable
               has = (ce && ce.owner === e.owner && ce.type === e.type && ce.event === e.event) ||
                     /* (debounce && !!this._eventQueue.find(e2 => e2 && e2.owner === e.owner && e2.type === e.type && e2.event.startsWith(e.debounceEvent))) || */
                     !!this._eventQueue.find(ev => e.owner === ev.owner && e.type === ev.type && e.event === ev.event);
-        if (!has) {
+        if (!has)
+        {
+            this.wrapper.log.methodOnce("queue", "queue event", 1, "", [
+                [ "event", e.event ], [ "# of events currently pending", this._eventQueue.length ]
+            ]);
             this._eventQueue.push(e);
         }
     };
@@ -94,16 +98,18 @@ export class EventQueue implements IEventQueue, Disposable
 
     private processQueue = async () =>
     {
-        const next = this._currentEvent = <IEventTask>this._eventQueue.shift();
-        this.wrapper.log.methodOnce("queue", "process event", 1, "", [
-            [ "next event", next.event ], [ "arg1", this.wrapper.typeUtils.isString(next.args[0]) ? next.args[0] : next.args[0].fsPath ],
-            [ "arg2", this.wrapper.typeUtils.isUri(next.args[1]) ? next.args[1].fsPath : "none (log padding)" ],
-            [ "# of events still pending", this._eventQueue.length ]
-        ]);
-        if (this._currentEvent) {
-            await this.processEvent(this._currentEvent);
+        const next = this._currentEvent = this._eventQueue.shift();
+        if (next)
+        {
+            let argCt = 0;
+            this.wrapper.log.methodOnce("queue", "process event", 1, "", [
+                [ "next event", next.event ], [ "# of events still pending", this._eventQueue.length ],
+                ...next.args.filter(a => this.wrapper.typeUtils.isPrimitive(a)).map(a => [ `arg ${++argCt}`, a ])
+            ]);
+            await this.processEvent(next);
         }
         else {
+            this.wrapper.log.methodOnce("queue", "process events complete, queue empty", 1, "");
             this._onReady.fire();
         }
     };

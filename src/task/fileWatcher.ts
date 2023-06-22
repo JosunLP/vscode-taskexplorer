@@ -131,7 +131,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         const isDir = this.wrapper.fs.isDirectory(uri.fsPath);
         if (isDir && !this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
         {
-            this.queueEvent({
+            void this.wrapper.eventQueue.queue({
                 fn: this._procDirCreateEvent,
                 scope: this,
                 args: [ uri, "   " ],
@@ -155,7 +155,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         const isDir = !extname(uri.fsPath);
         if (isDir && !this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
         {
-            this.queueEvent(
+            void this.wrapper.eventQueue.queue(
             {
                 fn: this._procDirDeleteEvent,
                 scope: this,
@@ -175,7 +175,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         if (!this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
         {
-            this.queueEvent(
+            void this.wrapper.eventQueue.queue(
             {
                 fn: this._procFileChangeEvent,
                 scope: this,
@@ -196,7 +196,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         if (!this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
         {
-            this.queueEvent(
+            void this.wrapper.eventQueue.queue(
             {
                 fn: this._procFileCreateEvent,
                 scope: this,
@@ -217,7 +217,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     {
         if (!this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
         {
-            this.queueEvent(
+            void this.wrapper.eventQueue.queue(
             {
                 fn: this._procFileDeleteEvent,
                 scope: this,
@@ -283,11 +283,6 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         else if (e.removed.length > 0 || e.added.length > 0)
         {
-            const fwEvent = {
-                fn: this._procWsDirAddRemoveEvent,
-                args: [ e, "   " ],
-                event: "workspace change"
-            };
             this.wrapper.log.write("   workspace folder has been added or removed, process/queue event", 1);
             //
             // Technically, there should never be a current event when program flow falls here, since
@@ -296,7 +291,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             // which this function is a listener of.  Even so, leaving the check here, with a handy
             // dandy cheap istanbul ignore tag for coverage ignorance.
             //
-            this.queueEvent(
+            void this.wrapper.eventQueue.queue(
             {
                 fn: this._procWsDirAddRemoveEvent,
                 scope: this,
@@ -328,16 +323,6 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
         this.currentNumWorkspaceFolders = workspace.workspaceFolders?.length;
         this.wrapper.log.methodDone("[event] workspace folder change", 1, "", [[ "current # of workspace folders", this.currentNumWorkspaceFolders ]]);
-    };
-
-
-    private queueEvent = (e: IEventTask): void =>
-    {
-        let argCt = 0;
-        this.wrapper.log.methodOnce("fs", `${e.event} - '${e.type}'`, 1, "", [
-            e.args.filter(a => this.wrapper.typeUtils.isPrimitive(a)).map(a => [ `arg ${++argCt}`, a ])
-        ]);
-        void this.wrapper.eventQueue.queue(e);
     };
 
 
