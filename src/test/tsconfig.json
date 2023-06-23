@@ -2,8 +2,8 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
 		"isolatedModules": false,
-        "outDir": "dist/test",
-		"tsBuildInfoFile": ".vscode/tsconfig.test.tsbuildinfo"
+        "outDir": "../../dist/test",
+		"tsBuildInfoFile": "../../.vscode/tsconfig.test.tsbuildinfo"
     },
 	"include": [
 		"**/*.ts",

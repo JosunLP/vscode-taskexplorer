@@ -1,6 +1,6 @@
 
 //@ts-check
-declare type WebpackBuild = "extension"|"browser"|"extension_tests"|"webview";
+declare type WebpackBuild = "extension"|"browser"|"tests"|"webview";
 declare type WebpackBuildOrUndefined = WebpackBuild|undefined;
 declare type WebpackConfig = import("webpack").Configuration;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
