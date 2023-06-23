@@ -3,7 +3,7 @@
 import * as path from "path";
 import { getDevPath, getRelativePath } from "../../utils/sharedUtils";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, TaskGroup, commands } from "vscode";
-import { ITaskDefinition, IExternalProvider, ITaskExplorerApi } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITaskDefinition, IExternalProvider, ITaskExplorerApi } from "../../../interface";
 
 
 export class ExternalTaskProvider2 implements IExternalProvider

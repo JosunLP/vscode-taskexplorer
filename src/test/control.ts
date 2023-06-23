@@ -1,6 +1,5 @@
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { IDictionary } from "@spmeesseman/vscode-taskexplorer-types";
+import { IDictionary } from "../interface";
 
 interface ISuiteResults extends IDictionary<any>
 {

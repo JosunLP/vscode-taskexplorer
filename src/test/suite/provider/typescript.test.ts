@@ -6,7 +6,7 @@ import { Uri } from "vscode";
 import fsUtils from "../../utils/fsUtils";
 import * as utils from "../../utils/utils";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITeWrapper } from "../../../interface";
 import { executeSettingsUpdate, executeTeCommand2 } from "../../utils/commandUtils";
 
 const testsName = "tsc";

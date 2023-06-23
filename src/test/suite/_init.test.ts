@@ -3,9 +3,9 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { expect } from "chai";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
-import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusFileExplorer, focusSidebarView, showTeWebview } from "../utils/commandUtils";
-import { activate, closeEditors, endRollingCount, exitRollingCount, promiseFromEvent, sleep, suiteFinished, testControl as tc, waitForEvent, waitForWebviewReadyEvent } from "../utils/utils";
+import { ITeWrapper } from "../../interface";
+import { executeSettingsUpdate, executeTeCommand2, focusFileExplorer, focusSidebarView, showTeWebview } from "../utils/commandUtils";
+import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc, waitForEvent, waitForWebviewReadyEvent } from "../utils/utils";
 
 
 let teWrapper: ITeWrapper;

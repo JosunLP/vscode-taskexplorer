@@ -3,7 +3,7 @@
 
 import { expect } from "chai";
 import { commands, WebviewPanel } from "vscode";
-import { ITeWebview, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITeWebview, ITeWrapper } from "../../interface";
 import { waitForTeIdle, testControl as tc, teWrapper, sleep, promiseFromEvent, waitForWebviewReadyEvent } from "./utils";
 
 let explorerHasFocused = false;

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { startupFocus } from "../../utils/suiteUtils";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import {  ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import {  ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "../../../interface";
 import { activate, endRollingCount, exitRollingCount, getWsPath,
     logErrorsAreFine, suiteFinished, testControl as tc, verifyTaskCount, waitForTeIdle
 } from "../../utils/utils";

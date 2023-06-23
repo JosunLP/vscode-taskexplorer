@@ -1,7 +1,7 @@
 
 import { expect } from "chai";
+import { IDictionary, ITeWrapper } from "../../interface";
 import { executeSettingsUpdate } from "../utils/commandUtils";
-import { IDictionary, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, endRollingCount, exitRollingCount, getSuccessCount, suiteFinished, testControl as tc, waitForTeIdle
 } from "../utils/utils";

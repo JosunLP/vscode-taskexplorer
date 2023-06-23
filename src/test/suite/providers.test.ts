@@ -5,7 +5,7 @@ import { join } from "path";
 import { expect } from "chai";
 import { refresh } from "../utils/treeUtils";
 import { tasks, TreeItemCollapsibleState } from "vscode";
-import { ITaskFile, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITaskFile, ITaskItem, ITeWrapper } from "../../interface";
 import { executeSettingsUpdate, executeTeCommand2, focusExplorerView } from "../utils/commandUtils";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, needsTreeBuild, suiteFinished, testControl as tc,

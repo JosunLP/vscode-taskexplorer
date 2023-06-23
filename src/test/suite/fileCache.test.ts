@@ -1,9 +1,8 @@
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import * as utils from "../utils/utils";
+import { ITeWrapper } from "../../interface";
 import { startupBuildTree } from "../utils/suiteUtils";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand } from "../utils/commandUtils";
 
 let teWrapper: ITeWrapper;

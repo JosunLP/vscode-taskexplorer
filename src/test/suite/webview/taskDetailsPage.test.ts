@@ -3,11 +3,11 @@
 
 import { TaskExecution } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITaskItem, ITeWrapper, ITeWebview } from "@spmeesseman/vscode-taskexplorer-types";
-import { closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand, executeTeCommand2, showTeWebview } from "../../utils/commandUtils";
+import { ITaskItem, ITeWrapper, ITeWebview } from "../../../interface";
+import { closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand2, showTeWebview } from "../../utils/commandUtils";
 import {
-	activate, closeEditors, testControl as tc, suiteFinished, sleep, exitRollingCount,
-	endRollingCount, treeUtils, waitForTaskExecution, waitForWebviewsIdle
+	activate, closeEditors, testControl as tc, suiteFinished, sleep, exitRollingCount, endRollingCount,
+	treeUtils, waitForTaskExecution, waitForWebviewsIdle
 } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;

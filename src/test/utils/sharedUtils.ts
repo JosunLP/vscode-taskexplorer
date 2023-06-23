@@ -1,20 +1,23 @@
 
-import { join, normalize, resolve } from "path";
+import { join, resolve } from "path";
 import { existsSync, mkdirSync } from "fs";
 import { Uri, WorkspaceFolder } from "vscode";
 
-const testsProjectsDir = normalize(resolve(__dirname, "..", "..", "..", ".vscode-test", "user-data", "projects"));
+const _projectPath = resolve(__dirname, "..", "..", "..");
+
+const testsProjectsDir = join(_projectPath, ".vscode-test", "user-data", "projects");
 if (!existsSync(testsProjectsDir)) {
     mkdirSync(testsProjectsDir);
 }
 
-export const getWsPath = (p: string) => normalize(resolve(__dirname, "..", "..", "..", "test-fixture", "project1", p));
+export const getWsPath = (p: string) => join(_projectPath, "test-fixture", "project1", p);
 
 
-export const getProjectsPath = (p: string) => normalize(resolve(testsProjectsDir, p));
+export const getProjectsPath = (p: string) => join(testsProjectsDir, p);
 
 
-export const getDevPath = (p: string) => normalize(resolve(__dirname, "..", "..", "..", p));
+export const getDevPath = (p: string) => join(_projectPath, p);
+
 
 export const getRelativePath = (folder: WorkspaceFolder, uri: Uri): string =>
 {

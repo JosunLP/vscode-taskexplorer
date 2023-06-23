@@ -1,5 +1,5 @@
 
-import {  refresh } from "./treeUtils";
+import { refresh } from "./treeUtils";
 import { focusExplorerView, focusSidebarView } from "./commandUtils";
 import { endRollingCount, exitRollingCount, needsTreeBuild, sleep, testControl as tc, waitForTeIdle } from "./utils";
 

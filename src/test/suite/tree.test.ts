@@ -3,8 +3,8 @@
 import { expect } from "chai";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
+import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from "../../interface";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
-import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 let teWrapper: ITeWrapper;
 const tc = utils.testControl;

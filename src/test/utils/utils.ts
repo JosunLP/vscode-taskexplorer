@@ -11,8 +11,8 @@ import { cleanupSettings, initSettings } from "./initSettings";
 import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import {
-    ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter, ITeFigures
-} from "@spmeesseman/vscode-taskexplorer-types";
+    ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
+} from "../../interface";
 import {
     commands, ConfigurationTarget, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks,
     Uri, ViewColumn, window, workspace

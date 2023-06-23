@@ -2,8 +2,8 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { Extension } from "vscode";
+import { ITeWrapper } from "../../../interface";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { closeTeWebviewPanel, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl, suiteFinished, sleep, exitRollingCount, endRollingCount

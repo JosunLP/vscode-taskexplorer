@@ -1,7 +1,7 @@
 
 import { startupFocus } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITeWrapper } from "../../../interface";
 import {
     activate, endRollingCount, exitRollingCount, needsTreeBuild, suiteFinished, testControl,
     treeUtils

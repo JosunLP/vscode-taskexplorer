@@ -2,8 +2,8 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { Uri } from "vscode";
+import { ITeWrapper } from "../../../interface";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { closeTeWebviewPanel, executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, testControl as tc, suiteFinished, getWsPath, exitRollingCount, waitForTeIdle, endRollingCount,

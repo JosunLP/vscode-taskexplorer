@@ -17,12 +17,12 @@
 
 import { join } from "path";
 import { startupFocus } from "../utils/suiteUtils";
+import { ITeWrapper, ITaskItem } from "../../interface";
 import { Task, Uri, workspace, WorkspaceFolder } from "vscode";
-import { ITeWrapper, ITaskItem } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, focusExplorerView, focusSearchView } from "../utils/commandUtils";
 import {
-    activate, endRollingCount, exitRollingCount, getProjectsPath, sleep, suiteFinished,
-    testControl as tc, verifyTaskCount, waitForTeIdle
+    activate, endRollingCount, exitRollingCount, getProjectsPath, sleep, suiteFinished, testControl as tc,
+    verifyTaskCount, waitForTeIdle
 } from "../utils/utils";
 
 const gruntCt = 7;

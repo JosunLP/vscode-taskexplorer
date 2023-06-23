@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { join } from "path";
@@ -7,8 +6,8 @@ import { expect } from "chai";
 import fsUtils from "../utils/fsUtils";
 import * as utils from "../utils/utils";
 import { startupBuildTree } from "../utils/suiteUtils";
+import { IDictionary, ITeWrapper } from "../../interface";
 import { executeSettingsUpdate } from "../utils/commandUtils";
-import { IDictionary, ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 
 const tc = utils.testControl;
 const startTaskCountBash = 1;

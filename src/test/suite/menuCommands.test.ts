@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import { TaskExecution, Uri } from "vscode";
+import { ITeWrapper } from "../../interface";
 import { executeTeCommand2, focusExplorerView } from "../utils/commandUtils";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import {
     activate, clearOverrideShowInputBox, endRollingCount, exitRollingCount, getWsPath,
     needsTreeBuild, overrideNextShowInfoBox, overrideNextShowInputBox, suiteFinished, testControl as tc, verifyTaskCount, waitForTaskExecution

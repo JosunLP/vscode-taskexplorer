@@ -2,8 +2,8 @@
 import { join } from "path";
 import { env } from "process";
 import { expect } from "chai";
+import { ITeWrapper } from "../../interface";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
 import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
 import {
 	activate, testControl, logErrorsAreFine, suiteFinished, exitRollingCount, getWsPath, endRollingCount, sleep

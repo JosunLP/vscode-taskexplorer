@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import { expect } from "chai";
-import { ITeWrapper } from "@spmeesseman/vscode-taskexplorer-types";
+import { ITeWrapper } from "../../../interface";
 import { activate, endRollingCount, exitRollingCount, suiteFinished } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
