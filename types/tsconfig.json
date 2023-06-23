@@ -11,6 +11,7 @@
 		"sourceMap": false,
 		"strict": true,
 		"target": "es2020",
+		"tsBuildInfoFile": "../.vscode/tsconfig.types.tsbuildinfo"
 	},
 	"include": [
 		"../src/interface"
@@ -22,6 +23,6 @@
 		"../src/test",
 		"../src/tree",
 		"../src/webview",
-		"../src/extension.*"
+		"../src/*.*"
 	]
 }

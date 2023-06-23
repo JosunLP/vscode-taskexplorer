@@ -2,22 +2,38 @@
 	"extends": "../../../tsconfig.base.json",
 	"compilerOptions": {
 		"jsx": "react",
-		"lib": [ "DOM", "DOM.Iterable", "ES2020" ],
 		"outDir": "../../",
+		// "rootDir": "../..",
+		"tsBuildInfoFile": "../../../.vscode/tsconfig.webapp.tsbuildinfo",
+		"useDefineForClassFields": false,
+		"lib": [
+			"DOM", "DOM.Iterable", "ES2020"
+		],
 		"paths": {
 			"@env/*": [ "src/lib/env/browser/*" ]
 		},
-		// "rootDir": "../..",
 		"rootDirs": [
 			".",
 			"../common"
-		],
-		"useDefineForClassFields": false
+		]
 	},
 	"include": [
 		"./**/*",
 		"../../../types/lib/**/*",
 		"../common/ipc.ts"
 	],
-	"exclude": [ "node_modules", "test" ]
+    "exclude": [
+        "node_modules",
+        ".vscode-test",
+        ".vscode",
+        "test-fixture",
+        "script",
+        "types",
+        "res",
+        "dist",
+        "doc",
+        ".nyc_output",
+        ".coverage",
+        "src/test/**/*"
+    ]
 }

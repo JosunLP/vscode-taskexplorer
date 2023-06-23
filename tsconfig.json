@@ -1,8 +1,9 @@
 {
     "extends": "./tsconfig.base.json",
     "compilerOptions": {
+        "outDir": "dist",
 		"rootDir": "src",
-		"tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
+		"tsBuildInfoFile": ".vscode/tsconfig.tsbuildinfo",
         "paths": {
 			"@env/*": [ "src/lib/env/node/*" ]
 		}

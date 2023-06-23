@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "dist/browser",
-		"tsBuildInfoFile": "tsconfig.browser.tsbuildinfo",
+		"tsBuildInfoFile": ".vscode/tsconfig.browser.tsbuildinfo",
 		"lib": [
 			"dom", "dom.iterable", "es2020"
 		],

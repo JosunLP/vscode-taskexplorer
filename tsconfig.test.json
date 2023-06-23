@@ -3,13 +3,17 @@
     // "ts-node": {"require": ["tsconfig-paths/register"]},
     "compilerOptions": {
 		"isolatedModules": false,
+        "outDir": "dist",
 		"rootDir": "src",
-		"tsBuildInfoFile": "tsconfig.test.tsbuildinfo",
+		"baseUrl": ".",
+		"tsBuildInfoFile": ".vscode/tsconfig.test.tsbuildinfo",
         "paths": {
-			"@env/*": [ "src/lib/env/node/*" ],
-			"@types": [ "types" ]
+			"@env/*": [ "src/lib/env/node/*" ]
 		}
     },
+	"include": [
+		"src"
+	],
     "exclude": [
         "node_modules",
         ".vscode-test",
