@@ -157,12 +157,7 @@ const wpPlugin =
 					"babel", "./src/test", "--out-dir", "./dist/test", "--extensions", ".ts",
 					"--presets=@babel/preset-env,@babel/preset-typescript",
 				];
-				spawnSync("npx", babel,
-				{
-					cwd: __dirname,
-					encoding: "utf8",
-					shell: true
-				});
+				spawnSync("npx", babel, { cwd: __dirname, encoding: "utf8", shell: true });
 			}
 		}
 	},
@@ -622,11 +617,24 @@ const wpPlugin =
 		{
 			const options = {
 				test: /\.(js|jsx)($|\?)/i,
-				exclude: /(vendor|runtime)\.js/,
+				exclude: /((vendor|runtime)\.js|node_modules)/,
 				filename: "[name].js.map",
 				// moduleFilenameTemplate: ".[resource-path]",
 				// moduleFilenameTemplate: '[absolute-resource-path]',
 				fallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]',
+				// fileContext: "..",
+				//
+				// The bundled node_modules will produce reference tags within the main entry point
+				// files in the form:
+				//
+				//     external commonjs "vscode"
+				//     external-node commonjs "crypto"
+				//     ...etc...
+				//
+				// This breaks the istanbul reporting library when the tests have completed and the
+				// coverage report is being built (via nyc.report()).  Replace the quote and space
+				// characters in this external reference name with filename firiendly characters.
+				//
 				/** @type {any} */moduleFilenameTemplate: (/** @type {any} */info) =>
 				{
 					if ((/[\" ]/).test(info.absoluteResourcePath)) {
@@ -719,12 +727,12 @@ const wpPlugin =
 				})
 			);
 		}
-		plugins.push(
-			new ForkTsCheckerNotifierWebpackPlugin({
-				title: "vscode-taskexplorer",
-				excludeWarnings: false
-			}),
-		);
+		// plugins.push(
+		// 	new ForkTsCheckerNotifierWebpackPlugin({
+		// 		title: "vscode-taskexplorer",
+		// 		excludeWarnings: false
+		// 	}),
+		// );
 		return plugins;
 	},
 
