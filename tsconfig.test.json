@@ -1,6 +1,5 @@
 {
     "extends": "./tsconfig.base.json",
-    // "ts-node": {"require": ["tsconfig-paths/register"]},
     "compilerOptions": {
 		"isolatedModules": false,
         "outDir": "dist",
