@@ -1,9 +1,9 @@
 
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
-import * as bombadil from "@sgarciac/bombadil";
 import { ITaskDefinition } from "../../interface";
 import { TaskExplorerProvider } from "./provider";
+import { TomlReader } from "@sgarciac/bombadil/lib/tables";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 
 
@@ -57,7 +57,7 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
         //
         // Using @sgarciac/bombadil package to parse the TOML Pipfile
         //
-        const pipfile = new bombadil.TomlReader();
+        const pipfile = new TomlReader();
         pipfile.readToml(contents);
 
         Object.entries(pipfile.result?.scripts ?? {}).forEach(([ scriptName, _scriptCmd ]) =>

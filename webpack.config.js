@@ -59,9 +59,9 @@ module.exports = (env, argv) =>
 		target: "node"
 	}, env);
 	
-	Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(k)).forEach((k) =>
+	Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
 	{
-		env[k] = String(env[k]).toLowerCase() == "true";
+		env[k] = env[k].toLowerCase() === "true";
 	});
 
 	consoleWrite("Start Webpack build");
@@ -437,7 +437,7 @@ const optimization = (env, wpConfig) =>
 			wpConfig.optimization.splitChunks = {
 				cacheGroups: {
 					vendor: {
-						test: /[\\/]node_modules[\\/]((?!(node-windows)).*)[\\/]/,
+						test: /node_modules/,
 						name: "vendor",
 						chunks: "all"
 					}
@@ -553,7 +553,7 @@ const plugins = (env, wpConfig) =>
 		wpPlugin.analyze.bundle(env, wpConfig),
 		wpPlugin.analyze.circular(env, wpConfig),
 		wpPlugin.banner(env, wpConfig),
-		wpPlugin.replace(env, wpConfig),
+		...wpPlugin.replace(env, wpConfig),
 		wpPlugin.afterdone(env, wpConfig)
 	);
 
@@ -669,11 +669,24 @@ const rules = (env, wpConfig) =>
 	}
 	else
 	{
-		wpConfig.module.rules.push(
+		wpConfig.module.rules.push(...[
 		{
-			exclude: [/node_modules/, /test/, /types/, /\.d\.ts$/ ],
-			include: path.join(__dirname, "src"),
+			test: /tools\.js$/,
+			include: path.join(__dirname, "node_modules", "@sgarciac", "bombadil", "lib"),
+			loader: "string-replace-loader",
+			options: {
+			  multiple: [
+				 { search: 'var moment = require(\"moment\");', replace: "" },
+				 { search: "return moment", replace: "return new Date" }
+			  ]
+			}
+		},
+		{
 			test: /\.tsx?$/,
+			include: path.join(__dirname, "src"),
+			exclude: [
+				/node_modules/, /test/, /types/, /\.d\.ts$/
+			],
 			use: [ env.esbuild ?
 			{
 				loader: "esbuild-loader",
@@ -694,7 +707,7 @@ const rules = (env, wpConfig) =>
 					transpileOnly: true
 				}
 			}]
-		});
+		}]);
 	}
 };
 

@@ -565,42 +565,52 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {ReplacePlugin}
+	 * @returns {ReplacePlugin[]}
 	 */
 	replace: (env, wpConfig) =>
 	{
-		/** @type {ReplacePlugin | undefined} */
-		let plugin;
-		const patterns = [];
-		if (env.build !== "webview" && wpConfig.mode === "production")
+		/** @type {ReplacePlugin[]} */
+		const plugins = [];
+
+		if (env.build !== "webview")
 		{
-			patterns.push(
-			{
-				regex: /(?: |\t)*(?:[a-z\.]+|^)log\.[a-zA-Z]+\([^]*?\);(?: |\t)*/g,
-				value: ""
-			});
+			// /** @type {ReplacePlugin[]} */
+			// plugins.push(
+			// 	new ReplacePlugin(
+			// 	{
+			// 		include: [ /node_modules[/\\]@sgarciac[/\\]bombadil[/\\]lib[/\\]tools\.js/ ],
+			// 		patterns: [{
+			// 			regex: /var moment = require\("moment"\);/,
+			// 			value: ""
+			// 		}],
+			// 		values: {
+			// 			"return moment": "return new Date"
+			// 		}
+			// 	})
+			// );
+			// if (wpConfig.mode === "production")
+			// {
+			// 	plugins.push(
+			// 		new ReplacePlugin(
+			// 		{
+			// 			// include: [ /src[/\\]/, /\.ts$/ ],
+			// 			include: [ /src[/\\]tree[/\\]/ ], // TEMP
+			// 			exclude: [
+			// 				/node_modules/, /test/, /\.d\.ts$/,
+			// 				(/** @type {String} */filepath) => filepath.includes('.')
+			// 			],
+			// 			patterns: [{
+			// 				regex: /(?: |\t)*(?:[a-z\.]+\.|^)log\.[a-zA-Z]+\([^]*?\);(?: |\t)*/gm,
+			// 				value: ""
+			// 			}],
+			// 			values: {
+			// 				"Dumb plugin": "doesn't work w/o at least 1 entry in values object"
+			// 			}
+			// 		})
+			// 	);
+			// }
 		}
-		if (patterns.length > 0)
-		{
-			plugin = new ReplacePlugin(
-			{
-				patterns: patterns,
-				include: [ /\.tsx?$/ ],
-				exclude: [
-					/node_modules/, /test/, /\.d\.ts$/,
-					// (/** @type {String} */filepath) => filepath.includes('.')
-				]
-				// values: {
-				// 	'process.env.NODE_ENV': JSON.stringify('production'),
-				// 	'FOO_BAR': '"hello world"',
-				// 	'DEV_MODE': false,
-				// }
-			});
-		}
-		if (!plugin) {
-			plugin = /** @type {ReplacePlugin} */(/** @type {unknown} */(undefined));
-		}
-		return plugin;
+		return plugins;
 	},
 
 
