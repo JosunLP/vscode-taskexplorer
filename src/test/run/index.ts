@@ -17,43 +17,11 @@ export async function run(): Promise<void>
 {
     const runCfg = await runConfig(resolve(__dirname, ".."));
     preparePlatform();
-/*
-    foreground(childArgs, async () =>
-    {
-        const mainChildExitCode = process.exitCode;
-        try {
-            await runCfg.nyc.writeProcessIndex();
-            // runCfg.nyc.maybePurgeSourceMapCache();
-            // if (argv.checkCoverage)
-            // {
-            //     await runCfg.nyc.checkCoverage(
-            //     {
-            //         lines: argv.lines,
-            //         functions: argv.functions,
-            //         branches: argv.branches,
-            //         statements: argv.statements
-            //     },
-            //     argv["per-file"]).catch(suppressEPIPE);
-            //     process.exitCode = process.exitCode || mainChildExitCode;
-            // }
-            await runCfg.nyc.writeCoverageFile();
-            //
-            // Capture text-summary reporter's output and log it in console
-            //
-            console.log(await captureStdout(runCfg.nyc.report.bind(runCfg.nyc)));
-            // if (!argv.silent) {
-            //     await runCfg.nyc.report().catch(suppressEPIPE)
-            // }
-        }
-        catch (error) {
-            process.exitCode = process.exitCode || mainChildExitCode || 1;
-            console.error(error.message);
-        }
-    });
-*/   let mochaError: Error | undefined,
-        failures = 0;
 
+    let mochaError: Error | undefined,
+        failures = 0;
     try {
+        // failures = await new Promise(async (resolve => foreground(childArgs, resolve));
         failures = await new Promise(resolve => runCfg.mocha.run(resolve));
     }
     catch (e) { mochaError = e; }
@@ -105,11 +73,11 @@ async function captureStdout(fn: any)
 }
 
 
-function suppressEPIPE (error)
+function suppressEPIPE (e: any)
 {   //
     // Prevent dumping error when `nyc npm t|head` causes stdout to be closed when reporting runs
     //
-    if (error.code !== "EPIPE") { throw error; }
+    if (e.code !== "EPIPE") { throw e; }
 }
 
 

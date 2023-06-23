@@ -14,6 +14,7 @@ export default (): NycConfig =>
 		extends: "@istanbuljs/nyc-config-typescript",
 		all: false,
 		cwd: projectRoot,
+		// exitOnError: true,
 		hookRequire: true,
 		hookRunInContext: true,
 		hookRunInThisContext: true,

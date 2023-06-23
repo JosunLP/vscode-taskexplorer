@@ -1,4 +1,3 @@
-/* istanbul ignore file */
 
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
@@ -13,7 +12,7 @@ export class NpmTaskProvider extends TaskExplorerProvider implements TaskExplore
 
     constructor(wrapper: TeWrapper) { super(wrapper, "npm"); }
 
-
+    /* istanbul ignore next */
     createTask(target: string, cmd: string, folder: WorkspaceFolder, uri: Uri): Task
     {
         const def = this.getDefaultDefinition(target, folder, uri),
@@ -25,6 +24,7 @@ export class NpmTaskProvider extends TaskExplorerProvider implements TaskExplore
     }
 
 
+    /* istanbul ignore next */
     getDocumentPosition(scriptName: string | undefined, documentText: string | undefined): number
     {
         if (!scriptName || !documentText) {
@@ -34,6 +34,7 @@ export class NpmTaskProvider extends TaskExplorerProvider implements TaskExplore
     }
 
 
+    /* istanbul ignore next */
     private getDefaultDefinition(target: string, folder: WorkspaceFolder, uri: Uri): ITaskDefinition
     {
         const def: ITaskDefinition = {
@@ -48,6 +49,7 @@ export class NpmTaskProvider extends TaskExplorerProvider implements TaskExplore
     }
 
 
+    /* istanbul ignore next */
     async readUriTasks(uri: Uri, logPad: string): Promise<Task[]>
     {
         const w = this.wrapper,
