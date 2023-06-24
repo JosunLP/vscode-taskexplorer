@@ -133,19 +133,20 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 	env.build = buildTarget;
 	/** @type {WebpackConfig}*/
 	const wpConfig = {};
-	basepath(env);                // Base path
-	mode(env, argv, wpConfig);    // Mode i.e. "production", "development", "none"
-	target(env, wpConfig);        // Target i.e. "node", "webworker", "tests"
-	context(env, wpConfig);       // Context for build
-	entry(env, wpConfig);         // Entry points for built output
-	externals(env, wpConfig);     // External modules
-	optimization(env, wpConfig);  // Build optimization
-	minification(env, wpConfig);  // Minification / Terser plugin options
-	output(env, wpConfig);        // Output specifications
-	plugins(env, wpConfig);       // Webpack plugins
-	resolve(env, wpConfig);       // Resolve config
-	rules(env, wpConfig);         // Loaders & build rules
-	stats(env, wpConfig);         // Stats i.e. console output & verbosity
+	basepath(env);                 // Base path
+	mode(env, argv, wpConfig);     // Mode i.e. "production", "development", "none"
+	target(env, wpConfig);         // Target i.e. "node", "webworker", "tests"
+	context(env, wpConfig);        // Context for build
+	entry(env, wpConfig);          // Entry points for built output
+	externals(env, wpConfig);      // External modules
+	ignorewarnings(env, wpConfig); // Warnings from the compiler to ignore
+	optimization(env, wpConfig);   // Build optimization
+	minification(env, wpConfig);   // Minification / Terser plugin options
+	output(env, wpConfig);         // Output specifications
+	plugins(env, wpConfig);        // Webpack plugins
+	resolve(env, wpConfig);        // Resolve config
+	rules(env, wpConfig);          // Loaders & build rules
+	stats(env, wpConfig);          // Stats i.e. console output & verbosity
 	wpConfig.name = `${buildTarget}:${wpConfig.mode}`;
 	return wpConfig;
 };
@@ -298,6 +299,33 @@ const externals = (env, wpConfig) =>
 		];
 	}
 };
+
+
+//
+// *************************************************************
+// *** IGNORE WARNINGS                                             ***
+// *************************************************************
+//
+/**
+ * @method ignorewarnings
+ * https://webpack.js.org/configuration/other-options/#ignorewarnings
+ * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackConfig} wpConfig Webpack config object
+ */
+const ignorewarnings = (env, wpConfig) =>
+{
+   if (!env.verbosity)
+   {
+		wpConfig.ignoreWarnings = [
+			/Critical dependency\: the request of a dependency is an expression/,
+			/Critical dependency\: require function is used in a way in which dependencies cannot be statically extracted/
+			// {
+			// 	module: /module2\.js\?[34]/, // A RegExp
+			// }
+		];
+	}
+};
+
 
 
 //
@@ -523,8 +551,7 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins = [
 		wpPlugin.clean(env, wpConfig),
 		wpPlugin.beforecompile(env, wpConfig),
-		...wpPlugin.tscheck(env, wpConfig),
-		wpPlugin.filterwarnings(env, wpConfig)
+		...wpPlugin.tscheck(env, wpConfig)
 	];
 
 	if (env.build !== "tests")
@@ -794,7 +821,7 @@ const stats = (env, wpConfig) =>
 	};
 
 	wpConfig.infrastructureLogging = {
-		level: env.verbosity || "log" // enables logging required for problem matchers
+		level: env.verbosity || "info" // enables logging required for problem matchers
 	};
 };
 

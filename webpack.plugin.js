@@ -15,7 +15,6 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
-const FilterWarningsPlugin = require("webpack-filter-warnings-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const ForkTsCheckerNotifierWebpackPlugin = require("fork-ts-checker-notifier-webpack-plugin");
 
@@ -406,32 +405,6 @@ const wpPlugin =
 			error: withColor("✘", colors.red),
 			errorTests: withColor("✘", colors.blue)
 		}
-	},
-
-
-	/**
-	 * @param {WebpackEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {WebpackPluginInstance | undefined}
-	 */
-	filterwarnings: (env, wpConfig) =>
-	{
-		/** @type {WebpackPluginInstance | undefined} */
-		let plugin;
-		if (!env.verbosity)
-		{   // @ts-ignore
-			plugin = new FilterWarningsPlugin(
-			{
-				exclude: [
-					/Critical dependency\: the request of a dependency is an expression/,
-					/Critical dependency\: require function is used in a way in which dependencies cannot be statically extracted/
-				]
-			});
-		}
-		if (!plugin) {
-			plugin = /** @type {WebpackPluginInstance} */(/** @type {unknown} */(undefined));
-		}
-		return plugin;
 	},
 
 

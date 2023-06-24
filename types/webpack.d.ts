@@ -2,7 +2,7 @@
 //@ts-check
 declare type WebpackBuild = "browser"|"client"|"common"|"extension"|"server"|"tests"|"webview";
 declare type WebpackBuildEnvironment= "dev"|"prod"|"test"|"testprod";
-declare type WebpackLogLevel = "none" | "log" | "verbose" | "error" | "warn" | "info" | undefined;
+declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
 declare type WebpakTarget = "webworker"|"node"|"web";
 declare type WebpackBuildOrUndefined = WebpackBuild|undefined;
 declare type WebpackConfig = import("webpack").Configuration;

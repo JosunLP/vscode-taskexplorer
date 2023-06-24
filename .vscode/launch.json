@@ -135,8 +135,8 @@
 			"sourceMaps": true,
 			"sourceMapRenames": true,
 			"trace": true,
-            "preLaunchTask": "npm: test:before",
-            "postDebugTask": "npm: test:after",
+            "preLaunchTask": "npm: test-hook-before",
+            "postDebugTask": "npm: test-hook-after",
             "debugWebviews": true,
 			"rendererDebugOptions": {
 				"pauseForSourceMap": true,
