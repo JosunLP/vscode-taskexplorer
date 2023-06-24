@@ -31,7 +31,7 @@ export interface ITeSession
 	readonly issued: number;
 }
 
-export const enum TeLicenseType
+export enum TeLicenseType
 {
     None = 0,
     Free,
@@ -55,7 +55,7 @@ export interface ITeLicense
 	readonly period: 0 | 1 | 2; // 2 indicates that extended trial was already requested/used
 }
 
-export const enum TeLicenseState
+export enum TeLicenseState
 {
 	Trial =  0,
 	Free = 1,

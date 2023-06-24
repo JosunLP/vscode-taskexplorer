@@ -1,9 +1,9 @@
 
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
+import { TomlReader } from "@sgarciac/bombadil";
 import { ITaskDefinition } from "../../interface";
 import { TaskExplorerProvider } from "./provider";
-import { TomlReader } from "@sgarciac/bombadil/lib/tables";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
 
 

@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
+import { env } from "vscode";
 import { request } from "https";
 // import fetch from "@env/fetch";
 import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "../utils/figures";
-import { Disposable, env, Event, EventEmitter } from "vscode";
 import { IDictionary, TeRuntimeEnvironment } from "../../interface";
 
 // const TLS_REJECT = "0"; // "0" to turn off tls rejection

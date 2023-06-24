@@ -60,6 +60,7 @@ export async function activate(context: ExtensionContext)
 }
 
 
+/* istanbul ignore next */
 export async function deactivate()
 {   //
     // Detect when a folder move occurs and the ext is about to deactivate/re-activate.  A
@@ -71,7 +72,6 @@ export async function deactivate()
     // of this scenario, in which case we'll load from this stored file cache so that the tree
     // reload is much quicker, especially in large workspaces.
     //
-    /* istanbul ignore next */
     if (!teWrapper.fileCache.isBusy && !teWrapper.config.get<boolean>(teWrapper.keys.Config.EnablePersistenFileCache))
     {
         const now = Date.now(),

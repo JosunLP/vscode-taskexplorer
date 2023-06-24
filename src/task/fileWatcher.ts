@@ -3,7 +3,6 @@
 import { extname } from "path";
 import { TeWrapper } from "../lib/wrapper";
 import { ITeFileWatcher } from "../interface";
-import { IEventTask } from "../lib/utils/eventQueue";
 import { executeCommand } from "../lib/command/command";
 import { getTaskTypes, isScriptType } from "../lib/utils/taskUtils";
 import {
