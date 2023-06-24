@@ -2,7 +2,7 @@
 import * as path from "path";
 import { Uri } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "../../../interface";
+import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from ":types";
 import { activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl } from "../../utils/utils";
 
 const testsName = "node";

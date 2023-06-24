@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { sleep, testControl as tc, waitForTeIdle } from "./utils";
 import { executeSettingsUpdate, executeTeCommand } from "./commandUtils";
-import { ITaskItem, ITeWrapper } from "../../interface";
+import { ITaskItem, ITeWrapper } from ":types";
 
 interface TaskMap { [id: string]: ITaskItem | undefined };
 

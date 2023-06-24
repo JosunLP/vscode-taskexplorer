@@ -12,7 +12,7 @@ import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
 import {
     ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
-} from "../../interface";
+} from ":types";
 import {
     commands, ConfigurationTarget, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks,
     Uri, ViewColumn, window, workspace

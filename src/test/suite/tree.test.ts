@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
-import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from "../../interface";
+import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from ":types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
 
 let teWrapper: ITeWrapper;

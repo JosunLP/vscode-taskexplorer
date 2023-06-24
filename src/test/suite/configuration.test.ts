@@ -1,6 +1,6 @@
 
 import { expect } from "chai";
-import { IDictionary, ITeWrapper } from "../../interface";
+import { IDictionary, ITeWrapper } from ":types";
 import { executeSettingsUpdate } from "../utils/commandUtils";
 import {
     activate, endRollingCount, exitRollingCount, getSuccessCount, suiteFinished, testControl as tc, waitForTeIdle

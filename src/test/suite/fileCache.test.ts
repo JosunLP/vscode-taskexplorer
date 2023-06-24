@@ -1,7 +1,7 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import * as utils from "../utils/utils";
-import { ITeWrapper } from "../../interface";
+import { ITeWrapper } from ":types";
 import { startupBuildTree } from "../utils/suiteUtils";
 import { executeSettingsUpdate, executeTeCommand } from "../utils/commandUtils";
 

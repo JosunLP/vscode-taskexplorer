@@ -6,7 +6,7 @@ import { expect } from "chai";
 import fsUtils from "../utils/fsUtils";
 import * as utils from "../utils/utils";
 import { startupBuildTree } from "../utils/suiteUtils";
-import { IDictionary, ITeWrapper } from "../../interface";
+import { IDictionary, ITeWrapper } from ":types";
 import { executeSettingsUpdate } from "../utils/commandUtils";
 
 const tc = utils.testControl;

@@ -4,7 +4,7 @@ import * as utils from "../../utils/utils";
 import { writeAndWait } from "../../utils/utils";
 import { startupFocus } from "../../utils/suiteUtils";
 import { executeTeCommand2 } from "../../utils/commandUtils";
-import { ITaskItem, ITeWrapper } from "../../../interface";
+import { ITaskItem, ITeWrapper } from ":types";
 
 const testsName = "npm";
 let teWrapper: ITeWrapper;

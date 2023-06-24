@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITaskExplorerApi, ITeWrapper } from "../../../interface";
+import { ITaskExplorerApi, ITeWrapper } from ":types";
 import { activate, endRollingCount, exitRollingCount, suiteFinished } from "../../utils/utils";
 
 let teApi: ITaskExplorerApi;

@@ -3,7 +3,7 @@
 
 import { TaskExecution } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITaskItem, ITeWrapper, ITeWebview } from "../../../interface";
+import { ITaskItem, ITeWrapper, ITeWebview } from ":types";
 import { closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand2, showTeWebview } from "../../utils/commandUtils";
 import {
 	activate, closeEditors, testControl as tc, suiteFinished, sleep, exitRollingCount, endRollingCount,

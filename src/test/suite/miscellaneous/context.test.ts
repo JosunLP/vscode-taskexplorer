@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import { expect } from "chai";
-import { ITeWrapper } from "../../../interface";
+import { ITeWrapper } from ":types";
 import { activate, endRollingCount, exitRollingCount, suiteFinished } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;

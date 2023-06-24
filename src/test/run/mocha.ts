@@ -12,10 +12,10 @@ export default (testsRoot: string) =>
 	// Create the mocha test
 	//
 	const mocha = new Mocha({
-		ui: "tdd", // the TDD UI is being used in extension.test.ts (suite, test, etc.)
-		color: true, // colored output from test results,
-		timeout: 30000, // default timeout: 10 seconds
-		retries: 0, // ,
+		ui: "tdd",
+		color: true,
+		timeout: 30000,
+		retries: 0,
 		slow: 250,
 		require: [
 		    "ts-node/register",
@@ -31,7 +31,7 @@ export default (testsRoot: string) =>
 		// }
 	});
 
-	let filesToTest = "**/*.test.js";
+	let filesToTest = "**/*.{spec,test}.js";
 	if (testArgs.length > 0)
 	{
 		filesToTest = (testArgs.length > 1 ? "{" : "");
@@ -40,7 +40,7 @@ export default (testsRoot: string) =>
 			if (filesToTest.length > 1) {
 				filesToTest += ",";
 			}
-			filesToTest += `**/${a}.test.js`;
+			filesToTest += `**/${a}.{spec,test}.js`;
 		});
 		filesToTest += (testArgs.length > 1 ? "}" : "");
 	}

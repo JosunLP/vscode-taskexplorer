@@ -1,7 +1,7 @@
 
 import { startupFocus } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { ITeWrapper } from "../../../interface";
+import { ITeWrapper } from ":types";
 import {
     activate, endRollingCount, exitRollingCount, needsTreeBuild, suiteFinished, testControl,
     treeUtils

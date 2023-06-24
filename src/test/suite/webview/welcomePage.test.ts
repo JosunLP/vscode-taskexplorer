@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { ITeWrapper } from "../../../interface";
+import { ITeWrapper } from ":types";
 import { startupFocus } from "../../utils/suiteUtils";
 import { activate, testControl as tc, suiteFinished, exitRollingCount, endRollingCount, sleep } from "../../utils/utils";
 

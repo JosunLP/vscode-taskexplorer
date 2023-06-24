@@ -3,7 +3,7 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { expect } from "chai";
-import { ITeWrapper } from "../../interface";
+import { ITeWrapper } from ":types";
 import { executeSettingsUpdate, executeTeCommand2, focusFileExplorer, focusSidebarView, showTeWebview } from "../utils/commandUtils";
 import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc, waitForEvent, waitForWebviewReadyEvent } from "../utils/utils";
 

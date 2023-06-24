@@ -4,7 +4,7 @@
 import { Task, TaskExecution } from "vscode";
 import { refresh } from "../../utils/treeUtils";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITaskItem, ITeWrapper } from "../../../interface";
+import { ITaskItem, ITeWrapper } from ":types";
 import {
 	echoWebviewCommand, executeSettingsUpdate, executeTeCommand, executeTeCommand2
 } from "../../utils/commandUtils";

@@ -1,5 +1,5 @@
 
-import { IDictionary } from "../interface";
+import { IDictionary } from ":types";
 
 interface ISuiteResults extends IDictionary<any>
 {

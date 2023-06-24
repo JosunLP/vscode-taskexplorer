@@ -2,7 +2,7 @@
 
 import { testControl as tc } from "../control";
 import { ConfigurationTarget, workspace } from "vscode";
-import { IDictionary } from "../../interface";
+import { IDictionary } from ":types";
 
 const isArray = <T>(value: any): value is T[] => !!value && Array.isArray(value);
 const isObject = (value: any): value is { [key: string]: any } => !!value && (value instanceof Object || typeof value === "object") && !isArray(value);

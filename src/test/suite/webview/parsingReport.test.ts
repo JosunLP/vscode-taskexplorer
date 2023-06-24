@@ -2,7 +2,7 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { Uri } from "vscode";
-import { ITeWrapper } from "../../../interface";
+import { ITeWrapper } from ":types";
 import { startupFocus } from "../../utils/suiteUtils";
 import { closeTeWebviewPanel, executeSettingsUpdate, showTeWebview } from "../../utils/commandUtils";
 import {

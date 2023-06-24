@@ -3,10 +3,14 @@
     "compilerOptions": {
 		"isolatedModules": false,
         "outDir": "../../dist/test",
-		"tsBuildInfoFile": "../../.vscode/tsconfig.test.tsbuildinfo"
+		"baseUrl": ".",
+		"rootDir": ".",
+		"tsBuildInfoFile": "../../.vscode/tsconfig.test.tsbuildinfo",
+        "paths": {
+			":types": [ "../../types" ]
+		}
     },
 	"include": [
-		"**/*.ts",
-		"../interface/**/*.ts"
+		"./**/*"
 	]
 }

@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
-import { ITeWrapper } from "../../interface";
+import { ITeWrapper } from ":types";
 import { executeSettingsUpdate, focusExplorerView } from "../utils/commandUtils";
 import {
     activate, endRollingCount, exitRollingCount, getSuccessCount, needsTreeBuild, suiteFinished, testControl as tc

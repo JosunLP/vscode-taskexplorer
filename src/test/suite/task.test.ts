@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { TaskExecution } from "vscode";
 import * as utils from "../utils/utils";
-import { ITaskItem, ITeWrapper } from "../../interface";
+import { ITaskItem, ITeWrapper } from ":types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusExplorerView, focusSearchView } from "../utils/commandUtils";
 
 const tc = utils.testControl;

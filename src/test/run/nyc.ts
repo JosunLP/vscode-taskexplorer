@@ -13,7 +13,6 @@ export default async(nycConfig: any) =>
 	// Inmstantiate an NYC instance and wrap the current running extension host process
 	//
 	const nyc = new NYC(nycConfig);
-	nyc.wrap();
 	//
 	// Check the modules already loaded and warn in case of race condition
 	// (ideally, at this point the require cache should only contain one file - this module (& helper imports)
@@ -80,6 +79,8 @@ export default async(nycConfig: any) =>
 	{
 		await nyc.addAllFiles();
 	}
+	console.log("1: " + nyc.require);
+	nyc.wrap();
 	//
 	// Initialize spawn-wrap module if required
 	//

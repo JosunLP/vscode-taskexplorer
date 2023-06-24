@@ -5,7 +5,7 @@
 
 import { commands, env, Uri } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
-import { ITeWrapper } from "../../../interface";
+import { ITeWrapper } from ":types";
 import {
     executeSettingsUpdate, executeTeCommand, showTeWebview, showTeWebviewByEchoCmd, focusFileExplorer,
     focusSidebarView, closeTeWebviewPanel

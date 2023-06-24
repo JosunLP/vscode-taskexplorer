@@ -3,7 +3,7 @@ import { join } from "path";
 import { Uri } from "vscode";
 import { startupBuildTree } from "../../utils/suiteUtils";
 import { executeSettingsUpdate, executeTeCommand } from "../../utils/commandUtils";
-import { ITaskExplorerApi, ITeWrapper } from "../../../interface";
+import { ITaskExplorerApi, ITeWrapper } from ":types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
     verifyTaskCount, waitForTeIdle

@@ -4,7 +4,7 @@ import { Uri } from "vscode";
 import { expect } from "chai";
 import { startupBuildTree } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from "../../../interface";
+import { ITaskExplorerApi, ITeWrapper, ITaskExplorerProvider } from ":types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc, testInvDocPositions,
     verifyTaskCount, waitForTeIdle

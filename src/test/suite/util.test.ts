@@ -2,7 +2,7 @@
 import { join } from "path";
 import { env } from "process";
 import { expect } from "chai";
-import { ITeWrapper } from "../../interface";
+import { ITeWrapper } from ":types";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
 import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
 import {

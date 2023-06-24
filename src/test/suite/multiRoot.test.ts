@@ -17,7 +17,7 @@
 
 import { join } from "path";
 import { startupFocus } from "../utils/suiteUtils";
-import { ITeWrapper, ITaskItem } from "../../interface";
+import { ITeWrapper, ITaskItem } from ":types";
 import { Task, Uri, workspace, WorkspaceFolder } from "vscode";
 import { executeSettingsUpdate, focusExplorerView, focusSearchView } from "../utils/commandUtils";
 import {

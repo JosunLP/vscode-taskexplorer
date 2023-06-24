@@ -7,7 +7,7 @@ import { join } from "path";
 import { expect } from "chai";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
-import { ITeAccount, ITeLicenseManager, ITeWrapper } from "../../interface";
+import { ITeAccount, ITeLicenseManager, ITeWrapper } from ":types";
 import {
 	closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand, focusExplorerView, focusSidebarView, showTeWebview,
 } from "../utils/commandUtils";

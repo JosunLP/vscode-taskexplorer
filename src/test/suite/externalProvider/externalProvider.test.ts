@@ -7,7 +7,7 @@ import { ExternalTaskProvider1 } from "./externalProvider1";
 import { ExternalTaskProvider2 } from "./externalProvider2";
 import { ExternalTaskProvider3 } from "./externalProvider3";
 import { Uri, workspace, WorkspaceFolder, tasks, Disposable } from "vscode";
-import { ITaskExplorerApi, ITeWrapper } from "../../../interface";
+import { ITaskExplorerApi, ITeWrapper } from ":types";
 import {
     activate, endRollingCount, exitRollingCount, getProjectsPath, getWsPath, needsTreeBuild, suiteFinished,
     testControl, treeUtils, verifyTaskCount, waitForTeIdle

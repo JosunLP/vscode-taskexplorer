@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import { TaskExecution, Uri } from "vscode";
-import { ITeWrapper } from "../../interface";
+import { ITeWrapper } from ":types";
 import { executeTeCommand2, focusExplorerView } from "../utils/commandUtils";
 import {
     activate, clearOverrideShowInputBox, endRollingCount, exitRollingCount, getWsPath,

@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { ITeWrapper } from "../../interface";
+import { ITeWrapper } from ":types";
 import { executeSettingsUpdate, executeTeCommand, focusExplorerView, showTeWebview } from "../utils/commandUtils";
 import { activate, endRollingCount, exitRollingCount, sleep, suiteFinished, testControl as tc, waitForWebviewsIdle } from "../utils/utils";
 

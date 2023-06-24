@@ -7,24 +7,24 @@ type NycConfig = Record<string, boolean | string | string[]>;
 
 export default (): NycConfig =>
 {
-	const projectRoot = normalize(join(__dirname, "..", "..", "..")),
-		  isWebpackBuild = existsSync(join(projectRoot, "dist", "vendor.js"));
+	const xArgs = JSON.parse(process.env.xArgs || "[]"),
+		  projectRoot = normalize(join(__dirname, "..", "..", "..")),
+		  isWebpackBuild = existsSync(join(projectRoot, "dist", "vendor.js")),
+		  verbose = xArgs.includes("--nyc-verbose");
 
 	return <NycConfig>{
 		extends: "@istanbuljs/nyc-config-typescript",
-		all: false,
 		cwd: projectRoot,
-		// exitOnError: true,
 		hookRequire: true,
 		hookRunInContext: true,
 		hookRunInThisContext: true,
 		instrument: true,
 		reportDir: "./.coverage",
-		showProcessTree: true,
+		showProcessTree: verbose,
 		silent: false,
-		tempDir: "./.nyc_output",
-		useSpawnWrap: false,
+		skipEmpty: true,
 		reporter: [ "text-summary", "html" ],
+		// require: [ "mocha", "string_decoder", "fs", "path", "os" ],
 		include: !isWebpackBuild ? [ "dist/**/*.js" ] : [ "dist/taskexplorer.js" ],
 		exclude: !isWebpackBuild ? [ "dist/**/test/**", "node_modules/**" ] :
 								   [ "dist/**/test/**", "node_modules/**", "dist/vendor.js", "dist/runtime.js" ]

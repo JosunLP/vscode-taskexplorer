@@ -3,7 +3,7 @@ import * as path from "path";
 import { Uri } from "vscode";
 import { startupFocus } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from "../../../interface";
+import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from ":types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc,
     testInvDocPositions, updateInternalProviderAutoDetect, verifyTaskCount, waitForTeIdle
