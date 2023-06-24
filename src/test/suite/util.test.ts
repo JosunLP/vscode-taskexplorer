@@ -570,26 +570,26 @@ suite("Util Tests", () =>
 		//
 		// Pop / Push fn
 		//
-		const // a = [ "a", "b", "c", "d", "e", "f", "g" ],
+		const a = [ "a", "b", "c", "d", "e", "f", "g" ],
 			  o = { a: "a", b: "b", c: "c", d: "d", e: "e", f: "f", g: "g" };
-		// teWrapper.utils.popIfExists(a, "a");
-		// teWrapper.utils.popIfExists(a, "z");
-		// teWrapper.utils.popIfExists(a, "a");
-		// teWrapper.utils.popIfExists(a, "b", "d");
-		// teWrapper.utils.popIfExists(a, "x", "y", "z");
-		// teWrapper.utils.popIfExists(a, "f", "q");
-		// teWrapper.utils.pushIfNotExists(undefined, "w");
-		// expect(a.length).to.be.equal(3);
-		// teWrapper.utils.popIfExists(o, "a");
-		// teWrapper.utils.popIfExists(o, "z");
-		// teWrapper.utils.popIfExists(o, "a");
-		// teWrapper.utils.popIfExists(o, "b", "e");
-		// teWrapper.utils.popIfExists(o, "x", "y", "z");
-		// teWrapper.utils.popIfExists(o, "f", "q");
-		// expect(Object.keys(o).length).to.be.equal(3);
-		// teWrapper.utils.popIfExists(undefined, "f");
+		teWrapper.utils.popIfExists(a, "a");
+		teWrapper.utils.popIfExists(a, "z");
+		teWrapper.utils.popIfExists(a, "a");
+		teWrapper.utils.popIfExists(a, "b", "d");
+		teWrapper.utils.popIfExists(a, "x", "y", "z");
+		teWrapper.utils.popIfExists(a, "f", "q");
+		teWrapper.utils.pushIfNotExists(undefined, "w");
+		expect(a.length).to.be.equal(3);
+		teWrapper.utils.popIfExists(o, "a");
+		teWrapper.utils.popIfExists(o, "z");
+		teWrapper.utils.popIfExists(o, "a");
+		teWrapper.utils.popIfExists(o, "b", "e");
+		teWrapper.utils.popIfExists(o, "x", "y", "z");
+		teWrapper.utils.popIfExists(o, "f", "q");
+		expect(Object.keys(o).length).to.be.equal(3);
+		teWrapper.utils.popIfExists(undefined, "f");
 		teWrapper.utils.popObjIfExistsBy(o, (v: any) => v === "g");
-		expect(Object.keys(o).length).to.be.equal(6);
+		expect(Object.keys(o).length).to.be.equal(2);
 		teWrapper.utils.popObjIfExistsBy(undefined, (v: any) => v === "c");
 		// teWrapper.utils.popIfStartsWith(undefined, "aa");
 		// teWrapper.utils.popIfStartsWith([ "abc", "abb", "aabcf", "afd", "aaa" ], "aa");
@@ -828,6 +828,8 @@ suite("Util Tests", () =>
 			finally {
 				disposable1.dispose();
 			}
+			expect(teWrapper.storage.get2Sync<string>("storage_test_and_a_ddefault", "default_value")).to.be.equal("default_value");
+			expect(teWrapper.storage.get2Sync<string>("storage_test_nodefault")).to.be.equal(undefined);
             await teWrapper.storage.update2("TEST_KEY", "This is a test");
             expect(await teWrapper.storage.get2<string>("TEST_KEY")).to.be.equal("This is a test");
             expect(await teWrapper.storage.get2<string>("TEST_KEY", "some other value")).to.be.equal("This is a test");

@@ -12,6 +12,7 @@ export type { ITaskDefinition } from "./ITaskDefinition";
 export type { ITaskExplorerApi } from "./ITaskExplorerApi";
 export type { ITaskExplorerProvider } from "./ITaskProvider";
 export type { IExternalProvider } from "./IExternalProvider";
+export type { IEventQueue, IEventTask } from "./IEventQueue";
 export type { ICacheItem, ITeFileCache } from "./ITeFileCache";
 export type { ILog, ILogControl, ILogQueueItem } from "./ILog";
 export type { ITeTaskManager, TaskMap } from "./ITeTaskManager";

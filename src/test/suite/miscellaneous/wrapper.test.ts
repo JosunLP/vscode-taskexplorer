@@ -63,6 +63,7 @@ suite("Wrapper Tests", () =>
     {
         if (exitRollingCount(this)) return;
         try { await teWrapper.init(); } catch { /* will throw */ }
+        await teWrapper.waitReady();
         endRollingCount(this);
     });
 

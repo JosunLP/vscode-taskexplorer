@@ -53,6 +53,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         this._disposables.push(
             this._onReady,
+            wrapper.eventQueue.onReady(() => this._onReady.fire(), this),
             workspace.onDidChangeWorkspaceFolders(this.onWsFoldersChange, this)
         );
     }
@@ -120,9 +121,6 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
 
     init = (logPad: string) => this.createFileWatchers(logPad);
-
-
-    private isSameEvent = (q: any[], kind: string, uri: Uri) => q.find(e => e.event === kind && e.fsPath === uri.fsPath);
 
 
     private onDirCreate = async(uri: Uri) =>

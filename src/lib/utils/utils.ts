@@ -166,7 +166,10 @@ export const openUrl = (url: string) =>
 };
 
 
-export const pushIfNotExists = (arr: any[], item: any) => { if (!arr.includes(item)) { arr.push(item); } };
+export const pushIfNotExists = (arr: string[] | undefined, ...item: string[]) => { if (arr) { item.forEach(i => { if (!arr.includes(i)) { arr.push(i); } }); return arr; }};
+
+
+// export const pushIfNotExistsBy = <T>(arr: T[] | undefined, fn: (v: T) => boolean, thisArg?: any, ...item: T[]) => { if (arr) { item.forEach(i => { if (fn.call(thisArg, i)) { arr.push(i); } }); return arr; }};
 
 
 export const popIfExists = (arrOrRec: string[] | Record<string, string> | undefined, ...item: string[]): string[] =>

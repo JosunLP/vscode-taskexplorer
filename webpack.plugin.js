@@ -413,18 +413,26 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {WebpackPluginInstance}
+	 * @returns {WebpackPluginInstance | undefined}
 	 */
 	filterwarnings: (env, wpConfig) =>
 	{
-		// @ts-ignore
-		return new FilterWarningsPlugin(
-		{
-			exclude: [
-				/Critical dependency\: the request of a dependency is an expression/,
-				/Critical dependency\: require function is used in a way in which dependencies cannot be statically extracted/
-			]
-		});
+		/** @type {WebpackPluginInstance | undefined} */
+		let plugin;
+		if (!env.verbosity)
+		{   // @ts-ignore
+			plugin = new FilterWarningsPlugin(
+			{
+				exclude: [
+					/Critical dependency\: the request of a dependency is an expression/,
+					/Critical dependency\: require function is used in a way in which dependencies cannot be statically extracted/
+				]
+			});
+		}
+		if (!plugin) {
+			plugin = /** @type {WebpackPluginInstance} */(/** @type {unknown} */(undefined));
+		}
+		return plugin;
 	},
 
 

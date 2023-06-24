@@ -1,20 +1,21 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { ILog } from "./ILog";
-import { ITeUsage, UsageKeys } from "./ITeUsage";
-import { IStorage, StorageKeys } from "./IStorage";
-import { ContextKeys, ITeContext } from "./ITeContext";
 import { ITeWebview } from "./ITeWebview";
 import { ITeFigures } from "./ITeFigures";
 import { IDictionary } from "./IDictionary";
+import { IEventQueue } from "./IEventQueue";
 import { ITeStatusBar } from "./ITeStatusBar";
 import { ITeFileCache } from "./ITeFileCache";
 import { ITeFilesystem } from "./ITeFilesystem";
+import { ITeUsage, UsageKeys } from "./ITeUsage";
+import { IStorage, StorageKeys } from "./IStorage";
 import { ITeTreeManager } from "./ITeTreeManager";
 import { ITeTaskManager } from "./ITeTaskManager";
 import { ITeFileWatcher } from "./ITeFileWatcher";
 import { Commands, VsCodeCommands } from "./ICommand";
 import { ITaskExplorerApi } from "./ITaskExplorerApi";
+import { ContextKeys, ITeContext } from "./ITeContext";
 import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
 import { ConfigKeys, IConfiguration } from "./IConfiguration";
@@ -41,6 +42,7 @@ export interface ITeWrapper
 {
 	init(): Promise<void>;
 	localize(key: string, defaultMessage: string): string;
+	waitReady(ignoreModule?: any[], minWait?: number, maxWait?: number): Promise<void>;
 
 	readonly dev: boolean;
 	readonly production: boolean;
@@ -56,6 +58,7 @@ export interface ITeWrapper
 	readonly config: IConfiguration;
 	readonly context: ExtensionContext;
 	readonly contextTe: ITeContext;
+	readonly eventQueue: IEventQueue;
 	readonly explorer: ITeTaskTree;
 	readonly explorerView: TreeView<TreeItem>;
 	readonly extensionAuthor: string;

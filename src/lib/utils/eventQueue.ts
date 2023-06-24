@@ -1,27 +1,7 @@
 
 import { TeWrapper } from "../wrapper";
 import { Disposable, Event, EventEmitter } from "vscode";
-
-export interface IEventTask
-{
-    args: any[];
-    data?: any;
-    debounceEvent?: string;
-    event: string;
-    ignoreActive?: boolean;
-    owner: string;
-    scope: any;
-    type: string;
-    waitReady?: boolean;
-    delay?: number;
-    fn: (...args: any[]) => unknown | PromiseLike<any>;
-}
-
-export interface IEventQueue
-{
-    isBusy(type?: string): boolean;
-    queue(e: IEventTask): Promise<void>;
-}
+import { IEventQueue, IEventTask } from "../../interface";
 
 
 export class EventQueue implements IEventQueue, Disposable
@@ -31,7 +11,6 @@ export class EventQueue implements IEventQueue, Disposable
     private readonly _onReady: EventEmitter<void>;
     private readonly _eventQueue: IEventTask[];
     // private readonly _delayTimers: { key: string; timer: NodeJS.Timeout }[];
-
 
     constructor(private readonly wrapper: TeWrapper)
 	{

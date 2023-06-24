@@ -9,7 +9,6 @@ import {
     activate, endRollingCount, exitRollingCount, suiteFinished, testControl as tc, verifyTaskCount, waitForTeIdle
 } from "../utils/utils";
 
-let teApi: ITaskExplorerApi;
 let didDisableTasks = false;
 let didResetEnabledTasks = false;
 let showFavorites = false;
