@@ -137,11 +137,11 @@
 		"test:before_2": "script\\enable-full-coverage.sh",
 		"test-openreport": "cmd /c \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" file://c:/Projects/vscode-taskexplorer/.coverage/index.html",
 		"tsc-build": "npm run tsc-build:types && npx tsc -p ./ && tsc-alias -p ./tsconfig.json && npm run webpack-build:webviews:dev",
-		"tsc-build:test": "npm run clean-tests:cache && npx tsc -p tsconfig.test.json && tsc-alias && npm run webpack-build:webviews:dev",
-		"tsc-build:types": "tsc -p ./types && cmd /c xcopy .\\types\\lib\\* .\\node_modules\\@spmeesseman\\vscode-taskexplorer-types\\lib /s /i /y",
+		"tsc-build:test": "npm run clean-tests:cache && npx tsc -p test/src/tsconfig.json && tsc-alias && npm run webpack-build:webviews:dev",
+		"tsc-build:types": "tsc -p ./types",
 		"tsc-rebuild": "npm run clean && npm run tsc-build && npm run tsc-build:types",
 		"tsc-rebuild:test": "npm run clean && npm run tsc-rebuild:types && npm run webpack-build:test",
-		"tsc-rebuild:types": "rimraf types/tsconfig.tsbuildinfo && rimraf types/lib && rimraf node_modules/@spmeesseman/vscode-taskexplorer-types/lib && npm run tsc-build:types",
+		"tsc-rebuild:types": "rimraf .vscode/tsconfig.types.tsbuildinfo && rimraf types/lib && npm run tsc-build:types",
 		"tsc-watch": "npm run tsc-build && (concurrently \"tsc -p ./tsconfig.json -w\" \"tsc-alias -p ./tsconfig.json -w\" \"tsc-alias -p ./tsconfig.json  -w\")",
 		"vsce-package": "vsce package --ignoreFile .vscode\\.vscodeignore",
 		"vsce-publish": "vsce publish --ignoreFile .vscode\\.vscodeignore",
@@ -253,11 +253,11 @@
 		"tsc-alias": "^1.8.2",
 		"tsconfig-paths": "^4.1.2",
 		"typescript": "^4.5.5",
-		"webpack": "^5.68.0",
+		"webpack": "^5.88.0",
 		"webpack-bundle-analyzer": "^4.7.0",
 		"webpack-cli": "^4.9.2",
-		"webpack-node-externals": "^3.0.0",
-		"webpack-plugin-replace": "^1.2.0"
+		"webpack-filter-warnings-plugin": "^1.2.1",
+		"webpack-node-externals": "^3.0.0"
 	},
 	"publishConfig": {
 		"access": "public"

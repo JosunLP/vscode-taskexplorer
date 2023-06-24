@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { relative, resolve } from "path";
 import resolveFrom from "resolve-from";
 const NYC = require("nyc");
 
@@ -13,6 +14,7 @@ export default async(nycConfig: any) =>
 	// Inmstantiate an NYC instance and wrap the current running extension host process
 	//
 	const nyc = new NYC(nycConfig);
+	nyc.wrap();
 	//
 	// Check the modules already loaded and warn in case of race condition
 	// (ideally, at this point the require cache should only contain one file - this module (& helper imports)
@@ -59,15 +61,16 @@ export default async(nycConfig: any) =>
 	//
 	if (!nycConfig.useSpawnWrap)
 	{
+		const nycLibPath = relative(__dirname, resolve(nyc.cwd, "node_modules", "nyc", "lib")).replace(/\\/g, "/");
 		const requireModules = [
-			require.resolve("../../../node_modules/nyc/lib/register-env.js"),
+			require.resolve(`${nycLibPath}/register-env.js`),
 			...nyc.require.map((mod: string) => resolveFrom.silent(nyc.cwd, mod) || mod)
 		];
 		// eslint-disable-next-line import/no-extraneous-dependencies
 		const preloadList = require("node-preload");
 		preloadList.push(
 			...requireModules,
-			require.resolve("../../../node_modules/nyc/lib/wrap.js")
+			require.resolve(`${nycLibPath}/wrap.js`)
 		);
 		Object.assign(process.env, env);
 		requireModules.forEach(mod => { require(mod); });
@@ -79,8 +82,6 @@ export default async(nycConfig: any) =>
 	{
 		await nyc.addAllFiles();
 	}
-	console.log("1: " + nyc.require);
-	nyc.wrap();
 	//
 	// Initialize spawn-wrap module if required
 	//

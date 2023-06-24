@@ -1,13 +1,14 @@
-//@ts-check
-// const fs = require("fs");
-const glob = require('glob');
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable import/no-extraneous-dependencies */
+// @ts-check
+
+const glob = require("glob");
 const path = require("path");
 const JSON5 = require("json5");
 const esbuild = require("esbuild");
-// const figures = require("./common").figures;
 const { spawnSync } = require("child_process");
 const { wpPlugin } = require("./webpack.plugin");
-// const nodeExternals = require("webpack-node-externals");
+const nodeExternals = require("webpack-node-externals");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 /** @typedef {import("./types/webpack").WebpackBuild} WebpackBuild */
@@ -17,7 +18,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 /** @typedef {"true"|"false"} BooleanString */
 /** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: String[] }} WebpackArgs */
 
-/********************************************************************************************
+/** ******************************************************************************************
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !!! IMPORTANT NOTE !!!
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -58,7 +59,7 @@ module.exports = (env, argv) =>
 		environment: "prod",
 		target: "node"
 	}, env);
-	
+
 	Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
 	{
 		env[k] = env[k].toLowerCase() === "true";
@@ -120,7 +121,7 @@ const consoleWrite = (msg, icon, pad = "") =>
 
 
 /**
- * @method
+ * @method getWebpackConfig
  * @private
  * @param {WebpackBuild} buildTarget
  * @param {WebpackEnvironment} env Webpack build environment
@@ -128,23 +129,23 @@ const consoleWrite = (msg, icon, pad = "") =>
  * @returns {WebpackConfig}
  */
 const getWebpackConfig = (buildTarget, env, argv) =>
-{   
+{
 	env.build = buildTarget;
-	/**@type {WebpackConfig}*/
+	/** @type {WebpackConfig}*/
 	const wpConfig = {};
 	basepath(env);                // Base path
 	mode(env, argv, wpConfig);    // Mode i.e. "production", "development", "none"
 	target(env, wpConfig);        // Target i.e. "node", "webworker", "tests"
 	context(env, wpConfig);       // Context for build
 	entry(env, wpConfig);         // Entry points for built output
-	externals(env, wpConfig)      // External modules
+	externals(env, wpConfig);     // External modules
 	optimization(env, wpConfig);  // Build optimization
 	minification(env, wpConfig);  // Minification / Terser plugin options
 	output(env, wpConfig);        // Output specifications
 	plugins(env, wpConfig);       // Webpack plugins
 	resolve(env, wpConfig);       // Resolve config
 	rules(env, wpConfig);         // Loaders & build rules
-	stats(wpConfig);              // Stats i.e. console output & verbosity
+	stats(env, wpConfig);         // Stats i.e. console output & verbosity
 	wpConfig.name = `${buildTarget}:${wpConfig.mode}`;
 	return wpConfig;
 };
@@ -164,6 +165,9 @@ const basepath = (env) =>
 	if (env.build === "webview") {
 		env.basePath = path.join(__dirname, "src", "webview", "app");
 	}
+	// else if (env.build === "tests") {
+	// 	env.basePath = path.join(__dirname, "src", "test");
+	// }
 	else {
 		env.basePath = __dirname;
 	}
@@ -182,10 +186,7 @@ const basepath = (env) =>
  */
 const context = (env, wpConfig) =>
 {
-	if (env.build === "webview")
-	{
-		wpConfig.context = env.basePath;
-	}
+	wpConfig.context = env.basePath;
 };
 
 
@@ -219,6 +220,7 @@ const context = (env, wpConfig) =>
 const devTool = (env, wpConfig) =>
 {   //
 	// Disabled for this build - Using source-map-plugin - see webpack.plugin.js#sourcemaps
+	// ann the plugins() function below
 	//
 	wpConfig.devtool = false;
 };
@@ -240,46 +242,31 @@ const entry = (env, wpConfig) =>
 	{
 		wpConfig.entry = webviewApps;
 	}
+	else if (env.build === "tests")
+	{
+		// const testFiles = glob.sync("./src/test/suite/**/*.{test,spec}.ts").reduce(
+		// 	(obj, e)=>
+		// 	{
+		// 		obj["suite/" + path.parse(e).name] = e;
+		// 		return obj;
+		// 	}, {}
+		// );
+		wpConfig.entry =
+		{
+			runTest: "./src/test/runTest.ts"
+			// "run/index": "./src/test/run/index.ts",
+			// ...testFiles
+		};
+	}
 	else
 	{
-		if (env.build !== "extension_tests")
+		wpConfig.entry =
 		{
-			wpConfig.entry =
-			{
-				"taskexplorer": {
-					import: "./src/taskexplorer.ts",
-					filename: "taskexplorer.js"
-				}
-			};
-		}
-		else
-		{
-			wpConfig.entry =
-			{
-				runTest: './src/test/runTest.ts',
-				'suite/index': './src/test/suite/index.ts',
-				...glob.sync('./src/test/suite/**/*.test.ts').reduce(function (obj, e) {
-					obj['suite/' + path.parse(e).name] = e;
-					return obj;
-				}, {})
-			};
-			// wpConfig.entry =
-			// {
-			// 	runTest: './src/test/runTest.ts'
-			// 	// runTest: {
-			// 	// 	import: [
-			// 	// 		'./src/test/runTest.ts',
-			// 	// 		'./src/test/suite/index.ts',
-			// 	// 		// @ts-ignore
-			// 	// 		...glob.sync('./src/test/suite/**/*.test.ts').reduce(function (obj, e) {
-			// 	// 				obj['suite/' + path.parse(e).name] = e;
-			// 	// 				return obj;
-			// 	// 			}, {})
-			// 	// 	],
-			// 	// 
-			// 	// }
-			// };
-		}
+			taskexplorer: {
+				import: "./src/taskexplorer.ts",
+				filename: "taskexplorer.js"
+			}
+		};
 	}
 };
 
@@ -297,12 +284,20 @@ const entry = (env, wpConfig) =>
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const externals = (env, wpConfig) =>
-{   //
-	// All external node_modules are packaged into vendor.js
-	//
-	wpConfig.externals = { vscode: "commonjs vscode" };
+{
+	if (env.build !== "tests")
+	{
+		wpConfig.externals = { vscode: "commonjs vscode" };
+	}
+	else
+	{
+		wpConfig.externals = [
+			{ vscode: "commonjs vscode" },
+			{ nyc: "commonjs nyc" },
+			/** @type {import("webpack").WebpackPluginInstance}*/(nodeExternals())
+		];
+	}
 };
-
 
 
 //
@@ -393,7 +388,7 @@ const mode = (env, argv, wpConfig) =>
 		if (env.environment === "dev") {
 			wpConfig.mode = "development";
 		}
-		else if (env.environment === "test") {
+		else if (env.environment === "test" || env.build === "tests") {
 			wpConfig.mode = "none";
 		}
 		else {
@@ -406,6 +401,9 @@ const mode = (env, argv, wpConfig) =>
 		wpConfig.mode = argv.mode;
 		if (argv.mode === "development") {
 			env.environment = "dev";
+		}
+		else if (argv.mode === "none") {
+			env.environment = "test";
 		}
 		else {
 			env.environment = "prod";
@@ -425,7 +423,7 @@ const mode = (env, argv, wpConfig) =>
  */
 const optimization = (env, wpConfig) =>
 {
-	if (env.build !== "webview") // && env.environment !== "test")
+	if (env.build === "extension" || env.build === "browser")
 	{
 		wpConfig.optimization =
 		{
@@ -442,7 +440,7 @@ const optimization = (env, wpConfig) =>
 						chunks: "all"
 					}
 				}
-			}
+			};
 		}
 	}
 	else {
@@ -478,33 +476,35 @@ const output = (env, wpConfig) =>
 			}
 		};
 	}
-	// else if (env.environment === "test")
-	// {
-	// 	wpConfig.output = {
-	// 		globalObject: "this",
-	// 		//libraryTarget: 'commonjs2',
-	// 		path: path.join(__dirname, "dist"),
-	// 		filename: '[name].js',
-	// 		//library: {
-	// 		//	type: "commonjs2"
-	// 		//}
-	// 		// module: true,
-	// 		// chunkFormat: "commonjs",
-	// 		library: {
-	// 			type: "commonjs2"
-	// 		}
-	// 	};
-	// }
+	else if (env.build === "tests")
+	{
+		wpConfig.output = {
+			// asyncChunks: true,
+			clean: env.clean === true,
+			// libraryExport: "run",
+			// globalObject: "this",
+			// libraryTarget: 'commonjs2',
+			path: path.join(__dirname, "dist", "test"),
+			filename: "[name].js",
+			// module: true,
+			// chunkFormat: "commonjs",
+			// scriptType: "text/javascript",
+			// library: {
+			// 	type: "commonjs2"
+			// },
+			libraryTarget: "commonjs2"
+		};
+	}
 	else
 	{
 		wpConfig.output = {
 			clean: env.clean === true,
 			path: env.build === "browser" ? path.join(__dirname, "dist", "browser") : path.join(__dirname, "dist"),
-			filename: '[name].js',
-			libraryTarget: 'commonjs2'
+			filename: "[name].js",
+			libraryTarget: "commonjs2"
 		};
 	}
-	
+
 	devTool(env, wpConfig);
 };
 
@@ -523,37 +523,42 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins = [
 		wpPlugin.clean(env, wpConfig),
 		wpPlugin.beforecompile(env, wpConfig),
-		...wpPlugin.tscheck(env, wpConfig)
+		...wpPlugin.tscheck(env, wpConfig),
+		wpPlugin.filterwarnings(env, wpConfig)
 	];
 
-	if (env.build === "webview")
+	if (env.build !== "tests")
 	{
-		const apps = Object.keys(webviewApps);
+		if (env.build === "webview")
+		{
+			const apps = Object.keys(webviewApps);
+			wpConfig.plugins.push(
+				wpPlugin.cssextract(env, wpConfig),
+				...wpPlugin.webviewapps(apps, env, wpConfig),
+				// @ts-ignore
+				wpPlugin.htmlcsp(env, wpConfig),
+				wpPlugin.htmlinlinechunks(env, wpConfig),
+				wpPlugin.copy(apps, env, wpConfig),
+				wpPlugin.imageminimizer(env, wpConfig)
+			);
+		}
+		else
+		{
+			wpConfig.plugins.push(
+				wpPlugin.sourcemaps(env, wpConfig),
+				wpPlugin.limitchunks(env, wpConfig),
+				wpPlugin.copy([], env, wpConfig)
+			);
+		}
 		wpConfig.plugins.push(
-			wpPlugin.cssextract(env, wpConfig),
-			...wpPlugin.webviewapps(apps, env, wpConfig),
-			// @ts-ignore
-			wpPlugin.htmlcsp(env, wpConfig),
-			wpPlugin.htmlinlinechunks(env, wpConfig),
-			wpPlugin.copy(apps, env, wpConfig),
-			wpPlugin.imageminimizer(env, wpConfig)
-		);
-	}
-	else
-	{
-		wpConfig.plugins.push(
-			wpPlugin.sourcemaps(env, wpConfig),
-			wpPlugin.limitchunks(env, wpConfig),
-			wpPlugin.copy([], env, wpConfig)
+			wpPlugin.optimize.noEmitOnError(env, wpConfig),
+			wpPlugin.analyze.bundle(env, wpConfig),
+			wpPlugin.analyze.circular(env, wpConfig),
+			wpPlugin.banner(env, wpConfig)
 		);
 	}
 
 	wpConfig.plugins.push(
-		wpPlugin.optimize.noEmitOnError(env, wpConfig),
-		wpPlugin.analyze.bundle(env, wpConfig),
-		wpPlugin.analyze.circular(env, wpConfig),
-		wpPlugin.banner(env, wpConfig),
-		...wpPlugin.replace(env, wpConfig),
 		wpPlugin.afterdone(env, wpConfig)
 	);
 
@@ -580,9 +585,10 @@ const resolve = (env, wpConfig) =>
 	if (env.build !== "webview")
 	{
 		wpConfig.resolve =
-		{   
+		{
 			alias: {
-				"@env": path.resolve(__dirname, "src", "lib", "env", env.build === "browser" ? "browser" : "node")
+				"@env": path.resolve(__dirname, "src", "lib", "env", env.build === "browser" ? "browser" : "node"),
+				":types": path.resolve(__dirname, "types")
 			},
 			fallback: env.build === "browser" ? { path: require.resolve("path-browserify"), os: require.resolve("os-browserify/browser") } : undefined,
 			mainFields: env.build === "browser" ? [ "browser", "module", "main" ] : [ "module", "main" ],
@@ -594,9 +600,10 @@ const resolve = (env, wpConfig) =>
 		wpConfig.resolve = {
 			alias: {
 				"@env": path.resolve(__dirname, "src", "lib", "env", "browser"),
+				":types": path.resolve(__dirname, "types")
 			},
-			extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
-			modules: [env.basePath, "node_modules"],
+			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
+			modules: [ env.basePath, "node_modules" ],
 		};
 	}
 };
@@ -634,16 +641,16 @@ const rules = (env, wpConfig) =>
 					implementation: esbuild,
 					loader: "tsx",
 					target: "es2020",
-					tsconfigRaw: resolveTSConfig(path.join(env.basePath, "tsconfig.json")),
+					tsconfigRaw: getTsConfig(path.join(env.basePath, "tsconfig.json")),
 				},
-			}:{
+			} : {
 				loader: "ts-loader",
 				options: {
 					configFile: path.join(env.basePath, "tsconfig.json"),
 					// experimentalWatchApi: true,
 					transpileOnly: true,
 				},
-			}]
+			} ]
 		},
 		{
 			test: /\.s?css$/,
@@ -667,25 +674,77 @@ const rules = (env, wpConfig) =>
 			}]
 		}]);
 	}
+	else if (env.build === "tests")
+	{
+		const testsRoot = path.join(__dirname, "src", "test");
+		wpConfig.module.rules.push(...[
+		{   //
+			// The author of this package decided to import a 700k library (Moment) (un-compressed)
+			// for the use of one single function call.
+			// Dynamically replace this garbage, it decreases our vendor package from 789K (compressed)
+			// to just over 380k (compressed).  Over half.  Smh.
+			//
+			test: /index\.js$/,
+			include: path.join(__dirname, "node_modules", "nyc"),
+			loader: "string-replace-loader",
+			options: {
+				multiple: [
+				{
+					search: "selfCoverageHelper = require('../self-coverage-helper')",
+					replace: "selfCoverageHelper = { onExit () {} }"
+				},
+				{
+					search: "return moment",
+					replace: "return new Date"
+				}]
+			}
+		},
+		{
+			test: /\.ts$/,
+			include: testsRoot,
+			exclude: [
+				/node_modules/, /types[\\/]/, /\.d\.ts$/
+			],
+			use: {
+				loader: "babel-loader",
+				options: {
+					presets: [
+						[ "@babel/preset-env", { targets: "defaults" }],
+						[ "@babel/preset-typescript" ],
+					]
+				}
+			}
+		}]);
+	}
 	else
 	{
 		wpConfig.module.rules.push(...[
-		{
+		{   //
+			// THe author of this package decided to import a 700k library (Moment) (un-compressed)
+			// for the use of one single function call.
+			// Dynamically replace this garbage, it decreases our vendor package from 789K (compressed)
+			// to just over 380k (compressed).  Over half.  Smh.
+			//
 			test: /tools\.js$/,
 			include: path.join(__dirname, "node_modules", "@sgarciac", "bombadil", "lib"),
 			loader: "string-replace-loader",
 			options: {
-			  multiple: [
-				 { search: 'var moment = require(\"moment\");', replace: "" },
-				 { search: "return moment", replace: "return new Date" }
-			  ]
+			  	multiple: [
+				{
+					search: 'var moment = require(\"moment\");',
+					replace: ""
+				},
+				{
+					search: "return moment",
+					replace: "return new Date"
+				}]
 			}
 		},
 		{
-			test: /\.tsx?$/,
+			test: /\.ts$/,
 			include: path.join(__dirname, "src"),
 			exclude: [
-				/node_modules/, /test/, /types/, /\.d\.ts$/
+				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
 			],
 			use: [ env.esbuild ?
 			{
@@ -693,8 +752,8 @@ const rules = (env, wpConfig) =>
 				options: {
 					implementation: esbuild,
 					loader: "tsx",
-					target: ["es2020", "chrome91", "node16.20"],
-					tsconfigRaw: resolveTSConfig(
+					target: [ "es2020", "chrome91", "node16.20" ],
+					tsconfigRaw: getTsConfig(
 						path.join(__dirname, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
 					)
 				}
@@ -706,7 +765,7 @@ const rules = (env, wpConfig) =>
 					// experimentalWatchApi: true,
 					transpileOnly: true
 				}
-			}]
+			} ]
 		}]);
 	}
 };
@@ -717,11 +776,11 @@ const rules = (env, wpConfig) =>
 // *** STATS                                                 ***
 // *************************************************************
 /**
- * @method
+ * @method stats
+ * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-// @ts-ignore
-const stats = (wpConfig) =>
+const stats = (env, wpConfig) =>
 {
 	wpConfig.stats = {
 		preset: "errors-warnings",
@@ -730,11 +789,12 @@ const stats = (wpConfig) =>
 		env: true,
 		errorsCount: true,
 		warningsCount: true,
-		timings: true
+		timings: true,
+		// warningsFilter: /Cannot find module \'common\' or its corresponding type declarations/
 	};
 
 	wpConfig.infrastructureLogging = {
-		level: "log" // enables logging required for problem matchers
+		level: env.verbosity || "log" // enables logging required for problem matchers
 	};
 };
 
@@ -747,9 +807,9 @@ const stats = (wpConfig) =>
  * @param {String} tsConfigFile
  * @returns {String}
  */
-const resolveTSConfig = (tsConfigFile) =>
+const getTsConfig = (tsConfigFile) =>
 {
-	const result = spawnSync("npx", ["tsc", `-p ${tsConfigFile}`, "--showConfig"], {
+	const result = spawnSync("npx", [ "tsc", `-p ${tsConfigFile}`, "--showConfig" ], {
 		cwd: __dirname,
 		encoding: "utf8",
 		shell: true,

@@ -1,4 +1,6 @@
-//@ts-check
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/naming-convention */
+// @ts-check
 
 const fs = require("fs");
 const path = require("path");
@@ -7,14 +9,15 @@ const { renameSync } = require("fs");
 const { spawnSync } = require("child_process");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlPlugin = require("html-webpack-plugin");
-const ReplacePlugin = require("webpack-plugin-replace");
 const CspHtmlPlugin = require("csp-html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
+const FilterWarningsPlugin = require("webpack-filter-warnings-plugin");
 const ForkTsCheckerNotifierWebpackPlugin = require("fork-ts-checker-notifier-webpack-plugin");
+const { join } = require("path");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 // const TerserPlugin = require("terser-webpack-plugin");
@@ -38,16 +41,20 @@ const colors = {
 	yellow: [ 33, 39 ]
 };
 
-function withColor(msg, color) { return "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m" };
+/**
+ * @param {String} msg
+ * @param {Number[]} color Webpack config object
+ */
+const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
 
 
 const wpPlugin =
 {
 	/**
-	* @param {WebpackEnvironment} env
-	* @param {WebpackConfig} wpConfig Webpack config object
-	* @returns {WebpackPluginInstance}
-	*/
+	 * @param {WebpackEnvironment} env
+	 * @param {WebpackConfig} wpConfig Webpack config object
+	 * @returns {WebpackPluginInstance}
+	 */
 	afterdone: (env, wpConfig) =>
 	{
 		// "AfterDonePlugin" MUST BE LAST IN THE PLUGINS ARRAY!!
@@ -55,7 +62,7 @@ const wpPlugin =
 		let plugin;
 		if (env.build !== "webview")
 		{
-			const _env = { ...env },
+			const // _env = { ...env },
 				  _wpConfig = { ...wpConfig };
 			plugin =
 			{   /** @param {import("webpack").Compiler} compiler Compiler */
@@ -95,10 +102,10 @@ const wpPlugin =
 	analyze:
 	{
 		/**
-		* @param {WebpackEnvironment} env
-		* @param {WebpackConfig} wpConfig Webpack config object
-		* @returns {BundleAnalyzerPlugin}
-		*/
+		 * @param {WebpackEnvironment} env
+		 * @param {WebpackConfig} wpConfig Webpack config object
+		 * @returns {BundleAnalyzerPlugin}
+		 */
 		bundle: (env, wpConfig) =>
 		{
 			/** @type {BundleAnalyzerPlugin | any  | undefined} */
@@ -114,10 +121,10 @@ const wpPlugin =
 		},
 
 		/**
-		* @param {WebpackEnvironment} env
-		* @param {WebpackConfig} wpConfig Webpack config object
-		* @returns {CircularDependencyPlugin}
-		*/
+		 * @param {WebpackEnvironment} env
+		 * @param {WebpackConfig} wpConfig Webpack config object
+		 * @returns {CircularDependencyPlugin}
+		 */
 		circular: (env, wpConfig) =>
 		{
 			/** @type {CircularDependencyPlugin | undefined} */
@@ -129,9 +136,9 @@ const wpPlugin =
 					cwd: __dirname,
 					exclude: /node_modules/,
 					failOnError: false,
-					onDetected: function ({ module: _webpackModuleRecord, paths, compilation })
+					onDetected: ({ module: _webpackModuleRecord, paths, compilation }) =>
 					{
-						compilation.warnings.push(/**@type {*}*/(new webpack.WebpackError(paths.join(" -> "))));
+						compilation.warnings.push(/** @type {*}*/(new webpack.WebpackError(paths.join(" -> "))));
 					}
 				});
 			// }
@@ -146,19 +153,26 @@ const wpPlugin =
 	babel:
 	{
 		/**
-		* @param {WebpackEnvironment} env
-		* @returns {void}
-		*/
+		 * @param {WebpackEnvironment} env
+		 * @returns {void}
+		 */
 		buildTests: (env) =>
 		{
-			if (env.build === "extension" && env.environment.startsWith("test"))
-			{
-				const babel = [
-					"babel", "./src/test", "--out-dir", "./dist/test", "--extensions", ".ts",
-					"--presets=@babel/preset-env,@babel/preset-typescript",
-				];
-				spawnSync("npx", babel, { cwd: __dirname, encoding: "utf8", shell: true });
-			}
+			// let babel = [
+			// 	"babel", "./src/test/suite", "--out-dir", "./dist/test/suite", "--extensions", ".ts",
+			// 	"--presets=@babel/preset-env,@babel/preset-typescript",
+			// ];
+			// spawnSync("npx", babel, { cwd: __dirname, encoding: "utf8", shell: true });
+			// babel = [
+			// 	"babel", "./src/test/run", "--out-dir", "./dist/test/run", "--extensions", ".ts",
+			// 	"--presets=@babel/preset-env,@babel/preset-typescript",
+			// ];
+			// spawnSync("npx", babel, { cwd: __dirname, encoding: "utf8", shell: true });
+			const babel = [
+				"babel", "./src/test", "--out-dir", "./dist/test", "--extensions", ".ts",
+				"--presets=@babel/preset-env,@babel/preset-typescript",
+			];
+			spawnSync("npx", babel, { cwd: __dirname, encoding: "utf8", shell: true });
 		}
 	},
 
@@ -178,7 +192,7 @@ const wpPlugin =
 			{
 				banner: `Copyright ${(new Date()).getFullYear()} Scott P Meesseman`,
 				entryOnly: true,
-				test: /taskexplorer\.js/ //s,
+				test: /taskexplorer\.js/
 				// raw: true
 			});
 		}
@@ -190,15 +204,16 @@ const wpPlugin =
 
 
 	/**
-	* @param {WebpackEnvironment} env
-	* @param {WebpackConfig} wpConfig Webpack config object
-	* @returns {WebpackPluginInstance}
-	*/
+	 * @param {WebpackEnvironment} env
+	 * @param {WebpackConfig} wpConfig Webpack config object
+	 * @returns {WebpackPluginInstance}
+	 */
 	beforecompile: (env, wpConfig) =>
 	{
+		const isTestsBuild = (env.build === "tests" || env.environment.startsWith("test"));
 		/** @type {WebpackPluginInstance | undefined} */
 		let plugin;
-		if (env.build === "extension")
+		if (env.build !== "webview")
 		{
 			const _env = { ...env };
 			plugin =
@@ -209,7 +224,9 @@ const wpPlugin =
 					{
 						try {
 							wpPlugin.tsc.buildTypes(_env);
-							wpPlugin.babel.buildTests(_env);
+							if (isTestsBuild) {
+								wpPlugin.babel.buildTests(_env);
+							}
 						} catch {}
 					});
 				}
@@ -305,7 +322,7 @@ const wpPlugin =
 				});
 			}
 		}
-		else if (wpConfig.mode === "production")
+		else if ((env.build === "extension" || env.build === "browser") && wpConfig.mode === "production")
 		{
 			const psx__dirname_info = path.posix.normalize(path.posix.join(psx__dirname, "..", "vscode-taskexplorer-info"));
 			patterns.push(
@@ -341,7 +358,7 @@ const wpPlugin =
 			});
 		}
 		if (patterns.length > 0) {
-			plugin = new CopyPlugin({ patterns: patterns });
+			plugin = new CopyPlugin({ patterns });
 		}
 		if (!plugin) {
 			plugin = /** @type {CopyPlugin} */(/** @type {unknown} */(undefined));
@@ -365,7 +382,7 @@ const wpPlugin =
 				if (pathData.chunk?.name) {
 					name = pathData.chunk.name.replace(/[a-z]+([A-Z])/g, (substr, token) => substr.replace(token, "-" + token.toLowerCase()));
 				}
-				return `css/${name}.css`
+				return `css/${name}.css`;
 			}
 		});
 	},
@@ -390,6 +407,24 @@ const wpPlugin =
 			error: withColor("✘", colors.red),
 			errorTests: withColor("✘", colors.blue)
 		}
+	},
+
+
+	/**
+	 * @param {WebpackEnvironment} env
+	 * @param {WebpackConfig} wpConfig Webpack config object
+	 * @returns {WebpackPluginInstance}
+	 */
+	filterwarnings: (env, wpConfig) =>
+	{
+		// @ts-ignore
+		return new FilterWarningsPlugin(
+		{
+			exclude: [
+				/Critical dependency\: the request of a dependency is an expression/,
+				/Critical dependency\: require function is used in a way in which dependencies cannot be statically extracted/
+			]
+		});
 	},
 
 
@@ -445,32 +480,32 @@ const wpPlugin =
 			// wpConfig.mode !== 'production'
 			// 		 ? [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.sandbox.paypal.com", "https://www.paypal.com" ]
 			// 		 : [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.paypal.com" ],
-			"img-src": ["#{cspSource}", "https:", "data:"],
+			"img-src": [ "#{cspSource}", "https:", "data:" ],
 			"script-src":
-			wpConfig.mode !== 'production'
+			wpConfig.mode !== "production"
 					? [ "#{cspSource}", "'nonce-#{cspNonce}'", "'unsafe-eval'" ]
 					: [ "#{cspSource}", "'nonce-#{cspNonce}'" ],
 			"style-src":
-			wpConfig.mode === 'production'
+			wpConfig.mode === "production"
 					? [ "#{cspSource}", "'nonce-#{cspNonce}'", "'unsafe-hashes'" ]
 					: [ "#{cspSource}", "'unsafe-hashes'", "'unsafe-inline'" ]
 		},
 		{
 			enabled: true,
-			hashingMethod: 'sha256',
+			hashingMethod: "sha256",
 			hashEnabled: {
-				'script-src': true,
-				'style-src': wpConfig.mode === 'production',
+				"script-src": true,
+				"style-src": wpConfig.mode === "production",
 			},
 			nonceEnabled: {
-				'script-src': true,
-				'style-src': wpConfig.mode === 'production',
+				"script-src": true,
+				"style-src": wpConfig.mode === "production",
 			}
 		});
 		//
 		// Override the nonce creation so it can be dynamically generated at runtime
 		// @ts-ignore
-		plugin.createNonce = () => '#{cspNonce}';
+		plugin.createNonce = () => "#{cspNonce}";
 		return plugin;
 	},
 
@@ -565,65 +600,13 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {ReplacePlugin[]}
-	 */
-	replace: (env, wpConfig) =>
-	{
-		/** @type {ReplacePlugin[]} */
-		const plugins = [];
-
-		if (env.build !== "webview")
-		{
-			// /** @type {ReplacePlugin[]} */
-			// plugins.push(
-			// 	new ReplacePlugin(
-			// 	{
-			// 		include: [ /node_modules[/\\]@sgarciac[/\\]bombadil[/\\]lib[/\\]tools\.js/ ],
-			// 		patterns: [{
-			// 			regex: /var moment = require\("moment"\);/,
-			// 			value: ""
-			// 		}],
-			// 		values: {
-			// 			"return moment": "return new Date"
-			// 		}
-			// 	})
-			// );
-			// if (wpConfig.mode === "production")
-			// {
-			// 	plugins.push(
-			// 		new ReplacePlugin(
-			// 		{
-			// 			// include: [ /src[/\\]/, /\.ts$/ ],
-			// 			include: [ /src[/\\]tree[/\\]/ ], // TEMP
-			// 			exclude: [
-			// 				/node_modules/, /test/, /\.d\.ts$/,
-			// 				(/** @type {String} */filepath) => filepath.includes('.')
-			// 			],
-			// 			patterns: [{
-			// 				regex: /(?: |\t)*(?:[a-z\.]+\.|^)log\.[a-zA-Z]+\([^]*?\);(?: |\t)*/gm,
-			// 				value: ""
-			// 			}],
-			// 			values: {
-			// 				"Dumb plugin": "doesn't work w/o at least 1 entry in values object"
-			// 			}
-			// 		})
-			// 	);
-			// }
-		}
-		return plugins;
-	},
-
-
-	/**
-	 * @param {WebpackEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
 	 * @returns {webpack.SourceMapDevToolPlugin}
 	 */
 	sourcemaps: (env, wpConfig) =>
 	{
 		/** @type {webpack.SourceMapDevToolPlugin | undefined} */
 		let plugin;
-		if (env.build !== "webview" && wpConfig.mode !== "production")
+		if (env.build !== "webview" && wpConfig.mode !== "production" && env.build !== "tests")
 		{
 			const options = {
 				test: /\.(js|jsx)($|\?)/i,
@@ -631,7 +614,7 @@ const wpPlugin =
 				filename: "[name].js.map",
 				// moduleFilenameTemplate: ".[resource-path]",
 				// moduleFilenameTemplate: '[absolute-resource-path]',
-				fallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]',
+				fallbackModuleFilenameTemplate: "[absolute-resource-path]?[hash]",
 				// fileContext: "..",
 				//
 				// The bundled node_modules will produce reference tags within the main entry point
@@ -656,7 +639,7 @@ const wpPlugin =
 			if (env.environment === "dev" || wpConfig.mode === "development")
 			{
 				options.filename = "[name].js.map";
-				options.moduleFilenameTemplate = '[absolute-resource-path]';
+				options.moduleFilenameTemplate = "[absolute-resource-path]";
 				// options.moduleFilenameTemplate = "../[resource-path]";
 				// options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
 			}
@@ -672,29 +655,26 @@ const wpPlugin =
 	tsc:
 	{
 		/**
-		* @param {WebpackEnvironment} env
-		* @returns {void}
-		*/
+		 * @param {WebpackEnvironment} env
+		 * @returns {void}
+		 */
 		buildTests: (env) =>
 		{
-			if (env.build === "extension" && env.environment.startsWith("test"))
-			{
-				const tscTests = [ "tsc", "-p", "./tsconfig.test.json" ];
-				spawnSync("npx", tscTests, { cwd: __dirname, encoding: "utf8", shell: true });
-			}
+			const tscTests = [ "tsc", "-p", "./src/test/tsconfig.json" ];
+			spawnSync("npx", tscTests, { cwd: __dirname, encoding: "utf8", shell: true });
 		},
 
 		/**
-		* @param {WebpackEnvironment} env
-		* @returns {void}
-		*/
+		 * @param {WebpackEnvironment} env
+		 * @returns {void}
+		 */
 		buildTypes: (env) =>
 		{
-			if (env.build === "extension")
-			{
-				const tscTypes = [  "tsc", "-p", "./types" ];
-				spawnSync("npx", tscTypes, { cwd: __dirname, encoding: "utf8", shell: true });
+			const tscTypes = [  "tsc", "-p", "./types" ];
+			if (!fs.existsSync(join(__dirname, "types", "lib"))) {
+				try { fs.unlinkSync(join(__dirname, ".vscode", "tsconfig.test.buildinfo")); } catch {}
 			}
+			spawnSync("npx", tscTypes, { cwd: __dirname, encoding: "utf8", shell: true });
 		}
 
 	},
@@ -708,7 +688,7 @@ const wpPlugin =
 	tscheck: (env, wpConfig) =>
 	{
 		/** @type {(ForkTsCheckerPlugin|ForkTsCheckerNotifierWebpackPlugin)[]} */
-		let plugins = [];
+		const plugins = [];
 		if (env.build === "webview")
 		{
 			plugins.push(
@@ -722,6 +702,21 @@ const wpPlugin =
 				})
 			);
 		}
+		else if (env.build === "tests")
+		{
+			plugins.push(
+				new ForkTsCheckerPlugin(
+				{
+					async: false,
+					formatter: "basic",
+					typescript: {
+						// build: true,
+						mode: "write-tsbuildinfo",
+						configFile: path.join(__dirname, "src", "test", "tsconfig.json"),
+					}
+				})
+			);
+		}
 		else
 		{
 			plugins.push(
@@ -731,7 +726,7 @@ const wpPlugin =
 					formatter: "basic",
 					typescript: {
 						// build: true,
-						mode: 'write-tsbuildinfo',
+						mode: "write-tsbuildinfo",
 						configFile: path.join(__dirname, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
 					}
 				})
@@ -831,7 +826,7 @@ class InlineChunkHtmlPlugin
 		}
 
 		const asset = assets[chunkName];
-		if (asset == null) {
+		if (!asset) {
 			return tag;
 		}
 
@@ -859,4 +854,4 @@ class InlineChunkHtmlPlugin
 
 module.exports = {
 	wpPlugin
-}
+};

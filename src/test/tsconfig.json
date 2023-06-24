@@ -5,6 +5,7 @@
         "outDir": "../../dist/test",
 		"baseUrl": ".",
 		"rootDir": ".",
+		"sourceMap": false,
 		"tsBuildInfoFile": "../../.vscode/tsconfig.test.tsbuildinfo",
         "paths": {
 			":types": [ "../../types" ]

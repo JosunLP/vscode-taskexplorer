@@ -1,25 +1,25 @@
 
 //@ts-check
-declare type WebpackBuild = "extension"|"browser"|"tests"|"webview";
+declare type WebpackBuild = "browser"|"client"|"common"|"extension"|"server"|"tests"|"webview";
+declare type WebpackBuildEnvironment= "dev"|"prod"|"test"|"testprod";
+declare type WebpackLogLevel = "none" | "log" | "verbose" | "error" | "warn" | "info" | undefined;
+declare type WebpakTarget = "webworker"|"node"|"web";
 declare type WebpackBuildOrUndefined = WebpackBuild|undefined;
 declare type WebpackConfig = import("webpack").Configuration;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
 declare type WebpackOptimization = any;
-declare interface WebpackBuildEnv
-{
-    clean: boolean; // If set,will clean the output directory before build
-    environment: string; // The environment to compile for, one of `prod`, `dev`, or `test`.  Note this is not the same as webpack `mode`.
-}
+
 declare interface WebpackEnvironment
 {
     analyze: boolean;
     basePath: string;
     build: WebpackBuild;
     clean: boolean;
-    environment: "dev"|"prod"|"test"|"testprod";
+    environment: WebpackBuildEnvironment;
     esbuild: boolean; // Is ES build
     imageOpt: boolean; // Perform image optimization
-    target: "webworker"|"node"|"web";
+    target: WebpakTarget;
+    verbosity: WebpackLogLevel
 }
 
 export {
@@ -28,6 +28,8 @@ export {
     WebpackConfig,
     WebpackPluginInstance,
     WebpackOptimization,
-    WebpackBuildEnv,
-    WebpackEnvironment
+    WebpackEnvironment,
+    WebpackLogLevel,
+    WebpakTarget,
+    WebpackBuildEnvironment
 };
