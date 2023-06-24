@@ -16,9 +16,8 @@ const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const FilterWarningsPlugin = require("webpack-filter-warnings-plugin");
-const ForkTsCheckerNotifierWebpackPlugin = require("fork-ts-checker-notifier-webpack-plugin");
-const { join } = require("path");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const ForkTsCheckerNotifierWebpackPlugin = require("fork-ts-checker-notifier-webpack-plugin");
 
 // const TerserPlugin = require("terser-webpack-plugin");
 // const ShebangPlugin = require("webpack-shebang-plugin");
@@ -679,8 +678,8 @@ const wpPlugin =
 		buildTypes: (env) =>
 		{
 			const tscTypes = [  "tsc", "-p", "./types" ];
-			if (!fs.existsSync(join(__dirname, "types", "lib"))) {
-				try { fs.unlinkSync(join(__dirname, ".vscode", "tsconfig.test.buildinfo")); } catch {}
+			if (!fs.existsSync(path.join(__dirname, "types", "lib"))) {
+				try { fs.unlinkSync(path.join(__dirname, ".vscode", "tsconfig.test.buildinfo")); } catch {}
 			}
 			spawnSync("npx", tscTypes, { cwd: __dirname, encoding: "utf8", shell: true });
 		}

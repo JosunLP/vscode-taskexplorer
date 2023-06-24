@@ -11,7 +11,8 @@ export default async(nycConfig: any) =>
     const xArgs = JSON.parse(process.env.xArgs || "[]"),
 		  clean = !xArgs.includes("--nyc-no-clean") || xArgs.includes("--nyc-clean");
 	//
-	// Inmstantiate an NYC instance and wrap the current running extension host process
+	// Instantiate an NYC instance and wrap the current running extension host process. This
+	// differs a bit from the way nyc is normally used on the command line.
 	//
 	const nyc = new NYC(nycConfig);
 	nyc.wrap();
@@ -20,8 +21,9 @@ export default async(nycConfig: any) =>
 	// (ideally, at this point the require cache should only contain one file - this module (& helper imports)
 	//
 	const myFilesRegex = /vscode\-[a-zA-Z0-9\-_]+[\/\\]dist/,
-		  filterFn = myFilesRegex.test.bind(myFilesRegex);
-	if (Object.keys(require.cache).filter(filterFn).length > 5)
+		  filterFn = myFilesRegex.test.bind(myFilesRegex),
+		  moduleCountShouldBe = 5;
+	if (Object.keys(require.cache).filter(filterFn).length > moduleCountShouldBe)
 	{
 		console.warn("NYC initialized after modules were loaded", Object.keys(require.cache).filter(filterFn));
 	}
@@ -96,15 +98,16 @@ export default async(nycConfig: any) =>
 		//        programatically, and use foreground() in indext.ts to launch it.  THis would pretty
 		//        much replicate how nyc/bin/nyc.js works.
 		//
-		// UPDATE 6/22/23 - Have language server srapped FINALLY without using useSpawnWrap.  Key was
+		// UPDATE 6/22/23 - Have language server srapped FINALLY "without" using useSpawnWrap.  Key was
 		//                  to use a node runtime to directly spawn the server, as opposed to the
 		//                  default fork.
 		//
-		// const sw = require("spawn-wrap"),
-		//       wrapper = require.resolve("../../../node_modules/nyc/bin/wrap.js");
-		// sw.runMain();
-		// env.SPAWN_WRAP_SHIM_ROOT = process.env.SPAWN_WRAP_SHIM_ROOT || process.env.XDG_CACHE_HOME || require("os").homedir();
-		// sw([ wrapper ], env);
+		const sw = require("spawn-wrap"),
+			  nycBinPath = relative(__dirname, resolve(nyc.cwd, "node_modules", "nyc", "bin")).replace(/\\/g, "/"),
+		      wrapper = require.resolve(`${nycBinPath}/wrap.js`);
+		sw.runMain();
+		env.SPAWN_WRAP_SHIM_ROOT = process.env.SPAWN_WRAP_SHIM_ROOT || process.env.XDG_CACHE_HOME || require("os").homedir();
+		sw([ wrapper ], env);
 	}
 
 	return nyc;
