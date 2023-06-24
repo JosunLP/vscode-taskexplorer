@@ -816,11 +816,11 @@ const stats = (env, wpConfig) =>
 		env: true,
 		errorsCount: true,
 		warningsCount: true,
-		timings: true,
-		// warningsFilter: /Cannot find module \'common\' or its corresponding type declarations/
+		timings: true
 	};
 
 	wpConfig.infrastructureLogging = {
+		colors: true,
 		level: env.verbosity || "info" // enables logging required for problem matchers
 	};
 };

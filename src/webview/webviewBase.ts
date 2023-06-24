@@ -8,7 +8,6 @@
  * concepts that got my super-praise (4th time ever) and thus used in Task Explorer as a starting point.
  */
 
-import { TextDecoder } from "util";
 import { getNonce } from "@env/crypto";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
@@ -140,8 +139,8 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected async getHtml(webview: Webview, ...args: unknown[]): Promise<string>
 	{
 		const webRootUri = Uri.joinPath(this.wrapper.context.extensionUri, "res"),
-			  uri = Uri.joinPath(webRootUri, "page", this.fileName),
-			  content = new TextDecoder("utf8").decode(await workspace.fs.readFile(uri)),
+			  changelogPath = Uri.joinPath(webRootUri, "page", this.fileName).fsPath,
+			  content = await this.wrapper.fs.readFileAsync(changelogPath),
 			  cspSource = webview.cspSource,
 			  webRoot = this.getWebRoot();
 

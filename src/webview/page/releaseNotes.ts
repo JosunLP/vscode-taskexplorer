@@ -1,6 +1,5 @@
 
 import { marked } from "marked";
-import { TextDecoder } from "util";
 import { State } from "../common/ipc";
 import { Uri, workspace } from "vscode";
 import { WebviewIds } from "../../interface";
@@ -123,8 +122,8 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 
 	protected override onHtmlFinalize = async(html: string): Promise<string> =>
 	{
-		const changelogUri = Uri.joinPath(this.wrapper.context.extensionUri, "CHANGELOG.md"),
-			  changeLogMd = new TextDecoder("utf8").decode(await workspace.fs.readFile(changelogUri)),
+		const changelogPath = Uri.joinPath(this.wrapper.context.extensionUri, "CHANGELOG.md").fsPath,
+			  changeLogMd = await this.wrapper.fs.readFileAsync(changelogPath),
 			  changeLogHtml = await marked(changeLogMd, { async: true }),
 			  version = this.wrapper.context.extension.packageJSON.version;
 		html = html.replace("#{changelog}", changeLogHtml)
