@@ -6,10 +6,8 @@ const path = require("path");
  * @module webpack.exports.output
  */
 
-/** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**

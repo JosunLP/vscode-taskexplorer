@@ -24,7 +24,6 @@ const ForkTsCheckerNotifierWebpackPlugin = require("fork-ts-checker-notifier-web
 // const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 // const FilterWarningsPlugin = require("webpack-filter-warnings-plugin");
 
-/** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
