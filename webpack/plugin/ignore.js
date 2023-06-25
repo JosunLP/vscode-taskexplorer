@@ -11,7 +11,7 @@ const webpack = require("webpack");
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {webpack.IgnorePlugin | undefined}
  */
-const banner = (env, wpConfig) =>
+const ignore = (env, wpConfig) =>
 {
     let plugin;
     if (wpConfig.mode === "production")
@@ -24,4 +24,4 @@ const banner = (env, wpConfig) =>
     return plugin;
 };
 
-module.exports = banner;
+module.exports = ignore;

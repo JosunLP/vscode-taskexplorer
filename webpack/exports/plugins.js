@@ -4,10 +4,10 @@
  * @module webpack.exports.plugins
  */
 
+const ignore = require("../plugin/ignore");
 const webviewApps = require("../webviewApps");
 const { wpPlugin } = require("../plugin/plugins");
 
-/** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
@@ -23,6 +23,7 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins = [
 		wpPlugin.clean(env, wpConfig),
 		wpPlugin.beforecompile(env, wpConfig),
+		ignore(env, wpConfig),
 		...wpPlugin.tscheck(env, wpConfig)
 	];
 
