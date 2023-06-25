@@ -1,5 +1,4 @@
 
-import { env } from "process";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
 import { ITaskDefinition } from "../../interface";
@@ -75,7 +74,7 @@ export class JenkinsTaskProvider extends TaskExplorerProvider implements TaskExp
             [ "path to jenkins", pathToJenkins ], [ "token env variable", envVariable ]
         ], this.logQueueId);
 
-        if (pathToJenkins && pathToCurl && env[envVariable])
+        if (pathToJenkins && pathToCurl && process.env[envVariable])
         {
             tasks.push(this.createTask(pathToJenkins, pathToCurl, folder, uri, [ envVariable ]));
         }
