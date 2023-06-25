@@ -6,7 +6,7 @@
  * !!! NEW VIEWS/PAGES NEED TO BE ADDED HERE IN ORDER TO BE COMPILED !!!
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  ********************************************************************************************/
-export const webviewApps =
+const webviewApps =
 {
 	home: "./home/home.ts",
 	license: "./license/license.ts",
@@ -18,3 +18,5 @@ export const webviewApps =
 	taskUsage: "./taskUsage/taskUsage.ts",
 	welcome: "./welcome/welcome.ts",
 };
+
+module.exports = webviewApps;

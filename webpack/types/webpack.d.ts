@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 declare type WebpackBuild = "browser"|"common"|"extension"|"tests"|"webview";
 declare type WebpackBuildEnvironment= "dev"|"prod"|"test"|"testprod";

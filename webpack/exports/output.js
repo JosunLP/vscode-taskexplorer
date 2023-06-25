@@ -1,6 +1,6 @@
 // @ts-check
 
-import path from "path";
+const path = require("path");
 
 /**
  * @module webpack.exports.output
@@ -17,7 +17,7 @@ import path from "path";
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-export const output = (env, wpConfig) =>
+const output = (env, wpConfig) =>
 {
 	if (env.build === "webview")
 	{
@@ -25,7 +25,7 @@ export const output = (env, wpConfig) =>
 			clean: env.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
 			path: path.join(__dirname, "res"),
 			publicPath: "#{webroot}/",
-			filename: (pathData, assetInfo) =>
+			filename: (pathData, _assetInfo) =>
 			{
 				let name = "[name]";
 				if (pathData.chunk?.name) {
@@ -65,3 +65,4 @@ export const output = (env, wpConfig) =>
 	}
 };
 
+module.exports = output;

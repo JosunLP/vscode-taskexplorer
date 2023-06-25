@@ -1,5 +1,11 @@
 // @ts-check
 
-export { entry} from "./entry";
-export { plugins} from "./plugins";
-export { output} from "./output";
+const entry = require("./entry");
+const plugins = require("./plugins");
+const output = require("./output");
+
+module.exports = {
+	entry,
+    plugins,
+    output
+};

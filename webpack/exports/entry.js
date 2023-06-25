@@ -4,7 +4,7 @@
  * @module webpack.exports.entry
  */
 
-const { webviewApps } = require("../webviewApps");
+const webviewApps = require("../webviewApps");
 
 /** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
@@ -28,7 +28,7 @@ const { webviewApps } = require("../webviewApps");
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-export const entry = (env, wpConfig) =>
+const entry = (env, wpConfig) =>
 {
 	if (env.build === "webview")
 	{
@@ -61,3 +61,5 @@ export const entry = (env, wpConfig) =>
 		};
 	}
 };
+
+module.exports = entry;

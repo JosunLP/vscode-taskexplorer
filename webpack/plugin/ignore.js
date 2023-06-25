@@ -13,7 +13,7 @@ const webpack = require("webpack");
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {webpack.IgnorePlugin | undefined}
  */
-export const banner = (env, wpConfig) =>
+const banner = (env, wpConfig) =>
 {
     let plugin;
     if (wpConfig.mode === "production")
@@ -25,3 +25,5 @@ export const banner = (env, wpConfig) =>
     }
     return plugin;
 };
+
+module.exports = banner;

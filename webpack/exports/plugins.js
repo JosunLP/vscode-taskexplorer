@@ -4,8 +4,8 @@
  * @module webpack.exports.plugins
  */
 
-const { wpPlugin } = require("../plugin");
-const { webviewApps } = require("../webviewApps");
+const webviewApps = require("../webviewApps");
+const { wpPlugin } = require("../plugin/plugins");
 
 /** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
@@ -18,7 +18,7 @@ const { webviewApps } = require("../webviewApps");
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-export const plugins = (env, wpConfig) =>
+const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [
 		wpPlugin.clean(env, wpConfig),
@@ -67,3 +67,5 @@ export const plugins = (env, wpConfig) =>
 		}
 	});
 };
+
+module.exports = plugins;
