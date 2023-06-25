@@ -587,19 +587,17 @@ const plugins = (env, wpConfig) =>
 			wpConfig.plugins.push(
 				wpPlugin.sourcemaps(env, wpConfig),
 				wpPlugin.limitchunks(env, wpConfig),
-				wpPlugin.copy([], env, wpConfig)
+				wpPlugin.copy([], env, wpConfig),
+				wpPlugin.analyze.bundle(env, wpConfig),
+				wpPlugin.analyze.visualizer(env, wpConfig),
+				wpPlugin.analyze.circular(env, wpConfig),
+				wpPlugin.banner(env, wpConfig)
 			);
 		}
-		wpConfig.plugins.push(
-			wpPlugin.optimize.noEmitOnError(env, wpConfig),
-			wpPlugin.analyze.bundle(env, wpConfig),
-			wpPlugin.analyze.visualizer(env, wpConfig),
-			wpPlugin.analyze.circular(env, wpConfig),
-			wpPlugin.banner(env, wpConfig)
-		);
 	}
 
 	wpConfig.plugins.push(
+		wpPlugin.optimize.noEmitOnError(env, wpConfig),
 		wpPlugin.afterdone(env, wpConfig)
 	);
 
