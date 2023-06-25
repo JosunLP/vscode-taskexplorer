@@ -100,7 +100,6 @@ const consoleWrite = (msg, icon, pad = "") =>
 
 /**
  * @method getWebpackConfig
- * @private
  * @param {WebpackBuild} buildTarget
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
