@@ -1,11 +1,17 @@
+// @ts-check
+
+import path from "path";
+
 /**
  * @module webpack.exports.output
  */
 
-//
-// *************************************************************
-// *** OUTPUT                                                ***
-// *************************************************************
+/** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
+/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+
+
 /**
  * @method
  * @param {WebpackEnvironment} env Webpack build environment
@@ -57,7 +63,5 @@ export const output = (env, wpConfig) =>
 			libraryTarget: "commonjs2"
 		};
 	}
-
-	devTool(env, wpConfig);
 };
 

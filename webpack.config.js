@@ -144,6 +144,7 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 	optimization(env, wpConfig);   // Build optimization
 	minification(env, wpConfig);   // Minification / Terser plugin options
 	output(env, wpConfig);         // Output specifications
+	devTool(env, wpConfig);        // Dev tool / sourcemap control
 	plugins(env, wpConfig);        // Webpack plugins
 	resolve(env, wpConfig);        // Resolve config
 	rules(env, wpConfig);          // Loaders & build rules
