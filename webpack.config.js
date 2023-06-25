@@ -9,7 +9,7 @@ const esbuild = require("esbuild");
 const { spawnSync } = require("child_process");
 // const nodeExternals = require("webpack-node-externals");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { plugins, output } = require("./webpack");
+const { entry, plugins, output } = require("./webpack");
 const { wpPlugin } = require("./webpack/plugin");
 
 /** @typedef {import("./webpack/types/webpack").WebpackBuild} WebpackBuild */
@@ -18,26 +18,6 @@ const { wpPlugin } = require("./webpack/plugin");
 /** @typedef {import("./webpack/types/webpack").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {"true"|"false"} BooleanString */
 /** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: String[] }} WebpackArgs */
-
-/** ******************************************************************************************
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !!! IMPORTANT NOTE !!!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !!! NEW VIEWS/PAGES NEED TO BE ADDED HERE IN ORDER TO BE COMPILED !!!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- ********************************************************************************************/
-const webviewApps =
-{
-	home: "./home/home.ts",
-	license: "./license/license.ts",
-	monitor: "./monitor/monitor.tsx",
-	parsingReport: "./parsingReport/parsingReport.ts",
-	releaseNotes: "./releaseNotes/releaseNotes.ts",
-	taskCount: "./taskCount/taskCount.ts",
-	taskDetails: "./taskDetails/taskDetails.ts",
-	taskUsage: "./taskUsage/taskUsage.ts",
-	welcome: "./welcome/welcome.ts",
-};
 
 
 /**
@@ -226,51 +206,6 @@ const devTool = (env, wpConfig) =>
 	// ann the plugins() function below
 	//
 	wpConfig.devtool = false;
-};
-
-
-//
-// *************************************************************
-// *** ENTRY POINTS                                          ***
-// *************************************************************
-//
-/**
- * @method
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
- */
-const entry = (env, wpConfig) =>
-{
-	if (env.build === "webview")
-	{
-		wpConfig.entry = webviewApps;
-	}
-	else if (env.build === "tests")
-	{
-		// const testFiles = glob.sync("./src/test/suite/**/*.{test,spec}.ts").reduce(
-		// 	(obj, e)=>
-		// 	{
-		// 		obj["suite/" + path.parse(e).name] = e;
-		// 		return obj;
-		// 	}, {}
-		// );
-		wpConfig.entry =
-		{
-			runTest: "./src/test/runTest.ts"
-			// "run/index": "./src/test/run/index.ts",
-			// ...testFiles
-		};
-	}
-	else
-	{
-		wpConfig.entry =
-		{
-			taskexplorer: {
-				import: "./src/taskexplorer.ts",
-				filename: "taskexplorer.js"
-			}
-		};
-	}
 };
 
 

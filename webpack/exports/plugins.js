@@ -1,35 +1,16 @@
 // @ts-check
 
-const { wpPlugin } = require("../plugin");
-
 /**
  * @module webpack.exports.plugins
  */
+
+const { wpPlugin } = require("../plugin");
+const { webviewApps } = require("../webviewApps");
 
 /** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
-
-/** ******************************************************************************************
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !!! IMPORTANT NOTE !!!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !!! NEW VIEWS/PAGES NEED TO BE ADDED HERE IN ORDER TO BE COMPILED !!!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- ********************************************************************************************/
-const webviewApps =
-{
-	home: "./home/home.ts",
-	license: "./license/license.ts",
-	monitor: "./monitor/monitor.tsx",
-	parsingReport: "./parsingReport/parsingReport.ts",
-	releaseNotes: "./releaseNotes/releaseNotes.ts",
-	taskCount: "./taskCount/taskCount.ts",
-	taskDetails: "./taskDetails/taskDetails.ts",
-	taskUsage: "./taskUsage/taskUsage.ts",
-	welcome: "./welcome/welcome.ts",
-};
 
 
 /**
