@@ -8,9 +8,9 @@ const JSON5 = require("json5");
 const esbuild = require("esbuild");
 const { spawnSync } = require("child_process");
 // const nodeExternals = require("webpack-node-externals");
-const { wpPlugin } = require("./webpack/plugin/webpack.plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { plugins } = require("./webpack");
+const { wpPlugin } = require("./webpack/plugin");
 
 /** @typedef {import("./webpack/types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("./webpack/types/webpack").WebpackConfig} WebpackConfig */
