@@ -290,13 +290,26 @@ const externals = (env, wpConfig) =>
 	{
 		wpConfig.externals = { vscode: "commonjs vscode" };
 	}
-	else
-	{
-		wpConfig.externals = [
-			{ vscode: "commonjs vscode" },
-			{ nyc: "commonjs nyc" },
-			/** @type {import("webpack").WebpackPluginInstance}*/(nodeExternals())
-		];
+	// if (env.build === "webview")
+	// {
+	// 	wpConfig.externals = { vscode: "commonjs vscode" };
+	// }
+	// else if (env.environment === "test")
+	// {
+	// 	wpConfig.externals = [
+	// 		{ vscode: "commonjs vscode" },
+	// 		{ nyc: "commonjs nyc" },
+	// 		/** @type {import("webpack").WebpackPluginInstance}*/(nodeExternals())
+	// 	];
+	// }
+	// else {
+	// 	wpConfig.externals = { vscode: "commonjs vscode" };
+	// }
+	if (env.build === "webview"|| env.build === "browser") {
+		wpConfig.externalsPresets = { web: true };
+	}
+	else {
+		wpConfig.externalsPresets = { node: true };
 	}
 };
 
@@ -580,6 +593,7 @@ const plugins = (env, wpConfig) =>
 		wpConfig.plugins.push(
 			wpPlugin.optimize.noEmitOnError(env, wpConfig),
 			wpPlugin.analyze.bundle(env, wpConfig),
+			wpPlugin.analyze.visualizer(env, wpConfig),
 			wpPlugin.analyze.circular(env, wpConfig),
 			wpPlugin.banner(env, wpConfig)
 		);
@@ -767,6 +781,29 @@ const rules = (env, wpConfig) =>
 				}]
 			}
 		},
+		// {
+		// 	test: /\.js$/,
+		// 	enforce: /** @type {"pre"|"post"} */("pre"),
+		// 	exclude: [
+		// 		/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
+		// 	],
+		// 	use: [
+		// 	{
+		// 		loader: "source-map-loader",
+		// 		options:
+		// 		{
+		// 			filterSourceMappingUrl: (url, resourcePath) => {
+		// 				if (/crypto$/i.test(url)) {
+		// 					return false;
+		// 				}
+		// 				if (/events/.test(resourcePath)) {
+		// 					return "skip";
+		// 				}
+		// 				return true;
+		// 			}
+		// 		}
+		// 	}]
+		// },
 		{
 			test: /\.ts$/,
 			include: path.join(__dirname, "src"),

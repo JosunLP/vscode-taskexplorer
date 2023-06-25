@@ -52,7 +52,7 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {WebpackPluginInstance}
+	 * @returns {WebpackPluginInstance | undefined}
 	 */
 	afterdone: (env, wpConfig) =>
 	{
@@ -61,38 +61,34 @@ const wpPlugin =
 		let plugin;
 		if (env.build !== "webview")
 		{
-			const // _env = { ...env },
+			const _env = { ...env },
 				  _wpConfig = { ...wpConfig };
 			plugin =
 			{   /** @param {import("webpack").Compiler} compiler Compiler */
 				apply: (compiler) =>
 				{
-					if (_wpConfig.mode === "production")
+					compiler.hooks.done.tap("AfterDonePlugin", () =>
 					{
-						compiler.hooks.done.tap("AfterDonePlugin", () =>
+						if (_wpConfig.mode === "production")
 						{
 							try {
 								renameSync(path.join(__dirname, "dist", "vendor.js.LICENSE.txt"), path.join(__dirname, "dist", "vendor.LICENSE"));
 								renameSync(path.join(__dirname, "dist", "taskexplorer.js.LICENSE.txt"), path.join(__dirname, "dist", "taskexplorer.LICENSE"));
 							} catch {}
-						});
-					}
-					// if (_env.environment === "test")
-					// {
-					// 	const istanbulFileWriter = path.join(__dirname, "node_modules", "istanbul-lib-report", "lib", "file-writer.js");
-					// 	if (fs.existsSync(istanbulFileWriter))
-					// 	{
-					// 		const regex = /new FileContentWriter\(fs\.openSync\(file, 'w'\)\);/mg,
-					// 		      value = `new FileContentWriter(fs.openSync(file.replace(/[\\" ]/g, ""), 'w'));`,
-					// 		      content = fs.readFileSync(istanbulFileWriter, "utf8").replace(regex,value);
-					// 		fs.writeFileSync(istanbulFileWriter, content);
-					// 	}
-					// }
+						}
+						else if (_env.build === "extension" && _env.environment === "test")
+						{
+							const outFile = path.join(__dirname, "dist", "taskexplorer.js");
+							if (fs.existsSync(outFile))
+							{
+								const regex = /\n[ \t]*module\.exports \= require\(/mg,
+										content = fs.readFileSync(outFile, "utf8").replace(regex, (v) => "/* istanbul ignore next */" + v);
+								fs.writeFileSync(outFile, content);
+							}
+						}
+					});
 				}
 			};
-		}
-		if (!plugin) {
-			plugin = /** @type {WebpackPluginInstance} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
 	},
@@ -103,18 +99,14 @@ const wpPlugin =
 		/**
 		 * @param {WebpackEnvironment} env
 		 * @param {WebpackConfig} wpConfig Webpack config object
-		 * @returns {BundleAnalyzerPlugin}
+		 * @returns {BundleAnalyzerPlugin | undefined}
 		 */
 		bundle: (env, wpConfig) =>
 		{
-			/** @type {BundleAnalyzerPlugin | any  | undefined} */
 			let plugin;
 			if (env.analyze === true)
 			{
 				plugin = new BundleAnalyzerPlugin({ analyzerPort: "auto" });
-			}
-			if (!plugin) {
-				plugin = /** @type {BundleAnalyzerPlugin} */(/** @type {unknown} */(undefined));
 			}
 			return plugin;
 		},
@@ -122,14 +114,13 @@ const wpPlugin =
 		/**
 		 * @param {WebpackEnvironment} env
 		 * @param {WebpackConfig} wpConfig Webpack config object
-		 * @returns {CircularDependencyPlugin}
+		 * @returns {CircularDependencyPlugin | undefined}
 		 */
 		circular: (env, wpConfig) =>
 		{
-			/** @type {CircularDependencyPlugin | undefined} */
 			let plugin;
-			// if (env.analyze === true)
-			// {
+			if (env.analyze === true)
+			{
 				plugin = new CircularDependencyPlugin(
 				{
 					cwd: __dirname,
@@ -140,9 +131,6 @@ const wpPlugin =
 						compilation.warnings.push(/** @type {*}*/(new webpack.WebpackError(paths.join(" -> "))));
 					}
 				});
-			// }
-			if (!plugin) {
-				plugin = /** @type {CircularDependencyPlugin} */(/** @type {unknown} */(undefined));
 			}
 			return plugin;
 		},
@@ -150,17 +138,13 @@ const wpPlugin =
 		/**
 		 * @param {WebpackEnvironment} env
 		 * @param {WebpackConfig} wpConfig Webpack config object
-		 * @returns {VisualizerPlugin}
+		 * @returns {VisualizerPlugin | undefined}
 		 */
 		visualizer: (env, wpConfig) =>
 		{
-			/** @type {VisualizerPlugin | undefined} */
 			let plugin;
 			if (env.analyze === true) {
 				plugin = new VisualizerPlugin({ filename: "./dist/statistics.html" });
-			}
-			else{
-				plugin = /** @type {VisualizerPlugin} */(/** @type {unknown} */(undefined));
 			}
 			return plugin;
 		}
@@ -197,11 +181,10 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {webpack.BannerPlugin}
+	 * @returns {webpack.BannerPlugin | undefined}
 	 */
 	banner: (env, wpConfig) =>
 	{
-		/** @type {webpack.BannerPlugin | undefined} */
 		let plugin;
 		if (wpConfig.mode === "production")
 		{
@@ -213,9 +196,6 @@ const wpPlugin =
 				// raw: true
 			});
 		}
-		if (!plugin) {
-			plugin = /** @type {webpack.BannerPlugin} */(/** @type {unknown} */(undefined));
-		}
 		return plugin;
 	},
 
@@ -223,12 +203,11 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {WebpackPluginInstance}
+	 * @returns {WebpackPluginInstance | undefined}
 	 */
 	beforecompile: (env, wpConfig) =>
 	{
 		const isTestsBuild = (env.build === "tests" || env.environment.startsWith("test"));
-		/** @type {WebpackPluginInstance | undefined} */
 		let plugin;
 		if (env.build !== "webview")
 		{
@@ -249,9 +228,6 @@ const wpPlugin =
 				}
 			};
 		}
-		if (!plugin) {
-			plugin = /** @type {WebpackPluginInstance} */(/** @type {unknown} */(undefined));
-		}
 		return plugin;
 	},
 
@@ -259,11 +235,10 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {CleanWebpackPlugin}
+	 * @returns {CleanWebpackPlugin | undefined}
 	 */
 	clean: (env, wpConfig) =>
 	{
-		/** @type {CleanWebpackPlugin | undefined} */
 		let plugin;
 		if (env.clean === true)
 		{
@@ -299,9 +274,6 @@ const wpPlugin =
 				});
 			}
 		}
-		if (!plugin) {
-			plugin = /** @type {CleanWebpackPlugin} */(/** @type {unknown} */(undefined));
-		}
 		return plugin;
 	},
 
@@ -310,11 +282,10 @@ const wpPlugin =
 	 * @param {String[]} apps
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {CopyPlugin}
+	 * @returns {CopyPlugin | undefined}
 	 */
 	copy: (apps, env, wpConfig) =>
 	{
-		/** @type {CopyPlugin | undefined} */
 		let plugin;
 		const /** @type {CopyPlugin.Pattern[]} */patterns = [],
 			  psx__dirname = __dirname.replace(/\\/g, "/"),
@@ -376,9 +347,6 @@ const wpPlugin =
 		}
 		if (patterns.length > 0) {
 			plugin = new CopyPlugin({ patterns });
-		}
-		if (!plugin) {
-			plugin = /** @type {CopyPlugin} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
 	},
@@ -512,19 +480,15 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {InlineChunkHtmlPlugin}
+	 * @returns {InlineChunkHtmlPlugin | undefined}
 	 */
 	htmlinlinechunks: (env, wpConfig) =>
 	{
-		/** @type {InlineChunkHtmlPlugin | undefined} */
 		let plugin;
 		if (env.build === "webview")
 		{
 			// plugin = new InlineChunkHtmlPlugin(HtmlPlugin, wpConfig.mode === "production" ? ["\\.css$"] : []);
 			plugin = new InlineChunkHtmlPlugin(HtmlPlugin, []);
-		}
-		if (!plugin) {
-			plugin = /** @type {InlineChunkHtmlPlugin} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
 	},
@@ -533,11 +497,10 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {ImageMinimizerPlugin}
+	 * @returns {ImageMinimizerPlugin | undefined}
 	 */
 	imageminimizer: (env, wpConfig) =>
 	{
-		/** @type {ImageMinimizerPlugin | undefined} */
 		let plugin;
 		if (env.build === "webview" && wpConfig.mode !== "production")
 		{
@@ -546,9 +509,6 @@ const wpPlugin =
 			// 	generator: [ imgConfig(env, wpConfig) ]
 			// });
 		}
-		if (!plugin) {
-			plugin = /** @type {ImageMinimizerPlugin} */(/** @type {unknown} */(undefined));
-		}
 		return plugin;
 	},
 
@@ -556,7 +516,7 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {webpack.optimize.LimitChunkCountPlugin}
+	 * @returns {webpack.optimize.LimitChunkCountPlugin | undefined}
 	 */
 	limitchunks: (env, wpConfig) =>
 	{
@@ -565,9 +525,6 @@ const wpPlugin =
 		if (env.build === "browser")
 		{
 			plugin = new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 });
-		}
-		if (!plugin) {
-			plugin = /** @type {webpack.optimize.LimitChunkCountPlugin} */(/** @type {unknown} */(undefined));
 		}
 		return plugin;
 	},
@@ -578,18 +535,14 @@ const wpPlugin =
 		/**
 		 * @param {WebpackEnvironment} env
 		 * @param {WebpackConfig} wpConfig Webpack config object
-		 * @returns {webpack.NoEmitOnErrorsPlugin}
+		 * @returns {webpack.NoEmitOnErrorsPlugin | undefined}
 		 */
 		noEmitOnError: (env, wpConfig) =>
 		{
-			/** @type {webpack.NoEmitOnErrorsPlugin | undefined} */
 			let plugin;
 			if (env.build !== "webview") // && wpConfig.mode === "production")
 			{
 				plugin = new webpack.NoEmitOnErrorsPlugin();
-			}
-			if (!plugin) {
-				plugin = /** @type {webpack.NoEmitOnErrorsPlugin} */(/** @type {unknown} */(undefined));
 			}
 			return plugin;
 		}
@@ -599,11 +552,10 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {webpack.SourceMapDevToolPlugin}
+	 * @returns {webpack.SourceMapDevToolPlugin | undefined}
 	 */
 	sourcemaps: (env, wpConfig) =>
 	{
-		/** @type {webpack.SourceMapDevToolPlugin | undefined} */
 		let plugin;
 		if (env.build !== "webview" && wpConfig.mode !== "production" && env.build !== "tests")
 		{
@@ -644,9 +596,6 @@ const wpPlugin =
 			}
 			plugin = new webpack.SourceMapDevToolPlugin(options);
 		}
-		else {
-			plugin = /** @type {webpack.SourceMapDevToolPlugin} */(/** @type {unknown} */(undefined));
-		}
 		return plugin;
 	},
 
@@ -686,7 +635,6 @@ const wpPlugin =
 	 */
 	tscheck: (env, wpConfig) =>
 	{
-		/** @type {(ForkTsCheckerPlugin|ForkTsCheckerNotifierWebpackPlugin)[]} */
 		const plugins = [];
 		if (env.build === "webview")
 		{
@@ -749,7 +697,6 @@ const wpPlugin =
 	 */
 	webviewapps: (apps, env, wpConfig) =>
 	{
-		/** @type {HtmlPlugin[]} */
 		const plugins = [];
 		if (env.build === "webview")
 		{

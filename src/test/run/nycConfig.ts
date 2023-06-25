@@ -9,7 +9,7 @@ export default (): NycConfig =>
 {
 	const xArgs = JSON.parse(process.env.xArgs || "[]"),
 		  projectRoot = normalize(join(__dirname, "..", "..", "..")),
-		  isWebpackBuild = existsSync(join(projectRoot, "dist", "vendor.js")),
+		  isWebpackBuild = existsSync(join(projectRoot, "dist", "runtime.js")),
 		  verbose = xArgs.includes("--nyc-verbose");
 
 	return <NycConfig>{
@@ -18,6 +18,7 @@ export default (): NycConfig =>
 		hookRequire: true,
 		hookRunInContext: true,
 		hookRunInThisContext: true,
+		ignoreClassMethods: [ "require " ],
 		instrument: true,
 		reportDir: "./.coverage",
 		showProcessTree: verbose,
@@ -26,7 +27,7 @@ export default (): NycConfig =>
 		reporter: [ "text-summary", "html" ],
 		// require: [ "mocha", "string_decoder", "fs", "path", "os" ],
 		include: !isWebpackBuild ? [ "dist/**/*.js" ] : [ "dist/taskexplorer.js" ],
-		exclude: !isWebpackBuild ? [ "dist/**/test/**", "node_modules/**" ] :
-								   [ "dist/**/test/**", "node_modules/**", "dist/vendor.js", "dist/runtime.js" ]
+		exclude: !isWebpackBuild ? [ "dist/test", "node_modules" ] :
+								   [ "dist/test", "node_modules", "dist/vendor.js", "dist/runtime.js" ]
 	};
 };
