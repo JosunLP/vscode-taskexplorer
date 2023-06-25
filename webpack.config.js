@@ -112,6 +112,7 @@ const consoleWrite = (msg, icon, pad = "") =>
 const getWebpackConfig = (buildTarget, env, argv) =>
 {
 	env.build = buildTarget;
+	env.buildPath = __dirname;
 	/** @type {WebpackConfig}*/
 	const wpConfig = {};
 	basepath(env);                 // Base path

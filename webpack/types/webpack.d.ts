@@ -14,6 +14,7 @@ declare interface WebpackEnvironment
     analyze: boolean;
     basePath: string;
     build: WebpackBuild;
+    buildPath: string;
     clean: boolean;
     environment: WebpackBuildEnvironment;
     esbuild: boolean; // Is ES build

@@ -23,7 +23,7 @@ const output = (env, wpConfig) =>
 	{
 		wpConfig.output = {
 			clean: env.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
-			path: path.join(__dirname, "res"),
+			path: path.join(env.buildPath, "res"),
 			publicPath: "#{webroot}/",
 			filename: (pathData, _assetInfo) =>
 			{
@@ -43,7 +43,7 @@ const output = (env, wpConfig) =>
 			// libraryExport: "run",
 			// globalObject: "this",
 			// libraryTarget: 'commonjs2',
-			path: path.join(__dirname, "dist", "test"),
+			path: path.join(env.buildPath, "dist", "test"),
 			filename: "[name].js",
 			// module: true,
 			// chunkFormat: "commonjs",
@@ -58,7 +58,7 @@ const output = (env, wpConfig) =>
 	{
 		wpConfig.output = {
 			clean: env.clean === true,
-			path: env.build === "browser" ? path.join(__dirname, "dist", "browser") : path.join(__dirname, "dist"),
+			path: env.build === "browser" ? path.join(env.buildPath, "dist", "browser") : path.join(env.buildPath, "dist"),
 			filename: "[name].js",
 			libraryTarget: "commonjs2"
 		};
