@@ -7,6 +7,8 @@
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 
+// const nodeExternals = require("webpack-node-externals");
+
 /**
  * @method
  * The vscode-module is created on-the-fly and must be excluded. Add other modules that cannot

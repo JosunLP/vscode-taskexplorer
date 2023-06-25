@@ -1,7 +1,10 @@
 // @ts-check
 
+const context = require("./context");
+const devtool = require("./devtool");
 const entry = require("./entry");
 const externals = require("./externals");
+const ignorewarnings = require("./ignorewarnings");
 const minification = require("./minification");
 const mode = require("./mode");
 const optimization = require("./optimization");
@@ -13,8 +16,11 @@ const stats = require("./stats");
 const target = require("./rules");
 
 module.exports = {
+    context,
+    devtool,
 	entry,
     externals,
+    ignorewarnings,
     minification,
     mode,
     optimization,

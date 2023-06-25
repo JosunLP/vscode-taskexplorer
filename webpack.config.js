@@ -2,11 +2,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-// const glob = require("glob");
 const path = require("path");
-// const nodeExternals = require("webpack-node-externals");
-const { entry, externals, minification,  mode, plugins, optimization, output, resolve, rules, stats, target } = require("./webpack/exports");
 const { wpPlugin } = require("./webpack/plugin/plugins");
+const {
+	context, devtool, entry, externals, ignorewarnings, minification,  mode, plugins,
+	optimization, output, resolve, rules, stats, target
+} = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("./webpack/types/webpack").WebpackConfig} WebpackConfig */
@@ -119,7 +120,7 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 	optimization(env, wpConfig);   // Build optimization
 	minification(env, wpConfig);   // Minification / Terser plugin options
 	output(env, wpConfig);         // Output specifications
-	devTool(env, wpConfig);        // Dev tool / sourcemap control
+	devtool(env, wpConfig);        // Dev tool / sourcemap control
 	plugins(env, wpConfig);        // Webpack plugins
 	resolve(env, wpConfig);        // Resolve config
 	rules(env, wpConfig);          // Loaders & build rules
@@ -143,83 +144,5 @@ const environment = (buildTarget, env) =>
 	}
 	else {
 		env.basePath = __dirname;
-	}
-};
-
-
-//
-// *************************************************************
-// *** CONTEXT                                               ***
-// *************************************************************
-//
-/**
- * @method
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
- */
-const context = (env, wpConfig) =>
-{
-	wpConfig.context = env.basePath;
-};
-
-
-//
-// *************************************************************
-// *** DEVTOOL                                               ***
-// *************************************************************
-//
-/**
- * Adds library mode webpack config `output` object.
- *
- * Possible devTool values:
- *
- *     none:                        : Recommended for prod builds w/ max performance
- *     inline-source-map:           : Possible when publishing a single file
- *     cheap-source-map
- *     cheap-module-source-map
- *     eval:                        : Recommended for de builds w/ max performance
- *     eval-source-map:             : Recommended for dev builds w/ high quality SourceMaps
- *     eval-cheap-module-source-map : Tradeoff for dev builds
- *     eval-cheap-source-map:       : Tradeoff for dev builds
- *     inline-cheap-source-map
- *     inline-cheap-module-source-map
- *     source-map:                  : Recommended for prod builds w/ high quality SourceMaps
- *
- * @method
- * @private
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
- */
-const devTool = (env, wpConfig) =>
-{   //
-	// Disabled for this build - Using source-map-plugin - see webpack.plugin.js#sourcemaps
-	// ann the plugins() function below
-	//
-	wpConfig.devtool = false;
-};
-
-
-//
-// *************************************************************
-// *** IGNORE WARNINGS                                             ***
-// *************************************************************
-//
-/**
- * @method ignorewarnings
- * https://webpack.js.org/configuration/other-options/#ignorewarnings
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
- */
-const ignorewarnings = (env, wpConfig) =>
-{
-   if (!env.verbosity)
-   {
-		wpConfig.ignoreWarnings = [
-			/Critical dependency\: the request of a dependency is an expression/,
-			/Critical dependency\: require function is used in a way in which dependencies cannot be statically extracted/
-			// {
-			// 	module: /module2\.js\?[34]/, // A RegExp
-			// }
-		];
 	}
 };
