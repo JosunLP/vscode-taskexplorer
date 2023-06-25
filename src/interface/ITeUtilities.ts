@@ -6,7 +6,6 @@ import { ITaskFolder } from "./ITaskFolder";
 import { IDictionary } from "./IDictionary";
 import { ITeTask, TeTaskListType } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
-import { ILog } from "./ILog";
 
 
 export type PromiseAdapter<T, U> = (

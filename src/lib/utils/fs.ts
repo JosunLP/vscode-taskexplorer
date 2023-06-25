@@ -14,21 +14,17 @@ import * as path from "path";
 const cwd = process.cwd();
 
 /*
-export function appendFile(file: string, data: string): Promise<void>
+export const appendFile = (file: string, data: string): Promise<void> =>
 {
     return new Promise<void>((resolve, reject) =>
     {
-        // file deepcode ignore WrongNumberOfArgs: invalid warning????
-        fs.appendFile(path.resolve(cwd, file), data, (err) =>
-        {
-            if (err) {
-                reject(err);
-            }
-            resolve();
-        });
+        fs.appendFile(path.resolve(cwd, file), data, (e) => handleTResult<void>(resolve, reject, e));
     });
-}
+};
 */
+
+export const appendFileSync = (file: string, data: string): void => { try { fs.appendFileSync(path.resolve(cwd, file), data); } catch {}};
+
 
 //
 // TODO - 'copyDir' and 'copyFile' are only used in tests.  If ever used in the application,
@@ -271,6 +267,7 @@ export const pathExists = (file: string) =>
         fs.access(path.resolve(cwd, file), e => handleBooleanResult(resolve, e));
     });
 };
+
 
 export const pathExistsSync = (file: string) =>
 {

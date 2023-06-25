@@ -1,6 +1,7 @@
 
 export interface ITeFilesystem
 {
+    appendFileSync(file: string, data: string): void;
     copyDir(src: string, dst: string, filter?: RegExp, copyWithBaseFolder?: boolean): Promise<boolean>;
     copyFile(src: string, dst: string): Promise<void>;
     createDir(dir: string): Promise<void>;
