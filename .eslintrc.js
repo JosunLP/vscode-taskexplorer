@@ -29,7 +29,7 @@ module.exports = {
     ignorePatterns: ["**/test-fixture/*.js", "types", "*.json", "**/node_modules/**", "**/.eslint*" ],
     overrides: [
     {
-        files: [ "src/**/*.ts", "script/**/*.js", "webpack.*.js" ],
+        files: [ "src/**/*.ts", "script/**/*.js", "webpack.*.js", "webpack/**/*.js" ],
         excludedFiles: ["test-fixture", "types", "*.json"  ]
     }],
     plugins: [

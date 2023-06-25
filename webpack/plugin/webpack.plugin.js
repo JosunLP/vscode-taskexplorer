@@ -24,10 +24,10 @@ const ForkTsCheckerNotifierWebpackPlugin = require("fork-ts-checker-notifier-web
 // const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 // const FilterWarningsPlugin = require("webpack-filter-warnings-plugin");
 
-/** @typedef {import("./types/webpack").WebpackBuild} WebpackBuild */
-/** @typedef {import("./types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("./types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("./types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
+/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
 
 const colors = {
 	white: [ 37, 39 ],
@@ -618,7 +618,7 @@ const wpPlugin =
 		 */
 		buildTypes: (env) =>
 		{
-			const tscTypes = [  "tsc", "-p", "./types" ];
+			const tscTypes = [  "tsc", "-p", "../types" ];
 			if (!fs.existsSync(path.join(__dirname, "types", "lib"))) {
 				try { fs.unlinkSync(path.join(__dirname, ".vscode", "tsconfig.test.buildinfo")); } catch {}
 			}
