@@ -1,6 +1,6 @@
 
 //@ts-check
-declare type WebpackBuild = "browser"|"client"|"common"|"extension"|"server"|"tests"|"webview";
+declare type WebpackBuild = "browser"|"common"|"extension"|"tests"|"webview";
 declare type WebpackBuildEnvironment= "dev"|"prod"|"test"|"testprod";
 declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
 declare type WebpakTarget = "webworker"|"node"|"web";

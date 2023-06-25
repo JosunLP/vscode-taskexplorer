@@ -10,6 +10,7 @@ const { spawnSync } = require("child_process");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlPlugin = require("html-webpack-plugin");
 const CspHtmlPlugin = require("csp-html-webpack-plugin");
+const VisualizerPlugin = require("webpack-visualizer-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
@@ -142,6 +143,24 @@ const wpPlugin =
 			// }
 			if (!plugin) {
 				plugin = /** @type {CircularDependencyPlugin} */(/** @type {unknown} */(undefined));
+			}
+			return plugin;
+		},
+
+		/**
+		 * @param {WebpackEnvironment} env
+		 * @param {WebpackConfig} wpConfig Webpack config object
+		 * @returns {VisualizerPlugin}
+		 */
+		visualizer: (env, wpConfig) =>
+		{
+			/** @type {VisualizerPlugin | undefined} */
+			let plugin;
+			if (env.analyze === true) {
+				plugin = new VisualizerPlugin({ filename: "./dist/statistics.html" });
+			}
+			else{
+				plugin = /** @type {VisualizerPlugin} */(/** @type {unknown} */(undefined));
 			}
 			return plugin;
 		}
