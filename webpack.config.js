@@ -5,15 +5,13 @@
 const path = require("path");
 const { wpPlugin } = require("./webpack/plugin/plugins");
 const {
-	context, devtool, entry, externals, ignorewarnings, minification,  mode, plugins,
-	optimization, output, resolve, rules, stats, target
+	context, devtool, entry, externals, ignorewarnings, minification,  mode, plugins, optimization,
+	output, resolve, rules, stats, target
 } = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("./webpack/types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("./webpack/types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("./webpack/types/webpack").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {"true"|"false"} BooleanString */
 /** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: String[] }} WebpackArgs */
 
 
@@ -100,6 +98,7 @@ const consoleWrite = (msg, icon, pad = "") =>
 
 /**
  * @method getWebpackConfig
+ * @private
  * @param {WebpackBuild} buildTarget
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
@@ -109,7 +108,7 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 {
 	/** @type {WebpackConfig}*/
 	const wpConfig = {};
-	environment(buildTarget, env);                 // Base path
+	environment(buildTarget, env); // Base path / Build path
 	mode(env, argv, wpConfig);     // Mode i.e. "production", "development", "none"
 	target(env, wpConfig);         // Target i.e. "node", "webworker", "tests"
 	context(env, wpConfig);        // Context for build

@@ -13,7 +13,7 @@ const output = require("./output");
 const resolve = require("./resolve");
 const rules = require("./rules");
 const stats = require("./stats");
-const target = require("./rules");
+const target = require("./target");
 
 module.exports = {
     context,
