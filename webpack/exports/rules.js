@@ -110,27 +110,29 @@ const rules = (env, wpConfig) =>
 	else
 	{
 		wpConfig.module.rules.push(...[
-		// {   //
-		// 	// THe author of this package decided to import a 700k library (Moment) (un-compressed)
-		// 	// for the use of one single function call.
-		// 	// Dynamically replace this garbage, it decreases our vendor package from 789K (compressed)
-		// 	// to just over 380k (compressed).  Over half.  Smh.
-		// 	//
-		// 	test: /tools\.js$/,
-		// 	include: path.join(env.buildPath, "node_modules", "@sgarciac", "bombadil", "lib"),
-		// 	loader: "string-replace-loader",
-		// 	options: {
-		// 	  	multiple: [
-		// 		{
-		// 			search: 'var moment = require(\"moment\");',
-		// 			replace: ""
-		// 		},
-		// 		{
-		// 			search: "return moment",
-		// 			replace: "return new Date"
-		// 		}]
-		// 	}
-		// },
+		{   //
+			// THe author of this package decided to import a 700k library (Moment) (un-compressed)
+			// for the use of one single function call.  We can use the IgnorePlugin to filter out the
+			// locales, but, we are left with dynamic import references in the coverage report.  So this
+			// brute force method wqorks best.  We do not even run the changed code, it is however imported.
+			// Dynamically replace this garbage, it decreases our vendor package from 789K (compressed)
+			// to just over 380k (compressed).  Over half.  Smh.
+			//
+			test: /tools\.js$/,
+			include: path.join(env.buildPath, "node_modules", "@sgarciac", "bombadil", "lib"),
+			loader: "string-replace-loader",
+			options: {
+				multiple: [
+				{
+					search: 'var moment = require(\"moment\");',
+					replace: ""
+				},
+				{
+					search: "return moment",
+					replace: "return new Date"
+				}]
+			}
+		},
 		// {
 		// 	test: /\.js$/,
 		// 	enforce: /** @type {"pre"|"post"} */("pre"),
