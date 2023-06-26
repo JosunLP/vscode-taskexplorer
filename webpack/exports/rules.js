@@ -81,25 +81,13 @@ const rules = (env, wpConfig) =>
 	{
 		const testsRoot = path.join(env.buildPath, "src", "test");
 		wpConfig.module.rules.push(...[
-		{   //
-			// The author of this package decided to import a 700k library (Moment) (un-compressed)
-			// for the use of one single function call.
-			// Dynamically replace this garbage, it decreases our vendor package from 789K (compressed)
-			// to just over 380k (compressed).  Over half.  Smh.
-			//
+		{
 			test: /index\.js$/,
 			include: path.join(env.buildPath, "node_modules", "nyc"),
 			loader: "string-replace-loader",
 			options: {
-				multiple: [
-				{
-					search: "selfCoverageHelper = require('../self-coverage-helper')",
-					replace: "selfCoverageHelper = { onExit () {} }"
-				},
-				{
-					search: "return moment",
-					replace: "return new Date"
-				}]
+				search: "selfCoverageHelper = require('../self-coverage-helper')",
+				replace: "selfCoverageHelper = { onExit () {} }"
 			}
 		},
 		{

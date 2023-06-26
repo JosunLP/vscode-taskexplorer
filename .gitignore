@@ -9,6 +9,7 @@ out
 coverage
 .coverage
 .nyc_output
+.stats
 types/lib
 types/types
 tsconfig.tsbuildinfo

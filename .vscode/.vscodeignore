@@ -47,5 +47,6 @@ node_modules
 **/node_modules/**
 script
 scripts
+.stats
 tools
 types

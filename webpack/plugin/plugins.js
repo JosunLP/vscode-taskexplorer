@@ -10,7 +10,7 @@ const { spawnSync } = require("child_process");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlPlugin = require("html-webpack-plugin");
 const CspHtmlPlugin = require("csp-html-webpack-plugin");
-const VisualizerPlugin = require("webpack-visualizer-plugin");
+const VisualizerPlugin = require("webpack-visualizer-plugin2");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
@@ -104,7 +104,14 @@ const wpPlugin =
 			let plugin;
 			if (env.analyze === true)
 			{
-				plugin = new BundleAnalyzerPlugin({ analyzerPort: "auto" });
+				plugin = new BundleAnalyzerPlugin({
+					analyzerPort: "auto",
+					analyzerMode: "static",
+					generateStatsFile: true,
+					statsFilename: "../.coverage/analyzer-stats.json",
+					reportFilename: "../.coverage/analyzer.html",
+					openAnalyzer: true
+				});
 			}
 			return plugin;
 		},
@@ -142,9 +149,9 @@ const wpPlugin =
 		{
 			let plugin;
 			if (env.analyze === true) {
-				plugin = new VisualizerPlugin({ filename: "./dist/statistics.html" });
+				plugin = new VisualizerPlugin({ filename: "../.coverage/visualizer.html" });
 			}
-			return plugin;
+			return /** @type {VisualizerPlugin | undefined}) */(plugin);
 		}
 	},
 
