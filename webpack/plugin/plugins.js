@@ -17,7 +17,6 @@ const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const ForkTsCheckerNotifierWebpackPlugin = require("fork-ts-checker-notifier-webpack-plugin");
 
 // const TerserPlugin = require("terser-webpack-plugin");
 // const ShebangPlugin = require("webpack-shebang-plugin");
@@ -617,11 +616,11 @@ const wpPlugin =
 		 */
 		buildTypes: (env) =>
 		{
-			const tscTypes = [  "tsc", "-p", "../types" ];
+			const typesDir = [  "tsc", "-p", "./types" ];
 			if (!fs.existsSync(path.join(env.buildPath, "types", "lib"))) {
 				try { fs.unlinkSync(path.join(env.buildPath, ".vscode", "tsconfig.test.buildinfo")); } catch {}
 			}
-			spawnSync("npx", tscTypes, { cwd: env.buildPath, encoding: "utf8", shell: true });
+			spawnSync("npx", typesDir, { cwd: env.buildPath, encoding: "utf8", shell: true });
 		}
 
 	},
@@ -630,7 +629,7 @@ const wpPlugin =
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {(ForkTsCheckerPlugin|ForkTsCheckerNotifierWebpackPlugin)[]}
+	 * @returns {(ForkTsCheckerPlugin)[]}
 	 */
 	tscheck: (env, wpConfig) =>
 	{
@@ -678,12 +677,6 @@ const wpPlugin =
 				})
 			);
 		}
-		// plugins.push(
-		// 	new ForkTsCheckerNotifierWebpackPlugin({
-		// 		title: "vscode-taskexplorer",
-		// 		excludeWarnings: false
-		// 	}),
-		// );
 		return plugins;
 	},
 

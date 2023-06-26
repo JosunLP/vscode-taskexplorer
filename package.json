@@ -146,7 +146,7 @@
 		"build-extension-prod:verbose": "webpack --mode production --stats verbose --env verbosity=verbose --env build=extension --config ./webpack.config.js",
 		"build-extension-test": "npm run clean-tests:cache && webpack --env build=extension --env environment=test --config ./webpack.config.js",
 		"build-extension-test:prod": "npm run clean-tests:cache && webpack--mode production  --env environment=testprod --config ./webpack.config.js",
-		"build-test-all": "npm run clean-tests:cache && webpack  --env environment=test --config ./webpack.config.js --config ./webpack.config.js",
+		"build-test-all": "npm run clean-tests:cache && webpack  --env environment=test --config ./webpack.config.js",
 		"build-test-suite": "npm run clean-tests:cache && webpack --env build=tests --config ./webpack.config.js",
 		"build-types": "tsc -p ./types",
 		"build-webviews-prod": "webpack --mode production --env v=webview --config ./webpack.config.js",
