@@ -8,9 +8,9 @@ import { properCase } from "../lib/utils/commonUtils";
 import { basename, extname, join, resolve } from "path";
 import { ITaskDefinition, ITaskFile } from "../interface";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
-import { getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { getInstallPathSync, getUserDataPath } from "../lib/utils/pathUtils";
+import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 
 
 /**
@@ -340,38 +340,28 @@ export class TaskFile extends TreeItem implements ITaskFile
      */
     // Note:  Making this function private bombs the types
     public getFileNameFromSource(source: string, folder: TaskFolder, taskDef: ITaskDefinition, incRelPathForCode?: boolean)
-    {
-        //
-        // Ant tasks or any tasks provided by this extension will have a "fileName" definition
-        // External tasks registered throughthe API also define fileName
+    {   //
+        // Any tasks provided by this extension will have a "fileName" definition. External tasks
+        // registered throughthe API also define fileName
         //
         if (taskDef.fileName)
         {
             return basename(taskDef.fileName);
         }
-
         //
-        // Since tasks are returned from VSCode API without a filename that they were found
-        // in we must deduce the filename from the task source.  This includes npm, tsc, and
-        // vscode (workspace) tasks
+        // Since tasks are returned from VSCode API without a filename that they were found in we
+        // must deduce the filename from the task source.  This includes npm, tsc, and vscode (workspace) tasks
         //
-
         let fileName = "package.json";
-
         if (source === "Workspace")
         {
             fileName = "tasks.json"; // // note:  user task has no resourceUri
-            /* istanbul ignore else */
-            if (incRelPathForCode === true && folder.resourceUri) // project folder task
-            {
-                fileName = ".vscode/tasks.json";
-            }
+            execIf(incRelPathForCode === true && folder.resourceUri, () => { fileName = ".vscode/tasks.json"; }, this);
         }
         else if (source === "tsc")
         {
             fileName = "tsconfig.json";
         }
-
         return fileName;
     }
 

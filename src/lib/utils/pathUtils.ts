@@ -5,6 +5,7 @@ import { isWorkspaceFolder } from "./typeUtils";
 import { pathExists, pathExistsSync } from "./fs";
 import { dirname, join, resolve, sep } from "path";
 import { Task, Uri, WorkspaceFolder } from "vscode";
+import { execIf, wrap } from "./utils";
 
 
 export const getCwd = (uri: Uri): string =>
@@ -38,23 +39,18 @@ export const getInstallPathSync = (): string =>
 
 export const getPortableDataPath = (logPad = ""): string | undefined =>
 {
-    /* istanbul ignore else */
-    if (process.env.VSCODE_PORTABLE)
+    execIf(process.env.VSCODE_PORTABLE, (portablePath) =>
     {
-        const uri = Uri.parse(process.env.VSCODE_PORTABLE);
+        const uri = Uri.parse(portablePath);
         if (pathExistsSync(uri.fsPath))
         {
-            try {
+            return wrap(() => {
                 const fullPath = join(uri.fsPath, "user-data", "User");
                 log.value(logPad + "found portable user data path", fullPath, 4);
                 return fullPath;
-            }
-            catch (e: any)
-            {   /* istanbul ignore next */
-                log.error(e);
-            }
+            }, log.error, this);
         }
-    }
+    }, this);
     return;
 };
 
@@ -72,22 +68,21 @@ export const getTaskAbsolutePath = (task: Task): string => join((<WorkspaceFolde
 
 export const getTaskRelativePath = (task: Task): string =>
 {
-    let relativePath = task.definition.path ?? "";
+    let relativePath = <string>task.definition.path ?? "";
     if (task.source === "tsc" && isWorkspaceFolder(task.scope))
     {
-        if (task.name.indexOf(" - ") !== -1 && task.name.indexOf(" - tsconfig.json") === -1)
+        if (task.name.includes(" - ")  && !task.name.includes(" - tsconfig.json")) // !(/ \- tsconfig\.[a-z\.\-_]+json$/i).test(task.name))
         {
             relativePath = dirname(task.name.substring(task.name.indexOf(" - ") + 3));
         }
     }
-    return relativePath as string;
+    return relativePath;
 };
 
 
 export const getUserDataPath = (platform?: string, logPad = ""): string =>
 {
     let userPath: string | undefined = "";
-
     log.write(logPad + "get user data path", 4);
     logUserDataEnv(logPad + "   ");
     //
