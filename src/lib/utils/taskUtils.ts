@@ -12,7 +12,7 @@ import { ConfigPrefix, ITaskDefinition, ITeTask, ITeWrapper, TeTaskListType } fr
 
 export const getGlobPattern = (taskType: string) =>
 {
-    if (taskType === "ant") { // TODO - 'includeAnt' is deprecated, remove sometime after v3 release
+    if (taskType === "ant") {
         return getCombinedGlobPattern(Globs.GLOB_ANT,
                 [ ...configuration.get<string[]>("includeAnt", []), ...configuration.get<string[]>("globPatternsAnt", []) ]);
     }
@@ -25,12 +25,9 @@ export const getGlobPattern = (taskType: string) =>
 };
 
 
-export function getScriptTaskTypes(): string[]
-{
-    return [
-        "bash", "batch", "node", "nsis", "perl", "powershell", "python", "ruby"
-    ];
-}
+export const getScriptTaskTypes = (): string[] => [
+    "bash", "batch", "node", "nsis", "perl", "powershell", "python", "ruby"
+];
 
 
 /**
@@ -41,10 +38,8 @@ export function getScriptTaskTypes(): string[]
  * @returns The task type's unique setting name
  */
 /* istanbul ignore next */
-export function getTaskTypeSettingName(taskType: string, settingPart: string)
-{
-    return settingPart + (!settingPart.endsWith(".") ? properCase(taskType) : taskType.toLowerCase());
-}
+export const getTaskTypeSettingName = (taskType: string, settingPart: string) =>
+    settingPart + (!settingPart.endsWith(".") ? properCase(taskType) : taskType.toLowerCase());
 
 
 /**
@@ -54,19 +49,15 @@ export function getTaskTypeSettingName(taskType: string, settingPart: string)
  * @returns The task type's unique setting name
  */
 /* istanbul ignore next */
-export function getTaskTypeEnabledSettingName(taskType: string)
-{
-    return getTaskTypeSettingName(taskType, "enabledTasks.");
-}
+export const getTaskTypeEnabledSettingName = (taskType: string) => getTaskTypeSettingName(taskType, "enabledTasks.");
 
 
-export function getTaskTypes()
-{
-    return [
-        "ant", "apppublisher", "bash", "batch", "composer",  "gradle", "grunt", "gulp", "jenkins", "make",
-        "maven", "node", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
-    ];
-}
+export const getTaskTypes = () => [
+    "ant", "apppublisher", "bash", "batch", "composer",  "gradle", "grunt", "gulp", "jenkins", "make",
+    "maven", "node", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
+];
+
+
 // Will bomb because we reference the fn in runTest. Just keep a static list i guess.  leaving commented for now...
 // export function getTaskTypes(includeExternal = false)
 // {
@@ -74,7 +65,7 @@ export function getTaskTypes()
 // }
 
 
-export function getTaskTypeFriendlyName(taskType: string, lowerCase = false)
+export const getTaskTypeFriendlyName = (taskType: string, lowerCase = false) =>
 {
     taskType = taskType.toLowerCase();
     if (taskType === "workspace") {
@@ -90,17 +81,17 @@ export function getTaskTypeFriendlyName(taskType: string, lowerCase = false)
         return lowerCase ? "nodejs" : "NodeJS";
     }
     return lowerCase ? taskType : properCase(taskType);
-}
+};
 
 
-export function getTaskTypeRealName(taskType: string)
+export const getTaskTypeRealName = (taskType: string) =>
 {
     taskType = taskType.toLowerCase();
     if (taskType === "workspace") {
         return "Workspace";
     }
     return taskType;
-}
+};
 
                                                                                                               //
                                                                                                               // TODO - Remove istanbul tag after internal npm provider tests are written
@@ -113,13 +104,17 @@ const hasExtraGlob = (taskType: string) =>  [ "ant", "bash", "node" ].includes(t
 
 export const isPinned = (id: string, listType: TeTaskListType): boolean =>
 {
-    const storageKey: PinnedStorageKey = `${ConfigPrefix.Pinned}${listType}`;
-    const pinnedTaskList = storage.get<ITeTask[]>(storageKey, []);
+    const storageKey: PinnedStorageKey = `${ConfigPrefix.Pinned}${listType}`,
+          pinnedTaskList = storage.get<ITeTask[]>(storageKey, []);
     return !!pinnedTaskList.find(t => t.treeId === id);
 };
 
 
 export const isScriptType = (source: string) => getScriptTaskTypes().includes(source);
+
+
+export const isConstTaskCountType = (taskType: string) =>
+    taskType === "apppublisher" || taskType === "maven" || taskType === "tsc" || taskType === "jenkins" || taskType === "webpack";
 
 
 export const isWatchTask = (source: string, wrapper: ITeWrapper) => getWatchTaskTypes(wrapper).includes(source);

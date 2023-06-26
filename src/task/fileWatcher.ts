@@ -4,7 +4,7 @@ import { extname } from "path";
 import { TeWrapper } from "../lib/wrapper";
 import { ITeFileWatcher } from "../interface";
 import { executeCommand } from "../lib/command/command";
-import { getTaskTypes, isScriptType } from "../lib/utils/taskUtils";
+import { getTaskTypes, isConstTaskCountType, isScriptType } from "../lib/utils/taskUtils";
 import {
     Disposable, FileSystemWatcher, workspace, WorkspaceFolder, Uri, WorkspaceFoldersChangeEvent, Event, EventEmitter
 } from "vscode";
@@ -365,8 +365,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             // Ignore modification events for some task types (script type, e.g. 'bash', 'python' etc)
             // app-publisher and maven only get watched for invalid syntax.  they always have same # of tasks for a file.
             //
-            const ignoreModify = isScriptType(taskType) || taskType === "apppublisher" || taskType === "maven" ||
-                                taskType === "tsc" || taskType === "jenkins" || taskType === "webpack";
+            const ignoreModify = isScriptType(taskType) || isConstTaskCountType(taskType);
             if (!watcher) {
                 watcher = workspace.createFileSystemWatcher(this.wrapper.taskUtils.getGlobPattern(taskType));
                 this._watchers[taskType] = watcher;
