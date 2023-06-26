@@ -613,8 +613,8 @@ const wpPlugin =
 		 */
 		buildTests: (env) =>
 		{
-			const tscTests = [ "tsc", "-p", "./src/test/tsconfig.json" ];
-			spawnSync("npx", tscTests, { cwd: env.buildPath, encoding: "utf8", shell: true });
+			const tscArgs = [ "tsc", "-p", "./src/test/tsconfig.json" ];
+			spawnSync("npx", tscArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
 		},
 
 		/**
@@ -623,11 +623,11 @@ const wpPlugin =
 		 */
 		buildTypes: (env) =>
 		{
-			const typesDir = [  "tsc", "-p", "./types" ];
+			const tscArgs = [  "tsc", "-p", "./types" ];
 			if (!fs.existsSync(path.join(env.buildPath, "types", "lib"))) {
-				try { fs.unlinkSync(path.join(env.buildPath, ".vscode", "tsconfig.test.buildinfo")); } catch {}
+				try { fs.unlinkSync(path.join(env.buildPath, "types", "tsconfig.tsbuildinfo")); } catch {}
 			}
-			spawnSync("npx", typesDir, { cwd: env.buildPath, encoding: "utf8", shell: true });
+			spawnSync("npx", tscArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
 		}
 
 	},
