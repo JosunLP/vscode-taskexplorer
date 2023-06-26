@@ -14,6 +14,8 @@ const {
 /** @typedef {import("./webpack/types/webpack").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: String[] }} WebpackArgs */
 
+let buildStep = 0;
+
 
 /**
  * Webpack Export
@@ -25,6 +27,8 @@ const {
  */
 module.exports = (env, argv) =>
 {
+	consoleWrite("Start Webpack build");
+
 	env = Object.assign(
 	{
 		clean: false,
@@ -41,33 +45,11 @@ module.exports = (env, argv) =>
 		env[k] = env[k].toLowerCase() === "true";
 	});
 
-	consoleWrite("Start Webpack build");
-	consoleWrite("Environment:");
-	consoleWrite(`   build         : ${env.build}`);
-	consoleWrite(`   clean         : ${env.clean}`);
-	consoleWrite(`   environment   : ${env.environment}`);
-	consoleWrite(`   esbuild       : ${env.esbuild}`);
-	consoleWrite(`   target        : ${env.target}`);
-	if (argv) {
-		consoleWrite("Arguments:");
-		if (argv.env) {
-			consoleWrite(`   environment   : ${argv.env}`);
-		}
-		if (argv.mode) {
-			consoleWrite(`   mode          : ${argv.mode}`);
-		}
-		if (argv.config) {
-			consoleWrite(`   config        : ${argv.config.join(", ")}`);
-		}
-	}
-
 	if (env.build){
-		consoleWrite(`Running environment specified build '${env.build}'`);
 		return getWebpackConfig(env.build, env, argv);
 	}
 
 	if (env.environment === "test") {
-		consoleWrite("Build test files");
 		// env.esbuild = true;
 		return [
 			getWebpackConfig("extension", env, argv),
@@ -76,14 +58,12 @@ module.exports = (env, argv) =>
 	}
 
 	if (env.environment === "testprod") {
-		consoleWrite("Build test files (production compiled)");
 		return [
 			getWebpackConfig("extension", env, argv),
 			getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, argv)
 		];
 	}
 
-	consoleWrite("Build extension and webviews");
 	return [
 		getWebpackConfig("extension", env, argv),
 		// getWebpackConfig("browser", env, argv),
@@ -98,7 +78,6 @@ const consoleWrite = (msg, icon, pad = "") =>
 
 /**
  * @method getWebpackConfig
- * @private
  * @param {WebpackBuild} buildTarget
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
@@ -106,34 +85,37 @@ const consoleWrite = (msg, icon, pad = "") =>
  */
 const getWebpackConfig = (buildTarget, env, argv) =>
 {
+	if (buildStep > 0) { console.log(""); }
+	consoleWrite(`Start Webpack build step ${++buildStep}`);
 	/** @type {WebpackConfig}*/
 	const wpConfig = {};
-	environment(buildTarget, env); // Base path / Build path
-	mode(env, argv, wpConfig);     // Mode i.e. "production", "development", "none"
-	target(env, wpConfig);         // Target i.e. "node", "webworker", "tests"
-	context(env, wpConfig);        // Context for build
-	entry(env, wpConfig);          // Entry points for built output
-	externals(env, wpConfig);      // External modules
-	ignorewarnings(env, wpConfig); // Warnings from the compiler to ignore
-	optimization(env, wpConfig);   // Build optimization
-	minification(env, wpConfig);   // Minification / Terser plugin options
-	output(env, wpConfig);         // Output specifications
-	devtool(env, wpConfig);        // Dev tool / sourcemap control
-	plugins(env, wpConfig);        // Webpack plugins
-	resolve(env, wpConfig);        // Resolve config
-	rules(env, wpConfig);          // Loaders & build rules
-	stats(env, wpConfig);          // Stats i.e. console output & verbosity
+	environment(buildTarget, env, argv); // Base path / Build path
+	mode(env, argv, wpConfig);           // Mode i.e. "production", "development", "none"
+	target(env, wpConfig);               // Target i.e. "node", "webworker", "tests"
+	context(env, wpConfig);              // Context for build
+	entry(env, wpConfig);                // Entry points for built output
+	externals(env, wpConfig);            // External modules
+	ignorewarnings(env, wpConfig);       // Warnings from the compiler to ignore
+	optimization(env, wpConfig);         // Build optimization
+	minification(env, wpConfig);         // Minification / Terser plugin options
+	output(env, wpConfig);               // Output specifications
+	devtool(env, wpConfig);              // Dev tool / sourcemap control
+	plugins(env, wpConfig);              // Webpack plugins
+	resolve(env, wpConfig);              // Resolve config
+	rules(env, wpConfig);                // Loaders & build rules
+	stats(env, wpConfig);                // Stats i.e. console output & verbosity
 	wpConfig.name = `${buildTarget}:${wpConfig.mode}`;
 	return wpConfig;
 };
 
 
 /**
- * @method basepath
+ * @method environment
  * @param {WebpackBuild} buildTarget
  * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackArgs} argv Webpack command line args
  */
-const environment = (buildTarget, env) =>
+const environment = (buildTarget, env, argv) =>
 {
 	env.build = buildTarget;
 	env.buildPath = __dirname;
@@ -142,5 +124,17 @@ const environment = (buildTarget, env) =>
 	}
 	else {
 		env.basePath = __dirname;
+	}
+	consoleWrite("Environment:");
+	Object.keys(env).forEach((k) => { consoleWrite(`   ${k.padEnd(15)}: ${env[k]}`); });
+	if (argv)
+	{
+		consoleWrite("Arguments:");
+		if (argv.mode) {
+			consoleWrite(`   mode          : ${argv.mode}`);
+		}
+		if (argv.config) {
+			consoleWrite(`   config        : ${argv.config.join(", ")}`);
+		}
 	}
 };
