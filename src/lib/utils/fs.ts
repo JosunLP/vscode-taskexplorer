@@ -233,6 +233,17 @@ export const getDateModified = (file: string) =>
 };
 
 
+export const getDateModifiedSync = (file: string) =>
+{
+    try {
+        if (file && pathExistsSync(file)) {
+            return fs.statSync(path.resolve(cwd, file), { bigint: true }).mtime.getTime();
+        }
+    } catch {}
+    return 0;
+};
+
+
 const handleBooleanResult = (res: (res: boolean) => void, e: any) => { if (!e) res(true); else res(false); };
 const handleTResult = <T>(res: (res: T | PromiseLike<T>) => void, rej: (e: any) => void, e: any, data?: T) => { if (!e) res(data as T); else rej(e); };
 

@@ -170,20 +170,33 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     private onFileChange = async(taskType: string, uri: Uri) =>
     {
-        if (!this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
-        {
-            void this.wrapper.eventQueue.queue(
+        const w = this.wrapper;
+        if (!w.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
+        {   //
+            // Check modification date.  No idea why but modification events are being fired for
+            // tasks.json files when they have not even been modified.  I "think" it may be firing
+            // even when any application logic "accesses" them, need to debug further.  FIrst effort
+            // to handle this situation is to check date of modification, make sure it's been modified
+            // in the last `msIndicatingModify` number of milliseconds.
+            //
+            const msIndicatingModify = 4000,
+                  modified = w.fs.getDateModifiedSync(uri.fsPath),
+                  diff = w.utils.getDateDifference(modified, Date.now());
+            if (diff < msIndicatingModify)
             {
-                fn: this._procFileChangeEvent,
-                scope: this,
-                args: [ taskType, uri, "   " ],
-                owner: this._queueOwner,
-                event: `changeefile-${uri.fsPath}`,
-                type: "change",
-                ignoreActive: true,
-                waitReady: true,
-                data: uri.fsPath
-            });
+                void w.eventQueue.queue(
+                {
+                    args: [ taskType, uri ],
+                    data: uri.fsPath,
+                    event: `changeefile-${uri.fsPath}`,
+                    fn: this._procFileChangeEvent,
+                    ignoreActive: true,
+                    owner: this._queueOwner,
+                    scope: this,
+                    type: "change",
+                    waitReady: true
+                });
+            }
         }
         this.decrementSkipEvent(uri);
     };
@@ -197,7 +210,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             {
                 fn: this._procFileCreateEvent,
                 scope: this,
-                args: [ taskType, uri, "   " ],
+                args: [ taskType, uri ],
                 owner: this._queueOwner,
                 event: `createefile-${uri.fsPath}`,
                 type: "create",
@@ -218,7 +231,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             {
                 fn: this._procFileDeleteEvent,
                 scope: this,
-                args: [ taskType, uri, "   " ],
+                args: [ taskType, uri ],
                 owner: this._queueOwner,
                 event: `deleteefile-${uri.fsPath}`,
                 type: "delete",
@@ -335,17 +348,18 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
      */
     registerFileWatcher = async(taskType: string, firstRun: boolean, enabled: boolean, logPad: string) =>
     {
-        this.wrapper.log.methodStart("register file watcher for task type '" + taskType + "'", 1, logPad, false, [[ "enabled", enabled ]]);
+        const w = this.wrapper;
+        w.log.methodStart("register file watcher for task type '" + taskType + "'", 1, logPad, false, [[ "enabled", enabled ]]);
 
         if (!firstRun && workspace.workspaceFolders)
         {
             if (enabled !== false) {
-                const numFilesFound  = await this.wrapper.fileCache.buildTaskTypeCache(taskType, undefined, true, logPad + "   ");
-                this.wrapper.log.write(`   ${numFilesFound} files were added to the file cache`, 1, logPad);
+                const numFilesFound  = await w.fileCache.buildTaskTypeCache(taskType, undefined, true, logPad + "   ");
+                w.log.write(`   ${numFilesFound} files were added to the file cache`, 1, logPad);
             }
             else {
-                const numFilesRemoved = this.wrapper.fileCache.removeTaskTypeFromCache(taskType, logPad + "   ");
-                this.wrapper.log.write(`   ${numFilesRemoved} files were removed from file cache`, 1, logPad);
+                const numFilesRemoved = w.fileCache.removeTaskTypeFromCache(taskType, logPad + "   ");
+                w.log.write(`   ${numFilesRemoved} files were removed from file cache`, 1, logPad);
             }
         }
 
@@ -367,7 +381,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             //
             const ignoreModify = isScriptType(taskType) || isConstTaskCountType(taskType);
             if (!watcher) {
-                watcher = workspace.createFileSystemWatcher(this.wrapper.taskUtils.getGlobPattern(taskType));
+                watcher = workspace.createFileSystemWatcher(w.taskUtils.getGlobPattern(taskType));
                 this._watchers[taskType] = watcher;
                 this._disposables.push(watcher);
             }
@@ -382,7 +396,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             }
         }
 
-        this.wrapper.log.methodDone("register file watcher for task type '" + taskType + "'", 1, logPad);
+        w.log.methodDone("register file watcher for task type '" + taskType + "'", 1, logPad);
     };
 
 
@@ -391,66 +405,72 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     private _procDirCreateEvent = async (uri: Uri, logPad: string) =>
     {
-        this.wrapper.log.methodStart("[event] directory 'create'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
-        const numFilesFound = await this.wrapper.fileCache.addFolder(uri, logPad + "   ");
+        const w = this.wrapper;
+        w.log.methodStart("[event] directory 'create'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
+        const numFilesFound = await w.fileCache.addFolder(uri, logPad + "   ");
         if (numFilesFound > 0) {
-            await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, uri, logPad + "   ");
+            await executeCommand(w.keys.Commands.Refresh, undefined, uri, logPad + "   ");
         }
-        this.wrapper.log.methodDone("[event] directory 'create'", 1, logPad);
+        w.log.methodDone("[event] directory 'create'", 1, logPad);
     };
 
 
     private _procDirDeleteEvent = async (uri: Uri, logPad: string) =>
     {
-        this.wrapper.log.methodStart("[event] directory 'delete'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
-        const numFilesRemoved = this.wrapper.fileCache.removeFolderFromCache(uri, logPad + "   ");
+        const w = this.wrapper;
+        w.log.methodStart("[event] directory 'delete'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
+        const numFilesRemoved = w.fileCache.removeFolderFromCache(uri, logPad + "   ");
         if (numFilesRemoved > 0) {
-            await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, uri, logPad + "   ");
+            await executeCommand(w.keys.Commands.Refresh, undefined, uri, logPad + "   ");
         }
-        this.wrapper.log.methodDone("[event] directory 'delete'", 1, logPad);
+        w.log.methodDone("[event] directory 'delete'", 1, logPad);
     };
 
 
-    private _procFileChangeEvent = async(taskType: string, uri: Uri, logPad: string) =>
+    private _procFileChangeEvent = async(taskType: string, uri: Uri) =>
     {
-        this.wrapper.log.methodStart("[event] file 'change'", 1, logPad, true, [[ "file", uri.fsPath ]]);
-        await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, logPad + "   ");
-        this.wrapper.log.methodDone("[event] file 'change'", 1, logPad);
+        const w = this.wrapper;
+        w.log.methodStart("[event] file 'change'", 1, "", true, [[ "file", uri.fsPath ]]);
+        await executeCommand(w.keys.Commands.Refresh, taskType, uri, "   ");
+        w.log.methodDone("[event] file 'change'", 1);
     };
 
 
-    private _procFileCreateEvent = async(taskType: string, uri: Uri, logPad: string) =>
+    private _procFileCreateEvent = async(taskType: string, uri: Uri) =>
     {
-        this.wrapper.log.methodStart("[event] file 'create'", 1, logPad, true, [[ "file", uri.fsPath ]]);
-        this.wrapper.fileCache.addFileToCache(taskType, uri, logPad + "   ");
-        await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, logPad + "   ");
-        this.wrapper.log.methodDone("[event] file 'create'", 1, logPad);
+        const w = this.wrapper;
+        w.log.methodStart("[event] file 'create'", 1, "", true, [[ "file", uri.fsPath ]]);
+        w.fileCache.addFileToCache(taskType, uri, "   ");
+        await executeCommand(w.keys.Commands.Refresh, taskType, uri, "   ");
+        w.log.methodDone("[event] file 'create'", 1);
     };
 
 
-    private _procFileDeleteEvent = async(taskType: string, uri: Uri, logPad: string) =>
+    private _procFileDeleteEvent = async(taskType: string, uri: Uri) =>
     {
-        this.wrapper.log.methodStart("[event] file 'delete'", 1, logPad, true, [[ "file", uri.fsPath ]]);
-        this.wrapper.fileCache.removeFileFromCache(taskType, uri, logPad + "   ");
-        await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, logPad + "   ");
-        this.wrapper.log.methodDone("[event] file 'delete'", 1, logPad);
+        const w = this.wrapper;
+        w.log.methodStart("[event] file 'delete'", 1, "", true, [[ "file", uri.fsPath ]]);
+        w.fileCache.removeFileFromCache(taskType, uri, "   ");
+        await executeCommand(w.keys.Commands.Refresh, taskType, uri, "   ");
+        w.log.methodDone("[event] file 'delete'", 1);
     };
 
 
     private _procWsDirAddRemoveEvent = async(e: WorkspaceFoldersChangeEvent, logPad: string) =>
     {
-        this.wrapper.log.methodStart("workspace folder 'add/remove'", 1, logPad, true, [
+        const w = this.wrapper;
+        w.log.methodStart("workspace folder 'add/remove'", 1, logPad, true, [
             [ "# added", e.added.length ], [ "# removed", e.removed.length ]
         ]);
-        const numFilesFound = await this.wrapper.fileCache.addWsFolders(e.added, logPad + "   "),
-            numFilesRemoved = this.wrapper.fileCache.removeWsFolders(e.removed, logPad + "   ");
+        const numFilesFound = await w.fileCache.addWsFolders(e.added, logPad + "   "),
+            numFilesRemoved = w.fileCache.removeWsFolders(e.removed, logPad + "   ");
         this.createDirWatcher();
         if (numFilesFound > 0 || numFilesRemoved > 0)
         {
             const all =  [ ...e.added, ...e.removed ];
-            await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, all.length === 1 ? all[0].uri : false, logPad + "   ");
+            await executeCommand(w.keys.Commands.Refresh, undefined, all.length === 1 ? all[0].uri : false, logPad + "   ");
         }
-        this.wrapper.log.methodDone("workspace folder 'add/remove'", 1, logPad, [
+        w.log.methodDone("workspace folder 'add/remove'", 1, logPad, [
             [ "# of files found", numFilesFound ], [ "# of files removed", numFilesRemoved ]
         ]);
     };

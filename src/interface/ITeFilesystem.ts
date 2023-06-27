@@ -9,6 +9,7 @@ export interface ITeFilesystem
     deleteFile(file: string): Promise<void>;
     isDirectory(dirPath: string): boolean;
     getDateModified(file: string): Promise<Date|undefined>;
+    getDateModifiedSync(file: string): number;
     numFilesInDirectory(dirPath: string): Promise<number>;
     pathExists(file: string): Promise<boolean>;
     pathExistsSync (file: string): boolean;
