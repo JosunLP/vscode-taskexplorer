@@ -2,11 +2,11 @@
 import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
-import { asArray, isArray, isFunction, isPromise, isString } from "./typeUtils";
 import { ConfigKeys } from "../../interface";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
+import { isArray, isFunction, isPromise, isString } from "./typeUtils";
 
 
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
@@ -17,15 +17,15 @@ export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) 
 
 export const execIf = <T, R = any | PromiseLike<any>>(checkValue: T | undefined, ifFn: (arg: T, ...args: any[]) => R, thisArg?: any, ...args: any[]): R | undefined =>
 {
-    let elseFn;
-    if (isFunction(args[0])) {
+    let elseFn: any[] | undefined;
+    if (isArray(args[0]) && isFunction(args[0][0])) {
         elseFn = args.shift();
     }
     if (checkValue) {
         return ifFn.call(thisArg, checkValue, ...args);
     }
     else if (elseFn) {
-        return elseFn.call(thisArg, ...args);
+        return elseFn.splice(0, 1)[0].call(thisArg, ...elseFn);
     }
 };
 

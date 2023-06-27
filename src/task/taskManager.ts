@@ -100,9 +100,9 @@ export class TaskManager implements ITeTaskManager, Disposable
                 this._log.value("   send to terminal", "\\u0003", 1);
                 t.sendText("\u0003");
             },
-            this, window.showInformationMessage, "Terminal not found");
+            this, [ window.showInformationMessage, "Terminal not found" ]);
         },
-        this, window.showInformationMessage, "Executing task not found");
+        this, [ window.showInformationMessage, "Executing task not found" ]);
 
         this._log.methodDone("pause", 1);
     };
@@ -420,7 +420,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                         this._log.value("   send to terminal", ctrlChar, 1);
                         // terminal = getTerminal(taskItem, "   ");
                         try {
-                            w.utils.execIf(getTerminal(taskItem, "   "), () => terminal.sendText(ctrlChar, true), this);
+                            w.utils.execIf(getTerminal(taskItem, "   "), (t) => t.sendText(ctrlChar, true), this);
                         } catch {}
                     }
                 }

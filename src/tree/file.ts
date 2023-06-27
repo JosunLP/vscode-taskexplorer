@@ -286,7 +286,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         {   //
             // Note that user task do not have a resourceUri property set
             //
-            execIf(folder.resourceUri, () => { fileName = ".vscode/tasks.json"; }, this, () => { fileName = "tasks.json"; });
+            execIf(folder.resourceUri, () => { fileName = ".vscode/tasks.json"; }, this, [ () => { fileName = "tasks.json"; } ]);
         }
         else if (source === "tsc")
         {   //

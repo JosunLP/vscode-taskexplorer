@@ -446,10 +446,13 @@ suite("Util Tests", () =>
 		expect(teWrapper.typeUtils.asArray(1, true)).to.be.an("array").with.length(1);
 		expect(teWrapper.typeUtils.asArray(1)).to.be.an("array").with.length(1);
 		expect(teWrapper.typeUtils.asArray([ 1, 2, 3 ], true)).to.be.an("array").with.length(3);
+		expect(teWrapper.typeUtils.asArray([ 1, 2, 3 ], false)).to.be.an("array").with.length(3);
+		expect(teWrapper.typeUtils.asArray([ 1, 2, 3 ])).to.be.an("array").with.length(3);
 		expect(teWrapper.typeUtils.asArray(undefined)).to.be.an("array").with.length(0);
 		expect(teWrapper.typeUtils.asArray("", false, true)).to.be.an("array").with.length(1);
 		expect(teWrapper.typeUtils.asArray("", false, false)).to.be.an("array").with.length(0);
 		expect(teWrapper.typeUtils.asArray("")).to.be.an("array").with.length(0);
+		expect(teWrapper.typeUtils.asArray([ 1 ], true)).to.be.an("array").with.length(1);
 		// expect(teWrapper.typeUtils.asString("")).to.be.equal("");
 		// expect(teWrapper.typeUtils.asString(undefined)).to.be.equal("");
 		// expect(teWrapper.typeUtils.asString("test")).to.be.equal("test");
@@ -488,6 +491,10 @@ suite("Util Tests", () =>
 		teWrapper.utils.execIf(false, () => {}, this);
 		teWrapper.utils.execIf(true, () => {}, this);
 		teWrapper.utils.execIf(true, () => {}, this, 1, 2, 3);
+		teWrapper.utils.execIf(true, () => {}, this, () => {}, 2, 3);
+		teWrapper.utils.execIf(false, () => {}, this, () => {}, 2, 3, 4);
+		teWrapper.utils.execIf(true, () => {}, this, [ () => {}, 2, 3 ], 4);
+		teWrapper.utils.execIf(false, () => {}, this, [ () => {}, 2, 3, 4 ]);
 
         expect(teWrapper.taskUtils.isScriptType("batch"));
         expect(teWrapper.taskUtils.getScriptTaskTypes().length > 0);
