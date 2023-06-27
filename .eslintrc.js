@@ -20,17 +20,17 @@ module.exports = {
     parser: "@typescript-eslint/parser",
     parserOptions: {
         project: [
-            "tsconfig.json", "tsconfig.browser.json", "src/test/tsconfig.json", "src/webview/app/tsconfig.json"
+            "tsconfig.json", "tsconfig.browser.json", "src/test/tsconfig.json"
         ],
         sourceType: "module",
         ecmaVersion: 2020,
         createDefaultProgram: true
     },
-    ignorePatterns: ["**/test-fixture/*.js", "types", "*.json", "**/node_modules/**", "**/.eslint*" ],
+    ignorePatterns: ["**/test-fixture/*.js", "types/**", "*.json", "**/node_modules/**", "**/.eslint*", "dist/**" ],
     overrides: [
     {
         files: [ "src/**/*.ts", "script/**/*.js", "webpack.*.js", "webpack/**/*.js" ],
-        excludedFiles: ["test-fixture", "types", "*.json"  ]
+        excludedFiles: ["test-fixture", "types", "*.json", "dist" ]
     }],
     plugins: [
         "eslint-plugin-jsdoc",
