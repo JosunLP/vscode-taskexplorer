@@ -18,75 +18,78 @@ import {
 
 export class TaskManager implements ITeTaskManager, Disposable
 {
-    private readonly log: ILog;
+    private readonly _log: ILog;
     private readonly _disposables: Disposable[] = [];
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        this.log = wrapper.log;
+        this._log = wrapper.log;
         this._disposables.push(
             registerCommand(wrapper.keys.Commands.NpmRunInstall, (item: TaskFile) => this.runNpmCommand(item, "install"), this),
             registerCommand(wrapper.keys.Commands.NpmRunUpdate, (item: TaskFile) => this.runNpmCommand(item, "update"), this),
             registerCommand(wrapper.keys.Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
             registerCommand(wrapper.keys.Commands.NpmRunAuditFix, (item: TaskFile) => this.runNpmCommand(item, "audit fix"), this),
             registerCommand(wrapper.keys.Commands.NpmRunUpdatePackage, (item: TaskFile) => this.runNpmCommand(item, "update <packagename>"), this),
-            registerCommand(wrapper.keys.Commands.Open, (item: TaskItem | ITeTask, itemClick?: boolean) => this.open(this.wrapper.treeManager.getTaskItem(item), itemClick), this),
-            registerCommand(wrapper.keys.Commands.Pause, (item: TaskItem | ITeTask) => this.pause(this.wrapper.treeManager.getTaskItem(item)), this),
-            registerCommand(wrapper.keys.Commands.Restart, (item: TaskItem) => this.restart(item), this),
-            registerCommand(wrapper.keys.Commands.Run,  (item: TaskItem | ITeTask | Uri) => this.run(this.wrapper.treeManager.getTaskItem(item)), this),
-            registerCommand(wrapper.keys.Commands.RunLastTask,  () => this.runLastTask(), this),
-            registerCommand(wrapper.keys.Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(this.wrapper.treeManager.getTaskItem(item), false, true, ...args), this),
+            registerCommand(wrapper.keys.Commands.Open, this.open, this),
+            registerCommand(wrapper.keys.Commands.Pause, this.pause, this),
+            registerCommand(wrapper.keys.Commands.Restart, this.restart, this),
+            registerCommand(wrapper.keys.Commands.Run, this.run, this),
+            registerCommand(wrapper.keys.Commands.RunLastTask, this.runLastTask, this),
+            registerCommand(wrapper.keys.Commands.RunWithArgs, (item: TaskItem | Uri, ...args: any[]) => this.run(item, false, true, ...args), this),
             registerCommand(wrapper.keys.Commands.RunWithNoTerminal, (item: TaskItem) => this.run(item, true, false), this),
-			registerCommand(wrapper.keys.Commands.SetPinned, (item: TaskItem | ITeTask, listType?: TeTaskListType) => this.setPinned(item, listType), this),
-            registerCommand(wrapper.keys.Commands.ShowTaskDetailsPage, (item: TaskItem | ITeTask) => this.showTaskDetailsPage(item), this),
-            registerCommand(wrapper.keys.Commands.Stop, (item: TaskItem | ITeTask) => this.stop(this.wrapper.treeManager.getTaskItem(item)), this)
+			registerCommand(wrapper.keys.Commands.SetPinned, this.setPinned, this),
+            registerCommand(wrapper.keys.Commands.ShowTaskDetailsPage, this.showTaskDetailsPage, this),
+            registerCommand(wrapper.keys.Commands.Stop, this.stop, this)
         );
     }
 
     dispose = () => this._disposables.forEach(d => d.dispose());
 
 
-    private open = async(selection: TaskItem, itemClick = false) =>
+    private open = async(item: TaskItem | ITeTask | Uri, itemClick = false) =>
     {
-        const clickAction = this.wrapper.config.get<string>(this.wrapper.keys.Config.TaskButtonsClickAction, "Open");
+        const w = this.wrapper,
+              taskItem = this.wrapper.treeManager.getTaskItem(item),
+              clickAction = w.config.get<string>(w.keys.Config.TaskButtonsClickAction, "Open");
         //
         // As of v1.30.0, added option to change the entry item click to execute.  In order to avoid having
         // to re-register the handler when the setting changes, we just re-route the request here
         //
         if (clickAction === "Execute" && itemClick === true) {
-            return this.run(selection);
+            return this.run(taskItem);
         }
 
-        const uri = !this.wrapper.taskUtils.isScriptType(selection.taskSource) ?
-                    selection.taskFile.resourceUri : Uri.file(selection.task.definition.uri.fsPath);
+        const uri = !w.taskUtils.isScriptType(taskItem.taskSource) ?
+                    taskItem.taskFile.resourceUri : Uri.file(taskItem.task.definition.uri.fsPath);
 
-        this.log.methodStart("open document at position", 1, "", true, [
-            [ "command", selection.command.command ], [ "source", selection.taskSource ],
+        this._log.methodStart("open document at position", 1, "", true, [
+            [ "command", taskItem.command.command ], [ "source", taskItem.taskSource ],
             [ "uri path", uri.path ], [ "fs path", uri.fsPath ]
         ]);
 
-        await this.wrapper.utils.execIf(this.wrapper.fs.pathExistsSync(uri.fsPath), async () =>
+        await w.utils.execIf(w.fs.pathExistsSync(uri.fsPath), async () =>
         {
             const document: TextDocument = await workspace.openTextDocument(uri),
-                  offset = findDocumentPosition(this.wrapper, document, selection, "   "),
+                  offset = findDocumentPosition(w, document, taskItem, "   "),
                   position = document.positionAt(offset);
             await window.showTextDocument(document, { selection: new Selection(position, position) });
         }, this);
 
-        this.log.methodDone("open document at position", 1);
+        this._log.methodDone("open document at position", 1);
     };
 
 
-    private pause = (taskItem: TaskItem) =>
+    private pause = (item: TaskItem | ITeTask | Uri) =>
     {
+        const taskItem = this.wrapper.treeManager.getTaskItem(item);
         if (taskItem.paused || this.wrapper.treeManager.isBusy)
         {
             window.showInformationMessage("Busy, please wait...");
             return;
         }
 
-        this.log.methodStart("pause", 1, "", true);
+        this._log.methodStart("pause", 1, "", true);
 
         this.wrapper.utils.execIf(taskItem.task.execution, () =>
         {
@@ -94,21 +97,21 @@ export class TaskManager implements ITeTaskManager, Disposable
             this.wrapper.utils.execIf(terminal, (t) =>
             {
                 taskItem.paused = true;
-                this.log.value("   send to terminal", "\\u0003", 1);
+                this._log.value("   send to terminal", "\\u0003", 1);
                 t.sendText("\u0003");
             },
             this, window.showInformationMessage, "Terminal not found");
         },
         this, window.showInformationMessage, "Executing task not found");
 
-        this.log.methodDone("pause", 1);
+        this._log.methodDone("pause", 1);
     };
 
 
     private restart = async(taskItem: TaskItem) =>
     {
         let exec: TaskExecution | undefined;
-        this.log.methodStart("restart task", 1, "", true);
+        this._log.methodStart("restart task", 1, "", true);
         if (this.wrapper.treeManager.isBusy)
         {
             window.showInformationMessage("Busy, please wait...");
@@ -117,7 +120,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             await this.stop(taskItem);
             exec = await this.run(taskItem);
         }
-        this.log.methodDone("restart task", 1);
+        this._log.methodDone("restart task", 1);
         return exec;
     };
 
@@ -125,14 +128,14 @@ export class TaskManager implements ITeTaskManager, Disposable
     private resumeTask = (taskItem: TaskItem) =>
     {
         let exec: TaskExecution | undefined;
-        this.log.methodStart("resume task", 1, "", true);
+        this._log.methodStart("resume task", 1, "", true);
         const term = getTerminal(taskItem, "   ");
         if (term)
         {   //
             // TODO - see ticket.  I guess its not CTRL+C in some parts.
             // so make the control chars a setting.  Also in stop().
             //
-            this.log.value("   send to terminal", "N", 1);
+            this._log.value("   send to terminal", "N", 1);
             term.sendText("N", true);
             exec = taskItem.execution;
         }
@@ -140,7 +143,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             window.showInformationMessage("Terminal not found");
         }
         taskItem.paused = false;
-        this.log.methodDone("resume task", 1);
+        this._log.methodDone("resume task", 1);
         return exec;
     };
 
@@ -156,9 +159,10 @@ export class TaskManager implements ITeTaskManager, Disposable
      * @param withArgs Whether or not to prompt for arguments
      * Note that only script type tasks use arguments (and Gradle, ref ticket #88)
      */
-    private run = async(taskItem: TaskItem, noTerminal = false, withArgs = false, ...args: any[]) =>
+    private run = async(item: TaskItem | ITeTask | Uri, noTerminal = false, withArgs = false, ...args: any[]) =>
     {
         let exec: TaskExecution | undefined;
+        const taskItem = this.wrapper.treeManager.getTaskItem(item);
 
         if (this.wrapper.treeManager.isBusy)
         {
@@ -166,7 +170,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             return exec;
         }
 
-        this.log.methodStart("run task", 1, "", true, [[ "task name", taskItem.label ]]);
+        this._log.methodStart("run task", 1, "", true, [[ "task name", taskItem.label ]]);
         taskItem.taskDetached = undefined;
 
         if (withArgs === true)
@@ -214,7 +218,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             exec = await this.runTask(newTask, taskItem, noTerminal);
         }
 
-        this.log.methodDone("run task", 1);
+        this._log.methodDone("run task", 1);
         return exec;
     };
 
@@ -277,20 +281,20 @@ export class TaskManager implements ITeTaskManager, Disposable
             return;
         }
 
-        this.log.methodStart("run last task", 1, "", true, [[ "last task id", lastTaskId ]]);
+        this._log.methodStart("run last task", 1, "", true, [[ "last task id", lastTaskId ]]);
         const exec = await this.run(taskItem);
-        this.log.methodDone("run last task", 1);
+        this._log.methodDone("run last task", 1);
         return exec;
     };
 
 
     private runTask = async (task: Task, taskItem: TaskItem, noTerminal?: boolean, logPad = "   ") =>
     {
-        this.log.methodStart("internal run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
+        this._log.methodStart("internal run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
         task.presentationOptions.reveal = noTerminal !== true ? TaskRevealKind.Always : TaskRevealKind.Silent;
         const exec = await tasks.executeTask(task);
         await this.wrapper.treeManager.lastTasksFolder.saveTask(taskItem, logPad + "   ");
-        this.log.methodDone("internal run task", 1, logPad, [[ "success", !!exec ]]);
+        this._log.methodDone("internal run task", 1, logPad, [[ "success", !!exec ]]);
         return exec;
     };
 
@@ -305,7 +309,7 @@ export class TaskManager implements ITeTaskManager, Disposable
     private runWithArgs = async(taskItem: TaskItem, noTerminal: boolean, logPad: string, ...args: any[]) =>
     {
         let exec: TaskExecution | undefined;
-        this.log.methodStart("run task with arguments", 1, logPad, false, [[ "no terminal", noTerminal ]]);
+        this._log.methodStart("run task with arguments", 1, logPad, false, [[ "no terminal", noTerminal ]]);
         /* istanbul ignore else */
         if (taskItem.task && !(taskItem.task.execution instanceof CustomExecution))
         {
@@ -344,18 +348,19 @@ export class TaskManager implements ITeTaskManager, Disposable
         else {
             window.showInformationMessage("Custom execution tasks cannot have the cmd line altered");
         }
-        this.log.methodDone("run task with arguments", 1, logPad);
+        this._log.methodDone("run task with arguments", 1, logPad);
         return exec;
     };
 
 
 	private setPinned = async (taskItem: TaskItem | ITeTask, listType: TeTaskListType = "all"): Promise<void> =>
 	{
-        const iTask = taskItem instanceof TaskItem ?
-                      this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], listType)[0] : taskItem,
+        const w = this.wrapper,
+              iTask = taskItem instanceof TaskItem ?
+                      w.taskUtils.toITask(w, [ taskItem.task ], listType)[0] : taskItem,
               storageKey: PinnedStorageKey = `taskexplorer.pinned.${iTask.listType}`;
-		this.log.methodStart("set pinned task", 2, "", false, [[ "id", iTask.treeId ], [ "pinned", iTask.pinned ]]);
-		const pinnedTaskList = this.wrapper.storage.get<ITeTask[]>(storageKey, []);
+		this._log.methodStart("set pinned task", 2, "", false, [[ "id", iTask.treeId ], [ "pinned", iTask.pinned ]]);
+		const pinnedTaskList = w.storage.get<ITeTask[]>(storageKey, []);
         const pinnedIdx =  pinnedTaskList.findIndex((t) => t.treeId === iTask.treeId);
         if (pinnedIdx === -1) {
 		    pinnedTaskList.push({  ...iTask });
@@ -363,8 +368,8 @@ export class TaskManager implements ITeTaskManager, Disposable
         else {
             pinnedTaskList.splice(pinnedIdx, 1);
         }
-		await this.wrapper.storage.update(storageKey, pinnedTaskList);
-		this.log.methodDone("set pinned task", 2);
+		await w.storage.update(storageKey, pinnedTaskList);
+		this._log.methodDone("set pinned task", 2);
         // await this._taskUsageTracker.setPinned(task, logPad);
 	};
 
@@ -378,11 +383,13 @@ export class TaskManager implements ITeTaskManager, Disposable
     };
 
 
-    private stop = async(taskItem: TaskItem) =>
+    private stop = async(item: TaskItem | ITeTask | Uri) =>
     {
-        this.log.methodStart("stop", 1, "", true);
+        const w = this.wrapper,
+              taskItem = this.wrapper.treeManager.getTaskItem(item);
+        this._log.methodStart("stop", 1, "", true);
 
-        if (this.wrapper.treeManager.isBusy)
+        if (w.treeManager.isBusy)
         {
             window.showInformationMessage("Busy, please wait...");
             return;
@@ -391,29 +398,29 @@ export class TaskManager implements ITeTaskManager, Disposable
         const exec = taskItem.isExecuting();
         if (exec)
         {
-            if (this.wrapper.config.get<boolean>(this.wrapper.keys.Config.KeepTerminalOnTaskDone) === true && !taskItem.taskDetached)
+            if (w.config.get<boolean>(w.keys.Config.KeepTerminalOnTaskDone) === true && !taskItem.taskDetached)
             {
                 const terminal = getTerminal(taskItem, "   ");
                 /* istanbul ignore else */
                 if (terminal)
                 {
-                    const ctrlChar = this.wrapper.config.get<string>(this.wrapper.keys.Config.TaskButtonsControlCharacter, "Y");
-                    this.log.write("   keep terminal open", 1);
+                    const ctrlChar = w.config.get<string>(w.keys.Config.TaskButtonsControlCharacter, "Y");
+                    this._log.write("   keep terminal open", 1);
                     if (taskItem.paused)
                     {
                         taskItem.paused = false;
-                        this.log.value("   send to terminal", ctrlChar, 1);
+                        this._log.value("   send to terminal", ctrlChar, 1);
                         terminal.sendText(ctrlChar);
                     }
                     else
                     {
-                        this.log.value("   send sequence to terminal", "\\u0003", 1);
+                        this._log.value("   send sequence to terminal", "\\u0003", 1);
                         terminal.sendText("\u0003");
-                        await this.wrapper.utils.sleep(50);
-                        this.log.value("   send to terminal", ctrlChar, 1);
+                        await w.utils.sleep(50);
+                        this._log.value("   send to terminal", ctrlChar, 1);
                         // terminal = getTerminal(taskItem, "   ");
                         try {
-                            this.wrapper.utils.execIf(getTerminal(taskItem, "   "), () => terminal.sendText(ctrlChar, true), this);
+                            w.utils.execIf(getTerminal(taskItem, "   "), () => terminal.sendText(ctrlChar, true), this);
                         } catch {}
                     }
                 }
@@ -422,7 +429,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                 }
             }
             else {
-                this.log.write("   kill task execution", 1);
+                this._log.write("   kill task execution", 1);
                 try { exec.terminate(); } catch {}
             }
         }
@@ -431,7 +438,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         }
 
         taskItem.paused = false;
-        this.log.methodDone("stop", 1);
+        this._log.methodDone("stop", 1);
     };
 
 }

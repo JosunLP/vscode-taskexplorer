@@ -21,14 +21,10 @@ export const execIf = <T, R = any | PromiseLike<any>>(checkValue: T | undefined,
     if (isFunction(args[0])) {
         elseFn = args.shift();
     }
-    if (checkValue)
-    {
-        if (elseFn) {
-            return ifFn.call(thisArg, checkValue);
-        }
+    if (checkValue) {
         return ifFn.call(thisArg, checkValue, ...args);
     }
-    if (elseFn) {
+    else if (elseFn) {
         return elseFn.call(thisArg, ...args);
     }
 };

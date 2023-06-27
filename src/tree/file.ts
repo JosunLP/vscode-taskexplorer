@@ -26,62 +26,26 @@ import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils
  */
 export class TaskFile extends TreeItem implements ITaskFile
 {
-    public path: string;
     /**
-     * @property folder
-     *
      * The owner TaskFolder representing a workspace or special (Last Tasks / Favorites)
      * folder.
      */
-    public folder: TaskFolder;
+    folder: TaskFolder;
     /**
-     * @property folder
-     *
      * Child TaskItem or TaskFile nodes in the tree.  A TaskFile can own another TaskFile
      * if "Grouping" is turned on in settings.
      */
-    public treeNodes: (TaskItem|TaskFile)[] = [];
-    /**
-     * @property fileName
-     *
-     * The name of the filesystem file that this TaskFile represents, and/or is associated
-     * with if grouped.
-     */
-    public fileName: string;
-    /**
-     * @property groupLevel
-     *
-     * Grouping level of this TaskFIle, if grouping is enabled in Settings.  The maximum
-     * group level is configurable in Settings 1-10.
-     */
-    public groupLevel: number;
-    /**
-     * @property nodePath ?
-     */
-    public nodePath: string;
-    /**
-     * @property taskSource
-     *
-     * The task source that the TaskFile will be associated with, e.g. `npm`, `ant`,
-     * `gulp`, etc.
-     *
-     * @readonly
-     */
-    public readonly taskSource: string;
-    /**
-     * @property isGroup Flag indicating if the TaskFile is being added in grouped mode.
-     * @readonly
-     */
-    public readonly isGroup: boolean;
-    /**
-     * @property isUser Flag indicating if the TaskFile is associated with "User" tasks.
-     * @readonly
-     */
-    public readonly isUser: boolean;
+    path: string;
+    treeNodes: (TaskItem|TaskFile)[] = [];
+    fileName: string;
+    groupLevel: number;
+    readonly taskSource: string;
+    readonly isGroup: boolean;
+    readonly isUser: boolean;
 
+    override id: string;
     override resourceUri: Uri;
 
-    public override id: string;
 
     /**
      * @constructor
@@ -122,24 +86,8 @@ export class TaskFile extends TreeItem implements ITaskFile
         // exception of TSC, which is handled elsewhere).
         //
         this.path = this.label !== "vscode" ? relativePath : ".vscode";
-        this.nodePath = this.label !== "vscode" ? relativePath : "vscode"; // <---- ??? TODO - Why vscode and not .vscode.  same as .path?
+        this.fileName = this.getFileNameFromSource(source, folder, taskDef);
 
-        if (groupId && this.label) {
-            this.nodePath = join(this.nodePath, this.label.toString());
-        }
-
-        /* istanbul ignore if */
-        if (!this.nodePath && this.label === "vscode") {
-            this.nodePath = join(".vscode", this.label);
-        }
-
-        if (!this.nodePath) { // force null or undefined to empty string
-            this.nodePath = "";
-        }
-
-        this.fileName = this.getFileNameFromSource(source, folder, taskDef, relativePath);
-
-        /* istanbul ignore else */
         if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
             if (relativePath && source !== "Workspace") {
@@ -152,7 +100,7 @@ export class TaskFile extends TreeItem implements ITaskFile
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder
         //
         else {
-            this.fileName = this.getFileNameFromSource(source, folder, taskDef, relativePath);
+            this.fileName = this.getFileNameFromSource(source, folder, taskDef);
             this.resourceUri = Uri.file(join(getUserDataPath(undefined, logPad), this.fileName));
             this.isUser = true;
         }
@@ -175,8 +123,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         // Set unique id
         //
-        this.id = folder.id + ":" + encodeUtf8Hex(this.nodePath + ":" + this.fileName +
-                  ":" + this.groupLevel + ":" + groupId + ":" + this.label + ":" + source);
+        this.id = folder.id + ":" + encodeUtf8Hex(`${this.fileName}:${this.groupLevel}:${groupId}:${this.label}:${source}`);
 
         //
         // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
@@ -217,19 +164,15 @@ export class TaskFile extends TreeItem implements ITaskFile
 
         const iconPath = this.iconPath as { light: string | Uri; dark: string | Uri };
         log.methodDone("construct tree file", 4, logPad, [
-            [ "id", this.id ], [ "label", this.label ], [ "Node Path", this.nodePath ], [ "is usertask", this.isUser ],
-            [ "context value", this.contextValue ], [ "is group", this.isGroup ], [ "groupLevel", this.groupLevel ],
-            [ "filename", this.fileName ], [ "resource uri path", this.resourceUri.fsPath ],
-            [ "path", this.path  ], [ "icon light", iconPath.light ], [ "icon dark", iconPath.dark ]
+            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ], [ "context value", this.contextValue ],
+            [ "is group", this.isGroup ], [ "groupLevel", this.groupLevel ], [ "filename", this.fileName ],
+            [ "resource uri path", this.resourceUri.fsPath ], [ "path", this.path  ], [ "icon light", iconPath.light ],
+            [ "icon dark", iconPath.dark ]
         ]);
     }
 
-    /**
-     * @method addTreeNode
-     *
-     * @param treeNode The node/item to add to this TaskFile node.
-     */
-    public addTreeNode(treeNode: (TaskFile | TaskItem | undefined))
+
+    addTreeNode(treeNode: (TaskFile | TaskItem | undefined))
     {
         /* istanbul ignore else */
         if (treeNode) {
@@ -253,11 +196,6 @@ export class TaskFile extends TreeItem implements ITaskFile
     };
 
 
-    /**
-     * @method getLabel
-     *
-     * @param treeNode The node/item to add to this TaskFile node.
-     */
     private static getLabel(taskDef: ITaskDefinition, source: string, relativePath: string, groupId: string | undefined): string
     {
         let label = source;
@@ -329,7 +267,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     }
 
 
-    private getFileNameFromSource(source: string, folder: TaskFolder, taskDef: ITaskDefinition, relativePath: string)
+    private getFileNameFromSource(source: string, folder: TaskFolder, taskDef: ITaskDefinition)
     {   //
         // Any tasks provided by this extension will have a "fileName" definition. External tasks
         // registered throughthe API also define fileName
@@ -340,7 +278,8 @@ export class TaskFile extends TreeItem implements ITaskFile
         }
         //
         // Since tasks are returned from VSCode API without a filename that they were found in we
-        // must deduce the filename from the task source.  This includes npm, tsc, and vscode (workspace) tasks
+        // must deduce the filename from the task source.  This includes npm, tsc, and vscode
+        // (workspace) tasks
         //
         let fileName = "package.json";
         if (source === "Workspace")
@@ -350,31 +289,23 @@ export class TaskFile extends TreeItem implements ITaskFile
             execIf(folder.resourceUri, () => { fileName = ".vscode/tasks.json"; }, this, () => { fileName = "tasks.json"; });
         }
         else if (source === "tsc")
-        {
+        {   //
+            // TypeScript task provider will set property `tsconfg` on the task definition, which
+            // includes the relative path to the tsonfig file, filename included.
+            //
             fileName = basename(taskDef.tsconfig);
         }
         return fileName;
     }
 
 
-    /**
-     * @method insertTreeNode
-     *
-     * @param treeNode The node/item to add to this TaskFile node.
-     * @param index The index at which to insert into the array
-     */
-    public insertTreeNode(treeItem: (TaskFile | TaskItem), index: number)
+    insertTreeNode(treeItem: (TaskFile | TaskItem), index: number)
     {
         this.treeNodes.splice(index, 0, treeItem);
     }
 
 
-    /**
-     * @method removeTreeNode
-     *
-     * @param treeNode The node/item to remove from this TaskFile node.
-     */
-    public removeTreeNode(treeItem: (TaskFile | TaskItem))
+    removeTreeNode(treeItem: (TaskFile | TaskItem))
     {
         const idx = this.treeNodes.findIndex(tn => tn.id === treeItem.id);
         /* istanbul ignore else */

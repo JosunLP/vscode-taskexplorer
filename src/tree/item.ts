@@ -32,10 +32,6 @@ export class TaskItem extends TreeItem implements ITaskItem
     public taskDetached: Task | undefined;
     public execution: TaskExecution | undefined;
     public paused: boolean;
-    /**
-     * @property nodePath Equivalent to `task.definition.path`
-     */
-    public nodePath: string;
     public groupLevel: number;
     public override id: string;
     public override command: Command;
@@ -60,7 +56,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         super(getDisplayName(task.name), TreeItemCollapsibleState.None);
         log.methodStart("construct tree item", 5, logPad, false, [
-            [ "label", this.label ], [ "source", taskFile.taskSource ], [ "node path", taskFile.nodePath ], [ "task file", taskFile.label ],
+            [ "label", this.label ], [ "source", taskFile.taskSource ], [ "task file", taskFile.label ],
             [ "groupLevel", taskFile.groupLevel ], [ "taskDef cmd line", taskDef.cmdLine ],
             [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
@@ -78,7 +74,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         if (task.definition.scriptFile) {
             this.resourceUri = Uri.file(fsPath);
         }
-        this.id = encodeUtf8Hex(fsPath + ":" + task.source + ":" + task.name + ":"); // <- leave trailing ':' for backwards compat
+        this.id = encodeUtf8Hex(`${fsPath}:${task.source}:${task.name}:`); // <- leave trailing ':' for backwards compat
         this.paused = false;                // paused flag used by start/stop/pause task functionality
         this.taskFile = taskFile;           // Save a reference to the TaskFile that this TaskItem belongs to
         this.task = task;                   // Save a reference to the Task that this TaskItem represents
@@ -98,17 +94,6 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         this.task.definition.taskItemId = this.id;
         //
-        // Node path
-        // 2-19-21 - This was being set to task.definition.path, which for workspace tasks doesn't
-        // necessarily mean that the file path is the same (workspace task filepath is ./.vscode).
-        // The 'nodePath' variable should be the same as the taskFile owner in any case, and this
-        // should not have had anything to do with the issue found in ticket #133, which the same
-        // situation with workspace tasks with paths set caused a never-ending loop when building
-        // the task groups.  Leaving commented, as a reminder, in case of any side effect.  It gets
-        // reset in _setNodePath of taskTree.createTaskGroupingsBySep while creating grouping levels.
-        //
-        this.nodePath = taskFile.nodePath; // task.definition.path;
-        //
         // Tooltip
         //
         const taskName = getTaskTypeFriendlyName(task.source, true);
@@ -122,7 +107,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         this.refreshState("   ", 5);
         log.methodDone("construct tree file", 5, logPad, [
-            [ "id", this.id ], [ "label", this.label ], [ "Node Path", this.nodePath ], [ "is usertask", this.isUser ],
+            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ],
             [ "context value", this.contextValue ], [ "groupLevel", this.groupLevel ],
             [ "resource uri path", this.taskFile.resourceUri.fsPath ], [ "path", this.taskFile.path  ]
         ]);

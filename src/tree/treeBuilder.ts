@@ -6,7 +6,7 @@ import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeGrouper } from "./treeGrouper";
 import { IDictionary, TaskMap } from "../interface";
-import { Task, TreeItemCollapsibleState } from "vscode";
+import { Task, TreeItemCollapsibleState, WorkspaceFolder } from "vscode";
 
 
 export class TaskTreeBuilder
@@ -209,78 +209,72 @@ export class TaskTreeBuilder
     getTaskTree = () => this.taskTree;
 
 
-    invalidate  = () =>
-    {
-        this.taskMap = {};
-        this.taskTree = null;
-    };
+    invalidate  = () => { this.taskMap = {}; this.taskTree = null; };
 
 
     private logTask = (task: Task, scopeName: string, logPad: string) =>
     {
-        const definition = task.definition;
-
-        if (!this.wrapper.log.isLoggingEnabled()) {
+        const w = this.wrapper,
+              definition = task.definition;
+        if (!w.log.isLoggingEnabled()) {
             return;
         }
-
-        this.wrapper.log.write("Task Details:", 3, logPad);
-        this.wrapper.log.value("   name", task.name, 3, logPad);
-        this.wrapper.log.value("   source", task.source, 3, logPad);
-        this.wrapper.log.value("   scope name", scopeName, 4, logPad);
-        /* istanbul ignore else */
-        if (this.wrapper.typeUtils.isWorkspaceFolder(task.scope))
+        w.log.write("Task Details:", 3, logPad);
+        w.log.value("   name", task.name, 3, logPad);
+        w.log.value("   source", task.source, 3, logPad);
+        w.log.value("   scope name", scopeName, 4, logPad);
+        w.utils.execIf(w.typeUtils.isWorkspaceFolder(task.scope), (_r, _v1, _v2, _v3, scope: WorkspaceFolder) =>
         {
-            this.wrapper.log.value("   scope.name", task.scope.name, 4, logPad);
-            this.wrapper.log.value("   scope.uri.path", task.scope.uri.path, 4, logPad);
-            this.wrapper.log.value("   scope.uri.fsPath", task.scope.uri.fsPath, 4, logPad);
-        }
-        else // User tasks
-        {
-            this.wrapper.log.value("   scope.uri.path", "N/A (User)", 4, logPad);
-        }
-        this.wrapper.log.value("   type", definition.type, 4, logPad);
-        this.wrapper.log.value("   relative Path", definition.path ? definition.path : "", 4, logPad);
+            w.log.value("   scope.name", scope.name, 4, logPad);
+            w.log.value("   scope.uri.path", scope.uri.path, 4, logPad);
+            w.log.value("   scope.uri.fsPath", scope.uri.fsPath, 4, logPad);
+        }, this, /* User tasks */w.log.value, "   scope.uri.path", "N/A (User)", 4, logPad, task.scope);
+        w.log.value("   type", definition.type, 4, logPad);
+        w.log.value("   relative Path", definition.path ? definition.path : "", 4, logPad);
         if (definition.scriptFile)
         {
-            this.wrapper.log.value("      script file", definition.scriptFile, 4, logPad);
+            w.log.value("      script file", definition.scriptFile, 4, logPad);
         }
         if (definition.script)
         {
-            this.wrapper.log.value("   script", definition.script, 4, logPad);
+            w.log.value("   script", definition.script, 4, logPad);
         }
         if (definition.target)
         {
-            this.wrapper.log.value("   target", definition.target, 4, logPad);
+            w.log.value("   target", definition.target, 4, logPad);
         }
         if (definition.path)
         {
-            this.wrapper.log.value("   path", definition.path, 4, logPad);
+            w.log.value("   path", definition.path, 4, logPad);
+        }
+        if (definition.tsconfig)
+        {
+            w.log.value("   tsconfig", definition.tsconfig, 4, logPad);
         }
         //
         // Internal task providers will set a fileName property
         //
         if (definition.fileName)
         {
-            this.wrapper.log.value("   file name", definition.fileName, 4, logPad);
+            w.log.value("   file name", definition.fileName, 4, logPad);
         }
         //
         // Internal task providers will set a uri property
         //
         if (definition.uri)
         {
-            this.wrapper.log.value("   file path", definition.uri.fsPath, 4, logPad);
+            w.log.value("   file path", definition.uri.fsPath, 4, logPad);
         }
         //
         // Script task providers will set a takesArgs property
         //
         if (definition.takesArgs)
         {
-            this.wrapper.log.value("   requires args", definition.takesArgs, 4, logPad);
+            w.log.value("   requires args", definition.takesArgs, 4, logPad);
         }
         if (definition.cmdLine)
         {
-            this.wrapper.log.value("   cmd line", definition.cmdLine, 4, logPad);
+            w.log.value("   cmd line", definition.cmdLine, 4, logPad);
         }
         //
         // External task providers can set a icon/iconDark property
@@ -288,7 +282,7 @@ export class TaskTreeBuilder
         /* istanbul ignore if */
         if (definition.icon)
         {
-            this.wrapper.log.value("   icon", definition.icon, 4, logPad);
+            w.log.value("   icon", definition.icon, 4, logPad);
         }
         //
         // External task providers can set a icon/iconDark property
@@ -296,9 +290,9 @@ export class TaskTreeBuilder
         /* istanbul ignore if */
         if (definition.iconDark)
         {
-            this.wrapper.log.value("   icon dark", definition.iconDark, 4, logPad);
+            w.log.value("   icon dark", definition.iconDark, 4, logPad);
         }
-        this.wrapper.log.write("Task Details Done", 3, logPad);
+        w.log.write("Task Details Done", 3, logPad);
     };
 
 }

@@ -187,9 +187,8 @@ export class TaskTreeGrouper
 
             w.log.write("   process task item", logLevel + 1, logPad);
             w.log.values(logLevel + 2, logPad + "      ", [
-                [ "id", each.id ], [ "label", label ], [ "node path", each.nodePath ], [ "command", each.command.command ],
-                [ "previous name [tree level]", prevName && prevNameOk ? prevName[treeLevel] : "undefined" ],
-                [ "this previous name", prevNameThis ]
+                [ "id", each.id ], [ "label", label ], [ "command", each.command.command ], [ "this previous name", prevNameThis ],
+                [ "previous name [tree level]", prevName && prevNameOk ? prevName[treeLevel] : "undefined" ]
             ]);
             //
             // Check if we're in a state to create a new group.
@@ -234,7 +233,6 @@ export class TaskTreeGrouper
                 //
                 const id = TaskFile.getGroupedId(folder, taskFile, label, treeLevel);
                 subfolder = subfolders[id];
-
                 if (!subfolder)
                 {   //
                     // Create the new node, add it to the list of nodes to add to the tree.  We must
@@ -244,7 +242,6 @@ export class TaskTreeGrouper
                     subfolder = new TaskFile(folder, each.task.definition, taskFile.taskSource,
                                              each.taskFile.path, treeLevel, id, prevName[treeLevel], logPad);
                     subfolders[id] = subfolder;
-                    this.setNodePath(prevTaskItem, taskFile, each.nodePath, treeLevel, atMaxLevel, prevName, logPad + "   ", logLevel + 2);
                     //
                     // Since we add the grouping when we find two or more equal group names, we are iterating
                     // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the
@@ -253,8 +250,6 @@ export class TaskTreeGrouper
                     subfolder.addTreeNode(prevTaskItem); // addScript will set the group level on the TaskItem
                     newNodes.push(subfolder);
                 }
-
-                this.setNodePath(each, taskFile, each.nodePath, treeLevel, atMaxLevel, prevName, logPad + "   ", logLevel + 2);
                 subfolder.addTreeNode(each); // addScript will set the group level on the TaskItem
             }
 
@@ -422,31 +417,6 @@ export class TaskTreeGrouper
                 await this.renameGroupedTasks(each2);
             }
         }
-    };
-
-
-    private setNodePath = (ti: TaskItem | undefined, taskFile: TaskFile, cPath: string, treeLevel: number, atMaxLevel: boolean, prevName: string[], logPad: string, logLevel: number) =>
-    {
-        const w = this.wrapper;
-        w.utils.execIf(!!ti && !atMaxLevel && !!prevName, (_v, t, p) =>
-        {
-            w.log.write("setting node path", logLevel, logPad);
-            w.log.value("   current", t.nodePath, logLevel, logPad);
-            /* istanbul ignore if */
-            if (!t.nodePath && taskFile.taskSource === "Workspace")
-            {   //
-                // Reference Ticket #?. Fixes never ending loop with specific case VSCode tasks.
-                //
-                t.nodePath = join(".vscode", p[treeLevel]);
-            }
-            else if (!t.nodePath) {
-                t.nodePath = p[treeLevel];
-            }
-            else {
-                t.nodePath = join(cPath, p[treeLevel]);
-            }
-            w.log.value("   new", t.nodePath, logLevel, logPad);
-        }, this, ti, prevName);
     };
 
 

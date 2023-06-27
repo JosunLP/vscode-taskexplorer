@@ -46,7 +46,7 @@ export const findJsonDocumentPosition = (documentText: string, taskName: string,
 };
 
 
-export const findDocumentPosition = (wrapper: TeWrapper, document: TextDocument, taskItem: TaskItem, logPad = ""): number =>
+export const findDocumentPosition = (wrapper: TeWrapper, document: TextDocument, taskItem: TaskItem, logPad: string): number =>
 {
     let scriptOffset = 0;
     const documentText = document.getText();
