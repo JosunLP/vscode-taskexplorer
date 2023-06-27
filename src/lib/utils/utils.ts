@@ -15,7 +15,7 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
-export const execIf = <T, R = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: any[]) => R | PromiseLike<R>, thisArg?: any, ...args: any[]): R | PromiseLike<R> | undefined | void =>
+export const execIf = <T, R = any | PromiseLike<any>>(checkValue: T | undefined, ifFn: (arg: T, ...args: any[]) => R, thisArg?: any, ...args: any[]): R | undefined =>
 {
     let elseFn;
     if (isFunction(args[0])) {
@@ -29,7 +29,7 @@ export const execIf = <T, R = any>(checkValue: T | undefined, ifFn: (arg: T, ...
         return ifFn.call(thisArg, checkValue, ...args);
     }
     if (elseFn) {
-        return elseFn.call(thisArg, ...args.shift());
+        return elseFn.call(thisArg, ...args);
     }
 };
 

@@ -228,14 +228,11 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             // Remove any Workspace type tasks returned as well, in this case the source type is
             // != _currentInvalidation, but the definition type == _currentInvalidation
             //
-            if (invalidation && item.source === invalidation || item.source === "Workspace")
+            if (invalidation && (item.source === invalidation || (item.source === "Workspace" && item.definition.type === invalidation)))
             {
-                if (item.source !== "Workspace" || item.definition.type === invalidation)
-                {
-                    this._tasks.splice(object.length - 1 - index, 1);
-                    this.wrapper.log.write(`      removed task '${item.source}/${item.name}'`, 3, logPad);
-                    ++ctRmv;
-                }
+                this._tasks.splice(object.length - 1 - index, 1);
+                this.wrapper.log.write(`      removed task '${item.source}/${item.name}'`, 3, logPad);
+                ++ctRmv;
             }
             //
             // Remove User tasks if they're not enabled

@@ -39,7 +39,7 @@ export const getInstallPathSync = (): string =>
 
 export const getPortableDataPath = (logPad = ""): string | undefined =>
 {
-    execIf(process.env.VSCODE_PORTABLE, (portablePath) =>
+    return execIf(process.env.VSCODE_PORTABLE, (portablePath) =>
     {
         const uri = Uri.parse(portablePath);
         if (pathExistsSync(uri.fsPath))
@@ -51,7 +51,6 @@ export const getPortableDataPath = (logPad = ""): string | undefined =>
             }, log.error, this);
         }
     }, this);
-    return;
 };
 
 
@@ -69,12 +68,10 @@ export const getTaskAbsolutePath = (task: Task): string => join((<WorkspaceFolde
 export const getTaskRelativePath = (task: Task): string =>
 {
     let relativePath = <string>task.definition.path ?? "";
-    if (task.source === "tsc" && isWorkspaceFolder(task.scope))
+    if (task.source === "tsc" && isWorkspaceFolder(task.scope) && (/ \- [a-z0-9_\- ]+\/tsconfig\.[a-z\.\-_]*json$/i).test(task.name))
     {
-        if (task.name.includes(" - ")  && !task.name.includes(" - tsconfig.json")) // !(/ \- tsconfig\.[a-z\.\-_]+json$/i).test(task.name))
-        {
-            relativePath = dirname(task.name.substring(task.name.indexOf(" - ") + 3));
-        }
+        relativePath = dirname(task.name.substring(task.name.indexOf(" - ") + 3));
+        // relativePath = dirname(task.definition.tsconfig);
     }
     return relativePath;
 };

@@ -431,6 +431,37 @@ suite("Util Tests", () =>
 		expect(teWrapper.commonUtils.properCase(undefined)).to.equal("");
 		expect(teWrapper.commonUtils.properCase("")).to.equal("");
 		//
+		// Type utils
+		//
+		expect(teWrapper.typeUtils.isPrimitive(33)).to.be.equal(true);
+		expect(teWrapper.typeUtils.isArray([], false)).to.be.equal(false);
+		expect(teWrapper.typeUtils.isArray([])).to.be.equal(true);
+		expect(teWrapper.typeUtils.isArray([ 1 ], false)).to.be.equal(true);
+		// expect(teWrapper.typeUtils.isError(33)).to.be.equal(false);
+		// expect(teWrapper.typeUtils.isError(33)).to.be.equal(false);
+		// expect(teWrapper.typeUtils.isError(new Error("Test"))).to.be.equal(true);
+		// expect(teWrapper.typeUtils.isDate(33)).to.be.equal(false);
+		// expect(teWrapper.typeUtils.isDate(new Date())).to.be.equal(true);
+		expect(teWrapper.typeUtils.isObjectEmpty(null)).to.be.equal(true);
+		expect(teWrapper.typeUtils.asArray(1, true)).to.be.an("array").with.length(1);
+		expect(teWrapper.typeUtils.asArray(1)).to.be.an("array").with.length(1);
+		expect(teWrapper.typeUtils.asArray([ 1, 2, 3 ], true)).to.be.an("array").with.length(3);
+		expect(teWrapper.typeUtils.asArray(undefined)).to.be.an("array").with.length(0);
+		expect(teWrapper.typeUtils.asArray("", false, true)).to.be.an("array").with.length(1);
+		expect(teWrapper.typeUtils.asArray("", false, false)).to.be.an("array").with.length(0);
+		expect(teWrapper.typeUtils.asArray("")).to.be.an("array").with.length(0);
+		// expect(teWrapper.typeUtils.asString("")).to.be.equal("");
+		// expect(teWrapper.typeUtils.asString(undefined)).to.be.equal("");
+		// expect(teWrapper.typeUtils.asString("test")).to.be.equal("test");
+		expect(teWrapper.typeUtils.isEmpty([])).to.be.equal(true);
+		expect(teWrapper.typeUtils.isEmpty("")).to.be.equal(true);
+		expect(teWrapper.typeUtils.isEmpty("", true)).to.be.equal(false);
+		expect(teWrapper.typeUtils.isPromise(null)).to.be.equal(false);
+		expect(teWrapper.typeUtils.isPromise(new Promise((r, j) => r(true)))).to.be.equal(true);
+		expect(teWrapper.typeUtils.isPromise(teWrapper.utils.sleep(5))).to.be.equal(true);
+		expect(teWrapper.typeUtils.isPromise({ dispose: () => {} })).to.be.equal(false);
+		expect(teWrapper.typeUtils.isPromise({ then: () => {} })).to.be.equal(true);
+		//
 		// wrap
 		//
 		teWrapper.utils.wrap(() => {});
@@ -800,6 +831,11 @@ suite("Util Tests", () =>
 		await teWrapper.fs.getDateModified(__dirname);
 		await teWrapper.fs.getDateModified("");
 		await teWrapper.fs.getDateModified(null as unknown as string);
+		teWrapper.fs.getDateModifiedSync(join(__dirname, "folder1", "folder2", "folder3"));
+		teWrapper.fs.getDateModifiedSync(join(__dirname, "hello.sh"));
+		teWrapper.fs.getDateModifiedSync(__dirname);
+		teWrapper.fs.getDateModifiedSync("");
+		teWrapper.fs.getDateModifiedSync(null as unknown as string);
 		try { await teWrapper.fs.writeFile(getWsPath("."), "its a dir"); } catch {}
 		try { teWrapper.fs.writeFileSync(getWsPath("."), "its a dir"); } catch {}
         endRollingCount(this);

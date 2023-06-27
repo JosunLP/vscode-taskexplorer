@@ -3,7 +3,7 @@ import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from "@env/hex";
-import { pathExistsSync } from "../lib/utils/fs";
+import { findFiles, pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
 import { basename, extname, join, resolve } from "path";
 import { ITaskDefinition, ITaskFile } from "../interface";
@@ -137,10 +137,10 @@ export class TaskFile extends TreeItem implements ITaskFile
             this.nodePath = "";
         }
 
-        this.fileName = this.getFileNameFromSource(source, folder, taskDef, true);
-        this.resourceUri = Uri.file(resolve(this.fileName));
+        this.fileName = this.getFileNameFromSource(source, folder, taskDef, relativePath);
+
         /* istanbul ignore else */
-        if (folder.resourceUri)
+        if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
             if (relativePath && source !== "Workspace") {
                 this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, relativePath, this.fileName));
@@ -152,6 +152,7 @@ export class TaskFile extends TreeItem implements ITaskFile
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder
         //
         else {
+            this.fileName = this.getFileNameFromSource(source, folder, taskDef, relativePath);
             this.resourceUri = Uri.file(join(getUserDataPath(undefined, logPad), this.fileName));
             this.isUser = true;
         }
@@ -166,7 +167,7 @@ export class TaskFile extends TreeItem implements ITaskFile
             this.fileName = "group"; // change to name of directory
             // Use a custom toolip (default is to display resource uri)
             const taskName = getTaskTypeFriendlyName(source, true);
-            this.tooltip = `A tree item representing a ${taskName} task file grouping`;
+            this.tooltip = `${taskName} task file grouping`;
             this.contextValue = "taskGroup" + properCase(this.taskSource);
             this.groupLevel = groupLevel;
         }
@@ -280,8 +281,7 @@ export class TaskFile extends TreeItem implements ITaskFile
                     return (label + " (" + taskDef.fileName.toLowerCase() + ")");
                 }
             }
-
-            if (source === "apppublisher")
+            else if (source === "apppublisher")
             {   //
                 // For ap files in the same dir, nsamed with a tag, e.g.:
                 //    .publishrc.spm.json
@@ -293,8 +293,7 @@ export class TaskFile extends TreeItem implements ITaskFile
                     return (label + " (" + match[1].toLowerCase() + ")");
                 }
             }
-
-            if (source === "webpack")
+            else if (source === "webpack")
             {   //
                 // For ap files in the same dir, nsamed with a tag, e.g.:
                 //    webpack.config.dev.json
@@ -330,16 +329,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     }
 
 
-    /**
-     * @method addTreeNode
-     * @private
-     *
-     * @param treeNode The node/item to add to this TaskFile node.
-     *
-     * @returns File name
-     */
-    // Note:  Making this function private bombs the types
-    public getFileNameFromSource(source: string, folder: TaskFolder, taskDef: ITaskDefinition, incRelPathForCode?: boolean)
+    private getFileNameFromSource(source: string, folder: TaskFolder, taskDef: ITaskDefinition, relativePath: string)
     {   //
         // Any tasks provided by this extension will have a "fileName" definition. External tasks
         // registered throughthe API also define fileName
@@ -354,13 +344,14 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         let fileName = "package.json";
         if (source === "Workspace")
-        {
-            fileName = "tasks.json"; // // note:  user task has no resourceUri
-            execIf(incRelPathForCode === true && folder.resourceUri, () => { fileName = ".vscode/tasks.json"; }, this);
+        {   //
+            // Note that user task do not have a resourceUri property set
+            //
+            execIf(folder.resourceUri, () => { fileName = ".vscode/tasks.json"; }, this, () => { fileName = "tasks.json"; });
         }
         else if (source === "tsc")
         {
-            fileName = "tsconfig.json";
+            fileName = basename(taskDef.tsconfig);
         }
         return fileName;
     }

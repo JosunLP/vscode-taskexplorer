@@ -124,19 +124,20 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
 
     public async invalidate(uri?: Uri, logPad?: string): Promise<void>
     {
-        const cachedTasks = this.cachedTasks as Task[];
+        const w = this.wrapper,
+              cachedTasks = this.cachedTasks as Task[];
         //
         // Note that 'taskType' may be different than 'this.providerName' for 'script' type tasks (e.g.
         // batch, bash, python, etc...)
         //
-        this.wrapper.log.methodStart(`invalidate ${this.providerName} tasks cache`, 1, logPad, false, [
+        w.log.methodStart(`invalidate ${this.providerName} tasks cache`, 1, logPad, false, [
             [ "uri", uri?.path ], [ "current # of cached tasks", cachedTasks.length ]
         ]);
 
-        const enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName) && (this.providerName !== "npm" || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.UseNpmProvider));
+        const enabled = w.utils.isTaskTypeEnabled(this.providerName) && (this.providerName !== "npm" || w.config.get<boolean>(w.keys.Config.UseNpmProvider));
         if (enabled && uri)
         {
-            const pathExists = this.wrapper.fs.pathExistsSync(uri.fsPath) && !!workspace.getWorkspaceFolder(uri) ;
+            const pathExists = w.fs.pathExistsSync(uri.fsPath) && !!workspace.getWorkspaceFolder(uri) ;
             //
             // Remove tasks of type '' from the 'tasks'array
             //
@@ -144,7 +145,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             {
                 if (this.needsRemoval(item, uri) && (item.source !== "Workspace" || /* istanbul ignore next */item.definition.type === this.providerName))
                 {
-                    this.wrapper.log.write(`   removing cached task '${item.source}/${item.name}'`, 4, logPad);
+                    w.log.write(`   removing cached task '${item.source}/${item.name}'`, 4, logPad);
                     (this.cachedTasks as Task[]).splice(object.length - 1 - index, 1);
                 }
             });
@@ -154,9 +155,9 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             // the the tree ui.  The check for excluded path patterns also found in the `excludes` array
             // is done by the file caching layer.
             //
-            if (pathExists && !this.wrapper.fs.isDirectory(uri.fsPath) && !this.wrapper.config.get<string[]>("exclude", []).includes(uri.path))
+            if (pathExists && !w.fs.isDirectory(uri.fsPath) && !w.config.get<string[]>("exclude", []).includes(uri.path))
             {
-                const tasks = (await this.readUriTasks(uri, logPad + "   ")).filter(t => isTaskIncluded(this.wrapper, t, t.definition.path));
+                const tasks = (await this.readUriTasks(uri, logPad + "   ")).filter(t => isTaskIncluded(w, t, t.definition.path));
                 cachedTasks.push(...tasks);
             }
 
@@ -166,7 +167,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             this.cachedTasks = undefined;
         }
 
-        this.wrapper.log.methodDone(`invalidate ${this.providerName} tasks cache`, 1, logPad, [
+        w.log.methodDone(`invalidate ${this.providerName} tasks cache`, 1, logPad, [
             [ "new # of cached tasks", this.cachedTasks ? this.cachedTasks.length : 0 ]
         ]);
     }
@@ -176,19 +177,19 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
     {
         const cstDef = item.definition;
         return !!(cstDef.uri &&
-                 (cstDef.uri.fsPath === uri.fsPath || !this.wrapper.fs.pathExistsSync(cstDef.uri.fsPath) || !workspace.getWorkspaceFolder(uri) ||
-                 //
-                 // If the directory wasdeleted, then isDirectory() fails, so for now rely on the fact
-                 // that of the path doesn't have an extension, it's probably a directory.  FileWatcher
-                 // does the same thing right now, ~ line 332.
-                 //
-                 // Might not even need this?  Depends if we remove when modify/add and I don't feel like
-                 // looking right now.  Harmless but the less calls the better.
-                 //
-                 // (cstDef.uri.fsPath.startsWith(uri.fsPath) && /* istanbul ignore next */isDirectory(uri.fsPath)) ||
-                 (cstDef.uri.fsPath.startsWith(uri.fsPath) && /* istanbul ignore next */!extname(uri.fsPath) /* ouch */) ||
-                 //
-                 !isTaskIncluded(this.wrapper, item, cstDef.uri.path)));
+            (cstDef.uri.fsPath === uri.fsPath || !this.wrapper.fs.pathExistsSync(cstDef.uri.fsPath) || !workspace.getWorkspaceFolder(uri) ||
+            //
+            // If the directory wasdeleted, then isDirectory() fails, so for now rely on the fact
+            // that of the path doesn't have an extension, it's probably a directory.  FileWatcher
+            // does the same thing right now, ~ line 332.
+            //
+            // Might not even need this?  Depends if we remove when modify/add and I don't feel like
+            // looking right now.  Harmless but the less calls the better.
+            //
+            // (cstDef.uri.fsPath.startsWith(uri.fsPath) && /* istanbul ignore next */isDirectory(uri.fsPath)) ||
+            (cstDef.uri.fsPath.startsWith(uri.fsPath) && /* istanbul ignore next */!extname(uri.fsPath) /* ouch */) ||
+            //
+            !isTaskIncluded(this.wrapper, item, cstDef.uri.path)));
     }
 
 }

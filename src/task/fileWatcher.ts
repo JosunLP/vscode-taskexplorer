@@ -182,7 +182,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             const msIndicatingModify = 4000,
                   modified = w.fs.getDateModifiedSync(uri.fsPath),
                   diff = w.utils.getDateDifference(modified, Date.now());
-            if (diff < msIndicatingModify)
+            w.utils.execIf(diff < msIndicatingModify, () =>
             {
                 void w.eventQueue.queue(
                 {
@@ -196,7 +196,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
                     type: "change",
                     waitReady: true
                 });
-            }
+            }, this);
         }
         this.decrementSkipEvent(uri);
     };

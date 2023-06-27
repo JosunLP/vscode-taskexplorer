@@ -62,14 +62,15 @@ export type Primitive = boolean | number | string;
 
 export interface ITeTypeUtilities
 {
-    // asArray<T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[];
+    asArray<T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[];
 	// asObject<T>(v: T | undefined | null): T;
     // asString(v: string | undefined | null, defaultValue?: string): string;
-	isArray<T>(v: any): v is T[];
+    isArray<T>(v: any, allowEmp?: boolean): v is T[];
 	// isAsyncFunction<T = any>(fn: any): fn is () => PromiseLike<T>;
 	isBoolean(v: any): v is boolean;
     // isDate(v: any): v is Date;
 	// isDefined(v: any): boolean;
+    isEmpty(v: any, allowEmpStr?: boolean): v is null | undefined | "" | [];
 	isNumber(v: any): v is number;
     // isObject<T>(v: any, allowArray?: boolean): v is { [key: string]: T } ;
     isObject<T = IDictionary<any>>(v: any, allowArray?: boolean): v is T;
@@ -84,7 +85,7 @@ export interface ITeTypeUtilities
 export interface ITeUtilities
 {
 	cloneJsonObject<T>(jso: any): T;
-	execIf<T, R = any>(checkValue: T | undefined, runFn: (arg: T, ...args: any[]) => R | PromiseLike<R>, thisArg?: any, ...args: any[]): R | PromiseLike<R> | undefined | void;
+	execIf<T, R = any | PromiseLike<any>>(checkValue: T | undefined, runFn: (arg: T, ...args: any[]) => R, thisArg?: any, ...args: any[]): R | undefined;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;

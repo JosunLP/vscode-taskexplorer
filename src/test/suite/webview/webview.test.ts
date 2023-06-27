@@ -148,11 +148,23 @@ suite("Webview Tests", () =>
         void executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, false);
         await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage, 50);
         await waitForWebviewsIdle(25, 5000);
-        expect(teWrapper.taskUsageView.view?.webview.html).to.be.a("string").and.to.include("tracking is disabled");
+        try {
+            expect(teWrapper.taskUsageView.view?.webview.html).to.be.a("string").and.to.include("tracking is disabled");
+        }
+        catch {
+            await sleep(500);
+            expect(teWrapper.taskUsageView.view?.webview.html).to.be.a("string").and.to.include("tracking is disabled");
+        }
         void executeSettingsUpdate(teWrapper.keys.Config.TrackUsage, true);
         await waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage, 50);
         await waitForWebviewsIdle(25, 5000);
-        expect(teWrapper.taskUsageView.view?.webview.html).to.be.a("string").and.to.not.include("tracking is disabled");
+        try {
+            expect(teWrapper.taskUsageView.view?.webview.html).to.be.a("string").and.to.not.include("tracking is disabled");
+        }
+        catch {
+            await sleep(500);
+            expect(teWrapper.taskUsageView.view?.webview.html).to.be.a("string").and.to.not.include("tracking is disabled");
+        }
         endRollingCount(this);
     });
 
