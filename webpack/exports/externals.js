@@ -7,7 +7,9 @@
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 
-// const nodeExternals = require("webpack-node-externals");
+// eslint-disable-next-line import/no-extraneous-dependencies
+const nodeExternals = require("webpack-node-externals");
+
 
 /**
  * @method
@@ -21,6 +23,13 @@ const externals = (env, wpConfig) =>
 	if (env.build !== "tests")
 	{
 		wpConfig.externals = { vscode: "commonjs vscode" };
+	}
+	else {
+		wpConfig.externals = [
+			{ vscode: "commonjs vscode" },
+			// { nyc: "commonjs nyc" },
+			/** @type {import("webpack").WebpackPluginInstance}*/(nodeExternals())
+		];
 	}
 	// if (env.build === "webview")
 	// {
