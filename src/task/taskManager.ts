@@ -3,14 +3,11 @@ import { dirname } from "path";
 import { TaskFile } from "../tree/file";
 import { TaskItem } from "../tree/item";
 import { TeWrapper } from "../lib/wrapper";
-import { pathExists } from "../lib/utils/fs";
 import { PinnedStorageKey } from "../lib/constants";
-import { isScriptType } from "../lib/utils/taskUtils";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "./provider/script";
 import { registerCommand } from "../lib/command/command";
 import { TaskDetailsPage } from "../webview/page/taskDetails";
-import { getPackageManager, sleep } from "../lib/utils/utils";
 import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
 import { ILog, ITeTaskManager, ITeTask, TeTaskListType } from "../interface";
 import {
@@ -53,7 +50,6 @@ export class TaskManager implements ITeTaskManager, Disposable
     private open = async(selection: TaskItem, itemClick = false) =>
     {
         const clickAction = this.wrapper.config.get<string>(this.wrapper.keys.Config.TaskButtonsClickAction, "Open");
-
         //
         // As of v1.30.0, added option to change the entry item click to execute.  In order to avoid having
         // to re-register the handler when the setting changes, we just re-route the request here
@@ -62,7 +58,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             return this.run(selection);
         }
 
-        const uri = !isScriptType(selection.taskSource) ?
+        const uri = !this.wrapper.taskUtils.isScriptType(selection.taskSource) ?
                     selection.taskFile.resourceUri : Uri.file(selection.task.definition.uri.fsPath);
 
         this.log.methodStart("open document at position", 1, "", true, [
@@ -70,13 +66,15 @@ export class TaskManager implements ITeTaskManager, Disposable
             [ "uri path", uri.path ], [ "fs path", uri.fsPath ]
         ]);
 
-        await this.wrapper.utils.execIf(await pathExists(uri.fsPath), async () =>
+        await this.wrapper.utils.execIf(this.wrapper.fs.pathExistsSync(uri.fsPath), async () =>
         {
             const document: TextDocument = await workspace.openTextDocument(uri),
-                  offset = findDocumentPosition(this.wrapper, document, selection),
+                  offset = findDocumentPosition(this.wrapper, document, selection, "   "),
                   position = document.positionAt(offset);
             await window.showTextDocument(document, { selection: new Selection(position, position) });
         }, this);
+
+        this.log.methodDone("open document at position", 1);
     };
 
 
@@ -90,24 +88,18 @@ export class TaskManager implements ITeTaskManager, Disposable
 
         this.log.methodStart("pause", 1, "", true);
 
-        /* istanbul ignore else */
-        if (taskItem.task.execution)
+        this.wrapper.utils.execIf(taskItem.task.execution, () =>
         {
             const terminal = getTerminal(taskItem, "   ");
-            /* istanbul ignore else */
-            if (terminal)
+            this.wrapper.utils.execIf(terminal, (t) =>
             {
                 taskItem.paused = true;
                 this.log.value("   send to terminal", "\\u0003", 1);
-                terminal.sendText("\u0003");
-            }
-            else {
-                window.showInformationMessage("Terminal not found");
-            }
-        }
-        else {
-            window.showInformationMessage("Executing task not found");
-        }
+                t.sendText("\u0003");
+            },
+            this, window.showInformationMessage, "Terminal not found");
+        },
+        this, window.showInformationMessage, "Executing task not found");
 
         this.log.methodDone("pause", 1);
     };
@@ -229,7 +221,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     private runNpmCommand = async(taskFile: TaskFile, command: string) =>
     {
-        const pkgMgr = getPackageManager(),
+        const pkgMgr = this.wrapper.utils.getPackageManager(),
             uri = taskFile.resourceUri;
 
         const options = {
@@ -417,7 +409,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                     {
                         this.log.value("   send sequence to terminal", "\\u0003", 1);
                         terminal.sendText("\u0003");
-                        await sleep(50);
+                        await this.wrapper.utils.sleep(50);
                         this.log.value("   send to terminal", ctrlChar, 1);
                         // terminal = getTerminal(taskItem, "   ");
                         try {
