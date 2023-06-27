@@ -2,7 +2,7 @@
 import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
-import { isArray, isPromise, isString } from "./typeUtils";
+import { asArray, isArray, isFunction, isPromise, isString } from "./typeUtils";
 import { ConfigKeys } from "../../interface";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
@@ -15,12 +15,32 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
-export const execIf = <T, R = any>(checkValue: T | undefined, runFn: (arg: T, ...args: any[]) => R | PromiseLike<R>, thisArg?: any, ...args: any[]): R | PromiseLike<R> | undefined | void =>
+export const execIf = <T, R = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: any[]) => R | PromiseLike<R>, thisArg?: any, ...args: any[]): R | PromiseLike<R> | undefined | void =>
 {
-    if (checkValue) {
-        return runFn.call(thisArg, checkValue, ...args);
+    let elseFn;
+    if (isFunction(args[0])) {
+        elseFn = args.shift();
+    }
+    if (checkValue)
+    {
+        if (elseFn) {
+            return ifFn.call(thisArg, checkValue);
+        }
+        return ifFn.call(thisArg, checkValue, ...args);
+    }
+    if (elseFn) {
+        return elseFn.call(thisArg, ...args.shift());
     }
 };
+
+
+// export const execIfElse = <T, R = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: any[]) => R | PromiseLike<R>, elseFn: (...args: any[]) => R | PromiseLike<R>, thisArg?: any, ifArgs?: any[], elseArgs?: any[]): R | PromiseLike<R> | undefined | void =>
+// {
+//     if (checkValue) {
+//         return ifFn.call(thisArg, checkValue, ...asArray(ifArgs));
+//     }
+//     return elseFn.call(this, ...asArray(elseArgs));
+// };
 
 
 export const formatDate = (epochMs: number, format?: "datetime" | "date" | "time") =>
