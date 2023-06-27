@@ -25,9 +25,7 @@ export const getGlobPattern = (taskType: string) =>
 };
 
 
-export const getScriptTaskTypes = (): string[] => [
-    "bash", "batch", "node", "nsis", "perl", "powershell", "python", "ruby"
-];
+export const getScriptTaskTypes = (): string[] => [ "bash", "batch", "node", "nsis", "perl", "powershell", "python", "ruby" ];
 
 
 /**

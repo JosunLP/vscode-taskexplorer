@@ -2,11 +2,11 @@
 import { Uri, WorkspaceFolder } from "vscode";
 import { IDictionary, Primitive } from "../../interface";
 
-// /**
-//  * @param v Variable to check to see if it's an array
-//  * @param shallow If `true`, and  `arr` is an array, return a shallow copy
-//  */
-// export const asArray = <T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[] => (isArray<T>(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
+/**
+ * @param v Variable to check to see if it's an array
+ * @param shallow If `true`, and  `arr` is an array, return a shallow copy
+ */
+export const asArray = <T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[] => (isArray<T>(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
 
 
 // export const asObject = <T>(v: T | undefined | null): T => isObject<T>(v) ? v : <T>{};
@@ -15,7 +15,7 @@ import { IDictionary, Primitive } from "../../interface";
 // export const asString = (v: string | undefined | null, defaultValue = ""): string => isString(v) ? v : defaultValue;
 
 
-export const isArray = <T>(v: any): v is T[] => !!v && Array.isArray(v);
+export const isArray = <T>(v: any, allowEmp?: boolean): v is T[] => !!v && Array.isArray(v) && (allowEmp !== false || v.length > 0);
 
 
 // export const isAsyncFunction = <T = any>(fn: any): fn is () => PromiseLike<T> => types.isAsyncFunction(fn);
@@ -28,6 +28,9 @@ export const isBoolean = (v: any): v is boolean => (v === false || v === true) &
 
 
 // export const isDefined = (v: any) => typeof v !== "undefined";
+
+
+export const isEmpty = (v: any, allowEmpStr?: boolean): v is null | undefined | "" | [] => v === null || v === undefined || (!allowEmpStr ? v === "" : false) || (isArray(v) && v.length === 0);
 
 
 export const isError = (e: any): e is Error => e instanceof Error;

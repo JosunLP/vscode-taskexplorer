@@ -4,7 +4,7 @@
 		"jsx": "react",
 		"outDir": "../../",
 		// "rootDir": "../..",
-		"tsBuildInfoFile": "../../../.vscode/tsconfig.webapp.tsbuildinfo",
+		"tsBuildInfoFile": "./tsconfig.tsbuildinfo",
 		"useDefineForClassFields": false,
 		"lib": [
 			"DOM", "DOM.Iterable", "ES2020"

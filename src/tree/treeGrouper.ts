@@ -162,50 +162,18 @@ export class TaskTreeGrouper
      */
     private createTaskGroupingsBySep = async(folder: TaskFolder, taskFile: TaskFile, subfolders: IDictionary<TaskFile>, treeLevel: number, logPad: string, logLevel: number) =>
     {
+        const w = this.wrapper,
+              newNodes: TaskFile[] = [],
+              groupSeparator = w.utils.getGroupSeparator(),
+              atMaxLevel: boolean = w.config.get<number>(w.keys.Config.GroupMaxLevel) <= treeLevel + 1;
+
         let prevName: string[] | undefined,
             prevTaskItem: TaskItem | undefined;
-        const newNodes: TaskFile[] = [],
-              groupSeparator = this.wrapper.utils.getGroupSeparator(),
-              atMaxLevel: boolean = this.wrapper.config.get<number>(this.wrapper.keys.Config.GroupMaxLevel) <= treeLevel + 1;
 
-        const _splitLabel = (lbl: string, item: TaskItem) =>
-        {
-            const lblParts = lbl.split(groupSeparator);
-            if (lblParts.length >= 2 && item.taskSource === "tsc" && (/ \- tsconfig\.[a-z\.\-_]+json$/i).test(lbl))
-            {
-                const lastPart = <string>lblParts.pop();
-                lblParts[lblParts.length - 1] = `${lblParts[lblParts.length - 1].trimEnd()} (${lastPart.trimStart()})`;
-            }
-            return lblParts;
-        };
-
-        this.wrapper.log.methodStart("create task groupings by separator", logLevel, logPad, true, [
+        w.log.methodStart("create task groupings by separator", logLevel, logPad, true, [
             [ "folder", folder.label ], [ "label (node name)", taskFile.label ], [ "grouping level", treeLevel ], [ "is group", taskFile.isGroup ],
             [ "file name", taskFile.fileName ], [ "folder", folder.label ], [ "path", taskFile.path ], [ "tree level", treeLevel ]
         ]);
-
-        const _setNodePath = (ti: TaskItem | undefined, cPath: string) =>
-        {
-            this.wrapper.utils.execIf(!!ti && !atMaxLevel && !!prevName, (_v, t, p) =>
-            {
-                this.wrapper.log.write("   setting node path", logLevel + 2, logPad);
-                this.wrapper.log.value("      current", t.nodePath, logLevel + 2, logPad);
-                /* istanbul ignore if */
-                if (!t.nodePath && taskFile.taskSource === "Workspace")
-                {   //
-                    // Reference Ticket #?. Fixes never ending loop with specific case VSCode tasks.
-                    //
-                    t.nodePath = join(".vscode", p[treeLevel]);
-                }
-                else if (!t.nodePath) {
-                    t.nodePath = p[treeLevel];
-                }
-                else {
-                    t.nodePath = join(cPath, p[treeLevel]);
-                }
-                this.wrapper.log.value("      new", t.nodePath, logLevel + 2, logPad);
-            }, this, ti, prevName);
-        };
 
         for (const each of taskFile.treeNodes)
         {
@@ -214,11 +182,11 @@ export class TaskTreeGrouper
             }
             let subfolder: TaskFile | undefined;
             const label = each.label.toString(),
-                  prevNameThis = _splitLabel(label, each),
+                  prevNameThis = this.splitLabel(label, groupSeparator, each),
                   prevNameOk = prevName && prevName.length > treeLevel && prevName[treeLevel];
 
-            this.wrapper.log.write("   process task item", logLevel + 1, logPad);
-            this.wrapper.log.values(logLevel + 2, logPad + "      ", [
+            w.log.write("   process task item", logLevel + 1, logPad);
+            w.log.values(logLevel + 2, logPad + "      ", [
                 [ "id", each.id ], [ "label", label ], [ "node path", each.nodePath ], [ "command", each.command.command ],
                 [ "previous name [tree level]", prevName && prevNameOk ? prevName[treeLevel] : "undefined" ],
                 [ "this previous name", prevNameThis ]
@@ -249,7 +217,7 @@ export class TaskTreeGrouper
                 for (let i = 0; i <= treeLevel; i++)
                 {
                     if (prevName[i] === prevNameThis[i]) {
-                        this.wrapper.log.write("   found group", 4, logPad);
+                        w.log.write("   found group", 4, logPad);
                         foundGroup = true;
                     }
                     else {
@@ -276,7 +244,7 @@ export class TaskTreeGrouper
                     subfolder = new TaskFile(folder, each.task.definition, taskFile.taskSource,
                                              each.taskFile.path, treeLevel, id, prevName[treeLevel], logPad);
                     subfolders[id] = subfolder;
-                    _setNodePath(prevTaskItem, each.nodePath);
+                    this.setNodePath(prevTaskItem, taskFile, each.nodePath, treeLevel, atMaxLevel, prevName, logPad + "   ", logLevel + 2);
                     //
                     // Since we add the grouping when we find two or more equal group names, we are iterating
                     // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the
@@ -286,7 +254,7 @@ export class TaskTreeGrouper
                     newNodes.push(subfolder);
                 }
 
-                _setNodePath(each, each.nodePath);
+                this.setNodePath(each, taskFile, each.nodePath, treeLevel, atMaxLevel, prevName, logPad + "   ", logLevel + 2);
                 subfolder.addTreeNode(each); // addScript will set the group level on the TaskItem
             }
 
@@ -305,14 +273,14 @@ export class TaskTreeGrouper
             for (const n of newNodes)
             {
                 taskFile.insertTreeNode(n, numGrouped++);
-                await this.wrapper.utils.execIf(!atMaxLevel, async () =>
+                await w.utils.execIf(!atMaxLevel, async () =>
                 {
                     await this.createTaskGroupingsBySep(folder, n, subfolders, treeLevel + 1, logPad + "   ", logLevel + 1);
                 }, this);
             }
         }
 
-        this.wrapper.log.methodDone("create task groupings by separator", logLevel, logPad);
+        w.log.methodDone("create task groupings by separator", logLevel, logPad);
     };
 
 
@@ -454,6 +422,43 @@ export class TaskTreeGrouper
                 await this.renameGroupedTasks(each2);
             }
         }
+    };
+
+
+    private setNodePath = (ti: TaskItem | undefined, taskFile: TaskFile, cPath: string, treeLevel: number, atMaxLevel: boolean, prevName: string[], logPad: string, logLevel: number) =>
+    {
+        const w = this.wrapper;
+        w.utils.execIf(!!ti && !atMaxLevel && !!prevName, (_v, t, p) =>
+        {
+            w.log.write("setting node path", logLevel, logPad);
+            w.log.value("   current", t.nodePath, logLevel, logPad);
+            /* istanbul ignore if */
+            if (!t.nodePath && taskFile.taskSource === "Workspace")
+            {   //
+                // Reference Ticket #?. Fixes never ending loop with specific case VSCode tasks.
+                //
+                t.nodePath = join(".vscode", p[treeLevel]);
+            }
+            else if (!t.nodePath) {
+                t.nodePath = p[treeLevel];
+            }
+            else {
+                t.nodePath = join(cPath, p[treeLevel]);
+            }
+            w.log.value("   new", t.nodePath, logLevel, logPad);
+        }, this, ti, prevName);
+    };
+
+
+    private splitLabel = (lbl: string, groupSeparator: string, item: TaskItem) =>
+    {
+        const lblParts = lbl.split(groupSeparator);
+        if (lblParts.length >= 2 && item.taskSource === "tsc" && (/ \- tsconfig\.[a-z\.\-_]+json$/i).test(lbl))
+        {
+            const lastPart = <string>lblParts.pop();
+            lblParts[lblParts.length - 1] = `${lblParts[lblParts.length - 1].trimEnd()} (${lastPart.trimStart()})`;
+        }
+        return lblParts;
     };
 
 }
