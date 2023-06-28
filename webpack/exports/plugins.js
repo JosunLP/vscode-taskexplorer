@@ -1,9 +1,12 @@
+/* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
 /**
  * @module webpack.exports.plugins
  */
 
+const webpack = require("webpack");
+const clean = require("../plugin/clean");
 const ignore = require("../plugin/ignore");
 const webviewApps = require("../webviewApps");
 const { wpPlugin } = require("../plugin/plugins");
@@ -21,7 +24,8 @@ const { wpPlugin } = require("../plugin/plugins");
 const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [
-		wpPlugin.clean(env, wpConfig),
+		new webpack.ProgressPlugin(),
+		clean(env, wpConfig),
 		wpPlugin.beforecompile(env, wpConfig),
 		ignore(env, wpConfig),
 		...wpPlugin.tscheck(env, wpConfig)

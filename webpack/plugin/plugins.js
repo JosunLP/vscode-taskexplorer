@@ -11,7 +11,6 @@ const CopyPlugin = require("copy-webpack-plugin");
 const HtmlPlugin = require("html-webpack-plugin");
 const CspHtmlPlugin = require("csp-html-webpack-plugin");
 const VisualizerPlugin = require("webpack-visualizer-plugin2");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
@@ -232,52 +231,6 @@ const wpPlugin =
 					});
 				}
 			};
-		}
-		return plugin;
-	},
-
-
-	/**
-	 * @param {WebpackEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {CleanWebpackPlugin | undefined}
-	 */
-	clean: (env, wpConfig) =>
-	{
-		let plugin;
-		if (env.clean === true)
-		{
-			if (env.build === "webview")
-			{
-				const basePath = path.posix.join(env.buildPath.replace(/\\/g, "/"), "res");
-				plugin = new CleanWebpackPlugin(
-				{
-					dry: false,
-					dangerouslyAllowCleanPatternsOutsideProject: true,
-					cleanOnceBeforeBuildPatterns: [
-						path.posix.join(basePath, "css", "**"),
-						path.posix.join(basePath, "js", "**"),
-						path.posix.join(basePath, "page", "**")
-					]
-				});
-			}
-			else
-			{
-				plugin = new CleanWebpackPlugin(
-				{
-					dry: false,
-					dangerouslyAllowCleanPatternsOutsideProject: true,
-					cleanOnceBeforeBuildPatterns: wpConfig.mode === "production" ? [
-						path.posix.join(env.buildPath.replace(/\\/g, "/"), "dist", "**"),
-						path.posix.join(env.buildPath.replace(/\\/g, "/"), ".coverage", "**"),
-						path.posix.join(env.buildPath.replace(/\\/g, "/"), ".nyc-output", "**"),
-						"!dist/webview/app/**"
-					] : [
-						path.posix.join(env.buildPath.replace(/\\/g, "/"), "dist", "**"),
-						"!dist/webview/app/**"
-					]
-				});
-			}
 		}
 		return plugin;
 	},
