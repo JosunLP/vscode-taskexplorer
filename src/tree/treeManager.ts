@@ -2,10 +2,10 @@
 import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
-import { getMd5 } from "@env/crypto";
+import { getMd5 } from ":env/crypto";
 import { TaskFolder } from "./folder";
 import { TeTreeView } from "./treeView";
-import { encodeUtf8Hex } from "@env/hex";
+import { encodeUtf8Hex } from ":env/hex";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeBuilder } from "./treeBuilder";

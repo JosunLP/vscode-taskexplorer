@@ -1,6 +1,6 @@
 
 import { workspace } from "vscode";
-import { encodeUtf8Hex } from "@env/hex";
+import { encodeUtf8Hex } from ":env/hex";
 import { ConfigKeys, IConfiguration, IStorage, StorageTarget } from "../interface";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./utils/taskUtils";
 

@@ -5,7 +5,7 @@
 		"rootDir": "src",
 		"tsBuildInfoFile": ".vscode/tsconfig.tsbuildinfo",
         "paths": {
-			"@env/*": [ "src/lib/env/node/*" ]
+			":env/*": [ "src/lib/env/node/*" ]
 		}
     },
     "exclude": [

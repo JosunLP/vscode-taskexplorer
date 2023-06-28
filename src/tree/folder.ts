@@ -1,7 +1,7 @@
 
 import { TaskItem } from "./item";
 import { TaskFile } from "./file";
-import { encodeUtf8Hex } from "@env/hex";
+import { encodeUtf8Hex } from ":env/hex";
 import { ITaskFolder } from "../interface";
 import { isString } from "../lib/utils/typeUtils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "vscode";

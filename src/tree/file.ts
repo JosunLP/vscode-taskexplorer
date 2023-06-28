@@ -2,7 +2,7 @@
 import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder }  from "./folder";
-import { encodeUtf8Hex } from "@env/hex";
+import { encodeUtf8Hex } from ":env/hex";
 import { findFiles, pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
 import { basename, extname, join, resolve } from "path";

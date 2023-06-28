@@ -2,7 +2,7 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
-import { getUuid } from "@env/crypto";
+import { getUuid } from ":env/crypto";
 import { TeContext } from "./context";
 import { logControl } from "./log/log";
 import { figures } from "./utils/figures";

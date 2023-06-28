@@ -4,7 +4,7 @@ import { TaskFile } from "./file";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
 import { ITaskItem } from "../interface";
-import { encodeUtf8Hex } from "@env/hex";
+import { encodeUtf8Hex } from ":env/hex";
 import { Strings } from "../lib/constants";
 import { configuration } from "../lib/configuration";
 import { getInstallPathSync } from "../lib/utils/pathUtils";

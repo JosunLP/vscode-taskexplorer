@@ -8,7 +8,7 @@
  * concepts that got my super-praise (4th time ever) and thus used in Task Explorer as a starting point.
  */
 
-import { getNonce } from "@env/crypto";
+import { getNonce } from ":env/crypto";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewView } from "./webviewView";

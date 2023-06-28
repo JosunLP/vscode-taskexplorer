@@ -2,7 +2,7 @@
 
 import { env } from "vscode";
 import { request } from "https";
-// import fetch from "@env/fetch";
+// import fetch from ":env/fetch";
 import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "../utils/figures";

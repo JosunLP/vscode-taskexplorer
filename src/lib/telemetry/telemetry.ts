@@ -1,6 +1,6 @@
 export default {};
-// // import { getProxyAgent } from "@env/fetch";
-// // import { getPlatform } from "@env/platform";
+// // import { getProxyAgent } from ":env/fetch";
+// // import { getPlatform } from ":env/platform";
 // import { getProxyAgent } from "../env/node/fetch";
 // import { getPlatform } from "../env/node/platform";
 // import type { TeWrapper } from "../container";
