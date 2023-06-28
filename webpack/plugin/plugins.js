@@ -586,8 +586,8 @@ const wpPlugin =
 				//
 				/** @type {any} */moduleFilenameTemplate: (/** @type {any} */info) =>
 				{
-					if ((/[\" ]/).test(info.absoluteResourcePath)) {
-						return info.absoluteResourcePath.replace(/\"/g, "").replace(/ /g, "_");
+					if ((/[\" \|]/).test(info.absoluteResourcePath)) {
+						return info.absoluteResourcePath.replace(/\"/g, "").replace(/[ \|]/g, "_");
 					}
 					return `${info.absoluteResourcePath}`;
 				}
