@@ -5,9 +5,11 @@
  * @module webpack.exports.plugins
  */
 
-const webpack = require("webpack");
 const clean = require("../plugin/clean");
 const ignore = require("../plugin/ignore");
+const progress = require("../plugin/progress");
+const sourcemaps = require("../plugin/sourcemaps");
+const tscheck = require("../plugin/tscheck");
 const webviewApps = require("../webviewApps");
 const { wpPlugin } = require("../plugin/plugins");
 
@@ -24,11 +26,11 @@ const { wpPlugin } = require("../plugin/plugins");
 const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [
-		new webpack.ProgressPlugin(),
+		progress(env, wpConfig),
 		clean(env, wpConfig),
 		wpPlugin.beforecompile(env, wpConfig),
 		ignore(env, wpConfig),
-		...wpPlugin.tscheck(env, wpConfig)
+		...tscheck(env, wpConfig)
 	];
 
 	if (env.build !== "tests")
@@ -49,7 +51,7 @@ const plugins = (env, wpConfig) =>
 		else
 		{
 			wpConfig.plugins.push(
-				wpPlugin.sourcemaps(env, wpConfig),
+				sourcemaps(env, wpConfig),
 				wpPlugin.limitchunks(env, wpConfig),
 				wpPlugin.copy([], env, wpConfig),
 				wpPlugin.analyze.bundle(env, wpConfig),

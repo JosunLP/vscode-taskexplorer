@@ -12,7 +12,6 @@ const HtmlPlugin = require("html-webpack-plugin");
 const CspHtmlPlugin = require("csp-html-webpack-plugin");
 const VisualizerPlugin = require("webpack-visualizer-plugin2");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
@@ -507,57 +506,6 @@ const wpPlugin =
 	},
 
 
-	/**
-	 * @param {WebpackEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {webpack.SourceMapDevToolPlugin | undefined}
-	 */
-	sourcemaps: (env, wpConfig) =>
-	{
-		let plugin;
-		if (env.build !== "webview" && wpConfig.mode !== "production" && env.build !== "tests")
-		{
-			const options = {
-				test: /\.(js|jsx)($|\?)/i,
-				exclude: /((vendor|runtime)\.js|node_modules)/,
-				filename: "[name].js.map",
-				// moduleFilenameTemplate: ".[resource-path]",
-				// moduleFilenameTemplate: '[absolute-resource-path]',
-				fallbackModuleFilenameTemplate: "[absolute-resource-path]?[hash]",
-				// fileContext: "..",
-				//
-				// The bundled node_modules will produce reference tags within the main entry point
-				// files in the form:
-				//
-				//     external commonjs "vscode"
-				//     external-node commonjs "crypto"
-				//     ...etc...
-				//
-				// This breaks the istanbul reporting library when the tests have completed and the
-				// coverage report is being built (via nyc.report()).  Replace the quote and space
-				// characters in this external reference name with filename firiendly characters.
-				//
-				/** @type {any} */moduleFilenameTemplate: (/** @type {any} */info) =>
-				{
-					if ((/[\" \|]/).test(info.absoluteResourcePath)) {
-						return info.absoluteResourcePath.replace(/\"/g, "").replace(/[ \|]/g, "_");
-					}
-					return `${info.absoluteResourcePath}`;
-				}
-			};
-			if (env.environment === "dev" || wpConfig.mode === "development")
-			{
-				options.filename = "[name].js.map";
-				options.moduleFilenameTemplate = "[absolute-resource-path]";
-				// options.moduleFilenameTemplate = "../[resource-path]";
-				// options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
-			}
-			plugin = new webpack.SourceMapDevToolPlugin(options);
-		}
-		return plugin;
-	},
-
-
 	tsc:
 	{
 		/**
@@ -583,61 +531,6 @@ const wpPlugin =
 			spawnSync("npx", tscArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
 		}
 
-	},
-
-
-	/**
-	 * @param {WebpackEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {(ForkTsCheckerPlugin)[]}
-	 */
-	tscheck: (env, wpConfig) =>
-	{
-		const plugins = [];
-		if (env.build === "webview")
-		{
-			plugins.push(
-				new ForkTsCheckerPlugin(
-				{
-					async: false,
-					formatter: "basic",
-					typescript: {
-						configFile: path.join(env.basePath, "tsconfig.json"),
-					}
-				})
-			);
-		}
-		else if (env.build === "tests")
-		{
-			plugins.push(
-				new ForkTsCheckerPlugin(
-				{
-					async: false,
-					formatter: "basic",
-					typescript: {
-						// build: true,
-						mode: "write-tsbuildinfo",
-						configFile: path.join(env.buildPath, "src", "test", "tsconfig.json"),
-					}
-				})
-			);
-		}
-		else
-		{
-			plugins.push(
-				new ForkTsCheckerPlugin(
-				{
-					async: false,
-					formatter: "basic",
-					typescript: {
-						// build: true,
-						mode: "write-tsbuildinfo",
-						configFile: path.join(env.buildPath, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
-					}
-				})
-			);
-		}
-		return plugins;
 	},
 
 

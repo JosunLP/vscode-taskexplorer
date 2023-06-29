@@ -52,6 +52,7 @@ const clean = (env, wpConfig) =>
 		}
 	}
 	return plugin;
-}
+};
+
 
 module.exports = clean;
