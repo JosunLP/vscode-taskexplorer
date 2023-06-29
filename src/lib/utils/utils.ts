@@ -2,7 +2,7 @@
 import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
-import { ConfigKeys } from "../../interface";
+import { ConfigKeys, ExecIfElseOptions } from "../../interface";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
@@ -15,17 +15,18 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
-export const execIf = <T, R = any | PromiseLike<any>>(checkValue: T | undefined, ifFn: (arg: T, ...args: any[]) => R, thisArg?: any, ...args: any[]): R | undefined =>
+export const execIf = <T, R = any | PromiseLike<any>, A = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: A[]) => R, thisArg?: any, ...args: (A | ExecIfElseOptions | undefined)[]): R | undefined =>
 {
-    let elseFn: any[] | undefined;
+    let elseFn: ExecIfElseOptions | undefined;
     if (isArray(args[0]) && isFunction(args[0][0])) {
-        elseFn = args.shift();
+        elseFn = args.shift() as ExecIfElseOptions;
     }
     if (checkValue) {
-        return ifFn.call(thisArg, checkValue, ...args);
+        return ifFn.call(thisArg, checkValue, ...(args as A[]));
     }
     else if (elseFn) {
-        return elseFn.splice(0, 1)[0].call(thisArg, ...elseFn);
+        const fn: (...args: A[]) => R = elseFn.splice(0, 1)[0];
+        return fn.call(thisArg, ...(elseFn as A[]));
     }
 };
 
@@ -319,24 +320,30 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
-export const wrap = <T>(runFn: (...args: any[]) => T, catchFn?: (e: unknown) => any, thisArg?: any, ...args: any[]): T | undefined =>
+export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: (e: any, ...args: any[]) => E, thisArg?: any, ...args: any[]): T | E =>
 {
-    try { return runFn.call(thisArg, ...args); } catch (e) { catchFn?.call(thisArg, e); }
+    let result;
+    try { result = runFn.call(thisArg, ...args); } catch (e) { result = catchFn?.call(thisArg, e, ...args) as E; }
+    return result;
 };
 
 
-export const wrapAsync = async <T>(runFn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined> =>
+export const wrapAsync = async <T, E = any>(runFn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any, ...args: any[]) => PromiseLike<E> | E, thisArg?: any, ...args: any[]): Promise<Awaited<T> | E> =>
 {
+    let result;
     try {
-        return await runFn.call(thisArg, ...args);
+        result = await runFn.call(thisArg, ...args);
     }
     catch (e)
-    {   if (catchFn)
+    {
+        result = undefined as unknown as E;
+        if (catchFn)
         {
-            const catchRes = catchFn.call(thisArg, e);
+            const catchRes = result = catchFn.call(thisArg, e, ...args);
             if (isPromise(catchRes)) {
-                try { await catchRes; } catch {}
+                try { result = await catchRes; } catch {}
             }
         }
     }
+    return result;
 };

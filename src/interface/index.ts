@@ -26,8 +26,8 @@ export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from ".
 export type { ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionChangeEvent } from "./ITeLicenseManager";
 export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType } from "./ITeTask";
 export type { AllContextKeys, IContextChangeEvent, TreeviewContextKey, WebviewContextKey, WebviewViewContextKey } from "./ITeContext";
-export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, Primitive, PromiseAdapter } from "./ITeUtilities";
 export type { AllUsageKeys, ITeUsage, ITaskRuntimeInfo, ITeTaskStats, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount, WebviewUsageKey, WebviewViewUsageKey, TreeviewUsageKey } from "./ITeUsage";
+export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, Primitive, PromiseAdapter, ExecIfElseOptions } from "./ITeUtilities";
 
 export { UsageKeys } from "./ITeUsage";
 export { ContextKeys } from "./ITeContext";

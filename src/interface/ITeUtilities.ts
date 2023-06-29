@@ -82,10 +82,12 @@ export interface ITeTypeUtilities
 	isWorkspaceFolder(v: any): v is WorkspaceFolder;
 }
 
+export type ExecIfElseOptions = [ (...args: any[]) => any, ...any[] ];
+
 export interface ITeUtilities
 {
 	cloneJsonObject<T>(jso: any): T;
-	execIf<T, R = any | PromiseLike<any>>(checkValue: T | undefined, runFn: (arg: T, ...args: any[]) => R, thisArg?: any, ...args: any[]): R | undefined;
+	execIf<T, R = any | PromiseLike<any>, A = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: A[]) => R, thisArg?: any, ...args: (A | ExecIfElseOptions | undefined)[]): R | undefined;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;
@@ -107,6 +109,6 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap <T>(runFn: (...args: any[]) => T, catchFn?: (e: unknown) => any, thisArg?: any, ...args: any[]): T | undefined;
-	wrapAsync<T>(runFn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: unknown) => any, thisArg?: any, ...args: any[]): Promise<Awaited<T> | undefined>;
+	wrap<T, E = any>(runFn: (...args: any[]) => T, catchFn?: (e: any, ...args: any[]) => E, thisArg?: any, ...args: any[]): T | E;
+	wrapAsync<T, E = any>(runFn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any, ...args: any[]) => PromiseLike<E> | E, thisArg?: any, ...args: any[]): Promise<Awaited<T> | E>;
 }
