@@ -21,11 +21,12 @@ const sourcemaps = (env, wpConfig) =>
     let plugin;
     if (env.build !== "webview" && wpConfig.mode !== "production")
     {
-        const isDev = env.environment === "dev" || wpConfig.mode === "development";
+        const isDev = env.environment === "dev" || wpConfig.mode === "development",
+              isTests = env.environment.startsWith("test");
         const options =
         {
             test: /\.(js|jsx)($|\?)/i,
-            exclude: !isDev ? /(?:(vendor|runtime|tests)\.js|node_modules)/ : /(?:(runtime|tests)\.js|node_modules)/,
+            exclude: /((vendor|runtime|tests)\.js|node_modules)/,
             filename: "[name].js.map",
             //
             // The bundled node_modules will produce reference tags within the main entry point
@@ -56,6 +57,11 @@ const sourcemaps = (env, wpConfig) =>
             options.moduleFilenameTemplate = "[absolute-resource-path]";
             // options.moduleFilenameTemplate = "../[resource-path]";
             // options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
+            options.exclude = /((runtime|tests)\.js|node_modules)/;
+        }
+        else if (isTests)
+        {
+            options.exclude = /((vendor|runtime)\.js|node_modules)/;
         }
         plugin = new webpack.SourceMapDevToolPlugin(options);
     }
