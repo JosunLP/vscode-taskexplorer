@@ -320,30 +320,20 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
-export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: (e: any, ...args: any[]) => E, thisArg?: any, ...args: any[]): T | E =>
-{
-    let result;
-    try { result = runFn.call(thisArg, ...args); } catch (e) { result = catchFn?.call(thisArg, e, ...args) as E; }
-    return result;
-};
-
-
-export const wrapAsync = async <T, E = any>(runFn: (...args: any[]) => PromiseLike<T>, catchFn?: (e: any, ...args: any[]) => PromiseLike<E> | E, thisArg?: any, ...args: any[]): Promise<Awaited<T> | E> =>
+export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: any, ...args: any[]) => E) | null, thisArg?: any, ...args: any[]): T | E =>
 {
     let result;
     try {
-        result = await runFn.call(thisArg, ...args);
+        result = runFn.call(thisArg, ...args);
     }
-    catch (e)
-    {
-        result = undefined as unknown as E;
-        if (catchFn)
-        {
-            const catchRes = result = catchFn.call(thisArg, e, ...args);
-            if (isPromise(catchRes)) {
-                try { result = await catchRes; } catch {}
-            }
-        }
+    catch (e) {
+        result = (catchFn || wrapThrow).call(thisArg, e, ...args);
     }
-    return result;
+    if (isPromise<T>(result)) {
+        result = result.then<T, E>(r => r, e => e);
+    }
+    return result as T | E;
 };
+
+
+const wrapThrow = <E>(e: E) => { throw(e); };

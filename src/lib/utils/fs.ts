@@ -10,6 +10,7 @@
 import * as fs from "fs";
 import { glob } from "glob";
 import * as path from "path";
+import { wrap } from "./utils";
 
 const cwd = process.cwd();
 
@@ -123,37 +124,18 @@ export const copyFile = (src: string, dst: string) =>
 
 export const createDir = (dir: string): Promise<void> =>
 {
-    return new Promise<void>(async (resolve, reject) =>
+    return wrap(async () =>
     {
         const newDir = path.resolve(cwd, dir);
-        if (!await pathExists(newDir))
+        if (!pathExistsSync(newDir))
         {
             const baseDir = path.dirname(dir);
-            if (!(await pathExists(baseDir)))
-            {
-                try {
-                    await createDir(baseDir);
-                }
-                catch (e) {
-                    /* istanbul ignore next */
-                    reject(e);
-                    /* istanbul ignore next */
-                    return;
-                };
-            }
-            fs.mkdir(path.resolve(cwd, dir), { mode: 0o777 }, (err) =>
-            {
-                /* istanbul ignore if */
-                if (err) {
-                    reject(err);
-                }
-                resolve();
+            await createDir(baseDir);
+            await new Promise((resolve, reject) => {
+                fs.mkdir(path.resolve(cwd, dir), { mode: 0o777 }, (e) => handleTResult<void>(resolve, reject, e));
             });
         }
-        else {
-            resolve();
-        }
-    });
+    }, e => { throw e; }, this);
 };
 
 

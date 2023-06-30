@@ -505,7 +505,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         w.log.methodStart("invalidate tasks cache", 1, logPad, false, [
             [ "opt1", opt1 ], [ "opt2", opt2 && opt2 instanceof Uri ? opt2.fsPath : opt2 ]
         ]);
-        await this.wrapper.utils.wrapAsync(async (o1, o2) =>
+        await this.wrapper.utils.wrap(async (o1, o2) =>
         {
             if (o1 && o2 instanceof Uri)
             {
