@@ -183,7 +183,11 @@ export const activate = async () =>
         //
         bestTimes.options = {
             isMultiRootWorkspace: tc.isMultiRootWorkspace,
-            ...tc.bestTimes
+            ...tc.bestTimes,
+            store: {
+                getStoreValue: teWrapper.storage.get,
+                updateStoreValue: teWrapper.storage.get
+            }
         };
         //
         // All done
