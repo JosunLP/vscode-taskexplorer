@@ -466,21 +466,83 @@ suite("Util Tests", () =>
 		expect(teWrapper.typeUtils.isPromise({ then: () => {} })).to.be.equal(true);
 		//
 		// wrap
-		// teWrapper.utils.wrap(() => {}, () => {}, this);
+		//
+		let wasException = false;
+		teWrapper.utils.wrap(() => {}, () => {}, this);
 		expect(teWrapper.utils.wrap(() => "testWrap", teWrapper.log.error, this)).to.be.equal("testWrap");
 		expect(teWrapper.utils.wrap(() => { return 4; }, teWrapper.log.error, this)).to.be.equal(4);
 		teWrapper.utils.wrap((..._args: string[]) => {}, teWrapper.log.error, this, "A", "B", "C", "D");
 		expect(teWrapper.utils.wrap((a: number, b: number, c: number) => a + b + c, teWrapper.log.error, undefined, 1, 2, 3)).to.be.equal(6);
-		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return "done"; }, teWrapper.log.error, this)).to.be.equal("done");
-		teWrapper.utils.wrap(() => { throw new Error("Test error A"); }, () => {}, this);
-		teWrapper.utils.wrap(() => { throw new Error("Test error B"); }, teWrapper.log.error, this);
-		teWrapper.utils.wrap((_n1: number, _n2: number) => { throw new Error("Test error"); }, teWrapper.log.error, this, 1, 2);
-        await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return 1 / 0; }, () => {}, this);
+		try {
+			teWrapper.utils.wrap(() => { throw new Error("Test error A"); }, () => {}, this);
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(false);
+		try {
+			teWrapper.utils.wrap(() => { throw new Error("Test error B"); }, null, this);
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(true);
+		wasException = false;
+		try {
+			teWrapper.utils.wrap(() => { throw new Error("Test error C"); }, teWrapper.log.error, this);
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(false);
+		wasException = false;
+		try {
+			teWrapper.utils.wrap((_n1: number, _n2: number) => { throw new Error("Test error D"); }, teWrapper.log.error, this, 1, 2);
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(false);
+		wasException = false;
+		try {
+			await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return 1 / 0; }, () => {}, this);
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(false);
         expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return 1; }, () => {}, this)).to.be.equal(1);
 		await teWrapper.utils.wrap(() => { return new Promise<any>((r, rej) => { rej(new Error("Test async error 2")); }); }, () => {}, this);
-		await teWrapper.utils.wrap(async () => { throw new Error("Test async error 2"); }, () => {}, this);
-		await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); throw new Error("Test async error 3"); }, teWrapper.log.error, this);
-		await teWrapper.utils.wrap(() => { return new Promise<any>((r) => { throw new Error("Test async error 4"); }); }, async () => { await teWrapper.utils.sleep(1); }, this);
+		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return "done"; }, teWrapper.log.error, this)).to.be.equal("done");
+		wasException = false;
+		try {
+			expect(await teWrapper.utils.wrap(async () => { throw new Error("Test async error 2"); }, () => { return "safe catch"; }, this)).to.be.equal("safe catch");
+		}
+		catch (e) { console.log(e); wasException = true; }
+		expect(wasException).to.be.equal(false);
+		wasException = false;
+		try {
+			expect(await teWrapper.utils.wrap(async () =>
+				{ throw new Error("Test async error 3"); }, async (e) => { await teWrapper.utils.sleep(1); return e.message; }, this
+			)).to.be.equal("Test async error 3");
+		}
+		catch (e) { console.log(e); wasException = true; }
+		expect(wasException).to.be.equal(false);
+		wasException = false;
+		try {
+			await teWrapper.utils.wrap(async () => { throw new Error("Test async error 4"); });
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(true);
+		wasException = false;
+		try {
+			await teWrapper.utils.wrap(async () => { throw new Error("Test async error 5"); }, undefined, this);
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(true);
+		wasException = false;
+		await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); throw new Error("Test async error 6"); }, teWrapper.log.error, this);
+		try {
+			expect(await teWrapper.utils.wrap(() => { return new Promise<any>((r) => { throw new Error("Test async error 7"); }); }, async () => { await teWrapper.utils.sleep(1); }, this)).to.be.equal(undefined);
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(false);
+		wasException = false;
+		try {
+			expect(await teWrapper.utils.wrap(() => { throw new Error("Test async error 8"); }, async (e) => { await teWrapper.utils.sleep(1); return e.message; }, this)).to.be.equal("Test async error 8");
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(false);
 		//
 		// execIf
 		//
