@@ -114,5 +114,5 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap<T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: any, ...args: any[]) => E) | null, thisArg?: any, ...args: any[]): T | E;
+	wrap<T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: any) => E) | null, thisArg?: any, ...args: any[]): T | E;
 }

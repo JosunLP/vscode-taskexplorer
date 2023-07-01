@@ -322,7 +322,7 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
-export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: any, ...args: any[]) => E) | null, thisArg?: any, ...args: any[]): T | E =>
+export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: any) => E) | null, thisArg?: any, ...args: any[]): T | E =>
 {
     let result;
     try {
@@ -331,7 +331,7 @@ export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: an
         {
             result = result.then<T, E>((r) => r, (e) =>
             {
-                result = (catchFn || wrapThrow).call(thisArg, e, ...args);
+                result = (catchFn || wrapThrow).call(thisArg, e);
                 if (isPromise<E>(result)) {
                     result = result.then<E, any>((e) => e, wrapThrow);
                 }
@@ -341,7 +341,7 @@ export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: an
     }
     catch (e)
     {
-        result = (catchFn || wrapThrow).call(thisArg, e, ...args);
+        result = (catchFn || wrapThrow).call(thisArg, e);
         if (isPromise<T>(result)) {
             result = result.then<T, E>(r => r, wrapThrow);
         }

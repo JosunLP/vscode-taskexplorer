@@ -489,9 +489,9 @@ suite("Util Tests", () =>
 		teWrapper.utils.execIf(null, () => {}, this);
 		teWrapper.utils.execIf(false, () => {}, this);
 		teWrapper.utils.execIf(true, () => {}, this);
-		teWrapper.utils.execIf(true, () => {}, this, 1, 2, 3);
-		teWrapper.utils.execIf(true, () => {}, this, () => {}, 2, 3);
-		teWrapper.utils.execIf(false, () => {}, this, () => {}, 2, 3, 4);
+		teWrapper.utils.execIf(true, () => {}, this, null, 1, 2, 3);
+		teWrapper.utils.execIf(true, () => {}, this, null, () => {}, 2, 3);
+		teWrapper.utils.execIf(false, () => {}, this, null,  () => {}, 2, 3, 4);
 		teWrapper.utils.execIf(true, () => {}, this, [ () => {}, 2, 3 ], 4);
 		teWrapper.utils.execIf(false, () => {}, this, [ () => {}, 2, 3, 4 ]);
 
