@@ -29,6 +29,7 @@ export let teWrapper: ITeWrapper;
 const bestTimes = new TestUtilsBestTimes();
 export const consoleWrite = bestTimes.utils.consoleWrite;
 export const isRollingCountError = () => bestTimes.utils.isRollingCountError;
+export const getSuccessCount = (instance: Mocha.Context) => bestTimes.utils.getSuccessCount(instance);
 export const suiteFinished = (instance: Mocha.Context) => bestTimes.utils.suiteFinished(instance);
 export const endRollingCount = (instance: Mocha.Context, isSetup?: boolean) => bestTimes.utils.endRollingCount(instance, isSetup);
 export const exitRollingCount = (instance: Mocha.Context, isSetup?: boolean, isTeardown?: boolean) => bestTimes.utils.exitRollingCount(instance, isSetup, isTeardown);

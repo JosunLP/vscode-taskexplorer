@@ -154,31 +154,31 @@ const wpPlugin =
 	},
 
 
-	babel:
-	{
-		/**
-		 * @param {WebpackEnvironment} env
-		 * @returns {void}
-		 */
-		buildTests: (env) =>
-		{
-			// let babel = [
-			// 	"babel", "./src/test/suite", "--out-dir", "./dist/test/suite", "--extensions", ".ts",
-			// 	"--presets=@babel/preset-env,@babel/preset-typescript",
-			// ];
-			// spawnSync("npx", babel, { cwd: env.buildPath, encoding: "utf8", shell: true });
-			// babel = [
-			// 	"babel", "./src/test/run", "--out-dir", "./dist/test/run", "--extensions", ".ts",
-			// 	"--presets=@babel/preset-env,@babel/preset-typescript",
-			// ];
-			// spawnSync("npx", babel, { cwd: env.buildPath, encoding: "utf8", shell: true });
-			const babel = [
-				"babel", "./src/test", "--out-dir", "./dist/test", "--extensions", ".ts",
-				"--presets=@babel/preset-env,@babel/preset-typescript",
-			];
-			spawnSync("npx", babel, { cwd: env.buildPath, encoding: "utf8", shell: true });
-		}
-	},
+	// babel:
+	// {
+	// 	/**
+	// 	 * @param {WebpackEnvironment} env
+	// 	 * @returns {void}
+	// 	 */
+	// 	buildTests: (env) =>
+	// 	{
+	// 		// let babel = [
+	// 		// 	"babel", "./src/test/suite", "--out-dir", "./dist/test/suite", "--extensions", ".ts",
+	// 		// 	"--presets=@babel/preset-env,@babel/preset-typescript",
+	// 		// ];
+	// 		// spawnSync("npx", babel, { cwd: env.buildPath, encoding: "utf8", shell: true });
+	// 		// babel = [
+	// 		// 	"babel", "./src/test/run", "--out-dir", "./dist/test/run", "--extensions", ".ts",
+	// 		// 	"--presets=@babel/preset-env,@babel/preset-typescript",
+	// 		// ];
+	// 		// spawnSync("npx", babel, { cwd: env.buildPath, encoding: "utf8", shell: true });
+	// 		const babel = [
+	// 			"babel", "./src/test", "--out-dir", "./dist/test", "--extensions", ".ts",
+	// 			"--presets=@babel/preset-env,@babel/preset-typescript",
+	// 		];
+	// 		spawnSync("npx", babel, { cwd: env.buildPath, encoding: "utf8", shell: true });
+	// 	}
+	// },
 
 
 	/**
@@ -224,7 +224,7 @@ const wpPlugin =
 						try {
 							wpPlugin.tsc.buildTypes(_env);
 							if (isTestsBuild) {
-								wpPlugin.babel.buildTests(_env);
+								wpPlugin.tsc.buildTests(_env);
 							}
 						} catch {}
 					});
@@ -514,8 +514,10 @@ const wpPlugin =
 		 */
 		buildTests: (env) =>
 		{
-			const tscArgs = [ "tsc", "-p", "./src/test/tsconfig.json" ];
-			spawnSync("npx", tscArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
+			// const tscArgs = [ "tsc", "-p", "./src/test/tsconfig.json" ];
+			// spawnSync("npx", tscArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
+			const npmArgs = [ "npm", "run", "build-test-suite:client" ];
+			spawnSync("npx", npmArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
 		},
 
 		/**
@@ -526,7 +528,7 @@ const wpPlugin =
 		{
 			const tscArgs = [  "tsc", "-p", "./types" ];
 			if (!fs.existsSync(path.join(env.buildPath, "types", "lib"))) {
-				try { fs.unlinkSync(path.join(env.buildPath, "types", "tsconfig.tsbuildinfo")); } catch {}
+				try { fs.unlinkSync(path.join(env.buildPath, "node_modules", ".cache", "tsconfig.tytpes.tsbuildinfo")); } catch {}
 			}
 			spawnSync("npx", tscArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
 		}

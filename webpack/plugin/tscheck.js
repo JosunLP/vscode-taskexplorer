@@ -63,6 +63,21 @@ const tscheck = (env, wpConfig) =>
 				}
 			})
 		);
+
+		if (env.environment === "test")
+		{
+			plugins.push(
+				new ForkTsCheckerPlugin(
+				{
+					async: false,
+					formatter: "basic",
+					typescript: {
+						mode: "readonly",
+						configFile: path.join(env.buildPath, "src", "test", "tsconfig.json")
+					}
+				})
+			);
+		}
 	}
 	return plugins;
 };

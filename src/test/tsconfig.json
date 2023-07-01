@@ -6,6 +6,7 @@
 		"baseUrl": ".",
 		"rootDir": ".",
 		"sourceMap": false,
+		"inlineSourceMap": true,
 		"tsBuildInfoFile": "../../node_modules/.cache/tsconfig.test.tsbuildinfo",
         "paths": {
 			":types": [ "../../types" ],
