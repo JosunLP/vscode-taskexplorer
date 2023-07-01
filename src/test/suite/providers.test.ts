@@ -33,7 +33,7 @@ suite("Provider Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
         rootPath = getWsPath(".");
         dirName = join(rootPath, "tasks_test_");
         dirNameL2 = join(dirName, "subfolder");

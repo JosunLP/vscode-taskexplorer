@@ -26,7 +26,7 @@ suite("Gradle Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         provider = teApi.providers[testsName];
         dirName = getWsPath(".");
         fileUri = Uri.file(path.join(dirName, "test2.gradle"));

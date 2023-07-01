@@ -26,7 +26,7 @@ suite("Webview Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
         if (tc.isSingleSuiteTest) {
             await sleep(230);
             await closeTeWebviewPanel(teWrapper.welcomePage);

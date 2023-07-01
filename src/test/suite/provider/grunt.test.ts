@@ -26,7 +26,7 @@ suite("Grunt Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         provider = teApi.providers[testsName];
         fileUri = Uri.file(path.join(getWsPath("."), "gruntfile.js"));
         endRollingCount(this, true);

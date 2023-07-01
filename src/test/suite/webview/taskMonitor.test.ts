@@ -25,7 +25,7 @@ suite("Task Monitor App Tests", () =>
 	suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
 		oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFoldersNumLastTasks);
 		await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersNumLastTasks, 2); // covering usage.trackFamousTasks
         await executeSettingsUpdate(teWrapper.keys.Config.KeepTerminalOnTaskDone, true);

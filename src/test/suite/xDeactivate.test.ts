@@ -7,7 +7,7 @@ suite("Deactivate Extension", () =>
 	suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-		await activate(this);
+		await activate();
         endRollingCount(this, true);
 	});
 

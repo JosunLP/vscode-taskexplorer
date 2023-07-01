@@ -45,7 +45,7 @@ suite("Multi-Root Workspace Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
 
         sortAlpha = teWrapper.config.get<boolean>(teWrapper.keys.Config.SortProjectFoldersAlphabetically);
         await teWrapper.config.updateVs("grunt.autoDetect", false); // we ignore internally provided grunt tasks when building the tree

@@ -14,7 +14,7 @@ suite("File Cache Tests", () =>
     suiteSetup(async function()
     {
         if (utils.exitRollingCount(this, true)) return;
-        ({ teWrapper } = await utils.activate(this));
+        ({ teWrapper } = await utils.activate());
         await teWrapper.storage.update2("fileCacheTaskFilesMap", undefined);
         await teWrapper.storage.update2("fileCacheProjectFilesMap", undefined);
         await teWrapper.storage.update2("fileCacheProjectFileToFileCountMap", undefined);

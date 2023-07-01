@@ -13,7 +13,7 @@ suite("Event Queue Tests", () =>
 	suiteSetup(async function()
     {
 		 if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
 		eventQueue = teWrapper.eventQueue;
         endRollingCount(this, true);
 	});

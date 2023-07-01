@@ -25,7 +25,7 @@ suite("Composer Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         dirName = getWsPath("tasks_test_");
         fileUri = Uri.file(path.join(dirName, "composer.json"));
         endRollingCount(this, true);

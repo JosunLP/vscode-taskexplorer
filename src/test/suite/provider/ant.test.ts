@@ -29,7 +29,7 @@ suite("Ant Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         provider = teApi.providers[testsName];
         rootWorkspace = (workspace.workspaceFolders as WorkspaceFolder[])[0];
         buildXmlFile = getWsPath("build.xml");

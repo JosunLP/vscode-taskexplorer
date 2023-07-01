@@ -21,7 +21,7 @@ suite("Configuration / Settings Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
         enabledTasks = teWrapper.config.get<IDictionary<boolean>>("enabledTasks");
         pathToPrograms = teWrapper.config.get<IDictionary<string>>("pathToPrograms");
         shellW32 = teWrapper.config.getVs<string>("terminal.integrated.shell.windows");

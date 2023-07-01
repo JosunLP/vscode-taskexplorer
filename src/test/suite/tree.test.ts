@@ -23,7 +23,7 @@ suite("Tree Tests", () =>
     suiteSetup(async function()
     {
         if (utils.exitRollingCount(this, true)) return;
-        ({ teWrapper } = await utils.activate(this));
+        ({ teWrapper } = await utils.activate());
         utils.endRollingCount(this, true);
     });
 

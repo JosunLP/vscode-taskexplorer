@@ -15,7 +15,7 @@ suite("Wrapper Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         endRollingCount(this, true);
     });
 

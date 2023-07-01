@@ -36,7 +36,7 @@ const main = async () =>
     let failed = false,
         multiRoot = false;
 
-    const extensionTestsPath = path.resolve(__dirname, "./run"),
+    const extensionTestsPath = path.resolve(__dirname, "./suite"),
           distPath = path.join(extensionDevelopmentPath, "dist"),
           testWorkspaceSingleRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture", "project1")),
           testWorkspaceMultiRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture")),

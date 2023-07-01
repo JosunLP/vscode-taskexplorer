@@ -25,7 +25,7 @@ suite("Jenkins Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         startTaskCount = tc.isMultiRootWorkspace ? 1 : 0;
         provider = teApi.providers[testsName];
         fileUri = Uri.file(path.join(getWsPath("."), "Jenkinsfile"));

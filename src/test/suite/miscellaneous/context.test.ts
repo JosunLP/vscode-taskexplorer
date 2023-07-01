@@ -33,7 +33,7 @@ suite("Context Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
         endRollingCount(this, true);
     });
 

@@ -9,7 +9,7 @@ import { startInput, stopInput } from "./input";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
-import { getSuiteFriendlyName, getSuiteKey, processTimes } from "./bestTimes";
+import { TestUtilsBestTimes, colors, figures } from "@spmeesseman/test-utils";
 import {
     ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
 } from ":types";
@@ -25,6 +25,13 @@ export { treeUtils };
 export { getWsPath, getProjectsPath };
 export let teApi: ITaskExplorerApi;
 export let teWrapper: ITeWrapper;
+
+const bestTimes = new TestUtilsBestTimes();
+export const consoleWrite = bestTimes.utils.consoleWrite;
+export const isRollingCountError = () => bestTimes.utils.isRollingCountError;
+export const suiteFinished = (instance: Mocha.Context) => bestTimes.utils.suiteFinished(instance);
+export const endRollingCount = (instance: Mocha.Context, isSetup?: boolean) => bestTimes.utils.endRollingCount(instance, isSetup);
+export const exitRollingCount = (instance: Mocha.Context, isSetup?: boolean, isTeardown?: boolean) => bestTimes.utils.exitRollingCount(instance, isSetup, isTeardown);
 
 let activated = false;
 let caughtControlC = false;
@@ -42,42 +49,6 @@ const originalShowInputBox = window.showInputBox;
 const originalShowInfoBox = window.showInformationMessage;
 const originalGetExtension = extensions.getExtension;
 const disableSSLMsg = "Disabled ssl cert validation due to Electron/LetsEncrypt DST Root CA X3 Expiry";
-
-const withColor = (msg: string, color: number[]) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
-
-const colors = {
-    white: [ 37, 39 ],
-    grey: [ 90, 39 ],
-    blue: [ 34, 39 ],
-    cyan: [ 36, 39 ],
-    green: [ 32, 39 ],
-    magenta: [ 35, 39 ],
-    red: [ 31, 39 ],
-    yellow: [ 33, 39 ]
-};
-
-const figures =
-{
-    withColor,
-    success: "✔",
-    info: "ℹ",
-	warning: "⚠",
-	error: "✘",
-    up: "△",
-	pointer: "❯",
-    color:
-    {
-        success: withColor("✔", colors.green),
-        successBlue: withColor("✔", colors.blue),
-        info: withColor("ℹ", colors.magenta),
-        infoTask: withColor("ℹ", colors.blue),
-        warning: withColor("⚠", colors.yellow),
-        warningTests: withColor("⚠", colors.blue),
-        error: withColor("✘", colors.red),
-        errorTests: withColor("✘", colors.blue),
-        up: withColor("△", colors.green)
-    }
-};
 
 //
 // Suppress some stderr messages.  It's just tests.
@@ -141,7 +112,7 @@ extensions.getExtension = (str: string) =>
 };
 
 
-export const activate = async (instance: Mocha.Context) =>
+export const activate = async () =>
 {
     extension = <Extension<any>>extensions.getExtension("spmeesseman.vscode-taskexplorer");
     expect(extension).to.not.be.undefined;
@@ -207,6 +178,13 @@ export const activate = async (instance: Mocha.Context) =>
             tc.slowTime.licenseMgr.getTrialExtension  = Math.round(tc.slowTime.licenseMgr.getTrialExtension * factor);
         }
         //
+        // Set options in testUtils/bestTImes module
+        //
+        bestTimes.options = {
+            isMultiRootWorkspace: tc.isMultiRootWorkspace,
+            ...tc.bestTimes
+        };
+        //
         // All done
         //
         const tzOffset = (new Date()).getTimezoneOffset() * 60000,
@@ -223,24 +201,6 @@ export const activate = async (instance: Mocha.Context) =>
 
         timeStarted = Date.now();
         activated = true;
-    }
-
-    const suite = instance.currentTest?.parent;
-    if (suite)
-    {
-        const suiteKey = getSuiteKey(suite.title);
-        tc.tests.suiteResults[suiteKey] = {
-            timeStarted: Date.now(),
-            numTests: suite.tests.length,
-            success: false,
-            successCount: -1,
-            suiteName: getSuiteFriendlyName(suite.title),
-            timeFinished: 0,
-            numTestsFailed: 0
-        };
-        if (suite.parent) {
-            tc.isSingleSuiteTest = suite.parent.suites.length <= 2;
-        }
     }
 
     return {
@@ -310,7 +270,7 @@ export const cleanup = async () =>
     // day of my life coding.
     //
     try {
-        await processTimes(timeStarted, hasRollingCountError);
+        await bestTimes.processTimes(timeStarted, hasRollingCountError);
     } catch {}
     //
     // If rolling count error is set, reset the mocha success icon for "cleanup" final test/step
@@ -355,10 +315,6 @@ export const closeEditors = () => commands.executeCommand("openEditors.closeAll"
 export const closeActiveEditor = () => commands.executeCommand("workbench.action.closeActiveEditor");
 
 
-export const consoleWrite = (msg?: string, icon?: string, pad = "") =>
-    console.log(`    ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, colors.grey) : ""}`);
-
-
 export const createwebviewForRevive = (viewTitle: string, viewType: string) =>
 {
     const resourceDir = Uri.joinPath(teWrapper.context.extensionUri, "res");
@@ -378,57 +334,6 @@ export const createwebviewForRevive = (viewTitle: string, viewType: string) =>
 };
 
 
-export const getSuccessCount = (instance: Mocha.Context) =>
-{
-
-    const mTest = instance.test || instance.currentTest as Mocha.Runnable,
-          suite = mTest.parent as Mocha.Suite,
-          suiteKey = getSuiteKey(suite.title),
-          suiteResults = tc.tests.suiteResults[suiteKey];
-    return suiteResults.successCount;
-};
-
-
-export const endRollingCount = (instance: Mocha.Context, isSetup?: boolean) =>
-{
-
-    const mTest = (!isSetup ? instance.test : instance.currentTest) as Mocha.Runnable,
-          suite = mTest.parent as Mocha.Suite,
-          suiteKey = getSuiteKey(suite.title),
-          suiteResults = tc.tests.suiteResults[suiteKey];
-    ++suiteResults.successCount;
-};
-
-
-export const exitRollingCount = (instance: Mocha.Context, isSetup?: boolean, isTeardown?: boolean) =>
-{
-
-    const mTest = (!isSetup && !isTeardown ? instance.test : instance.currentTest) as Mocha.Runnable,
-          suite = mTest.parent as Mocha.Suite,
-          suiteKey = getSuiteKey(suite.title),
-          suiteResults = tc.tests.suiteResults[suiteKey],
-          testIdx = !isSetup && !isTeardown ? suite.tests.findIndex(t => t.title === mTest.title && !t.isFailed() && !t.isPassed()) :
-                                              (isSetup ? undefined : (suiteResults ? suite.tests.length : undefined));
-
-    try
-    {
-        expect(suiteResults?.successCount).to.be.equal(testIdx);
-    }
-    catch (e: any)
-    {
-        if (!hasRollingCountError) {
-            const msg = `rolling success count failure @ test ${(testIdx || -1) + 1}, all further tests will be skipped`;
-            console.log(`    ${figures.color.info} ${figures.withColor(msg, colors.grey)}`);
-        }
-        setFailed(false);
-        if (suite.tests.filter(t => t.isFailed).length === 0) {
-            throw new Error("Rolling count error: " + e.message);
-        }
-    }
-
-    return !isTeardown ? hasRollingCountError : !suiteResults && hasRollingCountError;
-};
-
 export const getPackageManager = () =>
 {
     let pkgMgr = workspace.getConfiguration("npm", null).get<string>("packageManager") || "npm";
@@ -440,9 +345,6 @@ export const getPackageManager = () =>
 
 
 export const getTeApi = () => teApi;
-
-
-export const isRollingCountError = () => hasRollingCountError;
 
 
 const isExecuting = (task: Task) =>
@@ -580,37 +482,6 @@ export const setLicenseType = async (type: TeLicenseType) =>
 
 
 export const sleep = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-
-export const suiteFinished = (instance: Mocha.Context) =>
-{
-    const suite = instance.currentTest?.parent;
-    if (suite)
-    {
-        const numTestsFailedThisSuite = suite.tests.filter(t => t.isFailed()).length,
-              suiteKey = getSuiteKey(suite.title),
-              suiteResults = tc.tests.suiteResults[suiteKey];
-        tc.tests.numTestsFail += numTestsFailedThisSuite;
-        tc.tests.numTestsSuccess += suite.tests.filter(t => t.isPassed()).length;
-        tc.tests.numSuites++;
-        tc.tests.numTests += suite.tests.length;
-        if (numTestsFailedThisSuite > 0) {
-            tc.tests.numSuitesFail++;
-        }
-        else {
-            tc.tests.numSuitesSuccess++;
-        }
-        tc.tests.suiteResults[suiteKey] = Object.assign(suiteResults,
-        {
-            success: numTestsFailedThisSuite === 0,
-            timeFinished: Date.now(),
-            numTestsFailed: numTestsFailedThisSuite
-        });
-    }
-    else {
-        teWrapper.log.warn("Suite Finished: Instance is undefined!");
-    }
-};
 
 
 export const tagLog = (test: string, suite: string) =>

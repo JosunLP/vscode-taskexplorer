@@ -39,7 +39,7 @@ suite("License Manager Tests", () =>
 		// and until this is resolved in vscode/test-electron (I think that's wherethe problem is?),
 		// we just disable TLS_REJECT_UNAUTHORIZED in the NodeJS environment.
 		//
-        ({ teWrapper } = await utils.activate(this));
+        ({ teWrapper } = await utils.activate());
 		licMgr = teWrapper.licenseManager;
 		expect(licMgr).to.not.be.undefined;
 		expect(licMgr.isLicensed).to.be.equal(true);

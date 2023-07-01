@@ -26,7 +26,7 @@ suite("Task Tests", () =>
     suiteSetup(async function()
     {
         if (utils.exitRollingCount(this, true)) return;
-        ({ teWrapper } = await utils.activate(this));
+        ({ teWrapper } = await utils.activate());
         clickAction = teWrapper.config.get<string>(teWrapper.keys.Config.TaskButtonsClickAction);
         oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFoldersNumLastTasks);
         await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersNumLastTasks, 3);

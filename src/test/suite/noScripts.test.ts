@@ -29,7 +29,7 @@ suite("NoScripts TreeItem Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
         showFavorites = teWrapper.config.get<boolean>("specialFolders.showFavorites");
         showLastTasks = teWrapper.config.get<boolean>("specialFolders.showLastTasks");
         showUserTasks = teWrapper.config.get<boolean>("specialFolders.showUserTasks");

@@ -31,7 +31,7 @@ suite("External Provider Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper, teApi } = await activate(this));
+        ({ teWrapper, teApi } = await activate());
         insideWsDir = getWsPath("tasks_test_");
         outsideWsDir = getProjectsPath("testA");
         taskProvider = new ExternalTaskProvider1();

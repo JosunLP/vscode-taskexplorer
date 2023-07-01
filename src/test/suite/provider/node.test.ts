@@ -21,7 +21,7 @@ suite("NodeJS Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         provider = teApi.providers[testsName];
         dirName = getWsPath("bin");
         fileUri = Uri.file(path.join(dirName, "node-script.js"));

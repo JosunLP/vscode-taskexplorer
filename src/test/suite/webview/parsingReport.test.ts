@@ -21,7 +21,7 @@ suite("Parsing Report Tests", () =>
 	suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
 		projectUri = Uri.file(getWsPath("."));
 		pkgMgr = teWrapper.config.getVs<string>("npm.packageManager");
 		userTasks = teWrapper.config.get<boolean>("specialFolders.showUserTasks");

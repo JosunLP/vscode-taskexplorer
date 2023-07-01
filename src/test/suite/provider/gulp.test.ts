@@ -25,7 +25,7 @@ suite("Gulp Tests", () =>
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         provider = teApi.providers[testsName];
         fileUri = Uri.file(path.join(getWsPath("."), "gulpfile.js"));
         file2Uri = Uri.file(path.join(getWsPath("."), "gulpfile.mjs"));

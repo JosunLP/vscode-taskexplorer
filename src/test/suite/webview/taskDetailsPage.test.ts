@@ -25,7 +25,7 @@ suite("Task Details Page Tests", () =>
 	suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper } = await activate(this));
+        ({ teWrapper } = await activate());
 		await teWrapper.config.update(teWrapper.keys.Config.KeepTerminalOnTaskDone, true);
         endRollingCount(this, true);
 	});

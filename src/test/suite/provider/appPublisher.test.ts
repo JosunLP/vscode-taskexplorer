@@ -25,7 +25,7 @@ suite("App-Publisher Tests", () =>
         // Initialize
         //
         if (exitRollingCount(this, true)) return;
-        ({ teApi, teWrapper } = await activate(this));
+        ({ teApi, teWrapper } = await activate());
         endRollingCount(this, true);
     });
 

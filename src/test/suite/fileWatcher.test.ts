@@ -32,7 +32,7 @@ suite("File Watcher Tests", () =>
     suiteSetup(async function()
     {
         if (utils.exitRollingCount(this, true)) return;
-        ({ teWrapper } = await utils.activate(this));
+        ({ teWrapper } = await utils.activate());
         startTaskCountNpm = tc.isMultiRootWorkspace ? 17 : 2;
         rootPath = utils.getWsPath(".");
         insideWsDir = join(rootPath, "tasks_test_");

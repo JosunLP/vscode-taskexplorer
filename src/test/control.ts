@@ -29,6 +29,14 @@ export const testControl =
     //
     keepSettingsFileChanges: false,
     //
+    // Test Utils module best times
+    //
+    bestTimes: {
+        clearAllBestTimes: false,
+        clearBestTime: false,
+        clearBestTimesOnTestCountChange: false
+    },
+    //
     // LOGGING DEFAULTS
     //
     log: {
@@ -43,21 +51,6 @@ export const testControl =
         openFileOnFinish: true, // not yet. got it working opening a separate vscode instance but not existing one
         output: false,          // enabled automatically if enabled is `true` and all 3 output flags are `false`
         taskExecutionSteps: false,
-    },
-    //
-    // Rolling success count and failure flag
-    //
-    tests: {
-        clearAllBestTimes: false,
-        clearBestTime: false,
-        clearBestTimesOnTestCountChange: false,
-        numSuites: 0,
-        numSuitesFail: 0,
-        numSuitesSuccess: 0,
-        numTests: 0,
-        numTestsFail: 0,
-        numTestsSuccess: 0,
-        suiteResults: <ISuiteResults>{},
     },
     //
     // These 2 properties are for using update() for coverage, see helper.initSettings

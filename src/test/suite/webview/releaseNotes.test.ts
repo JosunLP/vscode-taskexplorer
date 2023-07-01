@@ -18,7 +18,7 @@ suite("Release Notes Page Tests", () =>
 	suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
-        ({ teWrapper, extension } = await activate(this));
+        ({ teWrapper, extension } = await activate());
         endRollingCount(this, true);
 	});
 

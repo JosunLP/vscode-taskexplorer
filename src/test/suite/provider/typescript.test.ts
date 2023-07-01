@@ -27,7 +27,7 @@ suite("Typescript Tests", () =>
     suiteSetup(async function()
     {
         if (utils.exitRollingCount(this, true)) return;
-        ({ teWrapper } = await utils.activate(this));
+        ({ teWrapper } = await utils.activate());
         rootPath = utils.getWsPath(".");
         dirName = join(rootPath, "tasks_test_ts_");
         fileUri = Uri.file(join(rootPath, "tsconfig.json"));
