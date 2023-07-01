@@ -135,7 +135,7 @@ export const createDir = (dir: string): Promise<void> =>
                 fs.mkdir(path.resolve(cwd, dir), { mode: 0o777 }, (e) => handleTResult<void>(resolve, reject, e));
             });
         }
-    }, e => { throw e; }, this);
+    }, null, this);
 };
 
 
