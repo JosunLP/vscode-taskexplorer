@@ -87,7 +87,7 @@ export type ExecIfElseOptions = [ (...args: any[]) => any, ...any[] ];
 export interface ITeUtilities
 {
 	cloneJsonObject<T>(jso: any): T;
-	execIf<T, R = any | PromiseLike<any>, A = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: A[]) => R, thisArg?: any, ...args: (A | ExecIfElseOptions | undefined)[]): R | undefined;
+	execIf<T, R = any | PromiseLike<any>, A = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: A[]) => R, thisArg?: any, elseOpts?: ExecIfElseOptions | A,  ...args: A[]): R | undefined;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;

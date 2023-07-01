@@ -15,14 +15,20 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
-export const execIf = <T, R = any | PromiseLike<any>, A = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: A[]) => R, thisArg?: any, ...args: (A | ExecIfElseOptions | undefined)[]): R | undefined =>
+export const execIf = <T, R = any | PromiseLike<any>, A = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: A[]) => R, thisArg?: any, elseOpts?: ExecIfElseOptions | A,  ...args: A[]): R | undefined =>
 {
     let elseFn: ExecIfElseOptions | undefined;
-    if (isArray(args[0]) && isFunction(args[0][0])) {
-        elseFn = args.shift() as ExecIfElseOptions;
+    if (elseOpts)
+    {
+        if (isExecIfElseOptions(elseOpts)) {
+            elseFn = elseOpts;
+        }
+        else {
+            args.unshift(elseOpts);
+        }
     }
     if (checkValue) {
-        return ifFn.call(thisArg, checkValue, ...(args as A[]));
+        return ifFn.call(thisArg, checkValue, ...args);
     }
     else if (elseFn) {
         const fn: (...args: A[]) => R = elseFn.splice(0, 1)[0];
@@ -146,6 +152,9 @@ export const isExcluded = (uriPath: string, logPad = "") =>
     log.methodDone("Check exclusion", 4, logPad, [[ "excluded", "no" ]]);
     return false;
 };
+
+
+const isExecIfElseOptions = (v: any): v is ExecIfElseOptions => isArray(v) && isFunction(v[0]);
 
 
 /**
@@ -325,12 +334,24 @@ export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: an
     let result;
     try {
         result = runFn.call(thisArg, ...args);
+        if (isPromise<T>(result))
+        {
+            result = result.then<T, E>((r) => r, (e) =>
+            {
+                result = (catchFn || wrapThrow).call(thisArg, e, ...args);
+                if (isPromise<E>(result)) {
+                    result = result.then<E, any>((e) => e, wrapThrow);
+                }
+                return result;
+            });
+        }
     }
-    catch (e) {
+    catch (e)
+    {
         result = (catchFn || wrapThrow).call(thisArg, e, ...args);
-    }
-    if (isPromise<T>(result)) {
-        result = result.then<T, E>(r => r, e => e);
+        if (isPromise<T>(result)) {
+            result = result.then<T, E>(r => r, wrapThrow);
+        }
     }
     return result as T | E;
 };
