@@ -3,7 +3,7 @@
     "compilerOptions": {
         "outDir": "dist",
 		"rootDir": "src",
-		"tsBuildInfoFile": ".vscode/tsconfig.tsbuildinfo",
+		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.tsbuildinfo",
         "paths": {
 			":env/*": [ "src/lib/env/node/*" ]
 		}

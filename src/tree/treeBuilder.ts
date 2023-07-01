@@ -223,12 +223,12 @@ export class TaskTreeBuilder
         w.log.value("   name", task.name, 3, logPad);
         w.log.value("   source", task.source, 3, logPad);
         w.log.value("   scope name", scopeName, 4, logPad);
-        w.utils.execIf(w.typeUtils.isWorkspaceFolder(task.scope), (_r: boolean, scope: WorkspaceFolder) =>
+        w.utils.execIf(w.typeUtils.isWorkspaceFolder(task.scope), (_r, scope) =>
         {
             w.log.value("   scope.name", scope.name, 4, logPad);
             w.log.value("   scope.uri.path", scope.uri.path, 4, logPad);
             w.log.value("   scope.uri.fsPath", scope.uri.fsPath, 4, logPad);
-        }, this, [ /* User tasks */w.log.value, "   scope.uri.path", "N/A (User)", 4, logPad ], task.scope);
+        }, this, [ /* User tasks */w.log.value, "   scope.uri.path", "N/A (User)", 4, logPad ], task.scope as WorkspaceFolder);
         w.log.value("   type", definition.type, 4, logPad);
         w.log.value("   relative Path", definition.path ? definition.path : "", 4, logPad);
         if (definition.scriptFile)

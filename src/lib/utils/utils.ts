@@ -15,24 +15,17 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
-export const execIf = <T, R = any | PromiseLike<any>, A = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: A[]) => R, thisArg?: any, elseOpts?: ExecIfElseOptions | A,  ...args: A[]): R | undefined =>
+export const execIf = <T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: ExecIfElseOptions | null | undefined, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined =>
 {
     let elseFn: ExecIfElseOptions | undefined;
-    if (elseOpts)
-    {
-        if (isExecIfElseOptions(elseOpts)) {
-            elseFn = elseOpts;
-        }
-        else {
-            args.unshift(elseOpts);
-        }
+    if (isExecIfElseOptions(elseOpts)) {
+        elseFn = elseOpts;
     }
     if (checkValue) {
-        return ifFn.call(thisArg, checkValue, ...args);
+        return ifFn.call(thisArg, checkValue, arg1, arg2, arg3, arg4, arg5);
     }
     else if (elseFn) {
-        const fn: (...args: A[]) => R = elseFn.splice(0, 1)[0];
-        return fn.call(thisArg, ...(elseFn as A[]));
+        return elseFn.splice(0, 1)[0].call(thisArg, ...elseFn);
     }
 };
 
@@ -154,7 +147,7 @@ export const isExcluded = (uriPath: string, logPad = "") =>
 };
 
 
-const isExecIfElseOptions = (v: any): v is ExecIfElseOptions => isArray(v) && isFunction(v[0]);
+const isExecIfElseOptions = (v: any): v is ExecIfElseOptions => !!v && isArray(v) && isFunction(v[0]);
 
 
 /**

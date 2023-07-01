@@ -82,7 +82,7 @@ export class TaskTreeGrouper
                         // new group just created
                         //
                         subfolder.addTreeNode(prevTaskFile); // addScript will set the group level on the TaskItem
-                    }, this, node);
+                    }, this, null, node as TaskItem);
                 }
                 subfolder.addTreeNode(taskFile);
             }

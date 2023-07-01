@@ -198,7 +198,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                 const def = newTask.definition,
                     folder = taskItem.getFolder(),
                     p = this.wrapper.providers[def.type];
-                this.wrapper.utils.execIf(!!folder && !!p, (_v: boolean, f: WorkspaceFolder) =>
+                this.wrapper.utils.execIf(!!folder && !!p, (_v, f) =>
                 {
                     newTask = p.createTask(def.target, undefined, f, def.uri, undefined, "   ") as Task;
                     //
@@ -213,7 +213,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                     else {
                         newTask = taskItem.task;
                     }
-                }, this, folder);
+                }, this, null, folder as WorkspaceFolder);
             }
             exec = await this.runTask(newTask, taskItem, noTerminal);
         }
@@ -252,13 +252,13 @@ export class TaskManager implements ITeTaskManager, Disposable
             const opts: InputBoxOptions = { prompt: "Enter package name to " + command };
             await window.showInputBox(opts).then(async (str) =>
             {
-                this.wrapper.utils.execIf(!!(str !== undefined && taskFile.folder.workspaceFolder), (_v, wsf: WorkspaceFolder, s: string) =>
+                this.wrapper.utils.execIf(!!(str !== undefined && taskFile.folder.workspaceFolder), (_v, wsf, s) =>
                 {
-                    kind.script = command.replace("<packagename>", s).trim();
+                    kind.script = command.replace("<packagename>", s as string).trim();
                     const execution = new ShellExecution(pkgMgr + " " + kind.script, options);
-                    const task = new Task(kind, wsf, kind.script, "npm", execution, undefined);
+                    const task = new Task(kind, wsf as WorkspaceFolder, kind.script, "npm", execution, undefined);
                     return tasks.executeTask(task);
-                }, this, taskFile.folder.workspaceFolder, str);
+                }, this, null, taskFile.folder.workspaceFolder, str);
             });
         }
     };

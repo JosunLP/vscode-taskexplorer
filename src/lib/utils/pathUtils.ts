@@ -37,7 +37,7 @@ export const getInstallPathSync = (): string =>
 };
 
 
-export const getPortableDataPath = (logPad = ""): string | undefined =>
+export const getPortableDataPath = (logPad = ""): string | undefined | void =>
 {
     return execIf(process.env.VSCODE_PORTABLE, (portablePath) =>
     {
@@ -79,7 +79,7 @@ export const getTaskRelativePath = (task: Task): string =>
 
 export const getUserDataPath = (platform?: string, logPad = ""): string =>
 {
-    let userPath: string | undefined = "";
+    let userPath: string | undefined | void = "";
     log.write(logPad + "get user data path", 4);
     logUserDataEnv(logPad + "   ");
     //

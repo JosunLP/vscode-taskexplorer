@@ -25,7 +25,7 @@ export interface ITePathUtilities
 {
 	getCwd(uri: Uri): string;
 	getInstallPath(): Promise<string>;
-	getPortableDataPath(logPad?: string): string | undefined;
+	getPortableDataPath(logPad?: string): string | undefined | void;
 	getRelativePath(folder: WorkspaceFolder, uri: Uri): string;
 	getTaskAbsolutePath(task: Task): string;
 	getTaskRelativePath(task: Task): string;
@@ -87,7 +87,12 @@ export type ExecIfElseOptions = [ (...args: any[]) => any, ...any[] ];
 export interface ITeUtilities
 {
 	cloneJsonObject<T>(jso: any): T;
-	execIf<T, R = any | PromiseLike<any>, A = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: A[]) => R, thisArg?: any, elseOpts?: ExecIfElseOptions | A,  ...args: A[]): R | undefined;
+	execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: ExecIfElseOptions | null): R | undefined;
+	execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1): R | undefined;
+	execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1, arg2: A2): R | undefined;
+	execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+	execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+	execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;

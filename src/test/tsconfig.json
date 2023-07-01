@@ -6,7 +6,7 @@
 		"baseUrl": ".",
 		"rootDir": ".",
 		"sourceMap": false,
-		"tsBuildInfoFile": "../../.vscode/tsconfig.test.tsbuildinfo",
+		"tsBuildInfoFile": "../../node_modules/.cache/tsconfig.test.tsbuildinfo",
         "paths": {
 			":types": [ "../../types" ],
 			"@spmeesseman/test-utils": [ "../../node_modules/@spmeesseman/test-utils/dist" ]

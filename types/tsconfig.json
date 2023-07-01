@@ -11,7 +11,7 @@
 		"sourceMap": false,
 		"strict": true,
 		"target": "es2020",
-		"tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.tsbuildinfo"
 	},
 	"include": [
 		"../src/interface"
