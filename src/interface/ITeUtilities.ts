@@ -82,17 +82,17 @@ export interface ITeTypeUtilities
 	isWorkspaceFolder(v: any): v is WorkspaceFolder;
 }
 
-export type ExecIfElseOptions = [ (...args: any[]) => any, ...any[] ];
+export type CallbackOptions = [ (...args: any[]) => any, ...any[] ];
 
 export interface ITeUtilities
 {
 	cloneJsonObject<T>(jso: any): T;
-	execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: ExecIfElseOptions | null): R | undefined;
-	execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1): R | undefined;
-	execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1, arg2: A2): R | undefined;
-	execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3): R | undefined;
-	execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
-	execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: ExecIfElseOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+	execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions | null): R | undefined;
+	execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1): R | undefined;
+	execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2): R | undefined;
+	execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+	execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+	execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;
@@ -114,5 +114,5 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap<T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: any) => E) | null, thisArg?: any, ...args: any[]): T | E;
+	wrap<T, E = any>(runFn: (...args: any[]) => T, catchFn?: CallbackOptions | ((e: any) => E) | null, thisArg?: any, ...args: any[]): T | E;
 }

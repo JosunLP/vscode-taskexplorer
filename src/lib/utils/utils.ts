@@ -1,8 +1,10 @@
+/* eslint-disable no-redeclare */
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
-import { ConfigKeys, ExecIfElseOptions } from "../../interface";
+import { ConfigKeys, CallbackOptions } from "../../interface";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
@@ -15,10 +17,16 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
-export const execIf = <T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: ExecIfElseOptions | null | undefined, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined =>
+export function execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions | null): R | undefined;
+export function execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1): R | undefined;
+export function execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2): R | undefined;
+export function execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+export function execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+export function execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions | null | undefined, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
 {
-    let elseFn: ExecIfElseOptions | undefined;
-    if (isExecIfElseOptions(elseOpts)) {
+    let elseFn: CallbackOptions | null | undefined;
+    if (isCallbackOptions(elseOpts)) {
         elseFn = elseOpts;
     }
     if (checkValue) {
@@ -147,7 +155,7 @@ export const isExcluded = (uriPath: string, logPad = "") =>
 };
 
 
-const isExecIfElseOptions = (v: any): v is ExecIfElseOptions => !!v && isArray(v) && isFunction(v[0]);
+const isCallbackOptions = (v: any): v is CallbackOptions => !!v && isArray(v) && isFunction(v[0]);
 
 
 /**
@@ -322,16 +330,22 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
-export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: any) => E) | null, thisArg?: any, ...args: any[]): T | E =>
+export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: CallbackOptions | ((e: any) => E) | null, thisArg?: any, ...args: any[]): T | E =>
 {
     let result;
-    try {
+    try
+    {
         result = runFn.call(thisArg, ...args);
         if (isPromise<T>(result))
         {
             result = result.then<T, E>((r) => r, (e) =>
             {
-                result = (catchFn || wrapThrow).call(thisArg, e);
+                if (!isCallbackOptions(catchFn)) {
+                    result = (catchFn || wrapThrow).call(thisArg, e);
+                }
+                else {
+                    result = catchFn.splice(0)[0].call(thisArg, e, ...catchFn);
+                }
                 if (isPromise<E>(result)) {
                     result = result.then<E, any>((e) => e, wrapThrow);
                 }
@@ -341,9 +355,14 @@ export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: ((e: an
     }
     catch (e)
     {
-        result = (catchFn || wrapThrow).call(thisArg, e);
-        if (isPromise<T>(result)) {
-            result = result.then<T, E>(r => r, wrapThrow);
+        if (!isCallbackOptions(catchFn)) {
+            result = (catchFn || wrapThrow).call(thisArg, e);
+        }
+        else {
+            result = catchFn.splice(0)[0].call(thisArg, e, ...catchFn);
+        }
+        if (isPromise<E>(result)) {
+            result = result.then<E, any>((e) => e, wrapThrow);
         }
     }
     return result as T | E;

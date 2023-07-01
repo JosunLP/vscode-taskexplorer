@@ -543,6 +543,18 @@ suite("Util Tests", () =>
 		}
 		catch { wasException = true; }
 		expect(wasException).to.be.equal(false);
+		wasException = false;
+		try {
+			expect(await teWrapper.utils.wrap(() => { return new Promise<any>((r) => { throw new Error("Test async error 9"); }); }, [ async (_e, p) => { await teWrapper.utils.sleep(1); return p; }, "p1" ], this)).to.be.equal("p1");
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(false);
+		wasException = false;
+		try {
+			expect(await teWrapper.utils.wrap(() => { throw new Error("Test async error 10"); }, [ async (e, p) => { await teWrapper.utils.sleep(1); return e.message + "_" + p; }, "param1" ], this)).to.be.equal("Test async error 10_param1");
+		}
+		catch { wasException = true; }
+		expect(wasException).to.be.equal(false);
 		//
 		// execIf
 		//
