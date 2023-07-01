@@ -516,7 +516,7 @@ const wpPlugin =
 		{
 			// const tscArgs = [ "tsc", "-p", "./src/test/tsconfig.json" ];
 			// spawnSync("npx", tscArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
-			const npmArgs = [ "npm", "run", "build-test-suite:client" ];
+			const npmArgs = [ "npm", "run", "build-test-suite" ];
 			spawnSync("npx", npmArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
 		},
 

@@ -179,7 +179,7 @@ export const activate = async () =>
             tc.slowTime.licenseMgr.getTrialExtension  = Math.round(tc.slowTime.licenseMgr.getTrialExtension * factor);
         }
         //
-        // Set options in testUtils/bestTImes module
+        // Set options in testUtils / bestTImes module
         //
         bestTimes.options = {
             isMultiRootWorkspace: tc.isMultiRootWorkspace,
