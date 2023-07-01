@@ -344,7 +344,7 @@ export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: Callbac
                     result = (catchFn || wrapThrow).call(thisArg, e);
                 }
                 else {
-                    result = catchFn.splice(0)[0].call(thisArg, e, ...catchFn);
+                    result = catchFn.splice(0, 1)[0].call(thisArg, e, ...catchFn);
                 }
                 if (isPromise<E>(result)) {
                     result = result.then<E, any>((e) => e, wrapThrow);
@@ -359,7 +359,7 @@ export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: Callbac
             result = (catchFn || wrapThrow).call(thisArg, e);
         }
         else {
-            result = catchFn.splice(0)[0].call(thisArg, e, ...catchFn);
+            result = catchFn.splice(0, 1)[0].call(thisArg, e, ...catchFn);
         }
         if (isPromise<E>(result)) {
             result = result.then<E, any>((e) => e, wrapThrow);
