@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { resolve } from "path";
-import { TestUtils } from "@spmeesseman/test-utils";
+import { TestRunner } from "@spmeesseman/test-utils";
 
 
 export const run = (): Promise<void> =>
@@ -13,7 +13,7 @@ export const run = (): Promise<void> =>
 		  verbose = xArgs.includes("--nyc-verbose"),
 		  silent = xArgs.includes("--nyc-silent");
 
-	return new TestUtils(
+	return new TestRunner(
 	{
 		isTypescript: true,
 		moduleBuildDir: "dist",

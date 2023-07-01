@@ -8,8 +8,8 @@ import { testControl } from "../control";
 import { startInput, stopInput } from "./input";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
+import { TestTracker, colors, figures } from "@spmeesseman/test-utils";
 import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
-import { TestUtilsBestTimes, colors, figures } from "@spmeesseman/test-utils";
 import {
     ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
 } from ":types";
@@ -26,7 +26,7 @@ export { getWsPath, getProjectsPath };
 export let teApi: ITaskExplorerApi;
 export let teWrapper: ITeWrapper;
 
-const bestTimes = new TestUtilsBestTimes();
+const bestTimes = new TestTracker();
 export const consoleWrite = bestTimes.utils.consoleWrite;
 export const isRollingCountError = () => bestTimes.utils.isRollingCountError;
 export const getSuccessCount = (instance: Mocha.Context) => bestTimes.utils.getSuccessCount(instance);
