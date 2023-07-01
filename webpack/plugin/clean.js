@@ -35,20 +35,20 @@ const clean = (env, wpConfig) =>
 		}
 		else
 		{
-			plugin = new CleanWebpackPlugin(
-			{
-				dry: false,
-				dangerouslyAllowCleanPatternsOutsideProject: true,
-				cleanOnceBeforeBuildPatterns: wpConfig.mode === "production" ? [
-					path.posix.join(env.buildPath.replace(/\\/g, "/"), "dist", "**"),
-					path.posix.join(env.buildPath.replace(/\\/g, "/"), ".coverage", "**"),
-					path.posix.join(env.buildPath.replace(/\\/g, "/"), ".nyc-output", "**"),
-					"!dist/webview/app/**"
-				] : [
-					path.posix.join(env.buildPath.replace(/\\/g, "/"), "dist", "**"),
-					"!dist/webview/app/**"
-				]
-			});
+			// plugin = new CleanWebpackPlugin(
+			// {
+			// 	dry: false,
+			// 	dangerouslyAllowCleanPatternsOutsideProject: true,
+			// 	cleanOnceBeforeBuildPatterns: wpConfig.mode === "production" ? [
+			// 		path.posix.join(env.buildPath.replace(/\\/g, "/"), "dist", "**"),
+			// 		path.posix.join(env.buildPath.replace(/\\/g, "/"), ".coverage", "**"),
+			// 		path.posix.join(env.buildPath.replace(/\\/g, "/"), ".nyc-output", "**"),
+			// 		"!dist/webview/app/**"
+			// 	] : [
+			// 		path.posix.join(env.buildPath.replace(/\\/g, "/"), "dist", "**"),
+			// 		"!dist/webview/app/**"
+			// 	]
+			// });
 		}
 	}
 	return plugin;

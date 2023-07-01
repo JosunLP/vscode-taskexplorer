@@ -54,8 +54,9 @@ const output = (env, wpConfig) =>
 	}
 	else
 	{
+		const isTests = env.environment.startsWith("test");
 		wpConfig.output = {
-			clean: env.clean === true,
+			clean: env.clean === true ? (isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
 			path: env.build === "browser" ? path.join(env.buildPath, "dist", "browser") : path.join(env.buildPath, "dist"),
 			filename: "[name].js",
 			libraryTarget: "commonjs2"

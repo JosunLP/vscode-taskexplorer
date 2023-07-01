@@ -94,6 +94,7 @@
 		"rebuild-prod": "npm run clean-all && webpack --mode production --env clean=true --config ./webpack.config.js",
 		"rebuild-dev": "npm run clean-all && webpack --mode development --env clean=true --config ./webpack.config.js",
 		"rebuild-test": "npm run clean-all && webpack --env environment=test --env clean=true --config ./webpack.config.js",
+		"rebuild-test_suite": "npm run clean-tests:build && tsc -b ./src/test && tsc-alias -p ./src/test/tsconfig.json",
 		"rebuild-extension-prod": "npm run clean-extension && webpack --mode production --env build=extension --env clean=true --config ./webpack.config.js",
 		"rebuild-extension-browser": "npm run clean-extension && webpack --mode production --env clean=true --env build=extension --env target=web --config ./webpack.config.js",
 		"rebuild-extension-dev": "npm run clean-extension && webpack --mode development --env build=extension --env clean=true --config ./webpack.config.js",
