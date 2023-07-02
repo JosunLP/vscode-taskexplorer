@@ -9,7 +9,9 @@ const afterdone = require("../plugin/afterdone");
 const banner = require("../plugin/banner");
 const build = require("../plugin/build");
 const clean = require("../plugin/clean");
+const copy = require("../plugin/copy");
 const ignore = require("../plugin/ignore");
+const optimization = require("../plugin/optimization");
 const progress = require("../plugin/progress");
 const sourcemaps = require("../plugin/sourcemaps");
 const tscheck = require("../plugin/tscheck");
@@ -47,7 +49,7 @@ const plugins = (env, wpConfig) =>
 				// @ts-ignore
 				wpPlugin.htmlcsp(env, wpConfig),
 				wpPlugin.htmlinlinechunks(env, wpConfig),
-				wpPlugin.copy(apps, env, wpConfig),
+				copy(apps, env, wpConfig),
 				wpPlugin.imageminimizer(env, wpConfig)
 			);
 		}
@@ -55,8 +57,7 @@ const plugins = (env, wpConfig) =>
 		{
 			wpConfig.plugins.push(
 				sourcemaps(env, wpConfig),
-				wpPlugin.limitchunks(env, wpConfig),
-				wpPlugin.copy([], env, wpConfig),
+				copy([], env, wpConfig),
 				wpPlugin.analyze.bundle(env, wpConfig),
 				wpPlugin.analyze.visualizer(env, wpConfig),
 				wpPlugin.analyze.circular(env, wpConfig),
@@ -66,7 +67,7 @@ const plugins = (env, wpConfig) =>
 	}
 
 	wpConfig.plugins.push(
-		wpPlugin.optimize.noEmitOnError(env, wpConfig),
+		...optimization(env, wpConfig),
 		afterdone(env, wpConfig)
 	);
 

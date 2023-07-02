@@ -2,8 +2,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+/**
+ * @module webpack.plugin.clean
+ */
+
 const path = require("path");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
