@@ -2,7 +2,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.ignore
+ * @module webpack.plugin.banner
  */
 
 const webpack = require("webpack");
@@ -13,19 +13,23 @@ const webpack = require("webpack");
 /**
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {webpack.IgnorePlugin | undefined}
+ * @returns {webpack.BannerPlugin | undefined}
  */
-const ignore = (env, wpConfig) =>
+const banner = (env, wpConfig) =>
 {
     let plugin;
-    if (wpConfig.mode === "production")
-    {
-        plugin = new webpack.IgnorePlugin({
-            resourceRegExp: /^\.\/locale$/,
-            contextRegExp: /moment$/,
-          });
-    }
-    return plugin;
+		if (wpConfig.mode === "production")
+		{
+			plugin = new webpack.BannerPlugin(
+			{
+				banner: `Copyright ${(new Date()).getFullYear()} Scott P Meesseman`,
+				entryOnly: true,
+				test: /taskexplorer\.js/
+				// raw: true
+			});
+		}
+		return plugin;
 };
 
-module.exports = ignore;
+
+module.exports = banner;

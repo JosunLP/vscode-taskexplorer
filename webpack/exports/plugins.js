@@ -6,6 +6,8 @@
  */
 
 const afterdone = require("../plugin/afterdone");
+const banner = require("../plugin/banner");
+const build = require("../plugin/build");
 const clean = require("../plugin/clean");
 const ignore = require("../plugin/ignore");
 const progress = require("../plugin/progress");
@@ -29,7 +31,7 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins = [
 		progress(env, wpConfig),
 		clean(env, wpConfig),
-		wpPlugin.beforecompile(env, wpConfig),
+		build(env, wpConfig),
 		ignore(env, wpConfig),
 		...tscheck(env, wpConfig)
 	];
@@ -58,7 +60,7 @@ const plugins = (env, wpConfig) =>
 				wpPlugin.analyze.bundle(env, wpConfig),
 				wpPlugin.analyze.visualizer(env, wpConfig),
 				wpPlugin.analyze.circular(env, wpConfig),
-				wpPlugin.banner(env, wpConfig)
+				banner(env, wpConfig)
 			);
 		}
 	}
