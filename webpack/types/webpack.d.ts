@@ -20,7 +20,7 @@ declare interface WebpackEnvironment
     esbuild: boolean; // Is ES build
     imageOpt: boolean; // Perform image optimization
     target: WebpakTarget;
-    verbosity: WebpackLogLevel
+    verbosity: WebpackLogLevel;
 }
 
 export {

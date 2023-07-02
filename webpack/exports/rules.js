@@ -109,6 +109,7 @@ const rules = (env, wpConfig) =>
 	}
 	else
 	{
+		const configFile = env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json";
 		wpConfig.module.rules.push(...[
 		{   //
 			// THe author of this package decided to import a 700k library (Moment) (un-compressed)
@@ -170,14 +171,14 @@ const rules = (env, wpConfig) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						env, path.join(env.buildPath, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
+						env, path.join(env.buildPath, configFile),
 					)
 				}
 			} :
 			{
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(env.buildPath, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
+					configFile: path.join(env.buildPath, configFile),
 					// experimentalWatchApi: true,
 					transpileOnly: true
 				}

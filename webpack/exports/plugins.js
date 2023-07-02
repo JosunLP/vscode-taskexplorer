@@ -5,6 +5,7 @@
  * @module webpack.exports.plugins
  */
 
+const afterdone = require("../plugin/afterdone");
 const clean = require("../plugin/clean");
 const ignore = require("../plugin/ignore");
 const progress = require("../plugin/progress");
@@ -64,7 +65,7 @@ const plugins = (env, wpConfig) =>
 
 	wpConfig.plugins.push(
 		wpPlugin.optimize.noEmitOnError(env, wpConfig),
-		wpPlugin.afterdone(env, wpConfig)
+		afterdone(env, wpConfig)
 	);
 
 	wpConfig.plugins.slice().reverse().forEach((p, index, object) =>
