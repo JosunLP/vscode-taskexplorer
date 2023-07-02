@@ -49,7 +49,6 @@ const main = async () =>
           vsCodeTestVersion = pkgJso.engines.vscode.replace(/[^0-9a-z\-\.]/g, ""),
           projectSettingsFile = path.join(project1Path, ".vscode", "settings.json"),
           multiRootWsFile = path.join(testWorkspaceMultiRoot, "tests.code-workspace"),
-          isWebpackBuild = fs.existsSync(path.join(distPath, "vendor.js")),
           defaultSettings = await createDefaultSettings(pkgJso);
 
 
@@ -111,9 +110,6 @@ const main = async () =>
 
         consoleWrite("clear package.json activation event");
         execSync("sh ./enable-full-coverage.sh", { cwd: "script" });
-        if (!isWebpackBuild) {
-            // execSync("sh ./set-main-entry.sh", { cwd: "script" });
-        }
 
         //
         // Clear workspace settings file if it exists
@@ -222,9 +218,6 @@ const main = async () =>
             consoleWrite("restore package.json activation event");
             // execSync(`enable-full-coverage.sh --off${logFile ? ` --logfile "${logFile}` : ""}"`, { cwd: "script" });
             execSync("sh ./enable-full-coverage.sh --off", { cwd: "script" });
-            if (!isWebpackBuild) {
-                // execSync("sh ./set-main-entry.sh --off", { cwd: "script" });
-            }
             // if (settingsJsonOrig && !testControl.keepSettingsFileChanges) {
             // if (!testControl.keepSettingsFileChanges)
             // {
