@@ -31,7 +31,7 @@ export const testControl =
     //
     // Test Utils module best times
     //
-    bestTimes: {
+    testTracker: {
         clearAllBestTimes: false,
         clearBestTime: false,
         clearBestTimesOnTestCountChange: false

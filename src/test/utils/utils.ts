@@ -5,11 +5,10 @@ import * as path from "path";
 import { expect } from "chai";
 import * as treeUtils from "./treeUtils";
 import { testControl } from "../control";
-import { startInput, stopInput } from "./input";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
-import { TestTracker, colors, figures } from "@spmeesseman/test-utils";
 import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
+import { TestTracker, colors, figures, startInput, stopInput, writeErrorsAreOk } from "@spmeesseman/test-utils";
 import {
     ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
 } from ":types";
@@ -18,25 +17,21 @@ import {
     Uri, ViewColumn, window, workspace
 } from "vscode";
 
-const { symbols } = require("mocha/lib/reporters/base");
-
 export { testControl };
 export { treeUtils };
 export { getWsPath, getProjectsPath };
 export let teApi: ITaskExplorerApi;
 export let teWrapper: ITeWrapper;
 
-const bestTimes = new TestTracker();
-export const consoleWrite = bestTimes.utils.consoleWrite;
-export const isRollingCountError = () => bestTimes.utils.isRollingCountError;
-export const getSuccessCount = (instance: Mocha.Context) => bestTimes.utils.getSuccessCount(instance);
-export const suiteFinished = (instance: Mocha.Context) => bestTimes.utils.suiteFinished(instance);
-export const endRollingCount = (instance: Mocha.Context, isSetup?: boolean) => bestTimes.utils.endRollingCount(instance, isSetup);
-export const exitRollingCount = (instance: Mocha.Context, isSetup?: boolean, isTeardown?: boolean) => bestTimes.utils.exitRollingCount(instance, isSetup, isTeardown);
+const testTracker = new TestTracker();
+export const consoleWrite = testTracker.utils.consoleWrite;
+export const isRollingCountError = () => testTracker.utils.isRollingCountError;
+export const getSuccessCount = (instance: Mocha.Context) => testTracker.utils.getSuccessCount(instance);
+export const suiteFinished = (instance: Mocha.Context) => testTracker.utils.suiteFinished(instance);
+export const endRollingCount = (instance: Mocha.Context, isSetup?: boolean) => testTracker.utils.endRollingCount(instance, isSetup);
+export const exitRollingCount = (instance: Mocha.Context, isSetup?: boolean, isTeardown?: boolean) => testTracker.utils.exitRollingCount(instance, isSetup, isTeardown);
 
 let activated = false;
-let caughtControlC = false;
-let hasRollingCountError = false;
 let timeStarted: number;
 let extension: Extension<any>;
 let overridesShowInputBox: any[] = [];
@@ -165,10 +160,6 @@ export const activate = async () =>
         //
         teWrapper.log.setWriteToConsole(tc.log.console, tc.log.level);
         //
-        // Catch CTRL+C and set hasRollingCountError if caught
-        //
-        startInput(setFailed);
-        //
         // Increase slow times for local license server (making remote db requests)
         //
         if (testControl.apiServer === "localhost")
@@ -181,9 +172,9 @@ export const activate = async () =>
         //
         // Set options in testUtils / bestTImes module
         //
-        bestTimes.options = {
+        testTracker.options = {
             isMultiRootWorkspace: tc.isMultiRootWorkspace,
-            ...tc.bestTimes,
+            ...tc.testTracker,
             store: {
                 getStoreValue: teWrapper.storage.get2.bind(teWrapper.storage),
                 updateStoreValue: teWrapper.storage.update2.bind(teWrapper.storage)
@@ -275,12 +266,8 @@ export const cleanup = async () =>
     // day of my life coding.
     //
     try {
-        await bestTimes.processTimes(timeStarted, hasRollingCountError);
+        await testTracker.processTimes(timeStarted);
     } catch {}
-    //
-    // If rolling count error is set, reset the mocha success icon for "cleanup" final test/step
-    //
-    if (hasRollingCountError) { symbols.ok = figures.color.success; }
     //
     // Delete stored user account
     //
@@ -394,19 +381,7 @@ export const logErrorsAreFine = (willFail = true) =>
 {
     if (willFail && tc.log.enabled && teWrapper.config.get<boolean>("logging.enabled"))
     {
-        console.log(`    ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}`);
-        console.log(`    ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.up}  ${figures.withColor("  THESE ERRORS WERE SUPPOSED TO HAPPEN!!!  ", colors.green)}  ` +
-                    `${figures.color.up}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}`);
-        console.log(`    ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ` +
-                    `${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}  ${figures.color.success}`);
+        writeErrorsAreOk();
     }
 };
 
@@ -456,14 +431,6 @@ export const waitForEvent = async <T>(event: Event<T>, timeout = 10000, followUp
 
 
 export const promiseFromEvent = <T, U>(e: Event<T>, adapter: PromiseAdapter<T, U> = passthrough) => teWrapper.promiseUtils.promiseFromEvent(e, adapter);
-
-
-export const setFailed = (ctrlc = true) =>
-{
-    caughtControlC = ctrlc;
-    hasRollingCountError = true;
-    symbols.ok = figures.withColor(figures.pointer, colors.blue);
-};
 
 
 export const setLicenseType = async (type: TeLicenseType) =>
