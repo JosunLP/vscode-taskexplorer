@@ -2,6 +2,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+/**
+ * @module webpack.plugin.afterdone
+ */
+
 const path = require("path");
 const { renameSync, existsSync, writeFileSync, readFileSync } = require("fs");
 
