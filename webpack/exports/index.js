@@ -14,6 +14,7 @@ const resolve = require("./resolve");
 const rules = require("./rules");
 const stats = require("./stats");
 const target = require("./target");
+const watch = require("./watch");
 
 module.exports = {
     context,
@@ -29,5 +30,6 @@ module.exports = {
     resolve,
     rules,
     stats,
-    target
+    target,
+    watch
 };
