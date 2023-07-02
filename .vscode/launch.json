@@ -2,20 +2,23 @@
 {
     "version": "0.2.0",
     "configurations": [
-         {
-            "name": "Launch (TSC)(Project Root)",
+        {
+            "name": "Launch (Project Root)",
             "type": "extensionHost",
             "request": "launch",
+			"debugWebviews": true,
             "runtimeExecutable": "${execPath}",
             "smartStep": true,
 			"sourceMaps": true,
 			"sourceMapRenames": true,
 			"trace": true,
-            "preLaunchTask": "npm: watch:tsc",
+            "preLaunchTask": "npm: watch",
+            "autoAttachChildProcesses": true,
 			"rendererDebugOptions": {
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
+				"urlFilter": "*spmeesseman.*",
 				"webRoot": "${workspaceFolder}/res"
 			},
             "outFiles": [
@@ -26,14 +29,14 @@
             ],
             "args": [
                 "${workspaceFolder}",
-                "--profile=Debug (TaskExplorer | TSC)",
+                "--profile=Debug (TaskExplorer)",
                 "--disable-extensions",
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}"
             ]
         },
         {
-            "name": "Launch (TSC)(Test Fixture)",
+            "name": "Launch (Test Fixture)",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
@@ -42,11 +45,13 @@
 			"sourceMapRenames": true,
 			"trace": true,
 			"debugWebviews": true,
-            "preLaunchTask": "npm: watch:tsc",
+            "preLaunchTask": "npm: watch",
+            "autoAttachChildProcesses": true,
 			"rendererDebugOptions": {
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
+				"urlFilter": "*spmeesseman.*",
 				"webRoot": "${workspaceFolder}/res"
 			},
             "outFiles": [
@@ -57,14 +62,14 @@
             ],
             "args": [
                 "${workspaceFolder}/test-fixture/tests.code-workspace",
-                "--profile=Debug (TaskExplorer | TSC)",
+                "--profile=Debug (TaskExplorer)",
 				"--disable-extensions",
                 "--disable-workspace-trust",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			]
         },
         {
-            "name": "Launch (TSC)(G2)",
+            "name": "Launch (G2)",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
@@ -72,12 +77,14 @@
 			"sourceMaps": true,
 			"sourceMapRenames": true,
 			"trace": true,
-            "preLaunchTask": "npm: watch:tsc",
 			"debugWebviews": true,
+            "preLaunchTask": "npm: watch",
+            "autoAttachChildProcesses": true,
 			"rendererDebugOptions": {
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
+				"urlFilter": "*spmeesseman.*",
 				"webRoot": "${workspaceFolder}/res"
 			},
             "outFiles": [
@@ -88,14 +95,14 @@
             ],
             "args": [
                 "${workspaceFolder}/../pja/GEMS2",
-                "--profile=Debug (TaskExplorer | TSC)",
+                "--profile=Debug (TaskExplorer)",
                 "--disable-extensions",
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}"
             ]
         },
         {
-			"name": "Launch (Webpack)(TestFixture Root)",
+			"name": "Launch (TestFixture Root)",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
@@ -104,12 +111,13 @@
 			"sourceMapRenames": true,
 			"trace": true,
             "autoAttachChildProcesses": true,
-			"preLaunchTask": "npm: watch",
 			"debugWebviews": true,
+            "preLaunchTask": "npm: watch",
 			"rendererDebugOptions": {
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
+				"urlFilter": "*spmeesseman.*",
 				"webRoot": "${workspaceFolder}/res"
 			},
 			"outFiles": [
@@ -120,7 +128,7 @@
             ],
 			"args": [
                 "${workspaceFolder}/test-fixture/tests.code-workspace",
-                "--profile=Debug (TaskExplorer | WP)",
+                "--profile=Debug (TaskExplorer)",
 				"--disable-extensions",
                 "--disable-workspace-trust",
 				"--extensionDevelopmentPath=${workspaceFolder}"
@@ -135,14 +143,15 @@
 			"sourceMaps": true,
 			"sourceMapRenames": true,
 			"trace": true,
-            "preLaunchTask": "npm: test-hook-before",
-            "postDebugTask": "npm: test-hook-after",
-            "debugWebviews": true,
+			"debugWebviews": true,
+            "preLaunchTask": "npm: watch",
+            "autoAttachChildProcesses": true,
 			"rendererDebugOptions": {
 				"pauseForSourceMap": true,
 				"sourceMapRenames": true,
 				"sourceMaps": true,
-				"webRoot": "${workspaceFolder}/src/webviews/apps"
+				"urlFilter": "*spmeesseman.*",
+				"webRoot": "${workspaceFolder}/res"
 			},
 			"outFiles": [
                 "${workspaceFolder}/dist/test/**/*.js"
@@ -152,7 +161,7 @@
             ],
             "args": [
                 "${workspaceFolder}/test-fixture/project1",
-                "--profile=Tests (TaskExplorer | TSC)",
+                "--profile=Tests (TaskExplorer)",
                 "--disable-extensions",
                 "--disable-workspace-trust",
                 "--extensionTestsPath=${workspaceFolder}/dist/test/suite",
