@@ -566,14 +566,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this.wrapper.statusBar.update("Sending payment request");
 			const ep: ITeApiEndpoint = "payment/paypal/hook",
 				  token = this._account.session.token;
-			await this.wrapper.utils.wrap<Promise<void>>(
+			await this.wrapper.utils.wrap(
 				async () =>
 				{
 					await this._server.request<any>(ep, token, logPad, this.getPaypalWebhookPayload());
 					await this.wrapper.utils.sleep(50);
 					await this.validateLicense(this._account.license.key, logPad + "   ");
 				},
-				this.handleServerError, this
+				[ this.handleServerError ], this
 			);
 			this.restoreStatusBar(sbInfo);
 			this._busy = false;

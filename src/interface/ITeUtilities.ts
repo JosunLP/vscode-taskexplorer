@@ -114,5 +114,11 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap<T, E = any>(runFn: (...args: any[]) => T, catchFn?: CallbackOptions | ((e: any) => E) | null, thisArg?: any, ...args: any[]): T | E;
+	wrap<R, E>(runFn: () => R, catchFn: CallbackOptions | null | undefined, thisArg?: any): R;
+	wrap<R, E, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1): R;
+	wrap<R, E, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2): R;
+	wrap<R, E, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
+	wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
+	wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
+	wrap<R, E = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFn?: CallbackOptions | null | undefined, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R;
 }

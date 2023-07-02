@@ -48,7 +48,7 @@ export const getPortableDataPath = (logPad = ""): string | undefined | void =>
                 const fullPath = join(uri.fsPath, "user-data", "User");
                 log.value(logPad + "found portable user data path", fullPath, 4);
                 return fullPath;
-            }, log.error, this);
+            }, [ log.error ], this);
         }
     }, this);
 };

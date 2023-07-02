@@ -330,15 +330,21 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
-export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: CallbackOptions | ((e: any) => E) | null, thisArg?: any, ...args: any[]): T | E =>
+export function wrap<R, E>(runFn: () => R, catchFn: CallbackOptions | null | undefined, thisArg?: any): R;
+export function wrap<R, E, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1): R;
+export function wrap<R, E, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2): R;
+export function wrap<R, E, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
+export function wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
+export function wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
+export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFn?: CallbackOptions | null | undefined, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
 {
     let result;
     try
     {
-        result = runFn.call(thisArg, ...args);
-        if (isPromise<T>(result))
+        result = runFn.call(thisArg, arg1, arg2, arg3, arg4, arg5);
+        if (isPromise<R>(result))
         {
-            result = result.then<T, E>((r) => r, (e) =>
+            result = result.then<R, E>((r) => r, (e) =>
             {
                 if (!isCallbackOptions(catchFn)) {
                     result = (catchFn || wrapThrow).call(thisArg, e);
@@ -365,7 +371,7 @@ export const wrap = <T, E = any>(runFn: (...args: any[]) => T, catchFn?: Callbac
             result = result.then<E, any>((e) => e, wrapThrow);
         }
     }
-    return result as T | E;
+    return result;
 };
 
 
