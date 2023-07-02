@@ -44,8 +44,8 @@ export const run = (): Promise<void> =>
 				exclude: [ "dist/test", "node_modules", "dist/vendor.js", "dist/runtime.js" ]
 			},
 		},
-		tests: {
-			tool: "mocha",
+		framework: {
+			type: "mocha",
 			root: __dirname,
 			suite: testArgs,
 			config: {

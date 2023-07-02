@@ -8,7 +8,7 @@ import { testControl } from "../control";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
 import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
-import { TestTracker, colors, figures, startInput, stopInput, writeErrorsAreOk } from "@spmeesseman/test-utils";
+import { TestTracker, colors, figures, sleep, writeErrorsAreOk } from "@spmeesseman/test-utils";
 import {
     ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
 } from ":types";
@@ -17,9 +17,8 @@ import {
     Uri, ViewColumn, window, workspace
 } from "vscode";
 
-export { testControl };
-export { treeUtils };
-export { getWsPath, getProjectsPath };
+export { sleep, testControl, treeUtils, getWsPath, getProjectsPath };
+
 export let teApi: ITaskExplorerApi;
 export let teWrapper: ITeWrapper;
 
@@ -32,7 +31,6 @@ export const endRollingCount = (instance: Mocha.Context, isSetup?: boolean) => t
 export const exitRollingCount = (instance: Mocha.Context, isSetup?: boolean, isTeardown?: boolean) => testTracker.utils.exitRollingCount(instance, isSetup, isTeardown);
 
 let activated = false;
-let timeStarted: number;
 let extension: Extension<any>;
 let overridesShowInputBox: any[] = [];
 let overridesShowInfoBox: any[] = [];
@@ -195,7 +193,6 @@ export const activate = async () =>
         consoleWrite(`   Extension Short  : ${teWrapper.extensionTitleShort}`);
         consoleWrite(`   ${disableSSLMsg}`, figures.color.warningTests);
 
-        timeStarted = Date.now();
         activated = true;
     }
 
@@ -211,9 +208,7 @@ export const cleanup = async () =>
 {
     console.log(`    ${figures.color.info}`);
     console.log(`    ${figures.color.info} ${figures.withColor("Tests complete, clean up", colors.grey)}`);
-    if (caughtControlC) {
-        console.log(`    ${figures.color.info} ${figures.withColor("User cancelled (caught CTRL+C)", colors.grey)}`);
-    }
+
     if (teWrapper)
     {
         if (tc.log.enabled && tc.log.file && tc.log.openFileOnFinish)
@@ -223,10 +218,6 @@ export const cleanup = async () =>
             console.log(`    ${figures.color.info} ${figures.withColor("   " + teWrapper.log.getLogFileName(), colors.grey)}`);
             console.log(`    ${figures.color.info}`);
         }
-        //
-        // Stop CTRL+C and set hasRollingCountError
-        //
-        stopInput();
         //
         // Cleanup or reset any settings, and clear license/account from tests storage
         //
@@ -266,7 +257,7 @@ export const cleanup = async () =>
     // day of my life coding.
     //
     try {
-        await testTracker.processTimes(timeStarted);
+        await testTracker.processTimes();
     } catch {}
     //
     // Delete stored user account
@@ -451,9 +442,6 @@ export const setLicenseType = async (type: TeLicenseType) =>
         account.license.state = 0;
     }
 };
-
-
-export const sleep = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 
 export const tagLog = (test: string, suite: string) =>
