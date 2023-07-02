@@ -10,7 +10,7 @@
 		"tsBuildInfoFile": "../../node_modules/.cache/tsconfig.test.tsbuildinfo",
         "paths": {
 			":types": [ "../../types" ],
-			"@spmeesseman/test-utils": [ "../../node_modules/@spmeesseman/test-utils/dist" ]
+			"@spmeesseman/test-utils": [ "../../node_modules/@spmeesseman/test-utils" ]
 		}
     },
 	"include": [
