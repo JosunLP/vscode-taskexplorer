@@ -4,7 +4,7 @@
     {
         "type": "npm",
         "script": "watch",
-        "problemMatcher": "$webpackTe",
+       // "problemMatcher": "$webpackTe",
         "isBackground": true,
         "presentation": {
             "reveal": "always",
@@ -12,6 +12,23 @@
         },
         "group": {
             "kind": "test"
+        },
+        "problemMatcher": {
+            "owner": "javascript",
+            "source": "javascript",
+            "pattern": [
+                {
+                    "regexp": "\\[tsl\\] ERROR",
+                    "file": 1,
+                    "location": 2,
+                    "message": 3
+                }
+            ],
+            "background": {
+                "activeOnStart": true,
+                "beginsPattern": "[a-z]+\\:[a-z]\\:",
+                "endsPattern": "compiled\\s+successfully\\s+in\\s+[0-9]+\\s+ms"
+            }
         }
     },
     {

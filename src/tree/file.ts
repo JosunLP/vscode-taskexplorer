@@ -3,13 +3,15 @@ import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
+import { Strings } from "../lib/constants";
 import { basename, extname, join } from "path";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
 import { ITaskDefinition, ITaskFile } from "../interface";
+import { isWorkspaceFolder } from "../lib/utils/typeUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { getInstallPathSync, getUserDataPath } from "../lib/utils/pathUtils";
+import { getInstallPathSync, getTaskRelativePath, getUserDataPath } from "../lib/utils/pathUtils";
 import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 
 
@@ -44,7 +46,6 @@ export class TaskFile extends TreeItem implements ITaskFile
     readonly isUser: boolean;
 
     override id: string;
-    override label = "";
     override resourceUri: Uri;
 
 
@@ -126,7 +127,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         // Set unique id
         //
-        this.id = TaskFile.createId(folder, task, this.fileName, this.label, this.taskSource, this.groupLevel, groupId);
+        this.id = TaskFile.createId(folder, task, this.fileName, <any>this.label, this.taskSource, this.groupLevel, groupId);
 
         //
         // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
@@ -175,9 +176,37 @@ export class TaskFile extends TreeItem implements ITaskFile
     }
 
 
-    static createId(folder: TaskFolder, task: Task, fileName: string, label: string, source: string, groupLevel: number, groupId?: string)
-    {   // 70726f6a65637432:webpack.config.js:0:::webpack is already
-        return folder.id + ":" + encodeUtf8Hex(`${(<any>task)._id}:${fileName}:${groupLevel}:${groupId || ""}:${label}:${source}`);
+    static createId(folder: TaskFolder, task: Task, fileName: string, label: string | undefined, source: string, groupLevel: number, groupId?: string)
+    {
+        let pathKey = "";
+        const relativePath = getTaskRelativePath(task),
+              relPathAdj = task.source !== "Workspace" ? relativePath : ".vscode";
+        if (task.definition.uri)
+        {
+            pathKey = task.definition.uri.fsPath;
+        }
+        else if (task.definition.fileName && !task.definition.scriptFile)
+        {
+            pathKey = join(relPathAdj, task.definition.fileName);
+        }
+        else if (task.definition.tsconfig)
+        {
+            pathKey = task.definition.tsconfig;
+        }
+        else
+        {
+            let scopeName = "";
+            if (isWorkspaceFolder(task.scope)) {
+                scopeName = task.scope.name;
+            }
+            else {
+                scopeName = Strings.USER_TASKS_LABEL;
+            }
+            pathKey = join(scopeName, relPathAdj);
+        }
+
+        const lblKey = label || this.getLabel(task.definition, task.source, relativePath, groupId);
+        return folder.id + ":" + encodeUtf8Hex(`${pathKey}:${fileName}:${groupLevel}:${groupId || ""}:${lblKey}:${source}`);
     }
 
 
