@@ -441,7 +441,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         }
         try {
             if (doFetch) {
-                this._treeBuilder.invalidate();
                 await this.fetchTasks(logPad);
             }
             this.fireTreeRefreshEvent(null, null, logPad);
@@ -529,7 +528,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                     w.providers[o1]?.invalidate(undefined, logPad + "   ");
                 }
             }
-        }, w.log.error, this, opt1, opt2);
+        }, [ w.log.error ], this, opt1, opt2);
         w.log.methodDone("invalidate tasks cache", 1, logPad);
     };
 
@@ -621,7 +620,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      *
      * If invalidate and opt are both undefined, then a configuration has changed
      *
-     * invalidate can be false when a grouping settingshas changed, where the tree needs to be rebuilt
+     * invalidate can be false when a grouping setting shas changed, where the tree needs to be rebuilt
      * but the file cache does not need to rebuild and  do not need to invalidate any task providers
      *
      * @param opt Uri of the invalidated resource
@@ -696,17 +695,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 else if (invalidate === false && opt === undefined) // Rebuild tree only, tasks have not changed
                 {
                     w.log.write("   no invalidation, rebuild tree only", 1, logPad);
-                    this._treeBuilder.invalidate();
                     await this._treeBuilder.createTaskItemTree(logPad + "   ", 2);
-                }     //
+                    doFetch = false;
+                }    //
                 else // Re-fetch for all tasks from all providers and rebuild tree
                 {   //
                     w.log.write("   invalidation is for all types", 1, logPad);
                     this._currentInvalidation = undefined;
-                    this._tasks.splice(0);
-                } //
-            }    // loadTasks() invalidates treeBuilder, sets taskMap to {} and taskTree to null
-                //
+                }
+            }
             await this.loadTasks(doFetch, logPad + "   ");
         }
 

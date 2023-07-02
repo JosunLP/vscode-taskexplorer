@@ -74,7 +74,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         if (task.definition.scriptFile) {
             this.resourceUri = Uri.file(fsPath);
         }
-        this.id = encodeUtf8Hex(`${fsPath}:${task.source}:${task.name}:`); // <- leave trailing ':' for backwards compat
+        this.id = TaskItem.createId(fsPath, task);
         this.paused = false;                // paused flag used by start/stop/pause task functionality
         this.taskFile = taskFile;           // Save a reference to the TaskFile that this TaskItem belongs to
         this.task = task;                   // Save a reference to the Task that this TaskItem represents
@@ -114,6 +114,12 @@ export class TaskItem extends TreeItem implements ITaskItem
     }
 
 
+    static createId(fsPath: string, task: Task)
+    {
+        return encodeUtf8Hex(`${fsPath}:${task.source}:${task.name}:`); // <- leave trailing ':' for backwards compat
+    }
+
+
     getFolder(): WorkspaceFolder | undefined { return this.taskFile.folder.workspaceFolder; }
 
 
@@ -129,7 +135,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         if (execs.length > 1) {
             log.error(`More than one task execution was found for '${this.task.name}' !!`);
         }
-        log.methodDone("is executing", 5, logPad, [
+        log.methodDone("is executing", 5, logPad, [ 
             [ "is executing", !!exec ], [ "task execution count", execs.length ], [ "total execution count", tasks.taskExecutions.length ]
         ]);
         return exec;

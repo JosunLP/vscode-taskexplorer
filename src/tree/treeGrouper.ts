@@ -73,7 +73,7 @@ export class TaskTreeGrouper
                     const node = taskFile.treeNodes[0];
                     this.wrapper.utils.execIf(node instanceof TaskItem, (_v, n) =>
                     {
-                        subfolder = new TaskFile(folder, n.task.definition, taskFile.taskSource, taskFile.path, 0, id, undefined, "   ");
+                        subfolder = new TaskFile(folder, n.task, taskFile.taskSource, taskFile.path, 0, id, undefined, "   ");
                         subfolders[id] = subfolder;
                         folder.addTaskFile(subfolder);
                         //
@@ -239,7 +239,7 @@ export class TaskTreeGrouper
                     // add them after we loop since we are looping on the array that they need to be
                     // added to
                     //
-                    subfolder = new TaskFile(folder, each.task.definition, taskFile.taskSource,
+                    subfolder = new TaskFile(folder, each.task, taskFile.taskSource,
                                              each.taskFile.path, treeLevel, id, prevName[treeLevel], logPad);
                     subfolders[id] = subfolder;
                     //

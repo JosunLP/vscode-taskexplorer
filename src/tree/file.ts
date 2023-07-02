@@ -3,12 +3,12 @@ import { TaskItem } from "./item";
 import { log } from "../lib/log/log";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
-import { findFiles, pathExistsSync } from "../lib/utils/fs";
+import { basename, extname, join } from "path";
+import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
-import { basename, extname, join, resolve } from "path";
 import { ITaskDefinition, ITaskFile } from "../interface";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
-import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
+import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { getInstallPathSync, getUserDataPath } from "../lib/utils/pathUtils";
 import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 
@@ -44,6 +44,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     readonly isUser: boolean;
 
     override id: string;
+    override label = "";
     override resourceUri: Uri;
 
 
@@ -60,10 +61,12 @@ export class TaskFile extends TreeItem implements ITaskFile
      * @param label The display label.
      * @param logPad Padding to prepend to log entries.  Should be a string of any # of space characters.
      */
-    constructor(folder: TaskFolder, taskDef: ITaskDefinition, source: string, relativePath: string,
+    constructor(folder: TaskFolder, task: Task, source: string, relativePath: string,
                 groupLevel: number, groupId: string | undefined, label: string | undefined, logPad: string)
     {
-        super(TaskFile.getLabel(taskDef, label ? label : source, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
+        super(TaskFile.getLabel(task.definition, label ? label : source, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
+
+        const taskDef = task.definition;
 
         log.methodStart("construct tree file", 4, logPad, false, [
             [ "label", label ?? source ], [ "source", source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
@@ -123,7 +126,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         // Set unique id
         //
-        this.id = folder.id + ":" + encodeUtf8Hex(`${this.fileName}:${this.groupLevel}:${groupId}:${this.label}:${source}`);
+        this.id = TaskFile.createId(folder, task, this.fileName, this.label, this.taskSource, this.groupLevel, groupId);
 
         //
         // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
@@ -169,6 +172,12 @@ export class TaskFile extends TreeItem implements ITaskFile
             [ "resource uri path", this.resourceUri.fsPath ], [ "path", this.path  ], [ "icon light", iconPath.light ],
             [ "icon dark", iconPath.dark ]
         ]);
+    }
+
+
+    static createId(folder: TaskFolder, task: Task, fileName: string, label: string, source: string, groupLevel: number, groupId?: string)
+    {   // 70726f6a65637432:webpack.config.js:0:::webpack is already
+        return folder.id + ":" + encodeUtf8Hex(`${(<any>task)._id}:${fileName}:${groupLevel}:${groupId || ""}:${label}:${source}`);
     }
 
 
