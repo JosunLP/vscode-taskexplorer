@@ -18,7 +18,7 @@ const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + col
 
 
 const consoleWrite = (msg, icon, pad = "") =>
-    console.log(`     ${pad}${icon || wpPlugin.figures.color.info}${msg ? " " + wpPlugin.figures.withColor(msg, wpPlugin.figures.colors.grey) : ""}`);
+    console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
 
 
 const figures =
