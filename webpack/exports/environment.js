@@ -5,7 +5,7 @@
  * @module webpack.exports.environment
  */
 
-const { join } = require("path");
+const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
 
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
@@ -23,12 +23,12 @@ const { writeInfo } = require("../console");
 const environment = (buildTarget, env, argv) =>
 {
 	env.build = buildTarget;
-	env.buildPath = __dirname;
+	env.buildPath = resolve(__dirname, "..", "..");
 	if (env.build === "webview") {
-		env.basePath = join(__dirname, "src", "webview", "app");
+		env.basePath = join(env.buildPath, "src", "webview", "app");
 	}
 	else {
-		env.basePath = __dirname;
+		env.basePath = env.buildPath;
 	}
 	writeInfo("Environment:");
 	Object.keys(env).forEach((k) => { writeInfo(`   ${k.padEnd(15)}: ${env[k]}`); });
