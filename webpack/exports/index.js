@@ -3,6 +3,7 @@
 const context = require("./context");
 const devtool = require("./devtool");
 const entry = require("./entry");
+const environment = require("./environment");
 const externals = require("./externals");
 const ignorewarnings = require("./ignorewarnings");
 const minification = require("./minification");
@@ -20,6 +21,7 @@ module.exports = {
     context,
     devtool,
 	entry,
+    environment,
     externals,
     ignorewarnings,
     minification,

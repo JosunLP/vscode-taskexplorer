@@ -15,6 +15,8 @@
  */
 const optimization = (env, wpConfig) =>
 {
+	wpConfig.parallelism = 1;
+
 	if (env.build === "extension" || env.build === "browser")
 	{
 		wpConfig.optimization =

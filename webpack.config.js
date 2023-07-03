@@ -2,12 +2,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const path = require("path");
-const wpConsole = require("./webpack/console");
-const { wpPlugin } = require("./webpack/plugin/plugins");
+const { writeInfo, figures } = require("./webpack/console");
 const {
 	context, devtool, entry, externals, ignorewarnings, minification,  mode, plugins, optimization,
-	output, resolve, rules, stats, target, watch
+	output, resolve, rules, stats, target, watch, environment
 } = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types/webpack").WebpackBuild} WebpackBuild */
@@ -28,7 +26,14 @@ let buildStep = 0;
  */
 module.exports = (env, argv) =>
 {
-	wpConsole.writeInfo("Start Webpack build");
+	writeInfo("----------------------------------------------------");
+	writeInfo(" Start Task Explorer VSCode Extension Webpack build");
+	writeInfo("----------------------------------------------------");
+	writeInfo("   Argv:");
+	writeInfo("   " + JSON.stringify(argv, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
+	writeInfo("   Env :");
+	writeInfo("   " + JSON.stringify(env, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
+	writeInfo("----------------------------------------------------");
 
 	env = Object.assign(
 	{
@@ -82,7 +87,7 @@ module.exports = (env, argv) =>
 const getWebpackConfig = (buildTarget, env, argv) =>
 {
 	if (buildStep > 0) { console.log(""); }
-	wpConsole.writeInfo(`Start Webpack build step ${++buildStep}`);
+	writeInfo(`Start Webpack build step ${++buildStep}`);
 	/** @type {WebpackConfig}*/
 	const wpConfig = {};
 	environment(buildTarget, env, argv); // Base path / Build path
@@ -103,35 +108,4 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 	watch(env, wpConfig);				 // Watch-mode options
 	wpConfig.name = `${buildTarget}:${wpConfig.mode}`;
 	return wpConfig;
-};
-
-
-/**
- * @method environment
- * @param {WebpackBuild} buildTarget
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackArgs} argv Webpack command line args
- */
-const environment = (buildTarget, env, argv) =>
-{
-	env.build = buildTarget;
-	env.buildPath = __dirname;
-	if (env.build === "webview") {
-		env.basePath = path.join(__dirname, "src", "webview", "app");
-	}
-	else {
-		env.basePath = __dirname;
-	}
-	wpConsole.writeInfo("Environment:");
-	Object.keys(env).forEach((k) => { wpConsole.writeInfo(`   ${k.padEnd(15)}: ${env[k]}`); });
-	if (argv)
-	{
-		wpConsole.writeInfo("Arguments:");
-		if (argv.mode) {
-			wpConsole.writeInfo(`   mode          : ${argv.mode}`);
-		}
-		if (argv.config) {
-			wpConsole.writeInfo(`   config        : ${argv.config.join(", ")}`);
-		}
-	}
 };
