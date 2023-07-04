@@ -23,8 +23,8 @@ export let teApi: ITaskExplorerApi;
 export let teWrapper: ITeWrapper;
 
 const testTracker = new TestTracker();
-export const consoleWrite = testTracker.utils.consoleWrite;
-export const isRollingCountError = () => testTracker.utils.isRollingCountError;
+export const consoleWrite = testTracker.utils.writeConsole;
+export const isRollingCountError = () => testTracker.isRollingCountError;
 export const getSuccessCount = (instance: Mocha.Context) => testTracker.utils.getSuccessCount(instance);
 export const suiteFinished = (instance: Mocha.Context) => testTracker.utils.suiteFinished(instance);
 export const endRollingCount = (instance: Mocha.Context, isSetup?: boolean) => testTracker.utils.endRollingCount(instance, isSetup);
@@ -256,9 +256,7 @@ export const cleanup = async () =>
     // Process execution timesand do the dorky best time thing that I forsome reason spent a whole
     // day of my life coding.
     //
-    try {
-        await testTracker.processTimes();
-    } catch {}
+    await testTracker.processTimes();
     //
     // Delete stored user account
     //
