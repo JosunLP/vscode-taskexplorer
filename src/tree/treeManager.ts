@@ -251,7 +251,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         const zeroTasksToStart = this._tasks.length === 0;
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
-        if (zeroTasksToStart || !this._currentInvalidation || this._currentInvalidation  === "Workspace" || this._currentInvalidation === "tsc")
+        if (zeroTasksToStart || !this._currentInvalidation) // || this._currentInvalidation  === "Workspace" || this._currentInvalidation === "tsc")
         {
             this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
             this.wrapper.statusBar.update("Requesting all tasks from all providers");
@@ -273,7 +273,13 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             // all tasks of the type defined in '_currentInvalidation' from the tasks list cache,
             // and add the new tasks from VSCode into the tasks list.
             //
-            const taskItems = await tasks.fetchTasks({ type: this._currentInvalidation });
+            let taskItems;
+            if (this._currentInvalidation  === "Workspace" || this._currentInvalidation === "tsc") {
+                taskItems = (await tasks.fetchTasks()).filter(t => t.source === this._currentInvalidation);
+            }
+            else {
+                taskItems = await tasks.fetchTasks({ type: this._currentInvalidation });
+            }
             //
             // Process the tasks cache array for any removals that might need to be made
             //                                                          // removes tasks that already existed that were just re-parsed
@@ -328,9 +334,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // Set relevant context keys
         //
         await this.setContext();
-        //
-        // Done!
-        //
         this.wrapper.log.methodDone("fetch tasks", 1, logPad);
     };
 
@@ -697,7 +700,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                     w.log.write("   no invalidation, rebuild tree only", 1, logPad);
                     await this._treeBuilder.createTaskItemTree(logPad + "   ", 2);
                     doFetch = false;
-                }    //
+                }     //
                 else // Re-fetch for all tasks from all providers and rebuild tree
                 {   //
                     w.log.write("   invalidation is for all types", 1, logPad);
