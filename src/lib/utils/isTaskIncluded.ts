@@ -2,13 +2,6 @@
 import { join } from "path";
 import { Task } from "vscode";
 import { TeWrapper } from "../wrapper";
-//
-// For JSON5, if I don't specifically import index.js with 'require', then the
-// damn mjs module file is included by webpack.  I'm sure there's a way to have
-// it import the commonjs module nicely, but couldn't find a way. JSON5 is needed
-// to read the VSCode tasks.json file since it allows comments, and VSCode doesn't
-// expose the task definition's 'hide' property.
-//
 const JSON5 = require("json5/dist/index.js");
 
 
@@ -82,24 +75,29 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
     // Check VSCode /workspace tasks for 'hide' property
     //
     let result = true;
-    if (task.source === "Workspace" && isScopeWsFolder)
+    if (task.source === "Workspace")
     {
-        const showHiddenWsTasks = wrapper.config.get<boolean>("showHiddenWsTasks", true);
-        if (!showHiddenWsTasks) // && task.definition.hide === true)
-        {   //
-            // Note: VSCode workspace task provider does not publish the 'hide' property anywhere
-            // in the task,, it's definition, detail, anywhere.  Stupid. So we have to JSON parse
-            // the tasks.json file to see if the hideproperty is set.
-            //
-            const tasksFile = join(task.scope.uri.fsPath, ".vscode", "tasks.json");
-            result = !!wrapper.utils.wrap((): boolean =>
-            {
-                const jsonc = wrapper.fs.readFileSync(tasksFile).toString(),
-                      tasksJso = JSON5.parse(jsonc), // damn mjs module json5 needed for comments allowed in tasks.json
-                      wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
-                return !(wsTask && wsTask.hide === true);
-            },
-            [ wrapper.log.error ], this);
+        if (isScopeWsFolder)
+        {
+            if (!wrapper.config.get<boolean>(wrapper.keys.Config.ShowHiddenVSCodeWsTasks, true)) // && task.definition.hide === true)
+            {   //
+                // Note: VSCode workspace task provider does not publish the 'hide' property anywhere
+                // in the task,, it's definition, detail, anywhere.  Stupid. So we have to JSON parse
+                // the tasks.json file to see if the hideproperty is set.
+                //
+                const tasksFile = join(task.scope.uri.fsPath, ".vscode", "tasks.json");
+                result = !!wrapper.utils.wrap(() =>
+                {
+                    const jsonc = wrapper.fs.readFileSync(tasksFile).toString(),
+                        tasksJso = JSON5.parse(jsonc), // json5 needed for comments allowed in tasks.json
+                        wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
+                    return !(wsTask && wsTask.hide === true);
+                },
+                [ wrapper.log.error ], this);
+            }
+        }
+        else if (!wrapper.config.get<boolean>(wrapper.keys.Config.SpecialFoldersShowUserTasks)) {
+            return false;
         }
     }
     wrapper.log.write("   task is included", 4, logPad, logQueueId);

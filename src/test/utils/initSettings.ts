@@ -73,6 +73,13 @@ export const initSettings = async () =>
     await workspace.getConfiguration("grunt").update("autoDetect", "on", ConfigurationTarget.Global);
     await workspace.getConfiguration("gulp").update("autoDetect", "on", ConfigurationTarget.Global);
 
+    //
+    // Grunt / Gulp VSCode internal task providers. Gulp suite will disable when done.
+    //
+    await config.update("groupWithSeparator", true, ConfigurationTarget.Workspace);
+    await config.update("groupSeparator", "-", ConfigurationTarget.Workspace);
+    await config.update("groupMaxLevel", 1, ConfigurationTarget.Workspace);
+
     if (tc.log.enabled)
     {
         const slowTimes = tc.slowTime as IDictionary<any>;

@@ -1,9 +1,12 @@
+
+import { ITaskItem } from "./ITaskItem";
 import { Task, Uri, Event } from "vscode";
-import { TaskMap } from "./ITeTaskManager";
 import { ITaskFolder } from "./ITaskFolder";
 import { ITaskTreeView } from "./ITeTaskTree";
 import { ITeTaskChangeEvent } from "./ITeTask";
 import { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
+
+export interface TaskMap<T = ITaskItem | undefined> { [id: string]: T };
 
 export interface ITeTreeManager
 {

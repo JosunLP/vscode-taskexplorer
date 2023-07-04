@@ -62,22 +62,22 @@ export class TaskFile extends TreeItem implements ITaskFile
      * @param label The display label.
      * @param logPad Padding to prepend to log entries.  Should be a string of any # of space characters.
      */
-    constructor(folder: TaskFolder, task: Task, source: string, relativePath: string,
+    constructor(folder: TaskFolder, task: Task, relativePath: string,
                 groupLevel: number, groupId: string | undefined, label: string | undefined, logPad: string)
     {
-        super(TaskFile.getLabel(task.definition, label ? label : source, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
+        super(TaskFile.getLabel(task.definition, label ? label : task.source, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
 
         const taskDef = task.definition;
 
         log.methodStart("construct tree file", 4, logPad, false, [
-            [ "label", label ?? source ], [ "source", source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
+            [ "label", label ?? task.source ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
             [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
             [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
 
         this.folder = folder;
-        this.taskSource = source;
+        this.taskSource = task.source;
         this.isGroup = !!groupId;
         this.isUser = false;
         this.groupLevel = 0;
@@ -90,11 +90,11 @@ export class TaskFile extends TreeItem implements ITaskFile
         // exception of TSC, which is handled elsewhere).
         //
         this.path = this.label !== "vscode" ? relativePath : ".vscode";
-        this.fileName = this.getFileNameFromSource(source, folder, taskDef);
+        this.fileName = this.getFileNameFromSource(task.source, folder, taskDef);
 
         if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
-            if (relativePath && source !== "Workspace") {
+            if (relativePath && task.source !== "Workspace") {
                 this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, relativePath, this.fileName));
             }
             else {
@@ -104,7 +104,7 @@ export class TaskFile extends TreeItem implements ITaskFile
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder
         //
         else {
-            this.fileName = this.getFileNameFromSource(source, folder, taskDef);
+            this.fileName = this.getFileNameFromSource(task.source, folder, taskDef);
             this.resourceUri = Uri.file(join(getUserDataPath(undefined, logPad), this.fileName));
             this.isUser = true;
         }
@@ -118,7 +118,7 @@ export class TaskFile extends TreeItem implements ITaskFile
              //
             this.fileName = "group"; // change to name of directory
             // Use a custom toolip (default is to display resource uri)
-            const taskName = getTaskTypeFriendlyName(source, true);
+            const taskName = getTaskTypeFriendlyName(task.source, true);
             this.tooltip = `${taskName} task file grouping`;
             this.contextValue = "taskGroup" + properCase(this.taskSource);
             this.groupLevel = groupLevel;
@@ -185,7 +185,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         {
             pathKey = task.definition.uri.fsPath;
         }
-        else if (task.definition.fileName && !task.definition.scriptFile)
+        else if (task.definition.fileName)
         {
             pathKey = join(relPathAdj, task.definition.fileName);
         }
@@ -204,7 +204,6 @@ export class TaskFile extends TreeItem implements ITaskFile
             }
             pathKey = join(scopeName, relPathAdj);
         }
-
         const lblKey = label || this.getLabel(task.definition, task.source, relativePath, groupId);
         return folder.id + ":" + encodeUtf8Hex(`${pathKey}:${fileName}:${groupLevel}:${groupId || ""}:${lblKey}:${source}`);
     }

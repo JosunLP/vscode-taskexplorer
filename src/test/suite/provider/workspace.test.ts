@@ -21,7 +21,7 @@ suite("Workspace / VSCode Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate());
-        wsEnable = teWrapper.config.get<boolean>("showHiddenWsTasks");
+        wsEnable = teWrapper.config.get<boolean>(teWrapper.keys.Config.ShowHiddenVSCodeWsTasks);
         endRollingCount(this, true);
     });
 
@@ -29,7 +29,7 @@ suite("Workspace / VSCode Tests", () =>
     suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-        await teWrapper.config.updateWs("showHiddenWsTasks", wsEnable);
+        await teWrapper.config.updateWs(teWrapper.keys.Config.ShowHiddenVSCodeWsTasks, wsEnable);
         suiteFinished(this);
     });
 
@@ -45,7 +45,7 @@ suite("Workspace / VSCode Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(testControl.slowTime.config.event + testControl.slowTime.tasks.count.verifyByTree);
-        await executeSettingsUpdate("showHiddenWsTasks", true);
+        await executeSettingsUpdate(teWrapper.keys.Config.ShowHiddenVSCodeWsTasks, true);
         await treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount);
         endRollingCount(this);
     });
@@ -55,7 +55,7 @@ suite("Workspace / VSCode Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.tasks.count.verifyByTree);
-        await executeSettingsUpdate("showHiddenWsTasks", false);
+        await executeSettingsUpdate(teWrapper.keys.Config.ShowHiddenVSCodeWsTasks, false);
         await treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount - 1);
         endRollingCount(this);
     });
@@ -96,7 +96,7 @@ suite("Workspace / VSCode Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(testControl.slowTime.config.enableEvent + testControl.slowTime.tasks.count.verifyByTree);
-        await executeSettingsUpdate("showHiddenWsTasks", true);
+        await executeSettingsUpdate(teWrapper.keys.Config.ShowHiddenVSCodeWsTasks, true);
         await treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount);
         endRollingCount(this);
     });

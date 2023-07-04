@@ -266,10 +266,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             // flag but the flag is not visible via the Task API Task definition, the file must be read
             // and parsed by the application to locate the value.
             //
-            if (this.wrapper.config.affectsConfiguration(e, "showHiddenWsTasks"))
+            if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.ShowHiddenVSCodeWsTasks))
             {
-                this.wrapper.log.write("   the 'npm.showHiddenWsTasks' setting has changed", 1);
-                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("showHiddenWsTasks"), 1);
+                this.wrapper.log.write(`   the '${this.wrapper.keys.Config.ShowHiddenVSCodeWsTasks}' setting has changed`, 1);
+                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>(this.wrapper.keys.Config.ShowHiddenVSCodeWsTasks), 1);
                 registerChange("Workspace");
             }
 
@@ -293,8 +293,9 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         //
         // Refresh tree depending on specific settings changes
         //
-        try
-        {   if (refresh || refreshTaskTypes.length > 3)
+        await this.wrapper.utils.wrap(async () =>
+        {
+            if (refresh || refreshTaskTypes.length > 3)
             {
                 await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, false, "   ");
             }
@@ -310,15 +311,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             else {
                 this.wrapper.log.write("   current changes require no processing", 1);
             }
-        }
-        catch (e) {
-            /* istanbul ignore next */
-            this.wrapper.log.error(e);
-        }
-        finally {
-            this._processingConfigEvent = false;
-            this._onReady.fire();
-        }
+        }, [ this.wrapper.log.error ], this);
+
+        this._processingConfigEvent = false;
+        this._onReady.fire();
 
         this.wrapper.log.methodDone("process config changes", 1);
     };

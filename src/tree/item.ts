@@ -44,16 +44,13 @@ export class TaskItem extends TreeItem implements ITaskItem
         const getDisplayName = (taskName: string): string =>
         {
             let displayName = taskName;
-            if (displayName.indexOf(" - ") !== -1 && (displayName.indexOf("/") !== -1 || displayName.indexOf("\\") !== -1 ||
-                displayName.indexOf(" - tsconfig.json") !== -1))
+            if (displayName.includes(" - ") && (displayName.includes("/") || displayName.includes("\\") ||
+                                                displayName.includes(" - tsconfig.json")))
             {
                 displayName = task.name.substring(0, taskName.indexOf(" - "));
             }
             return displayName;
         };
-        //
-        // Construction
-        //
         super(getDisplayName(task.name), TreeItemCollapsibleState.None);
         log.methodStart("construct tree item", 5, logPad, false, [
             [ "label", this.label ], [ "source", taskFile.taskSource ], [ "task file", taskFile.label ],
@@ -105,7 +102,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         // Refresh state - sets context value, icon path from execution state
         //
-        this.refreshState("   ", 5);
+        this.refreshState(logPad + "   ", 5);
         log.methodDone("construct tree file", 5, logPad, [
             [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ],
             [ "context value", this.contextValue ], [ "groupLevel", this.groupLevel ],
@@ -116,7 +113,7 @@ export class TaskItem extends TreeItem implements ITaskItem
 
     static createId(fsPath: string, task: Task)
     {
-        return encodeUtf8Hex(`${fsPath}:${task.source}:${task.name}:`); // <- leave trailing ':' for backwards compat
+        return encodeUtf8Hex(`${fsPath}:${task.source}:${task.definition.type}:${task.name}`);
     }
 
 
@@ -135,8 +132,8 @@ export class TaskItem extends TreeItem implements ITaskItem
         if (execs.length > 1) {
             log.error(`More than one task execution was found for '${this.task.name}' !!`);
         }
-        log.methodDone("is executing", 5, logPad, [ 
-            [ "is executing", !!exec ], [ "task execution count", execs.length ], [ "total execution count", tasks.taskExecutions.length ]
+        log.methodDone("is executing", 5, logPad, [
+            [ "is executing", !!exec ], [ "task exec count", execs.length ], [ "total exec count", tasks.taskExecutions.length ]
         ]);
         return exec;
     }

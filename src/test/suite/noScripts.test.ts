@@ -97,8 +97,7 @@ suite("NoScripts TreeItem Tests", () =>
         didDisableTasks = true;
         await waitForTeIdle(tc.waitTime.refreshCommand);
         const treeTasks = teWrapper.treeManager.getTaskTree() as TreeItem[];
-        expect(treeTasks).to.not.be.undefined;
-        expect(treeTasks.length).to.be.equal(0);
+        expect(treeTasks).to.be.oneOf([ null, undefined ]);
         await verifyTaskCount("ant", 0);
         await verifyTaskCount("grunt", 0);
         await verifyTaskCount("gulp", 0);
@@ -115,9 +114,8 @@ suite("NoScripts TreeItem Tests", () =>
         didResetEnabledTasks = true;
         const treeTasks = teWrapper.treeManager.getTasks();
         const treeFolders = teWrapper.treeManager.getTaskTree() as TreeItem[];
-        expect(treeFolders).to.not.be.undefined;
+        expect(treeFolders).to.not.be.oneOf([ null, undefined ]);
         expect(treeFolders.length).to.be.equal(tc.isMultiRootWorkspace ? 2 : 1);
-        expect(treeFolders[0].label).to.not.be.equal("No tasks found");
         expect(treeTasks.length).to.be.greaterThan(antStartCount + gruntStartCount + gulpStartCount + pythonStartCount);
         await verifyTaskCount("ant", antStartCount);
         await verifyTaskCount("grunt", gruntStartCount);

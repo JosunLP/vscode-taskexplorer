@@ -4,7 +4,7 @@ import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
-import { IDictionary } from "../interface";
+import { IDictionary, TaskMap } from "../interface";
 import { SpecialTaskFolder } from "./specialFolder";
 
 
@@ -13,7 +13,7 @@ export class TaskTreeGrouper
     constructor(private readonly wrapper: TeWrapper) {}
 
 
-    buildGroupings = async(folders: IDictionary<TaskFolder|SpecialTaskFolder>, logPad: string, logLevel: number) =>
+    buildGroupings = async(folders: TaskMap<TaskFolder|SpecialTaskFolder>, files: TaskMap<TaskFile>, logPad: string, logLevel: number) =>
     {
         const w = this.wrapper;
         const groupWithSep = w.config.get<boolean>(w.keys.Config.GroupWithSeperator);
@@ -32,7 +32,7 @@ export class TaskTreeGrouper
             //
             // Create groupings by task type
             //
-            await w.utils.execIf(groupWithSep, () => this.createTaskGroupings(folder, logPad + "   ", logLevel + 1));
+            await w.utils.execIf(groupWithSep, () => this.createTaskGroupings(folder, files, logPad + "   ", logLevel + 1));
         }
 
         w.log.methodDone("build tree node groupings", logLevel, logPad);
@@ -47,10 +47,10 @@ export class TaskTreeGrouper
      *
      * @param folder The TaskFolder to process
      */
-    private createTaskGroupings = async(folder: TaskFolder, logPad: string, logLevel: number) =>
+    private createTaskGroupings = async(folder: TaskFolder, files: TaskMap<TaskFile>, logPad: string, logLevel: number) =>
     {
         let prevTaskFile: TaskItem | TaskFile | undefined;
-        const subfolders: IDictionary<TaskFile> = {};
+        files = {};
 
         this.wrapper.log.methodStart("create tree node folder grouping", logLevel, logPad, true, [[ "project folder", folder.label ]]);
 
@@ -63,7 +63,7 @@ export class TaskTreeGrouper
             if (prevTaskFile && prevTaskFile.taskSource === taskFile.taskSource)
             {
                 const id = folder.label + taskFile.taskSource;
-                let subfolder: TaskFile | undefined = subfolders[id];
+                let subfolder: TaskFile | undefined = files[id];
                 if (!subfolder)
                 {
                     this.wrapper.log.values(logLevel + 2, logPad, [
@@ -73,8 +73,8 @@ export class TaskTreeGrouper
                     const node = taskFile.treeNodes[0];
                     this.wrapper.utils.execIf(node instanceof TaskItem, (_v, n) =>
                     {
-                        subfolder = new TaskFile(folder, n.task, taskFile.taskSource, taskFile.path, 0, id, undefined, "   ");
-                        subfolders[id] = subfolder;
+                        subfolder = new TaskFile(folder, n.task, taskFile.path, 0, id, undefined, "   ");
+                        files[id] = subfolder;
                         folder.addTaskFile(subfolder);
                         //
                         // Since we add the grouping when we find two or more equal group names, we are iterating
@@ -90,7 +90,7 @@ export class TaskTreeGrouper
             //
             // Create the grouping
             //
-            await this.createTaskGroupingsBySep(folder, taskFile, subfolders, 0, logPad + "   ", logLevel + 1);
+            await this.createTaskGroupingsBySep(folder, taskFile, files, 0, logPad + "   ", logLevel + 1);
         }
 
         //
@@ -98,7 +98,7 @@ export class TaskTreeGrouper
         // are created but the old task remains in the parent folder.  Remove all tasks that have been moved down
         // into the tree hierarchy due to groupings
         //
-        this.removeGroupedTasks(folder, subfolders, logPad + "   ", logLevel + 1);
+        this.removeGroupedTasks(folder, files, logPad + "   ", logLevel + 1);
 
         //
         // For groupings with separator, now go through and rename the labels within each group minus the
@@ -114,7 +114,6 @@ export class TaskTreeGrouper
         // Resort after making adds/removes
         //
         this.wrapper.sorters.sortTaskFolder(folder, "all");
-
         this.wrapper.log.methodDone("create tree node folder grouping", logLevel, logPad);
     };
 
@@ -239,8 +238,7 @@ export class TaskTreeGrouper
                     // add them after we loop since we are looping on the array that they need to be
                     // added to
                     //
-                    subfolder = new TaskFile(folder, each.task, taskFile.taskSource,
-                                             each.taskFile.path, treeLevel, id, prevName[treeLevel], logPad);
+                    subfolder = new TaskFile(folder, each.task, each.taskFile.path, treeLevel, id, prevName[treeLevel], logPad);
                     subfolders[id] = subfolder;
                     //
                     // Since we add the grouping when we find two or more equal group names, we are iterating

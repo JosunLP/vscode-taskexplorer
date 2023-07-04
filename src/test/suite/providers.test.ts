@@ -474,7 +474,7 @@ suite("Provider Tests", () =>
         this.slow(tc.slowTime.config.groupingEvent * 3);
         await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeperator, true);
         await executeSettingsUpdate(teWrapper.keys.Config.GroupSeparator, "-");
-        await executeSettingsUpdate(teWrapper.keys.Config.GroupMaxLevel, 5);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupMaxLevel, 4);
         endRollingCount(this);
     });
 
@@ -483,8 +483,9 @@ suite("Provider Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.event + tc.slowTime.config.globEvent + (tc.slowTime.commands.fetchTasks * 2) + tc.slowTime.general.min);
-        const taskItemsB4 = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri),
-              gruntCt = taskItemsB4.length;
+        let taskItems = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri);
+        const gruntCt = taskItems.length;
+        taskMap = teWrapper.treeManager.getTaskMap();
         for (const taskItem of Object.values(taskMap))
         {
             if (taskItem && taskItem.taskSource === "grunt")
@@ -501,7 +502,7 @@ suite("Provider Tests", () =>
                 }
             }
         }
-        const taskItems = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri);
+        taskItems = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri);
         expect(taskItems.length).to.be.equal(gruntCt - 2, `Unexpected grunt task count (Found ${taskItems.length} of ${gruntCt - 2})`);
         await waitForTeIdle(tc.waitTime.min);
         endRollingCount(this);
