@@ -72,7 +72,7 @@ export class GradleTaskProvider extends TaskExplorerProvider implements TaskExpl
     private getDefaultDefinition(target: string, folder: WorkspaceFolder, uri: Uri): ITaskDefinition
     {
         const def: ITaskDefinition = {
-            type: "gradle",
+            type: this.providerName,
             script: target,
             target,
             path: this.wrapper.pathUtils.getRelativePath(folder, uri),

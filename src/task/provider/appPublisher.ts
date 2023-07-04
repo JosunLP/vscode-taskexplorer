@@ -34,7 +34,7 @@ export class AppPublisherTaskProvider extends TaskExplorerProvider implements Ta
     private getDefaultDefinition(target: string | undefined, folder: WorkspaceFolder, uri: Uri): ITaskDefinition
     {
         const def: ITaskDefinition = {
-            type: "apppublisher",
+            type: this.providerName,
             script: target,
             target,
             fileName: basename(uri.fsPath),

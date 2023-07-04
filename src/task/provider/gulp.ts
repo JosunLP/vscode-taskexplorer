@@ -75,7 +75,7 @@ export class GulpTaskProvider extends TaskExplorerProvider implements TaskExplor
     private getDefaultDefinition(target: string, folder: WorkspaceFolder, uri: Uri): ITaskDefinition
     {
         const def: ITaskDefinition = {
-            type: "gulp",
+            type: this.providerName,
             script: target,
             target,
             path: this.wrapper.pathUtils.getRelativePath(folder, uri),

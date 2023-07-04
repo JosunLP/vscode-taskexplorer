@@ -246,7 +246,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
     private getDefaultDefinition(target: string, folder: WorkspaceFolder, uri: Uri): ITaskDefinition
     {
         const def: ITaskDefinition = {
-            type: "ant",
+            type: this.providerName,
             script: target,
             target,
             path: this.wrapper.pathUtils.getRelativePath(folder, uri),

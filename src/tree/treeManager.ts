@@ -244,15 +244,17 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     private fetchTasks = async(logPad: string): Promise<void> =>
     {
+        let taskItems;
         const inv = this._currentInvalidation,
               zeroTasksToStart = this._tasks.length === 0;
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
-        if (zeroTasksToStart || !inv) // || inv  === "Workspace" || inv === "tsc")
+        if (zeroTasksToStart || !inv)
         {
             this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
             this.wrapper.statusBar.update("Requesting all tasks from all providers");
-            const allTasks = await tasks.fetchTasks();
-            this._tasks.splice(0, this._tasks.length, ...allTasks);
+            taskItems = await tasks.fetchTasks();
+            this._tasks.splice(0);
+            this.wrapper.log.write(`   adding ${taskItems.length} tasks`, 2, logPad);
         }     //
         else // inv guaranteed to be a string (task type) here
         {   //
@@ -263,10 +265,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             // Request all tasks of type 'this._currentInvalidation'.  Workspace type tasks can be of
             // any task type, so in case of Ws task invalidation, request all tasks from all providers
             //
-            let taskItems;
-            if (inv  === "Workspace") {
+            if (inv === "Workspace") {
                 taskItems = (await tasks.fetchTasks()).filter(t => t.source === inv);
-console.log("ws ct: " + taskItems.length);
             }
             else {
                 taskItems = await tasks.fetchTasks({ type: inv !== "tsc" ? inv : "typescript" });
@@ -277,8 +277,11 @@ console.log("ws ct: " + taskItems.length);
             //
             this.doTaskCacheRemovals(inv, logPad);
             this.wrapper.log.write(`   adding ${taskItems.length} new ${inv} tasks`, 2, logPad);
-            this._tasks.push(...taskItems);
         }
+        //
+        // Cache the requested tasks
+        //
+        this._tasks.push(...taskItems);
         //
         // Check the finalized task cache array for any ignores that still need to be processed,
         // e.g. 'grunt' or 'gulp' tasks that are internally provided by VSCode and we have no
@@ -286,9 +289,7 @@ console.log("ws ct: " + taskItems.length);
         // are differentiable from TE provided Gulp and Grunt tasks in that the VSCode provided
         // tasks do no not have task.definition.uri set.
         //
-if (inv  === "Workspace")console.log("ct1: " + this._tasks.length);
         this.cleanFetchedTasks(logPad + "   ");
-if (inv  === "Workspace")console.log("ct2: " + this._tasks.length);
         //
         // Hash NPM script blocks, to ignore edits to package.json when scripts have not changed, since
         // we have to query the entire workspace for npm tasks to get changes.  TODO is srtill to write
@@ -417,11 +418,11 @@ if (inv  === "Workspace")console.log("ct2: " + this._tasks.length);
                 Object.values(this._specialFolders).forEach(f => f.build(logPad + "   "));
                 await this.setContext();
             }
-            this.fireTreeRefreshEvent(null, null, logPad);
-            this.fireTasksLoadedEvents(count);
         }
         finally {
             this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
+            this.fireTreeRefreshEvent(null, null, logPad);
+            this.fireTasksLoadedEvents(count);
             this._refreshPending = false;
         }
     };

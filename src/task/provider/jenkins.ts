@@ -42,7 +42,7 @@ export class JenkinsTaskProvider extends TaskExplorerProvider implements TaskExp
 
         const definition: ITaskDefinition =
         {
-            type: "jenkins",
+            type: this.providerName,
             script: undefined,
             target: undefined,
             fileName: basename(uri.fsPath),

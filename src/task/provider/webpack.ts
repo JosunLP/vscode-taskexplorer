@@ -26,7 +26,7 @@ export class WebpackTaskProvider extends TaskExplorerProvider implements TaskExp
     {
         const def: ITaskDefinition =
         {
-            type: "webpack",
+            type: this.providerName,
             script: target,
             target,
             fileName: basename(uri.fsPath),

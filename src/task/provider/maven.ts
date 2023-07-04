@@ -22,7 +22,7 @@ export class MavenTaskProvider extends TaskExplorerProvider implements TaskExplo
     private getDefaultDefinition(target: string | undefined, folder: WorkspaceFolder, uri: Uri): ITaskDefinition
     {
         const def: ITaskDefinition = {
-            type: "maven",
+            type: this.providerName,
             script: target,
             target,
             fileName: basename(uri.fsPath),
