@@ -117,7 +117,7 @@ export class TaskWatcher implements Disposable
         if (isMapEmpty || !taskMap[treeId])
         {
             /* istanbul ignore next */
-            if (taskTree && !taskMap[treeId] && taskTree.length > 0 && taskTree[0].contextValue !== "noscripts")
+            if (taskTree && !taskMap[treeId] && taskTree.length > 0 && this.wrapper.treeManager.getMessage() !== this.wrapper.keys.Strings.NoTasks)
             {
                 if (task.source === "npm" && task.definition.type === "npm" &&
                 (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit")))

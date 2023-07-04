@@ -367,6 +367,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
+    getMessage = (): string | undefined => Object.values(this._views).find(v => v.enabled && v.visible)?.view.message;
+
+
     getTaskItem =  (taskItem: TaskItem | ITeTask | Uri): TaskItem =>
     {
         if (taskItem instanceof Uri) // FileExplorer Context menu
@@ -439,9 +442,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         const count = this._tasks.length;
         this._refreshPending = true;
-        if (!this._firstTreeBuildDone) {
-		    this.setMessage(this.wrapper.keys.Strings.RequestingTasks);
-        }
+        this.setMessage(!this._firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
         try {
             if (doFetch) {
                 await this.fetchTasks(logPad);
@@ -450,7 +451,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this.fireTasksLoadedEvents(count);
         }
         finally {
-            this.setMessage(); // clear any status bar message
+            this.setMessage(this._tasks.length > 0 ? undefined : Strings.NoTasks);
             this._refreshPending = false;
         }
     };
