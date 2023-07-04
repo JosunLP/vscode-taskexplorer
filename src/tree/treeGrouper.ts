@@ -13,11 +13,11 @@ export class TaskTreeGrouper
     constructor(private readonly wrapper: TeWrapper) {}
 
 
-    buildGroupings = async(folders: TaskMap<TaskFolder|SpecialTaskFolder>, files: TaskMap<TaskFile>, logPad: string, logLevel: number) =>
+    buildGroupings = async(folders: TaskMap<TaskFolder|SpecialTaskFolder>, files: TaskMap<TaskFile>, logPad: string) =>
     {
         const w = this.wrapper;
         const groupWithSep = w.config.get<boolean>(w.keys.Config.GroupWithSeperator);
-        w.log.methodStart("build tree node groupings", logLevel, logPad, false, [[ "group withseparator", groupWithSep ]]);
+        w.log.methodStart("build tree node groupings", 3, logPad, false, [[ "group withseparator", groupWithSep ]]);
         //
         // Sort nodes.  By default the project folders are sorted in the same order as that
         // of the Explorer.  Sort TaskFile nodes and TaskItems nodes alphabetically, by default
@@ -32,10 +32,10 @@ export class TaskTreeGrouper
             //
             // Create groupings by task type
             //
-            await w.utils.execIf(groupWithSep, () => this.createTaskGroupings(folder, files, logPad + "   ", logLevel + 1));
+            await w.utils.execIf(groupWithSep, () => this.createTaskGroupings(folder, files, logPad + "   ", 4));
         }
 
-        w.log.methodDone("build tree node groupings", logLevel, logPad);
+        w.log.methodDone("build tree node groupings", 3, logPad);
     };
 
 
@@ -73,7 +73,7 @@ export class TaskTreeGrouper
                     const node = taskFile.treeNodes[0];
                     this.wrapper.utils.execIf(node instanceof TaskItem, (_v, n) =>
                     {
-                        subfolder = new TaskFile(folder, n.task, taskFile.path, 0, id, undefined, "   ");
+                        subfolder = new TaskFile(folder, n.task, taskFile.path, 0, id, n.task.source, "   ");
                         files[id] = subfolder;
                         folder.addTaskFile(subfolder);
                         //

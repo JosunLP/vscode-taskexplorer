@@ -41,7 +41,9 @@ export class TaskFile extends TreeItem implements ITaskFile
     treeNodes: (TaskItem|TaskFile)[] = [];
     fileName: string;
     groupLevel: number;
+    readonly task: Task;
     readonly taskSource: string;
+    readonly taskType: string;
     readonly isGroup: boolean;
     readonly isUser: boolean;
 
@@ -63,12 +65,11 @@ export class TaskFile extends TreeItem implements ITaskFile
      * @param logPad Padding to prepend to log entries.  Should be a string of any # of space characters.
      */
     constructor(folder: TaskFolder, task: Task, relativePath: string,
-                groupLevel: number, groupId: string | undefined, label: string | undefined, logPad: string)
+                groupLevel: number, groupId: string | undefined, label: string, logPad: string)
     {
-        super(TaskFile.getLabel(task.definition, label ? label : task.source, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
+        super(TaskFile.getLabel(task.definition, label, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
 
         const taskDef = task.definition;
-
         log.methodStart("construct tree file", 4, logPad, false, [
             [ "label", label ?? task.source ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
             [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
@@ -76,8 +77,10 @@ export class TaskFile extends TreeItem implements ITaskFile
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
 
+        this.task = task; // for id building when grouping
         this.folder = folder;
         this.taskSource = task.source;
+        this.taskType = task.definition.type;
         this.isGroup = !!groupId;
         this.isUser = false;
         this.groupLevel = 0;
@@ -127,7 +130,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         // Set unique id
         //
-        this.id = TaskFile.createId(folder, task, this.fileName, <any>this.label, this.taskSource, this.groupLevel, groupId);
+        this.id = TaskFile.getId(folder, task, <any>this.label, this.groupLevel, groupId);
 
         //
         // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
@@ -176,46 +179,33 @@ export class TaskFile extends TreeItem implements ITaskFile
     }
 
 
-    static createId(folder: TaskFolder, task: Task, fileName: string, label: string | undefined, source: string, groupLevel: number, groupId?: string)
+    addTreeNode(treeNode: (TaskFile | TaskItem | undefined))
     {
-        let pathKey = "";
+        execIf(treeNode, (t) => { t.groupLevel = this.groupLevel; this.treeNodes.push(t); }, this);
+    }
+
+
+    static getId(folder: TaskFolder, task: Task, label: string | undefined, groupLevel: number, groupId?: string)
+    {
+        let pathKey: string;
         const relativePath = getTaskRelativePath(task),
               relPathAdj = task.source !== "Workspace" ? relativePath : ".vscode";
         if (task.definition.uri)
         {
             pathKey = task.definition.uri.fsPath;
         }
-        else if (task.definition.fileName)
-        {
-            pathKey = join(relPathAdj, task.definition.fileName);
-        }
         else if (task.definition.tsconfig)
         {
             pathKey = task.definition.tsconfig;
         }
-        else
-        {
-            let scopeName = "";
-            if (isWorkspaceFolder(task.scope)) {
-                scopeName = task.scope.name;
-            }
-            else {
-                scopeName = Strings.USER_TASKS_LABEL;
-            }
-            pathKey = join(scopeName, relPathAdj);
+        else if (isWorkspaceFolder(task.scope)) {
+            pathKey = join(task.scope.uri.fsPath, relPathAdj);
+        }
+        else {
+            pathKey = Strings.USER_TASKS_LABEL;
         }
         const lblKey = label || this.getLabel(task.definition, task.source, relativePath, groupId);
-        return folder.id + ":" + encodeUtf8Hex(`${pathKey}:${fileName}:${groupLevel}:${groupId || ""}:${lblKey}:${source}`);
-    }
-
-
-    addTreeNode(treeNode: (TaskFile | TaskItem | undefined))
-    {
-        /* istanbul ignore else */
-        if (treeNode) {
-            treeNode.groupLevel = this.groupLevel;
-            this.treeNodes.push(treeNode);
-        }
+        return folder.id + ":" + encodeUtf8Hex(`${pathKey}:${groupLevel}:${groupId || ""}:${lblKey}:${task.source}`);
     }
 
 
@@ -309,9 +299,8 @@ export class TaskFile extends TreeItem implements ITaskFile
         // Any tasks provided by this extension will have a "fileName" definition. External tasks
         // registered throughthe API also define fileName
         //
-        if (taskDef.fileName)
-        {
-            return basename(taskDef.fileName);
+        if (taskDef.fileName) {
+            return taskDef.fileName;
         }
         //
         // Since tasks are returned from VSCode API without a filename that they were found in we
@@ -345,10 +334,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     removeTreeNode(treeItem: (TaskFile | TaskItem))
     {
         const idx = this.treeNodes.findIndex(tn => tn.id === treeItem.id);
-        /* istanbul ignore else */
-        if (idx !== -1) {
-            this.treeNodes.splice(idx, 1);
-        }
+        execIf(idx !== -1, () => { this.treeNodes.splice(idx, 1); }, this);
     }
 
 }

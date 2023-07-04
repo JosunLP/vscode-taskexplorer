@@ -51,7 +51,7 @@ export class TaskTreeBuilder
         if (!this.wrapper.typeUtils.isObjectEmpty(this._taskFolderMap))
         {
             if (isFullBuild) {
-                await this._treeGrouper.buildGroupings(this._taskFolderMap, this._taskFileMap, logPad + "   ", 3);
+                await this._treeGrouper.buildGroupings(this._taskFolderMap, this._taskFileMap, logPad + "   ");
             }
             //
             // Get sorted root project folders - only project folders are sorted, special folders
@@ -158,7 +158,7 @@ export class TaskTreeBuilder
 
     private getTaskFileNode = async(task: Task, folder: TaskFolder, relativePath: string, scopeName: string, logPad: string) =>
     {
-        let taskFile: TaskFile;
+        let taskFile: TaskFile | undefined;
         this.wrapper.log.methodStart("get task file node", 2, logPad, false, [[ "relative path", relativePath ], [ "scope name", scopeName ]]);
         //
         // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
@@ -168,20 +168,21 @@ export class TaskTreeBuilder
         // All other task types will have a relative path of it's location on the filesystem (with
         // exception of TSC, which is handled elsewhere).
         //
-        const relPathAdj = task.source !== "Workspace" ? relativePath : ".vscode";
-        let pathKey = join(scopeName, relPathAdj);
-        if (task.definition.fileName && !task.definition.scriptFile) {
-            pathKey = join(pathKey, task.definition.fileName);
-        }
-        const id = TaskFile.createId(folder, task, pathKey, undefined, task.source, 0);
+        const id = TaskFile.getId(folder, task, undefined, 0);
         taskFile = this._taskFileMap[id];
+        // let id: string;
+        // for (let i = 0; i < 10 && !taskFile; i++)
+        // {
+        //     id = TaskFile.getId(folder, task, undefined, i);
+        //     taskFile = this._taskFileMap[id];
+        // }
         if (!taskFile)
         {
             this.wrapper.log.value("   Add source taskfile container", task.source, 2, logPad);
-            taskFile = new TaskFile(folder, task, relativePath, 0, undefined, undefined, logPad + "   ");
+            taskFile = new TaskFile(folder, task, relativePath, 0, undefined, task.source, logPad + "   ");
+            this._taskFileMap[taskFile.id] = taskFile;
             folder.addTaskFile(taskFile);
         }
-        this._taskFileMap[id] = taskFile;
         this.wrapper.log.methodDone("get task file node", 2, logPad);
         return taskFile;
     };
