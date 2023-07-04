@@ -124,5 +124,12 @@ export const verifyTaskCountByTree = async(teWrapper: ITeWrapper, taskType: stri
         await sleep(300);
         taskCount = await _getCount();
     }
-    expect(taskCount).to.be.equal(expectedCount, `${teWrapper.figures.color.error} Unexpected ${taskType} task count (Found ${taskCount} of ${expectedCount})`);
+    try {
+        expect(taskCount).to.be.equal(expectedCount, `${teWrapper.figures.color.error} Unexpected ${taskType} task count (Found ${taskCount} of ${expectedCount})`);
+    }
+    catch (e) {
+        console.log(teWrapper.figures.withColor(`    ${teWrapper.figures.color.warning} All TaskMap items:\n    ${teWrapper.figures.color.warning}    ` +
+                    Object.keys(taskMap).map(k => Buffer.from(k, "hex").toString("utf8")).join(`\n    ${teWrapper.figures.color.warning}    `), teWrapper.figures.colors.grey));
+        throw e;
+    }
 };

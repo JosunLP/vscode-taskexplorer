@@ -130,6 +130,7 @@ export const testControl =
             modifyEvent: 1140,
             modifyEventAnt: 1200,
             modifyEventTsc: 1220,
+            modifyEventNoWatch: 280,
         },
         general: {
             cleanup: 475,

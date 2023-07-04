@@ -87,8 +87,7 @@ suite("Typescript Tests", () =>
             "  },\n" +
             '  "include": ["**/*"],\n' +
             '  "exclude": ["node_modules"]\n' +
-            "}\n",
-            tc.waitTime.fs.createEventTsc
+            "}\n"
         );
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 2);
         utils.endRollingCount(this);
@@ -132,8 +131,7 @@ suite("Typescript Tests", () =>
             "  },\n" +
             '  "include": ["**/*"],\n' +
         '  "exclude": ["node_modules","**/test/**","**/dom/**"]\n' +
-            "}\n",
-            tc.waitTime.fs.createEventTsc
+            "}\n"
         );
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 4);
         utils.endRollingCount(this);
@@ -158,8 +156,7 @@ suite("Typescript Tests", () =>
             "  },\n" +
             '  "include": ["**/*"],\n' +
             '  "exclude": ["node_modules","**/test/**","**/node/**"]\n' +
-            "}\n",
-            tc.waitTime.fs.createEventTsc
+            "}\n"
         );
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 6);
         await utils.sleep(25);
@@ -176,8 +173,7 @@ suite("Typescript Tests", () =>
             "  },\n" +
             '  "include": ["**/*"],\n' +
             '  "exclude": ["node_modules","**/dom/**"]\n' +
-            "}\n",
-            tc.waitTime.fs.createEventTsc
+            "}\n"
         );
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 8);
         await fsUtils.deleteFile(fileUriBrowser.fsPath);
@@ -215,17 +211,8 @@ suite("Typescript Tests", () =>
         //
         // Note: FileWatcher ignores mod event for this task type since # of tasks never changes
         //
-        this.slow(tc.slowTime.fs.modifyEventTsc + tc.slowTime.tasks.count.verifyByTree);
-        // let resetLogging = teApi.log.isLoggingEnabled();
-        // if (resetLogging) { // turn scary error logging off
-        //     this.slow(tc.slowTime.fs.createEvent + (tc.slowTime.config.event * 2));
-        //     executeSettingsUpdate("logging.enable", false);
-        //     resetLogging = true;
-        // }
-        // else {
-        //     this.slow(tc.slowTime.fs.createEvent);
-        // }
-        await utils.writeAndWait(
+        this.slow(tc.slowTime.fs.modifyEventNoWatch + tc.slowTime.tasks.count.verifyByTree);
+        await teWrapper.fs.writeFile(
             fileUri.fsPath,
             "{\n" +
             '    "compilerOptions":\n' +
@@ -242,9 +229,9 @@ suite("Typescript Tests", () =>
             "  },\n" +
             '  "include": ["**/*"],\n' +
             '  "exclude": ["node_modules"]\n' +
-            "\n",
-            tc.waitTime.fs.modifyEventTsc
+            "\n"
         );
+        await utils.waitForTeIdle2(1);
         //
         // See fileWatcher.ts, we ignore modify event because the task count will never change
         // for this task type. So if there is invalid json after a save, the tasks will remain,
@@ -252,9 +239,6 @@ suite("Typescript Tests", () =>
         // doesn't event matter if we had the file modify event watcher on or not.
         //
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 4);
-        // if (resetLogging) { // turn scary error logging off
-        //     executeSettingsUpdate("logging.enable", true);
-        // }
         utils.endRollingCount(this);
     });
 
@@ -262,8 +246,11 @@ suite("Typescript Tests", () =>
     test("Fix Invalid JSON", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.modifyEventTsc + tc.slowTime.tasks.count.verifyByTree);
-        await utils.writeAndWait(
+        //
+        // Note: FileWatcher ignores mod event for this task type since # of tasks never changes
+        //
+        this.slow(tc.slowTime.fs.modifyEventNoWatch + tc.slowTime.tasks.count.verifyByTree);
+        await teWrapper.fs.writeFile(
             fileUri.fsPath,
             "{\n" +
             '    "compilerOptions":\n' +
@@ -280,9 +267,15 @@ suite("Typescript Tests", () =>
             "  },\n" +
             '  "include": ["**/*"],\n' +
             '  "exclude": ["node_modules"]\n' +
-            "}\n",
-            tc.waitTime.fs.modifyEventTsc
+            "}\n"
         );
+        await utils.waitForTeIdle2(1);
+        //
+        // See fileWatcher.ts, we ignore modify event because the task count will never change
+        // for this task type. So if there is invalid json after a save, the tasks will remain,
+        // but are actually invalid.  TSC engine will report the old task count as well, so it
+        // doesn't event matter if we had the file modify event watcher on or not.
+        //
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 4);
         utils.endRollingCount(this);
     });
@@ -293,7 +286,7 @@ suite("Typescript Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.fs.deleteEventTsc + tc.slowTime.tasks.count.verifyByTree);
         await fsUtils.deleteFile(fileUri.fsPath, tc.waitTime.fs.deleteEventTsc);
-        await utils.waitForTeIdle2(1);
+        await utils.waitForTeIdle2(tc.waitTime.fs.deleteEventTsc);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount + 2);
         utils.endRollingCount(this);
     });
@@ -304,7 +297,7 @@ suite("Typescript Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.fs.deleteEventTsc + tc.slowTime.tasks.count.verifyByTree);
         await fsUtils.deleteFile(fileUri2.fsPath, tc.waitTime.fs.deleteEventTsc);
-        await utils.waitForTeIdle2(1);
+        await utils.waitForTeIdle2(tc.waitTime.fs.deleteEventTsc);
         await utils.treeUtils.verifyTaskCountByTree(teWrapper, testsName, startTaskCount);
         utils.endRollingCount(this);
     });

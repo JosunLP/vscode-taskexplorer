@@ -188,7 +188,7 @@
 		"test-single-run-taskmonitor": "node ./dist/test/runTest.js taskMonitor xDeactivate",
 		"test-single-run-tree": "node ./dist/test/runTest.js tree xDeactivate",
 		"test-single-run-treegrouping": "node ./dist/test/runTest.js treeGrouping xDeactivate",
-		"test-single-run-typescript:run": "node ./dist/test/runTest.js typescript xDeactivate",
+		"test-single-run-typescript": "node ./dist/test/runTest.js typescript xDeactivate",
 		"test-single-run-webpack": "node ./dist/test/runTest.js webpack xDeactivate",
 		"test-single-run-webview": "node ./dist/test/runTest.js webview xDeactivate",
 		"test-single-run-workspace": "node ./dist/test/runTest.js workspace xDeactivate",
