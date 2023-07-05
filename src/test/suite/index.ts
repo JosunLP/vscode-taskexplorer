@@ -4,7 +4,7 @@ import { resolve } from "path";
 import { TestRunner } from "@spmeesseman/test-utils";
 
 
-export const run = (): Promise<void> =>
+export const run = async (): Promise<void> =>
 {
     const xArgs = JSON.parse(process.env.xArgs || "[]"),
 		  testArgs = JSON.parse(process.env.testArgs || "[]"),
@@ -13,7 +13,7 @@ export const run = (): Promise<void> =>
 		  verbose = xArgs.includes("--nyc-verbose"),
 		  silent = xArgs.includes("--nyc-silent");
 
-	return new TestRunner(
+	const runner = new TestRunner(
 	{
 		isTypescript: true,
 		moduleBuildDir: "dist",
@@ -39,10 +39,16 @@ export const run = (): Promise<void> =>
 				showProcessTree: verbose,
 				silent,
 				skipEmpty: true,
-				reporter: [ "text-summary", "html" ],
-				include: [ "dist/taskexplorer.js" ],
-				exclude: [ "dist/test", "node_modules", "dist/vendor.js", "dist/runtime.js" ]
-			},
+				reporter: [
+					"text-summary", "html" // "text","lcov", "cobertura", "json", "lcov"
+				],
+				include: [
+					"dist/taskexplorer.js"
+				],
+				exclude: [
+					"dist/test", "node_modules", "dist/vendor.js", "dist/runtime.js"
+				]
+			}
 		},
 		framework: {
 			type: "mocha",
@@ -68,6 +74,15 @@ export const run = (): Promise<void> =>
 				// }
 			}
 		}
-	})
-	.run();
+	});
+
+	try {
+		await runner.run();
+	}
+	catch (error) {
+		try {
+			console.error(error.message);
+		} catch (_) {}
+		process.exit(1);
+	};
 };
