@@ -42,6 +42,9 @@ export const isFunction = (v: any) => !!v && typeof v === "function";
 export const isNumber = (v: any): v is number => (v || v === 0) && typeof v === "number" && isFinite(v);
 
 
+// export const isNumeric = (v: any) => !isNaN(parseFloat(v)) && isFinite(v);
+
+
 export const isObject = <T = IDictionary<any>>(v: any, allowArray?: boolean): v is T => !!v && (v instanceof Object || typeof v === "object") && (allowArray || !isArray<any>(v));
 
 

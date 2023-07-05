@@ -72,6 +72,7 @@ export interface ITeTypeUtilities
 	// isDefined(v: any): boolean;
     isEmpty(v: any, allowEmpStr?: boolean): v is null | undefined | "" | [];
 	isNumber(v: any): v is number;
+	// isNumeric(v: any): boolean;
     // isObject<T>(v: any, allowArray?: boolean): v is { [key: string]: T } ;
     isObject<T = IDictionary<any>>(v: any, allowArray?: boolean): v is T;
     isObjectEmpty(v: any): boolean;
