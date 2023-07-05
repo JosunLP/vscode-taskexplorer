@@ -71,7 +71,7 @@ export class TaskFile extends TreeItem implements ITaskFile
 
         const taskDef = task.definition;
         log.methodStart("construct tree file", 4, logPad, false, [
-            [ "label", label ?? task.source ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
+            [ "label", label ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
             [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
             [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
