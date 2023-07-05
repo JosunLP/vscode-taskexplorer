@@ -2392,7 +2392,7 @@
 			{
 				"name": "gccTe",
 				"owner": "cpp",
-				"label": "Task Explorer GCC",
+				"label": "Basic GCC Problem Matcher",
 				"fileLocation": [
 					"relative",
 					"${workspaceRoot}"
@@ -2410,7 +2410,7 @@
 				"name": "webpackTe",
 				"owner": "javascript",
 				"source": "javascript",
-				"label": "Task Explorer WebPack Watch",
+				"label": "Basic Webpack Watch Problem Matcher",
 				"pattern": [
 					{
 						"regexp": "\\[tsl\\] ERROR",
@@ -2421,13 +2421,13 @@
 				],
 				"background": {
 					"activeOnStart": true,
-					"beginsPattern": "Entrypoint\\s+[a-z0-9]+",
+					"beginsPattern": "(?:Entrypoint\\s+[a-z0-9_]+|[a-z0-9_]+\\:[a-z]\\:)",
 					"endsPattern": "compiled\\s+successfully\\s+in\\s+[0-9]+\\s+ms"
 				}
 			},
 			{
 				"name": "tsc-watch",
-				"label": "Task Explorer Tsc-Alias Watch",
+				"label": "Basic TSC-Alias Watch Problem Matcher",
 				"base": "$tsc-watch",
 				"background": {
 					"activeOnStart": true,
@@ -2443,7 +2443,7 @@
 				"name": "bashTe",
 				"owner": "bash",
 				"source": "bash",
-				"label": "Task Explorer Bash",
+				"label": "Basic Bash Script Problem Matcher",
 				"pattern": [
 					{
 						"code": 3,
@@ -2458,7 +2458,7 @@
 				"name": "batTe",
 				"owner": "batch",
 				"source": "batch",
-				"label": "Task Explorer Batch",
+				"label": "Basic Batch Script Problem Matcher",
 				"pattern": [
 					{
 						"file": 2,
