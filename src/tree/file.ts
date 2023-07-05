@@ -31,18 +31,18 @@ export class TaskFile extends TreeItem implements ITaskFile
     override id: string;
     override resourceUri: Uri;
 
-    folder: TaskFolder;
     path: string;
     fileName: string;
-    groupLevel: number;
     treeNodes: (TaskItem|TaskFile)[] = [];
 
-    readonly task: Task;
-    readonly taskSource: string;
-    readonly taskType: string;
-    readonly isGroup: boolean;
-    readonly isUser: boolean;
-    readonly groupId: string | undefined;
+    private _groupLevel: number;
+    // private readonly _task: Task;
+    private readonly _folder: TaskFolder;
+    private readonly _taskSource: string;
+    // private readonly _taskType: string;
+    private readonly _isGroup: boolean;
+    private readonly _isUser: boolean;
+    private readonly _groupId: string | undefined;
 
 
     /**
@@ -71,14 +71,14 @@ export class TaskFile extends TreeItem implements ITaskFile
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
 
-        this.task = task; // for id building when grouping
-        this.folder = folder;
-        this.taskSource = task.source;
-        this.taskType = task.definition.type;
-        this.isGroup = !!groupId;
-        this.isUser = false;
-        this.groupId = groupId;
-        this.groupLevel = 0;
+        // this._task = task; // for id building when grouping
+        this._folder = folder;
+        this._taskSource = task.source;
+        // this._taskType = task.definition.type;
+        this._isGroup = !!groupId;
+        this._isUser = false;
+        this._groupId = groupId;
+        this._groupLevel = 0;
         //
         // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
         // in the task tree, there is only one path for vscode/workspace tasks, /.vscode.  The fact that
@@ -104,12 +104,12 @@ export class TaskFile extends TreeItem implements ITaskFile
         else {
             this.fileName = this.getFileNameFromSource(task.source, folder, taskDef);
             this.resourceUri = Uri.file(join(getUserDataPath(undefined, logPad), this.fileName));
-            this.isUser = true;
+            this._isUser = true;
         }
 
-        if (!this.isGroup)
+        if (!this._isGroup)
         {
-            this.contextValue = "taskFile" + properCase(this.taskSource);
+            this.contextValue = "taskFile" + properCase(this._taskSource);
         }       //
         else { // When a grouped node is created, the definition for the first task is passed
               // to this function. Remove the filename part of tha path for this resource.
@@ -118,20 +118,20 @@ export class TaskFile extends TreeItem implements ITaskFile
             // Use a custom toolip (default is to display resource uri)
             const taskName = getTaskTypeFriendlyName(task.source, true);
             this.tooltip = `${taskName} task file grouping`;
-            this.contextValue = "taskGroup" + properCase(this.taskSource);
-            this.groupLevel = groupLevel;
+            this.contextValue = "taskGroup" + properCase(this._taskSource);
+            this._groupLevel = groupLevel;
         }
 
         //
         // Set unique id
         //
-        this.id = TaskFile.getId(folder, task, <any>this.label, this.groupLevel, this.groupId);
+        this.id = TaskFile.getId(folder, task, <any>this.label, this._groupLevel, this._groupId);
 
         //
         // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
         // which icon to display
         //
-        let src = this.taskSource;
+        let src = this._taskSource;
         if (src === "npm") { src = getPackageManager(); }
 
         //
@@ -166,17 +166,30 @@ export class TaskFile extends TreeItem implements ITaskFile
 
         const iconPath = this.iconPath as { light: string | Uri; dark: string | Uri };
         log.methodDone("construct tree file", 4, logPad, [
-            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ], [ "context value", this.contextValue ],
-            [ "is group", this.isGroup ], [ "groupLevel", this.groupLevel ], [ "filename", this.fileName ],
+            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ], [ "context value", this.contextValue ],
+            [ "is group", this._isGroup ], [ "groupLevel", this._groupLevel ], [ "filename", this.fileName ],
             [ "resource uri path", this.resourceUri.fsPath ], [ "path", this.path  ], [ "icon light", iconPath.light ],
             [ "icon dark", iconPath.dark ]
         ]);
     }
 
 
+    get folder() { return this._folder; };
+
+    get groupLevel() { return this._groupLevel; };
+
+    get isGroup() { return this._isGroup; };
+
+    get isUser() { return this._isUser; };
+
+    get taskFiles() { return this._taskSource; };
+
+    get taskSource() { return this._taskSource; };
+
+
     addTreeNode(treeNode: (TaskFile | TaskItem | undefined))
     {
-        execIf(treeNode, (t) => { t.groupLevel = this.groupLevel; this.treeNodes.push(t); }, this);
+        execIf(treeNode, (t) => { this._groupLevel = this._groupLevel; this.treeNodes.push(t); }, this);
     }
 
 

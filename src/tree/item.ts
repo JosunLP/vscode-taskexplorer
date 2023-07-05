@@ -24,18 +24,23 @@ import {
  */
 export class TaskItem extends TreeItem implements ITaskItem
 {
-    public readonly taskSource: string;
-    public readonly isUser: boolean;
-    readonly taskFile: TaskFile;
-    public folder: TaskFolder | undefined; // set for specialfolder tasks (i.e. Favorites or Last Tasks)
+    public override id: string;
+    public override command: Command;
+    public override resourceUri: Uri;
+
     public task: Task;
+    private _folder: TaskFolder | undefined;
     public taskDetached: Task | undefined;
     public execution: TaskExecution | undefined;
     public paused: boolean;
-    public groupLevel: number;
-    public override id: string;
-    public override command: Command;
-    // public resourceUri?: Uri;
+
+    private _groupLevel: number;
+    private readonly _taskFile: TaskFile;
+    private readonly _task: Task;
+    private readonly _taskSource: string;
+    private readonly _taskType: string;
+    private readonly _isUser: boolean;
+    private readonly _groupId: string | undefined;
 
 
     constructor(taskFile: TaskFile, task: Task, logPad: string)
@@ -59,10 +64,6 @@ export class TaskItem extends TreeItem implements ITaskItem
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
         //
-        // Task group indicates the TaskFile group name (double check this???)
-        //
-        this.isUser = taskFile.isUser;
-        //
         // Since we save tasks (last tasks and favorites), we need a known unique key to
         // save them with.  We can just use the existing id parameter...
         // 'Script' type tasks will set the file 'uri' and the 'scriptFile' flag on the task definition
@@ -71,21 +72,28 @@ export class TaskItem extends TreeItem implements ITaskItem
         if (task.definition.scriptFile) {
             this.resourceUri = Uri.file(fsPath);
         }
+        else {
+            this.resourceUri = taskFile.resourceUri;
+        }
         this.id = TaskItem.createId(fsPath, task);
+        this._task = task;
+        this._isUser = taskFile.isUser;
         this.paused = false;                // paused flag used by start/stop/pause task functionality
-        this.taskFile = taskFile;           // Save a reference to the TaskFile that this TaskItem belongs to
-        this.task = task;                   // Save a reference to the Task that this TaskItem represents
-        this.groupLevel = 0;                // Grouping level - will get set by treefile.addTreeNode()
-        this.command = {                    // Note that 'groupLevel' will be set by TaskFile.addScript()
+        this._taskFile = taskFile;          // Save a reference to the TaskFile that this TaskItem belongs to
+        this.task = task;                      // Save a reference to the Task that this TaskItem represents
+        this._groupLevel = 0;              // Grouping level - will get set by treefile.addTreeNode()
+        this.command = {                  // Note that 'groupLevel' will be set by TaskFile.addScript()
             title: "Open definition",       // Default click action is just Open file since it's easy to click on accident
             command: "taskexplorer.open",
             arguments: [ this, true ]
         };
         //
         // The task source, i.e. "npm", "Workspace", or any of the TaskExplorer provided task mnemonics,
-        // i.e. "ant", "gulp", "batch", etc...
+        // i.e. "ant", "gulp", "batch", etc... If the task source is `WOrkspace` then the `task type` can be of
+        // any provider, most likelt an npm script
         //
-        this.taskSource = task.source;
+        this._taskSource = task.source;
+        this._taskType = task.definition.type;
         //
         // Set taskItem on the task definition object for use in the task start/stop events
         //
@@ -104,11 +112,24 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         this.refreshState(logPad + "   ", 5);
         log.methodDone("construct tree file", 5, logPad, [
-            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ],
-            [ "context value", this.contextValue ], [ "groupLevel", this.groupLevel ],
-            [ "resource uri path", this.taskFile.resourceUri.fsPath ], [ "path", this.taskFile.path  ]
+            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ],
+            [ "context value", this.contextValue ], [ "groupLevel", this._groupLevel ],
+            [ "resource uri path", this._taskFile.resourceUri.fsPath ], [ "path", this._taskFile.path  ]
         ]);
     }
+
+
+    get isUser() { return this._isUser; };
+
+    get folder() { return this._folder; };
+
+    set folder(v) { this._folder = v; }
+
+    get groupLevel() { return this._groupLevel; };
+
+    get taskFile() { return this._taskFile; };
+
+    get taskSource() { return this._taskSource; };
 
 
     static createId(fsPath: string, task: Task)
@@ -117,7 +138,7 @@ export class TaskItem extends TreeItem implements ITaskItem
     }
 
 
-    getFolder(): WorkspaceFolder | undefined { return this.taskFile.folder.workspaceFolder; }
+    getFolder(): WorkspaceFolder | undefined { return this._taskFile.folder.workspaceFolder; }
 
 
     isExecuting(logPad = "   ")
@@ -125,7 +146,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         log.methodStart("is executing", 5, logPad);
         const task = this.taskDetached ?? this.task;
         const execs = tasks.taskExecutions.filter(e => e.task.name === task.name && e.task.source === task.source &&
-                                                  e.task.scope === task.scope && e.task.definition.path === task.definition.path);
+                                                e.task.scope === task.scope && e.task.definition.path === task.definition.path);
         const exec = execs.find(e => e.task.name === task.name && e.task.source === task.source &&
                                 e.task.scope === task.scope && e.task.definition.path === task.definition.path);
         /* istanbul ignore if */
