@@ -28,27 +28,21 @@ import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils
  */
 export class TaskFile extends TreeItem implements ITaskFile
 {
-    /**
-     * The owner TaskFolder representing a workspace or special (Last Tasks / Favorites)
-     * folder.
-     */
+    override id: string;
+    override resourceUri: Uri;
+
     folder: TaskFolder;
-    /**
-     * Child TaskItem or TaskFile nodes in the tree.  A TaskFile can own another TaskFile
-     * if "Grouping" is turned on in settings.
-     */
     path: string;
-    treeNodes: (TaskItem|TaskFile)[] = [];
     fileName: string;
     groupLevel: number;
+    treeNodes: (TaskItem|TaskFile)[] = [];
+
     readonly task: Task;
     readonly taskSource: string;
     readonly taskType: string;
     readonly isGroup: boolean;
     readonly isUser: boolean;
-
-    override id: string;
-    override resourceUri: Uri;
+    readonly groupId: string | undefined;
 
 
     /**
@@ -83,6 +77,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         this.taskType = task.definition.type;
         this.isGroup = !!groupId;
         this.isUser = false;
+        this.groupId = groupId;
         this.groupLevel = 0;
         //
         // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
@@ -112,7 +107,7 @@ export class TaskFile extends TreeItem implements ITaskFile
             this.isUser = true;
         }
 
-        if (!groupId)
+        if (!this.isGroup)
         {
             this.contextValue = "taskFile" + properCase(this.taskSource);
         }       //
@@ -130,7 +125,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         // Set unique id
         //
-        this.id = TaskFile.getId(folder, task, <any>this.label, this.groupLevel, groupId);
+        this.id = TaskFile.getId(folder, task, <any>this.label, this.groupLevel, this.groupId);
 
         //
         // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
@@ -211,9 +206,9 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     static getGroupedId = (folder: TaskFolder, file: TaskFile, label: string, treeLevel: number) =>
     {
-        const groupSeparator = getGroupSeparator();
-        const labelSplit = label.split(groupSeparator);
         let id = "";
+        const groupSeparator = getGroupSeparator(),
+              labelSplit = label.split(groupSeparator);
         for (let i = 0; i <= treeLevel; i++)
         {
             id += labelSplit[i];
@@ -325,10 +320,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     }
 
 
-    insertTreeNode(treeItem: (TaskFile | TaskItem), index: number)
-    {
-        this.treeNodes.splice(index, 0, treeItem);
-    }
+    insertTreeNode(treeItem: (TaskFile | TaskItem), index: number) { this.treeNodes.splice(index, 0, treeItem); }
 
 
     removeTreeNode(treeItem: (TaskFile | TaskItem))
