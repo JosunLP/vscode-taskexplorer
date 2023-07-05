@@ -15,7 +15,7 @@
  */
 const optimization = (env, wpConfig) =>
 {
-	wpConfig.parallelism = 1;
+	parallelism(env, wpConfig);
 
 	if (env.build === "extension" || env.build === "browser")
 	{
@@ -40,6 +40,18 @@ const optimization = (env, wpConfig) =>
 	else {
 		wpConfig.optimization = {};
 	}
+};
+
+
+/**
+ * @method optimization
+ * @private
+ * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackConfig} wpConfig Webpack config object
+ */
+const parallelism = (env, wpConfig) =>
+{
+	wpConfig.parallelism = 1;
 };
 
 
