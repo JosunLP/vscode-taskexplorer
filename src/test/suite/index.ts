@@ -25,6 +25,7 @@ export const run = async (): Promise<void> =>
 		},
 		coverage: {
 			clean,
+			htmlReportDark: true,
 			tool: "nyc",
 			config: {
 				clean,
