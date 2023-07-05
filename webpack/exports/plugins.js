@@ -6,6 +6,7 @@
  */
 
 const afterdone = require("../plugin/afterdone");
+const analyze = require("../plugin/analyze.js");
 const banner = require("../plugin/banner");
 const build = require("../plugin/build");
 const clean = require("../plugin/clean");
@@ -58,9 +59,9 @@ const plugins = (env, wpConfig) =>
 			wpConfig.plugins.push(
 				sourcemaps(env, wpConfig),
 				copy([], env, wpConfig),
-				wpPlugin.analyze.bundle(env, wpConfig),
-				wpPlugin.analyze.visualizer(env, wpConfig),
-				wpPlugin.analyze.circular(env, wpConfig),
+				analyze.bundle(env, wpConfig),
+				analyze.visualizer(env, wpConfig),
+				analyze.circular(env, wpConfig),
 				banner(env, wpConfig)
 			);
 		}

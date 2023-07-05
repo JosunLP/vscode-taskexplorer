@@ -68,4 +68,5 @@ const sourcemaps = (env, wpConfig) =>
     return plugin;
 };
 
+
 module.exports = sourcemaps;

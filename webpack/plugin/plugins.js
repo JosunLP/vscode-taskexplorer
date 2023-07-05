@@ -2,19 +2,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-const fs = require("fs");
 const path = require("path");
-const webpack = require("webpack");
-const { renameSync } = require("fs");
-const { spawnSync } = require("child_process");
-const CopyPlugin = require("copy-webpack-plugin");
+// const CopyPlugin = require("copy-webpack-plugin");
 const HtmlPlugin = require("html-webpack-plugin");
 const CspHtmlPlugin = require("csp-html-webpack-plugin");
-const VisualizerPlugin = require("webpack-visualizer-plugin2");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CircularDependencyPlugin = require("circular-dependency-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 // const TerserPlugin = require("terser-webpack-plugin");
 // const ShebangPlugin = require("webpack-shebang-plugin");
@@ -28,70 +21,6 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 
 const wpPlugin =
 {
-	analyze:
-	{
-		/**
-		 * @param {WebpackEnvironment} env
-		 * @param {WebpackConfig} wpConfig Webpack config object
-		 * @returns {BundleAnalyzerPlugin | undefined}
-		 */
-		bundle: (env, wpConfig) =>
-		{
-			let plugin;
-			if (env.analyze === true)
-			{
-				plugin = new BundleAnalyzerPlugin({
-					analyzerPort: "auto",
-					analyzerMode: "static",
-					generateStatsFile: true,
-					statsFilename: "../.coverage/analyzer-stats.json",
-					reportFilename: "../.coverage/analyzer.html",
-					openAnalyzer: true
-				});
-			}
-			return plugin;
-		},
-
-		/**
-		 * @param {WebpackEnvironment} env
-		 * @param {WebpackConfig} wpConfig Webpack config object
-		 * @returns {CircularDependencyPlugin | undefined}
-		 */
-		circular: (env, wpConfig) =>
-		{
-			let plugin;
-			if (env.analyze === true)
-			{
-				plugin = new CircularDependencyPlugin(
-				{
-					cwd: env.buildPath,
-					exclude: /node_modules/,
-					failOnError: false,
-					onDetected: ({ module: _webpackModuleRecord, paths, compilation }) =>
-					{
-						compilation.warnings.push(/** @type {*}*/(new webpack.WebpackError(paths.join(" -> "))));
-					}
-				});
-			}
-			return plugin;
-		},
-
-		/**
-		 * @param {WebpackEnvironment} env
-		 * @param {WebpackConfig} wpConfig Webpack config object
-		 * @returns {VisualizerPlugin | undefined}
-		 */
-		visualizer: (env, wpConfig) =>
-		{
-			let plugin;
-			if (env.analyze === true) {
-				plugin = new VisualizerPlugin({ filename: "../.coverage/visualizer.html" });
-			}
-			return /** @type {VisualizerPlugin | undefined}) */(plugin);
-		}
-	},
-
-
 	/**
 	 * @param {WebpackEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
@@ -228,42 +157,6 @@ const wpPlugin =
 			// });
 		}
 		return plugin;
-	},
-
-
-	/**
-	 * @param {WebpackEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
-	 * @returns {webpack.optimize.LimitChunkCountPlugin | undefined}
-	 */
-	limitchunks: (env, wpConfig) =>
-	{
-		/** @type {webpack.optimize.LimitChunkCountPlugin | undefined} */
-		let plugin;
-		if (env.build === "browser")
-		{
-			plugin = new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 });
-		}
-		return plugin;
-	},
-
-
-	optimize:
-	{
-		/**
-		 * @param {WebpackEnvironment} env
-		 * @param {WebpackConfig} wpConfig Webpack config object
-		 * @returns {webpack.NoEmitOnErrorsPlugin | undefined}
-		 */
-		noEmitOnError: (env, wpConfig) =>
-		{
-			let plugin;
-			if (env.build !== "webview") // && wpConfig.mode === "production")
-			{
-				plugin = new webpack.NoEmitOnErrorsPlugin();
-			}
-			return plugin;
-		}
 	},
 
 
