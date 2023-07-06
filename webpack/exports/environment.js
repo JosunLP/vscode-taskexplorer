@@ -8,10 +8,10 @@
 const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
 
+/** @typedef {import("..//types/webpack").WebpackArgs} WebpackArgs */
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
-/** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: String[] }} WebpackArgs */
 
 
 /**
@@ -37,6 +37,9 @@ const environment = (buildTarget, env, argv) =>
 		writeInfo("Arguments:");
 		if (argv.mode) {
 			writeInfo(`   mode          : ${argv.mode}`);
+		}
+		if (argv.watch) {
+			writeInfo(`   watch         : ${argv.config.join(", ")}`);
 		}
 		if (argv.config) {
 			writeInfo(`   config        : ${argv.config.join(", ")}`);

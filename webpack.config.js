@@ -8,10 +8,10 @@ const {
 	output, resolve, rules, stats, target, watch, environment
 } = require("./webpack/exports");
 
+/** @typedef {import("./webpack/types/webpack").WebpackArgs} WebpackArgs */
 /** @typedef {import("./webpack/types/webpack").WebpackBuild} WebpackBuild */
 /** @typedef {import("./webpack/types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("./webpack/types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: String[] }} WebpackArgs */
 
 let buildStep = 0;
 
@@ -105,7 +105,7 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 	resolve(env, wpConfig);              // Resolve config
 	rules(env, wpConfig);                // Loaders & build rules
 	stats(env, wpConfig);                // Stats i.e. console output & verbosity
-	watch(env, wpConfig);				 // Watch-mode options
+	watch(env, wpConfig, argv);		     // Watch-mode options
 	wpConfig.name = `${buildTarget}:${wpConfig.mode}`;
 	return wpConfig;
 };
