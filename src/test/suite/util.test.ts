@@ -568,6 +568,19 @@ suite("Util Tests", () =>
 		teWrapper.utils.execIf(false, () => {}, this, null,  () => {}, 2, 3, 4);
 		teWrapper.utils.execIf(true, () => {}, this, [ () => {}, 2, 3 ], 4);
 		teWrapper.utils.execIf(false, () => {}, this, [ () => {}, 2, 3, 4 ]);
+		//
+		// execIf2
+		//
+		teWrapper.utils.execIf2(false, () => {});
+		teWrapper.utils.execIf2(true, () => {});
+		teWrapper.utils.execIf2(null, () => {}, this);
+		teWrapper.utils.execIf2(false, () => {}, this);
+		teWrapper.utils.execIf2(true, () => {}, this);
+		teWrapper.utils.execIf2(true, () => {}, this, null, 1, 2, 3);
+		teWrapper.utils.execIf2(true, () => {}, this, null, () => {}, 2, 3);
+		teWrapper.utils.execIf2(false, () => {}, this, null,  () => {}, 2, 3, 4);
+		teWrapper.utils.execIf2(true, () => {}, this, [ () => {}, 2, 3 ], 4);
+		teWrapper.utils.execIf2(false, () => {}, this, [ () => {}, 2, 3, 4 ]);
 
         expect(teWrapper.taskUtils.isScriptType("batch"));
         expect(teWrapper.taskUtils.getScriptTaskTypes().length > 0);

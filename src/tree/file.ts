@@ -34,16 +34,15 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     private _groupLevel: number;
     private _relativePath: string;
-    private _treeNodes: (TaskItem|TaskFile)[];
 
     private readonly _fileName: string;
-    // private readonly _task: Task;
     private readonly _folder: TaskFolder;
     private readonly _taskSource: string;
     private readonly _taskType: string;
     private readonly _isGroup: boolean;
     private readonly _isUser: boolean;
     private readonly _groupId: string | undefined;
+    private readonly _treeNodes: (TaskItem|TaskFile)[];
 
 
     /**
@@ -217,7 +216,7 @@ export class TaskFile extends TreeItem implements ITaskFile
             pathKey = Strings.USER_TASKS_LABEL;
         }
         const lblKey = label || this.getLabel(task.definition, task.source, relativePath, groupId);
-        return folder.id + ":" + encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`) + (`:${groupId}` || "");
+        return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${groupId || ""}`;
     }
 
 

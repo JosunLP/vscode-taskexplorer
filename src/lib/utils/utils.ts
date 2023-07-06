@@ -4,11 +4,11 @@
 import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
-import { ConfigKeys, CallbackOptions } from "../../interface";
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
 import { isArray, isFunction, isPromise, isString } from "./typeUtils";
+import { ConfigKeys, CallbackOptions, CallbackArray } from "../../interface";
 
 
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
@@ -17,19 +17,19 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
-export function execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions | null): R | undefined;
-export function execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1): R | undefined;
-export function execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2): R | undefined;
-export function execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3): R | undefined;
-export function execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
-export function execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
-export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions | null | undefined, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
+export function execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions): R | undefined;
+export function execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
+export function execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
+export function execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+export function execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+export function execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
 {
     if (checkValue) {
         return ifFn.call(thisArg, checkValue, arg1, arg2, arg3, arg4, arg5);
     }
-    else if (isCallbackOptions(elseOpts)) {
-        return elseOpts.splice(0, 1)[0].call(thisArg, ...elseOpts);
+    else if (isCallbackArray(elseOpts)) {
+        return elseOpts.splice(0, 1)[0].call(thisArg, ...elseOpts, arg1, arg2, arg3, arg4, arg5);
     }
 };
 /*
@@ -44,21 +44,21 @@ export function execIf<T, R, A0 = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 =
     if (checkValue) {
         return ifFn.call(thisArg, checkValue, arg1, arg2, arg3, arg4, arg5);
     }
-    else if (isCallbackOptions(elseOpts)) {
+    else if (isCallbackArray(elseOpts)) {
         return elseOpts.splice(0, 1)[0].call(thisArg, ...elseOpts);
     }
 };
 export function execIf<T extends CheckValue, R>(checkValue: T, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions | null): R | undefined;
-export function execIf<T extends CheckValue, R, A1>(checkValue: T, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1): R | undefined;
-export function execIf<T extends CheckValue, R, A1, A2>(checkValue: T, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2): R | undefined;
-export function execIf<T extends CheckValue, R, A1, A2, A3>(checkValue: T, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3): R | undefined;
-export function execIf<T extends CheckValue, R, A1, A2, A3, A4>(checkValue: T, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
-export function execIf<T extends CheckValue, R, A1, A2, A3, A4, A5>(checkValue: T, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
-export function execIf<T extends CheckValue, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions | null | undefined, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
+export function execIf<T extends CheckValue, R, A1>(checkValue: T, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
+export function execIf<T extends CheckValue, R, A1, A2>(checkValue: T, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
+export function execIf<T extends CheckValue, R, A1, A2, A3>(checkValue: T, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+export function execIf<T extends CheckValue, R, A1, A2, A3, A4>(checkValue: T, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+export function execIf<T extends CheckValue, R, A1, A2, A3, A4, A5>(checkValue: T, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+export function execIf<T extends CheckValue, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
 {
-    let elseFn: CallbackOptions | null | undefined;
+    let elseFn: CallbackOptions;
     const checkValueIsParams = isArray(checkValue, false) && checkValue.length === 2;
-    if (isCallbackOptions(elseOpts)) {
+    if (isCallbackArray(elseOpts)) {
         elseFn = elseOpts;
     }
     if ((!checkValueIsParams && checkValue) || (checkValueIsParams ? checkValue[0] : null)) {
@@ -69,15 +69,19 @@ export function execIf<T extends CheckValue, R, A1, A2 = A1, A3 = A1, A4 = A1, A
     }
 };
 */
-
-
-// export const execIfElse = <T, R = any>(checkValue: T | undefined, ifFn: (arg: T, ...args: any[]) => R | PromiseLike<R>, elseFn: (...args: any[]) => R | PromiseLike<R>, thisArg?: any, ifArgs?: any[], elseArgs?: any[]): R | PromiseLike<R> | undefined | void =>
-// {
-//     if (checkValue) {
-//         return ifFn.call(thisArg, checkValue, ...asArray(ifArgs));
-//     }
-//     return elseFn.call(this, ...asArray(elseArgs));
-// };
+export function execIf2<T, R, A1>(checkValue: T | undefined, ifFn: (arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
+export function execIf2<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
+export function execIf2<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+export function execIf2<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+export function execIf2<T, R, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
+{
+    if (checkValue) {
+        return ifFn.call(thisArg, arg1, arg2, arg3, arg4, arg5);
+    }
+    else if (isCallbackArray(elseOpts)) {
+        return elseOpts.splice(0, 1)[0].call(thisArg, ...elseOpts, arg1, arg2, arg3, arg4, arg5);
+    }
+};
 
 
 export const formatDate = (epochMs: number, format?: "datetime" | "date" | "time") =>
@@ -188,7 +192,7 @@ export const isExcluded = (uriPath: string, logPad = "") =>
 };
 
 
-const isCallbackOptions = (v: any): v is CallbackOptions => !!v && isArray(v) && isFunction(v[0]);
+const isCallbackArray = (v: any): v is CallbackArray => !!v && isArray(v) && isFunction(v[0]);
 
 
 /**
@@ -363,13 +367,13 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
-export function wrap<R, E>(runFn: () => R, catchFn: CallbackOptions | null | undefined, thisArg?: any): R;
-export function wrap<R, E, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1): R;
-export function wrap<R, E, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2): R;
-export function wrap<R, E, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
-export function wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
-export function wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions | null | undefined, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
-export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFn?: CallbackOptions | null | undefined, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
+export function wrap<R, E>(runFn: () => R, catchFn: CallbackOptions, thisArg?: any): R;
+export function wrap<R, E, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1): R;
+export function wrap<R, E, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2): R;
+export function wrap<R, E, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
+export function wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
+export function wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
+export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFn?: CallbackOptions, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
 {
     let result;
     try
@@ -379,7 +383,7 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
         {
             result = result.then<R, E>((r) => r, (e) =>
             {
-                if (!isCallbackOptions(catchFn)) {
+                if (!isCallbackArray(catchFn)) {
                     result = (catchFn || wrapThrow).call(thisArg, e);
                 }
                 else {
@@ -394,7 +398,7 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
     }
     catch (e)
     {
-        if (!isCallbackOptions(catchFn)) {
+        if (!isCallbackArray(catchFn)) {
             result = (catchFn || wrapThrow).call(thisArg, e);
         }
         else {

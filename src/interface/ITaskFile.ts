@@ -11,7 +11,7 @@ export interface ITaskFile extends TreeItem
     readonly relativePath: string;
     resourceUri: Uri;
     readonly taskSource: string;
-    treeNodes: (ITaskItem|ITaskFile)[];
+    readonly treeNodes: (ITaskItem|ITaskFile)[];
     addChild(treeNode: ITaskFile | ITaskItem, index?: number): void;
     removeChild(treeItem: ITaskFile | ITaskItem): void;
 }
