@@ -453,12 +453,14 @@ suite("Util Tests", () =>
 		expect(teWrapper.typeUtils.asArray("", false, false)).to.be.an("array").with.length(0);
 		expect(teWrapper.typeUtils.asArray("")).to.be.an("array").with.length(0);
 		expect(teWrapper.typeUtils.asArray([ 1 ], true)).to.be.an("array").with.length(1);
-		// expect(teWrapper.typeUtils.asString("")).to.be.equal("");
-		// expect(teWrapper.typeUtils.asString(undefined)).to.be.equal("");
-		// expect(teWrapper.typeUtils.asString("test")).to.be.equal("test");
+		expect(teWrapper.typeUtils.asString("")).to.be.equal("");
+		expect(teWrapper.typeUtils.asString(undefined)).to.be.equal("");
+		expect(teWrapper.typeUtils.asString("test")).to.be.equal("test");
 		expect(teWrapper.typeUtils.isEmpty([])).to.be.equal(true);
 		expect(teWrapper.typeUtils.isEmpty("")).to.be.equal(true);
 		expect(teWrapper.typeUtils.isEmpty("", true)).to.be.equal(false);
+		expect(teWrapper.typeUtils.isEmpty({ a: 1 })).to.be.equal(false);
+		expect(teWrapper.typeUtils.isEmpty({})).to.be.equal(true);
 		expect(teWrapper.typeUtils.isPromise(null)).to.be.equal(false);
 		expect(teWrapper.typeUtils.isPromise(new Promise((r, j) => r(true)))).to.be.equal(true);
 		expect(teWrapper.typeUtils.isPromise(teWrapper.utils.sleep(5))).to.be.equal(true);
