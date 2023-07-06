@@ -8,6 +8,8 @@ import { ITeTask, TeTaskListType } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
 
 
+export type OneOf<T, V extends any[], NK extends keyof V = Exclude<keyof V, keyof any[]>> = { [K in NK]: T extends V[K] ? V[K] : never }[NK];
+
 export type PromiseAdapter<T, U> = (
     v: T,
     resolve:
@@ -64,7 +66,7 @@ export interface ITeTypeUtilities
 {
     asArray<T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[];
 	// asObject<T>(v: T | undefined | null): T;
-    // asString(v: string | undefined | null, defaultValue?: string): string;
+    asString(v: string | undefined | null, defaultValue?: string): string;
     isArray<T>(v: any, allowEmp?: boolean): v is T[];
 	// isAsyncFunction<T = any>(fn: any): fn is () => PromiseLike<T>;
 	isBoolean(v: any): v is boolean;
