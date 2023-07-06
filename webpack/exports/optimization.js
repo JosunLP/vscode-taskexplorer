@@ -4,6 +4,8 @@
  * @module webpack.exports.optimization
  */
 
+const webviewApps = require("../webviewApps");
+
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 
@@ -51,7 +53,16 @@ const optimization = (env, wpConfig) =>
  */
 const parallelism = (env, wpConfig) =>
 {
-	wpConfig.parallelism = 1;
+	if (env.build === "webview")
+	{
+		wpConfig.parallelism = Object.keys(webviewApps).length;
+	}
+	else if (env.build === "extension" && env.environment === "test") {
+		wpConfig.parallelism = 2;
+	}
+	else {
+		wpConfig.parallelism = 1;
+	}
 };
 
 
