@@ -12,7 +12,7 @@ export const asArray = <T>(v: T | T[] | undefined | null, shallow?: boolean, all
 // export const asObject = <T>(v: T | undefined | null): T => isObject<T>(v) ? v : <T>{};
 
 
-// export const asString = (v: string | undefined | null, defaultValue = ""): string => isString(v) ? v : defaultValue;
+export const asString = (v: string | undefined | null, defaultValue = ""): string => isString(v) ? v : defaultValue;
 
 
 export const isArray = <T>(v: any, allowEmp?: boolean): v is T[] => !!v && Array.isArray(v) && (allowEmp !== false || v.length > 0);
@@ -30,7 +30,7 @@ export const isBoolean = (v: any): v is boolean => (v === false || v === true) &
 // export const isDefined = (v: any) => typeof v !== "undefined";
 
 
-export const isEmpty = (v: any, allowEmpStr?: boolean): v is null | undefined | "" | [] => v === null || v === undefined || (!allowEmpStr ? v === "" : false) || (isArray(v) && v.length === 0);
+export const isEmpty = (v: any, allowEmpStr?: boolean): v is null | undefined | "" | [] => v === null || v === undefined || (!allowEmpStr ? v === "" : false) || (isArray(v) && v.length === 0) || (isObject(v) && isObjectEmpty(v));
 
 
 export const isError = (e: any): e is Error => e instanceof Error;
