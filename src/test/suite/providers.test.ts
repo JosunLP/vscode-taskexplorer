@@ -402,7 +402,7 @@ suite("Provider Tests", () =>
         const grunt = await treeUtils.getTreeTasks(teWrapper, "grunt", 13),
               taskItems = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri),
               gruntCt = taskItems.length,
-              taskItem = grunt.find(t => t.taskSource === "grunt" && !t.taskFile.path.startsWith("grunt") && t.task.name === "default" && t.taskFile.fileName === "GRUNTFILE.js");
+              taskItem = grunt.find(t => t.taskSource === "grunt" && !t.taskFile.relativePath.startsWith("grunt") && t.task.name === "default" && t.taskFile.fileName === "GRUNTFILE.js");
         await executeTeCommand2("addToExcludes", [ taskItem ], tc.waitTime.config.excludeTasksEvent);
         await verifyTaskCount("grunt", gruntCt - 2); // there are 3 tasks that would getmasked by the task name regex 'default'
         taskFile = taskItem?.taskFile;               // but oe of them is already ignored as it is in an ignored folder
@@ -495,7 +495,7 @@ suite("Provider Tests", () =>
                 {
                     taskFile = taskFile.treeNodes[0] as ITaskFile;
                 }
-                if (taskFile && taskFile.isGroup && !taskItem.taskFile.path.startsWith("grunt"))
+                if (taskFile && taskFile.isGroup && !taskItem.taskFile.relativePath.startsWith("grunt"))
                 {
                     await executeTeCommand2("addToExcludes", [ taskFile ]);
                     break;
