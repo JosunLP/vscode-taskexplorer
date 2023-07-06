@@ -348,13 +348,13 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     getTaskItem =  (taskItem: TaskItem | ITeTask | Uri): TaskItem => this._treeBuilder.toTaskItem(taskItem);
 
 
-    getTaskMap = (): TaskMap => this._treeBuilder.getTaskMap();
+    getTaskMap = (): TaskMap => this._treeBuilder.taskMap;
 
 
     getTasks = (): Task[] => this._tasks;
 
 
-    getTaskTree = (): TaskFolder[] | void | null | undefined => this._treeBuilder.getTaskTree();
+    getTaskTree = (): TaskFolder[] | void | null | undefined => this._treeBuilder.taskTree;
 
 
     private handleRebuildEvent = async(invalidate: string | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
@@ -510,8 +510,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         const w = this.wrapper,
               tasks = this._tasks,
-              taskMap = this._treeBuilder.getTaskMap(),
-              taskTree = this._treeBuilder.getTaskTree() as TaskFolder[];
+              taskMap = this._treeBuilder.taskMap,
+              taskTree = this._treeBuilder.taskTree as TaskFolder[];
 
         w.log.methodStart("treemgr: workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
         w.log.write("   removing project tasks from cache", 1, logPad);
@@ -706,7 +706,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         const taskTypeProcessed: string[] = [],
               scriptFilesWithArgs: string[] = [],
-              taskMap = Object.values(this._treeBuilder.getTaskMap()).filter(i => !!i);
+              taskMap = Object.values(this._treeBuilder.taskMap).filter(i => !!i);
         for (const taskItem of taskMap)
         {
             const task = taskItem.task;

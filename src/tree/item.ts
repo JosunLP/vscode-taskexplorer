@@ -84,7 +84,6 @@ export class TaskItem extends TreeItem implements ITaskItem
         this._isUser = taskFile.isUser;
         this._paused = false;                  // paused flag used by start/stop/pause task functionality
         this._taskFile = taskFile;
-        this._task = task;
         this._groupLevel = 0;                  // Grouping level - will get set by treefile.addTreeNode()
         this.command = {
             title: "Open definition",          // Default click action is just Open file since it's easy to click on accident
