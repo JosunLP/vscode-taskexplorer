@@ -24,7 +24,6 @@
             "composer": false,
             "gradle": false,
             "grunt": true,
-            "gulp": true,
             "jenkins": true,
             "make": true,
             "maven": false,

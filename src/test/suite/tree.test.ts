@@ -484,7 +484,6 @@ class DumbFolder implements ITaskFolder
 {
     public label: string;
     constructor(lbl: string) { this.label = lbl; }
-    addTaskFile(taskFile: ITaskItem | ITaskFile): void {}
-    insertTaskFile(taskFile: ITaskItem | ITaskFile, index: number): void {}
-    removeTaskFile(taskFile: ITaskItem | ITaskFile, logPad: string): void {}
+    addChild(taskFile: ITaskItem | ITaskFile, idx = 0): void {}
+    removeChild(taskFile: ITaskItem | ITaskFile, logPad: string): void {}
 }

@@ -317,15 +317,14 @@ export class TaskManager implements ITeTaskManager, Disposable
             const _run = async (..._args: any[]) =>
             {
                 let newTask = taskItem.task;
-                const def = taskItem.task.definition,
-                      folder = taskItem.getFolder();
-                // if (folder)
-                // {
+                const def = taskItem.task.definition;
+                this.wrapper.utils.execIf(taskItem.getFolder(), (f) =>
+                {
                     newTask = (new ScriptTaskProvider(this.wrapper)).createTask(
-                        def.script, undefined, folder as WorkspaceFolder, def.uri, _args, logPad + "   "
+                        def.script, undefined, f, def.uri, _args, logPad + "   "
                     ) as Task;
                     newTask.definition.taskItemId = def.taskItemId;
-                // }
+                }, this);
                 return this.runTask(newTask, taskItem, noTerminal, logPad + "   ");
             };
 
@@ -360,8 +359,8 @@ export class TaskManager implements ITeTaskManager, Disposable
                       w.taskUtils.toITask(w, [ taskItem.task ], listType)[0] : taskItem,
               storageKey: PinnedStorageKey = `taskexplorer.pinned.${iTask.listType}`;
 		this._log.methodStart("set pinned task", 2, "", false, [[ "id", iTask.treeId ], [ "pinned", iTask.pinned ]]);
-		const pinnedTaskList = w.storage.get<ITeTask[]>(storageKey, []);
-        const pinnedIdx =  pinnedTaskList.findIndex((t) => t.treeId === iTask.treeId);
+		const pinnedTaskList = w.storage.get<ITeTask[]>(storageKey, []),
+              pinnedIdx =  pinnedTaskList.findIndex((t) => t.treeId === iTask.treeId);
         if (pinnedIdx === -1) {
 		    pinnedTaskList.push({  ...iTask });
         }

@@ -131,11 +131,11 @@ export class TaskTreeBuilder
             // taskFile.addTreeNode(taskItem);
 // *************************************************************************************
             const fsPath = !each.definition.scriptFile ? taskFile.resourceUri.fsPath : each.definition.uri.fsPath;
-            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => n instanceof TaskItem &&  n.id === TaskItem.createId(fsPath, each));
+            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => n instanceof TaskItem &&  n.id === TaskItem.getId(fsPath, each));
             if (!taskItem)
             {
                 taskItem = new TaskItem(taskFile, each, logPad + "   ");
-                taskFile.addTreeNode(taskItem);
+                taskFile.addChild(taskItem);
             }
 // *************************************************************************************
             this._taskMap[taskItem.id] = taskItem;
@@ -149,7 +149,9 @@ export class TaskTreeBuilder
     {
         this.wrapper.log.methodStart("create task tree", 1, logPad);
         this.wrapper.statusBar.update(this.wrapper.keys.Strings.BuildingTaskTree);
-        if (rebuild) { this.invalidate(); }
+        if (rebuild) {
+            this.invalidate();
+        }
         await this.buildTree(logPad + "   ");
         this.wrapper.statusBar.update("");
         this.wrapper.log.methodDone("create task tree", 1, logPad, [[ "current task count", this.wrapper.treeManager.getTasks().length ]]);
@@ -181,7 +183,7 @@ export class TaskTreeBuilder
             this.wrapper.log.value("   Add source taskfile container", task.source, 2, logPad);
             taskFile = new TaskFile(folder, task, relativePath, 0, undefined, task.source, logPad + "   ");
             this._taskFileMap[taskFile.id] = taskFile;
-            folder.addTaskFile(taskFile);
+            folder.addChild(taskFile);
         }
         this.wrapper.log.methodDone("get task file node", 2, logPad);
         return taskFile;

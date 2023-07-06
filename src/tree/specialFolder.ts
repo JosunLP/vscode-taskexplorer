@@ -148,7 +148,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             }
             const taskItem = taskMap[t.id] as TaskItem; // Guaranteed to be TaskItem from cleanStores()
             const taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
-            this.insertTaskFile(taskItem2, 0);
+            this.addChild(taskItem2, 0);
             added.push(t.id);
         }
 
@@ -309,7 +309,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    override async removeTaskFile(taskItem: TaskItem, logPad: string, persist?: boolean): Promise<void>
+    override async removeChild(taskItem: TaskItem, logPad: string, persist?: boolean): Promise<void>
     {
         const idx = this.taskFiles.findIndex(f => f.id === this.getTaskSpecialId(taskItem.id));
         taskItem = this.taskFiles.splice(idx, 1)[0]; // idx guaranteed not to be -1 by caller

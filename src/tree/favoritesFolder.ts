@@ -63,7 +63,7 @@ export class FavoritesFolder extends SpecialTaskFolder
             await this.saveTask(taskItem, "   ");
         }
         else {
-           await this.removeTaskFile(taskItem, "   ", true);
+           await this.removeChild(taskItem, "   ", true);
         }
 
         this.wrapper.log.methodDone("add/remove favorite", 1);
@@ -82,7 +82,7 @@ export class FavoritesFolder extends SpecialTaskFolder
         this.storeWs.push({ id: taskId, timestamp: now });
         await this.saveStores();
         const taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
-        this.insertTaskFile(taskItem2, 0);
+        this.addChild(taskItem2, 0);
         this.sort();
         this.fireChangeEvent(taskItem, true, logPad);
         this.log.methodDone("save task", 1, logPad, [[ "new # of saved tasks", this.store.length + this.storeWs.length ]]);

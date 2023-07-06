@@ -61,16 +61,16 @@ export class LastTasksFolder extends SpecialTaskFolder
         let taskItem2 = this.taskFiles.find(t => t instanceof TaskItem && t.id === taskId);
         if (taskItem2)
         {
-            await this.removeTaskFile(taskItem2, logPad, false);
+            await this.removeChild(taskItem2, logPad, false);
         }
         else if (this.taskFiles.length >= this.maxItems)
         {
-            await this.removeTaskFile(this.taskFiles[this.taskFiles.length - 1], logPad, false);
+            await this.removeChild(this.taskFiles[this.taskFiles.length - 1], logPad, false);
         }
         if (!taskItem2) {
             taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
         }
-        this.insertTaskFile(taskItem2, 0);
+        this.addChild(taskItem2, 0);
         this.fireChangeEvent(taskItem2, false, logPad + "   "); // running task watcher will fire tree refresh
     };
 

@@ -5,7 +5,6 @@ import { TreeItem } from "vscode";
 
 export interface ITaskFolder extends TreeItem
 {
-    addTaskFile(taskFile: ITaskFile|ITaskItem): void;
-    insertTaskFile(taskFile: ITaskFile|ITaskItem, index: number): void;
-    removeTaskFile(taskFile: ITaskFile | ITaskItem, logPad: string): void | Promise<void>;
+    addChild(taskFile: ITaskFile|ITaskItem, index?: number): void;
+    removeChild(taskFile: ITaskFile | ITaskItem, logPad: string): void | Promise<void>;
 }

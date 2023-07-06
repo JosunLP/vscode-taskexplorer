@@ -1,5 +1,5 @@
 
-import * as path from "path";
+import { join } from "path";
 import { TaskFile } from "./file";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
@@ -24,23 +24,22 @@ import {
  */
 export class TaskItem extends TreeItem implements ITaskItem
 {
-    public override id: string;
-    public override command: Command;
-    public override resourceUri: Uri;
+    declare label: string;
+    override id: string;
+    override command: Command;
+    override resourceUri: Uri;
 
-    public task: Task;
     private _folder: TaskFolder | undefined;
-    public taskDetached: Task | undefined;
-    public execution: TaskExecution | undefined;
-    public paused: boolean;
-
+    private _taskDetached: Task | undefined;
+    private _execution: TaskExecution | undefined;
+    private _paused: boolean;
     private _groupLevel: number;
+
     private readonly _taskFile: TaskFile;
     private readonly _task: Task;
     private readonly _taskSource: string;
     private readonly _taskType: string;
     private readonly _isUser: boolean;
-    private readonly _groupId: string | undefined;
 
 
     constructor(taskFile: TaskFile, task: Task, logPad: string)
@@ -75,29 +74,27 @@ export class TaskItem extends TreeItem implements ITaskItem
         else {
             this.resourceUri = taskFile.resourceUri;
         }
-        this.id = TaskItem.createId(fsPath, task);
+        //
+        // Set ID and properties
+        //
+        this.id = TaskItem.getId(fsPath, task);
         this._task = task;
+        this._taskSource = task.source;
+        this._taskType = task.definition.type; // If the source is `Workspace`, def.type can be of any provider type
         this._isUser = taskFile.isUser;
-        this.paused = false;                // paused flag used by start/stop/pause task functionality
-        this._taskFile = taskFile;          // Save a reference to the TaskFile that this TaskItem belongs to
-        this.task = task;                      // Save a reference to the Task that this TaskItem represents
-        this._groupLevel = 0;              // Grouping level - will get set by treefile.addTreeNode()
-        this.command = {                  // Note that 'groupLevel' will be set by TaskFile.addScript()
-            title: "Open definition",       // Default click action is just Open file since it's easy to click on accident
+        this._paused = false;                  // paused flag used by start/stop/pause task functionality
+        this._taskFile = taskFile;
+        this._task = task;
+        this._groupLevel = 0;                  // Grouping level - will get set by treefile.addTreeNode()
+        this.command = {
+            title: "Open definition",          // Default click action is just Open file since it's easy to click on accident
             command: "taskexplorer.open",
             arguments: [ this, true ]
         };
         //
-        // The task source, i.e. "npm", "Workspace", or any of the TaskExplorer provided task mnemonics,
-        // i.e. "ant", "gulp", "batch", etc... If the task source is `WOrkspace` then the `task type` can be of
-        // any provider, most likelt an npm script
-        //
-        this._taskSource = task.source;
-        this._taskType = task.definition.type;
-        //
         // Set taskItem on the task definition object for use in the task start/stop events
         //
-        this.task.definition.taskItemId = this.id;
+        this._task.definition.taskItemId = this.id;
         //
         // Tooltip
         //
@@ -114,12 +111,12 @@ export class TaskItem extends TreeItem implements ITaskItem
         log.methodDone("construct tree file", 5, logPad, [
             [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ],
             [ "context value", this.contextValue ], [ "groupLevel", this._groupLevel ],
-            [ "resource uri path", this._taskFile.resourceUri.fsPath ], [ "path", this._taskFile.path  ]
+            [ "resource uri path", this._taskFile.resourceUri.fsPath ], [ "path", this._taskFile.relativePath  ]
         ]);
     }
 
 
-    get isUser() { return this._isUser; };
+    get execution() { return this._execution; };
 
     get folder() { return this._folder; };
 
@@ -127,12 +124,26 @@ export class TaskItem extends TreeItem implements ITaskItem
 
     get groupLevel() { return this._groupLevel; };
 
+    set groupLevel(v) { this._groupLevel = v; }
+
+    get taskDetached() { return this._taskDetached; };
+
+    set taskDetached(v) { this._taskDetached = v; };
+
+    get isUser() { return this._isUser; };
+
+    get paused() { return this._paused; };
+
+    set paused(v) { this._paused = v; };
+
+    get task() { return this._task; };
+
     get taskFile() { return this._taskFile; };
 
     get taskSource() { return this._taskSource; };
 
 
-    static createId(fsPath: string, task: Task)
+    static getId(fsPath: string, task: Task)
     {
         return encodeUtf8Hex(`${fsPath}:${task.source}:${task.definition.type}:${task.name}`);
     }
@@ -144,7 +155,7 @@ export class TaskItem extends TreeItem implements ITaskItem
     isExecuting(logPad = "   ")
     {
         log.methodStart("is executing", 5, logPad);
-        const task = this.taskDetached ?? this.task;
+        const task = this._taskDetached ?? this.task;
         const execs = tasks.taskExecutions.filter(e => e.task.name === task.name && e.task.source === task.source &&
                                                 e.task.scope === task.scope && e.task.definition.path === task.definition.path);
         const exec = execs.find(e => e.task.name === task.name && e.task.source === task.source &&
@@ -220,15 +231,15 @@ export class TaskItem extends TreeItem implements ITaskItem
         {
             const disableAnimated = configuration.get<boolean>("visual.disableAnimatedIcons");
             this.iconPath = {
-                light: path.join(installPath, "res", "img", "light", !disableAnimated ? "loading.svg" : "loadingna.svg"),
-                dark: path.join(installPath, "res", "img", "dark", !disableAnimated ? "loading.svg" : "loadingna.svg")
+                light: join(installPath, "res", "img", "light", !disableAnimated ? "loading.svg" : "loadingna.svg"),
+                dark: join(installPath, "res", "img", "dark", !disableAnimated ? "loading.svg" : "loadingna.svg")
             };
         }
         else
         {
             this.iconPath = {
-                light: path.join(installPath, "res", "img", "light", "script.svg"),
-                dark: path.join(installPath, "res", "img", "dark", "script.svg")
+                light: join(installPath, "res", "img", "light", "script.svg"),
+                dark: join(installPath, "res", "img", "dark", "script.svg")
             };
         }
     }
