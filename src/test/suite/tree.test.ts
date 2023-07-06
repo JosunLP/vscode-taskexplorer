@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
-import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper } from ":types";
+import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper, OneOf } from ":types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
 
 let teWrapper: ITeWrapper;
@@ -484,6 +484,7 @@ class DumbFolder implements ITaskFolder
 {
     public label: string;
     constructor(lbl: string) { this.label = lbl; }
-    addChild(taskFile: ITaskItem | ITaskFile, idx = 0): void {}
+    addChild<T extends (ITaskFile | ITaskItem)>(node: T, index?: number): OneOf<T, [ ITaskFile, ITaskItem ]>;
+    addChild(taskFile: ITaskItem | ITaskFile, idx = 0): ITaskFile | ITaskItem { return taskFile; }
     removeChild(taskFile: ITaskItem | ITaskFile, logPad: string): void {}
 }
