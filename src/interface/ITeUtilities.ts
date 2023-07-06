@@ -95,6 +95,14 @@ export interface ITeUtilities
 	execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
 	execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
 	/*
+	execIf<T, R, A0>(checkValue: T | undefined, ifFn: (arg: T | A0) => R, thisArg?: any, elseOpts?: CallbackOptions | A0 | null): R | undefined;
+	execIf<T, R, A0, A1>(checkValue: T | undefined, ifFn: (arg: T | A0, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions | A0 |null | undefined, arg1: A1): R | undefined;
+	execIf<T, R, A0, A1, A2>(checkValue: T | undefined, ifFn: (arg: T | A0, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions | A0 |null | undefined, arg1: A1, arg2: A2): R | undefined;
+	execIf<T, R, A0, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T | A0, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions | A0 |null | undefined, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+	execIf<T, R, A0, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T | A0, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions | A0 |null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+	execIf<T, R, A0 = T, A1 = any, A2= A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T | A0, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions | A0 | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+	*/
+	/*
 	execIf<T, V, R>(checkValue: [ T, V ], ifFn: (arg: V) => R, thisArg?: any, elseOpts?: CallbackOptions | null): R | undefined;
 	execIf<T, V, R, A1>(checkValue: [ T, V ], ifFn: (arg: V, arg1: A1) => R, thisArg?: any, elseOpts?: CallbackOptions | null): R | undefined;
 	execIf<T, V, R, A1, A2>(checkValue: [ T, V ], ifFn: (arg: V, arg1: A1, arg2: A2) => R, thisArg?: any, elseOpts?: CallbackOptions | null): R | undefined;

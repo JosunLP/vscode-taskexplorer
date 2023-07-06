@@ -25,18 +25,29 @@ export function execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (a
 export function execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
 export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions | null | undefined, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
 {
-    let elseFn: CallbackOptions | null | undefined;
-    if (isCallbackOptions(elseOpts)) {
-        elseFn = elseOpts;
-    }
     if (checkValue) {
         return ifFn.call(thisArg, checkValue, arg1, arg2, arg3, arg4, arg5);
     }
-    else if (elseFn) {
-        return elseFn.splice(0, 1)[0].call(thisArg, ...elseFn);
+    else if (isCallbackOptions(elseOpts)) {
+        return elseOpts.splice(0, 1)[0].call(thisArg, ...elseOpts);
     }
 };
 /*
+export function execIf<T, R, A0>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions | A0 | null | undefined): R | undefined;
+export function execIf<T, R, A0, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions | A0 | null | undefined, arg1: A1): R | undefined;
+export function execIf<T, R, A0, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions | A0 | null | undefined, arg1: A1, arg2: A2): R | undefined;
+export function execIf<T, R, A0, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions | A0 | null | undefined, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+export function execIf<T, R, A0, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions | A0 | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+export function execIf<T, R, A0, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions | A0 | null | undefined, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+export function execIf<T, R, A0 = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions | A0 | null | undefined, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
+{
+    if (checkValue) {
+        return ifFn.call(thisArg, checkValue, arg1, arg2, arg3, arg4, arg5);
+    }
+    else if (isCallbackOptions(elseOpts)) {
+        return elseOpts.splice(0, 1)[0].call(thisArg, ...elseOpts);
+    }
+};
 export function execIf<T extends CheckValue, R>(checkValue: T, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions | null): R | undefined;
 export function execIf<T extends CheckValue, R, A1>(checkValue: T, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1): R | undefined;
 export function execIf<T extends CheckValue, R, A1, A2>(checkValue: T, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions | null | undefined, arg1: A1, arg2: A2): R | undefined;
