@@ -16,11 +16,12 @@ svg {
 }
 
 .button-panel {
-  width: -webkit-fill-available;
-  align-content: left;
-  align-items: left;
-  align-content: left;
-}
+    width: -webkit-fill-available;
+    align-content: left;
+    align-items: left;
+    align-content: left;
+    padding-left: 5px;
+  }
 
 .te-icon {
     height: 46px;
@@ -29,12 +30,23 @@ svg {
 .homeview-title-container {
     display: inline-block;
     vertical-align: top;
-    margin-left: -30px;
+    margin-left: -35px;
     margin-top: -2px;
 }
 
 .homeview-info-panel {
+    width: 145px;
+    padding-right: 5px;
+    display: flex;
+}
+
+.homeview-info-td {
     width: 150px;
+    padding-right: 5px;
+    display: inline-block;
+}
+
+.homeview-title-td {
     padding-right: 5px;
     display: inline-block;
 }
@@ -61,7 +73,12 @@ svg {
     text-align: left;
     color: var(--vscode-button-background);
     text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 2px 1px #777, 1px 1px 0px #666, 0px 2px 0px #555, 1px 2px 0px #444, 0px 2px 0px #333, 0px 3px 1px #001135;
-  }
+}
+
+.homeview-content-title.homeview-content-title-line2  {
+    font-size: 22px;
+    line-height: 22px;
+}
 
 .homeview-content-title-version {
     font-size: 10px;
@@ -83,7 +100,7 @@ svg {
 	opacity: 0.725;
 }
 
-.homeview-license-status-container {
+.homeview-license-status-table {
     padding: 0px;
     border: gray 1px solid;
     opacity: .92;
@@ -92,6 +109,13 @@ svg {
     /* box-shadow: 0 0 2px 0 var(--vscode-background) inset; */
     background: var(--vscode-background);
     /* background: -webkit-linear-gradient(bottom, #000000, #222222, #696767, #222222, #000000); */
+}
+
+.homeview-license-status-container {
+    padding: 0px;
+    display: inline-block;
+    white-space: nowrap;
+    column-span: all;
 }
 
 .homeview-license-status-label-td {
