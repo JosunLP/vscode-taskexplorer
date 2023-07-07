@@ -4,7 +4,7 @@ import {  TreeviewIds, WebviewIds, WebviewViewIds } from "./ITeWebview";
 
 export type WebviewContextKey = `${ContextKeys.WebviewPrefix}${WebviewIds}${string}`;
 export type WebviewViewContextKey = `${ContextKeys.WebviewViewPrefix}${WebviewViewIds}${string}`;
-export type TreeviewContextKey = `${ContextKeys.TreeViewPrefix}${TreeviewIds}${string}`;
+export type TreeviewContextKey = `${ContextKeys.TreeviewPrefix}${TreeviewIds}${string}`;
 
 export type AllContextKeys = ContextKeys | TreeviewContextKey | WebviewContextKey | WebviewViewContextKey
 						   | `${ContextKeys.AccountPrefix}${string}`
@@ -18,7 +18,7 @@ export enum ContextKeys
 	FileCachePrefix = "taskexplorer:fileCache:",
 	KeyPrefix = "taskexplorer:key:",
 	TasksPrefix = "taskexplorer:tasks:",
-	TreeViewPrefix = "taskexplorer:treeView:",
+	TreeviewPrefix = "taskexplorer:treeView:",
 	TreeViewExplorerPrefix = "taskexplorer:treeView:taskTreeExplorer",
 	TreeViewSideBarPrefix = "taskexplorer:treeView:tasktreeSideBar",
 	WebviewPrefix = "taskexplorer:webview:",
