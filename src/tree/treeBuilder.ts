@@ -128,19 +128,19 @@ export class TaskTreeBuilder
     };
 
 
-    private getTaskFile = async (task: Task, folder: TaskFolder, relativePath: string, logPad: string) =>
+    private getTaskFile = async (task: Task, folder: TaskFolder, /* groupLevel: number,*/relativePath: string, logPad: string) =>
     {
         let taskFile: TaskFile | undefined;
         this.wrapper.log.methodStart("get task file node", 2, logPad, false, [[ "relative path", relativePath ]]);
         taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, 0)];
-        if (!taskFile)
-        {
-            for (let i = 0; i < this.wrapper.keys.Numbers.MaxGroupLevel && !taskFile; i++)
-            {
-                const fsPath = this.wrapper.pathUtils.getTaskAbsolutePath(task);
-                taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, i, TaskFile.groupId(folder, fsPath, task.source, task.name, i))];
-            }
-        }
+        // if (!taskFile)
+        // {
+        //     for (let i = 0; i < groupLevel && i < this.wrapper.keys.Numbers.MaxGroupLevel && !taskFile; i++)
+        //     {
+        //         const fsPath = this.wrapper.pathUtils.getTaskAbsolutePath(task);
+        //         taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, i, TaskFile.groupId(folder, fsPath, task.source, task.name, i))];
+        //     }
+        // }
         if (!taskFile)
         {
             this.wrapper.log.value("   Add source taskfile container", task.source, 2, logPad);
