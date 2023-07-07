@@ -58,7 +58,7 @@
 	"config.taskexplorer.logging.enableFile": "Enable logging to file (check the output window for location). If `#logging.enable#` is *on*, either writing to file or to the output window should be enabled. Has no effect if `#logging.enabled#` is *off*.",
 	"config.taskexplorer.logging.enableFileSymbols": "Enable decorative and folding (soon) symbols in log file. Has no effect if `#logging.enable#` or `#logging.enableFile#` are *off*.",
 	"config.taskexplorer.logging.enableOutputWindow": "Enable logging to a VSCode output window.  If `#logging.enable#` is *on*, either writing to file or to the output window should be enabled. Has no effect if `#logging.enabled#` is *off*.",
-	"config.taskexplorer.logging.level": "Set debug verbosity (1 - Low / 5 - High). Has no effect if `#logging.enable#` is disabled.",
+	"config.taskexplorer.logging.level": "Set log verbosity (1 - Low / 5 - High). Has no effect if `#logging.enable#` is disabled.",
 	
 	"config.taskexplorer.pathToPrograms": "Paths to programs, if not registered in system path",
 	"config.taskexplorer.pathToAnsicon": "Local path to the Ansicon executable",
