@@ -174,7 +174,7 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     get folder() { return this._folder; };
 
-    // get groupId() { return this._groupId; };
+    get groupId() { return this._groupId; };
 
     // set groupId(v) { this._groupId = v; }
 
