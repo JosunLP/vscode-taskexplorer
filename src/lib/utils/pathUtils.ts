@@ -62,7 +62,13 @@ export const getRelativePath = (folder: WorkspaceFolder, uri: Uri): string =>
 };
 
 
-export const getTaskAbsolutePath = (task: Task): string => join((<WorkspaceFolder>task.scope).uri.fsPath, getTaskRelativePath(task));
+export const getTaskAbsolutePath = (task: Task): string =>
+{
+    if (isWorkspaceFolder(task.scope)) {
+        return join(task.scope.uri.fsPath, getTaskRelativePath(task));
+    }
+    return join(getUserDataPath(), getTaskRelativePath(task));
+};
 
 
 export const getTaskRelativePath = (task: Task): string =>

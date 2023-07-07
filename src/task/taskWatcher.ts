@@ -100,8 +100,8 @@ export class TaskWatcher implements Disposable
 
     private async taskStartEvent(e: TaskStartEvent): Promise<void>
     {
-        const taskMap = this.wrapper.treeManager.getTaskMap(),
-              taskTree = this.wrapper.treeManager.getTaskTree(),
+        const taskMap = this.wrapper.treeManager.taskMap,
+              taskFolders = this.wrapper.treeManager.taskFolders,
               task = e.execution.task,
               treeId = task.definition.taskItemId,
               isMapEmpty = this.wrapper.typeUtils.isObjectEmpty(taskMap);
@@ -117,7 +117,7 @@ export class TaskWatcher implements Disposable
         if (isMapEmpty || !taskMap[treeId])
         {
             /* istanbul ignore next */
-            if (taskTree && !taskMap[treeId] && taskTree.length > 0 && this.wrapper.treeManager.getMessage() !== this.wrapper.keys.Strings.NoTasks)
+            if (taskFolders && !taskMap[treeId] && taskFolders.length > 0 && this.wrapper.treeManager.getMessage() !== this.wrapper.keys.Strings.NoTasks)
             {
                 if (task.source === "npm" && task.definition.type === "npm" &&
                 (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit")))
@@ -125,7 +125,7 @@ export class TaskWatcher implements Disposable
                     return;
                 }
                 this.wrapper.log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
-                                       `the task tree is non-null and holds ${taskTree.length} folders (task start event)`,
+                                       `the task tree is non-null and holds ${taskFolders.length} folders (task start event)`,
                                        [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
                                        [ "task source", task.source ], [ "task type", task.definition.type ]]);
             }
@@ -143,8 +143,8 @@ export class TaskWatcher implements Disposable
 
     private async taskFinishedEvent(e: TaskEndEvent): Promise<void>
     {
-        const taskMap = this.wrapper.treeManager.getTaskMap(),
-              taskTree = this.wrapper.treeManager.getTaskTree(),
+        const taskMap = this.wrapper.treeManager.taskMap,
+              taskFolders = this.wrapper.treeManager.taskFolders,
               task = e.execution.task,
               treeId = task.definition.taskItemId,
               isMapEmpty = this.wrapper.typeUtils.isObjectEmpty(taskMap);
@@ -165,7 +165,7 @@ export class TaskWatcher implements Disposable
         if (isMapEmpty || !taskMap[treeId])
         {
             /* istanbul ignore next */
-            if (taskTree && !taskMap[treeId] && taskTree.length > 0 && taskTree[0].contextValue !== "noscripts")
+            if (taskFolders && !taskMap[treeId] && taskFolders.length > 0 && taskFolders[0].contextValue !== "noscripts")
             {
                 if (task.source === "npm" && task.definition.type === "npm" &&
                 (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit")))
@@ -173,7 +173,7 @@ export class TaskWatcher implements Disposable
                     return;
                 }
                 this.wrapper.log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
-                                       `the task tree is non-null and holds ${taskTree.length} folders (task start event)`,
+                                       `the task tree is non-null and holds ${taskFolders.length} folders (task start event)`,
                                        [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
                                        [ "task source", task.source ], [ "task type", task.definition.type ]]);
             }

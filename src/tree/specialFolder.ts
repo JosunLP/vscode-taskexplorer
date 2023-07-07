@@ -127,10 +127,10 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         this.log.methodStart(`build ${this.labelLwr} folder`, 1, logPad);
 
         const added: string[] = [],
-              taskMap = this.wrapper.treeManager.getTaskMap(),
+              taskMap = this.wrapper.treeManager.taskMap,
               expandStateId = this.wrapper.utils.lowerCaseFirstChar(this.label, true),
               folderStateCfgKey = this.wrapper.keys.Config.SpecialFoldersFolderState,
-              tree = this.wrapper.treeManager.getTaskTree() as TaskFolder[], // Guaranted not to be undefined
+              taskFolders = this.wrapper.treeManager.taskFolders, // Guaranted not to be undefined
               nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(folderStateCfgKey);
 
         this.cleanStores();   // <- build() is called only after a taskMap build, and cleanStores() should
@@ -156,11 +156,11 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
         if (this._enabled)
         {
-            const sFolders = tree.filter(i => i.isSpecial) as SpecialTaskFolder[];
+            const sFolders = taskFolders.filter(i => i.isSpecial) as SpecialTaskFolder[];
             if (!sFolders.find(i => i.id === this.id))
             {
                 const idx = sFolders.findIndex(i => i.order > this.order);
-                tree.splice(idx !== -1 ? idx : sFolders.length, 0, this);
+                taskFolders.splice(idx !== -1 ? idx : sFolders.length, 0, this);
             }
         }
 
@@ -170,7 +170,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     private cleanStores = () =>
     {
-        const taskMap = this.wrapper.treeManager.getTaskMap();
+        const taskMap = this.wrapper.treeManager.taskMap;
         this.store.slice().reverse().forEach((t, idx, arr) => {
             if (!taskMap[t.id]) {
                 this.store.splice(arr.length - 1 - idx, 1);
@@ -266,7 +266,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     protected onConfigChanged(e: ConfigurationChangeEvent): void
     {
-        if (this.wrapper.config.affectsConfiguration(e, this._settingNameEnabled) && this.wrapper.treeManager.getTaskTree())
+        if (this.wrapper.config.affectsConfiguration(e, this._settingNameEnabled) && this.wrapper.treeManager.taskFolders)
         {
             this._enabled = this.wrapper.config.get<boolean>(this._settingNameEnabled);
             this.refresh();
@@ -276,7 +276,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     private refresh(): void
     {
-        const tree = this.wrapper.treeManager.getTaskTree() as TaskFolder[];
+        const tree = this.wrapper.treeManager.taskFolders;
         this.log.methodStart(`refresh ${this.labelLwr} folder`, 1, "", false, [[ "show / enabled", this._enabled ]]);
         if (this._enabled) {
             this.build("   ");

@@ -29,16 +29,17 @@ export class TaskItem extends TreeItem implements ITaskItem
     override command: Command;
     override resourceUri: Uri;
 
-    private _folder: TaskFolder | undefined;
     private _taskDetached: Task | undefined;
     private _execution: TaskExecution | undefined;
     private _paused: boolean;
     private _groupLevel: number;
+    private _folder: TaskFolder | undefined;
 
     private readonly _taskFile: TaskFile;
     private readonly _task: Task;
     private readonly _taskSource: string;
     private readonly _taskType: string;
+    private readonly _relativePath: string;
     private readonly _isUser: boolean;
 
 
@@ -79,6 +80,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         this.id = TaskItem.getId(fsPath, task);
         this._task = task;
+        this._relativePath = taskFile.relativePath;
         this._taskSource = task.source;
         this._taskType = task.definition.type; // If the source is `Workspace`, def.type can be of any provider type
         this._isUser = taskFile.isUser;
@@ -134,6 +136,8 @@ export class TaskItem extends TreeItem implements ITaskItem
     get paused() { return this._paused; };
 
     set paused(v) { this._paused = v; };
+
+    get relativePath() { return this._relativePath; };
 
     get task() { return this._task; };
 

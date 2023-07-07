@@ -2,7 +2,7 @@
 import { TaskItem } from "./item";
 import { TaskFile } from "./file";
 import { encodeUtf8Hex } from ":env/hex";
-import { ITaskFolder } from "../interface";
+import { ITaskFolder, OneOf } from "../interface";
 import { isString } from "../lib/utils/typeUtils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "vscode";
 
@@ -15,11 +15,12 @@ import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "
  */
 export class TaskFolder extends TreeItem implements ITaskFolder
 {
-    public override id: string;
-    public override label: string;
-    public isSpecial: boolean;
-    public taskFiles: (TaskFile|TaskItem)[] = [];
-    public workspaceFolder: WorkspaceFolder | undefined;
+    declare label: string;
+    override id: string;
+
+    readonly isSpecial: boolean;
+    readonly taskFiles: (TaskFile|TaskItem)[];
+    readonly workspaceFolder: WorkspaceFolder | undefined;
 
 
     constructor(folder: WorkspaceFolder | string, state: TreeItemCollapsibleState, isSpecial?: boolean)
@@ -38,11 +39,13 @@ export class TaskFolder extends TreeItem implements ITaskFolder
         this.iconPath = ThemeIcon.Folder;
         this.label = isString(folder) ? folder : folder.name;
         this.id = encodeUtf8Hex(this.label);
+        this.taskFiles = [];
         this.tooltip = "A tree folder representing a workspace/project";
     }
 
 
-    addChild(node: TaskFile|TaskItem, idx = 0) { this.taskFiles.splice(idx, 0, node); }
+    addChild<T extends (TaskFile | TaskItem)>(node: T, index?: number): OneOf<T, [ TaskFile, TaskItem ]>;
+    addChild(node: TaskFile|TaskItem, idx = 0) { this.taskFiles.splice(idx, 0, node); return node; }
 
 
     removeChild(node: TaskFile|TaskItem, _logPad: string)

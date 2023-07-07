@@ -1,5 +1,4 @@
 
-import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
@@ -15,7 +14,7 @@ export class TaskTreeBuilder
     private _taskMap: TaskMap<TaskItem>;
     private _taskFileMap: TaskMap<TaskFile>;
     private _taskFolderMap: TaskMap<TaskFolder|SpecialTaskFolder>;
-    private _taskTree: TaskFolder[] | undefined | null | void = null;
+    private _taskFolders: TaskFolder[];
 
     private readonly _treeGrouper: TaskTreeGrouper;
 
@@ -24,26 +23,32 @@ export class TaskTreeBuilder
     {
         this._taskMap = {};
         this._taskFileMap = {};
+        this._taskFolders = [];
         this._taskFolderMap = {};
         this._treeGrouper = new TaskTreeGrouper(wrapper);
     }
 
 
-    private buildTree = async(logPad: string): Promise<void> =>
+    get taskMap() { return this._taskMap; }
+
+    get taskFolders() { return this._taskFolders; }
+
+
+    private buildTree = async (logPad: string): Promise<void> =>
     {
         let taskCt = 0;
-        const tasks = this.wrapper.treeManager.getTasks(),
+        const tasks = this.wrapper.treeManager.tasks,
               isFullBuild = this.wrapper.typeUtils.isObjectEmpty(this._taskFolderMap);
         //
         this.wrapper.log.methodStart("build task tree", 2, logPad);
         //
         // Loop through each task provided by the engine and build a task tree
         //
-        for (const each of tasks)
+        for (const task of tasks)
         {
             this.wrapper.log.blank(4);
-            this.wrapper.log.write(`   Processing task ${++taskCt} of ${ tasks.length} (${each.source})`, 4, logPad);
-            await this.buildTaskTree(each, logPad + "   ");
+            this.wrapper.log.write(`   Processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
+            await this.buildTaskTree(task, logPad + "   ");
         }
         //
         // Build groupings and sort root taskfolders
@@ -57,36 +62,36 @@ export class TaskTreeBuilder
             // Get sorted root project folders - only project folders are sorted, special folders
             // e.g. 'Favorites', 'User Tasks' and 'Last Tasks' are kept at the top of the list.
             //
-            this._taskTree = this.wrapper.sorters.sortFolders(this._taskFolderMap) as TaskFolder[];
+            this._taskFolders = this.wrapper.sorters.sortFolders(this._taskFolderMap) as TaskFolder[];
         }
         this.wrapper.log.methodDone("build task tree", 2, logPad);
     };
 
 
-    private buildTaskTree = async(each: Task, logPad: string): Promise<void> =>
+    private buildTaskTree = async (task: Task, logPad: string): Promise<void> =>
     {
         let folder: TaskFolder | undefined,
             scopeName: string;
 
         this.wrapper.log.methodStart("build task tree list", 2, logPad, true, [
-            [ "name", each.name ], [ "source", each.source ], [ "definition type", each.definition.type ],
-            [ "definition path", each.definition.path ]
+            [ "name", task.name ], [ "source", task.source ], [ "definition type", task.definition.type ],
+            [ "definition path", task.definition.path ]
         ]);
-        this.wrapper.log.value("   scope", each.scope, 4, logPad);
-        const relativePath = this.wrapper.pathUtils.getTaskRelativePath(each);
+        this.wrapper.log.value("   scope", task.scope, 4, logPad);
+        const relativePath = this.wrapper.pathUtils.getTaskRelativePath(task);
         //
         // Set scope name and create the TaskFolder, a "user" task will have a TaskScope scope, not
         // a WorkspaceFolder scope.
         //
-        if (this.wrapper.typeUtils.isWorkspaceFolder(each.scope))
+        if (this.wrapper.typeUtils.isWorkspaceFolder(task.scope))
         {
-            scopeName = each.scope.name;
+            scopeName = task.scope.name;
             folder = this._taskFolderMap[scopeName];
             if (!folder)
             {
                 const key = this.wrapper.utils.lowerCaseFirstChar(scopeName, true),
                       state = this.wrapper.config.get<"Collapsed"|"Expanded">(`${this.wrapper.keys.Config.SpecialFoldersFolderState}.${key}`, "Expanded");
-                folder = new TaskFolder(each.scope, TreeItemCollapsibleState[state]);
+                folder = new TaskFolder(task.scope, TreeItemCollapsibleState[state]);
                 this._taskFolderMap[scopeName] = folder;
                 this.wrapper.log.value("constructed tree taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
             }
@@ -106,11 +111,11 @@ export class TaskTreeBuilder
         //
         // Log the task details now that `scopeName` is set
         //
-        this.logTask(each, scopeName, logPad + "   ");
+        this.logTask(task, scopeName, logPad + "   ");
         //
         // Get task file node, this will create one of it doesn't exist
         //
-        const taskFile = await this.getTaskFileNode(each, folder, relativePath, scopeName, logPad + "   ");
+        const taskFile = await this.getTaskFile(task, folder, relativePath, logPad + "   ");
         //
         // Create and add task item to task file node
         //
@@ -121,23 +126,14 @@ export class TaskTreeBuilder
         // found, but in doing so, if there were no npm "scripts" in the package.json, code execution
         // would not get far enough to create the "tree file" node for the context menu.
         //
-        const isNpmInstallTask = each.source === "npm" && (each.name === "install" || each.name.startsWith("install - "));
+        const isNpmInstallTask = task.source === "npm" && (task.name === "install" || task.name.startsWith("install - "));
         if (!isNpmInstallTask)
-        {   //
-            // Create "tree item" node and add it to the owner "tree file" node
-            //
-// *************************************************************************************
-            // const taskItem = new TaskItem(taskFile, each, logPad + "   ");
-            // taskFile.addTreeNode(taskItem);
-// *************************************************************************************
-            const fsPath = !each.definition.scriptFile ? taskFile.resourceUri.fsPath : each.definition.uri.fsPath;
-            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => n instanceof TaskItem &&  n.id === TaskItem.getId(fsPath, each));
-            if (!taskItem)
-            {
-                taskItem = new TaskItem(taskFile, each, logPad + "   ");
-                taskFile.addChild(taskItem);
+        {
+            const fsPath = !task.definition.scriptFile ? taskFile.resourceUri.fsPath : task.definition.uri.fsPath;
+            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => n instanceof TaskItem && n.id === TaskItem.getId(fsPath, task));
+            if (!taskItem) {
+                taskItem = taskFile.addChild(new TaskItem(taskFile, task, logPad + "   "));
             }
-// *************************************************************************************
             this._taskMap[taskItem.id] = taskItem;
         }
 
@@ -145,7 +141,7 @@ export class TaskTreeBuilder
     };
 
 
-    createTaskItemTree = async(rebuild: boolean, logPad: string) =>
+    createTaskItemTree = async (rebuild: boolean, logPad: string) =>
     {
         this.wrapper.log.methodStart("create task tree", 1, logPad);
         this.wrapper.statusBar.update(this.wrapper.keys.Strings.BuildingTaskTree);
@@ -154,49 +150,38 @@ export class TaskTreeBuilder
         }
         await this.buildTree(logPad + "   ");
         this.wrapper.statusBar.update("");
-        this.wrapper.log.methodDone("create task tree", 1, logPad, [[ "current task count", this.wrapper.treeManager.getTasks().length ]]);
+        this.wrapper.log.methodDone("create task tree", 1, logPad, [[ "current task count", this.wrapper.treeManager.tasks.length ]]);
     };
 
 
-    private getTaskFileNode = async(task: Task, folder: TaskFolder, relativePath: string, scopeName: string, logPad: string) =>
+    private getTaskFile = async (task: Task, folder: TaskFolder, relativePath: string, logPad: string) =>
     {
         let taskFile: TaskFile | undefined;
-        this.wrapper.log.methodStart("get task file node", 2, logPad, false, [[ "relative path", relativePath ], [ "scope name", scopeName ]]);
-        //
-        // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
-        // in the task tree, there is only one path for vscode/workspace tasks, /.vscode.  The fact that
-        // you can set the path variable inside a vscode task changes the relativePath for the task,
-        // causing an endless loop when putting the tasks into groups (see _taskTree.createTaskGroupings).
-        // All other task types will have a relative path of it's location on the filesystem (with
-        // exception of TSC, which is handled elsewhere).
-        //
-        const id = TaskFile.getId(folder, task, undefined, 0);
-        taskFile = this._taskFileMap[id];
-        // let id: string;
-        // for (let i = 0; i < 10 && !taskFile; i++)
-        // {
-        //     id = TaskFile.getId(folder, task, undefined, i);
-        //     taskFile = this._taskFileMap[id];
-        // }
+        this.wrapper.log.methodStart("get task file node", 2, logPad, false, [[ "relative path", relativePath ]]);
+        taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, 0)];
+        if (!taskFile)
+        {
+            for (let i = 0; i < 10 && !taskFile; i++)
+            {
+                const fsPath = this.wrapper.pathUtils.getTaskAbsolutePath(task);
+                taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, i, TaskFile.groupId(folder, fsPath, task.source, task.name, i))];
+                if (taskFile) {
+                    break;
+                }
+            }
+        }
         if (!taskFile)
         {
             this.wrapper.log.value("   Add source taskfile container", task.source, 2, logPad);
-            taskFile = new TaskFile(folder, task, relativePath, 0, undefined, task.source, logPad + "   ");
+            taskFile = folder.addChild(new TaskFile(folder, task, relativePath, 0, undefined, task.source, logPad + "   "));
             this._taskFileMap[taskFile.id] = taskFile;
-            folder.addChild(taskFile);
         }
         this.wrapper.log.methodDone("get task file node", 2, logPad);
         return taskFile;
     };
 
 
-    getTaskMap = () => this._taskMap;
-
-
-    getTaskTree = () => this._taskTree;
-
-
-    private invalidate  = () => { this._taskMap = {}; this._taskFileMap = {}; this._taskFolderMap = {}; this._taskTree = null; };
+    private invalidate  = () => { this._taskMap = {}; this._taskFileMap = {}; this._taskFolderMap = {}; this._taskFolders = []; };
 
 
     private logTask = (task: Task, scopeName: string, logPad: string) =>

@@ -1,17 +1,24 @@
 
-import { ITaskItem } from "./ITaskItem";
+import { OneOf } from "./ITeUtilities";
 import { TreeItem, Uri } from "vscode";
+import { ITaskItem } from "./ITaskItem";
+import { ITaskFolder } from "./ITaskFolder";
 
 export interface ITaskFile extends TreeItem
 {
-    readonly fileName: string;
+    // groupId: string | undefined;
     groupLevel: number;
+    id: string;
+    isGroup: boolean;
     label: string;
-    readonly isGroup: boolean;
+    fileName: string;
+    readonly isUser: boolean;
     readonly relativePath: string;
-    resourceUri: Uri;
+    readonly resourceUri: Uri;
     readonly taskSource: string;
+    readonly folder: ITaskFolder | undefined;
     readonly treeNodes: (ITaskItem|ITaskFile)[];
-    addChild(treeNode: ITaskFile | ITaskItem, index?: number): void;
+    addChild<T extends (ITaskFile | ITaskItem)>(node: T, index?: number): OneOf<T, [ ITaskFile, ITaskItem ]>;
+    addChild(treeNode: ITaskFile | ITaskItem, index?: number): ITaskFile | ITaskItem;
     removeChild(treeItem: ITaskFile | ITaskItem): void;
 }

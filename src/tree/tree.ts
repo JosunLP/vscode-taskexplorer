@@ -125,8 +125,8 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     {
         let items: TreeItem[] = [];
         const logPad = log.getLogPad(),
-              tasks = this._treeManager.getTasks(),
-              taskItemTree = this._treeManager.getTaskTree();
+              tasks = this._treeManager.tasks,
+              taskItemTree = this._treeManager.taskFolders;
 
         this.logGetChildrenStart(element, tasks, logPad, 1);
 
@@ -200,7 +200,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     {
         log.methodStart("get tree children", logLevel, logPad, false, [
             [ "task folder", element?.label ], [ "all tasks need to be retrieved", !tasks ],
-            [ "needs rebuild", !this._treeManager.getTaskTree() ], [ "instance name", this.name ]
+            [ "needs rebuild", !this._treeManager.taskFolders ], [ "instance name", this.name ]
         ]);
 
         if (element instanceof TaskFile)

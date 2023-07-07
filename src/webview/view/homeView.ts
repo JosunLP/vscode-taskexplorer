@@ -33,7 +33,7 @@ export class HomeView extends TeWebviewView<State>
 		const isLic = this.wrapper.licenseManager.isLicensed,
 			  isTrial = this.wrapper.licenseManager.isTrial,
 			  days = this.wrapper.licenseManager.statusDays;
-    	html = html.replace("#{taskCounts.length}", this.wrapper.treeManager.getTasks().length.toString())
+    	html = html.replace("#{taskCounts.length}", this.wrapper.treeManager.tasks.length.toString())
 				   .replace("#{taskCounts.today}", this.wrapper.usage.getTodayCount("").toString())
 				   .replace("#{license.sessionIconTip}", "Session status - Not Verified")
 				   .replace("#{license.statusIconTip}", "License status - " + (isTrial ? "Unlocked (Trial)" : (isLic ? "Unlocked" : "Locked")))

@@ -45,7 +45,7 @@ export class ParsingReportPage extends TeWebviewPanel<State>
 		</tr><tr><td colspan="6"><hr></td></tr>`;
 
 		const projects: string[] = [],
-			  tasks = this.wrapper.treeManager.getTasks();
+			  tasks = this.wrapper.treeManager.tasks;
 
 		tasks.forEach((t: Task) =>
 		{

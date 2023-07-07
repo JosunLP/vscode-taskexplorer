@@ -14,7 +14,7 @@ export const createTaskCountTable = (wrapper: TeWrapper, project?: string, html?
 
     let fileCount = 0;
     const treeMgr = wrapper.treeManager;
-    const tasks = treeMgr.getTasks() // Filter out 'User' tasks for project/folder reports
+    const tasks = treeMgr.tasks // Filter out 'User' tasks for project/folder reports
                          .filter((t: Task) => !project || (isWorkspaceFolder(t.scope) &&
                                   project === getWorkspaceProjectName(t.scope.uri.fsPath)));
     tasks.forEach((t) =>

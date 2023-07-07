@@ -7,8 +7,8 @@ import { Strings } from "../lib/constants";
 import { basename, extname, join } from "path";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
-import { ITaskDefinition, ITaskFile } from "../interface";
-import { isWorkspaceFolder } from "../lib/utils/typeUtils";
+import { ITaskDefinition, ITaskFile, OneOf } from "../interface";
+import { asString, isEmpty, isWorkspaceFolder } from "../lib/utils/typeUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { getInstallPathSync, getTaskRelativePath, getUserDataPath } from "../lib/utils/pathUtils";
@@ -32,16 +32,17 @@ export class TaskFile extends TreeItem implements ITaskFile
     override id: string;
     override resourceUri: Uri;
 
+    private _isGroup: boolean;
     private _groupLevel: number;
-    private _relativePath: string;
+    private _groupId: string | undefined;
+    private _fileName: string;
 
-    private readonly _fileName: string;
+    private readonly _task: Task;
     private readonly _folder: TaskFolder;
     private readonly _taskSource: string;
     private readonly _taskType: string;
-    private readonly _isGroup: boolean;
     private readonly _isUser: boolean;
-    private readonly _groupId: string | undefined;
+    private readonly _relativePath: string;
     private readonly _treeNodes: (TaskItem|TaskFile)[];
 
 
@@ -71,7 +72,7 @@ export class TaskFile extends TreeItem implements ITaskFile
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
 
-        // this._task = task; // for id building when grouping
+        this._task = task;
         this._treeNodes = [];
         this._folder = folder;
         this._taskSource = task.source;
@@ -79,6 +80,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         this._isGroup = !!groupId;
         this._isUser = false;
         this._groupLevel = 0;
+
         //
         // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
         // in the task tree, there is only one path for vscode/workspace tasks, /.vscode.  The fact that
@@ -110,22 +112,16 @@ export class TaskFile extends TreeItem implements ITaskFile
         if (!groupId)
         {
             this.contextValue = "taskFile" + properCase(this._taskSource);
-        }       //
-        else { // When a grouped node is created, the definition for the first task is passed
-              // to this function. Remove the filename part of tha path for this resource.
-             //
-            this._isGroup = true;
-            this._groupId = groupId;
-            this._groupLevel = groupLevel;
-            this._fileName = "group"; // change to name of directory
-            this.tooltip = `${getTaskTypeFriendlyName(task.source, true)} task file grouping`;
-            this.contextValue = "taskGroup" + properCase(this._taskSource);
+        }
+        else {
+            this.setGroupContext(groupId, groupLevel, task.source);
         }
 
         //
         // Set unique id
         //
-        this.id = TaskFile.getId(folder, task, <any>this.label, this._groupLevel, this._groupId);
+        // this._groupId = TaskFile.createGroupId(folder, this, this.label, this._groupLevel);
+        this.id = TaskFile.id(folder, task, this.label, this._groupLevel, this._groupId);
 
         //
         // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
@@ -178,6 +174,10 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     get folder() { return this._folder; };
 
+    // get groupId() { return this._groupId; };
+
+    // set groupId(v) { this._groupId = v; }
+
     get groupLevel() { return this._groupLevel; };
 
     set groupLevel(v) { this._groupLevel = v; }
@@ -188,17 +188,39 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     get relativePath() { return this._relativePath; };
 
+    // get task() { return this._task; };
+
     get taskSource() { return this._taskSource; };
 
     get treeNodes() { return this._treeNodes; };
 
 
-    addChild(node: TaskFile | TaskItem, idx = 0) { node.groupLevel = this._groupLevel; this.treeNodes.splice(idx, 0, node); }
+    addChild<T extends (TaskFile | TaskItem)>(node: T, index?: number): OneOf<T, [ TaskFile, TaskItem ]>;
+    addChild(node: TaskFile | TaskItem, idx = 0)
+    {
+        node.groupLevel = this._groupLevel;
+        // if (node instanceof TaskFile)
+        // {
+        //     node.groupId = TaskFile.groupId(this._folder, node, node.label, node.groupLevel);
+        //     node.id = TaskFile.id(this._folder, node.task, node.label, node.groupLevel, node.groupId);
+        //     this.setGroupContext(node.groupId, node.groupLevel, node.taskSource);
+        // }
+        this.treeNodes.splice(idx, 0, node);
+        return node;
+    }
 
 
-    static getId(folder: TaskFolder, task: Task, label: string | undefined, groupLevel: number, groupId?: string)
+    static id(folder: TaskFolder, task: Task, label: string | undefined, groupLevel: number, groupId?: string)
     {
         let pathKey: string;
+        //
+        // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
+        // in the task tree, there is only one path for vscode/workspace tasks, /.vscode.  The fact that
+        // you can set the path variable inside a vscode task changes the relativePath for the task,
+        // causing an endless loop when putting the tasks into groups (see _taskTree.createTaskGroupings).
+        // All other task types will have a relative path of it's location on the filesystem (with
+        // exception of TSC, which is handled elsewhere).
+        //
         const relativePath = getTaskRelativePath(task),
               relPathAdj = task.source !== "Workspace" ? relativePath : ".vscode";
         if (task.definition.uri)
@@ -216,21 +238,21 @@ export class TaskFile extends TreeItem implements ITaskFile
             pathKey = Strings.USER_TASKS_LABEL;
         }
         const lblKey = label || this.getLabel(task.definition, task.source, relativePath, groupId);
-        return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${groupId || ""}`;
+        return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${asString(groupId)}`;
     }
 
 
-    static getGroupedId = (folder: TaskFolder, file: TaskFile, label: string, treeLevel: number) =>
+    static groupId = (folder: TaskFolder, fsPath: string, source: string, label: string, treeLevel: number) =>
     {
         let id = "";
         const groupSeparator = getGroupSeparator(),
               labelSplit = label.split(groupSeparator);
-        for (let i = 0; i <= treeLevel; i++)
+        for (let i = 0; i <= treeLevel && i < labelSplit.length; i++)
         {
             id += labelSplit[i];
         }
-        id += file.resourceUri.fsPath.replace(/\W/gi, "");
-        return encodeUtf8Hex(`${folder.label}:${file.taskSource}:${id}:${treeLevel}`);
+        id += fsPath.replace(/\W/gi, "");
+        return encodeUtf8Hex(`${folder.label}:${source}:${id}:${treeLevel}`);
     };
 
 
@@ -247,9 +269,9 @@ export class TaskFile extends TreeItem implements ITaskFile
                 {
                     if (relativePath.length > 0 && relativePath !== ".vscode" && taskDef.type)
                     {
-                        return label + " (" + relativePath.substring(0, relativePath.length - 1).toLowerCase() + "/" + taskDef.fileName.toLowerCase() + ")";
+                        return `${label} (${relativePath.substring(0, relativePath.length - 1).toLowerCase()}/${taskDef.fileName.toLowerCase()})`;
                     }
-                    return (label + " (" + taskDef.fileName.toLowerCase() + ")");
+                    return `${label} (${taskDef.fileName.toLowerCase()})`;
                 }
             }
             else if (source === "apppublisher")
@@ -261,7 +283,7 @@ export class TaskFile extends TreeItem implements ITaskFile
                 const match = (taskDef.fileName as string).match(/\.publishrc\.(.+)\.(?:js(?:on)?|ya?ml)$/i);
                 if (match && match.length > 1 && match[1])
                 {
-                    return (label + " (" + match[1].toLowerCase() + ")");
+                    return `${label} (${match[1].toLowerCase()})`;
                 }
             }
             else if (source === "webpack")
@@ -272,7 +294,7 @@ export class TaskFile extends TreeItem implements ITaskFile
                 const match = (taskDef.fileName as string).match(/webpack\.config\.(.+)\.(?:js(?:on)?)$/i);
                 if (match && match.length > 1 && match[1])
                 {
-                    return (label + " (" + match[1].toLowerCase() + ")");
+                    return `${label} (${match[1].toLowerCase()})`;
                 }
             }
             //
@@ -287,10 +309,10 @@ export class TaskFile extends TreeItem implements ITaskFile
             {
                 if (relativePath.endsWith("\\") || relativePath.endsWith("/")) // trim slash chars
                 {
-                    return label + " (" + relativePath.substring(0, relativePath.length - 1).toLowerCase() + ")";
+                    return `${label} (${relativePath.substring(0, relativePath.length - 1).toLowerCase()})`;
                 }
                 else {
-                    return label + " (" + relativePath.toLowerCase() + ")";
+                    return `${label} (${relativePath.toLowerCase()})`;
                 }
             }
         }
@@ -333,6 +355,20 @@ export class TaskFile extends TreeItem implements ITaskFile
     {
         const idx = this._treeNodes.findIndex(tn => tn.id === node.id);
         execIf(idx !== -1, () => { this._treeNodes.splice(idx, 1); }, this);
+    }
+
+
+    private setGroupContext(groupId: string, groupLevel: number, taskSource: string)
+    {   //
+        // When a grouped node is created, the definition for the first task is passed
+        // to this function. Remove the filename part of tha path for this resource.
+        //
+        this._isGroup = true;
+        this._groupId = groupId;
+        this._groupLevel = groupLevel;
+        this._fileName = "group"; // change to name of directory
+        this.tooltip = `${getTaskTypeFriendlyName(taskSource, true)} task file grouping`;
+        this.contextValue = "taskGroup" + properCase(taskSource);
     }
 
 }

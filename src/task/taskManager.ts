@@ -271,7 +271,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             return;
         }
 
-        const taskMap = this.wrapper.treeManager.getTaskMap(),
+        const taskMap = this.wrapper.treeManager.taskMap,
               lastTasks = this.wrapper.treeManager.lastTasksFolder,
               lastTaskId = lastTasks.getLastRanId(),
               taskItem = lastTaskId ? taskMap[lastTaskId] as TaskItem : null;

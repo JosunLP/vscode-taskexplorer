@@ -1,16 +1,20 @@
 
 import { ITaskFile } from "./ITaskFile";
 import { Task, TaskExecution, TreeItem, WorkspaceFolder } from "vscode";
+import { ITaskFolder } from "./ITaskFolder";
 
 export interface ITaskItem extends TreeItem
 {
     groupLevel: number;
-    readonly id: string;
+    id: string;
     label: string;
-    readonly isUser: boolean;
     paused: boolean;
-    readonly task: Task;
     taskDetached: Task | undefined;
+    execution: TaskExecution | undefined;
+    readonly relativePath: string;
+    folder: ITaskFolder | undefined;
+    readonly isUser: boolean;
+    readonly task: Task;
     readonly taskFile: ITaskFile;
     readonly taskSource: string;
     isExecuting(logPad?: string): TaskExecution | undefined;

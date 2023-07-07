@@ -20,7 +20,7 @@ import {
     IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap
 } from "../interface";
 import {
-    TreeItem, Uri, workspace, Task, tasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
+    TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
 } from "vscode";
 
 
@@ -87,57 +87,37 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     dispose = () => { this._tasks.splice(0); this._disposables.splice(0).forEach(d => d.dispose()); };
 
 
-	get configWatcher(): TeTreeConfigWatcher {
-		return this._configWatcher;
-	}
+    get taskMap(): TaskMap { return this._treeBuilder.taskMap; }
 
-    get isBusy(): boolean {
-        return this._refreshPending || this._configWatcher.isBusy;
-    }
+    get tasks(): Task[] { return this._tasks; }
 
-	get onDidAllTasksChange(): Event<ITeTaskChangeEvent> {
-		return this._onDidTasksChange.event;
-	}
+    get taskFolders(): TaskFolder[] { return this._treeBuilder.taskFolders; }
 
-    get onDidTaskCountChange(): Event<ITeTaskChangeEvent> {
-		return this._onDidTaskCountChange.event;
-	}
+	get configWatcher(): TeTreeConfigWatcher { return this._configWatcher; }
 
-	get onDidFavoriteTasksChange(): Event<ITeTaskChangeEvent> {
-		return this._specialFolders.favorites.onDidTasksChange;
-	}
+    get isBusy(): boolean { return this._refreshPending || this._configWatcher.isBusy; }
 
-	get onDidLastTasksChange(): Event<ITeTaskChangeEvent> {
-		return this._specialFolders.lastTasks.onDidTasksChange;
-	}
+	get onDidAllTasksChange(): Event<ITeTaskChangeEvent> { return this._onDidTasksChange.event; }
 
-    get onReady(): Event<ITeTaskChangeEvent> {
-        return this._onReady.event;
-    }
+    get onDidTaskCountChange(): Event<ITeTaskChangeEvent> { return this._onDidTaskCountChange.event; }
 
-    get famousTasks(): ITeTask[] {
-        return this.wrapper.usage.famousTasks;
-    }
+	get onDidFavoriteTasksChange(): Event<ITeTaskChangeEvent> { return this._specialFolders.favorites.onDidTasksChange; }
 
-    get favoritesTasks(): Task[] {
-        return this._specialFolders.favorites.taskFiles.map(f => f.task);
-    }
+	get onDidLastTasksChange(): Event<ITeTaskChangeEvent> { return this._specialFolders.lastTasks.onDidTasksChange; }
 
-    get lastTasks(): Task[] {
-        return this._specialFolders.lastTasks.taskFiles.map(f => f.task);
-    }
+    get onReady(): Event<ITeTaskChangeEvent> { return this._onReady.event; }
 
-    get lastTasksFolder(): LastTasksFolder {
-        return this._specialFolders.lastTasks;
-    }
+    get famousTasks(): ITeTask[] { return this.wrapper.usage.famousTasks; }
 
-    get runningTasks(): Task[] {
-        return tasks.taskExecutions.map(e => e.task);
-    }
+    get favoritesTasks(): Task[] { return this._specialFolders.favorites.taskFiles.map(f => f.task); }
 
-    get views(): { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView } {
-        return this._views;
-    }
+    get lastTasks(): Task[] { return this._specialFolders.lastTasks.taskFiles.map(f => f.task); }
+
+    get lastTasksFolder(): LastTasksFolder { return this._specialFolders.lastTasks; }
+
+    get runningTasks(): Task[] { return vscTasks.taskExecutions.map(e => e.task); }
+
+    get views(): { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView } { return this._views; }
 
 
     private addRemoveSpecialTaskLabel = async (item: TaskItem): Promise<boolean> => (<SpecialTaskFolder>item.folder).addRemoveRenamedLabel(item);
@@ -250,7 +230,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
             this.wrapper.statusBar.update("Requesting all tasks from all providers");
-            taskItems = await tasks.fetchTasks();
+            taskItems = await vscTasks.fetchTasks();
             this._tasks.splice(0);
             this.wrapper.log.write(`   adding ${taskItems.length} tasks`, 2, logPad);
         }     //
@@ -264,10 +244,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             // any task type, so in case of Ws task invalidation, request all tasks from all providers
             //
             if (inv === "Workspace") {
-                taskItems = (await tasks.fetchTasks()).filter(t => t.source === inv);
+                taskItems = (await vscTasks.fetchTasks()).filter(t => t.source === inv);
             }
             else {
-                taskItems = await tasks.fetchTasks({ type: inv !== "tsc" ? inv : "typescript" });
+                taskItems = await vscTasks.fetchTasks({ type: inv !== "tsc" ? inv : "typescript" });
             }
             //
             // Process the tasks cache array for any removals that might need to be made, e.g. remove
@@ -348,15 +328,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     getTaskItem =  (taskItem: TaskItem | ITeTask | Uri): TaskItem => this._treeBuilder.toTaskItem(taskItem);
 
 
-    getTaskMap = (): TaskMap => this._treeBuilder.taskMap;
-
-
-    getTasks = (): Task[] => this._tasks;
-
-
-    getTaskTree = (): TaskFolder[] | void | null | undefined => this._treeBuilder.taskTree;
-
-
     private handleRebuildEvent = async(invalidate: string | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
     {   //
         // The file cache only needs to update once on any change, since this will get called through
@@ -412,7 +383,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 if (!firstTreeBuildDone) {
                     this.setMessage(this.wrapper.keys.Strings.BuildingTaskTree);
                 }
-                await this._treeBuilder.createTaskItemTree(count > this._tasks.length, logPad + "   ");
+                await this._treeBuilder.createTaskItemTree(true /* count > this._tasks.length*/, logPad + "   ");
                 Object.values(this._specialFolders).forEach(f => f.build(logPad + "   "));
                 await this.setContext();
             }
@@ -511,12 +482,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         const w = this.wrapper,
               tasks = this._tasks,
               taskMap = this._treeBuilder.taskMap,
-              taskTree = this._treeBuilder.taskTree as TaskFolder[];
+              taskFolders = this._treeBuilder.taskFolders;
 
         w.log.methodStart("treemgr: workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
         w.log.write("   removing project tasks from cache", 1, logPad);
         w.log.values(1, logPad + "   ", [
-            [ "current # of tasks", tasks.length ], [ "current # of tree folders", taskTree.length ],
+            [ "current # of tasks", tasks.length ], [ "current # of tree folders", taskFolders.length ],
             [ "project path removed", uri.fsPath ]
         ]);
         w.statusBar.update("Deleting all tasks from removed project folder");
@@ -531,11 +502,11 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this
         );
 
-        this.wrapper.utils.popIfExistsBy(taskTree, f => f.resourceUri?.fsPath === uri.fsPath, this, true);
+        this.wrapper.utils.popIfExistsBy(taskFolders, f => f.resourceUri?.fsPath === uri.fsPath, this, true);
 
         w.log.write(`   removed ${removed.length} tasks from task cache`, 1, logPad);
         w.log.values(1, logPad + "   ", [
-            [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskTree.length ]
+            [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskFolders.length ]
         ]);
 
         w.statusBar.update("");
