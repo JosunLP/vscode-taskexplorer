@@ -350,6 +350,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private hashKey = (key: string) => encodeUtf8Hex(key);
 
 
+    private hashKeyValue = (value: string) => getMd5(value, "base64");
+
+
     private hashNpmScripts = (): void =>
     {
         const w = this.wrapper;
@@ -361,13 +364,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                   scriptsBlock = npmPkgJso.scripts,
                   scriptsJson = JSON.stringify(scriptsBlock),
                   hashKey = this.hashKey(fsPath),
-                  scriptsChecksum = this.hashValue(scriptsJson);
+                  scriptsChecksum = this.hashKeyValue(scriptsJson);
             this._npmScriptsHash[hashKey] = scriptsChecksum;
         });
     };
-
-
-    private hashValue = (value: string) => getMd5(value, "base64");
 
 
     private loadTasks = async(doFetch: boolean, logPad: string): Promise<void> =>
@@ -625,7 +625,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 const npmPkgJso = w.fs.readJsonSync<any>(opt.fsPath),
                       scriptsJso = npmPkgJso.scripts || {},
                       scriptsJson = JSON.stringify(scriptsJso),
-                      scriptsChecksum = this.hashValue(scriptsJson),
+                      scriptsChecksum = this.hashKeyValue(scriptsJson),
                       hashKey = this.hashKey(opt.fsPath);
                 doFetch = scriptsChecksum !== this._npmScriptsHash[hashKey];
                 this._npmScriptsHash[hashKey] = scriptsChecksum;

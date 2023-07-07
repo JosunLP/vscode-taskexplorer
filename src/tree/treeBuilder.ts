@@ -14,8 +14,8 @@ export class TaskTreeBuilder
     private _taskMap: TaskMap<TaskItem>;
     private _taskFileMap: TaskMap<TaskFile>;
     private _taskFolderMap: TaskMap<TaskFolder|SpecialTaskFolder>;
-    private _taskFolders: TaskFolder[];
 
+    private readonly _taskFolders: TaskFolder[];
     private readonly _treeGrouper: TaskTreeGrouper;
 
 
@@ -34,50 +34,14 @@ export class TaskTreeBuilder
     get taskFolders() { return this._taskFolders; }
 
 
-    private buildTree = async (logPad: string): Promise<void> =>
-    {
-        let taskCt = 0;
-        const tasks = this.wrapper.treeManager.tasks,
-              isFullBuild = this.wrapper.typeUtils.isObjectEmpty(this._taskFolderMap);
-        //
-        this.wrapper.log.methodStart("build task tree", 2, logPad);
-        //
-        // Loop through each task provided by the engine and build a task tree
-        //
-        for (const task of tasks)
-        {
-            this.wrapper.log.blank(4);
-            this.wrapper.log.write(`   Processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
-            await this.buildTaskTree(task, logPad + "   ");
-        }
-        //
-        // Build groupings and sort root taskfolders
-        //
-        if (!this.wrapper.typeUtils.isObjectEmpty(this._taskFolderMap))
-        {
-            if (isFullBuild) {
-                await this._treeGrouper.buildGroupings(this._taskFolderMap, this._taskFileMap, logPad + "   ");
-            }
-            //
-            // Get sorted root project folders - only project folders are sorted, special folders
-            // e.g. 'Favorites', 'User Tasks' and 'Last Tasks' are kept at the top of the list.
-            //
-            this._taskFolders = this.wrapper.sorters.sortFolders(this._taskFolderMap) as TaskFolder[];
-        }
-        this.wrapper.log.methodDone("build task tree", 2, logPad);
-    };
-
-
     private buildTaskTree = async (task: Task, logPad: string): Promise<void> =>
     {
-        let folder: TaskFolder | undefined,
-            scopeName: string;
-
         this.wrapper.log.methodStart("build task tree list", 2, logPad, true, [
             [ "name", task.name ], [ "source", task.source ], [ "definition type", task.definition.type ],
-            [ "definition path", task.definition.path ]
+            [ "definition path", task.definition.path ], [ "scope", task.scope ]
         ]);
-        this.wrapper.log.value("   scope", task.scope, 4, logPad);
+        let folder: TaskFolder | undefined,
+            scopeName: string;
         const relativePath = this.wrapper.pathUtils.getTaskRelativePath(task);
         //
         // Set scope name and create the TaskFolder, a "user" task will have a TaskScope scope, not
@@ -108,9 +72,6 @@ export class TaskTreeBuilder
                 this.wrapper.log.value("constructed tree user taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
             }
         }
-        //
-        // Log the task details now that `scopeName` is set
-        //
         this.logTask(task, scopeName, logPad + "   ");
         //
         // Get task file node, this will create one of it doesn't exist
@@ -136,19 +97,32 @@ export class TaskTreeBuilder
             }
             this._taskMap[taskItem.id] = taskItem;
         }
-
         this.wrapper.log.methodDone("build task tree list", 2, logPad);
     };
 
 
     createTaskItemTree = async (rebuild: boolean, logPad: string) =>
     {
+        let taskCt = 0;
+        const tasks = this.wrapper.treeManager.tasks;
         this.wrapper.log.methodStart("create task tree", 1, logPad);
         this.wrapper.statusBar.update(this.wrapper.keys.Strings.BuildingTaskTree);
         if (rebuild) {
             this.invalidate();
         }
-        await this.buildTree(logPad + "   ");
+        for (const task of tasks)
+        {
+            this.wrapper.log.blank(4);
+            this.wrapper.log.write(`   Processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
+            await this.buildTaskTree(task, logPad + "   ");
+        }
+        if (!this.wrapper.typeUtils.isObjectEmpty(this._taskFolderMap))
+        {
+            if (rebuild) {
+                await this._treeGrouper.buildGroupings(this._taskFolderMap, this._taskFileMap, logPad + "   ");
+            }
+            this._taskFolders.push(...<TaskFolder[]>this.wrapper.sorters.sortFolders(this._taskFolderMap));
+        }
         this.wrapper.statusBar.update("");
         this.wrapper.log.methodDone("create task tree", 1, logPad, [[ "current task count", this.wrapper.treeManager.tasks.length ]]);
     };
@@ -181,7 +155,7 @@ export class TaskTreeBuilder
     };
 
 
-    private invalidate  = () => { this._taskMap = {}; this._taskFileMap = {}; this._taskFolderMap = {}; this._taskFolders = []; };
+    private invalidate  = () => { this._taskMap = {}; this._taskFileMap = {}; this._taskFolderMap = {}; this._taskFolders.splice(0); };
 
 
     private logTask = (task: Task, scopeName: string, logPad: string) =>
@@ -203,67 +177,39 @@ export class TaskTreeBuilder
         }, this, [ /* User tasks */w.log.value, "   scope.uri.path", "N/A (User)", 4, logPad ], task.scope as WorkspaceFolder);
         w.log.value("   type", definition.type, 4, logPad);
         w.log.value("   relative Path", definition.path ? definition.path : "", 4, logPad);
-        if (definition.scriptFile)
-        {
+        if (definition.scriptFile) {
             w.log.value("      script file", definition.scriptFile, 4, logPad);
         }
-        if (definition.script)
-        {
+        if (definition.script) {
             w.log.value("   script", definition.script, 4, logPad);
         }
-        if (definition.target)
-        {
+        if (definition.target) {
             w.log.value("   target", definition.target, 4, logPad);
         }
-        if (definition.path)
-        {
+        if (definition.path) {
             w.log.value("   path", definition.path, 4, logPad);
         }
-        if (definition.tsconfig)
-        {
+        if (definition.tsconfig) {
             w.log.value("   tsconfig", definition.tsconfig, 4, logPad);
         }
-        //
-        // Internal task providers will set a fileName property
-        //
-        if (definition.fileName)
-        {
+        if (definition.fileName) { // Internal task providers will set a fileName property
             w.log.value("   file name", definition.fileName, 4, logPad);
         }
-        //
-        // Internal task providers will set a uri property
-        //
-        if (definition.uri)
-        {
+        if (definition.uri) { // Internal task providers will set a uri property
             w.log.value("   file path", definition.uri.fsPath, 4, logPad);
         }
-        //
-        // Script task providers will set a takesArgs property
-        //
-        if (definition.takesArgs)
-        {
+        if (definition.takesArgs) { // Script task providers will set a takesArgs property
             w.log.value("   requires args", definition.takesArgs, 4, logPad);
         }
-        if (definition.cmdLine)
-        {
+        if (definition.cmdLine) {
             w.log.value("   cmd line", definition.cmdLine, 4, logPad);
         }
-        //
-        // External task providers can set a icon/iconDark property
-        //
-        /* istanbul ignore if */
-        if (definition.icon)
-        {
+        w.utils.execIf(definition.icon, () => { // External task providers can set a icon/iconDark property
             w.log.value("   icon", definition.icon, 4, logPad);
-        }
-        //
-        // External task providers can set a icon/iconDark property
-        //
-        /* istanbul ignore if */
-        if (definition.iconDark)
-        {
+        }, this);
+        w.utils.execIf(definition.iconDark, () => { // External task providers can set a icon/iconDark property
             w.log.value("   icon dark", definition.iconDark, 4, logPad);
-        }
+        }, this);
         w.log.write("Task Details Done", 3, logPad);
     };
 
