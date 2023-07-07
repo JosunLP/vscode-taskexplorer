@@ -173,7 +173,7 @@ export class TaskTreeGrouper
               atMaxLevel: boolean = w.config.get<number>(w.keys.Config.GroupMaxLevel) <= treeLevel + 1,
               taskItems = taskFile.treeNodes.splice(0).filter((n): n is TaskItem => this.isTaskItem(n));
         let didGroupLast = false,
-            prevName: string[] | undefined,
+            prevLblParts: string[] | undefined,
             prevTaskItem: TaskItem | undefined;
         //
         w.log.methodStart("create task groupings by separator", 3, logPad, true, [
@@ -188,22 +188,22 @@ export class TaskTreeGrouper
         for (const taskItem of taskItems)
         {
             const thisName = this.splitLabel(taskItem.label, taskItem),
-                  prevNameOk = prevName && prevName.length > treeLevel && prevName[treeLevel];
+                  prevNameOk = prevLblParts && prevLblParts.length > treeLevel && prevLblParts[treeLevel];
             //
             w.log.write("   process taskitem grouping by separator", 5, logPad);
             w.log.values(5, logPad + "      ", [
                 [ "id", taskItem.id ], [ "label", taskItem.label ], [ "sep", this._groupSep ],
                 [ "command", taskItem.command.command ], [ "this name", thisName ],
-                [ "previous name [tree level]", prevName && prevNameOk ? prevName[treeLevel] : "undefined" ]
+                [ "previous name [tree level]", prevLblParts && prevNameOk ? prevLblParts[treeLevel] : "undefined" ]
             ]);
             //
-            // If 'prevName' length > 1, then this task was grouped using the group separator
+            // If 'prevLblParts' length > 1, then this task was grouped using the group separator
             //
             let foundGroup = false;
-            if (prevName && prevNameOk && thisName && thisName.length > treeLevel)
+            if (prevLblParts && prevNameOk && thisName && thisName.length > treeLevel)
             {
                 for (let i = 0; i <= treeLevel && (foundGroup || i === 0); i++) {
-                    foundGroup = prevName[i] === thisName[i];
+                    foundGroup = prevLblParts[i] === thisName[i];
                 }
             }
             //
@@ -211,7 +211,7 @@ export class TaskTreeGrouper
             //
             if (prevTaskItem)
             {
-                if (foundGroup && prevName)
+                if (foundGroup && prevLblParts)
                 {   //
                     // We found a pair of tasks that need to be grouped.  i.e. the first part of the label
                     // when split by the separator character is the same...
@@ -223,8 +223,8 @@ export class TaskTreeGrouper
                         // add them after we loop since we are looping on the array that they need to be
                         // added to
                         //
-                        w.log.value("   add grouped taskfile node", prevName[treeLevel], 4, logPad);
-                        groupHash[gid] = new TaskFile(folder, taskItem.task, taskItem.taskFile.relativePath, treeLevel, gid, prevName[treeLevel], logPad);
+                        w.log.value("   add grouped taskfile node", prevLblParts[treeLevel], 4, logPad);
+                        groupHash[gid] = new TaskFile(folder, taskItem.task, taskItem.taskFile.relativePath, treeLevel, gid, prevLblParts[treeLevel], logPad);
                         //
                         // Since we add the grouping when we find two or more equal group names, we are iterating
                         // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the
@@ -251,12 +251,12 @@ export class TaskTreeGrouper
                     // {
                     // }
                 }
-                didGroupLast = !!foundGroup && !!prevName;
+                didGroupLast = !!foundGroup && !!prevLblParts;
             }
-            prevName = undefined;
+            prevLblParts = undefined;
             prevTaskItem = taskItem;
             if (taskItem.label.includes(this._groupSep)) {
-                prevName = taskItem.label.split(this._groupSep);
+                prevLblParts = taskItem.label.split(this._groupSep);
             }
         }
         if (!didGroupLast && prevTaskItem)
