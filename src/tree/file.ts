@@ -188,7 +188,7 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     get relativePath() { return this._relativePath; };
 
-    // get task() { return this._task; };
+    get task() { return this._task; };
 
     get taskSource() { return this._taskSource; };
 
@@ -208,6 +208,13 @@ export class TaskFile extends TreeItem implements ITaskFile
         this.treeNodes.splice(idx, 0, node);
         return node;
     }
+
+
+    static createId = (folder: TaskFolder, file: TaskFile, groupLevel: number) =>
+    {
+        const groupId = TaskFile.groupId(folder, file.resourceUri.fsPath, file.taskSource, file.label, groupLevel);
+        return TaskFile.id(folder, file.task, undefined, 0, groupId);
+    };
 
 
     static id(folder: TaskFolder, task: Task, label: string | undefined, groupLevel: number, groupId?: string)
@@ -242,17 +249,11 @@ export class TaskFile extends TreeItem implements ITaskFile
     }
 
 
-    static groupId = (folder: TaskFolder, fsPath: string, source: string, label: string, treeLevel: number) =>
+    static groupId = (folder: TaskFolder, fsPath: string, source: string, label: string, groupLevel: number) =>
     {
-        let id = "";
-        const groupSeparator = getGroupSeparator(),
-              labelSplit = label.split(groupSeparator);
-        for (let i = 0; i <= treeLevel && i < labelSplit.length; i++)
-        {
-            id += labelSplit[i];
-        }
-        id += fsPath.replace(/\W/gi, "");
-        return encodeUtf8Hex(`${folder.label}:${source}:${id}:${treeLevel}`);
+        const pathKey = fsPath.replace(/\W/gi, ""),
+              labelKey = (label.length > groupLevel ? label.substring(0, groupLevel) : label) + groupLevel;
+        return encodeUtf8Hex(`${folder.label}:${source}${labelKey}:${pathKey}:${groupLevel}`);
     };
 
 

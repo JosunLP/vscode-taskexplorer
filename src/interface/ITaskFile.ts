@@ -1,8 +1,8 @@
 
 import { OneOf } from "./ITeUtilities";
-import { TreeItem, Uri } from "vscode";
 import { ITaskItem } from "./ITaskItem";
 import { ITaskFolder } from "./ITaskFolder";
+import { Task, TreeItem, Uri } from "vscode";
 
 export interface ITaskFile extends TreeItem
 {
@@ -12,6 +12,7 @@ export interface ITaskFile extends TreeItem
     isGroup: boolean;
     label: string;
     fileName: string;
+    readonly task: Task;
     readonly isUser: boolean;
     readonly relativePath: string;
     readonly resourceUri: Uri;
