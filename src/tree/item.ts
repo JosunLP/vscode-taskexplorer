@@ -137,8 +137,6 @@ export class TaskItem extends TreeItem implements ITaskItem
 
     set paused(v) { this._paused = v; };
 
-    get relativePath() { return this._relativePath; };
-
     get task() { return this._task; };
 
     get taskFile() { return this._taskFile; };

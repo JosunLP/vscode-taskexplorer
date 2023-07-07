@@ -210,13 +210,6 @@ export class TaskFile extends TreeItem implements ITaskFile
     }
 
 
-    static createId = (folder: TaskFolder, file: TaskFile, groupLevel: number) =>
-    {
-        const groupId = TaskFile.groupId(folder, file.resourceUri.fsPath, file.taskSource, file.label, groupLevel);
-        return TaskFile.id(folder, file.task, undefined, 0, groupId);
-    };
-
-
     static id(folder: TaskFolder, task: Task, label: string | undefined, groupLevel: number, groupId?: string)
     {
         let pathKey: string;

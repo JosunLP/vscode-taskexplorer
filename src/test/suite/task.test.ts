@@ -372,11 +372,11 @@ const startTask = async (taskItem: ITaskItem, addToSpecial: boolean) =>
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ taskItem ]);
         }
-        const taskTree = teWrapper.treeManager.getTaskTree();
+        const taskTree = teWrapper.treeManager.taskFolders;
         if (taskTree)
         {
-            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
-                           (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
+            const sFolder: any = taskTree[0].label === "Favorites" ? taskTree[0] :
+                           (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
                 const sTaskItem = sFolder.taskFiles.find((t: ITaskItem) => sFolder.getTaskItemId(t.id) === taskItem.id);

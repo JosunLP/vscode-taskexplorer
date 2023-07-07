@@ -363,10 +363,10 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
-		setTasks({ tasks: teWrapper.treeManager.getTasks() });
+		setTasks({ tasks: teWrapper.treeManager.tasks });
 		utils.overrideNextShowInfoBox(undefined, true);
 		await utils.treeUtils.refresh(teWrapper, );
-		expect(teWrapper.treeManager.getTasks().length).to.be.equal(25);
+		expect(teWrapper.treeManager.tasks.length).to.be.equal(25);
         utils.endRollingCount(this);
 	});
 
@@ -381,10 +381,10 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: 10,
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
-		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "gulp" }});
+		setTasks({ tasks: teWrapper.treeManager.tasks, task: {source: "gulp" }});
 		utils.overrideNextShowInfoBox(undefined, true);
 		await utils.treeUtils.refresh(teWrapper, );
-		expect(teWrapper.treeManager.getTasks().filter((t: Task) => t.source === "gulp").length).to.be.equal(10);
+		expect(teWrapper.treeManager.tasks.filter((t: Task) => t.source === "gulp").length).to.be.equal(10);
         utils.endRollingCount(this);
 	});
 
@@ -399,10 +399,10 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
 			maxFreeTasksForScriptType: 1
 		});
-		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "batch" }});
+		setTasks({ tasks: teWrapper.treeManager.tasks, task: {source: "batch" }});
 		utils.overrideNextShowInfoBox(undefined, true);
 		await utils.treeUtils.refresh(teWrapper, );
-		expect(teWrapper.treeManager.getTasks().filter((t: Task) => t.source === "batch").length).to.be.equal(1);
+		expect(teWrapper.treeManager.tasks.filter((t: Task) => t.source === "batch").length).to.be.equal(1);
         utils.endRollingCount(this);
 	});
 
@@ -426,7 +426,7 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForTaskType: licMgrMaxFreeTasksForTaskType,
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
-		setTasks({ tasks: teWrapper.treeManager.getTasks(), task: {source: "grunt" }});
+		setTasks({ tasks: teWrapper.treeManager.tasks, task: {source: "grunt" }});
 		utils.overrideNextShowInfoBox(undefined, true);
 		await utils.treeUtils.refresh(teWrapper, );
 		await teWrapper.fs.copyDir(outsideWsDir, utils.getWsPath("."), undefined, true); // Cover fileCache.addFolder()

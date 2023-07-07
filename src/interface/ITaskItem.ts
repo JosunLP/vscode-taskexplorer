@@ -11,7 +11,6 @@ export interface ITaskItem extends TreeItem
     paused: boolean;
     taskDetached: Task | undefined;
     execution: TaskExecution | undefined;
-    readonly relativePath: string;
     folder: ITaskFolder | undefined;
     readonly isUser: boolean;
     readonly task: Task;

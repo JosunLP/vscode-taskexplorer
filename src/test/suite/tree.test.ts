@@ -5,6 +5,7 @@ import * as utils from "../utils/utils";
 import { startupFocus } from "../utils/suiteUtils";
 import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper, OneOf } from ":types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
+import { WorkspaceFolder, Uri, ThemeIcon, MarkdownString, Command, TreeItemCollapsibleState, AccessibilityInformation } from "vscode";
 
 let teWrapper: ITeWrapper;
 const tc = utils.testControl;
@@ -52,7 +53,7 @@ suite("Tree Tests", () =>
         else {
             this.slow(tc.slowTime.config.showHideSpecialFolder);
         }
-        const taskMap = teWrapper.treeManager.getTaskMap();
+        const taskMap = teWrapper.treeManager.taskMap;
         const tmp = { ...taskMap };
         try {
             Object.keys(tmp).forEach(k => {
@@ -105,11 +106,11 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard * 2);
-        const taskTree = teWrapper.treeManager.getTaskTree();
+        const taskTree = teWrapper.treeManager.taskFolders;
         if (taskTree)
         {
-            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
-                            (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
+            const sFolder: any = taskTree[0].label === "Favorites" ? taskTree[0] :
+                            (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
                 cstItem1 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === batch[0].id);
@@ -130,11 +131,11 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard);
-        const taskTree = teWrapper.treeManager.getTaskTree();
+        const taskTree = teWrapper.treeManager.taskFolders;
         if (taskTree)
         {
-            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
-                            (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
+            const sFolder: any = taskTree[0].label === "Favorites" ? taskTree[0] :
+                            (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
                 cstItem2 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === batch[1].id);
@@ -154,11 +155,11 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard * 2);
-        const taskTree = teWrapper.treeManager.getTaskTree();
+        const taskTree = teWrapper.treeManager.taskFolders;
         if (taskTree)
         {
-            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
-                            (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
+            const sFolder: any = taskTree[0].label === "Favorites" ? taskTree[0] :
+                            (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
                 cstItem3 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === bash[0].id);
@@ -179,11 +180,11 @@ suite("Tree Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.standard * 2);
-        const taskTree = teWrapper.treeManager.getTaskTree();
+        const taskTree = teWrapper.treeManager.taskFolders;
         if (taskTree)
         {
-            const sFolder = taskTree[0].label === "Favorites" ? taskTree[0] as any :
-                            (taskTree[1].label === "Favorites" ? taskTree[1] as any : null);
+            const sFolder: any = taskTree[0].label === "Favorites" ? taskTree[0] :
+                            (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
                 cstItem4 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === ant[0].id);
@@ -295,7 +296,7 @@ suite("Tree Tests", () =>
                 await reveal();
             }
         }
-        const taskTree = teWrapper.treeManager.getTaskTree() as any[];
+        const taskTree = teWrapper.treeManager.taskFolders as any[];
         expect(teWrapper.explorer?.getParent(taskTree[0])).to.be.null; // Last Tasks
         expect(teWrapper.explorer?.getParent(taskTree[1])).to.be.null; // Last Tasks
         expect(teWrapper.explorer?.getParent(taskTree[2])).to.be.null; // Project Folder
@@ -484,6 +485,18 @@ class DumbFolder implements ITaskFolder
 {
     public label: string;
     constructor(lbl: string) { this.label = lbl; }
+    id = "";
+    isSpecial = false;
+    taskFiles: (ITaskItem | ITaskFile)[] = [];
+    workspaceFolder: WorkspaceFolder | undefined;
+    iconPath?: string | Uri | { light: string | Uri; dark: string | Uri } | ThemeIcon | undefined;
+    description?: string | boolean | undefined;
+    resourceUri?: Uri | undefined;
+    tooltip?: string | MarkdownString | undefined;
+    command?: Command | undefined;
+    collapsibleState?: TreeItemCollapsibleState | undefined;
+    contextValue?: string | undefined;
+    accessibilityInformation?: AccessibilityInformation | undefined;
     addChild<T extends (ITaskFile | ITaskItem)>(node: T, index?: number): OneOf<T, [ ITaskFile, ITaskItem ]>;
     addChild(taskFile: ITaskItem | ITaskFile, idx = 0): ITaskFile | ITaskItem { return taskFile; }
     removeChild(taskFile: ITaskItem | ITaskFile, logPad: string): void {}

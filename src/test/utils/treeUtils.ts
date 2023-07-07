@@ -22,12 +22,12 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
 {
     const _getTaskMap = async(retries: number): Promise<TaskMap> =>
     {
-        let taskMap = teWrapper.treeManager.getTaskMap();
+        let taskMap = teWrapper.treeManager.taskMap;
 
         if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findTaskTypeInTaskMap(taskType, taskMap))
         {
             await waitForTeIdle(150, 1600);
-            taskMap = teWrapper.treeManager.getTaskMap();
+            taskMap = teWrapper.treeManager.taskMap;
         }
 
         if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findTaskTypeInTaskMap(taskType, taskMap))
@@ -38,7 +38,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
             if (retries % 10 === 0)
             {
                 await refresh(teWrapper);
-                taskMap = teWrapper.treeManager.getTaskMap();
+                taskMap = teWrapper.treeManager.taskMap;
             }
             if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap))
             {
@@ -109,12 +109,12 @@ export const refresh = async(teWrapper: ITeWrapper, instance?: any) =>
 
 export const verifyTaskCountByTree = async(teWrapper: ITeWrapper, taskType: string, expectedCount: number, retries = 2) =>
 {
-    let taskMap = teWrapper.treeManager.getTaskMap();
+    let taskMap = teWrapper.treeManager.taskMap;
     const _getCount = async() =>
     {
         if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap)) {
             await refresh(teWrapper);
-            taskMap = teWrapper.treeManager.getTaskMap();
+            taskMap = teWrapper.treeManager.taskMap;
         }
         return findTaskTypeInTaskMap(taskType, taskMap).length;
     };

@@ -30,7 +30,7 @@ export class TeTreeView implements ITaskTreeView, Disposable
         this._view.title = title;
         this._view.description = description;
 		this._usageKey = `${wrapper.keys.Usage.TreeviewPrefix}${viewId}View`;
-		this._contextKeyPrefix = `${wrapper.keys.Context.TreeViewPrefix}${viewId}`;
+		this._contextKeyPrefix = `${wrapper.keys.Context.TreeviewPrefix}${viewId}`;
 		this._disposables = [
             this._view.onDidChangeVisibility(this.onVisibilityChanged, this),
             // this._view.onDidCollapseElement(this.onElementCollapsed, this),

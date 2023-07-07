@@ -346,8 +346,8 @@ suite("Multi-Root Workspace Tests", () =>
         this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.tasks.count.verify);
         if (!tc.isMultiRootWorkspace)
         {   // Push task and task item, vscode knows they're fake and won't return them in fetchTasks()
-            const taskMap = teWrapper.treeManager.getTaskMap(),
-                  tasks = teWrapper.treeManager.getTasks();
+            const taskMap = teWrapper.treeManager.taskMap,
+                  tasks = teWrapper.treeManager.tasks;
             tasks.push({
                 definition: {
                     type: "grunt",
@@ -392,8 +392,8 @@ suite("Multi-Root Workspace Tests", () =>
         this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.tasks.count.verify);
         if (!tc.isMultiRootWorkspace)
         {   // Push task and task item, vscode knows they're fake and won't return them in fetchTasks()
-            const taskMap = teWrapper.treeManager.getTaskMap(),
-                  tasks = teWrapper.treeManager.getTasks();
+            const taskMap = teWrapper.treeManager.taskMap,
+                  tasks = teWrapper.treeManager.tasks;
             tasks.push({
                 definition: {
                     type: "grunt",
@@ -426,8 +426,8 @@ suite("Multi-Root Workspace Tests", () =>
         this.slow((tc.slowTime.wsFolder.remove * 2) + tc.slowTime.tasks.count.verify);
         if (!tc.isMultiRootWorkspace)
         {   // Push tasks and task items, vscode knows they're fake and won't return them in fetchTasks()
-            const taskMap = teWrapper.treeManager.getTaskMap(),
-                  tasks = teWrapper.treeManager.getTasks();
+            const taskMap = teWrapper.treeManager.taskMap,
+                  tasks = teWrapper.treeManager.tasks;
             tasks.push({
                 definition: {
                     type: "grunt",

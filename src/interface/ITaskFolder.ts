@@ -13,5 +13,4 @@ export interface ITaskFolder extends TreeItem
     readonly workspaceFolder: WorkspaceFolder | undefined;
     addChild<T extends (ITaskFile | ITaskItem)>(node: T, index?: number): OneOf<T, [ ITaskFile, ITaskItem ]>;
     addChild(taskFile: ITaskFile|ITaskItem, index?: number): ITaskFile | ITaskItem;
-    removeChild(taskFile: ITaskFile | ITaskItem, logPad: string): void | Promise<void>;
 }

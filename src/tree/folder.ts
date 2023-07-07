@@ -47,10 +47,4 @@ export class TaskFolder extends TreeItem implements ITaskFolder
     addChild<T extends (TaskFile | TaskItem)>(node: T, index?: number): OneOf<T, [ TaskFile, TaskItem ]>;
     addChild(node: TaskFile|TaskItem, idx = 0) { this.taskFiles.splice(idx, 0, node); return node; }
 
-
-    removeChild(node: TaskFile|TaskItem, _logPad: string)
-    {
-        const idx = this.taskFiles.findIndex(f => f.id === node.id);
-        this.taskFiles.splice(idx, 1);
-    }
 }

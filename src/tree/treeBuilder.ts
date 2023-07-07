@@ -201,12 +201,6 @@ export class TaskTreeBuilder
         if (definition.cmdLine) {
             w.log.value("   cmd line", definition.cmdLine, 4, logPad);
         }
-        w.utils.execIf(definition.icon, () => { // External task providers can set a icon/iconDark property
-            w.log.value("   icon", definition.icon, 4, logPad);
-        }, this);
-        w.utils.execIf(definition.iconDark, () => { // External task providers can set a icon/iconDark property
-            w.log.value("   icon dark", definition.iconDark, 4, logPad);
-        }, this);
         w.log.write("Task Details Done", 3, logPad);
     };
 

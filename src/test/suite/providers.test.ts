@@ -349,7 +349,7 @@ suite("Provider Tests", () =>
         if (exitRollingCount(this)) return;
         let numOpened = 0,
             numFilesOpened = 0;
-        const taskMap = teWrapper.treeManager.getTaskMap(),
+        const taskMap = teWrapper.treeManager.taskMap,
               filesOpened: string[] = [];
         for (const t of Object.keys(taskMap))
         {
@@ -369,7 +369,7 @@ suite("Provider Tests", () =>
     test("Verify Task Counts", async function()
     {
         if (exitRollingCount(this)) return;
-        taskMap = teWrapper.treeManager.getTaskMap();
+        taskMap = teWrapper.treeManager.taskMap;
         let taskCount = treeUtils.findTaskTypeInTaskMap("ant", taskMap).length;
         expect(taskCount).to.be.equal(7, `Unexpected Ant task count (Found ${taskCount} of 7)`);
         taskCount = treeUtils.findTaskTypeInTaskMap("apppublisher", taskMap).length;
@@ -485,7 +485,7 @@ suite("Provider Tests", () =>
         this.slow(tc.slowTime.config.event + tc.slowTime.config.globEvent + (tc.slowTime.commands.fetchTasks * 2) + tc.slowTime.general.min);
         let taskItems = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri);
         const gruntCt = taskItems.length;
-        taskMap = teWrapper.treeManager.getTaskMap();
+        taskMap = teWrapper.treeManager.taskMap;
         for (const taskItem of Object.values(taskMap))
         {
             if (taskItem && taskItem.taskSource === "grunt")

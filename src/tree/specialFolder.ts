@@ -309,7 +309,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    override async removeChild(taskItem: TaskItem, logPad: string, persist?: boolean): Promise<void>
+    async removeChild(taskItem: TaskItem, logPad: string, persist?: boolean): Promise<void>
     {
         const idx = this.taskFiles.findIndex(f => f.id === this.getTaskSpecialId(taskItem.id));
         taskItem = this.taskFiles.splice(idx, 1)[0]; // idx guaranteed not to be -1 by caller
