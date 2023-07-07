@@ -346,7 +346,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
                 await this.fetchTasks(logPad);
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.BuildingTaskTree : undefined);
-                await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
+                await this._treeBuilder.createTaskItemTree(undefined /* TEMP this._currentInvalidation */, callLogPad);
                 Object.values(this._specialFolders).forEach(f => f.build(callLogPad));
                 await this.setContext();
             }
@@ -477,8 +477,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
               isOptUri = w.typeUtils.isUri(opt);
 
         await this.waitForRefreshComplete();
-        this._refreshPending = true;
         this._currentInvalidation = undefined;
+        this._refreshPending = true;
 
         w.log.methodStart("refresh task tree", 1, logPad, logPad === "", [
             [ "invalidate", invalidate ], [ "opt fsPath", isOptUri ? opt.fsPath : "n/a" ]

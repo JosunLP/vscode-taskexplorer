@@ -199,10 +199,10 @@ export class TaskTreeGrouper
             //
             // If 'prevName' length > 1, then this task was grouped using the group separator
             //
-            let foundGroup = true;
+            let foundGroup = false;
             if (prevName && prevNameOk && thisName && thisName.length > treeLevel)
             {
-                for (let i = 0; i <= treeLevel && foundGroup; i++) {
+                for (let i = 0; i <= treeLevel && (foundGroup || i === 0); i++) {
                     foundGroup = prevName[i] === thisName[i];
                 }
             }
@@ -231,30 +231,41 @@ export class TaskTreeGrouper
                         // new group just created
                         //
                         groupHash[gid].addChild(prevTaskItem); // will set the group level on the TaskItem
-                        // groupHash[gid].treeNodes.push();
+                        hash[groupHash[gid].id] = groupHash[gid];
                         newNodes.push(groupHash[gid]);
                     }
                     groupHash[gid].addChild(taskItem); // will set the group level on the TaskItem
                 }
                 else if (!didGroupLast)
                 {
-                    const gid = <string>taskFile.groupId;
-                    taskFile.groupLevel = treeLevel;
-                    taskFile.addChild(prevTaskItem);
-                    groupHash[gid] = taskFile;
-                    hash[taskFile.id] = taskFile;
+                    // if (!this.wrapper.taskUtils.isScriptType(taskItem.taskSource))
+                    // {
+                        taskFile.groupLevel = treeLevel;
+                        taskFile.groupId = TaskFile.groupId(folder, taskFile.resourceUri.fsPath, prevTaskItem.taskSource, prevTaskItem.label, treeLevel);
+                        taskFile.id = TaskFile.id(folder, prevTaskItem.task, taskFile.taskSource, treeLevel, taskFile.groupId);
+                        taskFile.addChild(prevTaskItem);
+                        groupHash[taskFile.groupId] = taskFile;
+                        hash[taskFile.id] = taskFile;
+                    // }
+                    // else
+                    // {
+                    // }
                 }
                 didGroupLast = !!foundGroup && !!prevName;
             }
+            prevName = undefined;
+            prevTaskItem = taskItem;
             if (taskItem.label.includes(this._groupSep)) {
                 prevName = taskItem.label.split(this._groupSep);
             }
-            prevTaskItem = taskItem;
         }
         if (!didGroupLast && prevTaskItem)
         {
+            taskFile.groupLevel = treeLevel;
+            taskFile.groupId = TaskFile.groupId(folder, taskFile.resourceUri.fsPath, prevTaskItem.taskSource, prevTaskItem.label, treeLevel);
+            taskFile.id = TaskFile.id(folder, prevTaskItem.task, taskFile.taskSource, treeLevel, taskFile.groupId);
             taskFile.addChild(prevTaskItem);
-            groupHash[<string>taskFile.groupId] = taskFile;
+            groupHash[taskFile.groupId] = taskFile;
             hash[taskFile.id] = taskFile;
         }
         //
