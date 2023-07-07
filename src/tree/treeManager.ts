@@ -367,7 +367,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         const count = this._tasks.length,
               firstTreeBuildDone = this._firstTreeBuildDone;
-        this._refreshPending = true;
         try
         {   if (doFetch)
             {
@@ -383,7 +382,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
             this.fireTreeRefreshEvent(null, null, logPad);
             this.fireTasksLoadedEvents(count);
-            this._refreshPending = false;
         }
     };
 
@@ -486,7 +484,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         );
         this.wrapper.utils.popIfExistsBy(taskFolders, f => f.resourceUri?.fsPath === uri.fsPath, this, true);
         w.statusBar.update("");
-        this._refreshPending = false;
         this.fireTreeRefreshEvent(null, null, logPad + "   ");
         w.log.methodDone("workspace folder removed", 1, logPad,  [
             [ "# removed", removed.length ], [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskFolders.length ]
@@ -554,6 +551,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         await this.waitForRefreshComplete();
         this._refreshPending = true;
+
         w.log.methodStart("refresh task tree", 1, logPad, logPad === "", [
             [ "invalidate", invalidate ], [ "opt fsPath", isOptUri ? opt.fsPath : "n/a" ]
         ]);
@@ -646,6 +644,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             await this.loadTasks(doFetch, logPad + "   ");
         }
 
+        this._refreshPending = false;
         w.log.methodDone("refresh task tree", 1, logPad);
     };
 

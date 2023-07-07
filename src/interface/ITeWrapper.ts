@@ -32,6 +32,8 @@ export interface ITeKeys
 	Config: typeof ConfigKeys;
 	Context: typeof ContextKeys;
 	Globs: any;
+	Numbers: any;
+	Regexes: any;
 	Strings: any;
 	Storage: typeof StorageKeys;
 	Usage: typeof UsageKeys;

@@ -135,13 +135,10 @@ export class TaskTreeBuilder
         taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, 0)];
         if (!taskFile)
         {
-            for (let i = 0; i < 10 && !taskFile; i++)
+            for (let i = 0; i < this.wrapper.keys.Numbers.MaxGroupLevel && !taskFile; i++)
             {
                 const fsPath = this.wrapper.pathUtils.getTaskAbsolutePath(task);
                 taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, i, TaskFile.groupId(folder, fsPath, task.source, task.name, i))];
-                if (taskFile) {
-                    break;
-                }
             }
         }
         if (!taskFile)

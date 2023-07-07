@@ -5,6 +5,21 @@ import {
     UsageKeys, VsCodeCommands, Commands
 } from "../interface";
 
+export const Constants =
+{
+    GlobalFrameworkConfName: "global",
+    GlobalFrameworkProjectName: "global"
+};
+
+export const Numbers =
+{
+    MaxGroupLevel: 10
+};
+
+export const Regexes =
+{
+};
+
 export const Strings =
 {
 	DEFAULT_SEPARATOR: "-",
@@ -55,6 +70,8 @@ export const All: ITeKeys =
     Config: ConfigKeys,
     Context: ContextKeys,
     Globs,
+    Numbers,
+    Regexes,
     Storage: StorageKeys,
     Strings,
     Usage: UsageKeys,
