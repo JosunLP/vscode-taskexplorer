@@ -6,7 +6,7 @@ import { Task, Uri, Event, TreeItem } from "vscode";
 import { ITeTask, ITeTaskChangeEvent } from "./ITeTask";
 import { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 
-export interface TaskMap<T = ITaskItem | undefined> { [id: string]: T };
+export interface TaskMap<T = ITaskItem> { [id: string]: T };
 
 export interface ITeTreeManager
 {

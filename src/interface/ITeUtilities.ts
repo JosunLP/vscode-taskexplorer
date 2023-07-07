@@ -125,7 +125,8 @@ export interface ITeUtilities
 	execIf2<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
 	execIf2<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
 	execIf2<T, R, A1, A2, A3, A4, A5, A6>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6): R | undefined;
-	execIf2<T, R, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1, A6 = A1>(checkValue: T | undefined, ifFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6): R | undefined
+	execIf2<T, R, A1, A2, A3, A4, A5, A6, A7>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7): R | undefined;
+	execIf2<T, R, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1, A6 = A1, A7 = A1>(checkValue: T | undefined, ifFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7): R | undefined;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
 	getDateDifference(date1: Date | number, date2: Date | number, type?: "d" | "h" | "m" | "s"): number;

@@ -132,8 +132,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         const term = getTerminal(taskItem, "   ");
         if (term)
         {   //
-            // TODO - see ticket.  I guess its not CTRL+C in some parts.
-            // so make the control chars a setting.  Also in stop().
+            // TODO - see ticket. its not CTRL+C in some parts so make the ctrl char a setting. Also stop().
             //
             this._log.value("   send to terminal", "N", 1);
             term.sendText("N", true);
@@ -226,18 +225,9 @@ export class TaskManager implements ITeTaskManager, Disposable
     private runNpmCommand = async(taskFile: TaskFile, command: string) =>
     {
         const pkgMgr = this.wrapper.utils.getPackageManager(),
-            uri = taskFile.resourceUri;
-
-        const options = {
-            cwd: dirname(uri.fsPath)
-        };
-
-        const kind: TaskDefinition = {
-            type: "npm",
-            script: command,
-            path: dirname(uri.fsPath)
-        };
-
+              uri = taskFile.resourceUri,
+              options = { cwd: dirname(uri.fsPath) },
+              kind: TaskDefinition = { type: "npm", script: command, path: dirname(uri.fsPath) };
         if (command.indexOf("<packagename>") === -1)
         {
             this.wrapper.utils.execIf(taskFile.folder.workspaceFolder, (wsf) =>
@@ -270,17 +260,14 @@ export class TaskManager implements ITeTaskManager, Disposable
             window.showInformationMessage("Busy, please wait...");
             return;
         }
-
         const taskMap = this.wrapper.treeManager.taskMap,
               lastTasks = this.wrapper.treeManager.lastTasksFolder,
               lastTaskId = lastTasks.getLastRanId(),
               taskItem = lastTaskId ? taskMap[lastTaskId] as TaskItem : null;
-
         if (!taskItem) {
             window.showInformationMessage("Task not found! Check log for details");
             return;
         }
-
         this._log.methodStart("run last task", 1, "", true, [[ "last task id", lastTaskId ]]);
         const exec = await this.run(taskItem);
         this._log.methodDone("run last task", 1);
@@ -310,10 +297,8 @@ export class TaskManager implements ITeTaskManager, Disposable
     {
         let exec: TaskExecution | undefined;
         this._log.methodStart("run task with arguments", 1, logPad, false, [[ "no terminal", noTerminal ]]);
-        /* istanbul ignore else */
-        if (taskItem.task && !(taskItem.task.execution instanceof CustomExecution))
+        await this.wrapper.utils.execIf(taskItem.task && !(taskItem.task.execution instanceof CustomExecution), async () =>
         {
-
             const _run = async (..._args: any[]) =>
             {
                 let newTask = taskItem.task;
@@ -343,10 +328,7 @@ export class TaskManager implements ITeTaskManager, Disposable
             else {
                 exec = await _run(...args);
             }
-        }
-        else {
-            window.showInformationMessage("Custom execution tasks cannot have the cmd line altered");
-        }
+        }, this, [ window.showInformationMessage, "Custom execution tasks cannot have the cmd line altered" ]);
         this._log.methodDone("run task with arguments", 1, logPad);
         return exec;
     };
