@@ -74,7 +74,7 @@ export class TaskTreeBuilder
         }
         this.logTask(task, scopeName, logPad + "   ");
         //
-        // Get task file node, this will create one of it doesn't exist
+        // Get task file node, getTaskFile() will create one of it doesn't exist
         //
         const taskFile = await this.getTaskFile(task, folder, relativePath, logPad + "   ");
         //
@@ -101,30 +101,25 @@ export class TaskTreeBuilder
     };
 
 
-    createTaskItemTree = async (rebuild: boolean, logPad: string) =>
+    createTaskItemTree = async (source: string | undefined, logPad: string) =>
     {
         let taskCt = 0;
-        const tasks = this.wrapper.treeManager.tasks;
-        this.wrapper.log.methodStart("create task tree", 1, logPad);
+        const tasks = this.wrapper.treeManager.tasks.filter(t => !source || source === t.source);
+        this.wrapper.log.methodStart("create task tree", 1, logPad, false, [[ "source", source ], [ "# of tasks", tasks.length ]]);
         this.wrapper.statusBar.update(this.wrapper.keys.Strings.BuildingTaskTree);
-        if (rebuild) {
-            this.invalidate();
-        }
+        this.invalidate(source);
         for (const task of tasks)
         {
-            this.wrapper.log.blank(4);
-            this.wrapper.log.write(`   Processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
+            this.wrapper.log.write(`   create task tree - processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
             await this.buildTaskTree(task, logPad + "   ");
         }
         if (!this.wrapper.typeUtils.isObjectEmpty(this._taskFolderMap))
         {
-            if (rebuild) {
-                await this._treeGrouper.buildGroupings(this._taskFolderMap, this._taskFileMap, logPad + "   ");
-            }
+            await this._treeGrouper.buildGroupings(source, this._taskFolderMap, this._taskFileMap, logPad + "   ");
             this._taskFolders.push(...<TaskFolder[]>this.wrapper.sorters.sortFolders(this._taskFolderMap));
         }
         this.wrapper.statusBar.update("");
-        this.wrapper.log.methodDone("create task tree", 1, logPad, [[ "current task count", this.wrapper.treeManager.tasks.length ]]);
+        this.wrapper.log.methodDone("create task tree", 1, logPad, [[ "task count", this.wrapper.treeManager.tasks.length ]]);
     };
 
 
@@ -152,7 +147,18 @@ export class TaskTreeBuilder
     };
 
 
-    private invalidate  = () => { this._taskMap = {}; this._taskFileMap = {}; this._taskFolderMap = {}; this._taskFolders.splice(0); };
+    private invalidate = (source?: string) =>
+    {
+        this._taskFolders.splice(0);
+        if (!source) {
+            this._taskMap = {}; this._taskFileMap = {}; this._taskFolderMap = {};
+        }
+        else
+        {
+            this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_k, t) => t.taskSource === source, this);
+            this.wrapper.utils.popObjIfExistsBy(this._taskFileMap, (_k, t) => t.taskSource === source, this);
+        }
+    };
 
 
     private logTask = (task: Task, scopeName: string, logPad: string) =>

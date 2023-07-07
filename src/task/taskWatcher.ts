@@ -111,7 +111,7 @@ export class TaskWatcher implements Disposable
 
         if (task.source === "Workspace" && !treeId)
         {
-            taskItem = Object.values(taskMap).find((t): t is TaskItem => t.taskSource === "Workspace" && t.task.definition.type === task.definition.type);
+            taskItem = Object.values(taskMap).find((t): t is TaskItem => !!t && t.taskSource === "Workspace" && t.task.definition.type === task.definition.type);
         }
         //
         // If taskMap is empty, then this view has not yet been made visible, an there's nothing
@@ -163,7 +163,7 @@ export class TaskWatcher implements Disposable
         if (task.source === "Workspace" && !treeId)
         {
             taskItem = Object.values(taskMap).find(
-                (t): t is TaskItem => t.taskSource === "Workspace" && t.task.definition.type === task.definition.type && t.task.name === task.name
+                (t): t is TaskItem => !!t && t.taskSource === "Workspace" && t.task.definition.type === task.definition.type && t.task.name === task.name
             );
         }
         //

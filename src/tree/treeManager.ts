@@ -172,75 +172,28 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private cleanFetchedTasks = (logPad: string): void =>
-    {
-        let ctRmv = 0;
-        const tasksCache = this._tasks;
-        this.wrapper.log.write("removing any ignored tasks from new fetch", 3, logPad);
-        tasksCache.slice().reverse().forEach((item, index, object) => // niftiest loop ever
-        {   //
-            // Make sure this task shouldn't be ignored based on various criteria...
-            // Process only if this task type/source is enabled in settings or is scope is empty (VSCode provided task)
-            // By default, also ignore npm 'install' tasks, since its available in the context menu, ignore
-            // other providers unless it has registered as an external provider via Task Explorer API.
-            // Only internally provided tasks will be present in the this.tasks cache at this point, as extension
-            // provided tasks will have been skipped/ignored in the provideTasks() processing.
-            //
-            if (!isTaskIncluded(this.wrapper, item, this.wrapper.pathUtils.getTaskRelativePath(item), logPad + "   "))
-            {
-                ++ctRmv;
-                tasksCache.splice(object.length - 1 - index, 1);
-                this.wrapper.log.value("   ignoring task", item.name, 3, logPad);
-            }
-        });
-        this.wrapper.log.write(`ignored ${ctRmv} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
-    };
-
-
-    private clearCachedTasks = (source: string, logPad: string): void =>
-    {
-        let ctRmv = 0;
-        this.wrapper.log.methodStart("do task cache removals", 2, logPad);
-        this._tasks.slice().reverse().forEach((item, index, object) => // niftiest loop ever
-        {   //
-            // Note that requesting a task type can return Workspace tasks (tasks.json/vscode)
-            // if the script type set for the task in tasks.json is of type '_currentInvalidation'.
-            // Remove any Workspace type tasks returned as well, in this case the source type is
-            // != _currentInvalidation, but the definition type == _currentInvalidation
-            //
-            if (item.source === source || (item.source === "Workspace" && item.definition.type === source))
-            {
-                this._tasks.splice(object.length - 1 - index, 1);
-                this.wrapper.log.write(`      removed task '${item.source}/${item.name}'`, 3, logPad);
-                ++ctRmv;
-            }
-        });
-        this.wrapper.log.write(`   removed ${ctRmv} ${source} current tasks from cache`, 2, logPad);
-        this.wrapper.log.methodDone("do task cache removals", 2, logPad);
-    };
-
-
     private fetchTasks = async(logPad: string): Promise<void> =>
     {
         let taskItems;
-        const source = this._currentInvalidation,
+        const w = this.wrapper,
+              source = this._currentInvalidation,
               zeroTasksToStart = this._tasks.length === 0,
-              licMgr = this.wrapper.licenseManager,
+              licMgr = w.licenseManager,
               maxTasks = licMgr.getMaxNumberOfTasks();
-        this.wrapper.log.methodStart("fetch tasks", 1, logPad);
+        w.log.methodStart("fetch tasks", 1, logPad);
         if (zeroTasksToStart || !source)
         {
-            this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
-            this.wrapper.statusBar.update("Requesting all tasks from all providers");
+            w.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
+            w.statusBar.update("Requesting all tasks from all providers");
             taskItems = await vscTasks.fetchTasks();
             this._tasks.splice(0);
-            this.wrapper.log.write(`   adding ${taskItems.length} tasks`, 2, logPad);
+            w.log.write(`   adding ${taskItems.length} tasks`, 2, logPad);
         }     //
         else // inv guaranteed to be a string (task type) here
         {   //
-            const taskName = this.wrapper.taskUtils.getTaskTypeFriendlyName(source);
-            this.wrapper.log.write(`   fetching ${taskName} tasks via VSCode fetchTasks call`, 1, logPad);
-            this.wrapper.statusBar.update("Requesting  tasks from " + taskName + " task provider");
+            const taskName = w.taskUtils.getTaskTypeFriendlyName(source);
+            w.log.write(`   fetching ${taskName} tasks via VSCode fetchTasks call`, 1, logPad);
+            w.statusBar.update("Requesting  tasks from " + taskName + " task provider");
             //
             // Request all tasks of type 'this._currentInvalidation'.  Workspace type tasks can be of
             // any task type, so in case of Ws task invalidation, request all tasks from all providers
@@ -253,23 +206,34 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             }
             //
             // Process the tasks cache array for any removals that might need to be made, e.g. remove
-            // tasks that already existed that were just re-parsed
+            // tasks that already existed that were just re-parsed. Note that requesting a task type can return
+            // Workspace tasks (tasks.json/vscode) if the script type set for the task in tasks.json is of
+            // type '_currentInvalidation'. Remove any Workspace type tasks returned as well, in this case the
+            // source type is != _currentInvalidation, but the definition type == _currentInvalidation
             //
-            this.clearCachedTasks(source, logPad);
-            this.wrapper.log.write(`   adding ${taskItems.length} new ${source} tasks`, 2, logPad);
+            const rmv = w.utils.popIfExistsBy(this._tasks,
+                (t) => t.source === source || (t.source === "Workspace" && t.definition.type === source), this
+            );
+            w.log.write(`   cleaeed ${rmv.length} ${source} tasks from cache`, 2, logPad);
+            w.log.write(`   adding ${taskItems.length} new ${source} tasks`, 2, logPad);
         }
         //
         // Cache the requested tasks
         //
         this._tasks.push(...taskItems);
         //
-        // Check the finalized task cache array for any ignores that still need to be processed,
-        // e.g. 'grunt' or 'gulp' tasks that are internally provided by VSCode and we have no
-        // control over the provider returning them.  Internally provided Grunt and Gulp tasks
-        // are differentiable from TE provided Gulp and Grunt tasks in that the VSCode provided
-        // tasks do no not have task.definition.uri set.
+        // Make sure this task shouldn't be ignored based on various criteria...
+        // Process only if this task type/source is enabled in settings or is scope is empty (VSCode provided task)
+        // or e.g. 'grunt' or 'gulp' tasks that are internally provided by VSCode.  By default, also ignore npm
+        // 'install' tasks, since its available in the context menu, ignore other providers unless it has registered
+        // as an external provider via Task Explorer API.  Only internally provided tasks will be present in the
+        // this.tasks cache at this point, as extension provided tasks will have been skipped/ignored in the
+        // provideTasks() processing.
         //
-        this.cleanFetchedTasks(logPad + "   ");
+        const rmv = w.utils.popIfExistsBy(this._tasks,
+            (t) => !isTaskIncluded(w, t, w.pathUtils.getTaskRelativePath(t), logPad + "   "), this
+        );
+        w.log.write(`   ignored ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
         //
         // Hash NPM script blocks, to ignore edits to package.json when scripts have not changed, since
         // we have to query the entire workspace for npm tasks to get changes.  TODO is srtill to write
@@ -285,11 +249,11 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             let ctRmv = 0;
             ctRmv = this._tasks.length - maxTasks;
-            this.wrapper.log.write(`      removing ${ctRmv} tasks, max count reached (no license)`, 3, logPad);
+            w.log.write(`      removing ${ctRmv} tasks, max count reached (no license)`, 3, logPad);
             this._tasks.splice(maxTasks, ctRmv);
             licMgr.setMaxTasksReached();
         }
-        this.wrapper.log.methodDone("fetch tasks", 1, logPad);
+        w.log.methodDone("fetch tasks", 1, logPad);
     };
 
 
@@ -363,9 +327,18 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private loadTasks = async(doFetch: boolean, logPad: string): Promise<void> =>
+    /**
+     * @method loadTasks
+     * @since 3.0.0
+     *
+     * Base loading function called by {@link refresh} after determining load parameters.
+     * Peforms all steps of requested task loas... fetch tasks, build task cache,
+     * build / updte task tree, lastly perform any tree groupings.
+     */
+    private loadTasks = async (doFetch: boolean, logPad: string): Promise<void> =>
     {
-        const count = this._tasks.length,
+        const callLogPad = logPad + "   ",
+              count = this._tasks.length,
               firstTreeBuildDone = this._firstTreeBuildDone;
         try
         {   if (doFetch)
@@ -373,9 +346,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
                 await this.fetchTasks(logPad);
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.BuildingTaskTree : undefined);
-                await this._treeBuilder.createTaskItemTree(count !== this._tasks.length || doFetch, logPad + "   ");
-                Object.values(this._specialFolders).forEach(f => f.build(logPad + "   "));
+                await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
+                Object.values(this._specialFolders).forEach(f => f.build(callLogPad));
                 await this.setContext();
+            }
+            else {
+                await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
             }
         }
         finally {
@@ -407,29 +383,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      *
      * If a FileSystemWatcher event, then 'opt2' should contain the Uri of the file that was
      * modified, created, or deleted.
-     *
-     *
-     * @param opt1 Task provider type.  Can be one of:
-     *     "ant"
-     *     "apppublisher"
-     *     "bash"
-     *     "batch"
-     *     "composer"
-     *     "gradle"
-     *     "grunt"
-     *     "gulp"
-     *     "jenkins"
-     *     "make"
-     *     "npm"
-     *     "nsis"
-     *     "perl"
-     *     "pipenv"
-     *     "powershell"
-     *     "python"
-     *     "ruby"
-     *     "webpack"
-     *     "Workspace"
-     * @param opt2 The uri of the file that contains/owns the task
      */
     private invalidateTasksCache = async(opt1: string | undefined, opt2: Uri | false | undefined, logPad: string) =>
     {
@@ -499,34 +452,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      * This function is called each time and event occurs, whether its a modified or new
      * file (via FileSystemWatcher event), or when the view first becomes active/visible, etc.
      *
-     * @param invalidate The invalidation event.
-     * Can be one of the custom values:
-     *     false
-     *     null
-     *     undefined
-     *
-     * Or one of the task types (from FileSystemWatcher event):
-     *
-     *     "ant"
-     *     "apppublisher"
-     *     "bash"
-     *     "batch"
-     *     "composer"
-     *     "gradle"
-     *     "grunt"
-     *     "gulp"
-     *     "jenkins"
-     *     "make"
-     *     "npm"
-     *     "nsis"
-     *     "perl"
-     *     "pipenv"
-     *     "powershell"
-     *     "python"
-     *     "ruby"
-     *     "webpack"
-     *     "Workspace"
-     *
      * If invalidate is false, then this is both an event as a result from adding to excludes list
      * and the item being added is a file, not a group / set of files.  If the item being added to
      * the excludes list is a group/folder, then invalidate will be set to the task source, i.e.
@@ -539,10 +464,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      *
      * If invalidate and opt are both undefined, then a configuration has changed
      *
-     * invalidate can be false when a grouping setting shas changed, where the tree needs to be rebuilt
-     * but the file cache does not need to rebuild and  do not need to invalidate any task providers
+     * If `invalidate`is `false` then a grouping setting has changed, where the tree needs to be rebuilt
+     * but the file cache does not need to rebuild and no need to invalidate any providers
      *
-     * @param opt Uri of the invalidated resource
+     * Once loading parameters are determined, tasks providers are invalidated as necessary via the
+     * {@link invalidateTasksCache} function,next the base loading function {@link loadTasks} is called, or
+     * in the case of a workspace foler heving been remoged, {@link onWorkspaceFolderRemoved}.
      */
     refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
     {
@@ -551,6 +478,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         await this.waitForRefreshComplete();
         this._refreshPending = true;
+        this._currentInvalidation = undefined;
 
         w.log.methodStart("refresh task tree", 1, logPad, logPad === "", [
             [ "invalidate", invalidate ], [ "opt fsPath", isOptUri ? opt.fsPath : "n/a" ]
@@ -629,13 +557,11 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                     // has changed, or the sort method, etc...
                     //
                     w.log.write("   no invalidation, rebuild tree only", 1, logPad);
-                    await this._treeBuilder.createTaskItemTree(true, logPad + "   ");
                     doFetch = false;
                 }     //
                 else // Re-fetch all tasks from all providers, and rebuild tree
                 {   //
                     w.log.write("   invalidation is for all types", 1, logPad);
-                    this._currentInvalidation = undefined;
                 }
             } //
              // Fetch specified tasks.  If `doFetch` is false, then this call will only fire the completion
