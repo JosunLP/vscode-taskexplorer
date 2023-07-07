@@ -44,7 +44,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        this.wrapper.log.methodStart("treemgr: construct task tree manager", 1, "   ");
+        this.wrapper.log.methodStart("construct task tree manager", 1, "   ");
 
         this._tasks = [];
         this._npmScriptsHash = {};
@@ -81,7 +81,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             registerCommand(wrapper.keys.Commands.Refresh, this.refresh, this)
         ];
 
-        this.wrapper.log.methodDone("treemgr: construct task tree manager", 1, "   ");
+        this.wrapper.log.methodDone("construct task tree manager", 1, "   ");
     }
 
     dispose = () => { this._tasks.splice(0); this._disposables.splice(0).forEach(d => d.dispose()); };
@@ -129,7 +129,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             excludesList = "exclude";
         const pathValues: string[] = [];
 
-        this.wrapper.log.methodStart("treemgr: add to excludes", 1, "", true, [[ "global", global ]]);
+        this.wrapper.log.methodStart("add to excludes", 1, "", true, [[ "global", global ]]);
 
         if (selection instanceof TaskFile)
         {
@@ -161,14 +161,14 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 pathValues.push(selection.task.name);
             }
         }
-
+        //
+        // Update `excludes` configuration value and refresh tree(s) for the relavant task source
+        //
         this._configWatcher.enableConfigWatcher(false);
         await addToExcludes(pathValues, excludesList, "   ");
         this._configWatcher.enableConfigWatcher(true);
-
         await this.refresh(selection.taskSource, uri, "   ");
-
-        this.wrapper.log.methodDone("treemgr: add to excludes", 1);
+        this.wrapper.log.methodDone("add to excludes", 1);
     };
 
 
@@ -197,10 +197,10 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    private doTaskCacheRemovals = (invalidation: string, logPad: string): void =>
+    private clearCachedTasks = (source: string, logPad: string): void =>
     {
         let ctRmv = 0;
-        this.wrapper.log.methodStart("treemgr: do task cache removals", 2, logPad);
+        this.wrapper.log.methodStart("do task cache removals", 2, logPad);
         this._tasks.slice().reverse().forEach((item, index, object) => // niftiest loop ever
         {   //
             // Note that requesting a task type can return Workspace tasks (tasks.json/vscode)
@@ -208,25 +208,27 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             // Remove any Workspace type tasks returned as well, in this case the source type is
             // != _currentInvalidation, but the definition type == _currentInvalidation
             //
-            if (item.source === invalidation || (item.source === "Workspace" && item.definition.type === invalidation))
+            if (item.source === source || (item.source === "Workspace" && item.definition.type === source))
             {
                 this._tasks.splice(object.length - 1 - index, 1);
                 this.wrapper.log.write(`      removed task '${item.source}/${item.name}'`, 3, logPad);
                 ++ctRmv;
             }
         });
-        this.wrapper.log.write(`   removed ${ctRmv} ${invalidation} current tasks from cache`, 2, logPad);
-        this.wrapper.log.methodDone("treemgr: do task cache removals", 2, logPad);
+        this.wrapper.log.write(`   removed ${ctRmv} ${source} current tasks from cache`, 2, logPad);
+        this.wrapper.log.methodDone("do task cache removals", 2, logPad);
     };
 
 
     private fetchTasks = async(logPad: string): Promise<void> =>
     {
         let taskItems;
-        const inv = this._currentInvalidation,
-              zeroTasksToStart = this._tasks.length === 0;
+        const source = this._currentInvalidation,
+              zeroTasksToStart = this._tasks.length === 0,
+              licMgr = this.wrapper.licenseManager,
+              maxTasks = licMgr.getMaxNumberOfTasks();
         this.wrapper.log.methodStart("fetch tasks", 1, logPad);
-        if (zeroTasksToStart || !inv)
+        if (zeroTasksToStart || !source)
         {
             this.wrapper.log.write("   fetching all tasks via VSCode fetchTasks call", 1, logPad);
             this.wrapper.statusBar.update("Requesting all tasks from all providers");
@@ -236,25 +238,25 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         }     //
         else // inv guaranteed to be a string (task type) here
         {   //
-            const taskName = this.wrapper.taskUtils.getTaskTypeFriendlyName(inv);
+            const taskName = this.wrapper.taskUtils.getTaskTypeFriendlyName(source);
             this.wrapper.log.write(`   fetching ${taskName} tasks via VSCode fetchTasks call`, 1, logPad);
             this.wrapper.statusBar.update("Requesting  tasks from " + taskName + " task provider");
             //
             // Request all tasks of type 'this._currentInvalidation'.  Workspace type tasks can be of
             // any task type, so in case of Ws task invalidation, request all tasks from all providers
             //
-            if (inv === "Workspace") {
-                taskItems = (await vscTasks.fetchTasks()).filter(t => t.source === inv);
+            if (source === "Workspace") {
+                taskItems = (await vscTasks.fetchTasks()).filter(t => t.source === source);
             }
             else {
-                taskItems = await vscTasks.fetchTasks({ type: inv !== "tsc" ? inv : "typescript" });
+                taskItems = await vscTasks.fetchTasks({ type: source !== "tsc" ? source : "typescript" });
             }
             //
             // Process the tasks cache array for any removals that might need to be made, e.g. remove
             // tasks that already existed that were just re-parsed
             //
-            this.doTaskCacheRemovals(inv, logPad);
-            this.wrapper.log.write(`   adding ${taskItems.length} new ${inv} tasks`, 2, logPad);
+            this.clearCachedTasks(source, logPad);
+            this.wrapper.log.write(`   adding ${taskItems.length} new ${source} tasks`, 2, logPad);
         }
         //
         // Cache the requested tasks
@@ -273,14 +275,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // we have to query the entire workspace for npm tasks to get changes.  TODO is srtill to write
         // an internal NPM task provider like I did for Grunt and Gulp.
         //
-        if (zeroTasksToStart || !inv || inv === "npm") {
+        if (zeroTasksToStart || !source || source === "npm") {
             this.hashNpmScripts();
         }
         //
         // Check License Manager for any task count restrictions
         //
-        const licMgr = this.wrapper.licenseManager,
-              maxTasks = licMgr.getMaxNumberOfTasks();
         if (this._tasks.length > maxTasks)
         {
             let ctRmv = 0;
@@ -329,21 +329,14 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
 
     private handleRebuildEvent = async(invalidate: string | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
-    {   //
-        // The file cache only needs to update once on any change, since this will get called through
-        // twice if both the Explorer and Sidebar Views are enabled, do a lil check here to make sure
-        // we don't double scan for nothing.
-        //
-        this.wrapper.log.methodStart("treemgr: handle tree rebuild event", 1, logPad);
+    {
+        this.wrapper.log.methodStart("handle tree rebuild event", 1, logPad);
         if (invalidate === undefined && opt === undefined) // i.e. refresh button was clicked
         {
-            this.wrapper.log.write("   handling 'rebuild cache' event", 1, logPad + "   ");
             await this.wrapper.fileCache.rebuildCache(logPad + "   ");
-            this.wrapper.log.write("   handling 'rebuild cache' event complete", 1, logPad + "   ");
         }
-        this.wrapper.log.write("   handling 'invalidate tasks cache' event", 1, logPad);
         await this.invalidateTasksCache(invalidate, opt, logPad + "   ");
-        this.wrapper.log.methodDone("treemgr: handle tree rebuild event", 1, logPad);
+        this.wrapper.log.methodDone("handle tree rebuild event", 1, logPad);
     };
 
 
@@ -375,15 +368,13 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         const count = this._tasks.length,
               firstTreeBuildDone = this._firstTreeBuildDone;
         this._refreshPending = true;
-        this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
         try
         {   if (doFetch)
             {
+                this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
                 await this.fetchTasks(logPad);
-                if (!firstTreeBuildDone) {
-                    this.setMessage(this.wrapper.keys.Strings.BuildingTaskTree);
-                }
-                await this._treeBuilder.createTaskItemTree(true /* count > this._tasks.length*/, logPad + "   ");
+                this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.BuildingTaskTree : undefined);
+                await this._treeBuilder.createTaskItemTree(count !== this._tasks.length || doFetch, logPad + "   ");
                 Object.values(this._specialFolders).forEach(f => f.build(logPad + "   "));
                 await this.setContext();
             }
@@ -442,7 +433,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      *     "Workspace"
      * @param opt2 The uri of the file that contains/owns the task
      */
-    private invalidateTasksCache = async(opt1?: string, opt2?: Uri | boolean, logPad?: string) =>
+    private invalidateTasksCache = async(opt1: string | undefined, opt2: Uri | false | undefined, logPad: string) =>
     {
         const w = this.wrapper;
         w.log.methodStart("invalidate tasks cache", 1, logPad, false, [
@@ -481,38 +472,25 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     {
         const w = this.wrapper,
               tasks = this._tasks,
-              taskMap = this._treeBuilder.taskMap,
               taskFolders = this._treeBuilder.taskFolders;
-
-        w.log.methodStart("treemgr: workspace folder removed event", 1, logPad, false, [[ "path", uri.fsPath ]]);
-        w.log.write("   removing project tasks from cache", 1, logPad);
-        w.log.values(1, logPad + "   ", [
-            [ "current # of tasks", tasks.length ], [ "current # of tree folders", taskFolders.length ],
-            [ "project path removed", uri.fsPath ]
+        w.log.methodStart("workspace folder removed", 1, logPad, false, [
+            [ "path", uri.fsPath ], [ "current # of tasks", tasks.length ],
+            [ "current # of tree folders", taskFolders.length ], [ "project path removed", uri.fsPath ]
         ]);
         w.statusBar.update("Deleting all tasks from removed project folder");
-
         const removed = this.wrapper.utils.popIfExistsBy(tasks,
-            (t) => t.definition.uri && t.definition.uri.fsPath.startsWith(uri.fsPath),
-            this
+            (t) => !!t.definition.uri && t.definition.uri.fsPath.startsWith(uri.fsPath), this
         );
-
-        this.wrapper.utils.popObjIfExistsBy(taskMap,
-            (_k, i) => !!i && (i.resourceUri?.fsPath.startsWith(uri.fsPath) || i.taskFile.resourceUri.fsPath.startsWith(uri.fsPath)),
-            this
+        this.wrapper.utils.popObjIfExistsBy(this._treeBuilder.taskMap,
+            (_k, i) => !!i && (i.resourceUri?.fsPath.startsWith(uri.fsPath) || i.taskFile.resourceUri.fsPath.startsWith(uri.fsPath)), this
         );
-
         this.wrapper.utils.popIfExistsBy(taskFolders, f => f.resourceUri?.fsPath === uri.fsPath, this, true);
-
-        w.log.write(`   removed ${removed.length} tasks from task cache`, 1, logPad);
-        w.log.values(1, logPad + "   ", [
-            [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskFolders.length ]
-        ]);
-
         w.statusBar.update("");
         this._refreshPending = false;
         this.fireTreeRefreshEvent(null, null, logPad + "   ");
-        w.log.methodDone("treemgr: workspace folder removed event", 1, logPad);
+        w.log.methodDone("workspace folder removed", 1, logPad,  [
+            [ "# removed", removed.length ], [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskFolders.length ]
+        ]);
     };
 
 
@@ -576,8 +554,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         await this.waitForRefreshComplete();
         this._refreshPending = true;
-
-        w.log.methodStart("treemgr: refresh task tree", 1, logPad, logPad === "", [
+        w.log.methodStart("refresh task tree", 1, logPad, logPad === "", [
             [ "invalidate", invalidate ], [ "opt fsPath", isOptUri ? opt.fsPath : "n/a" ]
         ]);
 
@@ -669,22 +646,19 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             await this.loadTasks(doFetch, logPad + "   ");
         }
 
-        w.log.methodDone("treemgr: refresh task tree", 1, logPad);
+        w.log.methodDone("refresh task tree", 1, logPad);
     };
 
 
     private setContext = async (): Promise<void> =>
     {
-        const taskTypeProcessed: string[] = [],
-              scriptFilesWithArgs: string[] = [],
-              taskMap = Object.values(this._treeBuilder.taskMap).filter(i => !!i);
+        const scriptFilesWithArgs: string[] = [],
+              taskMap = Object.values(this._treeBuilder.taskMap);
         for (const taskItem of taskMap)
         {
-            const task = taskItem.task;
-            if (task.definition.takesArgs && taskItem.resourceUri) {
+            if (taskItem.task.definition.takesArgs && taskItem.resourceUri) {
                 scriptFilesWithArgs.push(taskItem.resourceUri.fsPath);
             }
-            this.wrapper.utils.pushIfNotExists(taskTypeProcessed, task.source);
         }
         scriptFilesWithArgs.sort();
         await this.wrapper.contextTe.setContext(`${this.wrapper.keys.Context.TasksPrefix}scriptFilesWithArgs`, scriptFilesWithArgs);

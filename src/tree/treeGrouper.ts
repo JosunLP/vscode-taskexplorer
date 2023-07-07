@@ -17,8 +17,7 @@ export class TaskTreeGrouper
 
     buildGroupings = async(folders: TaskMap<TaskFolder|SpecialTaskFolder>, taskFileMap: TaskMap<TaskFile>, logPad: string) =>
     {
-        const w = this.wrapper,
-              hash: TaskMap<TaskFile> = {};
+        const w = this.wrapper;
         this._groupSeparator = w.config.get<string>(w.keys.Config.GroupSeparator);
         this._groupWithSeparator = w.config.get<boolean>(w.keys.Config.GroupWithSeperator);
         w.log.methodStart("build tree node groupings", 3, logPad, false, [[ "group withseparator", this._groupWithSeparator ]]);
@@ -36,7 +35,7 @@ export class TaskTreeGrouper
             //
             // Create groupings by task type
             //
-            await w.utils.execIf2(this._groupWithSeparator, this.createTaskGroupings, this, null, folder, taskFileMap, logPad + "   ");
+            await w.utils.execIf2(this._groupWithSeparator, this.createTaskGroups, this, null, folder, taskFileMap, logPad + "   ");
         }
 
         w.log.methodDone("build tree node groupings", 3, logPad);
@@ -47,7 +46,7 @@ export class TaskTreeGrouper
      * @method createTaskGroupings
      * @since 1.28.0
      */
-    private createTaskGroupings = async(folder: TaskFolder, hash: TaskMap<TaskFile>, logPad: string) =>
+    private createTaskGroups = async(folder: TaskFolder, hash: TaskMap<TaskFile>, logPad: string) =>
     {
         let prevTaskFile: TaskItem | TaskFile | undefined;
         // const taskFiles = folder.taskFiles.splice(0).filter((t): t is TaskFile => this.isTaskFile(t))
@@ -55,10 +54,10 @@ export class TaskTreeGrouper
         const taskFiles = folder.taskFiles.filter((t): t is TaskFile => this.isTaskFile(t));
         this.wrapper.log.methodStart("create tree node folder grouping", 3, logPad, true, [[ "project folder", folder.label ]]);
         //
-        // Clear hash map
+        // Clear all items in this folder from the taskfile hash map
         //
-        hash = {};
-        const groupingHash: TaskMap<TaskFile> = hash; // {};
+        // hash = {};
+        Object.keys(hash).filter(k => k.startsWith(`${folder.id}:`)).forEach(k => delete hash[k]);
         //
         // Guaranteed to be TaskFile, only SpecialFolder can have TaskItems, TaskFolder cannot
         //
@@ -74,40 +73,39 @@ export class TaskTreeGrouper
                 // const groupId = TaskFile.groupId(folder, taskFile, 0),
                 //       id = TaskFile.getId(folder, taskFile.task, undefined, 0, groupId);
 // ************************************************************************************************
-                let subfolder: TaskFile | undefined = groupingHash[id];
+                let subfolder: TaskFile | undefined = hash[id];
                 if (!subfolder)
                 {
                     this.wrapper.log.values(3, logPad, [
                         [ "add source file sub-container", taskFile.relativePath ], [ "id", id ]
                     ]);
                     const node = taskFile.treeNodes[0];
-                    this.wrapper.utils.execIf(node instanceof TaskItem, (_v, n, p) =>
+                    this.wrapper.utils.execIf2(this.isTaskItem(node), (n, p) =>
                     {
-                        subfolder = new TaskFile(folder, n.task, taskFile.relativePath, 0, id, n.task.source, "   ");
-                        groupingHash[id] = subfolder;
-                        folder.addChild(subfolder);
+                        subfolder = hash[id] = folder.addChild(new TaskFile(folder, n.task, taskFile.relativePath, 0, id, n.task.source, "   "));
                         //
                         // Since we add the grouping when we find two or more equal group names, we are iterating
                         // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the
                         // new group just created
                         //
-                        subfolder.addChild(p); // will set the group level on the TaskItem
-                    }, this, null, <TaskItem>node, prevTaskFile);
+                        subfolder.addChild(p); // will reset the group level on the TaskItem
+                    },
+                    this, null, <TaskItem>node, prevTaskFile);
                 }
                 subfolder.addChild(taskFile);
             }
-            prevTaskFile = taskFile;
+            prevTaskFile = hash[taskFile.id] = taskFile;
             //
-            // Create the grouping
+            // Continue sub-grouping by breaking down any tasks containing `groupSeparator`
             //
-            await this.createTaskGroupingsBySep(folder, taskFile, groupingHash, 0, logPad + "   ");
+            await this.groupByBySep(folder, taskFile, hash, 0, logPad + "   ");
         }
         //
         // For groupings with separator, when building the task tree, when tasks are grouped new task definitions
         // are created but the old task remains in the parent folder.  Remove all tasks that have been moved down
         // into the tree hierarchy due to groupings
         //
-        this.removeGroupedTasks(folder, groupingHash, logPad + "   ");
+        this.removeGroupedTasks(folder, hash, logPad + "   ");
         //
         // For groupings with separator, now go through and rename the labels within each group minus the
         // first part of the name split by the separator character (the name of the new grouped-with-separator node)
@@ -117,10 +115,6 @@ export class TaskTreeGrouper
         {
             await this.renameGroupedTasks(tf);
         }
-        //
-        // Apply this project folder's grouping hash to the main hash
-        //
-        // Object.assign(hash, groupingHash);
         //
         // Resort after making adds/removes
         //
@@ -137,62 +131,60 @@ export class TaskTreeGrouper
      *
      *  For example, consider the set of task names/labels:
      *
-     *      build-prod
-     *      build-dev
-     *      build-server-dev
-     *      build-server-prod
-     *      build-sass
+     *     build-prod
+     *     build-dev
+     *     build-server-dev
+     *     build-server-prod
+     *     build-sass
      *
      * If the option 'groupWithSeparator' is ON and 'groupSeparator' is set, then group this set of tasks.
      * By default the hierarchy would look like:
      *
-     *      build
-     *          prod
-     *          dev
-     *          server-dev
-     *          server-prod
-     *          sass
+     *     build
+     *       rod
+     *       dev
+     *       server-dev
+     *       server-prod
+     *       sass
      *
      * If 'groupMaxLevel' is > 1 (default), then the hierarchy continues to be broken down until the max
      * nesting level is reached.  The example above, with 'groupMaxLevel' set > 1, would look like:
      *
-     *      build
-     *          prod
-     *          dev
-     *          server
-     *             dev
-     *             prod
-     *          sass
-     *
-     * @param folder The base task folder
-     * @param each  Task file to process
-     * @param prevTaskFile Previous task file processed
-     * @param subfolders Tree taskfile map
-     * @param groupSeparator The group separator
+     *     build
+     *       prod
+     *       dev
+     *       server
+     *         dev
+     *         prod
+     *       sass
      */
-    private createTaskGroupingsBySep = async(folder: TaskFolder, taskFile: TaskFile, files: TaskMap<TaskFile>, treeLevel: number, logPad: string) =>
+    private groupByBySep = async(folder: TaskFolder, taskFile: TaskFile, hash: TaskMap<TaskFile>, treeLevel: number, logPad: string) =>
     {
         const w = this.wrapper,
               newNodes: TaskFile[] = [],
               atMaxLevel: boolean = w.config.get<number>(w.keys.Config.GroupMaxLevel) <= treeLevel + 1;
-
         let prevName: string[] | undefined,
             prevTaskItem: TaskItem | undefined;
-
+        //
         w.log.methodStart("create task groupings by separator", 3, logPad, true, [
-            [ "folder", folder.label ], [ "label (node name)", taskFile.label ], [ "grouping level", treeLevel ], [ "is group", taskFile.isGroup ],
-            [ "file name", taskFile.fileName ], [ "folder", folder.label ], [ "path", taskFile.relativePath ], [ "tree level", treeLevel ]
+            [ "folder", folder.label ], [ "label (node name)", taskFile.label ], [ "grouping level", treeLevel ],
+            [ "is group", taskFile.isGroup ], [ "file name", taskFile.fileName ], [ "folder", folder.label ],
+            [ "path", taskFile.relativePath ], [ "tree level", treeLevel ], [ "sep", this._groupSeparator ]
         ]);
-
-        for (const each of taskFile.treeNodes.filter((n): n is TaskItem => !!n && n instanceof TaskItem && !!n.task && !!n.label))
+        //
+        // Loop through all items of type `TaskItem` and break down into taskfile groups if
+        // the taskitem label contains the `groupSeparator` character
+        //
+        for (const taskItem of taskFile.treeNodes.filter((n): n is TaskItem => this.isTaskItem(n)))
         {
             let subfolder: TaskFile | undefined;
-            const prevNameThis = this.splitLabel(each.label, this._groupSeparator, each),
+            const prevNameThis = this.splitLabel(taskItem.label, this._groupSeparator, taskItem),
                   prevNameOk = prevName && prevName.length > treeLevel && prevName[treeLevel];
-
-            w.log.write("   process task item", 4, logPad);
+            //
+            w.log.write("   process taskitem grouping by separator", 5, logPad);
             w.log.values(5, logPad + "      ", [
-                [ "id", each.id ], [ "label", each.label ], [ "command", each.command.command ], [ "this previous name", prevNameThis ],
+                [ "id", taskItem.id ], [ "label", taskItem.label ], [ "sep", this._groupSeparator ],
+                [ "command", taskItem.command.command ], [ "this previous name", prevNameThis ],
                 [ "previous name [tree level]", prevName && prevNameOk ? prevName[treeLevel] : "undefined" ]
             ]);
             //
@@ -214,7 +206,9 @@ export class TaskTreeGrouper
                     }
                 }
             }
-
+            //
+            // Group with previous taskfile if necessary
+            //
             if (prevTaskItem && foundGroup && prevName)
             {   //
                 // We found a pair of tasks that need to be grouped.  i.e. the first part of the label
@@ -225,9 +219,9 @@ export class TaskTreeGrouper
                 //      id = TaskFile.getId(folder, each.task, label, treeLevel, groupId);
 // ************************************************************************************************
                 // const id = TaskFile.groupId(folder, taskFile, treeLevel);
-                const id = TaskFile.groupId(folder, taskFile.resourceUri.fsPath, each.taskSource, each.label, treeLevel);
+                const id = TaskFile.groupId(folder, taskFile.resourceUri.fsPath, taskItem.taskSource, taskItem.label, treeLevel);
 // ************************************************************************************************
-                subfolder = files[id];
+                subfolder = hash[id];
                 if (!subfolder)
                 {   //
                     // Create the new node, add it to the list of nodes to add to the tree.  We must
@@ -235,8 +229,8 @@ export class TaskTreeGrouper
                     // added to
                     //
                     w.log.value("   add grouped taskfile node", prevName[treeLevel], 4, logPad);
-                    subfolder = new TaskFile(folder, each.task, each.taskFile.relativePath, treeLevel, id, prevName[treeLevel], logPad);
-                    files[id] = subfolder;
+                    subfolder = new TaskFile(folder, taskItem.task, taskItem.taskFile.relativePath, treeLevel, id, prevName[treeLevel], logPad);
+                    hash[id] = subfolder;
                     //
                     // Since we add the grouping when we find two or more equal group names, we are iterating
                     // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the
@@ -245,15 +239,13 @@ export class TaskTreeGrouper
                     subfolder.addChild(prevTaskItem); // will set the group level on the TaskItem
                     newNodes.push(subfolder);
                 }
-                subfolder.addChild(each); // will set the group level on the TaskItem
+                subfolder.addChild(taskItem); // will set the group level on the TaskItem
             }
-
-            if (each.label.includes(this._groupSeparator)) {
-                prevName = each.label.split(this._groupSeparator);
+            if (taskItem.label.includes(this._groupSeparator)) {
+                prevName = taskItem.label.split(this._groupSeparator);
             }
-            prevTaskItem = each;
+            prevTaskItem = taskItem;
         }
-
         //
         // If there are new grouped by separator nodes to add to the tree...
         //
@@ -263,12 +255,9 @@ export class TaskTreeGrouper
             for (const n of newNodes)
             {
                 taskFile.addChild(n, numGrouped++);
-                await w.utils.execIf(!atMaxLevel,
-                    () => this.createTaskGroupingsBySep(folder, n, files, treeLevel + 1, logPad + "   "),
-                this);
+                await w.utils.execIf2(!atMaxLevel, this.groupByBySep, this, null, folder, n, hash, treeLevel + 1, logPad + "   ");
             }
         }
-
         w.log.methodDone("create task groupings by separator", 4, logPad);
     };
 
@@ -276,26 +265,28 @@ export class TaskTreeGrouper
     private isTaskFile = (t: any): t is TaskFile => t instanceof TaskFile;
 
 
-    private removeGroupedTasks = (folder: TaskFolder, files: TaskMap<TaskFile>, logPad: string) =>
+    private isTaskItem = (t: any): t is TaskItem  => t instanceof TaskItem ;
+
+
+    private removeGroupedTasks = (folder: TaskFolder, hash: TaskMap<TaskFile>, logPad: string) =>
     {
         const taskTypesRmv: TaskFile[] = [];
-
         this.wrapper.log.methodStart("remove grouped tasks", 4, logPad);
-
-        for (const taskFile of folder.taskFiles.filter((t): t is TaskFile => this.isTaskFile(t) && !!t.label))
+        //
+        // Loop through all items of type`TaskFile` and remove leftover nodes that re-grouped
+        //
+        for (const taskFile of folder.taskFiles.filter((t): t is TaskFile => this.isTaskFile(t)))
         {
 // ************************************************************************************************
-            // const id = folder.label + taskFile.taskSource,
-            //       id2 = TaskFile.groupId(folder, taskFile, taskFile.groupLevel);
             const taskFileLabel = taskFile.label,
                   id = folder.label + taskFile.taskSource,
                   id2 = TaskFile.groupId(folder, taskFile.resourceUri.fsPath, taskFile.taskSource, taskFileLabel, taskFile.groupLevel);
 
-            if (!taskFile.isGroup && files[id])
+            if (!taskFile.isGroup && hash[id])
             {
                 taskTypesRmv.push(taskFile);
             }
-            else /* istanbul ignore if */if (id2 && !taskFile.isGroup && files[id2])
+            else /* istanbul ignore if */if (id2 && !taskFile.isGroup && hash[id2])
             {
                 taskTypesRmv.push(taskFile);
             }
@@ -315,39 +306,27 @@ export class TaskTreeGrouper
             {
                 for (const node2 of taskFile.treeNodes.filter((n): n is TaskFile => this.isTaskFile(n)))
                 {
-                    this.removeTreeNodes(node2, folder, files, 0, logPad, 5);
+                    this.removeTreeNodes(node2, folder, hash, 0, logPad, 5);
                     /* istanbul ignore next */
                     if (this.isTaskFile(node2) && node2.isGroup && node2.groupLevel > 0)
                     {
                         for (const node3 of node2.treeNodes.filter((n): n is TaskFile => this.isTaskFile(n)))
                         {
-                            this.removeTreeNodes(node3, folder, files, 0, logPad, 5);
+                            this.removeTreeNodes(node3, folder, hash, 0, logPad, 5);
                         }
                     }
                 }
             }
             else {
-                this.removeTreeNodes(taskFile, folder, files, 0, logPad, 5);
+                this.removeTreeNodes(taskFile, folder, hash, 0, logPad, 5);
             }
         }
-        //
-        // Do node removals
-        //
-        taskTypesRmv.forEach((t) => { delete files[t.id]; folder.removeChild(t, logPad + "   "); });
+        taskTypesRmv.forEach((t) => { delete hash[t.id]; folder.removeChild(t, logPad + "   "); });
         this.wrapper.log.methodDone("remove grouped tasks", 4, logPad);
     };
 
 
-    /**
-     * Perform some removal based on groupings with separator.  The nodes added within the new
-     * group nodes need to be removed from the old parent node still...
-     *
-     * @param taskFile TaskFile instance to remove tasks from
-     * @param folder Project task folder
-     * @param subfolders Current tree subfolders map
-     * @param level Current grouping level
-     */
-    private removeTreeNodes = (taskFile: TaskFile, folder: TaskFolder, files: TaskMap<TaskFile>, level: number, logPad: string, logLevel: number) =>
+    private removeTreeNodes = (taskFile: TaskFile, folder: TaskFolder, hash: TaskMap<TaskFile>, level: number, logPad: string, logLevel: number) =>
     {
         const me = this,
               taskTypesRmv: (TaskFile | TaskItem)[] = [];
@@ -359,7 +338,7 @@ export class TaskTreeGrouper
             const labelParts = each.label.split(this._groupSeparator),
                   labelPart = labelParts[level];
 
-            if (each instanceof TaskItem)
+            if (this.isTaskItem(each))
             {
 // ************************************************************************************************
                 // const id = TaskFile.groupId(folder, taskFile, level);
@@ -370,7 +349,7 @@ export class TaskTreeGrouper
 // ************************************************************************************************
                 // const groupId = TaskFile.groupId(folder, taskFile, label, level),
                 //       id = TaskFile.getId(folder, each.task, label, level, groupId);
-                if (labelParts.length > 1 && labelPart && files[id]) {
+                if (labelParts.length > 1 && labelPart && hash[id]) {
                     taskTypesRmv.push(each);
                 }
             }
@@ -379,17 +358,15 @@ export class TaskTreeGrouper
                 let allTasks = false;
                 for (const each2 of each.treeNodes)
                 {
-                    allTasks = each2 instanceof TaskItem;
+                    allTasks = this.isTaskItem(each2);
                     if (each2 instanceof TaskFile) { break; }
                 }
                 if (!allTasks) {
-                    me.removeTreeNodes(each, folder, files, level + 1, logPad, logLevel + 1);
+                    me.removeTreeNodes(each, folder, hash, level + 1, logPad, logLevel + 1);
                 }
             }
         }
-
         taskTypesRmv.forEach(t => taskFile.removeChild(t));
-
         this.wrapper.log.methodDone("remove tree nodes", logLevel, logPad);
     };
 
@@ -407,7 +384,7 @@ export class TaskTreeGrouper
 
         for (const each2 of taskFile.treeNodes.filter(n => !!n.label))
         {
-            if (each2 instanceof TaskItem)
+            if (this.isTaskItem(each2))
             {
                 const rgx = new RegExp(rmvLbl + groupSeparator, "i");
                 each2.label = each2.label.replace(rgx, "");
