@@ -100,6 +100,7 @@ export class TaskWatcher implements Disposable
 
     private async taskStartEvent(e: TaskStartEvent): Promise<void>
     {
+        let taskItem: TaskItem | undefined;
         const taskMap = this.wrapper.treeManager.taskMap,
               taskFolders = this.wrapper.treeManager.taskFolders,
               task = e.execution.task,
@@ -108,31 +109,36 @@ export class TaskWatcher implements Disposable
 
         this.wrapper.log.methodStart("task started event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 
+        if (task.source === "Workspace" && !treeId)
+        {
+            taskItem = Object.values(taskMap).find((t): t is TaskItem => t.taskSource === "Workspace" && t.task.definition.type === task.definition.type);
+        }
         //
         // If taskMap is empty, then this view has not yet been made visible, an there's nothing
         // to update.  The `taskTree` property should also be null.  We could probably do this
         // before the timer check above, but hey, just in case taskMap goes empty between events
         // for some un4seen reason.
         //
-        if (isMapEmpty || !taskMap[treeId])
+        else if (!treeId || isMapEmpty || !taskMap[treeId])
         {
             /* istanbul ignore next */
             if (taskFolders && !taskMap[treeId] && taskFolders.length > 0 && this.wrapper.treeManager.getMessage() !== this.wrapper.keys.Strings.NoTasks)
             {
-                if (task.source === "npm" && task.definition.type === "npm" &&
-                (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit")))
+                if (!(task.source === "npm" && task.definition.type === "npm" &&
+                     (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit"))))
                 {
-                    return;
+                    this.wrapper.log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
+                        `the task tree is non-null and holds ${taskFolders.length} folders (task start event)`,
+                    [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
+                     [ "task source", task.source ], [ "task type", task.definition.type ]]);
                 }
-                this.wrapper.log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
-                                       `the task tree is non-null and holds ${taskFolders.length} folders (task start event)`,
-                                       [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
-                                       [ "task source", task.source ], [ "task type", task.definition.type ]]);
             }
         }
-        else
-        {
-            const taskItem = taskMap[treeId] as TaskItem;
+        else {
+            taskItem = <TaskItem>taskMap[treeId];
+        }
+
+        if (taskItem) {
             this.showStatusMessage(task, "   ");
             this.fireTaskChangeEvents(taskItem, true, "   ");
         }
@@ -143,6 +149,7 @@ export class TaskWatcher implements Disposable
 
     private async taskFinishedEvent(e: TaskEndEvent): Promise<void>
     {
+        let taskItem: TaskItem | undefined;
         const taskMap = this.wrapper.treeManager.taskMap,
               taskFolders = this.wrapper.treeManager.taskFolders,
               task = e.execution.task,
@@ -153,6 +160,12 @@ export class TaskWatcher implements Disposable
 
         this.showStatusMessage(task, "  "); // hides
 
+        if (task.source === "Workspace" && !treeId)
+        {
+            taskItem = Object.values(taskMap).find(
+                (t): t is TaskItem => t.taskSource === "Workspace" && t.task.definition.type === task.definition.type && t.task.name === task.name
+            );
+        }
         //
         // If taskMap is empty, then this view has not yet been made visible or an event fired
         // that caused the tree to refresh (e.g. when tests end and the package.json file is
@@ -162,24 +175,26 @@ export class TaskWatcher implements Disposable
         // the Explorer and SideBar views are enabled, but the sidebar hasn't received a visible
         // event yet, i.e. it hasn't been opened yet by the user.
         //
-        if (isMapEmpty || !taskMap[treeId])
+        else if (!treeId || isMapEmpty || !taskMap[treeId])
         {
             /* istanbul ignore next */
             if (taskFolders && !taskMap[treeId] && taskFolders.length > 0 && taskFolders[0].contextValue !== "noscripts")
             {
-                if (task.source === "npm" && task.definition.type === "npm" &&
-                (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit")))
+                if (!(task.source === "npm" && task.definition.type === "npm" &&
+                     (task.name === "build" || task.name === "install" || task.name === "watch" || task.name.startsWith("update")  || task.name.startsWith("audit"))))
                 {
-                    return;
+                    this.wrapper.log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
+                    `the task tree is non-null and holds ${taskFolders.length} folders (task start event)`,
+                    [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
+                     [ "task source", task.source ], [ "task type", task.definition.type ]]);
                 }
-                this.wrapper.log.error(`The task map is ${isMapEmpty ? "empty" : "missing the running task"} but ` +
-                                       `the task tree is non-null and holds ${taskFolders.length} folders (task start event)`,
-                                       [[ "# of tasks in task map", Object.keys(taskMap).length ], [ "task name", task.name ],
-                                       [ "task source", task.source ], [ "task type", task.definition.type ]]);
             }
         }
         else {
-            const taskItem = taskMap[treeId] as TaskItem;
+            taskItem = <TaskItem>taskMap[treeId];
+        }
+
+        if (taskItem) {
             this.fireTaskChangeEvents(taskItem, false, "   ");
         }
 
