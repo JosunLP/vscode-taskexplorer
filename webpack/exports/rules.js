@@ -120,6 +120,7 @@ const rules = (env, wpConfig) =>
 			// to just over 380k (compressed).  Over half.  Smh.
 			//
 			test: /tools\.js$/,
+			// test: /(tools|table)\.js$/,
 			include: path.join(env.buildPath, "node_modules", "@sgarciac", "bombadil", "lib"),
 			loader: "string-replace-loader",
 			options: {
@@ -131,6 +132,14 @@ const rules = (env, wpConfig) =>
 				{
 					search: "return moment",
 					replace: "return new Date"
+				// },
+				// {
+				// 	search: "var l = require(\"./lexer\");",
+				// 	replace: ""
+				// },
+				// {
+				// 	search: "var l = require(\"./lexer\");",
+				// 	replace: "export interface ILexingError { offset: number line: number column: number length: number message: string }"
 				}]
 			}
 		},

@@ -2,6 +2,7 @@
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
 import { TomlReader } from "@sgarciac/bombadil";
+// import { TomlReader } from "./vendor/TomlReader";
 import { ITaskDefinition } from "../../interface";
 import { TaskExplorerProvider } from "./provider";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
@@ -22,27 +23,24 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
         let pythonPath = pipenv;
 
         /* istanbul ignore else */
-        if (pipenv === "pipenv")
+        this.wrapper.utils.execIf(pipenv === "pipenv", () =>
         {   //
             // If the user didn't explicitly set a pathToPrograms.pipenv (meaning it is the default value),
             // then use the python path from the environment to run pipenv as a module. This way it
             // has the best chance of using the correct Python environment (virtual, global,...)
             //
             pythonPath = workspace.getConfiguration("python").get("pythonPath", "python");
-        }
+        }, this);
 
-        const def = this.getDefaultDefinition(target, folder, uri);
-        const cwd = dirname(uri.fsPath);
-        const args = [ "run", target ];
-        /* istanbul ignore else */
-        if (pythonPath)
-        {   //
-            // If using python path, run pipenv as a module
-            //
-            args.unshift(...[ "-m", "pipenv" ]);
-        }
-        const options: ShellExecutionOptions = { cwd };
-        const execution = new ShellExecution(pythonPath, args, options);
+        const def = this.getDefaultDefinition(target, folder, uri),
+              cwd = dirname(uri.fsPath),
+              args = [ "run", target ];
+        //
+        // If using python path, run pipenv as a module
+        //
+        this.wrapper.utils.execIf(pythonPath, () => args.unshift(...[ "-m", "pipenv" ]), this);
+        const options: ShellExecutionOptions = { cwd },
+              execution = new ShellExecution(pythonPath, args, options);
 
         return new Task(def, folder, target, "pipenv", execution, "$msCompile");
     }
