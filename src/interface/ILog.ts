@@ -1,5 +1,6 @@
+
+import { IDictionary } from ":types";
 import { OutputChannel } from "vscode";
-import { IDictionary } from "./IDictionary";
 
 export interface ILogControl
 {
