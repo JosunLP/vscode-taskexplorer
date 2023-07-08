@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { ILog } from "./ILog";
+import { IDictionary } from ":types";
 import { ITeWebview } from "./ITeWebview";
 import { ITeFigures } from "./ITeFigures";
-import { IDictionary } from ":types";
 import { IEventQueue } from "./IEventQueue";
 import { ITeStatusBar } from "./ITeStatusBar";
 import { ITeFileCache } from "./ITeFileCache";
