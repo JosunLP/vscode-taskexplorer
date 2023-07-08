@@ -1376,10 +1376,20 @@
 						"default": "-",
 						"description": "%config.taskexplorer.groupSeparator%"
 					},
+					"taskexplorer.groupScripts": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "%config.taskexplorer.groupScripts%"
+					},
+					"taskexplorer.groupStripScriptLabel": {
+						"type": "boolean",
+						"default": false,
+						"markdownDescription": "%config.taskexplorer.groupStripScriptLabel%"
+					},
 					"taskexplorer.groupStripTaskLabel": {
 						"type": "boolean",
 						"default": true,
-						"description": "%config.taskexplorer.groupStripTaskLabel%"
+						"markdownDescription": "%config.taskexplorer.groupStripTaskLabel%"
 					},
 					"taskexplorer.groupMaxLevel": {
 						"type": "number",

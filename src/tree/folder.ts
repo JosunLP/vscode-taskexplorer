@@ -4,7 +4,7 @@ import { TaskFile } from "./file";
 import { encodeUtf8Hex } from ":env/hex";
 import { ITaskFolder, OneOf } from "../interface";
 import { isString } from "../lib/utils/typeUtils";
-import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "vscode";
+import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, WorkspaceFolder } from "vscode";
 
 
 /**
@@ -15,8 +15,9 @@ import { ThemeIcon, TreeItem, TreeItemCollapsibleState, WorkspaceFolder } from "
  */
 export class TaskFolder extends TreeItem implements ITaskFolder
 {
-    declare label: string;
     override id: string;
+    declare label: string;
+    declare resourceUri: Uri;
 
     readonly isSpecial: boolean;
     readonly taskFiles: (TaskFile|TaskItem)[];

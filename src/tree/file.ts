@@ -244,9 +244,15 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     static groupId = (folder: TaskFolder, fsPath: string, source: string, label: string, groupLevel: number) =>
     {
+        let labelKey = fsPath[groupLevel + 1] + groupLevel;
         const pathKey = fsPath.replace(/\W/gi, ""),
-              labelKey = (label.length > groupLevel ? label.substring(0, groupLevel) : label) + groupLevel;
-        return encodeUtf8Hex(`${folder.label}:${source}${labelKey}:${pathKey}:${groupLevel}`);
+              groupSeparator = getGroupSeparator(),
+              labelSplit = label.split(groupSeparator);
+        for (let i = 0; i <= groupLevel && i < labelSplit.length; i++)
+        {
+            labelKey += labelSplit[i];
+        }
+        return encodeUtf8Hex(`${folder.label}:${source}:${labelKey}:${pathKey}:${groupLevel}`);
     };
 
 

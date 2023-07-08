@@ -34,31 +34,33 @@
 	"config.taskexplorer.enableWebpack": "Webpack",
 	"config.taskexplorer.enableWorkspace": "VSCode",
 
-	"config.taskexplorer.environment": "Configure Task Explorer specific environment variable names and values.  Used in specific cases only, e.g. the `Jenkins` task provider.",
+	"config.taskexplorer.environment": "Configure Task Explorer specific environment variable names and values.  Used in specific cases only, e.g. the `Jenkins` task provider",
 
-	"config.taskexplorer.exclude": "Configure `glob` patterns for folders and files that should be excluded from script detection.",
-	"config.taskexplorer.excludeTask": "Configure `regex` patterns for individual tasks that should be excluded from task tree inclusion.",
+	"config.taskexplorer.exclude": "Configure `glob` patterns for folders and files that should be excluded from script detection",
+	"config.taskexplorer.excludeTask": "Configure `regex` patterns for individual tasks that should be excluded from task tree inclusion",
 
-	"config.taskexplorer.globPatternsAnt": "Configure glob patterns for locating Apache `Ant` files not named *b(B)uild.xml*.",
-	"config.taskexplorer.globPatternsBash": "Configure the glob patterns for locating `Bash` scripts without an *.sh* extension.",
+	"config.taskexplorer.globPatternsAnt": "Configure glob patterns for locating Apache `Ant` files not named *b(B)uild.xml.",
+	"config.taskexplorer.globPatternsBash": "Configure the glob patterns for locating `Bash` scripts without an *.sh* extension",
 	"config.taskexplorer.globPatternsNode": "Configure the glob patterns for locating `Node` scripts (js files marked with *#!/usr/bin/env node*)",
 	
-	"config.taskexplorer.groupWithSeparator": "If script names contain the configured separator, break them into grouped nodes according to similar fist parts.",
-	"config.taskexplorer.groupSeparator": "The separator to use when grouping tasks.",
+	"config.taskexplorer.groupWithSeparator": "Group tasks and/or scripts into grouped tree nodes using the configured separatorto obtain the grouping",
+	"config.taskexplorer.groupSeparator": "The separator to use when grouping task and script names.",
 	"config.taskexplorer.groupMaxLevel": "Maximum grouping level (tree node depth) of grouped tasks",
-	"config.taskexplorer.groupStripTaskLabel": "Strip extracted grouping labels from the task name displayed in the tree",
-
+	"config.taskexplorer.groupScripts": "Group script file types using the script file name (i.e. `bash, `python` `powershell`, etc)",
+	"config.taskexplorer.groupStripScriptLabel": "Strip extracted grouping labels from the script name displayed in the tree (scripts types - i.e. `bash, `python` `powershell`, etc)",
+	"config.taskexplorer.groupStripTaskLabel": "Strip extracted grouping labels from the task name displayed in the tree (task / non-script types - i.e. `npm, `gulp` `ant`, etc)",
+	
 	"config.taskexplorer.includeAntDsc": "Configure glob patterns for locating Apache Ant files not named b(B)uild.xml.",
 	"config.taskexplorer.includeAntDeprecated": "Deprecated - Use `#globPatternsAnt#`",
 	"config.taskexplorer.keepTermOnStop": "Keep terminal open when stopping a task.",
 	"config.taskexplorer.trackUsage": "Track application usage. **NOTE:** Disabling this setting will also disable `#taskMonitor.trackStats#`",
 	"config.taskexplorer.allowUsageReporting": "Allow application usage tracking to be submitted to the Task Explorer app server.",
 
-	"config.taskexplorer.logging.enable": "Turn on logging. Log messages are written to either the `Task Explorer` output window or to file, dependent on the `#logging.enableFile#` and `#logging.enableOutputWindow#` settings.",
-	"config.taskexplorer.logging.enableFile": "Enable logging to file (check the output window for location). If `#logging.enable#` is *on*, either writing to file or to the output window should be enabled. Has no effect if `#logging.enabled#` is *off*.",
-	"config.taskexplorer.logging.enableFileSymbols": "Enable decorative and folding (soon) symbols in log file. Has no effect if `#logging.enable#` or `#logging.enableFile#` are *off*.",
-	"config.taskexplorer.logging.enableOutputWindow": "Enable logging to a VSCode output window.  If `#logging.enable#` is *on*, either writing to file or to the output window should be enabled. Has no effect if `#logging.enabled#` is *off*.",
-	"config.taskexplorer.logging.level": "Set log verbosity (1 - Low / 5 - High). Has no effect if `#logging.enable#` is disabled.",
+	"config.taskexplorer.logging.enable": "Enable logging - has no effect if both `#logging.enableOutputWindow#` and `#logging.enableFile#` are not enabled",
+	"config.taskexplorer.logging.enableFile": "Enable logging to file (check the output window for file location) - has no effect if `#logging.enabled#` is *off*",
+	"config.taskexplorer.logging.enableFileSymbols": "Enable decorative and folding (soon) symbols in log file - has no effect if `#logging.enable#` or `#logging.enableFile#` are *off*",
+	"config.taskexplorer.logging.enableOutputWindow": "Enable logging to output window - has no effect if `#logging.enabled#` is *off*",
+	"config.taskexplorer.logging.level": "Set log verbosity (1 - Low / 5 - High) - has no effect if `#logging.enable#` is disabled",
 	
 	"config.taskexplorer.pathToPrograms": "Paths to programs, if not registered in system path",
 	"config.taskexplorer.pathToAnsicon": "Local path to the Ansicon executable",

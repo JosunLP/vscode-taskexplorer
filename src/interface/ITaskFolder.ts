@@ -2,12 +2,13 @@
 import { OneOf } from "./ITeUtilities";
 import { ITaskFile } from "./ITaskFile";
 import { ITaskItem } from "./ITaskItem";
-import { TreeItem, WorkspaceFolder } from "vscode";
+import { TreeItem, Uri, WorkspaceFolder } from "vscode";
 
 export interface ITaskFolder extends TreeItem
 {
     id: string;
     label: string;
+    readonly resourceUri: Uri;
     readonly isSpecial: boolean;
     readonly taskFiles: (ITaskFile|ITaskItem)[];
     readonly workspaceFolder: WorkspaceFolder | undefined;

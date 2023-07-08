@@ -123,27 +123,19 @@ export class TaskTreeBuilder
     };
 
 
-    private getTaskFile = async (task: Task, folder: TaskFolder, /* groupLevel: number,*/relativePath: string, logPad: string) =>
+    private getTaskFile = async (task: Task, folder: TaskFolder, relativePath: string, logPad: string) =>
     {
-        let taskFile: TaskFile | undefined;
         this.wrapper.log.methodStart("get task file node", 2, logPad, false, [[ "relative path", relativePath ]]);
-        taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, 0)];
-        // if (!taskFile)
-        // {
-        //     for (let i = 0; i < groupLevel && i < this.wrapper.keys.Numbers.MaxGroupLevel && !taskFile; i++)
-        //     {
-        //         const fsPath = this.wrapper.pathUtils.getTaskAbsolutePath(task);
-        //         taskFile = this._taskFileMap[TaskFile.id(folder, task, undefined, i, TaskFile.groupId(folder, fsPath, task.source, task.name, i))];
-        //     }
-        // }
-        if (!taskFile)
+        const id = !this.wrapper.taskUtils.isScriptType(task.source) ?
+                    TaskFile.id(folder, task, undefined, 0) : // script type files in same dir - place in `one` taskfile
+                    TaskFile.groupId(folder, this.wrapper.pathUtils.getTaskAbsolutePath(task), task.source, task.source, -1);
+        if (!this._taskFileMap[id])
         {
             this.wrapper.log.value("   Add source taskfile container", task.source, 2, logPad);
-            taskFile = folder.addChild(new TaskFile(folder, task, relativePath, 0, undefined, task.source, logPad + "   "));
-            this._taskFileMap[taskFile.id] = taskFile;
+            this._taskFileMap[id] = folder.addChild(new TaskFile(folder, task, relativePath, 0, undefined, task.source, logPad + "   "));
         }
         this.wrapper.log.methodDone("get task file node", 2, logPad);
-        return taskFile;
+        return this._taskFileMap[id];
     };
 
 
