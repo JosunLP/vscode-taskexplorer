@@ -17,7 +17,7 @@ const pythonUri: Uri = Uri.file(getWsPath("test.py"));
 const readmeUri: Uri = Uri.file(getWsPath("README.md"));
 const antStartCount = 3;
 const gruntStartCount = 7;
-const pythonStartCount = 2;
+const pythonStartCount = 5;
 
 
 suite("Menu Command Tests", () =>

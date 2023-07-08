@@ -91,7 +91,7 @@ suite("Task Details Page Tests", () =>
 	{
         if (exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.page.taskDetailsScript + tc.slowTime.tasks.getTreeTasks + tc.slowTime.webview.closeSync);
-		python = await treeUtils.getTreeTasks(teWrapper, "python", 2);
+		python = await treeUtils.getTreeTasks(teWrapper, "python", 5);
 		teWebview = await showTeWebview("taskDetails", python[0]);
 		await closeTeWebviewPanel(teWebview);
         endRollingCount(this);

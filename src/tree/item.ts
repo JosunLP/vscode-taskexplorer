@@ -14,14 +14,6 @@ import {
 } from "vscode";
 
 
-/**
- * @class TaskItem
- *
- * The "O.G." Task Explorer source file.
- *
- * A tree node that represents a task.
- * An item of this type is always a child of type TaskFile in the tree.
- */
 export class TaskItem extends TreeItem implements ITaskItem
 {
     declare label: string;
@@ -29,17 +21,17 @@ export class TaskItem extends TreeItem implements ITaskItem
     override command: Command;
     override resourceUri: Uri;
 
-    private _taskDetached: Task | undefined;
-    private _execution: TaskExecution | undefined;
     private _paused: boolean;
     private _groupLevel: number;
-    private _folder: TaskFolder | undefined;
+    private _folder: TaskFolder;
+    private _taskDetached: Task | undefined;
+    private _execution: TaskExecution | undefined;
 
-    private readonly _taskFile: TaskFile;
     private readonly _task: Task;
+    private readonly _taskFile: TaskFile;
     private readonly _taskSource: string;
-    private readonly _taskType: string;
-    private readonly _relativePath: string;
+    // private readonly _taskType: string;
+    // private readonly _relativePath: string;
     private readonly _isUser: boolean;
 
 
@@ -78,24 +70,22 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         // Set ID and properties
         //
-        this.id = TaskItem.getId(fsPath, task);
+        this.id = TaskItem.id(fsPath, task);
+        this._folder = taskFile.folder;
         this._task = task;
-        this._relativePath = taskFile.relativePath;
+        this._task.definition.taskItemId = this.id; // Used in task start/stop events, see TaskWatcher
+        // this._relativePath = taskFile.relativePath;
         this._taskSource = task.source;
-        this._taskType = task.definition.type; // If the source is `Workspace`, def.type can be of any provider type
+        // this._taskType = task.definition.type;   // If the source is `Workspace`, def.type can be of any provider type
         this._isUser = taskFile.isUser;
-        this._paused = false;                  // paused flag used by start/stop/pause task functionality
+        this._paused = false;                       // paused flag used by start/stop/pause task functionality
         this._taskFile = taskFile;
-        this._groupLevel = 0;                  // Grouping level - will get set by treefile.addTreeNode()
+        this._groupLevel = 0;                       // Grouping level - will get set by treefile.addTreeNode()
         this.command = {
-            title: "Open definition",          // Default click action is just Open file since it's easy to click on accident
+            title: "Open definition",               // Default click action is just Open file since it's easy to click on accident
             command: "taskexplorer.open",
             arguments: [ this, true ]
         };
-        //
-        // Set taskItem on the task definition object for use in the task start/stop events
-        //
-        this._task.definition.taskItemId = this.id;
         //
         // Tooltip
         //
@@ -144,7 +134,7 @@ export class TaskItem extends TreeItem implements ITaskItem
     get taskSource() { return this._taskSource; };
 
 
-    static getId(fsPath: string, task: Task)
+    static id(fsPath: string, task: Task)
     {
         return encodeUtf8Hex(`${fsPath}:${task.source}:${task.definition.type}:${task.name}`);
     }

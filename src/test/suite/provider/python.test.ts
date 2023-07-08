@@ -10,9 +10,10 @@ import {
     activate, endRollingCount, exitRollingCount, getWsPath, logErrorsAreFine, suiteFinished,
     testControl as tc, verifyTaskCount, waitForTeIdle
 } from "../../utils/utils";
+import { getTreeTasks } from "utils/treeUtils";
 
 const testsName = "python";
-const startTaskCount = 2;
+const startTaskCount = 5;
 
 let teApi: ITaskExplorerApi;
 let teWrapper: ITeWrapper;
@@ -52,6 +53,7 @@ suite("Python Tests", () =>
         if (exitRollingCount(this, false, true)) return;
         await executeSettingsUpdate("pathToPrograms." + testsName, pathToTaskProgram, tc.waitTime.config.event);
         await executeSettingsUpdate("enabledTasks." + testsName, enableTaskType, tc.waitTime.config.enableEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupStripScriptLabel, false);
         await teWrapper.fs.deleteDir(dirName);
         suiteFinished(this);
     });
@@ -77,7 +79,7 @@ suite("Python Tests", () =>
         if (exitRollingCount(this)) return;
         const provider = teApi.providers[testsName];
         expect(!provider.createTask("no_ext", undefined, wsFolder,
-               Uri.file(getWsPath("test.py")))).to.not.be.equal(undefined, "ScriptProvider returnned undefined task");
+               Uri.file(getWsPath("test.py")))).to.not.be.equal(undefined, "ScriptProvider returned undefined task");
         logErrorsAreFine(true);
         endRollingCount(this);
     });
@@ -160,10 +162,27 @@ suite("Python Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.fs.deleteFolderEvent + (tc.waitTime.fs.deleteEvent * 2) + tc.slowTime.tasks.count.verify);
-        // await teWrapper.fs.deleteFile(fileUri.fsPath);
         await teWrapper.fs.deleteDir(dirName);
         await waitForTeIdle(tc.waitTime.fs.deleteEvent * 2);
         await verifyTaskCount(testsName, startTaskCount);
+        endRollingCount(this);
+    });
+
+
+    test("Enable / Disable Filename Stripdown in Grouping Item Label", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.enableEvent + tc.slowTime.config.disableEvent + (tc.slowTime.tasks.getTreeTasks * 2));
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupStripScriptLabel, true);
+        await waitForTeIdle(tc.waitTime.min);
+        let python = await getTreeTasks(teWrapper, "python", 5);
+        expect(!!python.find(p => p.label === "py-grp-test-one.py")).to.be.equal(false);
+        expect(!!python.find(p => p.label === "one.py")).to.be.equal(true);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupStripScriptLabel, false);
+        await waitForTeIdle(tc.waitTime.min);
+        python = await getTreeTasks(teWrapper, "python", 5);
+        expect(!!python.find(p => p.label === "py-grp-test-one.py")).to.be.equal(true);
+        expect(!!python.find(p => p.label === "one.py")).to.be.equal(false);
         endRollingCount(this);
     });
 

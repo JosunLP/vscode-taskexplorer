@@ -484,14 +484,14 @@ suite("Tree Tests", () =>
 class DumbFolder implements ITaskFolder
 {
     public label: string;
-    constructor(lbl: string) { this.label = lbl; }
+    constructor(lbl: string) { this.label = lbl; this.resourceUri = ""; }
     id = "";
     isSpecial = false;
     taskFiles: (ITaskItem | ITaskFile)[] = [];
     workspaceFolder: WorkspaceFolder | undefined;
     iconPath?: string | Uri | { light: string | Uri; dark: string | Uri } | ThemeIcon | undefined;
     description?: string | boolean | undefined;
-    resourceUri?: Uri | undefined;
+    resourceUri: Uri | any;
     tooltip?: string | MarkdownString | undefined;
     command?: Command | undefined;
     collapsibleState?: TreeItemCollapsibleState | undefined;

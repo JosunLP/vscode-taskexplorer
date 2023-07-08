@@ -51,46 +51,50 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
 
 
     private processConfigChanges = async(e: ConfigurationChangeEvent) =>
-    {   //
+    {
+        const w = this.wrapper;
+        //
         // if the application has called 'enableConfigWatcher' to disable, then there's nothing to do
         //
         if (!this._watcherEnabled)
         {
-            this.wrapper.log.methodOnce("treemgr", "process config changes - disabled", 1, "");
+            w.log.methodOnce("treemgr", "process config changes - disabled", 1, "");
             return;
         }
 
-        this.wrapper.log.methodStart("process config changes", 1, "", true);
+        w.log.methodStart("process config changes", 1, "", true);
 
         // context = ctx;
-        let refresh = false;
-        let refresh2 = false; // Uses 1st param 'false' in refresh(), for cases where task files have not changed
-        const refreshTaskTypes: string[] = [];
-        const registerChange = (taskType: string) => this.wrapper.utils.pushIfNotExists(refreshTaskTypes, taskType);
+        let refresh = false,
+            refresh2 = false, // Uses 1st param 'false' in refresh(), for cases where task files have not changed
+            explorerTreeEnabled: boolean | undefined,
+            sidebarEnabled: boolean | undefined;
+        const cfgKeys = w.keys.Config,
+              refreshTaskTypes: string[] = [];
+
+        const registerChange = (taskType: string) => w.utils.pushIfNotExists(refreshTaskTypes, taskType);
 
         this._processingConfigEvent = true;
 
         //
         // Explorer Tree / SideBar View
         //
-        let explorerTreeEnabled: boolean | undefined;
-        let sidebarEnabled: boolean | undefined;
-        if (this.wrapper.config.affectsConfiguration(e, "enableExplorerView"))
+        if (w.config.affectsConfiguration(e, "enableExplorerView"))
         {
-            explorerTreeEnabled = this.wrapper.config.get<boolean>("enableExplorerView");
-            this.wrapper.log.write("   the 'enableExplorerView' setting has changed", 1);
-            this.wrapper.log.value("      new value", explorerTreeEnabled, 1);
+            explorerTreeEnabled = w.config.get<boolean>("enableExplorerView");
+            w.log.write("   the 'enableExplorerView' setting has changed", 1);
+            w.log.value("      new value", explorerTreeEnabled, 1);
         }
-        if (this.wrapper.config.affectsConfiguration(e, "enableSideBar"))
+        if (w.config.affectsConfiguration(e, "enableSideBar"))
         {
-            sidebarEnabled = this.wrapper.config.get<boolean>("enableSideBar");
-            this.wrapper.log.write("   the 'enableSideBar' setting has changed", 1);
-            this.wrapper.log.value("      new value", sidebarEnabled, 1);
+            sidebarEnabled = w.config.get<boolean>("enableSideBar");
+            w.log.write("   the 'enableSideBar' setting has changed", 1);
+            w.log.value("      new value", sidebarEnabled, 1);
         }
         if (sidebarEnabled !== undefined || explorerTreeEnabled !== undefined)
         {
-            const enabled  = this.wrapper.utils.isTeEnabled();
-            setTimeout((e) => void this.wrapper.contextTe.setContext(this.wrapper.keys.Context.Enabled, e), 50, enabled); this._processingConfigEvent = false;
+            const enabled  = w.utils.isTeEnabled();
+            setTimeout((e) => void w.contextTe.setContext(w.keys.Context.Enabled, e), 50, enabled); this._processingConfigEvent = false;
             if (!enabled) {
                 this._processingConfigEvent = false;
                 this._onReady.fire();
@@ -101,11 +105,11 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         //
         // Main excludes list changes requires global refresh
         //
-        if (this.wrapper.config.affectsConfiguration(e, "exclude", "excludeTask"))
+        if (w.config.affectsConfiguration(e, cfgKeys.ExcludeGlobs, cfgKeys.ExcludeTaskRegexes))
         {
-            this.wrapper.log.write("   the 'exclude/excludeTask' setting has changed", 1);
-            this.wrapper.log.value("      exclude changed", e.affectsConfiguration("taskexplorer.exclude"), 1);
-            this.wrapper.log.value("      excludeTask changed", e.affectsConfiguration("taskexplorer.excludeTask"), 1);
+            w.log.write(`   the '${cfgKeys.ExcludeGlobs}/${cfgKeys.ExcludeTaskRegexes}' setting has changed`, 1);
+            w.log.value(`      ${cfgKeys.ExcludeGlobs} changed`, e.affectsConfiguration(cfgKeys.ExcludeGlobs), 1);
+            w.log.value(`      ${cfgKeys.ExcludeTaskRegexes} changed`, e.affectsConfiguration(cfgKeys.ExcludeTaskRegexes), 1);
             refresh = true;
         }
 
@@ -113,10 +117,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         // User Tasks / specialFolders.showUserTasks
         // Other specialFolder config events are process in tree/folderCache module
         //
-        if (this.wrapper.config.affectsConfiguration(e, "specialFolders.showUserTasks"))
+        if (w.config.affectsConfiguration(e, cfgKeys.SpecialFoldersShowUserTasks))
         {
-            this.wrapper.log.write("   the 'specialFolders.showUserTasks' setting has changed", 1);
-            this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("specialFolders.showUserTasks"), 1);
+            w.log.write(`   the '${cfgKeys.SpecialFoldersShowUserTasks}' setting has changed`, 1);
+            w.log.value("      new value", w.config.get<boolean>(cfgKeys.SpecialFoldersShowUserTasks), 1);
             refresh = true;
         }
 
@@ -127,9 +131,9 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         {   //
             // Task Types
             //
-            if (this.wrapper.config.affectsConfiguration(e, "enabledTasks"))
+            if (w.config.affectsConfiguration(e, "enabledTasks"))
             {
-                const newEnabledTasks = this.wrapper.config.get<IDictionary<boolean>>("enabledTasks");
+                const newEnabledTasks = w.config.get<IDictionary<boolean>>("enabledTasks");
                 for (const p of Object.keys(this._enabledTasks))
                 {
                     const taskType = getTaskTypeRealName(p),
@@ -137,9 +141,9 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
                         newValue = newEnabledTasks[p];
                     if (newValue !== oldValue)
                     {
-                        this.wrapper.log.write(`   the 'enabledTasks.${taskType}' setting has changed`, 1);
-                        this.wrapper.log.value("      new value", newValue, 1);
-                        await this.wrapper.fileWatcher.registerFileWatcher(taskType, false, newValue, "   ");
+                        w.log.write(`   the 'enabledTasks.${taskType}' setting has changed`, 1);
+                        w.log.value("      new value", newValue, 1);
+                        await w.fileWatcher.registerFileWatcher(taskType, false, newValue, "   ");
                         registerChange(taskType);
                     }
                 }
@@ -149,32 +153,34 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             // Groupings changes require global refresh
             //
-            if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.GroupWithSeperator, this.wrapper.keys.Config.GroupSeparator, this.wrapper.keys.Config.GroupMaxLevel, this.wrapper.keys.Config.GroupStripTaskLabel))
+            if (w.config.affectsConfiguration(e, cfgKeys.GroupWithSeperator, cfgKeys.GroupSeparator, cfgKeys.GroupMaxLevel, cfgKeys.GroupStripTaskLabel, cfgKeys.GroupScripts, cfgKeys.GroupStripScriptLabel))
             {
-                this.wrapper.log.write("   A tree grouping setting has changed", 1);
-                this.wrapper.log.value(`      ${this.wrapper.keys.Config.GroupWithSeperator} changed`, this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupWithSeperator), 1);
-                this.wrapper.log.value(`      ${this.wrapper.keys.Config.GroupSeparator} changed`, this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupSeparator), 1);
-                this.wrapper.log.value(`      ${this.wrapper.keys.Config.GroupMaxLevel} changed`, this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupMaxLevel), 1);
-                this.wrapper.log.value(`      ${this.wrapper.keys.Config.GroupStripTaskLabel} changed`, this.wrapper.config.get<boolean>(this.wrapper.keys.Config.GroupStripTaskLabel), 1);
+                w.log.write("   A tree grouping setting has changed", 1);
+                w.log.value(`      ${cfgKeys.GroupWithSeperator} changed`, w.config.get<boolean>(cfgKeys.GroupWithSeperator), 1);
+                w.log.value(`      ${cfgKeys.GroupSeparator} changed`, w.config.get<boolean>(cfgKeys.GroupSeparator), 1);
+                w.log.value(`      ${cfgKeys.GroupMaxLevel} changed`, w.config.get<boolean>(cfgKeys.GroupMaxLevel), 1);
+                w.log.value(`      ${cfgKeys.GroupScripts} changed`, w.config.get<boolean>(cfgKeys.GroupScripts), 1);
+                w.log.value(`      ${cfgKeys.GroupStripScriptLabel} changed`, w.config.get<boolean>(cfgKeys.GroupStripScriptLabel), 1);
+                w.log.value(`      ${cfgKeys.GroupStripTaskLabel} changed`, w.config.get<boolean>(cfgKeys.GroupStripTaskLabel), 1);
                 refresh2 = true; // refresh2 will rebuild the tree but won't trigger a file cache build and/or task provider invalidation
             }
 
             //
             // Workspace/project folder sorting
             //
-            if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.SortProjectFoldersAlphabetically))
+            if (w.config.affectsConfiguration(e, cfgKeys.SortProjectFoldersAlphabetically))
             {
-                this.wrapper.log.write(`   the '${this.wrapper.keys.Config.SortProjectFoldersAlphabetically}' setting has changed`, 1);
-                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>(this.wrapper.keys.Config.SortProjectFoldersAlphabetically), 1);
+                w.log.write(`   the '${cfgKeys.SortProjectFoldersAlphabetically}' setting has changed`, 1);
+                w.log.value("      new value", w.config.get<boolean>(cfgKeys.SortProjectFoldersAlphabetically), 1);
                 refresh2 = true; // refresh2 will rebuild the tree but won't trigger a file cache build and/or task provider invalidation
             }
 
             //
             // Program paths
             //
-            if (this.wrapper.config.affectsConfiguration(e, "pathToPrograms"))
+            if (w.config.affectsConfiguration(e, "pathToPrograms"))
             {
-                const newPathToPrograms = this.wrapper.config.get<IDictionary<string>>("pathToPrograms");
+                const newPathToPrograms = w.config.get<IDictionary<string>>("pathToPrograms");
                 for (const p of Object.keys(this._pathToPrograms))
                 {
                     const taskType = getTaskTypeRealName(p),
@@ -182,8 +188,8 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
                         newValue = newPathToPrograms[p];
                     if (newValue !== oldValue)
                     {
-                        this.wrapper.log.write(`   the 'pathToPrograms.${taskType}' setting has changed`, 1);
-                        this.wrapper.log.value("      new value", newValue, 1);
+                        w.log.write(`   the 'pathToPrograms.${taskType}' setting has changed`, 1);
+                        w.log.value("      new value", newValue, 1);
                         if (taskType !== "ansicon" && taskType !== "curl") {// these paths are ont 'task types'
                             registerChange(taskType);
                         }
@@ -199,31 +205,31 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             // Extra Bash Globs (for extensionless script files)
             //
-            if (this.wrapper.config.affectsConfiguration(e, "globPatternsBash") && !refreshTaskTypes.includes("bash"))
+            if (w.config.affectsConfiguration(e, "globPatternsBash") && !refreshTaskTypes.includes("bash"))
             {
-                this.wrapper.log.write("   the 'globPatternsBash' setting has changed", 1);
-                await this.wrapper.fileWatcher.registerFileWatcher("bash", false, this.wrapper.config.get<boolean>("enabledTasks.bash"), "   ");
+                w.log.write("   the 'globPatternsBash' setting has changed", 1);
+                await w.fileWatcher.registerFileWatcher("bash", false, w.config.get<boolean>("enabledTasks.bash"), "   ");
                 registerChange("bash");
             }
 
             //
             // Extra Apache Ant Globs (for non- build.xml files)s
             //
-            if (this.wrapper.config.affectsConfiguration(e, "includeAnt", "globPatternsAnt") && !refreshTaskTypes.includes("ant"))
+            if (w.config.affectsConfiguration(e, "includeAnt", "globPatternsAnt") && !refreshTaskTypes.includes("ant"))
             {
-                this.wrapper.log.write("   the 'globPatternsAnt' setting has changed", 1);
-                await this.wrapper.fileWatcher.registerFileWatcher("ant", false, this.wrapper.config.get<boolean>("enabledTasks.ant"), "   ");
+                w.log.write("   the 'globPatternsAnt' setting has changed", 1);
+                await w.fileWatcher.registerFileWatcher("ant", false, w.config.get<boolean>("enabledTasks.ant"), "   ");
                 registerChange("ant");
             }
 
             //
             // Whether or not to use 'ansicon'when running 'ant' tasks
             //
-            if (this.wrapper.config.affectsConfiguration(e, "enableAnsiconForAnt"))
+            if (w.config.affectsConfiguration(e, "enableAnsiconForAnt"))
             {
-                const newValue = this.wrapper.config.get<boolean>("enableAnsiconForAnt");
-                this.wrapper.log.write("   the '.enableAnsiconForAnt' setting has changed", 1);
-                this.wrapper.log.value("      new value", newValue, 1);
+                const newValue = w.config.get<boolean>("enableAnsiconForAnt");
+                w.log.write("   the '.enableAnsiconForAnt' setting has changed", 1);
+                w.log.value("      new value", newValue, 1);
                 if (newValue) {
                     window.showInformationMessage("For Ant/Ansicon configuration change to take effect, close all open terminals");
                 }
@@ -233,20 +239,20 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             // Whether or not to use the 'ant' program to detect ant tasks (default is xml2js parser)
             //
-            if (this.wrapper.config.affectsConfiguration(e, "useAnt"))
+            if (w.config.affectsConfiguration(e, "useAnt"))
             {
-                this.wrapper.log.write("   the 'useAnt' setting has changed", 1);
-                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("useAnt"), 1);
+                w.log.write("   the 'useAnt' setting has changed", 1);
+                w.log.value("      new value", w.config.get<boolean>("useAnt"), 1);
                 registerChange("ant");
             }
 
             //
             // Whether or not to use the 'gulp' program to detect gulp tasks (default is custom parser)
             //
-            if (this.wrapper.config.affectsConfiguration(e, "useGulp"))
+            if (w.config.affectsConfiguration(e, "useGulp"))
             {
-                this.wrapper.log.write("   the 'useGulp' setting has changed", 1);
-                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>("useGulp"), 1);
+                w.log.write("   the 'useGulp' setting has changed", 1);
+                w.log.value("      new value", w.config.get<boolean>("useGulp"), 1);
                 registerChange("gulp");
             }
 
@@ -256,8 +262,8 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             if (e.affectsConfiguration("npm.packageManager"))
             {
-                this.wrapper.log.write("   the 'npm.packageManager' setting has changed", 1);
-                this.wrapper.log.value("      new value", this.wrapper.config.getVs<boolean>("npm.packageManager"), 1);
+                w.log.write("   the 'npm.packageManager' setting has changed", 1);
+                w.log.value("      new value", w.config.getVs<boolean>("npm.packageManager"), 1);
                 registerChange("npm");
             }
 
@@ -266,10 +272,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             // flag but the flag is not visible via the Task API Task definition, the file must be read
             // and parsed by the application to locate the value.
             //
-            if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.ShowHiddenVSCodeWsTasks))
+            if (w.config.affectsConfiguration(e, cfgKeys.ShowHiddenVSCodeWsTasks))
             {
-                this.wrapper.log.write(`   the '${this.wrapper.keys.Config.ShowHiddenVSCodeWsTasks}' setting has changed`, 1);
-                this.wrapper.log.value("      new value", this.wrapper.config.get<boolean>(this.wrapper.keys.Config.ShowHiddenVSCodeWsTasks), 1);
+                w.log.write(`   the '${cfgKeys.ShowHiddenVSCodeWsTasks}' setting has changed`, 1);
+                w.log.value("      new value", w.config.get<boolean>(cfgKeys.ShowHiddenVSCodeWsTasks), 1);
                 registerChange("Workspace");
             }
 
@@ -282,10 +288,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             {   //
                 // Script type task defs will change with terminal change
                 //
-                this.wrapper.log.write("   a terminal shell setting has changed", 1);
-                this.wrapper.log.value("      windows shell", this.wrapper.config.getVs<boolean>("terminal.integrated.shell.windows"), 2);
-                this.wrapper.log.value("      linux shell", this.wrapper.config.getVs<boolean>("terminal.integrated.shell.linux"), 2);
-                this.wrapper.log.value("      osx shell", this.wrapper.config.getVs<boolean>("terminal.integrated.shell.osx"), 2);
+                w.log.write("   a terminal shell setting has changed", 1);
+                w.log.value("      windows shell", w.config.getVs<boolean>("terminal.integrated.shell.windows"), 2);
+                w.log.value("      linux shell", w.config.getVs<boolean>("terminal.integrated.shell.linux"), 2);
+                w.log.value("      osx shell", w.config.getVs<boolean>("terminal.integrated.shell.osx"), 2);
                 getScriptTaskTypes().forEach(t => { if (this._enabledTasks[t]) registerChange(t); });
             }
         }
@@ -293,30 +299,30 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         //
         // Refresh tree depending on specific settings changes
         //
-        await this.wrapper.utils.wrap(async () =>
+        await w.utils.wrap(async () =>
         {
             if (refresh || refreshTaskTypes.length > 3)
             {
-                await executeCommand(this.wrapper.keys.Commands.Refresh, undefined, false, "   ");
+                await executeCommand(w.keys.Commands.Refresh, undefined, false, "   ");
             }
             else if (refreshTaskTypes.length > 0)
             {
                 for (const t of refreshTaskTypes) {
-                    await executeCommand(this.wrapper.keys.Commands.Refresh, t, undefined, "   ");
+                    await executeCommand(w.keys.Commands.Refresh, t, undefined, "   ");
                 }
             }
             else if (refresh2) {
-                await executeCommand(this.wrapper.keys.Commands.Refresh, false, undefined, "   ");
+                await executeCommand(w.keys.Commands.Refresh, false, undefined, "   ");
             }
             else {
-                this.wrapper.log.write("   current changes require no processing", 1);
+                w.log.write("   current changes require no processing", 1);
             }
-        }, [ this.wrapper.log.error ], this);
+        }, [ w.log.error ], this);
 
         this._processingConfigEvent = false;
         this._onReady.fire();
 
-        this.wrapper.log.methodDone("process config changes", 1);
+        w.log.methodDone("process config changes", 1);
     };
 
 }

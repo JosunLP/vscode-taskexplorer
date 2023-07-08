@@ -18,7 +18,7 @@ let enabledTasks: IDictionary<boolean>;
 const antStartCount = 3;
 const gruntStartCount = 7;
 const gulpStartCount = 17;
-const pythonStartCount = 2;
+const pythonStartCount = 5;
 
 let teWrapper: ITeWrapper;
 

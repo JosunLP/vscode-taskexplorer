@@ -12,12 +12,12 @@ export interface ITaskFile extends TreeItem
     isGroup: boolean;
     label: string;
     fileName: string;
+    folder: ITaskFolder;
     readonly task: Task;
     readonly isUser: boolean;
     readonly relativePath: string;
     readonly resourceUri: Uri;
     readonly taskSource: string;
-    readonly folder: ITaskFolder | undefined;
     readonly treeNodes: (ITaskItem|ITaskFile)[];
     addChild<T extends (ITaskFile | ITaskItem)>(node: T, index?: number): OneOf<T, [ ITaskFile, ITaskItem ]>;
     addChild(treeNode: ITaskFile | ITaskItem, index?: number): ITaskFile | ITaskItem;

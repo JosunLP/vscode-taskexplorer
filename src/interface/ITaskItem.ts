@@ -9,9 +9,9 @@ export interface ITaskItem extends TreeItem
     id: string;
     label: string;
     paused: boolean;
+    folder: ITaskFolder;
     taskDetached: Task | undefined;
     execution: TaskExecution | undefined;
-    folder: ITaskFolder | undefined;
     readonly isUser: boolean;
     readonly task: Task;
     readonly taskFile: ITaskFile;

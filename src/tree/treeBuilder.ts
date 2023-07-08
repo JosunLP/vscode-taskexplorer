@@ -91,7 +91,7 @@ export class TaskTreeBuilder
         if (!isNpmInstallTask)
         {
             const fsPath = !task.definition.scriptFile ? taskFile.resourceUri.fsPath : task.definition.uri.fsPath;
-            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => n instanceof TaskItem && n.id === TaskItem.getId(fsPath, task));
+            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => n instanceof TaskItem && n.id === TaskItem.id(fsPath, task));
             if (!taskItem) {
                 taskItem = taskFile.addChild(new TaskItem(taskFile, task, logPad + "   "));
             }

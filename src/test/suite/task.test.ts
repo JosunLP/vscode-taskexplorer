@@ -62,7 +62,7 @@ suite("Task Tests", () =>
         bash = await utils.treeUtils.getTreeTasks(teWrapper, "bash", 1);
         batch = await utils.treeUtils.getTreeTasks(teWrapper, "batch", 2);
         ant = await utils.treeUtils.getTreeTasks(teWrapper, "ant", 3);
-        python = await utils.treeUtils.getTreeTasks(teWrapper, "python", 2);
+        python = await utils.treeUtils.getTreeTasks(teWrapper, "python", 5);
         utils.endRollingCount(this);
     });
 

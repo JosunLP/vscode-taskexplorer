@@ -385,7 +385,7 @@ suite("Provider Tests", () =>
         taskCount = treeUtils.findTaskTypeInTaskMap("gulp", taskMap).length;
         expect(taskCount).to.be.equal(32, `Unexpected Gulp task count (Found ${taskCount} of 32)`);
         taskCount = treeUtils.findTaskTypeInTaskMap("python", taskMap).length;
-        expect(taskCount).to.be.equal(2, `Unexpected Python task count (Found ${taskCount} of 2)`);
+        expect(taskCount).to.be.equal(5, `Unexpected Python task count (Found ${taskCount} of 5)`);
         taskCount = treeUtils.findTaskTypeInTaskMap("tsc", taskMap).length;
         expect(taskCount).to.be.equal(4, `Unexpected Typescript task count (Found ${taskCount} of 4)`);
         taskCount = treeUtils.findTaskTypeInTaskMap("Workspace", taskMap).length;

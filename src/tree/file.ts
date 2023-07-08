@@ -7,12 +7,12 @@ import { Strings } from "../lib/constants";
 import { basename, extname, join } from "path";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
-import { ITaskDefinition, ITaskFile, OneOf } from "../interface";
-import { asString, isEmpty, isWorkspaceFolder } from "../lib/utils/typeUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
+import { ITaskDefinition, ITaskFile, OneOf } from "../interface";
+import { asString, isWorkspaceFolder } from "../lib/utils/typeUtils";
+import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { getInstallPathSync, getTaskRelativePath, getUserDataPath } from "../lib/utils/pathUtils";
-import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 
 
 /**
@@ -33,37 +33,23 @@ export class TaskFile extends TreeItem implements ITaskFile
     override resourceUri: Uri;
 
     private _isGroup: boolean;
-    private _groupLevel: number;
-    private _groupId: string | undefined;
     private _fileName: string;
+    private _groupLevel: number;
+    private _folder: TaskFolder;
+    private _groupId: string | undefined;
 
     private readonly _task: Task;
-    private readonly _folder: TaskFolder;
     private readonly _taskSource: string;
-    private readonly _taskType: string;
+    // private readonly _taskType: string;
     private readonly _isUser: boolean;
     private readonly _relativePath: string;
     private readonly _treeNodes: (TaskItem|TaskFile)[];
 
 
-    /**
-     * @constructor
-     *
-     * @param context The VSCode extension context.
-     * @param folder The owner TaskFolder, a TaskFolder represents a workspace or special (Last Tasks / Favorites) folder.
-     * @param taskDef The task definition.
-     * @param source The task source that the TaskFile will be associated with, e.g. `npm`, `ant`, `gulp`, etc.
-     * @param relativePath The relative path of the task file, relative to the workspace folder it was found in.
-     * @param groupLevel The grouping level in the tree.
-     * @param group Flag indicating if the TaskFile is being added in grouped mode.
-     * @param label The display label.
-     * @param logPad Padding to prepend to log entries.  Should be a string of any # of space characters.
-     */
     constructor(folder: TaskFolder, task: Task, relativePath: string,
                 groupLevel: number, groupId: string | undefined, label: string, logPad: string)
     {
         super(TaskFile.getLabel(task.definition, label, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
-
         const taskDef = task.definition;
         log.methodStart("construct tree file", 4, logPad, false, [
             [ "label", label ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
@@ -71,16 +57,17 @@ export class TaskFile extends TreeItem implements ITaskFile
             [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
-
+        //
+        // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
+        this.id = TaskFile.id(folder, task, this.label, groupLevel, groupId);
         this._task = task;
         this._treeNodes = [];
         this._folder = folder;
         this._taskSource = task.source;
-        this._taskType = task.definition.type;  // If the source is `Workspace`, def.type can be of any provider type
+        // this._taskType = task.definition.type;  // If the source is `Workspace`, def.type can be of any provider type
         this._isGroup = !!groupId;
         this._isUser = false;
         this._groupLevel = 0;
-
         //
         // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
         // in the task tree, there is only one path for vscode/workspace tasks, /.vscode.  The fact that
@@ -91,7 +78,6 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         this._relativePath = this.label !== "vscode" ? relativePath : ".vscode";
         this._fileName = this.getFileNameFromSource(task.source, folder, taskDef);
-
         if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
             if (relativePath && task.source !== "Workspace") {
@@ -108,7 +94,9 @@ export class TaskFile extends TreeItem implements ITaskFile
             this.resourceUri = Uri.file(join(getUserDataPath(undefined, logPad), this.fileName));
             this._isUser = true;
         }
-
+        //
+        // Set context / context icons
+        //
         if (!groupId)
         {
             this.contextValue = "taskFile" + properCase(this._taskSource);
@@ -116,27 +104,11 @@ export class TaskFile extends TreeItem implements ITaskFile
         else {
             this.setGroupContext(groupId, groupLevel, task.source);
         }
-
-        //
-        // Set unique id
-        //
-        // this._groupId = TaskFile.createGroupId(folder, this, this.label, this._groupLevel);
-        this.id = TaskFile.id(folder, task, this.label, this._groupLevel, this._groupId);
-
-        //
-        // If npm TaskFile, check package manager set in vscode settings, (npm, pnpm, or yarn) to determine
-        // which icon to display
-        //
-        let src = this._taskSource;
-        if (src === "npm") { src = getPackageManager(); }
-
-        //
-        // Set context icons
-        //
         this.iconPath = ThemeIcon.File;
         if (!taskDef.icon)
         {
-            const installPath = getInstallPathSync(),
+            const src = this._taskSource !== "npm" ? this._taskSource : getPackageManager(),
+                  installPath = getInstallPathSync(),
                   icon = join(installPath, "res", "img", "sources", src + ".svg");
             if (pathExistsSync(icon))
             {
@@ -160,12 +132,10 @@ export class TaskFile extends TreeItem implements ITaskFile
             this.iconPath = { light: iconLight, dark: iconDark };
         }
 
-        const iconPath = this.iconPath as { light: string | Uri; dark: string | Uri };
         log.methodDone("construct tree file", 4, logPad, [
             [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ], [ "context value", this.contextValue ],
             [ "is group", this._isGroup ], [ "groupLevel", this._groupLevel ], [ "filename", this._fileName ],
-            [ "resource uri path", this.resourceUri.fsPath ], [ "path", this._relativePath  ], [ "icon light", iconPath.light ],
-            [ "icon dark", iconPath.dark ]
+            [ "resource uri path", this.resourceUri.fsPath ], [ "path", this._relativePath  ]
         ]);
     }
 
@@ -173,6 +143,8 @@ export class TaskFile extends TreeItem implements ITaskFile
     get fileName() { return this._fileName; };
 
     get folder() { return this._folder; };
+
+    set folder(v) { this._folder = v; }
 
     get groupId() { return this._groupId; };
 
