@@ -25,7 +25,11 @@ const watch = (env, wpConfig, argv) =>
 			poll: true,
 			stdin: true,
 			followSymlinks: false,
-			ignored: /(node_modules|test|webpack|doc|.vscode(?:\-test)?|res|types)[\\\/]/
+			ignored: [
+				"**/node_modules", "**/dist", "**/doc", "**/res", "**/script", "**/test",
+				"**/types", "**/webpack/**/*.js", "**/.vscode", "**/.vscode-test",
+				"**/.nyc_output", "**/.coverage", "**/.github"
+			]
 		};
 	}
 };
