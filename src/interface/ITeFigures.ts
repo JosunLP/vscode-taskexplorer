@@ -1,4 +1,4 @@
-import { IDictionary } from "./IDictionary";
+import { IDictionary } from ":types";
 
 export type LogColor = [ number, number ];
 export type LogStyle = [ number, number ];

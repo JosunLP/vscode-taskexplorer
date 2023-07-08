@@ -7,13 +7,14 @@
 		"lib": [ "es2020" ],
 		"module": "commonjs",
 		"outDir": "lib",
-		"rootDir": "../src/interface",
+		"rootDir": "../src",
 		"sourceMap": false,
 		"strict": true,
 		"target": "es2020",
 		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.tsbuildinfo"
 	},
 	"include": [
-		"../src/interface"
+		"../src/interface",
+		"../src/utils/log/log"
 	]
 }

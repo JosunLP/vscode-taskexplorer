@@ -1,7 +1,7 @@
 
 import { IExternalProvider } from "./IExternalProvider";
 import { ITaskExplorerProvider } from "./ITaskProvider";
-import { IDictionary } from "./IDictionary";
+import { IDictionary } from ":types";
 
 export interface ITaskExplorerApi
 {

@@ -2,7 +2,7 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { IDictionary } from "../../interface";
+import { IDictionary } from ":types";
 import { Disposable, commands } from "vscode";
 import { SupportedCommands } from "../../interface/ICommand";
 

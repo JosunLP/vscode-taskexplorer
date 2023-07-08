@@ -3,7 +3,7 @@ import { ITaskFile } from "./ITaskFile";
 import { ITaskItem } from "./ITaskItem";
 import { ITeWrapper } from "./ITeWrapper";
 import { ITaskFolder } from "./ITaskFolder";
-import { IDictionary } from "./IDictionary";
+import { IDictionary } from ":types";
 import { ITeTask, TeTaskListType } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
 

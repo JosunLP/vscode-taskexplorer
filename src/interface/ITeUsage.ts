@@ -2,7 +2,7 @@
 
 import { Event } from "vscode";
 import { ITeTask } from "./ITeTask";
-import { IDictionary } from "./IDictionary";
+import { IDictionary } from ":types";
 import { TreeviewIds, WebviewIds, WebviewViewIds } from "./ITeWebview";
 
 export type WebviewUsageKey = `${UsageKeys.WebviewPrefix}${WebviewIds}${string}`;

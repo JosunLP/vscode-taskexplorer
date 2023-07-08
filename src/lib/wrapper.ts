@@ -2,6 +2,7 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
+import { IDictionary } from ":types";
 import { getUuid } from ":env/crypto";
 import { TeContext } from "./context";
 import { logControl } from "./log/log";
@@ -60,7 +61,7 @@ import {
 	Disposable, EventEmitter, Event
 } from "vscode";
 import {
-	IConfiguration, ITaskExplorerProvider, IStorage, IDictionary, ILog, ITaskTreeView, ITeFilesystem,
+	IConfiguration, ITaskExplorerProvider, IStorage, ILog, ITaskTreeView, ITeFilesystem,
 	ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities,
 	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeKeys
 } from "../interface";

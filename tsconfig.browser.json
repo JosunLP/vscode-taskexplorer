@@ -9,6 +9,7 @@
 		],
 		"paths": {
 			":env/*": ["src/lib/env/browser/*"],
+			":types": [ "types" ],
 			"path": ["node_modules/path-browserify"]
 		}
 	},

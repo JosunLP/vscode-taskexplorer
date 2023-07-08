@@ -1,6 +1,6 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { IDictionary } from "../../interface";
+import { IDictionary } from ":types";
 
 /**
  * @module commonUtils

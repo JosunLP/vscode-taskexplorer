@@ -1,6 +1,6 @@
 export default {};
 //
-// import { IDictionary } from "../../interface";
+// import { IDictionary } from ":types";
 // import { isArray, isString } from "../utils/typeUtils";
 //
 // /**

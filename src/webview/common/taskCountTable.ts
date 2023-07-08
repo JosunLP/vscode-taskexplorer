@@ -1,7 +1,7 @@
 
 import { Task, workspace } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
-import { IDictionary } from "../../interface";
+import { IDictionary } from ":types";
 import { getTaskTypes } from "../../lib/utils/taskUtils";
 import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
 import { getWorkspaceProjectName } from "../../lib/utils/utils";

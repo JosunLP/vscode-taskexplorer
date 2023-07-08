@@ -1,5 +1,5 @@
 /* eslint-disable quote-props */
-import { IDictionary } from "../../interface";
+import { IDictionary } from ":types";
 
 export const fontawesome = {
     /* Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
