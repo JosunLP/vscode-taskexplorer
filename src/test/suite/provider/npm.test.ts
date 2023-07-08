@@ -5,12 +5,15 @@ import { writeAndWait } from "../../utils/utils";
 import { startupFocus } from "../../utils/suiteUtils";
 import { executeTeCommand2 } from "../../utils/commandUtils";
 import { ITaskItem, ITeWrapper } from ":types";
+import { join } from "path";
 
 const testsName = "npm";
 let teWrapper: ITeWrapper;
 const tc = utils.testControl;
 let startTaskCount = 0; // set in suiteSetup() as it will change depending on single or multi root ws
-let packageJsonPath: string | undefined;
+let packageJsonPath: string;
+let packageJson2Dir: string;
+let packageJson2Path: string;
 let npmTaskItems: ITaskItem[];
 
 
@@ -22,6 +25,9 @@ suite("NPM Tests", () =>
         if (utils.exitRollingCount(this, true)) return;
         ({ teWrapper } = await utils.activate());
         startTaskCount = tc.isMultiRootWorkspace ? 15 : 5;
+        packageJsonPath = utils.getWsPath("package.json");
+        packageJson2Dir = utils.getWsPath("npm_test");
+        packageJson2Path = join(packageJson2Dir, "package.json");
         utils.endRollingCount(this, true);
     });
 
@@ -29,20 +35,8 @@ suite("NPM Tests", () =>
     suiteTeardown(async function()
     {
         if (utils.exitRollingCount(this, false, true)) return;
-        if (packageJsonPath)
-        {
-            const packageLockJsonPath = packageJsonPath.replace(".", "-lock.");
-            await teWrapper.fs.deleteFile(packageJsonPath);
-            if (await teWrapper.fs.pathExists(packageLockJsonPath)) {
-                try {
-                    await teWrapper.fs.deleteFile(packageLockJsonPath);
-                }
-                catch (error) {
-                    console.log(error);
-                }
-            }
-            await utils.waitForTeIdle(tc.waitTime.fs.deleteEvent);
-        }
+        try { await teWrapper.fs.deleteDir(packageJson2Dir); } catch {}
+        await utils.waitForTeIdle(tc.waitTime.fs.deleteEvent);
         utils.suiteFinished(this);
     });
 
@@ -53,44 +47,34 @@ suite("NPM Tests", () =>
 	});
 
 
-    // test("Create Package File (package.json)", async function()
-    // {
-    //     if (utils.exitRollingCount(this)) return;
-    //     this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
-    //     packageJsonPath = utils.getWsPath("package.json");
-    //     await writeAndWait(
-    //         packageJsonPath,
-    //         "{\r\n" +
-    //         '    "name": "vscode-taskexplorer",\r\n' +
-    //         '    "version": "0.0.1",\r\n' +
-    //         '    "scripts":{\r\n' +
-    //         '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
-    //         '        "compile": "cmd.exe /c test.bat",\r\n' +
-    //         '        "watch": "tsc -watch -p ./",\r\n' +
-    //         '        "build": "npx tsc -p ./"\r\n' +
-    //         "    }\r\n" +
-    //         "}\r\n"
-    //     );
-    //     await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
-    //     utils.endRollingCount(this);
-    // });
-
-
-    test("Get NPM Task Items", async function()
-    {   //
-        // vscode npm task provider is slower than a turtle's s***
-        //
+    test("Create Nested Package File (package.json)", async function()
+    {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.tasks.getTreeTasksNpm);
-        //
-        // Get the explorer tree task items (three less task than above, one of them tree
-        // does not display the 'install' task with the other tasks found, and two of them
-        // are the 'build' and 'watch' tasks are registered in tasks.json and will show in
-        // the tree under the VSCode tasks node, not the npm node)
-        //
-        // tagLog("NPM", "Get NPM Task Items [DoWorkSon]"); / -1 for install task not in tree for multi-root ws
-        npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount - (tc.isMultiRootWorkspace ? 1 : 0) + 2);
-        // tagLog("NPM", "Get NPM Task Items [Complete]");
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
+        packageJsonPath = utils.getWsPath("package.json");
+        await teWrapper.fs.createDir(packageJson2Dir);
+        await writeAndWait(
+            packageJson2Path,
+            "{\r\n" +
+            '    "name": "project1-subproject",\r\n' +
+            '    "version": "0.0.1",\r\n' +
+            '    "scripts":{\r\n' +
+            '        "compile": "tsc -b",\r\n' +
+            "    }\r\n" +
+            "}\r\n"
+        );
+        await utils.verifyTaskCount(testsName, startTaskCount + 1, 2);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Delete Nested Package File Folder", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.fs.deleteFolderEvent + (tc.waitTime.fs.deleteEvent * 2) + tc.slowTime.tasks.count.verify);
+        await teWrapper.fs.deleteDir(packageJson2Dir);
+        await utils.waitForTeIdle(tc.waitTime.fs.deleteEvent * 2);
+        await utils.verifyTaskCount(testsName, startTaskCount);
         utils.endRollingCount(this);
     });
 
@@ -100,9 +84,9 @@ suite("NPM Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow((tc.slowTime.fs.modifyEvent * 2) + (tc.slowTime.tasks.count.verify * 2) + 50);
         await writeAndWait(
-            packageJsonPath as string,
+            packageJsonPath,
             "{\r\n" +
-            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "name": "project1",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "scripts": {\r\n' +
             '        "build": "npx tsc -p ./"\r\n' +
@@ -116,9 +100,9 @@ suite("NPM Tests", () =>
         await utils.verifyTaskCount(testsName, startTaskCount + 1, 2);
         await utils.sleep(25);
         await writeAndWait(
-            packageJsonPath as string,
+            packageJsonPath,
             "{\r\n" +
-            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "name": "project1",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "scripts": {\r\n' +
             '        "build": "npx tsc -p ./"\r\n' +
@@ -138,9 +122,9 @@ suite("NPM Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
         await writeAndWait(
-            packageJsonPath as string,
+            packageJsonPath,
             "{\r\n" +
-            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "name": "project1",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "author": "Scott Meesseman",\r\n' + // <- Add author
             '    "scripts": {\r\n' +
@@ -161,15 +145,15 @@ suite("NPM Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
         await writeAndWait(
-            packageJsonPath as string,
+            packageJsonPath,
             "{\r\n" +
-            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "name": "project1",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "author": "Scott Meesseman",\r\n' +
             "}\r\n"
         );
         // + 1 because tasks.json still points to the build script (+ install task)
-        await utils.verifyTaskCount(testsName, startTaskCount + 2, 2);
+        await utils.verifyTaskCount(testsName, startTaskCount - 3, 2);
         utils.endRollingCount(this);
     });
 
@@ -179,9 +163,9 @@ suite("NPM Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.fs.modifyEvent + tc.slowTime.tasks.count.verify);
         await writeAndWait(
-            packageJsonPath as string,
+            packageJsonPath,
             "{\r\n" +
-            '    "name": "vscode-taskexplorer",\r\n' +
+            '    "name": "project1",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "author": "Scott Meesseman",\r\n' +
             '    "scripts": {\r\n' +
@@ -192,7 +176,7 @@ suite("NPM Tests", () =>
             "    }\r\n" +
             "}\r\n"
         );
-        await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
+        await utils.verifyTaskCount(testsName, startTaskCount, 2);
         utils.endRollingCount(this);
     });
 
@@ -210,7 +194,8 @@ suite("NPM Tests", () =>
     test("Document Position", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.tasks.findPosition + (tc.slowTime.tasks.findPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
+        this.slow(tc.slowTime.tasks.findPosition + tc.slowTime.tasks.getTreeTasks + (tc.slowTime.tasks.findPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
+        npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount + 1);
         for (const taskItem of npmTaskItems) {
             await executeTeCommand2("open", [ taskItem ], tc.waitTime.commandFast);
         }
@@ -284,7 +269,7 @@ suite("NPM Tests", () =>
     {
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.run + tc.slowTime.tasks.npmCommand);
-        const tasks = await utils.treeUtils.getTreeTasks(teWrapper, "Workspace", 3);
+        const tasks = await utils.treeUtils.getTreeTasks(teWrapper, "Workspace", 10);
         const task = tasks.find(t => t.label === "say_hello") as ITaskItem;
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ task ], tc.waitTime.runCommandMin) ;
         await utils.waitForTaskExecution(exec);

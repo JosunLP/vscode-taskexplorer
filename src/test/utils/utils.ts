@@ -13,22 +13,21 @@ import {
     ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
 } from ":types";
 import {
-    commands, ConfigurationTarget, Event, EventEmitter, Extension, extensions, Task, TaskExecution, tasks,
-    Uri, ViewColumn, window, workspace
+    commands, ConfigurationTarget, Event, EventEmitter, Extension, extensions, Task, TaskExecution,
+    tasks, Uri, ViewColumn, window, workspace
 } from "vscode";
-
-export { sleep, testControl, treeUtils, getWsPath, getProjectsPath };
 
 export let teApi: ITaskExplorerApi;
 export let teWrapper: ITeWrapper;
+export { sleep, testControl, treeUtils, getWsPath, getProjectsPath };
 
 const testTracker = new TestTracker();
 export const consoleWrite = testTracker.utils.writeConsole;
-export const isRollingCountError = () => testTracker.isRollingCountError;
-export const getSuccessCount = (instance: Mocha.Context) => testTracker.utils.getSuccessCount(instance);
-export const suiteFinished = (instance: Mocha.Context) => testTracker.utils.suiteFinished(instance);
-export const endRollingCount = (instance: Mocha.Context, isSetup?: boolean) => testTracker.utils.endRollingCount(instance, isSetup);
-export const exitRollingCount = (instance: Mocha.Context, isSetup?: boolean, isTeardown?: boolean) => testTracker.utils.exitRollingCount(instance, isSetup, isTeardown);
+export const isRollingCountError = testTracker.isRollingCountError;
+export const getSuccessCount = testTracker.utils.getSuccessCount;
+export const suiteFinished = testTracker.utils.suiteFinished;
+export const endRollingCount = testTracker.utils.endRollingCount;
+export const exitRollingCount = testTracker.utils.exitRollingCount;
 
 let activated = false;
 let extension: Extension<any>;
@@ -210,15 +209,7 @@ export const cleanup = async () =>
     console.log(`    ${figures.color.info} ${figures.withColor("Tests complete, clean up", colors.grey)}`);
 
     if (teWrapper)
-    {
-        if (tc.log.enabled && tc.log.file && tc.log.openFileOnFinish)
-        {
-            console.log(`    ${figures.color.info}`);
-            console.log(`    ${figures.color.info} ${figures.withColor("Log File Location:", colors.grey)}`);
-            console.log(`    ${figures.color.info} ${figures.withColor("   " + teWrapper.log.getLogFileName(), colors.grey)}`);
-            console.log(`    ${figures.color.info}`);
-        }
-        //
+    {   //
         // Cleanup or reset any settings, and clear license/account from tests storage
         //
         await cleanupSettings();
@@ -232,9 +223,9 @@ export const cleanup = async () =>
         console.log(`    ${figures.color.info} ${figures.withColor("Removing any leftover temporary files", colors.grey)}`);
         // teWrapper.fileWatcher.skipEvent({ files: [ "*" ], type: "all" });
         try {
-            const packageLockFile = path.join(getWsPath("."), "package-lock.json");
-            if (await teWrapper.fs.pathExists(packageLockFile)) {
-                await teWrapper.fs.deleteFile(packageLockFile);
+            const packageLock2Dir = path.join(getWsPath("."), "npm_test");
+            if (await teWrapper.fs.pathExists(packageLock2Dir)) {
+                await teWrapper.fs.deleteDir(packageLock2Dir);
             }
         } catch (e) { console.error(e); }
         // extjsWrapper.fileWatcher.skipEvent({ files: [], type: "all" });
@@ -262,6 +253,14 @@ export const cleanup = async () =>
     //
     await teWrapper.storage.deleteSecret(teWrapper.keys.Storage.Account);
     //
+    // Log file name (log below just before exit, but get path before extension deactivation)
+    //
+    let logFileName: string | undefined;
+    if (tc.log.enabled && tc.log.file && tc.log.openFileOnFinish)
+    {
+        logFileName = teWrapper.log.getLogFileName();
+    }
+    //
     // Deactivate extension / Dispose disposable resources
     //
     console.log(`    ${figures.color.info} ${figures.withColor("Deactivating extension", colors.grey)}`);
@@ -273,6 +272,16 @@ export const cleanup = async () =>
         for (const d of disposables) { const r = d.dispose(); if (teWrapper.typeUtils.isPromise(r)) { await r; }}
     } catch {}
     console.log(`    ${figures.color.info} ${figures.withColor("Extension successfully deactivated", colors.grey)}`);
+    //
+    // Write logfile name for eacy click-access
+    //
+    if (logFileName)
+    {
+        console.log(`    ${figures.color.info}`);
+        console.log(`    ${figures.color.info} ${figures.withColor("Log File Location:", colors.grey)}`);
+        console.log(`    ${figures.color.info} ${figures.withColor("   " + logFileName, colors.grey)}`);
+        console.log(`    ${figures.color.info}`);
+    }
     //
     // Exit
     //
