@@ -7,9 +7,10 @@
  * Watches all configuration parameters that can cause a a tree refresh
  */
 
+import { IDictionary } from ":types";
 import { TeWrapper } from "../lib/wrapper";
 import { executeCommand } from "../lib/command/command";
-import { IDictionary, ITeTreeConfigWatcher } from "../interface";
+import { ITeTreeConfigWatcher } from "../interface";
 import { getScriptTaskTypes, getTaskTypeRealName } from "../lib/utils/taskUtils";
 import { ConfigurationChangeEvent, window, Disposable, Event, EventEmitter, workspace } from "vscode";
 

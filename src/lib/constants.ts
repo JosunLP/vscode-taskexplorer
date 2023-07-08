@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { IDictionary } from ":types";
 import {
-    IDictionary, TeTaskListType, ConfigPrefix, ITeKeys, ConfigKeys, ContextKeys, StorageKeys,
+    TeTaskListType, ConfigPrefix, ITeKeys, ConfigKeys, ContextKeys, StorageKeys,
     UsageKeys, VsCodeCommands, Commands
 } from "../interface";
 

@@ -1,6 +1,6 @@
 
 import { Uri, WorkspaceFolder } from "vscode";
-import { IDictionary, Primitive } from "../../interface";
+import { IDictionary, Primitive } from ":types";
 
 /**
  * @param v Variable to check to see if it's an array

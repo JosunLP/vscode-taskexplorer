@@ -3,10 +3,11 @@
 import { env } from "vscode";
 import { request } from "https";
 // import fetch from ":env/fetch";
+import { IDictionary } from ":types";
 import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "../utils/figures";
-import { IDictionary, TeRuntimeEnvironment } from "../../interface";
+import { TeRuntimeEnvironment } from "../../interface";
 
 // const TLS_REJECT = "0"; // "0" to turn off tls rejection
 

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { join } from "path";
+import { IDictionary } from ":types";
 import { isNumber, isString } from "./utils/typeUtils";
-import { IDictionary, ISecretStorageChangeEvent, IStorage, IStorageChangeEvent, StorageTarget } from "../interface";
+import { ISecretStorageChangeEvent, IStorage, IStorageChangeEvent, StorageTarget } from "../interface";
 import { createDir, pathExistsSync, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./utils/fs";
 import { Memento, ExtensionContext, SecretStorage, ExtensionMode, EventEmitter, Event } from "vscode";
-import { execIf } from "./utils/utils";
 
 export let storage: IStorage;
 

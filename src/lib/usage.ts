@@ -1,8 +1,9 @@
 
+import { IDictionary } from ":types";
 import { TeWrapper } from "./wrapper";
 import { ConfigurationChangeEvent, Disposable, Event, EventEmitter } from "vscode";
 import {
-    IDictionary, ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent,
+    ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent,
     ITeTaskStatusChangeEvent, ILog, ITaskRuntimeInfo, ITeTaskStats
 } from "../interface";
 

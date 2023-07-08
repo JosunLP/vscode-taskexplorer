@@ -8,6 +8,7 @@
  * concepts that got my super-praise (4th time ever) and thus used in Task Explorer as a starting point.
  */
 
+import { IDictionary } from ":types";
 import { getNonce } from ":env/crypto";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
@@ -15,7 +16,7 @@ import { TeWebviewView } from "./webviewView";
 import { TeWebviewPanel } from "./webviewPanel";
 import { fontawesome } from "./common/fontawesome";
 import { executeCommand } from "../lib/command/command";
-import { Commands, IDictionary, ITeWebview, WebviewIds, WebviewPrefix, WebviewViewIds } from "../interface";
+import { Commands, ITeWebview, WebviewIds, WebviewPrefix, WebviewViewIds } from "../interface";
 import {
 	ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, window, workspace
 } from "vscode";

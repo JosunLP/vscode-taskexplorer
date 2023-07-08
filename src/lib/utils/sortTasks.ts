@@ -1,4 +1,5 @@
 
+import { IDictionary } from ":types";
 import { Strings } from "../constants";
 import { isPinned } from "./taskUtils";
 import { TreeItemLabel } from "vscode";
@@ -6,7 +7,7 @@ import { TaskItem } from "../../tree/item";
 import { TaskFile } from "../../tree/file";
 import { TaskFolder } from "../../tree/folder";
 import { configuration } from "../configuration";
-import { IDictionary, TeTaskListType, ConfigKeys } from "../../interface";
+import { TeTaskListType, ConfigKeys } from "../../interface";
 
 
 export const sortFolders = (folders: IDictionary<TaskFolder>): TaskFolder[] =>

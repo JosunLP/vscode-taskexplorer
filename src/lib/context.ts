@@ -1,8 +1,9 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { ITeContext, IDictionary, AllContextKeys, VsCodeCommands, IContextChangeEvent } from "../interface";
+import { IDictionary } from ":types";
 import { commands, Disposable, EventEmitter } from "vscode";
+import { ITeContext, AllContextKeys, VsCodeCommands, IContextChangeEvent } from "../interface";
 
 
 export class TeContext implements ITeContext, Disposable

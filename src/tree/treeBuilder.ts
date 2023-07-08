@@ -1,11 +1,12 @@
 
+import { IDict } from ":types";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeGrouper } from "./treeGrouper";
 import { SpecialTaskFolder } from "./specialFolder";
-import { IDict, ITeTask, TaskMap } from "../interface";
+import { ITeTask, TaskMap } from "../interface";
 import { Task, TreeItemCollapsibleState, Uri, WorkspaceFolder } from "vscode";
 
 

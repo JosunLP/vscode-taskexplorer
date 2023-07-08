@@ -3,7 +3,7 @@ import { ITaskFile } from "./ITaskFile";
 import { ITaskItem } from "./ITaskItem";
 import { ITeWrapper } from "./ITeWrapper";
 import { ITaskFolder } from "./ITaskFolder";
-import { IDictionary } from ":types";
+import { IDictionary, Primitive } from ":types";
 import { ITeTask, TeTaskListType } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
 
@@ -59,8 +59,6 @@ export interface ITeTaskUtilities
 	isWatchTask(source: string, wrapper: ITeWrapper): boolean;
 	toITask(wrapper: ITeWrapper, teTasks: Task[], listType: TeTaskListType): ITeTask[];
 }
-
-export type Primitive = boolean | number | string;
 
 export interface ITeTypeUtilities
 {

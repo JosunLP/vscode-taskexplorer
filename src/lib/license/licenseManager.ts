@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { IDictionary } from ":types";
 import { TeWrapper } from "../wrapper";
 import { ITeApiEndpoint, TeServer } from "./server";
 import { LicensePage } from "../../webview/page/licensePage";
@@ -8,7 +9,7 @@ import { executeCommand, registerCommand } from "../command/command";
 import { IpcAccountRegistrationParams } from "../../webview/common/ipc";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent, ContextKeys,
-	TeLicenseState, IDictionary, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo
+	TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo
 } from "../../interface";
 
 

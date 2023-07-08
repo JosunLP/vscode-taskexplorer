@@ -1,10 +1,11 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { join } from "path";
+import { IDictionary } from ":types";
 import { TeWrapper } from "../lib/wrapper";
 import * as taskTypeUtils from "../lib/utils/taskUtils";
+import { ICacheItem, ITeFileCache } from "../interface";
 import { findFiles, numFilesInDirectory } from "../lib/utils/fs";
-import { IDictionary, ICacheItem, ITeFileCache } from "../interface";
 import { workspace, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent, Event, EventEmitter } from "vscode";
 
 

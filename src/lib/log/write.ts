@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { window } from "vscode"; // TODO - this is used as scope but thought browser 'window' duh
+import { IDictionary } from ":types";
 import { figures } from "../utils/figures";
 import { appendFileSync } from "../utils/fs";
-import { IDictionary, ILogControl } from "../../interface";
+import { ILogControl } from "../../interface";
 
 const colors = figures.colors;
 let logControl: ILogControl;
