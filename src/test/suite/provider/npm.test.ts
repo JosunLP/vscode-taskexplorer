@@ -21,7 +21,7 @@ suite("NPM Tests", () =>
     {
         if (utils.exitRollingCount(this, true)) return;
         ({ teWrapper } = await utils.activate());
-        startTaskCount = tc.isMultiRootWorkspace ? 15 : 0;
+        startTaskCount = tc.isMultiRootWorkspace ? 15 : 5;
         utils.endRollingCount(this, true);
     });
 
@@ -53,27 +53,27 @@ suite("NPM Tests", () =>
 	});
 
 
-    test("Create Package File (package.json)", async function()
-    {
-        if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
-        packageJsonPath = utils.getWsPath("package.json");
-        await writeAndWait(
-            packageJsonPath,
-            "{\r\n" +
-            '    "name": "vscode-taskexplorer",\r\n' +
-            '    "version": "0.0.1",\r\n' +
-            '    "scripts":{\r\n' +
-            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "compile": "cmd.exe /c test.bat",\r\n' +
-            '        "watch": "tsc -watch -p ./",\r\n' +
-            '        "build": "npx tsc -p ./"\r\n' +
-            "    }\r\n" +
-            "}\r\n"
-        );
-        await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
-        utils.endRollingCount(this);
-    });
+    // test("Create Package File (package.json)", async function()
+    // {
+    //     if (utils.exitRollingCount(this)) return;
+    //     this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
+    //     packageJsonPath = utils.getWsPath("package.json");
+    //     await writeAndWait(
+    //         packageJsonPath,
+    //         "{\r\n" +
+    //         '    "name": "vscode-taskexplorer",\r\n' +
+    //         '    "version": "0.0.1",\r\n' +
+    //         '    "scripts":{\r\n' +
+    //         '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
+    //         '        "compile": "cmd.exe /c test.bat",\r\n' +
+    //         '        "watch": "tsc -watch -p ./",\r\n' +
+    //         '        "build": "npx tsc -p ./"\r\n' +
+    //         "    }\r\n" +
+    //         "}\r\n"
+    //     );
+    //     await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
+    //     utils.endRollingCount(this);
+    // });
 
 
     test("Get NPM Task Items", async function()
@@ -105,15 +105,15 @@ suite("NPM Tests", () =>
             '    "name": "vscode-taskexplorer",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "scripts": {\r\n' +
+            '        "build": "npx tsc -p ./"\r\n' +
+            '        "say_hello": "cmd /c echo hello",\r\n' +
             '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
             '        "test2": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "compile": "cmd.exe /c test.bat",\r\n' +
             '        "watch": "tsc -watch -p ./",\r\n' +
-            '        "build": "npx tsc -p ./"\r\n' +
             "    }\r\n" +
             "}\r\n"
         );
-        await utils.verifyTaskCount(testsName, startTaskCount + 6, 2);
+        await utils.verifyTaskCount(testsName, startTaskCount + 1, 2);
         await utils.sleep(25);
         await writeAndWait(
             packageJsonPath as string,
@@ -121,14 +121,14 @@ suite("NPM Tests", () =>
             '    "name": "vscode-taskexplorer",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "scripts": {\r\n' +
-            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "compile": "cmd.exe /c test.bat",\r\n' +
-            '        "watch": "tsc -watch -p ./",\r\n' +
             '        "build": "npx tsc -p ./"\r\n' +
+            '        "say_hello": "cmd /c echo hello",\r\n' +
+            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
+            '        "watch": "tsc -watch -p ./",\r\n' +
             "    }\r\n" +
             "}\r\n"
         );
-        await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
+        await utils.verifyTaskCount(testsName, startTaskCount, 2);
         utils.endRollingCount(this);
     });
 
@@ -142,16 +142,16 @@ suite("NPM Tests", () =>
             "{\r\n" +
             '    "name": "vscode-taskexplorer",\r\n' +
             '    "version": "0.0.1",\r\n' +
-            '    "author": "Scott Meesseman",\r\n' +
+            '    "author": "Scott Meesseman",\r\n' + // <- Add author
             '    "scripts": {\r\n' +
-            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "compile": "cmd.exe /c test.bat",\r\n' +
-            '        "watch": "tsc -watch -p ./",\r\n' +
             '        "build": "npx tsc -p ./"\r\n' +
+            '        "say_hello": "cmd /c echo hello",\r\n' +
+            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
+            '        "watch": "tsc -watch -p ./",\r\n' +
             "    }\r\n" +
             "}\r\n"
         );
-        await utils.verifyTaskCount(testsName, startTaskCount + 5, 2);
+        await utils.verifyTaskCount(testsName, startTaskCount, 2);
         utils.endRollingCount(this);
     });
 
@@ -185,10 +185,10 @@ suite("NPM Tests", () =>
             '    "version": "0.0.1",\r\n' +
             '    "author": "Scott Meesseman",\r\n' +
             '    "scripts": {\r\n' +
-            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "compile": "cmd.exe /c test.bat",\r\n' +
-            '        "watch": "tsc -watch -p ./",\r\n' +
             '        "build": "npx tsc -p ./"\r\n' +
+            '        "say_hello": "cmd /c echo hello",\r\n' +
+            '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
+            '        "watch": "tsc -watch -p ./",\r\n' +
             "    }\r\n" +
             "}\r\n"
         );
@@ -275,6 +275,18 @@ suite("NPM Tests", () =>
         const exec = await executeTeCommand2<TaskExecution | undefined>(
             "runAuditFix", [ npmTaskItems[0].taskFile ], tc.waitTime.npmCommandMin, tc.waitTime.npmCommandMax
         );
+        await utils.waitForTaskExecution(exec);
+        utils.endRollingCount(this);
+    });
+
+
+    test("Run Workspace Integrated Script", async function()
+    {
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.commands.run + tc.slowTime.tasks.npmCommand);
+        const tasks = await utils.treeUtils.getTreeTasks(teWrapper, "Workspace", 3);
+        const task = tasks.find(t => t.label === "say_hello") as ITaskItem;
+        const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ task ], tc.waitTime.runCommandMin) ;
         await utils.waitForTaskExecution(exec);
         utils.endRollingCount(this);
     });

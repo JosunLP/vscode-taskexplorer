@@ -58,17 +58,29 @@
                 "reveal": "never"
             },
             "group": {
-                "kind": "build",
+                "kind": "test",
                 "isDefault": true
             }
         },
         {
             "type": "npm",
             "script": "build",
+            "problemMatcher": "$tsc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "npm",
+            "script": "say_hello",
             "group": "build",
-            "problemMatcher": [
-                "$tsc"
-            ]
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            }
         },
         {
             "type": "shell",
@@ -82,15 +94,6 @@
         {
             "type": "shell",
             "label": "build-prod",
-            "command": "..\\test.bat",
-            "group": "build",
-            "problemMatcher": [
-                "$eslint-stylish"
-            ]
-        },
-        {
-            "type": "shell",
-            "label": "test.bat",
             "command": "..\\test.bat",
             "group": "build",
             "problemMatcher": [

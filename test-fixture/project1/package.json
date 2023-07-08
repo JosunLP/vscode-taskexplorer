@@ -1,0 +1,21 @@
+{
+    "name": "project1",
+    "version": "0.0.1",
+    "description": "Project 1",
+    "license": "MIT",
+    "author": {
+        "name": "Scott Meesseman",
+        "email": "spmeesseman@gmail.com"
+    },
+    "scripts": {
+        "build": "npx tsc -p ./",
+        "say_hello": "cmd /c echo hello",
+        "test": "node ./node_modules/vscode/bin/test",
+        "watch": "tsc -watch -p ./"
+    },
+    "devDependencies": {},
+    "dependencies": {},
+    "files": [
+        "dist"
+    ]
+}
