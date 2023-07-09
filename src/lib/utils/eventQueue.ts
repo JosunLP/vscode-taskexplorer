@@ -55,7 +55,7 @@ export class EventQueue implements IEventQueue, Disposable
                     (e.debounceEvent && !!this._eventQueue.find(de => this.compareDebounceEvent(e, de)));
         if (!has)
         {
-            this.wrapper.log.methodOnce("queue", "queue event", 1, "", [
+            this.wrapper.log.methodEvent("queue", "queue event", 1, [
                 [ "event", e.event ], [ "# of events currently pending", this._eventQueue.length ]
             ]);
             this._eventQueue.push(e);
@@ -82,14 +82,14 @@ export class EventQueue implements IEventQueue, Disposable
         if (next)
         {
             let argCt = 0;
-            this.wrapper.log.methodOnce("queue", "process event", 1, "", [
+            this.wrapper.log.methodEvent("queue", "process event", 1, [
                 [ "next event", next.event ], [ "# of events still pending", this._eventQueue.length ],
                 ...next.args.filter(a => this.wrapper.typeUtils.isPrimitive(a)).map(a => [ `arg ${++argCt}`, a ])
             ]);
             await this.processEvent(next);
         }
         else {
-            this.wrapper.log.methodOnce("queue", "process events complete, queue empty", 1, "");
+            this.wrapper.log.methodEvent("queue", "process events complete, queue empty", 1);
             this._onReady.fire();
         }
     };

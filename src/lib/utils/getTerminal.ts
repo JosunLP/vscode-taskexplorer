@@ -5,21 +5,16 @@
  */
 
 import { basename } from "path";
-import { log } from "../log/log";
 import { window, Terminal } from "vscode";
 import { TaskItem } from "../../tree/item";
 
 
-export const getTerminal = (taskItem: TaskItem, logPad = ""): Terminal | undefined =>
+export const getTerminal = (taskItem: TaskItem): Terminal | undefined =>
 {
-    let checkNum = 0;
     let term: Terminal | undefined;
-
-    log.write("Get terminal", 1, logPad);
 
     if (!window.terminals || window.terminals.length === 0)
     {
-        log.write("   zero terminals alive", 2, logPad);
         return term;
     }
 
@@ -31,13 +26,10 @@ export const getTerminal = (taskItem: TaskItem, logPad = ""): Terminal | undefin
 
     const check = (taskName: string) =>
     {
-        let termNum = 0,
-            term2: Terminal | undefined;
-        log.value("   Checking possible task terminal name #" + (++checkNum).toString(), taskName, 2);
+        let term2: Terminal | undefined;
         taskName = taskName.toLowerCase();
         for (const t of window.terminals)
         {
-            log.value("      == terminal " + (++termNum) + " name", t.name, 2, logPad);
             let termName = t.name.toLowerCase().replace("task - ", "");
             /* istanbul ignore if */
             if (termName.endsWith(" Task")) {
@@ -47,7 +39,6 @@ export const getTerminal = (taskItem: TaskItem, logPad = ""): Terminal | undefin
             if (taskName.indexOf(termName) !== -1 || /* istanbul ignore next */ termName.indexOf(taskName) !== -1)
             {
                 term2 = t;
-                log.write("   found!", 2, logPad);
                 break;
             }
         }

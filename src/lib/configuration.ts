@@ -3,65 +3,79 @@ import { isObject } from "./utils/typeUtils";
 import { IConfiguration } from "../interface/IConfiguration";
 import {
     ConfigurationChangeEvent, workspace, WorkspaceConfiguration, ConfigurationTarget,
-    ExtensionContext, ExtensionMode, Event, EventEmitter
+    ExtensionContext, ExtensionMode, Event, EventEmitter, Disposable
 } from "vscode";
 
 
-class Configuration implements IConfiguration
+class Configuration implements IConfiguration, Disposable
 {
-    private isDev = false;
-    private isTests = false;
-    private pkgJsonCfgProps: any;
-    private baseConfigSection = "taskexplorer";
+    private _isDev = false;
+    private _isTests = false;
+    private _pkgJsonCfgProps: any;
     private configuration: WorkspaceConfiguration;
     private configurationGlobal: WorkspaceConfiguration;
-    private _onDidChange = new EventEmitter<ConfigurationChangeEvent>();
+
+    private readonly _disposables: Disposable[];
+    private readonly _baseConfigSection = "taskexplorer";
+    private readonly _onDidChange = new EventEmitter<ConfigurationChangeEvent>();
+    private readonly _onDidChangeHighPriority: EventEmitter<ConfigurationChangeEvent>;
 
 
     constructor()
     {
-        this.configuration = workspace.getConfiguration(this.baseConfigSection);
+        this._pkgJsonCfgProps = {};
+        this._onDidChange = new EventEmitter<ConfigurationChangeEvent>();
+        this._onDidChangeHighPriority = new EventEmitter<ConfigurationChangeEvent>();
+        this.configuration = workspace.getConfiguration(this._baseConfigSection);
         this.configurationGlobal = workspace.getConfiguration();
+        this._disposables = [
+            this._onDidChange,
+            this._onDidChangeHighPriority
+        ];
     }
 
 
-	public get onDidChange(): Event<ConfigurationChangeEvent> {
+    dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
+
+	get onDidChange(): Event<ConfigurationChangeEvent> {
+		return this._onDidChange.event;
+	}
+
+	get onDidChangeHighPriority(): Event<ConfigurationChangeEvent> {
 		return this._onDidChange.event;
 	}
 
 
     public initialize(context: ExtensionContext)
     {
-        this.isTests = context.extensionMode === ExtensionMode.Test;
-        this.isDev = context.extensionMode === ExtensionMode.Development;
-        this.configurationGlobal = workspace.getConfiguration();
-        this.configuration = workspace.getConfiguration(this.baseConfigSection);
-        this.pkgJsonCfgProps = {};
+        this._isTests = context.extensionMode === ExtensionMode.Test;
+        this._isDev = context.extensionMode === ExtensionMode.Development;
         const pkgJsonConfiguration = context.extension.packageJSON.contributes.configuration;
-        pkgJsonConfiguration.forEach((c: any) => Object.assign(this.pkgJsonCfgProps, c.properties));
-        context.subscriptions.push(
-            this._onDidChange,
+        pkgJsonConfiguration.forEach((c: any) => Object.assign(this._pkgJsonCfgProps, c.properties));
+        this._disposables.push(
             workspace.onDidChangeConfiguration(this.onConfigurationChanged, this)
         );
+        context.subscriptions.push(this);
     }
 
 
     private onConfigurationChanged(e: ConfigurationChangeEvent)
     {
-        if (e.affectsConfiguration(this.baseConfigSection))
+        if (e.affectsConfiguration(this._baseConfigSection))
         {
-            this.configuration = workspace.getConfiguration(this.baseConfigSection);
+            this.configuration = workspace.getConfiguration(this._baseConfigSection);
             this.configurationGlobal = workspace.getConfiguration();
+            this._onDidChangeHighPriority.fire(e);
             this._onDidChange.fire(e);
         }
     }
 
 
     affectsConfiguration = (e: ConfigurationChangeEvent, ...settings: string[]) =>
-        !!settings.find(s => e.affectsConfiguration(`${this.baseConfigSection}.${s.replace(`${this.baseConfigSection}.`, "")}`));
+        !!settings.find(s => e.affectsConfiguration(`${this._baseConfigSection}.${s.replace(`${this._baseConfigSection}.`, "")}`));
 
 
-    public get = <T>(key: string, defaultValue?: T) => this.configuration.get<T>(key, defaultValue!);
+    get = <T>(key: string, defaultValue?: T) => this.configuration.get<T>(key, defaultValue!);
 
 
     private getSettingKeys(key: string)
@@ -69,15 +83,15 @@ class Configuration implements IConfiguration
         let propertyKey = key,
             valueKey = key,
             isObject = false;
-        if (!this.pkgJsonCfgProps[propertyKey] && key.includes("."))
+        if (!this._pkgJsonCfgProps[propertyKey] && key.includes("."))
         {
             let propsKey = "";
             const keys = key.split(".");
             for (let i = 0; i < keys.length - 1; i++) {
                 propsKey += ((i > 0 ? "." : "") + keys[i]);
             }
-            const pkgJsonPropsKey = this.baseConfigSection + "." + propsKey;
-            if (this.pkgJsonCfgProps[pkgJsonPropsKey] && this.pkgJsonCfgProps[pkgJsonPropsKey].type === "object")
+            const pkgJsonPropsKey = this._baseConfigSection + "." + propsKey;
+            if (this._pkgJsonCfgProps[pkgJsonPropsKey] && this._pkgJsonCfgProps[pkgJsonPropsKey].type === "object")
             {
                 isObject = true;
                 propertyKey = propsKey;
@@ -97,66 +111,26 @@ class Configuration implements IConfiguration
      * Example:
      *     getGlobal<string>("terminal.integrated.shell.windows", "")
      */
-    public getVs = <T>(key: string, defaultValue?: T) => this.configurationGlobal.get<T>(key, defaultValue!);
+    getVs = <T>(key: string, defaultValue?: T) => this.configurationGlobal.get<T>(key, defaultValue!);
 
 
-    public updateVs = (key: string, value: any): Thenable<void> => this.configurationGlobal.update(key, value, ConfigurationTarget.Global);
+    updateVs = (key: string, value: any): Thenable<void> => this.configurationGlobal.update(key, value, ConfigurationTarget.Global);
 
 
-    public updateVsWs = (key: string, value: any): Thenable<void> => this.configurationGlobal.update(key, value, ConfigurationTarget.Workspace);
+    updateVsWs = (key: string, value: any): Thenable<void> => this.configurationGlobal.update(key, value, ConfigurationTarget.Workspace);
 
 
-    public update(key: string, value: any): Thenable<void>
-    {
-        const settingKeys = this.getSettingKeys(key);
-        if (settingKeys.isObject)
-        {
-            const v = this.get<any>(settingKeys.pKey);
-            // if (value !== undefined) {
-                v[settingKeys.vKey] = value;
-            //  }
-            //  else {
-            //      delete v[settingKeys.vKey];
-            //  }
-            value = v;
-        }
-        else if (isObject(value))
-        {
-            const v = this.get<object>(settingKeys.pKey, {});
-            value = Object.assign(v, value);
-        }
-        return this.configuration.update(settingKeys.pKey, value, this.isDev || this.isTests ?
-                                         ConfigurationTarget.Workspace : /* istanbul ignore next */ConfigurationTarget.Global);
-    }
+    update = (key: string, value: any): Thenable<void> =>
+        this._update(key, value, this._isDev || this._isTests ? ConfigurationTarget.Workspace : /* istanbul ignore next */ConfigurationTarget.Global);
 
 
-    public updateWs(key: string, value: any): Thenable<void>
-    {
-        const settingKeys = this.getSettingKeys(key);
-        if (settingKeys.isObject)
-        {
-            const v = this.get<any>(settingKeys.pKey);
-            // if (value !== undefined) {
-                v[settingKeys.vKey] = value;
-            // }
-            // else {
-            //     delete v[settingKeys.vKey];
-            // }
-            value = v;
-        }
-        else if (isObject(value))
-        {
-            const v = this.get<object>(settingKeys.pKey, {});
-            value = Object.assign(v, value);
-        }
-        return this.configuration.update(settingKeys.pKey, value, ConfigurationTarget.Workspace);
-    }
+    updateWs = (key: string, value: any): Thenable<void> => this._update(key, value, ConfigurationTarget.Workspace);
 
 
     // public updateWsf(section: string, value: any, uri?: Uri): Thenable<void>
     // {
     //     uri = uri || (workspace.workspaceFolders ? workspace.workspaceFolders[0].uri : undefined);
-    //     return workspace.getConfiguration(baseConfigSection, uri).update(section, value, ConfigurationTarget.WorkspaceFolder);
+    //     return workspace.getConfiguration(_baseConfigSection, uri).update(section, value, ConfigurationTarget.WorkspaceFolder);
     // }
 
 
@@ -165,11 +139,32 @@ class Configuration implements IConfiguration
     //     return this.configuration.inspect(section);
     // }
 
+
+    private _update = (key: string, value: any, target: ConfigurationTarget) =>
+    {
+        let v = value;
+        const settingKeys = this.getSettingKeys(key);
+        if (settingKeys.isObject)
+        {
+            v = this.get<Record<string, any>>(settingKeys.pKey, value);
+            // if (value !== undefined) {
+                v[settingKeys.vKey] = value;
+            // }
+            // else {
+            //     delete v[settingKeys.vKey];
+            // }
+        }
+        else if (isObject(value))
+        {
+            v = Object.assign(this.get<Record<string, any>>(settingKeys.pKey, {}), value);
+           // Object.keys(v).filter(k => v[k] === undefined).forEach(k => delete v[k]);
+        }
+        return this.configuration.update(settingKeys.pKey, v, target);
+    };
+
 }
 
 export const configuration = new Configuration();
 
-export const registerConfiguration = (context: ExtensionContext) =>
-{
-    configuration.initialize(context);
-};
+
+export const initConfiguration = (context: ExtensionContext) => configuration.initialize(context);

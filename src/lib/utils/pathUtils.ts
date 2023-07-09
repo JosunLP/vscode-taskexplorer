@@ -1,11 +1,10 @@
 
 import { homedir } from "os";
-import { log } from "../log/log";
 import { execIf, wrap } from "./utils";
 import { isWorkspaceFolder } from "./typeUtils";
 import { pathExists, pathExistsSync } from "./fs";
 import { Task, Uri, WorkspaceFolder } from "vscode";
-import { ITaskDefinition, ITaskFolder } from ":types";
+import { ILog, ITaskDefinition, ITaskFolder } from ":types";
 import { basename, dirname, join, resolve, sep } from "path";
 
 
@@ -38,7 +37,7 @@ export const getInstallPathSync = (): string =>
 };
 
 
-export const getPortableDataPath = (logPad = ""): string | undefined | void =>
+export const getPortableDataPath = (): string | undefined | void =>
 {
     return execIf(process.env.VSCODE_PORTABLE, (portablePath) =>
     {
@@ -47,9 +46,8 @@ export const getPortableDataPath = (logPad = ""): string | undefined | void =>
         {
             return wrap(() => {
                 const fullPath = join(uri.fsPath, "user-data", "User");
-                log.value(logPad + "found portable user data path", fullPath, 4);
                 return fullPath;
-            }, [ log.error ], this);
+            }, [ () => {} ], this);
         }
     }, this);
 };
@@ -126,22 +124,19 @@ export const getTaskRelativePath = (task: Task): string =>
 export const getUserDataPath = (platform?: string, logPad = ""): string =>
 {
     let userPath: string | undefined | void = "";
-    log.write(logPad + "get user data path", 4);
-    logUserDataEnv(logPad + "   ");
     //
     // Check if data path was passed on the command line
     //
     let argvIdx = process.argv.indexOf("--user-data-dir");
     if (argvIdx !== -1) {
         userPath = resolve(process.argv[++argvIdx]);
-        log.value(logPad + "user path is", userPath, 4);
         return userPath;
     }
     //
     // If this is a portable install (zip install), then VSCODE_PORTABLE will be defined in the
     // environment this process is running in
     //
-    userPath = getPortableDataPath(logPad + "   ");
+    userPath = getPortableDataPath();
     if (!userPath)
     {   //
         // Use system user data path
@@ -149,7 +144,6 @@ export const getUserDataPath = (platform?: string, logPad = ""): string =>
         userPath = getDefaultUserDataPath(platform);
     }
     userPath = resolve(userPath);
-    log.value(logPad + "user path is", userPath, 4);
     return userPath;
 };
 
@@ -184,18 +178,4 @@ const getDefaultUserDataPath = (platform?: string): string =>
         }
     }
     return join(appDataPath, "vscode");
-};
-
-
-const logUserDataEnv = (padding: string): void =>
-{
-    if (log.isLoggingEnabled())
-    {
-        log.value(padding + "os", process.platform, 4);
-        log.value(padding + "portable", process.env.VSCODE_PORTABLE, 4);
-        log.value(padding + "env:VSCODE_APPDATA", process.env.VSCODE_APPDATA, 4);
-        log.value(padding + "env:VSCODE_APPDATA", process.env.APPDATA, 4);
-        log.value(padding + "env:VSCODE_APPDATA", process.env.USERPROFILE, 4);
-        log.value("env:XDG_CONFIG_HOME", process.env.XDG_CONFIG_HOME, 4); // linux
-    }
 };

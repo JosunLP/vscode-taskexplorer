@@ -2,10 +2,8 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
-import { IDictionary } from ":types";
 import { getUuid } from ":env/crypto";
 import { TeContext } from "./context";
-import { logControl } from "./log/log";
 import { figures } from "./utils/figures";
 import { TeStatusBar } from "./statusBar";
 import * as utilities from "./utils/utils";
@@ -63,7 +61,7 @@ import {
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, ILog, ITaskTreeView, ITeFilesystem,
 	ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities,
-	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeKeys
+	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeKeys, IDictionary, ILogControl
 } from "../interface";
 
 
@@ -567,8 +565,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._log;
 	}
 
-	get logControl(): typeof logControl {
-		return logControl;
+	get logControl(): ILogControl {
+		return this._log.control;
 	}
 
 	/* istanbul ignore next */

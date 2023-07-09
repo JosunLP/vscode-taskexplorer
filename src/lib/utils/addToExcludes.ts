@@ -1,11 +1,10 @@
 
-
-import { log } from "../log/log";
+import { ILog } from ":types";
 import { configuration } from "../configuration";
 import { pushIfNotExists, removeFromArray } from "./utils";
 
 
-export const addToExcludes = async(paths: string[], excludesList: string, logPad: string) =>
+export const addToExcludes = async(paths: string[], excludesList: string, log: ILog, logPad: string) =>
 {
     const excludes = configuration.get<string[]>(excludesList, []);
     log.methodStart("add to excludes", 2, logPad, false, [[ "paths", paths.join(", ") ]]);
@@ -17,7 +16,7 @@ export const addToExcludes = async(paths: string[], excludesList: string, logPad
 };
 
 
-export const removeFromExcludes = async(paths: string[], excludesList: string, logPad: string) =>
+export const removeFromExcludes = async(paths: string[], excludesList: string, log: ILog, logPad: string) =>
 {
     const excludes = configuration.get<string[]>(excludesList, []);
     log.methodStart("remove from excludes", 2, logPad, false, [[ "paths", paths.join(", ") ]]);

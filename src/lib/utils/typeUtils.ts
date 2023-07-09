@@ -1,6 +1,6 @@
 
 import { Uri, WorkspaceFolder } from "vscode";
-import { IDictionary, Primitive } from ":types";
+import { IDictionary, Primitive } from "../../interface";
 
 /**
  * @param v Variable to check to see if it's an array
@@ -24,7 +24,7 @@ export const isArray = <T>(v: any, allowEmp?: boolean): v is T[] => !!v && Array
 export const isBoolean = (v: any): v is boolean => (v === false || v === true) && typeof v === "boolean";
 
 
-// export const isDate = (v: any): v is Date => !!v && Object.prototype.toString.call(v) === "[object Date]";
+export const isDate = (v: any): v is Date => !!v && Object.prototype.toString.call(v) === "[object Date]";
 
 
 // export const isDefined = (v: any) => typeof v !== "undefined";

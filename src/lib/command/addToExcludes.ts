@@ -31,7 +31,7 @@ export class AddToExcludesCommand implements Disposable
             {
                 const taskType = globKey.replace("GLOB_", "").toLowerCase();
                 this.wrapper.treeManager.configWatcher.enableConfigWatcher(false);
-                await addToExcludes([ uri.path ], "exclude", "   ");
+                await addToExcludes([ uri.path ], "exclude", this.wrapper.log, "   ");
                 this.wrapper.treeManager.configWatcher.enableConfigWatcher(true);
                 await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, "   ");
             }
@@ -42,7 +42,7 @@ export class AddToExcludesCommand implements Disposable
             }
         }
         else {
-            await addToExcludes([ uri.path + "/**" ], "exclude", "   ");
+            await addToExcludes([ uri.path + "/**" ], "exclude", this.wrapper.log, "   ");
         }
         this.wrapper.log.methodDone("add to excludes file explorer command", 1, "");
     };

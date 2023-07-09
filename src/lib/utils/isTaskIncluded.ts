@@ -31,7 +31,7 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
     if (isVsCodeNpmTaskSource)
     {
         const usesIntNpmProvider = wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider);
-        if (usesIntNpmProvider || wrapper.utils.isExcluded(wrapper.pathUtils.getTaskAbsolutePath(task)))
+        if (usesIntNpmProvider || wrapper.utils.isExcluded(wrapper.pathUtils.getTaskAbsolutePath(task), wrapper.log))
         {
             wrapper.log.write("   skipping vscode provided npm task", 4, logPad, logQueueId);
             return false;

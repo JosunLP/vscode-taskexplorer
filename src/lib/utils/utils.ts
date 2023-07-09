@@ -1,14 +1,13 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { log } from "../log/log";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
 import { isArray, isFunction, isPromise, isString } from "./typeUtils";
-import { ConfigKeys, CallbackOptions, CallbackArray } from "../../interface";
+import { ConfigKeys, CallbackOptions, CallbackArray, ILog } from "../../interface";
 
 
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
@@ -169,7 +168,7 @@ export const isTeEnabled = () => configuration.get<boolean>(ConfigKeys.EnableSid
                                  configuration.get<boolean>(ConfigKeys.EnableExplorerTree);
 
 
-export const isExcluded = (uriPath: string, logPad = "") =>
+export const isExcluded = (uriPath: string, log: ILog, logPad = "") =>
 {
     const exclude = uniq(configuration.get<string[]>("exclude", []));
     log.methodStart("Check exclusion", 4, logPad, false, [[ "path", uriPath ]]);
@@ -226,11 +225,7 @@ export const lowerCaseFirstChar = (s: string, removeSpaces: boolean) =>
 };
 
 
-export const openUrl = (url: string) =>
-{
-    log.methodOnce("homeview", "open url", 1, log.getLogPad(), [[ "url", url ]]);
-    env.openExternal(Uri.parse(url));
-};
+export const openUrl = (url: string) => env.openExternal(Uri.parse(url));
 
 
 export const pushIfNotExists = (arr: string[] | undefined, ...item: string[]) => { if (arr) { item.forEach(i => { if (!arr.includes(i)) { arr.push(i); } }); return arr; }};

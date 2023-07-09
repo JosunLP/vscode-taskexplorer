@@ -28,9 +28,9 @@ export class Usage implements ITeUsage, Disposable
         this.log = wrapper.log;
         this._onDidFamousTasksChange = new EventEmitter<ITeTaskChangeEvent>();
 		this._onDidChange = new EventEmitter<ITeUsageChangeEvent | undefined>();
-        this._trackUsage = this.wrapper.config.get<boolean>(wrapper.keys.Config.TrackUsage);
-        this._trackTaskStats = this.wrapper.config.get<boolean>(wrapper.keys.Config.TaskMonitorTrackStats);
-        this._allowUsageReporting = this.wrapper.config.get<boolean>(wrapper.keys.Config.AllowUsageReporting);
+        this._trackUsage = this.wrapper.config.get<boolean>(wrapper.keys.Config.TrackUsage, true);
+        this._trackTaskStats = this.wrapper.config.get<boolean>(wrapper.keys.Config.TaskMonitorTrackStats, true);
+        this._allowUsageReporting = this.wrapper.config.get<boolean>(wrapper.keys.Config.AllowUsageReporting, false);
 		this._disposables.push(
 			this._onDidChange,
 			this._onDidFamousTasksChange,
@@ -242,11 +242,11 @@ export class Usage implements ITeUsage, Disposable
     {
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TrackUsage))
         {
-            this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage);
+            this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage, true);
         }
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.TaskMonitorTrackStats))
         {
-            this._trackTaskStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats);
+            this._trackTaskStats = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats, true);
             if (this._trackTaskStats && !this._trackUsage)
             {
                 this._trackUsage = this._trackTaskStats;
@@ -255,7 +255,7 @@ export class Usage implements ITeUsage, Disposable
         }
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.AllowUsageReporting))
         {
-            this._allowUsageReporting = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.AllowUsageReporting);
+            this._allowUsageReporting = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.AllowUsageReporting, false);
         }
     };
 
@@ -373,7 +373,7 @@ export class Usage implements ITeUsage, Disposable
     {
         let added = false,
             changed = false;
-        const specTaskListLength = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFoldersNumLastTasks);
+        const specTaskListLength = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFoldersNumLastTasks, 10);
         //
         // First remove this task from the list of it is present, it'll be put back
         // in the following steps

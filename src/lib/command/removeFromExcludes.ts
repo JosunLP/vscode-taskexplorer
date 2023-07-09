@@ -29,7 +29,7 @@ export class RemoveFromExcludesCommand implements Disposable
             {
                 const taskType = globKey.replace("GLOB_", "").toLowerCase();
                 this.wrapper.treeManager.configWatcher.enableConfigWatcher(false);
-                await removeFromExcludes([ uri.path ], "exclude", "   ");
+                await removeFromExcludes([ uri.path ], "exclude", this.wrapper.log, "   ");
                 this.wrapper.treeManager.configWatcher.enableConfigWatcher(true);
                 await executeCommand(this.wrapper.keys.Commands.Refresh, taskType, uri, "   ");
             }
@@ -40,7 +40,7 @@ export class RemoveFromExcludesCommand implements Disposable
             }
         }
         else {
-            await removeFromExcludes([ uri.path + "/**" ], "exclude", "   ");
+            await removeFromExcludes([ uri.path + "/**" ], "exclude", this.wrapper.log, "   ");
         }
         this.wrapper.log.methodDone("remove from excludes file explorer command", 1, "");
     };

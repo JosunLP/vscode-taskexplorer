@@ -544,7 +544,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private onTasksChanged = (e: ITeTaskChangeEvent) =>
 	{
-		this.wrapper.log.methodOnce("license event", "on tasks changed", 1, "");
+		this.wrapper.log.methodEvent("license event", "on tasks changed", 1);
 		if (e.tasks.length > this.getMaxNumberOfTasks(e.task?.source)) {
 			this.setMaxTasksReached();
 			this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", "");
