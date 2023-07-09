@@ -22,7 +22,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
 {
     const _getTaskMap = async(retries: number): Promise<TaskMap> =>
     {
-        let taskMap = teWrapper.treeManager.taskMap;
+        let taskMap: any = teWrapper.treeManager.taskMap;
 
         if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findTaskTypeInTaskMap(taskType, taskMap))
         {

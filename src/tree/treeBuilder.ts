@@ -11,12 +11,11 @@ import { Task, TreeItemCollapsibleState, Uri, WorkspaceFolder } from "vscode";
 
 export class TaskTreeBuilder
 {
-    private _taskMap: TaskMap<TaskItem>;
-    private _taskFileMap: TaskMap<TaskFile>;
-    private _taskFolderMap: TaskMap<TaskFolder|SpecialTaskFolder>;
-
     private readonly _taskFolders: TaskFolder[];
+    private readonly _taskMap: TaskMap<TaskItem>;
     private readonly _treeGrouper: TaskTreeGrouper;
+    private readonly _taskFileMap: TaskMap<TaskFile>;
+    private readonly _taskFolderMap: TaskMap<TaskFolder|SpecialTaskFolder>;
 
 
     constructor(private readonly wrapper: TeWrapper)
@@ -143,7 +142,9 @@ export class TaskTreeBuilder
     {
         this._taskFolders.splice(0);
         if (!source) {
-            this._taskMap = {}; this._taskFileMap = {}; this._taskFolderMap = {};
+            Object.keys(this._taskMap).forEach(k => delete this._taskMap[k]);
+            Object.keys(this._taskFileMap).forEach(k => delete this._taskMap[k]);
+            Object.keys(this._taskFolderMap).forEach(k => delete this._taskMap[k]);
         }
         else
         {

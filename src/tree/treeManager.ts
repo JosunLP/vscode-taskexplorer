@@ -228,15 +228,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // this.tasks cache at this point, as extension provided tasks will have been skipped/ignored in the
         // provideTasks() processing.
         //
-        const rmv = w.utils.popIfExistsBy(this._tasks,
-            (t) => !isTaskIncluded(w, t, w.pathUtils.getTaskRelativePath(t), logPad + "   ") ||
+        const rmv = w.utils.popIfExistsBy(this._tasks, (t) =>
+            !isTaskIncluded(w, t, w.pathUtils.getTaskRelativePath(t), logPad + "   ") ||
             //
             // Fng VSCode internal task providers suck *****.  I mean, come on.  Add a package.json to a folder,
             // see the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
             // provided by the engine.  Couldn't spend the time to set up a fs watcher I guess.  SO that's all
             // internal providers - they all suck.  Gulp, Grunt, NPM... who coded this ****???
             //
-            !w.fs.pathExistsSync(join(w.pathUtils.getTaskAbsolutePath(t, true))), this
+            !w.fs.pathExistsSync(w.pathUtils.getTaskAbsolutePath(t, true)), this
         );
         w.log.write(`   removed ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
         //
