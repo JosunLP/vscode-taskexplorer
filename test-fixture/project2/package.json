@@ -25,10 +25,6 @@
     },
     "devDependencies": {},
     "dependencies": {},
-    "main": "./project2.js",
-    "bin": {
-        "spm-project2": "./spm-project2.js"
-    },
     "files": [
         "etc",
         "spm-project2.js",

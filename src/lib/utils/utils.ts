@@ -194,7 +194,7 @@ export const isExcluded = (uriPath: string, log: ILog, logPad = "") =>
 };
 
 
-const isCallbackArray = (v: any): v is CallbackArray => !!v && isArray(v) && isFunction(v[0]);
+const isCallbackArray = <T = any>(v: any): v is CallbackArray<T> => !!v && isArray(v) && isFunction(v[0]);
 
 
 /**
@@ -365,15 +365,19 @@ export const textWithElipsis = (text: string, maxLength: number) => text.length 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
 
 
+// export const upperCaseFirstChar = (text: string): string => text.replace(/(?:^\w|[A-Za-z]|\b\w)/g, (l, i) => (i !== 0 ? l : l.toUpperCase()));
+
+
 export function wrap<R, E>(runFn: () => R, catchFn: CallbackOptions, thisArg?: any): R;
 export function wrap<R, E, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1): R;
 export function wrap<R, E, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2): R;
 export function wrap<R, E, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
 export function wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
 export function wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
-export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFn?: CallbackOptions, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
+export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFinallyOpts?: CallbackOptions, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
 {
-    let result;
+    let result,
+        failed = false;
     try
     {
         result = runFn.call(thisArg, arg1, arg2, arg3, arg4, arg5);
@@ -381,11 +385,12 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
         {
             result = result.then<R, E>((r) => r, (e) =>
             {
-                if (!isCallbackArray(catchFn)) {
-                    result = (catchFn || wrapThrow).call(thisArg, e);
+                if (!isCallbackArray<E>(catchFinallyOpts)) {
+                    result = (catchFinallyOpts || wrapThrow).call(thisArg, e);
                 }
                 else {
-                    result = catchFn.splice(0, 1)[0].call(thisArg, e, ...catchFn);
+                    failed = true;
+                    result = catchFinallyOpts.shift().call(thisArg, e, ...catchFinallyOpts);
                 }
                 if (isPromise<E>(result)) {
                     result = result.then<E, any>((e) => e, wrapThrow);
@@ -396,14 +401,31 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
     }
     catch (e)
     {
-        if (!isCallbackArray(catchFn)) {
-            result = (catchFn || wrapThrow).call(thisArg, e);
+        failed = true;
+        if (!isCallbackArray<E>(catchFinallyOpts)) {
+            result = (catchFinallyOpts || wrapThrow).call(thisArg, e);
         }
         else {
-            result = catchFn.splice(0, 1)[0].call(thisArg, e, ...catchFn);
+            result = catchFinallyOpts.shift().call(thisArg, e, ...catchFinallyOpts);
         }
         if (isPromise<E>(result)) {
             result = result.then<E, any>((e) => e, wrapThrow);
+        }
+    }
+    finally
+    {
+        if (isCallbackArray<E>(catchFinallyOpts))
+        {   //
+            // If we failed, then the `catchFinallyOpts` array will have had it's 1st element removed
+            //
+            const fn = failed ? catchFinallyOpts[0] : catchFinallyOpts[1];
+            if (isFunction(fn))
+            {
+                let fResult = fn.call(thisArg);
+                if (isPromise<E>(fResult)) {
+                    fResult = fResult.then<E, any>((e) => e, wrapThrow);
+                }
+            }
         }
     }
     return result;

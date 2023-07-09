@@ -110,8 +110,8 @@ export interface ITeTypeUtilities
 	isWorkspaceFolder(v: any): v is WorkspaceFolder;
 }
 
-export type CallbackArray = [ (...args: any[]) => any, ...any[] ];
-export type CallbackOptions = CallbackArray | null | undefined | false;
+export type CallbackArray<E> = [ (e: E, ...args: any[]) => any, ...any[] ];
+export type CallbackOptions<E = any> = CallbackArray<E> | null | undefined | false;
 
 export interface ITeUtilities
 {
@@ -173,11 +173,11 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap<R, E>(runFn: () => R, catchFn: CallbackOptions, thisArg?: any): R;
-	wrap<R, E, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1): R;
-	wrap<R, E, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2): R;
-	wrap<R, E, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
-	wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
-	wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
-	wrap<R, E = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFn?: CallbackOptions, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R;
+	wrap<R, E>(runFn: () => R, catchFn: CallbackOptions<E>, thisArg?: any): R;
+	wrap<R, E, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions<E>, thisArg: any, arg1: A1): R;
+	wrap<R, E, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions<E>, thisArg: any, arg1: A1, arg2: A2): R;
+	wrap<R, E, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions<E>, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
+	wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions<E>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
+	wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions<E>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
+	wrap<R, E = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFn?: CallbackOptions<E>, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R;
 }

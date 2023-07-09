@@ -108,11 +108,11 @@ suite("NPM Tests", () =>
             '    "name": "project1",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "scripts": {\r\n' +
-            '        "build": "npx tsc -p ./"\r\n' +
+            '        "build": "npx tsc -p ./",\r\n' +
             '        "say_hello": "cmd /c echo hello",\r\n' +
             '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
             '        "test2": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "watch": "tsc -watch -p ./",\r\n' +
+            '        "watch": "tsc -watch -p ./"\r\n' +
             "    }\r\n" +
             "}\r\n"
         );
@@ -124,10 +124,10 @@ suite("NPM Tests", () =>
             '    "name": "project1",\r\n' +
             '    "version": "0.0.1",\r\n' +
             '    "scripts": {\r\n' +
-            '        "build": "npx tsc -p ./"\r\n' +
+            '        "build": "npx tsc -p ./",\r\n' +
             '        "say_hello": "cmd /c echo hello",\r\n' +
             '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "watch": "tsc -watch -p ./",\r\n' +
+            '        "watch": "tsc -watch -p ./"\r\n' +
             "    }\r\n" +
             "}\r\n"
         );
@@ -147,10 +147,10 @@ suite("NPM Tests", () =>
             '    "version": "0.0.1",\r\n' +
             '    "author": "Scott Meesseman",\r\n' + // <- Add author
             '    "scripts": {\r\n' +
-            '        "build": "npx tsc -p ./"\r\n' +
+            '        "build": "npx tsc -p ./",\r\n' +
             '        "say_hello": "cmd /c echo hello",\r\n' +
             '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "watch": "tsc -watch -p ./",\r\n' +
+            '        "watch": "tsc -watch -p ./"\r\n' +
             "    }\r\n" +
             "}\r\n"
         );
@@ -168,7 +168,7 @@ suite("NPM Tests", () =>
             "{\r\n" +
             '    "name": "project1",\r\n' +
             '    "version": "0.0.1",\r\n' +
-            '    "author": "Scott Meesseman",\r\n' +
+            '    "author": "Scott Meesseman"\r\n' +
             "}\r\n"
         );
         // - 2 /  + 3 because tasks.json still points to the build script (+ install task)
@@ -188,10 +188,10 @@ suite("NPM Tests", () =>
             '    "version": "0.0.1",\r\n' +
             '    "author": "Scott Meesseman",\r\n' +
             '    "scripts": {\r\n' +
-            '        "build": "npx tsc -p ./"\r\n' +
+            '        "build": "npx tsc -p ./",\r\n' +
             '        "say_hello": "cmd /c echo hello",\r\n' +
             '        "test": "node ./node_modules/vscode/bin/test",\r\n' +
-            '        "watch": "tsc -watch -p ./",\r\n' +
+            '        "watch": "tsc -watch -p ./"\r\n' +
             "    }\r\n" +
             "}\r\n"
         );
@@ -213,7 +213,7 @@ suite("NPM Tests", () =>
     test("Document Position", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount);
+        npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount - 4); // only the 'test' task from project1 should be in the tree
         this.slow(tc.slowTime.tasks.findPosition + tc.slowTime.tasks.getTreeTasks + (tc.slowTime.tasks.findPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
         for (const taskItem of npmTaskItems) {
             await executeTeCommand2("open", [ taskItem ], tc.waitTime.commandFast);
