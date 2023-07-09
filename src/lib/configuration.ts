@@ -18,19 +18,19 @@ class Configuration implements IConfiguration, Disposable
     private readonly _disposables: Disposable[];
     private readonly _baseConfigSection = "taskexplorer";
     private readonly _onDidChange = new EventEmitter<ConfigurationChangeEvent>();
-    private readonly _onDidChangeHighPriority: EventEmitter<ConfigurationChangeEvent>;
+    // private readonly _onDidChangeHighPriority: EventEmitter<ConfigurationChangeEvent>;
 
 
     constructor()
     {
         this._pkgJsonCfgProps = {};
         this._onDidChange = new EventEmitter<ConfigurationChangeEvent>();
-        this._onDidChangeHighPriority = new EventEmitter<ConfigurationChangeEvent>();
+        // this._onDidChangeHighPriority = new EventEmitter<ConfigurationChangeEvent>();
         this.configuration = workspace.getConfiguration(this._baseConfigSection);
         this.configurationGlobal = workspace.getConfiguration();
         this._disposables = [
-            this._onDidChange,
-            this._onDidChangeHighPriority
+            this._onDidChange
+            // this._onDidChangeHighPriority
         ];
     }
 
@@ -41,9 +41,9 @@ class Configuration implements IConfiguration, Disposable
 		return this._onDidChange.event;
 	}
 
-	get onDidChangeHighPriority(): Event<ConfigurationChangeEvent> {
-		return this._onDidChange.event;
-	}
+	// get onDidChangeHighPriority(): Event<ConfigurationChangeEvent> {
+	// 	return this._onDidChange.event;
+	// }
 
 
     public initialize(context: ExtensionContext)
@@ -65,7 +65,7 @@ class Configuration implements IConfiguration, Disposable
         {
             this.configuration = workspace.getConfiguration(this._baseConfigSection);
             this.configurationGlobal = workspace.getConfiguration();
-            this._onDidChangeHighPriority.fire(e);
+            // this._onDidChangeHighPriority.fire(e);
             this._onDidChange.fire(e);
         }
     }

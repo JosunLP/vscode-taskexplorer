@@ -438,8 +438,12 @@ suite("Util Tests", () =>
 		// expect(teWrapper.typeUtils.isError(33)).to.be.equal(false);
 		// expect(teWrapper.typeUtils.isError(33)).to.be.equal(false);
 		// expect(teWrapper.typeUtils.isError(new Error("Test"))).to.be.equal(true);
-		// expect(teWrapper.typeUtils.isDate(33)).to.be.equal(false);
-		// expect(teWrapper.typeUtils.isDate(new Date())).to.be.equal(true);
+		expect(teWrapper.typeUtils.isDate(33)).to.be.equal(false);
+		expect(teWrapper.typeUtils.isDate(new Date())).to.be.equal(true);
+		expect(teWrapper.typeUtils.isObject({}));
+		expect(teWrapper.typeUtils.isObject({test: 1 }));
+		expect(teWrapper.typeUtils.isObject(new Object()));
+		expect(!teWrapper.typeUtils.isObject("string"));
 		expect(teWrapper.typeUtils.isObjectEmpty(null)).to.be.equal(true);
 		expect(teWrapper.typeUtils.asArray(1, true)).to.be.an("array").with.length(1);
 		expect(teWrapper.typeUtils.asArray(1)).to.be.an("array").with.length(1);
@@ -464,6 +468,47 @@ suite("Util Tests", () =>
 		expect(teWrapper.typeUtils.isPromise(teWrapper.utils.sleep(5))).to.be.equal(true);
 		expect(teWrapper.typeUtils.isPromise({ dispose: () => {} })).to.be.equal(false);
 		expect(teWrapper.typeUtils.isPromise({ then: () => {} })).to.be.equal(true);
+		//
+		// Merge / Clone
+		//
+		teWrapper.objUtils.apply({}, undefined as any);
+		teWrapper.objUtils.apply(undefined as any, {});
+		teWrapper.objUtils.apply({}, {});
+		teWrapper.objUtils.apply({ a: 1 }, {});
+		teWrapper.objUtils.apply({ a: 1, b: { a: 1 }}, { a: 2 });
+		teWrapper.objUtils.apply({ a: 1, b: { a: 1 }}, { a: 2, c: { b: 2 }}, { b: 2 });
+		// teWrapper.objUtils.clone(undefined);
+		// teWrapper.objUtils.clone({});
+		// teWrapper.objUtils.clone({ a: 1 });
+		// teWrapper.objUtils.clone({ a: 1, b: { a: 1 } });
+		// teWrapper.objUtils.clone([ 1, 2 ]);
+		// teWrapper.objUtils.clone(new Date());
+		// teWrapper.objUtils.merge({}, {});
+		// teWrapper.objUtils.merge({ a: 1, b: 2 }, { c: 3 });
+		// teWrapper.objUtils.merge({ a: 1, b: { c: 1 } }, { b: { d: 1 }, c: 3 });
+		// teWrapper.objUtils.merge({ a: 1, b: { c: 1 } }, { b: { c: 2, d: 1 }, c: 3 });
+		// teWrapper.objUtils.merge({ a: 1, b: [ 1, 2 ] }, { b: [ 3, 4 ], c: 3 });
+		// teWrapper.objUtils.merge({ a: 1, b: [ 1, 2 ] }, { a: 2, b: [ 3, 4 ], c: 3 });
+		// teWrapper.objUtils.merge({ a: 1, b: [ 1, 2 ] }, { a: { a: 2 }, b: [ 3, 4 ], c: 3 });
+		// teWrapper.objUtils.merge({ a: 1, b: [ 1, 2 ] }, { b: [ 1 ], c: 3, d: new Date() });
+		// teWrapper.objUtils.merge({ a: 1, b: [{ a: 1 }] }, { b: [{ b: 1 }], c: 3 });
+		// teWrapper.objUtils.merge({ a: 1, b: [{ a: 1 }], c: { a: 1 }}, { b: [{ a: 2 }]});
+		// teWrapper.objUtils.merge({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], c: { a: 1 }});
+		// teWrapper.objUtils.merge({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], b: { a: 1 }});
+		// teWrapper.objUtils.merge({ a: 1, b: { a: 1 }, c: { a: 1 }, d: new Date()}, { a: [ 1 ], b: [{ a: 1 }]});
+		// teWrapper.objUtils.merge({ a: 1, b: { a: 1 }, c: { a: 1 }, d: new Date()}, { a: [ 1 ], b: 1});
+		// teWrapper.objUtils.merge({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], b: [{ b: 2 }]});
+		// teWrapper.objUtils.merge({ a: 1, b: [ 1 ], c: { a: 1 }, d: new Date()}, { a: [ 1 ], b: [ 2 ]});
+		// teWrapper.objUtils.mergeIf({}, {});
+		// teWrapper.objUtils.mergeIf({ a: 1, b: 2 }, { c: 3 });
+		// teWrapper.objUtils.mergeIf({ a: 1, b: { c: 1 } }, { b: { d: 1 }, c: 3 });
+		// teWrapper.objUtils.mergeIf({ a: 1, b: { c: 1 } }, { b: { c: 2, d: 1 }, c: 3 });
+		// teWrapper.objUtils.mergeIf({ a: 1, b: [ 1, 2 ] }, { b: [ 3, 4 ], c: 3 });
+		// teWrapper.objUtils.mergeIf({ a: 1, b: [ 1, 2 ] }, { b: [ 1 ], c: 3, d: new Date() });
+		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }] }, { b: [{ b: 1 }], c: 3 });
+		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }], c: { a: 1 }}, { b: [{ a: 2 }]});
+		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], c: { a: 1 }});
+		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], c: { a: 1 }});
 		//
 		// wrap
 		//
@@ -503,7 +548,8 @@ suite("Util Tests", () =>
 		expect(wasException).to.be.equal(false);
         expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return 1; }, [ () => {}, () => {} ], this)).to.be.equal(1);
 		await teWrapper.utils.wrap(() => { return new Promise<any>((r, rej) => { rej(new Error("Test async error 2")); }); }, [ () => {} ], this);
-		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return "done"; }, [ teWrapper.log.error ], this)).to.be.equal("done");
+		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return "done"; }, [ teWrapper.log.error, () => {} ], this)).to.be.equal("done");
+		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return "done"; }, [ teWrapper.log.error, async () => { await teWrapper.utils.sleep(1); } ], this)).to.be.equal("done");
 		wasException = false;
 		try {
 			expect(await teWrapper.utils.wrap(async () => { throw new Error("Test async error 2"); }, [ (e) => { return "safe catch"; }, () => {} ], this)).to.be.equal("safe catch");

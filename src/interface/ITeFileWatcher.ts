@@ -12,7 +12,7 @@ export interface IFileSystemEvent
 export interface ITeFileWatcher
 {
     readonly isBusy: boolean;
-    readonly onEvent: Event<IFileSystemEvent>;
+    // readonly onEvent: Event<IFileSystemEvent>;
     readonly onReady: Event<void>;
     init(logPad: string): void;
     onWsFoldersChange(e: WorkspaceFoldersChangeEvent): Promise<void>;

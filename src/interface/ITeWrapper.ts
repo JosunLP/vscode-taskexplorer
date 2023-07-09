@@ -20,7 +20,7 @@ import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
 import { ConfigKeys, IConfiguration } from "./IConfiguration";
 import { ExtensionContext, Event, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
-	ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
+	ITeCommonUtilities, ITeObjectUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "./ITeUtilities";
 
 export type TeRuntimeEnvironment = "dev" | "tests" | "production";
@@ -77,6 +77,7 @@ export interface ITeWrapper
 	readonly licensePage: ITeWebview;
 	readonly log: ILog;
 	readonly logControl: Record<string, any>;
+	readonly objUtils: ITeObjectUtilities;
 	readonly parsingReportPage: ITeWebview;
 	readonly pathUtils: ITePathUtilities;
 	readonly promiseUtils: ITePromiseUtilities;

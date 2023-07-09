@@ -7,6 +7,7 @@ import { getUuid } from ":env/crypto";
 import { TeContext } from "./context";
 import { figures } from "./utils/figures";
 import { TeStatusBar } from "./statusBar";
+import * as objUtils from "./utils/object";
 import * as utilities from "./utils/utils";
 import * as sorters from "./utils/sortTasks";
 import * as pathUtils from "./utils/pathUtils";
@@ -62,7 +63,7 @@ import {
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, ILog, ITaskTreeView, ITeFilesystem,
 	ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities,
-	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeKeys, IDictionary, ILogControl
+	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeKeys, IDictionary, ILogControl, ITeObjectUtilities
 } from "../interface";
 
 
@@ -569,6 +570,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	get logControl(): ILogControl {
 		return this._log.control;
+	}
+
+	get objUtils(): ITeObjectUtilities {
+		return objUtils;
 	}
 
 	/* istanbul ignore next */

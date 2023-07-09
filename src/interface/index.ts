@@ -21,12 +21,21 @@ export type { ITaskTreeEvent, ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
 export type { ILog, ILogControl, ILogQueueItem, LogLevel, LogType } from "./ILog";
 export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from "./IStorage";
 export type { ITeFileWatcher, FileSystemEventType, IFileSystemEvent } from "./ITeFileWatcher";
-export type { ITeWebview, WebviewViewIds, TreeviewIds, WebviewIds, WebviewId, TreeviewId, ITreeview } from "./ITeWebview";
 export type { ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionChangeEvent } from "./ITeLicenseManager";
+export type { ITeWebview, WebviewViewIds, TreeviewIds, WebviewIds, WebviewId, TreeviewId, ITreeview } from "./ITeWebview";
 export type { AllContextKeys, IContextChangeEvent, TreeviewContextKey, WebviewContextKey, WebviewViewContextKey } from "./ITeContext";
-export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType, TeTaskSource, TeTaskNonScriptType, TeTaskScriptType } from "./ITeTask";
-export type { AllUsageKeys, ITeUsage, ITaskRuntimeInfo, ITeTaskStats, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount, WebviewUsageKey, WebviewViewUsageKey, TreeviewUsageKey } from "./ITeUsage";
-export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, PromiseAdapter, CallbackOptions, CallbackArray, OneOf, IDictionary, Primitive, ObjectDiff } from "./ITeUtilities";
+export type {
+    ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType, TeTaskSource,
+    TeTaskNonScriptType, TeTaskScriptType
+} from "./ITeTask";
+export type {
+    AllUsageKeys, ITeUsage, ITaskRuntimeInfo, ITeTaskStats, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount,
+    WebviewUsageKey, WebviewViewUsageKey, TreeviewUsageKey
+} from "./ITeUsage";
+export type {
+    ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, OneOf,
+    ITeTypeUtilities, PromiseAdapter, CallbackOptions, CallbackArray, IDictionary, Primitive, ObjectDiff, ITeObjectUtilities
+} from "./ITeUtilities";
 
 export { UsageKeys } from "./ITeUsage";
 export { ContextKeys } from "./ITeContext";

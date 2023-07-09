@@ -38,16 +38,16 @@ export interface ObjectDiff
 //     newValue: any;
 // }
 
-export interface IObjectUtils
+export interface ITeObjectUtilities
 {
     apply<T extends IDictionary<any>>(object: IDictionary<any>, config: IDictionary<any>, defaults?: IDictionary<any>): T;
-    clone<T>(item: any): T;
-    diff(oldObj: IDictionary<any>, newObj: IDictionary<any>): ObjectDiff;
-    merge<T extends IDictionary<any>>(...destination: IDictionary<any>[]): T;
-    mergeIf<T extends IDictionary<any>>(...destination: IDictionary<any>[]): T;
-    pick<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T;
-    pickBy<T extends Record<string, any>>(obj: T, pickFn: <K extends keyof T>(k: K) => boolean | undefined): T ;
-    pickNot<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T;
+    // clone<T>(item: any): T;
+    // diff(oldObj: IDictionary<any>, newObj: IDictionary<any>): ObjectDiff;
+    // merge<T extends IDictionary<any>>(...destination: IDictionary<any>[]): T;
+    // mergeIf<T extends IDictionary<any>>(...destination: IDictionary<any>[]): T;
+    // pick<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T;
+    // pickBy<T extends Record<string, any>>(obj: T, pickFn: <K extends keyof T>(k: K) => boolean | undefined): T ;
+    // pickNot<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T;
 }
 
 export interface ITePathUtilities

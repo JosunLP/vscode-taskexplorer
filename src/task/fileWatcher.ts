@@ -20,7 +20,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     private readonly _queueOwner = "fw";
     private readonly _disposables: Disposable[];
     private readonly _onReady: EventEmitter<void>;
-    private readonly _onFsEvent: EventEmitter<IFileSystemEvent>;
+    // private readonly _onFsEvent: EventEmitter<IFileSystemEvent>;
     private readonly _watchers: { [taskType: string]: FileSystemWatcher } = {};
     private readonly _watcherDisposables: { [taskType: string]: Disposable[] } = {};
     private readonly _dirWatcher: { watcher?: FileSystemWatcher; onDidCreate?: Disposable; onDidDelete?: Disposable } = {};
@@ -31,7 +31,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         this._disposables = [];
         this._skipNextEvent = [];
 		this._onReady = new EventEmitter<void>();
-		this._onFsEvent = new EventEmitter<IFileSystemEvent>();
+		// this._onFsEvent = new EventEmitter<IFileSystemEvent>();
         //
         // Record ws folder count and `rootPath` (which is deprecated but still causes the dumb extension
         // restart when changed?) so that we can detect when a workspace is opened/closed, when a single
@@ -55,7 +55,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         this._disposables.push(
             this._onReady,
-            this._onFsEvent,
+            // this._onFsEvent,
             wrapper.eventQueue.onReady(() => this._onReady.fire(), this),
             workspace.onDidChangeWorkspaceFolders(this.onWsFoldersChange, this)
         );
@@ -72,7 +72,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     get isBusy(): boolean { return this._busy || this.wrapper.eventQueue.isBusy(this._queueOwner); }
 
-    get onEvent(): Event<IFileSystemEvent> { return this._onFsEvent.event; }
+    // get onEvent(): Event<IFileSystemEvent> { return this._onFsEvent.event; }
 
     get onReady(): Event<void> { return this._onReady.event; }
 
@@ -407,7 +407,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         const numFilesFound = await w.fileCache.addFolder(uri, logPad + "   ");
         if (numFilesFound > 0) {
             await executeCommand(w.keys.Commands.Refresh, undefined, uri, logPad + "   ");
-            this._onFsEvent.fire({ files: [ uri.fsPath ], type: "create" }); // TODO - list files
+            // this._onFsEvent.fire({ files: [ uri.fsPath ], type: "create" }); // TODO - list files
         }
         w.log.methodDone("[event] directory 'create'", 1, logPad);
     };
@@ -428,7 +428,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             //     await this.wrapper.utils.sleep(3500);
             // }
             await executeCommand(w.keys.Commands.Refresh, undefined, uri, logPad + "   ");
-            this._onFsEvent.fire({ files: [ uri.fsPath ], type: "delete" }); // TODO - list files
+            // this._onFsEvent.fire({ files: [ uri.fsPath ], type: "delete" }); // TODO - list files
         }
         w.log.methodDone("[event] directory 'delete'", 1, logPad);
     };
@@ -449,10 +449,9 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             procEvent = numFilesRemoved !== 0;
             w.log.write(`   removed ${numFilesRemoved} file(s) from file cache`, 2);
         }
-        if (procEvent) {
-            await executeCommand(w.keys.Commands.Refresh, taskType, uri, "   ");
-            this._onFsEvent.fire({ files: [ uri.fsPath ], type });
-        }
+        await this.wrapper.utils.execIf(procEvent,
+            () => executeCommand(w.keys.Commands.Refresh, taskType, uri, "   "), this)
+        ;
         w.log.methodDone(`[event] file '${type}'`, 1);
     };
 

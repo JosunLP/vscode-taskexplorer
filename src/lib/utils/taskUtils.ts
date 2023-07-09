@@ -108,9 +108,6 @@ export const isPinned = (id: string, listType: TeTaskListType): boolean =>
 export const isScriptType = (source: TeTaskSource) => (<TeTaskSource[]>getScriptTaskTypes()).includes(source);
 
 
-export const isTaskType = (source: string) => (<string[]>getTaskTypes()).includes(source);
-
-
 export const isConstTaskCountType = (taskType: TeTaskSource) =>
     taskType === "apppublisher" || taskType === "maven" || taskType === "tsc" || taskType === "jenkins" || taskType === "webpack";
 
