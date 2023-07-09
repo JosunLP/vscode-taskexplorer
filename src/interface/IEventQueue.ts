@@ -3,7 +3,7 @@ export interface IEventTask
 {
     args: any[];
     data?: any;
-    debounceEvent?: string;
+    debounceEvent?: string | undefined;
     event: string;
     ignoreActive?: boolean;
     owner: string;

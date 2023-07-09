@@ -21,7 +21,7 @@ export class TeMigration
             if (groupSep !== "-" && groupSep !== "_" && groupSep !== ":" && groupSep !== "|") {
                 await this.configuration.update(ConfigKeys.GroupSeparator, "-");
             }
-
+            /*
             const taskTypes = getTaskTypes();
             taskTypes.push("ansicon");
             for (const taskType of taskTypes)
@@ -44,6 +44,7 @@ export class TeMigration
                     await this.configuration.update(newEnabledSetting, oldSettingValue2);
                 }
             }
+            */
             await this.storage.update("taskexplorer.v3SettingsUpgrade", true);
         }
     };

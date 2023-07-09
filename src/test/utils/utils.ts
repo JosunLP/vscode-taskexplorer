@@ -501,7 +501,7 @@ export const verifyTaskCount = async (taskType: string, expectedCount: number, r
             tTasks = tTasks.filter(t => !!t.definition.uri);
         }
         else if (taskType === "npm" && !teWrapper.config.get<boolean>(teWrapper.keys.Config.UseNpmProvider)) {
-            tTasks = tTasks.filter(t => !teWrapper.typeUtils.isWorkspaceFolder(t.scope) || !teWrapper.utils.isExcluded(path.join(t.scope.uri.fsPath, t.definition.path || "")));
+            tTasks = tTasks.filter(t => teWrapper.fs.pathExistsSync(teWrapper.pathUtils.getTaskAbsolutePath(t, true)) && (!teWrapper.typeUtils.isWorkspaceFolder(t.scope) || !teWrapper.utils.isExcluded(path.join(t.scope.uri.fsPath, t.definition.path || ""))));
         }
     }
     if (expectedCount >= 0) {
@@ -543,54 +543,83 @@ export const waitForTaskExecution = async (exec: TaskExecution | undefined, maxW
 };
 
 
-export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
+export const waitForTeIdle = async (minWait = 1, maxWait = 15000, delay = 0, verbose = false) =>
 {
-    const now = Date.now();
+    const now = Date.now(),
+          eventsProcessed: string[] = [];
     let waited = 0;
-    if (!teWrapper.busy) {
+    if (verbose) consoleWrite("START: WAIT FOR TASK EXPLORER IDLE");
+    if (delay > 0) {
+        if (verbose) consoleWrite(`   Delay ${delay}ms`);
+        await sleep(delay);
+    }
+    if (!teWrapper.busy)
+    {
+        if (verbose) consoleWrite("   Not busy, stall");
         const preWait = minWait > 30 ? 30 : minWait;
-        while (waited < preWait && !teWrapper.busy) {
+        while (waited < preWait && !teWrapper.busy)
+        {
             await sleep(10);
             waited += 10;
         }
     }
     const _event = () =>
     {
-        let event: Event<any> | undefined;
+        let event: [ Event<any>, string ] | undefined;
         if (!teWrapper.isReady) {
-            event = teWrapper.onReady;
+            event = [ teWrapper.onReady, "wrapper" ];
         }
         else if (teWrapper.fileCache.isBusy) {
-            event = teWrapper.fileCache.onReady;
+            event = [ teWrapper.fileCache.onReady, "fileCache" ];
         }
         else if (teWrapper.fileWatcher.isBusy) {
-            event = teWrapper.fileWatcher.onReady;
+            event = [ teWrapper.fileWatcher.onReady, "fileWatcher" ];
         }
         else if (teWrapper.licenseManager.isBusy) {
-            event = teWrapper.licenseManager.onReady;
+            event = [ teWrapper.licenseManager.onReady, "licenseManager" ];
         }
         else if (teWrapper.treeManager.configWatcher.isBusy) {
-            event = teWrapper.treeManager.configWatcher.onReady;
+            event = [ teWrapper.treeManager.configWatcher.onReady, "treeManager" ];
         }
         else if (teWrapper.treeManager.isBusy) {
-            event = teWrapper.treeManager.onDidAllTasksChange;
+            event = [ teWrapper.treeManager.onDidAllTasksChange, "treeManager" ];
         }
         return event;
     };
     if (teWrapper.busy)
     {
-        let event = _event();
-        while (event) {
+        if (verbose) consoleWrite("   Busy");
+        let eventInfo = _event();
+        while (eventInfo)
+        {
+            if (eventsProcessed.length >= 3 && eventsProcessed[0] === eventInfo[1] && eventsProcessed[1] === eventInfo[1] && eventsProcessed[2] === eventInfo[1])
+            {
+                if (verbose) {
+                    consoleWrite(`   Event '${eventInfo[1]}' fired 3 times, break wait`);
+                }
+                break;
+            }
+            if (verbose) {
+                consoleWrite(`   Wait for event '${eventInfo[1]}'`);
+            }
             await Promise.race<any>([
-                promiseFromEvent<any, any>(event).promise,
+                promiseFromEvent<any, any>(eventInfo[0]).promise,
                 new Promise<any>(resolve => setTimeout(resolve, maxWait - waited))
             ]);
             waited = Date.now() - now;
-            event = _event();
+            eventsProcessed.unshift(eventInfo[1]);
+            if (verbose) {
+                consoleWrite(`   Event '${eventInfo[1]}' has fired, continue`);
+            }
+            if (waited < maxWait) {
+                eventInfo = _event();
+            }
         };
     }
+    if (verbose) consoleWrite("   Not busy");
     if (minWait > waited)
     {
+        if (verbose) consoleWrite("   Waiting minumum specified time");
         const  toWait = minWait - waited;
         if (toWait >= 40)
         {
@@ -603,6 +632,7 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000) =>
             await sleep(toWait);
         }
     }
+    consoleWrite("COMPLETE: WAIT FOR TASK EXPLORER IDLE");
 };
 
 
@@ -680,7 +710,20 @@ export const waitForWebviewsIdle = async (minWait = 1, maxWait = 15000) =>
 };
 
 
-export const writeAndWait = async (path: string, content: string, maxWait = 30000) =>
+export const deleteAndWait = async (path: string, content: string, maxWait = 15000) =>
+{
+    await waitForTeIdle2(1);
+    if (teWrapper.fs.isDirectory(path)) {
+        void teWrapper.fs.deleteDir(path);
+    }
+    else {
+        void teWrapper.fs.deleteFile(path);
+    }
+    await waitForEvent(teWrapper.treeManager.onDidAllTasksChange, maxWait);
+};
+
+
+export const writeAndWait = async (path: string, content: string, maxWait = 15000) =>
 {
     await waitForTeIdle2(1);
     void teWrapper.fs.writeFile(path, content);

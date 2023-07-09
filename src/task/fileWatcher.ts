@@ -2,9 +2,9 @@
 
 import { extname } from "path";
 import { TeWrapper } from "../lib/wrapper";
-import { ITeFileWatcher } from "../interface";
 import { executeCommand } from "../lib/command/command";
 import { getTaskTypes, isConstTaskCountType, isScriptType } from "../lib/utils/taskUtils";
+import { FileSystemEventType, IFileSystemEvent, ITeFileWatcher, TeTaskSource } from "../interface";
 import {
     Disposable, FileSystemWatcher, workspace, WorkspaceFolder, Uri, WorkspaceFoldersChangeEvent, Event, EventEmitter
 } from "vscode";
@@ -20,6 +20,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     private readonly _queueOwner = "fw";
     private readonly _disposables: Disposable[];
     private readonly _onReady: EventEmitter<void>;
+    private readonly _onFsEvent: EventEmitter<IFileSystemEvent>;
     private readonly _watchers: { [taskType: string]: FileSystemWatcher } = {};
     private readonly _watcherDisposables: { [taskType: string]: Disposable[] } = {};
     private readonly _dirWatcher: { watcher?: FileSystemWatcher; onDidCreate?: Disposable; onDidDelete?: Disposable } = {};
@@ -30,6 +31,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         this._disposables = [];
         this._skipNextEvent = [];
 		this._onReady = new EventEmitter<void>();
+		this._onFsEvent = new EventEmitter<IFileSystemEvent>();
         //
         // Record ws folder count and `rootPath` (which is deprecated but still causes the dumb extension
         // restart when changed?) so that we can detect when a workspace is opened/closed, when a single
@@ -53,6 +55,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         //
         this._disposables.push(
             this._onReady,
+            this._onFsEvent,
             wrapper.eventQueue.onReady(() => this._onReady.fire(), this),
             workspace.onDidChangeWorkspaceFolders(this.onWsFoldersChange, this)
         );
@@ -67,13 +70,11 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     }
 
 
-    get isBusy(): boolean {
-        return this._busy || this.wrapper.eventQueue.isBusy(this._queueOwner);
-    }
+    get isBusy(): boolean { return this._busy || this.wrapper.eventQueue.isBusy(this._queueOwner); }
 
-    get onReady(): Event<void> {
-        return this._onReady.event;
-    }
+    get onEvent(): Event<IFileSystemEvent> { return this._onFsEvent.event; }
+
+    get onReady(): Event<void> { return this._onReady.event; }
 
 
     private createDirWatcher = () =>
@@ -128,6 +129,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         const isDir = this.wrapper.fs.isDirectory(uri.fsPath);
         if (isDir && !this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
         {
+            // this._busy = true;
             void this.wrapper.eventQueue.queue({
                 fn: this._procDirCreateEvent,
                 scope: this,
@@ -186,10 +188,10 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
             {
                 void w.eventQueue.queue(
                 {
-                    args: [ taskType, uri ],
+                    args: [ taskType, uri, "change" ],
                     data: uri.fsPath,
                     event: `changeefile-${uri.fsPath}`,
-                    fn: this._procFileChangeEvent,
+                    fn: this._procFileEvent,
                     ignoreActive: true,
                     owner: this._queueOwner,
                     scope: this,
@@ -208,15 +210,16 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         {
             void this.wrapper.eventQueue.queue(
             {
-                fn: this._procFileCreateEvent,
+                fn: this._procFileEvent,
                 scope: this,
-                args: [ taskType, uri ],
+                args: [ taskType, uri, "create" ],
                 owner: this._queueOwner,
                 event: `createefile-${uri.fsPath}`,
                 type: "create",
                 ignoreActive: true,
                 waitReady: true,
-                data: uri.fsPath
+                data: uri.fsPath,
+                debounceEvent: "createdir-" + (<WorkspaceFolder>workspace.getWorkspaceFolder(uri)).uri.fsPath
             });
         }
         this.decrementSkipEvent(uri);
@@ -229,15 +232,16 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         {
             void this.wrapper.eventQueue.queue(
             {
-                fn: this._procFileDeleteEvent,
+                fn: this._procFileEvent,
                 scope: this,
-                args: [ taskType, uri ],
+                args: [ taskType, uri, "delete" ],
                 owner: this._queueOwner,
                 event: `deleteefile-${uri.fsPath}`,
                 type: "delete",
                 ignoreActive: true,
                 waitReady: true,
-                data: uri.fsPath
+                data: uri.fsPath,
+                debounceEvent: "deletedir-" + (<WorkspaceFolder>workspace.getWorkspaceFolder(uri)).uri.fsPath
             });
         }
         this.decrementSkipEvent(uri);
@@ -337,16 +341,9 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
 
     /**
-     * Registers file watchers for a specific task type using the specified glob pattern.
-     *
-     * @param context Extension context
-     * @param taskType Task type, i.e. 'ant', 'bash' 'python', etc...
-     * @param fileBlob The file blob to use for the watchers, defined in constants module for each task type
-     * @param firstRun Is first run (ins initializing)
-     * @param enabled Is enabled.  `false` if task type was disabled.
-     * @param logPad Log padding.
+     * Registers file watchers for a specific task type using the specified glob pattern
      */
-    registerFileWatcher = async(taskType: string, firstRun: boolean, enabled: boolean, logPad: string) =>
+    registerFileWatcher = async(taskType: TeTaskSource, firstRun: boolean, enabled: boolean, logPad: string) =>
     {
         const w = this.wrapper;
         w.log.methodStart("register file watcher for task type '" + taskType + "'", 1, logPad, false, [[ "enabled", enabled ]]);
@@ -410,6 +407,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         const numFilesFound = await w.fileCache.addFolder(uri, logPad + "   ");
         if (numFilesFound > 0) {
             await executeCommand(w.keys.Commands.Refresh, undefined, uri, logPad + "   ");
+            this._onFsEvent.fire({ files: [ uri.fsPath ], type: "create" }); // TODO - list files
         }
         w.log.methodDone("[event] directory 'create'", 1, logPad);
     };
@@ -420,39 +418,42 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         const w = this.wrapper;
         w.log.methodStart("[event] directory 'delete'", 1, logPad, true, [[ "dir", uri.fsPath ]]);
         const numFilesRemoved = w.fileCache.removeFolderFromCache(uri, logPad + "   ");
-        if (numFilesRemoved > 0) {
+        if (numFilesRemoved > 0)
+        {
+            w.log.write(`   removed ${numFilesRemoved} file(s) from file cache`, 2);
+            // if (procEvent && taskType === "npm")
+            // {   //
+            //     // Let the poor VSCode programmer's sh** NPM provider code catch up, since it s***s
+            //     //
+            //     await this.wrapper.utils.sleep(3500);
+            // }
             await executeCommand(w.keys.Commands.Refresh, undefined, uri, logPad + "   ");
+            this._onFsEvent.fire({ files: [ uri.fsPath ], type: "delete" }); // TODO - list files
         }
         w.log.methodDone("[event] directory 'delete'", 1, logPad);
     };
 
 
-    private _procFileChangeEvent = async(taskType: string, uri: Uri) =>
+    private _procFileEvent = async (taskType: string, uri: Uri, type: FileSystemEventType): Promise<void> =>
     {
+        let procEvent = true;
         const w = this.wrapper;
-        w.log.methodStart("[event] file 'change'", 1, "", true, [[ "file", uri.fsPath ]]);
-        await executeCommand(w.keys.Commands.Refresh, taskType, uri, "   ");
-        w.log.methodDone("[event] file 'change'", 1);
-    };
-
-
-    private _procFileCreateEvent = async(taskType: string, uri: Uri) =>
-    {
-        const w = this.wrapper;
-        w.log.methodStart("[event] file 'create'", 1, "", true, [[ "file", uri.fsPath ]]);
-        w.fileCache.addFileToCache(taskType, uri, "   ");
-        await executeCommand(w.keys.Commands.Refresh, taskType, uri, "   ");
-        w.log.methodDone("[event] file 'create'", 1);
-    };
-
-
-    private _procFileDeleteEvent = async(taskType: string, uri: Uri) =>
-    {
-        const w = this.wrapper;
-        w.log.methodStart("[event] file 'delete'", 1, "", true, [[ "file", uri.fsPath ]]);
-        w.fileCache.removeFileFromCache(taskType, uri, "   ");
-        await executeCommand(w.keys.Commands.Refresh, taskType, uri, "   ");
-        w.log.methodDone("[event] file 'delete'", 1);
+        w.log.methodStart(`[event] file '${type}'`, 1, "", true, [[ "fs path", uri.fsPath ]]);
+        if (type === "create")
+        {
+            w.fileCache.addFileToCache(taskType, uri, "   ");
+        }
+        else if (type === "delete")
+        {
+            const numFilesRemoved = w.fileCache.removeFileFromCache(taskType, uri, "   ");
+            procEvent = numFilesRemoved !== 0;
+            w.log.write(`   removed ${numFilesRemoved} file(s) from file cache`, 2);
+        }
+        if (procEvent) {
+            await executeCommand(w.keys.Commands.Refresh, taskType, uri, "   ");
+            this._onFsEvent.fire({ files: [ uri.fsPath ], type });
+        }
+        w.log.methodDone(`[event] file '${type}'`, 1);
     };
 
 

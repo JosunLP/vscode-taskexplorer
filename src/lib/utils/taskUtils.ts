@@ -7,7 +7,7 @@ import { getCombinedGlobPattern } from "./utils";
 import { configuration } from "../configuration";
 import { pickBy, properCase } from "./commonUtils";
 import { Globs, PinnedStorageKey } from "../constants";
-import { ConfigPrefix, ITaskDefinition, ITeTask, ITeWrapper, TeTaskListType } from "../../interface";
+import { ConfigPrefix, ITaskDefinition, ITeTask, ITeWrapper, TaskScriptType, TaskSource, TeTaskListType, TeTaskScriptType, TeTaskSource } from "../../interface";
 
 
 export const getGlobPattern = (taskType: string) =>
@@ -25,7 +25,7 @@ export const getGlobPattern = (taskType: string) =>
 };
 
 
-export const getScriptTaskTypes = (): string[] => [ "bash", "batch", "node", "nsis", "perl", "powershell", "python", "ruby" ];
+export const getScriptTaskTypes = (): readonly TeTaskScriptType[] => TaskScriptType;
 
 
 /**
@@ -50,10 +50,7 @@ export const getTaskTypeSettingName = (taskType: string, settingPart: string) =>
 export const getTaskTypeEnabledSettingName = (taskType: string) => getTaskTypeSettingName(taskType, "enabledTasks.");
 
 
-export const getTaskTypes = () => [
-    "ant", "apppublisher", "bash", "batch", "composer",  "gradle", "grunt", "gulp", "jenkins", "make",
-    "maven", "node", "npm", "nsis", "perl", "powershell", "python", "pipenv", "ruby", "tsc", "webpack",  "Workspace"
-];
+export const getTaskTypes = (): readonly TeTaskSource[] => TaskSource;
 
 
 // Will bomb because we reference the fn in runTest. Just keep a static list i guess.  leaving commented for now...
@@ -65,30 +62,30 @@ export const getTaskTypes = () => [
 
 export const getTaskTypeFriendlyName = (taskType: string, lowerCase = false) =>
 {
-    taskType = taskType.toLowerCase();
-    if (taskType === "workspace") {
+    const taskTypeLwr = taskType.toLowerCase();
+    if (taskTypeLwr === "workspace") {
         return lowerCase ? "vscode" : "VSCode";
     }
-    else if (taskType === "apppublisher") {
+    else if (taskTypeLwr === "apppublisher") {
         return lowerCase ? "app-publisher" : "App-Publisher";
     }
-    else if (taskType === "tsc") {
+    else if (taskTypeLwr === "tsc") {
         return lowerCase ? "typescript" : "Typescript";
     }
-    else if (taskType === "node") {
+    else if (taskTypeLwr === "node") {
         return lowerCase ? "nodejs" : "NodeJS";
     }
-    return lowerCase ? taskType : properCase(taskType);
+    return lowerCase ? taskTypeLwr : properCase(taskType);
 };
 
 
-export const getTaskTypeRealName = (taskType: string) =>
+export const getTaskTypeRealName = (taskType: string): TeTaskSource =>
 {
-    taskType = taskType.toLowerCase();
-    if (taskType === "workspace") {
+    const taskTypeLwr = taskType.toLowerCase();
+    if (taskTypeLwr === "workspace") {
         return "Workspace";
     }
-    return taskType;
+    return <TeTaskSource>taskType;
 };
 
                                                                                                               //
@@ -108,14 +105,17 @@ export const isPinned = (id: string, listType: TeTaskListType): boolean =>
 };
 
 
-export const isScriptType = (source: string) => getScriptTaskTypes().includes(source);
+export const isScriptType = (source: TeTaskSource) => (<TeTaskSource[]>getScriptTaskTypes()).includes(source);
 
 
-export const isConstTaskCountType = (taskType: string) =>
+export const isTaskType = (source: string) => (<string[]>getTaskTypes()).includes(source);
+
+
+export const isConstTaskCountType = (taskType: TeTaskSource) =>
     taskType === "apppublisher" || taskType === "maven" || taskType === "tsc" || taskType === "jenkins" || taskType === "webpack";
 
 
-export const isWatchTask = (source: string, wrapper: ITeWrapper) => getWatchTaskTypes(wrapper).includes(source);
+export const isWatchTask = (source: TeTaskSource, wrapper: ITeWrapper) => getWatchTaskTypes(wrapper).includes(source);
 
 
 /**
@@ -157,7 +157,7 @@ export const toITask = (wrapper: TeWrapper, teTasks: Task[], listType: TeTaskLis
             pinned: isPinned(t.definition.taskItemId, listType),
             runCount,
             running,
-            source: t.source,
+            source: <TeTaskSource>t.source,
             treeId: t.definition.taskItemId,
             fsPath: t.definition.uri?.fsPath,
             runTime: wrapper.usage.getRuntimeInfo(t.definition.taskItemId)

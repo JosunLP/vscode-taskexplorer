@@ -6,7 +6,7 @@ import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeGrouper } from "./treeGrouper";
 import { SpecialTaskFolder } from "./specialFolder";
-import { ITeTask, TaskMap } from "../interface";
+import { ITeTask, TaskMap, TeTaskSource } from "../interface";
 import { Task, TreeItemCollapsibleState, Uri, WorkspaceFolder } from "vscode";
 
 
@@ -127,7 +127,7 @@ export class TaskTreeBuilder
     private getTaskFile = async (task: Task, folder: TaskFolder, relativePath: string, logPad: string) =>
     {
         this.wrapper.log.methodStart("get task file node", 2, logPad, false, [[ "relative path", relativePath ]]);
-        const id = !this.wrapper.taskUtils.isScriptType(task.source) ?
+        const id = !this.wrapper.taskUtils.isScriptType(<TeTaskSource>task.source) ?
                     TaskFile.id(folder, task, undefined, 0) : // script type files in same dir - place in `one` taskfile
                     TaskFile.groupId(folder, this.wrapper.pathUtils.getTaskAbsolutePath(task), task.source, task.source, -1);
         if (!this._taskFileMap[id])

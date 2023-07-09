@@ -4,7 +4,7 @@ import { join } from "path";
 import { IDictionary } from ":types";
 import { TeWrapper } from "../lib/wrapper";
 import * as taskTypeUtils from "../lib/utils/taskUtils";
-import { ICacheItem, ITeFileCache } from "../interface";
+import { ICacheItem, ITeFileCache, TeTaskSource } from "../interface";
 import { findFiles, numFilesInDirectory } from "../lib/utils/fs";
 import { workspace, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent, Event, EventEmitter } from "vscode";
 
@@ -97,7 +97,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             await this.startBuild();
 
             const providers = this.wrapper.providers;
-            const taskProviders = ([ ...Object.keys(providers), ...taskTypeUtils.getWatchTaskTypes(this.wrapper) ]).sort((a, b) => {
+            const taskProviders = <TeTaskSource[]>([ ...Object.keys(providers), ...taskTypeUtils.getWatchTaskTypes(this.wrapper) ]).sort((a, b) => {
                 return taskTypeUtils.getTaskTypeFriendlyName(a).localeCompare(taskTypeUtils.getTaskTypeFriendlyName(b));
             });
 
@@ -166,7 +166,7 @@ export class TeFileCache implements ITeFileCache, Disposable
     };
 
 
-    private addWsFolder = async(folder: WorkspaceFolder, taskType: string, logPad: string) =>
+    private addWsFolder = async(folder: WorkspaceFolder, taskType: TeTaskSource, logPad: string) =>
     {
         let numFilesFound = 0;
         this.wrapper.log.methodStart(`scan workspace project folder for ${taskType} tasks`, 1, logPad, logPad === "", [[ "folder", folder.name ]]);
@@ -198,7 +198,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             if (!this.cancel)
             {
                 const providers = this.wrapper.providers;
-                const taskProviders = ([ ...Object.keys(providers), ...taskTypeUtils.getWatchTaskTypes(this.wrapper) ]).sort((a, b) => {
+                const taskProviders = <TeTaskSource[]>([ ...Object.keys(providers), ...taskTypeUtils.getWatchTaskTypes(this.wrapper) ]).sort((a, b) => {
                     return taskTypeUtils.getTaskTypeFriendlyName(a).localeCompare(taskTypeUtils.getTaskTypeFriendlyName(b));
                 });
 
@@ -312,7 +312,7 @@ export class TeFileCache implements ITeFileCache, Disposable
     };
 
 
-    buildTaskTypeCache = async(taskType: string, wsFolder: WorkspaceFolder | undefined, setCacheBuilding: boolean, logPad: string) =>
+    buildTaskTypeCache = async(taskType: TeTaskSource, wsFolder: WorkspaceFolder | undefined, setCacheBuilding: boolean, logPad: string) =>
     {
         let numFilesFound = 0;
         const providerType = taskTypeUtils.isScriptType(taskType) ? "script" : taskType;
@@ -745,7 +745,7 @@ export class TeFileCache implements ITeFileCache, Disposable
     {
         const taskFiles: string[] = [],
               scriptFiles: string[] = [];
-        for (const taskType of Object.keys(this.taskFilesMap))
+        for (const taskType of <TeTaskSource[]>Object.keys(this.taskFilesMap))
         {
             const items = this.taskFilesMap[taskType].map(i => i.uri.fsPath);
             taskFiles.push(...items);

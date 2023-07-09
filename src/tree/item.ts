@@ -3,7 +3,7 @@ import { join } from "path";
 import { TaskFile } from "./file";
 import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
-import { ITaskItem } from "../interface";
+import { ITaskItem, TeTaskSource } from "../interface";
 import { encodeUtf8Hex } from ":env/hex";
 import { Strings } from "../lib/constants";
 import { configuration } from "../lib/configuration";
@@ -29,7 +29,7 @@ export class TaskItem extends TreeItem implements ITaskItem
 
     private readonly _task: Task;
     private readonly _taskFile: TaskFile;
-    private readonly _taskSource: string;
+    private readonly _taskSource: TeTaskSource;
     // private readonly _taskType: string;
     // private readonly _relativePath: string;
     private readonly _isUser: boolean;
@@ -75,7 +75,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         this._task = task;
         this._task.definition.taskItemId = this.id; // Used in task start/stop events, see TaskWatcher
         // this._relativePath = taskFile.relativePath;
-        this._taskSource = task.source;
+        this._taskSource = <TeTaskSource>task.source;
         // this._taskType = task.definition.type;   // If the source is `Workspace`, def.type can be of any provider type
         this._isUser = taskFile.isUser;
         this._paused = false;                       // paused flag used by start/stop/pause task functionality

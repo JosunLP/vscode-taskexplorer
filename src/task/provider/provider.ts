@@ -2,7 +2,7 @@
 import { extname } from "path";
 import { Globs } from "../../lib/constants";
 import { TeWrapper } from "../../lib/wrapper";
-import { ITaskExplorerProvider } from "../../interface";
+import { ITaskExplorerProvider, TeTaskSource } from "../../interface";
 import { isTaskIncluded } from "../../lib/utils/isTaskIncluded";
 import { Uri, Task, WorkspaceFolder, workspace } from "vscode";
 
@@ -13,15 +13,19 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
     abstract getDocumentPosition(taskName: string | undefined, documentText: string | undefined): number;
     abstract readUriTasks(uri: Uri, logPad: string): Promise<Task[]>;
 
-    public cachedTasks: Task[] | undefined;
-    public providerName = "***";
-    public readonly isExternal = false;
-    public static logPad = "";
     protected callCount = 0;
     protected logQueueId: string | undefined;
 
+    cachedTasks: Task[] | undefined;
 
-    constructor(protected readonly wrapper: TeWrapper, name: string) {
+    readonly isExternal = false;
+    readonly providerName: TeTaskSource;
+
+    static logPad = "";
+
+
+    constructor(protected readonly wrapper: TeWrapper, name: TeTaskSource)
+    {
         this.providerName = name;
     }
 

@@ -3,6 +3,7 @@ import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { getMd5 } from ":env/crypto";
+import { IDictionary } from ":types";
 import { TaskFolder } from "./folder";
 import { TeTreeView } from "./treeView";
 import { encodeUtf8Hex } from ":env/hex";
@@ -16,9 +17,7 @@ import { getTerminal } from "../lib/utils/getTerminal";
 import { registerCommand } from "../lib/command/command";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
-import {
-    IDictionary, ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap
-} from "../interface";
+import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap } from "../interface";
 import {
     TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
 } from "vscode";
@@ -231,9 +230,17 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // provideTasks() processing.
         //
         const rmv = w.utils.popIfExistsBy(this._tasks,
-            (t) => !isTaskIncluded(w, t, w.pathUtils.getTaskRelativePath(t), logPad + "   "), this
+            (t) => !isTaskIncluded(w, t, w.pathUtils.getTaskRelativePath(t), logPad + "   ") ||
+            //
+            // Fng VSCode internal task providers suck *****.  I mean, come on.  Add a package.json to a folder,
+            // see the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
+            // provided by the engine.  Couldn't spend the time to set up a fs watcher I guess.  SO that's all
+            // internal providers - they all suck.  Gulp, Grunt, NPM... who coded this ****???
+            //
+            !w.fs.pathExistsSync(join(w.pathUtils.getTaskAbsolutePath(t, true))), this
         );
-        w.log.write(`   ignored ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
+console.log(JSON.stringify(rmv.map(r => r.source + ":" + r.name)));
+        w.log.write(`   removed ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
         //
         // Hash NPM script blocks, to ignore edits to package.json when scripts have not changed, since
         // we have to query the entire workspace for npm tasks to get changes.  TODO is srtill to write
@@ -328,41 +335,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
 
     /**
-     * @method loadTasks
-     * @since 3.0.0
-     *
-     * Base loading function called by {@link refresh} after determining load parameters.
-     * Peforms all steps of requested task loas... fetch tasks, build task cache,
-     * build / updte task tree, lastly perform any tree groupings.
-     */
-    private loadTasks = async (doFetch: boolean, logPad: string): Promise<void> =>
-    {
-        const callLogPad = logPad + "   ",
-              count = this._tasks.length,
-              firstTreeBuildDone = this._firstTreeBuildDone;
-        try
-        {   if (doFetch)
-            {
-                this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
-                await this.fetchTasks(logPad);
-                this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.BuildingTaskTree : undefined);
-                await this._treeBuilder.createTaskItemTree(undefined /* TEMP this._currentInvalidation */, callLogPad);
-                Object.values(this._specialFolders).forEach(f => f.build(callLogPad));
-                await this.setContext();
-            }
-            else {
-                await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
-            }
-        }
-        finally {
-            this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
-            this.fireTreeRefreshEvent(null, null, logPad);
-            this.fireTasksLoadedEvents(count);
-        }
-    };
-
-
-    /**
      * This function should only be called by the unit tests
      *
      * All internal task providers export an invalidate() function...
@@ -419,6 +391,42 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
+    /**
+     * @method loadTasks
+     * @since 3.0.0
+     *
+     * Base loading function called by {@link refresh} after determining load parameters.
+     * Peforms all steps of requested task loas... fetch tasks, build task cache,
+     * build / updte task tree, lastly perform any tree groupings.
+     */
+    private loadTasks = async (doFetch: boolean, logPad: string): Promise<void> =>
+    {
+        const callLogPad = logPad + "   ",
+              count = this._tasks.length,
+              firstTreeBuildDone = this._firstTreeBuildDone;
+        try
+        {   if (doFetch)
+            {
+                this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
+                await this.fetchTasks(logPad);
+                this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.BuildingTaskTree : undefined);
+                await this._treeBuilder.createTaskItemTree(undefined /* TEMP this._currentInvalidation */, callLogPad);
+                Object.values(this._specialFolders).forEach(f => f.build(callLogPad));
+                await this.setContext();
+            }
+            else {
+                await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
+            }
+        }
+        finally {
+            this._refreshPending = false;
+            this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
+            this.fireTreeRefreshEvent(null, null, logPad);
+            this.fireTasksLoadedEvents(count);
+        }
+    };
+
+
     private onWorkspaceFolderRemoved = async (uri: Uri, logPad: string): Promise<void> =>
     {
         const w = this.wrapper,
@@ -437,6 +445,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         );
         this.wrapper.utils.popIfExistsBy(taskFolders, f => f.resourceUri?.fsPath === uri.fsPath, this, true);
         w.statusBar.update("");
+        this._refreshPending = false;
         this.fireTreeRefreshEvent(null, null, logPad + "   ");
         w.log.methodDone("workspace folder removed", 1, logPad,  [
             [ "# removed", removed.length ], [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskFolders.length ]
@@ -473,19 +482,27 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      */
     refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
     {
-        const w = this.wrapper,
-              isOptUri = w.typeUtils.isUri(opt);
-
+        const w = this.wrapper, isOptUri = w.typeUtils.isUri(opt);
+        //
+        // Wait if busy
+        //
         await this.waitForRefreshComplete();
-        this._currentInvalidation = undefined;
-        this._refreshPending = true;
-
         w.log.methodStart("refresh task tree", 1, logPad, logPad === "", [
             [ "invalidate", invalidate ], [ "opt fsPath", isOptUri ? opt.fsPath : "n/a" ]
         ]);
-
+        //
+        // Set flags.  The `_refreshPending` flag will get cleared by the specific async request
+        // handler, e.g. the `loadTasks`` or `onWorkspaceFolderRemoved` functions.
+        //
+        this._refreshPending = true;
+        this._currentInvalidation = undefined;
+        //
+        // Process refresh request
+        //
         if (!this._firstTreeBuildDone)
-        {
+        {   //
+            // THis is the first call to this function, do a full task fetch and tree build of course
+            //
             await this.loadTasks(true, logPad + "   ");
             this._firstTreeBuildDone = true;
         }
@@ -501,7 +518,12 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             //
             await this.onWorkspaceFolderRemoved(opt, logPad);
         }
-        // else if (w.utils.isString(invalidate, true) && w.utils.isUri(opt))
+        // else if (isOptUri && w.utils.isString(invalidate, true))
+        // {
+        //     // TODO = Performance enhancement.  Handle a file deletejust like we do a workspace folder
+        //     //        delete above.  And we can avoid the task refresh/fetch and tree rebuild.
+        // }  //
+        // else if (isOptUri && invalidate === undefined)
         // {
         //     // TODO = Performance enhancement.  Handle a file deletejust like we do a workspace folder
         //     //        delete above.  And we can avoid the task refresh/fetch and tree rebuild.
@@ -569,8 +591,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             //
             await this.loadTasks(doFetch, logPad + "   ");
         }
-
-        this._refreshPending = false;
         w.log.methodDone("refresh task tree", 1, logPad);
     };
 

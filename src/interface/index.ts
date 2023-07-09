@@ -23,15 +23,16 @@ export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from ".
 export type { ITeFileWatcher, FileSystemEventType, IFileSystemEvent } from "./ITeFileWatcher";
 export type { ITeWebview, WebviewViewIds, TreeviewIds, WebviewIds, WebviewId, TreeviewId, ITreeview } from "./ITeWebview";
 export type { ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionChangeEvent } from "./ITeLicenseManager";
-export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType } from "./ITeTask";
 export type { AllContextKeys, IContextChangeEvent, TreeviewContextKey, WebviewContextKey, WebviewViewContextKey } from "./ITeContext";
+export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType, TeTaskSource, TeTaskNonScriptType, TeTaskScriptType } from "./ITeTask";
 export type { AllUsageKeys, ITeUsage, ITaskRuntimeInfo, ITeTaskStats, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount, WebviewUsageKey, WebviewViewUsageKey, TreeviewUsageKey } from "./ITeUsage";
 export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, PromiseAdapter, CallbackOptions, CallbackArray, OneOf } from "./ITeUtilities";
 
 export { UsageKeys } from "./ITeUsage";
 export { ContextKeys } from "./ITeContext";
-export { StorageKeys, StorageTarget } from "./IStorage";
 export { WebviewPrefix } from "./ITeWebview";
 export { Commands, VsCodeCommands } from "./ICommand";
+export { StorageKeys, StorageTarget } from "./IStorage";
 export { ConfigKeys, ConfigPrefix } from "./IConfiguration";
 export { TeLicenseState, TeLicenseType } from "./ITeLicenseManager";
+export { TaskSource, TaskNonScriptType, TaskScriptType } from "./ITeTask";

@@ -9,7 +9,7 @@ import { executeCommand, registerCommand } from "../command/command";
 import { IpcAccountRegistrationParams } from "../../webview/common/ipc";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent, ContextKeys,
-	TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo
+	TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo, TeTaskSource
 } from "../../interface";
 
 
@@ -327,7 +327,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.storage.getSecret<ITeAccount>(this.wrapper.keys.Storage.Account, this._account);
 
 
-	getMaxNumberOfTasks = (taskType?: string): number =>
+	getMaxNumberOfTasks = (taskType?: TeTaskSource): number =>
 		(this.isLicensed ? Infinity : (!taskType ? this._maxFreeTasks :
 						(this.wrapper.taskUtils.isScriptType(taskType) ? this._maxFreeTasksForScriptType : this._maxFreeTasksForTaskType)));
 

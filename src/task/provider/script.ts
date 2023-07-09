@@ -1,7 +1,7 @@
 
 import { Globs } from "../../lib/constants";
 import { TeWrapper } from "../../lib/wrapper";
-import { ITaskDefinition } from "../../interface";
+import { ITaskDefinition, TeTaskSource } from "../../interface";
 import { TaskExplorerProvider } from "./provider";
 import { basename, dirname, sep, extname, join } from "path";
 import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
@@ -22,7 +22,7 @@ import { Task, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOp
 export class ScriptTaskProvider extends TaskExplorerProvider implements TaskExplorerProvider
 {
 
-    constructor(wrapper: TeWrapper, name = "script") { super(wrapper, name); }
+    constructor(wrapper: TeWrapper, name = "script") { super(wrapper, <TeTaskSource>name); }
 
 
     private scriptTable: any = {

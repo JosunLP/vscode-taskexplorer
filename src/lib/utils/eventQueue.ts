@@ -24,34 +24,35 @@ export class EventQueue implements IEventQueue, Disposable
 	}
 
 	dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
-
     // dispose = () =>
     // {
     //     this._eventQueue.splice(0);
     //     this._delayTimers.splice(0).forEach(/* ist  anbul ignore next */(ti) => clearTimeout(ti.timer));
     // };
 
-    get onReady(): Event<void> {
-        return this._onReady.event;
-    }
 
+    get onReady(): Event<void> { return this._onReady.event; }
 
     // private getKey = (e: IEventTask) => `cache-key-${e.owner}-${e.type}-${e.event}`;
 
 
-	isBusy(type: string) {
-		return !!this._currentEvent && this._currentEvent.type === type;
-	}
+	isBusy(owner: string) { return !!this._currentEvent && this._currentEvent.owner === owner; }
+
+
+    private compareEvents = (e: IEventTask, e2: IEventTask, skipEventName = false) =>
+        e.owner === e2.owner && e.type === e2.type && (skipEventName || e.event === e2.event);
+
+
+    private compareDebounceEvent = (e: IEventTask, e2: IEventTask) =>
+        this.compareEvents(e, e2, true) && e2.event.startsWith(<string>e.debounceEvent);
 
 
     private queueIfNeeded = (e: IEventTask) =>
     {
-        const ce = !e.ignoreActive ? this._currentEvent : undefined,
-              // ce = !e.ignoreActive || e.debounceEvent ? this._currentEvent : undefined,
-              // debounce = this.wrapper.typeUtils.isString(e.debounceEvent),
-              has = (ce && ce.owner === e.owner && ce.type === e.type && ce.event === e.event) ||
-                    /* (debounce && !!this._eventQueue.find(e2 => e2 && e2.owner === e.owner && e2.type === e.type && e2.event.startsWith(e.debounceEvent))) || */
-                    !!this._eventQueue.find(ev => e.owner === ev.owner && e.type === ev.type && e.event === ev.event);
+        const ce = !e.ignoreActive || e.debounceEvent ? this._currentEvent : undefined,
+              has = (ce && (this.compareEvents(e, ce) || (e.debounceEvent && this.compareDebounceEvent(e, ce)))) ||
+                    !!this._eventQueue.find(ev => this.compareEvents(e, ev)) ||
+                    (e.debounceEvent && !!this._eventQueue.find(de => this.compareDebounceEvent(e, de)));
         if (!has)
         {
             this.wrapper.log.methodOnce("queue", "queue event", 1, "", [

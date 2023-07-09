@@ -1,11 +1,12 @@
 
 import { homedir } from "os";
 import { log } from "../log/log";
+import { execIf, wrap } from "./utils";
 import { isWorkspaceFolder } from "./typeUtils";
 import { pathExists, pathExistsSync } from "./fs";
-import { dirname, join, resolve, sep } from "path";
 import { Task, Uri, WorkspaceFolder } from "vscode";
-import { execIf, wrap } from "./utils";
+import { ITaskDefinition, ITaskFolder } from ":types";
+import { basename, dirname, join, resolve, sep } from "path";
 
 
 export const getCwd = (uri: Uri): string =>
@@ -62,12 +63,51 @@ export const getRelativePath = (folder: WorkspaceFolder, uri: Uri): string =>
 };
 
 
-export const getTaskAbsolutePath = (task: Task): string =>
+export const getTaskAbsolutePath = (task: Task, includeFileName = false): string =>
 {
-    if (isWorkspaceFolder(task.scope)) {
-        return join(task.scope.uri.fsPath, getTaskRelativePath(task));
+    let path: string;
+    const isWs = isWorkspaceFolder(task.scope);
+    if (isWs) {
+        path = join(task.scope.uri.fsPath, getTaskRelativePath(task));
     }
-    return join(getUserDataPath(), getTaskRelativePath(task));
+    else {
+        path = join(getUserDataPath(), getTaskRelativePath(task));
+    }
+    if (includeFileName) {
+        path = join(path, getTaskFileName(task.source, isWs ? task.scope.uri : undefined, task.definition));
+    }
+    return path;
+};
+
+
+export const getTaskFileName = (source: string, resourceUri: Uri | undefined, taskDef: ITaskDefinition) =>
+{   //
+    // Any tasks provided by this extension will have a "fileName" definition. External tasks
+    // registered throughthe API also define fileName
+    //
+    if (taskDef.fileName) {
+        return taskDef.fileName;
+    }
+    //
+    // Since tasks are returned from VSCode API without a filename that they were found in we
+    // must deduce the filename from the task source.  This includes npm, tsc, and vscode
+    // (workspace) tasks
+    //
+    let fileName = "package.json";
+    if (source === "Workspace")
+    {   //
+        // Note that user task do not have a resourceUri property set
+        //
+        execIf(resourceUri, () => { fileName = ".vscode/tasks.json"; }, this, [ () => { fileName = "tasks.json"; } ]);
+    }
+    else if (source === "tsc")
+    {   //
+        // TypeScript task provider will set property `tsconfg` on the task definition, which
+        // includes the relative path to the tsonfig file, filename included.
+        //
+        fileName = basename(taskDef.tsconfig);
+    }
+    return fileName;
 };
 
 

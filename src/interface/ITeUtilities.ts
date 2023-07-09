@@ -4,7 +4,7 @@ import { ITaskItem } from "./ITaskItem";
 import { ITeWrapper } from "./ITeWrapper";
 import { ITaskFolder } from "./ITaskFolder";
 import { IDictionary, Primitive } from ":types";
-import { ITeTask, TeTaskListType } from "./ITeTask";
+import { ITeTask, TeTaskListType, TeTaskSource } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
 
 
@@ -29,7 +29,7 @@ export interface ITePathUtilities
 	getInstallPath(): Promise<string>;
 	getPortableDataPath(logPad?: string): string | undefined | void;
 	getRelativePath(folder: WorkspaceFolder, uri: Uri): string;
-	getTaskAbsolutePath(task: Task): string;
+	getTaskAbsolutePath(task: Task, includeFileName?: boolean): string;
 	getTaskRelativePath(task: Task): string;
 	getUserDataPath(platform?: string, logPad?: string): string;
 }
@@ -50,13 +50,13 @@ export interface ITeSortUtilities
 export interface ITeTaskUtilities
 {
 	getGlobPattern(taskType: string): string;
-	getScriptTaskTypes(): string[];
-	getTaskTypes(): string[];
+	getScriptTaskTypes(): readonly string[];
+	getTaskTypes(): readonly string[];
 	getTaskTypeFriendlyName(taskType: string, lowerCase?: boolean): string;
-	getTaskTypeRealName(taskType: string): string;
+	getTaskTypeRealName(taskType: string): TeTaskSource;
 	isPinned(id: string, listType: TeTaskListType): boolean;
-	isScriptType(source: string): boolean;
-	isWatchTask(source: string, wrapper: ITeWrapper): boolean;
+	isScriptType(source: TeTaskSource): boolean;
+	isWatchTask(source: TeTaskSource, wrapper: ITeWrapper): boolean;
 	toITask(wrapper: ITeWrapper, teTasks: Task[], listType: TeTaskListType): ITeTask[];
 }
 

@@ -191,10 +191,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
                     {
                         w.log.write(`   the 'pathToPrograms.${taskType}' setting has changed`, 1);
                         w.log.value("      new value", newValue, 1);
-                        if (taskType !== "ansicon" && taskType !== "curl") {// these paths are ont 'task types'
+                        if (<string>taskType !== "ansicon" && <string>taskType !== "curl") {// these paths are ont 'task types'
                             registerChange(taskType);
                         }
-                        else if (taskType === "curl") {
+                        else if (<string>taskType === "curl") {
                             registerChange("jenkins");
                         }
                         else { registerChange("ant"); }

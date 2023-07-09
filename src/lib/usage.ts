@@ -124,7 +124,7 @@ export class Usage implements ITeUsage, Disposable
         listType: "all",
         pinned: false,
         running: false,
-        source: "N/A",
+        source: "Workspace",
         treeId: "N/A",
         definition: {
             type: "N/A"

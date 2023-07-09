@@ -8,11 +8,11 @@ import { basename, extname, join } from "path";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
-import { ITaskDefinition, ITaskFile, OneOf } from "../interface";
+import { ITaskDefinition, ITaskFile, OneOf, TeTaskSource } from "../interface";
 import { asString, isWorkspaceFolder } from "../lib/utils/typeUtils";
 import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { getInstallPathSync, getTaskRelativePath, getUserDataPath } from "../lib/utils/pathUtils";
+import { getInstallPathSync, getTaskRelativePath, getUserDataPath, getTaskFileName } from "../lib/utils/pathUtils";
 
 
 /**
@@ -39,7 +39,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     private _groupId: string | undefined;
 
     private readonly _task: Task;
-    private readonly _taskSource: string;
+    private readonly _taskSource: TeTaskSource;
     // private readonly _taskType: string;
     private readonly _isUser: boolean;
     private readonly _relativePath: string;
@@ -63,7 +63,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         this._task = task;
         this._treeNodes = [];
         this._folder = folder;
-        this._taskSource = task.source;
+        this._taskSource = <TeTaskSource>task.source;
         // this._taskType = task.definition.type;  // If the source is `Workspace`, def.type can be of any provider type
         this._isGroup = !!groupId;
         this._isUser = false;
@@ -77,7 +77,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         // exception of TSC, which is handled elsewhere).
         //
         this._relativePath = this.label !== "vscode" ? relativePath : ".vscode";
-        this._fileName = this.getFileNameFromSource(task.source, folder, taskDef);
+        this._fileName = getTaskFileName(task.source, folder.resourceUri, taskDef);
         if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
             if (relativePath && task.source !== "Workspace") {
@@ -90,7 +90,7 @@ export class TaskFile extends TreeItem implements ITaskFile
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder
         //
         else {
-            this._fileName = this.getFileNameFromSource(task.source, folder, taskDef);
+            this._fileName = getTaskFileName(task.source, folder.resourceUri, taskDef);
             this.resourceUri = Uri.file(join(getUserDataPath(undefined, logPad), this.fileName));
             this._isUser = true;
         }
@@ -289,37 +289,6 @@ export class TaskFile extends TreeItem implements ITaskFile
             }
         }
         return label.toLowerCase();
-    }
-
-
-    private getFileNameFromSource(source: string, folder: TaskFolder, taskDef: ITaskDefinition)
-    {   //
-        // Any tasks provided by this extension will have a "fileName" definition. External tasks
-        // registered throughthe API also define fileName
-        //
-        if (taskDef.fileName) {
-            return taskDef.fileName;
-        }
-        //
-        // Since tasks are returned from VSCode API without a filename that they were found in we
-        // must deduce the filename from the task source.  This includes npm, tsc, and vscode
-        // (workspace) tasks
-        //
-        let fileName = "package.json";
-        if (source === "Workspace")
-        {   //
-            // Note that user task do not have a resourceUri property set
-            //
-            execIf(folder.resourceUri, () => { fileName = ".vscode/tasks.json"; }, this, [ () => { fileName = "tasks.json"; } ]);
-        }
-        else if (source === "tsc")
-        {   //
-            // TypeScript task provider will set property `tsconfg` on the task definition, which
-            // includes the relative path to the tsonfig file, filename included.
-            //
-            fileName = basename(taskDef.tsconfig);
-        }
-        return fileName;
     }
 
 

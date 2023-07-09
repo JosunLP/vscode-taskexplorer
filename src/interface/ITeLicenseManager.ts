@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { Event } from "vscode";
+import { TeTaskSource } from "./ITeTask";
 
 export interface TeSessionChangeEvent
 {
@@ -91,7 +92,7 @@ export interface ITeLicenseManager
 	isTrialExtended: boolean;
 	onDidSessionChange: Event<TeSessionChangeEvent>;
     checkLicense(logPad: string): Promise<void>;
-    getMaxNumberOfTasks: (taskType?: string | undefined) => number;
+    getMaxNumberOfTasks: (taskType?: TeTaskSource | undefined) => number;
     getMaxNumberOfTaskFiles: () => number;
 	setMaxTasksReached(taskType?: string, force?: boolean): Promise<void>;
 	setTestData(data: any): void;
