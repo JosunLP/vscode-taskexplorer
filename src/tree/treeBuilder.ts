@@ -1,5 +1,4 @@
 
-import { IDict } from ":types";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
@@ -67,7 +66,7 @@ export class TaskTreeBuilder
             folder = this._taskFolderMap[scopeName];
             if (!folder)
             {
-                const nodeExpandedeMap = this.wrapper.config.get<IDict<"Collapsed"|"Expanded">>(this.wrapper.keys.Config.SpecialFoldersFolderState);
+                const nodeExpandedeMap = this.wrapper.config.get<Record<string, "Collapsed"|"Expanded">>(this.wrapper.keys.Config.SpecialFoldersFolderState, {});
                 folder = new TaskFolder(scopeName, TreeItemCollapsibleState[nodeExpandedeMap[this.wrapper.utils.lowerCaseFirstChar(scopeName, true)]]);
                 this._taskFolderMap[scopeName] = folder;
                 this.wrapper.log.value("constructed tree user taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
@@ -158,7 +157,7 @@ export class TaskTreeBuilder
     {
         const w = this.wrapper,
               definition = task.definition;
-        if (!w.log.isLoggingEnabled()) {
+        if (!w.log.control.enable) {
             return;
         }
         w.log.write("Task Details:", 3, logPad);

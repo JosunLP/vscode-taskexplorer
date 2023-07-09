@@ -25,7 +25,7 @@ export class TeTreeView implements ITaskTreeView, Disposable
 	{
 
         this.id = `${WebviewPrefix.View}${viewId}`;
-        this._tree = new TaskTree(viewId, treeManager);
+        this._tree = new TaskTree(wrapper, viewId, treeManager);
         this._view = window.createTreeView(this.id, { treeDataProvider: this._tree, showCollapseAll: true });
         this._view.title = title;
         this._view.description = description;
@@ -53,7 +53,7 @@ export class TeTreeView implements ITaskTreeView, Disposable
     }
 
     get enabled(): boolean {
-        return this.wrapper.config.get<boolean>(this.id === `${WebviewPrefix.View}taskTreeExplorer` ? "enableExplorerView" : "enableSideBar");
+        return this.wrapper.config.get<boolean>(this.id === `${WebviewPrefix.View}taskTreeExplorer` ? "enableExplorerView" : "enableSideBar", false);
     }
 
     get visible(): boolean {
@@ -65,11 +65,11 @@ export class TeTreeView implements ITaskTreeView, Disposable
 
 
     onElementExpanded = (e: TreeViewExpansionEvent<TreeItem>) =>
-        this.wrapper.log.methodOnce("tree view", "element expanded", 2, "", [[ "label", e.element.label ], [ "id", e.element.id ]]);
+        this.wrapper.log.methodEvent("tree view", "element expanded", 2, [[ "label", e.element.label ], [ "id", e.element.id ]]);
 
 
     onElementSelectionChanged = (e: TreeViewSelectionChangeEvent<TreeItem>) =>
-        this.wrapper.log.methodOnce("tree view", "selection changed", 2, "", [[ "selections", e.selection.map(i => i.label).join(", ") ]]);
+        this.wrapper.log.methodEvent("tree view", "selection changed", 2, [[ "selections", e.selection.map(i => i.label).join(", ") ]]);
 
 
     onVisibilityChanged(e: TreeViewVisibilityChangeEvent)

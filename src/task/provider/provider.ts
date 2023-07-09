@@ -64,7 +64,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
         if (!this.cachedTasks)
         {
             let rmvCount;
-            const logPad = this.wrapper.log.getLogPad();
+            const logPad = this.wrapper.log.lastPad;
             ++this.callCount;
             this.logQueueId = this.providerName + this.callCount;
             this.wrapper.log.methodStart(`provide ${this.providerName} tasks`, 1, logPad, true, [[ "call count", this.callCount ]], this.logQueueId);
@@ -102,7 +102,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
         {
             for (const fObj of paths)
             {
-                if (!this.wrapper.utils.isExcluded(fObj.uri.path) && !visitedFiles.includes(fObj.uri.fsPath) && this.wrapper.fs.pathExistsSync(fObj.uri.fsPath))
+                if (!this.wrapper.utils.isExcluded(fObj.uri.path, this.wrapper.log) && !visitedFiles.includes(fObj.uri.fsPath) && this.wrapper.fs.pathExistsSync(fObj.uri.fsPath))
                 {
                     visitedFiles.push(fObj.uri.fsPath);
                     const tasks = (await this.readUriTasks(fObj.uri, logPad + "   ")).filter(t => isTaskIncluded(this.wrapper, t, t.definition.path));

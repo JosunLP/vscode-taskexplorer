@@ -1,10 +1,9 @@
 
-import { IDict } from ":types";
 import { TaskItem } from "./item";
 import { TaskFolder } from "./folder";
 import { TeWrapper } from "../lib/wrapper";
 import { SpecialFolderStorageKey } from "../lib/constants";
-import { ILog, ITeTaskChangeEvent, StorageTarget, TeTaskListType, ConfigPrefix } from "../interface";
+import { ILog, ITeTaskChangeEvent, StorageTarget, TeTaskListType, ConfigPrefix, IDictionary } from "../interface";
 import {
     ConfigurationChangeEvent, Disposable, Event, EventEmitter, InputBoxOptions, ThemeIcon, TreeItemCollapsibleState, window
 } from "vscode";
@@ -48,7 +47,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
         this.contextValue = this.labelLwr.replace(/[\W \_\-]/g, "");
         this.tooltip = `A tree folder to store '${label}' tasks`;
         this._settingNameEnabled = settingName;
-        this._enabled = this.wrapper.config.get<boolean>(settingName);
+        this._enabled = this.wrapper.config.get<boolean>(settingName, false);
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         this.store = this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Global);
         this.storeWs = this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Workspace);
@@ -132,7 +131,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
               expandStateId = this.wrapper.utils.lowerCaseFirstChar(this.label, true),
               folderStateCfgKey = this.wrapper.keys.Config.SpecialFoldersFolderState,
               taskFolders = this.wrapper.treeManager.taskFolders, // Guaranted not to be undefined
-              nodeExpandedeMap = this.wrapper.config.get<IDict<"Collapsed"|"Expanded">>(folderStateCfgKey);
+              nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(folderStateCfgKey, {});
 
         this.cleanStores();   // <- build() is called only after a taskMap build, and cleanStores() should
         this.taskFiles = [];  //    only be called when the taskMap is completed.
@@ -269,7 +268,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     {
         if (this.wrapper.config.affectsConfiguration(e, this._settingNameEnabled) && this.wrapper.treeManager.taskFolders)
         {
-            this._enabled = this.wrapper.config.get<boolean>(this._settingNameEnabled);
+            this._enabled = this.wrapper.config.get<boolean>(this._settingNameEnabled, false);
             this.refresh();
         }
     }

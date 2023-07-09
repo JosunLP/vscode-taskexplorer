@@ -59,7 +59,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
         //
         if (!this._watcherEnabled)
         {
-            w.log.methodOnce("treemgr", "process config changes - disabled", 1, "");
+            w.log.methodEvent("treemgr", "process config changes - disabled", 1);
             return;
         }
 
@@ -134,7 +134,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             if (w.config.affectsConfiguration(e, "enabledTasks"))
             {
-                const newEnabledTasks = w.config.get<IDictionary<boolean>>("enabledTasks");
+                const newEnabledTasks = w.config.get<IDictionary<boolean>>("enabledTasks", {});
                 for (const p of Object.keys(this._enabledTasks))
                 {
                     const taskType = getTaskTypeRealName(p),
@@ -181,7 +181,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             if (w.config.affectsConfiguration(e, "pathToPrograms"))
             {
-                const newPathToPrograms = w.config.get<IDictionary<string>>("pathToPrograms");
+                const newPathToPrograms = w.config.get<IDictionary<string>>("pathToPrograms", {});
                 for (const p of Object.keys(this._pathToPrograms))
                 {
                     const taskType = getTaskTypeRealName(p),
@@ -209,7 +209,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             if (w.config.affectsConfiguration(e, "globPatternsBash") && !refreshTaskTypes.includes("bash"))
             {
                 w.log.write("   the 'globPatternsBash' setting has changed", 1);
-                await w.fileWatcher.registerFileWatcher("bash", false, w.config.get<boolean>("enabledTasks.bash"), "   ");
+                await w.fileWatcher.registerFileWatcher("bash", false, w.config.get<boolean>("enabledTasks.bash", false), "   ");
                 registerChange("bash");
             }
 
@@ -219,7 +219,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             if (w.config.affectsConfiguration(e, "includeAnt", "globPatternsAnt") && !refreshTaskTypes.includes("ant"))
             {
                 w.log.write("   the 'globPatternsAnt' setting has changed", 1);
-                await w.fileWatcher.registerFileWatcher("ant", false, w.config.get<boolean>("enabledTasks.ant"), "   ");
+                await w.fileWatcher.registerFileWatcher("ant", false, w.config.get<boolean>("enabledTasks.ant", false), "   ");
                 registerChange("ant");
             }
 

@@ -127,7 +127,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     private onDirCreate = async(uri: Uri) =>
     {
         const isDir = this.wrapper.fs.isDirectory(uri.fsPath);
-        if (isDir && !this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
+        if (isDir && !this.wrapper.utils.isExcluded(uri.fsPath, this.wrapper.log) && !this.shouldSkipEvent(uri))
         {
             // this._busy = true;
             void this.wrapper.eventQueue.queue({
@@ -152,7 +152,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         // can track existing directories, ut ugh.  Maybe someday.
         //
         const isDir = !extname(uri.fsPath);
-        if (isDir && !this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
+        if (isDir && !this.wrapper.utils.isExcluded(uri.fsPath, this.wrapper.log) && !this.shouldSkipEvent(uri))
         {
             void this.wrapper.eventQueue.queue(
             {
@@ -173,7 +173,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
     private onFileChange = async(taskType: string, uri: Uri) =>
     {
         const w = this.wrapper;
-        if (!w.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
+        if (!w.utils.isExcluded(uri.fsPath, this.wrapper.log) && !this.shouldSkipEvent(uri))
         {   //
             // Check modification date.  No idea why but modification events are being fired for
             // tasks.json files when they have not even been modified.  I "think" it may be firing
@@ -206,7 +206,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     private onFileCreate = async(taskType: string, uri: Uri) =>
     {
-        if (!this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
+        if (!this.wrapper.utils.isExcluded(uri.fsPath, this.wrapper.log) && !this.shouldSkipEvent(uri))
         {
             void this.wrapper.eventQueue.queue(
             {
@@ -228,7 +228,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     private onFileDelete = async(taskType: string, uri: Uri) =>
     {
-        if (!this.wrapper.utils.isExcluded(uri.fsPath) && !this.shouldSkipEvent(uri))
+        if (!this.wrapper.utils.isExcluded(uri.fsPath, this.wrapper.log) && !this.shouldSkipEvent(uri))
         {
             void this.wrapper.eventQueue.queue(
             {

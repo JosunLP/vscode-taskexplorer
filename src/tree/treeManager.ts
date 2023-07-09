@@ -3,7 +3,6 @@ import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskItem } from "./item";
 import { getMd5 } from ":env/crypto";
-import { IDictionary } from ":types";
 import { TaskFolder } from "./folder";
 import { TeTreeView } from "./treeView";
 import { encodeUtf8Hex } from ":env/hex";
@@ -17,7 +16,7 @@ import { getTerminal } from "../lib/utils/getTerminal";
 import { registerCommand } from "../lib/command/command";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
-import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap } from "../interface";
+import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap, IDictionary } from "../interface";
 import {
     TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
 } from "vscode";
@@ -51,7 +50,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         this._onDidTaskCountChange = new EventEmitter<ITeTaskChangeEvent>();
 
-        const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState");
+        const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState", {});
         this._specialFolders = {
             favorites: new FavoritesFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
             lastTasks: new LastTasksFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
@@ -164,7 +163,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // Update `excludes` configuration value and refresh tree(s) for the relavant task source
         //
         this._configWatcher.enableConfigWatcher(false);
-        await addToExcludes(pathValues, excludesList, "   ");
+        await addToExcludes(pathValues, excludesList, this.wrapper.log, "   ");
         this._configWatcher.enableConfigWatcher(true);
         await this.refresh(selection.taskSource, uri, "   ");
         this.wrapper.log.methodDone("add to excludes", 1);

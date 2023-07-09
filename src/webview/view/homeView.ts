@@ -24,7 +24,7 @@ export class HomeView extends TeWebviewView<State>
 
 	protected override onFocusChanged(_focused: boolean): void // covering
 	{
-		this.wrapper.log.methodOnce("homeview event", "focus changed", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodEvent("homeview event", "focus changed", 2);
 	}
 
 
@@ -57,7 +57,7 @@ export class HomeView extends TeWebviewView<State>
 
 	private onSessionChanged(e: TeSessionChangeEvent): void
 	{
-		this.wrapper.log.methodOnce("homeview event", "session changed", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodEvent("homeview event", "session changed", 2);
 		if (e.changeFlags.licenseState || e.changeFlags.licenseType || e.changeFlags.trialPeriod || e.changeFlags.verification || e.changeFlags.license) {
 			void this.refresh(true, false);
 		}
@@ -69,7 +69,7 @@ export class HomeView extends TeWebviewView<State>
 
 	protected override onVisibilityChanged(_visible: boolean)
 	{
-		this.wrapper.log.methodOnce("homeview event", "visibility changed", 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodEvent("homeview event", "visibility changed", 2);
 	}
 
 

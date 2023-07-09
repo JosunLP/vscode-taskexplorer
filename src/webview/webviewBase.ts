@@ -415,7 +415,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 			this._skippedChangeEvent = !!this._view && this._isReady && !this.visible;
 			return;
 		}
-		this.wrapper.log.methodStart(`${this.id}:refresh`, 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodStart(`${this.id}:refresh`, 2);
 		const skippedChangeEvent = this._skippedChangeEvent;
 		this._isReady = this._skippedChangeEvent = false;
 		if (visibilityChanged && !skippedChangeEvent)
@@ -438,7 +438,7 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 				this._view.webview.html = html;
 			}
 		}
-		this.wrapper.log.methodDone(`${this.id}:refresh`, 2, this.wrapper.log.getLogPad());
+		this.wrapper.log.methodDone(`${this.id}:refresh`, 2);
 	}
 
 

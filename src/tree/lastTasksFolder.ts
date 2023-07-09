@@ -19,7 +19,7 @@ export class LastTasksFolder extends SpecialTaskFolder
     constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
     {
         super(wrapper, "last", wrapper.keys.Strings.LAST_TASKS_LABEL, wrapper.keys.Config.SpecialFoldersShowLastTasks, state);
-        this._maxItems = wrapper.config.get<number>(wrapper.keys.Config.SpecialFoldersNumLastTasks);
+        this._maxItems = wrapper.config.get<number>(wrapper.keys.Config.SpecialFoldersNumLastTasks, 10);
         this.disposables.push(
             registerCommand(wrapper.keys.Commands.ClearLastTasks, this.clearSavedTasks, this)
         );
@@ -49,7 +49,7 @@ export class LastTasksFolder extends SpecialTaskFolder
     {
         if (this.wrapper.config.affectsConfiguration(e, this.wrapper.keys.Config.SpecialFoldersNumLastTasks))
         {
-            this._maxItems = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFoldersNumLastTasks);
+            this._maxItems = this.wrapper.config.get<number>(this.wrapper.keys.Config.SpecialFoldersNumLastTasks, 10);
         }
         super.onConfigChanged(e);
     }

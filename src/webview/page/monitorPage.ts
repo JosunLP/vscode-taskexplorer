@@ -31,9 +31,9 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 	private getSettingsState = () =>
 	({
-		timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(this.wrapper.keys.Config.TaskMonitorTimerMode),
-		trackStats: this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats),
-		trackUsage: this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage),
+		timerMode: this.wrapper.config.get<IMonitorAppTimerMode>(this.wrapper.keys.Config.TaskMonitorTimerMode, "MM:SS"),
+		trackStats: this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats, true),
+		trackUsage: this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage, true),
 	});
 
 
@@ -114,10 +114,10 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 
 
 	protected override onVisibilityChanged = (visible: boolean) =>
-		this.wrapper.log.methodOnce("task monitor", "visibility changed", 2, this.wrapper.log.getLogPad(), [[ "visible", visible ]]);
+		this.wrapper.log.methodEvent("task monitor", "visibility changed", 2, [[ "visible", visible ]]);
 
 
 	protected override onFocusChanged = (focused: boolean): void =>
-		this.wrapper.log.methodOnce("task monitor", "focus changed", 2, this.wrapper.log.getLogPad(), [[ "focused", focused ]]);
+		this.wrapper.log.methodEvent("task monitor", "focus changed", 2, [[ "focused", focused ]]);
 
 }

@@ -40,7 +40,7 @@ export class AntTaskProvider extends TaskExplorerProvider implements TaskExplore
         if (process.platform === "win32" && this.wrapper.config.get(this.wrapper.keys.Config.EnableAnsiconForAnt) === true)
         {
             let ansicon = "ansicon.exe";
-            const ansiPath: string = this.wrapper.config.get(`${this.wrapper.keys.Config.PathToPrograms}.ansicon`);
+            const ansiPath: string = this.wrapper.config.get(`${this.wrapper.keys.Config.PathToPrograms}.ansicon`, "");
             if (ansiPath && this.wrapper.fs.pathExistsSync(ansiPath))
             {
                 ansicon = ansiPath;

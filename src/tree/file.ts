@@ -1,6 +1,5 @@
 
 import { TaskItem } from "./item";
-import { log } from "../lib/log/log";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
 import { Strings } from "../lib/constants";
@@ -51,12 +50,12 @@ export class TaskFile extends TreeItem implements ITaskFile
     {
         super(TaskFile.getLabel(task.definition, label, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
         const taskDef = task.definition;
-        log.methodStart("construct tree file", 4, logPad, false, [
-            [ "label", label ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
-            [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
-            [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
-            [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
-        ]);
+        // log.methodStart("construct tree file", 4, logPad, false, [
+        //     [ "label", label ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
+        //     [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
+        //     [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
+        //     [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
+        // ]);
         //
         // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
         this.id = TaskFile.id(folder, task, this.label, groupLevel, groupId);
@@ -132,11 +131,11 @@ export class TaskFile extends TreeItem implements ITaskFile
             this.iconPath = { light: iconLight, dark: iconDark };
         }
 
-        log.methodDone("construct tree file", 4, logPad, [
-            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ], [ "context value", this.contextValue ],
-            [ "is group", this._isGroup ], [ "groupLevel", this._groupLevel ], [ "filename", this._fileName ],
-            [ "resource uri path", this.resourceUri.fsPath ], [ "path", this._relativePath  ]
-        ]);
+        // log.methodDone("construct tree file", 4, logPad, [
+        //     [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ], [ "context value", this.contextValue ],
+        //     [ "is group", this._isGroup ], [ "groupLevel", this._groupLevel ], [ "filename", this._fileName ],
+        //     [ "resource uri path", this.resourceUri.fsPath ], [ "path", this._relativePath  ]
+        // ]);
     }
 
 

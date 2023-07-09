@@ -155,7 +155,8 @@ export const activate = async () =>
         //
         // Write to console is just a tests feature, it's not controlled by settings, set it here if needed
         //
-        teWrapper.log.setWriteToConsole(tc.log.console, tc.log.level);
+        teWrapper.log.control.writeToConsole = tc.log.console;
+        teWrapper.log.control.writeToConsoleLevel = tc.log.level;
         //
         // Increase slow times for local license server (making remote db requests)
         //
@@ -258,7 +259,7 @@ export const cleanup = async () =>
     let logFileName: string | undefined;
     if (tc.log.enabled && tc.log.file && tc.log.openFileOnFinish)
     {
-        logFileName = teWrapper.log.getLogFileName();
+        logFileName = teWrapper.log.control.fileName;
     }
     //
     // Deactivate extension / Dispose disposable resources
@@ -501,7 +502,7 @@ export const verifyTaskCount = async (taskType: string, expectedCount: number, r
             tTasks = tTasks.filter(t => !!t.definition.uri);
         }
         else if (taskType === "npm" && !teWrapper.config.get<boolean>(teWrapper.keys.Config.UseNpmProvider)) {
-            tTasks = tTasks.filter(t => teWrapper.fs.pathExistsSync(teWrapper.pathUtils.getTaskAbsolutePath(t, true)) && (!teWrapper.typeUtils.isWorkspaceFolder(t.scope) || !teWrapper.utils.isExcluded(path.join(t.scope.uri.fsPath, t.definition.path || ""))));
+            tTasks = tTasks.filter(t => teWrapper.fs.pathExistsSync(teWrapper.pathUtils.getTaskAbsolutePath(t, true)) && (!teWrapper.typeUtils.isWorkspaceFolder(t.scope) || !teWrapper.utils.isExcluded(path.join(t.scope.uri.fsPath, t.definition.path || ""), teWrapper.log)));
         }
     }
     if (expectedCount >= 0) {

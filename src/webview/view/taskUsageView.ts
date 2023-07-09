@@ -82,7 +82,7 @@ export class TaskUsageView extends TeWebviewView<State>
 	{
 		if (e && e.key.startsWith("task:"))
 		{
-			this.wrapper.log.methodOnce("task usage view event", "onUsageChanged", 2, this.wrapper.log.getLogPad());
+			this.wrapper.log.methodEvent("task usage view event", "onUsageChanged", 2);
 			void this.refresh(false, false);
 		}
 	}

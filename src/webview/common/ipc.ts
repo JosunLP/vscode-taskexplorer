@@ -10,9 +10,10 @@
  * includes all of the data structures used in the messaging protocol between them.
  */
 
-// import { AuthenticationSession } from "vscode";
-import { IDictionary } from ":types";
+// import { AuthenticationSession } from "vscode";;
 import { ITeTask, TeTaskListType, ITeAccount, TeSessionChangeEvent } from "../../interface";
+
+export interface IDictionary<T> extends Record<string, T> {}
 
 export interface BaseState
 {
@@ -100,7 +101,7 @@ export const IpcRegisterAccountMsg = new IpcNotification<IpcAccountRegistrationP
 // TASK MONITOR APP
 //
 
-export type { ITeTask, TeTaskListType, IDictionary };
+export type { ITeTask, TeTaskListType };
 export type IMonitorAppTimerMode = "Hide" | "MM:SS" | "MM:SS:MS"  | "MM:SS:MSS";
 
 export interface MonitorAppState extends State

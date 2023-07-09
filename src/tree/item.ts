@@ -1,7 +1,6 @@
 
 import { join } from "path";
 import { TaskFile } from "./file";
-import { log } from "../lib/log/log";
 import { TaskFolder } from "./folder";
 import { ITaskItem, TeTaskSource } from "../interface";
 import { encodeUtf8Hex } from ":env/hex";
@@ -49,12 +48,6 @@ export class TaskItem extends TreeItem implements ITaskItem
             return displayName;
         };
         super(getDisplayName(task.name), TreeItemCollapsibleState.None);
-        log.methodStart("construct tree item", 5, logPad, false, [
-            [ "label", this.label ], [ "source", taskFile.taskSource ], [ "task file", taskFile.label ],
-            [ "groupLevel", taskFile.groupLevel ], [ "taskDef cmd line", taskDef.cmdLine ],
-            [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
-            [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
-        ]);
         //
         // Since we save tasks (last tasks and favorites), we need a known unique key to
         // save them with.  We can just use the existing id parameter...
@@ -99,11 +92,6 @@ export class TaskItem extends TreeItem implements ITaskItem
         // Refresh state - sets context value, icon path from execution state
         //
         this.refreshState(logPad + "   ", 5);
-        log.methodDone("construct tree file", 5, logPad, [
-            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ],
-            [ "context value", this.contextValue ], [ "groupLevel", this._groupLevel ],
-            [ "resource uri path", this._taskFile.resourceUri.fsPath ], [ "path", this._taskFile.relativePath  ]
-        ]);
     }
 
 
@@ -145,19 +133,11 @@ export class TaskItem extends TreeItem implements ITaskItem
 
     isExecuting(logPad = "   ")
     {
-        log.methodStart("is executing", 5, logPad);
         const task = this._taskDetached ?? this.task;
         const execs = tasks.taskExecutions.filter(e => e.task.name === task.name && e.task.source === task.source &&
                                                 e.task.scope === task.scope && e.task.definition.path === task.definition.path);
         const exec = execs.find(e => e.task.name === task.name && e.task.source === task.source &&
                                 e.task.scope === task.scope && e.task.definition.path === task.definition.path);
-        /* istanbul ignore if */
-        if (execs.length > 1) {
-            log.error(`More than one task execution was found for '${this.task.name}' !!`);
-        }
-        log.methodDone("is executing", 5, logPad, [
-            [ "is executing", !!exec ], [ "task exec count", execs.length ], [ "total exec count", tasks.taskExecutions.length ]
-        ]);
         return exec;
     }
 
@@ -168,10 +148,6 @@ export class TaskItem extends TreeItem implements ITaskItem
     refreshState(logPad: string, logLevel: number)
     {
         const isExecuting = !!this.isExecuting();
-        log.methodStart("refresh taskitem state", logLevel, logPad, false, [
-            [ "label", this.label ], [ "is executing", isExecuting ]
-        ]);
-        log.value("id", this.id, logLevel + 1);
         this.setContextValue(this.task, isExecuting);
         this.setIconPath(isExecuting);
     }

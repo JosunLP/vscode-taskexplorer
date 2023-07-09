@@ -93,7 +93,7 @@ export class TaskManager implements ITeTaskManager, Disposable
 
         this.wrapper.utils.execIf(taskItem.task.execution, () =>
         {
-            const terminal = getTerminal(taskItem, "   ");
+            const terminal = getTerminal(taskItem);
             this.wrapper.utils.execIf(terminal, (t) =>
             {
                 taskItem.paused = true;
@@ -129,7 +129,7 @@ export class TaskManager implements ITeTaskManager, Disposable
     {
         let exec: TaskExecution | undefined;
         this._log.methodStart("resume task", 1, "", true);
-        const term = getTerminal(taskItem, "   ");
+        const term = getTerminal(taskItem);
         if (term)
         {   //
             // TODO - see ticket. its not CTRL+C in some parts so make the ctrl char a setting. Also stop().
@@ -381,7 +381,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         {
             if (w.config.get<boolean>(w.keys.Config.KeepTerminalOnTaskDone) === true && !taskItem.taskDetached)
             {
-                const terminal = getTerminal(taskItem, "   ");
+                const terminal = getTerminal(taskItem);
                 /* istanbul ignore else */
                 if (terminal)
                 {
@@ -401,7 +401,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                         this._log.value("   send to terminal", ctrlChar, 1);
                         // terminal = getTerminal(taskItem, "   ");
                         try {
-                            w.utils.execIf(getTerminal(taskItem, "   "), (t) => t.sendText(ctrlChar, true), this);
+                            w.utils.execIf(getTerminal(taskItem), (t) => t.sendText(ctrlChar, true), this);
                         } catch {}
                     }
                 }

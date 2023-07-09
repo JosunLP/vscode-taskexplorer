@@ -1,11 +1,11 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { log } from "./lib/log/log";
+import { TeLog } from "./lib/utils/log";
 import { TeWrapper } from "./lib/wrapper";
 import { TeMigration } from "./lib/migration";
 import { initStorage, storage } from "./lib/storage";
 import { ExtensionContext, ExtensionMode } from "vscode";
-import { configuration, registerConfiguration } from "./lib/configuration";
+import { configuration, initConfiguration } from "./lib/configuration";
 
 let teWrapper: TeWrapper;
 
@@ -28,12 +28,13 @@ export async function activate(context: ExtensionContext)
     //
     // Initialize configuration
     //
-    registerConfiguration(context);
+    initConfiguration(context);
     //
     // Initialize logging
     //    0=off | 1=on w/red&yellow | 2=on w/ no red/yellow
     //
-    await log.registerLog(context, configuration, isTests ? 2 : /* istanbul ignore next */ 0);
+    const log = new TeLog(context, configuration, isTests ? 2 : /* istanbul ignore next */ 0);
+    await log.init(context.logUri.fsPath);
     log.methodStart("extension activation", 1, "", true);
     //
     // Initialize persistent storage
