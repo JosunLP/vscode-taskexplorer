@@ -385,8 +385,8 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
             result = result.then<R, E>(
             (r) => {
                 const fResult = wrapFinally(false, catchFinallyOpts, thisArg);
-                if (isPromise<E>(fResult)) {
-                    return fResult.then<E, any>(r => r, wrapThrow);
+                if (isPromise<any>(fResult)) {
+                    return fResult.then<R, any>(() => r, wrapThrow);
                 }
                 return r;
             },
@@ -403,8 +403,8 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
                     result = result.then<E, any>(
                         (r) => {
                             const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
-                            if (isPromise<E>(fResult)) {
-                                return fResult.then<E, any>(r => r, wrapThrow);
+                            if (isPromise<any>(fResult)) {
+                                return fResult.then<E, any>(() => r, wrapThrow);
                             }
                             return r;
                         }, wrapThrow
@@ -414,7 +414,7 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
                 {
                     const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
                     if (isPromise<E>(fResult)) {
-                        return fResult.then<E, any>(r => r, wrapThrow);
+                        return fResult.then<E, any>(() => e, wrapThrow);
                     }
                 }
                 return result;
