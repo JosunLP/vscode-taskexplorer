@@ -14,6 +14,7 @@ let startTaskCount = 5; // set in suiteSetup() as it will change depending on si
 let packageJsonPath: string;
 let packageJson2Dir: string;
 let packageJson2Path: string;
+let packageJsonContent: string;
 let npmTaskItems: ITaskItem[];
 
 
@@ -28,13 +29,20 @@ suite("NPM Tests", () =>
         packageJsonPath = utils.getWsPath("package.json");
         packageJson2Dir = utils.getWsPath("npm_test");
         packageJson2Path = join(packageJson2Dir, "package.json");
+        packageJsonContent = await teWrapper.fs.readFileAsync(packageJsonPath);
         utils.endRollingCount(this, true);
     });
 
 
     suiteTeardown(async function()
     {
-        if (utils.exitRollingCount(this, false, true)) return;
+        if (utils.exitRollingCount(this, false, true))
+        {
+            if (packageJsonPath && packageJsonContent) {
+                try { await teWrapper.fs.writeFile(packageJsonPath, packageJsonContent); } catch {}
+            }
+            return;
+        }
         try { await teWrapper.fs.deleteDir(packageJson2Dir); } catch {}
         await utils.waitForTeIdle(tc.waitTime.fs.deleteEvent);
         utils.suiteFinished(this);
@@ -205,8 +213,8 @@ suite("NPM Tests", () =>
     test("Document Position", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.tasks.findPosition + tc.slowTime.tasks.getTreeTasks + (tc.slowTime.tasks.findPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
         npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount + 1);
+        this.slow(tc.slowTime.tasks.findPosition + tc.slowTime.tasks.getTreeTasks + (tc.slowTime.tasks.findPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
         for (const taskItem of npmTaskItems) {
             await executeTeCommand2("open", [ taskItem ], tc.waitTime.commandFast);
         }

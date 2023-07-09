@@ -62,7 +62,7 @@ export enum Commands
 	RunWithNoTerminal = "taskexplorer.runNoTerm",
 	SetPinned = "taskexplorer.setPinned",
 	ShowLicensePage = "taskexplorer.view.licensePage.show",
-	ShowOutputWindow = "taskexplorer.showOutputWindow",
+	ShowOutputWindow = "taskexplorer.showOutput",
 	ShowParsingReportPage = "taskexplorer.view.parsingReport.show",
 	ShowReleaseNotesPage = "taskexplorer.view.releaseNotes.show",
 	ShowSideBar = "workbench.view.extension.taskExplorerSideBar",
