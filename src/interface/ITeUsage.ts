@@ -2,7 +2,6 @@
 
 import { Event } from "vscode";
 import { ITeTask } from "./ITeTask";
-import { IDictionary } from ":types";
 import { TreeviewIds, WebviewIds, WebviewViewIds } from "./ITeWebview";
 
 export type WebviewUsageKey = `${UsageKeys.WebviewPrefix}${WebviewIds}${string}`;
@@ -66,7 +65,7 @@ export interface ITeTaskStats
     favorites: ITeTask[];
     last: ITeTask[];
     running: ITeTask[];
-    runtimes: IDictionary<ITeTaskUsageRuntimeInfo>;
+    runtimes: Record<string, ITeTaskUsageRuntimeInfo>;
     taskLastRan: ITeTask;
     taskMostUsed: ITeTask;
     timeLastRan: number;
@@ -90,7 +89,7 @@ export interface ITeUsage
 {
 	onDidChange: Event<ITeUsageChangeEvent | undefined>;
     get(key: string): ITeTrackedUsage | undefined;
-    getAll(key?: string): IDictionary<ITeTrackedUsage>;
+    getAll(key?: string): Record<string, ITeTrackedUsage>;
     getAvgRunCount(period: "d" | "w", logPad: string): number;
     getLastRanTaskTime(): string;
     reset(key?: string): Promise<void>;

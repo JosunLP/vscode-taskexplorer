@@ -1,5 +1,4 @@
 
-import { IDictionary } from ":types";
 import { OutputChannel } from "vscode";
 
 export interface ILogControl
@@ -19,7 +18,7 @@ export interface ILogControl
     logLevel: number;
     logOutputChannel: OutputChannel | undefined;
     logValueWhiteSpace: number;
-    msgQueue: IDictionary<ILogQueueItem[]>;
+    msgQueue: Record<string, ILogQueueItem[]>;
     tzOffset: number;
     useTags: boolean;
     useTagsMaxLength: number;

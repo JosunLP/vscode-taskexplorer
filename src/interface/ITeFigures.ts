@@ -1,4 +1,3 @@
-import { IDictionary } from ":types";
 
 export type LogColor = [ number, number ];
 export type LogStyle = [ number, number ];
@@ -20,9 +19,9 @@ export interface ILogColors
     yellow: LogColor;
 };
 
-export interface ITeFigures extends IDictionary<any>
+export interface ITeFigures extends Record<string, any>
 {
-    color: IDictionary<any>;
+    color: Record<string, any>;
     // color: IDictionary<(msg: string, color: LogColor) => string>;
     colors: ILogColors;
     withColor(msg: string, color: LogColor): string;
