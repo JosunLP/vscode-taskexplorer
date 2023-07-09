@@ -258,6 +258,7 @@ const main = async () =>
             try { fs.unlinkSync(path.join(project1Path, "GRUNTFILE.js")); } catch {}
             try { fs.unlinkSync(path.join(project1Path, "tsconfig.json")); } catch {}
             try { fs.unlinkSync(path.join(project1Path, ".publishrc.json")); } catch {}
+            try { fs.rmSync(path.join(project1Path, "npm_test"), { recursive: true }); } catch {}
             try { fs.rmSync(path.join(project1Path, "tasks_test_"), { recursive: true }); } catch {}
             try { fs.rmSync(path.join(project1Path, "tasks_test_ts_"), { recursive: true }); } catch {}
             try { fs.rmSync(path.join(project1Path, "tasks_test_ignore_"), { recursive: true }); } catch {}

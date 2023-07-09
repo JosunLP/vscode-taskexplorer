@@ -83,7 +83,7 @@ suite("NPM Tests", () =>
         if (utils.exitRollingCount(this)) return;
         this.slow(tc.slowTime.fs.deleteFolderEvent + (tc.waitTime.fs.deleteEvent * 2) + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteDir(packageJson2Dir);
-        await utils.waitForTeIdle(tc.waitTime.fs.deleteEvent * 2, 7000, 50, true);
+        await utils.waitForTeIdle(tc.waitTime.fs.deleteEvent * 2, 7000, 50);
         try {
             await utils.verifyTaskCount(testsName, startTaskCount);
         }
@@ -213,7 +213,7 @@ suite("NPM Tests", () =>
     test("Document Position", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount + 1);
+        npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount);
         this.slow(tc.slowTime.tasks.findPosition + tc.slowTime.tasks.getTreeTasks + (tc.slowTime.tasks.findPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
         for (const taskItem of npmTaskItems) {
             await executeTeCommand2("open", [ taskItem ], tc.waitTime.commandFast);
