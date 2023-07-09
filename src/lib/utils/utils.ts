@@ -194,7 +194,7 @@ export const isExcluded = (uriPath: string, log: ILog, logPad = "") =>
 };
 
 
-const isCallbackArray = <T = any>(v: any): v is CallbackArray<T> => !!v && isArray(v) && isFunction(v[0]);
+const isCallbackArray = <T = any>(v: any): v is CallbackArray<T> => !!v && isArray(v) && (isFunction(v[0]) || (!v[0] && isFunction(v[2])));
 
 
 /**
@@ -376,59 +376,93 @@ export function wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3,
 export function wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
 export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFinallyOpts?: CallbackOptions, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
 {
-    let result,
-        failed = false;
+    let result;
     try
     {
         result = runFn.call(thisArg, arg1, arg2, arg3, arg4, arg5);
         if (isPromise<R>(result))
         {
-            result = result.then<R, E>((r) => r, (e) =>
+            result = result.then<R, E>(
+            (r) => {
+                const fResult = wrapFinally(false, catchFinallyOpts, thisArg);
+                if (isPromise<E>(fResult)) {
+                    return fResult.then<E, any>(r => r, wrapThrow);
+                }
+                return r;
+            },
+            (e) =>
             {
                 if (!isCallbackArray<E>(catchFinallyOpts)) {
                     result = (catchFinallyOpts || wrapThrow).call(thisArg, e);
                 }
                 else {
-                    failed = true;
                     result = catchFinallyOpts.shift().call(thisArg, e, ...catchFinallyOpts);
                 }
-                if (isPromise<E>(result)) {
-                    result = result.then<E, any>((e) => e, wrapThrow);
+                if (isPromise<E>(result))
+                {
+                    result = result.then<E, any>(
+                        (r) => {
+                            const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
+                            if (isPromise<E>(fResult)) {
+                                return fResult.then<E, any>(r => r, wrapThrow);
+                            }
+                            return r;
+                        }, wrapThrow
+                    );
+                }
+                else
+                {
+                    const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
+                    if (isPromise<E>(fResult)) {
+                        return fResult.then<E, any>(r => r, wrapThrow);
+                    }
                 }
                 return result;
             });
         }
+        else {
+            wrapFinally(false, catchFinallyOpts, thisArg);
+        }
     }
     catch (e)
     {
-        failed = true;
-        if (!isCallbackArray<E>(catchFinallyOpts)) {
-            result = (catchFinallyOpts || wrapThrow).call(thisArg, e);
+        if (!isCallbackArray<E>(catchFinallyOpts)) {     // catch
+            result = wrapThrow.call(thisArg, e);
         }
         else {
             result = catchFinallyOpts.shift().call(thisArg, e, ...catchFinallyOpts);
         }
-        if (isPromise<E>(result)) {
-            result = result.then<E, any>((e) => e, wrapThrow);
+        if (isPromise<E>(result))
+        {
+            result = result.then<E, any>(
+                (r) => {
+                    const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
+                    if (isPromise<E>(fResult)) {
+                        return fResult.then<E, any>(r => r, wrapThrow);
+                    }
+                    return r;
+                }, wrapThrow
+            );
         }
-    }
-    finally
-    {
-        if (isCallbackArray<E>(catchFinallyOpts))
-        {   //
-            // If we failed, then the `catchFinallyOpts` array will have had it's 1st element removed
-            //
-            const fn = failed ? catchFinallyOpts[0] : catchFinallyOpts[1];
-            if (isFunction(fn))
-            {
-                let fResult = fn.call(thisArg);
-                if (isPromise<E>(fResult)) {
-                    fResult = fResult.then<E, any>((e) => e, wrapThrow);
-                }
-            }
+        else {
+            wrapFinally(true, catchFinallyOpts, thisArg);
         }
     }
     return result;
+};
+
+
+const wrapFinally = <E>(failed: boolean, catchFinallyOpts: any, thisArg: any) =>
+{
+    if (isCallbackArray<E>(catchFinallyOpts))
+    {
+        if (!failed) {
+            catchFinallyOpts.shift(); // DIscard exception handler
+        }
+        if (isCallbackArray<E>(catchFinallyOpts)) {
+            return catchFinallyOpts.shift().call(thisArg, ...catchFinallyOpts);
+        }
+    }
 };
 
 

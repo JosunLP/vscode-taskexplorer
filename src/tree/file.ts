@@ -1,9 +1,10 @@
 
 import { TaskItem } from "./item";
+import { extname, join } from "path";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
 import { Strings } from "../lib/constants";
-import { basename, extname, join } from "path";
+import { TeWrapper } from "../lib/wrapper";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
@@ -45,17 +46,17 @@ export class TaskFile extends TreeItem implements ITaskFile
     private readonly _treeNodes: (TaskItem|TaskFile)[];
 
 
-    constructor(folder: TaskFolder, task: Task, relativePath: string,
+    constructor(wrapper: TeWrapper, folder: TaskFolder, task: Task, relativePath: string,
                 groupLevel: number, groupId: string | undefined, label: string, logPad: string)
     {
         super(TaskFile.getLabel(task.definition, label, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
         const taskDef = task.definition;
-        // log.methodStart("construct tree file", 4, logPad, false, [
-        //     [ "label", label ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
-        //     [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
-        //     [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
-        //     [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
-        // ]);
+        wrapper.log.methodStart("construct tree file", 4, logPad, false, [
+            [ "label", label ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
+            [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
+            [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
+            [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
+        ]);
         //
         // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
         this.id = TaskFile.id(folder, task, this.label, groupLevel, groupId);
@@ -131,11 +132,11 @@ export class TaskFile extends TreeItem implements ITaskFile
             this.iconPath = { light: iconLight, dark: iconDark };
         }
 
-        // log.methodDone("construct tree file", 4, logPad, [
-        //     [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ], [ "context value", this.contextValue ],
-        //     [ "is group", this._isGroup ], [ "groupLevel", this._groupLevel ], [ "filename", this._fileName ],
-        //     [ "resource uri path", this.resourceUri.fsPath ], [ "path", this._relativePath  ]
-        // ]);
+        wrapper.log.methodDone("construct tree file", 4, logPad, [
+            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ], [ "context value", this.contextValue ],
+            [ "is group", this.isGroup ], [ "groupLevel", this.groupLevel ], [ "filename", this._fileName ],
+            [ "resource uri path", this.resourceUri.fsPath ], [ "path", this.relativePath  ]
+        ]);
     }
 
 
@@ -159,7 +160,7 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     get relativePath() { return this._relativePath; };
 
-    get task() { return this._task; };
+    // get task() { return this._task; };
 
     get taskSource() { return this._taskSource; };
 

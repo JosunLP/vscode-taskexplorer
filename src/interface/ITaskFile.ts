@@ -14,7 +14,7 @@ export interface ITaskFile extends TreeItem
     label: string;
     fileName: string;
     folder: ITaskFolder;
-    readonly task: Task;
+    // readonly task: Task;
     readonly isUser: boolean;
     readonly relativePath: string;
     readonly resourceUri: Uri;

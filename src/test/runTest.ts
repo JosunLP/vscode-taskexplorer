@@ -123,12 +123,15 @@ const main = async () =>
         }
 
         //
-        // Copy a "User Tasks" file
+        // Copy a "User Tasks" file if this isnt a freash zip download
         //
-        if (!fs.existsSync(path.join(vscodeTestUserDataPath, "User"))) {
-            fs.mkdirSync(path.join(vscodeTestUserDataPath, "User"));
+        if (fs.existsSync(vscodeTestUserDataPath))
+        {
+            if (!fs.existsSync(path.join(vscodeTestUserDataPath, "User"))) {
+                fs.mkdirSync(path.join(vscodeTestUserDataPath, "User"));
+            }
+            fs.copyFileSync(path.join(testWorkspaceMultiRoot, "user-tasks.json"), path.join(vscodeTestUserDataPath, "User", "tasks.json"));
         }
-        fs.copyFileSync(path.join(testWorkspaceMultiRoot, "user-tasks.json"), path.join(vscodeTestUserDataPath, "User", "tasks.json"));
 
         //
         // const runCfg = await runConfig();
@@ -172,7 +175,8 @@ const main = async () =>
                 xArgs: JSON.stringify(xArgs),
                 testArgs: JSON.stringify(testsArgs),
                 vsCodeTestVersion,
-                testsMachineId: process.env.VSC_TESTS_MACHINEID
+                testsMachineId: process.env.VSC_TESTS_MACHINEID,
+                vscodeTestUserDataPath
             }
         }); // --upload-logs could be interesting (for prod).  look at it sometime.
     }

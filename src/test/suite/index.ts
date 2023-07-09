@@ -1,7 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
-import { resolve } from "path";
+import { join, resolve } from "path";
 import { TestRunner } from "@spmeesseman/test-utils";
+import { copyFileSync, existsSync, mkdirSync } from "fs";
 
 
 export const run = async (): Promise<void> =>
@@ -11,7 +12,20 @@ export const run = async (): Promise<void> =>
 		  clean = !xArgs.includes("--nyc-no-clean") || xArgs.includes("--nyc-clean"),
 		  projectRoot = resolve(__dirname, "..", "..", ".."),
 		  verbose = xArgs.includes("--nyc-verbose"),
-		  silent = xArgs.includes("--nyc-silent");
+		  silent = xArgs.includes("--nyc-silent"),
+		  userDir = <string>process.env.vscodeTestUserDataPath,
+          testWorkspaceMultiRoot = join(projectRoot, "test-fixture");
+
+	//
+	// Copy a "User Tasks" file
+	//
+	if (!existsSync(join(userDir, "user-data"))) {
+		mkdirSync(join(userDir, "user-data"));
+	}
+	if (!existsSync(join(userDir, "User"))) {
+		mkdirSync(join(userDir, "User"));
+	}
+	copyFileSync(join(testWorkspaceMultiRoot, "user-tasks.json"), join(userDir, "User", "tasks.json"));
 
 	const runner = new TestRunner(
 	{

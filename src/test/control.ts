@@ -61,8 +61,8 @@ export const testControl =
         pathToAnsicon: "c:\\Code\\ansicon\\x64\\ansicon.exe",
     },
     defaultWindowsShell: undefined,
-    vsCodeAutoDetectGrunt: false,
-    vsCodeAutoDetectGulp: false,
+    vsCodeAutoDetectGrunt: "off", // "off" | "on"
+    vsCodeAutoDetectGulp: "off",  // "off" | "on"
     //
     // SLOW TIMES (TESTS MARKED RED WHEN EXCEEDED)
     // Slow times are generally 2x the amount of time the command "should" take.  Mocha

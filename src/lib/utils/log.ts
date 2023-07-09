@@ -27,21 +27,34 @@ export class TeLog implements ILog, Disposable
 
     constructor(context: ExtensionContext, config: IConfiguration, testsRunning: number)
     {
-        this._fileNameTimer = 0 as unknown as NodeJS.Timeout;
-        this._logControl = this.getDefaultLogControl(context, config);
-
         this._config = config;
-        apply(this._logControl, {
+        this._fileNameTimer = 0 as unknown as NodeJS.Timeout;
+        this._logControl = {
+            dirPath: context.logUri.fsPath,
+            enable: config.get<boolean>("logging.enable", false),
+            enableOutputWindow: config.get<boolean>("logging.enableOutputWindow", true),
+            enableFile: config.get<boolean>("logging.enableFile", false),
+            enableFileSymbols: config.get<boolean>("logging.enableFileSymbols", true),
+            fileName: "",
             isTests: context.extensionMode === ExtensionMode.Test,
-            isTestsBlockScaryColors: this._logControl.isTests,
-            enable: config.get<boolean>("logging.client.enable", false),
-            level: config.get<LogLevel>("logging.client.level", 1),
-            enableOutputWindow: config.get<boolean>("logging.client.enableOutputWindow", true),
-            enableFile: config.get<boolean>("logging.client.enableFile", false),
-            enableFileSymbols: config.get<boolean>("logging.client.enableFileSymbols", true),
+            isTestsBlockScaryColors: context.extensionMode === ExtensionMode.Test,
+            lastErrorMesage: [],
+            lastLogPad: "",
+            lastWriteWasBlank: false,
+            lastWriteWasBlankError: false,
+            lastWriteToConsoleWasBlank: false,
+            level: config.get<LogLevel>("logging.level", 1),
+            msgQueue: {},
             outputChannelWriteFn: "appendLine",
-            outputChannel: window.createOutputChannel("ExtJs Language Client")
-        });
+            outputChannel: window.createOutputChannel("Task Explorer"),
+            useTags: true,
+            useTagsMaxLength: 8,
+            type: "global",
+            tzOffset: (new Date()).getTimezoneOffset() * 60000,
+            valueWhiteSpace: 45,
+            writeToConsole: false,
+            writeToConsoleLevel: 2
+        };
         this._disposables.push(
             this._logControl.outputChannel,
             registerCommand(Commands.ShowOutputWindow, this.showOutput, this),
@@ -55,10 +68,6 @@ export class TeLog implements ILog, Disposable
 
     private get allowScaryColors() {
         return !this._logControl.isTests || !this._logControl.isTestsBlockScaryColors;
-    }
-
-    protected get colors(): LogColors {
-        return figures.colors;
     }
 
     get control(): ILogControl {
@@ -193,7 +202,7 @@ export class TeLog implements ILog, Disposable
             this._write(symbols[0] + " " + msg, 1, "", queueId, false, true);
         }
         else {
-            this._write(figures.withColor(symbols[0] + " " + msg, this.colors.grey), 1, "", queueId, false, true);
+            this._write(figures.withColor(symbols[0] + " " + msg, figures.colors.grey), 1, "", queueId, false, true);
         }
     };
 
@@ -231,37 +240,6 @@ export class TeLog implements ILog, Disposable
         this._logControl.dirPath = logDirectory;
         this.setFileName();
         this.enable(this._logControl.enable);
-    };
-
-
-    private getDefaultLogControl = (context: ExtensionContext, config: IConfiguration): ILogControl =>
-    {
-        return {
-            dirPath: context.logUri.fsPath,
-            enable: config.get<boolean>("logging.enable", false),
-            enableOutputWindow: config.get<boolean>("logging.enableOutputWindow", true),
-            enableFile: config.get<boolean>("logging.enableFile", false),
-            enableFileSymbols: config.get<boolean>("logging.enableFileSymbols", true),
-            fileName: "",
-            isTests: context.extensionMode === ExtensionMode.Test,
-            isTestsBlockScaryColors: context.extensionMode === ExtensionMode.Test,
-            lastErrorMesage: [],
-            lastLogPad: "",
-            lastWriteWasBlank: false,
-            lastWriteWasBlankError: false,
-            lastWriteToConsoleWasBlank: false,
-            level: config.get<LogLevel>("logging.level", 1),
-            msgQueue: {},
-            outputChannelWriteFn: "appendLine",
-            outputChannel: window.createOutputChannel("Task Explorer"),
-            useTags: true,
-            useTagsMaxLength: 8,
-            type: "global",
-            tzOffset: (new Date()).getTimezoneOffset() * 60000,
-            valueWhiteSpace: 45,
-            writeToConsole: false,
-            writeToConsoleLevel: 2
-        };
     };
 
 
@@ -467,7 +445,7 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    protected showOutput = async(show: boolean) =>
+    private showOutput = async(show: boolean) =>
     {
         const channel: OutputChannel = this._logControl.outputChannel as OutputChannel;
         if (show) {
@@ -515,9 +493,9 @@ export class TeLog implements ILog, Disposable
             channelLog("***********************************************************************************************");
             channelLog(` ExtJs Intellisense Log File: ${this._logControl.fileName}`);
             channelLog("***********************************************************************************************");
-            console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", this.colors.grey)}`);
-            console.log(`    ${figures.color.info} ${figures.withColor(` ExtJs Intellisense Log File: ${this._logControl.fileName}`, this.colors.grey)}`);
-            console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", this.colors.grey)}`);
+            console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
+            console.log(`    ${figures.color.info} ${figures.withColor(` ExtJs Intellisense Log File: ${this._logControl.fileName}`, figures.colors.grey)}`);
+            console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
         }
     };
 
@@ -618,7 +596,7 @@ export class TeLog implements ILog, Disposable
         if (this._logControl.writeToConsole && (isError || !level || level <= this._logControl.writeToConsoleLevel))
         {
             const ts = !this._logControl.isTests ? /* istanbul ignore next */this.getStamp().stampTime + " " + figures.pointer : "   ";
-            msg = figures.withColor(msg, this.colors.grey);
+            msg = figures.withColor(msg, figures.colors.grey);
             this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, console.log, console, ts, false);
             this._logControl.lastWriteToConsoleWasBlank = false;
         } //

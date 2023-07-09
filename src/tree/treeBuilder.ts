@@ -131,7 +131,7 @@ export class TaskTreeBuilder
         if (!this._taskFileMap[id])
         {
             this.wrapper.log.value("   Add source taskfile container", task.source, 2, logPad);
-            this._taskFileMap[id] = folder.addChild(new TaskFile(folder, task, relativePath, 0, undefined, task.source, logPad + "   "));
+            this._taskFileMap[id] = folder.addChild(new TaskFile(this.wrapper, folder, task, relativePath, 0, undefined, task.source, logPad + "   "));
         }
         this.wrapper.log.methodDone("get task file node", 2, logPad);
         return this._taskFileMap[id];

@@ -402,6 +402,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         const callLogPad = logPad + "   ",
               count = this._tasks.length,
               firstTreeBuildDone = this._firstTreeBuildDone;
+
         await this.wrapper.utils.wrap(async () =>
         {
             if (doFetch)
@@ -417,14 +418,16 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
             }
         },
-        [   this.wrapper.log.error, // Catch
-            () => {                 // Finally
-                this._refreshPending = false;
-                this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
-                this.fireTreeRefreshEvent(null, null, logPad);
-                this.fireTasksLoadedEvents(count);
-            }
-        ], this);
+        [ this.wrapper.log.error, this.loadTasksFinally, count, callLogPad ], this);
+    };
+
+
+    private loadTasksFinally = (ct: number, logPad: string) =>
+    {
+        this._refreshPending = false;
+        this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
+        this.fireTreeRefreshEvent(null, null, logPad);
+        this.fireTasksLoadedEvents(ct);
     };
 
 
