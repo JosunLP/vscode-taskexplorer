@@ -143,8 +143,8 @@ export class TaskTreeBuilder
         this._taskFolders.splice(0);
         if (!source) {
             Object.keys(this._taskMap).forEach(k => delete this._taskMap[k]);
-            Object.keys(this._taskFileMap).forEach(k => delete this._taskMap[k]);
-            Object.keys(this._taskFolderMap).forEach(k => delete this._taskMap[k]);
+            Object.keys(this._taskFileMap).forEach(k => delete this._taskFileMap[k]);
+            Object.keys(this._taskFolderMap).forEach(k => delete this._taskFolderMap[k]);
         }
         else
         {
