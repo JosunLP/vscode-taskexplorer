@@ -4,14 +4,15 @@ import { join } from "path";
 import { apply } from "./object";
 import { figures, LogColors } from "./figures";
 import { appendFileSync, createDir } from "./fs";
-import { Commands, IConfiguration, IDictionary, ILog, ILogControl, LogLevel, VsCodeCommands } from "../../interface";
+import { executeCommand, registerCommand } from "../command/command";
 import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
 import { asString, isArray, isEmpty, isError, isFunction, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
-import { executeCommand, registerCommand } from "../command/command";
+import { Commands, IConfiguration, IDictionary, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
 
 
 export class TeLog implements ILog, Disposable
 {
+    private _wrapper: ITeWrapper | undefined;
     private _fileNameTimer: NodeJS.Timeout;
     private readonly _logControl: ILogControl;
     // private _wrapper: TeWrapper | undefined;
@@ -66,6 +67,14 @@ export class TeLog implements ILog, Disposable
 
     get lastPad(): string {
         return this._logControl.lastLogPad;
+    }
+
+    get wrapper(): ITeWrapper | undefined {
+        return this._wrapper;
+    }
+
+    set wrapper(wrapper) {
+        this._wrapper = wrapper;
     }
 
 

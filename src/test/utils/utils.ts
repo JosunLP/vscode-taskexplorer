@@ -633,7 +633,7 @@ export const waitForTeIdle = async (minWait = 1, maxWait = 15000, delay = 0, ver
             await sleep(toWait);
         }
     }
-    consoleWrite("COMPLETE: WAIT FOR TASK EXPLORER IDLE");
+    if (verbose) consoleWrite("COMPLETE: WAIT FOR TASK EXPLORER IDLE");
 };
 
 

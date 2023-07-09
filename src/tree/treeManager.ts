@@ -238,7 +238,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             //
             !w.fs.pathExistsSync(join(w.pathUtils.getTaskAbsolutePath(t, true))), this
         );
-console.log(JSON.stringify(rmv.map(r => r.source + ":" + r.name)));
         w.log.write(`   removed ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
         //
         // Hash NPM script blocks, to ignore edits to package.json when scripts have not changed, since

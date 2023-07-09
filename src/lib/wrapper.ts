@@ -2,6 +2,7 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
+import { TeLog } from "./utils/log";
 import { getUuid } from ":env/crypto";
 import { TeContext } from "./context";
 import { figures } from "./utils/figures";
@@ -72,7 +73,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private _initialized = false;
 	private _cacheBuster: string;
 
-	private readonly _log: ILog;
+	private readonly _log: TeLog;
 	private readonly _usage: Usage;
 	private readonly _teApi: TeApi;
 	private readonly _version: string;
@@ -107,12 +108,13 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _envMap: IDictionary<TeRuntimeEnvironment> = { production: "production", development: "dev", test: "tests" };
 
 
-	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: ILog)
+	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: TeLog)
     {
 		this._context = context;
         this._storage = storage;
         this._configuration = configuration;
 		this._log = log;
+		this._log.wrapper = this;
 		this._providers = {};
 
 		this._eventQueue = new EventQueue(this);
