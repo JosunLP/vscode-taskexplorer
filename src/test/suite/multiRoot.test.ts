@@ -47,7 +47,7 @@ suite("Multi-Root Workspace Tests", () =>
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate());
 
-        sortAlpha = teWrapper.config.get<boolean>(teWrapper.keys.Config.SortProjectFoldersAlphabetically);
+        sortAlpha = teWrapper.config.get<boolean>(teWrapper.keys.Config.SortProjectFoldersAlphabetically, true);
         await teWrapper.config.updateVs("grunt.autoDetect", false); // we ignore internally provided grunt tasks when building the tree
                                                                 // so make sure they're off for the verifyTaskCount() calls
         testsPath = getProjectsPath(".");

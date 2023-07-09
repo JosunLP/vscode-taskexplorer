@@ -1,20 +1,30 @@
 {
 	"compilerOptions": {
+		"baseUrl": ".",
         "declaration": true,
         "declarationMap": true,
 		"emitDeclarationOnly": false,
 		"incremental": true,
 		"lib": [ "es2020" ],
 		"module": "commonjs",
-		"outDir": "lib",
-		"rootDir": "../src",
+		"outDir": "dist",
+		// "rootDir": "../src",
+		"rootDirs": [ "../src/interface", "../src/lib" ],
 		"sourceMap": false,
 		"strict": true,
 		"target": "es2020",
-		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.tsbuildinfo"
+		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.types.tsbuildinfo",
+        "paths": {
+			":types": [ "." ]
+		}
 	},
 	"include": [
 		"../src/interface",
-		"../src/utils/log/log"
+		// "../src/lib/log/log.ts",
+		"./generic.d.ts"
+	],
+	"exclude": [
+		"../types",
+		"../**/*.d.ts"
 	]
 }

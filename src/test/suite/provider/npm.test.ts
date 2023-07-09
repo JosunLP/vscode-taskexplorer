@@ -1,11 +1,11 @@
 
+import { join } from "path";
 import { TaskExecution } from "vscode";
 import * as utils from "../../utils/utils";
+import { ITaskItem, ITeWrapper } from ":types";
 import { writeAndWait } from "../../utils/utils";
 import { startupFocus } from "../../utils/suiteUtils";
 import { executeTeCommand2 } from "../../utils/commandUtils";
-import { ITaskItem, ITeWrapper } from ":types";
-import { join } from "path";
 
 const testsName = "npm";
 let teWrapper: ITeWrapper;
@@ -163,8 +163,8 @@ suite("NPM Tests", () =>
             '    "author": "Scott Meesseman",\r\n' +
             "}\r\n"
         );
-        // + 1 because tasks.json still points to the build script (+ install task)
-        await utils.verifyTaskCount(testsName, startTaskCount - 3, 2);
+        // - 2 /  + 3 because tasks.json still points to the build script (+ install task)
+        await utils.verifyTaskCount(testsName, startTaskCount - 2, 2);
         utils.endRollingCount(this);
     });
 

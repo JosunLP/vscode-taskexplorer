@@ -23,9 +23,7 @@
         "taskexplorer"
     ],
     "files": [
-        "lib/interface",
-        "lib/tree",
-        "lib/lib/noScripts.d.ts",
+        "dist",
         "index.js",
         "index.d.ts"
     ],

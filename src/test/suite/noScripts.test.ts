@@ -30,9 +30,9 @@ suite("NoScripts TreeItem Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate());
-        showFavorites = teWrapper.config.get<boolean>("specialFolders.showFavorites");
-        showLastTasks = teWrapper.config.get<boolean>("specialFolders.showLastTasks");
-        showUserTasks = teWrapper.config.get<boolean>("specialFolders.showUserTasks");
+        showFavorites = teWrapper.config.get<boolean>("specialFolders.showFavorites", true);
+        showLastTasks = teWrapper.config.get<boolean>("specialFolders.showLastTasks", true);
+        showUserTasks = teWrapper.config.get<boolean>("specialFolders.showUserTasks", false);
         enabledTasks = { ...teWrapper.config.get<IDictionary<boolean>>("enabledTasks") };
         if (showUserTasks) {
             await executeSettingsUpdate("specialFolders.showFavorites", false, tc.waitTime.config.showHideSpecialFolder);

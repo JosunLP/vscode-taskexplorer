@@ -23,8 +23,8 @@ suite("Parsing Report Tests", () =>
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate());
 		projectUri = Uri.file(getWsPath("."));
-		pkgMgr = teWrapper.config.getVs<string>("npm.packageManager");
-		userTasks = teWrapper.config.get<boolean>("specialFolders.showUserTasks");
+		pkgMgr = teWrapper.config.getVs<string>("npm.packageManager", "npm");
+		userTasks = teWrapper.config.get<boolean>("specialFolders.showUserTasks", false);
         endRollingCount(this, true);
 	});
 

@@ -21,7 +21,7 @@ suite("Workspace / VSCode Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate());
-        wsEnable = teWrapper.config.get<boolean>(teWrapper.keys.Config.ShowHiddenVSCodeWsTasks);
+        wsEnable = teWrapper.config.get<boolean>(teWrapper.keys.Config.ShowHiddenVSCodeWsTasks, false);
         endRollingCount(this, true);
     });
 

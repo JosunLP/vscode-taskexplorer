@@ -12,13 +12,13 @@ export type { ITaskExplorerProvider } from "./ITaskProvider";
 export type { IExternalProvider } from "./IExternalProvider";
 export type { IEventQueue, IEventTask } from "./IEventQueue";
 export type { ICacheItem, ITeFileCache } from "./ITeFileCache";
-export type { ILog, ILogControl, ILogQueueItem } from "./ILog";
 export type { ITeTreeManager, TaskMap } from "./ITeTreeManager";
 export type { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 export type { IStatusBarInfo, ITeStatusBar } from "./ITeStatusBar";
 export type { ITeWrapper, ITeKeys, TeRuntimeEnvironment } from "./ITeWrapper";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
 export type { ITaskTreeEvent, ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
+export type { ILog, ILogControl, ILogQueueItem, LogLevel, LogType } from "./ILog";
 export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from "./IStorage";
 export type { ITeFileWatcher, FileSystemEventType, IFileSystemEvent } from "./ITeFileWatcher";
 export type { ITeWebview, WebviewViewIds, TreeviewIds, WebviewIds, WebviewId, TreeviewId, ITreeview } from "./ITeWebview";
@@ -26,7 +26,7 @@ export type { ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionCh
 export type { AllContextKeys, IContextChangeEvent, TreeviewContextKey, WebviewContextKey, WebviewViewContextKey } from "./ITeContext";
 export type { ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent, TeTaskListType, TeTaskSource, TeTaskNonScriptType, TeTaskScriptType } from "./ITeTask";
 export type { AllUsageKeys, ITeUsage, ITaskRuntimeInfo, ITeTaskStats, ITeTrackedUsage, ITeUsageChangeEvent, ITeTrackedUsageCount, WebviewUsageKey, WebviewViewUsageKey, TreeviewUsageKey } from "./ITeUsage";
-export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, PromiseAdapter, CallbackOptions, CallbackArray, OneOf, IDictionary, Primitive } from "./ITeUtilities";
+export type { ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, PromiseAdapter, CallbackOptions, CallbackArray, OneOf, IDictionary, Primitive, ObjectDiff } from "./ITeUtilities";
 
 export { UsageKeys } from "./ITeUsage";
 export { ContextKeys } from "./ITeContext";

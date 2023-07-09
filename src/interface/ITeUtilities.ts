@@ -1,4 +1,5 @@
 
+import { ILog } from "./ILog";
 import { ITaskFile } from "./ITaskFile";
 import { ITaskItem } from "./ITaskItem";
 import { ITeWrapper } from "./ITeWrapper";
@@ -24,6 +25,29 @@ export type PromiseAdapter<T, U> = (
 export interface ITeCommonUtilities
 {
 	properCase(name: string | undefined, removeSpaces?: boolean): string;
+}
+
+export interface ObjectDiff
+{
+    previous: IDictionary<any>;
+    current: IDictionary<any>;
+}
+
+// export interface ObjectUpdate {
+//     oldValue: any;
+//     newValue: any;
+// }
+
+export interface IObjectUtils
+{
+    apply<T extends IDictionary<any>>(object: IDictionary<any>, config: IDictionary<any>, defaults?: IDictionary<any>): T;
+    clone<T>(item: any): T;
+    diff(oldObj: IDictionary<any>, newObj: IDictionary<any>): ObjectDiff;
+    merge<T extends IDictionary<any>>(...destination: IDictionary<any>[]): T;
+    mergeIf<T extends IDictionary<any>>(...destination: IDictionary<any>[]): T;
+    pick<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T;
+    pickBy<T extends Record<string, any>>(obj: T, pickFn: <K extends keyof T>(k: K) => boolean | undefined): T ;
+    pickNot<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T;
 }
 
 export interface ITePathUtilities
@@ -71,7 +95,7 @@ export interface ITeTypeUtilities
     isArray<T>(v: any, allowEmp?: boolean): v is T[];
 	// isAsyncFunction<T = any>(fn: any): fn is () => PromiseLike<T>;
 	isBoolean(v: any): v is boolean;
-    // isDate(v: any): v is Date;
+    isDate(v: any): v is Date;
 	// isDefined(v: any): boolean;
     isEmpty(v: any, allowEmpStr?: boolean): v is null | undefined | "" | [];
 	isNumber(v: any): v is number;
@@ -135,7 +159,7 @@ export interface ITeUtilities
 	getPackageManager(): string;
 	getRandomNumber(max?: number, min?: number): number;
 	lowerCaseFirstChar(s: string, removeSpaces: boolean): string;
-	isExcluded(uriPath: string, logPad?: string): boolean;
+	isExcluded(uriPath: string, log: ILog, logPad?: string): boolean;
 	isTaskTypeEnabled(taskType: string): boolean;
 	isTeEnabled(): boolean;
 	openUrl(url: string): void;

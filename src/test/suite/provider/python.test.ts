@@ -2,10 +2,10 @@
 
 import * as path from "path";
 import { expect } from "chai";
+import { ITaskExplorerApi, ITeWrapper } from ":types";
 import { startupFocus } from "../../utils/suiteUtils";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper } from ":types";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, logErrorsAreFine, suiteFinished,
     testControl as tc, verifyTaskCount, waitForTeIdle
@@ -40,8 +40,8 @@ suite("Python Tests", () =>
         //
         // Store / set initial settings
         //
-        pathToTaskProgram = teWrapper.config.get<string>("pathToPrograms." + testsName);
-        enableTaskType = teWrapper.config.get<boolean>("enabledTasks." + testsName);
+        pathToTaskProgram = teWrapper.config.get<string>("pathToPrograms." + testsName, "");
+        enableTaskType = teWrapper.config.get<boolean>("enabledTasks." + testsName, false);
         await executeSettingsUpdate("pathToPrograms." + testsName, testsName + "/" + testsName + ".exe", tc.waitTime.config.event);
         await executeSettingsUpdate("enabledTasks." + testsName, true, tc.waitTime.config.enableEvent);
         endRollingCount(this, true);

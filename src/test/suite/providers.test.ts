@@ -38,7 +38,7 @@ suite("Provider Tests", () =>
         dirName = join(rootPath, "tasks_test_");
         dirNameL2 = join(dirName, "subfolder");
         dirNameIgn = join(rootPath, "tasks_test_ignore_");
-        excludes = teWrapper.config.get<string[]>("exclude");
+        excludes = teWrapper.config.get<string[]>("exclude", []);
         await executeSettingsUpdate("exclude", [ ...excludes, "**/tasks_test_ignore_/**", "**/ant/**" ], tc.waitTime.config.globEvent);
         endRollingCount(this, true);
     });

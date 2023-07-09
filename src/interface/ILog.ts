@@ -1,6 +1,17 @@
 
 import { OutputChannel } from "vscode";
 
+export type LogLevel = number; // 1 | 2 | 3 | 4 | 5;
+export type LogType = "global";
+
+export interface ILogQueueItem
+{
+    fn: any;
+    args: any[];
+    scope: any;
+}
+
+/*
 export interface ILogControl
 {
     enable: boolean;
@@ -25,29 +36,52 @@ export interface ILogControl
     writeToConsole: boolean;
     writeToConsoleLevel: number;
 };
+*/
 
-export interface ILogQueueItem
+export interface ILogControl
 {
-    fn: any;
-    args: any[];
-    scope: any;
-}
+    dirPath: string;
+    enable: boolean;
+    enableFile: boolean;
+    enableFileSymbols: boolean;
+    enableOutputWindow: boolean;
+    fileName: string;
+    isTests: boolean;
+    isTestsBlockScaryColors: boolean;
+    lastErrorMesage: string[];
+    lastLogPad: string;
+    lastWriteWasBlank: boolean;
+    lastWriteWasBlankError: boolean;
+    lastWriteToConsoleWasBlank: boolean;
+    level: LogLevel;
+    msgQueue: Record<string, ILogQueueItem[]>;
+    outputChannel: any;
+    outputChannelWriteFn: string;
+    type: LogType;
+    tzOffset: number;
+    useTags: boolean;
+    useTagsMaxLength: number;
+    valueWhiteSpace: number;
+    writeToConsole: boolean;
+    writeToConsoleLevel: number;
+};
 
 export interface ILog
 {
-    blank(level?: number, queueId?: string): void;
+    readonly control: ILogControl;
+    readonly lastPad: string;
+    blank(level?: LogLevel, queueId?: string): void;
     dequeue(queueId: string): void;
-    error(msg: any, params?: (string|any)[][], queueId?: string): void;
-    isLoggingEnabled(): boolean;
-    getLogFileName(): string;
-    getLogPad(): string;
-    methodStart(msg: string, level?: number, logPad?: string, doLogBlank?: boolean, params?: (string|any)[][], queueId?: string): void;
-    methodDone(msg: string, level?: number, logPad?: string, params?: (string|any)[][], queueId?: string): void;
-    methodOnce(tag: string, msg: string, level?: number, logPad?: string, params?: (string|any)[][], queueId?: string): void;
-    setWriteToConsole(set: boolean, level?: number): void;
-    value(msg: string, value: any, level?: number, logPad?: string, queueId?: string): void;
-    values(level: number, logPad: string, params: any | (string|any)[][], queueId?: string): void;
+    dispose(): void;
+    error(msg: any, params?: (string|any)[][], queueId?: string, symbols?: [ string, string ]): void;
+    info(msg: string, level?: LogLevel, logPad?: string, queueId?: string): void;
+    methodStart(msg: string, level?: LogLevel, logPad?: string, doLogBlank?: boolean, params?: (string|any)[][], queueId?: string): void;
+    methodDone(msg: string, level?: LogLevel, logPad?: string, params?: (string|any)[][], queueId?: string): void;
+    methodEvent(msg: string, tag?: string,  level?: LogLevel, params?: (string|any)[][], queueId?: string): void;
+    setWriteToConsole?(set: boolean, level?: LogLevel): void;
+    value(msg: string, value: any, level?: LogLevel, logPad?: string, queueId?: string): void;
+    values(level: LogLevel, logPad: string, params: any | (string|any)[][], queueId?: string): void;
     warn(msg: any, params?: (string|any)[][], queueId?: string): void;
-    write(msg: string, level?: number, logPad?: string, queueId?: string, isValue?: boolean, isError?: boolean): void;
+    write(msg: string, level?: LogLevel, logPad?: string, queueId?: string, isValue?: boolean, isError?: boolean): void;
     withColor(msg: string, color: any): void;
 }

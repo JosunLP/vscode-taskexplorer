@@ -196,7 +196,7 @@ suite("Composer Tests", () =>
     test("Invalid JSON", async function()
     {
         if (exitRollingCount(this)) return;
-        let resetLogging = teWrapper.log.isLoggingEnabled();
+        let resetLogging = teWrapper.log.control.enable;
         if (resetLogging) { // turn scary error logging off
             this.slow(tc.slowTime.fs.modifyEvent + (tc.slowTime.config.event * 2) + tc.slowTime.tasks.count.verify);
             executeSettingsUpdate("logging.enable", false);

@@ -27,8 +27,8 @@ suite("Task Tests", () =>
     {
         if (utils.exitRollingCount(this, true)) return;
         ({ teWrapper } = await utils.activate());
-        clickAction = teWrapper.config.get<string>(teWrapper.keys.Config.TaskButtonsClickAction);
-        oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFoldersNumLastTasks);
+        clickAction = teWrapper.config.get<string>(teWrapper.keys.Config.TaskButtonsClickAction, "open");
+        oNumLastTasks = teWrapper.config.get<number>(teWrapper.keys.Config.SpecialFoldersNumLastTasks, 10);
         await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersNumLastTasks, 3);
         await executeSettingsUpdate(teWrapper.keys.Config.SpecialFoldersShowLastTasks, true);
         utils.endRollingCount(this, true);

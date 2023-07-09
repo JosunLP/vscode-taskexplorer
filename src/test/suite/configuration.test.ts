@@ -22,14 +22,14 @@ suite("Configuration / Settings Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate());
-        enabledTasks = teWrapper.config.get<IDictionary<boolean>>("enabledTasks");
-        pathToPrograms = teWrapper.config.get<IDictionary<string>>("pathToPrograms");
-        shellW32 = teWrapper.config.getVs<string>("terminal.integrated.shell.windows");
-        shellLnx = teWrapper.config.getVs<string>("terminal.integrated.shell.linux");
-        shellOsx = teWrapper.config.getVs<string>("terminal.integrated.shell.osx");
-        globPatternsAnt = teWrapper.config.get<string[]>("globPatternsAnt");
-        globPatternsBash = teWrapper.config.get<string[]>("globPatternsBash");
-        pkgMgr = teWrapper.config.getVs<string>("npm.packageManager");
+        enabledTasks = teWrapper.config.get<IDictionary<boolean>>("enabledTasks", {});
+        pathToPrograms = teWrapper.config.get<IDictionary<string>>("pathToPrograms", {});
+        shellW32 = teWrapper.config.getVs<string>("terminal.integrated.shell.windows", "");
+        shellLnx = teWrapper.config.getVs<string>("terminal.integrated.shell.linux", "");
+        shellOsx = teWrapper.config.getVs<string>("terminal.integrated.shell.osx", "");
+        globPatternsAnt = teWrapper.config.get<string[]>("globPatternsAnt", []);
+        globPatternsBash = teWrapper.config.get<string[]>("globPatternsBash", []);
+        pkgMgr = teWrapper.config.getVs<string>("npm.packageManager", "npm");
         endRollingCount(this, true);
     });
 
@@ -139,7 +139,7 @@ suite("Configuration / Settings Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.enableEvent + tc.slowTime.config.globEvent + tc.slowTime.config.readEvent +
                   tc.waitTime.config.globEvent + tc.slowTime.config.readEvent);
-        globPatterns = teWrapper.config.get<string[]>("globPatternsAnt");
+        globPatterns = teWrapper.config.get<string[]>("globPatternsAnt", []);
         await executeSettingsUpdate("enabledTasks.ant", false, tc.waitTime.config.enableEvent);
         globPatterns.push("**/dummy.xml");
         await executeSettingsUpdate("globPatternsAnt", globPatterns, tc.waitTime.config.globEvent);
@@ -162,7 +162,7 @@ suite("Configuration / Settings Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.enableEvent + tc.slowTime.config.globEvent + tc.slowTime.config.readEvent);
-        globPatterns = teWrapper.config.get<string[]>("globPatternsBash");
+        globPatterns = teWrapper.config.get<string[]>("globPatternsBash", []);
         await executeSettingsUpdate("enabledTasks.bash", false, tc.waitTime.config.enableEvent);
         globPatterns.push("**/extensionless/**");
         await executeSettingsUpdate("globPatternsBash", globPatterns);

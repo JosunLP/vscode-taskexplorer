@@ -2,4 +2,4 @@
  * App Types
  */
 
-export * from "./lib";
+export * from "./dist";

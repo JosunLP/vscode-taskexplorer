@@ -31,7 +31,6 @@ suite("Util Tests", () =>
 	suiteTeardown(async function()
 	{
         if (exitRollingCount(this, false, true)) return;
-		teWrapper.log.setWriteToConsole(teWrapper.logControl.console, teWrapper.logControl.consoleLevel);
 		await executeSettingsUpdate("logging.enable", teWrapper.logControl.enabled);
 		await executeSettingsUpdate("logging.enableFile", teWrapper.logControl.file);
 		await executeSettingsUpdate("logging.enableOutputWindow", teWrapper.logControl.output);
@@ -157,7 +156,6 @@ suite("Util Tests", () =>
 		teWrapper.log.warn("Warning1");
 		teWrapper.log.value("Test3", "value3", 1);
 		await executeSettingsUpdate("logging.enableFile", false);
-		teWrapper.log.getLogFileName();
 		//
 		// Disable logging
 		//
@@ -189,10 +187,10 @@ suite("Util Tests", () =>
 		teWrapper.log.methodDone("methodName", 1, "");
 		teWrapper.log.methodStart("methodName", 1, "", false, [[ "p1", "v1" ]]);
 		teWrapper.log.methodDone("methodName", 1, "", [[ "p2", "v2" ]]);
-		teWrapper.log.methodOnce("tag", "message", 1, "", [[ "test", "test" ]]);
-		teWrapper.log.methodOnce("tag", "message", 1, "");
-		teWrapper.log.methodOnce("tag", "message", 1);
-		teWrapper.log.methodOnce("tag", "message");
+		teWrapper.log.methodEvent("tag", "message", 1, [[ "test", "test" ]]);
+		teWrapper.log.methodEvent("tag", "message", 1);
+		teWrapper.log.methodEvent("tag", "message", 1);
+		teWrapper.log.methodEvent("tag", "message");
 		//
 		// Disable logging
 		//
@@ -294,14 +292,14 @@ suite("Util Tests", () =>
 		//
 		// Console On
 		//
-		teWrapper.log.setWriteToConsole(true);
+		teWrapper.log.control.writeToConsole = true;
 		teWrapper.log.value("test", "1");
 		teWrapper.log.value("test", "1", 1);
 		teWrapper.log.value("test", "1", 5);
 		//
 		// Console Off
 		//
-		teWrapper.log.setWriteToConsole(false);
+		teWrapper.log.control.writeToConsole = false;
 		//
 		// Disable logging
 		//
@@ -364,12 +362,12 @@ suite("Util Tests", () =>
 		//
 		// Console On
 		//
-		teWrapper.log.setWriteToConsole(true);
+		teWrapper.log.control.writeToConsole = true;
 		teWrapper.log.write("test");
 		//
 		// Console Off
 		//
-		teWrapper.log.setWriteToConsole(false);
+		teWrapper.log.control.writeToConsole = false;
 		//
 		// Tags
 		//
