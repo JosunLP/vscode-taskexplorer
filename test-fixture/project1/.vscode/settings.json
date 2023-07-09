@@ -1,40 +1,9 @@
-{"taskexplorer.enableExplorerView":true,"taskexplorer.enableSideBar":false,"taskexplorer.enablePersistentFileCaching":false,"taskexplorer.enabledTasks":{
-        "ant": true,
-        "apppublisher": false,
-        "bash": true,
-        "batch": true,
-        "composer": false,
-        "gradle": false,
-        "grunt": true,
-        "gulp": true,
-        "jenkins": false,
-        "make": true,
-        "maven": false,
-        "node": false,
-        "npm": true,
-        "nsis": false,
-        "perl": false,
-        "pipenv": false,
-        "powershell": false,
-        "python": true,
-        "ruby": false,
-        "tsc": true,
-        "webpack": false,
-        "workspace": true
-    },"taskexplorer.pathToPrograms":{
-        "ant": "c:\\Projects\\vscode-taskexplorer\\test-fixture\\tools\\ant\\bin\\ant.bat",
-        "ansicon": "c:\\Projects\\vscode-taskexplorer\\test-fixture\\tools\\ansicon\\x64\\ansicon.exe",
-        "composer": "composer",
-        "curl": "curl",
-        "gradle": "c:\\Code\\gradle\\bin\\gradle.bat",
-        "jenkins": "",
-        "make": "C:\\Code\\compilers\\c_c++\\9.0\\VC\\bin\\nmake.exe",
-        "maven": "mvn",
-        "nsis": "c:\\Code\\nsis\\makensis.exe",
-        "perl": "perl",
-        "pipenv": "pipenv",
-        "powershell": "powershell",
-        "python": "c:\\Code\\python\\python.exe",
-        "ruby": "ruby",
-        "bash": "bash"
-    },"taskexplorer.logging.enable":false,"taskexplorer.logging.level":2,"taskexplorer.logging.enableFile":false,"taskexplorer.logging.enableFileSymbols":false,"taskexplorer.logging.enableOutputWindow":false,"taskexplorer.specialFolders.numLastTasks":10,"taskexplorer.specialFolders.showFavorites":true,"taskexplorer.specialFolders.showLastTasks":true,"taskexplorer.specialFolders.showUserTasks":true,"taskexplorer.specialFolders.folderState":{"favorites":"Expanded","lastTasks":"Expanded","userTasks":"Expanded"},"taskexplorer.taskButtons.clickAction":"Open","taskexplorer.taskButtons.showFavoritesButton":true,"taskexplorer.taskButtons.showExecuteWithArgumentsButton":false,"taskexplorer.taskButtons.showExecuteWithNoTerminalButton":false,"taskexplorer.visual.disableAnimatedIcons":true,"taskexplorer.enableAnsiconForAnt":false,"taskexplorer.groupMaxLevel":5,"taskexplorer.groupSeparator":"-","taskexplorer.groupWithSeparator":true,"taskexplorer.groupStripTaskLabel":true,"taskexplorer.exclude":["**/.bin/**","**/.cache/**","**/.coverage/**","**/.nuget/**","**/.nyc_output/**","**/.venv/**","**/asset{,s}/**","**/bin/**","**/build/**","**/compiledoutput/**","**/coverage/**","**/css/**","**/dbg/**","**/debug/**","**/dep{,s,ependency}/**","**/dist{,ribution}/**","**/doc{,s,umentation}/**","**/example{,s}/**","**/fixture/**","**/img/**","**/image{,s}/**","**/node_modules/**","**/obj/**","**/out{,put}/**","**/package{,s}/**","**/release/**","**/*-release/**","**/res/**","**/resource{,s}/**","**/sample{,s}/**","**/s{a,c}ss/**","**/script{,s}/**","**/sdk{,s}/**","**/spec/**","**/static/**","**/target/**","**/tgt/**","**/tool{s,ing}/**","**/type{,s}/**","**/third_party/**","**/vendor/**","**/work/**"],"taskexplorer.includeAnt":[],"taskexplorer.globPatternsAnt":["**/test.xml","**/emptytarget.xml","**/emptyproject.xml","**/hello.xml"],"taskexplorer.keepTermOnStop":false,"taskexplorer.showHiddenWsTasks":true,"taskexplorer.showRunningTask":true,"taskexplorer.useGulp":false,"taskexplorer.useAnt":true,"taskexplorer.taskMonitor.timerMode":"MM:SS:MS","taskexplorer.taskMonitor.trackStats":true,"taskexplorer.trackUsage":true}
+{
+    "taskexplorer.exclude": [
+        "**/tasks_test_ignore_/**",
+        "**/dbg/**"
+    ],
+    "taskexplorer.globPatternsAnt": [
+        "**/hello.xml"
+    ]
+}
