@@ -41,9 +41,9 @@ const getPortableDataPath = (): string | undefined | void =>
 {
     return execIf(process.env.VSCODE_PORTABLE, (portablePath) =>
     {
-        const fullPath = resolve(portablePath, "user-data", "User");
-        if (pathExistsSync(fullPath)) {
-            return fullPath;
+        const uri = Uri.parse(portablePath);
+        if (pathExistsSync(uri.fsPath)) {
+            return join(uri.fsPath, "user-data", "User");
         }
     }, this);
 };
