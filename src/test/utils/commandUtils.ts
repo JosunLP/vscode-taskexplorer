@@ -6,7 +6,6 @@ import { commands, WebviewPanel } from "vscode";
 import { ITeWebview, ITeWrapper } from ":types";
 import { waitForTeIdle, testControl as tc, teWrapper, sleep, promiseFromEvent, waitForWebviewReadyEvent } from "./utils";
 
-let explorerHasFocused = false;
 const wvShown: string[] = [];
 
 
@@ -54,7 +53,6 @@ export const focusExplorerView = async (wrapper: ITeWrapper | undefined, instanc
         }
         await commands.executeCommand("taskexplorer.view.taskTreeExplorer.focus");
         await waitForTeIdle(tc.waitTime.focusCommand);
-        explorerHasFocused = true;
     }
     else if (instance) {
         instance.slow(tc.slowTime.commands.focusAlreadyFocused);
@@ -72,9 +70,6 @@ export const focusSearchView = () => commands.executeCommand("workbench.view.sea
 
 // export const focusSidebarView = () => commands.executeCommand("taskExplorerSideBar.focus");
 export const focusSidebarView = () => commands.executeCommand("workbench.view.extension.taskExplorerSideBar");
-
-
-export const hasExplorerFocused = () => explorerHasFocused;
 
 
 export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) =>

@@ -51,16 +51,14 @@ suite("NPM Tests", () =>
 
     test("Focus Explorer View", async function()
 	{
-        await startupFocus(this);
-        await utils.sleep(1);
-        await utils.verifyTaskCount(testsName, startTaskCount, 2);
+        await startupFocus(this, () => utils.verifyTaskCount(testsName, startTaskCount, 2));
 	});
 
 
     test("Create Nested Package File", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
+        this.slow(tc.slowTime.fs.createFolderEvent + tc.slowTime.fs.createEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.createDir(packageJson2Dir);
         await utils.waitForTeIdle(tc.waitTime.fs.createFolderEvent * 2, 2000, 50);
         await writeAndWait(
@@ -81,7 +79,7 @@ suite("NPM Tests", () =>
     test("Delete Nested Package File Folder", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        this.slow(tc.slowTime.fs.deleteFolderEvent + (tc.waitTime.fs.deleteEvent * 2) + tc.slowTime.tasks.count.verify);
+        this.slow(tc.slowTime.fs.deleteFolderEvent + tc.waitTime.fs.deleteEvent + tc.slowTime.tasks.count.verify);
         await teWrapper.fs.deleteDir(packageJson2Dir);
         await utils.waitForTeIdle(tc.waitTime.fs.deleteEvent * 2, 7000, 50);
         try {

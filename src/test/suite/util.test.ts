@@ -797,8 +797,6 @@ suite("Util Tests", () =>
 		let dataPath: string = teWrapper.pathUtils.getUserDataPath(true, "darwin");
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "linux");
 
-		teWrapper.pathUtils.getPortableDataPath();
-
 		//
 		// Simulate --user-data-dir vscode command line option
 		//

@@ -1,7 +1,13 @@
 
-import { refresh } from "./treeUtils";
+import { hasRefreshed, refresh } from "./treeUtils";
 import { focusExplorerView, focusSidebarView } from "./commandUtils";
-import { endRollingCount, exitRollingCount, needsTreeBuild, sleep, testControl as tc, waitForTeIdle } from "./utils";
+import { endRollingCount, exitRollingCount, sleep, testControl as tc, waitForTeIdle } from "./utils";
+
+let explorerHasFocused = false;
+
+const hasExplorerFocused = () => explorerHasFocused;
+
+const needsTreeBuild = (isFocus?: boolean) => (isFocus || !hasRefreshed()) && !hasExplorerFocused();
 
 
 export const startupBuildTree = async(teWrapper: any, instance: Mocha.Context) =>
@@ -14,7 +20,7 @@ export const startupBuildTree = async(teWrapper: any, instance: Mocha.Context) =
 };
 
 
-export const startupFocus = async(instance: Mocha.Context, cb?: () => Promise<void>) =>
+export const startupFocus = async(instance: Mocha.Context, cb?: () => PromiseLike<any> | any) =>
 {
     if (exitRollingCount(instance)) return;
     if (needsTreeBuild(true)) {
@@ -27,6 +33,7 @@ export const startupFocus = async(instance: Mocha.Context, cb?: () => Promise<vo
     if (cb) {
         await cb();
     }
+    explorerHasFocused = true;
     endRollingCount(instance);
 };
 

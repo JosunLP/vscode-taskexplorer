@@ -5,9 +5,9 @@ import * as path from "path";
 import { expect } from "chai";
 import * as treeUtils from "./treeUtils";
 import { testControl } from "../control";
+import { closeTeWebviewPanel } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
-import { closeTeWebviewPanel, hasExplorerFocused } from "./commandUtils";
 import { TestTracker, colors, figures, sleep, writeErrorsAreOk } from "@spmeesseman/test-utils";
 import {
     ITaskExplorerApi, ITaskExplorerProvider, ITeWrapper, TeLicenseType, ITeWebview, PromiseAdapter
@@ -346,9 +346,6 @@ const isExecuting = (task: Task) =>
                             e.task.scope === task.scope && e.task.definition.path === task.definition.path);
     return exec;
 };
-
-
-export const needsTreeBuild = (isFocus?: boolean) => (isFocus || !treeUtils.hasRefreshed()) && !hasExplorerFocused();
 
 
 const isReady = (taskType?: string) =>

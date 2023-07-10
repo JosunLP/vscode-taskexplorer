@@ -1,10 +1,10 @@
 
 import { homedir } from "os";
-import { execIf, wrap } from "./utils";
+import { execIf } from "./utils";
+import { ITaskDefinition } from ":types";
 import { isWorkspaceFolder } from "./typeUtils";
 import { pathExists, pathExistsSync } from "./fs";
 import { Task, Uri, WorkspaceFolder } from "vscode";
-import { ILog, ITaskDefinition, ITaskFolder } from ":types";
 import { basename, dirname, join, resolve, sep } from "path";
 
 
@@ -37,11 +37,11 @@ export const getInstallPathSync = (): string =>
 };
 
 
-export const getPortableDataPath = (): string | undefined | void =>
+const getPortableDataPath = (): string | undefined | void =>
 {
     return execIf(process.env.VSCODE_PORTABLE, (portablePath) =>
     {
-        const fullPath = join(portablePath, "user-data", "User");
+        const fullPath = resolve(portablePath, "user-data", "User");
         if (pathExistsSync(fullPath)) {
             return fullPath;
         }
@@ -129,7 +129,7 @@ export const getUserDataPath = (test?: boolean, platform?: string): string =>
             return resolve(arg.substring(0, arg.lastIndexOf(sep)), "..", "user-data", "User");
         }
     }
-    return getPortableDataPath() || getDefaultUserDataPath(platform);
+    return resolve(getPortableDataPath() || getDefaultUserDataPath(platform));
 };
 
 

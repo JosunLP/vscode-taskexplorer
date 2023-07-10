@@ -4,6 +4,7 @@ import { expect } from "chai";
 import { TaskExecution } from "vscode";
 import * as utils from "../utils/utils";
 import { ITaskItem, ITeWrapper } from ":types";
+import { startupFocus } from "utils/suiteUtils";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusExplorerView, focusSearchView } from "../utils/commandUtils";
 
 const tc = utils.testControl;
@@ -47,11 +48,7 @@ suite("Task Tests", () =>
 
 	test("Focus Explorer View", async function()
 	{
-        if (utils.exitRollingCount(this)) return;
-        if (utils.needsTreeBuild()) {
-            await focusExplorerView(teWrapper, this);
-        }
-        utils.endRollingCount(this);
+        await startupFocus(this);
 	});
 
 

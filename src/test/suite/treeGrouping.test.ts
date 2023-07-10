@@ -1,9 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { ITeWrapper } from ":types";
-import { executeSettingsUpdate, focusExplorerView } from "../utils/commandUtils";
+import { startupFocus } from "utils/suiteUtils";
+import { executeSettingsUpdate } from "../utils/commandUtils";
 import {
-    activate, endRollingCount, exitRollingCount, getSuccessCount, needsTreeBuild, suiteFinished, testControl as tc
+    activate, endRollingCount, exitRollingCount, getSuccessCount, suiteFinished, testControl as tc
 } from "../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -35,11 +36,7 @@ suite("Tree Grouping Tests", () =>
 
 	test("Focus Explorer View", async function()
 	{
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild(true)) {
-            await focusExplorerView(teWrapper, this);
-        }
-        endRollingCount(this);
+        await startupFocus(this);
 	});
 
 

@@ -6,10 +6,11 @@ import { expect } from "chai";
 import { refresh } from "../utils/treeUtils";
 import { tasks, TreeItemCollapsibleState } from "vscode";
 import { ITaskFile, ITaskItem, ITeWrapper } from ":types";
-import { executeSettingsUpdate, executeTeCommand2, focusExplorerView } from "../utils/commandUtils";
+import { startupBuildTree, startupFocus } from "utils/suiteUtils";
+import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
 import {
-    activate, endRollingCount, exitRollingCount, getWsPath, needsTreeBuild, suiteFinished, testControl as tc,
-    treeUtils, verifyTaskCount, waitForTeIdle
+    activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc, treeUtils,
+    verifyTaskCount, waitForTeIdle
 } from "../utils/utils";
 
 interface TaskMap { [id: string]: ITaskItem | undefined };
@@ -86,11 +87,7 @@ suite("Provider Tests", () =>
 
     test("Build Tree", async function()
     {
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild()) {
-            await treeUtils.refresh(teWrapper, this);
-        }
-        endRollingCount(this);
+        await startupBuildTree(teWrapper, this);
     });
 
 
@@ -185,17 +182,9 @@ suite("Provider Tests", () =>
     });
 
 
-	test("Focus Tree View", async function()
+	test("Focus Explorer View", async function()
 	{
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild(true)) {
-            await focusExplorerView(teWrapper, this);
-        }
-        else {
-            this.slow(tc.slowTime.commands.focusAlreadyFocused + tc.slowTime.general.min);
-            await waitForTeIdle(tc.waitTime.min);
-        }
-        endRollingCount(this);
+        await startupFocus(this);
 	});
 
 

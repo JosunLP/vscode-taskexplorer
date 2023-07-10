@@ -54,7 +54,6 @@ export interface ITePathUtilities
 {
 	getCwd(uri: Uri): string;
 	getInstallPath(): Promise<string>;
-	getPortableDataPath(): string | undefined | void;
 	getRelativePath(folder: WorkspaceFolder, uri: Uri): string;
 	getTaskAbsolutePath(task: Task, includeFileName?: boolean): string;
 	getTaskRelativePath(task: Task): string;

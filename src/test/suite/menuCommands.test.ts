@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
-import { TaskExecution, Uri } from "vscode";
-import { ITeWrapper } from ":types";
-import { executeTeCommand2, focusExplorerView } from "../utils/commandUtils";
-import {
-    activate, clearOverrideShowInputBox, endRollingCount, exitRollingCount, getWsPath,
-    needsTreeBuild, overrideNextShowInfoBox, overrideNextShowInputBox, suiteFinished, testControl as tc, verifyTaskCount, waitForTaskExecution
-} from "../utils/utils";
 import { expect } from "chai";
+import { ITeWrapper } from ":types";
+import { TaskExecution, Uri } from "vscode";
+import { startupFocus } from "utils/suiteUtils";
+import { executeTeCommand2 } from "../utils/commandUtils";
+import {
+    activate, clearOverrideShowInputBox, endRollingCount, exitRollingCount, getWsPath, overrideNextShowInfoBox,
+    overrideNextShowInputBox, suiteFinished, testControl as tc, verifyTaskCount, waitForTaskExecution
+} from "../utils/utils";
 
 let teWrapper: ITeWrapper;
+
 const antUri: Uri = Uri.file(getWsPath("build.xml"));
 const gruntFolderUri: Uri = Uri.file(getWsPath("grunt"));
 const batchUri: Uri = Uri.file(getWsPath("hello.bat"));
@@ -40,11 +42,7 @@ suite("Menu Command Tests", () =>
 
 	test("Focus Explorer View", async function()
 	{
-        if (exitRollingCount(this)) return;
-        if (needsTreeBuild(true)) {
-            await focusExplorerView(teWrapper, this);
-        }
-        endRollingCount(this);
+        await startupFocus(this);
 	});
 
 
