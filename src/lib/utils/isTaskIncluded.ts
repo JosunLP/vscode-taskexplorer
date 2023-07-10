@@ -89,8 +89,8 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: str
                 result = !!wrapper.utils.wrap(() =>
                 {
                     const jsonc = wrapper.fs.readFileSync(tasksFile).toString(),
-                        tasksJso = JSON5.parse(jsonc), // json5 needed for comments allowed in tasks.json
-                        wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
+                          tasksJso = JSON5.parse(jsonc), // json5 needed for comments allowed in tasks.json
+                          wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
                     return !(wsTask && wsTask.hide === true);
                 },
                 [ wrapper.log.error ], this);

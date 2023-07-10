@@ -209,7 +209,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     protected createTaskItem(srcTaskItem: TaskItem, logPad: string):  TaskItem
     {
-        const taskItem = new TaskItem(srcTaskItem.taskFile, srcTaskItem.task, logPad);
+        const taskItem = new TaskItem(this.wrapper, srcTaskItem.taskFile, srcTaskItem.task, logPad);
         taskItem.id = this.getTaskSpecialId(taskItem.id);
         taskItem.label = this.getRenamedTaskName(taskItem);
         taskItem.folder = this;

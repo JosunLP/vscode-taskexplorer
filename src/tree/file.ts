@@ -51,7 +51,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     {
         super(TaskFile.getLabel(task.definition, label, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
         const taskDef = task.definition;
-        wrapper.log.methodStart("construct tree file", 4, logPad, false, [
+        wrapper.log.methodStart("create taskfile node", 4, logPad, false, [
             [ "label", label ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
             [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
             [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
@@ -91,7 +91,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         else {
             this._fileName = getTaskFileName(task.source, folder.resourceUri, taskDef);
-            this.resourceUri = Uri.file(join(getUserDataPath(undefined, logPad), this.fileName));
+            this.resourceUri = Uri.file(join(getUserDataPath(), this.fileName));
             this._isUser = true;
         }
         //
@@ -131,8 +131,7 @@ export class TaskFile extends TreeItem implements ITaskFile
                              taskDef.iconDark : taskDef.icon;
             this.iconPath = { light: iconLight, dark: iconDark };
         }
-
-        wrapper.log.methodDone("construct tree file", 4, logPad, [
+        wrapper.log.methodDone("create taskfile node", 4, logPad, [
             [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ], [ "context value", this.contextValue ],
             [ "is group", this.isGroup ], [ "groupLevel", this.groupLevel ], [ "filename", this._fileName ],
             [ "resource uri path", this.resourceUri.fsPath ], [ "path", this.relativePath  ]
@@ -141,29 +140,17 @@ export class TaskFile extends TreeItem implements ITaskFile
 
 
     get fileName() { return this._fileName; };
-
     get folder() { return this._folder; };
-
     set folder(v) { this._folder = v; }
-
     get groupId() { return this._groupId; };
-
     set groupId(v) { this._groupId = v; }
-
     get groupLevel() { return this._groupLevel; };
-
     set groupLevel(v) { this._groupLevel = v; }
-
     get isGroup() { return this._isGroup; };
-
     get isUser() { return this._isUser; };
-
     get relativePath() { return this._relativePath; };
-
     // get task() { return this._task; };
-
     get taskSource() { return this._taskSource; };
-
     get treeNodes() { return this._treeNodes; };
 
 

@@ -41,13 +41,9 @@ export const getPortableDataPath = (): string | undefined | void =>
 {
     return execIf(process.env.VSCODE_PORTABLE, (portablePath) =>
     {
-        const uri = Uri.parse(portablePath);
-        if (pathExistsSync(uri.fsPath))
-        {
-            return wrap(() => {
-                const fullPath = join(uri.fsPath, "user-data", "User");
-                return fullPath;
-            }, [ () => {} ], this);
+        const fullPath = join(portablePath, "user-data", "User");
+        if (pathExistsSync(fullPath)) {
+            return fullPath;
         }
     }, this);
 };
@@ -121,30 +117,19 @@ export const getTaskRelativePath = (task: Task): string =>
 };
 
 
-export const getUserDataPath = (platform?: string, logPad = ""): string =>
+export const getUserDataPath = (test?: boolean, platform?: string): string =>
 {
-    let userPath: string | undefined | void = "";
-    //
-    // Check if data path was passed on the command line
-    //
-    let argvIdx = process.argv.indexOf("--user-data-dir");
-    if (argvIdx !== -1) {
-        userPath = resolve(process.argv[++argvIdx]);
-        return userPath;
+    for (let i = 0; i < process.argv.length; i++)
+    {
+        const arg = process.argv[i];
+        if (arg === "--user-data-dir") {
+            return resolve(process.argv[++i]);
+        }
+        else if (!test && arg.includes(".vscode-test") && arg.includes("Code.exe")) {
+            return resolve(arg.substring(0, arg.lastIndexOf(sep)), "..", "user-data", "User");
+        }
     }
-    //
-    // If this is a portable install (zip install), then VSCODE_PORTABLE will be defined in the
-    // environment this process is running in
-    //
-    userPath = getPortableDataPath();
-    if (!userPath)
-    {   //
-        // Use system user data path
-        //
-        userPath = getDefaultUserDataPath(platform);
-    }
-    userPath = resolve(userPath);
-    return userPath;
+    return getPortableDataPath() || getDefaultUserDataPath(platform);
 };
 
 

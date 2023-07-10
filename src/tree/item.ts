@@ -2,10 +2,11 @@
 import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskFolder } from "./folder";
-import { ITaskItem, TeTaskSource } from "../interface";
 import { encodeUtf8Hex } from ":env/hex";
 import { Strings } from "../lib/constants";
+import { TeWrapper } from "../lib/wrapper";
 import { configuration } from "../lib/configuration";
+import { ITaskItem, TeTaskSource } from "../interface";
 import { getInstallPathSync } from "../lib/utils/pathUtils";
 import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import {
@@ -29,12 +30,12 @@ export class TaskItem extends TreeItem implements ITaskItem
     private readonly _task: Task;
     private readonly _taskFile: TaskFile;
     private readonly _taskSource: TeTaskSource;
-    // private readonly _taskType: string;
-    // private readonly _relativePath: string;
+    private readonly _taskType: string;
+    private readonly _relativePath: string;
     private readonly _isUser: boolean;
 
 
-    constructor(taskFile: TaskFile, task: Task, logPad: string)
+    constructor(wrapper: TeWrapper, taskFile: TaskFile, task: Task, logPad: string)
     {
         const taskDef = task.definition;
         const getDisplayName = (taskName: string): string =>
@@ -48,14 +49,19 @@ export class TaskItem extends TreeItem implements ITaskItem
             return displayName;
         };
         super(getDisplayName(task.name), TreeItemCollapsibleState.None);
+        wrapper.log.methodStart("create taskitem node", 5, logPad, false, [
+            [ "label", this.label ], [ "source", taskFile.taskSource ], [ "task file", taskFile.label ],
+            [ "groupLevel", taskFile.groupLevel ], [ "taskDef cmd line", taskDef.cmdLine ],
+            [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
+            [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
+        ]);
         //
         // Since we save tasks (last tasks and favorites), we need a known unique key to
         // save them with.  We can just use the existing id parameter...
         // 'Script' type tasks will set the file 'uri' and the 'scriptFile' flag on the task definition
         //
-        const fsPath = !task.definition.scriptFile ? taskFile.resourceUri.fsPath : task.definition.uri.fsPath;
         if (task.definition.scriptFile) {
-            this.resourceUri = Uri.file(fsPath);
+            this.resourceUri = task.definition.uri;
         }
         else {
             this.resourceUri = taskFile.resourceUri;
@@ -63,62 +69,63 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         // Set ID and properties
         //
-        this.id = TaskItem.id(fsPath, task);
-        this._folder = taskFile.folder;
+        this.id = TaskItem.id(this.resourceUri.fsPath, task);
         this._task = task;
-        this._task.definition.taskItemId = this.id; // Used in task start/stop events, see TaskWatcher
-        // this._relativePath = taskFile.relativePath;
+        this._folder = taskFile.folder;
+        this._relativePath = taskFile.relativePath;
         this._taskSource = <TeTaskSource>task.source;
-        // this._taskType = task.definition.type;   // If the source is `Workspace`, def.type can be of any provider type
+        this._taskType = task.definition.type;   // If the source is `Workspace`, def.type can be of any provider type
         this._isUser = taskFile.isUser;
         this._paused = false;                       // paused flag used by start/stop/pause task functionality
         this._taskFile = taskFile;
-        this._groupLevel = 0;                       // Grouping level - will get set by treefile.addTreeNode()
+        this._groupLevel = 0;                       // Grouping level - may be re-set by treefile.addTreeNode()
         this.command = {
             title: "Open definition",               // Default click action is just Open file since it's easy to click on accident
             command: "taskexplorer.open",
             arguments: [ this, true ]
         };
         //
+        // Copy some properties to the task definition
+        //
+        taskDef.taskItemId = this.id ;              // Used in task start/stop events, see TaskWatcher
+        taskDef.taskFileId = taskFile.id ;          // Used in task start/stop events, see TaskWatcher
+        taskDef.fileName = taskFile.fileName ;
+        taskDef.relativePath = taskFile.relativePath;
+        taskDef.absolutePath = this.resourceUri.fsPath;
+        taskDef.resourceUri = this.resourceUri;
+        //
         // Tooltip
         //
         const taskName = getTaskTypeFriendlyName(task.source, true);
-        this.tooltip = "Open " + task.name + (task.detail ? ` | ${task.detail}` : "") +
-                        `   source : \`${taskName}\``;
-        if (task.definition.type !== task.source) {
-            this.tooltip += `   type   : \`${task.definition.type}\``;
+        this.tooltip = "Open " + task.name + (task.detail ? ` | ${task.detail}` : "") + ` (source : \`${taskName}\``;
+        if (taskDef.type !== task.source) {
+            this.tooltip += ` | type   : \`${taskDef.type}\``;
         }
+        this.tooltip += ")";
         //
         // Refresh state - sets context value, icon path from execution state
         //
-        this.refreshState(logPad + "   ", 5);
+        this.refreshState();
+        wrapper.log.methodDone("create taskitem node", 5, logPad, [
+            [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ],
+            [ "context value", this.contextValue ], [ "groupLevel", this._groupLevel ],
+            [ "resource uri path", this._taskFile.resourceUri.fsPath ], [ "path", this._taskFile.relativePath  ]
+        ]);
     }
 
 
     get execution() { return this._execution; };
-
     get folder() { return this._folder; };
-
     set folder(v) { this._folder = v; }
-
     get groupLevel() { return this._groupLevel; };
-
     set groupLevel(v) { this._groupLevel = v; }
-
     get taskDetached() { return this._taskDetached; };
-
     set taskDetached(v) { this._taskDetached = v; };
-
     get isUser() { return this._isUser; };
-
     get paused() { return this._paused; };
-
     set paused(v) { this._paused = v; };
-
     get task() { return this._task; };
-
     get taskFile() { return this._taskFile; };
-
     get taskSource() { return this._taskSource; };
 
 
@@ -145,7 +152,7 @@ export class TaskItem extends TreeItem implements ITaskItem
     private isSpecial() { return this.id.includes("::") || this.id.includes(Strings.USER_TASKS_LABEL + ":"); }
 
 
-    refreshState(logPad: string, logLevel: number)
+    refreshState()
     {
         const isExecuting = !!this.isExecuting();
         this.setContextValue(this.task, isExecuting);

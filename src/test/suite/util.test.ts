@@ -282,6 +282,9 @@ suite("Util Tests", () =>
 		teWrapper.log.value("", "");
 		teWrapper.log.value("", null);
 		teWrapper.log.value("", undefined);
+		teWrapper.log.value("", undefined);
+		teWrapper.log.value("", []);
+		teWrapper.log.values(1, "", [[ "v1", []], [ "v2", [ 1 ]]]);
 		teWrapper.log.value("undefined value 1", undefined);
 		teWrapper.log.value("undefined value 2", undefined, 1);
 		teWrapper.log.values(1, "   ", [[ "Test5", "5" ]]);
@@ -791,8 +794,8 @@ suite("Util Tests", () =>
 		// path get here for linux and mac for increased coverage since we're only
 		// running the tests in a windows machine for release right now with ap.
 		//
-		let dataPath: string = teWrapper.pathUtils.getUserDataPath("darwin");
-		dataPath = teWrapper.pathUtils.getUserDataPath("linux");
+		let dataPath: string = teWrapper.pathUtils.getUserDataPath(true, "darwin");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "linux");
 
 		teWrapper.pathUtils.getPortableDataPath();
 
@@ -801,16 +804,16 @@ suite("Util Tests", () =>
 		//
 		const oArgv = process.argv;
 		process.argv = [ "--user-data-dir", dataPath ];
-		expect(teWrapper.pathUtils.getUserDataPath("linux")).to.be.equal(dataPath);
-		expect(teWrapper.pathUtils.getUserDataPath("win32")).to.be.equal(dataPath);
-		expect(teWrapper.pathUtils.getUserDataPath("darwin")).to.be.equal(dataPath);
+		expect(teWrapper.pathUtils.getUserDataPath(true, "linux")).to.be.equal(dataPath);
+		expect(teWrapper.pathUtils.getUserDataPath(true, "win32")).to.be.equal(dataPath);
+		expect(teWrapper.pathUtils.getUserDataPath(true, "darwin")).to.be.equal(dataPath);
 
 		//
-		// 0 args, which would probably never happen but the teWrapper.pathUtils.getUserDataPath() call
+		// 0 args, which would probably never happen but the teWrapper.pathUtils.getUserDataPath(true, ) call
 		// handles it an ;et's cover it
 		//
 		process.argv = [];
-		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 
 		//
 		// Save current environment
@@ -823,10 +826,10 @@ suite("Util Tests", () =>
 		//
 		// Set environment variables for specific test
 		//
-		process.env.VSCODE_PORTABLE = teWrapper.pathUtils.getUserDataPath("win32");
+		process.env.VSCODE_PORTABLE = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		process.env.APPDATA = "";
 		process.env.USERPROFILE = "test";
-		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\test\\AppData\\Roaming\\vscode`);
 		//
 		// Set environment variables for specific test
@@ -835,7 +838,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = dataPath;
 		process.env.APPDATA = dataPath2;
 		process.env.USERPROFILE = dataPath3;
-		dataPath = teWrapper.pathUtils.getUserDataPath("nothing");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "nothing");
 		expect(dataPath).to.be.oneOf([ `C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}`, "C:\\Code\\data\\user-data\\User\\user-data\\User" ]);
 		//
 		// Set environment variables for specific test
@@ -843,7 +846,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = undefined;
 		process.env.APPDATA = dataPath2;
 		process.env.USERPROFILE = dataPath3;
-		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal(`C:\\Users\\${env.USERNAME}\\AppData\\Roaming\\vscode`);
 		//
 		// Set environment variables for specific test
@@ -851,7 +854,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = "c:\\some\\invalid\\path";
 		process.env.APPDATA = dataPath2;
 		process.env.USERPROFILE = dataPath3;
-		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal(`C:\\Users\\${env.USERNAME}\\AppData\\Roaming\\vscode`);
 		//
 		// Set environment variables for specific test
@@ -859,7 +862,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = "C:\\Code\\data\\user-data\\User\\workspaceStorage";
 		process.env.APPDATA = "";
 		process.env.USERPROFILE = "";
-		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal("C:\\Code\\data\\user-data\\User\\workspaceStorage\\user-data\\User");
 		//
 		// Set environment variables for specific test
@@ -867,7 +870,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = "";
 		process.env.APPDATA = "";
 		process.env.USERPROFILE = "";
-		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\AppData\\Roaming\\vscode`);
 		//
 		// Set environment variables for specific test
@@ -876,38 +879,38 @@ suite("Util Tests", () =>
 		process.env.APPDATA = "";
 		process.env.USERPROFILE = "";
 		process.env.VSCODE_APPDATA = "";
-		dataPath = teWrapper.pathUtils.getUserDataPath("linux");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "linux");
 		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\.config\\vscode`);
-		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\AppData\\Roaming\\vscode`);
-		dataPath = teWrapper.pathUtils.getUserDataPath("darwin");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "darwin");
 		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\Library\\Application Support\\vscode`);
-		dataPath = teWrapper.pathUtils.getUserDataPath("invalid_platform");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "invalid_platform");
 		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}`);
 		//
 		// Set environment variables for specific test
 		//
 		process.env.VSCODE_APPDATA = "C:\\Code\\data\\user-data\\User\\workspaceStorage";
-		dataPath = teWrapper.pathUtils.getUserDataPath("linux");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "linux");
 		expect(dataPath).to.be.equal("C:\\Code\\data\\user-data\\User\\workspaceStorage\\vscode");
-		dataPath = teWrapper.pathUtils.getUserDataPath("win32");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal("C:\\Code\\data\\user-data\\User\\workspaceStorage\\vscode");
-		dataPath = teWrapper.pathUtils.getUserDataPath("darwin");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "darwin");
 		expect(dataPath).to.be.equal("C:\\Code\\data\\user-data\\User\\workspaceStorage\\vscode");
-		dataPath = teWrapper.pathUtils.getUserDataPath("invalid_platform");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "invalid_platform");
 		expect(dataPath).to.be.equal("C:\\Code\\data\\user-data\\User\\workspaceStorage\\vscode");
 		//
 		// Set portable / invalid platform
 		//
 		process.env.VSCODE_PORTABLE = "C:\\Code\\data\\user-data\\User\\workspaceStorage";
-		dataPath = teWrapper.pathUtils.getUserDataPath("invalid_platform");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "invalid_platform");
 		expect(dataPath).to.be.equal("C:\\Code\\data\\user-data\\User\\workspaceStorage\\user-data\\User");
 		//
 		// Empty platform
 		//
-		dataPath = teWrapper.pathUtils.getUserDataPath("");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "");
 		process.env.VSCODE_PORTABLE = "";
-		dataPath = teWrapper.pathUtils.getUserDataPath("");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true, "");
 		//
 		//
 		// Restore process argv
