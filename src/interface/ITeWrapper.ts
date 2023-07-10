@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { ILog } from "./ILog";
+import { ILog, ILogControl } from "./ILog";
 import { ITeWebview } from "./ITeWebview";
 import { ITeFigures } from "./ITeFigures";
 import { IEventQueue } from "./IEventQueue";
@@ -76,7 +76,7 @@ export interface ITeWrapper
 	readonly licenseManager: ITeLicenseManager;
 	readonly licensePage: ITeWebview;
 	readonly log: ILog;
-	readonly logControl: Record<string, any>;
+	readonly logControl: ILogControl;
 	readonly objUtils: ITeObjectUtilities;
 	readonly parsingReportPage: ITeWebview;
 	readonly pathUtils: ITePathUtilities;

@@ -1,6 +1,4 @@
 
-import { OutputChannel } from "vscode";
-
 export type LogLevel = number; // 1 | 2 | 3 | 4 | 5;
 export type LogType = "global";
 
@@ -37,6 +35,7 @@ export interface ILogControl
     writeToConsoleLevel: number;
 };
 */
+
 
 export interface ILogControl
 {

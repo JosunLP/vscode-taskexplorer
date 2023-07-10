@@ -36,7 +36,7 @@ suite("Initialization", () =>
         await sleep(5);
         await executeTeCommand2("showOutput", [ false ]);
         await sleep(5);
-        await executeTeCommand2("showOutput", [ tc.log.enabled && tc.log.output ]);
+        await executeTeCommand2("showOutput", [ teWrapper.logControl.enable && teWrapper.logControl.enableOutputWindow ]);
         endRollingCount(this);
     });
 
