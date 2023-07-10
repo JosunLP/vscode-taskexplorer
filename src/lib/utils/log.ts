@@ -2,12 +2,12 @@
 
 import { join } from "path";
 import { apply } from "./object";
-import { figures, LogColors } from "./figures";
+import { figures } from "./figures";
 import { appendFileSync, createDir } from "./fs";
 import { executeCommand, registerCommand } from "../command/command";
 import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
 import { asString, isArray, isEmpty, isError, isFunction, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
-import { Commands, IConfiguration, IDictionary, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
+import { Commands, IConfiguration, ConfigKeys, IDictionary, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
 
 
 export class TeLog implements ILog, Disposable
@@ -25,16 +25,16 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    constructor(context: ExtensionContext, config: IConfiguration, testsRunning: number)
+    constructor(context: ExtensionContext, config: IConfiguration, _testsRunning: number)
     {
         this._config = config;
         this._fileNameTimer = 0 as unknown as NodeJS.Timeout;
         this._logControl = {
             dirPath: context.logUri.fsPath,
-            enable: config.get<boolean>("logging.enable", false),
-            enableOutputWindow: config.get<boolean>("logging.enableOutputWindow", true),
-            enableFile: config.get<boolean>("logging.enableFile", false),
-            enableFileSymbols: config.get<boolean>("logging.enableFileSymbols", true),
+            enable: config.get<boolean>(ConfigKeys.LogEnable, false),
+            enableOutputWindow: config.get<boolean>(ConfigKeys.LogEnableOutputWindow, true),
+            enableFile: config.get<boolean>(ConfigKeys.LogEnableFile, false),
+            enableFileSymbols: config.get<boolean>(ConfigKeys.LogEnableFileSymbols, false),
             fileName: "",
             isTests: context.extensionMode === ExtensionMode.Test,
             isTestsBlockScaryColors: context.extensionMode === ExtensionMode.Test,
@@ -43,7 +43,7 @@ export class TeLog implements ILog, Disposable
             lastWriteWasBlank: false,
             lastWriteWasBlankError: false,
             lastWriteToConsoleWasBlank: false,
-            level: config.get<LogLevel>("logging.level", 1),
+            level: config.get<LogLevel>(ConfigKeys.LogLevel, 1),
             msgQueue: {},
             outputChannelWriteFn: "appendLine",
             outputChannel: window.createOutputChannel("Task Explorer"),

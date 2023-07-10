@@ -1,7 +1,7 @@
 
 import { ITeWrapper, ILog, ILogControl } from ":types";
-import { executeSettingsUpdate, executeTeCommand2 } from "../../utils/commandUtils";
-import { activate, exitRollingCount, endRollingCount, suiteFinished, testControl, sleep } from "../../utils/utils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
+import { activate, exitRollingCount, endRollingCount, suiteFinished, testControl } from "../../utils/utils";
 
 let log: ILog;
 let teWrapper: ITeWrapper;
@@ -16,7 +16,7 @@ suite("Logging Tests", () =>
 		({ teWrapper } = await activate());
 		log = teWrapper.log;
 		logControl = teWrapper.logControl;
-		await teWrapper.config.updateWs("logging.enable", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this, true);
 	});
 
@@ -25,11 +25,11 @@ suite("Logging Tests", () =>
     {
         if (exitRollingCount(this, false, true)) return;
 		log.setWriteToConsole?.(logControl.writeToConsole, logControl.writeToConsoleLevel);
-		await teWrapper.config.updateWs("logging.enable", logControl.enable);
-		await teWrapper.config.updateWs("logging.enableFile", logControl.enableFile);
-		await teWrapper.config.updateWs("logging.enableOutputWindow", logControl.enableOutputWindow);
-		await teWrapper.config.updateWs("logging.enableFileSymbols", logControl.enableFileSymbols);
-		await teWrapper.config.updateWs("logging.level", logControl.level);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, logControl.enable);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, logControl.enableFile);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, logControl.enableOutputWindow);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFileSymbols, logControl.enableFileSymbols);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogLevel, logControl.level);
         suiteFinished(this);
 	});
 
@@ -116,7 +116,7 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
-		await executeSettingsUpdate("logging.enable", false);
+		await executeSettingsUpdate(teWrapper.keys.Config.LogEnable, false);
 		teWrapper.log.error("Test5 error");
 		teWrapper.log.error("Test5 error");
 		teWrapper.log.error(new Error("Test error object"));
@@ -131,7 +131,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
-		await executeSettingsUpdate("logging.enable", true);
+		await executeSettingsUpdate(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
 
@@ -140,11 +140,11 @@ suite("Logging Tests", () =>
     {
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 7) + 150);
-		await teWrapper.config.updateWs("logging.enable", false);
-		await teWrapper.config.updateWs("logging.enableFile", false);
-		await teWrapper.config.updateWs("logging.enableFile", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, true);
 		await teWrapper.utils.sleep(25);
-		await teWrapper.config.updateWs("logging.enable", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
 		log.write("Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Test3 error");
@@ -154,30 +154,30 @@ suite("Logging Tests", () =>
 		log.error(new Error("Test error object"));
 		log.error([ "Test error 1", "Test error 2" ]);
 		log.error("Test4 error", [[ "p1", "e1" ]]);
-		await teWrapper.config.updateWs("logging.enableFileSymbols", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFileSymbols, true);
 		log.write("Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Test2 error");
 		log.error(new Error("Test error object"));
 		log.error([ "Test error 1", "Test error 2" ]);
 		log.error("Test4 error", [[ "p1", "e1" ]]);
-		await teWrapper.config.updateWs("logging.enableFileSymbols", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFileSymbols, false);
 		log.write("Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Error1");
 		log.warn("Warning1");
 		log.value("Test3", "value3", 1);
-		await teWrapper.config.updateWs("logging.enableFile", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
 		//
 		// Disable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.error("Error1");
 		log.warn("Warning1");
 		//
 		// Re-enable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
 	});
 
@@ -212,14 +212,14 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.methodStart("methodName");
 		log.methodDone("methodName");
 		log.methodEvent("methodName");
 		//
 		// Re-enable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
 
@@ -228,7 +228,7 @@ suite("Logging Tests", () =>
     {
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 2) + 50);
-		await teWrapper.config.updateWs("logging.enableOutputWindow", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, true);
 		log.write("Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Test5 error");
@@ -237,7 +237,7 @@ suite("Logging Tests", () =>
 		log.error(new Error("Test error object"));
 		log.error([ "Test error 1", "Test error 2" ]);
 		log.error("Test4 error", [[ "p1", "e1" ]]);
-		await teWrapper.config.updateWs("logging.enableOutputWindow", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, false);
 		log.write("Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Test5 error");
@@ -268,7 +268,7 @@ suite("Logging Tests", () =>
 		log.error(new Error("Test error object"));
 		log.dequeue("queueTestId");
 
-		await teWrapper.config.updateWs("logging.enableFile", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, true);
 		log.write("test1", 1, "", "queueTest2Id", false, false);
 		log.error("test4", undefined, "queueTest2Id");
 		log.value("test3", "value1", 1, "", "queueTest2Id");
@@ -276,7 +276,7 @@ suite("Logging Tests", () =>
 		log.error("error line1\nline2", undefined, "queueTest2Id");
 		log.write("line1\r\nline2", 1, "   ", "queueTest2Id");
 		log.dequeue("queueTest2Id");
-		await teWrapper.config.updateWs("logging.enableFile", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
 
         endRollingCount(this);
 	});
@@ -299,10 +299,10 @@ suite("Logging Tests", () =>
 		log.value("empty string value", "");
 		log.value("line break lf value", "line1\nline2");
 		log.value("line break crlf value", "line1\r\nline2");
-		await teWrapper.config.updateWs("logging.enableOutputWindow", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, false);
 		log.value("null value", null);
 		log.value("Test3", "value3", 1);
-		await teWrapper.config.updateWs("logging.enableOutputWindow", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, true);
 		log.value("", "");
 		log.value("", null);
 		log.value("", undefined);
@@ -328,7 +328,7 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.value("test", "1");
 		log.value(null as unknown as string, 1);
 		log.value(undefined as unknown as string, 1);
@@ -343,7 +343,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
 
@@ -363,13 +363,13 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.warn("test1");
 		log.warn("test2");
 		//
 		// Re-enable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
 
@@ -411,7 +411,7 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.blank(1);
 		log.dequeue("");
 		log.write("test");
@@ -423,7 +423,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
-		await teWrapper.config.updateWs("logging.enable", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
 
