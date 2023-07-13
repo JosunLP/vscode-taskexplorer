@@ -3,7 +3,7 @@ import { TaskItem } from "./item";
 import { extname, join } from "path";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
-import { Strings } from "../lib/constants";
+import { Regex, Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { pathExistsSync } from "../lib/utils/fs";
 import { properCase } from "../lib/utils/commonUtils";
@@ -276,14 +276,16 @@ export class TaskFile extends TreeItem implements ITaskFile
 
     static id(folder: TaskFolder, task: Task, groupLevel: number, groupId?: string)
     {
-        let pathKey: string;
+        let pathKey = "";
         if (task.definition.uri)
         {
             pathKey = task.definition.uri.fsPath;
         }
         else if (task.definition.tsconfig)
         {
-            pathKey = task.definition.tsconfig;
+            if (task.definition.tsconfig.includes("/")) {
+                pathKey = task.definition.tsconfig.substring(0, task.definition.tsconfig.indexOf("/"));
+            }
         }
         else if (isWorkspaceFolder(task.scope))
         {

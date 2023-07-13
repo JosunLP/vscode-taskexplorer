@@ -44,7 +44,8 @@ export class TaskItem extends TreeItem implements ITaskItem
             if (displayName.includes(" - ") && (displayName.includes("/") || displayName.includes("\\") ||
                                                 displayName.includes(" - tsconfig.")))
             {
-                displayName = taskName.substring(0, taskName.indexOf(" - "));
+                const match = task.definition.tsconfig.match(wrapper.keys.Regex.TsConfigFileName);
+                displayName = taskName.substring(0, taskName.indexOf(" - ")) + (match ? ` (${match[1]})` : "");
             }
             return displayName;
         };
@@ -96,7 +97,6 @@ export class TaskItem extends TreeItem implements ITaskItem
         //
         // Tooltip
         //
-        const taskName = getTaskTypeFriendlyName(task.source, true);
         this.tooltip = "Open " + task.name + (task.detail ? ` | ${task.detail}` : "") + ` (source : \`${task.source}\``;
         if (taskDef.type !== task.source) {
             this.tooltip += ` | type   : \`${taskDef.type}\``;
