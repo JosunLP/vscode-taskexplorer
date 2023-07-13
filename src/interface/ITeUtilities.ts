@@ -58,7 +58,7 @@ export interface ITePathUtilities
 	getInstallPathSync(): string;
 	getRelativePath(folder: WorkspaceFolder, uri: Uri): string;
 	getTaskAbsolutePath(task: Task, includeFileName?: boolean): string;
-	getTaskFileName(source: string, resourceUri: Uri | undefined, taskDef: ITaskDefinition): string;
+	getTaskFileName(source: string, taskDef: ITaskDefinition): string;
 	getTaskRelativePath(task: Task): string;
 	getUserDataPath(test?: boolean, platform?: string): string;
 }

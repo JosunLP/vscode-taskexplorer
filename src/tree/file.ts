@@ -74,7 +74,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         // exception of TSC, which is handled elsewhere).
         //
         this._relativePath = wrapper.pathUtils.getTaskRelativePath(task);
-        this._fileName = wrapper.pathUtils.getTaskFileName(task.source, folder.resourceUri, taskDef);
+        this._fileName = wrapper.pathUtils.getTaskFileName(task.source, taskDef);
         if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
             if (this._relativePath && task.source !== "Workspace") {

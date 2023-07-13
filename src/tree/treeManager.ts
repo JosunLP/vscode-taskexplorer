@@ -216,10 +216,9 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         const rmv = w.utils.popIfExistsBy(this._tasks, (t) =>
             !isTaskIncluded(w, t, logPad + "   ") ||
             //
-            // Fng VSCode internal task providers suck *****.  I mean, come on.  Add a package.json to a folder,
-            // see the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
-            // provided by the engine.  Couldn't spend the time to set up a fs watcher I guess.  SO that's all
-            // internal providers - they all suck.  Gulp, Grunt, NPM... who coded this ****???
+            // *** VSCode internal task providers s***.  I mean, come on.  Add a package.json to a folder, see
+            // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
+            // provided by the engine.
             //
             !w.fs.pathExistsSync(w.pathUtils.getTaskAbsolutePath(t, true)), this
         );
