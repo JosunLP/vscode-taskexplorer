@@ -238,6 +238,11 @@ suite("Logging Tests", () =>
 		log.error([ "Test error 1", "Test error 2" ]);
 		log.error("Test4 error", [[ "p1", "e1" ]]);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, true);
+		log.write("Test1", 1);
+		log.value("Test2", "value", 1);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, false);
 		log.write("Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Test5 error");

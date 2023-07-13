@@ -407,7 +407,7 @@ export class TeLog implements ILog, Disposable
         {
             this._logControl.enableOutputWindow = this._config.get<boolean>("logging.enableOutputWindow", true);
             if (!this._logControl.enable) {
-                void this._config.update("logging.enable", this._logControl.enableFile);
+                void this._config.update("logging.enable", this._logControl.enableOutputWindow);
             }
         }
         if (e.affectsConfiguration("taskexplorer.logging.enableFile"))

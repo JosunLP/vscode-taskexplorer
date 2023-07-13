@@ -44,4 +44,4 @@ export { Commands, VsCodeCommands } from "./ICommand";
 export { StorageKeys, StorageTarget } from "./IStorage";
 export { ConfigKeys, ConfigPrefix } from "./IConfiguration";
 export { TeLicenseState, TeLicenseType } from "./ITeLicenseManager";
-export { TaskSource, TaskNonScriptType, TaskScriptType } from "./ITeTask";
+export { TaskSource, /* TaskNonScriptType,*/ TaskScriptType } from "./ITeTask";

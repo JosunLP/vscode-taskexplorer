@@ -1,6 +1,7 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
+import { clone } from "./object";
 import { Strings } from "../constants";
 import minimatch = require("minimatch");
 import { basename, extname, sep } from "path";
@@ -198,7 +199,7 @@ export const isExcluded = (uriPath: string, log: ILog, logPad = "") =>
 };
 
 
-const isCallbackArray = <T = any>(v: any): v is CallbackArray<T> => !!v && isArray(v) && (isFunction(v[0]) || (!v[0] && isFunction(v[2])));
+const isCallbackArray = <E = any, ER = any>(v: any): v is CallbackArray<E, ER> => !!v && isArray(v) && (isFunction(v[0]) || (v[0] === undefined && isFunction(v[1])));
 
 
 /**
@@ -372,15 +373,15 @@ export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos
 // export const upperCaseFirstChar = (text: string): string => text.replace(/(?:^\w|[A-Za-z]|\b\w)/g, (l, i) => (i !== 0 ? l : l.toUpperCase()));
 
 
-export function wrap<R, E>(runFn: () => R, catchFn: CallbackOptions, thisArg?: any): R;
-export function wrap<R, E, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1): R;
-export function wrap<R, E, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2): R;
-export function wrap<R, E, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
-export function wrap<R, E, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
-export function wrap<R, E, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
-export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFinallyOpts?: CallbackOptions, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
+export function wrap<R, E, ER>(runFn: () => R, catchFn: CallbackOptions<E, ER>, thisArg?: any): E | R;
+export function wrap<R, E, ER, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1): E | R;
+export function wrap<R, E, ER, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2): E | R;
+export function wrap<R, E, ER, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3): E | R;
+export function wrap<R, E, ER, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): E | R;
+export function wrap<R, E, ER, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): E | R;
+export function wrap<R, E, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFinallyOpts?: CallbackOptions<E, ER>, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): E | R
 {
-    let result;
+    let result: any;
     try
     {
         result = runFn.call(thisArg, arg1, arg2, arg3, arg4, arg5);
@@ -396,7 +397,7 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
             },
             (e) =>
             {
-                if (!isCallbackArray<E>(catchFinallyOpts)) {
+                if (!isCallbackArray<E, ER>(catchFinallyOpts)) {
                     result = (catchFinallyOpts || wrapThrow).call(thisArg, e);
                 }
                 else {
@@ -417,8 +418,8 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
                 else
                 {
                     const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
-                    if (isPromise<E>(fResult)) {
-                        return fResult.then<E, any>(() => e, wrapThrow);
+                    if (isPromise<any>(fResult)) {
+                        return fResult.then<E, any>(() => result, wrapThrow);
                     }
                 }
                 return result;
@@ -430,7 +431,7 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
     }
     catch (e)
     {
-        if (!isCallbackArray<E>(catchFinallyOpts)) {     // catch
+        if (!isCallbackArray<E, ER>(catchFinallyOpts)) {     // catch
             result = wrapThrow.call(thisArg, e);
         }
         else {
@@ -441,15 +442,19 @@ export function wrap<R, E, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: 
             result = result.then<E, any>(
                 (r) => {
                     const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
-                    if (isPromise<E>(fResult)) {
-                        return fResult.then<E, any>(r => r, wrapThrow);
+                    if (isPromise<any>(fResult)) {
+                        return fResult.then<E, any>(() => r, wrapThrow);
                     }
                     return r;
                 }, wrapThrow
             );
         }
         else {
-            wrapFinally(true, catchFinallyOpts, thisArg);
+            const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
+            if (isPromise<any>(fResult)) {
+                const syncResult = clone(result);
+                result = fResult.then<E, any>(() => syncResult, wrapThrow);
+            }
         }
     }
     return result;

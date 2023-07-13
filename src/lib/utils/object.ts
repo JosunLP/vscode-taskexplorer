@@ -1,6 +1,6 @@
 
-import { isObject } from "./typeUtils";
 import { IDictionary } from "../../interface";
+import { isArray, isDate, isObject } from "./typeUtils";
 
 
 export const apply = <T>(object: IDictionary<any>, config: IDictionary<any>, defaults?: IDictionary<any>): T =>
@@ -18,42 +18,41 @@ export const apply = <T>(object: IDictionary<any>, config: IDictionary<any>, def
 };
 
 
-// export const clone = <T>(item: any) =>
-// {
-//     if (!item) {
-//         return item;
-//     }
-//     //
-//     // Date
-//     //
-//     if (isDate(item)) {
-//         return new Date(item.getTime());
-//     }
-//     //
-//     // Array
-//     //
-//     if (isArray(item))
-//     {
-//         let i = item.length;
-//         const c: any[] = [];
-//         while (i--) { c[i] = clone(item[i]); }
-//         return c;
-//     }
-//     //
-//     // Object
-//     //
-//     else if (isObject(item))
-//     {
-//         const c: IDictionary<any> = {};
-//         Object.keys((item)).forEach((key) =>
-//         {
-//             c[key] = clone(item[key]);
-//         });
-//         return c;
-//     }
-//
-//     return item as T;
-// };
+export const clone = <T>(item: any) =>
+{
+    if (!item) {
+        return item;
+    }
+    //
+    // Date
+    //
+    if (isDate(item)) {
+        return new Date(item.getTime());
+    }
+    //
+    // Array
+    //
+    if (isArray(item))
+    {
+        let i = item.length;
+        const c: any[] = [];
+        while (i--) { c[i] = clone(item[i]); }
+        return c;
+    }
+    //
+    // Object
+    //
+    else if (isObject(item))
+    {
+        const c: IDictionary<any> = {};
+        Object.keys((item)).forEach((key) =>
+        {
+            c[key] = clone(item[key]);
+        });
+        return c;
+    }
+    return item as T;
+};
 //
 //
 // export const diff = (oldObj: IDictionary<any>, newObj: IDictionary<any>): ObjectDiff =>

@@ -114,12 +114,12 @@ suite("Util Tests", () =>
 		teWrapper.objUtils.apply({ a: 1 }, {});
 		teWrapper.objUtils.apply({ a: 1, b: { a: 1 }}, { a: 2 });
 		teWrapper.objUtils.apply({ a: 1, b: { a: 1 }}, { a: 2, c: { b: 2 }}, { b: 2 });
-		// teWrapper.objUtils.clone(undefined);
-		// teWrapper.objUtils.clone({});
-		// teWrapper.objUtils.clone({ a: 1 });
-		// teWrapper.objUtils.clone({ a: 1, b: { a: 1 } });
-		// teWrapper.objUtils.clone([ 1, 2 ]);
-		// teWrapper.objUtils.clone(new Date());
+		teWrapper.objUtils.clone(undefined);
+		teWrapper.objUtils.clone({});
+		teWrapper.objUtils.clone({ a: 1 });
+		teWrapper.objUtils.clone({ a: 1, b: { a: 1 } });
+		teWrapper.objUtils.clone([ 1, 2 ]);
+		teWrapper.objUtils.clone(new Date());
 		// teWrapper.objUtils.merge({}, {});
 		// teWrapper.objUtils.merge({ a: 1, b: 2 }, { c: 3 });
 		// teWrapper.objUtils.merge({ a: 1, b: { c: 1 } }, { b: { d: 1 }, c: 3 });
@@ -147,7 +147,7 @@ suite("Util Tests", () =>
 		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], c: { a: 1 }});
 		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], c: { a: 1 }});
 		//
-		// wrap
+		// wrap()
 		//
 		let wasException = false;
 		teWrapper.utils.wrap(() => {}, [ () => {} ], this);
@@ -184,9 +184,13 @@ suite("Util Tests", () =>
 		catch { wasException = true; }
 		expect(wasException).to.be.equal(false);
         expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return 1; }, [ () => {}, () => {} ], this)).to.be.equal(1);
-		await teWrapper.utils.wrap(() => { return new Promise<any>((r, rej) => { rej(new Error("Test async error 2")); }); }, [ () => {} ], this);
+		await teWrapper.utils.wrap(() => { return new Promise<any>((r, rej) => { rej(new Error("Test async error 1")); }); }, [ () => {} ], this);
 		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return "done"; }, [ teWrapper.log.error, () => {} ], this)).to.be.equal("done");
 		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); return "done"; }, [ teWrapper.log.error, async () => { await teWrapper.utils.sleep(1); } ], this)).to.be.equal("done");
+		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); throw new Error("Test async error 1.1"); }, [ (e) => { return "safe catch 1.1"; }, async () => { await teWrapper.utils.sleep(1); } ], this)).to.be.equal("safe catch 1.1");
+		expect(await teWrapper.utils.wrap(async () => { await teWrapper.utils.sleep(1); throw new Error("Test async error 1.2"); }, [ async (e) => { await teWrapper.utils.sleep(1); return "safe catch 1.2"; }, async () => { await teWrapper.utils.sleep(1); } ], this)).to.be.equal("safe catch 1.2");
+		expect(await teWrapper.utils.wrap(() => { throw new Error("Test async error 1.3"); }, [ async (e) => { await teWrapper.utils.sleep(1); return "safe catch 1.3"; }, async () => { await teWrapper.utils.sleep(1); } ], this)).to.be.equal("safe catch 1.3");
+		expect(await teWrapper.utils.wrap(() => { throw new Error("Test async error 1.4"); }, [ () => "safe catch 1.4", async () => { await teWrapper.utils.sleep(1); } ], this)).to.be.equal("safe catch 1.4");
 		wasException = false;
 		try {
 			expect(await teWrapper.utils.wrap(async () => { throw new Error("Test async error 2"); }, [ (e) => { return "safe catch"; }, () => {} ], this)).to.be.equal("safe catch");
@@ -445,6 +449,7 @@ suite("Util Tests", () =>
 		// handles it an ;et's cover it
 		//
 		process.argv = [];
+		dataPath = teWrapper.pathUtils.getUserDataPath(true);
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 
 		//
@@ -478,6 +483,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = undefined;
 		process.env.APPDATA = dataPath2;
 		process.env.USERPROFILE = dataPath3;
+		dataPath = teWrapper.pathUtils.getUserDataPath(true);
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal(`C:\\Users\\${env.USERNAME}\\AppData\\Roaming\\vscode`);
 		//
@@ -486,6 +492,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = "c:\\some\\invalid\\path";
 		process.env.APPDATA = dataPath2;
 		process.env.USERPROFILE = dataPath3;
+		dataPath = teWrapper.pathUtils.getUserDataPath(true);
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal(`C:\\Users\\${env.USERNAME}\\AppData\\Roaming\\vscode`);
 		//
@@ -494,6 +501,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = "C:\\Code\\data\\user-data\\User\\workspaceStorage";
 		process.env.APPDATA = "";
 		process.env.USERPROFILE = "";
+		dataPath = teWrapper.pathUtils.getUserDataPath(true);
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal("C:\\Code\\data\\user-data\\User\\workspaceStorage\\user-data\\User");
 		//
@@ -502,6 +510,7 @@ suite("Util Tests", () =>
 		process.env.VSCODE_PORTABLE = "";
 		process.env.APPDATA = "";
 		process.env.USERPROFILE = "";
+		dataPath = teWrapper.pathUtils.getUserDataPath(true);
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "win32");
 		expect(dataPath).to.be.equal(`C:\\Projects\\${teWrapper.extensionName}\\.vscode-test\\vscode-win32-x64-archive-${env.vsCodeTestVersion}\\AppData\\Roaming\\vscode`);
 		//
@@ -538,11 +547,12 @@ suite("Util Tests", () =>
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "invalid_platform");
 		expect(dataPath).to.be.equal("C:\\Code\\data\\user-data\\User\\workspaceStorage\\user-data\\User");
 		//
-		// Empty platform
+		// Empty platform (production)
 		//
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "");
 		process.env.VSCODE_PORTABLE = "";
 		dataPath = teWrapper.pathUtils.getUserDataPath(true, "");
+		dataPath = teWrapper.pathUtils.getUserDataPath(true);
 		//
 		//
 		// Restore process argv
