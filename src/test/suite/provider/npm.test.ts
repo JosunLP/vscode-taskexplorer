@@ -10,7 +10,7 @@ import { executeTeCommand2 } from "../../utils/commandUtils";
 const testsName = "npm";
 let teWrapper: ITeWrapper;
 const tc = utils.testControl;
-let startTaskCount = 5; // set in suiteSetup() as it will change depending on single or multi root ws
+let startTaskCount = 2; // set in suiteSetup() as it will change depending on single or multi root ws
 let packageJsonPath: string;
 let packageJson2Dir: string;
 let packageJson2Path: string;
@@ -25,7 +25,7 @@ suite("NPM Tests", () =>
     {
         if (utils.exitRollingCount(this, true)) return;
         ({ teWrapper } = await utils.activate());
-        startTaskCount = !tc.isMultiRootWorkspace ? startTaskCount : startTaskCount + 15;
+        startTaskCount = !tc.isMultiRootWorkspace ? startTaskCount : startTaskCount + 12;
         packageJsonPath = utils.getWsPath("package.json");
         packageJson2Dir = utils.getWsPath("npm_test");
         packageJson2Path = join(packageJson2Dir, "package.json");

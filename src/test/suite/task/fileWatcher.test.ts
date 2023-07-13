@@ -15,7 +15,7 @@ const startTaskCountBatch = 2;
 const startTaskCountGrunt = 7;
 const startTaskCountGulp = 17;
 const startTaskCountWs = 13; // 10 + 3 User Tasks
-let startTaskCountNpm = 5;  // set in suiteSetup() as it will change depending on single or multi root ws
+let startTaskCountNpm = 2;  // set in suiteSetup() as it will change depending on single or multi root ws
 let teWrapper: ITeWrapper;
 let insideWsDir: string;
 let insideWsDir2: string;
@@ -33,7 +33,7 @@ suite("File Watcher Tests", () =>
     {
         if (utils.exitRollingCount(this, true)) return;
         ({ teWrapper } = await utils.activate());
-        startTaskCountNpm = tc.isMultiRootWorkspace ? 20 : 5;
+        startTaskCountNpm = tc.isMultiRootWorkspace ? 17 : 2;
         rootPath = utils.getWsPath(".");
         insideWsDir = join(rootPath, "tasks_test_");
         insideWsDir2 = join(rootPath, "tasks_test2_");

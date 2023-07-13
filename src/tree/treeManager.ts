@@ -213,14 +213,16 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // this.tasks cache at this point, as extension provided tasks will have been skipped/ignored in the
         // provideTasks() processing.
         //
-        const rmv = w.utils.popIfExistsBy(this._tasks, (t) =>
-            !isTaskIncluded(w, t, logPad + "   ") ||
-            //
-            // *** VSCode internal task providers s***.  I mean, come on.  Add a package.json to a folder, see
-            // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
-            // provided by the engine.
-            //
-            !w.fs.pathExistsSync(w.pathUtils.getTaskAbsolutePath(t, true)), this
+        const rmv = w.utils.popIfExistsBy(this._tasks,
+            (t) =>
+                !isTaskIncluded(w, t, logPad + "   ") ||
+                //
+                // *** VSCode internal task providers s***.  I mean, come on.  Add a package.json to a folder, see
+                // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
+                // provided by the engine.
+                //
+                !w.fs.pathExistsSync(w.pathUtils.getTaskAbsolutePath(t, true)),
+            this
         );
         w.log.write(`   removed ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
         //

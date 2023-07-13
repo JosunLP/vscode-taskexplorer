@@ -68,6 +68,10 @@ export function execIf<T extends CheckValue, R, A1, A2 = A1, A3 = A1, A4 = A1, A
     }
 };
 */
+/**
+ * A version of execIf() where T is not returned as a callback argument.
+ * Callback argumanets are A1, A2, A3... as opposed to T, A1, A2, A3...
+ */
 export function execIf2<T, R, A1>(checkValue: T | undefined, ifFn: (arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
 export function execIf2<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
 export function execIf2<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;

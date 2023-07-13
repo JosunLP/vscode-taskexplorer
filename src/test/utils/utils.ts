@@ -498,8 +498,15 @@ export const verifyTaskCount = async (taskType: string, expectedCount: number, r
         else if (taskType === "grunt" || taskType === "gulp") {
             tTasks = tTasks.filter(t => !!t.definition.uri);
         }
-        else if (taskType === "npm" && !teWrapper.config.get<boolean>(teWrapper.keys.Config.UseNpmProvider)) {
-            tTasks = tTasks.filter(t => teWrapper.fs.pathExistsSync(teWrapper.pathUtils.getTaskAbsolutePath(t, true)) && (!teWrapper.typeUtils.isWorkspaceFolder(t.scope) || !teWrapper.utils.isExcluded(path.join(t.scope.uri.fsPath, t.definition.path || ""), teWrapper.log)));
+        else if (taskType === "npm" && !teWrapper.config.get<boolean>(teWrapper.keys.Config.UseNpmProvider))
+        {
+            tTasks = tTasks.filter(
+                (t) => teWrapper.fs.pathExistsSync(teWrapper.pathUtils.getTaskAbsolutePath(t, true)) &&
+                (!teWrapper.typeUtils.isWorkspaceFolder(t.scope) ||
+                 !teWrapper.utils.isExcluded(path.join(t.scope.uri.fsPath, t.definition.path || ""), teWrapper.log)));
+        }
+        if (taskType !== "Workspace") {
+            tTasks = tTasks.filter(t => t.source === taskType);
         }
     }
     if (expectedCount >= 0) {
