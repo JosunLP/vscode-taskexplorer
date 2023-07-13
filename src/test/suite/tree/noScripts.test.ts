@@ -2,12 +2,12 @@
 
 import { expect } from "chai";
 import { TreeItem } from "vscode";
-import { startupFocus } from "../utils/suiteUtils";
-import { executeSettingsUpdate } from "../utils/commandUtils";
-import { IDictionary, ITaskExplorerApi, ITeWrapper } from ":types";
+import { IDictionary, ITeWrapper } from ":types";
+import { startupFocus } from "../../utils/suiteUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import {
     activate, endRollingCount, exitRollingCount, suiteFinished, testControl as tc, verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 let didDisableTasks = false;
 let didResetEnabledTasks = false;

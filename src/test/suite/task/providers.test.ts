@@ -3,15 +3,15 @@
 
 import { join } from "path";
 import { expect } from "chai";
-import { refresh } from "../utils/treeUtils";
+import { refresh } from "../../utils/treeUtils";
 import { tasks, TreeItemCollapsibleState } from "vscode";
 import { ITaskFile, ITaskItem, ITeWrapper } from ":types";
 import { startupBuildTree, startupFocus } from "utils/suiteUtils";
-import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
+import { executeSettingsUpdate, executeTeCommand2 } from "../../utils/commandUtils";
 import {
     activate, endRollingCount, exitRollingCount, getWsPath, suiteFinished, testControl as tc, treeUtils,
     verifyTaskCount, waitForTeIdle
-} from "../utils/utils";
+} from "../../utils/utils";
 
 interface TaskMap { [id: string]: ITaskItem | undefined };
 
@@ -342,7 +342,7 @@ suite("Provider Tests", () =>
               filesOpened: string[] = [];
         for (const t of Object.keys(taskMap))
         {
-            const taskItem = taskMap[t] as ITaskItem;
+            const taskItem = taskMap[t];
             await executeTeCommand2("open", [ taskItem ], 4);
             if (!filesOpened.includes(taskItem.taskFile.resourceUri.fsPath)) {
                 filesOpened.push(taskItem.taskFile.resourceUri.fsPath);

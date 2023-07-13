@@ -1,9 +1,9 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import * as utils from "../utils/utils";
 import { ITeWrapper } from ":types";
-import { startupBuildTree } from "../utils/suiteUtils";
-import { executeSettingsUpdate, executeTeCommand } from "../utils/commandUtils";
+import * as utils from "../../utils/utils";
+import { startupBuildTree } from "../../utils/suiteUtils";
+import { executeSettingsUpdate, executeTeCommand } from "../../utils/commandUtils";
 
 let teWrapper: ITeWrapper;
 const tc = utils.testControl;

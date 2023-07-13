@@ -4,10 +4,10 @@ import { env } from "process";
 import { expect } from "chai";
 import { ITeWrapper } from ":types";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
-import { executeSettingsUpdate, executeTeCommand2 } from "../utils/commandUtils";
+import { executeSettingsUpdate } from "../../utils/commandUtils";
 import {
 	activate, testControl, logErrorsAreFine, suiteFinished, exitRollingCount, getWsPath, endRollingCount, sleep
-} from "../utils/utils";
+} from "../../utils/utils";
 
 let rootUri: Uri;
 let teWrapper: ITeWrapper;

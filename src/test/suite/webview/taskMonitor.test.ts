@@ -82,7 +82,7 @@ suite("Task Monitor App Tests", () =>
         if (exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.run + tc.slowTime.commands.runStop + tc.slowTime.tasks.getTreeTasks + tc.slowTime.tasks.gulpTask);
 		const gulp = await treeUtils.getTreeTasks(teWrapper, "gulp", 14);
-		taskItem = gulp.find(t => t.taskFile.fileName.includes("gulpfile.js") && (<string>t.label).includes("build33")) as ITaskItem;
+		taskItem = gulp.find(t => t.taskFile.fileName.includes("gulpfile.js") && (t.label).includes("build33")) as ITaskItem;
 		task = taskItem.task;
 		const iTask = teWrapper.taskUtils.toITask(teWrapper, [ task ], "all")[0];
 		const exec = await executeTeCommand2<TaskExecution | undefined>("taskexplorer.run", [ iTask ]);

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import { expect } from "chai";
-import * as utils from "../utils/utils";
-import { startupFocus } from "../utils/suiteUtils";
+import * as utils from "../../utils/utils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper, OneOf } from ":types";
-import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../utils/commandUtils";
+import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../../utils/commandUtils";
 import { WorkspaceFolder, Uri, ThemeIcon, MarkdownString, Command, TreeItemCollapsibleState, AccessibilityInformation } from "vscode";
 
 let teWrapper: ITeWrapper;

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
-import { IEventQueue, ITeWrapper } from "../../../../types";
+import { IEventQueue, ITeWrapper } from ":types";
 import { activate, endRollingCount, exitRollingCount, suiteFinished } from "../../utils/utils";
 
 let eventQueue: IEventQueue;
