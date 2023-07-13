@@ -1,12 +1,13 @@
 
 import { ITaskItem } from "./ITaskItem";
+import { ITaskFile } from "./ITaskFile";
 import { ITaskFolder } from "./ITaskFolder";
 import { ITaskTreeView } from "./ITeTaskTree";
 import { Task, Uri, Event, TreeItem } from "vscode";
 import { ITeTask, ITeTaskChangeEvent } from "./ITeTask";
 import { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 
-export interface TaskMap<T = ITaskItem | undefined> { [id: string]: T };
+export interface TaskMap<T = ITaskFolder | ITaskFile | ITaskItem> { [id: string]: T };
 
 export interface ITeTreeManager
 {
@@ -23,7 +24,7 @@ export interface ITeTreeManager
     readonly onReady: Event<ITeTaskChangeEvent>;
     readonly runningTasks: any[];
     readonly tasks: Task[];
-    readonly taskMap: TaskMap;
+    readonly taskMap: TaskMap<ITaskItem>;
     readonly taskFolders: ITaskFolder[];
     readonly views: { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView };
     fireTreeRefreshEvent(treeItem: TreeItem | null, taskItem: ITaskItem | null, logPad: string): void;

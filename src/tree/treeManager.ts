@@ -85,36 +85,21 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     dispose = () => { this._tasks.splice(0); this._disposables.splice(0).forEach(d => d.dispose()); };
 
 
-    get taskMap(): TaskMap { return this._treeBuilder.taskMap; }
-
+    get taskMap(): TaskMap<TaskItem> { return this._treeBuilder.taskMap; }
     get tasks(): Task[] { return this._tasks; }
-
     get taskFolders(): TaskFolder[] { return this._treeBuilder.taskFolders; }
-
 	get configWatcher(): TeTreeConfigWatcher { return this._configWatcher; }
-
     get isBusy(): boolean { return this._refreshPending || this._configWatcher.isBusy; }
-
 	get onDidAllTasksChange(): Event<ITeTaskChangeEvent> { return this._onDidTasksChange.event; }
-
     get onDidTaskCountChange(): Event<ITeTaskChangeEvent> { return this._onDidTaskCountChange.event; }
-
 	get onDidFavoriteTasksChange(): Event<ITeTaskChangeEvent> { return this._specialFolders.favorites.onDidTasksChange; }
-
 	get onDidLastTasksChange(): Event<ITeTaskChangeEvent> { return this._specialFolders.lastTasks.onDidTasksChange; }
-
     get onReady(): Event<ITeTaskChangeEvent> { return this._onReady.event; }
-
     get famousTasks(): ITeTask[] { return this.wrapper.usage.famousTasks; }
-
     get favoritesTasks(): Task[] { return this._specialFolders.favorites.taskFiles.map(f => f.task); }
-
     get lastTasks(): Task[] { return this._specialFolders.lastTasks.taskFiles.map(f => f.task); }
-
     get lastTasksFolder(): LastTasksFolder { return this._specialFolders.lastTasks; }
-
     get runningTasks(): Task[] { return vscTasks.taskExecutions.map(e => e.task); }
-
     get views(): { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView } { return this._views; }
 
 

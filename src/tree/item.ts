@@ -42,9 +42,9 @@ export class TaskItem extends TreeItem implements ITaskItem
         {
             let displayName = taskName;
             if (displayName.includes(" - ") && (displayName.includes("/") || displayName.includes("\\") ||
-                                                displayName.includes(" - tsconfig.json")))
+                                                displayName.includes(" - tsconfig.")))
             {
-                displayName = task.name.substring(0, taskName.indexOf(" - "));
+                displayName = taskName.substring(0, taskName.indexOf(" - "));
             }
             return displayName;
         };
@@ -97,7 +97,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         // Tooltip
         //
         const taskName = getTaskTypeFriendlyName(task.source, true);
-        this.tooltip = "Open " + task.name + (task.detail ? ` | ${task.detail}` : "") + ` (source : \`${taskName}\``;
+        this.tooltip = "Open " + task.name + (task.detail ? ` | ${task.detail}` : "") + ` (source : \`${task.source}\``;
         if (taskDef.type !== task.source) {
             this.tooltip += ` | type   : \`${taskDef.type}\``;
         }
@@ -138,7 +138,10 @@ export class TaskItem extends TreeItem implements ITaskItem
     getFolder(): WorkspaceFolder | undefined { return this._taskFile.folder.workspaceFolder; }
 
 
-    isExecuting(logPad = "   ")
+    static is(item: any): item is TaskItem { return item instanceof TaskItem ; }
+
+
+    isExecuting()
     {
         const task = this._taskDetached ?? this.task;
         const execs = tasks.taskExecutions.filter(e => e.task.name === task.name && e.task.source === task.source &&

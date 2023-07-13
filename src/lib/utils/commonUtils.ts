@@ -25,20 +25,6 @@ import { IDictionary } from ":types";
 //     return ret;
 // };
 
-
-/**
- * @since 3.0.0
- * @param obj Source object
- * @param pickFn Callback function to specify keys to pick from source object
- */
-export const pickBy = <T extends IDictionary<any>>(obj: T, pickFn: <K extends keyof T>(k: K) => boolean | undefined): T =>
-{
-    const ret: any = {};
-    Object.keys(obj).filter(k => pickFn(k)).forEach(key => ret[key] = obj[key]);
-    return ret;
-};
-
-
 export function properCase(name: string | undefined, removeSpaces?: boolean)
 {
     if (!name) {

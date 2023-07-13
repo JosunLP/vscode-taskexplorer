@@ -110,11 +110,13 @@ export class TaskWatcher implements Disposable
         this.wrapper.log.methodStart("task started event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 
         if (task.source === "Workspace" && !treeId)
-        {
-            taskItem = Object.values(taskMap).find((t): t is TaskItem => !!t && t.taskSource === "Workspace" && t.task.definition.type === task.definition.type);
-        }
-        //
-        // If taskMap is empty, then this view has not yet been made visible, an there's nothing
+        {    //
+            /* istanbul ignore next */
+            taskItem = Object.values(taskMap).find(
+                (t): t is TaskItem => !!t && t.taskSource === "Workspace" && t.task.definition.type === task.definition.type && task.name.includes(t.task.name)
+            );
+        } //
+         // If taskMap is empty, then this view has not yet been made visible, an there's nothing
         // to update.  The `taskTree` property should also be null.  We could probably do this
         // before the timer check above, but hey, just in case taskMap goes empty between events
         // for some un4seen reason.
@@ -135,7 +137,7 @@ export class TaskWatcher implements Disposable
             }
         }
         else {
-            taskItem = <TaskItem>taskMap[treeId];
+            taskItem = taskMap[treeId];
         }
 
         if (taskItem) {
@@ -157,17 +159,16 @@ export class TaskWatcher implements Disposable
               isMapEmpty = this.wrapper.typeUtils.isObjectEmpty(taskMap);
 
         this.wrapper.log.methodStart("task finished event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
-
         this.showStatusMessage(task, "  "); // hides
 
         if (task.source === "Workspace" && !treeId)
-        {
+        {    //
+            /* istanbul ignore next */
             taskItem = Object.values(taskMap).find(
-                (t): t is TaskItem => !!t && t.taskSource === "Workspace" && t.task.definition.type === task.definition.type && t.task.name === task.name
+                (t): t is TaskItem => !!t && t.taskSource === "Workspace" && t.task.definition.type === task.definition.type && task.name.includes(t.task.name)
             );
-        }
-        //
-        // If taskMap is empty, then this view has not yet been made visible or an event fired
+        } //
+         // If taskMap is empty, then this view has not yet been made visible or an event fired
         // that caused the tree to refresh (e.g. when tests end and the package.json file is
         // restored, both the file hanged and task finished events fire at the same time from
         // VSCode). So there's nothing to update in the tree right now in these cases.  The
@@ -176,7 +177,7 @@ export class TaskWatcher implements Disposable
         // event yet, i.e. it hasn't been opened yet by the user.
         //
         else if (!treeId || isMapEmpty || !taskMap[treeId])
-        {
+        {    //
             /* istanbul ignore next */
             if (taskFolders && !taskMap[treeId] && taskFolders.length > 0 && taskFolders[0].contextValue !== "noscripts")
             {
@@ -191,7 +192,7 @@ export class TaskWatcher implements Disposable
             }
         }
         else {
-            taskItem = <TaskItem>taskMap[treeId];
+            taskItem = taskMap[treeId];
         }
 
         if (taskItem) {

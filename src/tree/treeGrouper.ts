@@ -56,7 +56,7 @@ export class TaskTreeGrouper
             prevTaskFile: TaskFile | undefined;
         const groupHash: TaskMap<TaskFile> = {};
         const taskFiles = this.wrapper.utils.popIfExistsBy(folder.taskFiles, t => !source || t.taskSource === source, this)
-                                            .filter((t): t is TaskFile => this.isTaskFile(t));
+                                            .filter((t): t is TaskFile => TaskFile.is(t));
         this.wrapper.log.methodStart("create tree node folder grouping", 3, logPad, true, [[ "project folder", folder.label ]]);
         //
         // Clear all items in this folder from the taskfile hash map
@@ -81,7 +81,7 @@ export class TaskTreeGrouper
                             [ "add taskfile grouped child container", taskFile.relativePath ], [ "group id", gid ]
                         ]);
                         const taskItem = taskFile.treeNodes[0];
-                        this.wrapper.utils.execIf2(this.isTaskItem(taskItem), (ti, ptf) =>
+                        this.wrapper.utils.execIf2(TaskItem.is(taskItem), (ti, ptf) =>
                         {
                             groupHash[gid] = folder.addChild(new TaskFile(this.wrapper, folder, ti.task, taskFile.relativePath, 0, gid, ti.task.source, "   "));
                             //
@@ -125,7 +125,7 @@ export class TaskTreeGrouper
         // first part of the name split by the separator character (the name of the new grouped-with-separator node)
         //
         this.wrapper.log.write(logPad + "   rename grouped tasks", 3);
-        for (const t of folder.taskFiles.filter((t): t is TaskFile => this.isTaskFile(t)))
+        for (const t of folder.taskFiles.filter((t): t is TaskFile => TaskFile.is(t)))
         {
             await this.renameGroupedTasks(t);
         }
@@ -177,7 +177,7 @@ export class TaskTreeGrouper
         const w = this.wrapper,
               newNodes: TaskFile[] = [],
               atMaxLevel: boolean = this._groupMaxLevel <= groupLevel + 1,
-              taskItems = taskFile.treeNodes.splice(0).filter((n): n is TaskItem => this.isTaskItem(n));
+              taskItems = taskFile.treeNodes.splice(0).filter((n): n is TaskItem => TaskItem.is(n));
         let didGroupLast = false,
             prevLblParts: string[] | undefined,
             prevTaskItem: TaskItem | undefined;
@@ -288,12 +288,6 @@ export class TaskTreeGrouper
     };
 
 
-    private isTaskFile = (t: any): t is TaskFile => t instanceof TaskFile;
-
-
-    private isTaskItem = (t: any): t is TaskItem  => t instanceof TaskItem ;
-
-
     private renameGroupedTasks = async(taskFile: TaskFile) =>
     {
         const w = this.wrapper,
@@ -306,7 +300,7 @@ export class TaskTreeGrouper
         const rmvLbl = taskFile.label.replace(/\(/gi, "\\(").replace(/\[/gi, "\\[").replace(/\)/gi, "\\)").replace(/\]/gi, "\\]");
         for (const item of taskFile.treeNodes)
         {
-            if (this.isTaskItem(item))
+            if (TaskItem.is(item))
             {
                 const rgx = new RegExp(`^[^]*${rmvLbl}\\${this._groupSep}`, "i");
                 item.label = item.label.replace(rgx, "");
@@ -331,11 +325,12 @@ export class TaskTreeGrouper
     private splitLabel = (lbl: string, item: TaskItem) =>
     {
         const lblParts = lbl.split(this._groupSep);
-        if (lblParts.length >= 2 && item.taskSource === "tsc" && (/ \- tsconfig\.[a-z\.\-_]+json$/i).test(lbl))
-        {
-            const lastPart = <string>lblParts.pop();
-            lblParts[lblParts.length - 1] = `${lblParts[lblParts.length - 1].trimEnd()} (${lastPart.trimStart()})`;
-        }
+        // if (item.taskSource === "tsc" && this.wrapper.keys.Regex.TsConfigTaskLabel.test(lbl))
+        // {
+        //     const tscLblParts = lbl.split(" - ");
+        //     const lastPart = <string>lblParts.pop();
+        //     lblParts[lblParts.length - 1] = `${lblParts[lblParts.length - 1].trimEnd()} (${lastPart.trimStart()})`;
+        // }
         return lblParts;
     };
 

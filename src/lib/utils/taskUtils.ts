@@ -1,13 +1,17 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
+import { pickBy } from "./object";
 import { storage } from "../storage";
 import { Task, tasks } from "vscode";
 import { TeWrapper } from "../wrapper";
-import { getCombinedGlobPattern } from "./utils";
+import { properCase } from "./commonUtils";
 import { configuration } from "../configuration";
-import { pickBy, properCase } from "./commonUtils";
+import { getCombinedGlobPattern } from "./utils";
 import { Globs, PinnedStorageKey } from "../constants";
-import { ConfigPrefix, ITaskDefinition, ITeTask, ITeWrapper, TaskScriptType, TaskSource, TeTaskListType, TeTaskScriptType, TeTaskSource } from "../../interface";
+import {
+    ConfigPrefix, ITaskDefinition, ITeTask, ITeWrapper, TaskScriptType, TaskSource, TeTaskListType,
+    TeTaskScriptType, TeTaskSource
+} from "../../interface";
 
 
 export const getGlobPattern = (taskType: string) =>

@@ -28,9 +28,8 @@ export class TaskTreeBuilder
     }
 
 
-    get taskMap() { return this._taskMap; }
-
     get taskFolders() { return this._taskFolders; }
+    get taskMap() { return this._taskMap; }
 
 
     private buildTaskTree = async (task: Task, logPad: string): Promise<void> =>
@@ -211,11 +210,11 @@ export class TaskTreeBuilder
         {
             const uri = taskItem;
             taskItem = Object.values(this._taskMap).find(
-                (i) =>  !!i && !!i.resourceUri && i.resourceUri.fsPath === uri.fsPath
+                (i): i is TaskItem => !!i && !!i.resourceUri && i.resourceUri.fsPath === uri.fsPath
             ) as TaskItem;
             void this.wrapper.treeManager.views.taskExplorer.view.reveal(taskItem, { select: false });
         }
-        else if (!(taskItem instanceof TaskItem)) // ITeTask (Webview app)
+        else if (!TaskItem.is(taskItem)) // ITeTask (Webview app)
         {
             taskItem = this._taskMap[<string>taskItem.definition.taskItemId];
         }

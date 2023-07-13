@@ -30,10 +30,10 @@ export interface ITeKeys
 	Commands: typeof Commands;
 	Config: typeof ConfigKeys;
 	Context: typeof ContextKeys;
-	Globs: any;
-	Numbers: any;
-	Regexes: any;
-	Strings: any;
+	Globs: Record<string, string>;
+	Numbers: Record<string, number>;
+	Regex: Record<string, RegExp>;
+	Strings: Record<string, string>;
 	Storage: typeof StorageKeys;
 	Usage: typeof UsageKeys;
 	VsCodeCommands: typeof VsCodeCommands;

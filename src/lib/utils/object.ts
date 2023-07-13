@@ -358,12 +358,12 @@ export const apply = <T>(object: IDictionary<any>, config: IDictionary<any>, def
 // };
 //
 //
-// export const pickBy = <T extends Record<string, any>>(obj: T, pickFn: <K extends keyof T>(k: K) => boolean | undefined): T =>
-// {
-//     const ret: Record<string, any> = {};
-//     Object.keys(obj).filter(k => pickFn(k)).forEach(key => ret[key] = obj[key]);
-//     return ret as T;
-// };
+export const pickBy = <T extends Record<string, any>>(obj: T, pickFn: <K extends keyof T>(k: K) => boolean | undefined): T =>
+{
+    const ret: Record<string, any> = {};
+    Object.keys(obj).filter(k => pickFn(k)).forEach(key => ret[key] = obj[key]);
+    return ret as T;
+};
 //
 //
 // export const pickNot = <T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T =>

@@ -1,26 +1,30 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
-    TeTaskListType, ConfigPrefix, ITeKeys, ConfigKeys, ContextKeys, StorageKeys,
-    UsageKeys, VsCodeCommands, Commands, IDictionary
+    TeTaskListType, ConfigPrefix, ITeKeys, ConfigKeys, ContextKeys, StorageKeys, UsageKeys, VsCodeCommands, Commands
 } from "../interface";
 
-export const Constants =
+export const Constants: Record<string, string> =
 {
     GlobalFrameworkConfName: "global",
     GlobalFrameworkProjectName: "global"
 };
 
-export const Numbers =
+export const Numbers: Record<string, number> =
 {
     MaxGroupLevel: 10
 };
 
-export const Regexes =
+export const Regex: Record<string, RegExp> =
 {
+    AppPublisherFileName: /\.publishrc\.(.+)\.(?:js(?:on)?|ya?ml)$/i,
+    TsConfigFileName: /tsconfig\.(.+)\.json$/i,
+    TsConfigLabel: /([a-z0-9\.\-_\\// ]+| )\- tsconfig\.([a-z0-9\.\-_]+?)\.?json$/i,
+    TsConfigTaskLabel: / \- tsconfig\.([a-z0-9\.\-_]+?)\.?json$/i,
+    WebpackFileName: /webpack\.config\.(.+)\.(?:js(?:on)?)$/i
 };
 
-export const Strings =
+export const Strings: Record<string, string> =
 {
 	DEFAULT_SEPARATOR: "-",
     LAST_TASKS_LABEL: "Last Tasks",
@@ -33,7 +37,7 @@ export const Strings =
 	NoTasks: "appstrings.noTasks|No tasks found"
 };
 
-export const Globs: IDictionary<string> =
+export const Globs: Record<string, string> =
 {
     GLOB_ANT: "**/[Bb][Uu][Ii][Ll][Dd].[Xx][Mm][Ll]",
     GLOB_APPPUBLISHER: "**/.publishrc*",
@@ -71,7 +75,7 @@ export const All: ITeKeys =
     Context: ContextKeys,
     Globs,
     Numbers,
-    Regexes,
+    Regex,
     Storage: StorageKeys,
     Strings,
     Usage: UsageKeys,
