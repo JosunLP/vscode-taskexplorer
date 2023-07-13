@@ -211,7 +211,7 @@ suite("NPM Tests", () =>
     test("Document Position", async function()
     {
         if (utils.exitRollingCount(this)) return;
-        npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount - 4); // only the 'test' task from project1 should be in the tree
+        npmTaskItems = await utils.treeUtils.getTreeTasks(teWrapper, testsName, startTaskCount - 1); // only the 'test' task from project1 should be in the tree
         this.slow(tc.slowTime.tasks.findPosition + tc.slowTime.tasks.getTreeTasks + (tc.slowTime.tasks.findPositionDocOpen * (npmTaskItems.length - 1)) + (tc.slowTime.commands.fast * npmTaskItems.length));
         for (const taskItem of npmTaskItems) {
             await executeTeCommand2("open", [ taskItem ], tc.waitTime.commandFast);
