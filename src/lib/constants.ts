@@ -19,9 +19,6 @@ export const Regex: Record<string, RegExp> =
 {
     AppPublisherFileName: /\.publishrc\.(.+)\.(?:js(?:on)?|ya?ml)$/i,
     TsConfigFileName: /tsconfig\.(.+)\.json$/i,
-    TsConfigLabel: /([a-z0-9\.\-_\\// ]+| )\- tsconfig\.([a-z0-9\.\-_]+?)\.?json$/i,
-    TsConfigTaskName: / \- [a-z0-9_\- ]+\/tsconfig\.[a-z\.\-_]*json$/i,
-    TsConfigTaskLabel: / \- tsconfig\.([a-z0-9\.\-_]+?)\.?json$/i,
     WebpackFileName: /webpack\.config\.(.+)\.(?:js(?:on)?)$/i
 };
 

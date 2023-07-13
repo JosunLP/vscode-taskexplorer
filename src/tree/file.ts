@@ -3,16 +3,9 @@ import { TaskItem } from "./item";
 import { extname, join } from "path";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
-import { Regex, Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { pathExistsSync } from "../lib/utils/fs";
-import { properCase } from "../lib/utils/commonUtils";
-import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import { ITaskDefinition, ITaskFile, OneOf, TeTaskSource } from "../interface";
-import { asString, isWorkspaceFolder } from "../lib/utils/typeUtils";
-import { execIf, getGroupSeparator, getPackageManager } from "../lib/utils/utils";
 import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { getInstallPathSync, getTaskRelativePath, getUserDataPath, getTaskFileName } from "../lib/utils/pathUtils";
 
 
 /**
@@ -40,9 +33,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     private _folder: TaskFolder;
     private _groupId: string | undefined;
 
-    private readonly _task: Task;
     private readonly _taskSource: TeTaskSource;
-    // private readonly _taskType: string;
     private readonly _isUser: boolean;
     private readonly _relativePath: string;
     private readonly _treeNodes: (TaskItem|TaskFile)[];
@@ -60,14 +51,17 @@ export class TaskFile extends TreeItem implements ITaskFile
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
         //
-        // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
+        // Save a static reference to the app wrapper
+        //
         TaskFile.wrapperInst = wrapper;
+        //
+        // Set ID and properties
+        //
+        // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
         this.id = TaskFile.id(folder, task, groupLevel, groupId);
-        this._task = task;
         this._treeNodes = [];
         this._folder = folder;
         this._taskSource = <TeTaskSource>task.source;
-        // this._taskType = task.definition.type;  // If the source is `Workspace`, def.type can be of any provider type
         this._isGroup = !!groupId;
         this._isUser = false;
         this._groupLevel = 0;
@@ -80,7 +74,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         // exception of TSC, which is handled elsewhere).
         //
         this._relativePath = wrapper.pathUtils.getTaskRelativePath(task);
-        this._fileName = getTaskFileName(task.source, folder.resourceUri, taskDef);
+        this._fileName = wrapper.pathUtils.getTaskFileName(task.source, folder.resourceUri, taskDef);
         if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
             if (this._relativePath && task.source !== "Workspace") {
@@ -93,7 +87,7 @@ export class TaskFile extends TreeItem implements ITaskFile
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder
         //
         else {
-            this.resourceUri = Uri.file(join(getUserDataPath(), this.fileName));
+            this.resourceUri = Uri.file(join(wrapper.pathUtils.getUserDataPath(), this.fileName));
             this._isUser = true;
         }
         //
@@ -105,7 +99,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         //
         if (!groupId)
         {
-            this.contextValue = "taskFile" + properCase(this._taskSource);
+            this.contextValue = "taskFile" + wrapper.commonUtils.properCase(this._taskSource);
         }
         else {
             this.setGroupContext(groupId, groupLevel, task.source);
@@ -113,10 +107,10 @@ export class TaskFile extends TreeItem implements ITaskFile
         this.iconPath = ThemeIcon.File;
         if (!taskDef.icon)
         {
-            const src = this._taskSource !== "npm" ? this._taskSource : getPackageManager(),
-                  installPath = getInstallPathSync(),
+            const src = this._taskSource !== "npm" ? this._taskSource : this.wrapper.utils.getPackageManager(),
+                  installPath = wrapper.pathUtils.getInstallPathSync(),
                   icon = join(installPath, "res", "img", "sources", src + ".svg");
-            if (pathExistsSync(icon))
+            if (wrapper.fs.pathExistsSync(icon))
             {
                 this.iconPath = { light: icon, dark: icon };
             }
@@ -124,16 +118,16 @@ export class TaskFile extends TreeItem implements ITaskFile
             {
                 const iconDark = join(installPath, "res", "img", "sources", "light", src + ".svg");
                 const iconLight = join(installPath, "res", "img", "sources", "light", src + ".svg");
-                if (pathExistsSync(iconDark) && pathExistsSync(iconDark))
+                if (wrapper.fs.pathExistsSync(iconDark) && wrapper.fs.pathExistsSync(iconDark))
                 {
                     this.iconPath = { light: iconLight, dark: iconDark };
                 }
             }
         }
-        else if (pathExistsSync(taskDef.icon) && extname(taskDef.icon) === ".svg")
+        else if (wrapper.fs.pathExistsSync(taskDef.icon) && extname(taskDef.icon) === ".svg")
         {
             const iconLight = taskDef.icon;
-            const iconDark = taskDef.iconDark && pathExistsSync(taskDef.iconDark) && extname(taskDef.iconDark) === ".svg" ?
+            const iconDark = taskDef.iconDark && wrapper.fs.pathExistsSync(taskDef.iconDark) && extname(taskDef.iconDark) === ".svg" ?
                              taskDef.iconDark : taskDef.icon;
             this.iconPath = { light: iconLight, dark: iconDark };
         }
@@ -155,7 +149,6 @@ export class TaskFile extends TreeItem implements ITaskFile
     get isGroup() { return this._isGroup; };
     get isUser() { return this._isUser; };
     get relativePath() { return this._relativePath; };
-    // get task() { return this._task; };
     get taskSource() { return this._taskSource; };
     get treeNodes() { return this._treeNodes; };
 
@@ -255,7 +248,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         {
             // let labelKey = fsPath[groupLevel + 1] + groupLevel;
             const // pathKey = fsPath.replace(/\W/gi, ""),
-                groupSeparator = getGroupSeparator(),
+                groupSeparator = this.wrapperInst.utils.getGroupSeparator(),
                 labelSplit = groupKey.split(groupSeparator);
             for (let i = 0; i <= groupLevel && i < labelSplit.length; i++)
             {
@@ -283,19 +276,18 @@ export class TaskFile extends TreeItem implements ITaskFile
         }
         else if (task.definition.tsconfig)
         {
-            if (task.definition.tsconfig.includes("/")) {
-                pathKey = task.definition.tsconfig.substring(0, task.definition.tsconfig.indexOf("/"));
-            }
+            pathKey = this.wrapperInst.pathUtils.getTaskRelativePath(task);
         }
-        else if (isWorkspaceFolder(task.scope))
+        else if (this.wrapperInst.typeUtils.isWorkspaceFolder(task.scope))
         {
-            pathKey = join(task.scope.uri.fsPath, getTaskRelativePath(task));
+            pathKey = join(task.scope.uri.fsPath, this.wrapperInst.pathUtils.getTaskRelativePath(task));
         }
         else {
-            pathKey = Strings.USER_TASKS_LABEL;
+            pathKey = this.wrapperInst.keys.Strings.USER_TASKS_LABEL;
         }
-        const lblKey = this.getLabelKey(pathKey, task.source, groupLevel);
-        return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${asString(groupId)}`;
+        const lblKey = this.getLabelKey(pathKey, task.source, groupLevel),
+              gidKey = this.wrapperInst.typeUtils.asString(groupId);
+        return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${gidKey}`;
     }
 
 
@@ -305,7 +297,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     removeChild(node: (TaskFile | TaskItem))
     {
         const idx = this._treeNodes.findIndex(tn => tn.id === node.id);
-        execIf(idx !== -1, () => { this._treeNodes.splice(idx, 1); }, this);
+        this.wrapper.utils.execIf(idx !== -1, () => { this._treeNodes.splice(idx, 1); }, this);
     }
 
 
@@ -318,8 +310,8 @@ export class TaskFile extends TreeItem implements ITaskFile
         this._groupId = groupId;
         this._groupLevel = groupLevel;
         this._fileName = "group"; // change to name of directory
-        this.tooltip = `${getTaskTypeFriendlyName(taskSource, true)} task file grouping`;
-        this.contextValue = "taskGroup" + properCase(taskSource);
+        this.tooltip = `${this.wrapper.taskUtils.getTaskTypeFriendlyName(taskSource, true)} task file grouping`;
+        this.contextValue = "taskGroup" + this.wrapper.commonUtils.properCase(taskSource);
     }
 
 }

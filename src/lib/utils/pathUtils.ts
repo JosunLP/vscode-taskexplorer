@@ -75,7 +75,7 @@ export const getTaskAbsolutePath = (task: Task, includeFileName = false): string
 };
 
 
-export const getTaskFileName = (source: string, resourceUri: Uri | undefined, taskDef: ITaskDefinition) =>
+export const getTaskFileName = (source: string, resourceUri: Uri | undefined, taskDef: ITaskDefinition): string =>
 {   //
     // Any tasks provided by this extension will have a "fileName" definition. External tasks
     // registered throughthe API also define fileName
@@ -111,10 +111,14 @@ export const getTaskRelativePath = (task: Task): string =>
     let relativePath = <string>task.definition.path ?? "";
     if (isWorkspaceFolder(task.scope))
     {
-        if (task.source === "tsc" && (Regex.TsConfigTaskName).test(task.name))
-        {
-            relativePath = dirname(task.name.substring(task.name.indexOf(" - ") + 3));
-            // relativePath = dirname(task.definition.tsconfig);
+        if (task.source === "tsc")
+        {   //
+            // TypeScript task provider will set property `tsconfg` on the task definition, which
+            // includes the relative path to the tsonfig file, filename included.
+            //
+            if (task.definition.tsconfig.includes("/")) {
+                relativePath = task.definition.tsconfig.substring(0, task.definition.tsconfig.indexOf("/"));
+            }
         }
         else if (task.source === "Workspace")
         {   //

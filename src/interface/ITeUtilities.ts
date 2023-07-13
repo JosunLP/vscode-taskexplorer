@@ -4,6 +4,7 @@ import { ITaskFile } from "./ITaskFile";
 import { ITaskItem } from "./ITaskItem";
 import { ITeWrapper } from "./ITeWrapper";
 import { ITaskFolder } from "./ITaskFolder";
+import { ITaskDefinition } from "./ITaskDefinition";
 import { ITeTask, TeTaskListType, TeTaskSource } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
 
@@ -54,8 +55,10 @@ export interface ITePathUtilities
 {
 	getCwd(uri: Uri): string;
 	getInstallPath(): Promise<string>;
+	getInstallPathSync(): string;
 	getRelativePath(folder: WorkspaceFolder, uri: Uri): string;
 	getTaskAbsolutePath(task: Task, includeFileName?: boolean): string;
+	getTaskFileName(source: string, resourceUri: Uri | undefined, taskDef: ITaskDefinition): string;
 	getTaskRelativePath(task: Task): string;
 	getUserDataPath(test?: boolean, platform?: string): string;
 }

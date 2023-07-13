@@ -2,7 +2,6 @@
 import { IDictionary } from ":types";
 import { Strings } from "../constants";
 import { isPinned } from "./taskUtils";
-import { TreeItemLabel } from "vscode";
 import { TaskItem } from "../../tree/item";
 import { TaskFile } from "../../tree/file";
 import { TaskFolder } from "../../tree/folder";
@@ -43,42 +42,47 @@ export const sortFolders = (folders: IDictionary<TaskFolder>): TaskFolder[] =>
 export const sortTaskFolder = (folder: TaskFolder, listType: TeTaskListType) =>
 {
     sortTasks(folder.taskFiles, listType);
-    for (const each of folder.taskFiles.filter(t => t instanceof TaskFile) as TaskFile[])
+    for (const taskFile of folder.taskFiles.filter((t): t is TaskFile => TaskFile.is(t)))
     {
-        sortTasks(each.treeNodes, listType);
+        sortTasks(taskFile.treeNodes, listType);
     }
 };
 
 
 export const sortTasks = (items: (TaskFile | TaskItem)[] | undefined, listType: TeTaskListType) =>
 {
-    items?.sort((a: TaskFile | TaskItem, b: TaskFile | TaskItem) =>
-    {               // TaskFiles are kept at the top, like a folder in Windows
-        let s = -1; // Explorer (b instanceof TaskItem && a instanceof TaskFile)
-        const labelA = (a.label as string | TreeItemLabel).toString(),
-              labelB = (b.label as string | TreeItemLabel).toString();
-        if (a instanceof TaskFile && b instanceof TaskFile)
+    if (items)
+    {
+        for (const item of items.filter((i): i is TaskFile => TaskFile.is(i)))
         {
-            s = labelA.localeCompare(labelB);
+            sortTasks(item.treeNodes, listType);
         }
-        else if (a instanceof TaskItem && b instanceof TaskItem)
+        items.sort((a: TaskFile | TaskItem, b: TaskFile | TaskItem) =>
         {
-            const aIsPinned = isPinned(a.id,  listType),
+            let s = -1;
+            if (TaskFile.is(a) && TaskFile.is(b))
+            {
+                s = a.label.localeCompare(b.label);
+            }
+            else if (TaskItem.is(a) && TaskItem.is(b))
+            {
+                const aIsPinned = isPinned(a.id,  listType),
                     bIsPinned = isPinned(b.id, listType);
-            if (aIsPinned && !bIsPinned) {
-                s = -1;
+                if (aIsPinned && !bIsPinned) {
+                    s = -1;
+                }
+                else if (!aIsPinned && bIsPinned) {
+                    s = 1;
+                }
+                else {
+                    s = a.label.localeCompare(b.label);
+                }
             }
-            else if (!aIsPinned && bIsPinned) {
-                s = 1;
+            else /* istanbul ignore else */ if (TaskItem.is(a))
+            {
+                s = 1; // TaskFiles are kept at the top, like a folder in Windows Explorer
             }
-            else {
-                s = labelA.localeCompare(labelB);
-            }
-        }
-        else /* istanbul ignore else */ if (a instanceof TaskItem) // TaskFiles are kept at the top, like a folder in Windows Explorer
-        {
-            s = 1;
-        }
-        return s;
-    });
+            return s;
+        });
+    }
 };

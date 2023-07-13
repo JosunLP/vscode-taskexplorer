@@ -3,12 +3,8 @@ import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskFolder } from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
-import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
-import { configuration } from "../lib/configuration";
 import { ITaskItem, TeTaskSource } from "../interface";
-import { getInstallPathSync } from "../lib/utils/pathUtils";
-import { getTaskTypeFriendlyName } from "../lib/utils/taskUtils";
 import {
     Task, TaskExecution, TreeItem, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command, Uri
 } from "vscode";
@@ -30,26 +26,23 @@ export class TaskItem extends TreeItem implements ITaskItem
     private readonly _task: Task;
     private readonly _taskFile: TaskFile;
     private readonly _taskSource: TeTaskSource;
-    private readonly _taskType: string;
-    private readonly _relativePath: string;
     private readonly _isUser: boolean;
 
 
-    constructor(wrapper: TeWrapper, taskFile: TaskFile, task: Task, logPad: string)
+    constructor(private readonly wrapper: TeWrapper, taskFile: TaskFile, task: Task, logPad: string)
     {
-        const taskDef = task.definition;
-        const getDisplayName = (taskName: string): string =>
+        super((() =>
         {
-            let displayName = taskName;
-            if (displayName.includes(" - ") && (displayName.includes("/") || displayName.includes("\\") ||
-                                                displayName.includes(" - tsconfig.")))
+            let displayName = task.name;
+            if (task.source === "tsc" && task.name.includes(" - "))
             {
                 const match = task.definition.tsconfig.match(wrapper.keys.Regex.TsConfigFileName);
-                displayName = taskName.substring(0, taskName.indexOf(" - ")) + (match ? ` (${match[1]})` : "");
+                displayName = task.name.substring(0, task.name.indexOf(" - ")) + (match ? ` (${match[1]})` : "");
             }
             return displayName;
-        };
-        super(getDisplayName(task.name), TreeItemCollapsibleState.None);
+        })(), TreeItemCollapsibleState.None);
+        //
+        const taskDef = task.definition;
         wrapper.log.methodStart("create taskitem node", 5, logPad, false, [
             [ "label", this.label ], [ "source", taskFile.taskSource ], [ "task file", taskFile.label ],
             [ "groupLevel", taskFile.groupLevel ], [ "taskDef cmd line", taskDef.cmdLine ],
@@ -73,9 +66,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         this.id = TaskItem.id(this.resourceUri.fsPath, task);
         this._task = task;
         this._folder = taskFile.folder;
-        this._relativePath = taskFile.relativePath;
         this._taskSource = <TeTaskSource>task.source;
-        this._taskType = task.definition.type;   // If the source is `Workspace`, def.type can be of any provider type
         this._isUser = taskFile.isUser;
         this._paused = false;                       // paused flag used by start/stop/pause task functionality
         this._taskFile = taskFile;
@@ -109,7 +100,7 @@ export class TaskItem extends TreeItem implements ITaskItem
         wrapper.log.methodDone("create taskitem node", 5, logPad, [
             [ "id", this.id ], [ "label", this.label ], [ "is usertask", this._isUser ],
             [ "context value", this.contextValue ], [ "groupLevel", this._groupLevel ],
-            [ "resource uri path", this._taskFile.resourceUri.fsPath ], [ "path", this._taskFile.relativePath  ]
+            [ "absolute path", taskDef.absolutePath ], [ "relative path", taskDef.relativePath  ]
         ]);
     }
 
@@ -152,7 +143,7 @@ export class TaskItem extends TreeItem implements ITaskItem
     }
 
 
-    private isSpecial() { return this.id.includes("::") || this.id.includes(Strings.USER_TASKS_LABEL + ":"); }
+    private isSpecial() { return this.id.includes("::") || this.id.includes(this.wrapper.keys.Strings.USER_TASKS_LABEL + ":"); }
 
 
     refreshState()
@@ -203,10 +194,10 @@ export class TaskItem extends TreeItem implements ITaskItem
     {   //
         // Type "$empty" is a composite tasks
         //
-        const installPath = getInstallPathSync();
+        const installPath = this.wrapper.pathUtils.getInstallPathSync();
         if (running) // && task.definition.type !== "$empty")
         {
-            const disableAnimated = configuration.get<boolean>("visual.disableAnimatedIcons");
+            const disableAnimated = this.wrapper.config.get<boolean>("visual.disableAnimatedIcons");
             this.iconPath = {
                 light: join(installPath, "res", "img", "light", !disableAnimated ? "loading.svg" : "loadingna.svg"),
                 dark: join(installPath, "res", "img", "dark", !disableAnimated ? "loading.svg" : "loadingna.svg")

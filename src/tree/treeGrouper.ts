@@ -121,8 +121,8 @@ export class TaskTreeGrouper
             hash[groupHash[gid].id] = groupHash[gid];
         }
         //
-        // For groupings with separator, now go through and rename the labels within each group minus the
-        // first part of the name split by the separator character (the name of the new grouped-with-separator node)
+        // For groupings with separator, now go through and rename the labels within each group.
+        // Configurable to use task name as is, or breakdown and remove the grouped parts from the label
         //
         this.wrapper.log.write(logPad + "   rename grouped tasks", 3);
         for (const t of folder.taskFiles.filter((t): t is TaskFile => TaskFile.is(t)))
@@ -193,7 +193,7 @@ export class TaskTreeGrouper
         //
         for (const taskItem of taskItems)
         {
-            const thisName = this.splitLabel(taskItem.label, taskItem),
+            const thisName = taskItem.label.split(this._groupSep),
                   prevNameOk = prevLblParts && prevLblParts.length > groupLevel && prevLblParts[groupLevel];
             //
             w.log.write("   process taskitem grouping by separator", 5, logPad);
@@ -317,19 +317,6 @@ export class TaskTreeGrouper
                 await this.renameGroupedTasks(item);
             }
         }
-    };
-
-
-    private splitLabel = (lbl: string, item: TaskItem) =>
-    {
-        const lblParts = lbl.split(this._groupSep);
-        // if (item.taskSource === "tsc" && this.wrapper.keys.Regex.TsConfigTaskLabel.test(lbl))
-        // {
-        //     const tscLblParts = lbl.split(" - ");
-        //     const lastPart = <string>lblParts.pop();
-        //     lblParts[lblParts.length - 1] = `${lblParts[lblParts.length - 1].trimEnd()} (${lastPart.trimStart()})`;
-        // }
-        return lblParts;
     };
 
 }
