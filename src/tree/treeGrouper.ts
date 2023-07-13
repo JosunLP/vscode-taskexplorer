@@ -305,7 +305,7 @@ export class TaskTreeGrouper
                 if (item.groupLevel > 0)
                 {
                     let label = "";
-                    const labelParts = item.label.split(this._groupSep);
+                    const labelParts = item.label.replace(" - Default", "").split(this._groupSep);
                     for (let i = item.groupLevel; i < labelParts.length; i++)
                     {
                         label += (label ? this._groupSep : "") + labelParts[i];
