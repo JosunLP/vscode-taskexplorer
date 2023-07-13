@@ -163,7 +163,7 @@ export class Usage implements ITeUsage, Disposable
     {
         const stats = this.getTaskUsageStore();
         if (stats.runtimes[treeId]) {
-            return this.wrapper.commonUtils.pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
+            return this.wrapper.objUtils.pickBy<any>(stats.runtimes[treeId], k => k !== "runtimes");
         }
         return this.getEmptyITaskRuntimeInfo();
     };
@@ -560,7 +560,7 @@ export class Usage implements ITeUsage, Disposable
         //
         // Update reference iTask with new calculated runtimes
         //
-        Object.assign(iTask.runTime, this.wrapper.commonUtils.pickBy(taskRtStats, t => t !== "runtimes"));
+        Object.assign(iTask.runTime, this.wrapper.objUtils.pickBy(taskRtStats, t => t !== "runtimes"));
         //
         // Persist / save stats
         //

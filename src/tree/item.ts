@@ -129,13 +129,13 @@ export class TaskItem extends TreeItem implements ITaskItem
     get taskSource() { return this._taskSource; };
 
 
+    getFolder(): WorkspaceFolder | undefined { return this._taskFile.folder.workspaceFolder; }
+
+
     static id(fsPath: string, task: Task)
     {
         return encodeUtf8Hex(`${fsPath}:${task.source}:${task.definition.type}:${task.name}`);
     }
-
-
-    getFolder(): WorkspaceFolder | undefined { return this._taskFile.folder.workspaceFolder; }
 
 
     static is(item: any): item is TaskItem { return item instanceof TaskItem ; }

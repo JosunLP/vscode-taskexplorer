@@ -208,7 +208,8 @@
 		"vsce-package": "vsce package --ignoreFile .vscode\\.vscodeignore",
 		"vsce-publish": "vsce publish --ignoreFile .vscode\\.vscodeignore",
 		"vsce-publish_types": "npm publish",
-		"watch": "webpack -w --mode development --config ./webpack.config.js"
+		"watch": "webpack -w --mode development --config ./webpack.config.js",
+		"watch2": "webpack -w --mode development --config ./webpack.config.js"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.4.0",

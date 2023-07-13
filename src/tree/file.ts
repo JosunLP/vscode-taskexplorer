@@ -32,6 +32,8 @@ export class TaskFile extends TreeItem implements ITaskFile
     override id: string;
     override resourceUri: Uri;
 
+    private static wrapperInst: TeWrapper;
+
     private _isGroup: boolean;
     private _fileName: string;
     private _groupLevel: number;
@@ -46,20 +48,21 @@ export class TaskFile extends TreeItem implements ITaskFile
     private readonly _treeNodes: (TaskItem|TaskFile)[];
 
 
-    constructor(wrapper: TeWrapper, folder: TaskFolder, task: Task, relativePath: string,
+    constructor(private readonly wrapper: TeWrapper, folder: TaskFolder, task: Task,
                 groupLevel: number, groupId: string | undefined, label: string, logPad: string)
     {
-        super(TaskFile.getLabel(task.definition, label, relativePath, groupId), TreeItemCollapsibleState.Collapsed);
+        super(label, TreeItemCollapsibleState.Collapsed);
         const taskDef = task.definition;
         wrapper.log.methodStart("create taskfile node", 4, logPad, false, [
-            [ "label", label ], [ "source", task.source ], [ "relativePath", relativePath ], [ "task folder", folder.label ],
+            [ "label", label ], [ "source", task.source ], [ "task folder", folder.label ],
             [ "groupLevel", groupLevel ], [ "group id", groupId ], [ "taskDef cmd line", taskDef.cmdLine ],
             [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
         //
         // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
-        this.id = TaskFile.id(folder, task, this.label, groupLevel, groupId);
+        TaskFile.wrapperInst = wrapper;
+        this.id = TaskFile.id(folder, task, groupLevel, groupId);
         this._task = task;
         this._treeNodes = [];
         this._folder = folder;
@@ -76,12 +79,12 @@ export class TaskFile extends TreeItem implements ITaskFile
         // All other task types will have a relative path of it's location on the filesystem (with
         // exception of TSC, which is handled elsewhere).
         //
-        this._relativePath = this.label !== "vscode" ? relativePath : ".vscode";
+        this._relativePath = wrapper.pathUtils.getTaskRelativePath(task);
         this._fileName = getTaskFileName(task.source, folder.resourceUri, taskDef);
         if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
-            if (relativePath && task.source !== "Workspace") {
-                this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, relativePath, this.fileName));
+            if (this._relativePath && task.source !== "Workspace") {
+                this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this._relativePath, this.fileName));
             }
             else {
                 this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this.fileName));
@@ -90,10 +93,13 @@ export class TaskFile extends TreeItem implements ITaskFile
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder
         //
         else {
-            this._fileName = getTaskFileName(task.source, folder.resourceUri, taskDef);
             this.resourceUri = Uri.file(join(getUserDataPath(), this.fileName));
             this._isUser = true;
         }
+        //
+        // Reset / format node label dependent on task source, now that all properties have been set
+        //
+        this.label = this.getLabel(task.definition, label, this._relativePath, groupId);
         //
         // Set context / context icons
         //
@@ -134,7 +140,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         wrapper.log.methodDone("create taskfile node", 4, logPad, [
             [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ], [ "context value", this.contextValue ],
             [ "is group", this.isGroup ], [ "groupLevel", this.groupLevel ], [ "filename", this._fileName ],
-            [ "resource uri path", this.resourceUri.fsPath ], [ "path", this.relativePath  ]
+            [ "resource uri path", this.resourceUri.fsPath ], [ "relative path", this.relativePath  ]
         ]);
     }
 
@@ -169,53 +175,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     }
 
 
-    static id(folder: TaskFolder, task: Task, label: string | undefined, groupLevel: number, groupId?: string)
-    {
-        let pathKey: string;
-        //
-        // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
-        // in the task tree, there is only one path for vscode/workspace tasks, /.vscode.  The fact that
-        // you can set the path variable inside a vscode task changes the relativePath for the task,
-        // causing an endless loop when putting the tasks into groups (see _taskTree.createTaskGroupings).
-        // All other task types will have a relative path of it's location on the filesystem (with
-        // exception of TSC, which is handled elsewhere).
-        //
-        const relativePath = getTaskRelativePath(task),
-              relPathAdj = task.source !== "Workspace" ? relativePath : ".vscode";
-        if (task.definition.uri)
-        {
-            pathKey = task.definition.uri.fsPath;
-        }
-        else if (task.definition.tsconfig)
-        {
-            pathKey = task.definition.tsconfig;
-        }
-        else if (isWorkspaceFolder(task.scope)) {
-            pathKey = join(task.scope.uri.fsPath, relPathAdj);
-        }
-        else {
-            pathKey = Strings.USER_TASKS_LABEL;
-        }
-        const lblKey = label || this.getLabel(task.definition, task.source, relativePath, groupId);
-        return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${asString(groupId)}`;
-    }
-
-
-    static groupId = (folder: TaskFolder, fsPath: string, source: string, label: string, groupLevel: number) =>
-    {
-        let labelKey = fsPath[groupLevel + 1] + groupLevel;
-        const pathKey = fsPath.replace(/\W/gi, ""),
-              groupSeparator = getGroupSeparator(),
-              labelSplit = label.split(groupSeparator);
-        for (let i = 0; i <= groupLevel && i < labelSplit.length; i++)
-        {
-            labelKey += labelSplit[i];
-        }
-        return encodeUtf8Hex(`${folder.label}:${source}:${labelKey}:${pathKey}:${groupLevel}`);
-    };
-
-
-    private static getLabel(taskDef: ITaskDefinition, source: string, relativePath: string, groupId: string | undefined): string
+    private getLabel(taskDef: ITaskDefinition, source: string, relativePath: string, groupId: string | undefined): string
     {
         let label = source !== "Workspace" ? source : "vscode";
         if (!groupId)
@@ -224,22 +184,32 @@ export class TaskFile extends TreeItem implements ITaskFile
             {   //
                 // For ant files not named build.xml, display the file name too
                 //
-                if (taskDef.fileName && !taskDef.fileName.match(/build.xml/i))
+                if (!this._fileName.match(/build.xml/i))
                 {
                     if (relativePath.length > 0 && relativePath !== ".vscode" && taskDef.type)
                     {
-                        return `${label} (${relativePath.substring(0, relativePath.length - 1).toLowerCase()}/${taskDef.fileName.toLowerCase()})`;
+                        return `${label} (${relativePath.substring(0, relativePath.length - 1).toLowerCase()}/${this._fileName.toLowerCase()})`;
                     }
-                    return `${label} (${taskDef.fileName.toLowerCase()})`;
+                    return `${label} (${this._fileName.toLowerCase()})`;
+                }
+            }
+            else if (source === "tsc")
+            {   //
+                // Typescript task names are dumb.  Just don't know a great
+                // way to handle them and set them up in groups that actually makes sense.
+                //
+                const match = this._fileName.match(this.wrapper.keys.Regex.WebpackFileName);
+                if (match && match.length > 1 && match[1])
+                {
+                    return `${label} (${match[1].toLowerCase()})`;
                 }
             }
             else if (source === "apppublisher")
             {   //
-                // For ap files in the same dir, nsamed with a tag, e.g.:
-                //    .publishrc.spm.json
+                // For ap files in the same dir, nsamed with a tag, e.g.: .publishrc.spm.json
                 //
                 label = label.replace("ppp", "pp-p"); // `ppp -> pp-p` my app-publisher;
-                const match = (taskDef.fileName as string).match(/\.publishrc\.(.+)\.(?:js(?:on)?|ya?ml)$/i);
+                const match = this._fileName.match(this.wrapper.keys.Regex.AppPublisherFileName);
                 if (match && match.length > 1 && match[1])
                 {
                     return `${label} (${match[1].toLowerCase()})`;
@@ -247,10 +217,9 @@ export class TaskFile extends TreeItem implements ITaskFile
             }
             else if (source === "webpack")
             {   //
-                // For ap files in the same dir, nsamed with a tag, e.g.:
-                //    webpack.config.dev.json
+                // For ap files in the same dir, nsamed with a tag, e.g.: webpack.config.dev.json
                 //
-                const match = (taskDef.fileName as string).match(/webpack\.config\.(.+)\.(?:js(?:on)?)$/i);
+                const match = this._fileName.match(this.wrapper.keys.Regex.WebpackFileName);
                 if (match && match.length > 1 && match[1])
                 {
                     return `${label} (${match[1].toLowerCase()})`;
@@ -277,6 +246,58 @@ export class TaskFile extends TreeItem implements ITaskFile
         }
         return label.toLowerCase();
     }
+
+
+    private static getLabelKey(fsPath: string, groupKey: string, groupLevel: number)
+    {
+        let lblKey = fsPath[groupLevel + 1] + groupLevel;
+        if (groupLevel > 0)
+        {
+            // let labelKey = fsPath[groupLevel + 1] + groupLevel;
+            const // pathKey = fsPath.replace(/\W/gi, ""),
+                groupSeparator = getGroupSeparator(),
+                labelSplit = groupKey.split(groupSeparator);
+            for (let i = 0; i <= groupLevel && i < labelSplit.length; i++)
+            {
+                lblKey += labelSplit[i];
+            }
+        }
+        return lblKey;
+    }
+
+
+    static groupId(folder: TaskFolder, fsPath: string, source: string, taskName: string, groupLevel: number)
+    {
+        const labelKey = this.getLabelKey(fsPath, taskName, groupLevel),
+              pathKey = fsPath.replace(/\W/gi, "");
+        return encodeUtf8Hex(`${folder.label}:${source}:${labelKey}:${pathKey}:${groupLevel}`);
+    }
+
+
+    static id(folder: TaskFolder, task: Task, groupLevel: number, groupId?: string)
+    {
+        let pathKey: string;
+        if (task.definition.uri)
+        {
+            pathKey = task.definition.uri.fsPath;
+        }
+        else if (task.definition.tsconfig)
+        {
+            pathKey = task.definition.tsconfig;
+        }
+        else if (isWorkspaceFolder(task.scope))
+        {
+            pathKey = join(task.scope.uri.fsPath, getTaskRelativePath(task));
+        }
+        else {
+            pathKey = Strings.USER_TASKS_LABEL;
+        }
+        const lblKey = this.getLabelKey(pathKey, task.source, groupLevel);
+        return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${asString(groupId)}`;
+    }
+
+
+    static is(item: any): item is TaskFile { return item instanceof TaskFile ; }
 
 
     removeChild(node: (TaskFile | TaskItem))

@@ -154,7 +154,7 @@ export class TeLog implements ILog, Disposable
 
         errMsgs.forEach(m => this.errorWriteLogs(m, currentWriteToFile, symbols, queueId));
 
-        if (params)
+        if (isArray(params, false) && isArray(params[0]))
         {
             for (const [ n, v, l ] of params)
             {

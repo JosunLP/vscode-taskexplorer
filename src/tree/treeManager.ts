@@ -214,7 +214,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // provideTasks() processing.
         //
         const rmv = w.utils.popIfExistsBy(this._tasks, (t) =>
-            !isTaskIncluded(w, t, w.pathUtils.getTaskRelativePath(t), logPad + "   ") ||
+            !isTaskIncluded(w, t, logPad + "   ") ||
             //
             // Fng VSCode internal task providers suck *****.  I mean, come on.  Add a package.json to a folder,
             // see the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
@@ -239,7 +239,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             let ctRmv = 0;
             ctRmv = this._tasks.length - maxTasks;
-            w.log.write(`      removing ${ctRmv} tasks, max count reached (no license)`, 3, logPad);
+            w.log.write(`   removing ${ctRmv} tasks, max count reached (no license)`, 3, logPad);
             this._tasks.splice(maxTasks, ctRmv);
             licMgr.setMaxTasksReached();
         }

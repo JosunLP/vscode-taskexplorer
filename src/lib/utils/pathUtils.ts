@@ -6,6 +6,7 @@ import { isWorkspaceFolder } from "./typeUtils";
 import { pathExists, pathExistsSync } from "./fs";
 import { Task, Uri, WorkspaceFolder } from "vscode";
 import { basename, dirname, join, resolve, sep } from "path";
+import { Regex } from "../constants";
 
 
 export const getCwd = (uri: Uri): string =>
@@ -108,10 +109,24 @@ export const getTaskFileName = (source: string, resourceUri: Uri | undefined, ta
 export const getTaskRelativePath = (task: Task): string =>
 {
     let relativePath = <string>task.definition.path ?? "";
-    if (task.source === "tsc" && isWorkspaceFolder(task.scope) && (/ \- [a-z0-9_\- ]+\/tsconfig\.[a-z\.\-_]*json$/i).test(task.name))
+    if (isWorkspaceFolder(task.scope))
     {
-        relativePath = dirname(task.name.substring(task.name.indexOf(" - ") + 3));
-        // relativePath = dirname(task.definition.tsconfig);
+        if (task.source === "tsc" && (Regex.TsConfigTaskName).test(task.name))
+        {
+            relativePath = dirname(task.name.substring(task.name.indexOf(" - ") + 3));
+            // relativePath = dirname(task.definition.tsconfig);
+        }
+        else if (task.source === "Workspace")
+        {   //
+            // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
+            // in the task tree, there is only one path for vscode/workspace tasks, /.vscode.  The fact that
+            // you can set the path variable inside a vscode task changes the relativePath for the task,
+            // causing an endless loop when putting the tasks into groups (see _taskTree.createTaskGroupings).
+            // All other task types will have a relative path of it's location on the filesystem (with
+            // exception of TSC, which is handled elsewhere).
+            //
+            relativePath = ".vscode";
+        }
     }
     return relativePath;
 };

@@ -45,7 +45,7 @@
 			"sourceMapRenames": true,
 			"trace": true,
 			"debugWebviews": true,
-            "preLaunchTask": "npm: watch",
+            //"preLaunchTask": "npm: watch",
             "autoAttachChildProcesses": true,
 			"rendererDebugOptions": {
 				"pauseForSourceMap": true,

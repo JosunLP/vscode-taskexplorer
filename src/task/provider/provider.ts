@@ -105,7 +105,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
                 if (!this.wrapper.utils.isExcluded(fObj.uri.path, this.wrapper.log) && !visitedFiles.includes(fObj.uri.fsPath) && this.wrapper.fs.pathExistsSync(fObj.uri.fsPath))
                 {
                     visitedFiles.push(fObj.uri.fsPath);
-                    const tasks = (await this.readUriTasks(fObj.uri, logPad + "   ")).filter(t => isTaskIncluded(this.wrapper, t, t.definition.path));
+                    const tasks = (await this.readUriTasks(fObj.uri, logPad + "   ")).filter(t => isTaskIncluded(this.wrapper, t, logPad + "   ", this.logQueueId));
                     this.wrapper.log.write(`   processed ${this.providerName} file`, 2, logPad, this.logQueueId);
                     this.wrapper.log.value("      file", fObj.uri.fsPath, 2, logPad, this.logQueueId);
                     this.wrapper.log.value("      targets in file", tasks.length, 2, logPad, this.logQueueId);
@@ -147,7 +147,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             //
             cachedTasks.slice().reverse().forEach((item, index, object) =>
             {
-                if (this.needsRemoval(item, uri) && (item.source !== "Workspace" || /* istanbul ignore next */item.definition.type === this.providerName))
+                if (this.needsRemoval(item, uri, logPad + "   ") && (item.source !== "Workspace" || /* istanbul ignore next */item.definition.type === this.providerName))
                 {
                     w.log.write(`   removing cached task '${item.source}/${item.name}'`, 4, logPad);
                     (this.cachedTasks as Task[]).splice(object.length - 1 - index, 1);
@@ -161,7 +161,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             //
             if (pathExists && !w.fs.isDirectory(uri.fsPath) && !w.config.get<string[]>("exclude", []).includes(uri.path))
             {
-                const tasks = (await this.readUriTasks(uri, logPad + "   ")).filter(t => isTaskIncluded(w, t, t.definition.path));
+                const tasks = (await this.readUriTasks(uri, logPad + "   ")).filter(t => isTaskIncluded(w, t, logPad + "   "));
                 cachedTasks.push(...tasks);
             }
 
@@ -177,7 +177,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
     }
 
 
-    private needsRemoval(item: Task, uri: Uri)
+    private needsRemoval(item: Task, uri: Uri, logPad: string)
     {
         const cstDef = item.definition;
         return !!(cstDef.uri &&
@@ -193,7 +193,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             // (cstDef.uri.fsPath.startsWith(uri.fsPath) && /* istanbul ignore next */isDirectory(uri.fsPath)) ||
             (cstDef.uri.fsPath.startsWith(uri.fsPath) && /* istanbul ignore next */!extname(uri.fsPath) /* ouch */) ||
             //
-            !isTaskIncluded(this.wrapper, item, cstDef.uri.path)));
+            !isTaskIncluded(this.wrapper, item, logPad)));
     }
 
 }

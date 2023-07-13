@@ -5,9 +5,9 @@ import { TeWrapper } from "../wrapper";
 const JSON5 = require("json5/dist/index.js");
 
 
-export const isTaskIncluded = (wrapper: TeWrapper, task: Task, relativePath: string, logPad = "", logQueueId?: string) =>
+export const isTaskIncluded = (wrapper: TeWrapper, task: Task, logPad: string, logQueueId?: string) =>
 {
-    wrapper.log.methodStart(`Check task '${task.source}/${task.name}' against excludes`, 4, logPad, false, [[ "relative path", relativePath ]], logQueueId);
+    wrapper.log.methodStart(`Check task '${task.source}/${task.name}' against excludes`, 4, logPad, false, undefined, logQueueId);
     //
     // We have our own provider for Gulp and Grunt tasks...
     // Ignore VSCode provided gulp and grunt tasks, which are always and only from a gulp/gruntfile

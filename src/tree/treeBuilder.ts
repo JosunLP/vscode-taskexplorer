@@ -41,7 +41,6 @@ export class TaskTreeBuilder
         ]);
         let folder: TaskFolder | undefined,
             scopeName: string;
-        const relativePath = w.pathUtils.getTaskRelativePath(task);
         //
         // Set scope name and create the TaskFolder, a "user" task will have a TaskScope scope, not
         // a WorkspaceFolder scope.
@@ -75,7 +74,7 @@ export class TaskTreeBuilder
         //
         // Get task file node, getTaskFile() will create one of it doesn't exist
         //
-        const taskFile = await this.getTaskFile(task, folder, relativePath, logPad + "   ");
+        const taskFile = await this.getTaskFile(task, folder, logPad + "   ");
         //
         // Create and add task item to task file node
         //
@@ -123,16 +122,17 @@ export class TaskTreeBuilder
     };
 
 
-    private getTaskFile = async (task: Task, folder: TaskFolder, relativePath: string, logPad: string) =>
+    private getTaskFile = async (task: Task, folder: TaskFolder, logPad: string) =>
     {
         const w = this.wrapper,
               id = !w.taskUtils.isScriptType(<TeTaskSource>task.source) ?
-                    TaskFile.id(folder, task, undefined, 0) : // script type files in same dir - place in `one` taskfile
+                    TaskFile.id(folder, task, 0) :
+                    // script type files in same dir - place in `one` taskfile
                     TaskFile.groupId(folder, w.pathUtils.getTaskAbsolutePath(task), task.source, task.source, -1);
         if (!this._taskFileMap[id])
         {
             w.log.value("Add source base taskfile container", task.source, 2, logPad);
-            this._taskFileMap[id] = folder.addChild(new TaskFile(w, folder, task, relativePath, 0, undefined, task.source, logPad + "   "));
+            this._taskFileMap[id] = folder.addChild(new TaskFile(w, folder, task, 0, undefined, task.source, logPad + "   "));
         }
         return this._taskFileMap[id];
     };
