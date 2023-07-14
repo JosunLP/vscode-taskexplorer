@@ -51,38 +51,35 @@ export const sortTaskFolder = (folder: TaskFolder, listType: TeTaskListType) =>
 
 export const sortTasks = (items: (TaskFile | TaskItem)[], listType: TeTaskListType) =>
 {
-    if (items)
+    for (const item of items.filter((i): i is TaskFile => TaskFile.is(i)))
     {
-        for (const item of items.filter((i): i is TaskFile => TaskFile.is(i)))
+        sortTasks(item.treeNodes, listType);
+    }
+    items.sort((a: TaskFile | TaskItem, b: TaskFile | TaskItem) =>
+    {
+        let s = -1;
+        if (TaskFile.is(a) && TaskFile.is(b))
         {
-            sortTasks(item.treeNodes, listType);
+            s = a.label.localeCompare(b.label);
         }
-        items.sort((a: TaskFile | TaskItem, b: TaskFile | TaskItem) =>
+        else if (TaskItem.is(a) && TaskItem.is(b))
         {
-            let s = -1;
-            if (TaskFile.is(a) && TaskFile.is(b))
-            {
+            const aIsPinned = isPinned(a.id,  listType),
+                bIsPinned = isPinned(b.id, listType);
+            if (aIsPinned && !bIsPinned) {
+                s = -1;
+            }
+            else if (!aIsPinned && bIsPinned) {
+                s = 1;
+            }
+            else {
                 s = a.label.localeCompare(b.label);
             }
-            else if (TaskItem.is(a) && TaskItem.is(b))
-            {
-                const aIsPinned = isPinned(a.id,  listType),
-                    bIsPinned = isPinned(b.id, listType);
-                if (aIsPinned && !bIsPinned) {
-                    s = -1;
-                }
-                else if (!aIsPinned && bIsPinned) {
-                    s = 1;
-                }
-                else {
-                    s = a.label.localeCompare(b.label);
-                }
-            }
-            else /* istanbul ignore else */ if (TaskItem.is(a))
-            {
-                s = 1; // TaskFiles are kept at the top, like a folder in Windows Explorer
-            }
-            return s;
-        });
-    }
+        }
+        else /* istanbul ignore else */ if (TaskItem.is(a))
+        {
+            s = 1; // TaskFiles are kept at the top, like a folder in Windows Explorer
+        }
+        return s;
+    });
 };

@@ -23,8 +23,8 @@ export class ExternalTaskProvider3 implements IExternalProvider
             script: target,
             target,
             icon: getDevPath("res/img/sources/missing_icon.svg"),
-            path: getRelativePath(folder, uri),
-            fileName: path.basename(uri.path),
+            path: path.dirname(getRelativePath(folder, uri)),
+            fileName: path.basename(uri.fsPath),
             uri
         };
 
@@ -41,15 +41,15 @@ export class ExternalTaskProvider3 implements IExternalProvider
 
     public getGlobPattern(): string
     {
-        return "**/tasks.test";
+        return "**/tasks.test3";
     }
 
 
     public async getTasks()
     {
         const result: Task[] = [],
-              uri = Uri.file("/dummy_path"),
-              folder = (workspace.workspaceFolders as WorkspaceFolder[])[0]; // for tests only!
+              folder = (workspace.workspaceFolders as WorkspaceFolder[])[0],
+              uri = Uri.file(path.join(folder.uri.fsPath, "/dummy_path/tasks.test3"));
 
         const task = this.createTask("ext3_1_task_name", "ext3_1_task_name", folder, uri);
         task.group = TaskGroup.Build;

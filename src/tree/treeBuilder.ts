@@ -89,7 +89,7 @@ export class TaskTreeBuilder
         if (!isNpmInstallTask)
         {
             const fsPath = !task.definition.scriptFile ? taskFile.resourceUri.fsPath : task.definition.uri.fsPath;
-            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => n instanceof TaskItem && n.id === TaskItem.id(fsPath, task));
+            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => TaskItem.is(n) && n.id === TaskItem.id(fsPath, task));
             if (!taskItem) {
                 taskItem = taskFile.addChild(new TaskItem(w, taskFile, task, logPad + "   "));
             }
@@ -141,13 +141,13 @@ export class TaskTreeBuilder
     private invalidate = (source?: string) =>
     {
         this._taskFolders.splice(0);
-        if (!source) {
-            Object.keys(this._taskMap).forEach(k => delete this._taskMap[k]);
-            Object.keys(this._taskFileMap).forEach(k => delete this._taskFileMap[k]);
-            Object.keys(this._taskFolderMap).forEach(k => delete this._taskFolderMap[k]);
-        }
-        else
+        if (!source)
         {
+            Object.keys(this._taskMap).forEach(k => delete this._taskMap[k], this);
+            Object.keys(this._taskFileMap).forEach(k => delete this._taskFileMap[k], this);
+            Object.keys(this._taskFolderMap).forEach(k => delete this._taskFolderMap[k], this);
+        }
+        else {
             this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_k, t) => t.taskSource === source, this);
             this.wrapper.utils.popObjIfExistsBy(this._taskFileMap, (_k, t) => t.taskSource === source, this);
         }

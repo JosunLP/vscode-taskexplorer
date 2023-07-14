@@ -213,18 +213,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // this.tasks cache at this point, as extension provided tasks will have been skipped/ignored in the
         // provideTasks() processing.
         //
-        const rmv = w.utils.popIfExistsBy(this._tasks,
-            (t) =>
-                !isTaskIncluded(w, t, logPad + "   ") ||
-                //
-                // *** VSCode internal task providers s***.  I mean, come on.  Add a package.json to a folder, see
-                // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
-                // provided by the engine.
-                //
-                (!w.taskUtils.isExternalType(w, t.source) &&
-                 !w.fs.pathExistsSync(w.pathUtils.getTaskAbsolutePath(t, true))),
-            this
-        );
+        const rmv = w.utils.popIfExistsBy(this._tasks, t => !isTaskIncluded(w, t, logPad + "   "), this);
         w.log.write(`   removed ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
         //
         // Hash NPM script blocks, to ignore edits to package.json when scripts have not changed, since
@@ -397,7 +386,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
                 await this.fetchTasks(logPad);
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.BuildingTaskTree : undefined);
-                await this._treeBuilder.createTaskItemTree(undefined /* TEMP this._currentInvalidation */, callLogPad);
+                await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
                 Object.values(this._specialFolders).forEach(f => f.build(callLogPad));
                 await this.setContext();
             }
@@ -412,6 +401,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private loadTasksFinally = (ct: number, logPad: string) =>
     {
         this._refreshPending = false;
+        this._currentInvalidation = undefined;
         this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
         this.fireTreeRefreshEvent(null, null, logPad);
         this.fireTasksLoadedEvents(ct);
@@ -545,6 +535,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                       hashKey = this.hashKey(opt.fsPath);
                 doFetch = scriptsChecksum !== this._npmScriptsHash[hashKey];
                 this._npmScriptsHash[hashKey] = scriptsChecksum;
+                this._currentInvalidation = invalidate;
             }
             //
             // Fetch tasks from VSCode.  The type of fetch is dependent upon the function parameters that

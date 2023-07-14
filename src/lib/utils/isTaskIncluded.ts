@@ -1,6 +1,6 @@
 
-import { join } from "path";
 import { Task } from "vscode";
+import { dirname, join } from "path";
 import { TeWrapper } from "../wrapper";
 const JSON5 = require("json5/dist/index.js");
 
@@ -26,36 +26,17 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, logPad: string, l
     // We would want the user to turn off the VSCode NPM provider if using the internal provider, but we
     // should assume that they haven't, and we'll still be receiving them on fetch()
     //
-    const isNpmTaskSource = isScopeWsFolder && task.source === "npm" && task.definition.type === "npm",
+    const absolutePath = wrapper.pathUtils.getTaskAbsolutePath(task, true),
+          isNpmTaskSource = isScopeWsFolder && task.source === "npm" && task.definition.type === "npm",
           isVsCodeNpmTaskSource = !task.definition.uri && isNpmTaskSource;
     if (isVsCodeNpmTaskSource)
     {
         const usesIntNpmProvider = wrapper.config.get<boolean>(wrapper.keys.Config.UseNpmProvider);
-        if (usesIntNpmProvider || wrapper.utils.isExcluded(wrapper.pathUtils.getTaskAbsolutePath(task), wrapper.log))
+        if (usesIntNpmProvider || wrapper.utils.isExcluded(dirname(absolutePath), wrapper.log))
         {
             wrapper.log.write("   skipping vscode provided npm task", 4, logPad, logQueueId);
             return false;
         }
-    }
-    //
-    // External tasks registered via Task Explorer API
-    //
-    const providers = wrapper.providers;
-    if (providers[task.source] && providers[task.source].isExternal)
-    {
-        return !!task.definition && !!task.name && !!task.execution;
-    }
-    //
-    // Check enabled and npm install task
-    // This will ignore tasks from other providers as well, unless it has registered
-    // as an external provider via Task Explorer API
-    //
-    const srcEnabled = wrapper.utils.isTaskTypeEnabled(task.source);
-    wrapper.log.value("   enabled in settings", srcEnabled, 3, logPad, logQueueId);
-    if (!srcEnabled)
-    {
-        wrapper.log.write(`   skipping this task (${task.source} disabled in settings)`, 4, logPad, logQueueId);
-        return false;
     }
     //
     // Check task excludes array.  Uses REGEX, not GLOB
@@ -70,6 +51,35 @@ export const isTaskIncluded = (wrapper: TeWrapper, task: Task, logPad: string, l
             wrapper.log.methodDone("Check task exclusion", 4, logPad, undefined, logQueueId);
             return false;
         }
+    }
+    //
+    // External tasks registered via Task Explorer API
+    //
+    const providers = wrapper.providers;
+    if (providers[task.source] && providers[task.source].isExternal)
+    {
+        return !!task.definition && !!task.name && !!task.execution;
+    }
+    //
+    // *** VSCode internal task providers s***.  I mean, come on.  Add a package.json to a folder, see
+    // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
+    // provided by the engine.  SO check to make sure the task uri actually exists
+    //
+    else if (!wrapper.fs.pathExistsSync(absolutePath))
+    {
+        return false;
+    }
+    //
+    // Check enabled and npm install task
+    // This will ignore tasks from other providers as well, unless it has registered
+    // as an external provider via Task Explorer API
+    //
+    const srcEnabled = wrapper.utils.isTaskTypeEnabled(task.source);
+    wrapper.log.value("   enabled in settings", srcEnabled, 3, logPad, logQueueId);
+    if (!srcEnabled)
+    {
+        wrapper.log.write(`   skipping this task (${task.source} disabled in settings)`, 4, logPad, logQueueId);
+        return false;
     }
     //
     // Check VSCode /workspace tasks for 'hide' property

@@ -23,8 +23,8 @@ export class ExternalTaskProvider1 implements IExternalProvider
             script: target,
             target,
             icon: getDevPath("res/img/sources/ant.svg"),
-            path: getRelativePath(folder, uri),
-            fileName: path.basename(uri.path),
+            path: path.dirname(getRelativePath(folder, uri)),
+            fileName: path.basename(uri.fsPath),
             uri
         };
 
@@ -48,8 +48,8 @@ export class ExternalTaskProvider1 implements IExternalProvider
     public async getTasks()
     {
         const result: Task[] = [],
-              uri = Uri.file("/dummy_path"),
-              folder = (workspace.workspaceFolders as WorkspaceFolder[])[0]; // for tests only!
+              folder = (workspace.workspaceFolders as WorkspaceFolder[])[0],
+              uri = Uri.file(path.join(folder.uri.fsPath, "/dummy_path/tasks.test"));
 
         const task = this.createTask("test_1_task_name", "test_1_task_name", folder, uri);
         task.group = TaskGroup.Build;

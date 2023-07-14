@@ -103,7 +103,7 @@ export class TeFileCache implements ITeFileCache, Disposable
 
             for (const providerName of taskProviders)
             {
-                const isExternal = providers[providerName] && providers[providerName].isExternal;
+                const isExternal = this.wrapper.taskUtils.isExternalType(this.wrapper, providerName);
                 if (!this.cancel && numFilesFound < numFiles && (isExternal || this.wrapper.utils.isTaskTypeEnabled(providerName)))
                 {
                     let glob;
@@ -260,10 +260,9 @@ export class TeFileCache implements ITeFileCache, Disposable
 
         this.initMaps(taskType, folder.name);
 
-        const providers = this.wrapper.providers,
-            isExternal = providers[taskType] && providers[taskType].isExternal,
-            fsChanged = this.isFsChanged(taskType, folder.name),
-            globChanged = this.isGlobChanged(taskType, fileGlob);
+        const isExternal = this.wrapper.taskUtils.isExternalType(this.wrapper, taskType),
+              fsChanged = this.isFsChanged(taskType, folder.name),
+              globChanged = this.isGlobChanged(taskType, fileGlob);
 
         this.wrapper.log.value("   glob changed", globChanged, 3, logPad);
         this.wrapper.log.value("   fIlesystem changed", fsChanged, 3, logPad);
