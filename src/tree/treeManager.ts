@@ -461,7 +461,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      * {@link invalidateTasksCache} function,next the base loading function {@link loadTasks} is called, or
      * in the case of a workspace foler heving been remoged, {@link onWorkspaceFolderRemoved}.
      */
-    refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
+    refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad = ""): Promise<void> =>
     {
         if (this._refreshPending) {
             // void window.showInformationMessage("Busy, please wait...");

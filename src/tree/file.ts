@@ -25,8 +25,6 @@ export class TaskFile extends TreeItem implements ITaskFile
     override id: string;
     override resourceUri: Uri;
 
-    private static wrapperInst: TeWrapper;
-
     private _isGroup: boolean;
     private _fileName: string;
     private _groupLevel: number;
@@ -50,10 +48,6 @@ export class TaskFile extends TreeItem implements ITaskFile
             [ "taskDef file name", taskDef.fileName ], [ "taskDef icon light", taskDef.icon ], [ "taskDef icon dark", taskDef.iconDark ],
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
-        //
-        // Save a static reference to the app wrapper
-        //
-        TaskFile.wrapperInst = wrapper;
         //
         // Set ID and properties
         //
@@ -248,7 +242,7 @@ export class TaskFile extends TreeItem implements ITaskFile
         {
             // let labelKey = fsPath[groupLevel + 1] + groupLevel;
             const // pathKey = fsPath.replace(/\W/gi, ""),
-                groupSeparator = this.wrapperInst.utils.getGroupSeparator(),
+                groupSeparator = TeWrapper.instance.utils.getGroupSeparator(),
                 labelSplit = groupKey.split(groupSeparator);
             for (let i = 0; i <= groupLevel && i < labelSplit.length; i++)
             {
@@ -276,17 +270,17 @@ export class TaskFile extends TreeItem implements ITaskFile
         }
         else if (task.definition.tsconfig)
         {
-            pathKey = this.wrapperInst.pathUtils.getTaskRelativePath(task);
+            pathKey = TeWrapper.instance.pathUtils.getTaskRelativePath(task);
         }
-        else if (this.wrapperInst.typeUtils.isWorkspaceFolder(task.scope))
+        else if (TeWrapper.instance.typeUtils.isWorkspaceFolder(task.scope))
         {
-            pathKey = join(task.scope.uri.fsPath, this.wrapperInst.pathUtils.getTaskRelativePath(task));
+            pathKey = join(task.scope.uri.fsPath, TeWrapper.instance.pathUtils.getTaskRelativePath(task));
         }
         else {
-            pathKey = this.wrapperInst.keys.Strings.USER_TASKS_LABEL;
+            pathKey = TeWrapper.instance.keys.Strings.USER_TASKS_LABEL;
         }
         const lblKey = this.getLabelKey(pathKey, task.source, groupLevel),
-              gidKey = this.wrapperInst.typeUtils.asString(groupId);
+              gidKey = TeWrapper.instance.typeUtils.asString(groupId);
         return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${gidKey}`;
     }
 

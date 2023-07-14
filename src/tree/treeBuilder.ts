@@ -37,7 +37,7 @@ export class TaskTreeBuilder
         const w = this.wrapper;
         w.log.methodStart("build task tree list", 2, logPad, true, [
             [ "name", task.name ], [ "source", task.source ], [ "definition type", task.definition.type ],
-            [ "definition path", task.definition.path ], [ "scope", task.scope ]
+            [ "definition path", task.definition.path ]
         ]);
         let folder: TaskFolder | undefined,
             scopeName: string;

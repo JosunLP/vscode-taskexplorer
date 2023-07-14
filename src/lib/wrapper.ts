@@ -69,6 +69,8 @@ import {
 
 export class TeWrapper implements ITeWrapper, Disposable
 {
+    private static _instance: TeWrapper;
+
 	private _ready = false;
 	private _busy = false;
 	private _initialized = false;
@@ -111,6 +113,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: TeLog)
     {
+		TeWrapper._instance = this;
+
 		this._context = context;
         this._storage = storage;
         this._configuration = configuration;
@@ -445,256 +449,78 @@ export class TeWrapper implements ITeWrapper, Disposable
 	waitReady = async (ignoreModule: any[] = [], minWait = 1, maxWait = 15000) => {}; // this._waitUtils.waitReady(ignoreModule, minWait, maxWait);
 
 
-	get api(): TeApi {
-		return this._teApi;
-	}
-
+	static get instance() { return this._instance; }
+	get api(): TeApi { return this._teApi; }
 	get busy(): boolean {
 		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy || this._treeManager.isBusy ||
 			   this._fileWatcher.isBusy || this._licenseManager.isBusy;
 	}
-
 	get busyWebviews(): boolean {
 		return this._licensePage.busy || this._parsingReportPage.busy || this._releaseNotesPage.busy || this._homeView.busy ||
 			   this._taskUsageView.busy || this._taskCountView.busy || this._welcomePage.busy;
 	}
-
-	get cacheBuster(): string {
-		return this._cacheBuster;
-	}
-
-	get commonUtils(): typeof commonUtils {
-		return commonUtils;
-	}
-
-	get config(): IConfiguration {
-		return this._configuration;
-	}
-
-	get context(): ExtensionContext {
-		return this._context;
-	}
-
-	get contextTe(): TeContext {
-		return this._teContext;
-	}
-
-	get dev(): boolean {
-		return this._context.extensionMode === ExtensionMode.Development;
-	}
-
-	get env(): TeRuntimeEnvironment {
-		return this._envMap[ExtensionMode[this._context.extensionMode].toLowerCase()];
-	}
-
-	get eventQueue(): EventQueue {
-		return this._eventQueue;
-	}
-
-    get explorer(): ITeTaskTree {
-        return this.treeManager.views.taskExplorer.tree;
-    }
-
-    get explorerView(): TreeView<TreeItem> {
-        return this.treeManager.views.taskExplorer.view;
-    }
-
-	get extensionAuthor(): string {
-		return this.extensionId.substring(0, this.extensionId.indexOf("."));
-	}
-
-	get extensionId(): string {
-		return this._context.extension.id;
-	}
-
-	get extensionName(): string {
-		return this.extensionId.replace(`${this.extensionAuthor}.`, "");
-	}
-
-	get extensionTitle(): string {
-		return this.localize("name", this._context.extension.packageJSON.displayName);
-	}
-
-	get extensionTitleShort(): string {
-		return this.extensionTitle;
-	}
-
-	get figures(): typeof figures {
-		return figures;
-	}
-
-	get fileCache(): TeFileCache {
-		return this._fileCache;
-	}
-
-	get fileWatcher(): TeFileWatcher {
-		return this._fileWatcher;
-	}
-
-	get fs(): ITeFilesystem {
-		return fs;
-	}
-
-	get homeView(): HomeView {
-		return this._homeView;
-	}
-
-	get isNewInstall(): boolean {
-		return this.versionchanged && this._previousVersion === undefined;
-	}
-
-	get isReady(): boolean {
-		return this._ready;
-	}
-
-	get keys(): ITeKeys {
-		return AllConstants;
-	}
-
-	get licenseManager(): LicenseManager {
-		return this._licenseManager;
-	}
-
-	get licensePage(): LicensePage {
-		return this._licensePage;
-	}
-
+	get cacheBuster(): string { return this._cacheBuster; }
+	get commonUtils(): typeof commonUtils { return commonUtils; }
+	get config(): IConfiguration { return this._configuration; }
+	get context(): ExtensionContext { return this._context; }
+	get contextTe(): TeContext { return this._teContext; }
+	get dev(): boolean { return this._context.extensionMode === ExtensionMode.Development; }
+	get env(): TeRuntimeEnvironment { return this._envMap[ExtensionMode[this._context.extensionMode].toLowerCase()]; }
+	get eventQueue(): EventQueue { return this._eventQueue; }
+    get explorer(): ITeTaskTree { return this.treeManager.views.taskExplorer.tree; }
+    get explorerView(): TreeView<TreeItem> { return this.treeManager.views.taskExplorer.view; }
+	get extensionAuthor(): string { return this.extensionId.substring(0, this.extensionId.indexOf(".")); }
+	get extensionId(): string { return this._context.extension.id; }
+	get extensionName(): string { return this.extensionId.replace(`${this.extensionAuthor}.`, ""); }
+	get extensionTitle(): string {return this.localize("name", this._context.extension.packageJSON.displayName); }
+	get extensionTitleShort(): string { return this.extensionTitle; }
+	get figures(): typeof figures { return figures; }
+	get fileCache(): TeFileCache { return this._fileCache; }
+	get fileWatcher(): TeFileWatcher { return this._fileWatcher; }
+	get fs(): ITeFilesystem { return fs; }
+	get homeView(): HomeView { return this._homeView; }
+	get isNewInstall(): boolean { return this.versionchanged && this._previousVersion === undefined; }
+	get isReady(): boolean { return this._ready; }
+	get keys(): ITeKeys { return AllConstants; }
+	get licenseManager(): LicenseManager { return this._licenseManager; }
+	get licensePage(): LicensePage { return this._licensePage; }
 	//
 	// TODO - Localization
 	//
 	localize = (_key: string, defaultMessage: string): string => defaultMessage; // this._localize(key, defaultMessage);
-
-	get log(): ILog {
-		return this._log;
-	}
-
-	get logControl(): ILogControl {
-		return this._log.control;
-	}
-
-	get objUtils(): ITeObjectUtilities {
-		return objUtils;
-	}
-
+	get log(): ILog { return this._log; }
+	get logControl(): ILogControl { return this._log.control; }
+	get objUtils(): ITeObjectUtilities { return objUtils; }
 	/* istanbul ignore next */
-	get onDidBusyComplete(): Event<void> {
-		return this._onBusyComplete.event;
-	}
-
-	get onReady(): Event<void> {
-		return this._onReady.event;
-	}
-
-	get parsingReportPage(): ParsingReportPage {
-		return this._parsingReportPage;
-	}
-
-	get production(): boolean {
-		return this._context.extensionMode === ExtensionMode.Production;
-	}
-
-	get providers(): Record<string, ITaskExplorerProvider> {
-		return this._providers;
-	}
-
-	get pathUtils(): ITePathUtilities {
-		return pathUtils;
-	}
-
-	get promiseUtils(): ITePromiseUtilities {
-		return promiseUtils;
-	}
-
-	get releaseNotesPage(): ReleaseNotesPage {
-		return this._releaseNotesPage;
-	}
-
-    get sidebar(): ITeTaskTree {
-        return this.treeManager.views.taskExplorerSideBar.tree;
-    }
-
-    get sidebarView(): TreeView<TreeItem> {
-        return this.treeManager.views.taskExplorerSideBar.view;
-    }
-
-    get sorters(): ITeSortUtilities {
-        return sorters;
-    }
-
-	get statusBar(): ITeStatusBar {
-		return this._statusBar;
-	}
-
-	get storage(): IStorage {
-		return this._storage;
-	}
-
-	get taskCountView(): TaskCountView {
-		return this._taskCountView;
-	}
-
-	get taskManager(): TaskManager {
-		return this._taskManager;
-	}
-
-	get taskMonitorPage(): MonitorPage {
-		return this._taskMonitorPage;
-	}
-
-	get taskUsageView(): TaskUsageView {
-		return this._taskUsageView;
-	}
-
-	get taskUtils(): ITeTaskUtilities {
-		return taskUtils;
-	}
-
-	get typeUtils(): ITeTypeUtilities {
-		return typeUtils;
-	}
-
-	get taskWatcher(): TaskWatcher {
-		return this._taskWatcher;
-	}
-
-	get tests(): boolean {
-		return this._context.extensionMode === ExtensionMode.Test;
-	}
-
-	get treeManager(): TaskTreeManager {
-		return this._treeManager;
-	}
-
-	get usage(): Usage {
-		return this._usage;
-	}
-
-	get utils(): ITeUtilities {
-		return utilities;
-	}
-
-	get version(): string {
-		return this._version;
-	}
-
-	get versionchanged(): boolean {
-		return this._version !== this._previousVersion;
-	}
-
-    get views(): { [id in "taskExplorer" | "taskExplorerSideBar"]: ITaskTreeView } {
-        return this.treeManager.views;
-    }
-
-	get welcomePage(): WelcomePage {
-		return this._welcomePage;
-	}
-
-	get wsfolder(): WorkspaceFolder {
-		return (workspace.workspaceFolders as WorkspaceFolder[])[0];
-	}
-
-	// get telemetry(): TelemetryService {
-	// 	return this._telemetry;
-	// }
+	get onDidBusyComplete(): Event<void> { return this._onBusyComplete.event; }
+	get onReady(): Event<void> { return this._onReady.event; }
+	get parsingReportPage(): ParsingReportPage { return this._parsingReportPage; }
+	get production(): boolean { return this._context.extensionMode === ExtensionMode.Production; }
+	get providers(): Record<string, ITaskExplorerProvider> { return this._providers; }
+	get pathUtils(): ITePathUtilities { return pathUtils; }
+	get promiseUtils(): ITePromiseUtilities { return promiseUtils; }
+	get releaseNotesPage(): ReleaseNotesPage { return this._releaseNotesPage; }
+    get sidebar(): ITeTaskTree { return this.treeManager.views.taskExplorerSideBar.tree; }
+    get sidebarView(): TreeView<TreeItem> { return this.treeManager.views.taskExplorerSideBar.view; }
+    get sorters(): ITeSortUtilities { return sorters; }
+	get statusBar(): ITeStatusBar { return this._statusBar; }
+	get storage(): IStorage { return this._storage; }
+	get taskCountView(): TaskCountView { return this._taskCountView; }
+	get taskManager(): TaskManager { return this._taskManager; }
+	get taskMonitorPage(): MonitorPage { return this._taskMonitorPage; }
+	get taskUsageView(): TaskUsageView { return this._taskUsageView; }
+	get taskUtils(): ITeTaskUtilities { return taskUtils; }
+	get typeUtils(): ITeTypeUtilities { return typeUtils; }
+	get taskWatcher(): TaskWatcher { return this._taskWatcher; }
+	get tests(): boolean { return this._context.extensionMode === ExtensionMode.Test; }
+	get treeManager(): TaskTreeManager { return this._treeManager; }
+	get usage(): Usage { return this._usage; }
+	get utils(): ITeUtilities { return utilities; }
+	get version(): string { return this._version; }
+	get versionchanged(): boolean { return this._version !== this._previousVersion; }
+    get views(): { [id in "taskExplorer" | "taskExplorerSideBar"]: ITaskTreeView } { return this.treeManager.views; }
+	get welcomePage(): WelcomePage { return this._welcomePage; }
+	get wsfolder(): WorkspaceFolder { return (workspace.workspaceFolders as WorkspaceFolder[])[0]; }
+	// get telemetry(): TelemetryService { 	return this._telemetry; }
 
 }
