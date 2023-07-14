@@ -376,7 +376,7 @@ const startTask = async (taskItem: ITaskItem, addToSpecial: boolean) =>
                            (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
-                const sTaskItem = sFolder.taskFiles.find((t: ITaskItem) => sFolder.getTaskItemId(t.id) === taskItem.id);
+                const sTaskItem = sFolder.treeNodes.find((t: ITaskItem) => sFolder.getTaskItemId(t.id) === taskItem.id);
                 if (sTaskItem)
                 {
                     utils.overrideNextShowInputBox("test label");

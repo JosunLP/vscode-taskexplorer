@@ -13,7 +13,7 @@ export class TaskFolder extends TreeItem implements ITaskFolder
     declare label: string;
     declare resourceUri: Uri;
     readonly isSpecial: boolean;
-    readonly taskFiles: (TaskFile|TaskItem)[];
+    readonly treeNodes: (TaskFile|TaskItem)[];
     readonly workspaceFolder: WorkspaceFolder | undefined;
 
     constructor(folder: WorkspaceFolder | string, state: TreeItemCollapsibleState, isSpecial?: boolean)
@@ -29,10 +29,14 @@ export class TaskFolder extends TreeItem implements ITaskFolder
         this.iconPath = ThemeIcon.Folder;
         this.label = isString(folder) ? folder : folder.name;
         this.id = encodeUtf8Hex(this.label);
-        this.taskFiles = [];
+        this.treeNodes = [];
         this.tooltip = "A tree folder representing a workspace/project";
     }
 
     addChild<T extends (TaskFile | TaskItem)>(node: T, idx?: number): OneOf<T, [ TaskFile, TaskItem ]>;
-    addChild(node: TaskFile|TaskItem, idx = 0) { node.folder = this; this.taskFiles.splice(idx, 0, node); return node; }
+    addChild(node: TaskFile|TaskItem, idx = 0) { node.folder = this; this.treeNodes.splice(idx, 0, node); return node; }
+
+
+    static is(item: any): item is TaskFolder { return item instanceof TaskFolder ; }
+
 }

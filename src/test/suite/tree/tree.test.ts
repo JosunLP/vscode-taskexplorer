@@ -113,7 +113,7 @@ suite("Tree Tests", () =>
                             (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
-                cstItem1 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === batch[0].id);
+                cstItem1 = sFolder.treeNodes.find((t: any) => sFolder.getTaskItemId(t.id) === batch[0].id);
                 if (cstItem1)
                 {
                     utils.overrideNextShowInputBox("Label 1");
@@ -138,7 +138,7 @@ suite("Tree Tests", () =>
                             (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
-                cstItem2 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === batch[1].id);
+                cstItem2 = sFolder.treeNodes.find((t: any) => sFolder.getTaskItemId(t.id) === batch[1].id);
                 if (cstItem2)
                 {
                     await executeTeCommand2("addRemoveCustomLabel", [ cstItem2 ]);
@@ -162,7 +162,7 @@ suite("Tree Tests", () =>
                             (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
-                cstItem3 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === bash[0].id);
+                cstItem3 = sFolder.treeNodes.find((t: any) => sFolder.getTaskItemId(t.id) === bash[0].id);
                 if (cstItem3)
                 {
                     utils.overrideNextShowInputBox("Label 3");
@@ -187,7 +187,7 @@ suite("Tree Tests", () =>
                             (taskTree[1].label === "Favorites" ? taskTree[1] : null);
             if (sFolder)
             {
-                cstItem4 = sFolder.taskFiles.find((t: any) => sFolder.getTaskItemId(t.id) === ant[0].id);
+                cstItem4 = sFolder.treeNodes.find((t: any) => sFolder.getTaskItemId(t.id) === ant[0].id);
                 if (cstItem4)
                 {
                     utils.overrideNextShowInputBox("Label 6");
@@ -302,8 +302,8 @@ suite("Tree Tests", () =>
         expect(teWrapper.explorer?.getParent(taskTree[2])).to.be.null; // Project Folder
         expect(teWrapper.explorer?.getParent(batch[0])).to.not.be.null;
         expect(teWrapper.explorer?.getParent(batch[0].taskFile)).to.not.be.null;
-        expect(await teWrapper.explorer?.getChildren(taskTree[2].taskFiles[0])).to.not.be.null;
-        expect(await teWrapper.explorer?.getChildren(taskTree[2].taskFiles[1])).to.not.be.null;
+        expect(await teWrapper.explorer?.getChildren(taskTree[2].treeNodes[0])).to.not.be.null;
+        expect(await teWrapper.explorer?.getChildren(taskTree[2].treeNodes[1])).to.not.be.null;
         expect(teWrapper.explorer?.getName()).to.be.oneOf([ "taskTreeExplorer", "taskTreeSideBar" ]);
         utils.endRollingCount(this);
     });
@@ -479,6 +479,17 @@ suite("Tree Tests", () =>
         utils.endRollingCount(this);
     });
 
+
+    test("Trigger Busy State", async function()
+	{
+        if (utils.exitRollingCount(this)) return;
+        this.slow(tc.slowTime.commands.refresh * 2);
+        void executeTeCommand("refresh", 0);
+        await executeTeCommand("refresh", 0);
+        await utils.waitForTeIdle(10);
+        utils.endRollingCount(this);
+	});
+
 });
 
 class DumbFolder implements ITaskFolder
@@ -487,7 +498,7 @@ class DumbFolder implements ITaskFolder
     constructor(lbl: string) { this.label = lbl; this.resourceUri = ""; }
     id = "";
     isSpecial = false;
-    taskFiles: (ITaskItem | ITaskFile)[] = [];
+    treeNodes: (ITaskItem | ITaskFile)[] = [];
     workspaceFolder: WorkspaceFolder | undefined;
     iconPath?: string | Uri | { light: string | Uri; dark: string | Uri } | ThemeIcon | undefined;
     description?: string | boolean | undefined;

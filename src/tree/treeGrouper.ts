@@ -55,7 +55,7 @@ export class TaskTreeGrouper
         let didGroupLast = false,
             prevTaskFile: TaskFile | undefined;
         const groupHash: TaskMap<TaskFile> = {};
-        const taskFiles = this.wrapper.utils.popIfExistsBy(folder.taskFiles, t => !source || t.taskSource === source, this)
+        const taskFiles = this.wrapper.utils.popIfExistsBy(folder.treeNodes, t => !source || t.taskSource === source, this)
                                             .filter((t): t is TaskFile => TaskFile.is(t));
         this.wrapper.log.methodStart("create tree node folder grouping", 3, logPad, true, [[ "project folder", folder.label ]]);
         //
@@ -125,7 +125,7 @@ export class TaskTreeGrouper
         // Configurable to use task name as is, or breakdown and remove the grouped parts from the label
         //
         this.wrapper.log.write(logPad + "   rename grouped tasks", 3);
-        for (const t of folder.taskFiles.filter((t): t is TaskFile => TaskFile.is(t)))
+        for (const t of folder.treeNodes.filter((t): t is TaskFile => TaskFile.is(t)))
         {
             await this.renameGroupedTasks(t);
         }

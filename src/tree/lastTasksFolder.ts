@@ -58,14 +58,14 @@ export class LastTasksFolder extends SpecialTaskFolder
     private pushToTreeTop = async (taskItem: TaskItem, logPad: string) =>
     {
         const taskId = this.getTaskSpecialId(taskItem.id);
-        let taskItem2 = this.taskFiles.find(t => t instanceof TaskItem && t.id === taskId);
+        let taskItem2 = this.treeNodes.find(t => t instanceof TaskItem && t.id === taskId);
         if (taskItem2)
         {
             await this.removeChild(taskItem2, logPad, false);
         }
-        else if (this.taskFiles.length >= this.maxItems)
+        else if (this.treeNodes.length >= this.maxItems)
         {
-            await this.removeChild(this.taskFiles[this.taskFiles.length - 1], logPad, false);
+            await this.removeChild(this.treeNodes[this.treeNodes.length - 1], logPad, false);
         }
         if (!taskItem2) {
             taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
@@ -81,20 +81,20 @@ export class LastTasksFolder extends SpecialTaskFolder
               now = Date.now();
         this.log.methodStart(`save task to ${this.labelLwr} folder`, 1, logPad, false, [
             [ "treenode label", this.label ], [ "max tasks", this.maxItems ],
-            [ "task id", taskId ], [ "current # of saved tasks", this.taskFiles.length ]
+            [ "task id", taskId ], [ "current # of saved tasks", this.treeNodes.length ]
         ]);
         this.removeFromStore(taskItem);
         this.store.push({ id: taskId, timestamp: now });
         this.storeWs.push({ id: taskId, timestamp: now });
         await this.saveStores();
         await this.pushToTreeTop(taskItem, logPad + "   ");
-        this.log.methodDone(`save task to ${this.labelLwr} folder`, 1, logPad, [[ "new # of saved tasks", this.taskFiles.length ]]);
+        this.log.methodDone(`save task to ${this.labelLwr} folder`, 1, logPad, [[ "new # of saved tasks", this.treeNodes.length ]]);
     };
 
 
     protected override sort = () =>
     {
-        this.taskFiles.sort((a: TaskItem, b: TaskItem) =>
+        this.treeNodes.sort((a: TaskItem, b: TaskItem) =>
         {
             const aIsPinned = this.wrapper.taskUtils.isPinned(this.getTaskItemId(a.id), this.listType),
                   bIsPinned = this.wrapper.taskUtils.isPinned(this.getTaskItemId(b.id), this.listType);

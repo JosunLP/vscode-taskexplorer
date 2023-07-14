@@ -124,39 +124,19 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
      */
     getChildren = async(element?: TreeItem): Promise<TreeItem[]> =>
     {
-        let items: TreeItem[] = [];
         const w = this.wrapper,
               logPad = w.log.control.lastLogPad,
-              tasks = this._treeManager.tasks,
-              taskItemTree = this._treeManager.taskFolders;
-
+              tasks = this._treeManager.tasks;
+        let items: TreeItem[] = this._treeManager.taskFolders;
         this.logGetChildrenStart(element, tasks, logPad, 1);
-
-        if (taskItemTree)
+        if (TaskFolder.is(element) || TaskFile.is(element))
         {
-            if (element instanceof TaskFolder)
-            {
-                w.log.write("   Return task folder (task files)", 1, logPad);
-                items = element.taskFiles;
-            }
-            else if (element instanceof TaskFile)
-            {
-                w.log.write("   Return taskfile (tasks/scripts)", 1, logPad);
-                items = element.treeNodes;
-            }
-            else
-            {
-                w.log.write("   Return full task tree", 1, logPad);
-                items = taskItemTree;
-            }
+            items = element.treeNodes;
         }
-
         this.processEventQueue(logPad + "   ");
-
         w.log.methodDone("get tree children", 1, logPad, [
             [ "# of tasks total", tasks.length ], [ "# of tree task items returned", items.length ]
         ]);
-
         return items;
     };
 
@@ -164,7 +144,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     getName = () => this.name;
 
 
-    getParent(element: TreeItem): TreeItem | null
+    getParent(element: TreeItem): TaskFile | TaskFolder |null
     {
         const e = (<any>element);
         if (e.taskFile) // (element instanceof TaskItem)
@@ -175,6 +155,14 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         {
             return e.folder as TaskFolder;
         }
+        // if (TaskItem.is(element))
+        // {
+        //     return !element.folder.isSpecial ? element.taskFile : element.folder;
+        // }
+        // else if (TaskFile.is(element))
+        // {
+        //     return element.folder;
+        // }
         return null;
     }
 
@@ -206,7 +194,6 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
             [ "task folder", element?.label ], [ "all tasks need to be retrieved", !tasks ],
             [ "needs rebuild", !this._treeManager.taskFolders ], [ "instance name", this.name ]
         ]);
-
         if (element instanceof TaskFile)
         {
             w.log.values(logLevel + 1, logPad + "   ", [

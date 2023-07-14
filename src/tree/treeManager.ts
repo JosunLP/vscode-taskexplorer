@@ -96,8 +96,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 	get onDidLastTasksChange(): Event<ITeTaskChangeEvent> { return this._specialFolders.lastTasks.onDidTasksChange; }
     get onReady(): Event<ITeTaskChangeEvent> { return this._onReady.event; }
     get famousTasks(): ITeTask[] { return this.wrapper.usage.famousTasks; }
-    get favoritesTasks(): Task[] { return this._specialFolders.favorites.taskFiles.map(f => f.task); }
-    get lastTasks(): Task[] { return this._specialFolders.lastTasks.taskFiles.map(f => f.task); }
+    get favoritesTasks(): Task[] { return this._specialFolders.favorites.treeNodes.map(f => f.task); }
+    get lastTasks(): Task[] { return this._specialFolders.lastTasks.treeNodes.map(f => f.task); }
     get lastTasksFolder(): LastTasksFolder { return this._specialFolders.lastTasks; }
     get runningTasks(): Task[] { return vscTasks.taskExecutions.map(e => e.task); }
     get views(): { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView } { return this._views; }

@@ -41,8 +41,8 @@ export const sortFolders = (folders: IDictionary<TaskFolder>): TaskFolder[] =>
 
 export const sortTaskFolder = (folder: TaskFolder, listType: TeTaskListType) =>
 {
-    sortTasks(folder.taskFiles, listType);
-    for (const taskFile of folder.taskFiles.filter((t): t is TaskFile => TaskFile.is(t)))
+    sortTasks(folder.treeNodes, listType);
+    for (const taskFile of folder.treeNodes.filter((t): t is TaskFile => TaskFile.is(t)))
     {
         sortTasks(taskFile.treeNodes, listType);
     }

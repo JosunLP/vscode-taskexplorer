@@ -35,7 +35,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     protected readonly storeWs: ITeSpecialTask[] = [];
     protected readonly disposables: Disposable[] = [];
 
-    override taskFiles: TaskItem[] = [];
+    override treeNodes: TaskItem[] = [];
 
 
     constructor(protected readonly wrapper: TeWrapper, protected readonly listType: TeTaskListType, label: string, settingName: string, state: TreeItemCollapsibleState)
@@ -134,13 +134,13 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
               nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>(folderStateCfgKey, {});
 
         this.cleanStores();   // <- build() is called only after a taskMap build, and cleanStores() should
-        this.taskFiles = [];  //    only be called when the taskMap is completed.
+        this.treeNodes = [];  //    only be called when the taskMap is completed.
         this.collapsibleState = TreeItemCollapsibleState[nodeExpandedeMap[expandStateId]];
 
         const allStoreItems = this.getCombinedStore();
         for (const t of allStoreItems)
         {
-            if (this.taskFiles.length >= this.maxItems) {
+            if (this.treeNodes.length >= this.maxItems) {
                 break;
             }
             if (added.includes(t.id)) {
@@ -201,7 +201,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
                 this.store.splice(0);
             }
             await this.saveStores();
-            this.taskFiles = [];
+            this.treeNodes = [];
             this.refresh();
         }
     }
@@ -219,7 +219,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     protected fireChangeEvent = (taskItem: TaskItem | undefined, fireTreeRefresh: boolean, logPad: string): void =>
     {
-        const iTasks = this._enabled ? this.wrapper.taskUtils.toITask(this.wrapper, this.taskFiles.map(f => f.task), this.listType) : [],
+        const iTasks = this._enabled ? this.wrapper.taskUtils.toITask(this.wrapper, this.treeNodes.map(f => f.task), this.listType) : [],
               iTask = taskItem ? iTasks.find(t => t.treeId === taskItem.id) : taskItem;
         this._onDidTasksChange.fire({ tasks: iTasks, task: iTask, type: this.listType });
         if (fireTreeRefresh) {
@@ -261,7 +261,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     protected getTaskSpecialId = (id: string): string => `${this.label}::${this.getTaskItemId(id)}`;
 
 
-    hasTask = (item: TaskItem): boolean => !!(this._enabled && this.taskFiles.find(t => this.getTaskItemId(t.id) === this.getTaskItemId(item.id)));
+    hasTask = (item: TaskItem): boolean => !!(this._enabled && this.treeNodes.find(t => this.getTaskItemId(t.id) === this.getTaskItemId(item.id)));
 
 
     protected onConfigChanged(e: ConfigurationChangeEvent): void
@@ -311,8 +311,8 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     async removeChild(taskItem: TaskItem, logPad: string, persist?: boolean): Promise<void>
     {
-        const idx = this.taskFiles.findIndex(f => f.id === this.getTaskSpecialId(taskItem.id));
-        taskItem = this.taskFiles.splice(idx, 1)[0]; // idx guaranteed not to be -1 by caller
+        const idx = this.treeNodes.findIndex(f => f.id === this.getTaskSpecialId(taskItem.id));
+        taskItem = this.treeNodes.splice(idx, 1)[0]; // idx guaranteed not to be -1 by caller
         if (persist)
         {
             this.removeFromStore(taskItem);
@@ -322,6 +322,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    protected sort = (): void => this.wrapper.sorters.sortTasks(this.taskFiles, this.listType);
+    protected sort = (): void => this.wrapper.sorters.sortTasks(this.treeNodes, this.listType);
 
 }
