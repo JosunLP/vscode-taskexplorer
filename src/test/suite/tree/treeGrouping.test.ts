@@ -24,11 +24,13 @@ suite("Tree Grouping Tests", () =>
     suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-        if (getSuccessCount(this) < 10) {
+        if (getSuccessCount(this) < 18) {
             await executeSettingsUpdate(teWrapper.keys.Config.GroupMaxLevel, 5, tc.waitTime.config.groupingEvent);
             await executeSettingsUpdate(teWrapper.keys.Config.GroupSeparator, "-", tc.waitTime.config.groupingEvent);
             await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
             await executeSettingsUpdate(teWrapper.keys.Config.GroupStripTaskLabel, true, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(teWrapper.keys.Config.GroupScripts, true, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(teWrapper.keys.Config.GroupStripScriptLabel, false, tc.waitTime.config.groupingEvent);
         }
         suiteFinished(this);
     });
@@ -85,6 +87,15 @@ suite("Tree Grouping Tests", () =>
     });
 
 
+    test("Enable Script Type Strip Task Label", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.groupingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupStripScriptLabel, true, tc.waitTime.config.groupingEvent);
+        endRollingCount(this);
+    });
+
+
     test("Change Grouping Max Level 3", async function()
     {
         if (exitRollingCount(this)) return;
@@ -103,11 +114,29 @@ suite("Tree Grouping Tests", () =>
     });
 
 
-    test("Enable Strip Task Label", async function()
+    test("Reset Strip Task Label", async function()
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
         await executeSettingsUpdate(teWrapper.keys.Config.GroupStripTaskLabel, true, tc.waitTime.config.groupingEvent);
+        endRollingCount(this);
+    });
+
+
+    test("Reset Script Type Strip Task Label", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.groupingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupStripScriptLabel, false, tc.waitTime.config.groupingEvent);
+        endRollingCount(this);
+    });
+
+
+    test("Disable Script Type Grouping", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.groupingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupScripts, false, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -144,6 +173,15 @@ suite("Tree Grouping Tests", () =>
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
         await executeSettingsUpdate(teWrapper.keys.Config.GroupSeparator, "-", tc.waitTime.config.groupingEvent);
+        endRollingCount(this);
+    });
+
+
+    test("Reset Script Type Grouping", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.config.groupingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupScripts, true, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 

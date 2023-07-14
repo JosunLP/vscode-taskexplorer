@@ -88,11 +88,7 @@ export class TaskTreeBuilder
         const isNpmInstallTask = task.source === "npm" && (task.name === "install" || task.name.startsWith("install - "));
         if (!isNpmInstallTask)
         {
-            const fsPath = !task.definition.scriptFile ? taskFile.resourceUri.fsPath : task.definition.uri.fsPath;
-            let taskItem = taskFile.treeNodes.find((n): n is TaskItem => TaskItem.is(n) && n.id === TaskItem.id(fsPath, task));
-            if (!taskItem) {
-                taskItem = taskFile.addChild(new TaskItem(w, taskFile, task, logPad + "   "));
-            }
+            const taskItem = taskFile.addChild(new TaskItem(w, taskFile, task, logPad + "   "));
             this._taskMap[taskItem.id] = taskItem;
         }
         w.log.methodDone("build task tree list", 2, logPad);

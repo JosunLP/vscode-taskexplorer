@@ -18,7 +18,7 @@ import { addToExcludes } from "../lib/utils/addToExcludes";
 import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap, IDictionary } from "../interface";
 import {
-    TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
+    TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event, window
 } from "vscode";
 
 
@@ -463,11 +463,11 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      */
     refresh = async(invalidate: string | false | undefined, opt: Uri | false | undefined, logPad: string): Promise<void> =>
     {
+        if (this._refreshPending) {
+            // void window.showInformationMessage("Busy, please wait...");
+            return;
+        }
         const w = this.wrapper, isOptUri = w.typeUtils.isUri(opt);
-        //
-        // Wait if busy
-        //
-        await this.waitForRefreshComplete();
         w.log.methodStart("refresh task tree", 1, logPad, logPad === "", [
             [ "invalidate", invalidate ], [ "opt fsPath", isOptUri ? opt.fsPath : "n/a" ]
         ]);
@@ -593,15 +593,5 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
 
     setMessage = (m?: string): void => Object.values(this._views).filter(v => v.enabled && v.visible).forEach(v => { v.view.message =  m; });
-
-
-    private waitForRefreshComplete = async (maxWait = 15000): Promise<void> =>
-    {
-        let waited = 0;
-        while (this._refreshPending && waited < maxWait) {
-            await this.wrapper.utils.sleep(50);
-            waited += 50;
-        }
-    };
 
 }
