@@ -221,7 +221,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
                 // provided by the engine.
                 //
-                !w.fs.pathExistsSync(w.pathUtils.getTaskAbsolutePath(t, true)),
+                (!w.taskUtils.isExternalType(w, t.source) &&
+                 !w.fs.pathExistsSync(w.pathUtils.getTaskAbsolutePath(t, true))),
             this
         );
         w.log.write(`   removed ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);

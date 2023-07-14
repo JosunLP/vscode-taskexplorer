@@ -109,9 +109,9 @@ export class TaskWatcher implements Disposable
 
         this.wrapper.log.methodStart("task started event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
 
+        /* istanbul ignore next */
         if (task.source === "Workspace" && !treeId)
-        {    //
-            /* istanbul ignore next */
+        {
             taskItem = Object.values(taskMap).find(
                 (t): t is TaskItem => !!t && t.taskSource === "Workspace" && t.task.definition.type === task.definition.type && task.name.includes(t.task.name)
             );
@@ -161,9 +161,9 @@ export class TaskWatcher implements Disposable
         this.wrapper.log.methodStart("task finished event", 1, "", false, [[ "task name", task.name ], [ "task id", treeId ]]);
         this.showStatusMessage(task, "  "); // hides
 
+        /* istanbul ignore next */
         if (task.source === "Workspace" && !treeId)
-        {    //
-            /* istanbul ignore next */
+        {
             taskItem = Object.values(taskMap).find(
                 (t): t is TaskItem => !!t && t.taskSource === "Workspace" && t.task.definition.type === task.definition.type && task.name.includes(t.task.name)
             );

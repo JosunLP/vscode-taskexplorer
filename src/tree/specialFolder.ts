@@ -146,7 +146,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             if (added.includes(t.id)) {
                 continue;
             }
-            const taskItem = taskMap[t.id] as TaskItem; // Guaranteed to be TaskItem from cleanStores()
+            const taskItem = taskMap[t.id]; // Guaranteed to be TaskItem from cleanStores()
             const taskItem2 = this.createTaskItem(taskItem, logPad + "   ");
             this.addChild(taskItem2, 0);
             added.push(t.id);

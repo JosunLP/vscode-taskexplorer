@@ -22,5 +22,4 @@ export interface ITaskFile extends TreeItem
     readonly treeNodes: (ITaskItem|ITaskFile)[];
     addChild<T extends (ITaskFile | ITaskItem)>(node: T, index?: number): OneOf<T, [ ITaskFile, ITaskItem ]>;
     addChild(treeNode: ITaskFile | ITaskItem, index?: number): ITaskFile | ITaskItem;
-    removeChild(treeItem: ITaskFile | ITaskItem): void;
 }

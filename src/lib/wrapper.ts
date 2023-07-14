@@ -102,10 +102,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _releaseNotesPage: ReleaseNotesPage;
 	private readonly _previousVersion: string | undefined;
 	private readonly _parsingReportPage: ParsingReportPage;
-    private readonly _providers: IDictionary<ITaskExplorerProvider>;
 	private readonly _onReady: EventEmitter<void>;
     private readonly _onInitialized: EventEmitter<void>;
     private readonly _onBusyComplete: EventEmitter<void>;
+    private readonly _providers: Record<string, ITaskExplorerProvider>;
 	private readonly _envMap: IDictionary<TeRuntimeEnvironment> = { production: "production", development: "dev", test: "tests" };
 
 
@@ -593,7 +593,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		return this._context.extensionMode === ExtensionMode.Production;
 	}
 
-	get providers(): IDictionary<ITaskExplorerProvider> {
+	get providers(): Record<string, ITaskExplorerProvider> {
 		return this._providers;
 	}
 

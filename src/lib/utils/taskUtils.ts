@@ -119,6 +119,9 @@ export const isConstTaskCountType = (taskType: TeTaskSource) =>
 export const isWatchTask = (source: TeTaskSource, wrapper: ITeWrapper) => getWatchTaskTypes(wrapper).includes(source);
 
 
+export const isExternalType = (wrapper: ITeWrapper, source: string) => wrapper.providers[source] && wrapper.providers[source].isExternal;
+
+
 /**
  * @method toITask
  * @since 3.0.0

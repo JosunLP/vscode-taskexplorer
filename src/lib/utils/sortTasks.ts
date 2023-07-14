@@ -49,7 +49,7 @@ export const sortTaskFolder = (folder: TaskFolder, listType: TeTaskListType) =>
 };
 
 
-export const sortTasks = (items: (TaskFile | TaskItem)[] | undefined, listType: TeTaskListType) =>
+export const sortTasks = (items: (TaskFile | TaskItem)[], listType: TeTaskListType) =>
 {
     if (items)
     {

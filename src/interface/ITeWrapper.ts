@@ -22,6 +22,7 @@ import { ExtensionContext, Event, TreeItem, TreeView, WorkspaceFolder } from "vs
 import {
 	ITeCommonUtilities, ITeObjectUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "./ITeUtilities";
+import { ITaskExplorerProvider } from "./ITaskProvider";
 
 export type TeRuntimeEnvironment = "dev" | "tests" | "production";
 
@@ -81,6 +82,7 @@ export interface ITeWrapper
 	readonly parsingReportPage: ITeWebview;
 	readonly pathUtils: ITePathUtilities;
 	readonly promiseUtils: ITePromiseUtilities;
+	readonly providers: Record<string, ITaskExplorerProvider>;
 	readonly releaseNotesPage: ITeWebview;
 	readonly sidebar: ITeTaskTree;
 	readonly sidebarView: TreeView<TreeItem>;

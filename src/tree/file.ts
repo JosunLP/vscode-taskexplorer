@@ -186,17 +186,17 @@ export class TaskFile extends TreeItem implements ITaskFile
                     return `${label} (${this._fileName.toLowerCase()})`;
                 }
             }
-            else if (source === "tsc")
-            {   //
-                // Typescript task names are dumb.  Just don't know a great
-                // way to handle them and set them up in groups that actually makes sense.
-                //
-                const match = this._fileName.match(this.wrapper.keys.Regex.WebpackFileName);
-                if (match && match.length > 1 && match[1])
-                {
-                    return `${label} (${match[1].toLowerCase()})`;
-                }
-            }
+            // else if (source === "tsc")
+            // {   //
+            //     // Typescript task names are dumb.  Just don't know a great
+            //     // way to handle them and set them up in groups that actually makes sense.
+            //     //
+            //     const match = this._fileName.match(this.wrapper.keys.Regex.TsConfigFileName);
+            //     if (match && match.length > 1 && match[1])
+            //     {
+            //         return `${label} (${match[1].toLowerCase()})`;
+            //     }
+            // }
             else if (source === "apppublisher")
             {   //
                 // For ap files in the same dir, nsamed with a tag, e.g.: .publishrc.spm.json
@@ -292,13 +292,6 @@ export class TaskFile extends TreeItem implements ITaskFile
 
 
     static is(item: any): item is TaskFile { return item instanceof TaskFile ; }
-
-
-    removeChild(node: (TaskFile | TaskItem))
-    {
-        const idx = this._treeNodes.findIndex(tn => tn.id === node.id);
-        this.wrapper.utils.execIf(idx !== -1, () => { this._treeNodes.splice(idx, 1); }, this);
-    }
 
 
     private setGroupContext(groupId: string, groupLevel: number, taskSource: string)

@@ -73,7 +73,7 @@ export interface ITeSortUtilities
 {
 	sortFolders(folders: IDictionary<ITaskFolder>): ITaskFolder[];
 	sortTaskFolder(folder: ITaskFolder, listType: TeTaskListType): void;
-	sortTasks(items: (ITaskFile | ITaskItem)[] | undefined, listType: TeTaskListType): void;
+	sortTasks(items: (ITaskFile | ITaskItem)[], listType: TeTaskListType): void;
 }
 
 export interface ITeTaskUtilities
@@ -83,6 +83,7 @@ export interface ITeTaskUtilities
 	getTaskTypes(): readonly string[];
 	getTaskTypeFriendlyName(taskType: string, lowerCase?: boolean): string;
 	getTaskTypeRealName(taskType: string): TeTaskSource;
+	isExternalType(wrapper: ITeWrapper, source: string): boolean;
 	isPinned(id: string, listType: TeTaskListType): boolean;
 	isScriptType(source: TeTaskSource): boolean;
 	isWatchTask(source: TeTaskSource, wrapper: ITeWrapper): boolean;
