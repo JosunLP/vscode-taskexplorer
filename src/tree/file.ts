@@ -238,7 +238,7 @@ export class TaskFile extends TreeItem implements ITaskFile
     private static getLabelKey(fsPath: string, groupKey: string, groupLevel: number)
     {
         let lblKey = fsPath[groupLevel + 1] + groupLevel;
-        if (groupLevel > 0)
+        if (groupLevel >= 0)
         {
             // let labelKey = fsPath[groupLevel + 1] + groupLevel;
             const // pathKey = fsPath.replace(/\W/gi, ""),

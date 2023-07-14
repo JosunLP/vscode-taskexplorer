@@ -182,7 +182,7 @@ export class TaskTreeGrouper
             prevLblParts: string[] | undefined,
             prevTaskItem: TaskItem | undefined;
         //
-        w.log.methodStart("create task groupings by separator", 3, logPad, true, [
+        w.log.methodStart("create task groupings by separator", 4, logPad, true, [
             [ "folder", folder.label ], [ "label (node name)", taskFile.label ], [ "grouping level", groupLevel ],
             [ "is group", taskFile.isGroup ], [ "file name", taskFile.fileName ], [ "folder", folder.label ],
             [ "path", taskFile.relativePath ], [ "tree level", groupLevel ], [ "sep", this._groupSep ]

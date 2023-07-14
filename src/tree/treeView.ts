@@ -65,11 +65,11 @@ export class TeTreeView implements ITaskTreeView, Disposable
 
 
     onElementExpanded = (e: TreeViewExpansionEvent<TreeItem>) =>
-        this.wrapper.log.methodEvent("tree view", "element expanded", 2, [[ "label", e.element.label ], [ "id", e.element.id ]]);
+        this.wrapper.log.methodEvent("tree view", "element expanded", 5, [[ "label", e.element.label ], [ "id", e.element.id ]]);
 
 
     onElementSelectionChanged = (e: TreeViewSelectionChangeEvent<TreeItem>) =>
-        this.wrapper.log.methodEvent("tree view", "selection changed", 2, [[ "selections", e.selection.map(i => i.label).join(", ") ]]);
+        this.wrapper.log.methodEvent("tree view", "selection changed", 5, [[ "selections", e.selection.map(i => i.label).join(", ") ]]);
 
 
     onVisibilityChanged(e: TreeViewVisibilityChangeEvent)
