@@ -2,10 +2,10 @@
 import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskFolder } from "./folder";
-import { TaskTreeNode } from "./node/base";
+import { TaskTreeNode } from "./base";
 import { encodeUtf8Hex } from ":env/hex";
-import { TeWrapper } from "../lib/wrapper";
-import { ITaskItem, TeTaskSource } from "../interface";
+import { TeWrapper } from "../../lib/wrapper";
+import { ITaskItem, TeTaskSource } from "../../interface";
 import { Task, TaskExecution, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command } from "vscode";
 
 

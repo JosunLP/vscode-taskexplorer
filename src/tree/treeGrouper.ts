@@ -1,7 +1,7 @@
 
-import { TaskFile } from "./file";
-import { TaskItem } from "./item";
-import { TaskFolder } from "./folder";
+import { TaskFile } from "./node/file";
+import { TaskItem } from "./node/item";
+import { TaskFolder } from "./node/folder";
 import { TaskMap } from "../interface";
 import { TeWrapper } from "../lib/wrapper";
 import { SpecialTaskFolder } from "./specialFolder";

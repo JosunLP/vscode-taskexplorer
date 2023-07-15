@@ -1,6 +1,6 @@
 
-import { TaskItem } from "./item";
-import { TaskFolder } from "./folder";
+import { TaskItem } from "./node/item";
+import { TaskFolder } from "./node/folder";
 import { TeWrapper } from "../lib/wrapper";
 import { SpecialFolderStorageKey } from "../lib/constants";
 import { ILog, ITeTaskChangeEvent, StorageTarget, TeTaskListType, ConfigPrefix, IDictionary } from "../interface";

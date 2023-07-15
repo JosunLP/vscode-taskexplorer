@@ -6,7 +6,7 @@
 
 import { basename } from "path";
 import { window, Terminal } from "vscode";
-import { TaskItem } from "../../tree/item";
+import { TaskItem } from "../../tree/node/item";
 
 
 export const getTerminal = (taskItem: TaskItem): Terminal | undefined =>

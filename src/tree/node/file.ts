@@ -1,11 +1,11 @@
 
 import { TaskItem } from "./item";
 import { extname, join } from "path";
-import { TaskTreeNode } from "./node/base";
+import { TaskTreeNode } from "./base";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
-import { TeWrapper } from "../lib/wrapper";
-import { ITaskDefinition, ITaskFile, OneOf, TeTaskSource } from "../interface";
+import { TeWrapper } from "../../lib/wrapper";
+import { ITaskDefinition, ITaskFile, OneOf, TeTaskSource } from "../../interface";
 import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 
 

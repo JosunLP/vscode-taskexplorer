@@ -1,7 +1,7 @@
 
-import { TaskFile } from "./file";
-import { TaskItem } from "./item";
-import { TaskFolder } from "./folder";
+import { TaskFile } from "./node/file";
+import { TaskItem } from "./node/item";
+import { TaskFolder } from "./node/folder";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./treeManager";
 import { ITaskTreeEvent, ITeTaskTree, TreeviewIds } from "../interface";

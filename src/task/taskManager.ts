@@ -1,11 +1,11 @@
 
 import { dirname } from "path";
 import { TaskUtils } from "./utils";
-import { TaskFile } from "../tree/file";
-import { TaskItem } from "../tree/item";
+import { TaskFile } from "../tree/node/file";
+import { TaskItem } from "../tree/node/item";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskWatcher } from "./taskWatcher";
-import { TaskFolder } from "../tree/folder";
+import { TaskFolder } from "../tree/node/folder";
 import { PinnedStorageKey } from "../lib/constants";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "./provider/script";

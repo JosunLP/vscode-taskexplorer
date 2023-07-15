@@ -1,7 +1,7 @@
 
-import { TaskItem } from "./item";
-import { TaskFile } from "./file";
-import { TaskFolder } from "./folder";
+import { TaskItem } from "./node/item";
+import { TaskFile } from "./node/file";
+import { TaskFolder } from "./node/folder";
 import { TeWrapper } from "../lib/wrapper";
 import { isPinned } from "../lib/utils/taskUtils";
 import { ITeTreeSorter, TeTaskListType } from "../interface";

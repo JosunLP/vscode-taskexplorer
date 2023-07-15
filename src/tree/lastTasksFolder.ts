@@ -1,5 +1,5 @@
 
-import { TaskItem } from "./item";
+import { TaskItem } from "./node/item";
 import { TeWrapper } from "../lib/wrapper";
 import { SpecialTaskFolder } from "./specialFolder";
 import { ITeTaskStatusChangeEvent } from "../interface";

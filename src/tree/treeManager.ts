@@ -1,9 +1,9 @@
 
 import { join } from "path";
-import { TaskFile } from "./file";
-import { TaskItem } from "./item";
+import { TaskFile } from "./node/file";
+import { TaskItem } from "./node/item";
 import { getMd5 } from ":env/crypto";
-import { TaskFolder } from "./folder";
+import { TaskFolder } from "./node/folder";
 import { TeTreeView } from "./treeView";
 import { encodeUtf8Hex } from ":env/hex";
 import { TeWrapper } from "../lib/wrapper";

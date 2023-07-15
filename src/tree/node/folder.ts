@@ -1,10 +1,10 @@
 
 import { TaskItem } from "./item";
 import { TaskFile } from "./file";
-import { TaskTreeNode } from "./node/base";
+import { TaskTreeNode } from "./base";
 import { encodeUtf8Hex } from ":env/hex";
-import { ITaskFolder, OneOf } from "../interface";
-import { isString } from "../lib/utils/typeUtils";
+import { ITaskFolder, OneOf } from "../../interface";
+import { isString } from "../../lib/utils/typeUtils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, WorkspaceFolder } from "vscode";
 
 

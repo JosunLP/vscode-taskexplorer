@@ -2,7 +2,7 @@
 import { TextDocument } from "vscode";
 import { TeWrapper } from "../wrapper";
 import { isWatchTask } from "./taskUtils";
-import { TaskItem } from "../../tree/item";
+import { TaskItem } from "../../tree/node/item";
 import { IDictionary } from ":types";
 
 

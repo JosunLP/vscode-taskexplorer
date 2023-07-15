@@ -1,6 +1,6 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import { TaskItem } from "../tree/item";
+import { TaskItem } from "../tree/node/item";
 import { TeWrapper } from "../lib/wrapper";
 import { ITeTaskStatusChangeEvent, ITeRunningTaskChangeEvent } from "../interface";
 import {

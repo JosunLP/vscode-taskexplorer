@@ -1,5 +1,5 @@
 
-import { TaskItem } from "./item";
+import { TaskItem } from "./node/item";
 import { ITeTask } from "../interface";
 import { TeWrapper } from "../lib/wrapper";
 import { TreeItemCollapsibleState } from "vscode";
