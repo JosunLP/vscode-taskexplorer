@@ -91,7 +91,7 @@
 		"fa_icon_module-build": "node script\\update-fa-module.js --extract",
 		"install_extensions.bat": "cmd /c ..\\install_extensions.bat",
 		"lint": "eslint -c .eslintrc.js --ext .ts .",
-		"publish-types": "",
+		"publish-types": "cmd /c echo todo",
 		"rebuild-prod": "npm run clean-all && webpack --mode production --env clean=true --config ./webpack.config.js",
 		"rebuild-dev": "npm run clean-all && webpack --mode development --env clean=true --config ./webpack.config.js",
 		"rebuild-test": "npm run clean-all && webpack --env environment=test --env clean=true --config ./webpack.config.js",

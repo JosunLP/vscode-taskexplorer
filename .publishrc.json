@@ -3,11 +3,9 @@
     "branch":                   "master",
     "buildCommand":             "npm run webpack-rebuild",
     "buildPostCommand": [
-        "npm run tsc-rebuild_test",
-        "npm run tsc-rebuild_types",
-        "npm run test-all",
-        "npm run test-all_mws_nc",
-        "npm run webpack-rebuild",
+        "npm run rebuild-test",
+        "npm run test-all-sws:mws",
+        "npm run rebuild-prod",
         "npm run publish-types"
     ],
     "changelogFile":            "CHANGELOG.md",
@@ -21,7 +19,10 @@
     ],
     "githubRelease":            "Y",
     "githubReleasePreCommand":  "npx vsce package",
-    "githubReleasePostCommand": "npx rimraf \"*.vsix\"",
+    "githubReleasePostCommand": [
+        "cmd /c copy /Y \"*.vsix\" ..\\vscode-taskexplorter-info\\release",
+        "npx rimraf -g \"*.vsix\""
+    ],
     "githubUser":               "spmeesseman",
     "promptVersion":            "N",
     "repo":                     "https://github.com/spmeesseman/vscode-taskexplorer.git",
