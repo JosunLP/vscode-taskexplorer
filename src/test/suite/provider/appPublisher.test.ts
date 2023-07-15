@@ -171,6 +171,62 @@ suite("App-Publisher Tests", () =>
     });
 
 
+    test("Set Publishrc Flag - Disable Task Explorer", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.commands.refresh + tc.slowTime.tasks.count.verify);
+        await teWrapper.fs.writeFile(
+            fileUri.fsPath,
+            "{\n" +
+            '    "version": "1.0.0",\n' +
+            '    "branch": "trunk",\n' +
+            '    "buildCommand": [],\n' +
+            '    "disableTaskExplorer": "Y",\n' +
+            '    "mantisbtRelease": "Y",\n' +
+            '    "mantisbtChglogEdit": "N",\n' +
+            '    "mantisbtProject": "",\n' +
+            '    "repoType": "svn"\n' +
+            "}\n"
+        );
+        await waitForTeIdle(tc.waitTime.fs.modifyEvent);
+        //
+        // The 'modify' event is ignored for app-publisher tasks, since the # of tasks for any.publishrc
+        // file is always 21. Force a task invalidation to cover the invalid json fix check
+        //
+        await executeTeCommand("refresh", tc.waitTime.refreshCommand);
+        await verifyTaskCount(testsName, startTaskCount);
+        endRollingCount(this);
+    });
+
+
+    test("Unset Publishrc Flag - Disable Task Explorer", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.fs.createEvent + tc.slowTime.commands.refresh + tc.slowTime.tasks.count.verify);
+        await teWrapper.fs.writeFile(
+            fileUri.fsPath,
+            "{\n" +
+            '    "version": "1.0.0",\n' +
+            '    "branch": "trunk",\n' +
+            '    "buildCommand": [],\n' +
+            '    "disableTaskExplorer": "N",\n' +
+            '    "mantisbtRelease": "Y",\n' +
+            '    "mantisbtChglogEdit": "N",\n' +
+            '    "mantisbtProject": "",\n' +
+            '    "repoType": "svn"\n' +
+            "}\n"
+        );
+        await waitForTeIdle(tc.waitTime.fs.modifyEvent);
+        //
+        // The 'modify' event is ignored for app-publisher tasks, since the # of tasks for any.publishrc
+        // file is always 21. Force a task invalidation to cover the invalid json fix check
+        //
+        await executeTeCommand("refresh", tc.waitTime.refreshCommand);
+        await verifyTaskCount(testsName, startTaskCount + 21);
+        endRollingCount(this);
+    });
+
+
     test("Delete file", async function()
     {
         if (exitRollingCount(this)) return;

@@ -51,6 +51,7 @@ suite("NPM Tests", () =>
 
     test("Focus Explorer View", async function()
 	{
+        this.slow(tc.slowTime.commands.focusAlreadyFocused + tc.slowTime.tasks.count.verify);
         await startupFocus(this, () => utils.verifyTaskCount(testsName, startTaskCount, 2));
 	});
 
