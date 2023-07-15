@@ -65,6 +65,15 @@ suite("Multi-Root Workspace Tests", () =>
             fakeWsfStartIdx = 2;
             wsf.push((workspace.workspaceFolders as WorkspaceFolder[])[1]);
         }
+        else {
+            workspace.getWorkspaceFolder = (uri: Uri) =>
+            {
+                if (uri.fsPath.includes("test-fixture")) {
+                    return wsf[0];
+                }
+                return wsf.find(f => uri.fsPath.toLowerCase().startsWith(f.uri.fsPath.toLowerCase())) || wsf[0];
+            };
+        }
         wsf.push(...[
         {
             uri: Uri.file(wsf1DirName),
@@ -285,10 +294,6 @@ suite("Multi-Root Workspace Tests", () =>
         );
         if (!tc.isMultiRootWorkspace)
         {
-            workspace.getWorkspaceFolder = (uri: Uri) =>
-            {
-                return wsf[uri.fsPath.includes("test-fixture") ? 0 : fakeWsfStartIdx];
-            };
             await teWrapper.fileWatcher.onWsFoldersChange({
                 added: [ wsf[fakeWsfStartIdx] ],
                 removed: []
@@ -320,10 +325,6 @@ suite("Multi-Root Workspace Tests", () =>
         await teWrapper.fs.copyFile(join(wsf2DirName, "Gruntfile.js"), join(wsf4DirName, "GRUNTFILE.js"));
         if (!tc.isMultiRootWorkspace)
         {
-            workspace.getWorkspaceFolder = (uri: Uri) =>
-            {
-                return wsf[uri.fsPath.includes("test-fixture") ? 0 : fakeWsfStartIdx + 1];
-            };
             await teWrapper.fileWatcher.onWsFoldersChange({
                 added: [ wsf[fakeWsfStartIdx + 1], wsf[fakeWsfStartIdx + 2], wsf[fakeWsfStartIdx + 3] ],
                 removed: []
@@ -482,7 +483,10 @@ suite("Multi-Root Workspace Tests", () =>
         {
             workspace.getWorkspaceFolder = (uri: Uri) =>
             {
-                return wsf[uri.fsPath.includes("test-fixture") ? 0 : fakeWsfStartIdx];
+                if (uri.fsPath.includes("test-fixture")) {
+                    return wsf[0];
+                }
+                return wsf.find(f => uri.fsPath.toLowerCase().startsWith(f.uri.fsPath.toLowerCase())) || wsf[0];
             };
             await teWrapper.fileWatcher.onWsFoldersChange({
                 added: [ wsf[fakeWsfStartIdx] ],
@@ -504,7 +508,7 @@ suite("Multi-Root Workspace Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.wsFolder.remove + tc.slowTime.tasks.count.verify + tc.slowTime.cache.rebuildCancel + 200);
-        teWrapper.fileCache.rebuildCache(""); // Don't 'await'
+        void teWrapper.fileCache.rebuildCache(""); // Don't 'await'
         await sleep(100);
         if (!tc.isMultiRootWorkspace)
         {

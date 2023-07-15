@@ -350,131 +350,140 @@ suite("Tree Tests", () =>
     test("Misc Sort Folders", function()
     {
         if (utils.exitRollingCount(this)) return;
-        let map: IDictionary<DumbFolder> = {};
-        map.frank = new DumbFolder("frank");
-        map["richard face"] = new DumbFolder("richard face");
-        map.bob = new DumbFolder("bob");
-        map.scott = new DumbFolder("maurice");
-        map.Favorites = new DumbFolder("Favorites");
-        map.chris = new DumbFolder("chris");
-        map.maurice = new DumbFolder("maurice");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map.peter = new DumbFolder("peter");
-        map.larry = new DumbFolder("larry");
-        map.mike = new DumbFolder("maurice");
+        let map: DumbFolder[] = [
+            new DumbFolder("frank"),
+            new DumbFolder("richard face"),
+            new DumbFolder("bob"),
+            new DumbFolder("maurice"),
+            new DumbFolder("Favorites"),
+            new DumbFolder("chris"),
+            new DumbFolder("maurice"),
+            new DumbFolder("User Tasks"),
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("peter"),
+            new DumbFolder("larry"),
+            new DumbFolder("maurice")
+        ];
         teWrapper.sorters.sortFolders(map);
-        map = {};
-        map.Zoo = new DumbFolder("onetwothree");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        map.OMG = new DumbFolder("if i was");
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map["Andrew was here"] = new DumbFolder("tasks4");
-        map["maya and sierra"] = new DumbFolder("tasks5");
-        map["front DOOR"] = new DumbFolder("Christmas");
-        map["change folder"] = new DumbFolder("what");
-        map.Favorites = new DumbFolder("Favorites");
-        map["extremely tired"] = new DumbFolder("tired1");
-        map.tired = new DumbFolder("tired2");
-        map["dozing off"] = new DumbFolder("doze");
-        teWrapper.sorters.sortFolders(map);
-        map = {};
-        map.Zoo = new DumbFolder("onetwothree");
-        map.OMG = new DumbFolder("if i was");
-        map.Favorites = new DumbFolder("Favorites");
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map["Andrew was here"] = new DumbFolder("tasks4");
-        map["maya and sierra"] = new DumbFolder("tasks5");
-        map["front DOOR"] = new DumbFolder("Christmas");
-        map["change folder"] = new DumbFolder("what");
-        map["extremely tired"] = new DumbFolder("tired1");
-        map.tired = new DumbFolder("tired2");
-        map["dozing off"] = new DumbFolder("doze");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        teWrapper.sorters.sortFolders(map);
-        map = {};
-        map.Zoo = new DumbFolder("onetwothree");
-        map.OMG = new DumbFolder("if i was");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        map.Favorites = new DumbFolder("Favorites");
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map["Andrew was here"] = new DumbFolder("tasks4");
-        map["maya and sierra"] = new DumbFolder("tasks5");
-        map["front DOOR"] = new DumbFolder("Christmas");
-        map["change folder"] = new DumbFolder("what");
-        map["extremely tired"] = new DumbFolder("tired1");
-        map.tired = new DumbFolder("tired2");
-        map["dozing off"] = new DumbFolder("doze");
-        teWrapper.sorters.sortFolders(map);
-        map = {};
-        map.Zoo = new DumbFolder("onetwothree");
-        map.OMG = new DumbFolder("if i was");
-        map.Favorites = new DumbFolder("Favorites");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map["Andrew was here"] = new DumbFolder("tasks4");
-        map["maya and sierra"] = new DumbFolder("tasks5");
-        map["front DOOR"] = new DumbFolder("Christmas");
-        map["change folder"] = new DumbFolder("what");
-        map["extremely tired"] = new DumbFolder("tired1");
-        map.tired = new DumbFolder("tired2");
-        map["dozing off"] = new DumbFolder("doze");
-        teWrapper.sorters.sortFolders(map);
-        map = {};
-        map.Zoo = new DumbFolder("onetwothree");
-        map.OMG = new DumbFolder("if i was");
-        map.Favorites = new DumbFolder("Favorites");
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        map["Andrew was here"] = new DumbFolder("tasks4");
-        map["maya and sierra"] = new DumbFolder("tasks5");
-        map["front DOOR"] = new DumbFolder("Christmas");
-        map["change folder"] = new DumbFolder("what");
-        map["extremely tired"] = new DumbFolder("tired1");
-        map.tired = new DumbFolder("tired2");
-        map["dozing off"] = new DumbFolder("doze");
-        teWrapper.sorters.sortFolders(map);
-        map = {};
-        map.Zoo = new DumbFolder("onetwothree");
-        map.OMG = new DumbFolder("if i was");
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map.Favorites = new DumbFolder("Favorites");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        map["Andrew was here"] = new DumbFolder("tasks4");
-        map["maya and sierra"] = new DumbFolder("tasks5");
-        map["front DOOR"] = new DumbFolder("Christmas");
-        map["change folder"] = new DumbFolder("what");
-        map["extremely tired"] = new DumbFolder("tired1");
-        map.tired = new DumbFolder("tired2");
-        map["dozing off"] = new DumbFolder("doze");
-        teWrapper.sorters.sortFolders(map);
-        map = {};
-        map.Zoo = new DumbFolder("onetwothree");
-        map.OMG = new DumbFolder("if i was");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map.Favorites = new DumbFolder("Favorites");
-        map["Andrew was here"] = new DumbFolder("tasks4");
-        map["maya and sierra"] = new DumbFolder("tasks5");
-        map["front DOOR"] = new DumbFolder("Christmas");
-        map["change folder"] = new DumbFolder("what");
-        map["extremely tired"] = new DumbFolder("tired1");
-        map.tired = new DumbFolder("tired2");
-        map["dozing off"] = new DumbFolder("doze");
-        teWrapper.sorters.sortFolders(map);
-        map = {};
-        map["Last Tasks"] = new DumbFolder("Last Tasks");
-        map[""] = new DumbFolder("onetwothree");
-        map.OMG = new DumbFolder("if i was");
-        map["Andrew was here"] = new DumbFolder("");
-        map.Favorites = new DumbFolder("Favorites");
-        map["maya and sierra"] = new DumbFolder("tasks5");
-        map["front DOOR"] = new DumbFolder("");
-        map["User Tasks"] = new DumbFolder("User Tasks");
-        map[""] = new DumbFolder("what");
-        map["extremely tired"] = new DumbFolder("tired1");
-        map.tired = new DumbFolder("tired2");
-        map["dozing off"] = new DumbFolder("doze");
+        map = [
+            new DumbFolder("onetwothree"),
+            new DumbFolder("User Tasks"),
+            new DumbFolder("if i was"),
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("tasks4"),
+            new DumbFolder("tasks5"),
+            new DumbFolder("Christmas"),
+            new DumbFolder("what"),
+            new DumbFolder("Favorites"),
+            new DumbFolder("tired1"),
+            new DumbFolder("tired2"),
+            new DumbFolder("doze"),
+        ],
+        teWrapper.sorters.sortFolders(map),
+        map = [
+            new DumbFolder("onetwothree"),
+            new DumbFolder("if i was"),
+            new DumbFolder("Favorites"),
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("tasks4"),
+            new DumbFolder("tasks5"),
+            new DumbFolder("Christmas"),
+            new DumbFolder("what"),
+            new DumbFolder("tired1"),
+            new DumbFolder("tired2"),
+            new DumbFolder("doze"),
+            new DumbFolder("User Tasks")
+        ];
+        teWrapper.sorters.sortFolders(map),
+        map = [
+            new DumbFolder("onetwothree"),
+            new DumbFolder("if i was"),
+            new DumbFolder("User Tasks"),
+            new DumbFolder("Favorites"),
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("tasks4"),
+            new DumbFolder("tasks5"),
+            new DumbFolder("Christmas"),
+            new DumbFolder("what"),
+            new DumbFolder("tired1"),
+            new DumbFolder("tired2"),
+            new DumbFolder("doze")
+        ];
+        teWrapper.sorters.sortFolders(map),
+        map = [
+            new DumbFolder("onetwothree"),
+            new DumbFolder("if i was"),
+            new DumbFolder("Favorites"),
+            new DumbFolder("User Tasks"),
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("tasks4"),
+            new DumbFolder("tasks5"),
+            new DumbFolder("Christmas"),
+            new DumbFolder("what"),
+            new DumbFolder("tired1"),
+            new DumbFolder("tired2"),
+            new DumbFolder("doze")
+        ];
+        teWrapper.sorters.sortFolders(map),
+        map = [
+            new DumbFolder("onetwothree"),
+            new DumbFolder("if i was"),
+            new DumbFolder("Favorites"),
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("User Tasks"),
+            new DumbFolder("tasks4"),
+            new DumbFolder("tasks5"),
+            new DumbFolder("Christmas"),
+            new DumbFolder("what"),
+            new DumbFolder("tired1"),
+            new DumbFolder("tired2"),
+            new DumbFolder("doze")
+        ];
+        teWrapper.sorters.sortFolders(map),
+        map = [
+            new DumbFolder("onetwothree"),
+            new DumbFolder("if i was"),
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("Favorites"),
+            new DumbFolder("User Tasks"),
+            new DumbFolder("tasks4"),
+            new DumbFolder("tasks5"),
+            new DumbFolder("Christmas"),
+            new DumbFolder("what"),
+            new DumbFolder("tired1"),
+            new DumbFolder("tired2"),
+            new DumbFolder("doze")
+        ];
+        teWrapper.sorters.sortFolders(map),
+        map = [
+            new DumbFolder("onetwothree"),
+            new DumbFolder("if i was"),
+            new DumbFolder("User Tasks"),
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("Favorites"),
+            new DumbFolder("tasks4"),
+            new DumbFolder("tasks5"),
+            new DumbFolder("Christmas"),
+            new DumbFolder("what"),
+            new DumbFolder("tired1"),
+            new DumbFolder("tired2"),
+            new DumbFolder("doze")
+        ];
+        teWrapper.sorters.sortFolders(map),
+        map = [
+            new DumbFolder("Last Tasks"),
+            new DumbFolder("onetwothree"),
+            new DumbFolder("if i was"),
+            new DumbFolder(""),
+            new DumbFolder("Favorites"),
+            new DumbFolder("tasks5"),
+            new DumbFolder(""),
+            new DumbFolder("User Tasks"),
+            new DumbFolder("what"),
+            new DumbFolder("tired1"),
+            new DumbFolder("tired2"),
+            new DumbFolder("doze")
+        ];
         teWrapper.sorters.sortFolders(map);
         utils.endRollingCount(this);
     });

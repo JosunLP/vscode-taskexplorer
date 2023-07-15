@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { ITaskItem } from "./ITaskItem";
 import { ITaskDefinition } from "./ITaskDefinition";
 import { ITeTrackedUsageCount, ITaskRuntimeInfo } from "./ITeUsage";
 
@@ -42,12 +43,14 @@ export interface ITeTaskChangeEvent
     type: TeTaskListType;
     tasks: ITeTask[];
     task?: ITeTask;
+    taskItem?: ITaskItem;
 };
 
 export interface ITeTaskStatusChangeEvent
 {
     isRunning: boolean;
     task: ITeTask;
+    taskItem: ITaskItem;
     treeId: string;
 };
 

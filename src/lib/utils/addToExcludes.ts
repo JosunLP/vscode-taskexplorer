@@ -1,5 +1,5 @@
 
-import { ILog } from ":types";
+import { ILog } from "../../interface";
 import { configuration } from "../configuration";
 import { pushIfNotExists, removeFromArray } from "./utils";
 

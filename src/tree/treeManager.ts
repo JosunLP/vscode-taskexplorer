@@ -17,7 +17,7 @@ import { registerCommand } from "../lib/command/command";
 import { addToExcludes } from "../lib/utils/addToExcludes";
 import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap, IDictionary } from "../interface";
 import {
-    TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event, window
+    TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
 } from "vscode";
 
 
@@ -262,7 +262,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                     v.tree.fireTreeRefreshEvent(f, logPad);
                 });
             }
-        });
+        }, this);
     };
 
 
@@ -374,8 +374,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
      */
     private loadTasks = async (doFetch: boolean, logPad: string): Promise<void> =>
     {
-        const callLogPad = logPad + "   ",
-              count = this._tasks.length,
+        const count = this._tasks.length,
               firstTreeBuildDone = this._firstTreeBuildDone;
 
         await this.wrapper.utils.wrap(async () =>
@@ -385,40 +384,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
                 await this.fetchTasks(logPad);
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.BuildingTaskTree : undefined);
-                this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
-                Object.values(this._specialFolders).forEach(f => f.build(callLogPad));
+                this._treeBuilder.createTaskItemTree(this._currentInvalidation, logPad);
+                Object.values(this._specialFolders).forEach(f => f.build(logPad));
                 await this.setContext();
             }
             else {
-                this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
+                this._treeBuilder.createTaskItemTree(this._currentInvalidation, logPad);
             }
         },
-        [ this.wrapper.log.error, this.onOperationComplete, count, callLogPad ], this);
-    };
-
-
-    private onOperationComplete = (ct: number, logPad: string) =>
-    {
-        this._refreshPending = false;
-        this._currentInvalidation = undefined;
-        this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
-        this.fireTreeRefreshEvent(null, null, logPad);
-        this.fireTasksLoadedEvents(ct);
-    };
-
-
-    private onWorkspaceFolderRemoved = async (uri: Uri, logPad: string): Promise<void> =>
-    {
-        const w = this.wrapper,
-              count = this._tasks.length;
-        w.log.methodStart("workspace folder removed", 1, logPad, false, [[ "path", uri.fsPath ]]);
-        w.statusBar.update("Deleting all tasks from removed project folder");
-        const removed = w.utils.popIfExistsBy(
-            this._tasks, (t) => w.pathUtils.getTaskAbsolutePath(t).startsWith(uri.fsPath), this
-        );
-        this._treeBuilder.removeFolder(uri, logPad + "   ");
-        this.onOperationComplete(count, logPad);
-        w.log.methodDone("workspace folder removed", 1, logPad, [[ "# of tasks removed", removed.length ]]);
+        [ this.wrapper.log.error, this.workComplete, count, logPad ], this);
     };
 
 
@@ -485,7 +459,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             // break out this case with a different handler since we can improve the performance pretty
             // significantly for this specific event.
             //
-            await this.onWorkspaceFolderRemoved(opt, logPad);
+            this.removeWorkspaceFolder(opt, logPad);
         }
         // else if (isOptUri && w.utils.isString(invalidate, true))
         // {
@@ -565,6 +539,22 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
+    private removeWorkspaceFolder = (uri: Uri, logPad: string): void =>
+    {
+        const w = this.wrapper,
+              count = this._tasks.length;
+        this.wrapper.utils.wrap(() =>
+        {
+            w.statusBar.update("Deleting all tasks from removed project folder");
+            w.utils.popIfExistsBy(
+                this._tasks, (t) => w.pathUtils.getTaskAbsolutePath(t).startsWith(uri.fsPath), this
+            );
+            this._treeBuilder.removeFolder(uri);
+        },
+        [ this.wrapper.log.error, this.workComplete, count, logPad ], this);
+    };
+
+
     private setContext = async (): Promise<void> =>
     {
         const scriptFilesWithArgs: string[] = [],
@@ -581,5 +571,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
 
     setMessage = (m?: string): void => Object.values(this._views).filter(v => v.enabled && v.visible).forEach(v => { v.view.message =  m; });
+
+
+    private workComplete = (ct: number, logPad: string) =>
+    {
+        this._refreshPending = false;
+        this._currentInvalidation = undefined;
+        this.setMessage(this._tasks.length > 0 ? undefined : this.wrapper.keys.Strings.NoTasks);
+        this.fireTreeRefreshEvent(null, null, logPad);
+        this.fireTasksLoadedEvents(ct);
+    };
 
 }

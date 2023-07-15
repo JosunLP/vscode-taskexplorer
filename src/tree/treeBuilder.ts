@@ -116,7 +116,7 @@ export class TaskTreeBuilder
             w.log.write(`   create task tree - processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
             this.buildTaskTree(task, logPad + "   ");
         }
-        this.wrapper.utils.popIfExistsBy(this._taskFolders, f => !f.isSpecial && f.stamp !== this._buildStamp);
+        // this.wrapper.utils.popIfExistsBy(this._taskFolders, f => !f.isSpecial && f.stamp !== this._buildStamp);
         if (this._taskFolders.length > 0)
         {
             this._treeGrouper.buildGroupings(source, this._taskFolders, this._taskFileMap, logPad + "   ");
@@ -214,14 +214,14 @@ export class TaskTreeBuilder
     };
 
 
-    removeFolder = (uri: Uri, logPad: string) =>
+    removeFolder = (uri: Uri) =>
     {
-        const w = this.wrapper;
-        w.utils.popObjIfExistsBy(this._taskMap,
-            (_k, i) => !!i && (i.resourceUri?.fsPath.startsWith(uri.fsPath) || i.taskFile.resourceUri.fsPath.startsWith(uri.fsPath)), this
+        this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_, i) => !!i && (i.resourceUri.fsPath.startsWith(uri.fsPath)), this);
+        this.wrapper.utils.popIfExistsBy(
+            this._taskFolders,
+            f => !!f.resourceUri && f.resourceUri.fsPath === uri.fsPath, // Exclude special folders (do not have a resourceUri)
+            this, true // single pop
         );
-        const rmv = w.utils.popIfExistsBy(this._taskFolders, f => f.resourceUri.fsPath === uri.fsPath, this, true);
-        w.log.write2("treebuilder", "remove workspace folder", 1, logPad,  [[ "# of folders removed", rmv.length ]]);
     };
 
 

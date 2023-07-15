@@ -75,6 +75,7 @@ export interface ILog
     dispose(): void;
     error(msg: any, params?: (string|any)[][], queueId?: string, symbols?: [ string, string ]): void;
     info(msg: string, level?: LogLevel, logPad?: string, queueId?: string): void;
+    // method(fileTag: string, methodTag: string, msg: string, level: LogLevel, logPad: string, params?: (string|any)[][], queueId?: string): void;
     methodStart(msg: string, level?: LogLevel, logPad?: string, doLogBlank?: boolean, params?: (string|any)[][], queueId?: string): void;
     methodDone(msg: string, level?: LogLevel, logPad?: string, params?: (string|any)[][], queueId?: string): void;
     methodEvent(msg: string, tag?: string,  level?: LogLevel, params?: (string|any)[][], queueId?: string): void;

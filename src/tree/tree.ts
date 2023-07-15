@@ -122,7 +122,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
      * @param logPad Log padding
      * @param logLevel Log level
      */
-    getChildren = async(element?: TreeItem): Promise<TreeItem[]> =>
+    getChildren = (element?: TreeItem): TreeItem[] =>
     {
         const w = this.wrapper,
               logPad = w.log.control.lastLogPad,

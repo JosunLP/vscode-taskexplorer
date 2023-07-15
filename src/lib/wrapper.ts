@@ -87,7 +87,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _fileCache: TeFileCache;
 	private readonly _statusBar: TeStatusBar;
     private readonly _eventQueue: EventQueue;
-    private readonly _taskWatcher: TaskWatcher;
 	private readonly _licensePage: LicensePage;
 	private readonly _welcomePage: WelcomePage;
     private readonly _taskManager: TaskManager;
@@ -145,9 +144,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._fileCache = new TeFileCache(this);
 		this._fileWatcher = new TeFileWatcher(this);
 
-		this._treeManager = new TaskTreeManager(this);
         this._taskManager = new TaskManager(this);
-        this._taskWatcher = new TaskWatcher(this);
+		this._treeManager = new TaskTreeManager(this);
 
 		this._licenseManager = new LicenseManager(this);
 		this._usage = new Usage(this);
@@ -188,7 +186,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._homeView,
 			this._statusBar,
 			this._teContext,
-            this._taskWatcher,
             this._taskManager,
 			this._treeManager,
 			this._licensePage,
@@ -511,7 +508,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get taskUsageView(): TaskUsageView { return this._taskUsageView; }
 	get taskUtils(): ITeTaskUtilities { return taskUtils; }
 	get typeUtils(): ITeTypeUtilities { return typeUtils; }
-	get taskWatcher(): TaskWatcher { return this._taskWatcher; }
+	get taskWatcher(): TaskWatcher { return this._taskManager.watcher; }
 	get tests(): boolean { return this._context.extensionMode === ExtensionMode.Test; }
 	get treeManager(): TaskTreeManager { return this._treeManager; }
 	get usage(): Usage { return this._usage; }

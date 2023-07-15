@@ -112,6 +112,7 @@ export class TeLog implements ILog, Disposable
             methodStart: enable ? this._methodStart : () => {},
             methodDone: enable ? this._methodDone : () => {},
             methodEvent: enable ? this._methodEvent : () => {},
+            // method: enable ? this._method : () => {},
             value: enable ? this._value : () => {},
             values: enable ? this._values : () => {},
             warn: enable ? this._warn : () => {},
@@ -318,6 +319,21 @@ export class TeLog implements ILog, Disposable
             }
         }
     };
+
+
+    // private _method = (fileTag: string, methodTag: string, msg: string, level: LogLevel, logPad: string, params?: (string|any)[][], queueId?: string) =>
+    // {
+    //     if (!level || level <= this._logControl.level)
+    //     {
+    //         const tag = `[${fileTag}][${methodTag}] ${logPad}`;
+    //         this._write(`[${tag}]${msg}`, level, "", queueId);
+    //         if (params) {
+    //             for (const [ m, v ] of params) {
+    //                 this._value(`[${tag}]${m}`, v, level, "", queueId);
+    //             }
+    //         }
+    //     }
+    // };
 
 
     private msUntilMidnight(): number
@@ -641,6 +657,7 @@ export class TeLog implements ILog, Disposable
     methodStart = this._methodStart;
     methodDone = this._methodDone;
     methodEvent = this._methodEvent;
+    // method = this._method;
     value = this._value;
     values = this._values;
     warn = this._warn;

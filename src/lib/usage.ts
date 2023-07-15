@@ -262,8 +262,9 @@ export class Usage implements ITeUsage, Disposable
 
     private onTaskStatusChanged = async(e: ITeTaskStatusChangeEvent) =>
     {
-        const taskName = `${e.task.name} (${e.task.source})`;
-        this.log.methodStart("task usage tracker: on running task changed", 2, "", false, [
+        const logPad = this.log.control.lastLogPad,
+              taskName = `${e.task.name} (${e.task.source})`;
+        this.log.methodStart("task usage tracker: on running task changed", 2, logPad, false, [
             [ "task name", taskName ], [ "tree id", e.task.treeId ], [ "is running", e.isRunning ],
             [ "track usage enabled", this._trackUsage ], [ "track tasks enabled", this._trackTaskStats ]
         ]);
@@ -272,13 +273,13 @@ export class Usage implements ITeUsage, Disposable
             if (e.isRunning)
             {
                 this._runStartTimes[e.treeId] = Date.now();
-                await this.trackTask(e.task, "   ");
+                await this.trackTask(e.task, logPad + "   ");
             }
             else {
-                await this.trackTaskRuntime(e.task, "   ");
+                await this.trackTaskRuntime(e.task, logPad + "   ");
             }
         }
-        this.log.methodDone("task usage tracker: on running task changed", 2, "");
+        this.log.methodDone("task usage tracker: on running task changed", 2, logPad);
     };
 
 
@@ -418,7 +419,7 @@ export class Usage implements ITeUsage, Disposable
     };
 
 
-    private trackTask = async(iTask: ITeTask, logPad: string) =>
+    private trackTask = async (iTask: ITeTask, logPad: string) =>
     {
         const stats = this.getTaskUsageStore();
         this.log.methodStart("track task usage details", 2, logPad);

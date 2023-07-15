@@ -21,7 +21,7 @@ export interface ITaskTreeView
 export interface ITeTaskTree
 {
     isVisible(): boolean;
-    getChildren(element?: TreeItem): Promise<TreeItem[]>;
+    getChildren(element?: TreeItem): TreeItem[];
     getName(): string;
     getParent(element: TreeItem): TreeItem | null;
     onDidLoadTreeData: Event<void>;

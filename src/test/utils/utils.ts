@@ -5,6 +5,7 @@ import * as path from "path";
 import { expect } from "chai";
 import * as treeUtils from "./treeUtils";
 import { testControl } from "../control";
+import { execSync } from "child_process";
 import { closeTeWebviewPanel } from "./commandUtils";
 import { getWsPath, getProjectsPath } from "./sharedUtils";
 import { cleanupSettings, initSettings } from "./initSettings";
@@ -178,6 +179,13 @@ export const activate = async () =>
                 updateStoreValue: teWrapper.storage.update2.bind(teWrapper.storage)
             }
         };
+        //
+        // Load used external programs into memory
+        //
+        if (!testControl.isSingleSuiteTest) {
+            execSync("npx gulp --help", { stdio: [ "pipe", "pipe", "ignore" ] });
+            execSync("ant.bat -h", { stdio: [ "pipe", "pipe", "ignore" ] });
+        }
         //
         // All done
         //
