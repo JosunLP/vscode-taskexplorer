@@ -2,20 +2,16 @@
 import { join } from "path";
 import { TaskFile } from "./file";
 import { TaskFolder } from "./folder";
+import { TaskTreeNode } from "./node/base";
 import { encodeUtf8Hex } from ":env/hex";
 import { TeWrapper } from "../lib/wrapper";
 import { ITaskItem, TeTaskSource } from "../interface";
-import {
-    Task, TaskExecution, TreeItem, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command, Uri
-} from "vscode";
+import { Task, TaskExecution, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command } from "vscode";
 
 
-export class TaskItem extends TreeItem implements ITaskItem
+export class TaskItem extends TaskTreeNode implements ITaskItem
 {
-    declare label: string;
-    override id: string;
     override command: Command;
-    override resourceUri: Uri;
 
     private _paused: boolean;
     private _groupLevel: number;
@@ -29,7 +25,7 @@ export class TaskItem extends TreeItem implements ITaskItem
     private readonly _isUser: boolean;
 
 
-    constructor(private readonly wrapper: TeWrapper, taskFile: TaskFile, task: Task, logPad: string)
+    constructor(private readonly wrapper: TeWrapper, taskFile: TaskFile, task: Task, stamp: number, logPad: string)
     {
         super((() =>
         {
@@ -40,7 +36,7 @@ export class TaskItem extends TreeItem implements ITaskItem
                 displayName = task.name.substring(0, task.name.indexOf(" - ")) + (match ? ` (${match[1]})` : "");
             }
             return displayName;
-        })(), TreeItemCollapsibleState.None);
+        })(), stamp, TreeItemCollapsibleState.None);
         //
         const taskDef = task.definition;
         wrapper.log.methodStart("create taskitem node", 5, logPad, false, [
@@ -50,24 +46,14 @@ export class TaskItem extends TreeItem implements ITaskItem
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
         //
-        // Since we save tasks (last tasks and favorites), we need a known unique key to
-        // save them with.  We can just use the existing id parameter...
-        // 'Script' type tasks will set the file 'uri' and the 'scriptFile' flag on the task definition
-        //
-        if (task.definition.scriptFile) {
-            this.resourceUri = task.definition.uri;
-        }
-        else {
-            this.resourceUri = taskFile.resourceUri;
-        }
-        //
         // Set ID and properties
         //
+        this.resourceUri = task.definition.uri || taskFile.resourceUri;
         this.id = TaskItem.id(this.resourceUri.fsPath, task);
         this._task = task;
         this._folder = taskFile.folder;
         this._taskSource = <TeTaskSource>task.source;
-        this._isUser = taskFile.isUser;
+        this._isUser = taskFile.isUser;             // User task not related to a project/workspace folder
         this._paused = false;                       // paused flag used by start/stop/pause task functionality
         this._taskFile = taskFile;
         this._groupLevel = 0;                       // Grouping level - may be re-set by treefile.addTreeNode()

@@ -1,6 +1,7 @@
 
 import { TaskItem } from "./item";
 import { extname, join } from "path";
+import { TaskTreeNode } from "./node/base";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
 import { TeWrapper } from "../lib/wrapper";
@@ -19,12 +20,8 @@ import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode
  * The last TaskFile in a grouping will contain items of type TaskItem.  If not grouped,
  * the TaskFile node for each task type within each TaskFolder will contain items of type TaskItem.
  */
-export class TaskFile extends TreeItem implements ITaskFile
+export class TaskFile extends TaskTreeNode implements ITaskFile
 {
-    declare label: string;
-    override id: string;
-    override resourceUri: Uri;
-
     private _isGroup: boolean;
     private _fileName: string;
     private _groupLevel: number;
@@ -38,9 +35,9 @@ export class TaskFile extends TreeItem implements ITaskFile
 
 
     constructor(private readonly wrapper: TeWrapper, folder: TaskFolder, task: Task,
-                groupLevel: number, groupId: string | undefined, label: string, logPad: string)
+                groupLevel: number, groupId: string | undefined, label: string, stamp: number, logPad: string)
     {
-        super(label, TreeItemCollapsibleState.Collapsed);
+        super(label, stamp, TreeItemCollapsibleState.Collapsed);
         const taskDef = task.definition;
         wrapper.log.methodStart("create taskfile node", 4, logPad, false, [
             [ "label", label ], [ "source", task.source ], [ "task folder", folder.label ],
@@ -71,11 +68,17 @@ export class TaskFile extends TreeItem implements ITaskFile
         this._fileName = wrapper.pathUtils.getTaskFileName(task.source, taskDef);
         if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
         {
-            if (this._relativePath && task.source !== "Workspace") {
-                this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this._relativePath, this.fileName));
+            if (task.source !== "Workspace")
+            {
+                if (this._relativePath) {
+                    this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this._relativePath, this.fileName));
+                }
+                else {
+                    this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this.fileName));
+                }
             }
             else {
-                this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this.fileName));
+                this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, ".vscode", this.fileName));
             }
         } //
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder

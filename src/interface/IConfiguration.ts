@@ -15,6 +15,7 @@ export enum ConfigKeys
     EnableExplorerTree = "enableExplorerView",
     EnableSideBar = "enableSideBar",
     EnablePersistenFileCache = "enablePersistentFileCaching",
+    EnabledTasks = "enabledTasks",
     Environment = "environment",
     ExcludeGlobs = "exclude",
     ExcludeTaskRegexes = "excludeTask",

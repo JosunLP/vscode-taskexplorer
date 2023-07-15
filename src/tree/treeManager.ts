@@ -15,7 +15,6 @@ import { TeTreeConfigWatcher } from "./configWatcher";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { registerCommand } from "../lib/command/command";
 import { addToExcludes } from "../lib/utils/addToExcludes";
-import { isTaskIncluded } from "../lib/utils/isTaskIncluded";
 import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap, IDictionary } from "../interface";
 import {
     TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event, window
@@ -52,8 +51,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState", {});
         this._specialFolders = {
-            favorites: new FavoritesFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
-            lastTasks: new LastTasksFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
+            favorites: new FavoritesFolder(wrapper, 0, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
+            lastTasks: new LastTasksFolder(wrapper, 0, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
         };
 
         this._treeBuilder = new TaskTreeBuilder(wrapper);
@@ -85,8 +84,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     dispose = () => { this._tasks.splice(0); this._disposables.splice(0).forEach(d => d.dispose()); };
 
 
-    get taskMap(): TaskMap<TaskItem> { return this._treeBuilder.taskMap; }
     get tasks(): Task[] { return this._tasks; }
+    get taskMap(): TaskMap<TaskItem> { return this._treeBuilder.taskMap; }
     get taskFolders(): TaskFolder[] { return this._treeBuilder.taskFolders; }
 	get configWatcher(): TeTreeConfigWatcher { return this._configWatcher; }
     get isBusy(): boolean { return this._refreshPending || this._configWatcher.isBusy; }
@@ -213,7 +212,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         // this.tasks cache at this point, as extension provided tasks will have been skipped/ignored in the
         // provideTasks() processing.
         //
-        const rmv = w.utils.popIfExistsBy(this._tasks, t => !isTaskIncluded(w, t, logPad + "   "), this);
+        const rmv = w.utils.popIfExistsBy(this._tasks, t => !w.taskManager.utils.isTaskIncluded(t, logPad + "   "), this);
         w.log.write(`   removed ${rmv.length} ${this._currentInvalidation} tasks from new fetch`, 3, logPad);
         //
         // Hash NPM script blocks, to ignore edits to package.json when scripts have not changed, since
@@ -386,19 +385,19 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.RequestingTasks : undefined);
                 await this.fetchTasks(logPad);
                 this.setMessage(!firstTreeBuildDone ? this.wrapper.keys.Strings.BuildingTaskTree : undefined);
-                await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
+                this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
                 Object.values(this._specialFolders).forEach(f => f.build(callLogPad));
                 await this.setContext();
             }
             else {
-                await this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
+                this._treeBuilder.createTaskItemTree(this._currentInvalidation, callLogPad);
             }
         },
-        [ this.wrapper.log.error, this.loadTasksFinally, count, callLogPad ], this);
+        [ this.wrapper.log.error, this.onOperationComplete, count, callLogPad ], this);
     };
 
 
-    private loadTasksFinally = (ct: number, logPad: string) =>
+    private onOperationComplete = (ct: number, logPad: string) =>
     {
         this._refreshPending = false;
         this._currentInvalidation = undefined;
@@ -411,26 +410,15 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private onWorkspaceFolderRemoved = async (uri: Uri, logPad: string): Promise<void> =>
     {
         const w = this.wrapper,
-              tasks = this._tasks,
-              taskFolders = this._treeBuilder.taskFolders;
-        w.log.methodStart("workspace folder removed", 1, logPad, false, [
-            [ "path", uri.fsPath ], [ "current # of tasks", tasks.length ],
-            [ "current # of tree folders", taskFolders.length ], [ "project path removed", uri.fsPath ]
-        ]);
+              count = this._tasks.length;
+        w.log.methodStart("workspace folder removed", 1, logPad, false, [[ "path", uri.fsPath ]]);
         w.statusBar.update("Deleting all tasks from removed project folder");
-        const removed = this.wrapper.utils.popIfExistsBy(tasks,
-            (t) => !!t.definition.uri && t.definition.uri.fsPath.startsWith(uri.fsPath), this
+        const removed = w.utils.popIfExistsBy(
+            this._tasks, (t) => w.pathUtils.getTaskAbsolutePath(t).startsWith(uri.fsPath), this
         );
-        this.wrapper.utils.popObjIfExistsBy(this._treeBuilder.taskMap,
-            (_k, i) => !!i && (i.resourceUri?.fsPath.startsWith(uri.fsPath) || i.taskFile.resourceUri.fsPath.startsWith(uri.fsPath)), this
-        );
-        this.wrapper.utils.popIfExistsBy(taskFolders, f => f.resourceUri?.fsPath === uri.fsPath, this, true);
-        w.statusBar.update("");
-        this._refreshPending = false;
-        this.fireTreeRefreshEvent(null, null, logPad + "   ");
-        w.log.methodDone("workspace folder removed", 1, logPad,  [
-            [ "# removed", removed.length ], [ "new # of tasks", tasks.length ], [ "new # of tree folders", taskFolders.length ]
-        ]);
+        this._treeBuilder.removeFolder(uri, logPad + "   ");
+        this.onOperationComplete(count, logPad);
+        w.log.methodDone("workspace folder removed", 1, logPad, [[ "# of tasks removed", removed.length ]]);
     };
 
 

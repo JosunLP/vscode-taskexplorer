@@ -9,9 +9,39 @@ import { configuration } from "../configuration";
 import { TeTaskListType, ConfigKeys } from "../../interface";
 
 
-export const sortFolders = (folders: IDictionary<TaskFolder>): TaskFolder[] =>
+// export const sortFolders = (folders: IDictionary<TaskFolder>): TaskFolder[] =>
+// {
+//     const sortAlpha = configuration.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically);
+//     return [ ...Object.values(folders) ].sort((a: TaskFolder, b: TaskFolder) =>
+//     {
+//         if (a.label === Strings.LAST_TASKS_LABEL) {
+//             return -1;
+//         }
+//         else if (b.label === Strings.LAST_TASKS_LABEL) {
+//             return 1;
+//         }
+//         else if (a.label === Strings.FAV_TASKS_LABEL) {
+//             return -1;
+//         }
+//         else if (b.label === Strings.FAV_TASKS_LABEL) {
+//             return 1;
+//         }
+//         else if (a.label === Strings.USER_TASKS_LABEL) {
+//             return -1;
+//         }
+//         else if (b.label === Strings.USER_TASKS_LABEL) {
+//             return 1;
+//         }
+//         if (a.label && b.label && sortAlpha) {
+//             return a.label.toString().localeCompare(b.label.toString());
+//         }
+//         return 0;
+//     });
+// };
+export const sortFolders = (folders: TaskFolder[]): void =>
 {
-    return [ ...Object.values(folders) ].sort((a: TaskFolder, b: TaskFolder) =>
+    const sortAlpha = configuration.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically);
+    folders.sort((a: TaskFolder, b: TaskFolder) =>
     {
         if (a.label === Strings.LAST_TASKS_LABEL) {
             return -1;
@@ -31,7 +61,7 @@ export const sortFolders = (folders: IDictionary<TaskFolder>): TaskFolder[] =>
         else if (b.label === Strings.USER_TASKS_LABEL) {
             return 1;
         }
-        if (a.label && b.label && configuration.get<boolean>(ConfigKeys.SortProjectFoldersAlphabetically)) {
+        if (a.label && b.label && sortAlpha) {
             return a.label.toString().localeCompare(b.label.toString());
         }
         return 0;

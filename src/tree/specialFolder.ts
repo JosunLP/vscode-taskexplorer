@@ -38,15 +38,15 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     override treeNodes: TaskItem[] = [];
 
 
-    constructor(protected readonly wrapper: TeWrapper, protected readonly listType: TeTaskListType, label: string, settingName: string, state: TreeItemCollapsibleState)
+    constructor(protected readonly wrapper: TeWrapper, protected readonly listType: TeTaskListType, label: string, settingName: string, stamp: number, state: TreeItemCollapsibleState)
     {
-        super(label, state, true);
+        super(label, stamp, state, true);
         this.log = this.wrapper.log;
         this.iconPath = ThemeIcon.Folder;
+        this._settingNameEnabled = settingName;
         this.labelLwr = this.label.toLowerCase();
         this.contextValue = this.labelLwr.replace(/[\W \_\-]/g, "");
         this.tooltip = `A tree folder to store '${label}' tasks`;
-        this._settingNameEnabled = settingName;
         this._enabled = this.wrapper.config.get<boolean>(settingName, false);
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         this.store = this.wrapper.storage.get<ITeSpecialTask[]>(this.storeName, [], StorageTarget.Global);
@@ -209,7 +209,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     protected createTaskItem(srcTaskItem: TaskItem, logPad: string):  TaskItem
     {
-        const taskItem = new TaskItem(this.wrapper, srcTaskItem.taskFile, srcTaskItem.task, logPad);
+        const taskItem = new TaskItem(this.wrapper, srcTaskItem.taskFile, srcTaskItem.task, this.stamp, logPad);
         taskItem.id = this.getTaskSpecialId(taskItem.id);
         taskItem.label = this.getRenamedTaskName(taskItem);
         taskItem.folder = this;
