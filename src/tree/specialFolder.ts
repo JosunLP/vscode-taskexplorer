@@ -322,6 +322,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     }
 
 
-    sort = (): void => this.wrapper.sorters.sortTasks(this.treeNodes, this.listType);
+    sort = (): void => this.wrapper.treeManager.sorter.sortTasks(this.treeNodes, this.listType);
 
 }

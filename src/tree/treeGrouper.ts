@@ -27,7 +27,7 @@ export class TaskTreeGrouper
         w.log.methodStart("build tree node groupings", 3, logPad, false, [[ "group with separator", this._group ]]);
         for (const f of Object.values(folders).filter((f): f is TaskFolder => !f.isSpecial))
         {
-            w.sorters.sortTaskFolder(f, "all");
+            w.treeManager.sorter.sortTaskFolder(f, "all");
             //
             // Clear all items in this folder from the taskfile hash map
             //
@@ -47,17 +47,18 @@ export class TaskTreeGrouper
      */
     private createGroupings = (source: string | undefined, folder: TaskFolder, logPad: string) =>
     {
+        const w = this.wrapper,
+              groupHash: TaskMap<TaskFile> = {};
         let didGroupLast = false,
             prevTaskFile: TaskFile | undefined;
-        const groupHash: TaskMap<TaskFile> = {};
-        this.wrapper.log.methodStart("create tree node folder grouping", 3, logPad, true, [[ "project folder", folder.label ]]);
+        w.log.methodStart("create tree node folder grouping", 3, logPad, true, [[ "project folder", folder.label ]]);
         //
         // Loop through each TaskFile, creating a bse group node for each task source that has
         // two separate taskfile nodes.  Note that script type task files in the same directory
         // are under one node, different behavior than non-script type tasks where multiple tasks
         // can be defined in one task file.
         //
-        const taskFiles = this.wrapper.utils.popIfExistsBy(folder.treeNodes, t => !source || t.taskSource === source, this)
+        const taskFiles = w.utils.popIfExistsBy(folder.treeNodes, t => !source || t.taskSource === source, this)
                                             .filter((t): t is TaskFile => TaskFile.is(t));
         for (const taskFile of taskFiles)
         {   //
@@ -71,13 +72,13 @@ export class TaskTreeGrouper
                     const gid = TaskFile.groupId(folder, folder.resourceUri.fsPath, prevTaskFile.taskSource, prevTaskFile.taskSource, 0);
                     if (!groupHash[gid])
                     {
-                        this.wrapper.log.values(3, logPad, [
+                        w.log.values(3, logPad, [
                             [ "add taskfile grouped child container", taskFile.relativePath ], [ "group id", gid ]
                         ]);
                         const taskItem = taskFile.treeNodes[0];
-                        this.wrapper.utils.execIf2(TaskItem.is(taskItem), (ti, ptf) =>
+                        w.utils.execIf2(TaskItem.is(taskItem), (ti, ptf) =>
                         {
-                            groupHash[gid] = folder.addChild(new TaskFile(this.wrapper, folder, ti.task, 0, gid, ti.task.source, folder.stamp, "   "));
+                            groupHash[gid] = folder.addChild(new TaskFile(w, folder, ti.task, 0, gid, ti.task.source, folder.stamp, "   "));
                             //
                             // Since we add the grouping when we find two or more equal group names, we are iterating
                             // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the
@@ -101,7 +102,7 @@ export class TaskTreeGrouper
             // Continue sub-grouping by breaking down any taskitems containing `groupSeparator`.
             // User may optionally turn off parsing of script file groupings (by sepoarators in filename)
             //
-            if (this._groupScripts || !this.wrapper.taskUtils.isScriptType(taskFile.taskSource))
+            if (this._groupScripts || !w.taskUtils.isScriptType(taskFile.taskSource))
             {
                 this.groupBySep(folder, taskFile, groupHash, 0, logPad + "   ");
             }
@@ -115,7 +116,7 @@ export class TaskTreeGrouper
         // For groupings with separator, now go through and rename the labels within each group.
         // Configurable to use task name as is, or breakdown and remove the grouped parts from the label
         //
-        this.wrapper.log.write(logPad + "   rename grouped tasks", 3);
+        w.log.write(logPad + "   rename grouped tasks", 3);
         for (const t of folder.treeNodes.filter((t): t is TaskFile => TaskFile.is(t)))
         {
             this.renameGroupedTasks(t);
@@ -123,8 +124,8 @@ export class TaskTreeGrouper
         //
         // Resort after making adds/removes
         //
-        this.wrapper.sorters.sortTaskFolder(folder, "all");
-        this.wrapper.log.methodDone("create tree node folder grouping", 3, logPad);
+        w.treeManager.sorter.sortTaskFolder(folder, "all");
+        w.log.methodDone("create tree node folder grouping", 3, logPad);
         return groupHash;
     };
 

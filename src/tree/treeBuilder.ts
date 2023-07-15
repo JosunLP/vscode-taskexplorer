@@ -124,7 +124,7 @@ export class TaskTreeBuilder
         }
         const modFolders = projectFolders.filter(f => !source || !!f.treeNodes.find(n => n.taskSource === source));
         if (modFolders.length > 0) {
-            w.sorters.sortFolders(this._taskFolders);
+            w.treeManager.sorter.sortFolders(this._taskFolders);
             this._treeGrouper.buildGroupings(source, this._taskFolders, this._taskFileMap, logPad + "   ");
         }
         w.statusBar.update("");

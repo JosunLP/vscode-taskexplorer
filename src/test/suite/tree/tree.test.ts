@@ -366,7 +366,7 @@ suite("Tree Tests", () =>
             new DumbFolder("larry"),
             new DumbFolder("maurice")
         ];
-        teWrapper.sorters.sortFolders(map);
+        teWrapper.treeManager.sorter.sortFolders(map);
         map = [
             new DumbFolder("onetwothree"),
             new DumbFolder("User Tasks"),
@@ -381,7 +381,7 @@ suite("Tree Tests", () =>
             new DumbFolder("tired2"),
             new DumbFolder("doze"),
         ],
-        teWrapper.sorters.sortFolders(map),
+        teWrapper.treeManager.sorter.sortFolders(map),
         map = [
             new DumbFolder("onetwothree"),
             new DumbFolder("if i was"),
@@ -396,7 +396,7 @@ suite("Tree Tests", () =>
             new DumbFolder("doze"),
             new DumbFolder("User Tasks")
         ];
-        teWrapper.sorters.sortFolders(map),
+        teWrapper.treeManager.sorter.sortFolders(map),
         map = [
             new DumbFolder("onetwothree"),
             new DumbFolder("if i was"),
@@ -411,7 +411,7 @@ suite("Tree Tests", () =>
             new DumbFolder("tired2"),
             new DumbFolder("doze")
         ];
-        teWrapper.sorters.sortFolders(map),
+        teWrapper.treeManager.sorter.sortFolders(map),
         map = [
             new DumbFolder("onetwothree"),
             new DumbFolder("if i was"),
@@ -426,7 +426,7 @@ suite("Tree Tests", () =>
             new DumbFolder("tired2"),
             new DumbFolder("doze")
         ];
-        teWrapper.sorters.sortFolders(map),
+        teWrapper.treeManager.sorter.sortFolders(map),
         map = [
             new DumbFolder("onetwothree"),
             new DumbFolder("if i was"),
@@ -441,7 +441,7 @@ suite("Tree Tests", () =>
             new DumbFolder("tired2"),
             new DumbFolder("doze")
         ];
-        teWrapper.sorters.sortFolders(map),
+        teWrapper.treeManager.sorter.sortFolders(map),
         map = [
             new DumbFolder("onetwothree"),
             new DumbFolder("if i was"),
@@ -456,7 +456,7 @@ suite("Tree Tests", () =>
             new DumbFolder("tired2"),
             new DumbFolder("doze")
         ];
-        teWrapper.sorters.sortFolders(map),
+        teWrapper.treeManager.sorter.sortFolders(map),
         map = [
             new DumbFolder("onetwothree"),
             new DumbFolder("if i was"),
@@ -471,7 +471,7 @@ suite("Tree Tests", () =>
             new DumbFolder("tired2"),
             new DumbFolder("doze")
         ];
-        teWrapper.sorters.sortFolders(map),
+        teWrapper.treeManager.sorter.sortFolders(map),
         map = [
             new DumbFolder("Last Tasks"),
             new DumbFolder("onetwothree"),
@@ -486,7 +486,7 @@ suite("Tree Tests", () =>
             new DumbFolder("tired2"),
             new DumbFolder("doze")
         ];
-        teWrapper.sorters.sortFolders(map);
+        teWrapper.treeManager.sorter.sortFolders(map);
         utils.endRollingCount(this);
     });
 

@@ -4,10 +4,18 @@ import { ITaskFile } from "./ITaskFile";
 import { ITaskFolder } from "./ITaskFolder";
 import { ITaskTreeView } from "./ITeTaskTree";
 import { Task, Uri, Event, TreeItem } from "vscode";
-import { ITeTask, ITeTaskChangeEvent } from "./ITeTask";
 import { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
+import { ITeTask, ITeTaskChangeEvent, TeTaskListType } from "./ITeTask";
 
 export interface TaskMap<T = ITaskFolder | ITaskFile | ITaskItem> { [id: string]: T };
+
+export interface ITeTreeSorter
+{
+	// sortFolders(folders: IDictionary<ITaskFolder>): ITaskFolder[];
+	sortFolders(folders: ITaskFolder[]): void;
+	sortTaskFolder(folder: ITaskFolder, listType: TeTaskListType): void;
+	sortTasks(items: (ITaskFile | ITaskItem)[], listType: TeTaskListType): void;
+}
 
 export interface ITeTreeManager
 {
@@ -23,6 +31,7 @@ export interface ITeTreeManager
     readonly onDidAllTasksChange: Event<ITeTaskChangeEvent>;
     readonly onReady: Event<ITeTaskChangeEvent>;
     readonly runningTasks: any[];
+    readonly sorter: ITeTreeSorter;
     readonly tasks: Task[];
     readonly taskMap: TaskMap<ITaskItem>;
     readonly taskFolders: ITaskFolder[];

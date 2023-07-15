@@ -5,13 +5,14 @@ import { TaskFile } from "../tree/file";
 import { TaskItem } from "../tree/item";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskWatcher } from "./taskWatcher";
+import { TaskFolder } from "../tree/folder";
 import { PinnedStorageKey } from "../lib/constants";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "./provider/script";
 import { registerCommand } from "../lib/command/command";
 import { TaskDetailsPage } from "../webview/page/taskDetails";
 import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
-import { ILog, ITeTaskManager, ITeTask, TeTaskListType, ITaskFolder } from "../interface";
+import { ILog, ITeTaskManager, ITeTask, TeTaskListType } from "../interface";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder
@@ -371,8 +372,8 @@ export class TaskManager implements ITeTaskManager, Disposable
         }
         else if (listType === "all")
         {
-            this.wrapper.sorters.sortTaskFolder(
-                <ITaskFolder>w.treeManager.taskFolders.find(f => f.resourceUri && f.resourceUri.fsPath.startsWith(iTask.fsPath)),
+            this.wrapper.treeManager.sorter.sortTaskFolder(
+                <TaskFolder>w.treeManager.taskFolders.find(f => f.resourceUri && iTask.fsPath.startsWith(f.resourceUri.fsPath)),
                 listType
             );
         }

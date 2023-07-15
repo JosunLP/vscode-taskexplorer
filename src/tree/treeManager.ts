@@ -19,6 +19,7 @@ import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap, ID
 import {
     TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
 } from "vscode";
+import { TeTreeSorter } from "./sorter";
 
 
 export class TaskTreeManager implements ITeTreeManager, Disposable
@@ -29,6 +30,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     private _currentInvalidation: string | undefined;
 
     private readonly _tasks: Task[];
+    private readonly _sorter: TeTreeSorter;
     private readonly _disposables: Disposable[];
     private readonly _treeBuilder: TaskTreeBuilder;
 	private readonly _configWatcher: TeTreeConfigWatcher;
@@ -55,6 +57,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             lastTasks: new LastTasksFolder(wrapper, 0, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
         };
 
+        this._sorter = new TeTreeSorter(wrapper);
         this._treeBuilder = new TaskTreeBuilder(wrapper);
 		this._configWatcher = new TeTreeConfigWatcher(wrapper);
 
@@ -100,6 +103,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     get lastTasks(): Task[] { return this._specialFolders.lastTasks.treeNodes.map(f => f.task); }
     get lastTasksFolder(): LastTasksFolder { return this._specialFolders.lastTasks; }
     get runningTasks(): Task[] { return vscTasks.taskExecutions.map(e => e.task); }
+    get sorter(): TeTreeSorter { return this._sorter; }
     get views(): { taskExplorer: ITaskTreeView; taskExplorerSideBar: ITaskTreeView } { return this._views; }
 
 

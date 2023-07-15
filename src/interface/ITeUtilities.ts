@@ -69,14 +69,6 @@ export interface ITePromiseUtilities
 	promiseFromEvent<T, U>(event: Event<T>, adapter?: PromiseAdapter<T, U>): { promise: Promise<U>; cancel: EventEmitter<void> };
 }
 
-export interface ITeSortUtilities
-{
-	// sortFolders(folders: IDictionary<ITaskFolder>): ITaskFolder[];
-	sortFolders(folders: ITaskFolder[]): void;
-	sortTaskFolder(folder: ITaskFolder, listType: TeTaskListType): void;
-	sortTasks(items: (ITaskFile | ITaskItem)[], listType: TeTaskListType): void;
-}
-
 export interface ITeTaskUtilities
 {
 	getGlobPattern(taskType: string): string;

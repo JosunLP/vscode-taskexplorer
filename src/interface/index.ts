@@ -12,7 +12,7 @@ export type { ITaskExplorerProvider } from "./ITaskProvider";
 export type { IExternalProvider } from "./IExternalProvider";
 export type { IEventQueue, IEventTask } from "./IEventQueue";
 export type { ICacheItem, ITeFileCache } from "./ITeFileCache";
-export type { ITeTreeManager, TaskMap } from "./ITeTreeManager";
+export type { ITeTreeManager, ITeTreeSorter, TaskMap } from "./ITeTreeManager";
 export type { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 export type { IStatusBarInfo, ITeStatusBar } from "./ITeStatusBar";
 export type { ITeWrapper, ITeKeys, TeRuntimeEnvironment } from "./ITeWrapper";
@@ -33,7 +33,7 @@ export type {
     WebviewUsageKey, WebviewViewUsageKey, TreeviewUsageKey
 } from "./ITeUsage";
 export type {
-    ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, OneOf,
+    ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, OneOf,
     ITeTypeUtilities, PromiseAdapter, CallbackOptions, CallbackArray, IDictionary, Primitive, ObjectDiff, ITeObjectUtilities
 } from "./ITeUtilities";
 

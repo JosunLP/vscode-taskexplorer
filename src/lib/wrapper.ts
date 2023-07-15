@@ -9,7 +9,6 @@ import { figures } from "./utils/figures";
 import { TeStatusBar } from "./statusBar";
 import * as objUtils from "./utils/object";
 import * as utilities from "./utils/utils";
-import * as sorters from "./utils/sortTasks";
 import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
 import * as typeUtils from "./utils/typeUtils";
@@ -61,9 +60,9 @@ import {
 	Disposable, EventEmitter, Event
 } from "vscode";
 import {
-	IConfiguration, ITaskExplorerProvider, IStorage, ILog, ITaskTreeView, ITeFilesystem,
-	ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities,
-	ITeTypeUtilities, ITeUtilities, ITeWrapper, TeRuntimeEnvironment, ITeKeys, IDictionary, ILogControl, ITeObjectUtilities
+	IConfiguration, ITaskExplorerProvider, IStorage, ITaskTreeView, ITeFilesystem, ITePathUtilities,
+	ITePromiseUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities,
+	ILog, ITeWrapper, TeRuntimeEnvironment, ITeKeys, IDictionary, ILogControl, ITeObjectUtilities
 } from "../interface";
 
 
@@ -499,7 +498,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get releaseNotesPage(): ReleaseNotesPage { return this._releaseNotesPage; }
     get sidebar(): ITeTaskTree { return this.treeManager.views.taskExplorerSideBar.tree; }
     get sidebarView(): TreeView<TreeItem> { return this.treeManager.views.taskExplorerSideBar.view; }
-    get sorters(): ITeSortUtilities { return sorters; }
 	get statusBar(): ITeStatusBar { return this._statusBar; }
 	get storage(): IStorage { return this._storage; }
 	get taskCountView(): TaskCountView { return this._taskCountView; }

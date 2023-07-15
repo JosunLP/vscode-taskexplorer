@@ -20,7 +20,7 @@ import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
 import { ConfigKeys, IConfiguration } from "./IConfiguration";
 import { ExtensionContext, Event, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
-	ITeCommonUtilities, ITeObjectUtilities, ITePathUtilities, ITePromiseUtilities, ITeSortUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
+	ITeCommonUtilities, ITeObjectUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "./ITeUtilities";
 import { ITaskExplorerProvider } from "./ITaskProvider";
 
@@ -86,7 +86,6 @@ export interface ITeWrapper
 	readonly releaseNotesPage: ITeWebview;
 	readonly sidebar: ITeTaskTree;
 	readonly sidebarView: TreeView<TreeItem>;
-	readonly sorters: ITeSortUtilities;
 	readonly statusBar: ITeStatusBar;
 	readonly storage: IStorage;
 	readonly treeManager: ITeTreeManager;
