@@ -202,17 +202,6 @@ export const isExcluded = (uriPath: string, log: ILog, logPad = "") =>
 const isCallbackArray = <E = any, ER = any>(v: any): v is CallbackArray<E, ER> => !!v && isArray(v) && (isFunction(v[0]) || (v[0] === undefined && isFunction(v[1])));
 
 
-/**
- * @param taskType Task type, e.g. `npm`, `apppublisher`, `grunt`, `bash`, etc
- * @returns `true` if enabled, `false` if disabled
- */
-export const isTaskTypeEnabled = (taskType: string) =>
-{
-    const settingName = "enabledTasks." + taskType.replace(/\-/g, "").toLowerCase();
-    return configuration.get<boolean>(settingName, false);
-};
-
-
 export const lowerCaseFirstChar = (s: string, removeSpaces: boolean) =>
 {
     let fs = "";
