@@ -78,8 +78,39 @@ export class LicenseManager implements ITeLicenseManager, Disposable
     get onDidSessionChange(): Event<TeSessionChangeEvent> { return this._onSessionChange.event; }
     get onReady(): Event<void> { return this._onReady.event; }
 	get sessionInterval(): number { return this._sessionInterval[this.wrapper.env]; }
-	get statusDays(): string { return !this._account.errorState ? (this.isTrial ? this.wrapper.utils.getDateDifference(Date.now(), this.lic.expires, "d").toString() : (this.isLicensed ? this.wrapper.utils.getDateDifference(Date.now(), this.lic.expires, "d").toString() : "")) : ""; }
-    get statusDescription(): string { return !this._account.errorState ? (this.isTrial ? (this.lic.period <= 1 ? "PRE-TRIAL" : "EXT-TRIAL") : (this.isLicensed ? "LICENSED" : "UNLICENSED")) : "SERVER ERROR"; }
+
+	get statusDays(): string
+	{
+		let days: number | string = "";
+		if (!this._account.errorState)
+		{
+			if (this.isTrial) {
+				days = this.wrapper.utils.getDateDifference(Date.now(), this.lic.expires, "d");
+			}
+			else if (this.isLicensed) {
+				days = this.wrapper.utils.getDateDifference(Date.now(), this.lic.expires, "d");
+			}
+		}
+		if (days < 0) {
+			days = "--";
+		}
+		return days.toString();
+	}
+
+    get statusDescription(): string
+	{
+		let dsc = "UNLICENSED";
+		if (this._account.errorState) {
+			dsc = "SERVER ERR";
+		}
+		else if (this.isTrial) {
+			dsc = (this.lic.period <= 1 ? "PRE-TRIAL" : "EXT-TRIAL");
+		}
+		else if (this.isLicensed) {
+			dsc = "LICENSED";
+		}
+		return dsc;
+	}
 
 
 	private beginTrial = async(logPad: string): Promise<void> =>
@@ -87,9 +118,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.log.methodStart("begin trial", 1, logPad);
 		this._busy = true;
 		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
-		const result = await this.executeRequest("register/trial/start", this.wrapper.statusBar.info, logPad + "   ", {});
-		/* istanbul ignore else */
-		if (result)
+		const result = await this.executeRequest("register/trial/start", logPad + "   ", {});
+		this.wrapper.utils.execIf(result, () =>
 		{
 			window.showInformationMessage(`Welcome to ${this.wrapper.extensionTitle} 3.0.  Your 30 day trial has been activated.`, "More Info")
 			.then((action) =>
@@ -98,7 +128,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 					void executeCommand(this.wrapper.keys.Commands.ShowLicensePage);
 				}
 			});
-		}
+		}, this);
 		this.restoreStatusBar(sbInfo);
 		this.wrapper.log.methodDone("begin trial", 1, logPad);
 	};
@@ -191,7 +221,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private executeRequest = async (ep: ITeApiEndpoint, resetSbInfo: IStatusBarInfo, logPad: string, params?: any): Promise<boolean> =>
+	private executeRequest = async (ep: ITeApiEndpoint, logPad: string, params: Record<string, any>): Promise<boolean> =>
 	{
 		const token = this._account.session.token;
 		this._busy = true;
@@ -240,7 +270,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			  email = `scott-${this.wrapper.utils.getRandomNumber()}@spmeesseman.com`;
 
 		this._busy = true;
-		await this.executeRequest(ep, sbInfo, logPad + "   ", {
+		await this.executeRequest(ep, logPad + "   ", {
 			accountId: this._account.id,
 			email,
 			firstName,
@@ -399,7 +429,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private handleServerError = async (e: any): Promise<void> =>
 	{
-		this._account.errorState = e instanceof Error ||  e.status === 500;
+		this._account.errorState = e instanceof Error || e.status === 500;
 		await this.wrapper.utils.execIf2(!(e instanceof Error), async(e) =>
 		{   //
 		    // Possible Error Status Codes:
@@ -412,7 +442,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			//     409  : License/Account/Trial Record Not Found
 			//     500  : Server Error
 			//
-			const message = e.body ? e.body.message : /* istanbul ignore next */e.message;
+			const message: string = e.body ? e.body.message : /* istanbul ignore next */e.message;
 			this.wrapper.log.value("response body", JSON.stringify(e.body), 3);
 			this.wrapper.log.error(e, [[ "status code", e.status ], [ "server message", message ]]);
 			await this.wrapper.utils.execIf2(!this._account.errorState, async (m) =>
@@ -422,15 +452,20 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 					case "Account does not exist":           // 409
 					case "Account trial does not exist":     // 409
 					case "Account license does not exist":   // 409
-						this.lic.type = TeLicenseType.Free;
-						this.lic.state = TeLicenseState.Free;
+						this._account.license.type = TeLicenseType.Free;
+						this._account.license.state = TeLicenseState.Free;
 						await this.saveAccount(this._account, "   ");
 						this._account.verified = false;
 						break;
-					// case "Account trial cannot be extended": // 402
+					// case "Account trial cannot be extended": // 402 this.lic.period > 1 || !this.isRegistered
+					case "Trial already exists":             // 409
+						this._account.license.type = TeLicenseType.Free; // this.lic.period > 1 ? TeLicenseType.Free : TeLicenseType.Free;
+						this._account.license.state = TeLicenseState.Free;
+						await this.saveAccount(this._account, "   ");
+						break;
 					case "Invalid license key":              // 406
-						this.lic.type = TeLicenseType.Free;
-						this.lic.state = TeLicenseState.Free;
+						this._account.license.type = TeLicenseType.Free;
+						this._account.license.state = TeLicenseState.Free;
 						await this.saveAccount(this._account, "   ");
 						break;
 					// case "Error - could not update trial":
@@ -626,7 +661,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._busy = true;
 		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 		this.wrapper.statusBar.update("Submitting resgistration");
-		await this.executeRequest("register/account", sbInfo, "   ", params);
+		await this.executeRequest("register/account", "   ", params);
 		this.restoreStatusBar(sbInfo);
 		this.wrapper.log.methodDone("submit registration", 1, "");
 	};
@@ -638,7 +673,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._busy = true;
 		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 		this.wrapper.statusBar.update("Validating license");
-		await this.executeRequest("license/validate", sbInfo, logPad + "   ", { key });
+		await this.executeRequest("license/validate", logPad + "   ", { key });
 		this.restoreStatusBar(sbInfo);
 		this.wrapper.log.methodDone("validate license", 1, logPad);
 	};

@@ -52,9 +52,9 @@ export class TeServer
 	private readonly _requestTimeout = 7500;
 	private readonly _spmApiServer = "license.spmeesseman.com";
 	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
-		dev: "1Ac4qiBjXsNQP82FqmeJ5k0/oMEmjR6Dx9fw1ojUO9//Z4MS6gdHvmzPYY+tuhp3UV/xILD301dQZpeAt+YZzQCPupLbkKIlGhNm+bkKFbIicWdOxSuNtZW+cubqvhfid2YdEZ7Ndt3lqREaifvLPQ==",
+		dev: "1Ac4qiBjXsNQP82FqmeJ5k0/oMEmjR6Dx9fw1ojUO9//Z4MS6gdHvmzPYY+tuhp3UV/xILD301dQZpeAt+YZzY+Lnh8DlVCPjc0B4pdP84XazzZ+c3JN0vNN4cIfa+fsyPAEDzcsFUWf3z04kMyDXktZU7EiJ4vBU89qAbjOX9I=",
 		tests: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcOBrbGCpyITCp0Wm19f8gdI1hNJttkARO5Unac4LA2g7RmT/kdXSsz64zNjB9FrvrzHe97tLBHRGorwcOx/K/hQ==",
-		production: "1Ac4qiBjXsNQP82FqmeJ5qMMv9GdCsyTifVKI1MvX7GD2Wu/Ao1j5tJdleYcfG+VpMzyZOvrCohb/9PFbNw9d/pSj0Tv1UFgaFeKajtOCDiIPDYfjmqL130ghjFrjTBfE3qUge2hCg55PGtBp/20aA=="
+		production: "1Ac4qiBjXsNQP82FqmeJ5qMMv9GdCsyTifVKI1MvX7GD2Wu/Ao1j5tJdleYcfG+VAQowzMb8rivzViBQgqkR+3Ub5PUoXcS0pnupIaknMjJOjlrYCBnlpfEu54RTU/noeLfHvolDC4sBhNYYKsVcQA=="
 	};
 
 
@@ -145,7 +145,7 @@ export class TeServer
 	};
 
 
-	request = async <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: any) =>
+	request = async <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>) =>
 	{
 		return Promise.race<T>(
 		[
@@ -157,7 +157,7 @@ export class TeServer
 	};
 
 
-    private _request = <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: any): Promise<T> =>
+    private _request = <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>): Promise<T> =>
 	{
 
 		return new Promise<T>((resolve, reject) =>
