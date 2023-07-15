@@ -3,26 +3,19 @@ import { State } from "../common/ipc";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewView } from "../webviewView";
 import { ConfigurationChangeEvent } from "vscode";
+import { ITeUsageChangeEvent } from "../../interface";
 import { debounceCommand } from "../../lib/command/command";
-import { ITeUsageChangeEvent, WebviewViewIds } from "../../interface";
 
 
 export class TaskUsageView extends TeWebviewView<State>
 {
-	static viewId: WebviewViewIds = "taskUsage"; // Must match view id in package.jso
 	private _trackStats = false;
 	private _trackUsage = false;
 
 
 	constructor(wrapper: TeWrapper)
 	{
-		super(
-			wrapper,
-			"Task Usage",
-			"Task Usage Details",
-			"task-usage.html",
-			TaskUsageView.viewId
-		);
+		super(wrapper, "Task Usage", "Task Usage Details", "task-usage.html", "taskUsage");
 		this._trackUsage = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TrackUsage, false);
 		this._trackStats = this._trackUsage && this.wrapper.config.get<boolean>(this.wrapper.keys.Config.TaskMonitorTrackStats, false);
 	}

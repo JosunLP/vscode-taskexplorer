@@ -23,7 +23,7 @@ export interface ITeWebview
     onDidReceiveMessage: Event<string>;
     onDidReceiveReady: Event<void>;
     serializer?: WebviewPanelSerializer;
-    view: TreeView<TreeItem> | WebviewView | WebviewPanel | undefined;
+    view: WebviewView | WebviewPanel | undefined;
     readonly visible: boolean;
     postMessage(type: any, params: any, completionId?: string): Promise<boolean>;
     show(options?: any, ...args: any[]): Promise<any>;

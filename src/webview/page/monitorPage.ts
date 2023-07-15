@@ -3,29 +3,16 @@ import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { ConfigurationChangeEvent } from "vscode";
 import { toITask } from "../../lib/utils/taskUtils";
-import {
-	ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent, WebviewIds
-} from "../../interface";
-import {
-	MonitorAppState, IpcTasksChangedMsg, IpcTaskChangedMsg, IMonitorAppTimerMode, IpcConfigChangedMsg
-} from "../common/ipc";
+import { ITeRunningTaskChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent } from "../../interface";
+import { MonitorAppState, IpcTasksChangedMsg, IpcTaskChangedMsg, IMonitorAppTimerMode, IpcConfigChangedMsg } from "../common/ipc";
 
 
 export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 {
-	static viewId: WebviewIds = "taskMonitor"; // Must match view id in package.json
-
 
 	constructor(wrapper: TeWrapper)
 	{
-		super(
-			wrapper,
-			"monitor.html",
-			"Task Monitor",
-			MonitorPage.viewId,
-			"res/img/logo-bl.png",
-			wrapper.keys.Commands.ShowTaskMonitorPage
-		);
+		super(wrapper, "monitor.html", "Task Monitor", "taskMonitor", "res/img/logo-bl.png", wrapper.keys.Commands.ShowTaskMonitorPage);
 	}
 
 

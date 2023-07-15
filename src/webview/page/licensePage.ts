@@ -2,27 +2,21 @@
 import { Disposable } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
+import { ITeTaskChangeEvent } from "../../interface";
 import { debounceCommand } from "../../lib/command/command";
 import { createTaskCountTable } from "../common/taskCountTable";
 import { createTaskImageTable } from "../common/taskImageTable";
-import { ITeTaskChangeEvent, WebviewIds } from "../../interface";
 import { IIpcMessage, IpcRegisterAccountMsg, onIpc, State } from "../common/ipc";
 
 
 export class LicensePage extends TeWebviewPanel<State>
 {
-	static viewId: WebviewIds = "licensePage";
-
 
 	constructor(wrapper: TeWrapper)
 	{
 		super(
-			wrapper,
-			"license.html",
-			`${wrapper.extensionTitle} Licensing`,
-			LicensePage.viewId,
-			"res/img/logo-bl.png",
-			wrapper.keys.Commands.ShowLicensePage
+			wrapper, "license.html", `${wrapper.extensionTitle} Licensing`,
+			"licensePage", "res/img/logo-bl.png", wrapper.keys.Commands.ShowLicensePage
 		);
 	}
 

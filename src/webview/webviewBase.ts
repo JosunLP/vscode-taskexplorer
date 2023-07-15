@@ -17,7 +17,7 @@ import { TeWebviewView } from "./webviewView";
 import { TeWebviewPanel } from "./webviewPanel";
 import { fontawesome } from "./common/fontawesome";
 import { executeCommand } from "../lib/command/command";
-import { Commands, ITeWebview, WebviewIds, WebviewPrefix, WebviewViewIds } from "../interface";
+import { Commands, ITeWebview, WebviewIds, WebviewViewIds } from "../interface";
 import {
 	ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, window, workspace
 } from "vscode";
@@ -25,8 +25,6 @@ import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, onIpc, IpcFocusChangedParams,
 	IpcReadyCommand, IpcUpdateConfigCommand, IpcEnabledChangedMsg, IpcShowMessageCommand
 } from "./common/ipc";
-
-type WebviewId = `${WebviewPrefix.View}${WebviewViewIds|WebviewIds}`;
 
 
 export interface FontAwesomeClass
@@ -93,6 +91,10 @@ export abstract class TeWebviewBase<State, SerializedState> extends TeViewBase i
 
 	get onDidReceiveMessage(): Event<string> {
 		return this._onMessageReceived.event;
+	}
+
+	override get view(): WebviewView | WebviewPanel | undefined {
+		return this._view;
 	}
 
 

@@ -14,13 +14,7 @@ export class TaskCountView extends TeWebviewView<State>
 
 	constructor(wrapper: TeWrapper)
 	{
-		super(
-			wrapper,
-			"Task Count",
-			"Task Counts by Type",
-			"task-count.html",
-			TaskCountView.viewId
-		);
+		super(wrapper, "Task Count", "Task Counts by Type", "task-count.html", "taskCount");
 	}
 
 

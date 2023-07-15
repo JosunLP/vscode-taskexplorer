@@ -8,18 +8,11 @@ import { createTaskImageTable } from "../common/taskImageTable";
 
 export class WelcomePage extends TeWebviewPanel<State>
 {
-	static viewId: WebviewIds = "welcome";
-
-
 	constructor(wrapper: TeWrapper)
 	{
 		super(
-			wrapper,
-			`${WelcomePage.viewId}.html`,
-			`${wrapper.extensionTitle} Tutorial`,
-			WelcomePage.viewId,
-			"res/img/logo-bl.png",
-			wrapper.keys.Commands.ShowWelcomePage
+			wrapper, "welcome.html", `${wrapper.extensionTitle} Tutorial`,
+			"welcome", "res/img/logo-bl.png", wrapper.keys.Commands.ShowWelcomePage
 		);
 		this._ignoreTeBusy = true;
 	}

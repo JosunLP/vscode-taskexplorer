@@ -129,7 +129,7 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
         }
     }
 
-    if (!wasVisible || force || teWebview.busy)
+    if (!wasVisible || force || teWebview.isBusy)
     {
         await Promise.race<void>(
         [
@@ -140,7 +140,7 @@ export const showTeWebview = async(teView: ITeWebview | string, ...args: any[]) 
     }
 
     let waited = Date.now() - start;
-    while (teWebview.busy && waited < timeout)
+    while (teWebview.isBusy && waited < timeout)
     {
         await sleep(25);
         waited += 25;
@@ -164,7 +164,7 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
     await waitForWebviewReadyEvent(webviewPage, 4000);
     await sleep(1);
     let waited = Date.now() - start;
-    while (webviewPage.busy && waited < 5000)
+    while (webviewPage.isBusy && waited < 5000)
     {
         await sleep(25);
         waited += 25;
@@ -195,12 +195,12 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
     expect(webviewPage).to.not.be.undefined;
     expect(webviewPage.visible).to.be.equal(true);
     waited = Date.now() - start;
-    while (webviewPage.busy && waited < 5000)
+    while (webviewPage.isBusy && waited < 5000)
     {
         await sleep(25);
         waited += 25;
     }
-    expect(webviewPage.busy).to.be.equal(false);
+    expect(webviewPage.isBusy).to.be.equal(false);
 };
 
 
@@ -208,7 +208,7 @@ export const closeTeWebviewPanel = async(teView: ITeWebview) =>
 {
     let waited = 0;
     const maxWait = 2200;
-    while (teView.view && teView.busy) {
+    while (teView.view && teView.isBusy) {
         await sleep(25);
         waited += 25;
     }
@@ -226,7 +226,7 @@ export const closeTeWebviewPanel = async(teView: ITeWebview) =>
             waited += 25;
         }
         expect(teView.visible).to.be.equal(false);
-        expect(teView.busy).to.be.equal(false);
+        expect(teView.isBusy).to.be.equal(false);
         expect(teView.view).to.be.undefined;
     } catch  {
         await sleep(10);

@@ -452,8 +452,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 			   this._fileWatcher.isBusy || this._licenseManager.isBusy;
 	}
 	get busyWebviews(): boolean {
-		return this._licensePage.busy || this._parsingReportPage.busy || this._releaseNotesPage.busy || this._homeView.busy ||
-			   this._taskUsageView.busy || this._taskCountView.busy || this._welcomePage.busy;
+		return this._licensePage.isBusy || this._parsingReportPage.isBusy || this._releaseNotesPage.isBusy || this._homeView.isBusy ||
+			   this._taskUsageView.isBusy || this._taskCountView.isBusy || this._welcomePage.isBusy;
 	}
 	get cacheBuster(): string { return this._cacheBuster; }
 	get commonUtils(): typeof commonUtils { return commonUtils; }

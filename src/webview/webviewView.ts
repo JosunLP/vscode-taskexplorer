@@ -11,7 +11,7 @@
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewBase } from "./webviewBase";
 import { executeCommand } from "../lib/command/command";
-import { WebviewPrefix, WebviewViewContextKey, WebviewViewIds, WebviewViewUsageKey } from "../interface";
+import { WebviewViewContextKey, WebviewViewIds, WebviewViewUsageKey } from "../interface";
 import {
 	CancellationToken, WebviewView, WebviewViewProvider, WebviewViewResolveContext, WindowState, Disposable, window, Uri
 } from "vscode";
@@ -30,7 +30,7 @@ export abstract class TeWebviewView<State, SerializedState = State> extends TeWe
 
 	constructor(wrapper: TeWrapper, title: string, description: string, fileName: string, viewId: WebviewViewIds)
 	{
-		super(wrapper, `${WebviewPrefix.View}${viewId}`, title, fileName);
+		super(wrapper, title, fileName, viewId);
 		this.description = description;
 		this._usageKey = `${wrapper.keys.Usage.WebviewViewPrefix}${viewId}View`;
 		this._contextKeyPrefix = `${wrapper.keys.Context.WebviewViewPrefix}${viewId}`;

@@ -1,16 +1,13 @@
 
+import { Uri } from "vscode";
 import { marked } from "marked";
 import { State } from "../common/ipc";
-import { Uri, workspace } from "vscode";
-import { WebviewIds } from "../../interface";
 import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 
 
 export class ReleaseNotesPage extends TeWebviewPanel<State>
 {
-	static viewId: WebviewIds = "releaseNotes";
-
 
 	constructor(wrapper: TeWrapper)
 	{
@@ -18,7 +15,7 @@ export class ReleaseNotesPage extends TeWebviewPanel<State>
 			wrapper,
 			"release-notes.html",
 			`${wrapper.extensionName} ${wrapper.context.extension.packageJSON.version} Release Notes`,
-			ReleaseNotesPage.viewId,
+			"releaseNotes",
 			"res/img/logo-bl.png",
 			wrapper.keys.Commands.ShowReleaseNotesPage
 		);

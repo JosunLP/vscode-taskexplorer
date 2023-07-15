@@ -11,7 +11,7 @@
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewBase } from "./webviewBase";
 import { registerCommand } from "../lib/command/command";
-import { WebviewPrefix, WebviewIds, WebviewContextKey, WebviewUsageKey, Commands } from "../interface";
+import { WebviewIds, WebviewContextKey, WebviewUsageKey, Commands } from "../interface";
 import {
     WebviewOptions, WebviewPanel, WebviewPanelOnDidChangeViewStateEvent, WebviewPanelOptions, WindowState,
     Disposable, Uri, ViewColumn, window, WebviewPanelSerializer
@@ -29,7 +29,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 
 	constructor(wrapper: TeWrapper, fileName: string, title: string,  viewId: WebviewIds, private readonly iconPath: string, showCommand?: Commands)
 	{
-		super(wrapper, `${WebviewPrefix.View}${viewId}`, title, fileName);
+		super(wrapper, title, fileName, viewId);
 		this._isMultiInstance = !showCommand;
 		if (showCommand){
 			this.disposables.push(

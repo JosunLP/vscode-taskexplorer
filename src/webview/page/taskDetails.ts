@@ -5,24 +5,17 @@ import { TeWrapper } from "../../lib/wrapper";
 import { TeWebviewPanel } from "../webviewPanel";
 import { ConfigurationChangeEvent } from "vscode";
 import { debounceCommand } from "../../lib/command/command";
-import { ITeTask, ITeTaskStatusChangeEvent, WebviewIds } from "../../interface";
+import { ITeTask, ITeTaskStatusChangeEvent } from "../../interface";
 
 
 export class TaskDetailsPage extends TeWebviewPanel<State>
 {
-	static viewId: WebviewIds = "taskDetails";
 	private _task: ITeTask;
 
 
 	constructor(wrapper: TeWrapper, task: ITeTask)
 	{
-		super(
-			wrapper,
-			"task-details.html",
-			`Task Details - ${task.name}`,
-			TaskDetailsPage.viewId,
-			"res/img/logo-bl.png"
-		);
+		super(wrapper, "task-details.html", `Task Details - ${task.name}`, "taskDetails", "res/img/logo-bl.png");
 		this._task = { ...task };
 	}
 
