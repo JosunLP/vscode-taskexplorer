@@ -26,11 +26,11 @@ module.exports = {
         ecmaVersion: 2020,
         createDefaultProgram: true
     },
-    ignorePatterns: ["**/test-fixture/*.js", "types/**", "*.json", "**/node_modules/**", "**/.eslint*", "dist/**" ],
+    ignorePatterns: ["**/test-fixture/**/*.js", "types/**", "*.json", "**/node_modules/**", "**/.eslint*", "dist/**" ],
     overrides: [
     {
         files: [ "src/**/*.ts", "script/**/*.js", "webpack.*.js", "webpack/**/*.js" ],
-        excludedFiles: ["test-fixture", "types", "*.json", "dist" ]
+        excludedFiles: ["test-fixture/**", "types", "*.json", "dist" ]
     }],
     plugins: [
         "eslint-plugin-jsdoc",
