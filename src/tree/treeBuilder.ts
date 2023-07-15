@@ -106,7 +106,7 @@ export class TaskTreeBuilder
     {
         let taskCt = 0;
         const w = this.wrapper,
-              tasks = w.treeManager.tasks; // .filter(t => !source || source === t.source);
+              tasks = w.treeManager.tasks.filter(t => !source || source === t.source);
         w.log.methodStart("create task tree", 1, logPad, false, [[ "source", source ], [ "# of tasks", tasks.length ]]);
         w.statusBar.update(w.keys.Strings.BuildingTaskTree);
         this.invalidate(source);
@@ -148,21 +148,19 @@ export class TaskTreeBuilder
     };
 
 
-    private invalidate = (_source?: string) =>
+    private invalidate = (source?: string) =>
     {
-        this._taskFolders.forEach(f => f.treeNodes.splice(0));
-        // this.wrapper.utils.popIfExistsBy(this._taskFolders, f => !f.isSpecial);
-        // if (!source)
-        // {
-            // this._taskFolders.splice(0);
+        if (!source)
+        {
+            this._taskFolders.forEach(f => f.treeNodes.splice(0));
             Object.keys(this._taskMap).forEach(k => delete this._taskMap[k], this);
             Object.keys(this._taskFileMap).forEach(k => delete this._taskFileMap[k], this);
-        // }
-        // else {
-        //     this.wrapper.utils.popIfExistsBy(this._taskFolders, f => !f.isSpecial);
-        //     this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_k, t) => t.taskSource === source, this);
-        //     this.wrapper.utils.popObjIfExistsBy(this._taskFileMap, (_k, t) => t.taskSource === source, this);
-        // }
+        }
+        else {
+            this._taskFolders.forEach(f => this.wrapper.utils.popIfExistsBy(f.treeNodes, n => n.taskSource === source));
+            this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_k, t) => t.taskSource === source, this);
+            this.wrapper.utils.popObjIfExistsBy(this._taskFileMap, (_k, t) => t.taskSource === source, this);
+        }
     };
 
 
