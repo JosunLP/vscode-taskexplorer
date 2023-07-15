@@ -15,9 +15,9 @@ export class TaskFolder extends TaskTreeNode implements ITaskFolder
     readonly workspaceFolder: WorkspaceFolder | undefined;
 
 
-    constructor(folder: WorkspaceFolder | string, stamp: number, state: TreeItemCollapsibleState, isSpecial?: boolean)
+    constructor(folder: WorkspaceFolder | string, state: TreeItemCollapsibleState, isSpecial?: boolean)
     {
-        super(isString(folder) ? folder  : folder.name, stamp, state);
+        super(isString(folder) ? folder  : folder.name, state);
         this.contextValue = "folder";
         if (!isString(folder))
         {   // 'SpecialFolder' will have string type i.e. "Favorites", "Last Tasks", "User Tasks"

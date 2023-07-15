@@ -25,7 +25,7 @@ export class TaskItem extends TaskTreeNode implements ITaskItem
     private readonly _isUser: boolean;
 
 
-    constructor(private readonly wrapper: TeWrapper, taskFile: TaskFile, task: Task, stamp: number, logPad: string)
+    constructor(private readonly wrapper: TeWrapper, taskFile: TaskFile, task: Task, logPad: string)
     {
         super((() =>
         {
@@ -36,7 +36,7 @@ export class TaskItem extends TaskTreeNode implements ITaskItem
                 displayName = task.name.substring(0, task.name.indexOf(" - ")) + (match ? ` (${match[1]})` : "");
             }
             return displayName;
-        })(), stamp, TreeItemCollapsibleState.None);
+        })(), TreeItemCollapsibleState.None);
         //
         const taskDef = task.definition;
         wrapper.log.methodStart("create taskitem node", 5, logPad, false, [

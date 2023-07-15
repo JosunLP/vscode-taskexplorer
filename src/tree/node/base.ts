@@ -9,10 +9,10 @@ export abstract class TaskTreeNode extends TreeItem
 
     private _stamp: number;
 
-    constructor(label: string, stamp: number, state: TreeItemCollapsibleState)
+    constructor(label: string, state: TreeItemCollapsibleState)
     {
         super(label, state);
-        this._stamp = stamp;
+        this._stamp = Date.now();
     }
 
     get stamp() { return this._stamp; }

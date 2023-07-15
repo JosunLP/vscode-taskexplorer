@@ -10,8 +10,6 @@ import { Task, TreeItemCollapsibleState, Uri, WorkspaceFolder } from "vscode";
 
 export class TaskTreeBuilder
 {
-    private _buildStamp: number;
-
     private readonly _taskFolders: TaskFolder[];
     private readonly _taskMap: TaskMap<TaskItem>;
     private readonly _treeGrouper: TaskTreeGrouper;
@@ -20,7 +18,6 @@ export class TaskTreeBuilder
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        this._buildStamp = 0;
         this._taskMap = {};
         this._taskFileMap = {};
         this._taskFolders = [];
@@ -53,12 +50,9 @@ export class TaskTreeBuilder
             {
                 const key = w.utils.lowerCaseFirstChar(scopeName, true),
                       state = w.config.get<"Collapsed"|"Expanded">(`${w.keys.Config.SpecialFoldersFolderState}.${key}`, "Expanded");
-                folder = new TaskFolder(task.scope, this._buildStamp, TreeItemCollapsibleState[state]);
+                folder = new TaskFolder(task.scope, TreeItemCollapsibleState[state]);
                 this._taskFolders.push(folder);
                 w.log.value("constructed tree taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
-            }
-            else {
-                folder.stamp = this._buildStamp;
             }
         }     //
         else // User Task (not related to a ws or project)
@@ -68,12 +62,9 @@ export class TaskTreeBuilder
             if (!folder)
             {
                 const nodeExpandedeMap = w.config.get<Record<string, "Collapsed"|"Expanded">>(w.keys.Config.SpecialFoldersFolderState, {});
-                folder = new TaskFolder(scopeName, this._buildStamp, TreeItemCollapsibleState[nodeExpandedeMap[w.utils.lowerCaseFirstChar(scopeName, true)]]);
+                folder = new TaskFolder(scopeName, TreeItemCollapsibleState[nodeExpandedeMap[w.utils.lowerCaseFirstChar(scopeName, true)]]);
                 this._taskFolders.push(folder);
                 w.log.value("constructed tree user taskfolder", `${scopeName} (${folder.id})`, 3, logPad + "   ");
-            }
-            else {
-                folder.stamp = this._buildStamp;
             }
         }
         this.logTask(task, scopeName, logPad + "   ");
@@ -94,8 +85,7 @@ export class TaskTreeBuilder
         const isNpmInstallTask = task.source === "npm" && (task.name === "install" || task.name.startsWith("install - "));
         if (!isNpmInstallTask)
         {
-            const taskItem = taskFile.addChild(new TaskItem(w, taskFile, task, this._buildStamp, logPad + "   "));
-            taskItem.stamp = this._buildStamp;
+            const taskItem = taskFile.addChild(new TaskItem(w, taskFile, task, logPad + "   "));
             this._taskMap[taskItem.id] = taskItem;
         }
         w.log.methodDone("build task tree list", 3, logPad);
@@ -110,7 +100,6 @@ export class TaskTreeBuilder
         w.log.methodStart("create task tree", 2, logPad, false, [[ "source", source ], [ "# of tasks", tasks.length ]]);
         w.statusBar.update(w.keys.Strings.BuildingTaskTree);
         this.invalidate(source);
-        this._buildStamp = Date.now();
         for (const task of tasks)
         {
             w.log.write(`   create task tree - processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
@@ -143,11 +132,8 @@ export class TaskTreeBuilder
         {
             w.log.value("Add source base taskfile container", task.source, 2, logPad);
             this._taskFileMap[id] = folder.addChild(
-                new TaskFile(w, folder, task, 0, undefined, task.source, this._buildStamp, logPad + "   ")
+                new TaskFile(w, folder, task, 0, undefined, task.source, logPad + "   ")
             );
-        }
-        else {
-            folder.stamp = this._buildStamp;
         }
         return this._taskFileMap[id];
     };
@@ -155,14 +141,15 @@ export class TaskTreeBuilder
 
     private invalidate = (source?: string) =>
     {
+        const projectFolders = this._taskFolders.filter(f => !f.isSpecial);
         if (!source)
         {
-            this._taskFolders.forEach(f => f.treeNodes.splice(0));
+            projectFolders.forEach(f => f.treeNodes.splice(0));
             Object.keys(this._taskMap).forEach(k => delete this._taskMap[k], this);
             Object.keys(this._taskFileMap).forEach(k => delete this._taskFileMap[k], this);
         }
         else {
-            this._taskFolders.forEach(f => this.wrapper.utils.popIfExistsBy(f.treeNodes, n => n.taskSource === source));
+            projectFolders.forEach(f => this.wrapper.utils.popIfExistsBy(f.treeNodes, n => n.taskSource === source));
             this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_k, t) => t.taskSource === source, this);
             this.wrapper.utils.popObjIfExistsBy(this._taskFileMap, (_k, t) => t.taskSource === source, this);
         }

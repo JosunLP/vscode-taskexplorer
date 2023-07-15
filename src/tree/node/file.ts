@@ -35,9 +35,9 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
 
 
     constructor(private readonly wrapper: TeWrapper, folder: TaskFolder, task: Task,
-                groupLevel: number, groupId: string | undefined, label: string, stamp: number, logPad: string)
+                groupLevel: number, groupId: string | undefined, label: string, logPad: string)
     {
-        super(label, stamp, TreeItemCollapsibleState.Collapsed);
+        super(label, TreeItemCollapsibleState.Collapsed);
         const taskDef = task.definition;
         wrapper.log.methodStart("create taskfile node", 4, logPad, false, [
             [ "label", label ], [ "source", task.source ], [ "task folder", folder.label ],

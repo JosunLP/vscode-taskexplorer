@@ -37,9 +37,9 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     override treeNodes: TaskItem[] = [];
 
 
-    constructor(protected readonly wrapper: TeWrapper, protected readonly listType: TeTaskListType, label: string, settingName: string, stamp: number, state: TreeItemCollapsibleState)
+    constructor(protected readonly wrapper: TeWrapper, protected readonly listType: TeTaskListType, label: string, settingName: string, state: TreeItemCollapsibleState)
     {
-        super(label, stamp, state, true);
+        super(label, state, true);
         this.log = this.wrapper.log;
         this.iconPath = ThemeIcon.Folder;
         this._settingNameEnabled = settingName;
@@ -208,7 +208,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     protected createTaskItem(srcTaskItem: TaskItem, logPad: string):  TaskItem
     {
-        const taskItem = new TaskItem(this.wrapper, srcTaskItem.taskFile, srcTaskItem.task, this.stamp, logPad);
+        const taskItem = new TaskItem(this.wrapper, srcTaskItem.taskFile, srcTaskItem.task, logPad);
         taskItem.id = this.getTaskSpecialId(taskItem.id);
         taskItem.label = this.getRenamedTaskName(taskItem);
         taskItem.folder = this;

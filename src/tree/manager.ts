@@ -53,8 +53,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState", {});
         this._specialFolders = {
-            favorites: new FavoritesFolder(wrapper, 0, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
-            lastTasks: new LastTasksFolder(wrapper, 0, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
+            favorites: new FavoritesFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
+            lastTasks: new LastTasksFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
         };
 
         this._sorter = new TeTreeSorter(wrapper);

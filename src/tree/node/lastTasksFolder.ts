@@ -18,9 +18,9 @@ export class LastTasksFolder extends SpecialTaskFolder
     private _maxItems: number;
 
 
-    constructor(wrapper: TeWrapper, stamp: number, state: TreeItemCollapsibleState)
+    constructor(wrapper: TeWrapper, state: TreeItemCollapsibleState)
     {
-        super(wrapper, "last", wrapper.keys.Strings.LAST_TASKS_LABEL, wrapper.keys.Config.SpecialFoldersShowLastTasks, stamp, state);
+        super(wrapper, "last", wrapper.keys.Strings.LAST_TASKS_LABEL, wrapper.keys.Config.SpecialFoldersShowLastTasks, state);
         this._maxItems = wrapper.config.get<number>(wrapper.keys.Config.SpecialFoldersNumLastTasks, 10);
         this.disposables.push(
             wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),

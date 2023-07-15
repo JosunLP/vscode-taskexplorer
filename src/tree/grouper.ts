@@ -78,7 +78,7 @@ export class TaskTreeGrouper
                         const taskItem = taskFile.treeNodes[0];
                         w.utils.execIf2(TaskItem.is(taskItem), (ti, ptf) =>
                         {
-                            groupHash[gid] = folder.addChild(new TaskFile(w, folder, ti.task, 0, gid, ti.task.source, folder.stamp, "   "));
+                            groupHash[gid] = folder.addChild(new TaskFile(w, folder, ti.task, 0, gid, ti.task.source, "   "));
                             //
                             // Since we add the grouping when we find two or more equal group names, we are iterating
                             // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the
@@ -223,7 +223,7 @@ export class TaskTreeGrouper
                         // added to
                         //
                         w.log.value("   add grouped taskfile node", prevLblParts[groupLevel], 4, logPad);
-                        groupHash[gid] = new TaskFile(w, folder, taskItem.task, groupLevel, gid, prevLblParts[groupLevel], folder.stamp, logPad);
+                        groupHash[gid] = new TaskFile(w, folder, taskItem.task, groupLevel, gid, prevLblParts[groupLevel], logPad);
                         //
                         // Since we add the grouping when we find two or more equal group names, we are iterating
                         // over the 2nd one at this point, and need to add the previous iteration's TaskItem to the
