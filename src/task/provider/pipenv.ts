@@ -1,8 +1,6 @@
 
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
-import { TomlReader } from "@sgarciac/bombadil";
-// import { TomlReader } from "./vendor/TomlReader";
 import { ITaskDefinition } from "../../interface";
 import { TaskExplorerProvider } from "./provider";
 import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace, ShellExecutionOptions } from "vscode";
@@ -21,8 +19,6 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
     {
         const pipenv = this.wrapper.config.get<string>("pathToPrograms.pipenv", "pipenv");
         let pythonPath = pipenv;
-
-        /* istanbul ignore else */
         this.wrapper.utils.execIf(pipenv === "pipenv", () =>
         {   //
             // If the user didn't explicitly set a pathToPrograms.pipenv (meaning it is the default value),
@@ -31,7 +27,6 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
             //
             pythonPath = workspace.getConfiguration("python").get("pythonPath", "python");
         }, this);
-
         const def = this.getDefaultDefinition(target, folder, uri),
               cwd = dirname(uri.fsPath),
               args = [ "run", target ];
@@ -47,27 +42,39 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
 
 
     private async findTargets(fsPath: string, logPad: string)
-    {
+    {   //
+        // 2023 - pre v3 release - Dumped the garbage/overweight @sgarciac/bombadil package.  So this may need some work.
+        //
         this.wrapper.log.methodStart("find pipenv Pipfile targets", 4, logPad, false, [[ "path", fsPath ]], this.logQueueId);
-
-        const scripts: string[] = [];
-        const contents = await this.wrapper.fs.readFileAsync(fsPath);
-        //
-        // Using @sgarciac/bombadil package to parse the TOML Pipfile
-        //
-        const pipfile = new TomlReader();
-        pipfile.readToml(contents);
-
-        Object.entries(pipfile.result?.scripts ?? {}).forEach(([ scriptName, _scriptCmd ]) =>
-        {   //
-            // Only need the script name, not the whole command, since it is run as `pipenv run <scriptName>`
-            //
-            scripts.push(scriptName);
-            this.wrapper.log.value("   found pipenv pipfile task", scriptName, 4, logPad, this.logQueueId);
-        });
-
+        const scripts: string[] = [],
+              contents = await this.wrapper.fs.readFileAsync(fsPath),
+              idx = contents.indexOf("[scripts]");
+        if (idx !== -1)
+        {
+            let idx2;
+            if (contents.includes("\r\n")) {
+                idx2 = contents.indexOf("\r\n\r\n", idx);
+            }
+            else {
+                idx2 = contents.indexOf("\n\n", idx);
+            }
+            if (idx2 === -1) {
+                idx2 = contents.length;
+            }
+            if (idx2 === -1) {
+                idx2 = contents.length;
+            }
+            let match: RegExpExecArray | null;
+            const regex = /\s*(.+)\s*\=\s*["']?(.+)["'$\r\n]/gi,
+                  scriptsText = contents.substring(idx, idx2);
+            while ((match = regex.exec(scriptsText)) !== null)
+            {
+                const [ _, scriptName, _scriptCmd ] = match;
+                scripts.push(scriptName);
+                this.wrapper.log.value("   found pipenv pipfile task", scriptName, 4, logPad, this.logQueueId);
+            }
+        }
         this.wrapper.log.methodDone("find pipenv Pipfile targets", 4, logPad, undefined, this.logQueueId);
-
         return scripts;
     }
 
