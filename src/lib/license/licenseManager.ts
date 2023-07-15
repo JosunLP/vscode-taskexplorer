@@ -400,7 +400,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private handleServerError = async (e: any): Promise<void> =>
 	{
 		this._account.errorState = e instanceof Error ||  e.status === 500;
-		await this.wrapper.utils.execIf(!(e instanceof Error), async() =>
+		await this.wrapper.utils.execIf2(!(e instanceof Error), async(e) =>
 		{   //
 		    // Possible Error Status Codes:
 			//
@@ -435,9 +435,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 						break;
 					// case "Error - could not update trial":
 					// case "Invalid request parameters":
+					case "Access Denied":                    // 401
+					default:
+						this._account.errorState = true;
+						break;
 				}
 			}, this, undefined, message);
-		}, this, [ this.wrapper.log.error, e ]);
+		}, this, [ this.wrapper.log.error ], e);
 		this.wrapper.statusBar.showTimed({ text: "Server error" }, this._sbInfo);
 		this._sbInfo = undefined;
 	};
