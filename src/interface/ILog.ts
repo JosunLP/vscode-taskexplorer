@@ -1,3 +1,4 @@
+import { OutputChannel } from "vscode";
 
 export type LogLevel = number; // 1 | 2 | 3 | 4 | 5;
 export type LogType = "global";
@@ -54,8 +55,8 @@ export interface ILogControl
     lastWriteToConsoleWasBlank: boolean;
     level: LogLevel;
     msgQueue: Record<string, ILogQueueItem[]>;
-    outputChannel: any;
-    outputChannelWriteFn: string;
+    errorChannel: OutputChannel;
+    outputChannel: OutputChannel;
     type: LogType;
     tzOffset: number;
     useTags: boolean;
@@ -82,5 +83,6 @@ export interface ILog
     values(level: LogLevel, logPad: string, params: any | (string|any)[][], queueId?: string): void;
     warn(msg: any, params?: (string|any)[][], queueId?: string): void;
     write(msg: string, level?: LogLevel, logPad?: string, queueId?: string, isValue?: boolean, isError?: boolean): void;
+    write2(tag: string, msg: string, level?: LogLevel, logPad?: string, params?: (string|any)[][], queueId?: string, isValue?: boolean, isError?: boolean): void;
     withColor(msg: string, color: any): void;
 }

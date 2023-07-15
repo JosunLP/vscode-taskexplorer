@@ -45,8 +45,8 @@ export class TeLog implements ILog, Disposable
             lastWriteToConsoleWasBlank: false,
             level: config.get<LogLevel>(ConfigKeys.LogLevel, 1),
             msgQueue: {},
-            outputChannelWriteFn: "appendLine",
-            outputChannel: window.createOutputChannel("Task Explorer"),
+            errorChannel: window.createOutputChannel("Task Explorer"),
+            outputChannel: window.createOutputChannel("Task Explorer (Errors)"),
             useTags: true,
             useTagsMaxLength: 8,
             type: "global",
@@ -56,6 +56,7 @@ export class TeLog implements ILog, Disposable
             writeToConsoleLevel: 2
         };
         this._disposables.push(
+            this._logControl.errorChannel,
             this._logControl.outputChannel,
             registerCommand(Commands.ShowOutputWindow, this.showOutput, this),
             config.onDidChange(this.processConfigChanges, this)
@@ -63,7 +64,7 @@ export class TeLog implements ILog, Disposable
 		context.subscriptions.push(this);
     }
 
-    dispose = () => { clearTimeout(this._fileNameTimer); };
+    dispose = () => { clearTimeout(this._fileNameTimer); this._disposables.splice(0).forEach(d => d.dispose()); };
 
 
     private get allowScaryColors() {
@@ -115,7 +116,8 @@ export class TeLog implements ILog, Disposable
             values: enable ? this._values : () => {},
             warn: enable ? this._warn : () => {},
             withColor: enable ? figures.withColor : () => {},
-            write: enable ? this._write : () => {}
+            write: enable ? this._write : () => {},
+            write2: enable ? this._write2 : () => {}
         });
     };
 
@@ -447,13 +449,12 @@ export class TeLog implements ILog, Disposable
 
     private showOutput = async(show: boolean) =>
     {
-        const channel: OutputChannel = this._logControl.outputChannel as OutputChannel;
         if (show) {
             await executeCommand(VsCodeCommands.FocusOutputWindowPanel);
-            channel.show();
+            this._logControl.outputChannel.show();
         }
         else {
-            channel.hide();
+            this._logControl.outputChannel.hide();
         }
     };
 
@@ -486,13 +487,11 @@ export class TeLog implements ILog, Disposable
 
     protected writeLogFileLocation = () =>
     {
-        if (this._logControl.enable && this._logControl.enableFile &&  this._logControl.outputChannel &&
-            isString(this._logControl.outputChannelWriteFn) && isFunction(this._logControl.outputChannel[this._logControl.outputChannelWriteFn]))
+        if (this._logControl.enable && this._logControl.enableFile &&  this._logControl.outputChannel)
         {
-            const channelLog = this._logControl.outputChannel[this._logControl.outputChannelWriteFn];
-            channelLog("***********************************************************************************************");
-            channelLog(` ExtJs Intellisense Log File: ${this._logControl.fileName}`);
-            channelLog("***********************************************************************************************");
+            this._logControl.outputChannel.appendLine("***********************************************************************************************");
+            this._logControl.outputChannel.appendLine(` ExtJs Intellisense Log File: ${this._logControl.fileName}`);
+            this._logControl.outputChannel.appendLine("***********************************************************************************************");
             console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
             console.log(`    ${figures.color.info} ${figures.withColor(` ExtJs Intellisense Log File: ${this._logControl.fileName}`, figures.colors.grey)}`);
             console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
@@ -586,10 +585,15 @@ export class TeLog implements ILog, Disposable
         } //
          // VSCODE OUTPUT WINDOW LOGGING
         //
-        if (this._logControl.enableOutputWindow && this._logControl.outputChannel && this._logControl.outputChannelWriteFn && isMinLevel)
+        if (isError || (this._logControl.enableOutputWindow && isMinLevel))
         {
             const ts = this.getStamp().stamp + " ";
-            this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.outputChannel[this._logControl.outputChannelWriteFn], this._logControl.outputChannel, ts, false);
+            if (this._logControl.enableOutputWindow) {
+                this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.outputChannel.appendLine, this._logControl.outputChannel, ts, false);
+            }
+            if (isError) {
+                this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.errorChannel.appendLine, this._logControl.errorChannel, ts, false);
+            }
         } //
          // CONSOLE LOGGING
         //
@@ -616,6 +620,20 @@ export class TeLog implements ILog, Disposable
     };
 
 
+    private _write2 = (tag: string, msg: string, level: LogLevel, logPad: string, params?: (string|any)[][], queueId?: string, isValue?: boolean, isError?: boolean) =>
+    {
+        if (!level || level <= this._logControl.level)
+        {
+            this._write(`[${tag}] ${logPad}${msg}`, level, "", queueId, isValue, isError);
+            if (params) {
+                for (const [ m, v ] of params) {
+                    this._value(`[${tag}] ${logPad}${m}`, v, level, "", queueId);
+                }
+            }
+        }
+    };
+
+
     blank = this._blank;
     dequeue = this._dequeue;
     error = this._error;
@@ -628,5 +646,6 @@ export class TeLog implements ILog, Disposable
     warn = this._warn;
     withColor = figures.withColor;
     write = this._write;
+    write2 = this._write2;
 
 }
