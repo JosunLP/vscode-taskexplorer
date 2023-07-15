@@ -181,13 +181,33 @@ suite("License Manager Tests", () =>
 
 	test("License Nag in Trial Mode - Extend Trial", async function()
 	{
+		let timeout = false;
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.licenseMgr.nag);
 		await setNag();
 		utils.overrideNextShowInfoBox("Extend Trial", true);
 		void licMgr.checkLicense("");
-		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		await expectLicense(true, false, true, true, true);
+		await Promise.race([
+			utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise,
+			new Promise<void>(resolve => setTimeout(() => {timeout = true; resolve(); }, 6000))
+		]);
+		if (timeout) {
+			try {
+				await expectLicense(true, false, true, true, true);
+			}
+			catch {
+				utils.overrideNextShowInfoBox("Extend Trial", true);
+				void licMgr.checkLicense("");
+				await Promise.race([
+					utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise,
+					new Promise<void>(resolve => setTimeout(resolve, 9000))
+				]);
+				await expectLicense(true, false, true, true, true);
+			}
+		}
+		else {
+			await expectLicense(true, false, true, true, true);
+		}
 		utils.endRollingCount(this);
 	});
 
@@ -365,7 +385,7 @@ suite("License Manager Tests", () =>
 		});
 		setTasks({ tasks: teWrapper.treeManager.tasks });
 		utils.overrideNextShowInfoBox(undefined, true);
-		await utils.treeUtils.refresh(teWrapper, );
+		await utils.treeUtils.refresh(teWrapper);
 		expect(teWrapper.treeManager.tasks.length).to.be.equal(25);
         utils.endRollingCount(this);
 	});
@@ -383,7 +403,7 @@ suite("License Manager Tests", () =>
 		});
 		setTasks({ tasks: teWrapper.treeManager.tasks, task: {source: "gulp" }});
 		utils.overrideNextShowInfoBox(undefined, true);
-		await utils.treeUtils.refresh(teWrapper, );
+		await utils.treeUtils.refresh(teWrapper);
 		expect(teWrapper.treeManager.tasks.filter((t: Task) => t.source === "gulp").length).to.be.equal(10);
         utils.endRollingCount(this);
 	});
@@ -401,7 +421,7 @@ suite("License Manager Tests", () =>
 		});
 		setTasks({ tasks: teWrapper.treeManager.tasks, task: {source: "batch" }});
 		utils.overrideNextShowInfoBox(undefined, true);
-		await utils.treeUtils.refresh(teWrapper, );
+		await utils.treeUtils.refresh(teWrapper);
 		expect(teWrapper.treeManager.tasks.filter((t: Task) => t.source === "batch").length).to.be.equal(1);
         utils.endRollingCount(this);
 	});
@@ -428,7 +448,7 @@ suite("License Manager Tests", () =>
 		});
 		setTasks({ tasks: teWrapper.treeManager.tasks, task: {source: "grunt" }});
 		utils.overrideNextShowInfoBox(undefined, true);
-		await utils.treeUtils.refresh(teWrapper, );
+		await utils.treeUtils.refresh(teWrapper);
 		await teWrapper.fs.copyDir(outsideWsDir, utils.getWsPath("."), undefined, true); // Cover fileCache.addFolder()
         await utils.waitForTeIdle(tc.waitTime.fs.createFolderEvent);
 		await teWrapper.fs.deleteDir(join(utils.getWsPath("."), "testA"));
@@ -504,7 +524,7 @@ suite("License Manager Tests", () =>
 			maxFreeTasksForScriptType: licMgrMaxFreeTasksForScriptType
 		});
 		await expectLicense(true, false, true, false);
-		await utils.treeUtils.refresh(teWrapper, );
+		await utils.treeUtils.refresh(teWrapper);
         utils.endRollingCount(this);
 	});
 

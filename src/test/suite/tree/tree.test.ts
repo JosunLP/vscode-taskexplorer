@@ -98,6 +98,8 @@ suite("Tree Tests", () =>
         if (removed) {
             await executeTeCommand2("addRemoveFavorite", [ bash[0] ]);
         }
+		await executeTeCommand2("taskexplorer.setPinned", [ ant[0], "favorites" ]);
+		await executeTeCommand2("taskexplorer.setPinned", [ batch[1], "favorites" ]);
         utils.endRollingCount(this);
     });
 

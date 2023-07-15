@@ -89,6 +89,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     get taskFolders(): TaskFolder[] { return this._treeBuilder.taskFolders; }
 	get configWatcher(): TeTreeConfigWatcher { return this._configWatcher; }
     get isBusy(): boolean { return this._refreshPending || this._configWatcher.isBusy; }
+    get favoritesFolder(): FavoritesFolder { return this._specialFolders.favorites; }
 	get onDidAllTasksChange(): Event<ITeTaskChangeEvent> { return this._onDidTasksChange.event; }
     get onDidTaskCountChange(): Event<ITeTaskChangeEvent> { return this._onDidTaskCountChange.event; }
 	get onDidFavoriteTasksChange(): Event<ITeTaskChangeEvent> { return this._specialFolders.favorites.onDidTasksChange; }

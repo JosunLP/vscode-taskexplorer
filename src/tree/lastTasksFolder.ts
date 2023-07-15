@@ -2,7 +2,7 @@
 import { TaskItem } from "./item";
 import { TeWrapper } from "../lib/wrapper";
 import { SpecialTaskFolder } from "./specialFolder";
-// import { ITeTaskStatusChangeEvent } from "../interface";
+import { ITeTaskStatusChangeEvent } from "../interface";
 import { registerCommand } from "../lib/command/command";
 import { ConfigurationChangeEvent, TreeItemCollapsibleState, window } from "vscode";
 
@@ -23,7 +23,7 @@ export class LastTasksFolder extends SpecialTaskFolder
         super(wrapper, "last", wrapper.keys.Strings.LAST_TASKS_LABEL, wrapper.keys.Config.SpecialFoldersShowLastTasks, stamp, state);
         this._maxItems = wrapper.config.get<number>(wrapper.keys.Config.SpecialFoldersNumLastTasks, 10);
         this.disposables.push(
-            // wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
+            wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
             registerCommand(wrapper.keys.Commands.ClearLastTasks, this.clearSavedTasks, this)
         );
     }
@@ -57,7 +57,7 @@ export class LastTasksFolder extends SpecialTaskFolder
     }
 
 
-    // private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.saveTask(this.wrapper.treeManager.taskMap[e.treeId]);
+    private onTaskStatusChanged = (_e: ITeTaskStatusChangeEvent) => { /* TODO - Double check status updated */ };
 
 
     private pushToTreeTop = async (taskItem: TaskItem) =>
@@ -94,7 +94,7 @@ export class LastTasksFolder extends SpecialTaskFolder
     };
 
 
-    protected override sort = () =>
+    override sort = () =>
     {
         this.treeNodes.sort((a: TaskItem, b: TaskItem) =>
         {

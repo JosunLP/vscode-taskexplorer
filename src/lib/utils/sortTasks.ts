@@ -1,5 +1,4 @@
 
-import { IDictionary } from ":types";
 import { Strings } from "../constants";
 import { isPinned } from "./taskUtils";
 import { TaskItem } from "../../tree/item";

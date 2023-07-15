@@ -11,7 +11,7 @@ import { ScriptTaskProvider } from "./provider/script";
 import { registerCommand } from "../lib/command/command";
 import { TaskDetailsPage } from "../webview/page/taskDetails";
 import { findDocumentPosition } from "../lib/utils/findDocumentPosition";
-import { ILog, ITeTaskManager, ITeTask, TeTaskListType } from "../interface";
+import { ILog, ITeTaskManager, ITeTask, TeTaskListType, ITaskFolder } from "../interface";
 import {
     CustomExecution, Disposable, InputBoxOptions, Selection, ShellExecution, Task, TaskDefinition,
     TaskExecution, TaskRevealKind, tasks, TextDocument, Uri, window, workspace, WorkspaceFolder
@@ -361,6 +361,21 @@ export class TaskManager implements ITeTaskManager, Disposable
             pinnedTaskList.splice(pinnedIdx, 1);
         }
 		await w.storage.update(storageKey, pinnedTaskList);
+        if (listType === "last")
+        {
+            w.treeManager.lastTasksFolder.sort();
+        }
+        else if (listType === "favorites")
+        {
+            w.treeManager.favoritesFolder.sort();
+        }
+        else if (listType === "all")
+        {
+            this.wrapper.sorters.sortTaskFolder(
+                <ITaskFolder>w.treeManager.taskFolders.find(f => f.resourceUri && f.resourceUri.fsPath.startsWith(iTask.fsPath)),
+                listType
+            );
+        }
 		this._log.methodDone("set pinned task", 2);
         // await this._taskUsageTracker.setPinned(task, logPad);
 	};

@@ -116,15 +116,16 @@ export class TaskTreeBuilder
             w.log.write(`   create task tree - processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
             this.buildTaskTree(task, logPad + "   ");
         }
-        this.wrapper.utils.popIfExistsBy(this._taskFolders, f => !f.isSpecial && f.treeNodes.length === 0); // && f.stamp !== this._buildStamp);
-        if (this._taskFolders.filter(f => !f.isSpecial).length === 0)
+        w.utils.popIfExistsBy(this._taskFolders, f => !f.isSpecial && f.treeNodes.length === 0);
+        const projectFolders = this._taskFolders.filter(f => !f.isSpecial);
+        if (projectFolders.length === 0)
         {
             this._taskFolders.splice(0);
         }
-        if (this._taskFolders.filter(f => !source || !!f.treeNodes.find(n => n.taskSource === source)).length > 0)
-        {
-            this._treeGrouper.buildGroupings(source, this._taskFolders, this._taskFileMap, logPad + "   ");
+        const modFolders = projectFolders.filter(f => !source || !!f.treeNodes.find(n => n.taskSource === source));
+        if (modFolders.length > 0) {
             w.sorters.sortFolders(this._taskFolders);
+            this._treeGrouper.buildGroupings(source, this._taskFolders, this._taskFileMap, logPad + "   ");
         }
         w.statusBar.update("");
         w.log.methodDone("create task tree", 2, logPad, [[ "task count", w.treeManager.tasks.length ]]);
