@@ -22,7 +22,7 @@ import { HomeView } from "../webview/view/homeView";
 import { TeFileWatcher } from "../task/fileWatcher";
 import * as promiseUtils from "./utils/promiseUtils";
 import { WelcomePage } from "../webview/page/welcome";
-import { TaskTreeManager } from "../tree/treeManager";
+import { TaskTreeManager } from "../tree/manager";
 import { AntTaskProvider } from "../task/provider/ant";
 import { NpmTaskProvider } from "../task/provider/npm";
 import { BashTaskProvider } from "../task/provider/bash";

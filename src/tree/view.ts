@@ -1,7 +1,7 @@
 
 import { TaskTree } from "./tree";
 import { TeWrapper } from "../lib/wrapper";
-import { TaskTreeManager } from "./treeManager";
+import { TaskTreeManager } from "./manager";
 import { ITaskTreeView, TreeviewContextKey, TreeviewIds, TreeviewUsageKey, WebviewPrefix } from "../interface";
 import {
     Disposable, TreeItem, TreeView, TreeViewExpansionEvent, TreeViewSelectionChangeEvent,

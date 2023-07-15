@@ -3,7 +3,7 @@ import { TaskFile } from "./node/file";
 import { TaskItem } from "./node/item";
 import { TaskFolder } from "./node/folder";
 import { TeWrapper } from "../lib/wrapper";
-import { TaskTreeGrouper } from "./treeGrouper";
+import { TaskTreeGrouper } from "./grouper";
 import { ITeTask, TaskMap, TeTaskSource } from "../interface";
 import { Task, TreeItemCollapsibleState, Uri, WorkspaceFolder } from "vscode";
 

@@ -3,7 +3,7 @@ import { TaskFile } from "./node/file";
 import { TaskItem } from "./node/item";
 import { TaskFolder } from "./node/folder";
 import { TeWrapper } from "../lib/wrapper";
-import { TaskTreeManager } from "./treeManager";
+import { TaskTreeManager } from "./manager";
 import { ITaskTreeEvent, ITeTaskTree, TreeviewIds } from "../interface";
 import { Event, EventEmitter, Task, TreeItem, TreeDataProvider, Disposable } from "vscode";
 
