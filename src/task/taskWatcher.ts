@@ -42,30 +42,23 @@ export class TaskWatcher implements Disposable
     }
 
 
-    private fireTaskChangeEvents(taskItem: TaskItem, isRunning: boolean, logPad: string): void
+    private fireTaskChangeEvents(taskItem: TaskItem, isRunning: boolean): void
     {
-        this.wrapper.log.methodStart("fire task change events", 1, logPad, false, [
+        this.wrapper.log.write2("taskwatcher", "fire task change events", 1, "   ", [
             [ "task name", taskItem.task.name ], [ "task type", taskItem.task.source ],
             [ "resource path", taskItem.taskFile.resourceUri.fsPath ]
         ]);
         //
-        // Fire change event for parent folder.  Firing the change event for the task item itself
-        // does not cause the getTreeItem() callback to be called from VSCode Tree API.  Firing it
-        // on the parent folder (type TreeFile) works good though.  Pre v2, we refreshed the entire
-        // tree, so this is still good.  TODO possibly this gets fixed in the future to be able to
-        // invalidate just the TaskItem, so check back on this sometime.
+        // Request tree change event-fire for parent TaskFolder | TaskFile
         //
-        this.wrapper.log.write("   request fire tree refresh event", 1, logPad);
-        this.wrapper.treeManager.fireTreeRefreshEvent(taskItem.taskFile, taskItem, logPad + "   ");
+        this.wrapper.treeManager.fireTreeRefreshEvent(taskItem.taskFile, taskItem, "      ");
         //
-        this.wrapper.log.write("   fire 'task status changed' and 'running tasks changed' events", 1, logPad);
+        // Fire TaskWatcher managed events
+        //
         const iTask = this.wrapper.taskUtils.toITask(this.wrapper, [ taskItem.task ], "running")[0];
-        // const iTasks = this.wrapper.taskUtils.toITask(this.wrapper.usage, this.wrapper.treeManager.runningTasks, "running");
         this._onTaskStatusChange.fire({ task: iTask, treeId: taskItem.id, isRunning });
-        // this._onDidRunningTasksChange.fire({ tasks: iTasks, task: iTask, treeId: taskItem.id, isRunning });
         this._onDidRunningTasksChange.fire({ tasks: [], task: iTask, treeId: taskItem.id, isRunning });
-        //
-        this.wrapper.log.methodDone("fire task change events", 1, logPad);
+        this.wrapper.log.methodDone("fire task change events", 1, "   ");
     }
 
 
@@ -98,7 +91,7 @@ export class TaskWatcher implements Disposable
         this.wrapper.log.methodEvent("task watcher", "process finished", 2, [[ "exit code", e.exitCode ], [ "task name", e.execution.task.name ]]);
 
 
-    private async taskStartEvent(e: TaskStartEvent): Promise<void>
+    private taskStartEvent(e: TaskStartEvent): void
     {
         let taskItem: TaskItem | undefined;
         const taskMap = this.wrapper.treeManager.taskMap,
@@ -140,16 +133,17 @@ export class TaskWatcher implements Disposable
             taskItem = taskMap[treeId];
         }
 
-        if (taskItem) {
+        if (taskItem)
+        {
             this.showStatusMessage(task, "   ");
-            this.fireTaskChangeEvents(taskItem, true, "   ");
+            this.wrapper.treeManager.lastTasksFolder.saveTask(taskItem).then(i => this.fireTaskChangeEvents(i, true));
         }
 
         this.wrapper.log.methodDone("task started event", 1);
     }
 
 
-    private async taskFinishedEvent(e: TaskEndEvent): Promise<void>
+    private taskFinishedEvent(e: TaskEndEvent): void
     {
         let taskItem: TaskItem | undefined;
         const taskMap = this.wrapper.treeManager.taskMap,
@@ -196,7 +190,7 @@ export class TaskWatcher implements Disposable
         }
 
         if (taskItem) {
-            this.fireTaskChangeEvents(taskItem, false, "   ");
+            this.fireTaskChangeEvents(taskItem, false);
         }
 
         this.wrapper.log.methodDone("task finished event", 1);

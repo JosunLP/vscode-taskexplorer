@@ -27,7 +27,6 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
 
     protected abstract order: number;
     protected abstract maxItems: number;
-    protected abstract saveTask(taskItem: TaskItem, logPad: string): Promise<void>;
 
     protected readonly log: ILog;
     protected readonly labelLwr: string;
@@ -255,7 +254,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    protected getTaskItemId = (id: string): string => (id.includes("::") ? id.replace(id.substring(0, id.indexOf("::") + 2), "") : id);
+    protected getTaskItemId = (id: string): string => (id.includes("::") ? id.substring(id.indexOf("::") + 2) : id);
 
 
     protected getTaskSpecialId = (id: string): string => `${this.label}::${this.getTaskItemId(id)}`;
@@ -309,7 +308,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
     };
 
 
-    async removeChild(taskItem: TaskItem, logPad: string, persist?: boolean): Promise<void>
+    async removeChild(taskItem: TaskItem, logPad: string, persist?: boolean): Promise<TaskItem>
     {
         const idx = this.treeNodes.findIndex(f => f.id === this.getTaskSpecialId(taskItem.id));
         taskItem = this.treeNodes.splice(idx, 1)[0]; // idx guaranteed not to be -1 by caller
@@ -319,6 +318,7 @@ export abstract class SpecialTaskFolder extends TaskFolder implements Disposable
             await this.saveStores();
             this.fireChangeEvent(taskItem, true, logPad);
         }
+        return taskItem;
     }
 
 

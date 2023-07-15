@@ -146,6 +146,7 @@ suite("Logging Tests", () =>
 		await teWrapper.utils.sleep(25);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
 		log.write("Test1", 1);
+		log.write2("Test1", "Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Test3 error");
 		log.error({});
@@ -156,6 +157,7 @@ suite("Logging Tests", () =>
 		log.error("Test4 error", [[ "p1", "e1" ]]);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFileSymbols, true);
 		log.write("Test1", 1);
+		log.write2("Test1", "Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Test2 error");
 		log.error(new Error("Test error object"));
@@ -174,6 +176,7 @@ suite("Logging Tests", () =>
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.error("Error1");
 		log.warn("Warning1");
+		log.write2("Test1", "Test1", 1);
 		//
 		// Re-enable logging
 		//
@@ -382,7 +385,7 @@ suite("Logging Tests", () =>
     test("Logging (Write)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 2) + 65);
+		this.slow((testControl.slowTime.config.event * 2) + 70);
 
         log.blank();
         log.blank(1);
@@ -408,9 +411,14 @@ suite("Logging Tests", () =>
 		logControl.useTags = false;
 		log.blank(2);
 		log.write("test1");
+		log.write2("Test1", "Test1");
+		log.write2("Test1", "Test1", 1);
+		log.write2("Test1", "Test1", 1, "");
+		log.write2("Test1", "Test1", 1, "", [[ "t", 1 ]]);
 		logControl.useTags = true;
 		log.blank(3);
 		log.write("test1", 1);
+		log.write2("Test1", "Test1", 5);
 		log.withColor("Test1", teWrapper.figures.colors.blue);
 		logControl.useTags = useTags;
 		//
@@ -422,6 +430,8 @@ suite("Logging Tests", () =>
 		log.write("test");
 		log.write("Test1", 1);
 		log.write("Test1", 1);
+		log.write2("Test1", "Test1", 1);
+		log.write2("Test1", "Test1", 1, "", [[ "t", 1 ]]);
 		log.info("test");
 		log.info("");
 		log.withColor("Test1", teWrapper.figures.colors.blue);

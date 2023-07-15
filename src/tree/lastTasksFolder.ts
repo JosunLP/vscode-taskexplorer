@@ -2,6 +2,7 @@
 import { TaskItem } from "./item";
 import { TeWrapper } from "../lib/wrapper";
 import { SpecialTaskFolder } from "./specialFolder";
+// import { ITeTaskStatusChangeEvent } from "../interface";
 import { registerCommand } from "../lib/command/command";
 import { ConfigurationChangeEvent, TreeItemCollapsibleState, window } from "vscode";
 
@@ -16,18 +17,19 @@ export class LastTasksFolder extends SpecialTaskFolder
     protected order = 0;
     private _maxItems: number;
 
+
     constructor(wrapper: TeWrapper, stamp: number, state: TreeItemCollapsibleState)
     {
         super(wrapper, "last", wrapper.keys.Strings.LAST_TASKS_LABEL, wrapper.keys.Config.SpecialFoldersShowLastTasks, stamp, state);
         this._maxItems = wrapper.config.get<number>(wrapper.keys.Config.SpecialFoldersNumLastTasks, 10);
         this.disposables.push(
+            // wrapper.taskWatcher.onDidTaskStatusChange(this.onTaskStatusChanged, this),
             registerCommand(wrapper.keys.Commands.ClearLastTasks, this.clearSavedTasks, this)
         );
     }
 
-    protected get maxItems(): number {
-        return this._maxItems;
-    }
+
+    protected get maxItems(): number { return this._maxItems; }
 
 
     getLastRanId = () =>
@@ -55,13 +57,17 @@ export class LastTasksFolder extends SpecialTaskFolder
     }
 
 
-    private pushToTreeTop = async (taskItem: TaskItem, logPad: string) =>
+    // private onTaskStatusChanged = (e: ITeTaskStatusChangeEvent) => this.saveTask(this.wrapper.treeManager.taskMap[e.treeId]);
+
+
+    private pushToTreeTop = async (taskItem: TaskItem) =>
     {
-        const taskId = this.getTaskSpecialId(taskItem.id);
-        let taskItem2 = this.treeNodes.find(t => t instanceof TaskItem && t.id === taskId);
+        const logPad = this.wrapper.log.control.lastLogPad,
+              taskId = this.getTaskSpecialId(taskItem.id);
+        let taskItem2 = this.treeNodes.find(t => t.id === taskId);
         if (taskItem2)
         {
-            await this.removeChild(taskItem2, logPad, false);
+            taskItem2 = await this.removeChild(taskItem2, logPad, false);
         }
         else if (this.treeNodes.length >= this.maxItems)
         {
@@ -75,20 +81,16 @@ export class LastTasksFolder extends SpecialTaskFolder
     };
 
 
-    saveTask = async (taskItem: TaskItem, logPad: string) =>
+    saveTask = async (taskItem: TaskItem) =>
     {
         const taskId = this.getTaskItemId(taskItem.id),
               now = Date.now();
-        this.log.methodStart(`save task to ${this.labelLwr} folder`, 1, logPad, false, [
-            [ "treenode label", this.label ], [ "max tasks", this.maxItems ],
-            [ "task id", taskId ], [ "current # of saved tasks", this.treeNodes.length ]
-        ]);
         this.removeFromStore(taskItem);
         this.store.push({ id: taskId, timestamp: now });
         this.storeWs.push({ id: taskId, timestamp: now });
         await this.saveStores();
-        await this.pushToTreeTop(taskItem, logPad + "   ");
-        this.log.methodDone(`save task to ${this.labelLwr} folder`, 1, logPad, [[ "new # of saved tasks", this.treeNodes.length ]]);
+        await this.pushToTreeTop(taskItem);
+        return taskItem;
     };
 
 

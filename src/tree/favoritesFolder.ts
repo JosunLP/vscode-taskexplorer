@@ -29,9 +29,7 @@ export class FavoritesFolder extends SpecialTaskFolder
     }
 
 
-    protected get maxItems(): number {
-        return this._maxItems;
-    }
+    protected get maxItems(): number { return this._maxItems; }
 
 
     /**
@@ -71,7 +69,7 @@ export class FavoritesFolder extends SpecialTaskFolder
     }
 
 
-    saveTask = async (taskItem: TaskItem, logPad: string) =>
+    private saveTask = async (taskItem: TaskItem, logPad: string) =>
     {
         const now = Date.now(),
               taskId = this.getTaskItemId(taskItem.id);

@@ -35,7 +35,7 @@ export class TaskTreeBuilder
     private buildTaskTree = (task: Task, logPad: string): void =>
     {
         const w = this.wrapper;
-        w.log.methodStart("build task tree list", 2, logPad, true, [
+        w.log.methodStart("build task tree list", 3, logPad, true, [
             [ "name", task.name ], [ "source", task.source ], [ "definition type", task.definition.type ],
             [ "definition path", task.definition.path ]
         ]);
@@ -98,7 +98,7 @@ export class TaskTreeBuilder
             taskItem.stamp = this._buildStamp;
             this._taskMap[taskItem.id] = taskItem;
         }
-        w.log.methodDone("build task tree list", 2, logPad);
+        w.log.methodDone("build task tree list", 3, logPad);
     };
 
 
@@ -107,7 +107,7 @@ export class TaskTreeBuilder
         let taskCt = 0;
         const w = this.wrapper,
               tasks = w.treeManager.tasks.filter(t => !source || source === t.source);
-        w.log.methodStart("create task tree", 1, logPad, false, [[ "source", source ], [ "# of tasks", tasks.length ]]);
+        w.log.methodStart("create task tree", 2, logPad, false, [[ "source", source ], [ "# of tasks", tasks.length ]]);
         w.statusBar.update(w.keys.Strings.BuildingTaskTree);
         this.invalidate(source);
         this._buildStamp = Date.now();
@@ -116,14 +116,18 @@ export class TaskTreeBuilder
             w.log.write(`   create task tree - processing task ${++taskCt} of ${ tasks.length} (${task.source})`, 4, logPad);
             this.buildTaskTree(task, logPad + "   ");
         }
-        // this.wrapper.utils.popIfExistsBy(this._taskFolders, f => !f.isSpecial && f.stamp !== this._buildStamp);
-        if (this._taskFolders.length > 0)
+        this.wrapper.utils.popIfExistsBy(this._taskFolders, f => !f.isSpecial && f.treeNodes.length === 0); // && f.stamp !== this._buildStamp);
+        if (this._taskFolders.filter(f => !f.isSpecial).length === 0)
+        {
+            this._taskFolders.splice(0);
+        }
+        if (this._taskFolders.filter(f => !source || !!f.treeNodes.find(n => n.taskSource === source)).length > 0)
         {
             this._treeGrouper.buildGroupings(source, this._taskFolders, this._taskFileMap, logPad + "   ");
             w.sorters.sortFolders(this._taskFolders);
         }
         w.statusBar.update("");
-        w.log.methodDone("create task tree", 1, logPad, [[ "task count", w.treeManager.tasks.length ]]);
+        w.log.methodDone("create task tree", 2, logPad, [[ "task count", w.treeManager.tasks.length ]]);
     };
 
 

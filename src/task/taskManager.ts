@@ -4,6 +4,7 @@ import { TaskUtils } from "./utils";
 import { TaskFile } from "../tree/file";
 import { TaskItem } from "../tree/item";
 import { TeWrapper } from "../lib/wrapper";
+import { TaskWatcher } from "./taskWatcher";
 import { PinnedStorageKey } from "../lib/constants";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "./provider/script";
@@ -21,15 +22,18 @@ export class TaskManager implements ITeTaskManager, Disposable
 {
     private readonly _log: ILog;
     private readonly _utils: TaskUtils;
-    private readonly _disposables: Disposable[] = [];
+    private readonly _disposables: Disposable[];
+    private readonly _taskWatcher: TaskWatcher;
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
         this._log = wrapper.log;
         this._utils = new TaskUtils(wrapper);
-        this._disposables.push(
+        this._taskWatcher = new TaskWatcher(wrapper);
+        this._disposables = [
             this._utils,
+            this._taskWatcher,
             registerCommand(wrapper.keys.Commands.NpmRunInstall, (item: TaskFile) => this.runNpmCommand(item, "install"), this),
             registerCommand(wrapper.keys.Commands.NpmRunUpdate, (item: TaskFile) => this.runNpmCommand(item, "update"), this),
             registerCommand(wrapper.keys.Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
@@ -45,13 +49,14 @@ export class TaskManager implements ITeTaskManager, Disposable
 			registerCommand(wrapper.keys.Commands.SetPinned, this.setPinned, this),
             registerCommand(wrapper.keys.Commands.ShowTaskDetailsPage, this.showTaskDetailsPage, this),
             registerCommand(wrapper.keys.Commands.Stop, this.stop, this)
-        );
+        ];
     }
 
     dispose = () => this._disposables.forEach(d => d.dispose());
 
 
     get utils() { return this._utils; }
+	get watcher(): TaskWatcher { return this._taskWatcher; }
 
 
     private open = async(item: TaskItem | ITeTask | Uri, itemClick = false) =>
@@ -287,7 +292,6 @@ export class TaskManager implements ITeTaskManager, Disposable
         this._log.methodStart("internal run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
         task.presentationOptions.reveal = noTerminal !== true ? TaskRevealKind.Always : TaskRevealKind.Silent;
         const exec = await tasks.executeTask(task);
-        await this.wrapper.treeManager.lastTasksFolder.saveTask(taskItem, logPad + "   ");
         this._log.methodDone("internal run task", 1, logPad, [[ "success", !!exec ]]);
         return exec;
     };
