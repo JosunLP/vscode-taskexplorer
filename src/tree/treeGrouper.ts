@@ -4,7 +4,7 @@ import { TaskItem } from "./node/item";
 import { TaskFolder } from "./node/folder";
 import { TaskMap } from "../interface";
 import { TeWrapper } from "../lib/wrapper";
-import { SpecialTaskFolder } from "./specialFolder";
+import { SpecialTaskFolder } from "./node/specialFolder";
 
 
 export class TaskTreeGrouper

@@ -1,9 +1,9 @@
 
-import { TaskItem } from "./node/item";
-import { TeWrapper } from "../lib/wrapper";
+import { TaskItem } from "./item";
+import { TeWrapper } from "../../lib/wrapper";
 import { SpecialTaskFolder } from "./specialFolder";
-import { ITeTaskStatusChangeEvent } from "../interface";
-import { registerCommand } from "../lib/command/command";
+import { ITeTaskStatusChangeEvent } from "../../interface";
+import { registerCommand } from "../../lib/command/command";
 import { ConfigurationChangeEvent, TreeItemCollapsibleState, window } from "vscode";
 
 

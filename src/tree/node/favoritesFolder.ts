@@ -1,10 +1,10 @@
 
-import { TaskItem } from "./node/item";
-import { ITeTask } from "../interface";
-import { TeWrapper } from "../lib/wrapper";
+import { TaskItem } from "./item";
+import { ITeTask } from "../../interface";
+import { TeWrapper } from "../../lib/wrapper";
 import { TreeItemCollapsibleState } from "vscode";
 import { SpecialTaskFolder } from "./specialFolder";
-import { registerCommand } from "../lib/command/command";
+import { registerCommand } from "../../lib/command/command";
 
 
 /**
