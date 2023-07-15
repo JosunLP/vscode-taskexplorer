@@ -9,7 +9,7 @@ import { executeCommand, registerCommand } from "../command/command";
 import { IpcAccountRegistrationParams } from "../../webview/common/ipc";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent, ContextKeys,
-	TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo, TeTaskSource
+	TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo, TeTaskSource, ITeLicense
 } from "../../interface";
 
 
@@ -54,7 +54,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			wrapper.treeManager.onDidTaskCountChange(this.onTasksChanged, this),
 			registerCommand(wrapper.keys.Commands.ExtendTrial, this.extendTrial, this),
 			registerCommand(wrapper.keys.Commands.PurchaseLicense, this.purchaseLicense, this),
-			registerCommand(wrapper.keys.Commands.RefreshSession, () => this.validateLicense(this._account.license.key, ""), this),
+			registerCommand(wrapper.keys.Commands.RefreshSession, () => this.validateLicense(this.lic.key, ""), this),
 			registerCommand(wrapper.keys.Commands.Register, this.register, this)
 		);
     }
@@ -66,55 +66,20 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	get account(): ITeAccount {
-		return this._account;
-	}
-
-	get isBusy(): boolean {
-		return this._busy;
-	}
-
-	get isLicensed(): boolean {
-		return this._account.errorState || this.isTrial || this._account.license.type >= TeLicenseType.Standard;
-	}
-
-	get isPaid(): boolean {
-		return this._account.license.type >= TeLicenseType.Standard && this._account.license.state === TeLicenseState.Paid;
-	}
-
-	get isRegistered(): boolean {
-		return this._account.verified;
-	}
-
-	get isTrial(): boolean {
-		return this._account.license.type <= TeLicenseType.TrialExtended && this._account.license.state === TeLicenseState.Trial && this._account.license.period <= 2;
-	}
-
-	get isTrialExtended(): boolean {
-		return this._account.license.type === TeLicenseType.TrialExtended && this._account.license.state === TeLicenseState.Trial && this._account.license.period === 2;
-	}
-
-    get onDidSessionChange(): Event<TeSessionChangeEvent> {
-        return this._onSessionChange.event;
-    }
-
-    get onReady(): Event<void> {
-        return this._onReady.event;
-    }
-
-	get sessionInterval(): number {
-		return this._sessionInterval[this.wrapper.env];
-	}
-
-	get statusDays(): string {
-		return this.isTrial ?
-			this.wrapper.utils.getDateDifference(Date.now(), this._account.license.expires, "d").toString() :
-			(this.isLicensed ? this.wrapper.utils.getDateDifference(Date.now(), this._account.license.expires, "d").toString() : "");
-	}
-
-    get statusDescription(): string {
-        return this.isTrial ? (this._account.license.period <= 1 ? "PRE-TRIAL" : "EXT-TRIAL") : (this.isLicensed ? "LICENSED" : "UNLICENSED");
-    }
+	get account(): ITeAccount { return this._account; }
+	get isBusy(): boolean { return this._busy; }
+	get isErrorState(): boolean { return !!this._account.errorState; }
+	get isLicensed(): boolean { return !!this._account.errorState || this.isTrial || this.lic.type >= TeLicenseType.Standard; }
+	get isPaid(): boolean { return this.lic.type >= TeLicenseType.Standard && this.lic.state === TeLicenseState.Paid; }
+	get isRegistered(): boolean { return this._account.verified; }
+	get isTrial(): boolean { return this.lic.type <= TeLicenseType.TrialExtended && this.lic.state === TeLicenseState.Trial && this.lic.period <= 2; }
+	get isTrialExtended(): boolean { return this.lic.type === TeLicenseType.TrialExtended && this.lic.state === TeLicenseState.Trial && this.lic.period === 2; }
+	get lic(): ITeLicense { return this._account.license; }
+    get onDidSessionChange(): Event<TeSessionChangeEvent> { return this._onSessionChange.event; }
+    get onReady(): Event<void> { return this._onReady.event; }
+	get sessionInterval(): number { return this._sessionInterval[this.wrapper.env]; }
+	get statusDays(): string { return !this._account.errorState ? (this.isTrial ? this.wrapper.utils.getDateDifference(Date.now(), this.lic.expires, "d").toString() : (this.isLicensed ? this.wrapper.utils.getDateDifference(Date.now(), this.lic.expires, "d").toString() : "")) : ""; }
+    get statusDescription(): string { return !this._account.errorState ? (this.isTrial ? (this.lic.period <= 1 ? "PRE-TRIAL" : "EXT-TRIAL") : (this.isLicensed ? "LICENSED" : "UNLICENSED")) : "SERVER ERROR"; }
 
 
 	private beginTrial = async(logPad: string): Promise<void> =>
@@ -148,14 +113,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			this._account = await this.getStoredAccount();
 			this.logAccountFields(logPad + "   ");
-			if (this._account.license.type !== TeLicenseType.None)
+			if (this.lic.type !== TeLicenseType.None)
 			{
-				if (this._account.license.key && this._account.license.type !== TeLicenseType.Free)
+				if (this.lic.key && this.lic.type !== TeLicenseType.Free)
 				{
 					if (this._account.session.expires <= Date.now() + this.sessionInterval)
 					{
 						this._busy = true;
-						await this.validateLicense(this._account.license.key, logPad + "   ");
+						await this.validateLicense(this.lic.key, logPad + "   ");
 					}
 					else {
 						await this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", logPad + "   ");
@@ -200,7 +165,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		if (displayPopup)
 		{
 			const options = [ "Buy License", "Info", "Not Now" ];
-			if (this._account.license.type !== TeLicenseType.TrialExtended) {
+			if (this.lic.type !== TeLicenseType.TrialExtended) {
 				options.push("Extend Trial");
 			}
 			await this.wrapper.storage.update(this.wrapper.keys.Storage.LastLicenseNag, Date.now().toString());
@@ -257,7 +222,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this.wrapper.statusBar.update("Requesting extended trial");
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
 
-		if (this._account.license.period > 1 || !this.isRegistered)
+		if (this.lic.period > 1 || !this.isRegistered)
 		{
 			const msg = "user is not registered or an extended trial license has already been allocated to this machine";
 			window.showInformationMessage("Can't proceed - " + msg);
@@ -434,14 +399,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private handleServerError = async (e: any): Promise<void> =>
 	{
-		/* istanbul ignore if  */
-		if (e instanceof Error)
-		{
-			this.wrapper.log.error(e);
-			this._account.errorState = true; // In error state, licensed mode is ON
-		}
-		else //
-		{   // Possible Status Codes:
+		this._account.errorState = e instanceof Error ||  e.status === 500;
+		await this.wrapper.utils.execIf(!(e instanceof Error), async() =>
+		{   //
+		    // Possible Error Status Codes:
 			//
 			//     201  : Success
 			//     400  : Client Error (Invalid Parameters)
@@ -454,34 +415,29 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			const message = e.body ? e.body.message : /* istanbul ignore next */e.message;
 			this.wrapper.log.value("response body", JSON.stringify(e.body), 3);
 			this.wrapper.log.error(e, [[ "status code", e.status ], [ "server message", message ]]);
-			/* istanbul ignore else */
-			if (e.status !== 500)
+			await this.wrapper.utils.execIf2(!this._account.errorState, async (m) =>
 			{
-				switch (message)
+				switch (m)
 				{
 					case "Account does not exist":           // 409
 					case "Account trial does not exist":     // 409
 					case "Account license does not exist":   // 409
-						this._account.license.type = TeLicenseType.Free;
-						this._account.license.state = TeLicenseState.Free;
+						this.lic.type = TeLicenseType.Free;
+						this.lic.state = TeLicenseState.Free;
 						await this.saveAccount(this._account, "   ");
 						this._account.verified = false;
 						break;
 					// case "Account trial cannot be extended": // 402
 					case "Invalid license key":              // 406
-						this._account.license.type = TeLicenseType.Free;
-						this._account.license.state = TeLicenseState.Free;
+						this.lic.type = TeLicenseType.Free;
+						this.lic.state = TeLicenseState.Free;
 						await this.saveAccount(this._account, "   ");
 						break;
 					// case "Error - could not update trial":
 					// case "Invalid request parameters":
 				}
-			}
-			else {
-				this._account.errorState = true; // In error state, licensed mode goes ON
-			}
-		}
-
+			}, this, undefined, message);
+		}, this, [ this.wrapper.log.error, e ]);
 		this.wrapper.statusBar.showTimed({ text: "Server error" }, this._sbInfo);
 		this._sbInfo = undefined;
 	};
@@ -489,7 +445,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private logAccountFields = (logPad: string) =>
 	{
-		const _v = (e: [ string, any ]) => {
+		const _v = (e: [ string, any ]) =>
+		{
 			if (!e[0].match(/(?:expires|issued)/i)) return e[1];
 			return this.wrapper.utils.formatDate(e[1]);
 		};
@@ -523,13 +480,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				account: this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account),
 				changeNumber: this._accountChangeNumber,
 				changeFlags: {
-					expiration: this._account.license.expired !== pAccount.license.expired,
-					license: this._account.license.paid !== pAccount.license.paid,
-					licenseState: this._account.license.state !== pAccount.license.state,
-					licenseType: this._account.license.type !== pAccount.license.type,
-					paymentDate: this._account.license.paid !== pAccount.license.paid,
+					expiration: this.lic.expired !== pAccount.license.expired,
+					license: this.lic.paid !== pAccount.license.paid,
+					licenseState: this.lic.state !== pAccount.license.state,
+					licenseType: this.lic.type !== pAccount.license.type,
+					paymentDate: this.lic.paid !== pAccount.license.paid,
 					session: this._account.session.token !== pAccount.session.token,
-					trialPeriod: this._account.license.type < 4 && this._account.license.period !== pAccount.license.period,
+					trialPeriod: this.lic.type < 4 && this.lic.period !== pAccount.license.period,
 					verification: this._account.verified !== pAccount.verified || this._account.verificationPending !== pAccount.verificationPending
 				},
 				session: {
@@ -572,7 +529,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				{
 					await this._server.request<any>(ep, token, logPad, this.getPaypalWebhookPayload());
 					await this.wrapper.utils.sleep(50);
-					await this.validateLicense(this._account.license.key, logPad + "   ");
+					await this.validateLicense(this.lic.key, logPad + "   ");
 				},
 				[ this.handleServerError ], this
 			);
@@ -624,8 +581,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}registered`, this.isRegistered);
 		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trial`, this.isTrial);
 		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trialext`, this.isTrialExtended);
-		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}license:type`, this._account.license.type);
-		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trial:period`, this._account.license.period);
+		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}license:type`, this.lic.type);
+		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trial:period`, this.lic.period);
 	};
 
 
