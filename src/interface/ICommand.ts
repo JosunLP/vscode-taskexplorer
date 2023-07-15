@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { Disposable } from "vscode";
-import { WebviewIds, WebviewPrefix, WebviewViewIds } from "./ITeWebview";
+import { TreeviewIds, WebviewIds, WebviewPrefix, WebviewViewIds } from "./ITeWebview";
 
 export const enum CommandPrefix
 {
@@ -98,8 +98,8 @@ export enum VsCodeCommands
 }
 
  export type SupportedCommands = Commands | VsCodeCommands |
-		`${WebviewPrefix.View}${WebviewViewIds|WebviewIds}.focus` |
-		`${WebviewPrefix.View}${WebviewViewIds|WebviewIds}.resetViewLocation`;
+		`${WebviewPrefix.View}${WebviewViewIds|WebviewIds|TreeviewIds}.focus` |
+		`${WebviewPrefix.View}${WebviewViewIds|WebviewIds|TreeviewIds}.resetViewLocation`;
 
 export interface ICommand
 {

@@ -37,34 +37,31 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     private visible = false;
     private wasVisible = false;
     private currentRefreshEvent: string | undefined;
+
+    private readonly _disposables: Disposable[];
+    private readonly _eventQueue: ITaskTreeEvent[];
     private readonly _treeManager: TaskTreeManager;
-    private readonly _disposables: Disposable[] = [];
-    private readonly _eventQueue: ITaskTreeEvent[] = [];
-    private readonly _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void>;
     private readonly _onDidLoadTreeData: EventEmitter<void>;
+    private readonly _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void>;
 
 
     constructor(private readonly wrapper: TeWrapper, public readonly name: TreeviewIds, treeManager: TaskTreeManager)
     {
+        this._eventQueue = [];
         this._treeManager = treeManager;
         this._onDidLoadTreeData = new EventEmitter<void>();
         this._onDidChangeTreeData = new EventEmitter<TreeItem | undefined | null | void>();
-        this._disposables.push(
+        this._disposables = [
             this._onDidLoadTreeData ,
             this._onDidChangeTreeData
-        );
+        ];
     }
 
 	dispose = () => this._disposables.forEach(d => d.dispose());
 
 
-    get onDidChangeTreeData(): Event<TreeItem | undefined | null | void> {
-        return this._onDidChangeTreeData.event;
-    }
-
-    get onDidLoadTreeData(): Event<void> {
-        return this._onDidLoadTreeData.event;
-    }
+    get onDidChangeTreeData(): Event<TreeItem | undefined | null | void> { return this._onDidChangeTreeData.event; }
+    get onDidLoadTreeData(): Event<void> { return this._onDidLoadTreeData.event; }
 
 
     fireTreeRefreshEvent = (treeItem: TreeItem | null, logPad: string, fromQueue?: boolean) =>

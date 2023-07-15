@@ -10,6 +10,7 @@
 
 import { IDictionary } from ":types";
 import { getNonce } from ":env/crypto";
+import { TeViewBase } from "./viewBase";
 import { Strings } from "../lib/constants";
 import { TeWrapper } from "../lib/wrapper";
 import { TeWebviewView } from "./webviewView";
@@ -42,7 +43,7 @@ export interface FontAwesomeClass
 }
 
 
-export abstract class TeWebviewBase<State, SerializedState> implements ITeWebview, Disposable
+export abstract class TeWebviewBase<State, SerializedState> extends TeViewBase implements ITeWebview, Disposable
 {
     abstract show(options?: any, ..._args: unknown[]): Promise<TeWebviewPanel<State> | TeWebviewView<State, SerializedState>>;
 
@@ -60,80 +61,38 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 	protected onWindowFocusChanged?(focused: boolean): void;
 	protected registerCommands?(): Disposable[];
 
-	protected _isReady = false;
+	protected override _view: WebviewView | WebviewPanel | undefined;
+    protected declare viewId: WebviewIds | WebviewViewIds;
+
 	protected _skippedChangeEvent = false;
 	protected _ignoreTeBusy = false;
 	protected _teEnabled: boolean;
-	protected _view: WebviewView | WebviewPanel | undefined;
-	protected readonly disposables: Disposable[] = [];
+	protected readonly fileName: string;
 
-	private _title: string;
     private _ipcSequence: number;
 
 	private readonly _cspNonce: string;
     private readonly _maxSmallIntegerV8 = Math.pow(2, 30);
-	private readonly _originalTitle: string | undefined;
-	private readonly _onReadyReceived: EventEmitter<void>;
 	private readonly _onMessageReceived: EventEmitter<string>;
 	// private readonly htmlCache: { [id in `taskexplorer.view.${WebviewViewIds|WebviewIds}`]?: string; } = {};
 
 
-    constructor(protected readonly wrapper: TeWrapper, protected id: WebviewId, title: string, protected readonly fileName: string)
+    constructor(wrapper: TeWrapper, title: string, fileName: string, viewId: WebviewIds | WebviewViewIds)
     {
-		this._title = title;
+        super(wrapper, title, viewId);
+		this.fileName = fileName;
 		this._ipcSequence = 0;
-		this._originalTitle = title;
+		this._view = undefined;
 		this._cspNonce = getNonce();
-		this._onReadyReceived = new EventEmitter<void>();
-		this._onMessageReceived = new EventEmitter<string>();
 		this._teEnabled = wrapper.utils.isTeEnabled();
+		this._onMessageReceived = new EventEmitter<string>();
 		this.disposables.push(
-			this._onReadyReceived,
-			this._onMessageReceived ,
 			wrapper.config.onDidChange(this.onConfigChanged, this)
 		);
     }
 
-	dispose()
-	{
-		this.disposables.forEach(d => void d.dispose());
-		this.disposables.splice(0);
-	}
-
-	get busy(): boolean {
-		return !!this._view && !this._isReady && this.visible;
-	}
-
 	get onDidReceiveMessage(): Event<string> {
 		return this._onMessageReceived.event;
-	}
-
-	get onDidReceiveReady(): Event<void> {
-		return this._onReadyReceived.event;
-	}
-
-	get title(): string {
-		return this._view?.title ?? this._title;
-	}
-
-	set title(title: string)
-	{
-		this._title = title;
-		if (this._view) {
-			this._view.title = title;
-		}
-	}
-
-	get originalTitle(): string | undefined {
-		return this._originalTitle;
-	}
-
-	get view(): WebviewView | WebviewPanel | undefined {
-		return this._view;
-	}
-
-	get visible(): boolean {
-		return this._view?.visible ?? false;
 	}
 
 
@@ -440,12 +399,5 @@ export abstract class TeWebviewBase<State, SerializedState> implements ITeWebvie
 		}
 		this.wrapper.log.methodDone(`${this.id}:refresh`, 2);
 	}
-
-
-	private setReady = () =>
-	{
-		this._isReady = true;
-		this._onReadyReceived.fire();
-	};
 
 }
