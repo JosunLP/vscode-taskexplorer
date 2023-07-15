@@ -69,6 +69,38 @@
 			]
         },
         {
+            "name": "Launch (No Watch) (Test Fixture Single-Root)",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "smartStep": true,
+			"sourceMaps": true,
+			"sourceMapRenames": true,
+			"trace": true,
+			"debugWebviews": true,
+            "autoAttachChildProcesses": true,
+			"rendererDebugOptions": {
+				"pauseForSourceMap": true,
+				"sourceMapRenames": true,
+				"sourceMaps": true,
+				"urlFilter": "*spmeesseman.*",
+				"webRoot": "${workspaceFolder}/res"
+			},
+            "outFiles": [
+                "${workspaceFolder}/dist/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**", "**/node_modules/**", "**/resources/app/out/vs/**"
+            ],
+            "args": [
+                "${workspaceFolder}/test-fixture/project1",
+                "--profile=Debug (TaskExplorer)",
+				"--disable-extensions",
+                "--disable-workspace-trust",
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			]
+        },
+        {
             "name": "Launch (Test Fixture Multi-Root)",
             "type": "extensionHost",
             "request": "launch",
