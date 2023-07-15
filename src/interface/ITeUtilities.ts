@@ -71,7 +71,8 @@ export interface ITePromiseUtilities
 
 export interface ITeSortUtilities
 {
-	sortFolders(folders: IDictionary<ITaskFolder>): ITaskFolder[];
+	// sortFolders(folders: IDictionary<ITaskFolder>): ITaskFolder[];
+	sortFolders(folders: ITaskFolder[]): void;
 	sortTaskFolder(folder: ITaskFolder, listType: TeTaskListType): void;
 	sortTasks(items: (ITaskFile | ITaskItem)[], listType: TeTaskListType): void;
 }
@@ -163,7 +164,6 @@ export interface ITeUtilities
 	getRandomNumber(max?: number, min?: number): number;
 	lowerCaseFirstChar(s: string, removeSpaces: boolean): string;
 	isExcluded(uriPath: string, log: ILog, logPad?: string): boolean;
-	isTaskTypeEnabled(taskType: string): boolean;
 	isTeEnabled(): boolean;
 	openUrl(url: string): void;
 	popIfExists(arrOrRec: string[] | Record<string, string> | undefined, ...item: string[]): string[];

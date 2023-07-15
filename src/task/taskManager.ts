@@ -1,5 +1,6 @@
 
 import { dirname } from "path";
+import { TaskUtils } from "./utils";
 import { TaskFile } from "../tree/file";
 import { TaskItem } from "../tree/item";
 import { TeWrapper } from "../lib/wrapper";
@@ -19,13 +20,16 @@ import {
 export class TaskManager implements ITeTaskManager, Disposable
 {
     private readonly _log: ILog;
+    private readonly _utils: TaskUtils;
     private readonly _disposables: Disposable[] = [];
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
         this._log = wrapper.log;
+        this._utils = new TaskUtils(wrapper);
         this._disposables.push(
+            this._utils,
             registerCommand(wrapper.keys.Commands.NpmRunInstall, (item: TaskFile) => this.runNpmCommand(item, "install"), this),
             registerCommand(wrapper.keys.Commands.NpmRunUpdate, (item: TaskFile) => this.runNpmCommand(item, "update"), this),
             registerCommand(wrapper.keys.Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
@@ -45,6 +49,9 @@ export class TaskManager implements ITeTaskManager, Disposable
     }
 
     dispose = () => this._disposables.forEach(d => d.dispose());
+
+
+    get utils() { return this._utils; }
 
 
     private open = async(item: TaskItem | ITeTask | Uri, itemClick = false) =>
@@ -263,7 +270,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         const taskMap = this.wrapper.treeManager.taskMap,
               lastTasks = this.wrapper.treeManager.lastTasksFolder,
               lastTaskId = lastTasks.getLastRanId(),
-              taskItem = lastTaskId ? taskMap[lastTaskId] as TaskItem : null;
+              taskItem = lastTaskId ? taskMap[lastTaskId] : null;
         if (!taskItem) {
             window.showInformationMessage("Task not found! Check log for details");
             return;
