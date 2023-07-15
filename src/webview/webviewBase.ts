@@ -93,7 +93,7 @@ export abstract class TeWebviewBase<State, SerializedState> extends TeViewBase i
 		return this._onMessageReceived.event;
 	}
 
-	override get view(): WebviewView | WebviewPanel | undefined {
+	get view(): WebviewView | WebviewPanel | undefined {
 		return this._view;
 	}
 

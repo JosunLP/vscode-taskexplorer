@@ -58,12 +58,7 @@ export class PipenvTaskProvider extends TaskExplorerProvider implements TaskExpl
             else {
                 idx2 = contents.indexOf("\n\n", idx);
             }
-            if (idx2 === -1) {
-                idx2 = contents.length;
-            }
-            if (idx2 === -1) {
-                idx2 = contents.length;
-            }
+            this.wrapper.utils.execIf(idx2 === -1, () => { idx2 = contents.length; });
             let match: RegExpExecArray | null;
             const regex = /\s*(.+)\s*\=\s*["']?(.+)["'$\r\n]/gi,
                   scriptsText = contents.substring(idx, idx2);

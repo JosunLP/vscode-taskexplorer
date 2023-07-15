@@ -7,14 +7,14 @@ export abstract class TaskTreeNode extends TreeItem
     declare label: string;
     declare resourceUri: Uri;
 
-    private _stamp: number;
+    // private _stamp: number;
 
     constructor(label: string, state: TreeItemCollapsibleState)
     {
         super(label, state);
-        this._stamp = Date.now();
+        // this._stamp = Date.now();
     }
 
-    get stamp() { return this._stamp; }
-    set stamp(v) { this._stamp = v; }
+    // get stamp() { return this._stamp; }
+    // set stamp(v) { this._stamp = v; }
 }

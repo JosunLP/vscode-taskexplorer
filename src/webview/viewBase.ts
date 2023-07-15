@@ -69,9 +69,9 @@ export abstract class TeViewBase implements Disposable
 		return this._originalTitle;
 	}
 
-	get view(): TreeView<TeTreeItem> | WebviewView | WebviewPanel | undefined {
-		return this._view;
-	}
+	// get view(): TreeView<TeTreeItem> | WebviewView | WebviewPanel | undefined {
+	// 	return this._view;
+	// }
 
 	get visible(): boolean {
 		return this._view?.visible ?? false;
