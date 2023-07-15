@@ -4,8 +4,8 @@ import { join } from "path";
 import { IDictionary } from ":types";
 import { TeWrapper } from "../lib/wrapper";
 import * as taskTypeUtils from "../lib/utils/taskUtils";
-import { ICacheItem, ITeFileCache, TeTaskSource } from "../interface";
 import { findFiles, numFilesInDirectory } from "../lib/utils/fs";
+import { ICacheItem, ITeFileCache, TeTaskSource } from "../interface";
 import { workspace, WorkspaceFolder, Uri, Disposable, ConfigurationChangeEvent, Event, EventEmitter } from "vscode";
 
 
@@ -104,7 +104,7 @@ export class TeFileCache implements ITeFileCache, Disposable
             for (const providerName of taskProviders)
             {
                 const isExternal = this.wrapper.taskUtils.isExternalType(this.wrapper, providerName);
-                if (!this.cancel && numFilesFound < numFiles && (isExternal || this.wrapper.utils.isTaskTypeEnabled(providerName)))
+                if (!this.cancel && numFilesFound < numFiles && (isExternal || this.wrapper.taskManager.utils.isTaskTypeEnabled(providerName)))
                 {
                     let glob;
                     if (!taskTypeUtils.isWatchTask(providerName, this.wrapper))
@@ -173,7 +173,7 @@ export class TeFileCache implements ITeFileCache, Disposable
 
         const providers = this.wrapper.providers;
         const externalProvider = providers[taskType]  && providers[taskType].isExternal;
-        if (!this.cancel && (externalProvider || this.wrapper.utils.isTaskTypeEnabled(taskType)))
+        if (!this.cancel && (externalProvider || this.wrapper.taskManager.utils.isTaskTypeEnabled(taskType)))
         {
             this.wrapper.log.value(`   building workspace project ${taskType} task file cache`, taskType, 3, logPad);
             numFilesFound += await this.buildTaskTypeCache(taskType, folder, false, logPad + "   ");
@@ -217,7 +217,7 @@ export class TeFileCache implements ITeFileCache, Disposable
                 }
             }
             await this.finishBuild();
-            this.wrapper.log.value("   was cancelled", this.cancel, 3);
+            this.wrapper.log.value("   was cancelled", this.cancel, 3, logPad);
             this.wrapper.log.methodDone("add workspace project folders", 1, logPad, [[ "# of file found", numFilesFound ]]);
         }
         return numFilesFound;

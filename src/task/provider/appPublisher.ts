@@ -69,8 +69,11 @@ export class AppPublisherTaskProvider extends TaskExplorerProvider implements Ta
             [ "path", uri.fsPath ], [ "project folder", folder.name ]
         ], this.logQueueId);
 
-        try { // Validate JSON
-            await this.wrapper.fs.readJsonAsync(uri.fsPath);
+        try { // Validate JSON and check te disable flag
+            const jso = await this.wrapper.fs.readJsonAsync<any>(uri.fsPath);
+            if (jso.disableTaskExplorer === "Y") {
+                return [];
+            }
         }
         catch (e: any)
         {

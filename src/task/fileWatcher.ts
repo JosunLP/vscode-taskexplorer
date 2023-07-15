@@ -103,7 +103,7 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
         for (const taskType of taskTypes)
         {
             this.wrapper.log.write(`   create file watchers for task type '${taskType}'`, 1, logPad);
-            if (this.wrapper.utils.isTaskTypeEnabled(taskType))
+            if (this.wrapper.taskManager.utils.isTaskTypeEnabled(taskType))
             {
                 await this.registerFileWatcher(taskType, true, true, logPad + "   ");
             }

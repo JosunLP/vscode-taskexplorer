@@ -2,9 +2,8 @@
 import { extname } from "path";
 import { Globs } from "../../lib/constants";
 import { TeWrapper } from "../../lib/wrapper";
-import { ITaskExplorerProvider, TeTaskSource } from "../../interface";
-import { isTaskIncluded } from "../../lib/utils/isTaskIncluded";
 import { Uri, Task, WorkspaceFolder, workspace } from "vscode";
+import { ITaskExplorerProvider, TeTaskSource } from "../../interface";
 
 
 export abstract class TaskExplorerProvider implements ITaskExplorerProvider
@@ -91,30 +90,31 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
 
     protected async readTasks(logPad: string): Promise<Task[]>
     {
-        const allTasks: Task[] = [],
+        const w = this.wrapper,
+              allTasks: Task[] = [],
               visitedFiles: string[] = [],
-              paths = this.wrapper.fileCache.getTaskFiles(this.providerName),
-              enabled = this.wrapper.utils.isTaskTypeEnabled(this.providerName) && (this.providerName !== "npm" || this.wrapper.config.get<boolean>(this.wrapper.keys.Config.UseNpmProvider));
+              paths = w.fileCache.getTaskFiles(this.providerName),
+              enabled = w.taskManager.utils.isTaskTypeEnabled(this.providerName) && (this.providerName !== "npm" || w.config.get<boolean>(w.keys.Config.UseNpmProvider));
 
-        this.wrapper.log.methodStart(`read ${this.providerName} tasks`, 2, logPad, false, [[ "enabled", enabled ]], this.logQueueId);
+        w.log.methodStart(`read ${this.providerName} tasks`, 2, logPad, false, [[ "enabled", enabled ]], this.logQueueId);
 
         if (enabled && paths)
         {
             for (const fObj of paths)
             {
-                if (!this.wrapper.utils.isExcluded(fObj.uri.path, this.wrapper.log) && !visitedFiles.includes(fObj.uri.fsPath) && this.wrapper.fs.pathExistsSync(fObj.uri.fsPath))
+                if (!w.utils.isExcluded(fObj.uri.path, w.log) && !visitedFiles.includes(fObj.uri.fsPath) && w.fs.pathExistsSync(fObj.uri.fsPath))
                 {
                     visitedFiles.push(fObj.uri.fsPath);
-                    const tasks = (await this.readUriTasks(fObj.uri, logPad + "   ")).filter(t => isTaskIncluded(this.wrapper, t, logPad + "   ", this.logQueueId));
-                    this.wrapper.log.write(`   processed ${this.providerName} file`, 2, logPad, this.logQueueId);
-                    this.wrapper.log.value("      file", fObj.uri.fsPath, 2, logPad, this.logQueueId);
-                    this.wrapper.log.value("      targets in file", tasks.length, 2, logPad, this.logQueueId);
+                    const tasks = (await this.readUriTasks(fObj.uri, logPad + "   ")).filter(t => w.taskManager.utils.isTaskIncluded(t, logPad + "   ", this.logQueueId));
+                    w.log.write(`   processed ${this.providerName} file`, 2, logPad, this.logQueueId);
+                    w.log.value("      file", fObj.uri.fsPath, 2, logPad, this.logQueueId);
+                    w.log.value("      targets in file", tasks.length, 2, logPad, this.logQueueId);
                     allTasks.push(...tasks);
                 }
             }
         }
 
-        this.wrapper.log.methodDone(`read ${this.providerName} tasks`, 2, logPad, [[ "# of tasks parsed", allTasks.length ]], this.logQueueId);
+        w.log.methodDone(`read ${this.providerName} tasks`, 2, logPad, [[ "# of tasks parsed", allTasks.length ]], this.logQueueId);
 
         return allTasks;
     }
@@ -138,7 +138,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             [ "uri", uri?.path ], [ "current # of cached tasks", cachedTasks.length ]
         ]);
 
-        const enabled = w.utils.isTaskTypeEnabled(this.providerName) && (this.providerName !== "npm" || w.config.get<boolean>(w.keys.Config.UseNpmProvider));
+        const enabled = w.taskManager.utils.isTaskTypeEnabled(this.providerName) && (this.providerName !== "npm" || w.taskManager.utils.useNpmProvider);
         if (enabled && uri)
         {
             const pathExists = w.fs.pathExistsSync(uri.fsPath) && !!workspace.getWorkspaceFolder(uri) ;
@@ -161,7 +161,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             //
             if (pathExists && !w.fs.isDirectory(uri.fsPath) && !w.config.get<string[]>("exclude", []).includes(uri.path))
             {
-                const tasks = (await this.readUriTasks(uri, logPad + "   ")).filter(t => isTaskIncluded(w, t, logPad + "   "));
+                const tasks = (await this.readUriTasks(uri, logPad + "   ")).filter(t => w.taskManager.utils.isTaskIncluded(t, logPad + "   "));
                 cachedTasks.push(...tasks);
             }
 
@@ -193,7 +193,7 @@ export abstract class TaskExplorerProvider implements ITaskExplorerProvider
             // (cstDef.uri.fsPath.startsWith(uri.fsPath) && /* istanbul ignore next */isDirectory(uri.fsPath)) ||
             (cstDef.uri.fsPath.startsWith(uri.fsPath) && /* istanbul ignore next */!extname(uri.fsPath) /* ouch */) ||
             //
-            !isTaskIncluded(this.wrapper, item, logPad)));
+            !this.wrapper.taskManager.utils.isTaskIncluded(item, logPad)));
     }
 
 }
