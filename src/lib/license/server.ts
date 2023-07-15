@@ -52,10 +52,9 @@ export class TeServer
 	private readonly _requestTimeout = 7500;
 	private readonly _spmApiServer = "license.spmeesseman.com";
 	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
-		dev: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcpO14r6dmkYwk9mN3qwbdbF8ty8DUWKqJO5JKR5FqQbOFuYYI0FrdIlsleAuvmaq/aeYhKbBxDfTKLZRTVx2TfA==",
-		// dev: "3N0wTENSyQNF1t3Opi2Ke+UiJe4Jhb3b1WOKIS6I0mICPQ7O+iOUaUQUsQrda/gUnBRjJNjCs+1vc78lgDEdOsSELTG7jXakfbgPLj61YtKftBdzrvekagM9CZ+9zRx1",
+		dev: "1Ac4qiBjXsNQP82FqmeJ5k0/oMEmjR6Dx9fw1ojUO9//Z4MS6gdHvmzPYY+tuhp3UV/xILD301dQZpeAt+YZzQCPupLbkKIlGhNm+bkKFbIicWdOxSuNtZW+cubqvhfid2YdEZ7Ndt3lqREaifvLPQ==",
 		tests: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcOBrbGCpyITCp0Wm19f8gdI1hNJttkARO5Unac4LA2g7RmT/kdXSsz64zNjB9FrvrzHe97tLBHRGorwcOx/K/hQ==",
-		production: "1Ac4qiBjXsNQP82FqmeJ5iH7IIw3Bou7eibskqg+Jg0U6rYJ0QhvoWZ+5RpH/Kq0EbIrZ9874fDG9u7bnrQP3zYf69DFkOSnOmz3lCMwEA85ZDn79P+fbRubTS+eDrbinnOdPe/BBQhVW7pYHxeK28tYuvcJuj0mOjIOz+3ZgTY="
+		production: "1Ac4qiBjXsNQP82FqmeJ5qMMv9GdCsyTifVKI1MvX7GD2Wu/Ao1j5tJdleYcfG+VpMzyZOvrCohb/9PFbNw9d/pSj0Tv1UFgaFeKajtOCDiIPDYfjmqL130ghjFrjTBfE3qUge2hCg55PGtBp/20aA=="
 	};
 
 
