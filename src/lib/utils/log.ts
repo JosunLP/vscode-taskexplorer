@@ -3,14 +3,14 @@
 
 import { apply } from "./object";
 import { figures } from "./figures";
-import { basename, join } from "path";
+import { basename, dirname, join } from "path";
 import { popIfExistsBy } from "./utils";
-import { appendFileSync, createDir, pathExistsSync, readJsonAsync } from "./fs";
 import { executeCommand, registerCommand } from "../command/command";
-import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, Uri, window } from "vscode";
-import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
-import { Commands, IConfiguration, ConfigKeys, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
+import { appendFileSync, createDir, pathExistsSync, readJsonAsync } from "./fs";
 import { BasicSourceMapConsumer, NullableMappedPosition, RawSourceMap, SourceMapConsumer } from "source-map";
+import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
+import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, Uri, window } from "vscode";
+import { Commands, IConfiguration, ConfigKeys, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
 
 
 export class TeLog implements ILog, Disposable
@@ -23,8 +23,7 @@ export class TeLog implements ILog, Disposable
     private readonly _config: IConfiguration;
     private readonly _logControl: ILogControl;
     private readonly _context: ExtensionContext;
-    private readonly _disposables: Disposable[] = [];
-    // private readonly _moduleMap: Record<string, string> = { TaskTreeDataProvider: "TREE", LicenseManager: "AUTH" };
+    private readonly _disposables: Disposable[];
     private readonly _separator = "-----------------------------------------------------------------------------------------";
 
 
@@ -60,38 +59,25 @@ export class TeLog implements ILog, Disposable
             writeToConsole: false,
             writeToConsoleLevel: 2
         };
-        this._disposables.push(
+        this._disposables = [
             this._logControl.errorChannel,
             this._logControl.outputChannel,
             registerCommand(Commands.ShowOutputWindow, () => this.showOutput(true, this._logControl.outputChannel), this),
             registerCommand(Commands.ShowErrorOutputWindow, () => this.showOutput(true, this._logControl.errorChannel), this),
             config.onDidChange(this.processConfigChanges, this)
-        );
+        ];
 		context.subscriptions.push(this);
     }
 
-    dispose = () => { clearTimeout(this._fileNameTimer); this._disposables.splice(0).forEach(d => d.dispose()); };
+    dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
 
 
-    private get allowScaryColors() {
-        return !this._logControl.isTests || !this._logControl.isTestsBlockScaryColors;
-    }
+    private get allowScaryColors() { return !this._logControl.isTests || !this._logControl.isTestsBlockScaryColors; }
 
-    get control(): ILogControl {
-        return this._logControl;
-    }
-
-    get lastPad(): string {
-        return this._logControl.lastLogPad;
-    }
-
-    get wrapper(): ITeWrapper | undefined {
-        return this._wrapper;
-    }
-
-    set wrapper(wrapper) {
-        this._wrapper = wrapper;
-    }
+    get control(): ILogControl { return this._logControl; }
+    get lastPad(): string { return this._logControl.lastLogPad; }
+    get wrapper(): ITeWrapper | undefined { return this._wrapper; }
+    set wrapper(wrapper) { this._wrapper = wrapper; }
 
 
     private _blank = (level?: LogLevel, queueId?: string) => this._write("", level, "", queueId);
@@ -284,12 +270,16 @@ export class TeLog implements ILog, Disposable
         this._logControl.dirPath = logDirectory;
         this.setFileName();
         const sourceMapUri = Uri.joinPath(this._context.extensionUri, "dist", "taskexplorer.js.map");
-        if (pathExistsSync(sourceMapUri.fsPath))
+        if (pathExistsSync(sourceMapUri.fsPath) && pathExistsSync(join(dirname(sourceMapUri.fsPath), "mappings.wasm")))
         {
             const sourceMapJso = await readJsonAsync<RawSourceMap>(sourceMapUri.fsPath);
             this._srcMapConsumer = await new SourceMapConsumer(sourceMapJso);
-            this._disposables.push({
+            this._disposables.push(
+            {
                 dispose: this._srcMapConsumer.destroy
+            },
+            {
+                dispose: () => clearTimeout(this._fileNameTimer)
             });
         }
         this.enable(this._logControl.enable);
@@ -308,7 +298,6 @@ export class TeLog implements ILog, Disposable
             line: 1,
             map: <NullableMappedPosition>{},
             method: "",
-            tag: "",
             stamp: timeTags.join(" "),
             stampDate: timeTags[0],
             stampTime: timeTags[1]
@@ -340,8 +329,7 @@ export class TeLog implements ILog, Disposable
                     file: basename(file),
                     method,
                     col: parseInt(col, 10),
-                    line: parseInt(line, 10) // ,
-                    // tag: tagKey ? this._moduleMap[tagKey] : ""
+                    line: parseInt(line, 10)
                 });
                 info.map = this.getMap(info.line, info.col);
             }
