@@ -4,7 +4,7 @@
 import { apply } from "./object";
 import { figures } from "./figures";
 import { basename, dirname, join } from "path";
-import { popIfExistsBy } from "./utils";
+import { popIfExistsBy, wrap } from "./utils";
 import { executeCommand, registerCommand } from "../command/command";
 import { appendFileSync, createDir, pathExistsSync, readJsonAsync } from "./fs";
 import { BasicSourceMapConsumer, NullableMappedPosition, RawSourceMap, SourceMapConsumer } from "source-map";
@@ -18,7 +18,7 @@ export class TeLog implements ILog, Disposable
     private _errorsWritten = 0;
     private _fileNameTimer: NodeJS.Timeout;
     private _wrapper: ITeWrapper | undefined;
-    private _srcMapConsumer: BasicSourceMapConsumer;
+    private _srcMapConsumer: BasicSourceMapConsumer | undefined;
 
     private readonly _config: IConfiguration;
     private readonly _logControl: ILogControl;
@@ -32,7 +32,6 @@ export class TeLog implements ILog, Disposable
         this._config = config;
         this._context = context;
         this._fileNameTimer = 0 as unknown as NodeJS.Timeout;
-        this._srcMapConsumer = 0 as unknown as BasicSourceMapConsumer;
         this._logControl = {
             dirPath: context.logUri.fsPath,
             enable: config.get<boolean>(ConfigKeys.LogEnable, false),
@@ -151,7 +150,7 @@ export class TeLog implements ILog, Disposable
         //
         // Add additional error info to error channel
         //
-        if (!queueId) {
+        if (!queueId && this._srcMapConsumer) {
             this.errorWriteChannelInfo(symbols);
         }
         //
@@ -256,9 +255,6 @@ export class TeLog implements ILog, Disposable
         this._logControl.errorChannel.appendLine(`${ts} name          : ${sInfo.map ? sInfo.map.name : sInfo.method}`);
         this._logControl.errorChannel.appendLine(`${ts} file          : ${sInfo.map ? sInfo.map.source : sInfo.file}`);
         this._logControl.errorChannel.appendLine(ts);
-        // if (sInfo.tag) {
-        //     this._logControl.errorChannel.appendLine(`${ts} Module        : ${sInfo.tag}`);
-        // }
         this._logControl.errorChannel.appendLine(`${ts} error message :`);
         this._logControl.errorChannel.appendLine(ts);
     };
@@ -270,23 +266,18 @@ export class TeLog implements ILog, Disposable
         this._logControl.dirPath = logDirectory;
         this.setFileName();
         const sourceMapUri = Uri.joinPath(this._context.extensionUri, "dist", "taskexplorer.js.map");
-        if (pathExistsSync(sourceMapUri.fsPath) && pathExistsSync(join(dirname(sourceMapUri.fsPath), "mappings.wasm")))
+        if (pathExistsSync(sourceMapUri.fsPath))
         {
             const sourceMapJso = await readJsonAsync<RawSourceMap>(sourceMapUri.fsPath);
-            this._srcMapConsumer = await new SourceMapConsumer(sourceMapJso);
-            this._disposables.push(
+            await wrap(async () =>
             {
-                dispose: this._srcMapConsumer.destroy
-            },
-            {
-                dispose: () => clearTimeout(this._fileNameTimer)
-            });
+                this._srcMapConsumer = await new SourceMapConsumer(sourceMapJso); // "https://license.spmeesseman.com/static/app/log/mappings.wasm");
+                this._disposables.push({ dispose: this._srcMapConsumer.destroy });
+            }, [ this._error ], this);
+            this._disposables.push({ dispose: () => clearTimeout(this._fileNameTimer) });
         }
         this.enable(this._logControl.enable);
     };
-
-
-    private getMap = (line: number, column: number) => this._srcMapConsumer.originalPositionFor({ line, column });
 
 
     private getStamp = (detailed?: boolean) =>
@@ -320,7 +311,7 @@ export class TeLog implements ILog, Disposable
             //     at TaskTreeDataProvider.<anonymous> (c:\\....\extension.js:1:col) // Prod / Webpack
             //
             const match = stackline.match(/at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i);
-            if (match)
+            if (match && this._srcMapConsumer)
             {
                 const [ _, method, file, line, col ] = match;
                       // tagKey = Object.keys(this._moduleMap).find(k => this._moduleMap[k].includes(method));
@@ -331,7 +322,7 @@ export class TeLog implements ILog, Disposable
                     col: parseInt(col, 10),
                     line: parseInt(line, 10)
                 });
-                info.map = this.getMap(info.line, info.col);
+                info.map = this._srcMapConsumer.originalPositionFor({ line: info.line, column: info.col});
             }
         }
 
@@ -662,7 +653,7 @@ export class TeLog implements ILog, Disposable
             if (this._logControl.enableOutputWindow) {
                 this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.outputChannel.appendLine, this._logControl.outputChannel, ts, false);
             }
-            if (isError && (msg || !this._errorsWritten)) {
+            if (isError && this._srcMapConsumer && (msg || !this._errorsWritten)) {
                 this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.errorChannel.appendLine, this._logControl.errorChannel, ts, false);
             }
         } //
