@@ -265,6 +265,8 @@ export class TeLog implements ILog, Disposable
         await createDir(logDirectory);
         this._logControl.dirPath = logDirectory;
         this.setFileName();
+        this.writeErrorChannelHeader();
+        this.writeOutputChannelHeader();
         const sourceMapUri = Uri.joinPath(this._context.extensionUri, "dist", "taskexplorer.js.map");
         if (pathExistsSync(sourceMapUri.fsPath))
         {
@@ -547,15 +549,35 @@ export class TeLog implements ILog, Disposable
         this._error(msg, params, queueId, [ this.allowScaryColors ? figures.color.warning : figures.color.warningTests, figures.warning ]);
 
 
+    private writeErrorChannelHeader = () =>
+    {
+        this._logControl.outputChannel.appendLine("");
+        this._logControl.outputChannel.appendLine("***********************************************************************************************");
+        this._logControl.outputChannel.appendLine(" Task Explorer Error Logging Channel");
+        this._logControl.outputChannel.appendLine("***********************************************************************************************");
+        this._logControl.outputChannel.appendLine("");
+    };
+
+
+    private writeOutputChannelHeader = () =>
+    {
+        this._logControl.outputChannel.appendLine("");
+        this._logControl.outputChannel.appendLine("***********************************************************************************************");
+        this._logControl.outputChannel.appendLine(" Task Explorer Logging Channel");
+        this._logControl.outputChannel.appendLine("***********************************************************************************************");
+        this._logControl.outputChannel.appendLine("");
+    };
+
+
     protected writeLogFileLocation = () =>
     {
         if (this._logControl.enable && this._logControl.enableFile &&  this._logControl.outputChannel)
         {
             this._logControl.outputChannel.appendLine("***********************************************************************************************");
-            this._logControl.outputChannel.appendLine(` ExtJs Intellisense Log File: ${this._logControl.fileName}`);
+            this._logControl.outputChannel.appendLine(` Task Explorer Log File: ${this._logControl.fileName}`);
             this._logControl.outputChannel.appendLine("***********************************************************************************************");
             console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
-            console.log(`    ${figures.color.info} ${figures.withColor(` ExtJs Intellisense Log File: ${this._logControl.fileName}`, figures.colors.grey)}`);
+            console.log(`    ${figures.color.info} ${figures.withColor(` Task Explorer Log File: ${this._logControl.fileName}`, figures.colors.grey)}`);
             console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
         }
     };
