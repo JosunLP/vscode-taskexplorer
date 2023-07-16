@@ -6,8 +6,8 @@
  * @module webpack.plugin.afterdone
  */
 
-const path = require("path");
-const { renameSync, existsSync, writeFileSync, readFileSync } = require("fs");
+const { join } = require("path");
+const { renameSync, existsSync, writeFileSync, readFileSync, copyFileSync } = require("fs");
 
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
@@ -34,22 +34,26 @@ const afterdone = (env, wpConfig) =>
             {
                 compiler.hooks.done.tap("AfterDonePlugin", () =>
                 {
+                    const distPath = join(env.buildPath, "dist");
                     if (_wpConfig.mode === "production")
                     {
                         try {
-                            renameSync(path.join(env.buildPath, "dist", "vendor.js.LICENSE.txt"), path.join(env.buildPath, "dist", "vendor.LICENSE"));
-                            renameSync(path.join(env.buildPath, "dist", "taskexplorer.js.LICENSE.txt"), path.join(env.buildPath, "dist", "taskexplorer.LICENSE"));
+                            renameSync(join(distPath, "vendor.js.LICENSE.txt"), join(distPath, "vendor.LICENSE"));
+                            renameSync(join(distPath, "taskexplorer.js.LICENSE.txt"), join(distPath, "taskexplorer.LICENSE"));
                         } catch {}
                     }
                     else if (_env.build === "extension" && _env.environment === "test")
                     {
-                        const outFile = path.join(env.buildPath, "dist", "taskexplorer.js");
+                        const outFile = join(distPath, "taskexplorer.js");
                         if (existsSync(outFile))
                         {
                             const regex = /\n[ \t]*module\.exports \= require\(/mg,
                                     content = readFileSync(outFile, "utf8").replace(regex, (v) => "/* istanbul ignore next */" + v);
                             writeFileSync(outFile, content);
                         }
+                    }
+                    if (_env.build === "extension") {
+                        copyFileSync(join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"), join(distPath, "mappings.wasm"));
                     }
                 });
             }

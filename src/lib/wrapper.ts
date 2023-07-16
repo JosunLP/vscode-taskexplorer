@@ -468,6 +468,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get extensionAuthor(): string { return this.extensionId.substring(0, this.extensionId.indexOf(".")); }
 	get extensionId(): string { return this._context.extension.id; }
 	get extensionName(): string { return this.extensionId.replace(`${this.extensionAuthor}.`, ""); }
+	get extensionNameShort(): string { return this.extensionName.replace("vscode-", ""); }
 	get extensionTitle(): string {return this.localize("name", this._context.extension.packageJSON.displayName); }
 	get extensionTitleShort(): string { return this.extensionTitle; }
 	get figures(): typeof figures { return figures; }

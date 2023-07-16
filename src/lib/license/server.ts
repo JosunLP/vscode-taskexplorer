@@ -69,6 +69,8 @@ export class TeServer
 		return this._publicToken[this.wrapper.env];
 	}
 
+	get apiServer() { return this._spmApiServer; }
+
 
 	private getApiPath = (ep: ITeApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
 

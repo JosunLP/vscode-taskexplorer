@@ -19,9 +19,10 @@ const webpack = require("webpack");
 const sourcemaps = (env, wpConfig) =>
 {
     let plugin;
-    if (env.build !== "webview" && wpConfig.mode !== "production")
+    if (env.build !== "webview")
     {
         const isDev = env.environment === "dev" || wpConfig.mode === "development",
+              isProd = env.environment === "prod" || wpConfig.mode === "production",
               isTests = env.environment.startsWith("test");
         const options =
         {
@@ -59,9 +60,11 @@ const sourcemaps = (env, wpConfig) =>
             // options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
             options.exclude = /((runtime|tests)\.js|node_modules)/;
         }
-        else if (isTests)
-        {
+        else if (isTests) {
             options.exclude = /((vendor|runtime)\.js|node_modules)/;
+        }
+        else if (isProd) {
+            options.filename = "[name].js.map";
         }
         plugin = new webpack.SourceMapDevToolPlugin(options);
     }

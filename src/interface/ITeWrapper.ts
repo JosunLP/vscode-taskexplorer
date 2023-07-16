@@ -66,6 +66,7 @@ export interface ITeWrapper
 	readonly extensionAuthor: string;
 	readonly extensionId: string;
 	readonly extensionName: string;
+	readonly extensionNameShort: string;
 	readonly extensionTitle: string;
 	readonly extensionTitleShort: string;
 	readonly fileWatcher: ITeFileWatcher;

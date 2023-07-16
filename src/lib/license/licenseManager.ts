@@ -132,7 +132,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			});
 		}, this);
 		this.restoreStatusBar(sbInfo);
-		this.wrapper.log.methodDone("begin trial", 1, logPad);
+		this.wrapper.log.methodDone("begin trial", 1, logPad, [[ "result", !!result ]]);
 	};
 
 
@@ -240,7 +240,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		try
 		{
 			const account = await this._server.request<ITeAccount>(ep, token, logPad, { accountId: this._account.id,  ...params });
-			await this.saveAccount(account, logPad);
+			await this.saveAccount(account, false, logPad);
 			this.wrapper.statusBar.update("");
 			return true;
 		}
@@ -441,7 +441,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private handleServerError = async (e: any): Promise<void> =>
 	{
-		this._account.errorState = e instanceof Error || e.status === 500;
+		// eslint-disable-next-line eqeqeq
+		this._account.errorState = e instanceof Error || e.status == 500;
 		await this.wrapper.utils.execIf2(!(e instanceof Error), async(e) =>
 		{   //
 		    // Possible Error Status Codes:
@@ -456,36 +457,26 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			//     500  : Server Error
 			//
 			const message: string = e.body ? e.body.message : /* istanbul ignore next */e.message;
-			this.wrapper.log.error([ "License server is down or has returned an error status", e ], [
-				[ "status code", e.status ], [ "server message", message ], [ "response body",  JSON.stringify(e.body) ]
-			]);
+			this.wrapper.log.error(
+				[ `the license server @  ${this._server.apiServer} is down or has returned an error status`, e ],
+				[[ "status code", e.status ], [ "server message", message ], [ "response body",  JSON.stringify(e.body) ]]
+			);
 			await this.wrapper.utils.execIf2(!this._account.errorState, async (m) =>
 			{
 				switch (m)
 				{
-					case "Account does not exist":           // 409
-					case "Account trial does not exist":     // 409
-					case "Account license does not exist":   // 409
-						this._account.license.type = TeLicenseType.Free;
-						this._account.license.state = TeLicenseState.Free;
-						await this.saveAccount(this._account, "   ");
+					case "Account does not exist":         // 409 (Conflict)
+					case "Account trial does not exist":   // 409 (Conflict)
+					case "Account license does not exist": // 409 (Conflict)
+					case "Trial already exists":           // 409 (Conflict)
 						this._account.verified = false;
-						break;
-					// case "Account trial cannot be extended": // 402 this.lic.period > 1 || !this.isRegistered
-					case "Trial already exists":             // 409
-						// this._account.license.type = TeLicenseType.Free; // this.lic.period > 1 ? TeLicenseType.Free : TeLicenseType.Free;
-						// this._account.license.state = TeLicenseState.Free;
-						// await this.saveAccount(this._account, "   ");
-						// break;
 					// eslint-disable-next-line no-fallthrough
-					case "Invalid license key":              // 406
+					case "Invalid license key":            // 406
 						this._account.license.type = TeLicenseType.Free;
 						this._account.license.state = TeLicenseState.Free;
-						await this.saveAccount(this._account, "   ");
+						await this.saveAccount(this._account, true, "   ");
 						break;
-					// case "Error - could not update trial":
-					// case "Invalid request parameters":
-					case "Access Denied":                    // 401, probably app access token has expired, or is invalid
+					case "Access Denied": // 401 (unauthorized) - token expired, or invalid
 					default:
 						this._account.errorState = true;
 						break;
@@ -611,12 +602,15 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private saveAccount = async (account: ITeAccount, logPad: string): Promise<void> =>
+	private saveAccount = async (account: ITeAccount, force: boolean, logPad: string): Promise<void> =>
 	{
-		const compareCurrent = { ...this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account), ...{ session: {}}};
-		const compareNew = { ...this.wrapper.utils.cloneJsonObject<ITeAccount>(account), ...{ session: {}}};
-		if (JSON.stringify(compareNew) === JSON.stringify(compareCurrent)) {
-			return;
+		if (!force)
+		{
+			const compareCurrent = { ...this.wrapper.utils.cloneJsonObject<ITeAccount>(this._account), ...{ session: {}}};
+			const compareNew = { ...this.wrapper.utils.cloneJsonObject<ITeAccount>(account), ...{ session: {}}};
+			if (JSON.stringify(compareNew) === JSON.stringify(compareCurrent)) {
+				return;
+			}
 		}
 		this.wrapper.log.methodStart("save account", 1, logPad, false, [
 			[ "account id", account.id ],
