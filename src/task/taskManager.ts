@@ -227,7 +227,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                     }
                 }, this, null, folder as WorkspaceFolder);
             }
-            exec = await this.runTask(newTask, taskItem, noTerminal);
+            exec = await this.runTask(newTask, noTerminal);
         }
 
         this._log.methodDone("run task", 1);
@@ -288,7 +288,7 @@ export class TaskManager implements ITeTaskManager, Disposable
     };
 
 
-    private runTask = async (task: Task, taskItem: TaskItem, noTerminal?: boolean, logPad = "   ") =>
+    private runTask = async (task: Task, noTerminal?: boolean, logPad = "   ") =>
     {
         this._log.methodStart("internal run task", 1, logPad, false, [[ "no terminal", noTerminal ]]);
         task.presentationOptions.reveal = noTerminal !== true ? TaskRevealKind.Always : TaskRevealKind.Silent;
@@ -322,7 +322,7 @@ export class TaskManager implements ITeTaskManager, Disposable
                     ) as Task;
                     newTask.definition.taskItemId = def.taskItemId;
                 }, this);
-                return this.runTask(newTask, taskItem, noTerminal, logPad + "   ");
+                return this.runTask(newTask, noTerminal, logPad + "   ");
             };
 
             if (args.length > 0 && !this.wrapper.typeUtils.isString(args[0])) {

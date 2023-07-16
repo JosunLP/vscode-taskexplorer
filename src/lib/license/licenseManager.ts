@@ -15,6 +15,8 @@ import {
 
 export class LicenseManager implements ITeLicenseManager, Disposable
 {
+	private _LICENSE_SERVER_DISABLED_ = false;
+
 	private _busy = false;
 	private _maxFreeTasks = 500;
 	private _account: ITeAccount;
@@ -91,17 +93,17 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 				days = this.wrapper.utils.getDateDifference(Date.now(), this.lic.expires, "d");
 			}
 		}
-		if (days < 0) {
+		if (days && days < 0) {
 			days = "--";
 		}
-		return days.toString();
+		return /* TEMP */!this._LICENSE_SERVER_DISABLED_ ? days.toString() : "";
 	}
 
     get statusDescription(): string
 	{
 		let dsc = "UNLICENSED";
 		if (this._account.errorState) {
-			dsc = "SERVER ERR";
+			dsc = "LIC SVR ERROR";
 		}
 		else if (this.isTrial) {
 			dsc = (this.lic.period <= 1 ? "PRE-TRIAL" : "EXT-TRIAL");
@@ -109,7 +111,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		else if (this.isLicensed) {
 			dsc = "LICENSED";
 		}
-		return dsc;
+		return /* TEMP */!this._LICENSE_SERVER_DISABLED_ ? dsc : "LIC SVR INACTIVE";
 	}
 
 
@@ -143,29 +145,39 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		{
 			this._account = await this.getStoredAccount();
 			this.logAccountFields(logPad + "   ");
-			if (this.lic.type !== TeLicenseType.None)
+			/* TEMP */await this.wrapper.utils.execIf(/* TEMP */!this._LICENSE_SERVER_DISABLED_, async () =>
 			{
-				if (this.lic.key && this.lic.type !== TeLicenseType.Free)
+				if (this.lic.type !== TeLicenseType.None)
 				{
-					if (this._account.session.expires <= Date.now() + this.sessionInterval)
+					if (this.lic.key && this.lic.type !== TeLicenseType.Free)
 					{
-						this._busy = true;
-						await this.validateLicense(this.lic.key, logPad + "   ");
+						if (this._account.session.expires <= Date.now() + this.sessionInterval)
+						{
+							this._busy = true;
+							await this.validateLicense(this.lic.key, logPad + "   ");
+						}
+						else {
+							await this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", logPad + "   ");
+						}
 					}
 					else {
 						await this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", logPad + "   ");
 					}
 				}
 				else {
-					await this.displayPopup("Purchase a license to unlock unlimited parsed tasks.", logPad + "   ");
+					this._busy = true;
+					await this.beginTrial(logPad + "   ");
 				}
-			}
-			else {
-				this._busy = true;
-				await this.beginTrial(logPad + "   ");
-			}
+			}, this);
 		}
-		finally {
+		finally
+		{   /* TEMP */this.wrapper.utils.execIf(/* TEMP */this._LICENSE_SERVER_DISABLED_, () =>
+			{
+				this._account.license.state = TeLicenseState.Paid;
+				this._account.license.type = TeLicenseType.Standard;
+				this._account.license.paid = true;
+				this._account.verified = true;
+			}, this);
 			this.setContext();
 		}
 
