@@ -1,28 +1,27 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { join } from "path";
 import { apply } from "./object";
 import { figures } from "./figures";
+import { basename, join } from "path";
+import { popIfExistsBy } from "./utils";
 import { appendFileSync, createDir } from "./fs";
 import { executeCommand, registerCommand } from "../command/command";
 import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
-import { asString, isArray, isEmpty, isError, isFunction, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
-import { Commands, IConfiguration, ConfigKeys, IDictionary, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
+import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
+import { Commands, IConfiguration, ConfigKeys, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
 
 
 export class TeLog implements ILog, Disposable
 {
-    private _wrapper: ITeWrapper | undefined;
+    private _errorChannelWritten = false;
     private _fileNameTimer: NodeJS.Timeout;
-    private readonly _logControl: ILogControl;
-    // private _wrapper: TeWrapper | undefined;
+    private _wrapper: ITeWrapper | undefined;
+
     private readonly _config: IConfiguration;
+    private readonly _logControl: ILogControl;
     private readonly _disposables: Disposable[] = [];
-    private readonly _moduleMap: IDictionary<string> =
-    {
-        TaskTreeDataProvider: "TREE",
-        LicenseManager: "AUTH"
-    };
+    private readonly _moduleMap: Record<string, string> = { TaskTreeDataProvider: "TREE", LicenseManager: "AUTH" };
+    private readonly _separator = "-----------------------------------------------------------------------------------------";
 
 
     constructor(context: ExtensionContext, config: IConfiguration, _testsRunning: number)
@@ -46,8 +45,8 @@ export class TeLog implements ILog, Disposable
             lastWriteToConsoleWasBlank: false,
             level: config.get<LogLevel>(ConfigKeys.LogLevel, 1),
             msgQueue: {},
-            outputChannel: window.createOutputChannel("Task Explorer"), // , "javascript"),
-            useTags: true,
+            outputChannel: window.createOutputChannel("Task Explorer"),
+            useTags: false,
             useTagsMaxLength: 8,
             type: "global",
             tzOffset: (new Date()).getTimezoneOffset() * 60000,
@@ -58,7 +57,8 @@ export class TeLog implements ILog, Disposable
         this._disposables.push(
             this._logControl.errorChannel,
             this._logControl.outputChannel,
-            registerCommand(Commands.ShowOutputWindow, this.showOutput, this),
+            registerCommand(Commands.ShowOutputWindow, () => this.showOutput(true, this._logControl.outputChannel), this),
+            registerCommand(Commands.ShowErrorOutputWindow, () => this.showOutput(true, this._logControl.errorChannel), this),
             config.onDidChange(this.processConfigChanges, this)
         );
 		context.subscriptions.push(this);
@@ -126,14 +126,14 @@ export class TeLog implements ILog, Disposable
     private _error = (msg: any, params?: (string|any)[][], queueId?: string, symbols: [ string, string ] = [ "", "" ]) =>
     {
         if (!msg) { return; }
-
         if (!symbols || !symbols[0]) {
             const symbol1 = this.allowScaryColors ? figures.color.error : figures.color.errorTests;
             symbols = [ symbol1, figures.error ];
         }
-
+        //
+        // Ignore consecutive duplicate messages
+        //
         const errMsgs = this.parseValue(msg);
-
         if (this._logControl.lastErrorMesage[0] === errMsgs[0])
         {
             if (!isArray(msg)) {
@@ -145,18 +145,29 @@ export class TeLog implements ILog, Disposable
             }
         }
         this._logControl.lastErrorMesage = errMsgs;
-
         const currentWriteToConsole = this._logControl.writeToConsole,
               currentWriteToFile = this._logControl.enableFile,
               currentWriteToOutputWindow = this._logControl.enableOutputWindow;
-
+        //
+        // Write blank line
+        //
         if (!this._logControl.lastWriteWasBlankError && !this._logControl.lastWriteToConsoleWasBlank)
         {
             this.errorWriteLogs("", currentWriteToFile, symbols, queueId);
         }
-
+        //
+        // Add additional error info to error channel
+        //
+        if (!queueId) {
+            this.errorWriteChannelInfo(symbols);
+        }
+        //
+        // Write all parsed lines from parameter `msg` to thw enabled log channels
+        //
         errMsgs.forEach(m => this.errorWriteLogs(m, currentWriteToFile, symbols, queueId));
-
+        //
+        // Write all specified additional values to thw enabled log channels
+        //
         if (isArray(params, false) && isArray(params[0]))
         {
             for (const [ n, v, l ] of params)
@@ -186,9 +197,13 @@ export class TeLog implements ILog, Disposable
                 }
             }
         }
-
+        //
+        // Write blank line
+        //
         this.errorWriteLogs("", currentWriteToFile, symbols, queueId);
-
+        //
+        // Reset channel configuration and save error state
+        //
         apply(this._logControl, {
             enableFile: currentWriteToFile,
             writeToConsole: currentWriteToConsole,
@@ -237,6 +252,22 @@ export class TeLog implements ILog, Disposable
     };
 
 
+    private errorWriteChannelInfo = (symbols: [ string, string ]) =>
+    {
+        const sInfo = this.getStamp(true);
+        const ts = `${sInfo.stamp} ${figures.pointer} ${symbols[1]}`;
+        this._logControl.errorChannel.appendLine(`${ts} ${this._separator}`);
+        this._logControl.errorChannel.appendLine(ts);
+        this._logControl.errorChannel.appendLine(`${ts} Line    : ${sInfo.line}|${sInfo.col}`);
+        if (sInfo.tag) {
+            this._logControl.errorChannel.appendLine(`${ts} Module  : ${sInfo.tag}`);
+        }
+        this._logControl.errorChannel.appendLine(`${ts} Method  : ${sInfo.method}`);
+        this._logControl.errorChannel.appendLine(`${ts} File    : ${sInfo.file}`);
+        this._logControl.errorChannel.appendLine(ts);
+    };
+
+
     init = async (logDirectory: string) =>
     {
         await createDir(logDirectory);
@@ -246,29 +277,28 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private getStamp = () =>
+    private getStamp = (detailed?: boolean) =>
     {
         const timeTags = (new Date(Date.now() - this._logControl.tzOffset)).toISOString().slice(0, -1).split("T");
         const info = {
+            col: 1,
+            file: "",
+            line: 1,
+            method: "",
             tag: "",
             stamp: timeTags.join(" "),
             stampDate: timeTags[0],
             stampTime: timeTags[1]
         };
 
-        if (this._logControl.useTags)
+        if (detailed || this._logControl.useTags)
         {
             const err = new Error();
             let stackline = "";
-            const errStackLines = asString(err.stack, "at unknown ").split("\n");
-            for (const l in errStackLines)
-            {
-                if (!/(?:Error| (?:Object\.)?(?:write|_?error|warn(?:ing)?|values?|method[DS]) )/.test(errStackLines[l]))
-                {
-                    stackline = errStackLines[l];
-                    break;
-                }
-            }
+            const errStackLines = asString(err.stack, "at unknown ").split("\n"),
+                  logLineRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
+            popIfExistsBy(errStackLines, l => logLineRgx.test(l) || l.includes("Error:"));
+            stackline = errStackLines[0];
             //
             // Stackline at this point will be something like:
             //
@@ -277,7 +307,20 @@ export class TeLog implements ILog, Disposable
             //     at TaskTreeDataProvider.runLastTask (c:\\....\extension.js:1:col) // Prod / Webpack
             //     at TaskTreeDataProvider.<anonymous> (c:\\....\extension.js:1:col) // Prod / Webpack
             //
-            info.tag = this._moduleMap[stackline.substring(stackline.indexOf("at ") + 3, stackline.lastIndexOf(" "))];
+            const match = stackline.match(/at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i);
+            if (match)
+            {
+                const [ _, method, file, line, col ] = match,
+                      tagKey = Object.keys(this._moduleMap).find(k => this._moduleMap[k].includes(method));
+                apply(info,
+                {
+                    file: basename(file),
+                    method,
+                    col: parseInt(col, 10),
+                    line: parseInt(line, 10),
+                    tag: tagKey ? this._moduleMap[tagKey] : ""
+                });
+            }
         }
 
         return info;
@@ -370,7 +413,7 @@ export class TeLog implements ILog, Disposable
             if (isEmpty(value)) {
                 eMsg = "[] (empty array)";
             }
-            else if (isString(value[0])) {
+            else if (value.every(v => isString(v))) {
                 eMsg = `[ ${value.join(", ")} ]`;
             }
             else {
@@ -463,14 +506,14 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private showOutput = async(show: boolean) =>
+    private showOutput = async(show: boolean, channel: OutputChannel) =>
     {
         if (show) {
             await executeCommand(VsCodeCommands.FocusOutputWindowPanel);
-            this._logControl.outputChannel.show();
+            channel.show();
         }
         else {
-            this._logControl.outputChannel.hide();
+            channel.hide();
         }
     };
 
@@ -597,13 +640,13 @@ export class TeLog implements ILog, Disposable
         }
         const isMinLevel = (!level || level <= this._logControl.level);
         if (logPad === undefined) {
-            logPad = this._logControl.lastLogPad || "";
+            logPad = ""; // this._logControl.lastLogPad || "";
         } //
          // VSCODE OUTPUT WINDOW LOGGING
         //
-        if (isError || (this._logControl.enableOutputWindow && isMinLevel))
+        if ((isError && !this._logControl.writeToConsole && !this._logControl.enableFile) || (this._logControl.enableOutputWindow && isMinLevel))
         {
-            const ts = this.getStamp().stamp + " ";
+            const ts = this.getStamp().stamp  + " " + figures.pointer;
             if (this._logControl.enableOutputWindow) {
                 this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.outputChannel.appendLine, this._logControl.outputChannel, ts, false);
             }

@@ -63,6 +63,7 @@ export enum Commands
 	SetPinned = "taskexplorer.setPinned",
 	ShowLicensePage = "taskexplorer.view.licensePage.show",
 	ShowOutputWindow = "taskexplorer.showOutput",
+	ShowErrorOutputWindow = "taskexplorer.showErrorOutput",
 	ShowParsingReportPage = "taskexplorer.view.parsingReport.show",
 	ShowReleaseNotesPage = "taskexplorer.view.releaseNotes.show",
 	ShowSideBar = "workbench.view.extension.taskExplorerSideBar",

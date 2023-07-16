@@ -451,12 +451,14 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			//     402  : Payment required, trial extension already granted
 			//     406  : Invalid License Key
 			//     408  : Timeout
+			//     409  : Trial already exists
 			//     409  : License/Account/Trial Record Not Found
 			//     500  : Server Error
 			//
 			const message: string = e.body ? e.body.message : /* istanbul ignore next */e.message;
-			this.wrapper.log.value("response body", JSON.stringify(e.body), 3);
-			this.wrapper.log.error(e, [[ "status code", e.status ], [ "server message", message ]]);
+			this.wrapper.log.error([ "License server is down or has returned an error status", e ], [
+				[ "status code", e.status ], [ "server message", message ], [ "response body",  JSON.stringify(e.body) ]
+			]);
 			await this.wrapper.utils.execIf2(!this._account.errorState, async (m) =>
 			{
 				switch (m)
@@ -471,10 +473,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 						break;
 					// case "Account trial cannot be extended": // 402 this.lic.period > 1 || !this.isRegistered
 					case "Trial already exists":             // 409
-						this._account.license.type = TeLicenseType.Free; // this.lic.period > 1 ? TeLicenseType.Free : TeLicenseType.Free;
-						this._account.license.state = TeLicenseState.Free;
-						await this.saveAccount(this._account, "   ");
-						break;
+						// this._account.license.type = TeLicenseType.Free; // this.lic.period > 1 ? TeLicenseType.Free : TeLicenseType.Free;
+						// this._account.license.state = TeLicenseState.Free;
+						// await this.saveAccount(this._account, "   ");
+						// break;
+					// eslint-disable-next-line no-fallthrough
 					case "Invalid license key":              // 406
 						this._account.license.type = TeLicenseType.Free;
 						this._account.license.state = TeLicenseState.Free;
@@ -482,7 +485,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 						break;
 					// case "Error - could not update trial":
 					// case "Invalid request parameters":
-					case "Access Denied":                    // 401
+					case "Access Denied":                    // 401, probably app access token has expired, or is invalid
 					default:
 						this._account.errorState = true;
 						break;

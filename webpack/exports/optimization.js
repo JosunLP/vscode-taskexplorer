@@ -61,7 +61,7 @@ const parallelism = (env, wpConfig) =>
 	// 	wpConfig.parallelism = 2;
 	// }
 	else {
-		wpConfig.parallelism = 1;
+		wpConfig.parallelism = 2;
 	}
 };
 

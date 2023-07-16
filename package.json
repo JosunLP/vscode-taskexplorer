@@ -455,6 +455,11 @@
 				"when": "taskexplorer:enabled"
 			},
 			{
+				"command": "taskexplorer.showErrorOutput",
+				"title": "Task Explorer: Show Error Log in Output Window",
+				"when": "taskexplorer:enabled"
+			},
+			{
 				"command": "taskexplorer.donate",
 				"title": "%command.donate%",
 				"when": "taskexplorer:enabled",
