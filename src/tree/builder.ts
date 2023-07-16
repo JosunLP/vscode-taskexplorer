@@ -208,10 +208,10 @@ export class TaskTreeBuilder
 
     removeFolder = (uri: Uri) =>
     {
-        this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_, i) => !!i && (i.resourceUri.fsPath.startsWith(uri.fsPath)), this);
+        this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_, i) => !!i && (i.uri.fsPath.startsWith(uri.fsPath)), this);
         this.wrapper.utils.popIfExistsBy(
             this._taskFolders,
-            f => !!f.resourceUri && f.resourceUri.fsPath === uri.fsPath, // Exclude special folders (do not have a resourceUri)
+            f => !!f.uri && f.uri.fsPath === uri.fsPath, // Exclude special folders (do not have a uri property set)
             this, true // single pop
         );
     };
@@ -222,7 +222,7 @@ export class TaskTreeBuilder
         if (taskItem instanceof Uri) // FileExplorer Context menu
         {
             const uri = taskItem;
-            taskItem = <TaskItem>Object.values(this._taskMap).find(i => i.resourceUri.fsPath === uri.fsPath);
+            taskItem = <TaskItem>Object.values(this._taskMap).find(i => i.uri.fsPath === uri.fsPath);
             void this.wrapper.treeManager.views.taskExplorer.view.reveal(taskItem, { select: false });
         }
         else if (!TaskItem.is(taskItem)) // ITeTask (Webview app)

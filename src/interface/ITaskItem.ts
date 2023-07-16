@@ -2,7 +2,7 @@
 import { ITaskFile } from "./ITaskFile";
 import { TeTaskSource } from "./ITeTask";
 import { ITaskFolder } from "./ITaskFolder";
-import { Task, TaskExecution, TreeItem, WorkspaceFolder } from "vscode";
+import { Task, TaskExecution, TreeItem, Uri, WorkspaceFolder } from "vscode";
 
 export interface ITaskItem extends TreeItem
 {
@@ -17,6 +17,7 @@ export interface ITaskItem extends TreeItem
     readonly task: Task;
     readonly taskFile: ITaskFile;
     readonly taskSource: TeTaskSource;
+    readonly uri: Uri;
     isExecuting(logPad?: string): TaskExecution | undefined;
     getFolder(): WorkspaceFolder | undefined;
     refreshState(logPad: string, logLevel: number): void;

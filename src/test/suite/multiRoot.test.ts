@@ -357,7 +357,7 @@ suite("Multi-Root Workspace Tests", () =>
             } as unknown as Task);
             taskMap.fakeTaskId1 = {
                 id: "fakeTaskId1",
-                resourceUri: wsf[fakeWsfStartIdx].uri
+                uri: wsf[fakeWsfStartIdx].uri
             } as unknown as ITaskItem;
             workspace.getWorkspaceFolder = originalGetWorkspaceFolder;
             await teWrapper.fileWatcher.onWsFoldersChange({
@@ -403,7 +403,7 @@ suite("Multi-Root Workspace Tests", () =>
             } as unknown as Task);
             taskMap.fakeTaskId2 = {
                 id: "fakeTaskId2",
-                resourceUri: wsf[fakeWsfStartIdx + 1].uri
+                uri: wsf[fakeWsfStartIdx + 1].uri
             } as unknown as ITaskItem;
             await teWrapper.fileWatcher.onWsFoldersChange({
                 added: [],
@@ -437,7 +437,7 @@ suite("Multi-Root Workspace Tests", () =>
             } as unknown as Task);
             taskMap.fakeTaskId3 = {
                 id: "fakeTaskId3",
-                resourceUri: wsf[fakeWsfStartIdx + 2].uri
+                uri: wsf[fakeWsfStartIdx + 2].uri
             } as unknown as ITaskItem;
             tasks.push({
                 definition: {
@@ -447,7 +447,7 @@ suite("Multi-Root Workspace Tests", () =>
             } as unknown as Task);
             taskMap.fakeTaskId4 = {
                 id: "fakeTaskId4",
-                resourceUri: wsf[fakeWsfStartIdx + 3].uri
+                uri: wsf[fakeWsfStartIdx + 3].uri
             } as unknown as ITaskItem;
             await teWrapper.fileWatcher.onWsFoldersChange({
                 added: [],

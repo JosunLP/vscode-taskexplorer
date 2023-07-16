@@ -17,7 +17,7 @@ export type { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 export type { IStatusBarInfo, ITeStatusBar } from "./ITeStatusBar";
 export type { ITeWrapper, ITeKeys, TeRuntimeEnvironment } from "./ITeWrapper";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
-export type { ITaskTreeEvent, ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
+export type { ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
 export type { ILog, ILogControl, ILogQueueItem, LogLevel, LogType } from "./ILog";
 export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from "./IStorage";
 export type { ITeFileWatcher, FileSystemEventType, IFileSystemEvent } from "./ITeFileWatcher";

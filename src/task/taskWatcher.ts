@@ -46,7 +46,7 @@ export class TaskWatcher implements Disposable
     {
         this.wrapper.log.write2("taskwatcher", "fire task change events", 1, "   ", [
             [ "task name", taskItem.task.name ], [ "task type", taskItem.task.source ],
-            [ "resource path", taskItem.taskFile.resourceUri.fsPath ]
+            [ "resource path", taskItem.taskFile.uri.fsPath ]
         ]);
         //
         // Request tree change event-fire for parent TaskFolder | TaskFile

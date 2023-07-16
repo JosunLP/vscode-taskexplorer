@@ -344,8 +344,8 @@ suite("Provider Tests", () =>
         {
             const taskItem = taskMap[t];
             await executeTeCommand2("open", [ taskItem ], 4);
-            if (!filesOpened.includes(taskItem.taskFile.resourceUri.fsPath)) {
-                filesOpened.push(taskItem.taskFile.resourceUri.fsPath);
+            if (!filesOpened.includes(taskItem.taskFile.uri.fsPath)) {
+                filesOpened.push(taskItem.taskFile.uri.fsPath);
                 ++numFilesOpened;
             }
             ++numOpened;

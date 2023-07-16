@@ -6,7 +6,7 @@ import { TaskTreeNode } from "./base";
 import { encodeUtf8Hex } from ":env/hex";
 import { TeWrapper } from "../../lib/wrapper";
 import { ITaskItem, TeTaskSource } from "../../interface";
-import { Task, TaskExecution, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command } from "vscode";
+import { Task, TaskExecution, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command, Uri } from "vscode";
 
 
 export class TaskItem extends TaskTreeNode implements ITaskItem
@@ -19,6 +19,7 @@ export class TaskItem extends TaskTreeNode implements ITaskItem
     private _taskDetached: Task | undefined;
     private _execution: TaskExecution | undefined;
 
+    private readonly _uri: Uri;
     private readonly _task: Task;
     private readonly _taskFile: TaskFile;
     private readonly _taskSource: TeTaskSource;
@@ -48,8 +49,8 @@ export class TaskItem extends TaskTreeNode implements ITaskItem
         //
         // Set ID and properties
         //
-        this.resourceUri = task.definition.uri || taskFile.resourceUri;
-        this.id = TaskItem.id(this.resourceUri.fsPath, task);
+        this._uri = task.definition.uri || taskFile.uri;
+        this.id = TaskItem.id(this._uri.fsPath, task);
         this._task = task;
         this._folder = taskFile.folder;
         this._taskSource = <TeTaskSource>task.source;
@@ -69,8 +70,8 @@ export class TaskItem extends TaskTreeNode implements ITaskItem
         taskDef.taskFileId = taskFile.id ;          // Used in task start/stop events, see TaskWatcher
         taskDef.fileName = taskFile.fileName ;
         taskDef.relativePath = taskFile.relativePath;
-        taskDef.absolutePath = this.resourceUri.fsPath;
-        taskDef.resourceUri = this.resourceUri;
+        taskDef.absolutePath = this._uri.fsPath;
+        taskDef.uri = this._uri;
         //
         // Tooltip
         //
@@ -104,6 +105,7 @@ export class TaskItem extends TaskTreeNode implements ITaskItem
     get task() { return this._task; };
     get taskFile() { return this._taskFile; };
     get taskSource() { return this._taskSource; };
+    get uri() { return this._uri; };
 
 
     getFolder(): WorkspaceFolder | undefined { return this._taskFile.folder.workspaceFolder; }

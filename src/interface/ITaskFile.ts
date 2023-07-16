@@ -17,9 +17,9 @@ export interface ITaskFile extends TreeItem
     // readonly task: Task;
     readonly isUser: boolean;
     readonly relativePath: string;
-    readonly resourceUri: Uri;
     readonly taskSource: TeTaskSource;
     readonly treeNodes: (ITaskItem|ITaskFile)[];
+    readonly uri: Uri;
     addChild<T extends (ITaskFile | ITaskItem)>(node: T, index?: number): OneOf<T, [ ITaskFile, ITaskItem ]>;
     addChild(treeNode: ITaskFile | ITaskItem, index?: number): ITaskFile | ITaskItem;
 }

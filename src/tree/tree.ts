@@ -4,9 +4,14 @@ import { TaskItem } from "./node/item";
 import { TaskFolder } from "./node/folder";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeManager } from "./manager";
-import { ITaskTreeEvent, ITeTaskTree, TreeviewIds } from "../interface";
+import { ITeTaskTree, TreeviewIds } from "../interface";
 import { Event, EventEmitter, Task, TreeItem, TreeDataProvider, Disposable } from "vscode";
 
+interface ITaskTreeEvent
+{
+    id: string;
+    args: [ TreeItem | null, string, boolean? ];
+}
 
 /**
  * @class TaskTree
@@ -36,11 +41,13 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
 {
     private visible = false;
     private wasVisible = false;
+    private _eventTimer: NodeJS.Timeout | undefined;
     private currentRefreshEvent: string | undefined;
 
     private readonly _disposables: Disposable[];
     private readonly _eventQueue: ITaskTreeEvent[];
     private readonly _treeManager: TaskTreeManager;
+    private readonly _onDidGetChildren: EventEmitter<void>;
     private readonly _onDidLoadTreeData: EventEmitter<void>;
     private readonly _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void>;
 
@@ -49,6 +56,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     {
         this._eventQueue = [];
         this._treeManager = treeManager;
+        this._onDidGetChildren = new EventEmitter<void>();
         this._onDidLoadTreeData = new EventEmitter<void>();
         this._onDidChangeTreeData = new EventEmitter<TreeItem | undefined | null | void>();
         this._disposables = [
@@ -82,7 +90,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         }
         else if (this.wasVisible)
         {
-            if (id !== this.currentRefreshEvent && !this._eventQueue.find((e => e.type === "refresh" && e.id === id)))
+            if (id !== this.currentRefreshEvent && !this._eventQueue.find(e => e.id === id))
             {
                 if (!treeItem)
                 {   //
@@ -90,15 +98,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
                     //
                     this._eventQueue.splice(0);
                 }
-                this._eventQueue.push(
-                {
-                    id,
-                    delay: 1,
-                    fn: this.fireTreeRefreshEvent,
-                    args: [ treeItem, logPad, true ],
-                    scope: this,
-                    type: "refresh"
-                });
+                this._eventQueue.push({ id, args: [ treeItem, logPad, true ]});
                 w.log.write("   refresh event has been queued", 1, logPad);
             }
             else {
@@ -130,15 +130,13 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         {
             items = element.treeNodes;
         }
+        this._onDidGetChildren.fire();
         this.processEventQueue(logPad + "   ");
         w.log.methodDone("get tree children", 1, logPad, [
             [ "# of tasks total", tasks.length ], [ "# of tree task items returned", items.length ]
         ]);
         return items;
     };
-
-
-    getName = () => this.name;
 
 
     getParent(element: TreeItem): TaskFile | TaskFolder |null
@@ -196,14 +194,14 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
             w.log.values(logLevel + 1, logPad + "   ", [
                 [ "tree item type", "task file" ], [ "label", element.label ], [ "id", element.id ],
                 [ "description", element.description ], [ "file name", element.fileName ], [ "is user", element.isUser ],
-                [ "resource path", element.resourceUri?./* istanbul ignore next */fsPath ]
+                [ "resource path", element.uri?./* istanbul ignore next */fsPath ]
             ]);
         }
         else if (element instanceof TaskFolder)
         {
             w.log.values(logLevel + 1, logPad + "   ", [
                 [ "tree item type", "task folder" ], [ "label", element.label ], [ "id", element.id ],
-                [ "description", element.description ], [ "resource path", element.resourceUri?./* istanbul ignore next */fsPath ]
+                [ "description", element.description ], [ "resource path", element.uri?./* istanbul ignore next */fsPath ]
             ]);
         }
         else
@@ -239,18 +237,38 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         w.log.methodStart("process task explorer event queue", 1, logPad, true, [[ "# of queued events", this._eventQueue.length ]]);
         if (this._eventQueue.length > 0)
         {
-            const next = this._eventQueue.shift() as ITaskTreeEvent; // get the next event
+            const next = this._eventQueue.shift() as ITaskTreeEvent, // get the next event
+                  getChildrenAwaiter = this.wrapper.promiseUtils.promiseFromEvent<void, void>(this._onDidGetChildren.event);
+
             w.log.write("   loaded next queued event", 2, logPad);
             w.log.value("      id", next.id, 1, logPad);
-            w.log.value("      type", next.type, 1, logPad);
-            w.log.write(`   firing queued event with ${next.args.length} args and ${next.delay}ms delay`, 2, logPad);
             w.log.value("   # of queued events remaining", this._eventQueue.length, 1, logPad);
             this.currentRefreshEvent = next.id;
-            setTimeout((n) => n.fn.call(n.scope, ...n.args), next.delay, next);
+
+            if (this._eventTimer) {
+                clearTimeout(this._eventTimer);
+            }
+
+            this._eventTimer = setTimeout((ep: EventEmitter<void>) =>
+            {
+                ep.fire();
+                this._eventTimer = undefined;
+            }, 180, getChildrenAwaiter.cancel);
+
+            setTimeout(async (n) =>
+            {
+                this.fireTreeRefreshEvent(...n.args);
+                try {
+                    await getChildrenAwaiter.promise;
+                }
+                catch (e) {if (e === "cancelled") { this.processEventQueue(logPad); }}
+            }, 1, next);
         }
         else {
+            if (!this.currentRefreshEvent) {
+                this._onDidLoadTreeData.fire();
+            }
             this.currentRefreshEvent = undefined;
-            this._onDidLoadTreeData.fire();
         }
         w.log.methodDone("process task explorer main event queue", 1, logPad);
     };

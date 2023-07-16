@@ -9,8 +9,8 @@ export interface ITaskFolder extends TreeItem
     id: string;
     label: string;
     readonly isSpecial: boolean;
-    readonly resourceUri: Uri;
     readonly treeNodes: (ITaskFile|ITaskItem)[];
+    readonly uri: Uri | undefined;
     readonly workspaceFolder: WorkspaceFolder | undefined;
     addChild<T extends (ITaskFile | ITaskItem)>(node: T, index?: number): OneOf<T, [ ITaskFile, ITaskItem ]>;
     addChild(taskFile: ITaskFile|ITaskItem, index?: number): ITaskFile | ITaskItem;

@@ -5,7 +5,6 @@ export abstract class TaskTreeNode extends TreeItem
 {
     declare id: string;
     declare label: string;
-    declare resourceUri: Uri;
 
     // private _stamp: number;
 

@@ -14,6 +14,8 @@ export class TaskFolder extends TaskTreeNode implements ITaskFolder
     readonly treeNodes: (TaskFile|TaskItem)[];
     readonly workspaceFolder: WorkspaceFolder | undefined;
 
+    private readonly _uri: Uri | undefined;
+
 
     constructor(folder: WorkspaceFolder | string, state: TreeItemCollapsibleState, isSpecial?: boolean)
     {
@@ -22,7 +24,7 @@ export class TaskFolder extends TaskTreeNode implements ITaskFolder
         if (!isString(folder))
         {   // 'SpecialFolder' will have string type i.e. "Favorites", "Last Tasks", "User Tasks"
             this.workspaceFolder = folder;
-            this.resourceUri = folder.uri;
+            this._uri = folder.uri;
             // this.isSpecial = true;
         }
         this.isSpecial = !!isSpecial;
@@ -32,6 +34,9 @@ export class TaskFolder extends TaskTreeNode implements ITaskFolder
         this.treeNodes = [];
         this.tooltip = "A tree folder representing a workspace/project";
     }
+
+
+    get uri() { return this._uri; };
 
 
     addChild<T extends (TaskFile | TaskItem)>(node: T, idx?: number): OneOf<T, [ TaskFile, TaskItem ]>;

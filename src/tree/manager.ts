@@ -120,13 +120,13 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
         if (selection instanceof TaskFile)
         {
-            uri = selection.resourceUri;
+            uri = selection.uri;
             if (selection.isGroup)
             {
                 this.wrapper.log.value("   adding file group", uri.path, 2);
                 for (const each of selection.treeNodes)
                 {
-                    this.wrapper.log.value("      adding file path", each.resourceUri.path, 3);
+                    this.wrapper.log.value("      adding file path", each.uri.path, 3);
                     pathValues.push(uri.path);
                 }
             }
@@ -140,8 +140,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             uri = false;
             if (this.wrapper.taskUtils.isScriptType(selection.taskSource))
             {
-                this.wrapper.log.value("   adding file path", selection.resourceUri.path, 2);
-                pathValues.push(selection.resourceUri.path);
+                this.wrapper.log.value("   adding file path", selection.uri.path, 2);
+                pathValues.push(selection.uri.path);
             }
             else {
                 excludesList = "excludeTask";
@@ -566,8 +566,8 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
               taskMap = Object.values(this._treeBuilder.taskMap);
         for (const taskItem of taskMap)
         {
-            if (taskItem.task.definition.takesArgs && taskItem.resourceUri) {
-                scriptFilesWithArgs.push(taskItem.resourceUri.fsPath);
+            if (taskItem.task.definition.takesArgs && taskItem.uri) {
+                scriptFilesWithArgs.push(taskItem.uri.fsPath);
             }
         }
         scriptFilesWithArgs.sort();

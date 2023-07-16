@@ -306,7 +306,6 @@ suite("Tree Tests", () =>
         expect(teWrapper.explorer?.getParent(batch[0].taskFile)).to.not.be.null;
         expect(await teWrapper.explorer?.getChildren(taskTree[2].treeNodes[0])).to.not.be.null;
         expect(await teWrapper.explorer?.getChildren(taskTree[2].treeNodes[1])).to.not.be.null;
-        expect(teWrapper.explorer?.getName()).to.be.oneOf([ "taskTreeExplorer", "taskTreeSideBar" ]);
         utils.endRollingCount(this);
     });
 
@@ -506,14 +505,14 @@ suite("Tree Tests", () =>
 class DumbFolder implements ITaskFolder
 {
     public label: string;
-    constructor(lbl: string) { this.label = lbl; this.resourceUri = ""; }
+    constructor(lbl: string) { this.label = lbl; this.uri = undefined; }
     id = "";
     isSpecial = false;
     treeNodes: (ITaskItem | ITaskFile)[] = [];
     workspaceFolder: WorkspaceFolder | undefined;
     iconPath?: string | Uri | { light: string | Uri; dark: string | Uri } | ThemeIcon | undefined;
     description?: string | boolean | undefined;
-    resourceUri: Uri | any;
+    uri: Uri | undefined;
     tooltip?: string | MarkdownString | undefined;
     command?: Command | undefined;
     collapsibleState?: TreeItemCollapsibleState | undefined;

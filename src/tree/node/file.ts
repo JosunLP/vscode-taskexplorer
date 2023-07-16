@@ -28,6 +28,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     private _folder: TaskFolder;
     private _groupId: string | undefined;
 
+    private readonly _uri: Uri;
     private readonly _taskSource: TeTaskSource;
     private readonly _isUser: boolean;
     private readonly _relativePath: string;
@@ -66,25 +67,25 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         //
         this._relativePath = wrapper.pathUtils.getTaskRelativePath(task);
         this._fileName = wrapper.pathUtils.getTaskFileName(task.source, taskDef);
-        if (folder.resourceUri) // special folders i.e. 'user tasks', 'favorites, etc will not have resourceUri set
+        if (folder.uri) // special folders i.e. 'user tasks', 'favorites, etc will not have a uri property set
         {
             if (task.source !== "Workspace")
             {
                 if (this._relativePath) {
-                    this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this._relativePath, this.fileName));
+                    this._uri = Uri.file(join(folder.uri.fsPath, this._relativePath, this.fileName));
                 }
                 else {
-                    this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, this.fileName));
+                    this._uri = Uri.file(join(folder.uri.fsPath, this.fileName));
                 }
             }
             else {
-                this.resourceUri = Uri.file(join(folder.resourceUri.fsPath, ".vscode", this.fileName));
+                this._uri = Uri.file(join(folder.uri.fsPath, ".vscode", this.fileName));
             }
         } //
          // No resource uri means this file is 'user tasks', and not associated to a workspace folder
         //
         else {
-            this.resourceUri = Uri.file(join(wrapper.pathUtils.getUserDataPath(), this.fileName));
+            this._uri = Uri.file(join(wrapper.pathUtils.getUserDataPath(), this.fileName));
             this._isUser = true;
         }
         //
@@ -131,7 +132,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         wrapper.log.methodDone("create taskfile node", 4, logPad, [
             [ "id", this.id ], [ "label", this.label ], [ "is usertask", this.isUser ], [ "context value", this.contextValue ],
             [ "is group", this.isGroup ], [ "groupLevel", this.groupLevel ], [ "filename", this._fileName ],
-            [ "resource uri path", this.resourceUri.fsPath ], [ "relative path", this.relativePath  ]
+            [ "resource uri path", this.uri.fsPath ], [ "relative path", this.relativePath  ]
         ]);
     }
 
@@ -148,6 +149,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     get relativePath() { return this._relativePath; };
     get taskSource() { return this._taskSource; };
     get treeNodes() { return this._treeNodes; };
+    get uri() { return this._uri; };
 
 
     addChild<T extends (TaskFile | TaskItem)>(node: T, index?: number): OneOf<T, [ TaskFile, TaskItem ]>;

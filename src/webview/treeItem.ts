@@ -14,7 +14,6 @@ export class TeTreeItem {};
 //     protected abstract setTooltip(): void;
 //
 //     override label: string;
-//     override resourceUri: Uri;
 //
 //     private readonly _viewId: TreeviewIds;
 //     private readonly _wsFolder: WorkspaceFolder;
@@ -26,7 +25,7 @@ export class TeTreeItem {};
 //         super(label, state);
 //         const uri = Uri.file(fsPath);
 //         this.label = label;
-//         this.resourceUri = uri;
+//         this.uri = uri;
 //         this._viewId = viewId;
 //         this._parent = parent;
 //         this._wsFolder = (this._parent?.wsFolder || workspace.getWorkspaceFolder(uri)) as WorkspaceFolder;

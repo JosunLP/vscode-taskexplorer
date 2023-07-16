@@ -74,7 +74,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         }
 
         const uri = !w.taskUtils.isScriptType(taskItem.taskSource) ?
-                    taskItem.taskFile.resourceUri : Uri.file(taskItem.task.definition.uri.fsPath);
+                    taskItem.taskFile.uri : Uri.file(taskItem.task.definition.uri.fsPath);
 
         this._log.methodStart("open document at position", 1, "", true, [
             [ "command", taskItem.command.command ], [ "source", taskItem.taskSource ],
@@ -238,7 +238,7 @@ export class TaskManager implements ITeTaskManager, Disposable
     private runNpmCommand = async(taskFile: TaskFile, command: string) =>
     {
         const pkgMgr = this.wrapper.utils.getPackageManager(),
-              uri = taskFile.resourceUri,
+              uri = taskFile.uri,
               options = { cwd: dirname(uri.fsPath) },
               kind: TaskDefinition = { type: "npm", script: command, path: dirname(uri.fsPath) };
         if (command.indexOf("<packagename>") === -1)
@@ -373,7 +373,7 @@ export class TaskManager implements ITeTaskManager, Disposable
         else if (listType === "all")
         {
             this.wrapper.treeManager.sorter.sortTaskFolder(
-                <TaskFolder>w.treeManager.taskFolders.find(f => f.resourceUri && iTask.fsPath.startsWith(f.resourceUri.fsPath)),
+                <TaskFolder>w.treeManager.taskFolders.find(f => f.uri && iTask.fsPath.startsWith(f.uri.fsPath)),
                 listType
             );
         }
