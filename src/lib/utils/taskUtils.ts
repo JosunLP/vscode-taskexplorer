@@ -4,10 +4,9 @@ import { pickBy } from "./object";
 import { storage } from "../storage";
 import { Task, tasks } from "vscode";
 import { TeWrapper } from "../wrapper";
-import { properCase } from "./commonUtils";
 import { configuration } from "../configuration";
-import { getCombinedGlobPattern } from "./utils";
 import { Globs, PinnedStorageKey } from "../constants";
+import { getCombinedGlobPattern, properCase } from "./utils";
 import {
     ConfigPrefix, ITaskDefinition, ITeTask, ITeWrapper, TaskScriptType, TaskSource, TeTaskListType,
     TeTaskScriptType, TeTaskSource

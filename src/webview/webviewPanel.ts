@@ -205,17 +205,11 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 	{
 		deserializeWebviewPanel: async(webviewPanel: WebviewPanel, state: State) =>
 		{
-			/* istanbul ignore if */
-			if (!this._ignoreTeBusy && this.wrapper.busy)
+			this.wrapper.utils.execIf(!this._ignoreTeBusy && this.wrapper.busy, () =>
 			{
-				this.wrapper.promiseUtils.oneTimeEvent(this.wrapper.onDidBusyComplete)(() =>
-				{
-					void this.show(undefined, webviewPanel, state);
-				}, this);
-			}
-			else {
-				void this.show(undefined, webviewPanel, state);
-			}
+				setTimeout(this._serializer.deserializeWebviewPanel, 250, webviewPanel, state);
+			},
+			this, [ this.show, undefined, webviewPanel, state ]);
 		}
 	};
 

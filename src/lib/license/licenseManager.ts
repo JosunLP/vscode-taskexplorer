@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+/* TEMP */ /* istanbul ignore file */
+
 import { IDictionary } from ":types";
 import { TeWrapper } from "../wrapper";
 import { ITeApiEndpoint, TeServer } from "./server";
@@ -15,7 +17,7 @@ import {
 
 export class LicenseManager implements ITeLicenseManager, Disposable
 {
-	private _LICENSE_SERVER_DISABLED_ = false;
+	private _LICENSE_SERVER_DISABLED_ = true;
 
 	private _busy = false;
 	private _maxFreeTasks = 500;
@@ -61,15 +63,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		);
     }
 
-	dispose = () =>
-	{
-		clearInterval(this._checkLicenseTask);
-		this._disposables.forEach((d) => d.dispose());
-	};
+	dispose = () => { clearInterval(this._checkLicenseTask); this._disposables.splice(0).forEach((d) => d.dispose()); };
 
 
 	get account(): ITeAccount { return this._account; }
 	get isBusy(): boolean { return this._busy; }
+	/* TEMP */get isDisabled(): boolean { return this._LICENSE_SERVER_DISABLED_; }
 	get isErrorState(): boolean { return !!this._account.errorState; }
 	get isLicensed(): boolean { return !!this._account.errorState || this.isTrial || this.lic.type >= TeLicenseType.Standard; }
 	get isPaid(): boolean { return this.lic.type >= TeLicenseType.Standard && this.lic.state === TeLicenseState.Paid; }
@@ -456,10 +455,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			//     409  : License/Account/Trial Record Not Found
 			//     500  : Server Error
 			//
-			const message: string = e.body ? e.body.message : /* istanbul ignore next */e.message;
+			const body = this.wrapper.objUtils.apply({ message: e.message }, e.body);
 			this.wrapper.log.error(
 				[ `the license server @  ${this._server.apiServer} is down or has returned an error status`, e ],
-				[[ "status code", e.status ], [ "server message", message ], [ "response body",  JSON.stringify(e.body) ]]
+				[[ "status code", e.status ], [ "server message", body.message ], [ "response body",  JSON.stringify(e.body) ]]
 			);
 			await this.wrapper.utils.execIf2(!this._account.errorState, async (m) =>
 			{
@@ -481,7 +480,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 						this._account.errorState = true;
 						break;
 				}
-			}, this, undefined, message);
+			}, this, undefined, body.message);
 		}, this, [ this.wrapper.log.error ], e);
 		this.wrapper.statusBar.showTimed({ text: "Server error" }, this._sbInfo);
 		this._sbInfo = undefined;

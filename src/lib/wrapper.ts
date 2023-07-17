@@ -17,7 +17,6 @@ import { TeFileCache } from "../task/fileCache";
 import { All as AllConstants } from "./constants";
 import { TaskManager } from "../task/taskManager";
 import { TaskWatcher } from "../task/taskWatcher";
-import * as commonUtils from "./utils/commonUtils";
 import { HomeView } from "../webview/view/homeView";
 import { TeFileWatcher } from "../task/fileWatcher";
 import * as promiseUtils from "./utils/promiseUtils";
@@ -456,7 +455,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 			   this._taskUsageView.isBusy || this._taskCountView.isBusy || this._welcomePage.isBusy;
 	}
 	get cacheBuster(): string { return this._cacheBuster; }
-	get commonUtils(): typeof commonUtils { return commonUtils; }
 	get config(): IConfiguration { return this._configuration; }
 	get context(): ExtensionContext { return this._context; }
 	get contextTe(): TeContext { return this._teContext; }
@@ -488,8 +486,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get log(): ILog { return this._log; }
 	get logControl(): ILogControl { return this._log.control; }
 	get objUtils(): ITeObjectUtilities { return objUtils; }
-	/* istanbul ignore next */
-	get onDidBusyComplete(): Event<void> { return this._onBusyComplete.event; }
 	get onReady(): Event<void> { return this._onReady.event; }
 	get parsingReportPage(): ParsingReportPage { return this._parsingReportPage; }
 	get production(): boolean { return this._context.extensionMode === ExtensionMode.Production; }

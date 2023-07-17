@@ -97,7 +97,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         //
         if (!groupId)
         {
-            this.contextValue = "taskFile" + wrapper.commonUtils.properCase(this._taskSource);
+            this.contextValue = "taskFile" + wrapper.utils.properCase(this._taskSource);
         }
         else {
             this.setGroupContext(groupId, groupLevel, task.source);
@@ -303,7 +303,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         this._groupLevel = groupLevel;
         this._fileName = "group"; // change to name of directory
         this.tooltip = `${this.wrapper.taskUtils.getTaskTypeFriendlyName(taskSource, true)} task file grouping`;
-        this.contextValue = "taskGroup" + this.wrapper.commonUtils.properCase(taskSource);
+        this.contextValue = "taskGroup" + this.wrapper.utils.properCase(taskSource);
     }
 
 }

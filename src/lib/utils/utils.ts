@@ -222,12 +222,6 @@ export const lowerCaseFirstChar = (s: string, removeSpaces: boolean) =>
 export const openUrl = (url: string) => env.openExternal(Uri.parse(url));
 
 
-export const pushIfNotExists = (arr: string[] | undefined, ...item: string[]) => { if (arr) { item.forEach(i => { if (!arr.includes(i)) { arr.push(i); } }); return arr; }};
-
-
-// export const pushIfNotExistsBy = <T>(arr: T[] | undefined, fn: (v: T) => boolean, thisArg?: any, ...item: T[]) => { if (arr) { item.forEach(i => { if (fn.call(thisArg, i)) { arr.push(i); } }); return arr; }};
-
-
 export const popIfExists = (arrOrRec: string[] | Record<string, string> | undefined, ...item: string[]): string[] =>
 {
     const popped: string[] = [];
@@ -297,6 +291,21 @@ export const popObjIfExistsBy = <T>(rec: Record<string, T> | undefined, fn: (k: 
 
 
 // export const pluralize = (s: string, count: number) => `${count} ${s}${count === 1 ? "" : "s"}`;
+
+
+export function properCase(name: string | undefined, removeSpaces?: boolean)
+{
+    if (!name) {
+      return "";
+    }
+    return name.replace(/(?:^\w|[A-Z]|\b\w)/g, (ltr) => ltr.toUpperCase()).replace(/[ ]+/g, !removeSpaces ? " " : "");
+}
+
+
+export const pushIfNotExists = (arr: string[] | undefined, ...item: string[]) => { if (arr) { item.forEach(i => { if (!arr.includes(i)) { arr.push(i); } }); return arr; }};
+
+
+// export const pushIfNotExistsBy = <T>(arr: T[] | undefined, fn: (v: T) => boolean, thisArg?: any, ...item: T[]) => { if (arr) { item.forEach(i => { if (fn.call(thisArg, i)) { arr.push(i); } }); return arr; }};
 
 
 // export const removeFromArray = <T>(arr: T[], cb: (value: any, index: number, array: T[]) => void)

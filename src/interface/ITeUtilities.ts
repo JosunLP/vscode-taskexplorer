@@ -1,9 +1,6 @@
 
 import { ILog } from "./ILog";
-import { ITaskFile } from "./ITaskFile";
-import { ITaskItem } from "./ITaskItem";
 import { ITeWrapper } from "./ITeWrapper";
-import { ITaskFolder } from "./ITaskFolder";
 import { ITaskDefinition } from "./ITaskDefinition";
 import { ITeTask, TeTaskListType, TeTaskSource } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
@@ -15,23 +12,12 @@ export type Primitive = boolean | number | string;
 
 export type OneOf<T, V extends any[], NK extends keyof V = Exclude<keyof V, keyof any[]>> = { [K in NK]: T extends V[K] ? V[K] : never }[NK];
 
-export type PromiseAdapter<T, U> = (
-    v: T,
-    resolve:
-        (v: U | PromiseLike<U>) => void,
-    reject:
-        (reason: any) => void
-) => any;
-
-export interface ITeCommonUtilities
-{
-	properCase(name: string | undefined, removeSpaces?: boolean): string;
-}
+export type PromiseAdapter<T, U> = (v: T, resolve: (v: U | PromiseLike<U>) => void, reject: (reason: any) => void) => any;
 
 export interface ObjectDiff
 {
-    previous: IDictionary<any>;
-    current: IDictionary<any>;
+    previous: Record<string, any>;
+    current: Record<string, any>;
 }
 
 // export interface ObjectUpdate {
@@ -41,11 +27,11 @@ export interface ObjectDiff
 
 export interface ITeObjectUtilities
 {
-    apply<T extends IDictionary<any>>(object: IDictionary<any>, config: IDictionary<any>, defaults?: IDictionary<any>): T;
+    apply<T extends Record<string, any>>(object: Record<string, any>, config: Record<string, any>, defaults?: Record<string, any>): T;
     clone<T>(item: any): T;
-    // diff(oldObj: IDictionary<any>, newObj: IDictionary<any>): ObjectDiff;
-    // merge<T extends IDictionary<any>>(...destination: IDictionary<any>[]): T;
-    // mergeIf<T extends IDictionary<any>>(...destination: IDictionary<any>[]): T;
+    // diff(oldObj: Record<string, any>, newObj: Record<string, any>): ObjectDiff;
+    // merge<T extends Record<string, any>>(...destination: Record<string, any>[]): T;
+    // mergeIf<T extends Record<string, any>>(...destination: Record<string, any>[]): T;
     // pick<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T;
     pickBy<T extends Record<string, any>>(obj: T, pickFn: <K extends keyof T>(k: K) => boolean | undefined): T ;
     // pickNot<T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]): T;
@@ -97,7 +83,7 @@ export interface ITeTypeUtilities
 	isNumber(v: any): v is number;
 	// isNumeric(v: any): boolean;
     // isObject<T>(v: any, allowArray?: boolean): v is { [key: string]: T } ;
-    isObject<T = IDictionary<any>>(v: any, allowArray?: boolean): v is T;
+    isObject<T = Record<string, any>>(v: any, allowArray?: boolean): v is T;
     isObjectEmpty(v: any): boolean;
     isPrimitive(v: any): v is Primitive;
 	isPromise<T>(v: any): v is PromiseLike<T>;
@@ -161,6 +147,7 @@ export interface ITeUtilities
 	popIfExists(arrOrRec: string[] | Record<string, string> | undefined, ...item: string[]): string[];
 	popIfExistsBy<T>(arr: T[] | undefined, fn: (v1: T) => boolean, thisArg?: any, single?: boolean): T[];
 	popObjIfExistsBy<T>(rec: Record<string, T> | undefined, fn: (k: string, v: T) => boolean, thisArg?: any, single?: boolean): T[];
+	properCase(name: string | undefined, removeSpaces?: boolean): string;
 	pushIfNotExists(arr: string[] | undefined, ...item: string[]): void;
     // pushIfNotExistsBy<T>(arr: T[] | undefined, fn: (v: T) => boolean, thisArg?: any, ...item: T[]): T[] | undefined;
 	removeFromArray(arr: any[], item: any): void;

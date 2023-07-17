@@ -1,9 +1,8 @@
 
-import { IDictionary } from "../../interface";
 import { isArray, isDate, isObject } from "./typeUtils";
 
 
-export const apply = <T>(object: IDictionary<any>, config: IDictionary<any>, defaults?: IDictionary<any>): T =>
+export const apply = <T>(object: Record<string, any>, config: Record<string, any>, defaults?: Record<string, any>): T =>
 {
     if (object)
     {
@@ -44,7 +43,7 @@ export const clone = <T>(item: any) =>
     //
     else if (isObject(item))
     {
-        const c: IDictionary<any> = {};
+        const c: Record<string, any> = {};
         Object.keys((item)).forEach((key) =>
         {
             c[key] = clone(item[key]);
@@ -55,7 +54,7 @@ export const clone = <T>(item: any) =>
 };
 //
 //
-// export const diff = (oldObj: IDictionary<any>, newObj: IDictionary<any>): ObjectDiff =>
+// export const diff = (oldObj: Record<string, any>, newObj: Record<string, any>): ObjectDiff =>
 // {
 //     const _equals = (a: any, b: any) =>
 //     {
@@ -66,11 +65,11 @@ export const clone = <T>(item: any) =>
 //         return a === b;
 //     };
 //
-//     const _flatten = (obj: IDictionary<any>) =>
+//     const _flatten = (obj: Record<string, any>) =>
 //     {
-//         const object: IDictionary<any> = {},
+//         const object: Record<string, any> = {},
 //               path: string[] = [];
-//         const dig = (obj: IDictionary<any>) =>
+//         const dig = (obj: Record<string, any>) =>
 //         {
 //             for (const [ key, value ] of Object.entries(obj))
 //             {
@@ -88,7 +87,7 @@ export const clone = <T>(item: any) =>
 //         return object;
 //     };
 //
-//     const _diffFlatten = (oldFlat: IDictionary<any>, newFlat: IDictionary<any>) =>
+//     const _diffFlatten = (oldFlat: Record<string, any>, newFlat: Record<string, any>) =>
 //     {
 //         const previous = Object.assign({}, oldFlat);
 //         const current = Object.assign({}, newFlat);
@@ -103,9 +102,9 @@ export const clone = <T>(item: any) =>
 //         return [ previous, current ];
 //     };
 //
-//     const _unflatten = (flattenObject: IDictionary<any>): IDictionary<any> =>
+//     const _unflatten = (flattenObject: Record<string, any>): Record<string, any> =>
 //     {
-//         const unFlatten: IDictionary<any> = {};
+//         const unFlatten: Record<string, any> = {};
 //         for (const [ stringKeys, value ] of Object.entries(flattenObject))
 //         {
 //             const chain = stringKeys.split(".");
@@ -135,12 +134,12 @@ export const clone = <T>(item: any) =>
 //
 //
 // /*
-// export const diff2 = <T extends IDictionary<any>>(oldObj: IDictionary<any>, newObj: IDictionary<any>, deep = false): ObjectDiff  =>
+// export const diff2 = <T extends Record<string, any>>(oldObj: Record<string, any>, newObj: Record<string, any>, deep = false): ObjectDiff  =>
 // {
-//     const added: IDictionary<any> = {},
-//           updated: IDictionary<any> = {},
-//           removed: IDictionary<any> = {},
-//           unchanged: IDictionary<any> = {};
+//     const added: Record<string, any> = {},
+//           updated: Record<string, any> = {},
+//           removed: Record<string, any> = {},
+//           unchanged: Record<string, any> = {};
 //
 //     for (const oldProp in oldObj)
 //     {
@@ -189,9 +188,9 @@ export const clone = <T>(item: any) =>
 // };
 //
 //
-// export const diff3 = <T extends IDictionary<any>>(obj1: any, obj2: any): Partial<T> =>
+// export const diff3 = <T extends Record<string, any>>(obj1: any, obj2: any): Partial<T> =>
 // {
-//     const diffObj = isArray(obj2) ? [] : {} as IDictionary<any>;
+//     const diffObj = isArray(obj2) ? [] : {} as Record<string, any>;
 //     Object.getOwnPropertyNames(obj2).forEach(function(prop)
 //     {
 //         if (isObject(obj2[prop]))
@@ -269,7 +268,7 @@ export const clone = <T>(item: any) =>
 //     }
 //     else
 //     {
-//         const d: IDictionary<any> = {};
+//         const d: Record<string, any> = {};
 //         let key = Object.keys(obj1);
 //         for (let i = 0; i < key.length; i++)
 //         {
@@ -295,7 +294,7 @@ export const clone = <T>(item: any) =>
 // */
 //
 //
-// export const merge = <T>(...destination: IDictionary<any>[]): T =>
+// export const merge = <T>(...destination: Record<string, any>[]): T =>
 // {
 //     const ln = destination.length;
 //     for (let i = 1; i < ln; i++)
@@ -324,7 +323,7 @@ export const clone = <T>(item: any) =>
 // };
 //
 //
-// export const mergeIf = <T>(...destination: IDictionary<any>[]): T =>
+// export const mergeIf = <T>(...destination: Record<string, any>[]): T =>
 // {
 //     const ln = destination.length;
 //     for (let i = 1; i < ln; i++)

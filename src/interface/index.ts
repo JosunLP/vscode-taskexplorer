@@ -33,8 +33,8 @@ export type {
     WebviewUsageKey, WebviewViewUsageKey, TreeviewUsageKey
 } from "./ITeUsage";
 export type {
-    ITeUtilities, ITeCommonUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, OneOf,
-    ITeTypeUtilities, PromiseAdapter, CallbackOptions, CallbackArray, IDictionary, Primitive, ObjectDiff, ITeObjectUtilities
+    ITeUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, OneOf, ITeTypeUtilities, PromiseAdapter,
+    CallbackOptions, CallbackArray, IDictionary, Primitive, ObjectDiff, ITeObjectUtilities
 } from "./ITeUtilities";
 
 export { UsageKeys } from "./ITeUsage";
