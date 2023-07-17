@@ -12,6 +12,8 @@ import {
 	closeTeWebviewPanel, executeSettingsUpdate, executeTeCommand, focusExplorerView, focusSidebarView, showTeWebview,
 } from "../utils/commandUtils";
 
+const _LICENSE_SERVER_DISABLED_ = true;
+
 const tc = utils.testControl;
 
 let licMgr: ITeLicenseManager;
@@ -41,11 +43,14 @@ suite("License Manager Tests", () =>
 		//
         ({ teWrapper } = await utils.activate());
 		licMgr = teWrapper.licenseManager;
-		expect(licMgr).to.not.be.undefined;
-		expect(licMgr.isLicensed).to.be.equal(true);
-		expect(licMgr.isPaid).to.be.equal(false);
-		expect(licMgr.isTrial).to.be.equal(true);
-		expect(licMgr.isTrialExtended).to.be.equal(false);
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			expect(licMgr).to.not.be.undefined;
+			expect(licMgr.isLicensed).to.be.equal(true);
+			expect(licMgr.isPaid).to.be.equal(false);
+			expect(licMgr.isTrial).to.be.equal(true);
+			expect(licMgr.isTrialExtended).to.be.equal(false);
+		}
 		oAccount = JSON.parse(JSON.stringify(licMgr.account));
 		oAccount2 = JSON.parse(JSON.stringify(licMgr.account));
 		await utils.setLicenseType(1);
@@ -167,14 +172,17 @@ suite("License Manager Tests", () =>
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.submitRegistration + tc.slowTime.webview.show.page.license +
 				  tc.slowTime.webview.roundTripMessage + tc.slowTime.webview.closeSync + 100);
-		void executeTeCommand("taskexplorer.register", 1);
-        await showTeWebview(teWrapper.licensePage, "waitOnly");
-		await utils.sleep(10);
-		const echoCmd = { method: "echo/account/register", overwriteable: false };
-		void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "buyer@example.com", emailAlt: "" });
-		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		await expectLicense(true, false, true, false, true);
-		await closeTeWebviewPanel(teWrapper.licensePage);
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			void executeTeCommand("taskexplorer.register", 1);
+			await showTeWebview(teWrapper.licensePage, "waitOnly");
+			await utils.sleep(10);
+			const echoCmd = { method: "echo/account/register", overwriteable: false };
+			void teWrapper.licensePage.postMessage(echoCmd, { firstName: "John", lastName: "Doe", email: "buyer@example.com", emailAlt: "" });
+			await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
+			await expectLicense(true, false, true, false, true);
+			await closeTeWebviewPanel(teWrapper.licensePage);
+		}
         utils.endRollingCount(this);
 	});
 
@@ -184,29 +192,32 @@ suite("License Manager Tests", () =>
 		let timeout = false;
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.getTrialExtension + tc.slowTime.licenseMgr.nag);
-		await setNag();
-		utils.overrideNextShowInfoBox("Extend Trial", true);
-		void licMgr.checkLicense("");
-		await Promise.race([
-			utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise,
-			new Promise<void>(resolve => setTimeout(() => {timeout = true; resolve(); }, 6000))
-		]);
-		if (timeout) {
-			try {
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			await setNag();
+			utils.overrideNextShowInfoBox("Extend Trial", true);
+			void licMgr.checkLicense("");
+			await Promise.race([
+				utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise,
+				new Promise<void>(resolve => setTimeout(() => {timeout = true; resolve(); }, 6000))
+			]);
+			if (timeout) {
+				try {
+					await expectLicense(true, false, true, true, true);
+				}
+				catch {
+					utils.overrideNextShowInfoBox("Extend Trial", true);
+					void licMgr.checkLicense("");
+					await Promise.race([
+						utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise,
+						new Promise<void>(resolve => setTimeout(resolve, 9000))
+					]);
+					await expectLicense(true, false, true, true, true);
+				}
+			}
+			else {
 				await expectLicense(true, false, true, true, true);
 			}
-			catch {
-				utils.overrideNextShowInfoBox("Extend Trial", true);
-				void licMgr.checkLicense("");
-				await Promise.race([
-					utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise,
-					new Promise<void>(resolve => setTimeout(resolve, 9000))
-				]);
-				await expectLicense(true, false, true, true, true);
-			}
-		}
-		else {
-			await expectLicense(true, false, true, true, true);
 		}
 		utils.endRollingCount(this);
 	});
@@ -241,10 +252,13 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.getTrialExtensionDenied + 20);
-		utils.overrideNextShowInfoBox(undefined, true);
-		await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
-		await utils.sleep(10);
-		await expectLicense(true, false, true, true, true);
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			utils.overrideNextShowInfoBox(undefined, true);
+			await executeTeCommand("extendTrial", tc.waitTime.licenseMgr.request);
+			await utils.sleep(10);
+			await expectLicense(true, false, true, true, true);
+		}
         utils.endRollingCount(this);
 	});
 
@@ -256,13 +270,16 @@ suite("License Manager Tests", () =>
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.purchaseLicense + tc.slowTime.licenseMgr.validateLicense +
 				  tc.slowTime.licenseMgr.nag + tc.slowTime.webview.show.view.home + 200);
-		await setNag();
-		utils.overrideNextShowInfoBox("Buy License", true);
-		void licMgr.checkLicense("");
-		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		// License change will refresh home view
-		await utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2);
-		await expectLicense(true, true, false, false);
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			await setNag();
+			utils.overrideNextShowInfoBox("Buy License", true);
+			void licMgr.checkLicense("");
+			await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
+			// License change will refresh home view
+			await utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2);
+			await expectLicense(true, true, false, false);
+		}
         utils.endRollingCount(this);
 	});
 
@@ -333,10 +350,13 @@ suite("License Manager Tests", () =>
 	{
         if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.page.license + tc.slowTime.webview.closeSync + tc.slowTime.storage.update + tc.slowTime.licenseMgr.nag);
-		await setNag();
-		utils.overrideNextShowInfoBox("Info", true);
-		void licMgr.checkLicense("");
-        await utils.promiseFromEvent(teWrapper.licensePage.onDidReceiveReady).promise;
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			await setNag();
+			utils.overrideNextShowInfoBox("Info", true);
+			void licMgr.checkLicense("");
+			await utils.promiseFromEvent(teWrapper.licensePage.onDidReceiveReady).promise;
+		}
         utils.endRollingCount(this);
 	});
 
@@ -344,9 +364,12 @@ suite("License Manager Tests", () =>
 	test("License Nag in Unlicensed Mode - Not Now", async function()
 	{
         if (utils.exitRollingCount(this)) return;
-		await setNag();
-		utils.overrideNextShowInfoBox("Not Now", true);
-		await licMgr.checkLicense("");
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			await setNag();
+			utils.overrideNextShowInfoBox("Not Now", true);
+			await licMgr.checkLicense("");
+		}
         utils.endRollingCount(this);
 	});
 
@@ -533,9 +556,12 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.licenseMgr.validateLicense + 100);
-		void executeTeCommand("taskexplorer.refreshSession");
-		await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
-		await expectLicense(true, true, false, false, true);
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			void executeTeCommand("taskexplorer.refreshSession");
+			await utils.promiseFromEvent(teWrapper.licenseManager.onDidSessionChange).promise;
+			await expectLicense(true, true, false, false, true);
+		}
         utils.endRollingCount(this);
 	});
 
@@ -544,12 +570,15 @@ suite("License Manager Tests", () =>
 
 const expectLicense = async (isLic?: boolean, isPaid?: boolean, isTrial?: boolean, isTrialExt?: boolean, isRegistered?: boolean) =>
 {
-	expect(licMgr.isLicensed).to.be.equal(!!isLic);
-	expect(licMgr.isPaid).to.be.equal(!!isPaid);
-	expect(licMgr.isTrial).to.be.equal(!!isTrial);
-	expect(licMgr.isTrialExtended).to.be.equal(!!isTrialExt);
-	if (isRegistered !== undefined) {
-		expect(licMgr.isRegistered).to.be.equal(!!isRegistered);
+	if (!_LICENSE_SERVER_DISABLED_)
+	{
+		expect(licMgr.isLicensed).to.be.equal(!!isLic);
+		expect(licMgr.isPaid).to.be.equal(!!isPaid);
+		expect(licMgr.isTrial).to.be.equal(!!isTrial);
+		expect(licMgr.isTrialExtended).to.be.equal(!!isTrialExt);
+		if (isRegistered !== undefined) {
+			expect(licMgr.isRegistered).to.be.equal(!!isRegistered);
+		}
 	}
 	await utils.waitForWebviewsIdle();
 };
@@ -570,16 +599,22 @@ const setTasks = (e: any) => { licMgr.setTestData({ callTasksChanged: e }); };
 const validateLicense = async (instance: Mocha.Context | undefined, expectNow: boolean, expectAfter: boolean) =>
 {
 	instance?.slow(tc.slowTime.licenseMgr.validateLicense);
-	expect(licMgr.isLicensed).to.be.equal(expectNow);
-	expect(licMgr.isTrial).to.be.equal(expectNow);
-	try {
-		await licMgr.checkLicense("");
-		await utils.sleep(250);
-		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
-	} catch {}
-	finally {
-		licMgr.setTestData({ sessionInterval: undefined, setPaid: false });
+	if (!_LICENSE_SERVER_DISABLED_)
+	{
+		expect(licMgr.isLicensed).to.be.equal(expectNow);
+		expect(licMgr.isTrial).to.be.equal(expectNow);
+		try {
+			await licMgr.checkLicense("");
+			await utils.sleep(250);
+			await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
+		} catch {}
+		finally {
+			licMgr.setTestData({ sessionInterval: undefined, setPaid: false });
+		}
+		expect(licMgr.isLicensed).to.be.equal(expectAfter);
+		expect(licMgr.isTrial).to.be.equal(expectAfter);
 	}
-	expect(licMgr.isLicensed).to.be.equal(expectAfter);
-	expect(licMgr.isTrial).to.be.equal(expectAfter);
+	else {
+		await utils.waitForTeIdle(tc.waitTime.licenseMgr.request);
+	}
 };

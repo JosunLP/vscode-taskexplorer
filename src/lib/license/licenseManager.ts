@@ -68,7 +68,6 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	get account(): ITeAccount { return this._account; }
 	get isBusy(): boolean { return this._busy; }
-	/* TEMP */get isDisabled(): boolean { return this._LICENSE_SERVER_DISABLED_; }
 	get isErrorState(): boolean { return !!this._account.errorState; }
 	get isLicensed(): boolean { return !!this._account.errorState || this.isTrial || this.lic.type >= TeLicenseType.Standard; }
 	get isPaid(): boolean { return this.lic.type >= TeLicenseType.Standard && this.lic.state === TeLicenseState.Paid; }

@@ -32,7 +32,7 @@ const afterdone = (env, wpConfig) =>
         {   /** @param {import("webpack").Compiler} compiler Compiler */
             apply: (compiler) =>
             {
-                compiler.hooks.done.tap("AfterDonePlugin", () =>
+                compiler.hooks.afterDone.tap("AfterDonePlugin", () =>
                 {
                     const distPath = join(env.buildPath, "dist");
                     if (_wpConfig.mode === "production")

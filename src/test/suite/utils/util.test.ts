@@ -55,15 +55,15 @@ suite("Util Tests", () =>
 		//
 		// properCase
 		//
-        expect(teWrapper.commonUtils.properCase("taskexplorer")).to.be.equal("Taskexplorer");
-        expect(teWrapper.commonUtils.properCase(undefined)).to.be.equal("");
-		expect(teWrapper.commonUtils.properCase("dc is here", true)).to.be.equal("DcIsHere");
-		expect(teWrapper.commonUtils.properCase("dc is here", false)).to.be.equal("Dc Is Here");
-		expect(teWrapper.commonUtils.properCase("dc is here")).to.be.equal("Dc Is Here");
-		expect(teWrapper.commonUtils.properCase("dc was here", true)).to.be.equal("DcWasHere");
-		expect(teWrapper.commonUtils.properCase("dc was here", false)).to.be.equal("Dc Was Here");
-		expect(teWrapper.commonUtils.properCase(undefined)).to.equal("");
-		expect(teWrapper.commonUtils.properCase("")).to.equal("");
+        expect(teWrapper.utils.properCase("taskexplorer")).to.be.equal("Taskexplorer");
+        expect(teWrapper.utils.properCase(undefined)).to.be.equal("");
+		expect(teWrapper.utils.properCase("dc is here", true)).to.be.equal("DcIsHere");
+		expect(teWrapper.utils.properCase("dc is here", false)).to.be.equal("Dc Is Here");
+		expect(teWrapper.utils.properCase("dc is here")).to.be.equal("Dc Is Here");
+		expect(teWrapper.utils.properCase("dc was here", true)).to.be.equal("DcWasHere");
+		expect(teWrapper.utils.properCase("dc was here", false)).to.be.equal("Dc Was Here");
+		expect(teWrapper.utils.properCase(undefined)).to.equal("");
+		expect(teWrapper.utils.properCase("")).to.equal("");
 		//
 		// Type utils
 		//
