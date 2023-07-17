@@ -103,9 +103,7 @@ suite("Multi-Root Workspace Tests", () =>
     suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-        if (!teWrapper.explorer?.isVisible()) {
-            await focusExplorerView(teWrapper);
-        }
+        await focusExplorerView(teWrapper);
         await teWrapper.config.updateVs("grunt.autoDetect", tc.vsCodeAutoDetectGrunt);
         if (!tc.isMultiRootWorkspace) {
             workspace.getWorkspaceFolder = originalGetWorkspaceFolder;

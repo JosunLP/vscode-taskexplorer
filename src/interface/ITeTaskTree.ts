@@ -10,7 +10,6 @@ export interface ITaskTreeView
 
 export interface ITeTaskTree
 {
-    isVisible(): boolean;
     getChildren(element?: TreeItem): TreeItem[];
     getParent(element: TreeItem): TreeItem | null;
     onDidLoadTreeData: Event<void>;

@@ -38,7 +38,6 @@ suite("Util Tests", () =>
     test("Miscellaneous", async function()
     {
         if (exitRollingCount(this)) return;
-		teWrapper.explorer?.isVisible();
         await teWrapper.pathUtils.getInstallPath();
 		const now = Date.now();
 		teWrapper.utils.formatDate(now, "datetime");

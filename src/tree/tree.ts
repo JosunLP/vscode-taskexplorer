@@ -10,7 +10,7 @@ import { Event, EventEmitter, Task, TreeItem, TreeDataProvider, Disposable } fro
 interface ITaskTreeEvent
 {
     id: string;
-    args: [ TreeItem | null, string, boolean? ];
+    treeItem: TreeItem | null;
 }
 
 /**
@@ -39,15 +39,13 @@ interface ITaskTreeEvent
  */
 export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Disposable
 {
-    private visible = false;
-    private wasVisible = false;
-    private _eventTimer: NodeJS.Timeout | undefined;
-    private currentRefreshEvent: string | undefined;
+    private _visible = false;
+    private _wasVisible = false;
+    private _currentRefreshEvent: ITaskTreeEvent | undefined;
 
     private readonly _disposables: Disposable[];
     private readonly _eventQueue: ITaskTreeEvent[];
     private readonly _treeManager: TaskTreeManager;
-    private readonly _onDidGetChildren: EventEmitter<void>;
     private readonly _onDidLoadTreeData: EventEmitter<void>;
     private readonly _onDidChangeTreeData: EventEmitter<TreeItem | undefined | null | void>;
 
@@ -56,7 +54,6 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     {
         this._eventQueue = [];
         this._treeManager = treeManager;
-        this._onDidGetChildren = new EventEmitter<void>();
         this._onDidLoadTreeData = new EventEmitter<void>();
         this._onDidChangeTreeData = new EventEmitter<TreeItem | undefined | null | void>();
         this._disposables = [
@@ -75,30 +72,34 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     fireTreeRefreshEvent = (treeItem: TreeItem | null, logPad: string, fromQueue?: boolean) =>
     {
         const w = this.wrapper,
-              id = "pendingFireTreeRefreshEvent-" + (treeItem ? treeItem.id : "g");
-        logPad = !fromQueue ? logPad : w.log.control.lastLogPad;
+              id = "refresh-" + (treeItem ? treeItem.id : "g");
 
+        logPad = !fromQueue ? logPad : w.log.control.lastLogPad;
         w.log.methodStart("fire tree refresh event", 1, logPad, false, [
             [ "tree", this.name ], [ "is global refresh", !treeItem ], [ "item id", id ], [ "from queue", !!fromQueue ],
-            [ "is visible", this.visible ], [ "was visible", this.wasVisible ]
+            [ "is visible", this._visible ], [ "was visible", this._wasVisible ]
         ]);
-
-        if (this.visible)
+        //
+        // Request tree refresh if the tree is currently visible.  If not visible, add the
+        // treeItem to the event queue to be processed when the tree is next shown and becomes
+        // visible.  Note that if the treeItem node has not yet been revealed, the event is
+        // just ignored by the vsc engine, this is possible when tasks are started from a
+        // special folder (e.g. Favorites), while the base task node is still collapsed
+        // within the tree.
+        //
+        if (this._visible)
         {
             w.log.write("   fire tree refresh event", 1, logPad);
             this._onDidChangeTreeData.fire(treeItem);
         }
-        else if (this.wasVisible)
+        else if (this._wasVisible)
         {
-            if (id !== this.currentRefreshEvent && !this._eventQueue.find(e => e.id === id))
+            if ((!this._currentRefreshEvent || id !== this._currentRefreshEvent.id) && !this._eventQueue.find(e => e.id === id))
             {
-                if (!treeItem)
-                {   //
-                    // If this is a global refresh, remove all other refresh events from the q
-                    //
+                if (!treeItem) {// If this is a global refresh, remove all other refresh events
                     this._eventQueue.splice(0);
                 }
-                this._eventQueue.push({ id, args: [ treeItem, logPad, true ]});
+                this._eventQueue.push({ id, treeItem });
                 w.log.write("   refresh event has been queued", 1, logPad);
             }
             else {
@@ -112,86 +113,46 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     };
 
 
-    /**
-     * The main method VSCode TaskTreeProvider calls into
-     *
-     * @param element The tree item requested
-     * @param logPad Log padding
-     * @param logLevel Log level
-     */
     getChildren = (element?: TreeItem): TreeItem[] =>
     {
-        const w = this.wrapper,
-              logPad = w.log.control.lastLogPad,
-              tasks = this._treeManager.tasks;
-        let items: TreeItem[] = this._treeManager.taskFolders;
-        this.logGetChildrenStart(element, tasks, logPad, 1);
-        if (TaskFolder.is(element) || TaskFile.is(element))
-        {
-            items = element.treeNodes;
-        }
-        this._onDidGetChildren.fire();
-        this.processEventQueue(logPad + "   ");
-        w.log.methodDone("get tree children", 1, logPad, [
-            [ "# of tasks total", tasks.length ], [ "# of tree task items returned", items.length ]
-        ]);
-        return items;
+        this.logGetChildren(element);
+        return TaskFolder.is(element) || TaskFile.is(element) ? element.treeNodes : this._treeManager.taskFolders;
     };
 
 
     getParent(element: TreeItem): TaskFile | TaskFolder |null
     {
-        const e = (<any>element);
-        if (e.taskFile) // (element instanceof TaskItem)
+        if (TaskItem.is(element))
         {
-            return e.taskFile as TaskFile;
+            return !element.folder.isSpecial ? element.taskFile : element.folder;
         }
-        else if (e.folder) // (element instanceof TaskFile)
+        else if (TaskFile.is(element))
         {
-            return e.folder as TaskFolder;
+            return element.folder;
         }
-        // if (TaskItem.is(element))
-        // {
-        //     return !element.folder.isSpecial ? element.taskFile : element.folder;
-        // }
-        // else if (TaskFile.is(element))
-        // {
-        //     return element.folder;
-        // }
         return null;
     }
 
 
     getTreeItem = (element: TaskItem | TaskFile | TaskFolder) =>
     {
-        const w = this.wrapper;
-        w.log.methodStart("get tree item", 4, "", true, [[ "label", element.label ], [ "id", element.id ]]);
-        if (element instanceof TaskItem)
-        {
-            w.log.write("   refresh task item state", 4);
-            element.refreshState();
-        }
-        else {
-            w.log.write("   get tree file/folder", 4);
-        }
-        w.log.methodDone("get tree item", 4);
+        if (TaskItem.is(element)) { element.refreshState(); }
         return element;
     };
 
 
-    isVisible = () => this.visible;
-
-
-    private logGetChildrenStart = (element: TreeItem | undefined, tasks: Task[], logPad: string, logLevel: number) =>
+    private logGetChildren = (element: TreeItem | undefined) =>
     {
-        const w = this.wrapper;
-        w.log.methodStart("get tree children", logLevel, logPad, false, [
+        const w = this.wrapper,
+              logPad = w.log.control.lastLogPad,
+              tasks = this._treeManager.tasks;
+        w.log.write2("tree", "get tree children", 1, logPad, [
             [ "task folder", element?.label ], [ "all tasks need to be retrieved", !tasks ],
             [ "needs rebuild", !this._treeManager.taskFolders ], [ "instance name", this.name ]
         ]);
         if (element instanceof TaskFile)
         {
-            w.log.values(logLevel + 1, logPad + "   ", [
+            w.log.values(2, logPad + "   ", [
                 [ "tree item type", "task file" ], [ "label", element.label ], [ "id", element.id ],
                 [ "description", element.description ], [ "file name", element.fileName ], [ "is user", element.isUser ],
                 [ "resource path", element.uri?./* istanbul ignore next */fsPath ]
@@ -199,14 +160,14 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         }
         else if (element instanceof TaskFolder)
         {
-            w.log.values(logLevel + 1, logPad + "   ", [
+            w.log.values(2, logPad + "   ", [
                 [ "tree item type", "task folder" ], [ "label", element.label ], [ "id", element.id ],
                 [ "description", element.description ], [ "resource path", element.uri?./* istanbul ignore next */fsPath ]
             ]);
         }
         else
         {
-            w.log.value("tree item type", "asking for all (null)", logLevel + 1, logPad + "   ");
+            w.log.value("tree item type", "asking for all (null)", 2, logPad + "   ");
         }
     };
 
@@ -215,62 +176,27 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     {
         const w = this.wrapper;
         w.log.methodStart("visibility event received", 1, "", true, [[ "tree", this.name ], [ "is visible", visible ], [ "data changed", dataChanged ]]);
-        this.visible = visible;
-        if (dataChanged && this.visible)
+        this._visible = visible;
+        if (dataChanged && this._visible)
         {
-            if (this.wasVisible){
-                this.processEventQueue("   ");
+            if (this._wasVisible)
+            {
+                this.wrapper.log.write2("tree", "process event queue", 1, "   ", [[ "# of queued events", this._eventQueue.length ]]);
+                //
+                // Process all queued events / refresh requests.  Note that if the treeItem node has
+                // not yet been revealed, the event is just ignored by the vsc engine, this is possible
+                // when tasks are started from a special folder (e.g. Favorites), while the base task
+                // node is still collapsed within the tree.
+                //
+                this._eventQueue.splice(0).forEach(e => this._onDidChangeTreeData.fire(e.treeItem));
             }
             else {
+                this.wrapper.log.write2("tree", "fire full refresh event", 1, "   ");
                 this._onDidChangeTreeData.fire();
             }
         }
-        this.wasVisible = true;
+        this._wasVisible = true;
         w.log.methodDone("visibility event received", 1);
-        w.log.blank(1);
-    };
-
-
-    private processEventQueue = (logPad: string) =>
-    {
-        const w = this.wrapper;
-        w.log.methodStart("process task explorer event queue", 1, logPad, true, [[ "# of queued events", this._eventQueue.length ]]);
-        if (this._eventQueue.length > 0)
-        {
-            const next = this._eventQueue.shift() as ITaskTreeEvent, // get the next event
-                  getChildrenAwaiter = this.wrapper.promiseUtils.promiseFromEvent<void, void>(this._onDidGetChildren.event);
-
-            w.log.write("   loaded next queued event", 2, logPad);
-            w.log.value("      id", next.id, 1, logPad);
-            w.log.value("   # of queued events remaining", this._eventQueue.length, 1, logPad);
-            this.currentRefreshEvent = next.id;
-
-            if (this._eventTimer) {
-                clearTimeout(this._eventTimer);
-            }
-
-            this._eventTimer = setTimeout((ep: EventEmitter<void>) =>
-            {
-                ep.fire();
-                this._eventTimer = undefined;
-            }, 180, getChildrenAwaiter.cancel);
-
-            setTimeout(async (n) =>
-            {
-                this.fireTreeRefreshEvent(...n.args);
-                try {
-                    await getChildrenAwaiter.promise;
-                }
-                catch (e) {if (e === "cancelled") { this.processEventQueue(logPad); }}
-            }, 1, next);
-        }
-        else {
-            if (!this.currentRefreshEvent) {
-                this._onDidLoadTreeData.fire();
-            }
-            this.currentRefreshEvent = undefined;
-        }
-        w.log.methodDone("process task explorer main event queue", 1, logPad);
     };
 
 }
