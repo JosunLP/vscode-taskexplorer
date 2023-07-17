@@ -1,12 +1,12 @@
 
-import { join } from "path";
+import { join, sep } from "path";
 import { TaskFile } from "./file";
 import { TaskFolder } from "./folder";
 import { TaskTreeNode } from "./base";
 import { encodeUtf8Hex } from ":env/hex";
 import { TeWrapper } from "../../lib/wrapper";
-import { ITaskItem, TeTaskSource } from "../../interface";
-import { Task, TaskExecution, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command, Uri } from "vscode";
+import { ITaskItem, MarkdownChars, TeTaskSource } from "../../interface";
+import { Task, TaskExecution, TreeItemCollapsibleState, WorkspaceFolder, tasks, Command, Uri, MarkdownString, ShellExecution } from "vscode";
 
 
 export class TaskItem extends TaskTreeNode implements ITaskItem
@@ -75,11 +75,28 @@ export class TaskItem extends TaskTreeNode implements ITaskItem
         //
         // Tooltip
         //
-        this.tooltip = "Open " + task.name + (task.detail ? ` | ${task.detail}` : "") + ` (source : \`${task.source}\``;
-        if (taskDef.type !== task.source) {
-            this.tooltip += ` | type   : \`${taskDef.type}\``;
+        let tooltip = `Open task ${MarkdownChars.Italic}${task.name}${MarkdownChars.Italic}${MarkdownChars.NewLine}`;
+        tooltip += `source: ${MarkdownChars.Block}${task.source}${MarkdownChars.Block}`;
+        if (task.execution instanceof ShellExecution)
+        {
+            tooltip += `${MarkdownChars.NewLine}${MarkdownChars.Code}${task.execution.commandLine || task.execution.command}`;
+            if (task.execution.args) {
+                tooltip += ` ${task.execution.args.join(" ")}`;
+            }
         }
-        this.tooltip += ")";
+        // wrapper.utils.execIf2(task.execution instanceof ShellExecution, (e) =>
+        // {
+        //     tooltip += `${MarkdownChars.Code}${e.commandLine}`;
+        // }, this, null, <ShellExecution>task.execution);
+        tooltip += `${MarkdownChars.NewLine}file: ${taskDef.fileName}`;
+        tooltip += `${MarkdownChars.NewLine}path: ${taskDef.relativePath || sep}`;
+        tooltip += `${MarkdownChars.NewLine}loc: ${taskDef.absolutePath}`;
+        if (task.source !== taskDef.type && task.source !== "tsc")
+        {
+            tooltip += `${MarkdownChars.NewLine}This ${wrapper.taskUtils.getTaskTypeFriendlyName(task.source, true)} ` +
+                       `task is of type ${MarkdownChars.Block}${taskDef.type}${MarkdownChars.Block}`;
+        }
+        this.tooltip = new MarkdownString(tooltip);
         //
         // Refresh state - sets context value, icon path from execution state
         //

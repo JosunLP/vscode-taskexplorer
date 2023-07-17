@@ -5,8 +5,8 @@ import { TaskTreeNode } from "./base";
 import { TaskFolder }  from "./folder";
 import { encodeUtf8Hex } from ":env/hex";
 import { TeWrapper } from "../../lib/wrapper";
-import { ITaskDefinition, ITaskFile, OneOf, TeTaskSource } from "../../interface";
-import { Task, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
+import { MarkdownString, Task, ThemeIcon, TreeItemCollapsibleState, Uri } from "vscode";
+import { ITaskDefinition, ITaskFile, MarkdownChars, OneOf, TeTaskSource } from "../../interface";
 
 
 /**
@@ -29,9 +29,10 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     private _groupId: string | undefined;
 
     private readonly _uri: Uri;
-    private readonly _taskSource: TeTaskSource;
+    private readonly _task: Task;
     private readonly _isUser: boolean;
     private readonly _relativePath: string;
+    private readonly _taskSource: TeTaskSource;
     private readonly _treeNodes: (TaskItem|TaskFile)[];
 
 
@@ -51,6 +52,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         //
         // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
         this.id = TaskFile.id(folder, task, groupLevel, groupId);
+        this._task = task;
         this._treeNodes = [];
         this._folder = folder;
         this._taskSource = <TeTaskSource>task.source;
@@ -97,6 +99,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         //
         if (!groupId)
         {
+            this.setTooltip(groupLevel, this._taskSource);
             this.contextValue = "taskFile" + wrapper.utils.properCase(this._taskSource);
         }
         else {
@@ -147,6 +150,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     get isGroup() { return this._isGroup; };
     get isUser() { return this._isUser; };
     get relativePath() { return this._relativePath; };
+    get task() { return this._task; };
     get taskSource() { return this._taskSource; };
     get treeNodes() { return this._treeNodes; };
     get uri() { return this._uri; };
@@ -155,13 +159,12 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     addChild<T extends (TaskFile | TaskItem)>(node: T, index?: number): OneOf<T, [ TaskFile, TaskItem ]>;
     addChild(node: TaskFile | TaskItem, idx = 0)
     {
-        node.groupLevel = this._groupLevel;
-        // if (node instanceof TaskFile)
+        // if (TaskFile.is(node))
         // {
-        //     node.groupId = TaskFile.groupId(this._folder, node, node.label, node.groupLevel);
-        //     node.id = TaskFile.id(this._folder, node.task, node.label, node.groupLevel, node.groupId);
-        //     this.setGroupContext(node.groupId, node.groupLevel, node.taskSource);
+        //     node.groupId = TaskFile.groupId(this._folder, node.uri.fsPath, node.taskSource, node.taskSource, node.groupLevel);
+        //     node.id = TaskFile.id(this._folder, node.task, node.groupLevel, node.groupId);
         // }
+        node.groupLevel = this._groupLevel;
         this.treeNodes.splice(idx, 0, node);
         return node;
     }
@@ -290,7 +293,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     }
 
 
-    static is(item: any): item is TaskFile { return item instanceof TaskFile ; }
+    static is(item: any): item is TaskFile { return item instanceof TaskFile; }
 
 
     private setGroupContext(groupId: string, groupLevel: number, taskSource: string)
@@ -302,8 +305,23 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         this._groupId = groupId;
         this._groupLevel = groupLevel;
         this._fileName = "group"; // change to name of directory
-        this.tooltip = `${this.wrapper.taskUtils.getTaskTypeFriendlyName(taskSource, true)} task file grouping`;
+        this.setTooltip(groupLevel, taskSource);
         this.contextValue = "taskGroup" + this.wrapper.utils.properCase(taskSource);
+    }
+
+
+    private setTooltip(groupLevel: number, taskSource: string)
+    {
+        const pkgManager = this.wrapper.utils.getPackageManager();
+        let tooltip = `Task Grouping Level ${groupLevel}${MarkdownChars.NewLine}source: ` +
+                      `${MarkdownChars.Block}${this.wrapper.taskUtils.getTaskTypeFriendlyName(taskSource, true)}${MarkdownChars.Block}`;
+        if (!groupLevel && taskSource === "npm")
+        {
+            tooltip += `${MarkdownChars.NewLine}Run package management tasks from the context menu, e.g.:` +
+                       `${MarkdownChars.NewLine}${MarkdownChars.Code}${pkgManager} install` +
+                       `${MarkdownChars.NewLine}${MarkdownChars.Code}${pkgManager} update <pkgname>` ;
+        }
+        this.tooltip = new MarkdownString(tooltip);
     }
 
 }
