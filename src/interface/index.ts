@@ -40,8 +40,9 @@ export type {
 export { UsageKeys } from "./ITeUsage";
 export { ContextKeys } from "./ITeContext";
 export { WebviewPrefix } from "./ITeWebview";
+export { MarkdownChars } from "./ITeUtilities";
 export { Commands, VsCodeCommands } from "./ICommand";
 export { StorageKeys, StorageTarget } from "./IStorage";
-export { ConfigKeys, ConfigPrefix } from "./IConfiguration";
+export { ConfigDefaults, ConfigKeys, ConfigPrefix } from "./IConfiguration";
 export { TeLicenseState, TeLicenseType } from "./ITeLicenseManager";
 export { TaskSource, /* TaskNonScriptType,*/ TaskScriptType } from "./ITeTask";

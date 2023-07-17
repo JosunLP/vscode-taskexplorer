@@ -18,7 +18,7 @@ import { ContextKeys, ITeContext } from "./ITeContext";
 import { ITeLicenseManager } from "./ITeLicenseManager";
 import { ITaskExplorerProvider } from "./ITaskProvider";
 import { ITaskTreeView, ITeTaskTree } from "./ITeTaskTree";
-import { ConfigKeys, IConfiguration } from "./IConfiguration";
+import { ConfigDefaults, ConfigKeys, IConfiguration } from "./IConfiguration";
 import { ExtensionContext, Event, TreeItem, TreeView, WorkspaceFolder } from "vscode";
 import {
 	ITeObjectUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
@@ -38,6 +38,10 @@ export interface ITeKeys
 	Storage: typeof StorageKeys;
 	Usage: typeof UsageKeys;
 	VsCodeCommands: typeof VsCodeCommands;
+	Defaults:
+	{
+		Config: typeof ConfigDefaults;
+	};
 }
 
 export interface ITeWrapper

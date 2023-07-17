@@ -108,7 +108,10 @@ export const isPinned = (id: string, listType: TeTaskListType): boolean =>
 };
 
 
-export const isScriptType = (source: TeTaskSource) => (<TeTaskSource[]>getScriptTaskTypes()).includes(source);
+export const isScriptType = (source: string) => (<TeTaskSource[]>getScriptTaskTypes()).includes(<TeTaskSource>source);
+
+
+// export const isSupportedType = (source: string) => (<TeTaskSource[]>getTaskTypes()).includes(<TeTaskSource>source);
 
 
 export const isConstTaskCountType = (taskType: TeTaskSource) =>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import { ILog } from "./ILog";
 import { ITeWrapper } from "./ITeWrapper";
@@ -18,6 +19,26 @@ export interface ObjectDiff
 {
     previous: Record<string, any>;
     current: Record<string, any>;
+}
+
+export enum MarkdownChars
+{
+    NewLine = "  \n",
+    Block = "`",
+    Bold = "**",
+    Code = "    ",
+    Italic = "*",
+    BoldItalicStart = "_**",
+    BoldItalicEnd = "**_",
+    LongDash = "&#8212;",
+    Black = "\\u001b[30m",
+    Red = "\\u001b[31",
+    Green = "\\u001b[32m",
+    Yellow = "\\u001b[33m",
+    Blue = "\\u001b[34m",
+    Magenta = "\\u001b[35",
+    Cyan = "\\u001b[36m",
+    White = "\\u001b[37m"
 }
 
 // export interface ObjectUpdate {
@@ -64,7 +85,8 @@ export interface ITeTaskUtilities
 	getTaskTypeRealName(taskType: string): TeTaskSource;
 	isExternalType(wrapper: ITeWrapper, source: string): boolean;
 	isPinned(id: string, listType: TeTaskListType): boolean;
-	isScriptType(source: TeTaskSource): boolean;
+	isScriptType(source: string): boolean;
+	// isSupportedType(source: string): boolean;
 	isWatchTask(source: TeTaskSource, wrapper: ITeWrapper): boolean;
 	toITask(wrapper: ITeWrapper, teTasks: Task[], listType: TeTaskListType): ITeTask[];
 }

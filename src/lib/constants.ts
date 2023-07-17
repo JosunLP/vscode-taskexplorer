@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
-    TeTaskListType, ConfigPrefix, ITeKeys, ConfigKeys, ContextKeys, StorageKeys, UsageKeys, VsCodeCommands, Commands
+    TeTaskListType, ConfigPrefix, ITeKeys, ConfigKeys, ContextKeys, StorageKeys, UsageKeys, VsCodeCommands, Commands, ConfigDefaults
 } from "../interface";
 
 export const Constants: Record<string, string> =
@@ -12,6 +12,7 @@ export const Constants: Record<string, string> =
 
 export const Numbers: Record<string, number> =
 {
+    DefaultGroupLevel: 5,
     MaxGroupLevel: 10
 };
 
@@ -77,5 +78,9 @@ export const All: ITeKeys =
     Storage: StorageKeys,
     Strings,
     Usage: UsageKeys,
-    VsCodeCommands
+    VsCodeCommands,
+    Defaults:
+    {
+        Config: ConfigDefaults
+    }
 };

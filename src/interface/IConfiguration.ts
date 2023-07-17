@@ -8,6 +8,17 @@ export const enum ConfigPrefix
 	SpecialFolder = "taskexplorer.specialFolder."
 }
 
+export const ConfigDefaults =
+{
+    GroupMaxLevel: 5,
+    GroupSeparator: "-",
+    GroupWithSeperator: true,
+    GroupScripts: true,
+    GroupStripTaskLabel: true,
+    GroupStripScriptLabel: false,
+    LogEnable: false
+};
+
 export enum ConfigKeys
 {
     AllowUsageReporting = "allowUsageReporting",
