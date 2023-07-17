@@ -227,12 +227,15 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.webview.show.view.home + tc.slowTime.commands.focusChangeViews);
-		void  executeTeCommand("taskexplorer.view.home.focus", 1);
-        await Promise.all([
-            utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
-            utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
-            utils.waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2),
-        ]);
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			void  executeTeCommand("taskexplorer.view.home.focus", 1);
+			await Promise.all([
+				utils.waitForWebviewReadyEvent(teWrapper.homeView, tc.slowTime.webview.show.view.home * 2),
+				utils.waitForWebviewReadyEvent(teWrapper.taskCountView, tc.slowTime.webview.show.view.taskCount * 2),
+				utils.waitForWebviewReadyEvent(teWrapper.taskUsageView, tc.slowTime.webview.show.view.taskUsage * 2),
+			]);
+		}
         utils.endRollingCount(this);
 	});
 
@@ -288,8 +291,11 @@ suite("License Manager Tests", () =>
 	{
 		if (utils.exitRollingCount(this)) return;
 		this.slow(tc.slowTime.commands.focusChangeViews + 200);
-		void focusExplorerView(teWrapper);
-		utils.waitForEvent(teWrapper.treeManager.views.taskExplorer.tree.onDidLoadTreeData, tc.slowTime.commands.focusChangeViews * 2);
+		if (!_LICENSE_SERVER_DISABLED_)
+		{
+			void focusExplorerView(teWrapper);
+			utils.waitForEvent(teWrapper.treeManager.views.taskExplorer.tree.onDidLoadTreeData, tc.slowTime.commands.focusChangeViews * 2);
+		}
         utils.endRollingCount(this);
 	});
 
