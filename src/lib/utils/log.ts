@@ -551,11 +551,11 @@ export class TeLog implements ILog, Disposable
 
     private writeErrorChannelHeader = () =>
     {
-        this._logControl.outputChannel.appendLine("");
-        this._logControl.outputChannel.appendLine("***********************************************************************************************");
-        this._logControl.outputChannel.appendLine(" Task Explorer Error Logging Channel");
-        this._logControl.outputChannel.appendLine("***********************************************************************************************");
-        this._logControl.outputChannel.appendLine("");
+        this._logControl.errorChannel.appendLine("");
+        this._logControl.errorChannel.appendLine("***********************************************************************************************");
+        this._logControl.errorChannel.appendLine(" Task Explorer Error Logging Channel");
+        this._logControl.errorChannel.appendLine("***********************************************************************************************");
+        this._logControl.errorChannel.appendLine("");
     };
 
 

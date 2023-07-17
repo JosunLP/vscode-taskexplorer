@@ -95,7 +95,7 @@ suite("Parsing Report Tests", () =>
 	});
 
 
-	test("Deserialize Report Page (All Projects)", async function()
+	test("Deserialize Report Page", async function()
 	{
         if (exitRollingCount(this)) return;
 		this.slow((tc.slowTime.webview.show.page.parsingReport * 2) + tc.slowTime.webview.closeSync);

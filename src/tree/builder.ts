@@ -124,10 +124,15 @@ export class TaskTreeBuilder
     private getTaskFile = (task: Task, folder: TaskFolder, logPad: string) =>
     {
         const w = this.wrapper,
-              id = !w.taskUtils.isScriptType(<TeTaskSource>task.source) ?
-                    TaskFile.id(folder, task, 0) :
-                    // script type files in same dir - place in `one` taskfile
-                    TaskFile.groupId(folder, w.pathUtils.getTaskAbsolutePath(task), task.source, task.source, -1);
+              isScriptType = w.taskUtils.isScriptType(<TeTaskSource>task.source);
+        const  id = !isScriptType ? TaskFile.id(folder, task, 0) :
+               // script type files in same dir - place in `one` taskfile
+               TaskFile.groupId(folder, w.pathUtils.getTaskAbsolutePath(task), task.source, task.source, -1);
+        // if (!this._taskFileMap[id])
+        // {
+        //     id = !isScriptType ? TaskFile.id(folder, task, 1) :
+        //          TaskFile.groupId(folder, w.pathUtils.getTaskAbsolutePath(task), task.source, task.source, 1);
+        // }
         if (!this._taskFileMap[id])
         {
             w.log.value("Add source base taskfile container", task.source, 2, logPad);
@@ -141,17 +146,16 @@ export class TaskTreeBuilder
 
     private invalidate = (source?: string) =>
     {
-        const projectFolders = this._taskFolders.filter(f => !f.isSpecial);
         if (!source)
         {
-            projectFolders.forEach(f => f.treeNodes.splice(0));
             Object.keys(this._taskMap).forEach(k => delete this._taskMap[k], this);
             Object.keys(this._taskFileMap).forEach(k => delete this._taskFileMap[k], this);
+            this._taskFolders.forEach(f => { if (!f.isSpecial)  f.treeNodes.splice(0); });
         }
         else {
-            projectFolders.forEach(f => this.wrapper.utils.popIfExistsBy(f.treeNodes, n => n.taskSource === source));
             this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_k, t) => t.taskSource === source, this);
             this.wrapper.utils.popObjIfExistsBy(this._taskFileMap, (_k, t) => t.taskSource === source, this);
+            this._taskFolders.forEach(f => { if (!f.isSpecial) this.wrapper.utils.popIfExistsBy(f.treeNodes, n => n.taskSource === source); }, this);
         }
     };
 

@@ -209,7 +209,7 @@ export abstract class TeWebviewPanel<State> extends TeWebviewBase<State, State> 
 			{
 				setTimeout(this._serializer.deserializeWebviewPanel, 250, webviewPanel, state);
 			},
-			this, [ this.show, undefined, webviewPanel, state ]);
+			this, [ () => void this.show(undefined, webviewPanel, state) ]);
 		}
 	};
 
