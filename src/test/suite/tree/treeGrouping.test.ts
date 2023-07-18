@@ -27,7 +27,7 @@ suite("Tree Grouping Tests", () =>
         if (getSuccessCount(this) < 18) {
             await executeSettingsUpdate(teWrapper.keys.Config.GroupMaxLevel, 5, tc.waitTime.config.groupingEvent);
             await executeSettingsUpdate(teWrapper.keys.Config.GroupSeparator, "-", tc.waitTime.config.groupingEvent);
-            await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
+            await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeparator, true, tc.waitTime.config.groupingEvent);
             await executeSettingsUpdate(teWrapper.keys.Config.GroupStripTaskLabel, true, tc.waitTime.config.groupingEvent);
             await executeSettingsUpdate(teWrapper.keys.Config.GroupScripts, true, tc.waitTime.config.groupingEvent);
             await executeSettingsUpdate(teWrapper.keys.Config.GroupStripScriptLabel, false, tc.waitTime.config.groupingEvent);
@@ -46,7 +46,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeperator, false, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeparator, false, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 
@@ -55,7 +55,7 @@ suite("Tree Grouping Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent);
-        await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeperator, true, tc.waitTime.config.groupingEvent);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeparator, true, tc.waitTime.config.groupingEvent);
         endRollingCount(this);
     });
 

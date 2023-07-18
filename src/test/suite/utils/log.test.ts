@@ -71,7 +71,7 @@ suite("Logging Tests", () =>
 		teWrapper.log.error([ "Test error 11", "Test error 12" ], [[ "Test param error 13", "Test param value 14" ]]);
 		teWrapper.log.error("this is a test4", [[ "test6", true ], [ "test6", false ], [ "test7", "1111" ], [ "test8", [ 1, 2, 3 ]]]);
 		teWrapper.logControl.isTestsBlockScaryColors = testControl.log.blockScaryColors;
-		teWrapper.logControl.useTags = true;
+		teWrapper.logControl.trace = true;
 		const err = new Error("Test error object");
 		err.stack = undefined;
 		teWrapper.log.error(err);
@@ -109,7 +109,7 @@ suite("Logging Tests", () =>
 		teWrapper.log.error("error line1\nline2");
 		teWrapper.log.error("error line1\r\nline2");
 		teWrapper.log.error(new Error("Test error object"));
-		teWrapper.logControl.useTags = false;
+		teWrapper.logControl.trace = false;
 		teWrapper.logControl.isTestsBlockScaryColors = true;
 		teWrapper.log.error("Scary error");
 		teWrapper.logControl.isTestsBlockScaryColors = scaryOff;
@@ -405,22 +405,23 @@ suite("Logging Tests", () =>
 		//
 		log.setWriteToConsole?.(false);
 		//
-		// Tags
+		// Trace / integrtated source map suppor for stack tracing of the
+		// minified build / typescript source
 		//
-		const useTags = logControl.useTags;
-		logControl.useTags = false;
+		const trace = logControl.trace;
+		logControl.trace = false;
 		log.blank(2);
 		log.write("test1");
 		log.write2("Test1", "Test1");
 		log.write2("Test1", "Test1", 1);
 		log.write2("Test1", "Test1", 1, "");
 		log.write2("Test1", "Test1", 1, "", [[ "t", 1 ]]);
-		logControl.useTags = true;
+		logControl.trace = true;
 		log.blank(3);
 		log.write("test1", 1);
 		log.write2("Test1", "Test1", 5);
 		log.withColor("Test1", teWrapper.figures.colors.blue);
-		logControl.useTags = useTags;
+		logControl.trace = trace;
 		//
 		// Disable logging
 		//

@@ -118,6 +118,7 @@ export class TeWrapper implements ITeWrapper, Disposable
         this._storage = storage;
         this._configuration = configuration;
 		this._log = log;
+		this._log.wrapper = this;
 		this._providers = {};
 
 		this._eventQueue = new EventQueue(this);

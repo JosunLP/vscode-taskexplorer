@@ -461,7 +461,7 @@ suite("Provider Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.config.groupingEvent * 3);
-        await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeperator, true);
+        await executeSettingsUpdate(teWrapper.keys.Config.GroupWithSeparator, true);
         await executeSettingsUpdate(teWrapper.keys.Config.GroupSeparator, "-");
         await executeSettingsUpdate(teWrapper.keys.Config.GroupMaxLevel, 4);
         endRollingCount(this);

@@ -93,6 +93,7 @@ export class TeLog implements ILog, Disposable
     get lastPad(): string { return this._logControl.lastLogPad; }
 
     get wrapper(): ITeWrapper | undefined { return this._wrapper; }
+    set wrapper(wrapper) { this._wrapper = wrapper; }
 
 
     private _blank = (level?: LogLevel, queueId?: string) => this._write("", level, "", queueId);
@@ -291,15 +292,6 @@ export class TeLog implements ILog, Disposable
     installSourceMapSupport = (wrapper: ITeWrapper) =>
     {
         this._wrapper = wrapper;
-        // const _load = async (w: ITeWrapper, srcMapPath: string) =>
-        // {
-        //     const srcMap = await w.fs.readJsonAsync<RawSourceMap>(srcMapPath);
-        //     await wrap(async () =>
-        //     {
-        //         const srcMapConsumer = this._srcMapConsumer = await new SourceMapConsumer(srcMap);
-        //         this._disposables.push({ dispose: () => { wrap(srcMapConsumer.destroy, [ this._error ]); }});
-        //     }, [ this._error ], this);
-        // };
         return wrapper.utils.wrap(async (w) =>
         {
             const wasmUri = Uri.joinPath(this._context.extensionUri, "dist", "mappings.wasm"),
