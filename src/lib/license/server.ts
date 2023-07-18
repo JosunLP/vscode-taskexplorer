@@ -188,26 +188,19 @@ export class TeServer implements ISpmServer
 				res.on("end", () =>
 				{
 					this.log("   response stream read: eState: " + errorState);
-					let jso = null;
-					try {
-						jso = JSON.parse(rspData);
-					}
-					catch { /* istanbul ignore next */ jso = { message: rspData }; }
-					try
+					let jso = { message: rspData };
+					this.wrapper.utils.wrap(() => { jso = JSON.parse(rspData); });
+					this.wrapper.utils.wrap((r) =>
 					{
-						this.logServerResponse(res, jso, logPad);
-						if (!res.statusCode || res.statusCode > 299)
+						this.logServerResponse(r, jso, logPad);
+						if (r.statusCode && r.statusCode <= 299)
 						{
-							reject(<SpmServerError>{ message: res.statusMessage, status: res.statusCode, body: jso });
+							resolve(<T>jso);
 						}
 						else {
-							resolve(jso as T);
+							reject(new SpmServerError(r.statusCode, JSON.stringify(jso), r.statusMessage));
 						}
-					}
-					catch (e) {
-						/* istanbul ignore next */
-						reject(<SpmServerError>{ message: e.message, status: res.statusCode, body: jso });
-					}
+					}, [ reject ], this, res);
 				});
 			});
 
