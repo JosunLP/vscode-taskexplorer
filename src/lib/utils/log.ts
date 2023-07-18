@@ -303,16 +303,16 @@ export class TeLog implements ILog, Disposable
         return wrapper.utils.wrap(async (w) =>
         {
             const wasmUri = Uri.joinPath(this._context.extensionUri, "dist", "mappings.wasm"),
-                  srcMapUri = Uri.joinPath(this._context.extensionUri, "dist", `${w.extensionNameShort}.js.map`);
-            await wrapper.utils.execIf(!w.fs.pathExistsSync(srcMapUri.fsPath) || !!w.fs.pathExistsSync(wasmUri.fsPath), async () =>
+                  srcMapUri = Uri.joinPath(this._context.extensionUri, "dist", "taskexplorer.js.map");
+            await wrapper.utils.execIf(!w.fs.pathExistsSync(srcMapUri.fsPath) || !w.fs.pathExistsSync(wasmUri.fsPath), async () =>
             {
-                const wasmContent = await w.server.get("app/shared/mappings.wasm", true, ""),
-                      srcMapContent = await w.server.get(`app/vscode-taskexplorer/v${wrapper.version}/taskexplorer.js.map`, true, "");
-                await w.fs.writeFile(srcMapUri.fsPath, srcMapContent);
+                const wasmContent = await w.server.get("app/shared/mappings.wasm", true, "");
                 await w.fs.writeFile(wasmUri.fsPath, wasmContent);
-            }, this);
-            const srcMap = await w.fs.readJsonAsync<RawSourceMap>(srcMapUri.fsPath),
-                  srcMapConsumer = this._srcMapConsumer = await new SourceMapConsumer(srcMap);
+                const srcMapContent = await w.server.get(`app/vscode-taskexplorer/v${wrapper.version}/taskexplorer.js.map`, true, "");
+                await w.fs.writeFile(srcMapUri.fsPath, srcMapContent);
+            });
+            const srcMap = await w.fs.readJsonAsync<RawSourceMap>(srcMapUri.fsPath);
+            const srcMapConsumer = this._srcMapConsumer = await new SourceMapConsumer(srcMap);
             this._disposables.push({
                 dispose: () => { wrap((consumer) => consumer.destroy(), [ this._error ], this, srcMapConsumer); }
             });

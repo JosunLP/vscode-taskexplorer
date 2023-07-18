@@ -43,7 +43,7 @@ export class TeServer implements ISpmServer
 	private getApiPath = (ep: SpmApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
 
 
-	private getResourcPath = (ep: SpmServerResource) => `static/${ep}`;
+	private getResourcPath = (ep: SpmServerResource) => `https://${this._spmApiServer}/static/${ep}`;
 
 
 	get = async <T = string>(ep: SpmServerResource, raw: boolean, logPad: string) =>
