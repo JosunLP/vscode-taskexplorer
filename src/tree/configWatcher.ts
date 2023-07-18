@@ -154,10 +154,10 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             // Groupings changes require global refresh
             //
-            if (w.config.affectsConfiguration(e, cfgKeys.GroupWithSeperator, cfgKeys.GroupSeparator, cfgKeys.GroupMaxLevel, cfgKeys.GroupStripTaskLabel, cfgKeys.GroupScripts, cfgKeys.GroupStripScriptLabel))
+            if (w.config.affectsConfiguration(e, cfgKeys.GroupWithSeparator, cfgKeys.GroupSeparator, cfgKeys.GroupMaxLevel, cfgKeys.GroupStripTaskLabel, cfgKeys.GroupScripts, cfgKeys.GroupStripScriptLabel))
             {
                 w.log.write("   A tree grouping setting has changed", 1);
-                w.log.value(`      ${cfgKeys.GroupWithSeperator} changed`, w.config.get<boolean>(cfgKeys.GroupWithSeperator), 1);
+                w.log.value(`      ${cfgKeys.GroupWithSeparator} changed`, w.config.get<boolean>(cfgKeys.GroupWithSeparator), 1);
                 w.log.value(`      ${cfgKeys.GroupSeparator} changed`, w.config.get<boolean>(cfgKeys.GroupSeparator), 1);
                 w.log.value(`      ${cfgKeys.GroupMaxLevel} changed`, w.config.get<boolean>(cfgKeys.GroupMaxLevel), 1);
                 w.log.value(`      ${cfgKeys.GroupScripts} changed`, w.config.get<boolean>(cfgKeys.GroupScripts), 1);

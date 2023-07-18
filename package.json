@@ -1244,6 +1244,34 @@
 				}
 			},
 			{
+				"id": "httpProxy",
+				"order": 30,
+				"title": "Connection",
+				"properties": {
+					"taskexplorer.http.strictSSL": {
+						"type": "boolean",
+						"default": true,
+						"description": "%config.taskexplorer.http.strictSSL%"
+					},
+					"taskexplorer.http.proxySupport": {
+						"type": "string",
+						"default": "off",
+						"enum": [
+							"fallback",
+							"off",
+							"on",
+							"override"
+						],
+						"markdownDescription": "%config.taskexplorer.http.proxySupport%"
+					},
+					"taskexplorer.http.proxy": {
+						"type": "string",
+						"default": "",
+						"description": "%config.taskexplorer.http.proxy%"
+					}
+				}
+			},
+			{
 				"id": "excludeinclude",
 				"order": 40,
 				"title": "Exclude / Include",

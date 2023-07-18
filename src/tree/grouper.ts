@@ -300,7 +300,7 @@ export class TaskTreeGrouper
         const w = this.wrapper;
         this._groupSep = w.config.get<string>(w.keys.Config.GroupSeparator, w.keys.Defaults.Config.GroupSeparator);
         this._groupMaxLevel = w.config.get<number>(w.keys.Config.GroupMaxLevel, w.keys.Defaults.Config.GroupMaxLevel);
-        this._group = w.config.get<boolean>(w.keys.Config.GroupWithSeperator, w.keys.Defaults.Config.GroupWithSeperator);
+        this._group = w.config.get<boolean>(w.keys.Config.GroupWithSeparator, w.keys.Defaults.Config.GroupWithSeparator);
         this._groupScripts = w.config.get<boolean>(w.keys.Config.GroupScripts, w.keys.Defaults.Config.GroupScripts);
     };
 

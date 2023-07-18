@@ -103,6 +103,7 @@ export interface ITeWrapper
 	readonly typeUtils: ITeTypeUtilities;
 	readonly usage: ITeUsage;
 	readonly utils: ITeUtilities;
+	readonly version: string;
 	readonly views: { [id in "taskExplorer" | "taskExplorerSideBar"]: ITaskTreeView };
 	readonly welcomePage: ITeWebview;
 	readonly wsfolder: WorkspaceFolder;

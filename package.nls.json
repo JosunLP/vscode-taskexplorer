@@ -9,7 +9,9 @@
 	"config.taskexplorer.enableSideBar": "Enable **Task Explorer** in the `side/activity bar`.",
 
 	"config.taskexplorer.enablePersistentFileCaching": "Enable Persistent File Caching  `Experimental`",
-
+	"config.taskexplorer.http.proxy": "Proxy url for remote connections",
+	"config.taskexplorer.http.proxySupport": "Type of proxy support, or `off` to disable proxy support.",
+	"config.taskexplorer.http.strictSSL": "Enforce SSL secure connection.  Can be used to diagnose or bypass any connection issues.",
 	"config.taskexplorer.enabledTaskTypes": "Enabled task types to display in the task tree",
 	"config.taskexplorer.enableAnt": "Ant",
 	"config.taskexplorer.enableAppPublisher": "App Publisher",

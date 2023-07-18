@@ -5,7 +5,7 @@ import { request } from "https";
 import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "../utils/figures";
-import { fetch, /* getProxyAgent*/ } from ":env/fetch";
+import { fetch, getProxyAgent, RequestInfo, RequestInit } from ":env/fetch";
 import {
 	SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError
 } from "../../interface";
@@ -43,14 +43,14 @@ export class TeServer implements ISpmServer
 	private getApiPath = (ep: SpmApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
 
 
-	private getResourcPeath = (ep: SpmServerResource) => `https://${this._spmApiServer}/static/${ep}`;
+	private getResourcPath = (ep: SpmServerResource) => `static/${ep}`;
 
 
-	get = async <T>(ep: SpmServerResource, logPad: string) =>
+	get = async <T = string>(ep: SpmServerResource, raw: boolean, logPad: string) =>
 	{
 		return Promise.race<T>(
 		[
-			this._get(ep, logPad).then<T>(r => this.wrapper.utils.wrap(r => JSON.parse(r) as T, [ (r) => r, r ], this, r)),
+			this._get(ep, logPad).then<T>(r => this.wrapper.utils.wrap(r => (!raw ? JSON.parse(r) : r) as T, [ (r) => r, r ], this, r)),
 			new Promise<T>((_, reject) => {
 				setTimeout(reject, this._requestTimeout, <SpmServerError>{ message: "Timed out", status: 408 });
 			})
@@ -61,18 +61,20 @@ export class TeServer implements ISpmServer
 	private _get = async (ep: SpmServerResource, logPad: string) =>
 	{
 		this.wrapper.log.methodStart("server resource request", 1, logPad, false, [[ "endpoint", ep ]]);
-		const response = await fetch(this.getResourcPeath(ep));
-		// const response = await fetch(this.getResourceath(ep),
-		// const response = await fetch(Uri.joinPath(this._spmApiServer, ep).toString(),
-		// {
-		// 	method: "GET",
-		// 	// agent: getProxyAgent(),
-		// 	headers: {
-		// 		"token": this.publicToken,
-		// 		"user-agent": this.wrapper.extensionId,
-		// 		"content-type": "text/plain"
-		// 	}
-		// });
+		const response = await this.wrapFetch(
+			this.getResourcPath(ep),
+			{
+				agent: getProxyAgent(),
+				hostname: this._spmApiServer,
+				method: "GET",
+				port: 443,
+				headers: {
+					"token": this.publicToken,
+					"user-agent": this.wrapper.extensionId,
+					"content-type": "text/plain"
+				}
+			}
+		);
 		const rspBody = await response.text();
 		this.wrapper.log.methodDone("server resource request", 1, logPad, [
 			[ "response status", response.status ], [ "response body length", rspBody.length ]
@@ -86,9 +88,8 @@ export class TeServer implements ISpmServer
 
 	private getServerOptions = (apiEndpoint: SpmApiEndpoint, token?: string) =>
 	{
-		const server = this._spmApiServer;
 		const options = {
-			hostname: server,
+			hostname: this._spmApiServer,
 			method: "POST",
 			path: this.getApiPath(apiEndpoint),
 			port: this._spmApiPort,
@@ -223,38 +224,20 @@ export class TeServer implements ISpmServer
 		});
 	};
 
-    // 'Fetch' examples, in case I ever decide to go to fetch, which will also be built in in Node 18
-    //
-    // private async getUserInfo(_token: string): Promise<{ name: string; email: string }>
-    // {
-    //     const response = await fetch(`https://license.spmeesseman.com/...`, {
-    //         headers: {
-    //             Authorization: `Bearer ${token}`
-    //         }
-    //     });
-    //     return response.json() as Promise<{ name: string; email: string }>;
-    //     return { name: "Test", email: "test@spmeesseman.com" };
-    // }
-	//
-	// private validateLicenseFetch = async(licenseKey: string, logPad: string) =>
-	// {
-	// 	const res = await fetch(Uri.joinPath(this.host, this.authApiEndpoint).toString(),
-	// 	{
-	// 		method: "POST",
-	// 		agent: getProxyAgent(),
-	// 		headers: {
-	// 			"Authorization": `Bearer ${this.token}`,
-	// 			"User-Agent": "vscode-taskexplorer",
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 		body: JSON.stringify(
-	// 		{
-	// 			licensekey: licenseKey,
-	// 			appid: env.machineId,
-	// 			appname: "vscode-taskexplorer-prod",
-	// 			ip: "*"
-	// 		}),
-	// 	});
-	// };
+
+	private wrapFetch = async (url: URL | RequestInfo, init?: RequestInit) =>
+	{
+		const previousRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED,
+			  strict = !this.wrapper.tests && this.wrapper.config.get<boolean>("http.strictSSL", true);
+		if (!strict) {
+			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+		}
+		try {
+			return await fetch(url, init);
+		}
+		finally {
+			process.env.NODE_TLS_REJECT_UNAUTHORIZED = previousRejectUnauthorized;
+		}
+	};
 
 }

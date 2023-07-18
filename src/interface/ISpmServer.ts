@@ -1,8 +1,9 @@
 
-export type SpmApiEndpoint = "license/validate" | "payment/paypal/hook" |
-							  "register/account" | "register/trial/start" | "register/trial/extend";
+export type SpmApiEndpoint = "license/validate" | "payment/paypal/hook" | "register/account" |
+							 "register/trial/start" | "register/trial/extend";
 
-export type SpmServerResource = "app/log/mappings.wasm" | "app/vscode-taskexplorer/taskexplorer.js.map";
+export type SpmServerResource = "app/shared/mappings.wasm" |
+								`app/vscode-taskexplorer/v${string}/taskexplorer.js.map`;
 
 export interface ISpmServerError
 {
@@ -16,7 +17,7 @@ export interface ISpmServerError
 export interface ISpmServer
 {
     readonly apiServer: string;
-	get<T>(ep: SpmServerResource, logPad: string): Promise<T>;
+	get<T = string>(ep: SpmServerResource, raw: boolean, logPad: string): Promise<T>;
     request<T>(endpoint: SpmApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>): Promise<T>;
 }
 

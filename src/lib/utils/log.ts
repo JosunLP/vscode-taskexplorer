@@ -5,7 +5,7 @@ import { apply } from "./object";
 import { figures } from "./figures";
 import { basename, join } from "path";
 import { appendFileSync, createDir } from "./fs";
-import { execIf, execIf2, popIfExistsBy, wrap } from "./utils";
+import { execIf, popIfExistsBy, wrap } from "./utils";
 import { executeCommand, registerCommand } from "../command/command";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
@@ -291,29 +291,31 @@ export class TeLog implements ILog, Disposable
     installSourceMapSupport = (wrapper: ITeWrapper) =>
     {
         this._wrapper = wrapper;
-        return wrap(async (w) =>
+        // const _load = async (w: ITeWrapper, srcMapPath: string) =>
+        // {
+        //     const srcMap = await w.fs.readJsonAsync<RawSourceMap>(srcMapPath);
+        //     await wrap(async () =>
+        //     {
+        //         const srcMapConsumer = this._srcMapConsumer = await new SourceMapConsumer(srcMap);
+        //         this._disposables.push({ dispose: () => { wrap(srcMapConsumer.destroy, [ this._error ]); }});
+        //     }, [ this._error ], this);
+        // };
+        return wrapper.utils.wrap(async (w) =>
         {
-            let srcMapConsumer: BasicSourceMapConsumer;
-            const srcMap = await w.server.get<RawSourceMap>("app/vscode-taskexplorer/taskexplorer.js.map", ""),
-                  wasmUri = Uri.joinPath(this._context.extensionUri, "dist", "mappings.wasm"),
-                  wasmContent = await w.server.get<any>("app/log/mappings.wasm", "");
-            await w.fs.writeFile(wasmUri.fsPath, wasmContent);
-            this._srcMapConsumer = srcMapConsumer = await new SourceMapConsumer(srcMap);
-            this._disposables.push({ dispose: () => { wrap(srcMapConsumer.destroy, [ this._error ]); }});
-            // await w.fs.writeFile(sourceMapUri.fsPath, JSON.stringify(res));
-            // await execIf(pathExistsSync(sourceMapUri.fsPath), async () =>
-            // {
-            //     const sourceMapJso = await readJsonAsync<RawSourceMap>(sourceMapUri.fsPath);
-            //     await wrap(async () =>
-            //     {
-            //         this._srcMapConsumer = await new SourceMapConsumer(sourceMapJso);
-            //         this._disposables.push({
-            //             dispose: () => { try { (<BasicSourceMapConsumer>this._srcMapConsumer).destroy(); } catch {}}
-            //         });
-            //     },
-            //     [ this._error ], this);
-            // },
-            // this, [ this._error, "unable to download debug files from server" ]);
+            const wasmUri = Uri.joinPath(this._context.extensionUri, "dist", "mappings.wasm"),
+                  srcMapUri = Uri.joinPath(this._context.extensionUri, "dist", `${w.extensionNameShort}.js.map`);
+            await wrapper.utils.execIf(!w.fs.pathExistsSync(srcMapUri.fsPath) || !!w.fs.pathExistsSync(wasmUri.fsPath), async () =>
+            {
+                const wasmContent = await w.server.get("app/shared/mappings.wasm", true, ""),
+                      srcMapContent = await w.server.get(`app/vscode-taskexplorer/v${wrapper.version}/taskexplorer.js.map`, true, "");
+                await w.fs.writeFile(srcMapUri.fsPath, srcMapContent);
+                await w.fs.writeFile(wasmUri.fsPath, wasmContent);
+            }, this);
+            const srcMap = await w.fs.readJsonAsync<RawSourceMap>(srcMapUri.fsPath),
+                  srcMapConsumer = this._srcMapConsumer = await new SourceMapConsumer(srcMap);
+            this._disposables.push({
+                dispose: () => { wrap((consumer) => consumer.destroy(), [ this._error ], this, srcMapConsumer); }
+            });
         },
         [ this._error ], this, wrapper);
     };

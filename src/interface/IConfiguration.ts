@@ -12,7 +12,7 @@ export const ConfigDefaults =
 {
     GroupMaxLevel: 5,
     GroupSeparator: "-",
-    GroupWithSeperator: true,
+    GroupWithSeparator: true,
     GroupScripts: true,
     GroupStripTaskLabel: true,
     GroupStripScriptLabel: false,
@@ -38,7 +38,8 @@ export enum ConfigKeys
     GroupSeparator = "groupSeparator",
     GroupStripTaskLabel = "groupStripTaskLabel",
     GroupStripScriptLabel = "groupStripScriptLabel",
-    GroupWithSeperator = "groupWithSeparator",
+    GroupWithSeparator = "groupWithSeparator",
+    HttpProxy = "httpProxy",
     IncludeAnt = "includeAnt",
     KeepTerminalOnTaskDone = "keepTermOnStop",
     LogEnable = "logging.enable",

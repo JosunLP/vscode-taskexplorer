@@ -118,7 +118,6 @@ export class TeWrapper implements ITeWrapper, Disposable
         this._storage = storage;
         this._configuration = configuration;
 		this._log = log;
-		this._log.wrapper = this;
 		this._providers = {};
 
 		this._eventQueue = new EventQueue(this);
@@ -222,6 +221,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
 		await this.storage.update(AllConstants.Storage.Version, this._version);
+		//
+		// Download and install source map support files for error tracing
+		//
+		await this._log.installSourceMapSupport(this);
 		//
 		// Register busy complete event
 		//
