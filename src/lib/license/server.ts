@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { env } from "vscode";

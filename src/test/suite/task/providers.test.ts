@@ -387,7 +387,7 @@ suite("Provider Tests", () =>
     test("Add to Excludes - TaskItem", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.fetchTasks + tc.slowTime.tasks.count.verify + tc.slowTime.config.excludeTasksEvent);
+        this.slow(tc.slowTime.commands.fetchTasks + tc.slowTime.tasks.count.verify + tc.slowTime.config.excludeTasksEvent + tc.slowTime.tasks.getTreeTasks);
         const grunt = await treeUtils.getTreeTasks(teWrapper, "grunt", 13),
               taskItems = (await tasks.fetchTasks({ type: "grunt" })).filter(t => !!t.definition.uri),
               gruntCt = taskItems.length,
@@ -402,7 +402,8 @@ suite("Provider Tests", () =>
     test("Add to Excludes - TaskItem (Script Type)", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.commands.fetchTasks + tc.slowTime.tasks.count.verify + tc.slowTime.commands.exclude);
+        this.slow(tc.slowTime.commands.fetchTasks + tc.slowTime.tasks.count.verify + tc.slowTime.commands.exclude +
+                  tc.slowTime.tasks.getTreeTasks + tc.slowTime.config.eventFast);
         const batch = await treeUtils.getTreeTasks(teWrapper, "batch", 4),
               taskItems = await tasks.fetchTasks({ type: "batch" }),
               scriptCt = taskItems.length,
@@ -448,8 +449,7 @@ suite("Provider Tests", () =>
     test("Project Folder Collapsed on Start", async function()
     {
         if (exitRollingCount(this)) return;
-        this.slow(tc.slowTime.cache.build + tc.slowTime.config.event + tc.slowTime.config.eventFast + tc.slowTime.general.min +
-                  (tc.slowTime.commands.refresh * 2) + (tc.waitTime.refreshCommand * 2));
+        this.slow(tc.slowTime.config.event + tc.slowTime.config.eventFast + (tc.slowTime.commands.refresh * 2));
         await executeSettingsUpdate("logging.enable", false); // was hitting tree.logTask()
         await executeSettingsUpdate("specialFolders.folderState.project1", "Collapsed", tc.waitTime.config.event);
         await refresh(teWrapper);

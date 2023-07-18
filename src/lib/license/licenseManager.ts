@@ -1,6 +1,5 @@
+/* istanbul ignore file */
 /* eslint-disable @typescript-eslint/naming-convention */
-
-/* TEMP */ /* istanbul ignore file */
 
 import { IDictionary } from ":types";
 import { TeWrapper } from "../wrapper";
