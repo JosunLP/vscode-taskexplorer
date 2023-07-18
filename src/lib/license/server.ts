@@ -5,12 +5,10 @@ import { request } from "https";
 import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "../utils/figures";
-import { fetch, getProxyAgent, RequestInfo, RequestInit, Response } from ":env/fetch";
+import { fetch, getProxyAgent } from ":env/fetch";
 import {
 	SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError
 } from "../../interface";
-
-// const TLS_REJECT = "0"; // "0" to turn off tls rejection
 
 /* TEMP */ /* istanbul ignore next */
 export class TeServer implements ISpmServer
@@ -170,7 +168,7 @@ export class TeServer implements ISpmServer
 
     private _request = <T>(endpoint: SpmApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>): Promise<T> =>
 	{
-		return new Promise<T>((resolve, reject) =>
+		return this.wrapRequest(() => new Promise<T>((resolve, reject) =>
 		{
 			let rspData = "",
 			    errorState = false;
@@ -220,7 +218,7 @@ export class TeServer implements ISpmServer
 				this.log("   request stream written", logPad);
 				req.end();
 			});
-		});
+		}));
 	};
 
 
