@@ -6,7 +6,8 @@
  * @module webpack.plugin.afterdone
  */
 
-const { join } = require("path");
+const { join, resolve } = require("path");
+const { writeInfo, figures } = require("../console");
 const { renameSync, existsSync, writeFileSync, readFileSync, copyFileSync } = require("fs");
 
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
@@ -34,26 +35,60 @@ const afterdone = (env, wpConfig) =>
             {
                 compiler.hooks.afterDone.tap("AfterDonePlugin", () =>
                 {
-                    const distPath = join(env.buildPath, "dist");
-                    if (_wpConfig.mode === "production")
+                    if (_env.build === "extension")
                     {
-                        try {
-                            renameSync(join(distPath, "vendor.js.LICENSE.txt"), join(distPath, "vendor.LICENSE"));
-                            renameSync(join(distPath, "taskexplorer.js.LICENSE.txt"), join(distPath, "taskexplorer.LICENSE"));
-                        } catch {}
-                    }
-                    else if (_env.build === "extension" && _env.environment === "test")
-                    {
-                        const outFile = join(distPath, "taskexplorer.js");
-                        if (existsSync(outFile))
+                        const distPath = join(env.buildPath, "dist");
+                        if (_env.environment === "prod" || _wpConfig.mode === "production")
                         {
-                            const regex = /\n[ \t]*module\.exports \= require\(/mg,
-                                    content = readFileSync(outFile, "utf8").replace(regex, (v) => "/* istanbul ignore next */" + v);
-                            writeFileSync(outFile, content);
+                            try {
+                                renameSync(join(distPath, "vendor.js.LICENSE.txt"), join(distPath, "vendor.LICENSE"));
+                            } catch {}
+                            try {
+                                renameSync(join(distPath, "taskexplorer.js.LICENSE.txt"), join(distPath, "taskexplorer.LICENSE"));
+                            } catch {}
+                            try {
+                                renameSync(
+                                    join(distPath, "taskexplorer.js.map"),
+                                    resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer", "taskexplorer.js.map")
+                                );
+                            } catch {}
                         }
-                    }
-                    if (_env.build === "extension") {
-                        copyFileSync(join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"), join(distPath, "mappings.wasm"));
+                        else if (_env.environment === "test")
+                        {
+                            const outFile = join(distPath, "taskexplorer.js");
+                            if (existsSync(outFile))
+                            {
+                                const regex = /\n[ \t]*module\.exports \= require\(/mg,
+                                      content = readFileSync(outFile, "utf8"),
+                                      newContent = content.replace(regex, (v) => "/* istanbul ignore next */" + v);
+                                try {
+                                    writeFileSync(outFile, newContent);
+                                } catch {}
+                                if (content.includes("/* istanbul ignore file */")) {
+                                    writeInfo("The '/* istanbul ignore file */ ' tag was found and will break coverage", figures.error);
+                                }
+                            }
+                            try {
+                                copyFileSync(
+                                    join(distPath, "taskexplorer.js.map"),
+                                    resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer", "taskexplorer.js.map")
+                                );
+                            } catch {}
+                        }
+                        else {
+                            try {
+                                copyFileSync(
+                                    join(distPath, "taskexplorer.js.map"),
+                                    resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer", "taskexplorer.js.map")
+                                );
+                            } catch {}
+                        }
+                        try {
+                            copyFileSync(
+                                join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"),
+                                resolve(env.buildPath, "..", "spm-license-server", "res", "app", "log", "mappings.wasm")
+                            );
+                        } catch {}
                     }
                 });
             }

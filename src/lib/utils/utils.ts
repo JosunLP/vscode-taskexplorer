@@ -371,13 +371,13 @@ export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos
 // export const upperCaseFirstChar = (text: string): string => text.replace(/(?:^\w|[A-Za-z]|\b\w)/g, (l, i) => (i !== 0 ? l : l.toUpperCase()));
 
 
-export function wrap<R, E, ER>(runFn: () => R, catchFn: CallbackOptions<E, ER>, thisArg?: any): E | R;
-export function wrap<R, E, ER, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1): E | R;
-export function wrap<R, E, ER, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2): E | R;
-export function wrap<R, E, ER, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3): E | R;
-export function wrap<R, E, ER, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): E | R;
-export function wrap<R, E, ER, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): E | R;
-export function wrap<R, E, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFinallyOpts?: CallbackOptions<E, ER>, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): E | R
+export function wrap<R, E, ER>(runFn: () => R, catchFn: CallbackOptions<E, ER>, thisArg?: any): R;
+export function wrap<R, E, ER, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1): R;
+export function wrap<R, E, ER, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2): R;
+export function wrap<R, E, ER, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
+export function wrap<R, E, ER, A1, A2, A3, A4>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
+export function wrap<R, E, ER, A1, A2, A3, A4, A5>(runFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
+export function wrap<R, E, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFinallyOpts?: CallbackOptions<E, ER>, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
 {
     let result: any;
     try

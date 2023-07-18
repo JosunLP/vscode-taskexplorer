@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { ILog, ILogControl } from "./ILog";
+import { ISpmServer } from "./ISpmServer";
 import { ITeWebview } from "./ITeWebview";
 import { ITeFigures } from "./ITeFigures";
+import { ILog, ILogControl } from "./ILog";
 import { IEventQueue } from "./IEventQueue";
 import { ITeStatusBar } from "./ITeStatusBar";
 import { ITeFileCache } from "./ITeFileCache";
@@ -88,6 +89,7 @@ export interface ITeWrapper
 	readonly promiseUtils: ITePromiseUtilities;
 	readonly providers: Record<string, ITaskExplorerProvider>;
 	readonly releaseNotesPage: ITeWebview;
+	readonly server: ISpmServer;
 	readonly sidebar: ITeTaskTree;
 	readonly sidebarView: TreeView<TreeItem>;
 	readonly statusBar: ITeStatusBar;

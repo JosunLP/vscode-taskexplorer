@@ -59,8 +59,7 @@ export interface ILogControl
     outputChannel: OutputChannel;
     type: LogType;
     tzOffset: number;
-    useTags: boolean;
-    useTagsMaxLength: number;
+    trace: boolean;
     valueWhiteSpace: number;
     writeToConsole: boolean;
     writeToConsoleLevel: number;

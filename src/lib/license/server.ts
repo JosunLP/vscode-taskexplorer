@@ -1,52 +1,19 @@
-/* istanbul ignore file */
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { env } from "vscode";
 import { request } from "https";
-// import fetch from ":env/fetch";
-import { IDictionary } from ":types";
 import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "../utils/figures";
-import { TeRuntimeEnvironment } from "../../interface";
+import { fetch, /* getProxyAgent*/ } from ":env/fetch";
+import {
+	SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError
+} from "../../interface";
 
 // const TLS_REJECT = "0"; // "0" to turn off tls rejection
 
-export interface ServerError
-{
-	body?: string;
-	message: string;
-	status: number | undefined;
-	success: false;
-}
-/*
-class ServerError2 extends Error
-{
-	date: Date;
-	timestamp: number;
-
-	constructor(readonly status: number | undefined, readonly body: string | undefined, ...params: any[])
-	{	//
-		// Pass remaining arguments (including vendor specific ones) to parent constructor
-		//
-		super(...params);
-		//
-		// Maintains proper stack trace for where our error was thrown (only available on V8)
-		//
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, ServerError2);
-		}
-		this.name = "ServerError2";
-	  	this.date = new Date();
-	  	this.timestamp = Date.now();
-	}
-}
-*/
-
-export type ITeApiEndpoint = "license/validate" | "payment/paypal/hook" |
-							 "register/account" | "register/trial/start" | "register/trial/extend";
-
-export class TeServer
+/* TEMP */ /* istanbul ignore next */
+export class TeServer implements ISpmServer
 {
 	private readonly _spmApiPort = 443;
 	private readonly _spmApiVersion = 1;
@@ -73,10 +40,51 @@ export class TeServer
 	get apiServer() { return this._spmApiServer; }
 
 
-	private getApiPath = (ep: ITeApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
+	private getApiPath = (ep: SpmApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
 
 
-	private getServerOptions = (apiEndpoint: ITeApiEndpoint, token?: string) =>
+	private getResourcPeath = (ep: SpmServerResource) => `https://${this._spmApiServer}/static/${ep}`;
+
+
+	get = async <T>(ep: SpmServerResource, logPad: string) =>
+	{
+		return Promise.race<T>(
+		[
+			this._get(ep, logPad).then<T>(r => this.wrapper.utils.wrap(r => JSON.parse(r) as T, [ (r) => r, r ], this, r)),
+			new Promise<T>((_, reject) => {
+				setTimeout(reject, this._requestTimeout, <SpmServerError>{ message: "Timed out", status: 408 });
+			})
+		]);
+	};
+
+
+	private _get = async (ep: SpmServerResource, logPad: string) =>
+	{
+		this.wrapper.log.methodStart("server resource request", 1, logPad, false, [[ "endpoint", ep ]]);
+		const response = await fetch(this.getResourcPeath(ep));
+		// const response = await fetch(this.getResourceath(ep),
+		// const response = await fetch(Uri.joinPath(this._spmApiServer, ep).toString(),
+		// {
+		// 	method: "GET",
+		// 	// agent: getProxyAgent(),
+		// 	headers: {
+		// 		"token": this.publicToken,
+		// 		"user-agent": this.wrapper.extensionId,
+		// 		"content-type": "text/plain"
+		// 	}
+		// });
+		const rspBody = await response.text();
+		this.wrapper.log.methodDone("server resource request", 1, logPad, [
+			[ "response status", response.status ], [ "response body length", rspBody.length ]
+		]);
+		if (response.status > 299) {
+			throw new SpmServerError(response.status, rspBody, response.statusText);
+		}
+		return rspBody;
+	};
+
+
+	private getServerOptions = (apiEndpoint: SpmApiEndpoint, token?: string) =>
 	{
 		const server = this._spmApiServer;
 		const options = {
@@ -89,7 +97,7 @@ export class TeServer
 			// Timeout don't work worth a s***.  So do a promise race in request() for now.
 			//
 			timeout: this._requestTimeout,
-			headers: <IDictionary<string>> {
+			headers: <Record<string, string>> {
 				"token": this.publicToken,
 				"user-agent": this.wrapper.extensionId,
 				"content-type": "application/json"
@@ -134,7 +142,7 @@ export class TeServer
 
 
 	/* istanbul ignore next*/
-	private onServerError = (e: any, logPad: string, rspData?: string) =>
+	private onSpmServerError = (e: any, logPad: string, rspData?: string) =>
 	{
 		this.log(e, "", undefined, figures.color.errorTests);
 		this.wrapper.log.error(e);
@@ -148,26 +156,24 @@ export class TeServer
 	};
 
 
-	request = async <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>) =>
+	request = async <T>(endpoint: SpmApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>) =>
 	{
 		return Promise.race<T>(
 		[
 			this._request<T>(endpoint, token, logPad, params),
 			new Promise<T>((_resolve, reject) => {
-				setTimeout(reject, this._requestTimeout, <ServerError>{ message: "Timed out", status: 408 });
+				setTimeout(reject, this._requestTimeout, <SpmServerError>{ message: "Timed out", status: 408 });
 			})
 		]);
 	};
 
 
-    private _request = <T>(endpoint: ITeApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>): Promise<T> =>
+    private _request = <T>(endpoint: SpmApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>): Promise<T> =>
 	{
-
 		return new Promise<T>((resolve, reject) =>
 		{
-			let rspData = "";
-			let errorState = false;
-
+			let rspData = "",
+			    errorState = false;
 			const options = this.getServerOptions(endpoint, token);
 
 			this.wrapper.log.methodStart("server request", 1, logPad, false, [
@@ -192,7 +198,7 @@ export class TeServer
 						this.logServerResponse(res, jso, logPad);
 						if (!res.statusCode || res.statusCode > 299)
 						{
-							reject(<ServerError>{ message: res.statusMessage, status: res.statusCode, body: jso });
+							reject(<SpmServerError>{ message: res.statusMessage, status: res.statusCode, body: jso });
 						}
 						else {
 							resolve(jso as T);
@@ -200,7 +206,7 @@ export class TeServer
 					}
 					catch (e) {
 						/* istanbul ignore next */
-						reject(<ServerError>{ message: e.message, status: res.statusCode, body: jso });
+						reject(<SpmServerError>{ message: e.message, status: res.statusCode, body: jso });
 					}
 				});
 			});
@@ -208,7 +214,7 @@ export class TeServer
 			/* istanbul ignore next*/
 			req.on("error", (e) =>
 			{   // Not going to fail unless i birth a bug
-				this.onServerError(e, logPad);
+				this.onSpmServerError(e, logPad);
 				errorState = true;
 				reject(e);
 			});

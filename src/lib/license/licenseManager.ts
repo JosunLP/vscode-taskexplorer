@@ -1,19 +1,18 @@
-/* istanbul ignore file */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { IDictionary } from ":types";
 import { TeWrapper } from "../wrapper";
-import { ITeApiEndpoint, TeServer } from "./server";
 import { LicensePage } from "../../webview/page/licensePage";
 import { Disposable, Event, EventEmitter, window } from "vscode";
 import { executeCommand, registerCommand } from "../command/command";
 import { IpcAccountRegistrationParams } from "../../webview/common/ipc";
 import {
-	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent, ContextKeys,
-	TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo, TeTaskSource, ITeLicense
+	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
+	ContextKeys, TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent,
+	IStatusBarInfo, TeTaskSource, ITeLicense, ISpmServer, SpmApiEndpoint
 } from "../../interface";
 
 
+/* TEMP */ /* istanbul ignore next */
 export class LicenseManager implements ITeLicenseManager, Disposable
 {
 	private _LICENSE_SERVER_DISABLED_ = true;
@@ -29,11 +28,10 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private _checkLicenseTask: NodeJS.Timeout;
 	private _sbInfo: IStatusBarInfo | undefined;
 
-	private readonly _server: TeServer;
     private readonly _onReady: EventEmitter<void>;
 	private readonly _defaultSessionInterval = 1000 * 60 * 60 * 4;
 	private readonly _disposables: Disposable[] = [];
-	private readonly _maxTaskTypeMsgShown: IDictionary<boolean> = {};
+	private readonly _maxTaskTypeMsgShown: Record<string, boolean> = {};
     private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
 
 	private readonly _sessionInterval = <{ [id in TeRuntimeEnvironment]: number}>{
@@ -43,12 +41,11 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	constructor(private readonly wrapper: TeWrapper)
+	constructor(private readonly wrapper: TeWrapper, private readonly server: ISpmServer)
     {
 		this._account = this.getNewAccount();
 		this._onReady = new EventEmitter<void>();
 		this._onSessionChange = new EventEmitter<TeSessionChangeEvent>();
-		this._server = new TeServer(wrapper);
 		this._checkLicenseTask = setInterval(this.checkLicense, this.sessionInterval, "");
 		this._disposables.push(
 			this._onReady,
@@ -230,13 +227,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	};
 
 
-	private executeRequest = async (ep: ITeApiEndpoint, logPad: string, params: Record<string, any>): Promise<boolean> =>
+	private executeRequest = async (ep: SpmApiEndpoint, logPad: string, params: Record<string, any>): Promise<boolean> =>
 	{
 		const token = this._account.session.token;
 		this._busy = true;
 		try
 		{
-			const account = await this._server.request<ITeAccount>(ep, token, logPad, { accountId: this._account.id,  ...params });
+			const account = await this.server.request<ITeAccount>(ep, token, logPad, { accountId: this._account.id,  ...params });
 			await this.saveAccount(account, false, logPad);
 			this.wrapper.statusBar.update("");
 			return true;
@@ -255,7 +252,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private extendTrial = async (logPad: string): Promise<void> =>
 	{
-		const ep: ITeApiEndpoint = "register/trial/extend";
+		const ep: SpmApiEndpoint = "register/trial/extend";
 		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 
 		this.wrapper.statusBar.update("Requesting extended trial");
@@ -455,7 +452,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			//
 			const body = this.wrapper.objUtils.apply({ message: e.message }, e.body);
 			this.wrapper.log.error(
-				[ `the license server @  ${this._server.apiServer} is down or has returned an error status`, e ],
+				[ `the license server @  ${this.server.apiServer} is down or has returned an error status`, e ],
 				[[ "status code", e.status ], [ "server message", body.message ], [ "response body",  JSON.stringify(e.body) ]]
 			);
 			await this.wrapper.utils.execIf2(!this._account.errorState, async (m) =>
@@ -564,12 +561,12 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			this._busy = true;
 			const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
 			this.wrapper.statusBar.update("Sending payment request");
-			const ep: ITeApiEndpoint = "payment/paypal/hook",
+			const ep: SpmApiEndpoint = "payment/paypal/hook",
 				  token = this._account.session.token;
 			await this.wrapper.utils.wrap(
 				async () =>
 				{
-					await this._server.request<any>(ep, token, logPad, this.getPaypalWebhookPayload());
+					await this.server.request<any>(ep, token, logPad, this.getPaypalWebhookPayload());
 					await this.wrapper.utils.sleep(50);
 					await this.validateLicense(this.lic.key, logPad + "   ");
 				},

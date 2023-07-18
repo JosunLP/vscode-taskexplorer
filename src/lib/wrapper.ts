@@ -9,11 +9,13 @@ import { figures } from "./utils/figures";
 import { TeStatusBar } from "./statusBar";
 import * as objUtils from "./utils/object";
 import * as utilities from "./utils/utils";
+import { TeServer } from "./license/server";
 import * as pathUtils from "./utils/pathUtils";
 import * as taskUtils from "./utils/taskUtils";
 import * as typeUtils from "./utils/typeUtils";
 import { EventQueue } from "./utils/eventQueue";
 import { TeFileCache } from "../task/fileCache";
+import { TaskTreeManager } from "../tree/manager";
 import { All as AllConstants } from "./constants";
 import { TaskManager } from "../task/taskManager";
 import { TaskWatcher } from "../task/taskWatcher";
@@ -21,7 +23,6 @@ import { HomeView } from "../webview/view/homeView";
 import { TeFileWatcher } from "../task/fileWatcher";
 import * as promiseUtils from "./utils/promiseUtils";
 import { WelcomePage } from "../webview/page/welcome";
-import { TaskTreeManager } from "../tree/manager";
 import { AntTaskProvider } from "../task/provider/ant";
 import { NpmTaskProvider } from "../task/provider/npm";
 import { BashTaskProvider } from "../task/provider/bash";
@@ -61,7 +62,7 @@ import {
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, ITaskTreeView, ITeFilesystem, ITePathUtilities,
 	ITePromiseUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities,
-	ILog, ITeWrapper, TeRuntimeEnvironment, ITeKeys, IDictionary, ILogControl, ITeObjectUtilities
+	ILog, ITeWrapper, TeRuntimeEnvironment, ITeKeys, IDictionary, ILogControl, ITeObjectUtilities, ISpmServer
 } from "../interface";
 
 
@@ -78,6 +79,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _usage: Usage;
 	private readonly _teApi: TeApi;
 	private readonly _version: string;
+	private readonly _server: TeServer;
 	private readonly _storage: IStorage;
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
@@ -142,10 +144,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._fileCache = new TeFileCache(this);
 		this._fileWatcher = new TeFileWatcher(this);
 
+		this._server = new TeServer(this);
         this._taskManager = new TaskManager(this);
 		this._treeManager = new TaskTreeManager(this);
 
-		this._licenseManager = new LicenseManager(this);
+		this._licenseManager = new LicenseManager(this, this._server);
 		this._usage = new Usage(this);
 
 		this._homeView = new HomeView(this);
@@ -493,6 +496,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get pathUtils(): ITePathUtilities { return pathUtils; }
 	get promiseUtils(): ITePromiseUtilities { return promiseUtils; }
 	get releaseNotesPage(): ReleaseNotesPage { return this._releaseNotesPage; }
+    get server(): ISpmServer { return this._server; }
     get sidebar(): ITeTaskTree { return this.treeManager.views.taskExplorerSideBar.tree; }
     get sidebarView(): TreeView<TreeItem> { return this.treeManager.views.taskExplorerSideBar.view; }
 	get statusBar(): ITeStatusBar { return this._statusBar; }

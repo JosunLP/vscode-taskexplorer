@@ -3,16 +3,30 @@
 
 import { apply } from "./object";
 import { figures } from "./figures";
-import { basename, dirname, join } from "path";
-import { popIfExistsBy, wrap } from "./utils";
+import { basename, join } from "path";
+import { appendFileSync, createDir } from "./fs";
+import { execIf, execIf2, popIfExistsBy, wrap } from "./utils";
 import { executeCommand, registerCommand } from "../command/command";
-import { appendFileSync, createDir, pathExistsSync, readJsonAsync } from "./fs";
-import { BasicSourceMapConsumer, NullableMappedPosition, RawSourceMap, SourceMapConsumer } from "source-map";
+import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
 import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, Uri, window } from "vscode";
 import { Commands, IConfiguration, ConfigKeys, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
 
 
+/**
+ * @class TeLog
+ * @since 3.0.0
+ *
+ * To initialize an instance of this class, the following 3 calls must be made prior
+ * to app wrapper instantiation:
+ *
+ *      1.  new TeLog()
+ *      2.  init()
+ *
+ * And after the app wrapper has been instantiated:
+ *
+ *      3.  initSourceMapSupport()
+ */
 export class TeLog implements ILog, Disposable
 {
     private _errorsWritten = 0;
@@ -25,6 +39,8 @@ export class TeLog implements ILog, Disposable
     private readonly _context: ExtensionContext;
     private readonly _disposables: Disposable[];
     private readonly _separator = "-----------------------------------------------------------------------------------------";
+    private readonly _stackLineParserRgx = /at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i;
+    private readonly _stackLineFilterRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
 
 
     constructor(context: ExtensionContext, config: IConfiguration, _testsRunning: number)
@@ -50,8 +66,7 @@ export class TeLog implements ILog, Disposable
             level: config.get<LogLevel>(ConfigKeys.LogLevel, 1),
             msgQueue: {},
             outputChannel: window.createOutputChannel("Task Explorer"),
-            useTags: false,
-            useTagsMaxLength: 8,
+            trace: false,
             type: "global",
             tzOffset: (new Date()).getTimezoneOffset() * 60000,
             valueWhiteSpace: 45,
@@ -61,8 +76,8 @@ export class TeLog implements ILog, Disposable
         this._disposables = [
             this._logControl.errorChannel,
             this._logControl.outputChannel,
-            registerCommand(Commands.ShowOutputWindow, () => this.showOutput(true, this._logControl.outputChannel), this),
-            registerCommand(Commands.ShowErrorOutputWindow, () => this.showOutput(true, this._logControl.errorChannel), this),
+            registerCommand(Commands.ShowOutputWindow, (show: boolean) => this.showOutput(show, this._logControl.outputChannel), this),
+            registerCommand(Commands.ShowErrorOutputWindow, (show: boolean) => this.showOutput(show, this._logControl.errorChannel), this),
             config.onDidChange(this.processConfigChanges, this)
         ];
 		context.subscriptions.push(this);
@@ -74,9 +89,10 @@ export class TeLog implements ILog, Disposable
     private get allowScaryColors() { return !this._logControl.isTests || !this._logControl.isTestsBlockScaryColors; }
 
     get control(): ILogControl { return this._logControl; }
+
     get lastPad(): string { return this._logControl.lastLogPad; }
+
     get wrapper(): ITeWrapper | undefined { return this._wrapper; }
-    set wrapper(wrapper) { this._wrapper = wrapper; }
 
 
     private _blank = (level?: LogLevel, queueId?: string) => this._write("", level, "", queueId);
@@ -162,7 +178,7 @@ export class TeLog implements ILog, Disposable
         //
         if (isArray(params, false) && isArray(params[0]))
         {
-            for (const [ n, v, l ] of params)
+            for (const [ n, v ] of params)
             {
                 this._logControl.enableFile = false;
                 this._logControl.writeToConsole = true;
@@ -250,10 +266,10 @@ export class TeLog implements ILog, Disposable
         const ts = `${sInfo.stamp} ${figures.pointer} ${symbols[1]}`;
         this._logControl.errorChannel.appendLine(`${ts} --- ERROR ${this._errorsWritten} ${this._separator}`);
         this._logControl.errorChannel.appendLine(ts);
-        this._logControl.errorChannel.appendLine(`${ts} line          : ${sInfo.map ? sInfo.map.line : sInfo.line}`);
-        this._logControl.errorChannel.appendLine(`${ts} column        : ${sInfo.map ? sInfo.map.column : sInfo.col}`);
-        this._logControl.errorChannel.appendLine(`${ts} name          : ${sInfo.map ? sInfo.map.name : sInfo.method}`);
-        this._logControl.errorChannel.appendLine(`${ts} file          : ${sInfo.map ? sInfo.map.source : sInfo.file}`);
+        this._logControl.errorChannel.appendLine(`${ts} line          : ${sInfo.line}`);
+        this._logControl.errorChannel.appendLine(`${ts} column        : ${sInfo.column}`);
+        this._logControl.errorChannel.appendLine(`${ts} name          : ${sInfo.name}`);
+        this._logControl.errorChannel.appendLine(`${ts} file          : ${sInfo.source}`);
         this._logControl.errorChannel.appendLine(ts);
         this._logControl.errorChannel.appendLine(`${ts} error message :`);
         this._logControl.errorChannel.appendLine(ts);
@@ -267,41 +283,66 @@ export class TeLog implements ILog, Disposable
         this.setFileName();
         this.writeErrorChannelHeader();
         this.writeOutputChannelHeader();
-        const sourceMapUri = Uri.joinPath(this._context.extensionUri, "dist", "taskexplorer.js.map");
-        if (pathExistsSync(sourceMapUri.fsPath))
-        {
-            const sourceMapJso = await readJsonAsync<RawSourceMap>(sourceMapUri.fsPath);
-            await wrap(async () =>
-            {
-                this._srcMapConsumer = await new SourceMapConsumer(sourceMapJso); // "https://license.spmeesseman.com/static/app/log/mappings.wasm");
-                this._disposables.push({ dispose: this._srcMapConsumer.destroy });
-            }, [ this._error ], this);
-            this._disposables.push({ dispose: () => clearTimeout(this._fileNameTimer) });
-        }
+        this._disposables.push({ dispose: () => clearTimeout(this._fileNameTimer) });
         this.enable(this._logControl.enable);
+    };
+
+
+    installSourceMapSupport = (wrapper: ITeWrapper) =>
+    {
+        this._wrapper = wrapper;
+        return wrap(async (w) =>
+        {
+            let srcMapConsumer: BasicSourceMapConsumer;
+            const srcMap = await w.server.get<RawSourceMap>("app/vscode-taskexplorer/taskexplorer.js.map", ""),
+                  wasmUri = Uri.joinPath(this._context.extensionUri, "dist", "mappings.wasm"),
+                  wasmContent = await w.server.get<any>("app/log/mappings.wasm", "");
+            await w.fs.writeFile(wasmUri.fsPath, wasmContent);
+            this._srcMapConsumer = srcMapConsumer = await new SourceMapConsumer(srcMap);
+            this._disposables.push({ dispose: () => { wrap(srcMapConsumer.destroy, [ this._error ]); }});
+            // await w.fs.writeFile(sourceMapUri.fsPath, JSON.stringify(res));
+            // await execIf(pathExistsSync(sourceMapUri.fsPath), async () =>
+            // {
+            //     const sourceMapJso = await readJsonAsync<RawSourceMap>(sourceMapUri.fsPath);
+            //     await wrap(async () =>
+            //     {
+            //         this._srcMapConsumer = await new SourceMapConsumer(sourceMapJso);
+            //         this._disposables.push({
+            //             dispose: () => { try { (<BasicSourceMapConsumer>this._srcMapConsumer).destroy(); } catch {}}
+            //         });
+            //     },
+            //     [ this._error ], this);
+            // },
+            // this, [ this._error, "unable to download debug files from server" ]);
+        },
+        [ this._error ], this, wrapper);
+    };
+
+
+    private getDefaultStamp = () =>
+    {
+        const timeTags = (new Date(Date.now() - this._logControl.tzOffset)).toISOString().slice(0, -1).split("T");
+        return {
+            column: 1,
+            source: "taskexplorer.js",
+            line: 1,
+            name: "anonymous",
+            stamp: timeTags.join(" "),
+            stampDate: timeTags[0],
+            stampTime: timeTags[1]
+        };
     };
 
 
     private getStamp = (detailed?: boolean) =>
     {
-        const timeTags = (new Date(Date.now() - this._logControl.tzOffset)).toISOString().slice(0, -1).split("T");
-        const info = {
-            col: 1,
-            file: "",
-            line: 1,
-            map: <NullableMappedPosition>{},
-            method: "",
-            stamp: timeTags.join(" "),
-            stampDate: timeTags[0],
-            stampTime: timeTags[1]
-        };
-
-        if (detailed || this._logControl.useTags)
+        const info = this.getDefaultStamp();
+        if (detailed || this._logControl.trace)
         {
-            const err = new Error();
             let stackline = "";
-            const errStackLines = asString(err.stack, "at unknown ").split("\n"),
-                  logLineRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
+            const err = new Error(),
+                  errStackLines = asString(err.stack, "at unknown ").split("\n"),
+                  logLineRgx = this._stackLineFilterRgx;
             popIfExistsBy(errStackLines, l => logLineRgx.test(l) || l.includes("Error:"));
             stackline = errStackLines[0];
             //
@@ -312,22 +353,14 @@ export class TeLog implements ILog, Disposable
             //     at TaskTreeDataProvider.runLastTask (c:\\....\extension.js:1:col) // Prod / Webpack
             //     at TaskTreeDataProvider.<anonymous> (c:\\....\extension.js:1:col) // Prod / Webpack
             //
-            const match = stackline.match(/at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i);
-            if (match && this._srcMapConsumer)
+            const match = stackline.match(this._stackLineParserRgx);
+            if (match)
             {
-                const [ _, method, file, line, col ] = match;
-                      // tagKey = Object.keys(this._moduleMap).find(k => this._moduleMap[k].includes(method));
-                apply(info,
-                {
-                    file: basename(file),
-                    method,
-                    col: parseInt(col, 10),
-                    line: parseInt(line, 10)
-                });
-                info.map = this._srcMapConsumer.originalPositionFor({ line: info.line, column: info.col});
+                const [ _, name, source, line, column ] = match;
+                apply(info, { source: basename(source), name, column: parseInt(column, 10), line: parseInt(line, 10) });
+                execIf(this._srcMapConsumer, c => apply(info, c.originalPositionFor({ line: info.line, column: info.column })));
             }
         }
-
         return info;
     };
 
@@ -361,7 +394,7 @@ export class TeLog implements ILog, Disposable
     {
         if (!level || level <= this._logControl.level)
         {
-            this._write(`[${tag || "EVENT"}] ` + msg, level, "", queueId);
+            this._write(`[${tag || "event"}] ` + msg, level, "", queueId);
             if (params) {
                 this._values(level || 1, "   ", params, queueId);
             }
@@ -502,7 +535,7 @@ export class TeLog implements ILog, Disposable
     private setFileName = () =>
     {
         const locISOTime = (new Date(Date.now() - this._logControl.tzOffset)).toISOString().slice(0, -1).split("T")[0].replace(/[\-]/g, "");
-        this._logControl.fileName = join(this._logControl.dirPath, `vscode-extjs-${this._logControl.type}-${locISOTime}.log`);
+        this._logControl.fileName = join(this._logControl.dirPath, `vscode-taskexplorer-${this._logControl.type}-${locISOTime}.log`);
         this.writeLogFileLocation();
         if (this._fileNameTimer) {
             clearTimeout(this._fileNameTimer);

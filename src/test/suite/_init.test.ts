@@ -32,11 +32,22 @@ suite("Initialization", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.commands.showOutput * 3);
-        await executeTeCommand2("showOutput", [ true ]);
+        await executeTeCommand2(teWrapper.keys.Commands.ShowOutputWindow, [ true ]);
         await sleep(5);
-        await executeTeCommand2("showOutput", [ false ]);
+        await executeTeCommand2(teWrapper.keys.Commands.ShowOutputWindow, [ false ]);
         await sleep(5);
-        await executeTeCommand2("showOutput", [ teWrapper.logControl.enable && teWrapper.logControl.enableOutputWindow ]);
+        await executeTeCommand2(teWrapper.keys.Commands.ShowOutputWindow, [ teWrapper.logControl.enable && teWrapper.logControl.enableOutputWindow ]);
+        endRollingCount(this);
+    });
+
+
+    test("Show/Hide Error Output Window", async function()
+    {
+        if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.commands.showOutput * 3);
+        await executeTeCommand2(teWrapper.keys.Commands.ShowErrorOutputWindow, [ true ]);
+        await sleep(5);
+        await executeTeCommand2(teWrapper.keys.Commands.ShowErrorOutputWindow, [ false ]);
         endRollingCount(this);
     });
 
