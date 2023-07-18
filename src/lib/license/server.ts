@@ -5,7 +5,7 @@ import { request } from "https";
 import { TeWrapper } from "../wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "../utils/figures";
-import { fetch, getProxyAgent, RequestInfo, RequestInit } from ":env/fetch";
+import { fetch, getProxyAgent, RequestInfo, RequestInit, Response } from ":env/fetch";
 import {
 	SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError
 } from "../../interface";
@@ -61,24 +61,23 @@ export class TeServer implements ISpmServer
 	private _get = async (ep: SpmServerResource, logPad: string) =>
 	{
 		this.wrapper.log.methodStart("server resource request", 1, logPad, false, [[ "endpoint", ep ]]);
-		const response = await this.wrapFetch(
-			this.getResourcPath(ep),
-			{
-				agent: getProxyAgent(),
-				hostname: this._spmApiServer,
-				method: "GET",
-				port: 443,
-				headers: {
-					"token": this.publicToken,
-					"user-agent": this.wrapper.extensionId,
-					"content-type": "text/plain"
-				}
+		const response = await this.wrapRequest(() => fetch(this.getResourcPath(ep),
+		{
+			agent: getProxyAgent(),
+			hostname: this._spmApiServer,
+			method: "GET",
+			port: 443,
+			headers: {
+				"token": this.publicToken,
+				"user-agent": this.wrapper.extensionId,
+				"content-type": "text/plain"
 			}
-		);
+		}));
 		const rspBody = await response.text();
 		this.wrapper.log.methodDone("server resource request", 1, logPad, [
 			[ "response status", response.status ], [ "response body length", rspBody.length ]
 		]);
+		/* istanbul ignore if */
 		if (response.status > 299) {
 			throw new SpmServerError(response.status, rspBody, response.statusText);
 		}
@@ -225,15 +224,23 @@ export class TeServer implements ISpmServer
 	};
 
 
-	private wrapFetch = async (url: URL | RequestInfo, init?: RequestInit) =>
-	{
+	private wrapRequest = async <T, A>(fn: (...args: A[]) => Promise<T>, ...args: A[]): Promise<T> =>
+	{   //
+		// There may be several cases where SSL may need to be disabled, but the most common reason:
+		//
+		// The LetsEncrypt certificate is rejected by VSCode/Electron Test Suite (?).
+		// See https://github.com/electron/electron/issues/31212. Expiry of DST Root CA X3.
+		// Works fine when debugging, works fine when the extension is installed, just fails in the
+		// tests with the "certificate is expired" error as explained in the link above.  For tests,
+		// and until this is resolved in vscode/test-electron (I think that's wherethe problem is?)
+		//
 		const previousRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED,
 			  strict = !this.wrapper.tests && this.wrapper.config.get<boolean>("http.strictSSL", true);
 		if (!strict) {
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 		}
 		try {
-			return await fetch(url, init);
+			return await fn(...args);
 		}
 		finally {
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = previousRejectUnauthorized;

@@ -35,7 +35,6 @@ let extension: Extension<any>;
 let overridesShowInputBox: any[] = [];
 let overridesShowInfoBox: any[] = [];
 let overridesShowWarningBox: any[] = [];
-let NODE_TLS_REJECT_UNAUTHORIZED: string | undefined;
 
 const tc = testControl;
 const overridesGetExtension: any[] = [];
@@ -117,16 +116,6 @@ export const activate = async () =>
         // The initSettings() functions does it's own logging to the console.
         //
         await initSettings();
-        //
-		// The LetsEncrypt certificate is rejected by VSCode/Electron Test Suite (?).
-		// See https://github.com/electron/electron/issues/31212. Expiry of DST Root CA X3.
-		// Works fine when debugging, works fine when the extension is installed, just fails in the
-		// tests with the "certificate is expired" error as explained in the link above.  For tests,
-		// and until this is resolved in vscode/test-electron (I think that's wherethe problem is?),
-		// we just disable TLS_REJECT_UNAUTHORIZED in the NodeJS environment.
-		//
-		NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-		process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         //
         // Activate extension
         // Note that the '*' is removed from package.json[activationEvents] before the runTest() call
@@ -225,7 +214,6 @@ export const cleanup = async () =>
         extensions.getExtension = originalGetExtension;
         window.showInputBox = originalShowInputBox;
         window.showInformationMessage = originalShowInfoBox;
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = NODE_TLS_REJECT_UNAUTHORIZED;
         //
         // File cleanup
         //
