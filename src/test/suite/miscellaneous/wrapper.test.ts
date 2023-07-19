@@ -55,6 +55,10 @@ suite("Wrapper Tests", () =>
         expect(teWrapper.homeView).to.not.be.undefined;
         expect(teWrapper.taskCountView).to.not.be.undefined;
         expect(teWrapper.promiseUtils).to.not.be.undefined;
+        expect(teWrapper.extensionName).to.not.be.undefined;
+        expect(teWrapper.extensionNameShort).to.not.be.undefined;
+        expect(teWrapper.extensionTitle).to.not.be.undefined;
+        expect(teWrapper.extensionTitleShort).to.not.be.undefined;
         endRollingCount(this);
     });
 

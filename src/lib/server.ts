@@ -27,9 +27,7 @@ class SpmServerError extends Error
 		let jso;
 		try { jso = JSON.parse(body || "{}"); } catch { jso = { message: this.message }; }
 		this._body = { raw: body || "", jso };
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, SpmServerError);
-		}
+		try { Error.captureStackTrace(this, SpmServerError); } catch {}
 	}
 	get body() { return this._body; }
 	get status() { return this._status; }

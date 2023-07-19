@@ -342,7 +342,8 @@ export class TeLog implements ILog, Disposable
             });
             await w.utils.execIf(downloadSourceMap, async () =>
             {
-                const srcMapContent = await w.server.get(`app/${w.extensionId}/v${w.version}/${w.extensionName}.js.map`, true, "");
+                console.log("WTF: " + `app/${w.extensionId}/v${w.version}/${w.extensionName}.js.map`);
+                const srcMapContent = await w.server.get(`app/${w.extensionName}/v${w.version}/${w.extensionNameShort}.js.map`, true, "");
                 await w.fs.writeFile(this._srcMapPath, srcMapContent);
             });
             await w.fs.copyFile(this._wasmPath, this._wasmRtPath);

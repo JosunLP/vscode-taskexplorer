@@ -52,6 +52,9 @@ suite("Server Tests", () =>
         let jso = error.toJSON();
         expect(jso).to.be.an("object");
         expect(jso.body).to.be.an("object");
+        expect(error.body).to.be.an("object");
+        expect(error.body.raw).to.be.a("string");
+        expect(error.body.jso).to.be.an("object");
         expect(jso.message).to.be.a("string").that.equals("err msg 1");
         error = teWrapper.server.createError(409, "{ \"message\": \"test message 2\" }", new Error("err msg 2"));
         expect(error.status).to.be.a("number").that.equals(409);
