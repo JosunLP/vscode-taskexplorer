@@ -41,6 +41,7 @@ const main = async () =>
           testWorkspaceSingleRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture", "project1")),
           testWorkspaceMultiRoot = path.resolve(__dirname, path.join("..", "..", "test-fixture")),
           vscodeTestUserDataPath = path.join(extensionDevelopmentPath, ".vscode-test", "user-data"),
+          traceFilesPath = path.join(vscodeTestUserDataPath, "User", "globalStorage", "spmeesseman.vscode-taskexplorer", "debug"),
           project1Path = testWorkspaceSingleRoot,
           project2Path = path.join(testWorkspaceMultiRoot, "project2"),
           pkgJsonPath = path.resolve(__dirname, path.join(extensionDevelopmentPath, "package.json")),
@@ -64,6 +65,7 @@ const main = async () =>
     consoleWrite(`   dist path               : ${distPath}`);
     consoleWrite(`   project settings file   : ${projectSettingsFile}`);
     consoleWrite(`   multi-root ws file      : ${multiRootWsFile}`);
+    consoleWrite(`   trace files path        : ${traceFilesPath}`);
     consoleWrite(logSep);
 
     const mwsConfig: Record<string, any> =
@@ -120,6 +122,14 @@ const main = async () =>
         }
         else {
             fs.writeFileSync(multiRootWsFile, JSON.stringify(mwsConfig, null, 4));
+        }
+
+        //
+        // Clear  dynamic source map suoort files for error tracing in log module
+        //
+        if (fs.existsSync(traceFilesPath))
+        {
+            fs.rmdirSync(traceFilesPath);
         }
 
         //

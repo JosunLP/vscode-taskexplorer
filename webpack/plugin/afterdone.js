@@ -86,7 +86,7 @@ const afterdone = (env, wpConfig) =>
                         try {
                             copyFileSync(
                                 join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"),
-                                resolve(env.buildPath, "..", "spm-license-server", "res", "app", "log", "mappings.wasm")
+                                resolve(env.buildPath, "..", "spm-license-server", "res", "app", "shared", "mappings.wasm")
                             );
                         } catch {}
                     }
