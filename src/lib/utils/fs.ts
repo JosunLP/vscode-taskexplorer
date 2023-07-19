@@ -10,7 +10,7 @@
 import * as fs from "fs";
 import { glob } from "glob";
 import * as path from "path";
-import { wrap } from "./utils";
+import { execIf, execIf2, wrap } from "./utils";
 
 const cwd = process.cwd();
 
@@ -88,36 +88,25 @@ export const copyDir = (src: string, dst: string, filter?: RegExp, copyWithBaseF
 };
 
 
-//
-// TODO - 'copyDir' and 'copyFile' are only used in tests.  If ever used in the application,
-//        remove all istanbul ignore tags and cover these functions 100%
-//
 export const copyFile = (src: string, dst: string) =>
 {
-    return new Promise<void>(async (resolve, reject) =>
+    return new Promise<void>((resolve, reject) =>
     {
         const srcFile = path.resolve(cwd, src);
-        if (!await pathExists(srcFile)) {
+        if (!pathExistsSync(srcFile)) {
             reject(new Error("Invalid source file path"));
         }
         //
         // If dst is a directory, a new file with the same name will be created
         //
         let fullPath = path.resolve(cwd, dst);
-        if (await pathExists(fullPath))
+        if (pathExistsSync(fullPath))
         {
             if (fs.lstatSync(fullPath).isDirectory()) {
                 fullPath = path.join(fullPath, path.basename(src));
             }
         }
-        fs.copyFile(srcFile, fullPath, (err) =>
-        {
-            /* istanbul ignore if */
-            if (err) {
-                reject(err);
-            }
-            resolve();
-        });
+        fs.copyFile(srcFile, fullPath, (e) => handleTResult<void>(resolve, reject, e));
     });
 };
 
@@ -139,35 +128,58 @@ export const createDir = (dir: string): Promise<void> =>
 };
 
 
+export const createDirSync = (dir: string): void =>
+{
+    const newDir = path.resolve(cwd, dir);
+    execIf(!pathExistsSync(newDir), () =>
+    {
+        const baseDir = path.dirname(dir);
+        try {
+            createDirSync(baseDir);
+            fs.mkdirSync(path.resolve(cwd, dir), { mode: 0o777 });
+        } catch {}
+    });
+};
+
+
 export const deleteDir = (dir: string): Promise<void> =>
 {
-    return new Promise<void>(async (resolve, reject) =>
+    return new Promise<void>((resolve, reject) =>
     {
-        const absPath = path.resolve(cwd, dir);
-        if (pathExistsSync(absPath))
+        wrap(() =>
         {
-            fs.rmdir(absPath, { recursive: true }, (e) => handleTResult<void>(resolve, reject, e));
-        }
-        else {
-            resolve();
-        }
+            const absPath = path.resolve(cwd, dir);
+            if (pathExistsSync(absPath))
+            {
+                fs.rmdir(absPath, { recursive: true }, (e) => handleTResult<void>(resolve, reject, e));
+            }
+            else {
+                resolve();
+            }
+        }, [ resolve ], this);
     });
 };
 
 
 export const deleteFile = (file: string): Promise<void> =>
 {
-    return new Promise<void>(async (resolve, reject) =>
+    return new Promise<void>((resolve, reject) =>
     {
-        if (pathExistsSync(file))
+        wrap(() =>
         {
-            fs.unlink(path.resolve(cwd, file), (e) => handleTResult<void>(resolve, reject, e));
-        }
-        else {
-            resolve();
-        }
+            if (pathExistsSync(file))
+            {
+                fs.unlink(path.resolve(cwd, file), (e) => handleTResult<void>(resolve, reject, e));
+            }
+            else {
+                resolve();
+            }
+        }, [ resolve ], this);
     });
 };
+
+
+export const deleteFileSync = (file: string): void => wrap(() => fs.unlinkSync(path.resolve(cwd, file)));
 
 
 /**
@@ -178,16 +190,7 @@ export const findFiles = (pattern: string, options: any): Promise<string[]> =>
 {
     return new Promise((resolve, reject) =>
     {
-        glob(pattern, options, (err, files) =>
-        {
-            /* istanbul ignore else */
-            if (!err) {
-                resolve(files);
-            }
-            else {
-                reject(err);
-            }
-        });
+        glob(pattern, options, (err, files) => execIf2(!err, resolve, this, [ reject, err ], files));
     });
 };
 
@@ -195,21 +198,17 @@ export const findFiles = (pattern: string, options: any): Promise<string[]> =>
 
 export const getDateModified = (file: string) =>
 {
-    return new Promise<Date|undefined>(async (resolve, reject) =>
+    return new Promise<number>(async (resolve, reject) =>
     {
         if (file && await pathExists(file))
         {
-            fs.stat(path.resolve(cwd, file), { bigint: true }, (e, stats) =>
+            fs.stat(path.resolve(cwd, file), { bigint: true }, (err, stats) =>
             {
-                /* istanbul ignore if */
-                if (e) {
-                    reject(e);
-                }
-                resolve(stats.mtime);
+                execIf2(!err, resolve, this, [ reject, err ], stats.mtime.getTime());
             });
         }
         else {
-            resolve(undefined);
+            resolve(0);
         }
     });
 };
@@ -266,11 +265,9 @@ export const pathExistsSync = (file: string) =>
 {
     try {
         fs.accessSync(path.resolve(cwd, file));
+        return true;
     }
-    catch {
-        return false;
-    }
-    return true;
+    catch { return false; }
 };
 
 
@@ -389,12 +386,9 @@ export const renameFile = (fileCurrent: string, fileNew: string): Promise<void> 
 // }
 //
 //
-// export function setCwd(dir: string)
-// {
-//     cwd = dir;
-// }
+// export const setCwd = (dir: string): void => { cwd = dir; };
 //
-//
+
 /**
  * Overwrites file if it exists
  *

@@ -371,7 +371,7 @@ export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos
 // export const upperCaseFirstChar = (text: string): string => text.replace(/(?:^\w|[A-Za-z]|\b\w)/g, (l, i) => (i !== 0 ? l : l.toUpperCase()));
 
 
-export function wrap<R, E, ER>(runFn: () => R, catchFn: CallbackOptions<E, ER>, thisArg?: any): R;
+export function wrap<R, E, ER>(runFn: () => R, catchFn?: CallbackOptions<E, ER>, thisArg?: any): R;
 export function wrap<R, E, ER, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1): R;
 export function wrap<R, E, ER, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2): R;
 export function wrap<R, E, ER, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;

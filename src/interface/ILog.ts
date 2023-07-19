@@ -57,7 +57,6 @@ export interface ILogControl
     msgQueue: Record<string, ILogQueueItem[]>;
     errorChannel: OutputChannel;
     outputChannel: OutputChannel;
-    type: LogType;
     tzOffset: number;
     trace: boolean;
     valueWhiteSpace: number;

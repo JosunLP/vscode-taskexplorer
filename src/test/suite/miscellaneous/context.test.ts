@@ -7,25 +7,6 @@ import { activate, endRollingCount, exitRollingCount, suiteFinished } from "../.
 
 let teWrapper: ITeWrapper;
 
-const enum ContextKeys
-{
-	ActionPrefix = "taskexplorer:action:",
-	KeyPrefix = "taskexplorer:key:",
-	TreeViewPrefix = "taskexplorer:treeView:",
-	WebviewPrefix = "taskexplorer:webview:",
-	WebviewViewPrefix = "taskexplorer:webviewView:",
-	Dev = "taskexplorer:dev",
-	Disabled = "taskexplorer:disabled",
-	Enabled = "taskexplorer:enabled",
-	Untrusted = "taskexplorer:untrusted",
-	licensePage = "taskexplorer:licensePage",
-	ParsingReport = "taskexplorer:parsingReport",
-	ReleaseNotes = "taskexplorer:releaseNotes",
-	TaskFiles = "taskexplorer:taskFiles",
-	Tests = "taskexplorer:tests",
-	TestsTest = "taskexplorer:testsTest"
-}
-
 
 suite("Context Tests", () =>
 {
@@ -48,12 +29,12 @@ suite("Context Tests", () =>
     test("Get Context", async function()
     {
         if (exitRollingCount(this)) return;
-        expect(teWrapper.contextTe.getContext<boolean>(ContextKeys.Enabled)).to.be.a("boolean").that.is.equal(true);
-        expect(teWrapper.contextTe.getContext<boolean>(ContextKeys.Dev)).to.be.a("boolean").that.is.equal(false);
-        expect(teWrapper.contextTe.getContext<boolean>(ContextKeys.Dev, true)).to.be.a("boolean").that.is.equal(true);
-        expect(teWrapper.contextTe.getContext<boolean>(ContextKeys.Dev, false)).to.be.a("boolean").that.is.equal(false);
-        expect(teWrapper.contextTe.getContext<string>(ContextKeys.TestsTest)).to.be.undefined;
-        expect(teWrapper.contextTe.getContext<string>(ContextKeys.TestsTest, "testing")).to.be.a("string").that.is.equal("testing");
+        expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Enabled)).to.be.a("boolean").that.is.equal(true);
+        expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Dev)).to.be.a("boolean").that.is.equal(false);
+        expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Dev, true)).to.be.a("boolean").that.is.equal(true);
+        expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Dev, false)).to.be.a("boolean").that.is.equal(false);
+        expect(teWrapper.contextTe.getContext<string>(teWrapper.keys.Context.TestsTest)).to.be.undefined;
+        expect(teWrapper.contextTe.getContext<string>(teWrapper.keys.Context.TestsTest, "testing")).to.be.a("string").that.is.equal("testing");
         endRollingCount(this);
     });
 
@@ -61,9 +42,9 @@ suite("Context Tests", () =>
     test("Set Context", async function()
     {
         if (exitRollingCount(this)) return;
-        await teWrapper.contextTe.setContext(ContextKeys.TestsTest, "testing");
-        expect(teWrapper.contextTe.getContext<string>(ContextKeys.TestsTest)).to.be.a("string").that.is.equal("testing");
-        await teWrapper.contextTe.setContext(ContextKeys.TestsTest, undefined);
+        await teWrapper.contextTe.setContext(teWrapper.keys.Context.TestsTest, "testing");
+        expect(teWrapper.contextTe.getContext<string>(teWrapper.keys.Context.TestsTest)).to.be.a("string").that.is.equal("testing");
+        await teWrapper.contextTe.setContext(teWrapper.keys.Context.TestsTest, undefined);
         endRollingCount(this);
     });
 

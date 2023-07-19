@@ -72,8 +72,6 @@ export class TeFileWatcher implements ITeFileWatcher, Disposable
 
     get isBusy(): boolean { return this._busy || this.wrapper.eventQueue.isBusy(this._queueOwner); }
 
-    // get onEvent(): Event<IFileSystemEvent> { return this._onFsEvent.event; }
-
     get onReady(): Event<void> { return this._onReady.event; }
 
 

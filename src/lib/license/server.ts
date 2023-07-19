@@ -196,7 +196,7 @@ export class TeServer implements ISpmServer
 							resolve(<T>jso);
 						}
 						else {
-							reject(new SpmServerError(r.statusCode, JSON.stringify(jso), r.statusMessage));
+							reject(new SpmServerError(r.statusCode, rspData, r.statusMessage));
 						}
 					}, [ reject ], this, res);
 				});

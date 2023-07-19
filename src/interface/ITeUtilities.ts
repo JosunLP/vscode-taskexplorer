@@ -177,7 +177,7 @@ export interface ITeUtilities
 	testPattern(path: string, pattern: string): boolean;
 	textWithElipsis(text: string, maxLength: number): string;
 	uniq<T>(a: T[]): T[];
-	wrap<R, E, ER>(runFn: () => R, catchFn: CallbackOptions<E, ER>, thisArg?: any): R;
+	wrap<R, E, ER>(runFn: () => R, catchFn?: CallbackOptions<E, ER>, thisArg?: any): R;
 	wrap<R, E, ER, A1>(runFn: (arg1: A1) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1): R;
 	wrap<R, E, ER, A1, A2>(runFn: (arg1: A1, arg2: A2) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2): R;
 	wrap<R, E, ER, A1, A2, A3>(runFn: (arg1: A1, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;

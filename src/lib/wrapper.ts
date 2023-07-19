@@ -5,6 +5,7 @@ import * as fs from "./utils/fs";
 import { TeLog } from "./utils/log";
 import { getUuid } from ":env/crypto";
 import { TeContext } from "./context";
+import { TeMigration } from "./migration";
 import { figures } from "./utils/figures";
 import { TeStatusBar } from "./statusBar";
 import * as objUtils from "./utils/object";
@@ -15,6 +16,7 @@ import * as taskUtils from "./utils/taskUtils";
 import * as typeUtils from "./utils/typeUtils";
 import { EventQueue } from "./utils/eventQueue";
 import { TeFileCache } from "../task/fileCache";
+import { initStorage, storage } from "./storage";
 import { TaskTreeManager } from "../tree/manager";
 import { All as AllConstants } from "./constants";
 import { TaskManager } from "../task/taskManager";
@@ -50,6 +52,7 @@ import { EnableTaskTypeCommand } from "./command/enableTaskType";
 import { ComposerTaskProvider } from "../task/provider/composer";
 import { TaskExplorerProvider } from "../task/provider/provider";
 import { DisableTaskTypeCommand } from "./command/disableTaskType";
+import { configuration, initConfiguration } from "./configuration";
 import { PowershellTaskProvider } from "../task/provider/powershell";
 import { debounceCommand, registerCommand } from "./command/command";
 import { ParsingReportPage } from "../webview/page/parsingReportPage";
@@ -110,16 +113,63 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _envMap: IDictionary<TeRuntimeEnvironment> = { production: "production", development: "dev", test: "tests" };
 
 
+	static async create(context: ExtensionContext): Promise<TeWrapper>
+	{   //
+		// TODO - Handle untrusted workspace
+		//
+		// if (!workspace.isTrusted) {
+		// 	void setContext(ContextKeys.Untrusted, true);
+		// 	context.subscriptions.push(
+		// 		workspace.onDidGrantWorkspaceTrust(() => {
+		// 			void setContext(ContextKeys.Untrusted, undefined);
+		// 			container.telemetry.setGlobalAttribute('workspace.isTrusted', workspace.isTrusted);
+		// 		}),
+		// 	);
+		// }
+		//
+		// Initialize configuration
+		//
+		initConfiguration(context);
+		//
+		// Initialize storage
+		//
+		await initStorage(context);
+		//
+		// Instantiate and initialize the logging module
+		//
+		const log = new TeLog(context, configuration);
+		log.write("activating extension", 1);
+		//
+		// Perform any necessary migration to configuration and storage, pre-wrapper initialization
+		//
+		const migration = new TeMigration(storage, configuration);
+		await migration.migrateSettings();
+		await migration.migrateStorage();
+		//
+		// Instantiate the application wrapper
+		//
+		this._instance = new TeWrapper(context, storage, configuration, log);
+		//
+		// Complete log initialization now that wrapper instance has been created.  Using the
+		// log.wrapper setter will initiate source map installation for error tracing
+		//
+		log.wrapper = this._instance;
+		//
+		// Initialize the application wrapper
+		//
+		await this._instance.init();
+		log.write("extension activation completed successfully, work pending", 1);
+		return this._instance;
+	}
+
+
 	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: TeLog)
     {
-		TeWrapper._instance = this;
-
+		this._log = log;
+		this._providers = {};
 		this._context = context;
         this._storage = storage;
         this._configuration = configuration;
-		this._log = log;
-		this._log.wrapper = this;
-		this._providers = {};
 
 		this._eventQueue = new EventQueue(this);
 		this._onReady = new EventEmitter<void>();
@@ -222,10 +272,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
 		await this.storage.update(AllConstants.Storage.Version, this._version);
-		//
-		// Download and install source map support files for error tracing
-		//
-		await this._log.installSourceMapSupport(this);
 		//
 		// Register busy complete event
 		//

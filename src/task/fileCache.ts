@@ -36,7 +36,29 @@ export class TeFileCache implements ITeFileCache, Disposable
         );
     }
 
-	dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
+	dispose = () =>
+    {   //
+        // Detect when a folder move occurs and the ext is about to deactivate/re-activate.  A
+        // folder move that changes the first workspace folder will restart the extension
+        // unfortunately.  Changing the first workspace folder modifies the deprecated `rootPath`
+        // and I think that's why the reload is needed or happens.  A timestamp is set by the
+        // fileWatcher module in the workspaceFolderChanged event on extension activation that and
+        // the below `lastDeactivated' flag is used to determine if it is being activated because
+        // of this scenario, in which case we'll load from this stored file cache so that the tree
+        // reload is much quicker, especially in large workspaces.
+        //
+        if (!this.isBusy && !this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache))
+        {
+            const now = Date.now(),
+                  lastWsRootPathChange = this.wrapper.storage.get2Sync<number>("lastWsRootPathChange", 0);
+            if (now < lastWsRootPathChange + 3000)
+            {
+                this.persistCache(false, true);
+            }
+        }
+        this.wrapper.storage.update2Sync("lastDeactivated", Date.now());
+        this._disposables.splice(0).forEach(d => d.dispose());
+    };
 
 
     get isBusy(): boolean {
