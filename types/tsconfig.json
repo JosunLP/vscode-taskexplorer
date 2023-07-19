@@ -2,8 +2,8 @@
 	"compilerOptions": {
 		"baseUrl": ".",
         "declaration": true,
-        "declarationMap": true,
-		"emitDeclarationOnly": false,
+        "declarationMap": false,
+		"emitDeclarationOnly": true,
 		"incremental": true,
 		"lib": [ "es2020" ],
 		"module": "commonjs",

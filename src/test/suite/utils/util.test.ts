@@ -44,6 +44,9 @@ suite("Util Tests", () =>
 		teWrapper.utils.formatDate(now, "date");
 		teWrapper.utils.formatDate(now, "time");
 		teWrapper.utils.formatDate(now);
+		teWrapper.utils.getRandomNumber();
+		teWrapper.utils.getRandomNumber(5);
+		teWrapper.utils.getRandomNumber(100, 1);
         endRollingCount(this);
     });
 

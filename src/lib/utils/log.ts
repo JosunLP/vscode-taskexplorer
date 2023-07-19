@@ -88,7 +88,7 @@ export class TeLog implements ILog, Disposable
     {
         clearTimeout(this._fileNameTimer);
         this._disposables.splice(0).forEach(d => d.dispose());
-        this.wrapper.fs.deleteFileSync(this._wasmRtPath);
+        try { this.wrapper.fs.deleteFileSync(this._wasmRtPath); } catch {}
     };
 
 
@@ -333,19 +333,23 @@ export class TeLog implements ILog, Disposable
     {
         return this.wrapper.utils.wrap(async (w) =>
         {
-            const downloadDbgFiles = !w.fs.pathExistsSync(this._srcMapPath) || !w.fs.pathExistsSync(this._wasmPath);
-            await w.utils.execIf(downloadDbgFiles, async () =>
+            const downloadWasm = !w.fs.pathExistsSync(this._wasmPath),
+                  downloadSourceMap = !w.fs.pathExistsSync(this._srcMapPath);
+            await w.utils.execIf(downloadWasm, async () =>
             {
                 const wasmContent = await w.server.get("app/shared/mappings.wasm", true, "");
                 await w.fs.writeFile(this._wasmPath, wasmContent);
-                const srcMapContent = await w.server.get(`app/vscode-taskexplorer/v${w.version}/taskexplorer.js.map`, true, "");
+            });
+            await w.utils.execIf(downloadSourceMap, async () =>
+            {
+                const srcMapContent = await w.server.get(`app/${w.extensionId}/v${w.version}/${w.extensionName}.js.map`, true, "");
                 await w.fs.writeFile(this._srcMapPath, srcMapContent);
             });
             await w.fs.copyFile(this._wasmPath, this._wasmRtPath);
             const srcMap = await w.fs.readJsonAsync<RawSourceMap>(this._srcMapPath);
-            const srcMapConsumer = this._srcMapConsumer = await new SourceMapConsumer(srcMap);
+            this._srcMapConsumer = await new SourceMapConsumer(srcMap);
             this._disposables.push({
-                dispose: () => wrap(c => c.destroy(), [ this._error ], this, srcMapConsumer)
+                dispose: () => wrap(c => c.destroy(), [ this._error ], this, this._srcMapConsumer)
             });
         },
         [ this._error ], this, this.wrapper);

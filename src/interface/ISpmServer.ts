@@ -1,39 +1,37 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable no-redeclare */
 
 export type SpmApiEndpoint = "license/validate" | "payment/paypal/hook" | "register/account" |
 							 "register/trial/start" | "register/trial/extend";
 
 export type SpmServerResource = "app/shared/mappings.wasm" |
-								`app/vscode-taskexplorer/v${string}/taskexplorer.js.map`;
+								`app/${string}/v${string}/${string}.js.map`;
 
 export interface ISpmServer
 {
     readonly apiServer: string;
+	createError(status: number | undefined, body: string | undefined, cause?: string | Error): ISpmServerError;
 	get<T = string>(endpoint: SpmServerResource, raw: boolean, logPad: string): Promise<T>;
     request<T>(endpoint: SpmApiEndpoint, token: string | undefined, logPad: string, params: Record<string, any>): Promise<T>;
 }
 
-// interface Error {
-//     name: string;
-//     message: string;
-//     stack?: string;
-// }
+export interface ISpmServerError extends Error {
+    body: any;
+	status: number;
+	success: boolean;
+	timestamp: number;
+	toJSON: () => { message: string; body: any; status: number };
+}
+/*
+export interface SpmServerErrorConstructor extends ErrorConstructor {
+    new(status: number | undefined, body: string | undefined, cause?: string | Error): SpmServerError;
+    (message?: string): SpmServerError;
+    readonly prototype: SpmServerError;
+}
 
-// interface SpmServerErrorErrorConstructor {
-//     new(message?: string): Error;
-//     (message?: string): Error;
-//     readonly prototype: Error;
-// }
+// export declare let SpmServerError: SpmServerErrorConstructor;
 
-// declare var SpmServerError: SpmServerErrorConstructor;
-
-// export interface ISpmServerError extends Error
-// {
-// 	body: { raw: string; jso: Record<string, any>};
-// 	status: number;
-// 	success: boolean;
-// }
-
-export class SpmServerError extends Error
+export class SpmServerError extends Error implements ISpmServerError
 {
 	private _status: number;
 	private _success: boolean;
@@ -46,11 +44,9 @@ export class SpmServerError extends Error
 		this._status = status || 500;
 		this._success = this._status <= 299;
 	  	this._timestamp = Date.now();
-		// let jso = { message: rspData };
-		this._body = {
-			raw: body || "",
-			jso: JSON.parse(body || "{}")
-		};
+		let jso;
+		try { jso = JSON.parse(body || "{}"); } catch { jso = { message: this.message }; }
+		this._body = { raw: body || "", jso };
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, SpmServerError);
 		}
@@ -62,3 +58,4 @@ export class SpmServerError extends Error
 	override toString() { return this.message; }
 	toJSON() { return { message: this.message, body: this._body, status: this._status }; }
 }
+*/

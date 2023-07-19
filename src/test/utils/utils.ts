@@ -41,7 +41,6 @@ const overridesGetExtension: any[] = [];
 const originalShowInputBox = window.showInputBox;
 const originalShowInfoBox = window.showInformationMessage;
 const originalGetExtension = extensions.getExtension;
-const disableSSLMsg = "Disabled ssl cert validation due to Electron/LetsEncrypt DST Root CA X3 Expiry";
 
 //
 // Suppress some stderr messages.  It's just tests.
@@ -188,7 +187,6 @@ export const activate = async () =>
         consoleWrite(`   Extension ID     : ${teWrapper.extensionId}`);
         consoleWrite(`   Extension Title  : ${teWrapper.extensionTitle}`);
         consoleWrite(`   Extension Short  : ${teWrapper.extensionTitleShort}`);
-        consoleWrite(`   ${disableSSLMsg}`, figures.color.warningTests);
 
         activated = true;
     }
@@ -265,8 +263,17 @@ export const cleanup = async () =>
     //     await  (extension as any).deactivate();
     // } catch {}
     const disposables = teWrapper.context.subscriptions.splice(0);
-    try {
-        for (const d of disposables) { const r = d.dispose(); if (teWrapper.typeUtils.isPromise(r)) { await r; }}
+    try
+    {   let dCount = 0;
+        console.log(`    ${figures.color.info} ${figures.withColor(`Dispose ${disposables.length} registered disposables`, colors.grey)}`);
+        for (const d of disposables)
+        {
+            console.log(`    ${figures.color.info} ${figures.withColor(`Disposing registered disposable #${++dCount}`, colors.grey)}`);
+            const r = d.dispose();
+            if (teWrapper.typeUtils.isPromise(r)) {
+                await r;
+            }
+        }
     } catch {}
     console.log(`    ${figures.color.info} ${figures.withColor("Extension successfully deactivated", colors.grey)}`);
     //

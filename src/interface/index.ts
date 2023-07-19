@@ -18,10 +18,10 @@ export type { IStatusBarInfo, ITeStatusBar } from "./ITeStatusBar";
 export type { ITeWrapper, ITeKeys, TeRuntimeEnvironment } from "./ITeWrapper";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
 export type { ITeTreeManager, ITeTreeSorter, TaskMap } from "./ITeTreeManager";
-export type { SpmServerResource, SpmApiEndpoint, ISpmServer } from "./ISpmServer";
 export type { ILog, ILogControl, ILogQueueItem, LogLevel, LogType } from "./ILog";
 export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from "./IStorage";
 export type { ITeFileWatcher, FileSystemEventType, IFileSystemEvent } from "./ITeFileWatcher";
+export type { SpmServerResource, SpmApiEndpoint, ISpmServer, ISpmServerError } from "./ISpmServer";
 export type {
     ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionChangeEvent
 } from "./ITeLicenseManager";
@@ -47,7 +47,6 @@ export type {
 export { UsageKeys } from "./ITeUsage";
 export { ContextKeys } from "./ITeContext";
 export { WebviewPrefix } from "./ITeWebview";
-export { SpmServerError } from "./ISpmServer";
 export { MarkdownChars } from "./ITeUtilities";
 export { Commands, VsCodeCommands } from "./ICommand";
 export { StorageKeys, StorageTarget } from "./IStorage";
