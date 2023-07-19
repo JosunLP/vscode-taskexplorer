@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { TeWrapper } from "../wrapper";
-import { LicensePage } from "../../webview/page/licensePage";
+import { TeWrapper } from "./wrapper";
+import { LicensePage } from "../webview/page/licensePage";
 import { Disposable, Event, EventEmitter, window } from "vscode";
-import { executeCommand, registerCommand } from "../command/command";
-import { IpcAccountRegistrationParams } from "../../webview/common/ipc";
+import { executeCommand, registerCommand } from "./command/command";
+import { IpcAccountRegistrationParams } from "../webview/common/ipc";
 import {
 	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
-	ContextKeys, TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent,
+	TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent,
 	IStatusBarInfo, TeTaskSource, ITeLicense, ISpmServer, SpmApiEndpoint
-} from "../../interface";
+} from "../interface";
 
 
 /* TEMP */ /* istanbul ignore next */
@@ -254,10 +254,8 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	{
 		const ep: SpmApiEndpoint = "register/trial/extend";
 		const sbInfo = this._sbInfo = this.wrapper.statusBar.info;
-
 		this.wrapper.statusBar.update("Requesting extended trial");
 		this.wrapper.log.methodStart("request extended trial", 1, logPad, false, [[ "endpoint", ep ]]);
-
 		if (this.lic.period > 1 || !this.isRegistered)
 		{
 			const msg = "user is not registered or an extended trial license has already been allocated to this machine";
@@ -619,12 +617,13 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 
 	private setContext = () =>
 	{
-		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}licensed`, this.isLicensed);
-		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}registered`, this.isRegistered);
-		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trial`, this.isTrial);
-		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trialext`, this.isTrialExtended);
-		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}license:type`, this.lic.type);
-		void this.wrapper.contextTe.setContext(`${ContextKeys.AccountPrefix}trial:period`, this.lic.period);
+		const ctxKeys = this.wrapper.keys.Context;
+		void this.wrapper.contextTe.setContext(`${ctxKeys.AccountPrefix}licensed`, this.isLicensed);
+		void this.wrapper.contextTe.setContext(`${ctxKeys.AccountPrefix}registered`, this.isRegistered);
+		void this.wrapper.contextTe.setContext(`${ctxKeys.AccountPrefix}trial`, this.isTrial);
+		void this.wrapper.contextTe.setContext(`${ctxKeys.AccountPrefix}trialext`, this.isTrialExtended);
+		void this.wrapper.contextTe.setContext(`${ctxKeys.AccountPrefix}license:type`, this._account.license.type);
+		void this.wrapper.contextTe.setContext(`${ctxKeys.AccountPrefix}trial:period`, this._account.license.period);
 	};
 
 

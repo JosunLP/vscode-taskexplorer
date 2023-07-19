@@ -2,13 +2,13 @@
 
 import { env } from "vscode";
 import { request } from "https";
-import { TeWrapper } from "../wrapper";
+import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
-import { figures } from "../utils/figures";
+import { figures } from "./utils/figures";
 import { fetch, getProxyAgent } from ":env/fetch";
 import {
 	SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError
-} from "../../interface";
+} from "../interface";
 
 /* TEMP */ /* istanbul ignore next */
 export class TeServer implements ISpmServer
