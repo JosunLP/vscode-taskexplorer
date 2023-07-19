@@ -33,7 +33,7 @@ export interface ISpmServer
 // 	success: boolean;
 // }
 
-export class SpmServerError extends Error // implements ISpmServerError
+export class SpmServerError extends Error
 {
 	private _status: number;
 	private _success: boolean;
