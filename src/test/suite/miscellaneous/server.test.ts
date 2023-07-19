@@ -2,8 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { expect } from "chai";
-import { ITeWrapper, ISpmServerError } from ":types";
-import { activate, endRollingCount, exitRollingCount, suiteFinished } from "../../utils/utils";
+import { ITeWrapper } from ":types";
+import { activate, endRollingCount, exitRollingCount, suiteFinished, testControl as tc } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
 
@@ -29,6 +29,7 @@ suite("Server Tests", () =>
     test("Download Stack Trace Support Files", async function()
     {
         if (exitRollingCount(this)) return;
+        this.slow(tc.slowTime.apiServer.httpGet * 2);
         const wasmContent = await teWrapper.server.get("app/shared/mappings.wasm", true, "");
         expect(wasmContent).to.not.be.undefined;
         let srcMapContent = await teWrapper.server.get(`app/vscode-taskexplorer/v${teWrapper.version}/taskexplorer.js.map`, true, "");

@@ -87,7 +87,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private readonly _homeView: HomeView;
 	private readonly _teContext: TeContext;
 	// private readonly _localize: nls.LocalizeFunc;
-	private readonly _fileCache: TeFileCache;
 	private readonly _statusBar: TeStatusBar;
     private readonly _eventQueue: EventQueue;
 	private readonly _licensePage: LicensePage;
@@ -95,7 +94,6 @@ export class TeWrapper implements ITeWrapper, Disposable
     private readonly _taskManager: TaskManager;
 	private readonly _disposables: Disposable[];
 	private readonly _context: ExtensionContext;
-	private readonly _fileWatcher: TeFileWatcher;
 	private readonly _treeManager: TaskTreeManager;
 	private readonly _taskUsageView: TaskUsageView;
 	private readonly _taskCountView: TaskCountView;
@@ -170,16 +168,22 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._context = context;
         this._storage = storage;
         this._configuration = configuration;
-
+		//
+		// Events
+		//
 		this._eventQueue = new EventQueue(this);
 		this._onReady = new EventEmitter<void>();
 		this._onInitialized = new EventEmitter<void>();
 		this._onBusyComplete = new EventEmitter<void>();
-
+		//
+		// Version
+		//
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
+		//
+		// Cache Buster
+		//
 		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
-
 		//
 		// TODO - Localization
 		//
@@ -188,31 +192,49 @@ export class TeWrapper implements ITeWrapper, Disposable
 			const lPair = e[1].split("|");
 			(<IDictionary<string>>AllConstants.Strings)[e[0]] = this.localize(lPair[0], lPair[1]);
 		});
-
+		//
+		// Context
+		//
 		this._teContext = new TeContext();
-		this._statusBar = new TeStatusBar(this);
-		this._fileCache = new TeFileCache(this);
-		this._fileWatcher = new TeFileWatcher(this);
-
+		//
+		// API sServer
+		//
 		this._server = new TeServer(this);
+		//
+		// Local Language Manager / Helper Functions
+		//
+		this._statusBar = new TeStatusBar(this);
+		//
+		// Task Manager
+		//
         this._taskManager = new TaskManager(this);
+		//
+		// Tree Manager
+		//
 		this._treeManager = new TaskTreeManager(this);
-
+		//
+		// License Manager
+		//
 		this._licenseManager = new LicenseManager(this, this._server);
+		//
+		// Usage
+		//
 		this._usage = new Usage(this);
-
+		//
+		// Webviews
+		//
 		this._homeView = new HomeView(this);
 		this._taskCountView = new TaskCountView(this);
 		this._taskUsageView = new TaskUsageView(this);
-
 		this._licensePage = new LicensePage(this);
 		this._taskMonitorPage = new MonitorPage(this);
 		this._parsingReportPage = new ParsingReportPage(this);
 		this._releaseNotesPage = new ReleaseNotesPage(this);
 		this._welcomePage = new WelcomePage(this);
-
+		//
+		// API
+		//
 		this._teApi = new TeApi(this);
-
 		//
 		// TODO - Telemetry
 		//
@@ -228,46 +250,32 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//     		"activation.elapsed": elapsed,
 		//     		"activation.mode": mode?.name
 		//     }, startTime, endTime);
-
+		//
 		this._disposables = [
-			{ dispose: () => { console.log("dispose1"); }},
 			this._eventQueue,
 			this._teApi,
-			{ dispose: () => { console.log("dispose1.5"); }},
 			this._usage,
 			this._onReady,
-			{ dispose: () => { console.log("dispose2"); }},
 			this._homeView,
 			this._statusBar,
 			this._teContext,
-			{ dispose: () => { console.log("dispose2.5"); }},
             this._taskManager,
 			this._treeManager,
 			this._licensePage,
-			{ dispose: () => { console.log("dispose3"); }},
 			this._taskMonitorPage,
-			this._fileWatcher,
-			this._fileCache,
 			this._taskCountView,
-			{ dispose: () => { console.log("dispose4"); }},
 			this._taskUsageView,
 			this._onInitialized,
 			this._onBusyComplete,
 			this._licenseManager,
-			{ dispose: () => { console.log("dispose5"); }},
 			this._welcomePage,
 			this._releaseNotesPage,
 			this._parsingReportPage
 		];
-
 		context.subscriptions.push(this);
 	}
 
-	dispose()
-	{
-		this._disposables.forEach(d => d.dispose());
-        this._disposables.splice(0);
-	}
+	dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
 
 
 	init = async() =>
@@ -292,14 +300,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		this.registerTaskProviders();
 		//
-		// Init/register file type watchers
-		// This "used" to also start the file scan to build the file task file cache. It now
-		// does not on startup.  We use rebuildCache() below, so as to initiate one scan as
-		// opposed to one scan per task type, like it did previously.  Note that if task types
-		// are enabled or disabled in settings after startup, then the individual calls to
-		// registerFileWatcher() will perform the scan for that task type.
+		// Init Task Manager / register file type watchers
 		//
-		await this._fileWatcher.init("   ");
+		await this._taskManager.init();
 		//
 		// Context
 		//
@@ -507,8 +510,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 	static get instance() { return this._instance; }
 	get api(): TeApi { return this._teApi; }
 	get busy(): boolean {
-		return this._busy || !this._ready || !this._initialized || this._fileCache.isBusy || this._treeManager.isBusy ||
-			   this._fileWatcher.isBusy || this._licenseManager.isBusy;
+		return this._busy || !this._ready || !this._initialized || this._taskManager.fileCache.isBusy || this._treeManager.isBusy ||
+			   this._taskManager.fileWatcher.isBusy || this._licenseManager.isBusy;
 	}
 	get busyWebviews(): boolean {
 		return this._licensePage.isBusy || this._parsingReportPage.isBusy || this._releaseNotesPage.isBusy || this._homeView.isBusy ||
@@ -530,8 +533,8 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get extensionTitle(): string {return this.localize("name", this._context.extension.packageJSON.displayName); }
 	get extensionTitleShort(): string { return this.extensionTitle; }
 	get figures(): typeof figures { return figures; }
-	get fileCache(): TeFileCache { return this._fileCache; }
-	get fileWatcher(): TeFileWatcher { return this._fileWatcher; }
+	get fileCache(): TeFileCache { return this._taskManager.fileCache; }
+	get fileWatcher(): TeFileWatcher { return this._taskManager.fileWatcher; }
 	get fs(): ITeFilesystem { return fs; }
 	get homeView(): HomeView { return this._homeView; }
 	get isNewInstall(): boolean { return this.versionchanged && this._previousVersion === undefined; }

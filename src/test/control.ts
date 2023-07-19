@@ -74,6 +74,10 @@ export const testControl =
     //
     slowTime:
     {
+        apiServer: {
+            httpGet: 2375,
+            httpPost: 2500
+        },
         cache: {
             build: 485,
             buildCancel: 375,

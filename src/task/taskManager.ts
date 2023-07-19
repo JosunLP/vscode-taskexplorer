@@ -5,8 +5,10 @@ import { TaskFile } from "../tree/node/file";
 import { TaskItem } from "../tree/node/item";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskWatcher } from "./taskWatcher";
+import { TeFileCache } from "../task/fileCache";
 import { TaskFolder } from "../tree/node/folder";
 import { PinnedStorageKey } from "../lib/constants";
+import { TeFileWatcher } from "../task/fileWatcher";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { ScriptTaskProvider } from "./provider/script";
 import { registerCommand } from "../lib/command/command";
@@ -23,18 +25,24 @@ export class TaskManager implements ITeTaskManager, Disposable
 {
     private readonly _log: ILog;
     private readonly _utils: TaskUtils;
+	private readonly _fileCache: TeFileCache;
     private readonly _disposables: Disposable[];
     private readonly _taskWatcher: TaskWatcher;
+	private readonly _fileWatcher: TeFileWatcher;
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
         this._log = wrapper.log;
+		this._fileCache = new TeFileCache(wrapper);
+		this._fileWatcher = new TeFileWatcher(wrapper);
         this._utils = new TaskUtils(wrapper);
         this._taskWatcher = new TaskWatcher(wrapper);
         this._disposables = [
             this._utils,
+            this._fileCache,
             this._taskWatcher,
+            this._fileWatcher,
             registerCommand(wrapper.keys.Commands.NpmRunInstall, (item: TaskFile) => this.runNpmCommand(item, "install"), this),
             registerCommand(wrapper.keys.Commands.NpmRunUpdate, (item: TaskFile) => this.runNpmCommand(item, "update"), this),
             registerCommand(wrapper.keys.Commands.NpmRunAudit, (item: TaskFile) => this.runNpmCommand(item, "audit"), this),
@@ -58,6 +66,21 @@ export class TaskManager implements ITeTaskManager, Disposable
 
     get utils() { return this._utils; }
 	get watcher(): TaskWatcher { return this._taskWatcher; }
+	get fileCache(): TeFileCache { return this._fileCache; }
+	get fileWatcher(): TeFileWatcher { return this._fileWatcher; }
+
+
+    init = async () =>
+    {   //
+		// Init/register file type watchers
+		// This "used" to also start the file scan to build the file task file cache. It now
+		// does not on startup.  We use rebuildCache() below, so as to initiate one scan as
+		// opposed to one scan per task type, like it did previously.  Note that if task types
+		// are enabled or disabled in settings after startup, then the individual calls to
+		// registerFileWatcher() will perform the scan for that task type.
+		//
+		await this._fileWatcher.init("   ");
+    };
 
 
     private open = async(item: TaskItem | ITeTask | Uri, itemClick = false) =>
