@@ -111,7 +111,8 @@ export class TaskTreeBuilder
     private getTaskFile = (task: Task, folder: TaskFolder, map: TaskMap<TaskFile>, logPad: string) =>
     {
         const w = this.wrapper,
-              absTaskPath = w.pathUtils.getTaskAbsoluteUri(task).fsPath,
+              isScriptType = w.taskUtils.isScriptType(<TeTaskSource>task.source),
+              absTaskPath = w.pathUtils.getTaskAbsoluteUri(task, !isScriptType).fsPath,
               id = TaskFile.id(folder, absTaskPath, task.source, task.source, 0);
         if (!map[id])
         {

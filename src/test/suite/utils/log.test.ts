@@ -28,7 +28,7 @@ suite("Logging Tests", () =>
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, logControl.enable);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, logControl.enableFile);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, logControl.enableOutputWindow);
-		await teWrapper.config.updateWs(teWrapper.keys.Config.logEnabledModuleReload, logControl.moduleReload);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, logControl.enableModuleReload);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogLevel, logControl.level);
         suiteFinished(this);
 	});

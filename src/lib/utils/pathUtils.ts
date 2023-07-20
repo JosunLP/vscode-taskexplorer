@@ -109,7 +109,7 @@ export const getTaskFileName = (task: Task): string =>
     else if (task.source === "tsc")
     {   //
         // TypeScript task provider will set property `tsconfg` on the task definition, which
-        // includes the relative path to the tsonfig file, filename included.
+        // is the relative path to the tsonfig file, filename included.
         //
         fileName = basename(task.definition.tsconfig);
     }

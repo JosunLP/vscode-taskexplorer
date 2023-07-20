@@ -258,7 +258,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         this._isGroup = true;
         this._groupId = groupId;
         this._groupLevel = groupLevel;
-        this._fileName = "group"; // change to name of directory
+        // this._fileName = "group"; // change to name of directory
         this.setTooltip(groupLevel, taskSource);
         this.contextValue = "taskGroup" + this.wrapper.utils.properCase(taskSource);
     }
