@@ -46,7 +46,7 @@ export const testControl =
         enabled: false,
         errors: false,          // print errors to console regardless if logging is enabled or not
         file: false,
-        fileSymbols: false,
+        moduleReload: false,
         level: 2,
         openFileOnFinish: true, // not yet. got it working opening a separate vscode instance but not existing one
         output: false,          // enabled automatically if enabled is `true` and all 3 output flags are `false`

@@ -64,7 +64,7 @@ export const initSettings = async () =>
     await config.update("logging.enable", tc.log.enabled, ConfigurationTarget.Workspace);
     await config.update("logging.level", tc.log.level, ConfigurationTarget.Workspace);
     await config.update("logging.enableFile", tc.log.file, ConfigurationTarget.Workspace);
-    await config.update("logging.enableFileSymbols", tc.log.fileSymbols, ConfigurationTarget.Workspace);
+    await config.update("logging.enableModuleReload", tc.log.moduleReload, ConfigurationTarget.Workspace);
     await config.update("logging.enableOutputWindow", tc.log.output, ConfigurationTarget.Workspace);
 
     //

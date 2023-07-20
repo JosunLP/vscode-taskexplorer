@@ -109,6 +109,18 @@ const rules = (env, wpConfig) =>
 	}
 	else
 	{
+		if (env.environment === "prod" || wpConfig.mode === "production")
+		{
+			// wpConfig.module.rules.push({
+			// 	test: /\.ts$/,
+			// 	loader: "string-replace-loader",
+			// 	options: {
+			// 		search: /(?:this\.wrapper|this|wrapper)\._?log\.(?:write|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\);?\s*?(?:\r\n|\n|$)/g,
+			// 		replace: "\r\n"
+			// 	}
+			// });
+		}
+
 		const configFile = env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json";
 		wpConfig.module.rules.push(...[
 		// {   //

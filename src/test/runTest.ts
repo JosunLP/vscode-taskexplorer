@@ -386,7 +386,7 @@ const createDefaultSettings = async(packageJson: any) =>
         "taskexplorer.logging.enable": false,
         "taskexplorer.logging.level": 1,
         "taskexplorer.logging.enableFile": false,
-        "taskexplorer.logging.enableFileSymbols": false,
+        "taskexplorer.logging.enableModuleReload": false,
         "taskexplorer.logging.enableOutputWindow": false,
         "taskexplorer.specialFolders.numLastTasks": 10,
         "taskexplorer.specialFolders.showFavorites": true,

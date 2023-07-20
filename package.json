@@ -1430,25 +1430,19 @@
 					"taskexplorer.logging.enable": {
 						"type": "boolean",
 						"default": false,
-						"order": 50,
+						"order": 5,
 						"markdownDescription": "%config.taskexplorer.logging.enable%"
 					},
 					"taskexplorer.logging.enableFile": {
 						"type": "boolean",
 						"default": false,
-						"order": 53,
+						"order": 10,
 						"markdownDescription": "%config.taskexplorer.logging.enableFile%"
-					},
-					"taskexplorer.logging.enableFileSymbols": {
-						"type": "boolean",
-						"default": true,
-						"order": 56,
-						"markdownDescription": "%config.taskexplorer.logging.enableFileSymbols%"
 					},
 					"taskexplorer.logging.enableOutputWindow": {
 						"type": "boolean",
 						"default": true,
-						"order": 60,
+						"order": 15,
 						"markdownDescription": "%config.taskexplorer.logging.enableOutputWindow%"
 					},
 					"taskexplorer.logging.level": {
@@ -1461,8 +1455,14 @@
 							5
 						],
 						"default": 1,
-						"order": 55,
+						"order": 20,
 						"markdownDescription": "%config.taskexplorer.logging.level%"
+					},
+					"taskexplorer.logging.enableModuleReload": {
+						"type": "boolean",
+						"default": false,
+						"order": 25,
+						"markdownDescription": "%config.taskexplorer.logging.enableModuleReload%"
 					}
 				}
 			},

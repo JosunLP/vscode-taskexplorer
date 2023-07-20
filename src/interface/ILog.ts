@@ -15,7 +15,7 @@ export interface ILogControl
 {
     enable: boolean;
     enableFile: boolean;
-    enableFileSymbols: boolean;
+    enableModuleReload: boolean;
     enableOutputWindow: boolean;
     fileName: string;
     isTests: boolean;
@@ -43,7 +43,7 @@ export interface ILogControl
     dirPath: string;
     enable: boolean;
     enableFile: boolean;
-    enableFileSymbols: boolean;
+    enableModuleReload: boolean;
     enableOutputWindow: boolean;
     fileName: string;
     isTests: boolean;

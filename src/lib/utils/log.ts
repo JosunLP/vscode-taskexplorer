@@ -51,7 +51,7 @@ export class TeLog implements ILog, Disposable
             enable: config.get<boolean>(ConfigKeys.LogEnable, false),
             enableOutputWindow: config.get<boolean>(ConfigKeys.LogEnableOutputWindow, true),
             enableFile: config.get<boolean>(ConfigKeys.LogEnableFile, false),
-            enableFileSymbols: config.get<boolean>(ConfigKeys.LogEnableFileSymbols, false),
+            enableModuleReload: config.get<boolean>(ConfigKeys.LogEnableModuleReload, false),
             errorChannel: window.createOutputChannel(`${context.extension.packageJSON.displayName} (Errors)`),
             fileName: "",
             isTests: context.extensionMode === ExtensionMode.Test,
@@ -196,12 +196,12 @@ export class TeLog implements ILog, Disposable
                     this._logControl.enableFile = true;
                     this._logControl.writeToConsole = false;
                     this._logControl.enableOutputWindow = false;
-                    if (this._logControl.enableFileSymbols) {
-                        this._value(`${symbols[1]}   ${n}`, v, 1, "", queueId, true);
-                    }
-                    else {
+                    // if (file symbols)) {
+                    //     this._value(`${symbols[1]}   ${n}`, v, 1, "", queueId, true);
+                    // }
+                    // else {
                         this._value(`   ${n}`, v, 1, "", queueId, true);
-                    }
+                    // }
                 }
                 if (currentWriteToOutputWindow)
                 {
@@ -243,12 +243,12 @@ export class TeLog implements ILog, Disposable
     private errorFile = (msg: string, symbols: [ string, string ]) =>
     {
         apply(this._logControl, { writeToConsole: false, enableFile: true, enableOutputWindow: false });
-        if (this._logControl.enableFileSymbols) {
+        // if (file symbols) {
             this._write(`${symbols[1]} ${msg}`, 1, "", undefined, false, true);
-        }
-        else {
-            this._write(`*** ${msg}`, 1, "", undefined, false, true);
-        }
+        // }
+        // else {
+        //     this._write(`*** ${msg}`, 1, "", undefined, false, true);
+        // }
     };
 
 
@@ -512,9 +512,9 @@ export class TeLog implements ILog, Disposable
                 }
             }
         }
-        if (e.affectsConfiguration("taskexplorer.logging.enableFileSymbols"))
+        if (e.affectsConfiguration("taskexplorer.logging.logEnabledModuleReload"))
         {
-            this._logControl.enableFileSymbols = this._config.get<boolean>("logging.enableFileSymbols", true);
+            this._logControl.enableModuleReload = this._config.get<boolean>("logging.enabledModuleReload", false);
         }
         if (e.affectsConfiguration("taskexplorer.logging.level"))
         {
@@ -716,7 +716,7 @@ export class TeLog implements ILog, Disposable
         //
         if (this._logControl.enableFile && isMinLevel)
         {
-            const ts = this.getStamp().stampTime + (this._logControl.enableFileSymbols ? " " + figures.pointer : " >");
+            const ts = this.getStamp().stampTime + /* (file symbols ? " " + figures.pointer : */ " >";
             this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, appendFileSync, null, ts, true, this._logControl.fileName);
         }
         apply(this._logControl, { lastLogPad: logPad, lastWriteWasBlank: (msg === "") });
