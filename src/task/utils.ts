@@ -54,12 +54,21 @@ export class TaskUtils implements Disposable
             return false;
         }
         //
+        // *** VSCode internal task providers s***.  I mean, come on.  Add a package.json to a folder, see
+        // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
+        // provided by the engine.  SO check to make sure the task uri actually exists
+        //
+        const absolutePath = this.wrapper.pathUtils.getTaskAbsoluteUri(task, true).fsPath;
+        if (!this.wrapper.fs.pathExistsSync(absolutePath))
+        {
+            return false;
+        }
+        //
         // NPM tasks might be provided by VSCode or internally.  Check type, and excludes if VSCode provided.
         // We would want the user to turn off the VSCode NPM provider if using the internal provider, but we
         // should assume that they haven't, and we'll still be receiving them on fetch()
         //
-        const absolutePath = this.wrapper.pathUtils.getTaskAbsoluteUri(task, true).fsPath,
-              isNpmTaskSource = isScopeWsFolder && task.source === "npm" && task.definition.type === "npm",
+        const isNpmTaskSource = isScopeWsFolder && task.source === "npm" && task.definition.type === "npm",
               isVsCodeNpmTaskSource = !task.definition.uri && isNpmTaskSource;
         if (isVsCodeNpmTaskSource)
         {
@@ -90,18 +99,8 @@ export class TaskUtils implements Disposable
             return !!task.definition && !!task.name && !!task.execution;
         }
         //
-        // *** VSCode internal task providers s***.  I mean, come on.  Add a package.json to a folder, see
-        // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
-        // provided by the engine.  SO check to make sure the task uri actually exists
-        //
-        else if (!this.wrapper.fs.pathExistsSync(absolutePath))
-        {
-            return false;
-        }
-        //
-        // Check enabled and npm install task
-        // This will ignore tasks from other providers as well, unless it has registered
-        // as an external provider via Task Explorer API
+        // Check enabled and npm install task.  This will ignore tasks from other providers as well,
+        // unless it has registered as an external provider via Task Explorer API
         //
         const srcEnabled = this._enabledProviders[task.source.toLowerCase()];
         this.wrapper.log.value("   is enabled in settings", srcEnabled, 4, logPad, logQueueId);
@@ -111,7 +110,7 @@ export class TaskUtils implements Disposable
             return false;
         }
         //
-        // Check VSCode /workspace tasks for 'hide' property
+        // Check VSCode /workspace tasks for 'hide' property and whether it's a workspace or user task
         //
         let result = true;
         if (task.source === "Workspace")

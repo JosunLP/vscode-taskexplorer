@@ -58,24 +58,6 @@ export const getRelativePath = (folder: WorkspaceFolder, uri: Uri): string =>
 };
 
 
-export const getTaskAbsolutePath = (task: Task, includeFileName = false): string =>
-{
-    let path: string;
-    const isWs = isWorkspaceFolder(task.scope);
-    if (isWs) {
-        path = join(task.scope.uri.fsPath, getTaskRelativePath(task));
-    }
-    else {
-        path = join(getUserDataPath(), getTaskRelativePath(task));
-    }
-    if (includeFileName) {
-        path = join(path, getTaskFileName(task));
-    }
-    return path;
-};
-
-
-
 export const getTaskAbsoluteUri = (task: Task, fileName?: string | boolean, relativePath?: string) =>
 {
     let uri: Uri;
@@ -83,25 +65,15 @@ export const getTaskAbsoluteUri = (task: Task, fileName?: string | boolean, rela
     relativePath = relativePath || getTaskRelativePath(task);
     if (isWs)
     {
-        if (task.source !== "Workspace")
+        if (task.source === "Workspace") {
+            uri = Uri.file(join(task.scope.uri.fsPath, ".vscode"));
+        }
+        else if (task.definition.uri)
         {
-            if (task.definition.uri)
-            {
-                uri = Uri.file(dirname(task.definition.uri.fsPath));
-            }
-            else if (task.definition.tsconfig)
-            {
-                uri = Uri.file(dirname(task.definition.tsconfig));
-            }
-            else if (isWs) {
-                uri = Uri.file(join(task.scope.uri.fsPath, relativePath));
-            }
-            else {
-                uri = Uri.file(join(getUserDataPath(), relativePath));
-            }
+            uri = Uri.file(dirname(task.definition.uri.fsPath));
         }
         else {
-            uri = Uri.file(join(task.scope.uri.fsPath, ".vscode"));
+            uri = Uri.file(join(task.scope.uri.fsPath, relativePath));
         }
     } //
      // No resource uri means this file is 'user tasks', and not associated to a workspace folder
@@ -117,14 +89,12 @@ export const getTaskAbsoluteUri = (task: Task, fileName?: string | boolean, rela
 
 
 export const getTaskFileName = (task: Task): string =>
-{
-    const taskDef = task.definition;
-    //
+{   //
     // Any tasks provided by this extension will have a "fileName" definition. External tasks
     // registered throughthe API also define fileName
     //
-    if (taskDef.fileName) {
-        return taskDef.fileName;
+    if (task.definition.fileName) {
+        return task.definition.fileName;
     }
     //
     // Since tasks are returned from VSCode API without a filename that they were found in we
@@ -141,7 +111,7 @@ export const getTaskFileName = (task: Task): string =>
         // TypeScript task provider will set property `tsconfg` on the task definition, which
         // includes the relative path to the tsonfig file, filename included.
         //
-        fileName = basename(taskDef.tsconfig);
+        fileName = basename(task.definition.tsconfig);
     }
     return fileName;
 };
