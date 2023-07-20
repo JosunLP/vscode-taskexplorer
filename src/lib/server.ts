@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { env } from "vscode";
-import { request as httpsRequest } from "https";
 import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
-import { Blob, fetch, getProxyAgent } from ":env/fetch";
-import {
-	SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError
-} from "../interface";
+import { request as httpsRequest } from "https";
+import { fetch, getProxyAgent } from ":env/fetch";
+import { SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError } from "../interface";
 
 
 /* TEMP */ /* istanbul ignore next */
@@ -33,6 +31,12 @@ export class TeServer implements ISpmServer
 	private get publicToken(): string { return this._publicToken[this.wrapper.env]; }
 
 	get apiServer() { return this._spmApiServer; }
+
+
+	createError(status: number | undefined, body: string | undefined, cause?: string | Error)
+	{
+		return new SpmServerError(status, body, cause);
+	}
 
 
 	private getApiPath = (ep: SpmApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;

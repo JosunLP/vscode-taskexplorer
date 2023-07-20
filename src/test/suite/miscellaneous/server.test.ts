@@ -10,13 +10,12 @@ let teWrapper: ITeWrapper;
 
 suite("Server Tests", () =>
 {
-
     suiteSetup(async function()
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate());
         if (tc.isSingleSuiteTest) {
-            teWrapper.utils.sleep(2500);
+            teWrapper.utils.sleep(2000);
         }
         endRollingCount(this, true);
     });
@@ -48,7 +47,8 @@ suite("Server Tests", () =>
     test("Simulate HTTP Exception", async function()
     {
         if (exitRollingCount(this)) return;
-        let error = new SpmServerError(500, "{ \"message\": \"test message 1\" }", "err msg 1");
+        // let error = new SpmServerError(500, "{ \"message\": \"test message 1\" }", "err msg 1");
+        let error = teWrapper.server.createError(500, "{ \"message\": \"test message 1\" }", "err msg 1");
         expect(error.status).to.be.a("number").that.equals(500);
         expect(error.success).to.be.a("boolean").that.equals(false);
         expect(error.message).to.be.a("string").that.equals("err msg 1");
@@ -61,7 +61,8 @@ suite("Server Tests", () =>
         expect(error.body.raw).to.be.a("string");
         expect(error.body.jso).to.be.an("object");
         expect(jso.message).to.be.a("string").that.equals("err msg 1");
-        error = new SpmServerError(409, "{ \"message\": \"test message 2\" }", new Error("err msg 2"));
+        // error = new SpmServerError(409, "{ \"message\": \"test message 2\" }", new Error("err msg 2"));
+        error = teWrapper.server.createError(409, "{ \"message\": \"test message 2\" }", new Error("err msg 2"));
         expect(error.status).to.be.a("number").that.equals(409);
         expect(error.success).to.be.a("boolean").that.equals(false);
         expect(error.message).to.be.a("string").that.equals("err msg 2");
@@ -71,10 +72,14 @@ suite("Server Tests", () =>
         expect(jso).to.be.an("object");
         expect(jso.body).to.be.an("object");
         expect(jso.message).to.be.a("string").that.equals("err msg 2");
-        error = new SpmServerError(undefined, undefined);
-        error = new SpmServerError(undefined, "body");
-        error = new SpmServerError(undefined, "{ \"message\": \"test message 3\" }");
-        expect(error.toString()).to.be.a("string").that.is.eq("SpmServerError");
+        // error = new SpmServerError(undefined, undefined);
+        // error = new SpmServerError(undefined, "body");
+        // error = new SpmServerError(undefined, "{ \"message\": \"test message 3\" }");
+        error = teWrapper.server.createError(undefined, undefined);
+        error = teWrapper.server.createError(undefined, "body");
+        error = teWrapper.server.createError(undefined, "{ \"message\": \"test message 3\" }");
+        error.toString();
+        expect(error.name).to.be.a("string").that.is.eq("SpmServerError");
 		teWrapper.utils.throwIf(false, SpmServerError, 300, "body", "err msg no throw");
 		try { teWrapper.utils.throwIf(true, SpmServerError, 401, "body", "err msg no throw"); } catch {}
         endRollingCount(this);
