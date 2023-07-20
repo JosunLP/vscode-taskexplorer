@@ -58,7 +58,7 @@ export class TaskUtils implements Disposable
         // We would want the user to turn off the VSCode NPM provider if using the internal provider, but we
         // should assume that they haven't, and we'll still be receiving them on fetch()
         //
-        const absolutePath = this.wrapper.pathUtils.getTaskAbsolutePath(task, true),
+        const absolutePath = this.wrapper.pathUtils.getTaskAbsoluteUri(task, true).fsPath,
               isNpmTaskSource = isScopeWsFolder && task.source === "npm" && task.definition.type === "npm",
               isVsCodeNpmTaskSource = !task.definition.uri && isNpmTaskSource;
         if (isVsCodeNpmTaskSource)

@@ -301,7 +301,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this._npmScriptsHash = {};
         this._tasks.filter(t => t.source === "npm" && t.definition.type === "npm" && w.typeUtils.isWorkspaceFolder(t.scope)).forEach((t) =>
         {
-            const fsPath = join(w.pathUtils.getTaskAbsolutePath(t), "package.json"),
+            const fsPath = join(w.pathUtils.getTaskAbsoluteUri(t).fsPath, "package.json"),
                   npmPkgJso = w.fs.readJsonSync<any>(fsPath),
                   scriptsBlock = npmPkgJso.scripts,
                   scriptsJson = JSON.stringify(scriptsBlock),
@@ -552,7 +552,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         {
             w.statusBar.update("Deleting all tasks from removed project folder");
             w.utils.popIfExistsBy(
-                this._tasks, (t) => w.pathUtils.getTaskAbsolutePath(t).startsWith(uri.fsPath), this
+                this._tasks, (t) => w.pathUtils.getTaskAbsoluteUri(t).fsPath.startsWith(uri.fsPath), this
             );
             this._treeBuilder.removeFolder(uri);
         },

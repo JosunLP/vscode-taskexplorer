@@ -111,16 +111,11 @@ export class TaskTreeBuilder
     private getTaskFile = (task: Task, folder: TaskFolder, map: TaskMap<TaskFile>, logPad: string) =>
     {
         const w = this.wrapper,
-              absTaskPath = w.pathUtils.getTaskAbsolutePath(task),
-              //
-              // Use groupId for `script` type files so that they are rooted under the same taskfile node
-              //
-              isScriptType = w.taskUtils.isScriptType(<TeTaskSource>task.source),
-              id = !isScriptType ? TaskFile.id(folder, task, 0) :
-                                   TaskFile.groupId(folder, absTaskPath, task.source, task.source, 0);
-        w.log.write(`Add ${task.source} non-grouped task container`, 2, logPad);
+              absTaskPath = w.pathUtils.getTaskAbsoluteUri(task).fsPath,
+              id = TaskFile.id(folder, absTaskPath, task.source, task.source, 0);
         if (!map[id])
         {
+            w.log.write(`Add ${task.source} non-grouped task container`, 2, logPad);
             map[id] = folder.addChild(new TaskFile(w, folder, task, 0, undefined, task.source, logPad));
         }
         return map[id];

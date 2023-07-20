@@ -48,17 +48,15 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
             [ "taskDef script", taskDef.script ], [ "taskDef target", taskDef.target ], [ "taskDef path", taskDef.path ]
         ]);
         //
-        // Set ID and properties
+        // Set private properties
         //
-        // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
-        this.id = TaskFile.id(folder, task, groupLevel, groupId);
         // this._task = task;
         this._treeNodes = [];
         this._folder = folder;
         this._taskSource = <TeTaskSource>task.source;
         this._isGroup = !!groupId;
-        this._isUser = false;
         this._groupLevel = 0;
+        this._isUser = !TeWrapper.instance.typeUtils.isWorkspaceFolder(task.scope);
         //
         // Reference ticket #133, vscode folder should not use a path appenditure in it's folder label
         // in the task tree, there is only one path for vscode/workspace tasks, /.vscode.  The fact that
@@ -68,31 +66,13 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         // exception of TSC, which is handled elsewhere).
         //
         this._relativePath = wrapper.pathUtils.getTaskRelativePath(task);
-        this._fileName = wrapper.pathUtils.getTaskFileName(task.source, taskDef);
-        if (folder.uri) // special folders i.e. 'user tasks', 'favorites, etc will not have a uri property set
-        {
-            if (task.source !== "Workspace")
-            {
-                if (this._relativePath) {
-                    this._uri = Uri.file(join(folder.uri.fsPath, this._relativePath, this.fileName));
-                }
-                else {
-                    this._uri = Uri.file(join(folder.uri.fsPath, this.fileName));
-                }
-            }
-            else {
-                this._uri = Uri.file(join(folder.uri.fsPath, ".vscode", this.fileName));
-            }
-        } //
-         // No resource uri means this file is 'user tasks', and not associated to a workspace folder
+        this._fileName = wrapper.pathUtils.getTaskFileName(task);
+        this._uri = wrapper.pathUtils.getTaskAbsoluteUri(task, this.fileName, this._relativePath);
         //
-        else {
-            this._uri = Uri.file(join(wrapper.pathUtils.getUserDataPath(), this.fileName));
-            this._isUser = true;
-        }
+        // Set ID and reset/format node label dependent on task source, now that all properties have been set
         //
-        // Reset / format node label dependent on task source, now that all properties have been set
-        //
+        // groupId = groupId || TaskFile.createGroupId(folder, this, this.label, groupLevel);
+        this.id = TaskFile.id(folder, this._uri.fsPath, task.source, task.name, groupLevel, groupId);
         this.label = this.getLabel(task.definition, label, this._relativePath, groupId);
         //
         // Set context / context icons
@@ -243,57 +223,31 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     }
 
 
-    private static getLabelKey(fsPath: string, groupKey: string, groupLevel: number)
+    private static getUniqueKey(folder: TaskFolder, source: string, pathKey: string, labelKey: string, groupLevel: number)
     {
-        let lblKey = fsPath[groupLevel + 1] + groupLevel;
-        if (groupLevel >= 0)
+        const pKey = pathKey.replace(/\W/gi, "") + pathKey.padEnd(groupLevel + 1, "_")[groupLevel + 1] + groupLevel;
+        // let labelKey = fsPath[groupLevel + 1] + groupLevel;
+        const // pathKey = fsPath.replace(/\W/gi, ""),
+            groupSeparator = TeWrapper.instance.utils.getGroupSeparator(),
+            labelSplit = labelKey.split(groupSeparator);
+        let lKey = "";
+        for (let i = 0; i <= groupLevel && i < labelSplit.length; i++)
         {
-            // let labelKey = fsPath[groupLevel + 1] + groupLevel;
-            const // pathKey = fsPath.replace(/\W/gi, ""),
-                groupSeparator = TeWrapper.instance.utils.getGroupSeparator(),
-                labelSplit = groupKey.split(groupSeparator);
-            for (let i = 0; i <= groupLevel && i < labelSplit.length; i++)
-            {
-                lblKey += labelSplit[i];
-            }
+            lKey += labelSplit[i];
         }
-        return lblKey;
+        return `${folder.label}:${source}${pKey}:${lKey}`;
     }
 
 
-    static groupId(folder: TaskFolder, fsPath: string, source: string, taskName: string, groupLevel: number)
+    static id(folder: TaskFolder, pathKey: string, source: string, labelKey: string, groupLevel: number, groupId?: string)
     {
-        const labelKey = this.getLabelKey(fsPath, taskName, groupLevel),
-              pathKey = fsPath.replace(/\W/gi, "");
-        return encodeUtf8Hex(`${folder.label}:${source}:${labelKey}:${pathKey}:${groupLevel}`);
+        const gidKey = TeWrapper.instance.typeUtils.asString(groupId),
+              nodeKey = encodeUtf8Hex(this.getUniqueKey(folder, source, pathKey, labelKey, groupLevel));
+        return `${nodeKey}:${gidKey}`;
     }
 
 
-    static id(folder: TaskFolder, task: Task, groupLevel: number, groupId?: string)
-    {
-        let pathKey = "";
-        if (task.definition.uri)
-        {
-            pathKey = task.definition.uri.fsPath;
-        }
-        else if (task.definition.tsconfig)
-        {
-            pathKey = TeWrapper.instance.pathUtils.getTaskRelativePath(task);
-        }
-        else if (TeWrapper.instance.typeUtils.isWorkspaceFolder(task.scope))
-        {
-            pathKey = join(task.scope.uri.fsPath, TeWrapper.instance.pathUtils.getTaskRelativePath(task));
-        }
-        else {
-            pathKey = TeWrapper.instance.keys.Strings.USER_TASKS_LABEL;
-        }
-        const lblKey = this.getLabelKey(pathKey, task.source, groupLevel),
-              gidKey = TeWrapper.instance.typeUtils.asString(groupId);
-        return `${folder.id}:${encodeUtf8Hex(`${pathKey}:${groupLevel}:${lblKey}:${task.source}`)}:${gidKey}`;
-    }
-
-
-    static is(item: any): item is TaskFile { return item instanceof TaskFile; }
+    static is(item: any): item is TaskFile { return !!item && item instanceof TaskFile; }
 
 
     private setGroupContext(groupId: string, groupLevel: number, taskSource: string)

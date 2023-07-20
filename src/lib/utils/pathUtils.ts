@@ -1,7 +1,7 @@
 
 import { homedir } from "os";
 import { execIf } from "./utils";
-import { ITaskDefinition } from ":types";
+import { ITaskDefinition, ITaskFolder } from ":types";
 import { isWorkspaceFolder } from "./typeUtils";
 import { pathExists, pathExistsSync } from "./fs";
 import { Task, Uri, WorkspaceFolder } from "vscode";
@@ -72,6 +72,47 @@ export const getTaskAbsolutePath = (task: Task, includeFileName = false): string
         path = join(path, getTaskFileName(task));
     }
     return path;
+};
+
+
+
+export const getTaskAbsoluteUri = (task: Task, fileName?: string | boolean, relativePath?: string) =>
+{
+    let uri: Uri;
+    const isWs = isWorkspaceFolder(task.scope);
+    relativePath = relativePath || getTaskRelativePath(task);
+    if (isWs)
+    {
+        if (task.source !== "Workspace")
+        {
+            if (task.definition.uri)
+            {
+                uri = Uri.file(dirname(task.definition.uri.fsPath));
+            }
+            else if (task.definition.tsconfig)
+            {
+                uri = Uri.file(dirname(task.definition.tsconfig));
+            }
+            else if (isWs) {
+                uri = Uri.file(join(task.scope.uri.fsPath, relativePath));
+            }
+            else {
+                uri = Uri.file(join(getUserDataPath(), relativePath));
+            }
+        }
+        else {
+            uri = Uri.file(join(task.scope.uri.fsPath, ".vscode"));
+        }
+    } //
+     // No resource uri means this file is 'user tasks', and not associated to a workspace folder
+    //
+    else {
+        uri = Uri.file(join(getUserDataPath(), relativePath));
+    }
+    if (fileName) {
+        uri = Uri.joinPath(uri, fileName === true ? getTaskFileName(task) : fileName);
+    }
+    return uri;
 };
 
 

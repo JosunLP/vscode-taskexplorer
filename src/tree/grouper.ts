@@ -54,8 +54,7 @@ export class TaskTreeGrouper
                 const doGrouping = prevTaskFile.taskSource === taskFile.taskSource;
                 if (doGrouping)
                 {
-                    const gid = TaskFile.groupId(folder, (<any>folder.uri).fsPath, prevTaskFile.taskSource, prevTaskFile.taskSource, 0);
-                    // const gid = TaskFile.groupId(folder, prevTaskFile.uri.fsPath, prevTaskFile.taskSource, prevTaskFile.taskSource, 0);
+                    const gid = TaskFile.id(folder, (<any>folder.uri).fsPath, prevTaskFile.taskSource, prevTaskFile.taskSource, 0);
                     if (!groupHash[gid])
                     {
                         w.log.values(3, logPad, [
@@ -200,7 +199,8 @@ export class TaskTreeGrouper
                     // We found a pair of tasks that need to be grouped.  i.e. the first part of the label
                     // when split by the separator character is the same...
                     //
-                    const gid = TaskFile.groupId(folder, taskFile.uri.fsPath, taskItem.taskSource, taskItem.task.name, groupLevel);
+                    const pKey = w.pathUtils.getTaskAbsoluteUri(taskItem.task, true).fsPath,
+                          gid = TaskFile.id(folder, pKey, taskItem.taskSource, taskItem.task.name, groupLevel);
                     if (!groupHash[gid])
                     {   //
                         // Create the new node, add it to the list of nodes to add to the tree.  We must
@@ -251,8 +251,8 @@ export class TaskTreeGrouper
     private processSingle = (folder: TaskFolder, taskFile: TaskFile, taskItem: TaskItem, groupHash: TaskMap<TaskFile>, groupLevel: number) =>
     {
         taskFile.groupLevel = groupLevel - 1 >= 0 ? groupLevel - 1 : 0;
-        taskFile.groupId = TaskFile.groupId(folder, taskFile.uri.fsPath, taskItem.taskSource, taskItem.task.name, groupLevel);
-        taskFile.id = TaskFile.id(folder, taskItem.task, groupLevel, taskFile.groupId);
+        taskFile.groupId = TaskFile.id(folder, taskFile.uri.fsPath, taskItem.taskSource, taskItem.taskSource, groupLevel);
+        taskFile.id = TaskFile.id(folder, taskFile.uri.fsPath, taskItem.taskSource, taskItem.task.name, groupLevel, taskFile.groupId);
         taskFile.addChild(taskItem);
         groupHash[taskFile.groupId] = taskFile;
     };
