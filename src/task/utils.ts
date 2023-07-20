@@ -54,13 +54,23 @@ export class TaskUtils implements Disposable
             return false;
         }
         //
+        // External tasks registered via Task Explorer API
+        //
+        const providers = this.wrapper.providers;
+        if (providers[task.source] && providers[task.source].isExternal)
+        {
+            // this.wrapper.log.write("   skipping this task (external)", 4, logPad, logQueueId);
+            return !!task.definition && !!task.name && !!task.execution;
+        }
+        //
         // *** VSCode internal task providers s***.  I mean, come on.  Add a package.json to a folder, see
         // the tasks provided by the engine, all good.  But delete the folder, and keep seeing the tasks
         // provided by the engine.  SO check to make sure the task uri actually exists
         //
         const absolutePath = this.wrapper.pathUtils.getTaskAbsoluteUri(task, true).fsPath;
-        if (!this.wrapper.fs.pathExistsSync(absolutePath))
+        if (/* !providers[task.source].isExternal && */!this.wrapper.fs.pathExistsSync(absolutePath))
         {
+            this.wrapper.log.write("   skipping this task (file does not exist)", 4, logPad, logQueueId);
             return false;
         }
         //
@@ -89,14 +99,6 @@ export class TaskUtils implements Disposable
                 this.wrapper.log.methodDone("Check task exclusion", 4, logPad, undefined, logQueueId);
                 return false;
             }
-        }
-        //
-        // External tasks registered via Task Explorer API
-        //
-        const providers = this.wrapper.providers;
-        if (providers[task.source] && providers[task.source].isExternal)
-        {
-            return !!task.definition && !!task.name && !!task.execution;
         }
         //
         // Check enabled and npm install task.  This will ignore tasks from other providers as well,

@@ -18,6 +18,7 @@ export class TeMigration
             const oldConfig = workspace.getConfiguration("taskExplorer");
 
             const groupSep = oldConfig.get<string>(ConfigKeys.GroupSeparator, "-");
+            /* istanbul ignore next */
             if (groupSep !== "-" && groupSep !== "_" && groupSep !== ":" && groupSep !== "|") {
                 await this.configuration.update(ConfigKeys.GroupSeparator, "-");
             }
