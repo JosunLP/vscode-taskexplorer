@@ -29,7 +29,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     private _groupId: string | undefined;
 
     private readonly _uri: Uri;
-    // private readonly _task: Task;
+    private readonly _task: Task;
     private readonly _isUser: boolean;
     private readonly _relativePath: string;
     private readonly _taskSource: TeTaskSource;
@@ -50,7 +50,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
         //
         // Set private properties
         //
-        // this._task = task;
+        this._task = task;
         this._treeNodes = [];
         this._folder = folder;
         this._taskSource = <TeTaskSource>task.source;
@@ -130,7 +130,7 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     get isGroup() { return this._isGroup; };
     get isUser() { return this._isUser; };
     get relativePath() { return this._relativePath; };
-    // get task() { return this._task; };
+    get task() { return this._task; };
     get taskSource() { return this._taskSource; };
     get treeNodes() { return this._treeNodes; };
     get uri() { return this._uri; };
@@ -139,12 +139,12 @@ export class TaskFile extends TaskTreeNode implements ITaskFile
     addChild<T extends (TaskFile | TaskItem)>(node: T, index?: number): OneOf<T, [ TaskFile, TaskItem ]>;
     addChild(node: TaskFile | TaskItem, idx = 0)
     {
-        // if (TaskFile.is(node))
-        // {
-        //     node.groupId = TaskFile.groupId(this._folder, node.uri.fsPath, node.taskSource, node.taskSource, node.groupLevel);
-        //     node.id = TaskFile.id(this._folder, node.task, node.groupLevel, node.groupId);
-        // }
         node.groupLevel = this._groupLevel;
+        if (TaskFile.is(node) && idx > 0)
+        {
+            node.groupId = TaskFile.id(node.folder, node.uri.fsPath, node.taskSource, node.task.name, node.groupLevel);
+            node.id = TaskFile.id(node.folder, node.uri.fsPath, node.taskSource, node.task.name, node.groupLevel, node.groupId);
+        }
         this.treeNodes.splice(idx, 0, node);
         return node;
     }

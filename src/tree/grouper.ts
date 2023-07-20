@@ -221,7 +221,7 @@ export class TaskTreeGrouper
                 }
                 else if (!didGroupLast)
                 {
-                    this.processSingle(folder, taskFile, prevTaskItem, groupHash, groupLevel);
+                    this.processSingle(taskFile, prevTaskItem, groupHash, groupLevel);
                 }
                 didGroupLast = foundGroup;
             }
@@ -229,7 +229,7 @@ export class TaskTreeGrouper
         }
         if (!didGroupLast && prevTaskItem)
         {
-            this.processSingle(folder, taskFile, prevTaskItem, groupHash, groupLevel);
+            this.processSingle(taskFile, prevTaskItem, groupHash, groupLevel);
         }
         //
         // If there are new grouped by separator nodes to add to the tree...
@@ -248,13 +248,11 @@ export class TaskTreeGrouper
     };
 
 
-    private processSingle = (folder: TaskFolder, taskFile: TaskFile, taskItem: TaskItem, groupHash: TaskMap<TaskFile>, groupLevel: number) =>
+    private processSingle = (taskFile: TaskFile, taskItem: TaskItem, groupHash: TaskMap<TaskFile>, groupLevel: number) =>
     {
         taskFile.groupLevel = groupLevel - 1 >= 0 ? groupLevel - 1 : 0;
-        taskFile.groupId = TaskFile.id(folder, taskFile.uri.fsPath, taskItem.taskSource, taskItem.taskSource, groupLevel);
-        taskFile.id = TaskFile.id(folder, taskFile.uri.fsPath, taskItem.taskSource, taskItem.task.name, groupLevel, taskFile.groupId);
         taskFile.addChild(taskItem);
-        groupHash[taskFile.groupId] = taskFile;
+        groupHash[<string>taskFile.groupId] = taskFile;
     };
 
 
