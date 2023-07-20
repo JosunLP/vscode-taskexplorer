@@ -8,7 +8,7 @@ import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
 import { Uri, workspace, env, WorkspaceFolder } from "vscode";
 import { isArray, isFunction, isPromise, isString } from "./typeUtils";
-import { ConfigKeys, CallbackOptions, CallbackArray, ILog } from "../../interface";
+import { ConfigKeys, CallbackOptions, CallbackArray, ILog, ErrorType } from "../../interface";
 
 
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
@@ -363,6 +363,12 @@ export const testPattern = (path: string, pattern: string) => minimatch(path, pa
 
 
 export const textWithElipsis = (text: string, maxLength: number) => text.length > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
+
+
+export function throwIf<T extends typeof Error>(checkValue: any, errorType: T, ...args: any[]): void | never
+{
+    if (checkValue) { throw new errorType(...args); }
+}
 
 
 export const uniq = <T>(a: T[]): T[] => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);

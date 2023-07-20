@@ -7,7 +7,7 @@ import fetch from "node-fetch";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { configuration } from "../../configuration";
 
-export type { BodyInit, RequestInit, Response, RequestInfo } from "node-fetch";
+export type { BodyInit, RequestInit, Response, RequestInfo, Blob } from "node-fetch";
 export { fetch, getProxyAgent };
 
 

@@ -270,6 +270,11 @@ suite("Util Tests", () =>
 		teWrapper.utils.execIf2(false, () => {}, this, null,  () => {}, 2, 3, 4);
 		teWrapper.utils.execIf2(true, () => {}, this, [ () => {}, 2, 3 ], 4);
 		teWrapper.utils.execIf2(false, () => {}, this, [ () => {}, 2, 3, 4 ]);
+		//
+		// throwIf
+		//
+		teWrapper.utils.throwIf(false, Error, "err msg no throw");
+		try { teWrapper.utils.throwIf(true, Error, "err msg throws"); } catch {}
 
         expect(teWrapper.taskUtils.isScriptType("batch"));
         expect(teWrapper.taskUtils.getScriptTaskTypes().length > 0);

@@ -47,15 +47,17 @@ export class TeFileCache implements ITeFileCache, Disposable
         // of this scenario, in which case we'll load from this stored file cache so that the tree
         // reload is much quicker, especially in large workspaces.
         //
-        if (!this.isBusy && !this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache))
+        const pCacheEnabled = this.wrapper.config.get<boolean>(this.wrapper.keys.Config.EnablePersistenFileCache);
+        this.wrapper.utils.execIf(!this.isBusy && !pCacheEnabled, () =>
         {
             const now = Date.now(),
                   lastWsRootPathChange = this.wrapper.storage.get2Sync<number>("lastWsRootPathChange", 0);
+            /* istanbul ignore if */
             if (now < lastWsRootPathChange + 3000)
             {
                 this.persistCache(false, true);
             }
-        }
+        }, this);
         this.wrapper.storage.update2Sync("lastDeactivated", Date.now());
         this._disposables.splice(0).forEach(d => d.dispose());
     };

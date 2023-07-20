@@ -19,6 +19,6 @@ export interface ITeFilesystem
     readFileSync(file: string): string;
     readJsonAsync<T>(file: string): Promise<T>;
     readJsonSync<T>(file: string): T;
-    writeFile(file: string, data: string): Promise<void>;
+    writeFile(file: string, data: string | Buffer): Promise<void>;
     writeFileSync(file: string, data: string): void;
 }

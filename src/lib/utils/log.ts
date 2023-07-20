@@ -337,14 +337,13 @@ export class TeLog implements ILog, Disposable
                   downloadSourceMap = !w.fs.pathExistsSync(this._srcMapPath);
             await w.utils.execIf(downloadWasm, async () =>
             {
-                const wasmContent = await w.server.get("app/shared/mappings.wasm", true, "");
-                await w.fs.writeFile(this._wasmPath, wasmContent);
+                const wasmContent = await w.server.get("app/shared/mappings.wasm", "");
+                await w.fs.writeFile(this._wasmPath, Buffer.from(wasmContent));
             });
             await w.utils.execIf(downloadSourceMap, async () =>
             {
-                console.log("WTF: " + `app/${w.extensionId}/v${w.version}/${w.extensionName}.js.map`);
-                const srcMapContent = await w.server.get(`app/${w.extensionName}/v${w.version}/${w.extensionNameShort}.js.map`, true, "");
-                await w.fs.writeFile(this._srcMapPath, srcMapContent);
+                const srcMapContent = await w.server.get(`app/${w.extensionName}/v${w.version}/${w.extensionNameShort}.js.map`, "");
+                await w.fs.writeFile(this._srcMapPath, Buffer.from(srcMapContent));
             });
             await w.fs.copyFile(this._wasmPath, this._wasmRtPath);
             const srcMap = await w.fs.readJsonAsync<RawSourceMap>(this._srcMapPath);

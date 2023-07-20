@@ -191,16 +191,6 @@ export class TaskTreeBuilder
     };
 
 
-    private removeFileItems = (item: TaskFile, uri: Uri): number =>
-    {
-        return this.wrapper.utils.popIfExistsBy(
-            item.treeNodes,
-            (ti) => TaskItem.is(ti) ? ti.uri.fsPath.startsWith(uri.fsPath) : this.removeFileItems(ti, uri) === 0,
-            this
-        ).length;
-    };
-
-
     removeFolder = (uri: Uri) =>
     {
         this.wrapper.utils.popObjIfExistsBy(this._taskMap, (_, i) => !!i && (i.uri.fsPath.startsWith(uri.fsPath)), this);

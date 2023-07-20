@@ -120,7 +120,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     };
 
 
-    getParent(element: TreeItem): TaskFile | TaskFolder |null
+    getParent(element: TreeItem): TaskItem | TaskFile | TaskFolder | null
     {
         if (TaskItem.is(element))
         {

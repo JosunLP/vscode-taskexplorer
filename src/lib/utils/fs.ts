@@ -395,12 +395,13 @@ export const renameFile = (fileCurrent: string, fileNew: string): Promise<void> 
  * @param file The file path to write to
  * @param data The data to write
  */
-export const writeFile = (file: string, data: string): Promise<void> =>
+export const writeFile = (file: string, data: string | Buffer): Promise<void> =>
 {
     return new Promise<void>((resolve, reject) =>
     {
         if (!isDirectory(file))
         {
+            // new Uint8Array(Buffer.from(data))
             fs.writeFile(path.resolve(cwd, file), data, (e) => handleTResult<void>(resolve, reject, e));
         }
         else {

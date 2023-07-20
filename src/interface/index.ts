@@ -19,9 +19,9 @@ export type { ITeWrapper, ITeKeys, TeRuntimeEnvironment } from "./ITeWrapper";
 export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
 export type { ITeTreeManager, ITeTreeSorter, TaskMap } from "./ITeTreeManager";
 export type { ILog, ILogControl, ILogQueueItem, LogLevel, LogType } from "./ILog";
+export type { SpmServerResource, SpmApiEndpoint, ISpmServer } from "./ISpmServer";
 export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from "./IStorage";
 export type { ITeFileWatcher, FileSystemEventType, IFileSystemEvent } from "./ITeFileWatcher";
-export type { SpmServerResource, SpmApiEndpoint, ISpmServer, ISpmServerError } from "./ISpmServer";
 export type {
     ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionChangeEvent
 } from "./ITeLicenseManager";
@@ -40,13 +40,14 @@ export type {
     ITeTrackedUsageCount, WebviewUsageKey, WebviewViewUsageKey, TreeviewUsageKey
 } from "./ITeUsage";
 export type {
-    ITeUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, OneOf, ITeTypeUtilities,
+    ITeUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, OneOf, ITeTypeUtilities, ErrorType,
     PromiseAdapter, CallbackOptions, CallbackArray, IDictionary, Primitive, ObjectDiff, ITeObjectUtilities
 } from "./ITeUtilities";
 
 export { UsageKeys } from "./ITeUsage";
 export { ContextKeys } from "./ITeContext";
 export { WebviewPrefix } from "./ITeWebview";
+export { SpmServerError } from "./ISpmServer";
 export { MarkdownChars } from "./ITeUtilities";
 export { Commands, VsCodeCommands } from "./ICommand";
 export { StorageKeys, StorageTarget } from "./IStorage";

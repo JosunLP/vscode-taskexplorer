@@ -1,41 +1,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { env } from "vscode";
-import { request } from "https";
+import { request as httpsRequest } from "https";
 import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { figures } from "./utils/figures";
-import { fetch, getProxyAgent } from ":env/fetch";
+import { Blob, fetch, getProxyAgent } from ":env/fetch";
 import {
-	SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment
+	SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError
 } from "../interface";
-
-
-class SpmServerError extends Error
-{
-	private _status: number;
-	private _success: boolean;
-	private _timestamp: number;
-	private _body: { raw: string; jso: Record<string, any> };
-	constructor(status: number | undefined, body: string | undefined, cause?: string | Error)
-	{
-		super(cause instanceof Error ? cause.message : cause);
-		this.name = "SpmServerError";
-		this._status = status || 500;
-		this._success = this._status <= 299;
-	  	this._timestamp = Date.now();
-		let jso;
-		try { jso = JSON.parse(body || "{}"); } catch { jso = { message: this.message }; }
-		this._body = { raw: body || "", jso };
-		try { Error.captureStackTrace(this, SpmServerError); } catch {}
-	}
-	get body() { return this._body; }
-	get status() { return this._status; }
-	get success() { return this._success; }
-	get timestamp() { return this._timestamp; }
-	override toString() { return this.message; }
-	toJSON() { return { message: this.message, body: this._body, status: this._status }; }
-}
 
 
 /* TEMP */ /* istanbul ignore next */
@@ -55,21 +28,11 @@ export class TeServer implements ISpmServer
     constructor(private readonly wrapper: TeWrapper) {}
 
 
-	private get productName() {
-		return `${this.wrapper.extensionName}-${this.wrapper.env}`.replace("-production", "");
-	};
+	private get productName() { return `${this.wrapper.extensionName}-${this.wrapper.env}`.replace("-production", ""); };
 
-	private get publicToken(): string {
-		return this._publicToken[this.wrapper.env];
-	}
+	private get publicToken(): string { return this._publicToken[this.wrapper.env]; }
 
 	get apiServer() { return this._spmApiServer; }
-
-
-	createError(status: number | undefined, body: string | undefined, cause?: string | Error)
-	{
-		return new SpmServerError(status, body, cause);
-	}
 
 
 	private getApiPath = (ep: SpmApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
@@ -78,22 +41,28 @@ export class TeServer implements ISpmServer
 	private getResourcPath = (ep: SpmServerResource) => `https://${this._spmApiServer}/static/${ep}`;
 
 
-	get = async <T = string>(ep: SpmServerResource, raw: boolean, logPad: string) =>
+	// get = async <T = string | ArrayBuffer | Record<string, any>>(ep: SpmServerResource, raw: boolean, logPad: string) =>
+	get = async(ep: SpmServerResource, logPad = ""): Promise<ArrayBuffer> =>
 	{
-		return Promise.race<T>(
+		return Promise.race<ArrayBuffer>(
 		[
-			this._get(ep, logPad).then<T>(r => this.wrapper.utils.wrap(r => (!raw ? JSON.parse(r) : r) as T, [ (r) => r, r ], this, r)),
-			new Promise<T>((_, reject) => {
+			this._get(ep, logPad).then(
+				// (r) => this.wrapper.utils.wrap(
+				// 	(r) => (!raw && this.wrapper.typeUtils.isString(r) ? JSON.parse(r) : r) as T, [ (r) => r, r ], this, r
+				// )
+				(r) => r
+			),
+			new Promise<ArrayBuffer>((_, reject) => {
 				setTimeout(reject, this._requestTimeout, <SpmServerError>{ message: "Timed out", status: 408 });
 			})
 		]);
 	};
 
 
-	private _get = async (ep: SpmServerResource, logPad: string) =>
+	private _get = async (ep: SpmServerResource, logPad: string): Promise<ArrayBuffer> =>
 	{
 		this.wrapper.log.methodStart("server resource request", 1, logPad, false, [[ "endpoint", ep ]]);
-		const response = await this.wrapRequest(() => fetch(this.getResourcPath(ep),
+		const rsp = await this.wrapRequest(() => fetch(this.getResourcPath(ep),
 		{
 			agent: getProxyAgent(),
 			hostname: this._spmApiServer,
@@ -105,14 +74,25 @@ export class TeServer implements ISpmServer
 				"content-type": "text/plain"
 			}
 		}));
-		const rspBody = await response.text();
-		this.wrapper.log.methodDone("server resource request", 1, logPad, [
-			[ "response status", response.status ], [ "response body length", rspBody.length ]
-		]);
-		/* istanbul ignore if */
-		if (response.status > 299) {
-			throw new SpmServerError(response.status, rspBody, response.statusText);
+		let rspBody: ArrayBuffer;
+		switch (rsp.headers.get("content-type"))
+		{   //
+			// case "text/html":
+			// case "text/plain":
+			// 	rspBody = await rsp.text();
+			// 	break;
+			// case "application/json":
+			// 	rspBody = await rsp.json() as Record<string, any>;
+			// 	break;
+			default:
+				// rspBody =  await rsp.blob();
+				rspBody = await rsp.arrayBuffer();
+				break;
 		}
+		this.wrapper.log.methodDone("server resource request", 1, logPad, [
+			[ "response status", rsp.status ], [ "response size", rsp.size ]
+		]);
+		this.wrapper.utils.throwIf(rsp.status > 299, SpmServerError, rsp.status, rspBody, `HTTP error description: ${rsp.statusText}`);
 		return rspBody;
 	};
 
@@ -214,7 +194,7 @@ export class TeServer implements ISpmServer
 			this.log("starting https request to license server", logPad + "   ");
 			this.log("   endpoint", logPad + "   ", endpoint);
 
-			const req = request(options, (res) =>
+			const req = httpsRequest(options, (res) =>
 			{
 				res.on("data", (chunk) => { rspData += chunk; });
 				res.on("end", () =>
