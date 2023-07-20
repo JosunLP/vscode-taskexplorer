@@ -112,7 +112,6 @@ export class TaskUtils implements Disposable
         //
         // Check VSCode /workspace tasks for 'hide' property and whether it's a workspace or user task
         //
-        let result = true;
         if (task.source === "Workspace")
         {
             if (isScopeWsFolder)
@@ -124,23 +123,28 @@ export class TaskUtils implements Disposable
                     // the tasks.json file to see if the hideproperty is set.
                     //
                     const tasksFile = join(task.scope.uri.fsPath, ".vscode", "tasks.json");
-                    result = !!this.wrapper.utils.wrap(() =>
+                    const result = !!this.wrapper.utils.wrap(() =>
                     {
                         const jsonc = this.wrapper.fs.readFileSync(tasksFile).toString(),
                               tasksJso = JSON5.parse(jsonc), // json5 needed for comments allowed in tasks.json
                               wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
                         return !(wsTask && wsTask.hide === true);
-                    },
-                    [ this.wrapper.log.error ], this);
+                    }, [ this.wrapper.log.error ], this);
+                    if (result === false)
+                    {
+                        this.wrapper.log.write("   skipping hidden workspace task (disabled in settings)", 4, logPad, logQueueId);
+                        return false;
+                    }
                 }
             }
             else if (!this._showUserTasks) {
+                this.wrapper.log.write("   skipping user task (disabled in settings)", 4, logPad, logQueueId);
                 return false;
             }
         }
         this.wrapper.log.write("   task is included", 4, logPad, logQueueId);
         this.wrapper.log.methodDone("Check task exclusion", 4, logPad, undefined, logQueueId);
-        return result;
+        return true;
     };
 
 
