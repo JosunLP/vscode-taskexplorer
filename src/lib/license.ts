@@ -57,6 +57,9 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 			registerCommand(wrapper.keys.Commands.RefreshSession, () => this.validateLicense(this.lic.key, ""), this),
 			registerCommand(wrapper.keys.Commands.Register, this.register, this)
 		);
+		/* TEMP */ if (this._LICENSE_SERVER_DISABLED_) {
+			/* TEMP */ queueMicrotask(() => wrapper.contextTe.setContext(wrapper.keys.Context.LicensingActive, false));
+		/* TEMP */ }
     }
 
 	dispose = () => { clearInterval(this._checkLicenseTask); this._disposables.splice(0).forEach((d) => d.dispose()); };

@@ -100,6 +100,8 @@ suite("Tree Tests", () =>
         }
 		await executeTeCommand2("taskexplorer.setPinned", [ ant[0], "favorites" ]);
 		await executeTeCommand2("taskexplorer.setPinned", [ batch[1], "favorites" ]);
+        teWrapper.explorer.getParent(ant[0]);
+        teWrapper.explorer.getParent(batch[1]);
         utils.endRollingCount(this);
     });
 
@@ -248,10 +250,10 @@ suite("Tree Tests", () =>
         utils.clearOverrideShowInfoBox();
         this.slow((tc.slowTime.commands.standard * 6) + 50);
         const taskTree = teWrapper.treeManager.taskFolders as any[];
-        expect(teWrapper.explorer?.getParent(taskTree[0])).to.be.null; // Last Tasks
-        expect(teWrapper.explorer?.getParent(taskTree[1])).to.be.null; // Favorites
-        expect(await teWrapper.explorer?.getChildren(taskTree[1].treeNodes[0])).to.not.be.null;
-        expect(await teWrapper.explorer?.getChildren(taskTree[0].treeNodes[0])).to.not.be.null;
+        expect(teWrapper.explorer.getParent(taskTree[0])).to.be.null; // Last Tasks
+        expect(teWrapper.explorer.getParent(taskTree[1])).to.be.null; // Favorites
+        teWrapper.explorer.getParent(taskTree[1].treeNodes[0]);
+        teWrapper.explorer.getParent(taskTree[0].treeNodes[0]);
         utils.overrideNextShowInfoBox("Cancel");
         await executeTeCommand("clearLastTasks");
         utils.overrideNextShowInfoBox("Cancel");
@@ -264,7 +266,6 @@ suite("Tree Tests", () =>
         await executeTeCommand("clearLastTasks");
         utils.overrideNextShowInfoBox("Global");
         await executeTeCommand("clearFavorites");
-        await utils.sleep(25);
         utils.endRollingCount(this);
     });
 
@@ -304,10 +305,9 @@ suite("Tree Tests", () =>
             }
         }
         const taskTree = teWrapper.treeManager.taskFolders as any[];
-        expect(teWrapper.explorer?.getParent(taskTree[2])).to.be.null; // Project Folder
-        expect(teWrapper.explorer?.getParent(batch[0])).to.not.be.null;
-        expect(teWrapper.explorer?.getParent(batch[0].taskFile)).to.not.be.null;
-        expect(teWrapper.explorer?.getParent(batch[0].taskFile)).to.not.be.null;
+        expect(teWrapper.explorer.getParent(taskTree[2])).to.be.null; // Project Folder
+        expect(teWrapper.explorer.getParent(batch[0])).to.not.be.null;
+        expect(teWrapper.explorer.getParent(batch[0].taskFile)).to.not.be.null;
         expect(await teWrapper.explorer?.getChildren(taskTree[2].treeNodes[0])).to.not.be.null;
         utils.endRollingCount(this);
     });

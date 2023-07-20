@@ -6,7 +6,7 @@ Bugs:
     ✔ Saving package.json is throwing the 'tree node already exists' error @done(21-03-22 22:24)
     ✔ Swutching away from view while task is running, and switching back after task has ended, view still shows it as running, must refresh @done(20-10-09 02:41)
     ✔ Damn son of bitch shit hole bug - '..... is already registered' @done(23-01-08 16:23)
-    ☐ Again - Running task not updating icon when task is finished
+    ✔ Again - Running task not updating icon when task is finished @done(23-07-20 03:08)
         mostly special folders / last tasks
         random, mostly when view was not visible when finished
 
@@ -30,7 +30,7 @@ Features:
         ✔ Fix - Timer always resets to m:s when task starts if it is hidden or in m:s:ms display mode @done(23-03-05 09:37)
         ✔ Maybe redo the timer mode buttons when changing to diferent display modes @done(23-03-05 09:37)
             e.g. the middle icon can switch to chevron-right when timer mode is in m:s:ms mode
-        ☐ Apply limits for unlicensed mode?  Or full-featured?
+        ✔ Apply limits for unlicensed mode?  Or full-featured? @done(23-07-20 03:08)
         ☐ Graph usage over time
             Maybe new view i terminal pane? (I forget what it's called)
         ☐ Clear buttons / options
@@ -106,6 +106,9 @@ Features:
 
     ☐ New config option for max-folder levels deep to search for task files
 
+    ☐ Stripped production build
+        Strip all log calls in final build
+
 General Todos:
 
     ✔ Auth / Sign In / Integration with License Manager @done(23-03-12 18:04)
@@ -166,3 +169,5 @@ Tests:
         i.e. a copy/move folder action by user, there's no other way.
         may or may not be from in-workspace, or same-project
         adjust instanbul ignores in cache.ts
+
+    ☐ Run SH script test not working in tasks.test.ts

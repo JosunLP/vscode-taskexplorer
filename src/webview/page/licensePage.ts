@@ -9,6 +9,7 @@ import { createTaskImageTable } from "../common/taskImageTable";
 import { IIpcMessage, IpcRegisterAccountMsg, onIpc, State } from "../common/ipc";
 
 
+/* TEMP */ /* istanbul ignore next */
 export class LicensePage extends TeWebviewPanel<State>
 {
 

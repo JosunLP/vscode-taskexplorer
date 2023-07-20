@@ -173,7 +173,7 @@ suite("Task Tests", () =>
         executeTeCommand2("stop", [ batch[0] ], 0);           // don't await
         utils.overrideNextShowInfoBox(undefined);
         executeTeCommand2("pause", [ batch[0] ], 0);           // don't await
-        await utils.waitForTeIdle(tc.waitTime.refreshCommand);      // now wait for refresh
+        await utils.waitForTeIdle(tc.waitTime.refreshCommand);
         utils.endRollingCount(this);
     });
 
@@ -230,6 +230,7 @@ suite("Task Tests", () =>
         const exec = await executeTeCommand2<TaskExecution | undefined>("run", [ antTask ], tc.waitTime.runCommandMin) ;
         await utils.waitForTaskExecution(exec);
         lastTask = antTask;
+        teWrapper.explorer.getParent(antTask);
         utils.endRollingCount(this);
     });
 
@@ -301,6 +302,7 @@ suite("Task Tests", () =>
         await executeTeCommand2("stop", [ batchTask ], tc.waitTime.taskCommand);
         await utils.waitForTaskExecution(exec,  500);
         lastTask = batchTask;
+        teWrapper.explorer.getParent(batchTask);
         utils.endRollingCount(this);
     });
 

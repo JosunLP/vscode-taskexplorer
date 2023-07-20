@@ -80,14 +80,10 @@ export class TaskItem extends TaskTreeNode implements ITaskItem
         if (task.execution instanceof ShellExecution)
         {
             tooltip += `${MarkdownChars.NewLine}${MarkdownChars.Code}${task.execution.commandLine || task.execution.command}`;
-            if (task.execution.args) {
+            if (task.execution.args.length > 0) {
                 tooltip += ` ${task.execution.args.join(" ")}`;
             }
         }
-        // wrapper.utils.execIf2(task.execution instanceof ShellExecution, (e) =>
-        // {
-        //     tooltip += `${MarkdownChars.Code}${e.commandLine}`;
-        // }, this, null, <ShellExecution>task.execution);
         tooltip += `${MarkdownChars.NewLine}file: ${taskDef.fileName}`;
         tooltip += `${MarkdownChars.NewLine}path: ${taskDef.relativePath || sep}`;
         tooltip += `${MarkdownChars.NewLine}loc: ${taskDef.absolutePath}`;

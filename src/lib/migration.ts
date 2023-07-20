@@ -1,5 +1,6 @@
 
 import { workspace } from "vscode";
+import { execIf } from "./utils/utils";
 import { encodeUtf8Hex } from ":env/hex";
 import { ConfigKeys, IConfiguration, IStorage, StorageTarget } from "../interface";
 import { getTaskTypeEnabledSettingName, getTaskTypes, getTaskTypeSettingName } from "./utils/taskUtils";
@@ -12,8 +13,7 @@ export class TeMigration
     migrateSettings = async () =>
     {
         const didSettingUpgrade = this.storage.get<boolean>("taskexplorer.v3SettingsUpgrade", false);
-        /* istanbul ignore next */
-        if (!didSettingUpgrade)
+        await execIf(!didSettingUpgrade, async () =>
         {
             const oldConfig = workspace.getConfiguration("taskExplorer");
 
@@ -46,7 +46,7 @@ export class TeMigration
             }
             */
             await this.storage.update("taskexplorer.v3SettingsUpgrade", true);
-        }
+        }, this);
     };
 
 

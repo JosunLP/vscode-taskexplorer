@@ -414,7 +414,7 @@
 			{
 				"command": "taskexplorer.refreshSession",
 				"title": "%command.refreshSession%",
-				"when": "taskexplorer:enabled",
+				"when": "taskexplorer:enabled && taskexplorer:licensingActive",
 				"icon": {
 					"light": "res/img/light/refresh.svg",
 					"dark": "res/img/dark/refresh.svg"
@@ -423,12 +423,12 @@
 			{
 				"command": "taskexplorer.register",
 				"title": "%command.register%",
-				"when": "taskexplorer:enabled && !taskexplorer:account:registered"
+				"when": "taskexplorer:enabled && taskexplorer:licensingActive && !taskexplorer:account:registered"
 			},
 			{
 				"command": "taskexplorer.purchaseLicense",
 				"title": "%command.purchaseLicense%",
-				"when": "taskexplorer:enabled && taskexplorer:account:license:type < 4"
+				"when": "taskexplorer:enabled && taskexplorer:licensingActive && taskexplorer:account:license:type < 4"
 			},
 			{
 				"command": "taskexplorer.extendTrial",
@@ -475,7 +475,7 @@
 			{
 				"command": "taskexplorer.view.licensePage.show",
 				"title": "%command.view.licensePage.show%",
-				"when": "taskexplorer:enabled"
+				"when": "taskexplorer:enabled && taskexplorer:licensingActive"
 			},
 			{
 				"command": "taskexplorer.view.welcome.show",
@@ -762,7 +762,8 @@
 					"when": "taskexplorer:enabled"
 				},
 				{
-					"command": "taskexplorer.view.licensePage.show"
+					"command": "taskexplorer.view.licensePage.show",
+					"when": "taskexplorer:enabled && taskexplorer:licensingActive"
 				},
 				{
 					"command": "taskexplorer.view.releaseNotes.show"
@@ -793,11 +794,11 @@
 				},
 				{
 					"command": "taskexplorer.refreshSession",
-					"when": "taskexplorer:enabled"
+					"when": "taskexplorer:enabled && taskexplorer:licensingActive"
 				},
 				{
 					"command": "taskexplorer.register",
-					"when": "taskexplorer:enabled && !taskexplorer:account:registered"
+					"when": "taskexplorer:enabled && taskexplorer:licensingActive && !taskexplorer:account:registered"
 				},
 				{
 					"command": "taskexplorer.clearTaskStats",
@@ -914,7 +915,7 @@
 				},
 				{
 					"command": "taskexplorer.refreshSession",
-					"when": "view == taskexplorer.view.home",
+					"when": "view == taskexplorer.view.home && taskexplorer:licensingActive",
 					"group": "navigation"
 				},
 				{

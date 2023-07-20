@@ -41,7 +41,7 @@ export class HomeView extends TeWebviewView<State>
 				   .replace("#{license.sessionIconCls}", "fal fa-" + (isTrial || isError ? "user-slash" : (isLic ? "user-slash" : "user-slash")))
 				   .replace("#{license.statusIconCls}", "fal fa-" + (isTrial || isError ? "unlock te-color-favorite-yellow" : (isLic ? "unlock te-color-ok-green" : "lock te-color-failure-red")))
 				   .replace("#{license.status}", this.wrapper.licenseManager.statusDescription)
-				   .replace("#{license.statusDays}", days && !isError && (isTrial || isLic) ? ` (${days})` : "")
+				   /* TEMP */ /* istanbul ignore next */.replace("#{license.statusDays}", days && !isError && (isTrial || isLic) ? ` (${days})` : "")
 				   .replace("#{license.statusTip}", !isError ? (isTrial ? `${days} days left in trial` : (isLic ? `${days} days left before renewal` : "")) : "A license server error occurred, full access granted");
 		return html;
 	};
@@ -59,6 +59,7 @@ export class HomeView extends TeWebviewView<State>
 	private onSessionChanged(e: TeSessionChangeEvent): void
 	{
 		this.wrapper.log.methodEvent("homeview event", "session changed", 2);
+		/* TEMP */ /* istanbul ignore next */
 		if (e.changeFlags.licenseState || e.changeFlags.licenseType || e.changeFlags.trialPeriod || e.changeFlags.verification || e.changeFlags.license) {
 			void this.refresh(true, false);
 		}

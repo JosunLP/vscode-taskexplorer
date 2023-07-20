@@ -255,7 +255,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
     };
 
 
-    fireTreeRefreshEvent = (treeItem: TreeItem | null, taskItem: TaskItem | null, logPad: string): void =>
+    fireTreeRefreshEvent = (treeItem: TaskFolder | TaskFile | null, taskItem: TaskItem | null, logPad: string): void =>
     {
         Object.values(this._views).filter(v => v.enabled).forEach((v) =>
         {

@@ -28,6 +28,7 @@ export enum ContextKeys
 	Enabled = "taskexplorer:enabled",
 	Untrusted = "taskexplorer:untrusted",
 	LicensePage = "taskexplorer:licensePage",
+	LicensingActive = "taskexplorer:licensingActive",
 	TaskMonitor  = "taskexplorer:taskMonitor",
 	ParsingReport = "taskexplorer:parsingReport",
 	ReleaseNotes = "taskexplorer:releaseNotes",

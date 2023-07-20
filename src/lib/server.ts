@@ -33,10 +33,7 @@ export class TeServer implements ISpmServer
 	get apiServer() { return this._spmApiServer; }
 
 
-	createError(status: number | undefined, body: string | undefined, cause?: string | Error)
-	{
-		return new SpmServerError(status, body, cause);
-	}
+	createError = (status: number | undefined, body: string | undefined, cause?: string | Error) => new SpmServerError(status, body, cause);
 
 
 	private getApiPath = (ep: SpmApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
