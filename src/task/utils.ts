@@ -130,7 +130,7 @@ export class TaskUtils implements Disposable
                               wsTask = tasksJso.tasks.find((t: any) => t.label === task.name || t.script === task.name);
                         return !(wsTask && wsTask.hide === true);
                     }, [ this.wrapper.log.error ], this);
-                    if (result === false)
+                    if (!result)
                     {
                         this.wrapper.log.write("   skipping hidden workspace task (disabled in settings)", 4, logPad, logQueueId);
                         return false;
