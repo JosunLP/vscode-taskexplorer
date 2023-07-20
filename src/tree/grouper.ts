@@ -237,10 +237,10 @@ export class TaskTreeGrouper
         if (newNodes.length > 0)
         {
             let numGrouped = 0;
-            for (const n of newNodes)
+            for (const node of newNodes)
             {
-                taskFile.addChild(n, numGrouped++);
-                w.utils.execIf2(!atMaxLevel, this.groupBySep, this, null, folder, n, groupHash, groupLevel + 1, logPad + "   ");
+                taskFile.addChild(node, numGrouped++);
+                w.utils.execIf2(!atMaxLevel, this.groupBySep, this, null, folder, node, groupHash, groupLevel + 1, logPad + "   ");
             }
         }
 
