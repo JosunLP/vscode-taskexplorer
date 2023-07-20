@@ -488,37 +488,38 @@ export class TeLog implements ILog, Disposable
 
     private processConfigChanges = (e: ConfigurationChangeEvent) =>
     {
-        if (e.affectsConfiguration("taskexplorer.logging.enable"))
+        const cfgKeys = this.wrapper.keys.Config;
+        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnable}`))
         {
-            this._logControl.enable = this._config.get<boolean>("logging.enable", false);
+            this._logControl.enable = this._config.get<boolean>(cfgKeys.LogEnable, false);
             this.enable(this._logControl.enable);
         }
-        if (e.affectsConfiguration("taskexplorer.logging.enableOutputWindow"))
+        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableOutputWindow}`))
         {
-            this._logControl.enableOutputWindow = this._config.get<boolean>("logging.enableOutputWindow", true);
+            this._logControl.enableOutputWindow = this._config.get<boolean>(cfgKeys.LogEnableOutputWindow, true);
             if (!this._logControl.enable) {
-                void this._config.update("logging.enable", this._logControl.enableOutputWindow);
+                void this._config.update(cfgKeys.LogEnable, this._logControl.enableOutputWindow);
             }
         }
-        if (e.affectsConfiguration("taskexplorer.logging.enableFile"))
+        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableFile}`))
         {
-            this._logControl.enableFile = this._config.get<boolean>("logging.enableFile", false);
+            this._logControl.enableFile = this._config.get<boolean>(cfgKeys.LogEnableFile, false);
             if (this._logControl.enableFile)
             {
                 this.writeLogFileLocation();
                 window.showInformationMessage("Log file location: " + this._logControl.fileName);
                 if (!this._logControl.enable) {
-                    void this._config.update("logging.enable", this._logControl.enableFile);
+                    void this._config.update(cfgKeys.LogEnable, this._logControl.enableFile);
                 }
             }
         }
-        if (e.affectsConfiguration("taskexplorer.logging.logEnabledModuleReload"))
+        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableModuleReload}`))
         {
-            this._logControl.enableModuleReload = this._config.get<boolean>("logging.enabledModuleReload", false);
+            this._logControl.enableModuleReload = this._config.get<boolean>(cfgKeys.LogEnableModuleReload, false);
         }
-        if (e.affectsConfiguration("taskexplorer.logging.level"))
+        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogLevel}`))
         {
-            this._logControl.level = this._config.get<LogLevel>("logging.level", 1);
+            this._logControl.level = this._config.get<LogLevel>(cfgKeys.LogLevel, 1);
         }
     };
 

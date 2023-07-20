@@ -48,7 +48,9 @@ export const run = async (): Promise<void> =>
 				hookRequire: true,
 				hookRunInContext: true,
 				hookRunInThisContext: true,
-				ignoreClassMethods: [ "require " ],
+				ignoreClassMethods: [
+					"require", "onWindowStateChanged"
+				],
 				instrument: true,
 				reportDir: "./.coverage",
 				showProcessTree: verbose,
