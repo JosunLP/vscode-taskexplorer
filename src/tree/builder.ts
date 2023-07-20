@@ -25,6 +25,7 @@ export class TaskTreeBuilder
 
 
     get taskFolders() { return this._taskFolders; }
+
     get taskMap() { return this._taskMap; }
 
 
@@ -117,7 +118,7 @@ export class TaskTreeBuilder
               isScriptType = w.taskUtils.isScriptType(<TeTaskSource>task.source),
               id = !isScriptType ? TaskFile.id(folder, task, 0) :
                                    TaskFile.groupId(folder, absTaskPath, task.source, task.source, 0);
-        w.log.write(`Add ${task.source} non-grouped taskfile task container`, 2, logPad);
+        w.log.write(`Add ${task.source} non-grouped task container`, 2, logPad);
         if (!map[id])
         {
             map[id] = folder.addChild(new TaskFile(w, folder, task, 0, undefined, task.source, logPad));

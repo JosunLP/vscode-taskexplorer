@@ -69,14 +69,16 @@ export const getTaskAbsolutePath = (task: Task, includeFileName = false): string
         path = join(getUserDataPath(), getTaskRelativePath(task));
     }
     if (includeFileName) {
-        path = join(path, getTaskFileName(task.source, task.definition));
+        path = join(path, getTaskFileName(task));
     }
     return path;
 };
 
 
-export const getTaskFileName = (source: string, taskDef: ITaskDefinition): string =>
-{   //
+export const getTaskFileName = (task: Task): string =>
+{
+    const taskDef = task.definition;
+    //
     // Any tasks provided by this extension will have a "fileName" definition. External tasks
     // registered throughthe API also define fileName
     //
@@ -89,11 +91,11 @@ export const getTaskFileName = (source: string, taskDef: ITaskDefinition): strin
     // (workspace) tasks
     //
     let fileName = "package.json";
-    if (source === "Workspace")
+    if (task.source === "Workspace")
     {
         fileName = "tasks.json";
     }
-    else if (source === "tsc")
+    else if (task.source === "tsc")
     {   //
         // TypeScript task provider will set property `tsconfg` on the task definition, which
         // includes the relative path to the tsonfig file, filename included.

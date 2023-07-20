@@ -2,7 +2,6 @@
 
 import { ILog } from "./ILog";
 import { ITeWrapper } from "./ITeWrapper";
-import { ITaskDefinition } from "./ITaskDefinition";
 import { ITeTask, TeTaskListType, TeTaskSource } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
 
@@ -65,7 +64,7 @@ export interface ITePathUtilities
 	getInstallPathSync(): string;
 	getRelativePath(folder: WorkspaceFolder, uri: Uri): string;
 	getTaskAbsolutePath(task: Task, includeFileName?: boolean): string;
-	getTaskFileName(source: string, taskDef: ITaskDefinition): string;
+	getTaskFileName(task: Task): string;
 	getTaskRelativePath(task: Task): string;
 	getUserDataPath(test?: boolean, platform?: string): string;
 }
