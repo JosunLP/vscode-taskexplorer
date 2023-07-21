@@ -486,7 +486,7 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private processConfigChanges = (e: ConfigurationChangeEvent) =>
+    private processConfigChanges = async (e: ConfigurationChangeEvent) =>
     {
         const cfgKeys = this.wrapper.keys.Config;
         if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnable}`))
@@ -497,8 +497,8 @@ export class TeLog implements ILog, Disposable
         if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableOutputWindow}`))
         {
             this._logControl.enableOutputWindow = this._config.get<boolean>(cfgKeys.LogEnableOutputWindow, true);
-            if (!this._logControl.enable) {
-                void this._config.update(cfgKeys.LogEnable, this._logControl.enableOutputWindow);
+            if (this._logControl.enableOutputWindow && !this._logControl.enable) {
+                await this._config.update(cfgKeys.LogEnable, this._logControl.enableOutputWindow);
             }
         }
         if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableFile}`))
@@ -509,7 +509,7 @@ export class TeLog implements ILog, Disposable
                 this.writeLogFileLocation();
                 window.showInformationMessage("Log file location: " + this._logControl.fileName);
                 if (!this._logControl.enable) {
-                    void this._config.update(cfgKeys.LogEnable, this._logControl.enableFile);
+                    await this._config.update(cfgKeys.LogEnable, this._logControl.enableFile);
                 }
             }
         }
@@ -694,13 +694,13 @@ export class TeLog implements ILog, Disposable
         } //
          // VSCODE OUTPUT WINDOW LOGGING
         //
-        if ((isError && !this._logControl.writeToConsole && !this._logControl.enableFile) || (this._logControl.enableOutputWindow && isMinLevel))
+        if (this._logControl.enableOutputWindow && (isMinLevel || isError))
         {
             const ts = this.getStamp().stamp  + " " + figures.pointer;
             if (this._logControl.enableOutputWindow) {
                 this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.outputChannel.appendLine, this._logControl.outputChannel, ts, false);
             }
-            if (isError && this._srcMapConsumer && (msg || !this._errorsWritten)) {
+            if (isError && this._srcMapConsumer && (!this._errorsWritten || msg)) {
                 this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.errorChannel.appendLine, this._logControl.errorChannel, ts, false);
             }
         } //

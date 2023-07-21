@@ -75,7 +75,8 @@ class Configuration implements IConfiguration, Disposable
         !!settings.find(s => e.affectsConfiguration(`${this._baseConfigSection}.${s.replace(`${this._baseConfigSection}.`, "")}`));
 
 
-    get = <T>(key: string, defaultValue?: T) => this.configuration.get<T>(key, defaultValue!);
+    get<T>(key: string, defaultValue: T): T;
+    get<T>(key: string, defaultValue?: T) { return this.configuration.get(key, defaultValue); }
 
 
     private getSettingKeys(key: string)
@@ -111,7 +112,8 @@ class Configuration implements IConfiguration, Disposable
      * Example:
      *     getGlobal<string>("terminal.integrated.shell.windows", "")
      */
-    getVs = <T>(key: string, defaultValue?: T) => this.configurationGlobal.get<T>(key, defaultValue!);
+    getVs<T>(key: string, defaultValue: T): T;
+    getVs<T>(key: string, defaultValue?: T) { return this.configurationGlobal.get(key, defaultValue); }
 
 
     updateVs = (key: string, value: any): Thenable<void> => this.configurationGlobal.update(key, value, ConfigurationTarget.Global);
