@@ -697,9 +697,7 @@ export class TeLog implements ILog, Disposable
         if (this._logControl.enableOutputWindow && (isMinLevel || isError))
         {
             const ts = this.getStamp().stamp  + " " + figures.pointer;
-            if (this._logControl.enableOutputWindow) {
-                this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.outputChannel.appendLine, this._logControl.outputChannel, ts, false);
-            }
+            this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.outputChannel.appendLine, this._logControl.outputChannel, ts, false);
             if (isError && this._srcMapConsumer && (!this._errorsWritten || msg)) {
                 this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.errorChannel.appendLine, this._logControl.errorChannel, ts, false);
             }
