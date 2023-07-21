@@ -55,6 +55,7 @@ suite("Util Tests", () =>
     {
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 2) + 30);
+		teWrapper.utils.emptyFn();
 		//
 		// properCase
 		//

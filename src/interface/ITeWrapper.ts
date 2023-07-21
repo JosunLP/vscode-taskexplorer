@@ -64,6 +64,7 @@ export interface ITeWrapper
 	readonly config: IConfiguration;
 	readonly context: ExtensionContext;
 	readonly contextTe: ITeContext;
+	readonly emptyFn: () => void;
 	readonly eventQueue: IEventQueue;
 	readonly explorer: ITeTaskTree;
 	readonly explorerView: TreeView<TreeItem>;

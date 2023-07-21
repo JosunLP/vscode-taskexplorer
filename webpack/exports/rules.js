@@ -113,7 +113,7 @@ const rules = (env, wpConfig) =>
 
 		if (wpConfig.mode === "production" || env.stripLogging)
 		{
-			wpConfig.module.rules.push({
+			wpConfig.module.rules.push(...[{
 				test: /\.ts$/,
 				include: path.join(env.buildPath, "src"),
 				loader: "string-replace-loader",
@@ -138,15 +138,40 @@ const rules = (env, wpConfig) =>
 						replace: "\r\n"
 					},
 					{
-						search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+),/g,
-						replace: "() => {},"
+						search: /this\.wrapper\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+),/g,
+						replace: "this.wrapper.emptyFn,"
 					},
 					{
-						search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
-						replace: "() => {}]"
+						search: /wrapper\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+),/g,
+						replace: "wrapper.emptyFn,"
+					},
+					{
+						search: /w\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+),/g,
+						replace: "w.emptyFn,"
+					},
+					{
+						search: /this\.wrapper\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+						replace: "this.wrapper.emptyFn]"
+					},
+					{
+						search: /wrapper\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+						replace: "wrapper.emptyFn]"
+					},
+					{
+						search: /w\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+						replace: "w.emptyFn]"
 					}]
 				}
-			});
+			},
+			{
+				test: /wrapper\.ts$/,
+				include: path.join(env.buildPath, "src", "lib"),
+				loader: "string-replace-loader",
+				options: {
+					search: /^log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+					replace: "() => {}]"
+				}
+			}]);
 		}
 
 		wpConfig.module.rules.push({

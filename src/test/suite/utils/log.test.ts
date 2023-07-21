@@ -4,6 +4,8 @@ import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { activate, exitRollingCount, endRollingCount, suiteFinished, testControl } from "../../utils/utils";
 
 let log: ILog;
+let writeConsole: boolean;
+let writeConsoleLvl: number;
 let teWrapper: ITeWrapper;
 let logControl: ILogControl;
 
@@ -16,6 +18,8 @@ suite("Logging Tests", () =>
 		({ teWrapper } = await activate());
 		log = teWrapper.log;
 		logControl = teWrapper.logControl;
+		writeConsole = logControl.writeToConsole;
+		writeConsoleLvl = logControl.writeToConsoleLevel;
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this, true);
 	});
@@ -24,7 +28,9 @@ suite("Logging Tests", () =>
 	suiteTeardown(async function()
     {
         if (exitRollingCount(this, false, true)) return;
-		log.setWriteToConsole?.(logControl.writeToConsole, logControl.writeToConsoleLevel);
+		teWrapper.logControl.writeToConsole = writeConsole;
+		teWrapper.logControl.writeToConsoleLevel = writeConsoleLvl;
+		log.setWriteToConsole?.(writeConsole, writeConsoleLvl);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, logControl.enable);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, logControl.enableFile);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, logControl.enableOutputWindow);
@@ -326,6 +332,7 @@ suite("Logging Tests", () =>
 		// Console On
 		//
 		log.setWriteToConsole?.(true);
+		teWrapper.logControl.writeToConsole = true;
 		log.value("test", "1");
 		log.value("test", "1", 1);
 		log.value("test", "1", 5);
@@ -333,6 +340,7 @@ suite("Logging Tests", () =>
 		// Console Off
 		//
 		log.setWriteToConsole?.(false);
+		teWrapper.logControl.writeToConsole = false;
 		//
 		// Disable logging
 		//
@@ -399,11 +407,13 @@ suite("Logging Tests", () =>
 		// Console On
 		//
 		log.setWriteToConsole?.(true);
+		teWrapper.logControl.writeToConsole = true;
 		log.write("test");
 		//
 		// Console Off
 		//
 		log.setWriteToConsole?.(false);
+		teWrapper.logControl.writeToConsole = false;
 		//
 		// Trace / integrtated source map suppor for stack tracing of the
 		// minified build / typescript source

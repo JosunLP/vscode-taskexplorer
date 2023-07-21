@@ -17,6 +17,9 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
+export const emptyFn = () => {};
+
+
 export function execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions): R | undefined;
 export function execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
 export function execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;

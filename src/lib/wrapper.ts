@@ -522,6 +522,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get context(): ExtensionContext { return this._context; }
 	get contextTe(): TeContext { return this._teContext; }
 	get dev(): boolean { return this._context.extensionMode === ExtensionMode.Development; }
+	get emptyFn(): () => void { return utilities.emptyFn; }
 	get env(): TeRuntimeEnvironment { return this._envMap[ExtensionMode[this._context.extensionMode].toLowerCase()]; }
 	get eventQueue(): EventQueue { return this._eventQueue; }
     get explorer(): ITeTaskTree { return this.treeManager.views.taskExplorer.tree; }
