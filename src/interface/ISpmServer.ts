@@ -5,6 +5,7 @@ export type SpmApiEndpoint = "license/validate" | "payment/paypal/hook" | "regis
 							 "register/trial/start" | "register/trial/extend";
 
 export type SpmServerResource = "app/shared/mappings.wasm" |
+								`app/${string}/v${string}/${string}.js` |
 								`app/${string}/v${string}/${string}.js.map`;
 
 

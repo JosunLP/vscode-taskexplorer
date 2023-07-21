@@ -54,7 +54,7 @@ const entry = (env, wpConfig) =>
 		{
 			taskexplorer: {
 				import: "./src/taskexplorer.ts",
-				filename: "taskexplorer.js"
+				filename: !env.prodDbgBuild ? "taskexplorer.js" : "taskexplorer.debug.js"
 			}
 		};
 	}

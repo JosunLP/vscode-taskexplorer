@@ -23,12 +23,13 @@ const sourcemaps = (env, wpConfig) =>
     {
         const isDev = env.environment === "dev" || wpConfig.mode === "development",
               isProd = env.environment === "prod" || wpConfig.mode === "production",
+              isProdDbg = isProd && env.prodDbgBuild,
               isTests = env.environment.startsWith("test");
         const options =
         {
             test: /\.(js|jsx)($|\?)/i,
-            exclude: /((vendor|runtime|tests)\.js|node_modules)/,
-            filename: "[name].js.map",
+            exclude: /((vendor|runtime|tests)(?:\.debug|)\.js|node_modules)/,
+            filename: !isProdDbg ? "[name].js.map" : "[name].debug.js.map",
             //
             // The bundled node_modules will produce reference tags within the main entry point
             // files in the form:
@@ -58,14 +59,14 @@ const sourcemaps = (env, wpConfig) =>
             options.moduleFilenameTemplate = "[absolute-resource-path]";
             // options.moduleFilenameTemplate = "../[resource-path]";
             // options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
-            options.exclude = /((runtime|tests)\.js|node_modules)/;
+            options.exclude = /((runtime|tests)(?:\.debug|)\.js|node_modules)/;
         }
         else if (isTests) {
-            options.exclude = /((vendor|runtime)\.js|node_modules)/;
+            options.exclude = /((vendor|runtime)(?:\.debug|)\.js|node_modules)/;
         }
-        else if (isProd) {
-            options.filename = "[name].js.map";
-        }
+        // else if (isProd) {
+        //     options.filename = !isProdDbg ? "[name].js.map" : "[name].debug.js.map";
+        // }
         plugin = new webpack.SourceMapDevToolPlugin(options);
     }
     return plugin;

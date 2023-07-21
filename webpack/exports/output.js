@@ -54,11 +54,15 @@ const output = (env, wpConfig) =>
 	}
 	else
 	{
-		const isTests = env.environment.startsWith("test");
+		const isTests = !env.prodDbgBuild && env.environment.startsWith("test");
+		let outPath = env.build === "browser" ? path.join(env.buildPath, "dist", "browser") : path.join(env.buildPath, "dist");
+		if (env.prodDbgBuild) {
+			outPath = path.resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer");
+		}
 		wpConfig.output = {
 			clean: env.clean === true ? (isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
-			path: env.build === "browser" ? path.join(env.buildPath, "dist", "browser") : path.join(env.buildPath, "dist"),
-			filename: "[name].js",
+			path: outPath,
+			filename: !env.prodDbgBuild ? "[name].js" : "[name].debug.js",
 			libraryTarget: "commonjs2"
 		};
 	}

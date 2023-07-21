@@ -17,33 +17,41 @@
  */
 const mode = (env, argv, wpConfig) =>
 {
-	if (!argv.mode)
-	{
-		if (env.environment === "dev") {
-			wpConfig.mode = "development";
-		}
-		else if (env.environment === "test" || env.build === "tests") {
-			wpConfig.mode = "none";
-		}
-		else {
-			wpConfig.mode = "production";
-			// env.environment = "prod"; ~ "testprod"
-		}
+	wpConfig.mode = getMode(env, argv);
+	if (argv.mode === "development") {
+		env.environment = "dev";
 	}
-	else
-	{
-		wpConfig.mode = argv.mode;
-		if (argv.mode === "development") {
-			env.environment = "dev";
-		}
-		else if (argv.mode === "none") {
-			env.environment = "test";
-		}
-		else {
-			env.environment = "prod";
-		}
+	else if (argv.mode === "none") {
+		env.environment = "test";
+	}
+	else {
+		env.environment = "prod";
 	}
 };
 
 
-module.exports = mode;
+/**
+ * @method
+ * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackArgs} argv Webpack command line args
+ */
+const getMode = (env, argv) =>
+{
+	let mode = argv.mode;
+	if (!mode)
+	{
+		if (env.environment === "dev") {
+			mode = "development";
+		}
+		else if (env.environment === "test" || env.build === "tests") {
+			mode = "none";
+		}
+		else {
+			mode = "production";
+		}
+	}
+	return mode;
+};
+
+
+module.exports = { mode, getMode };

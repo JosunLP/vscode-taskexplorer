@@ -4,8 +4,8 @@
 
 const { writeInfo, figures } = require("./webpack/console");
 const {
-	context, devtool, entry, externals, ignorewarnings, minification,  mode, plugins, optimization,
-	output, resolve, rules, stats, target, watch, environment
+	context, devtool, entry, externals, ignorewarnings, minification, mode, plugins, optimization,
+	output, resolve, rules, stats, target, watch, environment, getMode
 } = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types/webpack").WebpackArgs} WebpackArgs */
@@ -26,13 +26,17 @@ let buildStep = 0;
  */
 module.exports = (env, argv) =>
 {
+	const mode = getMode(env, argv);
+
 	writeInfo("----------------------------------------------------");
 	writeInfo(" Start Task Explorer VSCode Extension Webpack build");
 	writeInfo("----------------------------------------------------");
+	writeInfo("   Mode:");
+	writeInfo("      " + mode);
 	writeInfo("   Argv:");
-	writeInfo("   " + JSON.stringify(argv, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
+	writeInfo("      " + JSON.stringify(argv, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
 	writeInfo("   Env :");
-	writeInfo("   " + JSON.stringify(env, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
+	writeInfo("      " + JSON.stringify(env, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
 	writeInfo("----------------------------------------------------");
 
 	env = Object.assign(
@@ -43,9 +47,10 @@ module.exports = (env, argv) =>
 		fa: "custom",
 		imageOpt: true,
 		environment: "prod",
+		prodDbgBuild: false,
 		stripLogging: false,
 		target: "node"
-	}, env);
+	}, env, { prodDbgBuild: false });
 
 	Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
 	{
@@ -56,18 +61,25 @@ module.exports = (env, argv) =>
 		return getWebpackConfig(env.build, env, argv);
 	}
 
-	if (env.environment === "test") {
-		// env.esbuild = true;
+	else if (env.environment === "test" || mode === "none") {
 		return [
 			getWebpackConfig("extension", env, argv),
 			getWebpackConfig("webview", { ...env, ...{ environment: "dev" }}, argv)
 		];
 	}
 
-	if (env.environment === "testprod") {
+	else if (env.environment === "testprod") {
 		return [
 			getWebpackConfig("extension", env, argv),
 			getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, argv)
+		];
+	}
+
+	else if (env.environment === "prod" || mode === "production") {
+		return [
+			getWebpackConfig("extension", { ...env, ...{ stripLogging: false, prodDbgBuild: true }}, argv),
+			getWebpackConfig("extension", { ...env, ...{ stripLogging: true, clean: false }}, argv),
+			getWebpackConfig("webview", { ...env }, argv)
 		];
 	}
 

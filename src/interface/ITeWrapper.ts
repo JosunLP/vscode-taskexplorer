@@ -77,6 +77,7 @@ export interface ITeWrapper
 	readonly fileWatcher: ITeFileWatcher;
 	readonly figures: ITeFigures;
 	readonly homeView: ITeWebview;
+	readonly isNewInstall: boolean;
 	readonly fileCache: ITeFileCache;
 	readonly fs: ITeFilesystem;
 	readonly keys: ITeKeys;
@@ -105,6 +106,7 @@ export interface ITeWrapper
 	readonly usage: ITeUsage;
 	readonly utils: ITeUtilities;
 	readonly version: string;
+	readonly versionchanged: boolean;
 	readonly views: { [id in "taskExplorer" | "taskExplorerSideBar"]: ITaskTreeView };
 	readonly welcomePage: ITeWebview;
 	readonly wsfolder: WorkspaceFolder;

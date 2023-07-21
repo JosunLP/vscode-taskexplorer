@@ -161,15 +161,6 @@ suite("Logging Tests", () =>
 		log.error(new Error("Test error object"));
 		log.error([ "Test error 1", "Test error 2" ]);
 		log.error("Test4 error", [[ "p1", "e1" ]]);
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, true);
-		// log.write("Test1", 1);
-		// log.write2("Test1", "Test1", 1);
-		// log.value("Test2", "value", 1);
-		// log.error("Test2 error");
-		// log.error(new Error("Test error object"));
-		// log.error([ "Test error 1", "Test error 2" ]);
-		// log.error("Test4 error", [[ "p1", "e1" ]]);
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, false);
 		log.write("Test1", 1);
 		log.value("Test2", "value", 1);
 		log.error("Error1");
@@ -452,5 +443,16 @@ suite("Logging Tests", () =>
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
+
+
+	test("Logging (Debug Module Swap)", async function()
+    {
+        if (exitRollingCount(this)) return;
+		this.slow(testControl.slowTime.apiServer.httpGet + (testControl.slowTime.config.event * 2) + 200);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, true);
+		await teWrapper.utils.sleep(100);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, false);
+        endRollingCount(this);
+	});
 
 });

@@ -8,7 +8,7 @@
 
 const { join, resolve } = require("path");
 const { writeInfo, figures } = require("../console");
-const { renameSync, existsSync, writeFileSync, readFileSync, copyFileSync } = require("fs");
+const { renameSync, existsSync, writeFileSync, readFileSync, copyFileSync, unlinkSync } = require("fs");
 
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
@@ -37,21 +37,24 @@ const afterdone = (env, wpConfig) =>
                 {
                     if (_env.build === "extension")
                     {
-                        const distPath = join(env.buildPath, "dist");
+                        const distPath = join(env.buildPath, "dist"),
+                              licServerResourcePath = resolve(env.buildPath, "..", "spm-license-server", "res", "app");
                         if (_env.environment === "prod" || _wpConfig.mode === "production")
                         {
                             try {
                                 renameSync(join(distPath, "vendor.js.LICENSE.txt"), join(distPath, "vendor.LICENSE"));
-                            } catch {}
-                            try {
                                 renameSync(join(distPath, "taskexplorer.js.LICENSE.txt"), join(distPath, "taskexplorer.LICENSE"));
-                            } catch {}
-                            try {
                                 renameSync(
                                     join(distPath, "taskexplorer.js.map"),
-                                    resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer", "taskexplorer.js.map")
+                                    join(licServerResourcePath, "vscode-taskexplorer", "taskexplorer.js.map")
+                                );
+                                copyFileSync(
+                                    join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"),
+                                    join(licServerResourcePath, "app", "shared", "mappings.wasm")
                                 );
                             } catch {}
+                            try { unlinkSync(join(licServerResourcePath, "vscode-taskexplorer", "taskexplorer.debug.js.LICENSE.txt")); } catch {}
+                            try { unlinkSync(join(licServerResourcePath, "vscode-taskexplorer", "vendor.debug.js.LICENSE.txt")); } catch {}
                         }
                         else if (_env.environment === "test")
                         {
@@ -68,27 +71,7 @@ const afterdone = (env, wpConfig) =>
                                     writeInfo("The '/* istanbul ignore file */ ' tag was found and will break coverage", figures.error);
                                 }
                             }
-                            try {
-                                copyFileSync(
-                                    join(distPath, "taskexplorer.js.map"),
-                                    resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer", "taskexplorer.js.map")
-                                );
-                            } catch {}
                         }
-                        else {
-                            try {
-                                copyFileSync(
-                                    join(distPath, "taskexplorer.js.map"),
-                                    resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer", "taskexplorer.js.map")
-                                );
-                            } catch {}
-                        }
-                        try {
-                            copyFileSync(
-                                join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"),
-                                resolve(env.buildPath, "..", "spm-license-server", "res", "app", "shared", "mappings.wasm")
-                            );
-                        } catch {}
                     }
                 });
             }

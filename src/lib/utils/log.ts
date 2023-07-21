@@ -27,6 +27,8 @@ export class TeLog implements ILog, Disposable
     private readonly _wasmPath: string;
     private readonly _wasmRtPath: string;
     private readonly _srcMapPath: string;
+    private readonly _runtimePath: string;
+    private readonly _dbgModuleDir: string;
     private readonly _config: IConfiguration;
     private readonly _logControl: ILogControl;
     private readonly _context: ExtensionContext;
@@ -42,9 +44,11 @@ export class TeLog implements ILog, Disposable
         this._context = context;
         createDirSync(this._context.logUri.fsPath);
         createDirSync(join(this._context.globalStorageUri.fsPath, "debug"));
-        this._wasmRtPath = join(this._context.extensionUri.fsPath, "dist", "mappings.wasm");
-        this._wasmPath = join(this._context.globalStorageUri.fsPath, "debug", "mappings.wasm");
-        this._srcMapPath = join(this._context.globalStorageUri.fsPath, "debug", "taskexplorer.js.map");
+        this._runtimePath = join(this._context.extensionUri.fsPath, "dist");
+        this._wasmRtPath = join(this._runtimePath, "mappings.wasm");
+        this._dbgModuleDir = join(this._context.globalStorageUri.fsPath, "debug");
+        this._wasmPath = join(this._dbgModuleDir, "mappings.wasm");
+        this._srcMapPath = join(this._dbgModuleDir, "taskexplorer.js.map");
         this._fileNameTimer = 0 as unknown as NodeJS.Timeout;
         this._logControl = {
             dirPath: context.logUri.fsPath,
@@ -99,7 +103,13 @@ export class TeLog implements ILog, Disposable
     get lastPad(): string { return this._logControl.lastLogPad; }
 
     get wrapper(): ITeWrapper { return <ITeWrapper>this._wrapper; }
-    set wrapper(v) { this._wrapper = v; void this.installSourceMapSupport(); }
+    set wrapper(v) {
+        this._wrapper = v;
+        queueMicrotask(async () => {
+            await this.installSourceMapSupport();
+            await this.installDebugSupport();
+        });
+    }
 
 
     private _blank = (level?: LogLevel, queueId?: string) => this._write("", level, "", queueId);
@@ -126,7 +136,6 @@ export class TeLog implements ILog, Disposable
             methodStart: enable ? this._methodStart : () => {},
             methodDone: enable ? this._methodDone : () => {},
             methodEvent: enable ? this._methodEvent : () => {},
-            // method: enable ? this._method : () => {},
             value: enable ? this._value : () => {},
             values: enable ? this._values : () => {},
             warn: enable ? this._warn : () => {},
@@ -329,12 +338,54 @@ export class TeLog implements ILog, Disposable
     };
 
 
+    private installDebugSupport = (): Promise<void> =>
+    {
+        return this.wrapper.utils.wrap(async (w) =>
+        {
+            const enable = this._logControl.enableModuleReload,
+                  teDbgModulePath = join(this._dbgModuleDir, "taskexplorer.debug.js"),
+                  rtDbgModulePath = join(this._dbgModuleDir, "runtime.debug.js"),
+                  vendorDbgModulePath = join(this._dbgModuleDir, "vendor.debug.js");
+            if (w.versionchanged)
+            {
+                await w.fs.deleteFile(teDbgModulePath);
+                await w.fs.deleteFile(rtDbgModulePath);
+                await w.fs.deleteFile(vendorDbgModulePath);
+            }
+            const downloadDebugModule = enable && !w.fs.pathExistsSync(teDbgModulePath),
+                  downloadDebugRuntimeModule = enable && !w.fs.pathExistsSync(rtDbgModulePath),
+                  downloadDebugVendorModule = enable && !w.fs.pathExistsSync(vendorDbgModulePath);
+            await w.utils.execIf(downloadDebugModule, async () =>
+            {
+                const dbgModuleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/taskexplorer.debug.js`);
+                await w.fs.writeFile(teDbgModulePath, Buffer.from(dbgModuleContent));
+            });
+            await w.utils.execIf(downloadDebugRuntimeModule, async () =>
+            {
+                const dbgModuleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/runtime.debug.js`);
+                await w.fs.writeFile(rtDbgModulePath, Buffer.from(dbgModuleContent));
+            });
+            await w.utils.execIf(downloadDebugVendorModule, async () =>
+            {
+                const dbgModuleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/vendor.debug.js`);
+                await w.fs.writeFile(vendorDbgModulePath, Buffer.from(dbgModuleContent));
+            });
+        },
+        [ this._error ], this, this.wrapper);
+    };
+
+
     private installSourceMapSupport = (): Promise<void> =>
     {
         return this.wrapper.utils.wrap(async (w) =>
         {
             const downloadWasm = !w.fs.pathExistsSync(this._wasmPath),
                   downloadSourceMap = !w.fs.pathExistsSync(this._srcMapPath);
+            if (w.versionchanged)
+            {
+                w.fs.deleteFileSync(this._wasmPath);
+                w.fs.deleteFileSync(this._srcMapPath);
+            }
             await w.utils.execIf(downloadWasm, async () =>
             {
                 const wasmContent = await w.server.get("app/shared/mappings.wasm", "");
@@ -391,21 +442,6 @@ export class TeLog implements ILog, Disposable
             }
         }
     };
-
-
-    // private _method = (fileTag: string, methodTag: string, msg: string, level: LogLevel, logPad: string, params?: (string|any)[][], queueId?: string) =>
-    // {
-    //     if (!level || level <= this._logControl.level)
-    //     {
-    //         const tag = `[${fileTag}][${methodTag}] ${logPad}`;
-    //         this._write(`[${tag}]${msg}`, level, "", queueId);
-    //         if (params) {
-    //             for (const [ m, v ] of params) {
-    //                 this._value(`[${tag}]${m}`, v, level, "", queueId);
-    //             }
-    //         }
-    //     }
-    // };
 
 
     private msUntilMidnight(): number
@@ -492,7 +528,7 @@ export class TeLog implements ILog, Disposable
         if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnable}`))
         {
             this._logControl.enable = this._config.get<boolean>(cfgKeys.LogEnable, false);
-            this.enable(this._logControl.enable);
+            this.processLogEnableChange();
         }
         if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableOutputWindow}`))
         {
@@ -515,13 +551,49 @@ export class TeLog implements ILog, Disposable
         }
         if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableModuleReload}`))
         {
-            this._logControl.enableModuleReload = this._config.get<boolean>(cfgKeys.LogEnableModuleReload, false);
+            const enable = this._logControl.enableModuleReload = this._config.get<boolean>(cfgKeys.LogEnableModuleReload, false);
+            const rtModule = !enable ? "./dist/taskexplorer" : "./dist/taskexplorer.debug";
+            await execIf(this.wrapper.context.extension.packageJSON.main !== rtModule, async () =>
+            {
+                const pkgJsonPath = join(this._context.extensionUri.fsPath, "package.json");
+                let pkgJsonContent = await this.wrapper.fs.readFileAsync(pkgJsonPath);
+                    pkgJsonContent = pkgJsonContent.replace("\"main\": \"./dist/taskexplorer\"", `"main": "${rtModule}"`)
+                                                   .replace("\"main\": \"./dist/taskexplorer.debug\"", `"main": "${rtModule}"`);
+                await this.wrapper.fs.writeFile(pkgJsonPath, Buffer.from(pkgJsonContent));
+                void window.showInformationMessage("A restart is required to complete debug module settings change" + this._logControl.fileName);
+            }, this);
         }
         if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogLevel}`))
         {
             this._logControl.level = this._config.get<LogLevel>(cfgKeys.LogLevel, 1);
         }
     };
+
+
+    private processLogEnableChange = () =>
+    {
+        const enable = this._logControl.enable,
+              rtModule = !enable ? "./dist/taskexplorer" : "./dist/taskexplorer.debug";
+        return execIf(this.wrapper.context.extension.packageJSON.main !== rtModule, async () =>
+        {
+            const msg = `To ${enable ? "enable" : "disable"} logging, the ${enable ? "debug" : "release"} ` +
+                        "module must be activated and will require a restart.  Activate now?";
+            window.showInformationMessage(msg, "Yes", "Cancel")
+            .then(async (action) =>
+            {
+                if (action === "Yes")
+                {
+                    const rtModule = !enable ? "./dist/taskexplorer" : "./dist/taskexplorer.debug";
+                    const pkgJsonPath = join(this._context.extensionUri.fsPath, "package.json");
+                    let pkgJsonContent = await this.wrapper.fs.readFileAsync(pkgJsonPath);
+                        pkgJsonContent = pkgJsonContent.replace("\"main\": \"./dist/taskexplorer\"", `"main": "${rtModule}"`)
+                                                    .replace("\"main\": \"./dist/taskexplorer.debug\"", `"main": "${rtModule}"`);
+                    await this.wrapper.fs.writeFile(pkgJsonPath, Buffer.from(pkgJsonContent));
+                    this.enable(this._logControl.enable);
+                }
+            });
+        }, this);
+};
 
 
     private setFileName = () =>
@@ -748,7 +820,6 @@ export class TeLog implements ILog, Disposable
     methodStart = this._methodStart;
     methodDone = this._methodDone;
     methodEvent = this._methodEvent;
-    // method = this._method;
     value = this._value;
     values = this._values;
     warn = this._warn;

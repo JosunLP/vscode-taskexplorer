@@ -111,7 +111,7 @@ const rules = (env, wpConfig) =>
 	{
 		const configFile = env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json";
 
-		if (wpConfig.mode === "production" || env.stripLogging)
+		if (env.stripLogging)
 		{
 			wpConfig.module.rules.push(...[{
 				test: /\.ts$/,
@@ -120,45 +120,45 @@ const rules = (env, wpConfig) =>
 				options: {
 					multiple: [
 					{
-						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*\}\);/g,
+						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*\}\);/g,
 						replace: (/** @type {String} */r) => {
 							return "=> {}\r\n" + r.substring(r.slice(0, r.length - 3).lastIndexOf(")") + 1);
 						}
 					},
 					{
-						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\),/g,
+						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2|info|values?|method[A-Z][a-z]+)\s*\([^]*?\),/g,
 						replace: "=> {},"
 					},
 					{
-						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\) *;/g,
+						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\) *;/g,
 						replace: "=> {};"
 					},
 					{
-						search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*;\s*?(?:\r\n|$)/g,
+						search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*;\s*?(?:\r\n|$)/g,
 						replace: "\r\n"
 					},
 					{
-						search: /this\.wrapper\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+),/g,
+						search: /this\.wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
 						replace: "this.wrapper.emptyFn,"
 					},
 					{
-						search: /wrapper\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+),/g,
+						search: /wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
 						replace: "wrapper.emptyFn,"
 					},
 					{
-						search: /w\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+),/g,
+						search: /w\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
 						replace: "w.emptyFn,"
 					},
 					{
-						search: /this\.wrapper\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+						search: /this\.wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
 						replace: "this.wrapper.emptyFn]"
 					},
 					{
-						search: /wrapper\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+						search: /wrapper\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
 						replace: "wrapper.emptyFn]"
 					},
 					{
-						search: /w\.log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+						search: /w\.log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
 						replace: "w.emptyFn]"
 					}]
 				}
