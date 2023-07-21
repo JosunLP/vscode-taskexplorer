@@ -34,16 +34,12 @@ class Configuration implements IConfiguration, Disposable
         ];
     }
 
-
     dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
 
-	get onDidChange(): Event<ConfigurationChangeEvent> {
-		return this._onDidChange.event;
-	}
 
-	// get onDidChangeHighPriority(): Event<ConfigurationChangeEvent> {
-	// 	return this._onDidChange.event;
-	// }
+    get baseSection(): string { return this._baseConfigSection; }
+	get onDidChange(): Event<ConfigurationChangeEvent> { return this._onDidChange.event; }
+	// get onDidChangeHighPriority(): Event<ConfigurationChangeEvent> { return this._onDidChange.event; }
 
 
     public initialize(context: ExtensionContext)

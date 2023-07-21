@@ -105,10 +105,10 @@ export class TeLog implements ILog, Disposable
     get wrapper(): ITeWrapper { return <ITeWrapper>this._wrapper; }
     set wrapper(v) {
         this._wrapper = v;
-        queueMicrotask(async () => {
-            await this.installSourceMapSupport();
-            await this.installDebugSupport();
-        });
+        // queueMicrotask(async () => {
+            /* await */void this.installSourceMapSupport();
+            // await this.installDebugSupport();
+        // });
     }
 
 
@@ -342,34 +342,46 @@ export class TeLog implements ILog, Disposable
     {
         return this.wrapper.utils.wrap(async (w) =>
         {
-            const enable = this._logControl.enableModuleReload,
+            const enable = this._logControl.enable,
+                  teRelModulePath = join(this._dbgModuleDir, "taskexplorer.js"),
+                  rtRelModulePath = join(this._dbgModuleDir, "runtime.js"),
+                  vendorRelModulePath = join(this._dbgModuleDir, "vendor.js"),
                   teDbgModulePath = join(this._dbgModuleDir, "taskexplorer.debug.js"),
                   rtDbgModulePath = join(this._dbgModuleDir, "runtime.debug.js"),
-                  vendorDbgModulePath = join(this._dbgModuleDir, "vendor.debug.js");
-            if (w.versionchanged)
+                  vendorDbgModulePath = join(this._dbgModuleDir, "vendor.debug.js"),
+                  tePath = join(this._runtimePath, "taskexplorer.js"),
+                  rtPath = join(this._runtimePath, "runtime.js"),
+                  vendorPath = join(this._runtimePath, "vendor.js");
+            if (w.versionchanged || w.isNewInstall)
             {
+                await w.fs.deleteFile(teRelModulePath);
+                await w.fs.deleteFile(rtRelModulePath);
+                await w.fs.deleteFile(vendorRelModulePath);
                 await w.fs.deleteFile(teDbgModulePath);
                 await w.fs.deleteFile(rtDbgModulePath);
                 await w.fs.deleteFile(vendorDbgModulePath);
             }
-            const downloadDebugModule = enable && !w.fs.pathExistsSync(teDbgModulePath),
-                  downloadDebugRuntimeModule = enable && !w.fs.pathExistsSync(rtDbgModulePath),
-                  downloadDebugVendorModule = enable && !w.fs.pathExistsSync(vendorDbgModulePath);
-            await w.utils.execIf(downloadDebugModule, async () =>
+            await w.utils.execIf(!w.fs.pathExistsSync(teDbgModulePath), async () =>
             {
-                const dbgModuleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/taskexplorer.debug.js`);
-                await w.fs.writeFile(teDbgModulePath, Buffer.from(dbgModuleContent));
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/taskexplorer.debug.js`);
+                await w.fs.writeFile(teDbgModulePath, Buffer.from(moduleContent));
             });
-            await w.utils.execIf(downloadDebugRuntimeModule, async () =>
+            await w.utils.execIf(!w.fs.pathExistsSync(rtDbgModulePath), async () =>
             {
-                const dbgModuleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/runtime.debug.js`);
-                await w.fs.writeFile(rtDbgModulePath, Buffer.from(dbgModuleContent));
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/runtime.debug.js`);
+                await w.fs.writeFile(rtDbgModulePath, Buffer.from(moduleContent));
             });
-            await w.utils.execIf(downloadDebugVendorModule, async () =>
+            await w.utils.execIf(!w.fs.pathExistsSync(vendorDbgModulePath), async () =>
             {
-                const dbgModuleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/vendor.debug.js`);
-                await w.fs.writeFile(vendorDbgModulePath, Buffer.from(dbgModuleContent));
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/vendor.debug.js`);
+                await w.fs.writeFile(vendorDbgModulePath, Buffer.from(moduleContent));
             });
+            await w.utils.execIf(!w.fs.pathExistsSync(teRelModulePath), () => w.fs.copyFile(tePath, teRelModulePath), this);
+            await w.utils.execIf(!w.fs.pathExistsSync(rtRelModulePath), () => w.fs.copyFile(rtPath, rtRelModulePath), this);
+            await w.utils.execIf(!w.fs.pathExistsSync(vendorRelModulePath), () => w.fs.copyFile(vendorPath, vendorRelModulePath), this);
+            await this.wrapper.fs.copyFile(!enable ? teRelModulePath : teDbgModulePath, tePath);
+            await this.wrapper.fs.copyFile(!enable ? rtRelModulePath : rtDbgModulePath, rtPath);
+            await this.wrapper.fs.copyFile(!enable ? vendorRelModulePath : vendorDbgModulePath, vendorPath);
         },
         [ this._error ], this, this.wrapper);
     };
@@ -524,20 +536,21 @@ export class TeLog implements ILog, Disposable
 
     private processConfigChanges = async (e: ConfigurationChangeEvent) =>
     {
-        const cfgKeys = this.wrapper.keys.Config;
-        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnable}`))
+        const cfgBaseKey = this.wrapper.config.baseSection,
+              cfgKeys = this.wrapper.keys.Config;
+        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogEnable}`))
         {
             this._logControl.enable = this._config.get<boolean>(cfgKeys.LogEnable, false);
-            this.processLogEnableChange();
+            void this.processLogEnableChange();
         }
-        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableOutputWindow}`))
+        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogEnableOutputWindow}`))
         {
             this._logControl.enableOutputWindow = this._config.get<boolean>(cfgKeys.LogEnableOutputWindow, true);
             if (this._logControl.enableOutputWindow && !this._logControl.enable) {
                 await this._config.update(cfgKeys.LogEnable, this._logControl.enableOutputWindow);
             }
         }
-        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableFile}`))
+        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogEnableFile}`))
         {
             this._logControl.enableFile = this._config.get<boolean>(cfgKeys.LogEnableFile, false);
             if (this._logControl.enableFile)
@@ -549,50 +562,34 @@ export class TeLog implements ILog, Disposable
                 }
             }
         }
-        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogEnableModuleReload}`))
+        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogEnableModuleReload}`))
         {
-            const enable = this._logControl.enableModuleReload = this._config.get<boolean>(cfgKeys.LogEnableModuleReload, false);
-            const rtModule = !enable ? "./dist/taskexplorer" : "./dist/taskexplorer.debug";
-            await execIf(this.wrapper.context.extension.packageJSON.main !== rtModule, async () =>
-            {
-                const pkgJsonPath = join(this._context.extensionUri.fsPath, "package.json");
-                let pkgJsonContent = await this.wrapper.fs.readFileAsync(pkgJsonPath);
-                    pkgJsonContent = pkgJsonContent.replace("\"main\": \"./dist/taskexplorer\"", `"main": "${rtModule}"`)
-                                                   .replace("\"main\": \"./dist/taskexplorer.debug\"", `"main": "${rtModule}"`);
-                await this.wrapper.fs.writeFile(pkgJsonPath, Buffer.from(pkgJsonContent));
-                void window.showInformationMessage("A restart is required to complete debug module settings change" + this._logControl.fileName);
-            }, this);
+            this._logControl.enableModuleReload = this._config.get<boolean>(cfgKeys.LogEnableModuleReload, false);
         }
-        if (e.affectsConfiguration(`taskexplorer.${cfgKeys.LogLevel}`))
+        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogLevel}`))
         {
             this._logControl.level = this._config.get<LogLevel>(cfgKeys.LogLevel, 1);
         }
     };
 
 
-    private processLogEnableChange = () =>
+    private processLogEnableChange = async () =>
     {
-        const enable = this._logControl.enable,
-              rtModule = !enable ? "./dist/taskexplorer" : "./dist/taskexplorer.debug";
-        return execIf(this.wrapper.context.extension.packageJSON.main !== rtModule, async () =>
+        const enable = this._logControl.enable;
+        if (this._logControl.enableModuleReload)
         {
             const msg = `To ${enable ? "enable" : "disable"} logging, the ${enable ? "debug" : "release"} ` +
                         "module must be activated and will require a restart.  Activate now?";
-            window.showInformationMessage(msg, "Yes", "Cancel")
-            .then(async (action) =>
+            const action = await window.showInformationMessage(msg, "Yes", "Cancel")
+            if (action === "Yes")
             {
-                if (action === "Yes")
-                {
-                    const rtModule = !enable ? "./dist/taskexplorer" : "./dist/taskexplorer.debug";
-                    const pkgJsonPath = join(this._context.extensionUri.fsPath, "package.json");
-                    let pkgJsonContent = await this.wrapper.fs.readFileAsync(pkgJsonPath);
-                        pkgJsonContent = pkgJsonContent.replace("\"main\": \"./dist/taskexplorer\"", `"main": "${rtModule}"`)
-                                                    .replace("\"main\": \"./dist/taskexplorer.debug\"", `"main": "${rtModule}"`);
-                    await this.wrapper.fs.writeFile(pkgJsonPath, Buffer.from(pkgJsonContent));
-                    this.enable(this._logControl.enable);
-                }
-            });
-        }, this);
+                await this.installDebugSupport();
+                this.enable(this._logControl.enable);
+            }
+        }
+        else {
+            this.enable(this._logControl.enable);
+        }
 };
 
 

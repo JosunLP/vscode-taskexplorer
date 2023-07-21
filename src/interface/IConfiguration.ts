@@ -4,6 +4,7 @@ import { ConfigurationChangeEvent, Event } from "vscode";
 
 export const enum ConfigPrefix
 {
+    Base = "taskexplorer",
 	Pinned = "taskexplorer.pinned.",
 	SpecialFolder = "taskexplorer.specialFolder."
 }
@@ -66,6 +67,7 @@ export enum ConfigKeys
 
 export interface IConfiguration
 {
+    baseSection: string;
     onDidChange: Event<ConfigurationChangeEvent>;
     affectsConfiguration(e: ConfigurationChangeEvent, ...settings: string[]): boolean;
     get<T>(key: string): T | undefined;
