@@ -193,6 +193,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
                 this.wrapper.log.write2("tree", "fire full refresh event", 1, "   ");
                 this._onDidChangeTreeData.fire();
             }
+            queueMicrotask(() => this._onDidLoadTreeData.fire());
         }
         this._wasVisible = true;
         w.log.methodDone("visibility event received", 1);
