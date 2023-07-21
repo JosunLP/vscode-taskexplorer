@@ -43,6 +43,7 @@ module.exports = (env, argv) =>
 		fa: "custom",
 		imageOpt: true,
 		environment: "prod",
+		stripLogging: false,
 		target: "node"
 	}, env);
 

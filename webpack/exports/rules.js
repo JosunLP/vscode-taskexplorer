@@ -107,78 +107,49 @@ const rules = (env, wpConfig) =>
 			}
 		}]);
 	}
-	else
+	else // extension - node or browser
 	{
-		if (env.environment === "prod" || wpConfig.mode === "production")
+		const configFile = env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json";
+
+		if (wpConfig.mode === "production" || env.stripLogging)
 		{
-			// wpConfig.module.rules.push({
-			// 	test: /\.ts$/,
-			// 	loader: "string-replace-loader",
-			// 	options: {
-			// 		search: /(?:this\.wrapper|this|wrapper)\._?log\.(?:write|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\);?\s*?(?:\r\n|\n|$)/g,
-			// 		replace: "\r\n"
-			// 	}
-			// });
+			wpConfig.module.rules.push({
+				test: /\.ts$/,
+				include: path.join(env.buildPath, "src"),
+				loader: "string-replace-loader",
+				options: {
+					multiple: [
+					{
+						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*\}\);/g,
+						replace: (/** @type {String} */r) => {
+							return "=> {}\r\n" + r.substring(r.slice(0, r.length - 3).lastIndexOf(")") + 1);
+						}
+					},
+					{
+						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\),/g,
+						replace: "=> {},"
+					},
+					{
+						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\) *;/g,
+						replace: "=> {};"
+					},
+					{
+						search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*;\s*?(?:\r\n|$)/g,
+						replace: "\r\n"
+					},
+					{
+						search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+),/g,
+						replace: "() => {},"
+					},
+					{
+						search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+						replace: "() => {}]"
+					}]
+				}
+			});
 		}
 
-		const configFile = env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json";
-		wpConfig.module.rules.push(...[
-		// {   //
-		// 	// THe author of this package decided to import a 700k library (Moment) (un-compressed)
-		// 	// for the use of one single function call.  We can use the IgnorePlugin to filter out the
-		// 	// locales, but, we are left with dynamic import references in the coverage report.  So this
-		// 	// brute force method wqorks best.  We do not even run the changed code, it is however imported.
-		// 	// Dynamically replace this garbage, it decreases our vendor package from 789K (compressed)
-		// 	// to just over 380k (compressed).  Over half.  Smh.
-		// 	//
-		// 	test: /tools\.js$/,
-		// 	// test: /(tools|table)\.js$/,
-		// 	include: path.join(env.buildPath, "node_modules", "@sgarciac", "bombadil", "lib"),
-		// 	loader: "string-replace-loader",
-		// 	options: {
-		// 		multiple: [
-		// 		{
-		// 			search: 'var moment = require(\"moment\");',
-		// 			replace: ""
-		// 		},
-		// 		{
-		// 			search: "return moment",
-		// 			replace: "return new Date"
-		// 		// },
-		// 		// {
-		// 		// 	search: "var l = require(\"./lexer\");",
-		// 		// 	replace: ""
-		// 		// },
-		// 		// {
-		// 		// 	search: "var l = require(\"./lexer\");",
-		// 		// 	replace: "export interface ILexingError { offset: number line: number column: number length: number message: string }"
-		// 		}]
-		// 	}
-		// },
-		// {
-		// 	test: /\.js$/,
-		// 	enforce: /** @type {"pre"|"post"} */("pre"),
-		// 	exclude: [
-		// 		/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
-		// 	],
-		// 	use: [
-		// 	{
-		// 		loader: "source-map-loader",
-		// 		options:
-		// 		{
-		// 			filterSourceMappingUrl: (url, resourcePath) => {
-		// 				if (/crypto$/i.test(url)) {
-		// 					return false;
-		// 				}
-		// 				if (/events/.test(resourcePath)) {
-		// 					return "skip";
-		// 				}
-		// 				return true;
-		// 			}
-		// 		}
-		// 	}]
-		// },
-		{
+		wpConfig.module.rules.push({
 			test: /\.ts$/,
 			include: path.join(env.buildPath, "src"),
 			exclude: [
@@ -204,7 +175,7 @@ const rules = (env, wpConfig) =>
 					transpileOnly: true
 				}
 			} ]
-		}]);
+		});
 	}
 };
 

@@ -21,6 +21,7 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     environment: WebpackBuildEnvironment;
     esbuild: boolean; // Is ES build
     imageOpt: boolean; // Perform image optimization
+    stripLogging: boolean;
     target: WebpakTarget;
     verbosity: WebpackLogLevel;
 }
