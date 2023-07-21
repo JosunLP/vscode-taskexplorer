@@ -49,9 +49,7 @@
 		"bash"
 	],
 	"main": "./dist/taskexplorer",
-	"activationEvents": [
-		"*"
-	],
+	"activationEvents": [],
 	"preview": false,
 	"pricing": "Trial",
 	"scripts": {
