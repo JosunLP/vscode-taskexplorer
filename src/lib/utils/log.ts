@@ -580,7 +580,7 @@ export class TeLog implements ILog, Disposable
         {
             const msg = `To ${enable ? "enable" : "disable"} logging, the ${enable ? "debug" : "release"} ` +
                         "module must be activated and will require a restart.  Activate now?";
-            const action = await window.showInformationMessage(msg, "Yes", "Cancel")
+            const action = await window.showInformationMessage(msg, "Yes", "Cancel");
             if (action === "Yes")
             {
                 await this.installDebugSupport();
