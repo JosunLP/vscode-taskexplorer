@@ -17,30 +17,30 @@ const { renameSync, existsSync, writeFileSync, readFileSync, copyFileSync, unlin
 
 
 /**
+ * @method afterdone
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
 const afterdone = (env, wpConfig) =>
 {
-    // "AfterDonePlugin" MUST BE LAST IN THE PLUGINS ARRAY!!
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build !== "webview")
+    if (env.build === "extension")
     {
-        const _env = { ...env },
-              _wpConfig = { ...wpConfig };
+        const _env = { ...env };
         plugin =
         {   /** @param {import("webpack").Compiler} compiler Compiler */
             apply: (compiler) =>
             {
                 compiler.hooks.afterDone.tap("AfterDonePlugin", () =>
                 {
-                    if (_env.build === "extension")
-                    {
-                        copy(_env, _wpConfig);
-                        upload(_env);
+                    licenseFiles(_env);
+                    sourceMapFiles(_env);
+                    if (_env.environment === "test") {
+                        istanbulFileTags(_env);
                     }
+                    upload(_env);
                 });
             }
         };
@@ -50,67 +50,91 @@ const afterdone = (env, wpConfig) =>
 
 
 /**
+ * @method istanbulFileTags
  * @param {WebpackEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const copy = (env, wpConfig) =>
+const istanbulFileTags = (env) =>
 {
-    const distPath = join(env.buildPath, "dist"),
-          licServerResourcePath = resolve(env.buildPath, "..", "spm-license-server", "res", "app");
-    if (env.environment === "prod" || wpConfig.mode === "production")
+    const outFile = join(env.buildPath, "dist", "taskexplorer.js");
+    if (existsSync(outFile))
     {
+        const regex = /\n[ \t]*module\.exports \= require\(/mg,
+                content = readFileSync(outFile, "utf8"),
+                newContent = content.replace(regex, (v) => "/* istanbul ignore next */" + v);
         try {
-            renameSync(join(distPath, "vendor.js.LICENSE.txt"), join(distPath, "vendor.LICENSE"));
-            renameSync(join(distPath, "taskexplorer.js.LICENSE.txt"), join(distPath, "taskexplorer.LICENSE"));
-            renameSync(
-                join(distPath, "taskexplorer.js.map"),
-                join(licServerResourcePath, "vscode-taskexplorer", "taskexplorer.js.map")
-            );
-            copyFileSync(
-                join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"),
-                join(licServerResourcePath, "app", "shared", "mappings.wasm")
-            );
+            writeFileSync(outFile, newContent);
         } catch {}
-        try { unlinkSync(join(licServerResourcePath, "vscode-taskexplorer", "taskexplorer.debug.js.LICENSE.txt")); } catch {}
-        try { unlinkSync(join(licServerResourcePath, "vscode-taskexplorer", "vendor.debug.js.LICENSE.txt")); } catch {}
-    }
-    else if (env.environment === "test")
-    {
-        const outFile = join(distPath, "taskexplorer.js");
-        if (existsSync(outFile))
-        {
-            const regex = /\n[ \t]*module\.exports \= require\(/mg,
-                    content = readFileSync(outFile, "utf8"),
-                    newContent = content.replace(regex, (v) => "/* istanbul ignore next */" + v);
-            try {
-                writeFileSync(outFile, newContent);
-            } catch {}
-            if (content.includes("/* istanbul ignore file */")) {
-                writeInfo("The '/* istanbul ignore file */ ' tag was found and will break coverage", figures.error);
-            }
+        if (content.includes("/* istanbul ignore file */")) {
+            writeInfo("The '/* istanbul ignore file */ ' tag was found and will break coverage", figures.error);
         }
     }
 };
 
 
 /**
+ * @method sourceMapFiles
+ * @param {WebpackEnvironment} env
+ */
+const sourceMapFiles = (env) =>
+{
+    const distPath = join(env.buildPath, "dist");
+    try {
+        renameSync(join(distPath, "taskexplorer.js.map"), join(env.tempPath, env.app, env.environment, "taskexplorer.js.map"));
+        copyFileSync(join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"), join(env.tempPath, "shared", "mappings.wasm"));
+    } catch {}
+};
+
+
+/**
+ * @method licenseFiles
+ * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org/
+ * @param {WebpackEnvironment} env
+ */
+const licenseFiles = (env) =>
+{
+    try {
+        renameSync(join(env.distPath, "vendor.js.LICENSE.txt"), join(env.distPath, env.app, env.environment, "vendor.LICENSE"));
+        renameSync(join(env.distPath, "taskexplorer.js.LICENSE.txt"), join(env.distPath, env.app, env.environment, "taskexplorer.LICENSE"));
+        unlinkSync(join(env.tempPath, env.app, env.environment, "taskexplorer.debug.js.LICENSE.txt"));
+        unlinkSync(join(env.tempPath, env.app, env.environment, "vendor.debug.js.LICENSE.txt"));
+    } catch {}
+};
+
+
+/**
+ * @method upload
+ * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org/
  * @param {WebpackEnvironment} env
  */
 const upload = (env) =>
 {
     const user = "smeesseman",
           host = "app1.spmeesseman.com",
-          rBasePath = "/usr/lib/node_modules/@spmeesseman/spm-license-server/res/app",
-          lBasePath = resolve(env.buildPath, "..", "spm-license-server", "res", "app");
-    const scpArgs = [
-        "-pw", // undocument supply password
-        process.env.SPMEESSEMAN_COM_APP1_SSH_PWD || "InvalidPassword",
-        "-q", // quiet, don't show statistics
+          rBasePath = "/var/www/app1/res/app",
+          /** @type {import("child_process").SpawnSyncOptions} */
+          spawnSyncOpts = { cwd: env.buildPath, encoding: "utf8", shell: true },
+          lBasePath = resolve(process.env.TEMP || process.env.TMP  || ".", env.app, env.environment),
+          sshAuth = process.env.SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN || "InvalidAuth";
+    const plinkArgs = [
+        "-ssh",   // force use of ssh protocol
+        "-batch", // disable all interactive prompts
+        "-pw",    // authenticate
+        sshAuth,  // auth key
+        `${user}@${host}`,
+        `"mkdir ${rBasePath}/${env.app}/v${env.version}/${env.environment}"`
+    ];
+    const pscpArgs = [
+        "-pw",   // authenticate
+        sshAuth, // auth key
+        // "-q", // quiet, don't show statistics
         "-r", // copy directories recursively
         join(lBasePath, env.app, env.environment),
-        `${user}@${host}:"${rBasePath}/${env.app}/v${env.version}/${env.environment}"`
+        `${user}@${host}:"${rBasePath}/${env.app}/,lv${env.version}/${env.environment}"`
     ];
-    spawnSync("pscp", scpArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
+    console.log(`plink ${plinkArgs.join(" ")}`);
+    console.log(`pscp ${pscpArgs.join(" ")}`);
+    // spawnSync("plink", plinkArgs, spawnSyncOpts);
+    // spawnSync("pscp", pscpArgs, spawnSyncOpts);
 };
 
 

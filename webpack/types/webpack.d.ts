@@ -13,19 +13,23 @@ declare type WebpackOptimization = any;
 
 declare interface WebpackEnvironment extends WebpackEnvironmentInternal
 {
-    analyze: boolean;
-    app: string;
-    basePath: string;
+    analyze: boolean;                     // parform analysis after build
+    app: string;                          // app name (read from package.json)
+    basePath: string;                     // context base dir path
     build: WebpackBuild;
-    buildPath: string;
+    buildPath: string;                    // base/root level dir path of project
     clean: boolean;
+    distPath: string;
     environment: WebpackBuildEnvironment;
-    esbuild: boolean; // Is ES build
-    imageOpt: boolean; // Perform image optimization
+    esbuild: boolean;                     // Use esbuild and esloader
+    imageOpt: boolean;                    // Perform image optimization
+    isTests: boolean;
+    pkgJson: Record<string, any>;         // package.json parsed object
     stripLogging: boolean;
     target: WebpakTarget;
+    tempPath: string;                      // operating system temp directory
     verbosity: WebpackLogLevel;
-    version: string;
+    version: string;                      // app version (read from package.json)
 }
 
 declare interface WebpackEnvironmentInternal

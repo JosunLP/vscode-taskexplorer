@@ -1,6 +1,6 @@
 // @ts-check
 
-const path = require("path");
+const { join, resolve } = require("path");
 
 /**
  * @module webpack.exports.output
@@ -21,7 +21,7 @@ const output = (env, wpConfig) =>
 	{
 		wpConfig.output = {
 			clean: env.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
-			path: path.join(env.buildPath, "res"),
+			path: join(env.buildPath, "res"),
 			publicPath: "#{webroot}/",
 			filename: (pathData, _assetInfo) =>
 			{
@@ -37,11 +37,11 @@ const output = (env, wpConfig) =>
 	{
 		wpConfig.output = {
 			// asyncChunks: true,
-			clean: env.clean === true,
+			clean: env.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
 			// libraryExport: "run",
 			// globalObject: "this",
 			// libraryTarget: 'commonjs2',
-			path: path.join(env.buildPath, "dist", "test"),
+			path: join(env.distPath, "test"),
 			filename: "[name].js",
 			// module: true,
 			// chunkFormat: "commonjs",
@@ -54,20 +54,16 @@ const output = (env, wpConfig) =>
 	}
 	else
 	{
-		const isTests = env.environment.startsWith("test");
-		let outPath = env.build === "browser" ? path.join(env.buildPath, "dist", "browser") : path.join(env.buildPath, "dist");
-		if (!env.stripLogging)
-		{
-			outPath = path.resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer");
-			if (env.build === "browser") {
-				outPath = path.join(outPath, "browser");
-			}
-			if (env.environment !== "prod") {
-				outPath = path.join(outPath, env.environment);
-			}
+		let outPath;
+		const rtRelPath = env.build === "browser" ? "browser" : ".";
+		if (env.stripLogging) {
+			outPath = resolve(env.distPath, rtRelPath);
+		}
+		else {
+			outPath = resolve(env.tempPath, env.app, env.environment, rtRelPath);
 		}
 		wpConfig.output = {
-			clean: env.clean === true ? (isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
+			clean: env.clean === true ? (env.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
 			path: outPath,
 			filename: env.stripLogging ? "[name].js" : "[name].debug.js",
 			libraryTarget: "commonjs2"
