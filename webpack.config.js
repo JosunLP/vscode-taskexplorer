@@ -31,12 +31,11 @@ module.exports = (env, argv) =>
 	writeInfo("----------------------------------------------------");
 	writeInfo(" Start Task Explorer VSCode Extension Webpack build");
 	writeInfo("----------------------------------------------------");
-	writeInfo("   Mode:");
-	writeInfo("      " + mode);
+	writeInfo("   Mode: " + mode);
 	writeInfo("   Argv:");
-	writeInfo("      " + JSON.stringify(argv, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
+	writeInfo("     " + JSON.stringify(argv, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
 	writeInfo("   Env :");
-	writeInfo("      " + JSON.stringify(env, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
+	writeInfo("     " + JSON.stringify(env, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
 	writeInfo("----------------------------------------------------");
 
 	env = Object.assign(

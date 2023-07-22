@@ -17,7 +17,7 @@ const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
-export const emptyFn = () => {};
+export const emptyFn = (..._args: unknown[]) => {};
 
 
 export function execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions): R | undefined;
@@ -398,14 +398,14 @@ export function wrap<R, E, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A
             (r) => {
                 const fResult = wrapFinally(false, catchFinallyOpts, thisArg);
                 if (isPromise<any>(fResult)) {
-                    return fResult.then<R, any>(() => r, wrapThrow);
+                    return fResult.then<R, any>(() => r, emptyFn);
                 }
                 return r;
             },
             (e) =>
             {
                 if (!isCallbackArray<E, ER>(catchFinallyOpts)) {
-                    result = (catchFinallyOpts || wrapThrow).call(thisArg, e);
+                    result = (catchFinallyOpts || emptyFn).call(thisArg, e);
                 }
                 else {
                     result = catchFinallyOpts.shift().call(thisArg, e, ...catchFinallyOpts);
@@ -416,17 +416,17 @@ export function wrap<R, E, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A
                         (r) => {
                             const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
                             if (isPromise<any>(fResult)) {
-                                return fResult.then<E, any>(() => r, wrapThrow);
+                                return fResult.then<E, any>(() => r, emptyFn);
                             }
                             return r;
-                        }, wrapThrow
+                        }, emptyFn
                     );
                 }
                 else
                 {
                     const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
                     if (isPromise<any>(fResult)) {
-                        return fResult.then<E, any>(() => result, wrapThrow);
+                        return fResult.then<E, any>(() => result, emptyFn);
                     }
                 }
                 return result;
@@ -439,7 +439,7 @@ export function wrap<R, E, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A
     catch (e)
     {
         if (!isCallbackArray<E, ER>(catchFinallyOpts)) {     // catch
-            result = wrapThrow.call(thisArg, e);
+            result = emptyFn.call(thisArg, e);
         }
         else {
             result = catchFinallyOpts.shift().call(thisArg, e, ...catchFinallyOpts);
@@ -450,17 +450,17 @@ export function wrap<R, E, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A
                 (r) => {
                     const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
                     if (isPromise<any>(fResult)) {
-                        return fResult.then<E, any>(() => r, wrapThrow);
+                        return fResult.then<E, any>(() => r, emptyFn);
                     }
                     return r;
-                }, wrapThrow
+                }, emptyFn
             );
         }
         else {
             const fResult = wrapFinally(true, catchFinallyOpts, thisArg);
             if (isPromise<any>(fResult)) {
                 const syncResult = clone(result);
-                result = fResult.then<E, any>(() => syncResult, wrapThrow);
+                result = fResult.then<E, any>(() => syncResult, emptyFn);
             }
         }
     }
@@ -480,6 +480,3 @@ const wrapFinally = <E>(failed: boolean, catchFinallyOpts: any, thisArg: any) =>
         }
     }
 };
-
-
-const wrapThrow = <E>(e: E) => { throw(e); };

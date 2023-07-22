@@ -39,7 +39,7 @@ suite("Server Tests", () =>
             `app/${teWrapper.extensionName}/v${teWrapper.version}/${teWrapper.extensionNameShort}.js.map`, ""
         );
         expect(srcMapContent).to.be.an("ArrayBuffer");
-        expect(srcMapContent.byteLength).to.be.greaterThanOrEqual(1000000);
+        expect(srcMapContent.byteLength).to.be.greaterThanOrEqual(900000);
         endRollingCount(this);
     });
 

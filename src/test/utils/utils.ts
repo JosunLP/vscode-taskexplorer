@@ -253,7 +253,7 @@ export const cleanup = async () =>
     let logFileName: string | undefined;
     if (tc.log.enabled && tc.log.file && tc.log.openFileOnFinish)
     {
-        logFileName = teWrapper.log.control.fileName;
+        logFileName = teWrapper.log.state.fileName;
     }
     //
     // Deactivate extension / Dispose disposable resources

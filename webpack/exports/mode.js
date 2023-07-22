@@ -18,14 +18,17 @@
 const mode = (env, argv, wpConfig) =>
 {
 	wpConfig.mode = getMode(env, argv);
-	if (argv.mode === "development") {
-		env.environment = "dev";
-	}
-	else if (argv.mode === "none") {
-		env.environment = "test";
-	}
-	else {
-		env.environment = "prod";
+	if (!env.environment)
+	{
+		if (wpConfig.mode === "development") {
+			env.environment = "dev";
+		}
+		else if (wpConfig.mode === "none") {
+			env.environment = "test";
+		}
+		else {
+			env.environment = "prod";
+		}
 	}
 };
 

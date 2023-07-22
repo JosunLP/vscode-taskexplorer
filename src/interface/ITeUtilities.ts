@@ -120,7 +120,7 @@ export type ErrorType<T extends new (...args: any) => any> = T extends new (...a
 export interface ITeUtilities
 {
 	cloneJsonObject<T>(jso: any): T;
-	emptyFn(): void;
+	emptyFn(..._args: unknown[]): void;
 	execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions): R | undefined;
 	execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
 	execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
