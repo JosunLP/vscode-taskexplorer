@@ -57,8 +57,8 @@ module.exports = (env, argv) =>
 	});
 
 	const extBuild = [
-		getWebpackConfig("extension", { ...env, ...{ stripLogging: false }}, argv),
-		getWebpackConfig("extension", { ...env, ...{ stripLogging: true, clean: false }}, argv)
+		getWebpackConfig("extension", { ...env, ...{ stripLogging: false /* , clean: true */ }}, argv),
+		getWebpackConfig("extension", { ...env, ...{ stripLogging: true }}, argv)
 	];
 
 	if (env.build)

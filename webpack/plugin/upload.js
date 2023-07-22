@@ -91,8 +91,7 @@ const _upload = (env) =>
         "-batch", // disable all interactive prompts
         "-pw",    // authenticate
         sshAuth,  // auth key
-        `${user}@${host}`,
-        `"mkdir ${rBasePath}/${env.app}/v${env.version}/${env.environment}"`
+        `${user}@${host}`
     ];
     const pscpArgs = [
         "-pw",    // authenticate
@@ -100,12 +99,14 @@ const _upload = (env) =>
         // "-q",  // quiet, don't show statistics
         "-r",     // copy directories recursively
         join(env.tempPath, env.app, env.environment),
-        `${user}@${host}:"${rBasePath}/${env.app}/v${env.version}/${env.environment}"`
+        `${user}@${host}:"${rBasePath}/${env.app}/v${env.version}"`
     ];
     try {
         writeInfo(`upload debug support files to ${host}`);
         writeInfo(`   create dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
-        spawnSync("plink", plinkArgs, spawnSyncOpts);
+        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}` ], spawnSyncOpts);
+        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}` ], spawnSyncOpts);
+        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}/${env.environment}` ], spawnSyncOpts);
         writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
         spawnSync("pscp", pscpArgs, spawnSyncOpts);
         writeInfo("successfully uploaded debug support files");
