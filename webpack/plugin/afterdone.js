@@ -103,7 +103,9 @@ const licenseFiles = (env) =>
 
 /**
  * @method upload
- * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org/
+ * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
+ * !!! For first time build on fresh os install, run a command manually to generate and trust the fingerprints !!!
+ *     plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
  * @param {WebpackEnvironment} env
  */
 const upload = (env) =>
@@ -113,7 +115,6 @@ const upload = (env) =>
           rBasePath = "/var/www/app1/res/app",
           /** @type {import("child_process").SpawnSyncOptions} */
           spawnSyncOpts = { cwd: env.buildPath, encoding: "utf8", shell: true },
-          lBasePath = resolve(process.env.TEMP || process.env.TMP  || ".", env.app, env.environment),
           sshAuth = process.env.SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN || "InvalidAuth";
     const plinkArgs = [
         "-ssh",   // force use of ssh protocol
@@ -124,17 +125,19 @@ const upload = (env) =>
         `"mkdir ${rBasePath}/${env.app}/v${env.version}/${env.environment}"`
     ];
     const pscpArgs = [
-        "-pw",   // authenticate
-        sshAuth, // auth key
-        // "-q", // quiet, don't show statistics
-        "-r", // copy directories recursively
-        join(lBasePath, env.app, env.environment),
-        `${user}@${host}:"${rBasePath}/${env.app}/,lv${env.version}/${env.environment}"`
+        "-pw",    // authenticate
+        sshAuth,  // auth key
+        // "-q",  // quiet, don't show statistics
+        "-r",     // copy directories recursively
+        join(env.tempPath, env.app, env.environment),
+        `${user}@${host}:"${rBasePath}/${env.app}/v${env.version}/${env.environment}"`
     ];
-    console.log(`plink ${plinkArgs.join(" ")}`);
-    console.log(`pscp ${pscpArgs.join(" ")}`);
+    writeInfo(`upload debug support files to ${host}`);
+    writeInfo(`   create dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
     // spawnSync("plink", plinkArgs, spawnSyncOpts);
+    writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
     // spawnSync("pscp", pscpArgs, spawnSyncOpts);
+    writeInfo("successfully uploaded debug support files");
 };
 
 
