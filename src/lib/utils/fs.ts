@@ -10,7 +10,7 @@
 import * as fs from "fs";
 import { glob } from "glob";
 import * as path from "path";
-import { execIf, execIf2, wrap } from "./utils";
+import { emptyFn, execIf, execIf2, wrap } from "./utils";
 
 const cwd = process.cwd();
 
@@ -179,7 +179,7 @@ export const deleteFile = (file: string): Promise<void> =>
 };
 
 
-export const deleteFileSync = (file: string): void => wrap(() => fs.unlinkSync(path.resolve(cwd, file)));
+export const deleteFileSync = (file: string): void => wrap(() => fs.unlinkSync(path.resolve(cwd, file)), [ emptyFn ]);
 
 
 /**
