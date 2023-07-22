@@ -5,6 +5,7 @@
  * @module webpack.exports.environment
  */
 
+const { readFileSync } = require("fs");
 const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
 
@@ -30,6 +31,8 @@ const environment = (buildTarget, env, argv) =>
 	else {
 		env.basePath = env.buildPath;
 	}
+	const pkgJson = JSON.parse(readFileSync(join(env.buildPath, "package.json"), "utf8"));
+	Object.assign(env, { app: pkgJson.name, version: pkgJson.version });
 	writeInfo("Environment:");
 	Object.keys(env).forEach((k) => { writeInfo(`   ${k.padEnd(15)}: ${env[k]}`); });
 	if (argv)

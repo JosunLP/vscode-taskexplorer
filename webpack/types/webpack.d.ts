@@ -14,6 +14,7 @@ declare type WebpackOptimization = any;
 declare interface WebpackEnvironment extends WebpackEnvironmentInternal
 {
     analyze: boolean;
+    app: string;
     basePath: string;
     build: WebpackBuild;
     buildPath: string;
@@ -24,6 +25,7 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     stripLogging: boolean;
     target: WebpakTarget;
     verbosity: WebpackLogLevel;
+    version: string;
 }
 
 declare interface WebpackEnvironmentInternal
