@@ -57,11 +57,8 @@ const parallelism = (env, wpConfig) =>
 	{
 		wpConfig.parallelism = Object.keys(webviewApps).length;
 	}
-	// else if (env.build === "extension" && env.environment === "test") {
-	// 	wpConfig.parallelism = 2;
-	// }
 	else {
-		wpConfig.parallelism = 2;
+		wpConfig.parallelism = 4; // extension x 2 / vendor / runtime
 	}
 };
 

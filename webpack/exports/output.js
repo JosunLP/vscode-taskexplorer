@@ -58,9 +58,12 @@ const output = (env, wpConfig) =>
 		let outPath = env.build === "browser" ? path.join(env.buildPath, "dist", "browser") : path.join(env.buildPath, "dist");
 		if (!env.stripLogging)
 		{
-			outPath = path.resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-extjs");
+			outPath = path.resolve(env.buildPath, "..", "spm-license-server", "res", "app", "vscode-taskexplorer");
 			if (env.build === "browser") {
 				outPath = path.join(outPath, "browser");
+			}
+			if (env.environment !== "prod") {
+				outPath = path.join(outPath, env.environment);
 			}
 		}
 		wpConfig.output = {
