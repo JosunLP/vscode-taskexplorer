@@ -25,7 +25,7 @@ import {
 	ITeObjectUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities
 } from "./ITeUtilities";
 
-export type TeRuntimeEnvironment = "dev" | "tests" | "production";
+export type TeRuntimeEnvironment = "dev" | "test" | "prod";
 
 export interface ITeKeys
 {

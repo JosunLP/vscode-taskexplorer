@@ -6,9 +6,9 @@ import { Disposable, Event, EventEmitter, window } from "vscode";
 import { executeCommand, registerCommand } from "./command/command";
 import { IpcAccountRegistrationParams } from "../webview/common/ipc";
 import {
-	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent,
-	TeLicenseState, TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent,
-	IStatusBarInfo, TeTaskSource, ITeLicense, ISpmServer, SpmApiEndpoint
+	ITeLicenseManager, TeLicenseType, TeSessionChangeEvent, ITeAccount, ITeTaskChangeEvent, TeLicenseState,
+	TeRuntimeEnvironment, ITeSession, ISecretStorageChangeEvent, IStatusBarInfo, TeTaskSource, ITeLicense,
+	ISpmServer, SpmApiEndpoint
 } from "../interface";
 
 
@@ -33,10 +33,9 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 	private readonly _disposables: Disposable[] = [];
 	private readonly _maxTaskTypeMsgShown: Record<string, boolean> = {};
     private readonly _onSessionChange: EventEmitter<TeSessionChangeEvent>;
-
 	private readonly _sessionInterval = <{ [id in TeRuntimeEnvironment]: number}>{
-		production: this._defaultSessionInterval, // 4 hr
-		tests: this._defaultSessionInterval, // 4 hr
+		prod: this._defaultSessionInterval, // 4 hr
+		test: this._defaultSessionInterval, // 4 hr
 		dev: 1000 * 60 * 10 // 10 min
 	};
 
@@ -651,7 +650,7 @@ export class LicenseManager implements ITeLicenseManager, Disposable
 		this._maxFreeTaskFiles = data.maxFreeTaskFiles || this._maxFreeTaskFiles;
 		this._maxFreeTasksForTaskType = data.maxFreeTasksForTaskType || this._maxFreeTasksForTaskType;
 		this._maxFreeTasksForScriptType = data.maxFreeTasksForScriptType || this._maxFreeTasksForScriptType;
-		this._sessionInterval.tests = data.sessionInterval || this._defaultSessionInterval;
+		this._sessionInterval.test = data.sessionInterval || this._defaultSessionInterval;
 		if (data.callTasksChanged) {
 			this.onTasksChanged(data.callTasksChanged);
 		}

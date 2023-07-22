@@ -54,10 +54,10 @@ import { TaskExplorerProvider } from "../task/provider/provider";
 import { DisableTaskTypeCommand } from "./command/disableTaskType";
 import { configuration, initConfiguration } from "./configuration";
 import { PowershellTaskProvider } from "../task/provider/powershell";
+import { debounceCommand, registerCommand } from "./command/command";
 import { ParsingReportPage } from "../webview/page/parsingReportPage";
 import { AppPublisherTaskProvider } from "../task/provider/appPublisher";
 import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
-import { debounceCommand, registerCommand, executeCommand } from "./command/command";
 import {
 	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, window,
 	Disposable, EventEmitter, Event
@@ -107,7 +107,7 @@ export class TeWrapper implements ITeWrapper, Disposable
     private readonly _onInitialized: EventEmitter<void>;
     private readonly _onBusyComplete: EventEmitter<void>;
     private readonly _providers: Record<string, ITaskExplorerProvider>;
-	private readonly _envMap: IDictionary<TeRuntimeEnvironment> = { production: "production", development: "dev", test: "tests" };
+	private readonly _envMap: Record<string, TeRuntimeEnvironment> = { production: "prod", development: "dev", test: "test" };
 
 
 	static async create(context: ExtensionContext): Promise<TeWrapper>

@@ -18,16 +18,15 @@ export class TeServer implements ISpmServer
 	private readonly _spmApiServer = "license.spmeesseman.com";
 	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
 		dev: "1Ac4qiBjXsNQP82FqmeJ5k0/oMEmjR6Dx9fw1ojUO9//Z4MS6gdHvmzPYY+tuhp3UV/xILD301dQZpeAt+YZzY+Lnh8DlVCPjc0B4pdP84XazzZ+c3JN0vNN4cIfa+fsyPAEDzcsFUWf3z04kMyDXktZU7EiJ4vBU89qAbjOX9I=",
-		tests: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcOBrbGCpyITCp0Wm19f8gdI1hNJttkARO5Unac4LA2g7RmT/kdXSsz64zNjB9FrvrzHe97tLBHRGorwcOx/K/hQ==",
-		production: "1Ac4qiBjXsNQP82FqmeJ5qMMv9GdCsyTifVKI1MvX7GD2Wu/Ao1j5tJdleYcfG+VAQowzMb8rivzViBQgqkR+3Ub5PUoXcS0pnupIaknMjJOjlrYCBnlpfEu54RTU/noeLfHvolDC4sBhNYYKsVcQA=="
+		test: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcOBrbGCpyITCp0Wm19f8gdI1hNJttkARO5Unac4LA2g7RmT/kdXSsz64zNjB9FrvrzHe97tLBHRGorwcOx/K/hQ==",
+		prod: "1Ac4qiBjXsNQP82FqmeJ5qMMv9GdCsyTifVKI1MvX7GD2Wu/Ao1j5tJdleYcfG+VAQowzMb8rivzViBQgqkR+3Ub5PUoXcS0pnupIaknMjJOjlrYCBnlpfEu54RTU/noeLfHvolDC4sBhNYYKsVcQA=="
 	};
 
 
     constructor(private readonly wrapper: TeWrapper) {}
 
 
-	private get productName() { return `${this.wrapper.extensionName}-${this.wrapper.env}`.replace("-production", ""); };
-
+	private get productName(): string { return `${this.wrapper.extensionName}-${this.wrapper.env}`.replace("-prod", ""); };
 	private get publicToken(): string { return this._publicToken[this.wrapper.env]; }
 
 	get apiServer() { return this._spmApiServer; }
