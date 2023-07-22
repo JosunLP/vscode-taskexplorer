@@ -47,7 +47,7 @@ module.exports = (env, argv) =>
 		imageOpt: true,
 		environment: "prod",
 		prodDbgBuild: false,
-		stripLogging: false,
+		stripLogging: true,
 		target: "node"
 	}, env, { prodDbgBuild: false });
 
@@ -60,33 +60,20 @@ module.exports = (env, argv) =>
 		return getWebpackConfig(env.build, env, argv);
 	}
 
-	else if (env.environment === "test" || mode === "none") {
-		return [
-			getWebpackConfig("extension", env, argv),
-			getWebpackConfig("webview", { ...env, ...{ environment: "dev" }}, argv)
-		];
-	}
-
-	else if (env.environment === "testprod") {
-		return [
-			getWebpackConfig("extension", env, argv),
-			getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, argv)
-		];
-	}
-
-	else if (env.environment === "prod" || mode === "production") {
-		return [
-			getWebpackConfig("extension", { ...env, ...{ stripLogging: false, prodDbgBuild: true }}, argv),
-			getWebpackConfig("extension", { ...env, ...{ stripLogging: true, clean: false }}, argv),
-			getWebpackConfig("webview", { ...env }, argv)
-		];
-	}
-
-	return [
-		getWebpackConfig("extension", env, argv),
-		// getWebpackConfig("browser", env, argv),
-		getWebpackConfig("webview", env, argv),
+	const extBuild = [
+		getWebpackConfig("extension", { ...env, ...{ stripLogging: false }}, argv),
+		getWebpackConfig("extension", { ...env, ...{ stripLogging: true, clean: false }}, argv)
 	];
+
+	if (env.environment === "test") {
+		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "dev" }}, argv) ];
+	}
+
+	if (env.environment === "testprod") {
+		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, argv) ];
+	}
+
+	return [ ...extBuild, getWebpackConfig("webview", { ...env }, argv) ];
 };
 
 /**

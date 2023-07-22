@@ -21,15 +21,12 @@ const sourcemaps = (env, wpConfig) =>
     let plugin;
     if (env.build !== "webview")
     {
-        const isDev = env.environment === "dev" || wpConfig.mode === "development",
-              isProd = env.environment === "prod" || wpConfig.mode === "production",
-              isProdDbg = isProd && env.prodDbgBuild,
-              isTests = env.environment.startsWith("test");
+        const isTests = env.environment.startsWith("test");
         const options =
         {
             test: /\.(js|jsx)($|\?)/i,
             exclude: /((vendor|runtime|tests)(?:\.debug|)\.js|node_modules)/,
-            filename: !isProdDbg ? "[name].js.map" : "[name].debug.js.map",
+            filename: env.stripLogging ? "[name].js.map" : "[name].debug.js.map",
             //
             // The bundled node_modules will produce reference tags within the main entry point
             // files in the form:
@@ -49,24 +46,11 @@ const sourcemaps = (env, wpConfig) =>
                 }
                 return `${info.absoluteResourcePath}`;
             },
-            // moduleFilenameTemplate: ".[resource-path]",
-            // moduleFilenameTemplate: '[absolute-resource-path]',
             fallbackModuleFilenameTemplate: "[absolute-resource-path]?[hash]"
         };
-        if (isDev)
-        {
-            options.filename = "[name].js.map";
-            options.moduleFilenameTemplate = "[absolute-resource-path]";
-            // options.moduleFilenameTemplate = "../[resource-path]";
-            // options.fallbackModuleFilenameTemplate = '[resource-path]?[hash]';
-            options.exclude = /((runtime|tests)(?:\.debug|)\.js|node_modules)/;
-        }
-        else if (isTests) {
+        if (isTests) {
             options.exclude = /((vendor|runtime)(?:\.debug|)\.js|node_modules)/;
         }
-        // else if (isProd) {
-        //     options.filename = !isProdDbg ? "[name].js.map" : "[name].debug.js.map";
-        // }
         plugin = new webpack.SourceMapDevToolPlugin(options);
     }
     return plugin;
