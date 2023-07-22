@@ -7,9 +7,9 @@
  */
 
 const { join } = require("path");
-const { writeInfo } = require("../console");
 const { spawnSync } = require("child_process");
 const { renameSync, copyFileSync } = require("fs");
+const { writeInfo, figures } = require("../console");
 
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
@@ -102,12 +102,18 @@ const _upload = (env) =>
         join(env.tempPath, env.app, env.environment),
         `${user}@${host}:"${rBasePath}/${env.app}/v${env.version}/${env.environment}"`
     ];
-    writeInfo(`upload debug support files to ${host}`);
-    writeInfo(`   create dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
-    // spawnSync("plink", plinkArgs, spawnSyncOpts);
-    writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
-    // spawnSync("pscp", pscpArgs, spawnSyncOpts);
-    writeInfo("successfully uploaded debug support files");
+    try {
+        writeInfo(`upload debug support files to ${host}`);
+        writeInfo(`   create dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
+        spawnSync("plink", plinkArgs, spawnSyncOpts);
+        writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
+        spawnSync("pscp", pscpArgs, spawnSyncOpts);
+        writeInfo("successfully uploaded debug support files");
+    }
+    catch (e) {
+        writeInfo("error uploading debug support files:", figures.color.error);
+        writeInfo("   " + e.message.trim(), figures.color.error);
+    }
 };
 
 
