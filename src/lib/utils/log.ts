@@ -5,11 +5,10 @@ import { apply } from "./object";
 import { figures } from "./figures";
 import { basename, join } from "path";
 import { execIf, popIfExistsBy, wrap } from "./utils";
-import { executeCommand, registerCommand } from "../command/command";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
-import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
 import { appendFileSync, copyFile, createDirSync, deleteFileSync, pathExistsSync, readJsonAsync, writeFile } from "./fs";
+import { commands, ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
 import { Commands, IConfiguration, ConfigKeys, ILog, ILogConfig, ILogControl, ILogState, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
 
 
@@ -64,9 +63,9 @@ export class TeLog implements ILog, Disposable
         execIf(this._logConfig.errorChannel, this._disposables.push, this, null, this._logConfig.errorChannel);
         execIf(this._logConfig.outputChannel, this._disposables.push, this, null, this._logConfig.outputChannel);
         this._disposables.push(
-            registerCommand(Commands.ShowOutputWindow, (show: boolean) => this.showOutput(show, this._logConfig.outputChannel), this),
-            registerCommand(Commands.ShowErrorOutputWindow, (show: boolean) => this.showOutput(show, this._logConfig.errorChannel), this),
-            config.onDidChange(this.processConfigChanges, this)
+            config.onDidChange(this.processConfigChanges, this),
+            commands.registerCommand(Commands.ShowOutputWindow, (show: boolean) => this.showOutput(show, this._logConfig.outputChannel), this),
+            commands.registerCommand(Commands.ShowErrorOutputWindow, (show: boolean) => this.showOutput(show, this._logConfig.errorChannel), this)
         );
     }
 
@@ -363,11 +362,11 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    init = async (wrapper: ITeWrapper, version: string, isNewVersionOrInstall: boolean, promptRestartFn: (...args: any[]) => any) =>
+    init = async (wrapper: ITeWrapper, version: string, env: string, isNewVersionOrInstall: boolean, promptRestartFn: (...args: any[]) => any) =>
     {
         this._wrapper = wrapper;
-        await this.installDebugSupport(version, isNewVersionOrInstall);
-        await this.installSourceMapSupport(version, isNewVersionOrInstall);
+        await this.installDebugSupport(version, env, isNewVersionOrInstall);
+        await this.installSourceMapSupport(version, env, isNewVersionOrInstall);
         //
         // Logging is disabled by default in construction of the logging module, take any
         // necessary actions if it's enabled in user settings
@@ -385,7 +384,7 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private installDebugSupport = (version: string, clean?: boolean, swap?: boolean): Promise<void> =>
+    private installDebugSupport = (version: string, env: string, clean?: boolean, swap?: boolean): Promise<void> =>
     {
         return wrap(async (w) =>
         {
@@ -410,17 +409,17 @@ export class TeLog implements ILog, Disposable
             }
             await execIf(!pathExistsSync(teDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/taskexplorer.debug.js`);
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/${env}/taskexplorer.debug.js`);
                 await writeFile(teDbgModulePath, Buffer.from(moduleContent));
             });
             await execIf(!pathExistsSync(rtDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/runtime.debug.js`);
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/${env}/runtime.debug.js`);
                 await writeFile(rtDbgModulePath, Buffer.from(moduleContent));
             });
             await execIf(!pathExistsSync(vendorDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/vendor.debug.js`);
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/${env}/vendor.debug.js`);
                 await writeFile(vendorDbgModulePath, Buffer.from(moduleContent));
             });
             await execIf(!pathExistsSync(teRelModulePath), () => copyFile(tePath, teRelModulePath), this);
@@ -437,7 +436,7 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private installSourceMapSupport = (version: string, clean?: boolean): Promise<void> =>
+    private installSourceMapSupport = (version: string, env: string, clean?: boolean): Promise<void> =>
     {
         return wrap(async (w) =>
         {
@@ -455,7 +454,7 @@ export class TeLog implements ILog, Disposable
             });
             await execIf(downloadSourceMap, async () =>
             {
-                const srcMapContent = await w.server.get(`app/${w.extensionName}/v${version}/${w.extensionNameShort}.js.map`, "");
+                const srcMapContent = await w.server.get(`app/${w.extensionName}/v${version}/${env}/${w.extensionNameShort}.js.map`, "");
                 await writeFile(this._srcMapPath, Buffer.from(srcMapContent));
             });
             await copyFile(this._wasmPath, this._wasmRtPath);
@@ -631,12 +630,12 @@ export class TeLog implements ILog, Disposable
         {
             const msg = `To ${enable ? "enable" : "disable"} logging ${enabledPreviously ? "for the 1st time" : ""}, ` +
                         `the ${enable ? "debug" : "release"} module must be ${!enabledPreviously ? "activated" : "installed"} ` +
-                        "and will require a restart.  Activate now?";
-            const action = await window.showInformationMessage(msg, "Yes", "Cancel");
-            if (action === "Yes")
+                        "and will require a restart";
+            const action = await window.showInformationMessage(msg, "Restart", "Cancel");
+            if (action === "Restart")
             {
-                await this.installDebugSupport(this.wrapper.version);
-                this.enable(enable);
+                await this.installDebugSupport(this.wrapper.version, this.wrapper.env, false, true);
+                void commands.executeCommand<void>(this.wrapper.keys.VsCodeCommands.Reload);
             }
         }
         else { this.enable(enable); }
@@ -660,7 +659,7 @@ export class TeLog implements ILog, Disposable
     private showOutput = async(show: boolean, channel: OutputChannel) =>
     {
         if (show) {
-            await executeCommand(VsCodeCommands.FocusOutputWindowPanel);
+            await commands.executeCommand<void>(VsCodeCommands.FocusOutputWindowPanel);
             channel.show();
         }
         else {

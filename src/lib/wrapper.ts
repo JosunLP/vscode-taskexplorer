@@ -238,17 +238,18 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	private initLog = async (): Promise<void> =>
 	{
+		const isNewVersionOrInstall = this.isNewInstall || this.versionChanged;
 		let sb: any = { dispose: utilities.emptyFn, hide: utilities.emptyFn };
 		const eMsg = "Unable to install logging support files",
 			  wrapCbOpts: CallbackOptions = [ /* catch */window.showErrorMessage, /* finally */() => { sb.hide(); sb.dispose(); }, eMsg ];
-		if (this.isNewInstall || this.versionChanged)
+		if (isNewVersionOrInstall)
 		{
 			sb = window.createStatusBarItem(1, 100);
 			sb.text = `$(loading~spin) ${this.extensionTitleShort}: Installing debug support files`;
 			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
 			sb.show();
 		}
-		await utilities.wrap(this._log.init, wrapCbOpts, this, this, this._version, this.versionChanged, utilities.promptRestart);
+		await utilities.wrap(this._log.init, wrapCbOpts, this, this, this._version, this.env, isNewVersionOrInstall, utilities.promptRestart);
 		this.log.methodEvent("initializing extension", "wrapper", 1, [
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
