@@ -4,13 +4,14 @@
 import { apply } from "./object";
 import { figures } from "./figures";
 import { basename, join } from "path";
-import { appendFileSync, createDirSync } from "./fs";
+// import { EventEmitter } from "events";
 import { execIf, popIfExistsBy, wrap } from "./utils";
 import { executeCommand, registerCommand } from "../command/command";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
+import { appendFileSync, copyFile, createDirSync, deleteFile, pathExistsSync, readJsonAsync, writeFile } from "./fs";
 import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
-import { Commands, IConfiguration, ConfigKeys, ILog, ILogControl, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
+import { Commands, IConfiguration, ConfigKeys, ILog, ILogConfig, ILogControl, ILogState, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
 
 
 /**
@@ -19,6 +20,7 @@ import { Commands, IConfiguration, ConfigKeys, ILog, ILogControl, ITeWrapper, Lo
  */
 export class TeLog implements ILog, Disposable
 {
+    private _busy = false;
     private _errorsWritten = 0;
     private _fileNameTimer: NodeJS.Timeout;
     private _wrapper: ITeWrapper | undefined;
@@ -27,65 +29,49 @@ export class TeLog implements ILog, Disposable
     private readonly _wasmPath: string;
     private readonly _wasmRtPath: string;
     private readonly _srcMapPath: string;
-    private readonly _runtimePath: string;
+    private readonly _runtimeDir: string;
     private readonly _dbgModuleDir: string;
     private readonly _config: IConfiguration;
+    private readonly _logState: ILogState;
+    private readonly _logConfig: ILogConfig;
     private readonly _logControl: ILogControl;
     private readonly _context: ExtensionContext;
     private readonly _disposables: Disposable[];
+    // private readonly _eventEmitter: EventEmitter;
     private readonly _separator = "-----------------------------------------------------------------------------------------";
     private readonly _stackLineParserRgx = /at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i;
     private readonly _stackLineFilterRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
 
 
-    constructor(context: ExtensionContext, config: IConfiguration)
+    constructor(context: ExtensionContext, config: IConfiguration, logConfig?: Partial<ILogConfig>, logControl?: Partial<ILogControl>)
     {
+        this.enable(false);
         this._config = config;
         this._context = context;
-        createDirSync(this._context.logUri.fsPath);
-        createDirSync(join(this._context.globalStorageUri.fsPath, "debug"));
-        this._runtimePath = join(this._context.extensionUri.fsPath, "dist");
-        this._wasmRtPath = join(this._runtimePath, "mappings.wasm");
+        this._disposables = [];
+        // this._eventEmitter = new EventEmitter();
+        this._runtimeDir = join(this._context.extensionUri.fsPath, "dist");
+        this._wasmRtPath = join(this._runtimeDir, "mappings.wasm");
         this._dbgModuleDir = join(this._context.globalStorageUri.fsPath, "debug");
         this._wasmPath = join(this._dbgModuleDir, "mappings.wasm");
         this._srcMapPath = join(this._dbgModuleDir, "taskexplorer.js.map");
         this._fileNameTimer = 0 as unknown as NodeJS.Timeout;
-        this._logControl = {
-            dirPath: context.logUri.fsPath,
-            enable: config.get<boolean>(ConfigKeys.LogEnable, false),
-            enableOutputWindow: config.get<boolean>(ConfigKeys.LogEnableOutputWindow, true),
-            enableFile: config.get<boolean>(ConfigKeys.LogEnableFile, false),
-            enableModuleReload: config.get<boolean>(ConfigKeys.LogEnableModuleReload, false),
-            errorChannel: window.createOutputChannel(`${context.extension.packageJSON.displayName} (Errors)`),
-            fileName: "",
-            isTests: context.extensionMode === ExtensionMode.Test,
-            isTestsBlockScaryColors: context.extensionMode === ExtensionMode.Test,
-            lastErrorMesage: [],
-            lastLogPad: "",
-            lastWriteWasBlank: false,
-            lastWriteWasBlankError: false,
-            lastWriteToConsoleWasBlank: false,
-            level: config.get<LogLevel>(ConfigKeys.LogLevel, 1),
-            msgQueue: {},
-            outputChannel: window.createOutputChannel(context.extension.packageJSON.displayName),
-            trace: false,
-            tzOffset: (new Date()).getTimezoneOffset() * 60000,
-            valueWhiteSpace: 45,
-            writeToConsole: false,
-            writeToConsoleLevel: 2
-        };
-        this.enable(this._logControl.enable);
+        this._logState = this.getDefaultState();
+        this._logConfig = apply(this.getDefaultConfig(context), logConfig!);
+        this._logControl = apply(this.getDefaultControl(config), logControl!);
+        createDirSync(this._dbgModuleDir);
+        createDirSync(this._context.logUri.fsPath);
         this.writeErrorChannelHeader();
         this.writeOutputChannelHeader();
         this.setFileName();
-        this._disposables = [
-            this._logControl.errorChannel,
-            this._logControl.outputChannel,
-            registerCommand(Commands.ShowOutputWindow, (show: boolean) => this.showOutput(show, this._logControl.outputChannel), this),
-            registerCommand(Commands.ShowErrorOutputWindow, (show: boolean) => this.showOutput(show, this._logControl.errorChannel), this),
-            config.onDidChange(this.processConfigChanges, this)
-        ];
 		context.subscriptions.push(this);
+        execIf(this._logConfig.errorChannel, this._disposables.push, this, null, this._logConfig.errorChannel);
+        execIf(this._logConfig.outputChannel, this._disposables.push, this, null, this._logConfig.outputChannel);
+        this._disposables.push(
+            registerCommand(Commands.ShowOutputWindow, (show: boolean) => this.showOutput(show, this._logConfig.outputChannel), this),
+            registerCommand(Commands.ShowErrorOutputWindow, (show: boolean) => this.showOutput(show, this._logConfig.errorChannel), this),
+            config.onDidChange(this.processConfigChanges, this)
+        );
     }
 
     dispose = () =>
@@ -96,20 +82,13 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private get allowScaryColors() { return !this._logControl.isTests || !this._logControl.isTestsBlockScaryColors; }
+    private get allowScaryColors() { return !this._logConfig.isTests || !this._logConfig.isTestsBlockScaryColors; }
 
     get control(): ILogControl { return this._logControl; }
-
-    get lastPad(): string { return this._logControl.lastLogPad; }
-
+    get isBusy(): boolean { return this._busy; };
+    get lastPad(): string { return this._logState.lastLogPad; }
+    // get onReady() { return (listener: () => any) => this._eventEmitter.on("ready", listener); };
     get wrapper(): ITeWrapper { return <ITeWrapper>this._wrapper; }
-    set wrapper(v) {
-        this._wrapper = v;
-        // queueMicrotask(async () => {
-            /* await */void this.installSourceMapSupport();
-            // await this.installDebugSupport();
-        // });
-    }
 
 
     private _blank = (level?: LogLevel, queueId?: string) => this._write("", level, "", queueId);
@@ -117,10 +96,10 @@ export class TeLog implements ILog, Disposable
 
     private _dequeue = (queueId: string) =>
     {
-        if (this._logControl.msgQueue[queueId])
+        if (this._logState.msgQueue[queueId])
         {
-            this._logControl.msgQueue[queueId].forEach(l => l.fn.call(l.scope, ...l.args));
-            delete this._logControl.msgQueue[queueId];
+            this._logState.msgQueue[queueId].forEach(l => l.fn.call(l.scope, ...l.args));
+            delete this._logState.msgQueue[queueId];
         }
     };
 
@@ -157,25 +136,25 @@ export class TeLog implements ILog, Disposable
         // Ignore consecutive duplicate messages
         //
         const errMsgs = this.parseValue(msg);
-        if (this._logControl.lastErrorMesage[0] === errMsgs[0])
+        if (this._logState.lastErrorMesage[0] === errMsgs[0])
         {
             if (!isArray(msg)) {
                 return;
             }
             /* istanbul ignore next */
-            if (errMsgs[1] === this._logControl.lastErrorMesage[1] && errMsgs.length === this._logControl.lastErrorMesage.length) {
+            if (errMsgs[1] === this._logState.lastErrorMesage[1] && errMsgs.length === this._logState.lastErrorMesage.length) {
                 return;
             }
         }
         this._errorsWritten++;
-        this._logControl.lastErrorMesage = errMsgs;
+        this._logState.lastErrorMesage = errMsgs;
         const currentWriteToConsole = this._logControl.writeToConsole,
               currentWriteToFile = this._logControl.enableFile,
               currentWriteToOutputWindow = this._logControl.enableOutputWindow;
         //
         // Write blank line
         //
-        if (!this._logControl.lastWriteWasBlankError && !this._logControl.lastWriteToConsoleWasBlank)
+        if (!this._logState.lastWriteWasBlankError && !this._logState.lastWriteToConsoleWasBlank)
         {
             this.errorWriteLogs("", currentWriteToFile, symbols, queueId);
         }
@@ -240,7 +219,7 @@ export class TeLog implements ILog, Disposable
     private errorConsole = (msg: string, symbols: [ string, string ], queueId?: string) =>
     {
         apply(this._logControl, { writeToConsole: true, enableFile: false, enableOutputWindow: false });
-        if (!this._logControl.isTestsBlockScaryColors) {
+        if (!this._logConfig.isTestsBlockScaryColors) {
             this._write(symbols[0] + " " + msg, 1, "", queueId, false, true);
         }
         else {
@@ -280,21 +259,53 @@ export class TeLog implements ILog, Disposable
     {
         const sInfo = this.getStamp(true);
         const ts = `${sInfo.stamp} ${figures.pointer} ${symbols[1]}`;
-        this._logControl.errorChannel.appendLine(`${ts} --- ERROR ${this._errorsWritten} ${this._separator}`);
-        this._logControl.errorChannel.appendLine(ts);
-        this._logControl.errorChannel.appendLine(`${ts} line          : ${sInfo.line}`);
-        this._logControl.errorChannel.appendLine(`${ts} column        : ${sInfo.column}`);
-        this._logControl.errorChannel.appendLine(`${ts} name          : ${sInfo.name}`);
-        this._logControl.errorChannel.appendLine(`${ts} file          : ${sInfo.source}`);
-        this._logControl.errorChannel.appendLine(ts);
-        this._logControl.errorChannel.appendLine(`${ts} error message :`);
-        this._logControl.errorChannel.appendLine(ts);
+        this._logConfig.errorChannel.appendLine(`${ts} --- ERROR ${this._errorsWritten} ${this._separator}`);
+        this._logConfig.errorChannel.appendLine(ts);
+        this._logConfig.errorChannel.appendLine(`${ts} line          : ${sInfo.line}`);
+        this._logConfig.errorChannel.appendLine(`${ts} column        : ${sInfo.column}`);
+        this._logConfig.errorChannel.appendLine(`${ts} name          : ${sInfo.name}`);
+        this._logConfig.errorChannel.appendLine(`${ts} file          : ${sInfo.source}`);
+        this._logConfig.errorChannel.appendLine(ts);
+        this._logConfig.errorChannel.appendLine(`${ts} error message :`);
+        this._logConfig.errorChannel.appendLine(ts);
+    };
+
+
+    private getDefaultConfig = (context: ExtensionContext): ILogConfig =>
+    {
+        const pkgJson = context.extension.packageJSON;
+        return {
+            channelWriteFn: "appendLine",
+            dirPath: context.logUri.fsPath,
+            errorChannel: window.createOutputChannel(`${context.extension.packageJSON.displayName} (Errors)`),
+            extensionAuthor: isObject(pkgJson.author) ? pkgJson.author.name : pkgJson.name,
+            extensionId: context.extension.id,
+            isTests: context.extensionMode === ExtensionMode.Test,
+            isTestsBlockScaryColors: context.extensionMode === ExtensionMode.Test,
+            outputChannel: window.createOutputChannel(context.extension.packageJSON.displayName)
+        };
+    };
+
+
+    private getDefaultControl = (config: IConfiguration): ILogControl =>
+    {
+        return {
+            enable: config.get<boolean>(ConfigKeys.LogEnable, false),
+            enableOutputWindow: config.get<boolean>(ConfigKeys.LogEnableOutputWindow, true),
+            enableFile: config.get<boolean>(ConfigKeys.LogEnableFile, false),
+            enableModuleReload: config.get<boolean>(ConfigKeys.LogEnableModuleReload, false),
+            level: config.get<LogLevel>(ConfigKeys.LogLevel, 1),
+            trace: false,
+            valueWhiteSpace: 45,
+            writeToConsole: false,
+            writeToConsoleLevel: 2
+        };
     };
 
 
     private getDefaultStamp = () =>
     {
-        const timeTags = (new Date(Date.now() - this._logControl.tzOffset)).toISOString().slice(0, -1).split("T");
+        const timeTags = (new Date(Date.now() - this._logState.tzOffset)).toISOString().slice(0, -1).split("T");
         return {
             column: 1,
             source: "taskexplorer.js",
@@ -303,6 +314,21 @@ export class TeLog implements ILog, Disposable
             stamp: timeTags.join(" "),
             stampDate: timeTags[0],
             stampTime: timeTags[1]
+        };
+    };
+
+
+    private getDefaultState = (): ILogState =>
+    {
+        return {
+            fileName: "",
+            lastErrorMesage: [],
+            lastLogPad: "",
+            lastWriteWasBlank: false,
+            lastWriteWasBlankError: false,
+            lastWriteToConsoleWasBlank: false,
+            msgQueue: {},
+            tzOffset: (new Date()).getTimezoneOffset() * 60000,
         };
     };
 
@@ -338,9 +364,32 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private installDebugSupport = (): Promise<void> =>
+    init = async (wrapper: ITeWrapper) =>
     {
-        return this.wrapper.utils.wrap(async (w) =>
+        this._busy = true;
+        const w = this._wrapper = wrapper;
+        // if (wrapper.versionchanged || wrapper.isNewInstall)
+        // {
+            // queueMicrotask(async () =>
+            // {
+        // try {
+            const clean = w.versionchanged || w.isNewInstall;
+            await this.installDebugSupport(w.version, clean);
+            await this.installSourceMapSupport(w.version, clean);
+            this.enable(this._logControl.enable);
+        // }
+        // finally {
+        //     this._busy = false;
+        //     this._eventEmitter.emit("ready");
+        // }
+            // });
+        // }
+    };
+
+
+    private installDebugSupport = (version: string, clean?: boolean): Promise<void> =>
+    {
+        return wrap(async (w) =>
         {
             const enable = this._logControl.enable,
                   teRelModulePath = join(this._dbgModuleDir, "taskexplorer.js"),
@@ -349,73 +398,73 @@ export class TeLog implements ILog, Disposable
                   teDbgModulePath = join(this._dbgModuleDir, "taskexplorer.debug.js"),
                   rtDbgModulePath = join(this._dbgModuleDir, "runtime.debug.js"),
                   vendorDbgModulePath = join(this._dbgModuleDir, "vendor.debug.js"),
-                  tePath = join(this._runtimePath, "taskexplorer.js"),
-                  rtPath = join(this._runtimePath, "runtime.js"),
-                  vendorPath = join(this._runtimePath, "vendor.js");
-            if (w.versionchanged || w.isNewInstall)
+                  tePath = join(this._runtimeDir, "taskexplorer.js"),
+                  rtPath = join(this._runtimeDir, "runtime.js"),
+                  vendorPath = join(this._runtimeDir, "vendor.js");
+            if (clean)
             {
-                await w.fs.deleteFile(teRelModulePath);
-                await w.fs.deleteFile(rtRelModulePath);
-                await w.fs.deleteFile(vendorRelModulePath);
-                await w.fs.deleteFile(teDbgModulePath);
-                await w.fs.deleteFile(rtDbgModulePath);
-                await w.fs.deleteFile(vendorDbgModulePath);
+                await deleteFile(teRelModulePath);
+                await deleteFile(rtRelModulePath);
+                await deleteFile(vendorRelModulePath);
+                await deleteFile(teDbgModulePath);
+                await deleteFile(rtDbgModulePath);
+                await deleteFile(vendorDbgModulePath);
             }
-            await w.utils.execIf(!w.fs.pathExistsSync(teDbgModulePath), async () =>
+            await execIf(!pathExistsSync(teDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/taskexplorer.debug.js`);
-                await w.fs.writeFile(teDbgModulePath, Buffer.from(moduleContent));
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/taskexplorer.debug.js`);
+                await writeFile(teDbgModulePath, Buffer.from(moduleContent));
             });
-            await w.utils.execIf(!w.fs.pathExistsSync(rtDbgModulePath), async () =>
+            await execIf(!pathExistsSync(rtDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/runtime.debug.js`);
-                await w.fs.writeFile(rtDbgModulePath, Buffer.from(moduleContent));
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/runtime.debug.js`);
+                await writeFile(rtDbgModulePath, Buffer.from(moduleContent));
             });
-            await w.utils.execIf(!w.fs.pathExistsSync(vendorDbgModulePath), async () =>
+            await execIf(!pathExistsSync(vendorDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${w.version}/vendor.debug.js`);
-                await w.fs.writeFile(vendorDbgModulePath, Buffer.from(moduleContent));
+                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/vendor.debug.js`);
+                await writeFile(vendorDbgModulePath, Buffer.from(moduleContent));
             });
-            await w.utils.execIf(!w.fs.pathExistsSync(teRelModulePath), () => w.fs.copyFile(tePath, teRelModulePath), this);
-            await w.utils.execIf(!w.fs.pathExistsSync(rtRelModulePath), () => w.fs.copyFile(rtPath, rtRelModulePath), this);
-            await w.utils.execIf(!w.fs.pathExistsSync(vendorRelModulePath), () => w.fs.copyFile(vendorPath, vendorRelModulePath), this);
-            await this.wrapper.fs.copyFile(!enable ? teRelModulePath : teDbgModulePath, tePath);
-            await this.wrapper.fs.copyFile(!enable ? rtRelModulePath : rtDbgModulePath, rtPath);
-            await this.wrapper.fs.copyFile(!enable ? vendorRelModulePath : vendorDbgModulePath, vendorPath);
+            await execIf(!pathExistsSync(teRelModulePath), () => copyFile(tePath, teRelModulePath), this);
+            await execIf(!pathExistsSync(rtRelModulePath), () => copyFile(rtPath, rtRelModulePath), this);
+            await execIf(!pathExistsSync(vendorRelModulePath), () => copyFile(vendorPath, vendorRelModulePath), this);
+            await copyFile(!enable ? teRelModulePath : teDbgModulePath, tePath);
+            await copyFile(!enable ? rtRelModulePath : rtDbgModulePath, rtPath);
+            await copyFile(!enable ? vendorRelModulePath : vendorDbgModulePath, vendorPath);
         },
-        [ this._error ], this, this.wrapper);
+        [ this._error, "Unable to install logging supprt" ], this, this.wrapper);
     };
 
 
-    private installSourceMapSupport = (): Promise<void> =>
+    private installSourceMapSupport = (version: string, clean?: boolean): Promise<void> =>
     {
-        return this.wrapper.utils.wrap(async (w) =>
+        return wrap(async (w) =>
         {
-            const downloadWasm = !w.fs.pathExistsSync(this._wasmPath),
-                  downloadSourceMap = !w.fs.pathExistsSync(this._srcMapPath);
-            if (w.versionchanged)
+            const downloadWasm = !pathExistsSync(this._wasmPath),
+                  downloadSourceMap = !pathExistsSync(this._srcMapPath);
+            if (clean)
             {
-                w.fs.deleteFileSync(this._wasmPath);
-                w.fs.deleteFileSync(this._srcMapPath);
+                await deleteFile(this._wasmPath);
+                await deleteFile(this._srcMapPath);
             }
-            await w.utils.execIf(downloadWasm, async () =>
+            await execIf(downloadWasm, async () =>
             {
                 const wasmContent = await w.server.get("app/shared/mappings.wasm", "");
-                await w.fs.writeFile(this._wasmPath, Buffer.from(wasmContent));
+                await writeFile(this._wasmPath, Buffer.from(wasmContent));
             });
-            await w.utils.execIf(downloadSourceMap, async () =>
+            await execIf(downloadSourceMap, async () =>
             {
-                const srcMapContent = await w.server.get(`app/${w.extensionName}/v${w.version}/${w.extensionNameShort}.js.map`, "");
-                await w.fs.writeFile(this._srcMapPath, Buffer.from(srcMapContent));
+                const srcMapContent = await w.server.get(`app/${w.extensionName}/v${version}/${w.extensionNameShort}.js.map`, "");
+                await writeFile(this._srcMapPath, Buffer.from(srcMapContent));
             });
-            await w.fs.copyFile(this._wasmPath, this._wasmRtPath);
-            const srcMap = await w.fs.readJsonAsync<RawSourceMap>(this._srcMapPath);
+            await copyFile(this._wasmPath, this._wasmRtPath);
+            const srcMap = await readJsonAsync<RawSourceMap>(this._srcMapPath);
             this._srcMapConsumer = await new SourceMapConsumer(srcMap);
             this._disposables.push({
                 dispose: () => wrap(c => c.destroy(), [ this._error ], this, this._srcMapConsumer)
             });
         },
-        [ this._error ], this, this.wrapper);
+        [ this._error, "Unable to install source map supprt for error tracing" ], this, this.wrapper);
     };
 
 
@@ -463,7 +512,7 @@ export class TeLog implements ILog, Disposable
         midnight.setMinutes(0);
         midnight.setSeconds(0);
         midnight.setMilliseconds(0);
-        return (!this._logControl.isTests ? /* istanbul ignore next */midnight.getTime() - new Date().getTime() : 120000);
+        return (!this._logConfig.isTests ? /* istanbul ignore next */midnight.getTime() - new Date().getTime() : 120000);
     }
 
 
@@ -556,7 +605,7 @@ export class TeLog implements ILog, Disposable
             if (this._logControl.enableFile)
             {
                 this.writeLogFileLocation();
-                window.showInformationMessage("Log file location: " + this._logControl.fileName);
+                window.showInformationMessage("Log file location: " + this._logState.fileName);
                 if (!this._logControl.enable) {
                     await this._config.update(cfgKeys.LogEnable, this._logControl.enableFile);
                 }
@@ -575,29 +624,31 @@ export class TeLog implements ILog, Disposable
 
     private processLogEnableChange = async () =>
     {
-        const enable = this._logControl.enable;
-        if (this._logControl.enableModuleReload)
+        const enable = this._logControl.enable,
+              enabledPreviously = enable && this.wrapper.fs.pathExistsSync(join(this._dbgModuleDir, "taskexplorer.js"));
+        if (this._logControl.enableModuleReload || !enabledPreviously)
         {
-            const msg = `To ${enable ? "enable" : "disable"} logging, the ${enable ? "debug" : "release"} ` +
-                        "module must be activated and will require a restart.  Activate now?";
+            const msg = `To ${enable ? "enable" : "disable"} logging ${enabledPreviously ? "for the 1st time" : ""}, ` +
+                        `the ${enable ? "debug" : "release"} module must be ${!enabledPreviously ? "activated" : "installed"} ` +
+                        "and will require a restart.  Activate now?";
             const action = await window.showInformationMessage(msg, "Yes", "Cancel");
             if (action === "Yes")
             {
-                await this.installDebugSupport();
-                this.enable(this._logControl.enable);
+                await this.installDebugSupport(this.wrapper.version);
+                this.enable(enable);
             }
         }
-        else {
-            this.enable(this._logControl.enable);
-        }
-};
+        else { this.enable(enable); }
+    };
 
 
     private setFileName = () =>
     {
-        const locISOTime = (new Date(Date.now() - this._logControl.tzOffset)).toISOString().slice(0, -1).split("T")[0].replace(/[\-]/g, "");
-        this._logControl.fileName = join(this._logControl.dirPath, `vscode-taskexplorer-${locISOTime}.log`);
-        this.writeLogFileLocation();
+        const locISOTime = (new Date(Date.now() - this._logState.tzOffset)).toISOString().slice(0, -1).split("T")[0].replace(/[\-]/g, "");
+        this._logState.fileName = join(this._logConfig.dirPath, `vscode-taskexplorer-${locISOTime}.log`);
+        if (this._logControl.enableFile) {
+            this.writeLogFileLocation();
+        }
         if (this._fileNameTimer) {
             clearTimeout(this._fileNameTimer);
         }
@@ -645,35 +696,32 @@ export class TeLog implements ILog, Disposable
 
     private writeErrorChannelHeader = () =>
     {
-        this._logControl.errorChannel.appendLine("");
-        this._logControl.errorChannel.appendLine("****************************************************************************************************");
-        this._logControl.errorChannel.appendLine(" Task Explorer Error Logging Channel");
-        this._logControl.errorChannel.appendLine("****************************************************************************************************");
-        this._logControl.errorChannel.appendLine("");
+        this._logConfig.errorChannel.appendLine("");
+        this._logConfig.errorChannel.appendLine("****************************************************************************************************");
+        this._logConfig.errorChannel.appendLine(" Task Explorer Error Logging Channel");
+        this._logConfig.errorChannel.appendLine("****************************************************************************************************");
+        this._logConfig.errorChannel.appendLine("");
     };
 
 
     private writeOutputChannelHeader = () =>
     {
-        this._logControl.outputChannel.appendLine("");
-        this._logControl.outputChannel.appendLine("****************************************************************************************************");
-        this._logControl.errorChannel.appendLine(" Task Explorer Error Logging Channel");
-        this._logControl.outputChannel.appendLine("****************************************************************************************************");
-        this._logControl.outputChannel.appendLine("");
+        this._logConfig.outputChannel.appendLine("");
+        this._logConfig.outputChannel.appendLine("****************************************************************************************************");
+        this._logConfig.errorChannel.appendLine(" Task Explorer Error Logging Channel");
+        this._logConfig.outputChannel.appendLine("****************************************************************************************************");
+        this._logConfig.outputChannel.appendLine("");
     };
 
 
     private writeLogFileLocation = () =>
     {
-        if (this._logControl.enable && this._logControl.enableFile)
-        {
-            this._logControl.outputChannel.appendLine("***********************************************************************************************");
-            this._logControl.outputChannel.appendLine(` Task Explorer Log File: ${this._logControl.fileName}`);
-            this._logControl.outputChannel.appendLine("***********************************************************************************************");
-            console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
-            console.log(`    ${figures.color.info} ${figures.withColor(` Task Explorer Log File: ${this._logControl.fileName}`, figures.colors.grey)}`);
-            console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
-        }
+        this._logConfig.outputChannel.appendLine("***********************************************************************************************");
+        this._logConfig.outputChannel.appendLine(` Task Explorer Log File: ${this._logState.fileName}`);
+        this._logConfig.outputChannel.appendLine("***********************************************************************************************");
+        console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
+        console.log(`    ${figures.color.info} ${figures.withColor(` Task Explorer Log File: ${this._logState.fileName}`, figures.colors.grey)}`);
+        console.log(`    ${figures.color.info} ${figures.withColor("*************************************************************************************", figures.colors.grey)}`);
     };
 
 
@@ -733,8 +781,8 @@ export class TeLog implements ILog, Disposable
                         fn.call(scope, ...args, _msg);
                     }
                     else {
-                        if (!this._logControl.msgQueue[queueId]) this._logControl.msgQueue[queueId] = [];
-                        this._logControl.msgQueue[queueId].push({ fn, scope, args: [ ...args, _msg ] });
+                        if (!this._logState.msgQueue[queueId]) this._logState.msgQueue[queueId] = [];
+                        this._logState.msgQueue[queueId].push({ fn, scope, args: [ ...args, _msg ] });
                     }
                 }
                 else
@@ -743,8 +791,8 @@ export class TeLog implements ILog, Disposable
                         fn.call(scope, _msg);
                     }
                     else {
-                        if (!this._logControl.msgQueue[queueId]) this._logControl.msgQueue[queueId] = [];
-                        this._logControl.msgQueue[queueId].push({ fn, scope, args: [ _msg ] });
+                        if (!this._logState.msgQueue[queueId]) this._logState.msgQueue[queueId] = [];
+                        this._logState.msgQueue[queueId].push({ fn, scope, args: [ _msg ] });
                     }
                 }
             firstLineDone = true;
@@ -754,7 +802,7 @@ export class TeLog implements ILog, Disposable
 
     private _write = (msg: string, level?: LogLevel, logPad?: string, queueId?: string, isValue?: boolean, isError?: boolean) =>
     {
-        if (msg === null || msg === undefined || (this._logControl.lastWriteWasBlank && msg === "")) {
+        if (msg === null || msg === undefined || (this._logState.lastWriteWasBlank && msg === "")) {
             return;
         }
         const isMinLevel = (!level || level <= this._logControl.level);
@@ -766,32 +814,32 @@ export class TeLog implements ILog, Disposable
         if (this._logControl.enableOutputWindow && (isMinLevel || isError))
         {
             const ts = this.getStamp().stamp  + " " + figures.pointer;
-            this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.outputChannel.appendLine, this._logControl.outputChannel, ts, false);
+            this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logConfig.outputChannel.appendLine, this._logConfig.outputChannel, ts, false);
             if (isError && this._srcMapConsumer && (!this._errorsWritten || msg)) {
-                this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logControl.errorChannel.appendLine, this._logControl.errorChannel, ts, false);
+                this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logConfig.errorChannel.appendLine, this._logConfig.errorChannel, ts, false);
             }
         } //
          // CONSOLE LOGGING
         //
         if (this._logControl.writeToConsole && (isError || !level || level <= this._logControl.writeToConsoleLevel))
         {
-            const ts = !this._logControl.isTests ? /* istanbul ignore next */this.getStamp().stampTime + " " + figures.pointer : "   ";
+            const ts = !this._logConfig.isTests ? /* istanbul ignore next */this.getStamp().stampTime + " " + figures.pointer : "   ";
             msg = figures.withColor(msg, figures.colors.grey);
             this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, console.log, console, ts, false);
-            this._logControl.lastWriteToConsoleWasBlank = false;
+            this._logState.lastWriteToConsoleWasBlank = false;
         } //
          // FILE LOGGING
         //
         if (this._logControl.enableFile && isMinLevel)
         {
             const ts = this.getStamp().stampTime + /* (file symbols ? " " + figures.pointer : */ " >";
-            this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, appendFileSync, null, ts, true, this._logControl.fileName);
+            this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, appendFileSync, null, ts, true, this._logState.fileName);
         }
         apply(this._logControl, { lastLogPad: logPad, lastWriteWasBlank: (msg === "") });
         if (!isError)
         {
             apply(this._logControl, { lastErrorMesage: [], lastWriteWasBlankError: false });
-            this._logControl.lastWriteToConsoleWasBlank = this._logControl.lastWriteToConsoleWasBlank && !this._logControl.isTests;
+            this._logState.lastWriteToConsoleWasBlank = this._logState.lastWriteToConsoleWasBlank && !this._logConfig.isTests;
         }
     };
 

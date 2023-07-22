@@ -262,7 +262,7 @@ export class Usage implements ITeUsage, Disposable
 
     private onTaskStatusChanged = async(e: ITeTaskStatusChangeEvent) =>
     {
-        const logPad = this.log.control.lastLogPad,
+        const logPad = this.log.lastPad,
               taskName = `${e.task.name} (${e.task.source})`;
         this.log.methodStart("task usage tracker: on running task changed", 2, logPad, false, [
             [ "task name", taskName ], [ "tree id", e.task.treeId ], [ "is running", e.isRunning ],

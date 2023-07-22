@@ -73,7 +73,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
         const w = this.wrapper,
               id = "refresh-" + (treeItem ? treeItem.id : "g");
 
-        logPad = logPad ?? w.log.control.lastLogPad;
+        logPad = logPad ?? w.log.lastPad;
         w.log.methodStart("fire tree refresh event", 1, logPad, false, [
             [ "tree", this.name ], [ "is global refresh", !treeItem ], [ "item id", id ], [ "from queue", !logPad ],
             [ "is visible", this._visible ], [ "was visible", this._wasVisible ]
@@ -143,7 +143,7 @@ export class TaskTree implements TreeDataProvider<TreeItem>, ITeTaskTree, Dispos
     private logGetChildren = (element: TaskFile | TaskFolder | undefined) =>
     {
         const w = this.wrapper,
-              logPad = w.log.control.lastLogPad,
+              logPad = w.log.lastPad,
               tasks = this._treeManager.tasks;
         w.log.write2("tree", "get tree children", 1, logPad, [
             [ "task folder", element?.label ], [ "all tasks need to be retrieved", !tasks ],

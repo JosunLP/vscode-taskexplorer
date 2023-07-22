@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { IDictionary } from ":types";
-import { commands, Disposable, EventEmitter } from "vscode";
-import { ITeContext, AllContextKeys, VsCodeCommands, IContextChangeEvent } from "../interface";
+import { commands, Disposable, EventEmitter, workspace } from "vscode";
+import { ITeContext, AllContextKeys, ContextKeys, VsCodeCommands, IContextChangeEvent } from "../interface";
 
 
 export class TeContext implements ITeContext, Disposable
@@ -16,7 +16,10 @@ export class TeContext implements ITeContext, Disposable
 	constructor()
 	{
 		this._onDidChangeContext = new EventEmitter<IContextChangeEvent>();
-		this._disposables.push(this._onDidChangeContext);
+		this._disposables.push(
+			this._onDidChangeContext,
+			workspace.onDidGrantWorkspaceTrust(() => this.setContext(ContextKeys.Untrusted, undefined))
+		);
 	}
 
 

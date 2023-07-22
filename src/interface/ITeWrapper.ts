@@ -49,7 +49,6 @@ export interface ITeWrapper
 {
 	init(): Promise<void>;
 	localize(key: string, defaultMessage: string): string;
-	waitReady(ignoreModule?: any[], minWait?: number, maxWait?: number): Promise<void>;
 
 	readonly dev: boolean;
 	readonly production: boolean;

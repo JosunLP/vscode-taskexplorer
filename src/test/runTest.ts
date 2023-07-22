@@ -52,7 +52,6 @@ const main = async () =>
           multiRootWsFile = path.join(testWorkspaceMultiRoot, "tests.code-workspace"),
           defaultSettings = await createDefaultSettings(pkgJso);
 
-
     consoleWrite(logSep);
     consoleWrite("Runtime parameters");
     consoleWrite(`   vscode test version     : ${vsCodeTestVersion}`);

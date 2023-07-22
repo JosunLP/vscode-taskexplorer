@@ -43,8 +43,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
 
     constructor(private readonly wrapper: TeWrapper)
     {
-        this.wrapper.log.methodStart("construct task tree manager", 1, "   ");
-
         this._tasks = [];
         this._npmScriptsHash = {};
         this._onReady = new EventEmitter<ITeTaskChangeEvent>();
@@ -80,8 +78,6 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
             registerCommand(wrapper.keys.Commands.OpenTerminal, this.openTerminal, this),
             registerCommand(wrapper.keys.Commands.Refresh, this.refresh, this)
         ];
-
-        this.wrapper.log.methodDone("construct task tree manager", 1, "   ");
     }
 
     dispose = () => { this._tasks.splice(0); this._disposables.splice(0).forEach(d => d.dispose()); };

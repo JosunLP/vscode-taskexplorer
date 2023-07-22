@@ -37,31 +37,41 @@ export interface ILogControl
 };
 */
 
+export interface ILogConfig
+{
+    channelWriteFn: string;
+    dirPath: string;
+    errorChannel: OutputChannel;
+    extensionAuthor: string;
+    extensionId: string;
+    isTests: boolean;
+    isTestsBlockScaryColors: boolean;
+    outputChannel: OutputChannel;
+}
 
 export interface ILogControl
 {
-    dirPath: string;
     enable: boolean;
     enableFile: boolean;
     enableModuleReload: boolean;
     enableOutputWindow: boolean;
+    level: LogLevel;
+    trace: boolean;
+    valueWhiteSpace: number;
+    writeToConsole: boolean;
+    writeToConsoleLevel: number;
+};
+
+export interface ILogState
+{
     fileName: string;
-    isTests: boolean;
-    isTestsBlockScaryColors: boolean;
     lastErrorMesage: string[];
     lastLogPad: string;
     lastWriteWasBlank: boolean;
     lastWriteWasBlankError: boolean;
     lastWriteToConsoleWasBlank: boolean;
-    level: LogLevel;
     msgQueue: Record<string, ILogQueueItem[]>;
-    errorChannel: OutputChannel;
-    outputChannel: OutputChannel;
     tzOffset: number;
-    trace: boolean;
-    valueWhiteSpace: number;
-    writeToConsole: boolean;
-    writeToConsoleLevel: number;
 };
 
 export interface ILog

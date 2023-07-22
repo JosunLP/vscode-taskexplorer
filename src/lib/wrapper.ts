@@ -60,7 +60,7 @@ import { AppPublisherTaskProvider } from "../task/provider/appPublisher";
 import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import {
 	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView,
-	Disposable, EventEmitter, Event
+	Disposable, EventEmitter, Event, window
 } from "vscode";
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, ITaskTreeView, ITeFilesystem, ITePathUtilities,
@@ -113,18 +113,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	static async create(context: ExtensionContext): Promise<TeWrapper>
 	{   //
-		// TODO - Handle untrusted workspace
-		//
-		// if (!workspace.isTrusted) {
-		// 	void setContext(ContextKeys.Untrusted, true);
-		// 	context.subscriptions.push(
-		// 		workspace.onDidGrantWorkspaceTrust(() => {
-		// 			void setContext(ContextKeys.Untrusted, undefined);
-		// 			container.telemetry.setGlobalAttribute('workspace.isTrusted', workspace.isTrusted);
-		// 		}),
-		// 	);
-		// }
-		//
 		// Initialize configuration
 		//
 		initConfiguration(context);
@@ -133,43 +121,28 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		await initStorage(context);
 		//
-		// Instantiate and initialize the logging module
-		//
-		const log = new TeLog(context, configuration);
-		log.write("activating extension", 1);
-		//
-		// Perform any necessary migration to configuration and storage, pre-wrapper initialization
-		//
-		const migration = new TeMigration(storage, configuration);
-		await migration.migrateSettings();
-		await migration.migrateStorage();
-		//
 		// Instantiate the application wrapper
 		//
-		this._instance = new TeWrapper(context, storage, configuration, log);
-		//
-		// Complete log initialization now that wrapper instance has been created.  Using the
-		// log.wrapper setter will initiate source map installation for error tracing
-		//
-		log.wrapper = this._instance;
+		this._instance = new TeWrapper(context, storage, configuration);
 		//
 		// Initialize the application wrapper
 		//
 		await this._instance.init();
-		log.write("extension activation completed successfully, work pending", 1);
 		return this._instance;
 	}
 
 
-	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration, log: TeLog)
+	static get instance(): TeWrapper { return this._instance; }
+
+
+	constructor(context: ExtensionContext, storage: IStorage, configuration: IConfiguration)
     {
-		this._log = log;
 		this._providers = {};
 		this._context = context;
         this._storage = storage;
         this._configuration = configuration;
 		//
-		// Events
+		// Construct Event Emitters
 		//
 		this._eventQueue = new EventQueue(this);
 		this._onReady = new EventEmitter<void>();
@@ -193,17 +166,21 @@ export class TeWrapper implements ITeWrapper, Disposable
 			(<IDictionary<string>>AllConstants.Strings)[e[0]] = this.localize(lPair[0], lPair[1]);
 		});
 		//
-		// Context
+		// Instantiate and initialize the logging module.
 		//
-		this._teContext = new TeContext();
-		//
-		// API sServer
-		//
-		this._server = new TeServer(this);
+		this._log = new TeLog(context, configuration);
 		//
 		// Local Language Manager / Helper Functions
 		//
 		this._statusBar = new TeStatusBar(this);
+		//
+		// Context
+		//
+		this._teContext = new TeContext();
+		//
+		// API Server
+		//
+		this._server = new TeServer(this);
 		//
 		// Task Manager
 		//
@@ -238,7 +215,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// TODO - Telemetry
 		//
-		// Example from GitLens extension:
+		// Example:
 		//
 		//     this._telemetry.setGlobalAttributes({
 		//     	   dev: this.dev
@@ -250,6 +227,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//     		"activation.elapsed": elapsed,
 		//     		"activation.mode": mode?.name
 		//     }, startTime, endTime);
+		//
+		// this._disposables.push(
+		//     workspace.onDidGrantWorkspaceTrust(
+		//         () => this._telemetry.setGlobalAttribute('workspace.isTrusted', workspace.isTrusted
+		//     );
+		// );
 		//
 		this._disposables = [
 			this._eventQueue,
@@ -275,18 +258,28 @@ export class TeWrapper implements ITeWrapper, Disposable
 		context.subscriptions.push(this);
 	}
 
-	dispose = () => this._disposables.splice(0).forEach(d => d.dispose());
+
+	dispose = (): void => this._disposables.splice(0).forEach(d => d.dispose());
 
 
-	init = async() =>
-	{
-		if (this._initialized) {
-			throw new Error("TeWrapper is already initialized/ready");
-		}
+	init = async(): Promise<void> =>
+	{   //
+		// Update stored version to current
+		//
+		await this.storage.update(AllConstants.Storage.Version, this._version);
+		//
+		// Complete log initialization - note that the logging module may initiate download
+		// of debug support files if the version has changed or this is a new install.
+		//
+		await this.initLog();
+		//
 		this.log.methodStart("app wrapper - init", 1, "", false, [
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
-		await this.storage.update(AllConstants.Storage.Version, this._version);
+		//
+		// Perform any necessary migration for version updates
+		//
+		await this.migrate();
 		//
 		// Register busy complete event
 		//
@@ -310,6 +303,9 @@ export class TeWrapper implements ITeWrapper, Disposable
 		await this._teContext.setContext(AllConstants.Context.Dev, this.dev);
 		await this._teContext.setContext(AllConstants.Context.Tests, this.tests);
         await this._teContext.setContext(AllConstants.Context.Enabled, this.utils.isTeEnabled());
+		if (!workspace.isTrusted) {
+			await this._teContext.setContext(AllConstants.Context.Untrusted, true);
+		}
 		this._disposables.push(
 			this._teContext.onDidChangeContext(() => {}, this) // cover until used somewhere
 		);
@@ -327,7 +323,111 @@ export class TeWrapper implements ITeWrapper, Disposable
 	};
 
 
-	private run = async() =>
+	private initLog = (): Promise<void> =>
+	{
+		let sb: any = { dispose: utilities.emptyFn };
+		if (this.versionchanged || this.isNewInstall)
+		{
+			const errMsg = "Unable to install logging support files";
+			sb = window.createStatusBarItem(1, 100);
+			sb.text = "Installing log module support files";
+			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
+			sb.show();
+			return utilities.wrap(this._log.init, [ window.showErrorMessage, sb.dispose, errMsg ], this, this);
+		}
+		return this._log.init(this);
+	};
+
+
+	private migrate = async () =>
+	{
+		if (this.versionchanged)
+		{
+			const migration = new TeMigration(this._storage, this._configuration);
+			await migration.migrateSettings();
+			await migration.migrateStorage();
+		}
+	};
+
+
+	private registerBusyCompleteEvent = (): void =>
+	{
+		const _event = () => {
+			debounceCommand("wrapper.event.busy", () => { if (!this.busy) this._onBusyComplete.fire(); }, 150, this);
+		};
+		this._disposables.push(
+			// this.onReady(() => _event()),
+			this.fileCache.onReady(_event),
+			this.fileWatcher.onReady(_event),
+			this.licenseManager.onReady(_event),
+			this.treeManager.configWatcher.onReady(_event),
+			this.treeManager.onDidAllTasksChange(_event)
+		);
+	};
+
+
+	private registerGlobalCommands = (): void =>
+	{
+		this._disposables.push(
+			registerCommand(AllConstants.Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
+			registerCommand(AllConstants.Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/${this.extensionAuthor}/${this.extensionName}/issues`), this)
+		);
+	};
+
+
+	private registerContextMenuCommands = (): void =>
+	{
+		this._disposables.push(
+			new DisableTaskTypeCommand(this),
+			new EnableTaskTypeCommand(this),
+			new AddToExcludesCommand(this),
+			new RemoveFromExcludesCommand(this)
+		);
+	};
+
+
+	private registerTaskProviders = (): void =>
+    {
+		const _registerTaskProvider = (providerName: string, provider: TaskExplorerProvider) =>
+		{
+			this._disposables.push(tasks.registerTaskProvider(providerName, provider));
+			this._providers[providerName] = provider;
+		};
+		//
+        // Internal Task Providers
+        //
+        // These tak types are provided internally by the extension.  Some task types (npm, grunt,
+        //  gulp, ts) are provided by VSCode itself
+        //
+        // TODO: VSCODE API now implements "resolveTask" in addition to "provideTask".  Need to implement
+        //     https://code.visualstudio.com/api/extension-guides/task-provider
+        //
+        _registerTaskProvider("ant", new AntTaskProvider(this));                    // Apache Ant Build Automation Tool
+        _registerTaskProvider("apppublisher", new AppPublisherTaskProvider(this));  // App Publisher (work related)
+        _registerTaskProvider("composer", new ComposerTaskProvider(this));          // PHP / composer.json
+        _registerTaskProvider("gradle", new GradleTaskProvider(this));              // Gradle multi-Language Automation Tool
+        _registerTaskProvider("grunt", new GruntTaskProvider(this));                // Gulp JavaScript Toolkit
+        _registerTaskProvider("gulp", new GulpTaskProvider(this));                  // Grunt JavaScript Task Runner
+        _registerTaskProvider("jenkins", new JenkinsTaskProvider(this));            // Jenkinsfile validation task
+        _registerTaskProvider("make", new MakeTaskProvider(this));                  // C/C++ Makefile
+        _registerTaskProvider("maven", new MavenTaskProvider(this));                // Apache Maven Toolset
+        _registerTaskProvider("npm", new NpmTaskProvider(this));                    // Node Package Manager
+        _registerTaskProvider("pipenv", new PipenvTaskProvider(this));              // Pipfile for Python pipenv package manager
+        _registerTaskProvider("webpack", new WebpackTaskProvider(this));
+		//
+        // Script type tasks
+		//
+        _registerTaskProvider("bash", new BashTaskProvider(this));                  // Unix/Linux bash/sh script
+        _registerTaskProvider("batch", new BatchTaskProvider(this));                // Windows batch/cmd script
+        _registerTaskProvider("nsis", new NsisTaskProvider(this));                  // NSIS scriptable installer script
+        _registerTaskProvider("perl", new PerlTaskProvider(this));
+        _registerTaskProvider("powershell", new PowershellTaskProvider(this));      // Windows Powershell script
+        _registerTaskProvider("python", new PythonTaskProvider(this));
+        _registerTaskProvider("ruby", new RubyTaskProvider(this));
+    };
+
+
+	private run = async(): Promise<void> =>
 	{
 		await utilities.sleep(1);
 		this.log.methodStart("app wrapper - run", 1, "", true);
@@ -428,86 +528,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	};
 
 
-	private registerBusyCompleteEvent = () =>
-	{
-		const _event = () => {
-			debounceCommand("wrapper.event.busy", () => { if (!this.busy) this._onBusyComplete.fire(); }, 150, this);
-		};
-		this._disposables.push(
-			// this.onReady(() => _event()),
-			this.fileCache.onReady(_event),
-			this.fileWatcher.onReady(_event),
-			this.licenseManager.onReady(_event),
-			this.treeManager.configWatcher.onReady(_event),
-			this.treeManager.onDidAllTasksChange(_event)
-		);
-	};
-
-
-	private registerGlobalCommands = () =>
-	{
-		this._disposables.push(
-			registerCommand(AllConstants.Commands.Donate, () => this.utils.openUrl("https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"), this),
-			registerCommand(AllConstants.Commands.OpenBugReports, () => this.utils.openUrl(`https://github.com/${this.extensionAuthor}/${this.extensionName}/issues`), this)
-		);
-	};
-
-
-	private registerContextMenuCommands = () =>
-	{
-		this._disposables.push(
-			new DisableTaskTypeCommand(this),
-			new EnableTaskTypeCommand(this),
-			new AddToExcludesCommand(this),
-			new RemoveFromExcludesCommand(this)
-		);
-	};
-
-
-    private registerTaskProvider = (providerName: string, provider: TaskExplorerProvider) =>
-    {
-        this._disposables.push(tasks.registerTaskProvider(providerName, provider));
-        this._providers[providerName] = provider;
-    };
-
-
-	private registerTaskProviders = () =>
-    {   //
-        // Internal Task Providers
-        //
-        // These tak types are provided internally by the extension.  Some task types (npm, grunt,
-        //  gulp, ts) are provided by VSCode itself
-        //
-        // TODO: VSCODE API now implements "resolveTask" in addition to "provideTask".  Need to implement
-        //     https://code.visualstudio.com/api/extension-guides/task-provider
-        //
-        this.registerTaskProvider("ant", new AntTaskProvider(this));                    // Apache Ant Build Automation Tool
-        this.registerTaskProvider("apppublisher", new AppPublisherTaskProvider(this));  // App Publisher (work related)
-        this.registerTaskProvider("composer", new ComposerTaskProvider(this));          // PHP / composer.json
-        this.registerTaskProvider("gradle", new GradleTaskProvider(this));              // Gradle multi-Language Automation Tool
-        this.registerTaskProvider("grunt", new GruntTaskProvider(this));                // Gulp JavaScript Toolkit
-        this.registerTaskProvider("gulp", new GulpTaskProvider(this));                  // Grunt JavaScript Task Runner
-        this.registerTaskProvider("jenkins", new JenkinsTaskProvider(this));            // Jenkinsfile validation task
-        this.registerTaskProvider("make", new MakeTaskProvider(this));                  // C/C++ Makefile
-        this.registerTaskProvider("maven", new MavenTaskProvider(this));                // Apache Maven Toolset
-        this.registerTaskProvider("npm", new NpmTaskProvider(this));                    // Node Package Manager
-        this.registerTaskProvider("pipenv", new PipenvTaskProvider(this));              // Pipfile for Python pipenv package manager
-        this.registerTaskProvider("webpack", new WebpackTaskProvider(this));
-        // Script type tasks
-        this.registerTaskProvider("bash", new BashTaskProvider(this));
-        this.registerTaskProvider("batch", new BatchTaskProvider(this));
-        this.registerTaskProvider("nsis", new NsisTaskProvider(this));
-        this.registerTaskProvider("perl", new PerlTaskProvider(this));
-        this.registerTaskProvider("powershell", new PowershellTaskProvider(this));
-        this.registerTaskProvider("python", new PythonTaskProvider(this));
-        this.registerTaskProvider("ruby", new RubyTaskProvider(this));
-    };
-
-
-	waitReady = async (ignoreModule: any[] = [], minWait = 1, maxWait = 15000) => {}; // this._waitUtils.waitReady(ignoreModule, minWait, maxWait);
-
-
-	static get instance() { return this._instance; }
 	get api(): TeApi { return this._teApi; }
 	get busy(): boolean {
 		return this._busy || !this._ready || !this._initialized || this._taskManager.fileCache.isBusy || this._treeManager.isBusy ||

@@ -63,15 +63,6 @@ suite("Wrapper Tests", () =>
     });
 
 
-    test("Re-Access Initialization Properties (Throws)", async function()
-    {
-        if (exitRollingCount(this)) return;
-        try { await teWrapper.init(); } catch { /* will throw */ }
-        await teWrapper.waitReady();
-        endRollingCount(this);
-    });
-
-
     test("Access API Getter Properties", async function()
     {
         if (exitRollingCount(this)) return;

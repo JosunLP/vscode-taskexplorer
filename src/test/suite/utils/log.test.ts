@@ -1,4 +1,5 @@
 
+import { join } from "path";
 import { ITeWrapper, ILog, ILogControl } from ":types";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { activate, exitRollingCount, endRollingCount, suiteFinished, testControl } from "../../utils/utils";
@@ -8,6 +9,19 @@ let writeConsole: boolean;
 let writeConsoleLvl: number;
 let teWrapper: ITeWrapper;
 let logControl: ILogControl;
+
+
+let runtimeDir: string,
+	dbgModuleDir: string,
+	teRelModulePath: string,
+	rtRelModulePath: string,
+	vendorRelModulePath: string,
+	teDbgModulePath: string,
+	rtDbgModulePath: string,
+	vendorDbgModulePath: string,
+	tePath: string,
+	rtPath: string,
+	vendorPath: string;
 
 
 suite("Logging Tests", () =>
@@ -20,7 +34,20 @@ suite("Logging Tests", () =>
 		logControl = teWrapper.logControl;
 		writeConsole = logControl.writeToConsole;
 		writeConsoleLvl = logControl.writeToConsoleLevel;
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+        runtimeDir = join(teWrapper.context.extensionUri.fsPath, "dist");
+		dbgModuleDir = join(teWrapper.context.globalStorageUri.fsPath, "debug");
+		teRelModulePath = join(dbgModuleDir, "taskexplorer.js");
+		rtRelModulePath = join(dbgModuleDir, "runtime.js");
+		vendorRelModulePath = join(dbgModuleDir, "vendor.js");
+		teDbgModulePath = join(dbgModuleDir, "taskexplorer.debug.js");
+		rtDbgModulePath = join(dbgModuleDir, "runtime.debug.js");
+		vendorDbgModulePath = join(dbgModuleDir, "vendor.debug.js");
+		tePath = join(runtimeDir, "taskexplorer.js");
+		rtPath = join(runtimeDir, "runtime.js");
+		vendorPath = join(runtimeDir, "vendor.js");
+		// if (!testControl.isSingleSuiteTest) {
+		// 	await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+		// }
         endRollingCount(this, true);
 	});
 
@@ -37,6 +64,25 @@ suite("Logging Tests", () =>
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, logControl.enableModuleReload);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogLevel, logControl.level);
         suiteFinished(this);
+	});
+
+
+    test("Logging (Install Debug Module)", async function()
+    {
+        if (exitRollingCount(this)) return;
+		if (testControl.isSingleSuiteTest)
+		{
+			this.slow(testControl.slowTime.apiServer.httpGet * 3);
+			await teWrapper.fs.deleteFile(teRelModulePath);
+			await teWrapper.fs.deleteFile(rtRelModulePath);
+			await teWrapper.fs.deleteFile(vendorRelModulePath);
+			await teWrapper.fs.deleteFile(teDbgModulePath);
+			await teWrapper.fs.deleteFile(rtDbgModulePath);
+			await teWrapper.fs.deleteFile(vendorDbgModulePath);
+			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+			await teWrapper.utils.sleep(1000);
+		}
+        endRollingCount(this);
 	});
 
 
@@ -445,7 +491,7 @@ suite("Logging Tests", () =>
     });
 
 
-	test("Logging (Debug Module Swap)", async function()
+	test("Logging (Uninstall Debug Module)", async function()
     {
         if (exitRollingCount(this)) return;
 		this.slow(testControl.slowTime.apiServer.httpGet + (testControl.slowTime.config.event * 2) + 200);
