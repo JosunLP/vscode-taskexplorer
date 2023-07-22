@@ -54,18 +54,18 @@ import { TaskExplorerProvider } from "../task/provider/provider";
 import { DisableTaskTypeCommand } from "./command/disableTaskType";
 import { configuration, initConfiguration } from "./configuration";
 import { PowershellTaskProvider } from "../task/provider/powershell";
-import { debounceCommand, registerCommand } from "./command/command";
 import { ParsingReportPage } from "../webview/page/parsingReportPage";
 import { AppPublisherTaskProvider } from "../task/provider/appPublisher";
 import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
+import { debounceCommand, registerCommand, executeCommand } from "./command/command";
 import {
-	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView,
-	Disposable, EventEmitter, Event, window
+	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, window,
+	Disposable, EventEmitter, Event
 } from "vscode";
 import {
-	IConfiguration, ITaskExplorerProvider, IStorage, ITaskTreeView, ITeFilesystem, ITePathUtilities,
-	ITePromiseUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities,
-	ILog, ITeWrapper, TeRuntimeEnvironment, ITeKeys, IDictionary, ILogControl, ITeObjectUtilities, ISpmServer
+	IConfiguration, ITaskExplorerProvider, IStorage, ITaskTreeView, ITeFilesystem, ITePathUtilities, ILog,
+	ITePromiseUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities, ITeKeys,
+	ITeWrapper, TeRuntimeEnvironment, IDictionary, ILogControl, ITeObjectUtilities, ISpmServer, CallbackOptions
 } from "../interface";
 
 
@@ -74,7 +74,6 @@ export class TeWrapper implements ITeWrapper, Disposable
     private static _instance: TeWrapper;
 
 	private _ready = false;
-	private _busy = false;
 	private _initialized = false;
 	private _cacheBuster: string;
 
@@ -112,21 +111,10 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 
 	static async create(context: ExtensionContext): Promise<TeWrapper>
-	{   //
-		// Initialize configuration
-		//
+	{
 		initConfiguration(context);
-		//
-		// Initialize storage
-		//
 		await initStorage(context);
-		//
-		// Instantiate the application wrapper
-		//
 		this._instance = new TeWrapper(context, storage, configuration);
-		//
-		// Initialize the application wrapper
-		//
 		await this._instance.init();
 		return this._instance;
 	}
@@ -229,7 +217,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//     }, startTime, endTime);
 		//
 		// this._disposables.push(
-		//     workspace.onDidGrantWorkspaceTrust(
+		//     workspace.onDidGrantWorkspaceTrust( - TODO initContext() also registers to this event, combine
 		//         () => this._telemetry.setGlobalAttribute('workspace.isTrusted', workspace.isTrusted
 		//     );
 		// );
@@ -273,10 +261,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		await this.initLog();
 		//
-		this.log.methodStart("app wrapper - init", 1, "", false, [
-			[ "version", this._version ], [ "previous version", this._previousVersion  ],
-		]);
-		//
 		// Perform any necessary migration for version updates
 		//
 		await this.migrate();
@@ -299,16 +283,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//
 		// Context
 		//
-		this.registerContextMenuCommands();
-		await this._teContext.setContext(AllConstants.Context.Dev, this.dev);
-		await this._teContext.setContext(AllConstants.Context.Tests, this.tests);
-        await this._teContext.setContext(AllConstants.Context.Enabled, this.utils.isTeEnabled());
-		if (!workspace.isTrusted) {
-			await this._teContext.setContext(AllConstants.Context.Untrusted, true);
-		}
-		this._disposables.push(
-			this._teContext.onDidChangeContext(() => {}, this) // cover until used somewhere
-		);
+		await this.initContext();
 		//
 		// Signal we are ready/done
 		//
@@ -319,23 +294,50 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// we do it now and not wait until the view is first visible/focused/activated.
 		//
 		queueMicrotask(() => this.run());
-		this.log.methodDone("app wrapper - init", 1);
 	};
 
 
-	private initLog = (): Promise<void> =>
+	private initContext = async () =>
+	{
+		this.registerContextMenuCommands();
+		await this._teContext.setContext(AllConstants.Context.Dev, this.dev);
+		await this._teContext.setContext(AllConstants.Context.Tests, this.tests);
+        await this._teContext.setContext(AllConstants.Context.Enabled, this.utils.isTeEnabled());
+		if (!workspace.isTrusted) {
+			await this._teContext.setContext(AllConstants.Context.Untrusted, true);
+		}
+		this._disposables.push(
+			this._teContext.onDidChangeContext(() => {}, this) // cover until used somewhere
+		);
+	};
+
+
+	private initLog = async (): Promise<void> =>
 	{
 		let sb: any = { dispose: utilities.emptyFn };
+		const version = this._version,
+			  versionChg = this.versionchanged,
+			  errMsg = "Unable to install logging support files",
+			  wrapCbOpts: CallbackOptions = [ window.showErrorMessage, sb.dispose, errMsg ];
+		const _promptRestart = async () =>
+		{
+			const msg = "New debug support files have been installed, a restart is required to re-enable logging",
+				  action = await window.showInformationMessage(msg, "Cancel", "Restart");
+			if (action === "Restart") {
+				setTimeout(executeCommand, 1, AllConstants.VsCodeCommands.Reload);
+			}
+		};
 		if (this.versionchanged || this.isNewInstall)
 		{
-			const errMsg = "Unable to install logging support files";
 			sb = window.createStatusBarItem(1, 100);
 			sb.text = "Installing log module support files";
 			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
 			sb.show();
-			return utilities.wrap(this._log.init, [ window.showErrorMessage, sb.dispose, errMsg ], this, this);
 		}
-		return this._log.init(this);
+		await utilities.wrap(this._log.init, wrapCbOpts, this, this, version, versionChg, _promptRestart);
+		this.log.methodEvent("initializing extension", "wrapper", 1, [
+			[ "version", this._version ], [ "previous version", this._previousVersion  ],
+		]);
 	};
 
 
@@ -528,9 +530,12 @@ export class TeWrapper implements ITeWrapper, Disposable
 	};
 
 
+	waitReady = async (_ignoreMod: any[] = [], min = 1, _max = 15000) => utilities.sleep(min);
+																   // => this._waitUtils.wait(ignoreMod, min, max);
+
 	get api(): TeApi { return this._teApi; }
 	get busy(): boolean {
-		return this._busy || !this._ready || !this._initialized || this._taskManager.fileCache.isBusy || this._treeManager.isBusy ||
+		return !this._ready || !this._initialized || this._taskManager.fileCache.isBusy || this._treeManager.isBusy ||
 			   this._taskManager.fileWatcher.isBusy || this._licenseManager.isBusy;
 	}
 	get busyWebviews(): boolean {

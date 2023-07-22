@@ -23,7 +23,7 @@ const optimization = (env, wpConfig) =>
 	{
 		wpConfig.optimization =
 		{
-			runtimeChunk: env.environment === "prod" || env.environment === "test" ? "single" : undefined,
+			runtimeChunk: "single",
 			splitChunks: false
 		};
 		if (env.build !== "browser")

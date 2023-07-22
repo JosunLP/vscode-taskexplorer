@@ -62,7 +62,7 @@ export class LastTasksFolder extends SpecialTaskFolder
 
     private pushToTreeTop = async (taskItem: TaskItem) =>
     {
-        const logPad = this.wrapper.log.control.lastLogPad,
+        const logPad = this.wrapper.log.lastPad,
               taskId = this.getTaskSpecialId(taskItem.id);
         let taskItem2 = this.treeNodes.find(t => t.id === taskId);
         if (taskItem2)

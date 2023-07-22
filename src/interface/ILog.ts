@@ -45,12 +45,12 @@ export interface ILogConfig
     extensionAuthor: string;
     extensionId: string;
     isTests: boolean;
-    isTestsBlockScaryColors: boolean;
     outputChannel: OutputChannel;
 }
 
 export interface ILogControl
 {
+    blockScaryColors: boolean;
     enable: boolean;
     enableFile: boolean;
     enableModuleReload: boolean;
@@ -78,6 +78,7 @@ export interface ILog
 {
     readonly control: ILogControl;
     readonly lastPad: string;
+    readonly state: ILogState;
     blank(level?: LogLevel, queueId?: string): void;
     dequeue(queueId: string): void;
     dispose(): void;

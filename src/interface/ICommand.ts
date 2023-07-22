@@ -92,6 +92,7 @@ export enum VsCodeCommands
 	OpenWalkthrough = "workbench.action.openWalkthrough",
 	NextEditor = "workbench.action.nextEditor",
 	PreviewHtml = "vscode.previewHtml",
+	Reload = "workbench.action.reloadWindow",
 	RevealInExplorer = "revealInExplorer",
 	RevealInFileExplorer = "revealFileInOS",
 	SetContext = "setContext",

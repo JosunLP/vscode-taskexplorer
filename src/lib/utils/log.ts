@@ -4,13 +4,12 @@
 import { apply } from "./object";
 import { figures } from "./figures";
 import { basename, join } from "path";
-// import { EventEmitter } from "events";
 import { execIf, popIfExistsBy, wrap } from "./utils";
 import { executeCommand, registerCommand } from "../command/command";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
-import { appendFileSync, copyFile, createDirSync, deleteFile, pathExistsSync, readJsonAsync, writeFile } from "./fs";
 import { ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
+import { appendFileSync, copyFile, createDirSync, deleteFileSync, pathExistsSync, readJsonAsync, writeFile } from "./fs";
 import { Commands, IConfiguration, ConfigKeys, ILog, ILogConfig, ILogControl, ILogState, ITeWrapper, LogLevel, VsCodeCommands } from "../../interface";
 
 
@@ -20,7 +19,6 @@ import { Commands, IConfiguration, ConfigKeys, ILog, ILogConfig, ILogControl, IL
  */
 export class TeLog implements ILog, Disposable
 {
-    private _busy = false;
     private _errorsWritten = 0;
     private _fileNameTimer: NodeJS.Timeout;
     private _wrapper: ITeWrapper | undefined;
@@ -37,7 +35,6 @@ export class TeLog implements ILog, Disposable
     private readonly _logControl: ILogControl;
     private readonly _context: ExtensionContext;
     private readonly _disposables: Disposable[];
-    // private readonly _eventEmitter: EventEmitter;
     private readonly _separator = "-----------------------------------------------------------------------------------------";
     private readonly _stackLineParserRgx = /at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i;
     private readonly _stackLineFilterRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
@@ -49,7 +46,6 @@ export class TeLog implements ILog, Disposable
         this._config = config;
         this._context = context;
         this._disposables = [];
-        // this._eventEmitter = new EventEmitter();
         this._runtimeDir = join(this._context.extensionUri.fsPath, "dist");
         this._wasmRtPath = join(this._runtimeDir, "mappings.wasm");
         this._dbgModuleDir = join(this._context.globalStorageUri.fsPath, "debug");
@@ -58,7 +54,7 @@ export class TeLog implements ILog, Disposable
         this._fileNameTimer = 0 as unknown as NodeJS.Timeout;
         this._logState = this.getDefaultState();
         this._logConfig = apply(this.getDefaultConfig(context), logConfig!);
-        this._logControl = apply(this.getDefaultControl(config), logControl!);
+        this._logControl = apply(this.getDefaultControl(context.extensionMode === ExtensionMode.Test, config), logControl!);
         createDirSync(this._dbgModuleDir);
         createDirSync(this._context.logUri.fsPath);
         this.writeErrorChannelHeader();
@@ -82,12 +78,11 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private get allowScaryColors() { return !this._logConfig.isTests || !this._logConfig.isTestsBlockScaryColors; }
+    private get allowScaryColors() { return !this._logConfig.isTests || !this._logControl.blockScaryColors; }
 
     get control(): ILogControl { return this._logControl; }
-    get isBusy(): boolean { return this._busy; };
     get lastPad(): string { return this._logState.lastLogPad; }
-    // get onReady() { return (listener: () => any) => this._eventEmitter.on("ready", listener); };
+    get state(): ILogState { return this._logState; }
     get wrapper(): ITeWrapper { return <ITeWrapper>this._wrapper; }
 
 
@@ -219,7 +214,7 @@ export class TeLog implements ILog, Disposable
     private errorConsole = (msg: string, symbols: [ string, string ], queueId?: string) =>
     {
         apply(this._logControl, { writeToConsole: true, enableFile: false, enableOutputWindow: false });
-        if (!this._logConfig.isTestsBlockScaryColors) {
+        if (!this._logControl.blockScaryColors) {
             this._write(symbols[0] + " " + msg, 1, "", queueId, false, true);
         }
         else {
@@ -281,15 +276,15 @@ export class TeLog implements ILog, Disposable
             extensionAuthor: isObject(pkgJson.author) ? pkgJson.author.name : pkgJson.name,
             extensionId: context.extension.id,
             isTests: context.extensionMode === ExtensionMode.Test,
-            isTestsBlockScaryColors: context.extensionMode === ExtensionMode.Test,
             outputChannel: window.createOutputChannel(context.extension.packageJSON.displayName)
         };
     };
 
 
-    private getDefaultControl = (config: IConfiguration): ILogControl =>
+    private getDefaultControl = (isTests: boolean, config: IConfiguration): ILogControl =>
     {
         return {
+            blockScaryColors: isTests,
             enable: config.get<boolean>(ConfigKeys.LogEnable, false),
             enableOutputWindow: config.get<boolean>(ConfigKeys.LogEnableOutputWindow, true),
             enableFile: config.get<boolean>(ConfigKeys.LogEnableFile, false),
@@ -364,30 +359,28 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    init = async (wrapper: ITeWrapper) =>
+    init = async (wrapper: ITeWrapper, version: string, isNewVersionOrInstall: boolean, promptRestartFn: () => any) =>
     {
-        this._busy = true;
-        const w = this._wrapper = wrapper;
-        // if (wrapper.versionchanged || wrapper.isNewInstall)
-        // {
-            // queueMicrotask(async () =>
-            // {
-        // try {
-            const clean = w.versionchanged || w.isNewInstall;
-            await this.installDebugSupport(w.version, clean);
-            await this.installSourceMapSupport(w.version, clean);
-            this.enable(this._logControl.enable);
-        // }
-        // finally {
-        //     this._busy = false;
-        //     this._eventEmitter.emit("ready");
-        // }
-            // });
-        // }
+        this._wrapper = wrapper;
+        await this.installDebugSupport(version, isNewVersionOrInstall);
+        await this.installSourceMapSupport(version, isNewVersionOrInstall);
+        //
+        // Logging is disabled by default in construction of the logging module, take any
+        // necessary actions if it's enabled in user settings
+        //
+        if (this._logControl.enable)
+        {
+            if (isNewVersionOrInstall) {
+                queueMicrotask(() => promptRestartFn);
+            }
+            else {
+                this.enable(this._logControl.enable);
+            }
+        }
     };
 
 
-    private installDebugSupport = (version: string, clean?: boolean): Promise<void> =>
+    private installDebugSupport = (version: string, clean?: boolean, swap?: boolean): Promise<void> =>
     {
         return wrap(async (w) =>
         {
@@ -403,12 +396,12 @@ export class TeLog implements ILog, Disposable
                   vendorPath = join(this._runtimeDir, "vendor.js");
             if (clean)
             {
-                await deleteFile(teRelModulePath);
-                await deleteFile(rtRelModulePath);
-                await deleteFile(vendorRelModulePath);
-                await deleteFile(teDbgModulePath);
-                await deleteFile(rtDbgModulePath);
-                await deleteFile(vendorDbgModulePath);
+                deleteFileSync(teRelModulePath);
+                deleteFileSync(rtRelModulePath);
+                deleteFileSync(vendorRelModulePath);
+                deleteFileSync(teDbgModulePath);
+                deleteFileSync(rtDbgModulePath);
+                deleteFileSync(vendorDbgModulePath);
             }
             await execIf(!pathExistsSync(teDbgModulePath), async () =>
             {
@@ -428,9 +421,12 @@ export class TeLog implements ILog, Disposable
             await execIf(!pathExistsSync(teRelModulePath), () => copyFile(tePath, teRelModulePath), this);
             await execIf(!pathExistsSync(rtRelModulePath), () => copyFile(rtPath, rtRelModulePath), this);
             await execIf(!pathExistsSync(vendorRelModulePath), () => copyFile(vendorPath, vendorRelModulePath), this);
-            await copyFile(!enable ? teRelModulePath : teDbgModulePath, tePath);
-            await copyFile(!enable ? rtRelModulePath : rtDbgModulePath, rtPath);
-            await copyFile(!enable ? vendorRelModulePath : vendorDbgModulePath, vendorPath);
+            if (swap)
+            {
+                await copyFile(!enable ? teRelModulePath : teDbgModulePath, tePath);
+                await copyFile(!enable ? rtRelModulePath : rtDbgModulePath, rtPath);
+                await copyFile(!enable ? vendorRelModulePath : vendorDbgModulePath, vendorPath);
+            }
         },
         [ this._error, "Unable to install logging supprt" ], this, this.wrapper);
     };
@@ -444,8 +440,8 @@ export class TeLog implements ILog, Disposable
                   downloadSourceMap = !pathExistsSync(this._srcMapPath);
             if (clean)
             {
-                await deleteFile(this._wasmPath);
-                await deleteFile(this._srcMapPath);
+                deleteFileSync(this._wasmPath);
+                deleteFileSync(this._srcMapPath);
             }
             await execIf(downloadWasm, async () =>
             {

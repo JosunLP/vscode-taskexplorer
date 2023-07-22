@@ -110,7 +110,7 @@ suite("Logging Tests", () =>
 		teWrapper.log.error([ "Test error 9",  new Error("Test error object 10") ]);
 		teWrapper.log.error([ "Test error 11", "Test error 12" ], [[ "Test param error 13", "Test param value 14" ]]);
 		teWrapper.log.error("this is a test4", [[ "test6", true ], [ "test6", false ], [ "test7", "1111" ], [ "test8", [ 1, 2, 3 ]]]);
-		teWrapper.logControl.isTestsBlockScaryColors = !testControl.log.blockScaryColors;
+		teWrapper.logControl.blockScaryColors = !testControl.log.blockScaryColors;
 		teWrapper.log.error([ "Test error 1", "Test error 2" ]);
 		teWrapper.log.error([ "Test error 3", null, "Test error 4", "" ]);
 		teWrapper.log.error([ "Test error 3", "Test error 4" ]);
@@ -122,7 +122,7 @@ suite("Logging Tests", () =>
 		teWrapper.log.error([ "Test error 9",  new Error("Test error object 10") ]);
 		teWrapper.log.error([ "Test error 11", "Test error 12" ], [[ "Test param error 13", "Test param value 14" ]]);
 		teWrapper.log.error("this is a test4", [[ "test6", true ], [ "test6", false ], [ "test7", "1111" ], [ "test8", [ 1, 2, 3 ]]]);
-		teWrapper.logControl.isTestsBlockScaryColors = testControl.log.blockScaryColors;
+		teWrapper.logControl.blockScaryColors = testControl.log.blockScaryColors;
 		teWrapper.logControl.trace = true;
 		const err = new Error("Test error object");
 		err.stack = undefined;
@@ -155,16 +155,16 @@ suite("Logging Tests", () =>
 		await executeSettingsUpdate("logging.level", testControl.log.level);
 		teWrapper.log.error(new Error("Test error object w console"));
 		teWrapper.logControl.writeToConsole = false;
-		const scaryOff = teWrapper.logControl.isTestsBlockScaryColors;
-		teWrapper.logControl.isTestsBlockScaryColors = false;
+		const scaryOff = teWrapper.logControl.blockScaryColors;
+		teWrapper.logControl.blockScaryColors = false;
 		teWrapper.log.error("Scary error");
 		teWrapper.log.error("error line1\nline2");
 		teWrapper.log.error("error line1\r\nline2");
 		teWrapper.log.error(new Error("Test error object"));
 		teWrapper.logControl.trace = false;
-		teWrapper.logControl.isTestsBlockScaryColors = true;
+		teWrapper.logControl.blockScaryColors = true;
 		teWrapper.log.error("Scary error");
-		teWrapper.logControl.isTestsBlockScaryColors = scaryOff;
+		teWrapper.logControl.blockScaryColors = scaryOff;
 		//
 		// Disable logging
 		//
@@ -407,12 +407,12 @@ suite("Logging Tests", () =>
 		this.slow((testControl.slowTime.config.event * 2) + 50);
 		log.warn("test1");
 		log.warn("test2");
-		const scaryOff = logControl.isTestsBlockScaryColors;
-		logControl.isTestsBlockScaryColors = false;
+		const scaryOff = logControl.blockScaryColors;
+		logControl.blockScaryColors = false;
 		log.warn("test3");
-		logControl.isTestsBlockScaryColors = true;
+		logControl.blockScaryColors = true;
 		log.warn("test3");
-		logControl.isTestsBlockScaryColors = scaryOff;
+		logControl.blockScaryColors = scaryOff;
 		//
 		// Disable logging
 		//
