@@ -330,7 +330,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		if (this.versionchanged || this.isNewInstall)
 		{
 			sb = window.createStatusBarItem(1, 100);
-			sb.text = "Task Explorer: Installing log module support files";
+			sb.text = `$(loading~spin) ${this.extensionTitleShort}: Installing debug support files`;
 			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
 			sb.show();
 		}
