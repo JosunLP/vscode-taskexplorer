@@ -314,11 +314,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 	private initLog = async (): Promise<void> =>
 	{
-		let sb: any = { dispose: utilities.emptyFn };
+		let sb: any = { dispose: utilities.emptyFn, hide: utilities.emptyFn };
 		const version = this._version,
 			  versionChg = this.versionchanged,
 			  errMsg = "Unable to install logging support files",
-			  wrapCbOpts: CallbackOptions = [ window.showErrorMessage, sb.dispose, errMsg ];
+			  wrapCbOpts: CallbackOptions = [ window.showErrorMessage, () => { sb.hide(); sb.dispose(); }, errMsg ];
 		const _promptRestart = async () =>
 		{
 			const msg = "New debug support files have been installed, a restart is required to re-enable logging",
@@ -330,7 +330,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		if (this.versionchanged || this.isNewInstall)
 		{
 			sb = window.createStatusBarItem(1, 100);
-			sb.text = "Installing log module support files";
+			sb.text = "Task Explorer: Installing log module support files";
 			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
 			sb.show();
 		}
