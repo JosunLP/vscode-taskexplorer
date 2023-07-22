@@ -16,6 +16,7 @@ const optimization = require("../plugin/optimization");
 const progress = require("../plugin/progress");
 const sourcemaps = require("../plugin/sourcemaps");
 const tscheck = require("../plugin/tscheck");
+const upload = require("../plugin/upload");
 const webviewApps = require("../webviewApps");
 const { wpPlugin } = require("../plugin/plugins");
 
@@ -69,7 +70,8 @@ const plugins = (env, wpConfig) =>
 
 	wpConfig.plugins.push(
 		...optimization(env, wpConfig),
-		afterdone(env, wpConfig)
+		afterdone(env, wpConfig),
+		upload(env, wpConfig)
 	);
 
 	wpConfig.plugins.slice().reverse().forEach((p, index, object) =>
