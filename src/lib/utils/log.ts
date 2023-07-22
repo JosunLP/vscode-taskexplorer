@@ -397,7 +397,8 @@ export class TeLog implements ILog, Disposable
                   vendorDbgModulePath = join(this._dbgModuleDir, "vendor.debug.js"),
                   tePath = join(this._runtimeDir, "taskexplorer.js"),
                   rtPath = join(this._runtimeDir, "runtime.js"),
-                  vendorPath = join(this._runtimeDir, "vendor.js");
+                  vendorPath = join(this._runtimeDir, "vendor.js"),
+                  remoteBasePath: `app/${string}/v${string}` = `app/${w.extensionName}/v${version}/${env}`;
             if (clean)
             {
                 deleteFileSync(teRelModulePath);
@@ -409,17 +410,17 @@ export class TeLog implements ILog, Disposable
             }
             await execIf(!pathExistsSync(teDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/${env}/taskexplorer.debug.js`);
+                const moduleContent = await w.server.get(`${remoteBasePath}/taskexplorer.debug.js`);
                 await writeFile(teDbgModulePath, Buffer.from(moduleContent));
             });
             await execIf(!pathExistsSync(rtDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/${env}/runtime.debug.js`);
+                const moduleContent = await w.server.get(`${remoteBasePath}/runtime.debug.js`);
                 await writeFile(rtDbgModulePath, Buffer.from(moduleContent));
             });
             await execIf(!pathExistsSync(vendorDbgModulePath), async () =>
             {
-                const moduleContent = await w.server.get(`app/${w.extensionName}/v${version}/${env}/vendor.debug.js`);
+                const moduleContent = await w.server.get(`${remoteBasePath}/vendor.debug.js`);
                 await writeFile(vendorDbgModulePath, Buffer.from(moduleContent));
             });
             await execIf(!pathExistsSync(teRelModulePath), () => copyFile(tePath, teRelModulePath), this);
@@ -441,7 +442,8 @@ export class TeLog implements ILog, Disposable
         return wrap(async (w) =>
         {
             const downloadWasm = !pathExistsSync(this._wasmPath),
-                  downloadSourceMap = !pathExistsSync(this._srcMapPath);
+                  downloadSourceMap = !pathExistsSync(this._srcMapPath),
+                  remoteBasePath: `app/${string}/v${string}` = `app/${w.extensionName}/v${version}/${env}`;
             if (clean)
             {
                 deleteFileSync(this._wasmPath);
@@ -449,12 +451,12 @@ export class TeLog implements ILog, Disposable
             }
             await execIf(downloadWasm, async () =>
             {
-                const wasmContent = await w.server.get("app/shared/mappings.wasm", "");
+                const wasmContent = await w.server.get(`${remoteBasePath}/mappings.wasm`, "");
                 await writeFile(this._wasmPath, Buffer.from(wasmContent));
             });
             await execIf(downloadSourceMap, async () =>
             {
-                const srcMapContent = await w.server.get(`app/${w.extensionName}/v${version}/${env}/${w.extensionNameShort}.js.map`, "");
+                const srcMapContent = await w.server.get(`${remoteBasePath}/${w.extensionNameShort}.js.map`, "");
                 await writeFile(this._srcMapPath, Buffer.from(srcMapContent));
             });
             await copyFile(this._wasmPath, this._wasmRtPath);

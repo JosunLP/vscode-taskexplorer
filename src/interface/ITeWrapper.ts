@@ -2,7 +2,6 @@
 
 import { ISpmServer } from "./ISpmServer";
 import { ITeWebview } from "./ITeWebview";
-import { ITeFigures } from "./ITeFigures";
 import { ILog, ILogControl } from "./ILog";
 import { IEventQueue } from "./IEventQueue";
 import { ITeStatusBar } from "./ITeStatusBar";
@@ -74,7 +73,6 @@ export interface ITeWrapper
 	readonly extensionTitle: string;
 	readonly extensionTitleShort: string;
 	readonly fileWatcher: ITeFileWatcher;
-	readonly figures: ITeFigures;
 	readonly homeView: ITeWebview;
 	readonly isNewInstall: boolean;
 	readonly fileCache: ITeFileCache;

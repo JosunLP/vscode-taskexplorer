@@ -1,8 +1,7 @@
+type LogColor = [ number, number ];
+type LogStyle = [ number, number ];
 
-import { ILogColors, LogColor, LogStyle } from "../../interface";
-
-
-export class LogColors implements ILogColors
+export class LogColors
 {
     bold: LogStyle = [ 1, 22 ];
     italic: LogStyle = [ 3, 23 ];

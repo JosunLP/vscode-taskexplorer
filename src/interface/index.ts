@@ -16,7 +16,6 @@ export type { ITeTaskTree, ITaskTreeView } from "./ITeTaskTree";
 export type { ITeTreeConfigWatcher } from "./ITeTreeConfigWatcher";
 export type { IStatusBarInfo, ITeStatusBar } from "./ITeStatusBar";
 export type { ITeWrapper, ITeKeys, TeRuntimeEnvironment } from "./ITeWrapper";
-export type { ILogColors, ITeFigures, LogColor, LogStyle } from "./ITeFigures";
 export type { ITeTreeManager, ITeTreeSorter, TaskMap } from "./ITeTreeManager";
 export type { SpmServerResource, SpmApiEndpoint, ISpmServer } from "./ISpmServer";
 export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from "./IStorage";

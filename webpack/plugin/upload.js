@@ -102,11 +102,12 @@ const _upload = (env) =>
         `${user}@${host}:"${rBasePath}/${env.app}/v${env.version}"`
     ];
     try {
+        const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}/${env.environment}` ];
         writeInfo(`upload debug support files to ${host}`);
-        writeInfo(`   create dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
+        writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}` ], spawnSyncOpts);
         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}` ], spawnSyncOpts);
-        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}/${env.environment}` ], spawnSyncOpts);
+        spawnSync("plink", plinkArgsFull, spawnSyncOpts);
         writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
         spawnSync("pscp", pscpArgs, spawnSyncOpts);
         writeInfo("successfully uploaded debug support files");

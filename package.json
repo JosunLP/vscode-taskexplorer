@@ -201,7 +201,7 @@
 		"test-hook-after": "script\\enable-full-coverage.sh --off",
 		"test-hook-before": "npm run build-extension-test && npm run test-hook-before_2",
 		"test-hook-before_2": "script\\enable-full-coverage.sh",
-		"tsc-typecheck-all": "npm run typecheck-extension && npm run typecheck-extension:browser && npm run typecheck-tests && npm run tsc-typecheck-webviews",
+		"tsc-typecheck-all": "npm run tsc-typecheck-extension && npm run tsc-typecheck-extension:browser && npm run tsc-typecheck-tests && npm run tsc-typecheck-webviews",
 		"tsc-typecheck-extension": "tsc --noEmit -p .\\tsconfig.json",
 		"tsc-typecheck-extension:browser": "tsc --noEmit -p .\\tsconfig.browser.json",
 		"tsc-typecheck-tests": "tsc --noEmit -p .\\src\\test\\tsconfig.json",
