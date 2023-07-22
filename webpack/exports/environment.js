@@ -47,6 +47,20 @@ const readPackageDotJson = (env) =>
 {
 	const pkgJson = JSON.parse(readFileSync(join(env.buildPath, "package.json"), "utf8"));
 	Object.assign(env, { app: pkgJson.name, version: pkgJson.version, pkgJson });
+	version(env);
+};
+
+
+/**
+ * @method version
+ * @param {WebpackEnvironment} env
+ */
+const version = (env) =>
+{
+    if (env.build === "extension" && env.environment === "prod" && env.stripLogging)
+    {
+        // let version = env.version;
+    }
 };
 
 

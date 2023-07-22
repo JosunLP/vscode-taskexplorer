@@ -71,4 +71,5 @@ const output = (env, wpConfig) =>
 	}
 };
 
+
 module.exports = output;

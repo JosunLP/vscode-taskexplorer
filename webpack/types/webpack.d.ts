@@ -25,6 +25,7 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     imageOpt: boolean;                    // Perform image optimization
     isTests: boolean;
     pkgJson: Record<string, any>;         // package.json parsed object
+    preRelease: boolean;
     stripLogging: boolean;
     target: WebpakTarget;
     tempPath: string;                      // operating system temp directory

@@ -18,6 +18,11 @@ const { renameSync, copyFileSync } = require("fs");
 
 /**
  * @method upload
+ * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
+ * !!! For first time build on fresh os install:
+ * !!!   - create the environment variable SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN
+ * !!!   - run a plink command manually to generate and trust the fingerprints:
+ * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
@@ -26,7 +31,7 @@ const upload = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build === "extension")
+    if (env.build === "extension" && env.stripLogging)
     {
         const _env = { ...env };
         plugin =
@@ -52,13 +57,14 @@ const upload = (env, wpConfig) =>
 const sourceMapFiles = (env) =>
 {
     try {
+        const tmpPath = join(env.tempPath, env.app, env.environment);
         if (env.environment === "prod") {
-            renameSync(join(env.distPath, "taskexplorer.js.map"), join(env.tempPath, env.app, env.environment, "taskexplorer.js.map"));
+            renameSync(join(env.distPath, "taskexplorer.js.map"), join(tmpPath, "taskexplorer.js.map"));
         }
         else {
-            copyFileSync(join(env.distPath, "taskexplorer.js.map"), join(env.tempPath, env.app, env.environment, "taskexplorer.js.map"));
+            copyFileSync(join(env.distPath, "taskexplorer.js.map"), join(tmpPath, "taskexplorer.js.map"));
         }
-        copyFileSync(join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"), join(env.tempPath, "shared", "mappings.wasm"));
+        copyFileSync(join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"), join(tmpPath, "mappings.wasm"));
     } catch {}
 };
 

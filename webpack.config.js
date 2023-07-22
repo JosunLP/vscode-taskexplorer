@@ -46,7 +46,7 @@ module.exports = (env, argv) =>
 		fa: "custom",
 		imageOpt: true,
 		environment: "prod",
-		prodDbgBuild: false,
+		preRelease: true,
 		stripLogging: true,
 		target: "node"
 	}, env, { prodDbgBuild: false });
@@ -56,14 +56,18 @@ module.exports = (env, argv) =>
 		env[k] = env[k].toLowerCase() === "true";
 	});
 
-	if (env.build){
-		return getWebpackConfig(env.build, env, argv);
-	}
-
 	const extBuild = [
 		getWebpackConfig("extension", { ...env, ...{ stripLogging: false }}, argv),
 		getWebpackConfig("extension", { ...env, ...{ stripLogging: true, clean: false }}, argv)
 	];
+
+	if (env.build)
+	{
+		if (env.build !== "extension") {
+			return getWebpackConfig(env.build, env, argv);
+		}
+		return extBuild;
+	}
 
 	if (env.environment === "test") {
 		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "dev" }}, argv) ];
