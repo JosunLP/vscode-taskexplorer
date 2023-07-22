@@ -2,13 +2,13 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { clone } from "./object";
+import minimatch from "minimatch";
 import { Strings } from "../constants";
-import minimatch = require("minimatch");
 import { basename, extname, sep } from "path";
 import { configuration } from "../configuration";
-import { Uri, workspace, env, WorkspaceFolder } from "vscode";
 import { isArray, isFunction, isPromise, isString } from "./typeUtils";
-import { ConfigKeys, CallbackOptions, CallbackArray, ILog, ErrorType } from "../../interface";
+import { Uri, workspace, env, WorkspaceFolder, commands, window } from "vscode";
+import { ConfigKeys, CallbackOptions, CallbackArray, ILog, VsCodeCommands } from "../../interface";
 
 
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
@@ -269,7 +269,9 @@ export const popIfExistsBy = <T>(arr: T[] | undefined, fn: (v1: T) => boolean, t
     {
         if (!single)
         {
-            arr.slice().reverse().forEach((v, i, a) => { if (fn.call(thisArg, v)) { popped.push(...arr.splice(a.length - 1 - i, 1)); } });
+            arr.slice().reverse().forEach(
+                (v, i, a) => { if (fn.call(thisArg, v)) { popped.push(...arr.splice(a.length - 1 - i, 1)); }}
+            );
         }
         else {
             const idx = arr.findIndex(v => fn.call(thisArg, v));
@@ -287,13 +289,25 @@ export const popObjIfExistsBy = <T>(rec: Record<string, T> | undefined, fn: (k: 
     const popped: T[] = [];
     if (rec)
     {
-        Object.entries<T>(rec).every(e => { if (fn.call(thisArg, e[0], e[1])) { popped.push(e[1]); delete rec[e[0]]; return !single; } return true; });
+        Object.entries<T>(rec).every(
+            e => { if (fn.call(thisArg, e[0], e[1])) { popped.push(e[1]); delete rec[e[0]]; return !single; } return true; }
+        );
     }
     return popped;
 };
 
 
 // export const pluralize = (s: string, count: number) => `${count} ${s}${count === 1 ? "" : "s"}`;
+
+
+export const promptRestart = async (message: string): Promise<boolean> =>
+{
+    const action = await window.showInformationMessage(message, "Cancel", "Restart");
+    if (action === "Restart") {
+        return new Promise(resolve => setTimeout(c => { commands.executeCommand(c); resolve(true); }, 1, VsCodeCommands.Reload));
+    }
+    return false;
+};
 
 
 export function properCase(name: string | undefined, removeSpaces?: boolean)
@@ -305,10 +319,12 @@ export function properCase(name: string | undefined, removeSpaces?: boolean)
 }
 
 
-export const pushIfNotExists = (arr: string[] | undefined, ...item: string[]) => { if (arr) { item.forEach(i => { if (!arr.includes(i)) { arr.push(i); } }); return arr; }};
+export const pushIfNotExists = (arr: string[] | undefined, ...item: string[]) =>
+    { if (arr) { item.forEach(i => { if (!arr.includes(i)) { arr.push(i); } }); return arr; }};
 
 
-// export const pushIfNotExistsBy = <T>(arr: T[] | undefined, fn: (v: T) => boolean, thisArg?: any, ...item: T[]) => { if (arr) { item.forEach(i => { if (fn.call(thisArg, i)) { arr.push(i); } }); return arr; }};
+// export const pushIfNotExistsBy = <T>(arr: T[] | undefined, fn: (v: T) => boolean, thisArg?: any, ...item: T[]) =>
+//    { if (arr) { item.forEach(i => { if (fn.call(thisArg, i)) { arr.push(i); } }); return arr; }};
 
 
 // export const removeFromArray = <T>(arr: T[], cb: (value: any, index: number, array: T[]) => void)
@@ -323,6 +339,7 @@ export const pushIfNotExists = (arr: string[] | undefined, ...item: string[]) =>
 //         fn(item, index, object);
 //     });
 // };
+
 
 export const removeFromArray = (arr: any[], item: any) =>
 {

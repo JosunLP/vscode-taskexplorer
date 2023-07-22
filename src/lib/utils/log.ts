@@ -205,8 +205,12 @@ export class TeLog implements ILog, Disposable
         apply(this._logControl, {
             enableFile: currentWriteToFile,
             writeToConsole: currentWriteToConsole,
-            enableOutputWindow: currentWriteToOutputWindow,
-            lastWriteWasBlank: true, lastWriteWasBlankError: true, lastWriteToConsoleWasBlank: true
+            enableOutputWindow: currentWriteToOutputWindow
+        });
+        apply(this._logState, {
+            lastWriteWasBlank: true,
+            lastWriteWasBlankError: true,
+            lastWriteToConsoleWasBlank: true
         });
     };
 
@@ -359,7 +363,7 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    init = async (wrapper: ITeWrapper, version: string, isNewVersionOrInstall: boolean, promptRestartFn: () => any) =>
+    init = async (wrapper: ITeWrapper, version: string, isNewVersionOrInstall: boolean, promptRestartFn: (...args: any[]) => any) =>
     {
         this._wrapper = wrapper;
         await this.installDebugSupport(version, isNewVersionOrInstall);
@@ -371,7 +375,8 @@ export class TeLog implements ILog, Disposable
         if (this._logControl.enable)
         {
             if (isNewVersionOrInstall) {
-                queueMicrotask(() => promptRestartFn);
+                const msg = "New debug support files have been installed, a restart is required to re-enable logging";
+                queueMicrotask(() => promptRestartFn(msg));
             }
             else {
                 this.enable(this._logControl.enable);
@@ -831,10 +836,10 @@ export class TeLog implements ILog, Disposable
             const ts = this.getStamp().stampTime + /* (file symbols ? " " + figures.pointer : */ " >";
             this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, appendFileSync, null, ts, true, this._logState.fileName);
         }
-        apply(this._logControl, { lastLogPad: logPad, lastWriteWasBlank: (msg === "") });
+        apply(this._logState, { lastLogPad: logPad, lastWriteWasBlank: (msg === "") });
         if (!isError)
         {
-            apply(this._logControl, { lastErrorMesage: [], lastWriteWasBlankError: false });
+            apply(this._logState, { lastErrorMesage: [], lastWriteWasBlankError: false });
             this._logState.lastWriteToConsoleWasBlank = this._logState.lastWriteToConsoleWasBlank && !this._logConfig.isTests;
         }
     };

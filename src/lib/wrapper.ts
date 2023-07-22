@@ -129,65 +129,26 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._context = context;
         this._storage = storage;
         this._configuration = configuration;
-		//
-		// Construct Event Emitters
-		//
 		this._eventQueue = new EventQueue(this);
 		this._onReady = new EventEmitter<void>();
 		this._onInitialized = new EventEmitter<void>();
 		this._onBusyComplete = new EventEmitter<void>();
-		//
-		// Version
-		//
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
-		//
-		// Cache Buster
-		//
 		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
-		//
-		// TODO - Localization
-		//
 		Object.entries<string>(AllConstants.Strings).filter(s => s[1].includes("|")).forEach(e =>
-		{
+		{   // TODO - Localization
 			const lPair = e[1].split("|");
 			(<IDictionary<string>>AllConstants.Strings)[e[0]] = this.localize(lPair[0], lPair[1]);
 		});
-		//
-		// Instantiate and initialize the logging module.
-		//
 		this._log = new TeLog(context, configuration);
-		//
-		// Local Language Manager / Helper Functions
-		//
 		this._statusBar = new TeStatusBar(this);
-		//
-		// Context
-		//
 		this._teContext = new TeContext();
-		//
-		// API Server
-		//
 		this._server = new TeServer(this);
-		//
-		// Task Manager
-		//
         this._taskManager = new TaskManager(this);
-		//
-		// Tree Manager
-		//
 		this._treeManager = new TaskTreeManager(this);
-		//
-		// License Manager
-		//
 		this._licenseManager = new LicenseManager(this, this._server);
-		//
-		// Usage
-		//
 		this._usage = new Usage(this);
-		//
-		// Webviews
-		//
 		this._homeView = new HomeView(this);
 		this._taskCountView = new TaskCountView(this);
 		this._taskUsageView = new TaskUsageView(this);
@@ -196,9 +157,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._parsingReportPage = new ParsingReportPage(this);
 		this._releaseNotesPage = new ReleaseNotesPage(this);
 		this._welcomePage = new WelcomePage(this);
-		//
-		// API
-		//
 		this._teApi = new TeApi(this);
 		//
 		// TODO - Telemetry
@@ -221,7 +179,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		//         () => this._telemetry.setGlobalAttribute('workspace.isTrusted', workspace.isTrusted
 		//     );
 		// );
-		//
+		context.subscriptions.push(this);
 		this._disposables = [
 			this._eventQueue,
 			this._teApi,
@@ -243,7 +201,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._releaseNotesPage,
 			this._parsingReportPage
 		];
-		context.subscriptions.push(this);
 	}
 
 
@@ -251,48 +208,15 @@ export class TeWrapper implements ITeWrapper, Disposable
 
 
 	init = async(): Promise<void> =>
-	{   //
-		// Update stored version to current
-		//
+	{
 		await this.storage.update(AllConstants.Storage.Version, this._version);
-		//
-		// Complete log initialization - note that the logging module may initiate download
-		// of debug support files if the version has changed or this is a new install.
-		//
-		await this.initLog();
-		//
-		// Perform any necessary migration for version updates
-		//
 		await this.migrate();
-		//
-		// Register busy complete event
-		//
 		this.registerBusyCompleteEvent();
-		//
-		// Register global commands
-		//
 		this.registerGlobalCommands();
-		//
-		// Register all task provider services, i.e. ant, batch, bash, python, etc...
-		//
 		this.registerTaskProviders();
-		//
-		// Init Task Manager / register file type watchers
-		//
 		await this._taskManager.init();
-		//
-		// Context
-		//
 		await this.initContext();
-		//
-		// Signal we are ready/done
-		//
 		queueMicrotask(() => { this._initialized = true; this._onInitialized.fire(); });
-		//
-		// Start the whole work process, i.e. read task files and build the task tree, etc.
-		// Large workspaces can take a bit of time if persistent caching isn't enabled, so
-		// we do it now and not wait until the view is first visible/focused/activated.
-		//
 		queueMicrotask(() => this.run());
 	};
 
@@ -315,40 +239,30 @@ export class TeWrapper implements ITeWrapper, Disposable
 	private initLog = async (): Promise<void> =>
 	{
 		let sb: any = { dispose: utilities.emptyFn, hide: utilities.emptyFn };
-		const version = this._version,
-			  versionChg = this.versionchanged,
-			  errMsg = "Unable to install logging support files",
-			  wrapCbOpts: CallbackOptions = [ window.showErrorMessage, () => { sb.hide(); sb.dispose(); }, errMsg ];
-		const _promptRestart = async () =>
-		{
-			const msg = "New debug support files have been installed, a restart is required to re-enable logging",
-				  action = await window.showInformationMessage(msg, "Cancel", "Restart");
-			if (action === "Restart") {
-				setTimeout(executeCommand, 1, AllConstants.VsCodeCommands.Reload);
-			}
-		};
-		if (this.versionchanged || this.isNewInstall)
+		const eMsg = "Unable to install logging support files",
+			  wrapCbOpts: CallbackOptions = [ /* catch */window.showErrorMessage, /* finally */() => { sb.hide(); sb.dispose(); }, eMsg ];
+		if (this.isNewInstall || this.versionChanged)
 		{
 			sb = window.createStatusBarItem(1, 100);
 			sb.text = `$(loading~spin) ${this.extensionTitleShort}: Installing debug support files`;
 			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
 			sb.show();
 		}
-		await utilities.wrap(this._log.init, wrapCbOpts, this, this, version, versionChg, _promptRestart);
+		await utilities.wrap(this._log.init, wrapCbOpts, this, this, this._version, this.versionChanged, utilities.promptRestart);
 		this.log.methodEvent("initializing extension", "wrapper", 1, [
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
 	};
 
 
-	private migrate = async () =>
+	private migrate = () =>
 	{
-		if (this.versionchanged)
+		return utilities.execIf(this.versionChanged, async () =>
 		{
 			const migration = new TeMigration(this._storage, this._configuration);
 			await migration.migrateSettings();
 			await migration.migrateStorage();
-		}
+		}, this);
 	};
 
 
@@ -443,7 +357,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		// a new installation / first runtime.
 		//
 		this.log.write("   check version change / update", 2);
-		await utilities.execIf(this.versionchanged, async () =>
+		await utilities.execIf(this.versionChanged, async () =>
 		{
 			this.log.write("   version has changed", 1);
 			this.log.value("      previous version", this._previousVersion, 1);
@@ -563,7 +477,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get fileWatcher(): TeFileWatcher { return this._taskManager.fileWatcher; }
 	get fs(): ITeFilesystem { return fs; }
 	get homeView(): HomeView { return this._homeView; }
-	get isNewInstall(): boolean { return this.versionchanged && this._previousVersion === undefined; }
+	get isNewInstall(): boolean { return this.versionChanged && this._previousVersion === undefined; }
 	get isReady(): boolean { return this._ready; }
 	get keys(): ITeKeys { return AllConstants; }
 	get licenseManager(): LicenseManager { return this._licenseManager; }
@@ -599,7 +513,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get usage(): Usage { return this._usage; }
 	get utils(): ITeUtilities { return utilities; }
 	get version(): string { return this._version; }
-	get versionchanged(): boolean { return this._version !== this._previousVersion; }
+	get versionChanged(): boolean { return this._version !== this._previousVersion; }
     get views(): { [id in "taskExplorer" | "taskExplorerSideBar"]: ITaskTreeView } { return this.treeManager.views; }
 	get welcomePage(): WelcomePage { return this._welcomePage; }
 	get wsfolder(): WorkspaceFolder { return (workspace.workspaceFolders as WorkspaceFolder[])[0]; }

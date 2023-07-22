@@ -170,6 +170,7 @@ export interface ITeUtilities
 	popIfExists(arrOrRec: string[] | Record<string, string> | undefined, ...item: string[]): string[];
 	popIfExistsBy<T>(arr: T[] | undefined, fn: (v1: T) => boolean, thisArg?: any, single?: boolean): T[];
 	popObjIfExistsBy<T>(rec: Record<string, T> | undefined, fn: (k: string, v: T) => boolean, thisArg?: any, single?: boolean): T[];
+	promptRestart(message: string): Promise<boolean>;
 	properCase(name: string | undefined, removeSpaces?: boolean): string;
 	pushIfNotExists(arr: string[] | undefined, ...item: string[]): void;
     // pushIfNotExistsBy<T>(arr: T[] | undefined, fn: (v: T) => boolean, thisArg?: any, ...item: T[]): T[] | undefined;

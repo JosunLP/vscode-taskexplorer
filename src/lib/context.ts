@@ -1,7 +1,5 @@
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import { IDictionary } from ":types";
+import { isPrimitive } from "./utils/typeUtils";
 import { commands, Disposable, EventEmitter, workspace } from "vscode";
 import { ITeContext, AllContextKeys, ContextKeys, VsCodeCommands, IContextChangeEvent } from "../interface";
 
@@ -9,7 +7,7 @@ import { ITeContext, AllContextKeys, ContextKeys, VsCodeCommands, IContextChange
 export class TeContext implements ITeContext, Disposable
 {
 	private _disposables: Disposable[] = [];
-	private contextStorage: IDictionary<unknown> = {};
+	private _contextStorage: Record<string, unknown> = {};
 	private _onDidChangeContext: EventEmitter<IContextChangeEvent>;
 
 
@@ -18,28 +16,29 @@ export class TeContext implements ITeContext, Disposable
 		this._onDidChangeContext = new EventEmitter<IContextChangeEvent>();
 		this._disposables.push(
 			this._onDidChangeContext,
-			workspace.onDidGrantWorkspaceTrust(() => this.setContext(ContextKeys.Untrusted, undefined))
+			workspace.onDidGrantWorkspaceTrust(this.onWorkspaceTrustChange, this)
 		);
 	}
-
 
     dispose = () => this._disposables.forEach(d => d.dispose());
 
 
-	get onDidChangeContext() {
-		return this._onDidChangeContext.event;
-	}
+	get onDidChangeContext() { return this._onDidChangeContext.event; }
 
 
 	getContext = <T>(key: AllContextKeys, defaultValue?: T) =>
-		this.contextStorage[key] as T | undefined || (!defaultValue && this.contextStorage[key] === false ? false as unknown as T : defaultValue);
+		(this._contextStorage[key] || isPrimitive(this._contextStorage[key]) ? <T>this._contextStorage[key] : defaultValue);
 
 
-	setContext = async(key: AllContextKeys, value: unknown): Promise<void> =>
+	/* istanbul ignore next */
+	private onWorkspaceTrustChange = () => this.setContext(ContextKeys.Untrusted, undefined);
+
+
+	setContext = async (key: AllContextKeys, value: unknown): Promise<void> =>
 	{
-		if (this.contextStorage[key] !== value)
+		if (this._contextStorage[key] !== value)
 		{
-			this.contextStorage[key] = value;
+			this._contextStorage[key] = value;
 			void (await commands.executeCommand(VsCodeCommands.SetContext, key, value));
 			this._onDidChangeContext.fire({ key, value });
 		}

@@ -3,10 +3,10 @@ import { join } from "path";
 import { env } from "process";
 import { expect } from "chai";
 import { ITeWrapper } from ":types";
-import { Uri, workspace, WorkspaceFolder } from "vscode";
+import { commands, Uri, workspace, WorkspaceFolder } from "vscode";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import {
-	activate, testControl, logErrorsAreFine, suiteFinished, exitRollingCount, getWsPath, endRollingCount, sleep
+	activate, testControl, logErrorsAreFine, suiteFinished, exitRollingCount, getWsPath, endRollingCount, sleep, overrideNextShowInputBox
 } from "../../utils/utils";
 
 let rootUri: Uri;
@@ -149,6 +149,20 @@ suite("Util Tests", () =>
 		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }], c: { a: 1 }}, { b: [{ a: 2 }]});
 		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], c: { a: 1 }});
 		// teWrapper.objUtils.mergeIf({ a: 1, b: [{ a: 1 }], c: { a: 1 }, d: new Date()}, { a: [ 1 ], c: { a: 1 }});
+		//
+		// promptRestart
+		//
+		const originalFn = commands.executeCommand;
+		try {
+			commands.executeCommand = async <T>(args: any) => { return args as T; };
+			overrideNextShowInputBox("Restart", true);
+			await teWrapper.utils.promptRestart("Test restart message 1");
+			overrideNextShowInputBox("Cancel");
+			await teWrapper.utils.promptRestart("Test restart message 2");
+		}
+		finally {
+			commands.executeCommand = originalFn;
+		}
 		//
 		// wrap()
 		//
