@@ -51,9 +51,13 @@ const upload = (env, wpConfig) =>
  */
 const sourceMapFiles = (env) =>
 {
-    const distPath = join(env.buildPath, "dist");
     try {
-        renameSync(join(distPath, "taskexplorer.js.map"), join(env.tempPath, env.app, env.environment, "taskexplorer.js.map"));
+        if (env.environment === "prod") {
+            renameSync(join(env.distPath, "taskexplorer.js.map"), join(env.tempPath, env.app, env.environment, "taskexplorer.js.map"));
+        }
+        else {
+            copyFileSync(join(env.distPath, "taskexplorer.js.map"), join(env.tempPath, env.app, env.environment, "taskexplorer.js.map"));
+        }
         copyFileSync(join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"), join(env.tempPath, "shared", "mappings.wasm"));
     } catch {}
 };
@@ -62,8 +66,10 @@ const sourceMapFiles = (env) =>
 /**
  * @method _upload
  * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
- * !!! For first time build on fresh os install, run a command manually to generate and trust the fingerprints !!!
- *     plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
+ * !!! For first time build on fresh os install:
+ * !!!   - create the environment variable SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN
+ * !!!   - run a plink command manually to generate and trust the fingerprints:
+ * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
  * @param {WebpackEnvironment} env
  */
 const _upload = (env) =>
