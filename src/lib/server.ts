@@ -16,6 +16,7 @@ export class TeServer implements ISpmServer
 	private readonly _spmApiVersion = 1;
 	private readonly _requestTimeout = 7500;
 	private readonly _spmApiServer = "license.spmeesseman.com";
+	private readonly _spmResourceServer = "app1.spmeesseman.com";
 	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
 		dev: "1Ac4qiBjXsNQP82FqmeJ5k0/oMEmjR6Dx9fw1ojUO9//Z4MS6gdHvmzPYY+tuhp3UV/xILD301dQZpeAt+YZzY+Lnh8DlVCPjc0B4pdP84XazzZ+c3JN0vNN4cIfa+fsyPAEDzcsFUWf3z04kMyDXktZU7EiJ4vBU89qAbjOX9I=",
 		test: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcOBrbGCpyITCp0Wm19f8gdI1hNJttkARO5Unac4LA2g7RmT/kdXSsz64zNjB9FrvrzHe97tLBHRGorwcOx/K/hQ==",
@@ -38,7 +39,7 @@ export class TeServer implements ISpmServer
 	private getApiPath = (ep: SpmApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
 
 
-	private getResourcPath = (ep: SpmServerResource) => `https://${this._spmApiServer}/static/${ep}`;
+	private getResourcPath = (ep: SpmServerResource) => `https://${this._spmResourceServer}/res/${ep}`;
 
 
 	// get = async <T = string | ArrayBuffer | Record<string, any>>(ep: SpmServerResource, raw: boolean, logPad: string) =>
@@ -46,15 +47,8 @@ export class TeServer implements ISpmServer
 	{
 		return Promise.race<ArrayBuffer>(
 		[
-			this._get(ep, logPad).then(
-				// (r) => this.wrapper.utils.wrap(
-				// 	(r) => (!raw && this.wrapper.typeUtils.isString(r) ? JSON.parse(r) : r) as T, [ (r) => r, r ], this, r
-				// )
-				(r) => r
-			),
-			new Promise<ArrayBuffer>((_, reject) => {
-				setTimeout(reject, this._requestTimeout, <SpmServerError>{ message: "Timed out", status: 408 });
-			})
+			this._get(ep, logPad),
+			new Promise<ArrayBuffer>((_, r) => setTimeout(r, this._requestTimeout, new SpmServerError(408, undefined, "Timeout")))
 		]);
 	};
 

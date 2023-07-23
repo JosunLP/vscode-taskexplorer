@@ -403,12 +403,14 @@ export function wrap<R, E, ER, A1, A2>(runFn: (arg1: NonNullable<A1>, arg2: A2) 
 export function wrap<R, E, ER, A1, A2, A3>(runFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
 export function wrap<R, E, ER, A1, A2, A3, A4>(runFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
 export function wrap<R, E, ER, A1, A2, A3, A4, A5>(runFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
-export function wrap<R, E, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFinallyOpts?: CallbackOptions<E, ER>, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R
+export function wrap<R, E, ER, A1, A2, A3, A4, A5, A6>(runFn: (arg1: NonNullable<A1>, arg2: NonNullable<A2>, arg3: NonNullable<A3>, arg4: NonNullable<A4>, arg5: NonNullable<A5>, arg6: NonNullable<A6>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6): R;
+export function wrap<R, E, ER, A1, A2, A3, A4, A5, A6, A7>(runFn: (arg1: NonNullable<A1>, arg2: NonNullable<A2>, arg3: NonNullable<A3>, arg4: NonNullable<A4>, arg5: NonNullable<A5>, arg6: NonNullable<A6>, arg7: NonNullable<A7>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7): R;
+export function wrap<R, E = any, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1, A6 = A1, A7 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7) => R, catchFinallyOpts?: CallbackOptions<E, ER>, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7): R
 {
     let result: any;
     try
     {
-        result = runFn.call(thisArg, arg1, arg2, arg3, arg4, arg5);
+        result = runFn.call(thisArg, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
         if (isPromise<R>(result))
         {
             result = result.then<R, E>(

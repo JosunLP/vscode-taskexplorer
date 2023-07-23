@@ -116,6 +116,7 @@ export interface ITeTypeUtilities
 export type CallbackArray<E, ER> = [ (e: E, ...args: any[]) => ER, ...any[] ];
 export type CallbackOptions<E = any, ER = any> = CallbackArray<E, ER> | null | undefined | false;
 export type ErrorType<T extends new (...args: any) => any> = T extends new (...args: any) => infer R ? R : any;
+// type WrapArgs<T extends (...args: any) => any> = (...args: Parameters<T>) => Parameters<T>;
 
 export interface ITeUtilities
 {
@@ -126,6 +127,7 @@ export interface ITeUtilities
 	execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
 	execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
 	execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+	execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
 	execIf<T, R, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined;
 	/*
 	execIf<T, R, A0>(checkValue: T | undefined, ifFn: (arg: T | A0) => R, thisArg?: any, elseOpts?: CallbackOptions | A0 | null): R | undefined;
@@ -180,11 +182,14 @@ export interface ITeUtilities
 	textWithElipsis(text: string, maxLength: number): string;
 	throwIf<T extends typeof Error>(checkValue: any, errorType: T, ...args: any[]): void | never;
 	uniq<T>(a: T[]): T[];
+	// wrap2<R, E, ER, A>(runFn: (...args: WrapArgs<A>[]) => R, catchFn?: CallbackOptions<E, ER>, thisArg?: any, ...args: WrapArgs<A>[]): R;
 	wrap<R, E, ER>(runFn: () => R, catchFn?: CallbackOptions<E, ER>, thisArg?: any): R;
 	wrap<R, E, ER, A1>(runFn: (arg1: NonNullable<A1>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1): R;
 	wrap<R, E, ER, A1, A2>(runFn: (arg1: NonNullable<A1>, arg2: NonNullable<A2>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2): R;
 	wrap<R, E, ER, A1, A2, A3>(runFn: (arg1: NonNullable<A1>, arg2: NonNullable<A2>, arg3: NonNullable<A3>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3): R;
 	wrap<R, E, ER, A1, A2, A3, A4>(runFn: (arg1: NonNullable<A1>, arg2: NonNullable<A2>, arg3: NonNullable<A3>, arg4: NonNullable<A4>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R;
 	wrap<R, E, ER, A1, A2, A3, A4, A5>(runFn: (arg1: NonNullable<A1>, arg2: NonNullable<A2>, arg3: NonNullable<A3>, arg4: NonNullable<A4>, arg5: NonNullable<A5>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R;
-	wrap<R, E = any, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, catchFn?: CallbackOptions<E, ER>, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R;
+	wrap<R, E, ER, A1, A2, A3, A4, A5, A6>(runFn: (arg1: NonNullable<A1>, arg2: NonNullable<A2>, arg3: NonNullable<A3>, arg4: NonNullable<A4>, arg5: NonNullable<A5>, arg6: NonNullable<A6>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6): R;
+	wrap<R, E, ER, A1, A2, A3, A4, A5, A6, A7>(runFn: (arg1: NonNullable<A1>, arg2: NonNullable<A2>, arg3: NonNullable<A3>, arg4: NonNullable<A4>, arg5: NonNullable<A5>, arg6: NonNullable<A6>, arg7: NonNullable<A7>) => R, catchFn: CallbackOptions<E, ER>, thisArg: any, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7): R;
+	wrap<R, E = any, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1, A6 = A1, A7 = A1>(runFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7) => R, catchFn?: CallbackOptions<E, ER>, thisArg?: any, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7): R;
 }

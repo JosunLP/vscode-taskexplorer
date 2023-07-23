@@ -210,6 +210,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	init = async(): Promise<void> =>
 	{
 		await this.storage.update(AllConstants.Storage.Version, this._version);
+		await this.initLog();
 		await this.migrate();
 		this.registerBusyCompleteEvent();
 		this.registerGlobalCommands();
@@ -249,7 +250,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
 			sb.show();
 		}
-		await utilities.wrap(this._log.init, wrapCbOpts, this, this, this._version, this.env, isNewVersionOrInstall, utilities.promptRestart);
+		await this.utils.wrap(this._log.init, wrapCbOpts, this, this, this._version, this.env, isNewVersionOrInstall, this.server.get, utilities.promptRestart);
 		this.log.methodEvent("initializing extension", "wrapper", 1, [
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
