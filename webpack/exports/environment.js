@@ -26,8 +26,6 @@ const environment = (build, env, argv) =>
 	env.build = build;
 	env.buildPath = resolve(__dirname, "..", "..");
 	env.distPath = join(env.buildPath, "dist");
-	env.paths.cacheDir = join(env.basePath, "node_modules", ".cache", "webpack");
-	env.paths.hashFile = join(env.paths.cacheDir, "hash.json");
 	env.tempPath = resolve(process.env.TEMP || process.env.TMP  || ".");
 	if (env.build === "webview") {
 		env.basePath = join(env.buildPath, "src", "webview", "app");
@@ -35,6 +33,8 @@ const environment = (build, env, argv) =>
 	else {
 		env.basePath = env.buildPath;
 	}
+	env.paths.cacheDir = join(env.basePath, "node_modules", ".cache", "webpack");
+	env.paths.hashFile = join(env.paths.cacheDir, "hash.json");
 	readPackageDotJson(env);
 	writeEnvironment(env, argv);
 	env.isTests = env.environment.startsWith("test");
