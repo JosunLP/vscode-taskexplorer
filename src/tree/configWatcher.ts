@@ -7,7 +7,6 @@
  * Watches all configuration parameters that can cause a a tree refresh
  */
 
-import { IDictionary } from ":types";
 import { TeWrapper } from "../lib/wrapper";
 import { executeCommand } from "../lib/command/command";
 import { ITeTreeConfigWatcher } from "../interface";
@@ -20,16 +19,16 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
     private _disposables: Disposable[];
     private _watcherEnabled = true;
     private _processingConfigEvent = false;
-    private _enabledTasks: IDictionary<boolean>;
-    private _pathToPrograms: IDictionary<string>;
+    private _enabledTasks: Record<string, boolean>;
+    private _pathToPrograms: Record<string, string>;
     private readonly _onReady: EventEmitter<void>;
 
 
     constructor(private readonly wrapper: TeWrapper)
     {
 		this._onReady = new EventEmitter<void>();
-        this._enabledTasks = wrapper.config.get<IDictionary<boolean>>("enabledTasks", {});
-        this._pathToPrograms = wrapper.config.get<IDictionary<string>>("pathToPrograms", {});
+        this._enabledTasks = wrapper.config.get<Record<string, boolean>>("enabledTasks", {});
+        this._pathToPrograms = wrapper.config.get<Record<string, string>>("pathToPrograms", {});
         this._disposables = [
             this._onReady,
             workspace.onDidChangeConfiguration(this.processConfigChanges, this)
@@ -134,7 +133,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             if (w.config.affectsConfiguration(e, "enabledTasks"))
             {
-                const newEnabledTasks = w.config.get<IDictionary<boolean>>("enabledTasks", {});
+                const newEnabledTasks = w.config.get<Record<string, boolean>>("enabledTasks", {});
                 for (const p of Object.keys(this._enabledTasks))
                 {
                     const taskType = getTaskTypeRealName(p),
@@ -181,7 +180,7 @@ export class TeTreeConfigWatcher implements ITeTreeConfigWatcher, Disposable
             //
             if (w.config.affectsConfiguration(e, "pathToPrograms"))
             {
-                const newPathToPrograms = w.config.get<IDictionary<string>>("pathToPrograms", {});
+                const newPathToPrograms = w.config.get<Record<string, string>>("pathToPrograms", {});
                 for (const p of Object.keys(this._pathToPrograms))
                 {
                     const taskType = getTaskTypeRealName(p),

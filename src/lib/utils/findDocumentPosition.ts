@@ -3,10 +3,9 @@ import { TextDocument } from "vscode";
 import { TeWrapper } from "../wrapper";
 import { isWatchTask } from "./taskUtils";
 import { TaskItem } from "../../tree/node/item";
-import { IDictionary } from ":types";
 
 
-const jsonMap: IDictionary<{object: string; preKey: string; postKey: string}> = {
+const jsonMap: Record<string, {object: string; preKey: string; postKey: string}> = {
     npm: {
         object: "\"scripts\"",
         preKey: "(?<=\\s)\"",

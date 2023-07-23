@@ -80,12 +80,19 @@ const sourceMapFiles = (env) =>
  */
 const _upload = (env) =>
 {
+    const host = "app1.spmeesseman.com";
+    if (env.state.hashCurrent === env.state.hashCurrent)
+    {
+        writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`);
+        return;
+    }
+
     const user = "smeesseman",
-          host = "app1.spmeesseman.com",
           rBasePath = "/var/www/app1/res/app",
           /** @type {import("child_process").SpawnSyncOptions} */
           spawnSyncOpts = { cwd: env.buildPath, encoding: "utf8", shell: true },
           sshAuth = process.env.SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN || "InvalidAuth";
+
     const plinkArgs = [
         "-ssh",   // force use of ssh protocol
         "-batch", // disable all interactive prompts
@@ -93,6 +100,7 @@ const _upload = (env) =>
         sshAuth,  // auth key
         `${user}@${host}`
     ];
+
     const pscpArgs = [
         "-pw",    // authenticate
         sshAuth,  // auth key
@@ -101,19 +109,20 @@ const _upload = (env) =>
         join(env.tempPath, env.app, env.environment),
         `${user}@${host}:"${rBasePath}/${env.app}/v${env.version}"`
     ];
+
     try {
         const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}/${env.environment}` ];
-        writeInfo(`upload debug support files to ${host}`);
+        writeInfo(`upload resource files to ${host}`);
         writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}` ], spawnSyncOpts);
         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}` ], spawnSyncOpts);
         spawnSync("plink", plinkArgsFull, spawnSyncOpts);
         writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
         spawnSync("pscp", pscpArgs, spawnSyncOpts);
-        writeInfo("successfully uploaded debug support files");
+        writeInfo("successfully uploaded resource files");
     }
     catch (e) {
-        writeInfo("error uploading debug support files:", figures.color.error);
+        writeInfo("error uploading resource files:", figures.color.error);
         writeInfo("   " + e.message.trim(), figures.color.error);
     }
 };

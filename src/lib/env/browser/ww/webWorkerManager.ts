@@ -1,6 +1,5 @@
 export default {};
 //
-// import { IDictionary } from ":types";
 // import { isArray, isString } from "../utils/typeUtils";
 //
 // /**
@@ -9,9 +8,6 @@ export default {};
 //
 // export class TeWebWorkerManager
 // {
-//
-// 	private wwList: IDictionary<any> = {};
-//
 //
 // 	/**
 // 	 * @method register

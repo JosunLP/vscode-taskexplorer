@@ -5,7 +5,7 @@ import { join } from "path";
 import { expect } from "chai";
 import fsUtils from "../../utils/fsUtils";
 import * as utils from "../../utils/utils";
-import { IDictionary, ITeWrapper } from ":types";
+import { ITeWrapper } from ":types";
 import { startupBuildTree } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 
@@ -24,7 +24,7 @@ let outsideWsDir: string;
 let rootPath: string;
 let excludes: string[];
 
-let files: IDictionary<string> = {};
+let files: Record<string, string> = {};
 
 
 suite("File Watcher Tests", () =>

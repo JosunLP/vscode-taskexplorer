@@ -28,7 +28,8 @@ const optimization = (env, wpConfig) =>
 		};
 		if (env.build !== "browser")
 		{
-			wpConfig.optimization.splitChunks = {
+			wpConfig.optimization.splitChunks =
+			{
 				cacheGroups: {
 					vendor: {
 						test: /node_modules/,
@@ -37,6 +38,10 @@ const optimization = (env, wpConfig) =>
 					}
 				}
 			};
+			if (env.environment === "prod")
+			{
+				wpConfig.optimization.chunkIds = "deterministic";
+			}
 		}
 	}
 	else {

@@ -1,6 +1,6 @@
 
 import { expect } from "chai";
-import { IDictionary, ITeWrapper } from ":types";
+import { ITeWrapper } from ":types";
 import { executeSettingsUpdate } from "../utils/commandUtils";
 import {
     activate, endRollingCount, exitRollingCount, getSuccessCount, suiteFinished, testControl as tc, waitForTeIdle
@@ -10,8 +10,8 @@ let teWrapper: ITeWrapper;
 let globPatterns: string[];
 let globPatternsAnt: string[];
 let globPatternsBash: string[];
-let enabledTasks: IDictionary<boolean>;
-let pathToPrograms: IDictionary<string>;
+let enabledTasks: Record<string, boolean>;
+let pathToPrograms: Record<string, string>;
 let shellW32: string, shellLnx: string, shellOsx: string, pkgMgr: string;
 
 
@@ -22,8 +22,8 @@ suite("Configuration / Settings Tests", () =>
     {
         if (exitRollingCount(this, true)) return;
         ({ teWrapper } = await activate());
-        enabledTasks = teWrapper.config.get<IDictionary<boolean>>("enabledTasks", {});
-        pathToPrograms = teWrapper.config.get<IDictionary<string>>("pathToPrograms", {});
+        enabledTasks = teWrapper.config.get<Record<string, boolean>>("enabledTasks", {});
+        pathToPrograms = teWrapper.config.get<Record<string, string>>("pathToPrograms", {});
         shellW32 = teWrapper.config.getVs<string>("terminal.integrated.shell.windows", "");
         shellLnx = teWrapper.config.getVs<string>("terminal.integrated.shell.linux", "");
         shellOsx = teWrapper.config.getVs<string>("terminal.integrated.shell.osx", "");

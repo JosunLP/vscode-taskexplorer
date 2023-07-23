@@ -11,7 +11,6 @@ export interface TaskMap<T = ITaskFolder | ITaskFile | ITaskItem> { [id: string]
 
 export interface ITeTreeSorter
 {
-	// sortFolders(folders: IDictionary<ITaskFolder>): ITaskFolder[];
 	sortFolders(folders: ITaskFolder[]): void;
 	sortTaskFolder(folder: ITaskFolder, listType: TeTaskListType): void;
 	sortTasks(items: (ITaskFile | ITaskItem)[], listType: TeTaskListType): void;

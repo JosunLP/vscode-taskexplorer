@@ -4,7 +4,7 @@ import "./common/scss/te.scss";
 
 import { Disposable, DOM } from "./common/dom";
 import {
-	IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand, IDictionary, IpcExecCommand
+	IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand, IpcExecCommand
 } from "../common/ipc";
 
 interface VsCodeApi {
@@ -33,10 +33,11 @@ export abstract class TeWebviewApp<State = undefined>
 	private _focused?: boolean;
 	private _inputFocused?: boolean;
 	private _bindDisposables: Disposable[] | undefined;
+	private _debounceDict: Record<string, IDebounceParams> = {};
+
 	private readonly _tzOffset: number;
-	private readonly _maxSmallIntegerV8 = 2 ** 30; // Max # that can be stored in V8's smis (small int)
 	private readonly _vscode: VsCodeApi;
-	private _debounceDict: IDictionary<IDebounceParams> = {};
+	private readonly _maxSmallIntegerV8 = 2 ** 30; // Max # that can be stored in V8's smis (small int)
 
 
 	constructor(protected readonly appName: string)

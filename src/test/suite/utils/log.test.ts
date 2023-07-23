@@ -467,7 +467,7 @@ suite("Logging Tests", () =>
 		log.blank(3);
 		log.write("test1", 1);
 		log.write2("Test1", "Test1", 5);
-		log.withColor("Test1", teWrapper.figures.colors.blue);
+		log.withColor("Test1", teWrapper.log.colors.blue);
 		logControl.trace = trace;
 		//
 		// Disable logging
@@ -482,7 +482,7 @@ suite("Logging Tests", () =>
 		log.write2("Test1", "Test1", 1, "", [[ "t", 1 ]]);
 		log.info("test");
 		log.info("");
-		log.withColor("Test1", teWrapper.figures.colors.blue);
+		log.withColor("Test1", teWrapper.log.colors.blue);
 		//
 		// Re-enable logging
 		//

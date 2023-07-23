@@ -1,7 +1,6 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import { join } from "path";
-import { IDictionary } from ":types";
 import { TeWrapper } from "../lib/wrapper";
 import * as taskTypeUtils from "../lib/utils/taskUtils";
 import { findFiles, numFilesInDirectory } from "../lib/utils/fs";
@@ -16,9 +15,10 @@ export class TeFileCache implements ITeFileCache, Disposable
     private cacheBusy = false;
     private taskGlobs: any = {};
     private cacheBuilding = false;
-    private taskFilesMap: IDictionary<ICacheItem[]>;
-    private projectFilesMap: IDictionary<IDictionary<string[]>>;
-    private projectToFileCountMap: IDictionary<IDictionary<number>>;
+    private taskFilesMap: Record<string, ICacheItem[]>;
+    private projectFilesMap: Record<string, Record<string, string[]>>;
+    private projectToFileCountMap: Record<string, Record<string, number>>;
+
     private readonly _onReady: EventEmitter<void>;
     private readonly _disposables: Disposable[] = [];
 
@@ -90,9 +90,9 @@ export class TeFileCache implements ITeFileCache, Disposable
     {
         await this.startBuild();
         this.wrapper.statusBar.update("Loading tasks from file cache...");
-        this.taskFilesMap = await this.wrapper.storage.get2<IDictionary<ICacheItem[]>>(this.wrapper.keys.Storage.FileCacheTaskFilesMap, {});
-        this.projectFilesMap = await this.wrapper.storage.get2<IDictionary<IDictionary<string[]>>>(this.wrapper.keys.Storage.FileCacheProjectFilesMap, {});
-        this.projectToFileCountMap = await this.wrapper.storage.get2<IDictionary<IDictionary<number>>>(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, {});
+        this.taskFilesMap = await this.wrapper.storage.get2<Record<string, ICacheItem[]>>(this.wrapper.keys.Storage.FileCacheTaskFilesMap, {});
+        this.projectFilesMap = await this.wrapper.storage.get2<Record<string, Record<string, string[]>>>(this.wrapper.keys.Storage.FileCacheProjectFilesMap, {});
+        this.projectToFileCountMap = await this.wrapper.storage.get2<Record<string, Record<string, number>>>(this.wrapper.keys.Storage.FileCacheProjectFileToFileCountMap, {});
         await this.finishBuild(true);
     };
 
@@ -571,8 +571,8 @@ export class TeFileCache implements ITeFileCache, Disposable
         //
         this.cacheBusy = true;
         //
-        // Clear the cache maps.  This sets all 3 IDictionary map objects and the task glob
-        // mapping to empty objects {}
+        // Clear the cache maps.  This sets all 3 hash map objects and the task glob mapping to
+        // empty objects {}
         //
         this.clearMaps();
 

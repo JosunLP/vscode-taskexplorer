@@ -10,21 +10,12 @@ import { appendFileSync, copyFile, createDirSync, deleteFileSync, pathExistsSync
 import { commands, ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
 import {
     Commands, IConfiguration, ConfigKeys, ILog, ILogConfig, ILogControl, ILogState, ITeWrapper, LogLevel, VsCodeCommands,
-    SpmServerResource
+    SpmServerResource, ILogSymbols, LogColor, ILogColors
 } from "../../interface";
 
 interface IDisposable { dispose: () => any }
 
-type LogColor = [ number, number ];
 type HttpGetFunction = (url: SpmServerResource, ...args: any[]) => Promise<ArrayBuffer>;
-
-interface ILogSymbols
-{
-    bullet: "●"; bulletBig: "⬢"; checkboxOn: "☒"; checkboxOff: "☐"; end: "◀"; error: "✘"; info: "ℹ";
-    pointer: "❯"; pointerSmall: "›"; start: "▶"; star: "★"; success: "✔"; up: "△"; warning: "⚠";
-    blue: { error: "✘"; info: "ℹ"; success: "✔"; warning: "⚠" };
-    color: { end: "◀"; error: "✘"; info: "ℹ"; pointer: "❯"; start: "▶"; success: "✔"; up: "△"; warning: "⚠" };
-}
 
 
 /**
@@ -36,6 +27,7 @@ export class TeLog implements ILog, Disposable
     protected readonly _logState: ILogState;
     protected readonly _logConfig: ILogConfig;
     protected readonly _logControl: ILogControl;
+
     private _errorsWritten = 0;
     private _fileNameTimer: NodeJS.Timeout;
     private _wrapper: ITeWrapper | undefined;
@@ -57,7 +49,7 @@ export class TeLog implements ILog, Disposable
     private readonly _separator = "-----------------------------------------------------------------------------------------";
     private readonly _stackLineParserRgx = /at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i;
     private readonly _stackLineFilterRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
-    private readonly _colors: Record<string, LogColor> =
+    private readonly _colors: ILogColors =
     {
         bold: [ 1, 22 ],
         italic: [ 3, 23 ],
@@ -119,8 +111,7 @@ export class TeLog implements ILog, Disposable
     private get allowScaryColors(): boolean { return !this._logConfig.isTests || !this._logControl.blockScaryColors; }
     private get httpGet(): HttpGetFunction { return <HttpGetFunction>this._httpGetFn; }
 
-    protected get colors(): Record<string, LogColor> { return this._colors; }
-
+    get colors(): ILogColors { return this._colors; }
     get control(): ILogControl { return this._logControl; }
     get lastPad(): string { return this._logState.lastLogPad; }
     get state(): ILogState { return this._logState; }

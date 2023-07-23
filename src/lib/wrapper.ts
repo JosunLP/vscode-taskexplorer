@@ -65,7 +65,7 @@ import {
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, ITaskTreeView, ITeFilesystem, ITePathUtilities, ILog,
 	ITePromiseUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities, ITeKeys,
-	ITeWrapper, TeRuntimeEnvironment, IDictionary, ILogControl, ITeObjectUtilities, ISpmServer, CallbackOptions
+	ITeWrapper, TeRuntimeEnvironment, ILogControl, ITeObjectUtilities, ISpmServer, CallbackOptions
 } from "../interface";
 
 
@@ -139,7 +139,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		Object.entries<string>(AllConstants.Strings).filter(s => s[1].includes("|")).forEach(e =>
 		{   // TODO - Localization
 			const lPair = e[1].split("|");
-			(<IDictionary<string>>AllConstants.Strings)[e[0]] = this.localize(lPair[0], lPair[1]);
+			AllConstants.Strings[e[0]] = this.localize(lPair[0], lPair[1]);
 		});
 		this._log = new TeLog(context, configuration);
 		this._statusBar = new TeStatusBar(this);

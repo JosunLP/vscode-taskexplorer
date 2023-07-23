@@ -2,7 +2,6 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { IDictionary } from ":types";
 import { Disposable, commands } from "vscode";
 import { SupportedCommands } from "../../interface/ICommand";
 
@@ -30,7 +29,7 @@ export function executeCommand<T extends [...unknown[]] = [], U = any>(command: 
 	return commands.executeCommand<U>(command, ...args);
 }
 
-const _debounceDict: IDictionary<IDebounceParams> = {};
+const _debounceDict: Record<string, IDebounceParams> = {};
 interface IDebounceParams { fn: (...args: any[]) => any; args: any[]; scope: any; timer?: NodeJS.Timeout }
 
 export const debounceCommand = (key: string, fn: (...args: any[]) => any, wait: number, thisArg: any, ...args: any[]) =>

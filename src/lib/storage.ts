@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { join } from "path";
-import { IDictionary } from ":types";
 import { isNumber, isString } from "./utils/typeUtils";
 import { ISecretStorageChangeEvent, IStorage, IStorageChangeEvent, StorageTarget } from "../interface";
 import { createDir, pathExistsSync, readJsonAsync, readJsonSync, writeFile, writeFileSync } from "./utils/fs";
@@ -86,7 +85,7 @@ class Storage implements IStorage
     private getKey = (key: string) => this._keyPrefix + key;
 
 
-    private _get2<T>(key: string, store: IDictionary<T>, defaultValue?: T): T | undefined
+    private _get2<T>(key: string, store: Record<string, T>, defaultValue?: T): T | undefined
     {
         if (defaultValue || (isString(defaultValue) && defaultValue === "") || (isNumber(defaultValue) && defaultValue === 0))
         {
@@ -109,9 +108,9 @@ class Storage implements IStorage
 
     async get2<T>(key: string, defaultValue?: T): Promise<T | undefined>
     {
-        let store: IDictionary<any> = {};
+        let store: Record<string, any> = {};
         try {
-            store = await readJsonAsync<IDictionary<any>>(this.storageFile);
+            store = await readJsonAsync<Record<string, any>>(this.storageFile);
         }
         catch {}
         return this._get2(key, store, defaultValue);
@@ -120,9 +119,9 @@ class Storage implements IStorage
 
     get2Sync<T>(key: string, defaultValue?: T): T | undefined
     {
-        let store: IDictionary<any> = {};
+        let store: Record<string, any> = {};
         try {
-            store = readJsonSync<IDictionary<any>>(this.storageFile);
+            store = readJsonSync<Record<string, any>>(this.storageFile);
         }
         catch {}
         return this._get2(key, store, defaultValue);
@@ -151,9 +150,9 @@ class Storage implements IStorage
 
     async update2(key: string, value: any)
     {
-        let store: IDictionary<any> = {};
+        let store: Record<string, any> = {};
         try {
-            store = await readJsonAsync<IDictionary<any>>(this.storageFile);
+            store = await readJsonAsync<Record<string, any>>(this.storageFile);
         }
         catch  {}
         try {
@@ -169,9 +168,9 @@ class Storage implements IStorage
 
     update2Sync(key: string, value: any)
     {
-        let store: IDictionary<any> = {};
+        let store: Record<string, any> = {};
         try {
-            store = readJsonSync<IDictionary<any>>(this.storageFile);
+            store = readJsonSync<Record<string, any>>(this.storageFile);
         }
         catch {}
         try {

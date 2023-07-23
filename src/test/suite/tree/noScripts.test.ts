@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { TreeItem } from "vscode";
-import { IDictionary, ITeWrapper } from ":types";
+import { ITeWrapper } from ":types";
 import { startupFocus } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import {
@@ -14,7 +14,7 @@ let didResetEnabledTasks = false;
 let showFavorites = false;
 let showLastTasks = false;
 let showUserTasks = false;
-let enabledTasks: IDictionary<boolean>;
+let enabledTasks: Record<string, boolean>;
 const antStartCount = 3;
 const gruntStartCount = 7;
 const gulpStartCount = 17;
@@ -33,7 +33,7 @@ suite("NoScripts TreeItem Tests", () =>
         showFavorites = teWrapper.config.get<boolean>("specialFolders.showFavorites", true);
         showLastTasks = teWrapper.config.get<boolean>("specialFolders.showLastTasks", true);
         showUserTasks = teWrapper.config.get<boolean>("specialFolders.showUserTasks", false);
-        enabledTasks = { ...teWrapper.config.get<IDictionary<boolean>>("enabledTasks") };
+        enabledTasks = { ...teWrapper.config.get<Record<string, boolean>>("enabledTasks") };
         if (showUserTasks) {
             await executeSettingsUpdate("specialFolders.showFavorites", false, tc.waitTime.config.showHideSpecialFolder);
         }

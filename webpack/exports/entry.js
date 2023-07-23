@@ -31,6 +31,7 @@ const entry = (env, wpConfig) =>
 	if (env.build === "webview")
 	{
 		wpConfig.entry = webviewApps;
+		// exports.output() will set filename
 	}
 	else if (env.build === "tests")
 	{
@@ -44,6 +45,7 @@ const entry = (env, wpConfig) =>
 		wpConfig.entry =
 		{
 			runTest: "./src/test/runTest.ts"
+			// exports.output() will set filename
 			// "run/index": "./src/test/run/index.ts",
 			// ...testFiles
 		};
@@ -53,8 +55,8 @@ const entry = (env, wpConfig) =>
 		wpConfig.entry =
 		{
 			taskexplorer: {
-				import: "./src/taskexplorer.ts",
-				filename: env.stripLogging ? "taskexplorer.js" : "taskexplorer.debug.js"
+				import: "./src/taskexplorer.ts"
+				// exports.output() will set filename
 			}
 		};
 	}

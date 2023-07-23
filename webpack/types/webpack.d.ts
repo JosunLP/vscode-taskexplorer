@@ -26,11 +26,18 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     isTests: boolean;
     pkgJson: Record<string, any>;         // package.json parsed object
     preRelease: boolean;
+    state: WebpackBuildState;
     stripLogging: boolean;
     target: WebpakTarget;
-    tempPath: string;                      // operating system temp directory
+    tempPath: string;                     // operating system temp directory
     verbosity: WebpackLogLevel;
     version: string;                      // app version (read from package.json)
+}
+
+declare interface WebpackBuildState
+{
+    hashCurrent: string;                  // Content hash from previous output module build
+    hashNew: string;                      // Content hash for new output module build
 }
 
 declare interface WebpackEnvironmentInternal
@@ -50,6 +57,7 @@ export {
     WebpackArgs,
     WebpackBuild,
     WebpackBuildOrUndefined,
+    WebpackBuildState,
     WebpackConfig,
     WebpackPluginInstance,
     WebpackOptimization,

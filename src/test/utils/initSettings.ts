@@ -2,7 +2,7 @@
 
 import { testControl as tc } from "../control";
 import { ConfigurationTarget, workspace } from "vscode";
-import { IDictionary } from ":types";
+
 
 const isArray = <T>(value: any): value is T[] => !!value && Array.isArray(value);
 const isObject = (value: any): value is { [key: string]: any } => !!value && (value instanceof Object || typeof value === "object") && !isArray(value);
@@ -82,8 +82,8 @@ export const initSettings = async () =>
 
     if (tc.log.enabled)
     {
-        const slowTimes = tc.slowTime as IDictionary<any>;
-        // const waitTimes = tc.waitTime as IDictionary<number>;
+        const slowTimes = tc.slowTime as Record<string, any>;
+        // const waitTimes = tc.waitTime as Record<string, number>;
         let factor = 1.01;
         if (tc.log.output) {
             factor += 0.026;

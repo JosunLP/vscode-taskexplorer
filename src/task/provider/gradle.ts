@@ -1,5 +1,4 @@
 
-import { IDictionary } from ":types";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
 import { TaskExplorerProvider } from "./provider";
@@ -9,7 +8,7 @@ import { Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace } from
 
 export class GradleTaskProvider extends TaskExplorerProvider implements TaskExplorerProvider
 {
-    private commands: IDictionary<string> = {
+    private commands: Record<string, string> = {
         aix: "gradlew",
         darwin: "gradlew",
         freebsd: "gradlew",

@@ -172,8 +172,8 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
     const msg = `Failed to show ${showCmdName} with echo command`;
     if (!webviewPage.visible)
     {
-        console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor(msg, teWrapper.figures.colors.grey)}`);
-        console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.log.symbols.blue.warning} ${teWrapper.log.withColor(msg, teWrapper.log.colors.grey)}`);
+        console.log(`    ${teWrapper.log.symbols.blue.warning} ${teWrapper.log.withColor("Trying again in 100ms...", teWrapper.log.colors.grey)}`);
         await sleep(100);
         void webviewPageSender.postMessage(echoCmd, { command: `taskexplorer.view.${showCmdName}.show`, args: args.length > 0 ? args : undefined });
         await waitForWebviewReadyEvent(webviewPage, 3000);
@@ -181,8 +181,8 @@ export const showTeWebviewByEchoCmd = async (showCmdName: string, webviewPage: I
     }
     if (!webviewPage.visible)
     {
-        console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor(msg, teWrapper.figures.colors.grey)}`);
-        console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor("Trying again in 100ms with showTeWebview...", teWrapper.figures.colors.grey)}`);
+        console.log(`    ${teWrapper.log.symbols.blue.warning} ${teWrapper.log.withColor(msg, teWrapper.log.colors.grey)}`);
+        console.log(`    ${teWrapper.log.symbols.blue.warning} ${teWrapper.log.withColor("Trying again in 100ms with showTeWebview...", teWrapper.log.colors.grey)}`);
         await sleep(100);
         if (args.length > 0) {
             await showTeWebview(webviewPage, ...args);

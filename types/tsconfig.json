@@ -1,30 +1,41 @@
 {
+    "extends": "../tsconfig.base.json",
 	"compilerOptions": {
-		"baseUrl": ".",
         "declaration": true,
         "declarationMap": false,
 		"emitDeclarationOnly": true,
-		"incremental": true,
-		"lib": [ "es2020" ],
-		"module": "commonjs",
+		"isolatedModules": false,
+		// "outFile": "dist/index.d.ts",
 		"outDir": "dist",
-		// "rootDir": "../src",
-		"rootDirs": [ "../src/interface", "../src/lib" ],
-		"sourceMap": false,
-		"strict": true,
-		"target": "es2020",
-		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.types.tsbuildinfo",
         "paths": {
+			// ":env/*": [ "../src/lib/env/node/*" ]
 			":types": [ "." ]
-		}
+		},
+		// "rootDir": "..",
+		"rootDirs": [
+			"../src/interface",
+			"../src/lib",
+			// 	"../src/interface",
+		// 	"."
+		],
+		// "rootDirs": [
+		// 	"../src/interface",
+		// 	"."
+		// ],
+		"sourceMap": false,
+		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.types.tsbuildinfo"
 	},
 	"include": [
 		"../src/interface",
 		// "../src/lib/log/log.ts",
 		"./generic.d.ts"
+		// "./generic.ts",
+		// "./index.ts",
 	],
 	"exclude": [
 		"../types",
-		"../**/*.d.ts"
+		"../**/*.d.ts",
+		"../src/webview",
+		"**/node_modules/**"
 	]
 }

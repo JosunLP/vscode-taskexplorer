@@ -6,8 +6,6 @@ import { ITeTask, TeTaskListType, TeTaskSource } from "./ITeTask";
 import { Event, EventEmitter, Task, WorkspaceFolder, Uri } from "vscode";
 
 
-export interface IDictionary<TValue> { [id: string]: TValue }
-
 export type Primitive = boolean | number | string;
 
 export type OneOf<T, V extends any[], NK extends keyof V = Exclude<keyof V, keyof any[]>> = { [K in NK]: T extends V[K] ? V[K] : never }[NK];

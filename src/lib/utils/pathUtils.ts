@@ -1,12 +1,10 @@
 
 import { homedir } from "os";
 import { execIf } from "./utils";
-import { ITaskDefinition, ITaskFolder } from ":types";
 import { isWorkspaceFolder } from "./typeUtils";
 import { pathExists, pathExistsSync } from "./fs";
 import { Task, Uri, WorkspaceFolder } from "vscode";
 import { basename, dirname, join, resolve, sep } from "path";
-import { Regex } from "../constants";
 
 
 export const getCwd = (uri: Uri): string =>

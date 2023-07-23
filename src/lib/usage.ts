@@ -1,13 +1,12 @@
 
-import { IDictionary } from ":types";
 import { TeWrapper } from "./wrapper";
 import { ConfigurationChangeEvent, Disposable, Event, EventEmitter } from "vscode";
 import {
-    ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent,
-    ITeTaskStatusChangeEvent, ILog, ITaskRuntimeInfo, ITeTaskStats
+    ITeUsage, ITeTrackedUsage, ITeUsageChangeEvent, ITeTask, ITeTaskChangeEvent, ITeTaskStatusChangeEvent,
+    ILog, ITaskRuntimeInfo, ITeTaskStats
 } from "../interface";
 
-type UsageStore = IDictionary<ITeTrackedUsage>;
+type UsageStore = Record<string, ITeTrackedUsage>;
 
 
 export class Usage implements ITeUsage, Disposable
@@ -18,7 +17,7 @@ export class Usage implements ITeUsage, Disposable
     private readonly log: ILog;
     private readonly _taskUsageKey = "task:";
     private readonly _disposables: Disposable[] = [];
-    private readonly _runStartTimes: IDictionary<number> = {};
+    private readonly _runStartTimes: Record<string, number> = {};
     private readonly _onDidFamousTasksChange: EventEmitter<ITeTaskChangeEvent>;
 	private readonly _onDidChange: EventEmitter<ITeUsageChangeEvent | undefined>;
 

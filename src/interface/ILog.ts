@@ -2,6 +2,7 @@ import { OutputChannel } from "vscode";
 
 export type LogLevel = number; // 1 | 2 | 3 | 4 | 5;
 export type LogType = "global";
+export type LogColor = [ number, number ];
 
 export interface ILogQueueItem
 {
@@ -10,32 +11,30 @@ export interface ILogQueueItem
     scope: any;
 }
 
-/*
-export interface ILogControl
+export interface ILogColors
 {
-    enable: boolean;
-    enableFile: boolean;
-    enableModuleReload: boolean;
-    enableOutputWindow: boolean;
-    fileName: string;
-    isTests: boolean;
-    isTestsBlockScaryColors: boolean;
-    lastErrorMesage: string[];
-    lastLogPad: string;
-    lastWriteWasBlank: boolean;
-    lastWriteWasBlankError: boolean;
-    lastWriteToConsoleWasBlank: boolean;
-    logLevel: number;
-    logOutputChannel: OutputChannel | undefined;
-    logValueWhiteSpace: number;
-    msgQueue: Record<string, ILogQueueItem[]>;
-    tzOffset: number;
-    useTags: boolean;
-    useTagsMaxLength: number;
-    writeToConsole: boolean;
-    writeToConsoleLevel: number;
+    bold: LogColor;
+    italic: LogColor;
+    underline: LogColor;
+    inverse: LogColor;
+    white: LogColor;
+    grey: LogColor;
+    black: LogColor;
+    blue: LogColor;
+    cyan: LogColor;
+    green: LogColor;
+    magenta: LogColor;
+    red: LogColor;
+    yellow: LogColor;
 };
-*/
+
+export interface ILogSymbols
+{
+    bullet: "●"; bulletBig: "⬢"; checkboxOn: "☒"; checkboxOff: "☐"; end: "◀"; error: "✘"; info: "ℹ";
+    pointer: "❯"; pointerSmall: "›"; start: "▶"; star: "★"; success: "✔"; up: "△"; warning: "⚠";
+    blue: { error: "✘"; info: "ℹ"; success: "✔"; warning: "⚠" };
+    color: { end: "◀"; error: "✘"; info: "ℹ"; pointer: "❯"; start: "▶"; success: "✔"; up: "△"; warning: "⚠" };
+}
 
 export interface ILogConfig
 {
@@ -76,9 +75,11 @@ export interface ILogState
 
 export interface ILog
 {
+    readonly colors: ILogColors;
     readonly control: ILogControl;
     readonly lastPad: string;
     readonly state: ILogState;
+    readonly symbols: ILogSymbols;
     blank(level?: LogLevel, queueId?: string): void;
     dequeue(queueId: string): void;
     dispose(): void;

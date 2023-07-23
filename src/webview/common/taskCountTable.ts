@@ -1,7 +1,6 @@
 
 import { Task, workspace } from "vscode";
 import { TeWrapper } from "../../lib/wrapper";
-import { IDictionary } from ":types";
 import { getTaskTypes } from "../../lib/utils/taskUtils";
 import { isWorkspaceFolder } from "../../lib/utils/typeUtils";
 import { getWorkspaceProjectName } from "../../lib/utils/utils";
@@ -10,7 +9,7 @@ import { getWorkspaceProjectName } from "../../lib/utils/utils";
 export const createTaskCountTable = (wrapper: TeWrapper, project?: string, html?: string) =>
 {
     const projects: string[] = [],
-          taskCounts: IDictionary<number> = {};
+          taskCounts: Record<string, number> = {};
 
     let fileCount = 0;
     const treeMgr = wrapper.treeManager;

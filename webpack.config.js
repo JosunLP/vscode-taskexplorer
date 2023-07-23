@@ -29,7 +29,7 @@ module.exports = (env, argv) =>
 	const mode = getMode(env, argv);
 
 	writeInfo("----------------------------------------------------");
-	writeInfo(" Start Task Explorer VSCode Extension Webpack build");
+	writeInfo(" Start Task Explorer VSCode Extension Webpack Build");
 	writeInfo("----------------------------------------------------");
 	writeInfo("   Mode: " + mode);
 	writeInfo("   Argv:");
@@ -42,14 +42,18 @@ module.exports = (env, argv) =>
 	{
 		clean: false,
 		analyze: false,
+		environment: "prod",
 		esbuild: false,
 		fa: "custom",
 		imageOpt: true,
-		environment: "prod",
 		preRelease: true,
 		stripLogging: true,
-		target: "node"
-	}, env, { prodDbgBuild: false });
+		target: "node",
+		state: {
+			hashCurrent: "",
+			hashNew: ""
+		}
+	}, env);
 
 	Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
 	{

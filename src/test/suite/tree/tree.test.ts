@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import * as utils from "../../utils/utils";
 import { startupFocus } from "../../utils/suiteUtils";
-import { IDictionary, ITaskFile, ITaskFolder, ITaskItem, ITeWrapper, OneOf } from ":types";
+import { ITaskFile, ITaskFolder, ITaskItem, ITeWrapper, OneOf } from ":types";
 import { executeSettingsUpdate, executeTeCommand, executeTeCommand2 } from "../../utils/commandUtils";
 import { WorkspaceFolder, Uri, ThemeIcon, MarkdownString, Command, TreeItemCollapsibleState, AccessibilityInformation } from "vscode";
 
@@ -292,14 +292,14 @@ suite("Tree Tests", () =>
         }
         catch (e) {
             const msg = "Reveal API failed: " + e;
-            console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor(msg, teWrapper.figures.colors.grey)}`);
-            console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
+            console.log(`    ${teWrapper.log.symbols.color.warning} ${teWrapper.log.withColor(msg, teWrapper.log.colors.grey)}`);
+            console.log(`    ${teWrapper.log.symbols.color.warning} ${teWrapper.log.withColor("Trying again in 100ms...", teWrapper.log.colors.grey)}`);
             await utils.sleep(100);
             try {
                 await reveal();
             }
             catch {
-                console.log(`    ${teWrapper.figures.color.warningTests} ${teWrapper.figures.withColor("Trying again in 100ms...", teWrapper.figures.colors.grey)}`);
+                console.log(`    ${teWrapper.log.symbols.blue.warning} ${teWrapper.log.withColor("Trying again in 100ms...", teWrapper.log.colors.grey)}`);
                 await utils.sleep(100);
                 await reveal();
             }

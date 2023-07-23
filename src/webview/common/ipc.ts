@@ -13,8 +13,6 @@
 // import { AuthenticationSession } from "vscode";;
 import { ITeTask, TeTaskListType, ITeAccount, TeSessionChangeEvent } from "../../interface";
 
-export interface IDictionary<T> extends Record<string, T> {}
-
 export interface BaseState
 {
 	isEnabled: boolean;

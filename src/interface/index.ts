@@ -1,5 +1,5 @@
 
-export type { ITaskItem } from "./ITaskItem";
+export * from "./ITaskItem";
 export type { ITaskFile } from "./ITaskFile";
 export type { ITeContext } from "./ITeContext";
 export type { ITaskFolder } from "./ITaskFolder";
@@ -20,7 +20,7 @@ export type { ITeTreeManager, ITeTreeSorter, TaskMap } from "./ITeTreeManager";
 export type { SpmServerResource, SpmApiEndpoint, ISpmServer } from "./ISpmServer";
 export type { IStorage, IStorageChangeEvent, ISecretStorageChangeEvent } from "./IStorage";
 export type { ITeFileWatcher, FileSystemEventType, IFileSystemEvent } from "./ITeFileWatcher";
-export type { ILog, ILogConfig, ILogControl, ILogState, ILogQueueItem, LogLevel, LogType } from "./ILog";
+export * from "./ILog";
 export type {
     ITeAccount, ITeLicense, ITeLicenseManager, ITeSession, TeSessionChangeEvent
 } from "./ITeLicenseManager";
@@ -40,7 +40,7 @@ export type {
 } from "./ITeUsage";
 export type {
     ITeUtilities, ITePathUtilities, ITePromiseUtilities, ITeTaskUtilities, OneOf, ITeTypeUtilities, ErrorType,
-    PromiseAdapter, CallbackOptions, CallbackArray, IDictionary, Primitive, ObjectDiff, ITeObjectUtilities
+    PromiseAdapter, CallbackOptions, CallbackArray, Primitive, ObjectDiff, ITeObjectUtilities
 } from "./ITeUtilities";
 
 export { UsageKeys } from "./ITeUsage";

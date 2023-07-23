@@ -32,5 +32,7 @@
     },
     "scripts": {
         "build": "npx tsc -p ./"
-    }
+    },
+	"main": "dist/index.d.ts",
+    "types": "dist/index.d.ts"
 }

@@ -8,7 +8,6 @@
  * concepts that got my super-praise (4th time ever) and thus used in Task Explorer as a starting point.
  */
 
-import { IDictionary } from ":types";
 import { getNonce } from ":env/crypto";
 import { TeViewBase } from "./viewBase";
 import { Strings } from "../lib/constants";
@@ -19,7 +18,7 @@ import { fontawesome } from "./common/fontawesome";
 import { executeCommand } from "../lib/command/command";
 import { Commands, ITeWebview, WebviewIds, WebviewViewIds } from "../interface";
 import {
-	ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, window, workspace
+	ConfigurationChangeEvent, Disposable, Event, EventEmitter, Uri, Webview, WebviewPanel, WebviewView, window
 } from "vscode";
 import {
 	BaseState, IpcExecCommand, IIpcMessage, IpcMessageParams, IpcNotification, onIpc, IpcFocusChangedParams,
@@ -157,11 +156,7 @@ export abstract class TeWebviewBase<State, SerializedState> extends TeViewBase i
 		//
 		let rgx: RegExpExecArray | null;
 		const regex = /#{Strings\.([A-Za-z]+)}/g;
-        while ((rgx = regex.exec(html)) !== null)
-		{
-			const [ m, m2 ] = rgx;
-			html = html.replace(m, (<IDictionary<string>>Strings)[m2]);
-		}
+        while ((rgx = regex.exec(html)) !== null) { html = html.replace(rgx[0], Strings[rgx[1]]); }
 
 		// this.htmlCache[this.id] = await this.onHtmlFinalizeBase(html, ...args);
 		// return this.htmlCache[this.id] as string;

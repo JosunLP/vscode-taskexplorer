@@ -1,5 +1,4 @@
 
-import { IDictionary } from ":types";
 import { basename, dirname } from "path";
 import { TeWrapper } from "../../lib/wrapper";
 import { TaskExplorerProvider } from "./provider";
@@ -34,7 +33,7 @@ export class MakeTaskProvider extends TaskExplorerProvider implements TaskExplor
         ".MAKE",
     ];
 
-    private commands: IDictionary<string> = {
+    private commands: Record<string, string> = {
         aix: "make",
         darwin: "make",
         freebsd: "make",

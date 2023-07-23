@@ -1,17 +1,4 @@
 
-import { IDictionary } from ":types";
-
-interface ISuiteResults extends IDictionary<any>
-{
-    timeStarted: number;
-    numTests: number;
-    successCount: number;
-    suiteName: string;
-    success: boolean;
-    timeFinished: number;
-    numTestsFailed: number;
-}
-
 export const testControl =
 {
     // apiServer: "localhost",

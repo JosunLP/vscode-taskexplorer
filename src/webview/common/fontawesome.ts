@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable quote-props */
-import { IDictionary } from ":types";
 
 export const fontawesome = {
     /* Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
@@ -93,7 +93,7 @@ export const fontawesome = {
         "users": "\\f0c0",
         "xmark": "\\f00d",
         "xmark-circle": "\\f057"
-    } as IDictionary<string>,
+    } as Record<string, string>,
 
     sizes: `
     .fa-1x { font-size: 1em; },

@@ -62,10 +62,12 @@ const output = (env, wpConfig) =>
 		else {
 			outPath = resolve(env.tempPath, env.app, env.environment, rtRelPath);
 		}
-		wpConfig.output = {
+		wpConfig.output =
+		{
 			clean: env.clean === true ? (env.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
 			path: outPath,
-			filename: env.stripLogging ? "[name].js" : "[name].debug.js",
+			// filename: env.stripLogging ? "[name].js" : "[name].debug.js",
+			filename: env.stripLogging ? "[name].[contenthash].js" : "[name].debug.[contenthash].js",
 			libraryTarget: "commonjs2"
 		};
 	}

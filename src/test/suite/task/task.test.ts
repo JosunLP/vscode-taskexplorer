@@ -362,7 +362,7 @@ suite("Task Tests", () =>
 const startTask = async (taskItem: ITaskItem, addToSpecial: boolean) =>
 {
     if (tc.log.taskExecutionSteps) {
-        console.log(`    ${teWrapper.figures.color.info} Run ${taskItem.taskSource} task | ${taskItem.label} | ${taskItem.getFolder()?.name}`);
+        console.log(`    ${teWrapper.log.symbols.color.info} Run ${taskItem.taskSource} task | ${taskItem.label} | ${taskItem.getFolder()?.name}`);
     }
     if (addToSpecial)
     {

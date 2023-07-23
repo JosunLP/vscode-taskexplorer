@@ -1,5 +1,4 @@
 
-import { IDictionary } from ":types";
 import { execSync } from "child_process";
 import { Globs } from "../../lib/constants";
 import { parseStringPromise } from "xml2js";
@@ -14,7 +13,7 @@ interface StringMap { [s: string]: string }
 
 export class AntTaskProvider extends TaskExplorerProvider implements TaskExplorerProvider
 {
-    private commands: IDictionary<string> = {
+    private commands: Record<string, string> = {
         aix: "ant",
         darwin: "ant",
         freebsd: "ant",

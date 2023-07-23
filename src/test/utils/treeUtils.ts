@@ -33,7 +33,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
         if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap) || !findTaskTypeInTaskMap(taskType, taskMap))
         {
             if (retries === 0) {
-                console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor("Task map is empty, retry", teWrapper.figures.colors.grey)}`);
+                console.log(`    ${teWrapper.log.symbols.color.warning} ${teWrapper.log.withColor("Task map is empty, retry", teWrapper.log.colors.grey)}`);
             }
             if (retries % 10 === 0)
             {
@@ -43,7 +43,7 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
             if (!taskMap || teWrapper.typeUtils.isObjectEmpty(taskMap))
             {
                 if (retries === 40) {
-                    console.log(`    ${teWrapper.figures.color.error} ${teWrapper.figures.withColor("Task map is empty, test will fail in 3, 2, 1...", teWrapper.figures.colors.grey)}`);
+                    console.log(`    ${teWrapper.log.symbols.color.error} ${teWrapper.log.withColor("Task map is empty, test will fail in 3, 2, 1...", teWrapper.log.colors.grey)}`);
                 }
                 else {
                     await sleep(250);
@@ -60,16 +60,16 @@ export const getTreeTasks = async(teWrapper: ITeWrapper, taskType: string, expec
     if (tasks.length !== expectedCount)
     {
         if (Object.keys(taskMap).length === 0) {
-            console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor("Task map is empty.", teWrapper.figures.colors.grey)}`);
+            console.log(`    ${teWrapper.log.symbols.color.warning} ${teWrapper.log.withColor("Task map is empty.", teWrapper.log.colors.grey)}`);
         }
         else {
-            console.log(`    ${teWrapper.figures.color.warning} ${teWrapper.figures.withColor(`Unexpected ${taskType} task count (Found ${tasks.length} of ${expectedCount})`, teWrapper.figures.colors.grey)}`);
-            console.log(teWrapper.figures.withColor(`    Task items found:\n    ${teWrapper.figures.color.warning}    ` +
-                        tasks.map(i => i.label).join(`\n    ${teWrapper.figures.color.warning}    `), teWrapper.figures.colors.grey));
+            console.log(`    ${teWrapper.log.symbols.color.warning} ${teWrapper.log.withColor(`Unexpected ${taskType} task count (Found ${tasks.length} of ${expectedCount})`, teWrapper.log.colors.grey)}`);
+            console.log(teWrapper.log.withColor(`    Task items found:\n    ${teWrapper.log.symbols.color.warning}    ` +
+                        tasks.map(i => i.label).join(`\n    ${teWrapper.log.symbols.color.warning}    `), teWrapper.log.colors.grey));
         }
-        console.log(teWrapper.figures.withColor(`    ${teWrapper.figures.color.warning} All TaskMap items:\n    ${teWrapper.figures.color.warning}    ` +
-                    Object.keys(taskMap).map(k => Buffer.from(k, "hex").toString("utf8")).join(`\n    ${teWrapper.figures.color.warning}    `), teWrapper.figures.colors.grey));
-        expect.fail(`${teWrapper.figures.color.error} Unexpected ${taskType} task count (Found ${tasks.length} of ${expectedCount})`);
+        console.log(teWrapper.log.withColor(`    ${teWrapper.log.symbols.color.warning} All TaskMap items:\n    ${teWrapper.log.symbols.color.warning}    ` +
+                    Object.keys(taskMap).map(k => Buffer.from(k, "hex").toString("utf8")).join(`\n    ${teWrapper.log.symbols.color.warning}    `), teWrapper.log.colors.grey));
+        expect.fail(`${teWrapper.log.symbols.color.error} Unexpected ${taskType} task count (Found ${tasks.length} of ${expectedCount})`);
     }
 
     return [ ...Object.values(taskMap).filter((t): t is ITaskItem => !!t && t.taskSource === taskType) ];
@@ -125,11 +125,11 @@ export const verifyTaskCountByTree = async(teWrapper: ITeWrapper, taskType: stri
         taskCount = await _getCount();
     }
     try {
-        expect(taskCount).to.be.equal(expectedCount, `${teWrapper.figures.color.error} Unexpected ${taskType} task count (Found ${taskCount} of ${expectedCount})`);
+        expect(taskCount).to.be.equal(expectedCount, `${teWrapper.log.symbols.color.error} Unexpected ${taskType} task count (Found ${taskCount} of ${expectedCount})`);
     }
     catch (e) {
-        console.log(teWrapper.figures.withColor(`    ${teWrapper.figures.color.warning} All TaskMap items:\n    ${teWrapper.figures.color.warning}    ` +
-                    Object.keys(taskMap).map(k => Buffer.from(k, "hex").toString("utf8")).join(`\n    ${teWrapper.figures.color.warning}    `), teWrapper.figures.colors.grey));
+        console.log(teWrapper.log.withColor(`    ${teWrapper.log.symbols.color.warning} All TaskMap items:\n    ${teWrapper.log.symbols.color.warning}    ` +
+                    Object.keys(taskMap).map(k => Buffer.from(k, "hex").toString("utf8")).join(`\n    ${teWrapper.log.symbols.color.warning}    `), teWrapper.log.colors.grey));
         throw e;
     }
 };

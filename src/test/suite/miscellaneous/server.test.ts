@@ -32,7 +32,7 @@ suite("Server Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.apiServer.httpGet * 2);
-        const wasmContent = await teWrapper.server.get("app/shared/mappings.wasm", "");
+        const wasmContent = await teWrapper.server.get(`app/${teWrapper.extensionName}/v${teWrapper.version}/mappings.wasm`, "");
         expect(wasmContent).to.be.an("ArrayBuffer");
         expect(wasmContent.byteLength).to.be.equal(48693);
         const srcMapContent = await teWrapper.server.get(

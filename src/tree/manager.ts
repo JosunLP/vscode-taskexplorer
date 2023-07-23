@@ -1,32 +1,32 @@
 
 import { join } from "path";
+import { TeTreeView } from "./view";
+import { getMd5 } from ":env/crypto";
 import { TaskFile } from "./node/file";
 import { TaskItem } from "./node/item";
-import { getMd5 } from ":env/crypto";
-import { TaskFolder } from "./node/folder";
-import { TeTreeView } from "./view";
+import { TeTreeSorter } from "./sorter";
 import { encodeUtf8Hex } from ":env/hex";
+import { TaskFolder } from "./node/folder";
 import { TeWrapper } from "../lib/wrapper";
 import { TaskTreeBuilder } from "./builder";
-import { FavoritesFolder } from "./node/favoritesFolder";
-import { LastTasksFolder } from "./node/lastTasksFolder";
-import { SpecialTaskFolder } from "./node/specialFolder";
 import { TeTreeConfigWatcher } from "./configWatcher";
 import { getTerminal } from "../lib/utils/getTerminal";
 import { registerCommand } from "../lib/command/command";
+import { FavoritesFolder } from "./node/favoritesFolder";
+import { LastTasksFolder } from "./node/lastTasksFolder";
+import { SpecialTaskFolder } from "./node/specialFolder";
 import { addToExcludes } from "../lib/utils/addToExcludes";
-import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap, IDictionary } from "../interface";
+import { ITeTreeManager, ITeTaskChangeEvent, ITeTask, ITaskTreeView, TaskMap } from "../interface";
 import {
-    TreeItem, Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
+    Uri, workspace, Task, tasks as vscTasks, Disposable, TreeItemCollapsibleState, EventEmitter, Event
 } from "vscode";
-import { TeTreeSorter } from "./sorter";
 
 
 export class TaskTreeManager implements ITeTreeManager, Disposable
 {
     private _refreshPending = false;
     private _firstTreeBuildDone = false;
-    private _npmScriptsHash: IDictionary<string>;
+    private _npmScriptsHash: Record<string, string>;
     private _currentInvalidation: string | undefined;
 
     private readonly _tasks: Task[];
@@ -49,7 +49,7 @@ export class TaskTreeManager implements ITeTreeManager, Disposable
         this._onDidTasksChange = new EventEmitter<ITeTaskChangeEvent>();
         this._onDidTaskCountChange = new EventEmitter<ITeTaskChangeEvent>();
 
-        const nodeExpandedeMap = this.wrapper.config.get<IDictionary<"Collapsed"|"Expanded">>("specialFolders.folderState", {});
+        const nodeExpandedeMap = this.wrapper.config.get<Record<string, "Collapsed"|"Expanded">>("specialFolders.folderState", {});
         this._specialFolders = {
             favorites: new FavoritesFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.favorites]),
             lastTasks: new LastTasksFolder(wrapper, TreeItemCollapsibleState[nodeExpandedeMap.lastTasks])
