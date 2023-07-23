@@ -5,33 +5,17 @@
         "declarationMap": false,
 		"emitDeclarationOnly": true,
 		"isolatedModules": false,
-		// "outFile": "dist/index.d.ts",
 		"outDir": "dist",
         "paths": {
 			":env/*": [ "src/lib/env/node/*" ],
 			":types": [ "types" ]
 		},
 		"rootDir": "../src",
-		// "rootDirs": [
-		// 	"../src/interface",
-		// 	"../src/lib",
-		// 	// 	"../src/interface",
-		// // 	"."
-		// ],
-		// "rootDirs": [
-		// 	"../src/interface",
-		// 	"."
-		// ],
 		"sourceMap": false,
 		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.types.tsbuildinfo"
 	},
 	"include": [
 		"../src"
-		// "../src/interface",
-		// "../src/lib/log/log.ts",
-		// "./generic.d.ts"
-		// "./generic.ts",
-		// "./index.ts",
 	],
     "exclude": [
         "../.coverage",
