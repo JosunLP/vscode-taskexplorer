@@ -27,16 +27,16 @@ const environment = (build, env, argv) =>
 	env.buildPath = resolve(__dirname, "..", "..");
 	env.distPath = join(env.buildPath, "dist");
 	env.tempPath = resolve(process.env.TEMP || process.env.TMP  || ".");
+	env.paths.cacheDir = join(env.buildPath, "node_modules", ".cache", "webpack");
+	env.paths.hashFile = join(env.paths.cacheDir, "hash.json");
+	if (!existsSync(env.paths.cacheDir)) {
+		mkdirSync(env.paths.cacheDir);
+	}
 	if (env.build === "webview") {
 		env.basePath = join(env.buildPath, "src", "webview", "app");
 	}
 	else {
 		env.basePath = env.buildPath;
-	}
-	env.paths.cacheDir = join(env.basePath, "node_modules", ".cache", "webpack");
-	env.paths.hashFile = join(env.paths.cacheDir, "hash.json");
-	if (!existsSync(env.paths.cacheDir)) {
-		mkdirSync(env.paths.cacheDir);
 	}
 	readPackageDotJson(env);
 	writeEnvironment(env, argv);
