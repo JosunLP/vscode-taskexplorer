@@ -7,7 +7,6 @@ import { TeServer } from "./server";
 import { getUuid } from ":env/crypto";
 import { TeContext } from "./context";
 import { TeMigration } from "./migration";
-import { figures } from "./utils/figures";
 import { TeStatusBar } from "./statusBar";
 import * as objUtils from "./utils/object";
 import * as utilities from "./utils/utils";
@@ -474,7 +473,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get extensionNameShort(): string { return this.extensionName.replace("vscode-", ""); }
 	get extensionTitle(): string {return this.localize("name", this._context.extension.packageJSON.displayName); }
 	get extensionTitleShort(): string { return this.extensionTitle; }
-	get figures(): typeof figures { return figures; }
 	get fileCache(): TeFileCache { return this._taskManager.fileCache; }
 	get fileWatcher(): TeFileWatcher { return this._taskManager.fileWatcher; }
 	get fs(): ITeFilesystem { return fs; }

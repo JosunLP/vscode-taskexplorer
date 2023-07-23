@@ -3,7 +3,6 @@
 import { env } from "vscode";
 import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
-import { figures } from "./utils/figures";
 import { request as httpsRequest } from "https";
 import { fetch, getProxyAgent } from ":env/fetch";
 import { SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError } from "../interface";
@@ -118,15 +117,16 @@ export class TeServer implements ISpmServer
 
 	private log = (msg: string, logPad?: string, value?: any, symbol?: string) =>
 	{
+		const w = this.wrapper;
 		if (!value && value !== false) {
-			console.log(`       ${symbol || figures.color.infoTask} ${figures.withColor(msg.toString(), figures.colors.grey)}`);
+			console.log(`       ${symbol || w.log.symbols.blue.info} ${w.log.withColor(msg.toString(), w.log.colors.grey)}`);
 		}
 		else {
 			const valuePad = 18, diff = valuePad - msg.length;
 			for (let i = 0; i < diff; i++) {
 				msg += " ";
 			}
-			console.log(`       ${symbol || figures.color.infoTask} ${figures.withColor(msg + " : " + value, figures.colors.grey)}`);
+			console.log(`       ${symbol || w.log.symbols.blue.info} ${w.log.withColor(msg + " : " + value, w.log.colors.grey)}`);
 		}
 		if (!value) {
 			this.wrapper.log.write(msg, 1, logPad);
@@ -150,14 +150,15 @@ export class TeServer implements ISpmServer
 	/* istanbul ignore next*/
 	private onSpmServerError = (e: any, logPad: string, rspData?: string) =>
 	{
-		this.log(e, "", undefined, figures.color.errorTests);
+		const w = this.wrapper;
+		this.log(e, "", undefined, w.log.symbols.blue.error);
 		this.wrapper.log.error(e);
 		if (rspData) {
-			console.log(`       ${figures.color.errorTests} ${figures.withColor(rspData, figures.colors.grey)}`);
+			console.log(`       ${w.log.symbols.blue.error} ${w.log.withColor(rspData, w.log.colors.grey)}`);
 		}
-		this.log("   the license server is down, offline, or there is a connection issue", logPad, undefined, figures.color.errorTests);
-		this.log("   licensed mode will be automatically enabled", logPad, undefined, figures.color.errorTests);
-		this.log("server request completed w/ a failure", logPad + "   ", undefined, figures.color.errorTests);
+		this.log("   the license server is down, offline, or there is a connection issue", logPad, undefined, w.log.symbols.blue.error);
+		this.log("   licensed mode will be automatically enabled", logPad, undefined, w.log.symbols.blue.error);
+		this.log("server request completed w/ a failure", logPad + "   ", undefined, w.log.symbols.blue.error);
 		this.wrapper.log.methodDone("server request", 1, logPad);
 	};
 
