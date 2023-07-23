@@ -86,6 +86,8 @@ const _upload = (env) =>
         writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`);
         return;
     }
+console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+return;
 
     const user = "smeesseman",
           rBasePath = "/var/www/app1/res/app",

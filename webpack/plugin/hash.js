@@ -39,7 +39,7 @@ const hash = (env) =>
                           assetChunks = stats.assetsByChunkName;
                     if (assets && assetChunks)
                     {
-                        readAssetState(_env);
+                        readAssetStates(_env);
                         Object.keys(assetChunks).forEach(k => setAssetState(assets.find(a => a.name === assetChunks[k][0]), _env));
                         saveAssetState(_env);
                     }
@@ -65,7 +65,7 @@ const prehash = (env) =>
 		{
 			apply: /** @param {import("webpack").Compiler} compiler */(compiler) =>
 			{
-                compiler.hooks.done.tap("PreHashCheckPlugin", () => readAssetState(_env));
+                compiler.hooks.run.tap("PreHashCheckPlugin", () => readAssetStates(_env));
 			}
 		};
 	}
@@ -89,7 +89,7 @@ const setAssetState = (asset, env) =>
 {
     if (asset && asset.chunkNames)
     {
-        writeInfo("set asset state info   : " + asset.name);
+        writeInfo(`set asset state info for '${asset.name}'`);
         const chunkName = /** @type {String} */(asset.chunkNames[0]);
         env.state.hashNew[chunkName] = asset.info.contenthash?.toString();
         writeInfo("   size   : " + asset.info.size);
@@ -102,12 +102,20 @@ const setAssetState = (asset, env) =>
 
 
 /**
- * @method readAssetState
+ * @method readAssetStates
  * @param {WebpackEnvironment} env
  */
-const readAssetState = (env) =>
+const readAssetStates = (env) =>
 {
-    if (existsSync(env.paths.hashFile)) { try { Object.assign(env.state, JSON.parse(readFileSync(env.paths.hashFile, "utf8"))); } catch {}}
+    if (existsSync(env.paths.hashFile))
+    {
+        try {
+            Object.assign(env.state, JSON.parse(readFileSync(env.paths.hashFile, "utf8")));
+            writeInfo("read asset state info:");
+            Object.keys(env.state).forEach(k => writeInfo(`   ${k.padEnd(12)} : ` + env.state[k]));
+        }
+        catch {}
+    }
 };
 
 
