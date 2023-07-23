@@ -74,7 +74,7 @@
 		"build-webviews-dev": "webpack --mode development --env build=webview --config ./webpack.config.js",
 		"clean-all": "npm run clean-build && npm run clean-tests:build && npm run clean-types",
 		"clean-build": "npm run clean-extension && npm run clean-webviews",
-		"clean-extension": "rimraf dist && rimraf node_modules/.cache/tsconfig.tsbuildinfo",
+		"clean-extension": "rimraf dist && rimraf node_modules/.cache/tsconfig.tsbuildinfo && rimraf node_modules/.cache/webpack/hash.json",
 		"clean-tests": "npm run clean-tests:build && npm run clean-tests:cache",
 		"clean-tests:build": "rimraf dist/test && rimraf node_modules/.cache/tsconfig.test.tsbuildinfo",
 		"clean-tests:cache": "rimraf .nyc_output && rimraf .coverage",

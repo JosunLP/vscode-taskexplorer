@@ -25,6 +25,7 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
     isTests: boolean;
+    paths: WebpackBuildPaths;
     pkgJson: Record<string, any>;         // package.json parsed object
     preRelease: boolean;
     state: WebpackBuildState;
@@ -33,6 +34,12 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     tempPath: string;                     // operating system temp directory
     verbosity: WebpackLogLevel;
     version: string;                      // app version (read from package.json)
+}
+
+declare interface WebpackBuildPaths
+{
+    hashFile: string;
+    cacheDir: string;
 }
 
 declare interface WebpackBuildState
@@ -58,6 +65,7 @@ export {
     WebpackArgs,
     WebpackBuild,
     WebpackBuildOrUndefined,
+    WebpackBuildPaths,
     WebpackBuildState,
     WebpackConfig,
     WebpackPluginInstance,

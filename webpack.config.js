@@ -49,9 +49,13 @@ module.exports = (env, argv) =>
 		preRelease: true,
 		stripLogging: true,
 		target: "node",
+		paths: {
+			hashFile: "",
+			cacheDir: ""
+		},
 		state: {
-			hashCurrent: "",
-			hashNew: ""
+			hashCurrent: {},
+			hashNew: {}
 		}
 	}, env);
 

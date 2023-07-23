@@ -8,6 +8,7 @@
 
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const { unlinkSync, existsSync } = require("fs");
 
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
@@ -37,8 +38,11 @@ const clean = (env, wpConfig) =>
 				]
 			});
 		}
-		else
+		else if (env.build === "extension")
 		{
+			// if (existsSync(env.paths.hashFile)) {
+			// 	unlinkSync(env.paths.hashFile);
+			// }
 			// plugin = new CleanWebpackPlugin(
 			// {
 			// 	dry: false,

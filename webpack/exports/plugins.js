@@ -11,7 +11,6 @@ const banner = require("../plugin/banner");
 const build = require("../plugin/build");
 const clean = require("../plugin/clean");
 const copy = require("../plugin/copy");
-const done = require("../plugin/done");
 const ignore = require("../plugin/ignore");
 const optimization = require("../plugin/optimization");
 const progress = require("../plugin/progress");
@@ -20,6 +19,7 @@ const tscheck = require("../plugin/tscheck");
 const upload = require("../plugin/upload");
 const webviewApps = require("../webviewApps");
 const { wpPlugin } = require("../plugin/plugins");
+const { hash, prehash } = require("../plugin/hash");
 
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
@@ -35,6 +35,7 @@ const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [
 		progress(env, wpConfig),
+		prehash(env),
 		clean(env, wpConfig),
 		build(env, wpConfig),
 		ignore(env, wpConfig),
@@ -71,7 +72,7 @@ const plugins = (env, wpConfig) =>
 
 	wpConfig.plugins.push(
 		...optimization(env, wpConfig),
-		done(env),
+		hash(env),
 		afterdone(env, wpConfig),
 		upload(env, wpConfig)
 	);
