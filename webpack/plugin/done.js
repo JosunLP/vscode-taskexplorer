@@ -8,9 +8,39 @@ const { writeInfo, figures } = require("../console");
  * @module webpack.plugin.done
  */
 
+/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types/webpack").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+
+
+/**
+ * @param {WebpackEnvironment} env
+ * @param {WebpackConfig} wpConfig Webpack config object
+ * @returns {WebpackPluginInstance | undefined}
+ */
+const prehash = (env, wpConfig) =>
+{
+	const isTestsBuild = (env.build === "tests" || env.environment.startsWith("test"));
+	let plugin;
+	if (env.build !== "extension")
+	{
+		const _env = { ...env };
+		plugin =
+		{
+            /** @param {import("webpack").Compiler} compiler Compiler */
+			apply: (compiler) =>
+			{
+				compiler.hooks.beforeRun.tap("BeforeRunHashCheckPlugin", () =>
+				{
+					[ "taskexplorer", "vendor", "runtime" ].forEach(m => setPreviousAssetState(m, _env));
+				});
+			}
+		};
+	}
+	return plugin;
+};
+
 
 /**
  * @method done
@@ -25,7 +55,8 @@ const done = (env) =>
     {
         const _env = { ...env };
         plugin =
-        {   /** @param {import("webpack").Compiler} compiler Compiler */
+        {
+            /** @param {import("webpack").Compiler} compiler Compiler */
             apply: (compiler) =>
             {
                 compiler.hooks.done.tap("DonePlugin", (statsData) =>
@@ -63,6 +94,17 @@ const setAssetState = (asset, env) =>
     else {
         writeInfo("invalid asset info", figures.color.warning);
     }
+};
+
+
+/**
+ * @method setPreviousAssetState
+ * @param {String} asset
+ * @param {WebpackEnvironment} env
+ */
+const setPreviousAssetState = (asset, env) =>
+{
+    // TODO
 };
 
 
