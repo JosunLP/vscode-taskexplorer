@@ -5,9 +5,9 @@
  * @module webpack.exports.environment
  */
 
-const { readFileSync } = require("fs");
 const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
+const { readFileSync, existsSync, mkdirSync } = require("fs");
 
 /** @typedef {import("..//types/webpack").WebpackArgs} WebpackArgs */
 /** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
@@ -35,6 +35,9 @@ const environment = (build, env, argv) =>
 	}
 	env.paths.cacheDir = join(env.basePath, "node_modules", ".cache", "webpack");
 	env.paths.hashFile = join(env.paths.cacheDir, "hash.json");
+	if (!existsSync(env.paths.cacheDir)) {
+		mkdirSync(env.paths.cacheDir);
+	}
 	readPackageDotJson(env);
 	writeEnvironment(env, argv);
 	env.isTests = env.environment.startsWith("test");
