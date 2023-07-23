@@ -11,6 +11,7 @@ const banner = require("../plugin/banner");
 const build = require("../plugin/build");
 const clean = require("../plugin/clean");
 const copy = require("../plugin/copy");
+const done = require("../plugin/done");
 const ignore = require("../plugin/ignore");
 const optimization = require("../plugin/optimization");
 const progress = require("../plugin/progress");
@@ -70,6 +71,7 @@ const plugins = (env, wpConfig) =>
 
 	wpConfig.plugins.push(
 		...optimization(env, wpConfig),
+		done(env),
 		afterdone(env, wpConfig),
 		upload(env, wpConfig)
 	);
