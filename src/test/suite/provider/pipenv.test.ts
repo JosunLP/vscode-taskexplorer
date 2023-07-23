@@ -1,8 +1,8 @@
 
 import * as path from "path";
-import fsUtils from  "../../utils/fsUtils";
 import { Uri } from "vscode";
 import { expect } from "chai";
+import fsUtils from  "../../utils/fsUtils";
 import { startupFocus } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { ITaskExplorerApi,  ITaskExplorerProvider, ITeWrapper } from ":types";

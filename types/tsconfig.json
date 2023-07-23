@@ -8,16 +8,16 @@
 		// "outFile": "dist/index.d.ts",
 		"outDir": "dist",
         "paths": {
-			// ":env/*": [ "../src/lib/env/node/*" ]
-			":types": [ "." ]
+			":env/*": [ "src/lib/env/node/*" ],
+			":types": [ "types" ]
 		},
-		// "rootDir": "..",
-		"rootDirs": [
-			"../src/interface",
-			"../src/lib",
-			// 	"../src/interface",
-		// 	"."
-		],
+		"rootDir": "../src",
+		// "rootDirs": [
+		// 	"../src/interface",
+		// 	"../src/lib",
+		// 	// 	"../src/interface",
+		// // 	"."
+		// ],
 		// "rootDirs": [
 		// 	"../src/interface",
 		// 	"."
@@ -26,16 +26,27 @@
 		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.types.tsbuildinfo"
 	},
 	"include": [
-		"../src/interface",
+		"../src"
+		// "../src/interface",
 		// "../src/lib/log/log.ts",
-		"./generic.d.ts"
+		// "./generic.d.ts"
 		// "./generic.ts",
 		// "./index.ts",
 	],
-	"exclude": [
-		"../types",
-		"../**/*.d.ts",
-		"../src/webview",
-		"**/node_modules/**"
-	]
+    "exclude": [
+        "../.coverage",
+        "../.nyc_output",
+        "../.vscode",
+        "../.vscode-test",
+        "../dist",
+        "../doc",
+        "../node_modules",
+        "../res",
+        "../script",
+        "../src/test/**/*",
+        "../src/webview/**/*",
+        "../src/lib/env/browser/*",
+        "../test-fixture",
+        "../types"
+    ]
 }

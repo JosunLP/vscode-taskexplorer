@@ -3,7 +3,6 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "dist/browser",
-		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.browser.tsbuildinfo",
 		"lib": [
 			"dom", "dom.iterable", "es2020"
 		],
@@ -11,22 +10,23 @@
 			":env/*": ["src/lib/env/browser/*"],
 			":types": [ "types" ],
 			"path": ["node_modules/path-browserify"]
-		}
+		},
+		"tsBuildInfoFile": "node_modules/.cache/tsconfig.browser.tsbuildinfo"
 	},
     "exclude": [
-        "node_modules",
-        ".vscode-test",
+        ".coverage",
+        ".nyc_output",
         ".vscode",
-        "test-fixture",
-        "script",
-        "types",
-        "res",
+        ".vscode-test",
         "dist",
         "doc",
-        ".nyc_output",
-        ".coverage",
+        "node_modules",
+        "res",
+        "script",
         "src/test/**/*",
         "src/webview/app/**/*",
-        "src/lib/env/node/**/*"
+        "src/lib/env/node/**/*",
+        "test-fixture",
+        "types"
     ]
 }

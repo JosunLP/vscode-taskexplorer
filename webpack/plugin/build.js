@@ -94,13 +94,20 @@ const tsc =
 	 */
 	buildTypes: (env) =>
 	{
-		const tscArgs = [  "tsc", "-p", "./types" ];
-		if (!fs.existsSync(path.join(env.buildPath, "types", "lib"))) {
-			try { fs.unlinkSync(path.join(env.buildPath, "node_modules", ".cache", "tsconfig.tytpes.tsbuildinfo")); } catch {}
+		/** @type {import("child_process").SpawnSyncOptions} */
+		const spawnOptions = { cwd: env.buildPath, encoding: "utf8", shell: true };
+		if (!fs.existsSync(path.join(env.buildPath, "types", "dist")))
+		{
+			// try { fs.unlinkSync(path.join(env.buildPath, "node_modules", ".cache", "tsconfig.tsbuildinfo")); } catch {}
+			try { fs.unlinkSync(path.join(env.buildPath, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
 		}
-		spawnSync("npx", tscArgs, { cwd: env.buildPath, encoding: "utf8", shell: true });
+		// else if (!fs.existsSync(path.join(env.buildPath, "types", "dist", "lib")))
+		// {
+		// 	try { fs.unlinkSync(path.join(env.buildPath, "node_modules", ".cache", "tsconfig.tsbuildinfo")); } catch {}
+		// }
+		spawnSync("npx", [ "tsc", "-p", "./types" ], spawnOptions);
+		// spawnSync("npx", [ "tsc", "--emitDeclarationOnly", "-p", "./" ], spawnOptions);
 	}
-
 };
 
 

@@ -20,8 +20,5 @@
         "target": "es2020",
 		"useDefineForClassFields": true,
 		"useUnknownInCatchVariables": false
-    },
-	"include": [
-		"src"
-	]
+    }
 }

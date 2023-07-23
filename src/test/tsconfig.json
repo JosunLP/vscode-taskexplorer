@@ -10,7 +10,8 @@
 		"tsBuildInfoFile": "../../node_modules/.cache/tsconfig.test.tsbuildinfo",
         "paths": {
 			":types": [ "../../types" ]
-		}
+		} // ,
+		// "typeRoots": [ "../../types/dist" ]
     },
 	"include": [
 		"./**/*"
