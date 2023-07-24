@@ -2,8 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const { merge } = require("./webpack/utils");
-const { writeInfo, figures } = require("./webpack/console");
+const { writeInfo } = require("./webpack/console");
+const { merge, printSpmBanner } = require("./webpack/utils");
 const {
 	context, devtool, entry, externals, ignorewarnings, minification, mode, plugins, optimization,
 	output, resolve, rules, stats, target, watch, environment, getMode, name
@@ -29,15 +29,15 @@ module.exports = (env, argv) =>
 {
 	const mode = getMode(env, argv);
 
-	writeInfo("----------------------------------------------------");
+	writeInfo("------------------------------------------------------------------------------------------------------------------------");
+	printSpmBanner("0.0.1");
+	writeInfo("------------------------------------------------------------------------------------------------------------------------");
 	writeInfo(" Start Task Explorer VSCode Extension Webpack Build");
-	writeInfo("----------------------------------------------------");
-	writeInfo("   Mode: " + mode);
-	writeInfo("   Argv:");
-	writeInfo("     " + JSON.stringify(argv, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
-	writeInfo("   Env :");
-	writeInfo("     " + JSON.stringify(env, null, 3).replace(/\n/g, "\n     " + figures.color.info + "    "));
-	writeInfo("----------------------------------------------------");
+	writeInfo("------------------------------------------------------------------------------------------------------------------------");
+	writeInfo("   Mode  : " + mode);
+	writeInfo("   Argv  : " + JSON.stringify(argv));
+	writeInfo("   Env   : " + JSON.stringify(env));
+	writeInfo("------------------------------------------------------------------------------------------------------------------------");
 
 	env = merge(
 	{

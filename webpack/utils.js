@@ -1,3 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
+
+const gradient = require("gradient-string");
+
 
 /**
  * @method apply
@@ -154,4 +158,24 @@ const pickNot = (obj, ...keys) =>
 };
 
 
-module.exports = { apply, clone, isArray, isDate, isObject, isObjectEmpty, merge, mergeIf, pick, pickBy, pickNot };
+const printSpmBanner = (version) =>
+{
+    // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
+    console.log(gradient("red", "cyan", "pink", "orange", "blue").multiline(spmBanner(version), {interpolation: "hsv"}));
+};
+
+
+const spmBanner = (version) =>
+{
+    return `          ___ '\\___^\\   __   __  _ _ __ _ ____  ______
+         (|| '_   \\|\\\\/  | / _\\' || '_ \\\\| ' \\\\(  __)//
+         \\ \\| |_) | |\\// | | (_| || |_) || |_) |\\ \\ //
+         _)| |\\__| /| \\||/| \\__\\\\_ | | .//| //_)| |//
+        |___/|_|                 |_|    |_|  |___/| v${version}`;
+};
+
+
+module.exports = {
+    apply, clone, isArray, isDate, isObject, isObjectEmpty, merge, mergeIf,
+    pick, pickBy, pickNot, printSpmBanner, spmBanner
+};
