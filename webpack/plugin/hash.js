@@ -67,16 +67,17 @@ const hash = (env, wpConfig) =>
  */
 const logAssetInfo = (hashInfo, wpConfig) =>
 {
-    const hashLength = /** @type {Number} */(wpConfig.output?.hashDigestLength);
+    const // hashLength = /** @type {Number} */(wpConfig.output?.hashDigestLength),
+          labelLength = 25; //  + hashLength;
     // write(" ");
    //  write(withColor("asset state info for " + wpConfig.name, colors.white), figures.color.start);
     writeInfo("   current:");
     Object.keys(hashInfo.current).forEach(
-        (k) => writeInfo(`      ${k.padEnd(25 + hashLength)} : ` + withColor(hashInfo.current[k], colors.blue))
+        (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.current[k], colors.blue))
     );
-    writeInfo("   new:");
+    writeInfo("   next:");
     Object.keys(hashInfo.next).forEach(
-        (k) => writeInfo(`      ${k.padEnd(25 + hashLength)} : ` + withColor(hashInfo.next[k], colors.blue))
+        (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.next[k], colors.blue))
     );
 };
 
@@ -121,7 +122,7 @@ const saveAssetState = (env) => writeFileSync(env.paths.files.hash, JSON.stringi
 const setAssetState = (asset, env, wpConfig) =>
 {
     write(" ");
-    write(withColor(`set asset state info for ${asset.name}`, colors.white), figures.color.start);
+    write(withColor(`set asset state for ${withColor(asset.name, colors.blue)}`, colors.white), figures.color.start);
     if (asset.chunkNames && asset.info.contenthash)
     {
         const chunkName = /** @type {String}*/(asset.chunkNames[0]);
@@ -138,18 +139,18 @@ const setAssetState = (asset, env, wpConfig) =>
  */
 const readAssetStates = (env, wpConfig) =>
 {
-    write(withColor(`read asset state info from ${env.paths.files.hash}`, colors.white), figures.color.start);
-	env.state = { hash: { current: {}, next: {} } };
+    write(withColor(`read asset states from ${env.paths.files.hash}`, colors.white), figures.color.start);
     if (existsSync(env.paths.files.hash))
     {
-        try {
-            apply(env.state.hash, JSON.parse(readFileSync(env.paths.files.hash, "utf8")));
-			env.state.hash.current = {};
-			apply(env.state.hash.current, { ...env.state.hash.next });
-			env.state.hash.next = {};
-            logAssetInfo(env.state.hash, wpConfig);
-        }
-        catch {}
+        const hashJson = readFileSync(env.paths.files.hash, "utf8");
+        apply(env.state.hash, JSON.parse(hashJson));
+        env.state.hash.current = {};
+        apply(env.state.hash.current, { ...env.state.hash.next });
+        env.state.hash.next = {};
+        logAssetInfo(env.state.hash, wpConfig);
+    }
+    else {
+        writeInfo("   asset state cache file does not exist");
     }
 };
 

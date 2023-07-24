@@ -17,7 +17,7 @@
 const { join } = require("path");
 const { spawnSync } = require("child_process");
 const { renameSync, copyFileSync } = require("fs");
-const { writeInfo, figures } = require("../console");
+const { writeInfo, figures, withColor, colors } = require("../console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackHashState} WebpackHashState */
@@ -77,14 +77,13 @@ const sourceMapFiles = (env) =>
  */
 const _upload = (env) =>
 {
-    const host = "app1.spmeesseman.com";
-    if (env.state.hash.current === env.state.hash.current)
+    const host = "app1.spmeesseman.com",
+          mark = withColor(figures.star, colors.yellow);
+    if (JSON.stringify(env.state.hash.current) === JSON.stringify(env.state.hash.current))
     {
-        writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`);
+        writeInfo(`${mark} content hash unchanged, resource upload to ${host} will be skipped`);
         return;
     }
-writeInfo(`content hash changed, start resource upload to ${host}`);
-return;
 
     const user = "smeesseman",
           rBasePath = "/var/www/app1/res/app",
@@ -111,14 +110,14 @@ return;
 
     try {
         const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
-        writeInfo(`upload resource files to ${host}`);
+        writeInfo(`${mark} upload resource files to ${host}`);
         writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}` ], spawnSyncOpts);
         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}` ], spawnSyncOpts);
         spawnSync("plink", plinkArgsFull, spawnSyncOpts);
         writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
         spawnSync("pscp", pscpArgs, spawnSyncOpts);
-        writeInfo("successfully uploaded resource files");
+        writeInfo(`${mark} successfully uploaded resource files`);
     }
     catch (e) {
         writeInfo("error uploading resource files:", figures.color.error);

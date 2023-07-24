@@ -17,7 +17,8 @@
  */
 const name = (buildTarget, env, wpConfig) =>
 {
-	wpConfig.name = `${env.app.name}:${env.app.version}:${env.environment}:${buildTarget}:${wpConfig.mode}`;
+	const modeLabel = wpConfig.mode !== "none" ? wpConfig.mode : "tests";
+	wpConfig.name = `${env.app.name}:${env.app.version}:${env.environment}:${buildTarget}:${modeLabel}`;
 };
 
 
