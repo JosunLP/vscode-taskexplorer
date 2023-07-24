@@ -1,5 +1,6 @@
 // @ts-check
 
+const { apply } = require("../utils");
 const { join, resolve } = require("path");
 
 /**
@@ -72,8 +73,9 @@ const output = (env, wpConfig) =>
 		};
 	}
 
-	Object.assign(wpConfig.output,
+	apply(wpConfig.output,
 	{
+		compareBeforeEmit: true,
 		hashDigestLength: 20
 	});
 };

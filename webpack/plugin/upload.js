@@ -21,6 +21,7 @@ const { writeInfo, figures } = require("../console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackHashState} WebpackHashState */
+/** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackGlobalEnvironment} WebpackGlobalEnvironment */
@@ -45,29 +46,21 @@ const upload = (env, gEnv, wpConfig) =>
             {
                 compiler.hooks.afterDone.tap("AfterDoneUploadPlugin", (statsData) =>
                 {
-                    if (statsData.hasErrors()) { return; }
-                    // if (!gEnv.uploadCount) { gEnv.uploadCount = 0; }
-                    // ++gEnv.uploadCount;
-                    // if (gEnv.uploadCount === 2)
-                    // {
+                    if (statsData.hasErrors()) {
+                        return;
+                    }
                     const stats = statsData.toJson(),
                           assets = stats.assets?.filter(a => a.type === "asset"),
-                          assetChunks = stats.assetsByChunkName;
-                    if (assets && assetChunks)
-                    {
-                        const assetNames = assets.map(a => a.name);
-                        // Object.keys(assetChunks).forEach((k) =>
-                        // {
-                        //     const asset = assets.find(a => a.name === assetChunks[k][0]);
-                        //     if (asset && asset.chunkNames)
-                        //     {
-                        //         setAssetState(asset, env, wpConfig);
-                        //     }
-                        // });
-                        sourceMapFiles(assetNames, env);
-                        _upload(assetNames, env);
+                          chunks = stats.assetsByChunkName;
+                    if (!gEnv.uploadCount) {
+                        gEnv.uploadCount = 0;
                     }
-                    // }
+                    ++gEnv.uploadCount;
+                    if (assets && chunks)
+                    {
+                        sourceMapFiles(assets, chunks, env);
+                        _upload(assets, chunks, env, gEnv);
+                    }
                 });
             }
         };
@@ -78,10 +71,11 @@ const upload = (env, gEnv, wpConfig) =>
 
 /**
  * @method sourceMapFiles
- * @param {String[]} assetNames
+ * @param {WebpackStatsAsset[]} assets
+ * @param {Record<string, string[]>} chunks
  * @param {WebpackEnvironment} env
  */
-const sourceMapFiles = (assetNames, env) =>
+const sourceMapFiles = (assets, chunks, env) =>
 {
     try {
         if (env.environment === "prod") {
@@ -91,19 +85,22 @@ const sourceMapFiles = (assetNames, env) =>
             copyFileSync(join(env.paths.dist, "taskexplorer.js.map"), join(env.paths.temp, "taskexplorer.js.map"));
         }
         copyFileSync(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(env.paths.temp, "mappings.wasm"));
-    } catch {}
+    }
+    catch {}
 };
 
 
 /**
  * @method _upload
- * @param {String[]} assetNames
+ * @param {WebpackStatsAsset[]} assets
+ * @param {Record<string, string[]>} chunks
  * @param {WebpackEnvironment} env
+ * @param {WebpackGlobalEnvironment} gEnv Webpack global environment
  */
-const _upload = (assetNames, env) =>
+const _upload = (assets, chunks, env, gEnv) =>
 {
     const host = "app1.spmeesseman.com";
-    if (JSON.stringify(env.state.hash.current) === JSON.stringify(env.state.hash.current))
+    if (JSON.stringify(env.state.hash.next) === JSON.stringify(env.state.hash.current))
     {
         writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`, figures.color.star);
         return;
@@ -132,21 +129,68 @@ const _upload = (assetNames, env) =>
         `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"`
     ];
 
-    try {
-        const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
+    // if (gEnv.uploadCount === 1)
+    if (gEnv.uploadCount === 2)
+    {
         writeInfo(`upload resource files to ${host}`, figures.color.star);
-        writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
-        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}` ], spawnSyncOpts);
-        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}` ], spawnSyncOpts);
-        spawnSync("plink", plinkArgsFull, spawnSyncOpts);
-        writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
-        spawnSync("pscp", pscpArgs, spawnSyncOpts);
+        try {
+            const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
+            writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
+            spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}` ], spawnSyncOpts);
+            spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}` ], spawnSyncOpts);
+            spawnSync("plink", plinkArgsFull, spawnSyncOpts);
+        // }
+        // catch (e) {
+        //     writeInfo("error creating directory to upload resource files:", figures.color.error);
+        //     writeInfo("   " + e.message.trim(), figures.color.error);
+        // }
+    // }
+    // else if (gEnv.uploadCount === 2)
+    // {
+        // if (JSON.stringify(env.state.hash.next) !== JSON.stringify(env.state.hash.current))
+        // {
+            // try {
+                writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
+                spawnSync("pscp", pscpArgs, spawnSyncOpts);
+                writeInfo("successfully uploaded resource files", figures.color.star);
+            }
+            catch (e) {
+                writeInfo("error uploading resource files:", figures.color.error);
+                writeInfo("   " + e.message.trim(), figures.color.error);
+            }
+        // }
         writeInfo("successfully uploaded resource files", figures.color.star);
     }
-    catch (e) {
-        writeInfo("error uploading resource files:", figures.color.error);
-        writeInfo("   " + e.message.trim(), figures.color.error);
-    }
+
+    // assets.filter(a => !!a.chunkNames).forEach((a) =>
+    // {
+    //     const chunkName = /** @type {String}*/(/** @type {String[]}*/(a.chunkNames)[0]);
+    //     if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName])
+    //     {
+    //         try {
+    //             writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
+    //             // spawnSync("pscp", pscpArgs, spawnSyncOpts);
+    //             writeInfo("successfully uploaded resource files", figures.color.star);
+    //         }
+    //         catch (e) {
+    //             writeInfo("error uploading resource files:", figures.color.error);
+    //             writeInfo("   " + e.message.trim(), figures.color.error);
+    //         }
+    //     }
+    //     else {
+    //         writeInfo(`content in resource ${chunkName} unchanged, upload skipped`, figures.color.star);
+    //         return;
+    //     }
+    // });
+
+    // Object.keys(chunks).forEach((k) =>
+    // {
+    //     const asset = assets.find(a => a.name === assetChunks[k][0]);
+    //     if (asset && asset.chunkNames)
+    //     {
+    //         setAssetState(asset, env, wpConfig);
+    //     }
+    // });
 };
 
 

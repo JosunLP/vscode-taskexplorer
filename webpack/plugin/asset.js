@@ -36,10 +36,10 @@ const asset = (env, wpConfig) =>
                 compiler.hooks.assetEmitted.tapPromise("AssetBeforeEmitPlugin", async (file, /** @type {WebpackAssetEmittedInfo} */info) =>
                 {
                     if (env.environment === "test") {
-                        await istanbulTags(file, info.content, env);
+                        await istanbulTags(info.targetPath, info.content, env);
                     }
                     else if (env.environment === "prod") {
-                        await licenseFiles(file);
+                        await licenseFiles(info.targetPath);
                     }
                 });
             }
@@ -57,17 +57,13 @@ const asset = (env, wpConfig) =>
  */
 const istanbulTags = async (filePath, content, env) =>
 {
-    const outFile = join(env.paths.dist, filePath);
-    if (existsSync(outFile))
-    {
-        try {
-            const regex = /\n[ \t]*module\.exports \= require\(/mg,
-                  newContent = content.toString().replace(regex, (v) => "/* istanbul ignore next */" + v);
-            await writeFile(filePath, newContent);
-        } catch {}
-        if (content.includes("/* istanbul ignore file */")) {
-            writeInfo("The '/* istanbul ignore file */ ' tag was found and will break coverage", figures.error);
-        }
+    try {
+        const regex = /\n[ \t]*module\.exports \= require\(/mg,
+                newContent = content.toString().replace(regex, (v) => "/* istanbul ignore next */" + v);
+        await writeFile(filePath, newContent);
+    } catch {}
+    if (content.includes("/* istanbul ignore file */")) {
+        writeInfo("The '/* istanbul ignore file */ ' tag was found and will break coverage", figures.error);
     }
 };
 
