@@ -5,25 +5,18 @@
  * @module webpack.exports.plugins
  */
 
-const afterdone = require("../plugin/afterdone");
-const analyze = require("../plugin/analyze.js");
-const banner = require("../plugin/banner");
-const build = require("../plugin/build");
-const clean = require("../plugin/clean");
-const copy = require("../plugin/copy");
-const ignore = require("../plugin/ignore");
-const optimization = require("../plugin/optimization");
-const progress = require("../plugin/progress");
-const sourcemaps = require("../plugin/sourcemaps");
-const tscheck = require("../plugin/tscheck");
-const upload = require("../plugin/upload");
 const webviewApps = require("../webviewApps");
-const { wpPlugin } = require("../plugin/plugins");
-const { hash, prehash } = require("../plugin/hash");
+const {
+	afterdone, analyze, asset, banner, build, clean, copy, hash, hookSteps, ignore,
+	optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, html,
+	htmlcsp, imageminimizer, htmlinlinechunks, webviewapps
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+} = require("../plugin");
+
+
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
@@ -39,7 +32,8 @@ const plugins = (env, wpConfig) =>
 		clean(env, wpConfig),
 		build(env, wpConfig),
 		ignore(env, wpConfig),
-		...tscheck(env, wpConfig)
+		...tscheck(env, wpConfig),
+		...hookSteps(env)
 	];
 
 	if (env.build !== "tests")
@@ -48,13 +42,13 @@ const plugins = (env, wpConfig) =>
 		{
 			const apps = Object.keys(webviewApps);
 			wpConfig.plugins.push(
-				wpPlugin.cssextract(env, wpConfig),
-				...wpPlugin.webviewapps(apps, env, wpConfig),
+				cssextract(env, wpConfig),
+				...webviewapps(apps, env, wpConfig),
 				// @ts-ignore
-				wpPlugin.htmlcsp(env, wpConfig),
-				wpPlugin.htmlinlinechunks(env, wpConfig),
+				htmlcsp(env, wpConfig),
+				htmlinlinechunks(env, wpConfig),
 				copy(apps, env, wpConfig),
-				wpPlugin.imageminimizer(env, wpConfig)
+				imageminimizer(env, wpConfig)
 			);
 		}
 		else
@@ -73,6 +67,7 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins.push(
 		...optimization(env, wpConfig),
 		hash(env),
+		asset(env, wpConfig),
 		afterdone(env, wpConfig),
 		upload(env, wpConfig)
 	);

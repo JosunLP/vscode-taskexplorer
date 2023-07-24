@@ -6,8 +6,8 @@ const { join, resolve } = require("path");
  * @module webpack.exports.output
  */
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 
 /**
@@ -21,7 +21,7 @@ const output = (env, wpConfig) =>
 	{
 		wpConfig.output = {
 			clean: env.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
-			path: join(env.buildPath, "res"),
+			path: join(env.paths.build, "res"),
 			publicPath: "#{webroot}/",
 			filename: (pathData, _assetInfo) =>
 			{
@@ -41,7 +41,7 @@ const output = (env, wpConfig) =>
 			// libraryExport: "run",
 			// globalObject: "this",
 			// libraryTarget: 'commonjs2',
-			path: join(env.distPath, "test"),
+			path: join(env.paths.dist, "test"),
 			filename: "[name].js",
 			// module: true,
 			// chunkFormat: "commonjs",
@@ -57,10 +57,10 @@ const output = (env, wpConfig) =>
 		let outPath;
 		const rtRelPath = env.build === "browser" ? "browser" : ".";
 		if (env.stripLogging) {
-			outPath = resolve(env.distPath, rtRelPath);
+			outPath = resolve(env.paths.dist, rtRelPath);
 		}
 		else {
-			outPath = resolve(env.tempPath, env.app, env.environment, rtRelPath);
+			outPath = resolve(env.paths.temp, rtRelPath);
 		}
 		wpConfig.output =
 		{

@@ -4,9 +4,9 @@
  * @module webpack.exports.watch
  */
 
-/** @typedef {import("../types/webpack").WebpackArgs} WebpackArgs */
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackArgs} WebpackArgs */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 
 /**

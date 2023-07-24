@@ -5,13 +5,13 @@
 const { writeInfo, figures } = require("./webpack/console");
 const {
 	context, devtool, entry, externals, ignorewarnings, minification, mode, plugins, optimization,
-	output, resolve, rules, stats, target, watch, environment, getMode
+	output, resolve, rules, stats, target, watch, environment, getMode, name
 } = require("./webpack/exports");
 
-/** @typedef {import("./webpack/types/webpack").WebpackArgs} WebpackArgs */
-/** @typedef {import("./webpack/types/webpack").WebpackBuild} WebpackBuild */
-/** @typedef {import("./webpack/types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("./webpack/types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("./webpack/types").WebpackArgs} WebpackArgs */
+/** @typedef {import("./webpack/types").WebpackBuild} WebpackBuild */
+/** @typedef {import("./webpack/types").WebpackConfig} WebpackConfig */
+/** @typedef {import("./webpack/types").WebpackEnvironment} WebpackEnvironment */
 
 let buildStep = 0;
 
@@ -50,13 +50,10 @@ module.exports = (env, argv) =>
 		stripLogging: true,
 		target: "node",
 		paths: {
-			hashFile: "",
-			cacheDir: ""
+			files: { hash: "" },
+			cache: ""
 		},
-		state: {
-			hashCurrent: {},
-			hashNew: {}
-		}
+		state: {}
 	}, env);
 
 	Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
@@ -103,6 +100,7 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 	const wpConfig = {};
 	environment(buildTarget, env, argv); // Base path / Build path
 	mode(env, argv, wpConfig);           // Mode i.e. "production", "development", "none"
+	name(buildTarget, env, wpConfig);    // Build name / label
 	target(env, wpConfig);               // Target i.e. "node", "webworker", "tests"
 	context(env, wpConfig);              // Context for build
 	entry(env, wpConfig);                // Entry points for built output
@@ -117,6 +115,5 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 	rules(env, wpConfig);                // Loaders & build rules
 	stats(env, wpConfig);                // Stats i.e. console output & verbosity
 	watch(env, wpConfig, argv);		     // Watch-mode options
-	wpConfig.name = `${buildTarget}:${wpConfig.mode}`;
 	return wpConfig;
 };

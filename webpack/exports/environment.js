@@ -9,10 +9,10 @@ const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
 
-/** @typedef {import("..//types/webpack").WebpackArgs} WebpackArgs */
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types/webpack").WebpackBuild} WebpackBuild */
+/** @typedef {import("..//types").WebpackArgs} WebpackArgs */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackBuild} WebpackBuild */
 
 
 /**
@@ -24,35 +24,57 @@ const { readFileSync, existsSync, mkdirSync } = require("fs");
 const environment = (build, env, argv) =>
 {
 	env.build = build;
-	env.buildPath = resolve(__dirname, "..", "..");
-	env.distPath = join(env.buildPath, "dist");
-	env.tempPath = resolve(process.env.TEMP || process.env.TMP  || ".");
-	env.paths.cacheDir = join(env.buildPath, "node_modules", ".cache", "webpack");
-	env.paths.hashFile = join(env.paths.cacheDir, "hash.json");
-	if (!existsSync(env.paths.cacheDir)) {
-		mkdirSync(env.paths.cacheDir);
-	}
-	if (env.build === "webview") {
-		env.basePath = join(env.buildPath, "src", "webview", "app");
-	}
-	else {
-		env.basePath = env.buildPath;
-	}
-	readPackageDotJson(env);
-	writeEnvironment(env, argv);
+	env.paths.build = resolve(__dirname, "..", "..");
 	env.isTests = env.environment.startsWith("test");
+	readPkgJson(env);
+	setPaths(env);
+	initState(env);
+	setVersion(env);
+	writeEnvironment(env, argv);
 };
 
 
 /**
- * @method readPackageDotJson
+ * @method setState
  * @param {WebpackEnvironment} env Webpack build environment
  */
-const readPackageDotJson = (env) =>
+const initState = (env) =>
 {
-	const pkgJson = JSON.parse(readFileSync(join(env.buildPath, "package.json"), "utf8"));
-	Object.assign(env, { app: pkgJson.name, version: pkgJson.version, pkgJson });
-	version(env);
+	env.state = { hash: {} };
+	env.state.hash[env.environment] = { current: {}, next: {}};
+};
+
+
+/**
+ * @method readPkgJson
+ * @param {WebpackEnvironment} env Webpack build environment
+ */
+const readPkgJson = (env) =>
+{
+	const pkgJson = JSON.parse(readFileSync(join(env.paths.build, "package.json"), "utf8"));
+	Object.assign(env, { app: { name: pkgJson.name, version: pkgJson.version, pkgJson }});
+};
+
+
+/**
+ * @method setPaths
+ * @param {WebpackEnvironment} env Webpack build environment
+ */
+const setPaths = (env) =>
+{
+	env.paths.dist = join(env.paths.build, "dist");
+	env.paths.temp = resolve(process.env.TEMP || process.env.TMP  || ".", env.app.name, env.environment);
+	env.paths.cache = join(env.paths.build, "node_modules", ".cache", "webpack");
+	env.paths.files.hash = join(env.paths.cache, "hash.json");
+	if (!existsSync(env.paths.cache)) {
+		mkdirSync(env.paths.cache, { recursive: true });
+	}
+	if (env.build === "webview") {
+		env.paths.base = join(env.paths.build, "src", "webview", "app");
+	}
+	else {
+		env.paths.base = env.paths.build;
+	}
 };
 
 
@@ -60,11 +82,11 @@ const readPackageDotJson = (env) =>
  * @method version
  * @param {WebpackEnvironment} env
  */
-const version = (env) =>
+const setVersion = (env) =>
 {
     if (env.build === "extension" && env.environment === "prod" && env.stripLogging)
     {
-        // let version = env.version;
+        // let version = env.app.version;
     }
 };
 
@@ -77,7 +99,9 @@ const version = (env) =>
 const writeEnvironment = (env, argv) =>
 {
 	writeInfo("Environment:");
-	Object.keys(env).filter(k => typeof env[k] !== "object").forEach((k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`));
+	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
+		(k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`)
+	);
 	if (argv)
 	{
 		writeInfo("Arguments:");

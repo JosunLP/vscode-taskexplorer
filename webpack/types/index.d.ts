@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-/** @typedef {import("../types/webpack").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {import("webpack").AssetEmittedInfo} WebpackAssetEmittedInfo */
-/** @typedef {import("webpack").Compiler} WebpackCompiler */
-
 
 declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
 declare type WebpackBuild = "browser" | "common" | "extension" | "tests" | "webview" | undefined;
@@ -24,12 +18,9 @@ declare type WebpackOptimization = any;
 declare interface WebpackEnvironment extends WebpackEnvironmentInternal
 {
     analyze: boolean;                     // parform analysis after build
-    app: string;                          // app name (read from package.json)
-    basePath: string;                     // context base dir path
+    app: WebpackApp;                      // target js app info
     build: WebpackBuild;
-    buildPath: string;                    // base/root level dir path of project
     clean: boolean;
-    distPath: string;
     environment: WebpackBuildEnvironment;
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
@@ -40,21 +31,48 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     state: WebpackBuildState;
     stripLogging: boolean;
     target: WebpakTarget;
-    tempPath: string;                     // operating system temp directory
     verbosity: WebpackLogLevel;
+}
+
+declare interface WebpackApp
+{
+    name: string;                         // app name (read from package.json)
     version: string;                      // app version (read from package.json)
+}
+
+declare interface WebpackBuildFilePaths
+{
+    hash: string;
 }
 
 declare interface WebpackBuildPaths
 {
-    hashFile: string;
-    cacheDir: string;
+    base: string;                         // context base dir path
+    build: string;                        // base/root level dir path of project
+    cache: string;
+    dist: string;
+    files: WebpackBuildFilePaths;
+    temp: string;                         // operating system temp directory
+}
+
+declare interface WebpackEnvHashState
+{
+    current: Record<string, string | undefined>;  // Content hash from previous output chunk
+    next: Record<string, string | undefined>;      // Content hash for new output chunk
+}
+
+declare interface WebpackHashState extends Readonly<Record<WebpackBuildEnvironment, WebpackEnvHashState>>
+{
+    browser: WebpackEnvHashState;
+    dev: WebpackEnvHashState;
+    prod: WebpackEnvHashState;
+    test: WebpackEnvHashState;
+    testprod: WebpackEnvHashState;
 }
 
 declare interface WebpackBuildState
 {
-    hashCurrent: Record<string, string | undefined>;  // Content hash from previous output chunk
-    hashNew: Record<string, string | undefined>;      // Content hash for new output chunk
+    hash: Partial<WebpackHashState>;
 }
 
 declare interface WebpackEnvironmentInternal
@@ -71,6 +89,7 @@ declare interface WebpackArgs
 }
 
 export {
+    WebpackApp,
     WebpackArgs,
     WebpackAssetEmittedInfo,
     WebpackBuild,
@@ -79,6 +98,8 @@ export {
     WebpackBuildState,
     WebpackCompiler,
     WebpackConfig,
+    WebpackEnvHashState,
+    WebpackHashState,
     WebpackPluginInstance,
     WebpackOptimization,
     WebpackEnvironment,

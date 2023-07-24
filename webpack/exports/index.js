@@ -8,6 +8,7 @@ const externals = require("./externals");
 const ignorewarnings = require("./ignorewarnings");
 const minification = require("./minification");
 const { mode, getMode } = require("./mode");
+const name = require("./name");
 const optimization = require("./optimization");
 const plugins = require("./plugins");
 const output = require("./output");
@@ -27,6 +28,7 @@ module.exports = {
     ignorewarnings,
     minification,
     mode,
+    name,
     optimization,
     plugins,
     output,

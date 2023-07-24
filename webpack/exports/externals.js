@@ -4,8 +4,8 @@
  * @module webpack.exports.externals
  */
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const nodeExternals = require("webpack-node-externals");

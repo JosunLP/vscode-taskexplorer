@@ -9,8 +9,8 @@
 const path = require("path");
 const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 
 /**
@@ -29,7 +29,7 @@ const tscheck = (env, wpConfig) =>
 				async: false,
 				formatter: "basic",
 				typescript: {
-					configFile: path.join(env.basePath, "tsconfig.json"),
+					configFile: path.join(env.paths.base, "tsconfig.json"),
 				}
 			})
 		);
@@ -44,7 +44,7 @@ const tscheck = (env, wpConfig) =>
 				typescript: {
 					// build: true,
 					mode: "write-tsbuildinfo",
-					configFile: path.join(env.buildPath, "src", "test", "tsconfig.json"),
+					configFile: path.join(env.paths.build, "src", "test", "tsconfig.json"),
 				}
 			})
 		);
@@ -59,7 +59,7 @@ const tscheck = (env, wpConfig) =>
 				typescript: {
 					// build: true,
 					mode: "write-tsbuildinfo",
-					configFile: path.join(env.buildPath, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
+					configFile: path.join(env.paths.build, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"),
 				}
 			})
 		);
@@ -73,7 +73,7 @@ const tscheck = (env, wpConfig) =>
 					formatter: "basic",
 					typescript: {
 						mode: "readonly",
-						configFile: path.join(env.buildPath, "src", "test", "tsconfig.json")
+						configFile: path.join(env.paths.build, "src", "test", "tsconfig.json")
 					}
 				})
 			);

@@ -6,8 +6,8 @@
  * @module webpack.exports.rules
  */
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 const path = require("path");
 const JSON5 = require("json5");
@@ -35,7 +35,7 @@ const rules = (env, wpConfig) =>
 		},
 		{
 			exclude: /\.d\.ts$/,
-			include: path.join(env.buildPath, "src"),
+			include: path.join(env.paths.build, "src"),
 			test: /\.tsx?$/,
 			use: [ env.esbuild ?
 			{
@@ -44,12 +44,12 @@ const rules = (env, wpConfig) =>
 					implementation: esbuild,
 					loader: "tsx",
 					target: "es2020",
-					tsconfigRaw: getTsConfig(env, path.join(env.basePath, "tsconfig.json")),
+					tsconfigRaw: getTsConfig(env, path.join(env.paths.base, "tsconfig.json")),
 				},
 			} : {
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(env.basePath, "tsconfig.json"),
+					configFile: path.join(env.paths.base, "tsconfig.json"),
 					// experimentalWatchApi: true,
 					transpileOnly: true,
 				},
@@ -79,11 +79,11 @@ const rules = (env, wpConfig) =>
 	}
 	else if (env.build === "tests")
 	{
-		const testsRoot = path.join(env.buildPath, "src", "test");
+		const testsRoot = path.join(env.paths.build, "src", "test");
 		wpConfig.module.rules.push(...[
 		{
 			test: /index\.js$/,
-			include: path.join(env.buildPath, "node_modules", "nyc"),
+			include: path.join(env.paths.build, "node_modules", "nyc"),
 			loader: "string-replace-loader",
 			options: {
 				search: "selfCoverageHelper = require('../self-coverage-helper')",
@@ -115,7 +115,7 @@ const rules = (env, wpConfig) =>
 		{
 			wpConfig.module.rules.push(...[{
 				test: /\.ts$/,
-				include: path.join(env.buildPath, "src"),
+				include: path.join(env.paths.build, "src"),
 				loader: "string-replace-loader",
 				options: {
 					multiple: [
@@ -165,7 +165,7 @@ const rules = (env, wpConfig) =>
 			},
 			{
 				test: /wrapper\.ts$/,
-				include: path.join(env.buildPath, "src", "lib"),
+				include: path.join(env.paths.build, "src", "lib"),
 				loader: "string-replace-loader",
 				options: {
 					search: /^log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
@@ -176,7 +176,7 @@ const rules = (env, wpConfig) =>
 
 		wpConfig.module.rules.push({
 			test: /\.ts$/,
-			include: path.join(env.buildPath, "src"),
+			include: path.join(env.paths.build, "src"),
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
 			],
@@ -188,14 +188,14 @@ const rules = (env, wpConfig) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						env, path.join(env.buildPath, configFile),
+						env, path.join(env.paths.build, configFile),
 					)
 				}
 			} :
 			{
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(env.buildPath, configFile),
+					configFile: path.join(env.paths.build, configFile),
 					// experimentalWatchApi: true,
 					transpileOnly: true
 				}
@@ -213,7 +213,7 @@ const rules = (env, wpConfig) =>
 const getTsConfig = (env, tsConfigFile) =>
 {
 	const result = spawnSync("npx", [ "tsc", `-p ${tsConfigFile}`, "--showConfig" ], {
-		cwd: env.buildPath,
+		cwd: env.paths.build,
 		encoding: "utf8",
 		shell: true,
 	});

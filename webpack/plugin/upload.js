@@ -4,6 +4,14 @@
 
 /**
  * @module webpack.plugin.upload
+ *
+ * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
+ *
+ * !!! For first time build on fresh os install:
+ * !!!   - create the environment variable SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN
+ * !!!   - run a plink command manually to generate and trust the fingerprints:
+ * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
+ *
  */
 
 const { join } = require("path");
@@ -11,18 +19,15 @@ const { spawnSync } = require("child_process");
 const { renameSync, copyFileSync } = require("fs");
 const { writeInfo, figures } = require("../console");
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackEnvHashState} WebpackEnvHashState */
+/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @method upload
- * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
- * !!! For first time build on fresh os install:
- * !!!   - create the environment variable SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN
- * !!!   - run a plink command manually to generate and trust the fingerprints:
- * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
@@ -35,10 +40,10 @@ const upload = (env, wpConfig) =>
     {
         const _env = { ...env };
         plugin =
-        {   /** @param {import("webpack").Compiler} compiler Compiler */
-            apply: (compiler) =>
+        {
+            apply: /** @param {WebpackCompiler} compiler Compiler */(compiler) =>
             {
-                compiler.hooks.afterDone.tap("AfterDonePlugin", () =>
+                compiler.hooks.afterDone.tap("AfterDoneUploadPlugin", () =>
                 {
                     sourceMapFiles(_env);
                     _upload(_env);
@@ -57,31 +62,26 @@ const upload = (env, wpConfig) =>
 const sourceMapFiles = (env) =>
 {
     try {
-        const tmpPath = join(env.tempPath, env.app, env.environment);
         if (env.environment === "prod") {
-            renameSync(join(env.distPath, "taskexplorer.js.map"), join(tmpPath, "taskexplorer.js.map"));
+            renameSync(join(env.paths.dist, "taskexplorer.js.map"), join(env.paths.temp, "taskexplorer.js.map"));
         }
         else {
-            copyFileSync(join(env.distPath, "taskexplorer.js.map"), join(tmpPath, "taskexplorer.js.map"));
+            copyFileSync(join(env.paths.dist, "taskexplorer.js.map"), join(env.paths.temp, "taskexplorer.js.map"));
         }
-        copyFileSync(join(env.buildPath, "node_modules", "source-map", "lib", "mappings.wasm"), join(tmpPath, "mappings.wasm"));
+        copyFileSync(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(env.paths.temp, "mappings.wasm"));
     } catch {}
 };
 
 
 /**
  * @method _upload
- * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
- * !!! For first time build on fresh os install:
- * !!!   - create the environment variable SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN
- * !!!   - run a plink command manually to generate and trust the fingerprints:
- * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
  * @param {WebpackEnvironment} env
  */
 const _upload = (env) =>
 {
     const host = "app1.spmeesseman.com";
-    if (env.state.hashCurrent === env.state.hashCurrent)
+    const hashInfo = /** @type {WebpackEnvHashState} */(env.state.hash[env.environment]);
+    if (hashInfo.current === hashInfo.current)
     {
         writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`);
         return;
@@ -92,7 +92,7 @@ return;
     const user = "smeesseman",
           rBasePath = "/var/www/app1/res/app",
           /** @type {import("child_process").SpawnSyncOptions} */
-          spawnSyncOpts = { cwd: env.buildPath, encoding: "utf8", shell: true },
+          spawnSyncOpts = { cwd: env.paths.build, encoding: "utf8", shell: true },
           sshAuth = process.env.SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN || "InvalidAuth";
 
     const plinkArgs = [
@@ -108,16 +108,16 @@ return;
         sshAuth,  // auth key
         // "-q",  // quiet, don't show statistics
         "-r",     // copy directories recursively
-        join(env.tempPath, env.app, env.environment),
-        `${user}@${host}:"${rBasePath}/${env.app}/v${env.version}"`
+        env.paths.temp,
+        `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"`
     ];
 
     try {
-        const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}/${env.environment}` ];
+        const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
         writeInfo(`upload resource files to ${host}`);
         writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
-        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}` ], spawnSyncOpts);
-        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app}/v${env.version}` ], spawnSyncOpts);
+        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}` ], spawnSyncOpts);
+        spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}` ], spawnSyncOpts);
         spawnSync("plink", plinkArgsFull, spawnSyncOpts);
         writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
         spawnSync("pscp", pscpArgs, spawnSyncOpts);

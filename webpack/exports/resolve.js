@@ -5,8 +5,8 @@
  * @module webpack.exports.resolve
  */
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 const path = require("path");
 
@@ -23,8 +23,8 @@ const resolve = (env, wpConfig) =>
 		wpConfig.resolve =
 		{
 			alias: {
-				":env": path.resolve(env.buildPath, "src", "lib", "env", env.build === "browser" ? "browser" : "node"),
-				":types": path.resolve(env.buildPath, "types")
+				":env": path.resolve(env.paths.build, "src", "lib", "env", env.build === "browser" ? "browser" : "node"),
+				":types": path.resolve(env.paths.build, "types")
 			},
 			fallback: env.build === "browser" ? { path: require.resolve("path-browserify"), os: require.resolve("os-browserify/browser") } : undefined,
 			mainFields: env.build === "browser" ? [ "browser", "module", "main" ] : [ "module", "main" ],
@@ -35,11 +35,11 @@ const resolve = (env, wpConfig) =>
 	{
 		wpConfig.resolve = {
 			alias: {
-				":env": path.resolve(env.buildPath, "src", "lib", "env", "browser"),
-				":types": path.resolve(env.buildPath, "types")
+				":env": path.resolve(env.paths.build, "src", "lib", "env", "browser"),
+				":types": path.resolve(env.paths.build, "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			modules: [ env.basePath, "node_modules" ],
+			modules: [ env.paths.base, "node_modules" ],
 		};
 	}
 };

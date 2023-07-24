@@ -26,6 +26,7 @@ const figures =
     colors,
     error: "✘",
     info: "ℹ",
+    star: "★",
     success: "✔",
     warning: "⚠",
     withColor,
@@ -45,7 +46,7 @@ const figures =
 const wpConsole = {
     colors,
     figures,
-    write: withColor,
+    withColor,
     writeInfo: consoleWrite
 };
 

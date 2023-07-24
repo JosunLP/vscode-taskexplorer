@@ -11,9 +11,9 @@ const { spawnSync } = require("child_process");
 const { writeInfo, figures } = require("../console");
 const { renameSync, existsSync, writeFileSync, readFileSync, copyFileSync, unlinkSync } = require("fs");
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
@@ -53,7 +53,11 @@ const afterdone = (env, wpConfig) =>
  */
 const istanbulFileTags = (env) =>
 {
-    const outFile = join(env.buildPath, "dist", "taskexplorer.js");
+    //
+    // TODO - See we can move his and hook into afterEmit and replace content before emitted to outpout dir
+    //
+
+    const outFile = join(env.paths.build, "dist", "taskexplorer.js");
     if (existsSync(outFile))
     {
         const regex = /\n[ \t]*module\.exports \= require\(/mg,
@@ -71,17 +75,14 @@ const istanbulFileTags = (env) =>
 
 /**
  * @method licenseFiles
- * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org/
  * @param {WebpackEnvironment} env
  */
 const licenseFiles = (env) =>
 {
-    try {
-        renameSync(join(env.distPath, "vendor.js.LICENSE.txt"), join(env.distPath, env.app, env.environment, "vendor.LICENSE"));
-        renameSync(join(env.distPath, "taskexplorer.js.LICENSE.txt"), join(env.distPath, env.app, env.environment, "taskexplorer.LICENSE"));
-        unlinkSync(join(env.tempPath, env.app, env.environment, "taskexplorer.debug.js.LICENSE.txt"));
-        unlinkSync(join(env.tempPath, env.app, env.environment, "vendor.debug.js.LICENSE.txt"));
-    } catch {}
+    try { renameSync(join(env.paths.dist, "vendor.js.LICENSE.txt"), join(env.paths.dist, "vendor.LICENSE")); } catch {}
+    try { renameSync(join(env.paths.dist, "taskexplorer.js.LICENSE.txt"), join(env.paths.dist, "taskexplorer.LICENSE")); } catch {}
+    try { unlinkSync(join(env.paths.temp, "taskexplorer.debug.js.LICENSE.txt")); } catch {}
+    try { unlinkSync(join(env.paths.temp, "vendor.debug.js.LICENSE.txt")); } catch {}
 };
 
 

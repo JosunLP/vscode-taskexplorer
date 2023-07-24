@@ -7,11 +7,11 @@
  */
 
 const path = require("path");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const { unlinkSync, existsSync } = require("fs");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 
 /**
@@ -26,7 +26,7 @@ const clean = (env, wpConfig) =>
 	{
 		if (env.build === "webview")
 		{
-			const basePath = path.posix.join(env.buildPath.replace(/\\/g, "/"), "res");
+			const basePath = path.posix.join(env.paths.build.replace(/\\/g, "/"), "res");
 			plugin = new CleanWebpackPlugin(
 			{
 				dry: false,
@@ -40,20 +40,24 @@ const clean = (env, wpConfig) =>
 		}
 		else if (env.build === "extension")
 		{
-			// if (existsSync(env.paths.hashFile)) {
-			// 	unlinkSync(env.paths.hashFile);
+			if (!env.stripLogging && existsSync(env.paths.temp))
+			{
+				unlinkSync(env.paths.temp);
+			}
+			// if (existsSync(env.paths.files.hash)) {
+			// 	unlinkSync(env.paths.files.hash);
 			// }
 			// plugin = new CleanWebpackPlugin(
 			// {
 			// 	dry: false,
 			// 	dangerouslyAllowCleanPatternsOutsideProject: true,
 			// 	cleanOnceBeforeBuildPatterns: wpConfig.mode === "production" ? [
-			// 		path.posix.join(env.buildPath.replace(/\\/g, "/"), "dist", "**"),
-			// 		path.posix.join(env.buildPath.replace(/\\/g, "/"), ".coverage", "**"),
-			// 		path.posix.join(env.buildPath.replace(/\\/g, "/"), ".nyc-output", "**"),
+			// 		path.posix.join(env.paths.build.replace(/\\/g, "/"), "dist", "**"),
+			// 		path.posix.join(env.paths.build.replace(/\\/g, "/"), ".coverage", "**"),
+			// 		path.posix.join(env.paths.build.replace(/\\/g, "/"), ".nyc-output", "**"),
 			// 		"!dist/webview/app/**"
 			// 	] : [
-			// 		path.posix.join(env.buildPath.replace(/\\/g, "/"), "dist", "**"),
+			// 		path.posix.join(env.paths.build.replace(/\\/g, "/"), "dist", "**"),
 			// 		"!dist/webview/app/**"
 			// 	]
 			// });

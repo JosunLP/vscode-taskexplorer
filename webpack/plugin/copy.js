@@ -10,9 +10,9 @@ const fs = require("fs");
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 
-/** @typedef {import("../types/webpack").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
@@ -25,12 +25,12 @@ const copy = (apps, env, wpConfig) =>
 {
 	let plugin;
 	const /** @type {CopyPlugin.Pattern[]} */patterns = [],
-		psx__dirname = env.buildPath.replace(/\\/g, "/"),
-		psxBasePath = env.basePath.replace(/\\/g, "/"),
+		psx__dirname = env.paths.build.replace(/\\/g, "/"),
+		psxBasePath = env.paths.base.replace(/\\/g, "/"),
 		psxBaseCtxPath = path.posix.join(psxBasePath, "res");
 	if (env.build === "webview")
 	{
-		apps.filter(app => fs.existsSync(path.join(env.basePath, app, "res"))).forEach(
+		apps.filter(app => fs.existsSync(path.join(env.paths.base, app, "res"))).forEach(
 			app => patterns.push(
 			{
 				from: path.posix.join(psxBasePath, app, "res", "*.*"),
@@ -38,7 +38,7 @@ const copy = (apps, env, wpConfig) =>
 				context: path.posix.join(psxBasePath, app, "res")
 			})
 		);
-		if (fs.existsSync(path.join(env.basePath, "res")))
+		if (fs.existsSync(path.join(env.paths.base, "res")))
 		{
 			patterns.push({
 				from: path.posix.join(psxBasePath, "res", "*.*"),
