@@ -15,14 +15,16 @@ const {
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackGlobalEnvironment} WebpackGlobalEnvironment */
 
 
 /**
  * @method
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackEnvironment} env Webpack build specific environment
+ * @param {WebpackGlobalEnvironment} gEnv Webpack global environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const plugins = (env, wpConfig) =>
+const plugins = (env, gEnv, wpConfig) =>
 {
 	wpConfig.plugins = [
 		// progress(env, wpConfig),
@@ -65,7 +67,7 @@ const plugins = (env, wpConfig) =>
 			...optimization(env, wpConfig),
 			hash(env, wpConfig),
 			asset(env, wpConfig),
-			upload(env, wpConfig)
+			upload(env, gEnv, wpConfig)
 		);
 	}
 

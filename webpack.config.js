@@ -5,16 +5,15 @@
 const { writeInfo } = require("./webpack/console");
 const { merge, printSpmBanner } = require("./webpack/utils");
 const {
-	context, devtool, entry, externals, ignorewarnings, minification, mode, plugins, optimization,
-	output, resolve, rules, stats, target, watch, environment, getMode, name
+	context, devtool, entry, externals, ignorewarnings, minification, mode, name, plugins,
+	optimization, output, resolve, rules, stats, target, watch, environment, getMode
 } = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types").WebpackArgs} WebpackArgs */
 /** @typedef {import("./webpack/types").WebpackBuild} WebpackBuild */
 /** @typedef {import("./webpack/types").WebpackConfig} WebpackConfig */
 /** @typedef {import("./webpack/types").WebpackEnvironment} WebpackEnvironment */
-
-let buildStep = 0;
+/** @typedef {import("./webpack/types").WebpackGlobalEnvironment} WebpackGlobalEnvironment */
 
 
 /**
@@ -27,6 +26,8 @@ let buildStep = 0;
  */
 module.exports = (env, argv) =>
 {
+	/** @type {WebpackGlobalEnvironment} */
+	const gEnv = { buildCount: 0 };
 	const mode = getMode(env, argv);
 
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
@@ -60,40 +61,41 @@ module.exports = (env, argv) =>
 	});
 
 	const extBuild = [
-		getWebpackConfig("extension", { ...env, ...{ stripLogging: false /* , clean: true */ }}, argv),
-		getWebpackConfig("extension", { ...env, ...{ stripLogging: true }}, argv)
+		getWebpackConfig("extension", { ...env, ...{ stripLogging: false /* , clean: true */ }}, gEnv, argv),
+		getWebpackConfig("extension", { ...env, ...{ stripLogging: true }}, gEnv, argv)
 	];
 
 	if (env.build)
 	{
 		if (env.build !== "extension") {
-			return getWebpackConfig(env.build, env, argv);
+			return getWebpackConfig(env.build, env, gEnv, argv);
 		}
 		return extBuild;
 	}
 
 	if (env.environment === "test") {
-		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "dev" }}, argv) ];
+		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "dev" }}, gEnv, argv) ];
 	}
 
 	if (env.environment === "testprod") {
-		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, argv) ];
+		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, gEnv, argv) ];
 	}
 
-	return [ ...extBuild, getWebpackConfig("webview", { ...env }, argv) ];
+	return [ ...extBuild, getWebpackConfig("webview", { ...env }, gEnv, argv) ];
 };
 
 /**
  * @method getWebpackConfig
  * @param {WebpackBuild} buildTarget
  * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackGlobalEnvironment} gEnv Webpack global environment
  * @param {WebpackArgs} argv Webpack command line args
  * @returns {WebpackConfig}
  */
-const getWebpackConfig = (buildTarget, env, argv) =>
+const getWebpackConfig = (buildTarget, env, gEnv, argv) =>
 {
-	if (buildStep > 0) { console.log(""); }
-	writeInfo(`Start Webpack build step ${++buildStep}`);
+	if (gEnv.buildCount > 0) { console.log(""); }
+	writeInfo(`Start Webpack build step ${++gEnv.buildCount }`);
 	/** @type {WebpackEnvironment}*/
 	const lEnv = merge({}, env);
 	/** @type {WebpackConfig}*/
@@ -113,7 +115,7 @@ const getWebpackConfig = (buildTarget, env, argv) =>
 	resolve(lEnv, wpConfig);               // Resolve config
 	rules(lEnv, wpConfig);                 // Loaders & build rules
 	stats(lEnv, wpConfig);                 // Stats i.e. console output & verbosity
-	watch(lEnv, wpConfig, argv);		      // Watch-mode options
-	plugins(lEnv, wpConfig);               // Plugins - call last as `env` and `wpConfig` are cloned for hooks
+	watch(lEnv, wpConfig, argv);		   // Watch-mode options
+	plugins(lEnv, gEnv, wpConfig);          // Plugins - call last as `env` and `wpConfig` are cloned for hooks
 	return wpConfig;
 };

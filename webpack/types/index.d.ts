@@ -34,6 +34,12 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     verbosity: WebpackLogLevel;
 }
 
+declare interface WebpackGlobalEnvironment extends Record<string, any>
+{
+    buildCount: number;
+}
+
+
 declare interface WebpackApp
 {
     name: string;                         // app name (read from package.json)
@@ -89,6 +95,7 @@ export {
     WebpackBuildState,
     WebpackCompiler,
     WebpackConfig,
+    WebpackGlobalEnvironment,
     WebpackHashState,
     WebpackPluginInstance,
     WebpackOptimization,

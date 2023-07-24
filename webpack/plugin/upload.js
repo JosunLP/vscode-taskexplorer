@@ -23,15 +23,17 @@ const { writeInfo, figures } = require("../console");
 /** @typedef {import("../types").WebpackHashState} WebpackHashState */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackGlobalEnvironment} WebpackGlobalEnvironment */
 
 
 /**
  * @method upload
  * @param {WebpackEnvironment} env
+ * @param {WebpackGlobalEnvironment} gEnv Webpack global environment
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
-const upload = (env, wpConfig) =>
+const upload = (env, gEnv, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
@@ -41,10 +43,31 @@ const upload = (env, wpConfig) =>
         {
             apply: (compiler) =>
             {
-                compiler.hooks.afterDone.tap("AfterDoneUploadPlugin", () =>
+                compiler.hooks.afterDone.tap("AfterDoneUploadPlugin", (statsData) =>
                 {
-                    sourceMapFiles(env);
-                    _upload(env);
+                    if (statsData.hasErrors()) { return; }
+                    // if (!gEnv.uploadCount) { gEnv.uploadCount = 0; }
+                    // ++gEnv.uploadCount;
+                    // if (gEnv.uploadCount === 2)
+                    // {
+                    const stats = statsData.toJson(),
+                          assets = stats.assets?.filter(a => a.type === "asset"),
+                          assetChunks = stats.assetsByChunkName;
+                    if (assets && assetChunks)
+                    {
+                        const assetNames = assets.map(a => a.name);
+                        // Object.keys(assetChunks).forEach((k) =>
+                        // {
+                        //     const asset = assets.find(a => a.name === assetChunks[k][0]);
+                        //     if (asset && asset.chunkNames)
+                        //     {
+                        //         setAssetState(asset, env, wpConfig);
+                        //     }
+                        // });
+                        sourceMapFiles(assetNames, env);
+                        _upload(assetNames, env);
+                    }
+                    // }
                 });
             }
         };
@@ -55,9 +78,10 @@ const upload = (env, wpConfig) =>
 
 /**
  * @method sourceMapFiles
+ * @param {String[]} assetNames
  * @param {WebpackEnvironment} env
  */
-const sourceMapFiles = (env) =>
+const sourceMapFiles = (assetNames, env) =>
 {
     try {
         if (env.environment === "prod") {
@@ -73,9 +97,10 @@ const sourceMapFiles = (env) =>
 
 /**
  * @method _upload
+ * @param {String[]} assetNames
  * @param {WebpackEnvironment} env
  */
-const _upload = (env) =>
+const _upload = (assetNames, env) =>
 {
     const host = "app1.spmeesseman.com";
     if (JSON.stringify(env.state.hash.current) === JSON.stringify(env.state.hash.current))
