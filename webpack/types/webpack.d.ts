@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+/** @typedef {import("../types/webpack").WebpackStatsAsset} WebpackStatsAsset */
+/** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("webpack").AssetEmittedInfo} WebpackAssetEmittedInfo */
+/** @typedef {import("webpack").Compiler} WebpackCompiler */
+
+
 declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
 declare type WebpackBuild = "browser" | "common" | "extension" | "tests" | "webview" | undefined;
 declare type WebpackBuildEnvironment= "dev" | "prod" | "test" | "testprod";
@@ -10,6 +17,8 @@ declare type WebpackBuildOrUndefined = WebpackBuild | undefined;
 declare type WebpackConfig = import("webpack").Configuration;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
+declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
+declare type WebpackCompiler = import("webpack").Compiler;
 declare type WebpackOptimization = any;
 
 declare interface WebpackEnvironment extends WebpackEnvironmentInternal
@@ -63,10 +72,12 @@ declare interface WebpackArgs
 
 export {
     WebpackArgs,
+    WebpackAssetEmittedInfo,
     WebpackBuild,
     WebpackBuildOrUndefined,
     WebpackBuildPaths,
     WebpackBuildState,
+    WebpackCompiler,
     WebpackConfig,
     WebpackPluginInstance,
     WebpackOptimization,

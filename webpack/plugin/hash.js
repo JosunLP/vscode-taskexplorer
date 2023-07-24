@@ -13,6 +13,8 @@ const { writeInfo, figures } = require("../console");
 /** @typedef {import("../types/webpack").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types/webpack").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types/webpack").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("webpack").AssetEmittedInfo} WebpackAssetEmittedInfo */
+/** @typedef {import("webpack").Compiler} WebpackCompiler */
 
 
 /**
@@ -29,7 +31,7 @@ const hash = (env) =>
         const _env = { ...env };
         plugin =
         {
-			apply: /** @param {import("webpack").Compiler} compiler */(compiler) =>
+			apply: /** @param {WebpackCompiler} compiler */(compiler) =>
             {
                 compiler.hooks.done.tap("HashCheckPlugin", (statsData) =>
                 {
@@ -39,8 +41,10 @@ const hash = (env) =>
                           assetChunks = stats.assetsByChunkName;
                     if (assets && assetChunks)
                     {
-                        readAssetStates(_env);
-                        Object.keys(assetChunks).forEach(k => setAssetState(assets.find(a => a.name === assetChunks[k][0]), _env));
+                        readAssetStates(_env, false);
+                        Object.keys(assetChunks).forEach(
+                            (k) => setAssetState(assets.find(a => a.name === assetChunks[k][0]), _env)
+                        );
                         saveAssetState(_env);
                     }
                 });
@@ -63,9 +67,12 @@ const prehash = (env) =>
 		const _env = { ...env };
 		plugin =
 		{
-			apply: /** @param {import("webpack").Compiler} compiler */(compiler) =>
+			apply: /** @param {WebpackCompiler} compiler */(compiler) =>
 			{
-                compiler.hooks.run.tap("PreHashCheckPlugin", () => readAssetStates(_env));
+                compiler.hooks.assetEmitted.tap("PreHashCheckPlugin", (file, /** @type {WebpackAssetEmittedInfo} */info) =>
+                {
+                    readAssetStates(_env, true);
+                });
 			}
 		};
 	}
@@ -87,13 +94,14 @@ const saveAssetState = (env) => writeFileSync(env.paths.hashFile, JSON.stringify
  */
 const setAssetState = (asset, env) =>
 {
-    if (asset && asset.chunkNames)
+    if (asset && asset.chunkNames && asset.info.contenthash)
     {
-        writeInfo(`set asset state info for '${asset.name}'`);
         const chunkName = /** @type {String} */(asset.chunkNames[0]);
-        env.state.hashNew[chunkName] = asset.info.contenthash?.toString();
-        writeInfo("   size   : " + asset.info.size);
-        writeInfo("   content hash   : " + env.state.hashNew);
+        env.state.hashNew[asset.name] = asset.info.contenthash.toString();
+        writeInfo(`set asset state info for ${asset.name}`);
+        writeInfo("   chunk         : " + chunkName);
+        writeInfo("   size          : " + asset.info.size);
+        writeInfo("   content hash  : " + env.state.hashNew[asset.name]);
     }
     else {
         writeInfo("invalid asset info", figures.color.warning);
@@ -104,15 +112,28 @@ const setAssetState = (asset, env) =>
 /**
  * @method readAssetStates
  * @param {WebpackEnvironment} env
+ * @param {Boolean} rotate
  */
-const readAssetStates = (env) =>
+const readAssetStates = (env, rotate) =>
 {
     if (existsSync(env.paths.hashFile))
     {
         try {
             Object.assign(env.state, JSON.parse(readFileSync(env.paths.hashFile, "utf8")));
+            console.log("");
             writeInfo("read asset state info:");
-            Object.keys(env.state).forEach(k => writeInfo(`   ${k.padEnd(12)} : ` + env.state[k]));
+            writeInfo("   current:");
+            Object.keys(env.state.hashCurrent).forEach(k => writeInfo(`      ${k.padEnd(13)} : ` + env.state.hashCurrent[k]));
+            writeInfo("   new:");
+            Object.keys(env.state.hashNew).forEach(k => writeInfo(`      ${k.padEnd(13)} : ` + env.state.hashNew[k]));
+            writeInfo("read asset state info complete");
+            if (rotate)
+            {
+                Object.keys(env.state.hashCurrent).forEach(k => delete env.state.hashCurrent[k]);
+                Object.assign(env.state.hashCurrent, { ...env.state.hashNew });
+                Object.keys(env.state.hashNew).forEach(k => delete env.state.hashNew[k]);
+                saveAssetState(env);
+            }
         }
         catch {}
     }
