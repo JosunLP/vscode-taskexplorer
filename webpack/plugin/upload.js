@@ -14,10 +14,10 @@
  *
  */
 
-const { join } = require("path");
+const { join, extname } = require("path");
 const { spawnSync } = require("child_process");
-const { renameSync, copyFileSync } = require("fs");
 const { writeInfo, figures } = require("../console");
+const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackHashState} WebpackHashState */
@@ -100,14 +100,15 @@ const sourceMapFiles = (assets, chunks, env) =>
 const _upload = (assets, chunks, env, gEnv) =>
 {
     const host = "app1.spmeesseman.com";
-    if (JSON.stringify(env.state.hash.next) === JSON.stringify(env.state.hash.current))
-    {
-        writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`, figures.color.star);
-        return;
-    }
+    // if (JSON.stringify(env.state.hash.next) === JSON.stringify(env.state.hash.current))
+    // {
+    //     writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`, figures.color.star);
+    //     return;
+    // }
 
     const user = "smeesseman",
           rBasePath = "/var/www/app1/res/app",
+          lBasePath = join(env.paths.temp, env.environment),
           /** @type {import("child_process").SpawnSyncOptions} */
           spawnSyncOpts = { cwd: env.paths.build, encoding: "utf8", shell: true },
           sshAuth = process.env.SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN || "InvalidAuth";
@@ -125,11 +126,68 @@ const _upload = (assets, chunks, env, gEnv) =>
         sshAuth,  // auth key
         // "-q",  // quiet, don't show statistics
         "-r",     // copy directories recursively
-        env.paths.temp,
+        lBasePath,
         `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"`
     ];
 
-    // if (gEnv.uploadCount === 1)
+    if (gEnv.uploadCount === 1)
+    // // if (gEnv.uploadCount === 2)
+    {
+    //     writeInfo(`upload resource files to ${host}`, figures.color.star);
+    //     try {
+    //         const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
+    //         writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
+    //         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}` ], spawnSyncOpts);
+    //         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}` ], spawnSyncOpts);
+    //         spawnSync("plink", plinkArgsFull, spawnSyncOpts);
+    //     }
+    //     catch (e) {
+    //         writeInfo("error creating directory to upload resource files:", figures.color.error);
+    //         writeInfo("   " + e.message.trim(), figures.color.error);
+    //     }
+    //     mkdirSync(lBasePath);
+    // }
+    //     // if (JSON.stringify(env.state.hash.next) !== JSON.stringify(env.state.hash.current))
+    //     // {
+    //         // try {
+    //             writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
+    //             spawnSync("pscp", pscpArgs, spawnSyncOpts);
+    //             writeInfo("successfully uploaded resource files", figures.color.star);
+    //         }
+    //         catch (e) {
+    //             writeInfo("error uploading resource files:", figures.color.error);
+    //             writeInfo("   " + e.message.trim(), figures.color.error);
+    //         }
+    //     // }
+    //     writeInfo("successfully uploaded resource files", figures.color.star);
+        if (!existsSync(lBasePath)) {
+            mkdirSync(lBasePath);
+        }
+    }
+
+    assets.filter(a => !!a.chunkNames).forEach((a) =>
+    {
+        const chunkName = /** @type {String}*/(/** @type {String[]}*/(a.chunkNames)[0]);
+        if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName] && a.info.related)
+        {
+            const fileNameNoHash = a.name.replace(`.${a.info.contenthash}`, ""),
+                  fileNameSourceMap = a.info.related.sourceMap.toString();
+            console.log("__________________________________________");
+            console.log("" + chunkName);
+            console.log("" + fileNameNoHash);
+            console.log("" + a.name);
+            console.log("" + a.info.related.sourceMap);
+            console.log("__________________________________________");
+            console.log(JSON.stringify(a, null, 3));
+            console.log("__________________________________________");
+            copyFileSync(join(env.paths.temp, a.name), join(lBasePath, fileNameNoHash));
+            copyFileSync(join(env.paths.temp, fileNameSourceMap), join(lBasePath, fileNameSourceMap));
+        }
+        else {
+            writeInfo(`content in resource ${chunkName} unchanged, skip upload`, figures.color.star);
+        }
+    });
+
     if (gEnv.uploadCount === 2)
     {
         writeInfo(`upload resource files to ${host}`, figures.color.star);
@@ -139,49 +197,18 @@ const _upload = (assets, chunks, env, gEnv) =>
             spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}` ], spawnSyncOpts);
             spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}` ], spawnSyncOpts);
             spawnSync("plink", plinkArgsFull, spawnSyncOpts);
-        // }
-        // catch (e) {
-        //     writeInfo("error creating directory to upload resource files:", figures.color.error);
-        //     writeInfo("   " + e.message.trim(), figures.color.error);
-        // }
-    // }
-    // else if (gEnv.uploadCount === 2)
-    // {
-        // if (JSON.stringify(env.state.hash.next) !== JSON.stringify(env.state.hash.current))
-        // {
-            // try {
-                writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
-                spawnSync("pscp", pscpArgs, spawnSyncOpts);
-                writeInfo("successfully uploaded resource files", figures.color.star);
-            }
-            catch (e) {
-                writeInfo("error uploading resource files:", figures.color.error);
-                writeInfo("   " + e.message.trim(), figures.color.error);
-            }
-        // }
-        writeInfo("successfully uploaded resource files", figures.color.star);
+            writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
+            spawnSync("pscp", pscpArgs, spawnSyncOpts);
+            writeInfo("successfully uploaded resource files", figures.color.star);
+        }
+        catch (e) {
+            writeInfo("error uploading resource files:", figures.color.error);
+            writeInfo("   " + e.message.trim(), figures.color.error);
+        }
+        finally {
+            rmSync(lBasePath, { recursive: true, force: true });
+        }
     }
-
-    // assets.filter(a => !!a.chunkNames).forEach((a) =>
-    // {
-    //     const chunkName = /** @type {String}*/(/** @type {String[]}*/(a.chunkNames)[0]);
-    //     if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName])
-    //     {
-    //         try {
-    //             writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
-    //             // spawnSync("pscp", pscpArgs, spawnSyncOpts);
-    //             writeInfo("successfully uploaded resource files", figures.color.star);
-    //         }
-    //         catch (e) {
-    //             writeInfo("error uploading resource files:", figures.color.error);
-    //             writeInfo("   " + e.message.trim(), figures.color.error);
-    //         }
-    //     }
-    //     else {
-    //         writeInfo(`content in resource ${chunkName} unchanged, upload skipped`, figures.color.star);
-    //         return;
-    //     }
-    // });
 
     // Object.keys(chunks).forEach((k) =>
     // {
