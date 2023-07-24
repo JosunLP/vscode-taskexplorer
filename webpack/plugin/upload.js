@@ -17,7 +17,7 @@
 const { join } = require("path");
 const { spawnSync } = require("child_process");
 const { renameSync, copyFileSync } = require("fs");
-const { writeInfo, figures, withColor, colors } = require("../console");
+const { writeInfo, figures } = require("../console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackHashState} WebpackHashState */
@@ -77,11 +77,10 @@ const sourceMapFiles = (env) =>
  */
 const _upload = (env) =>
 {
-    const host = "app1.spmeesseman.com",
-          mark = withColor(figures.star, colors.yellow);
+    const host = "app1.spmeesseman.com";
     if (JSON.stringify(env.state.hash.current) === JSON.stringify(env.state.hash.current))
     {
-        writeInfo(`${mark} content hash unchanged, resource upload to ${host} will be skipped`);
+        writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`, figures.color.star);
         return;
     }
 
@@ -110,14 +109,14 @@ const _upload = (env) =>
 
     try {
         const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
-        writeInfo(`${mark} upload resource files to ${host}`);
+        writeInfo(`upload resource files to ${host}`, figures.color.star);
         writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}` ], spawnSyncOpts);
         spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}` ], spawnSyncOpts);
         spawnSync("plink", plinkArgsFull, spawnSyncOpts);
         writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
         spawnSync("pscp", pscpArgs, spawnSyncOpts);
-        writeInfo(`${mark} successfully uploaded resource files`);
+        writeInfo("successfully uploaded resource files", figures.color.star);
     }
     catch (e) {
         writeInfo("error uploading resource files:", figures.color.error);

@@ -9,6 +9,7 @@ const { writeInfo, withColor, figures, colors } = require("../console");
 // const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 // const FilterWarningsPlugin = require("webpack-filter-warnings-plugin");
 
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
@@ -19,14 +20,16 @@ const { writeInfo, withColor, figures, colors } = require("../console");
  * @param {String} hook
  * @param {WebpackPluginInstance[]} plugins
  * @param {WebpackEnvironment} env
+ * @param {WebpackConfig} wpConfig Webpack config object
  */
-const addStepHook = (hook, plugins, env) =>
+const addStepHook = (hook, plugins, env, wpConfig) =>
 {
 	plugins.push({
-		apply: /** @param {WebpackCompiler} compiler*/(compiler) =>
+		apply: (compiler) =>
 		{
-			const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`Build step: ${hookName}`));
+			const buildName = withColor(/** @type {String} */(wpConfig.name), colors.grey),
+				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
+			compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`Build step: ${hookName} ${buildName}`));
 		}
 	});
 };
@@ -37,14 +40,16 @@ const addStepHook = (hook, plugins, env) =>
  * @param {String} hook
  * @param {WebpackPluginInstance[]} plugins
  * @param {WebpackEnvironment} env
+ * @param {WebpackConfig} wpConfig Webpack config object
  */
-const addStepHookAsync = (hook, plugins, env) =>
+const addStepHookAsync = (hook, plugins, env, wpConfig) =>
 {
 	plugins.push({
-		apply: /** @param {WebpackCompiler} compiler*/(compiler) =>
+		apply: (compiler) =>
 		{
-			const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () => writeInfo(`Build step: ${hookName}`));
+			const buildName = withColor(/** @type {String} */(wpConfig.name), colors.grey),
+				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
+			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () => writeInfo(`Build step: ${hookName} ${buildName}`));
 		}
 	});
 };
@@ -53,41 +58,42 @@ const addStepHookAsync = (hook, plugins, env) =>
 /**
  * @method hookSteps
  * @param {WebpackEnvironment} env
+ * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance[]}
  */
-const hookSteps = (env) =>
+const hookSteps = (env, wpConfig) =>
 {
 	/** @type {WebpackPluginInstance[]} */
 	const plugins = [];
-	addStepHook("environment", plugins, env);
-	addStepHook("afterEnvironment", plugins, env);
-	addStepHook("entryOption", plugins, env);
-	addStepHook("afterPlugins", plugins, env);
-	addStepHook("afterResolvers", plugins, env);
-	addStepHook("initialize", plugins, env);
-	addStepHook("beforeRun", plugins, env);
-	addStepHook("run", plugins, env);
-	addStepHook("watchRun", plugins, env);
-	addStepHook("normalModuleFactory", plugins, env);
-	addStepHook("contextModuleFactory", plugins, env);
-	addStepHook("beforeCompile", plugins, env);
-	addStepHook("compile", plugins, env);
-	addStepHook("thisCompilation", plugins, env);
-	addStepHook("compilation", plugins, env);
-	addStepHook("make", plugins, env);
-	addStepHook("afterCompile", plugins, env);
-	addStepHook("shouldEmit", plugins, env);
-	addStepHook("emit", plugins, env);
-	addStepHook("afterEmit", plugins, env);
-	addStepHookAsync("assetEmitted", plugins, env);
-	addStepHook("emit", plugins, env);
-	addStepHook("done", plugins, env);
-	addStepHook("afterDone", plugins, env);
-	addStepHook("additionalPass", plugins, env);
-	addStepHook("failed", plugins, env);
-	addStepHook("invalid", plugins, env);
-	addStepHook("watchClose", plugins, env);
-	addStepHook("shutdown", plugins, env);
+	addStepHook("environment", plugins, env, wpConfig);
+	addStepHook("afterEnvironment", plugins, env, wpConfig);
+	addStepHook("entryOption", plugins, env, wpConfig);
+	addStepHook("afterPlugins", plugins, env, wpConfig);
+	addStepHook("afterResolvers", plugins, env, wpConfig);
+	addStepHook("initialize", plugins, env, wpConfig);
+	addStepHook("beforeRun", plugins, env, wpConfig);
+	addStepHook("run", plugins, env, wpConfig);
+	addStepHook("watchRun", plugins, env, wpConfig);
+	addStepHook("normalModuleFactory", plugins, env, wpConfig);
+	addStepHook("contextModuleFactory", plugins, env, wpConfig);
+	addStepHook("beforeCompile", plugins, env, wpConfig);
+	addStepHook("compile", plugins, env, wpConfig);
+	addStepHook("thisCompilation", plugins, env, wpConfig);
+	addStepHook("compilation", plugins, env, wpConfig);
+	addStepHook("make", plugins, env, wpConfig);
+	addStepHook("afterCompile", plugins, env, wpConfig);
+	addStepHook("shouldEmit", plugins, env, wpConfig);
+	addStepHook("emit", plugins, env, wpConfig);
+	addStepHook("afterEmit", plugins, env, wpConfig);
+	addStepHookAsync("assetEmitted", plugins, env, wpConfig);
+	addStepHook("emit", plugins, env, wpConfig);
+	addStepHook("done", plugins, env, wpConfig);
+	addStepHook("afterDone", plugins, env, wpConfig);
+	addStepHook("additionalPass", plugins, env, wpConfig);
+	addStepHook("failed", plugins, env, wpConfig);
+	addStepHook("invalid", plugins, env, wpConfig);
+	addStepHook("watchClose", plugins, env, wpConfig);
+	addStepHook("shutdown", plugins, env, wpConfig);
 	return plugins;
 };
 

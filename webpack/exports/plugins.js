@@ -31,7 +31,7 @@ const plugins = (env, wpConfig) =>
 		build(env, wpConfig),
 		ignore(env, wpConfig),
 		...tscheck(env, wpConfig),
-		...hookSteps(env)
+		...hookSteps(env, wpConfig)
 	];
 
 	if (env.build !== "tests")
@@ -76,5 +76,6 @@ const plugins = (env, wpConfig) =>
 		}
 	});
 };
+
 
 module.exports = plugins;

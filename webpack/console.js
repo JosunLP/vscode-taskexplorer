@@ -45,6 +45,7 @@ const figures =
     color:
     {
         info: withColor("ℹ", colors.magenta),
+        star: withColor("★", colors.yellow),
         start: withColor("▶", colors.green),
         success: withColor("✔", colors.green),
         warning: withColor("⚠", colors.yellow),
