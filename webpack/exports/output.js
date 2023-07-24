@@ -71,6 +71,11 @@ const output = (env, wpConfig) =>
 			libraryTarget: "commonjs2"
 		};
 	}
+
+	Object.assign(wpConfig.output,
+	{
+		hashDigestLength: 20
+	});
 };
 
 

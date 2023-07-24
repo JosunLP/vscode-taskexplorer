@@ -57,8 +57,8 @@ declare interface WebpackBuildPaths
 
 declare interface WebpackEnvHashState
 {
-    current: Record<string, string | undefined>;  // Content hash from previous output chunk
-    next: Record<string, string | undefined>;      // Content hash for new output chunk
+    current: Record<string, string>;  // Content hash from previous output chunk
+    next: Record<string, string>;      // Content hash for new output chunk
 }
 
 declare interface WebpackHashState extends Readonly<Record<WebpackBuildEnvironment, WebpackEnvHashState>>

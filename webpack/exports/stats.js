@@ -22,11 +22,12 @@ const stats = (env, wpConfig) =>
 		errorsCount: true,
 		warningsCount: true,
 		timings: true
+		// warningsFilter: /Cannot find module \'common\' or its corresponding type declarations/
 	};
 
 	wpConfig.infrastructureLogging = {
 		colors: true,
-		level: env.verbosity || "info" // enables logging required for problem matchers
+		level: env.verbosity || "none"
 	};
 };
 

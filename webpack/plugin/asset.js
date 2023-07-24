@@ -35,13 +35,8 @@ const asset = (env, wpConfig) =>
         {   /** @param {WebpackCompiler} compiler Compiler */
             apply: (compiler) =>
             {
-                compiler.hooks.assetEmitted.tapAsync("AssetBeforeEmitPlugin", async (file, /** @type {WebpackAssetEmittedInfo} */info) =>
+                compiler.hooks.assetEmitted.tapPromise("AssetBeforeEmitPlugin", async (file, /** @type {WebpackAssetEmittedInfo} */info) =>
                 {
-console.log("asset assetEmitted filename1: " + file);
-console.log("asset assetEmitted filename2: " + join(info.outputPath, file));
-console.log("asset assetEmitted filename3: " + info.targetPath);
-                    await new Promise(res => setTimeout(res, 2000));
-console.log("waited asset assetEmitted filename4: " + file);
                     if (_env.environment === "test") {
                         // await istanbulTags(file, info.content, _env);
                     }
@@ -58,13 +53,13 @@ console.log("waited asset assetEmitted filename4: " + file);
 
 /**
  * @method istanbulFileTags
- * @param {String} file filename e.g. `taskexplorer.[hash].js`
+ * @param {String} filePath filename e.g. `taskexplorer.[hash].js`
  * @param {Buffer} content
  * @param {WebpackEnvironment} env
  */
-const istanbulTags = async (file, content, env) =>
+const istanbulTags = async (filePath, content, env) =>
 {
-    const outFile = join(env.paths.dist, file);
+    const outFile = join(env.paths.dist, filePath);
     if (existsSync(outFile))
     {
         try {
@@ -72,7 +67,7 @@ const istanbulTags = async (file, content, env) =>
                   content = readFileSync(outFile, "utf8"),
                   newContent = content.toString().replace(regex, (v) => "/* istanbul ignore next */" + v);
             // writeFileSync(outFile, newContent);
-            await writeFile(file, newContent);
+            await writeFile(filePath, newContent);
         } catch {}
         if (content.includes("/* istanbul ignore file */")) {
             writeInfo("The '/* istanbul ignore file */ ' tag was found and will break coverage", figures.error);
@@ -88,7 +83,12 @@ const istanbulTags = async (file, content, env) =>
  */
 const renameLicense = async (file, env) =>
 {
-    try { await rename(join(env.paths.dist, `${file}.LICENSE.txt`), join(env.paths.dist, "vendor.LICENSE")); } catch {}
+    try {
+        await rename(
+            join(env.paths.dist, `${file}.LICENSE.txt`),
+            join(env.paths.dist, `${file.replace(".js", "")}.LICENSE`))
+        ;
+    } catch {}
 };
 
 

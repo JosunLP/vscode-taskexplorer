@@ -86,7 +86,7 @@ const copy = (apps, env, wpConfig) =>
 		plugin = new CopyPlugin({ patterns });
 	}
 	return plugin;
-}
+};
 
 
 module.exports = copy;

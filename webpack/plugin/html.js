@@ -269,4 +269,4 @@ class InlineChunkHtmlPlugin
 // };
 
 
-module.exports = { cssextract, html, htmlcsp, htmlinlinechunks, imageminimizer, webviewapps };
+module.exports = { cssextract, htmlcsp, htmlinlinechunks, imageminimizer, webviewapps };

@@ -18,6 +18,10 @@ const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + col
 
 
 const consoleWrite = (msg, icon, pad = "") =>
+    console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + msg : ""}`);
+
+
+const consoleWriteInfo = (msg, icon, pad = "") =>
     console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
 
 
@@ -27,19 +31,24 @@ const figures =
     error: "✘",
     info: "ℹ",
     star: "★",
+    start: "▶",
     success: "✔",
     warning: "⚠",
     withColor,
+    blue:
+    {
+        info: withColor("ℹ", colors.blue),
+        success: withColor("✔", colors.blue),
+        warning: withColor("⚠", colors.blue),
+        error: withColor("✘", colors.blue)
+    },
     color:
     {
-        success: withColor("✔", colors.green),
-        successBlue: withColor("✔", colors.blue),
         info: withColor("ℹ", colors.magenta),
-        infoTask: withColor("ℹ", colors.blue),
+        start: withColor("▶", colors.green),
+        success: withColor("✔", colors.green),
         warning: withColor("⚠", colors.yellow),
-        warningTests: withColor("⚠", colors.blue),
-        error: withColor("✘", colors.red),
-        errorTests: withColor("✘", colors.blue)
+        error: withColor("✘", colors.red)
     }
 };
 
@@ -47,7 +56,8 @@ const wpConsole = {
     colors,
     figures,
     withColor,
-    writeInfo: consoleWrite
+    write: consoleWrite,
+    writeInfo: consoleWriteInfo
 };
 
 module.exports = wpConsole;

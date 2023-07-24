@@ -33,6 +33,24 @@ const addStepHook = (hook, plugins, env) =>
 
 
 /**
+ * @method addStepHook
+ * @param {String} hook
+ * @param {WebpackPluginInstance[]} plugins
+ * @param {WebpackEnvironment} env
+ */
+const addStepHookAsync = (hook, plugins, env) =>
+{
+	plugins.push({
+		apply: /** @param {WebpackCompiler} compiler*/(compiler) =>
+		{
+			const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
+			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () => writeInfo(`Hooked build step: ${hookName}`));
+		}
+	});
+};
+
+
+/**
  * @method hookSteps
  * @param {WebpackEnvironment} env
  * @returns {WebpackPluginInstance[]}
@@ -61,7 +79,7 @@ const hookSteps = (env) =>
 	addStepHook("shouldEmit", plugins, _env);
 	addStepHook("emit", plugins, _env);
 	addStepHook("afterEmit", plugins, _env);
-	addStepHook("assetEmitted", plugins, _env);
+	addStepHookAsync("assetEmitted", plugins, _env);
 	addStepHook("emit", plugins, _env);
 	addStepHook("done", plugins, _env);
 	addStepHook("additionalPass", plugins, _env);

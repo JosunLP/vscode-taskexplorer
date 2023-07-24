@@ -7,10 +7,8 @@
 
 const webviewApps = require("../webviewApps");
 const {
-	afterdone, analyze, asset, banner, build, clean, copy, hash, hookSteps, ignore,
-	optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, html,
-	htmlcsp, imageminimizer, htmlinlinechunks, webviewapps
-
+	analyze, asset, banner, build, clean, copy, hash, hookSteps, ignore, optimization, prehash, /* progress, */
+	sourcemaps, tscheck, upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps
 } = require("../plugin");
 
 
@@ -27,8 +25,8 @@ const {
 const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [
-		progress(env, wpConfig),
-		prehash(env),
+		// progress(env, wpConfig),
+		prehash(env, wpConfig),
 		clean(env, wpConfig),
 		build(env, wpConfig),
 		ignore(env, wpConfig),
@@ -62,15 +60,14 @@ const plugins = (env, wpConfig) =>
 				banner(env, wpConfig)
 			);
 		}
-	}
 
-	wpConfig.plugins.push(
-		...optimization(env, wpConfig),
-		hash(env),
-		asset(env, wpConfig),
-		afterdone(env, wpConfig),
-		upload(env, wpConfig)
-	);
+		wpConfig.plugins.push(
+			...optimization(env, wpConfig),
+			hash(env, wpConfig),
+			asset(env, wpConfig),
+			upload(env, wpConfig)
+		);
+	}
 
 	wpConfig.plugins.slice().reverse().forEach((p, index, object) =>
 	{

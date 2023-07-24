@@ -1,6 +1,5 @@
 // @ts-check
 
-const afterdone = require("./afterdone");
 const analyze = require("./analyze");
 const asset = require("./asset");
 const banner = require("./banner");
@@ -15,10 +14,9 @@ const sourcemaps = require("./sourcemaps");
 const tscheck = require("./tscheck");
 const upload = require("./upload");
 const { hash, prehash } = require("../plugin/hash");
-const { cssextract, htmlcsp, html, imageminimizer, htmlinlinechunks, webviewapps } = require("./html");
+const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = require("./html");
 
 module.exports = {
-    afterdone,
     analyze,
     asset,
     banner,
@@ -27,7 +25,6 @@ module.exports = {
     copy,
     cssextract,
     hash,
-    html,
     htmlcsp,
     htmlinlinechunks,
 	ignore,
