@@ -26,7 +26,7 @@ const addStepHook = (hook, plugins, env) =>
 		apply: /** @param {WebpackCompiler} compiler*/(compiler) =>
 		{
 			const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`Hooked build step: ${hookName}`));
+			compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`Build step: ${hookName}`));
 		}
 	});
 };
@@ -44,7 +44,7 @@ const addStepHookAsync = (hook, plugins, env) =>
 		apply: /** @param {WebpackCompiler} compiler*/(compiler) =>
 		{
 			const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () => writeInfo(`Hooked build step: ${hookName}`));
+			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () => writeInfo(`Build step: ${hookName}`));
 		}
 	});
 };
@@ -58,35 +58,36 @@ const addStepHookAsync = (hook, plugins, env) =>
 const hookSteps = (env) =>
 {
 	/** @type {WebpackPluginInstance[]} */
-	const plugins = [], _env = { ...env };
-	addStepHook("environment", plugins, _env);
-	addStepHook("afterEnvironment", plugins, _env);
-	addStepHook("entryOption", plugins, _env);
-	addStepHook("afterPlugins", plugins, _env);
-	addStepHook("afterResolvers", plugins, _env);
-	addStepHook("initialize", plugins, _env);
-	addStepHook("beforeRun", plugins, _env);
-	addStepHook("run", plugins, _env);
-	addStepHook("watchRun", plugins, _env);
-	addStepHook("normalModuleFactory", plugins, _env);
-	addStepHook("contextModuleFactory", plugins, _env);
-	addStepHook("beforeCompile", plugins, _env);
-	addStepHook("compile", plugins, _env);
-	addStepHook("thisCompilation", plugins, _env);
-	addStepHook("compilation", plugins, _env);
-	addStepHook("make", plugins, _env);
-	addStepHook("afterCompile", plugins, _env);
-	addStepHook("shouldEmit", plugins, _env);
-	addStepHook("emit", plugins, _env);
-	addStepHook("afterEmit", plugins, _env);
-	addStepHookAsync("assetEmitted", plugins, _env);
-	addStepHook("emit", plugins, _env);
-	addStepHook("done", plugins, _env);
-	addStepHook("additionalPass", plugins, _env);
-	addStepHook("failed", plugins, _env);
-	addStepHook("invalid", plugins, _env);
-	addStepHook("watchClose", plugins, _env);
-	addStepHook("shutdown", plugins, _env);
+	const plugins = [];
+	addStepHook("environment", plugins, env);
+	addStepHook("afterEnvironment", plugins, env);
+	addStepHook("entryOption", plugins, env);
+	addStepHook("afterPlugins", plugins, env);
+	addStepHook("afterResolvers", plugins, env);
+	addStepHook("initialize", plugins, env);
+	addStepHook("beforeRun", plugins, env);
+	addStepHook("run", plugins, env);
+	addStepHook("watchRun", plugins, env);
+	addStepHook("normalModuleFactory", plugins, env);
+	addStepHook("contextModuleFactory", plugins, env);
+	addStepHook("beforeCompile", plugins, env);
+	addStepHook("compile", plugins, env);
+	addStepHook("thisCompilation", plugins, env);
+	addStepHook("compilation", plugins, env);
+	addStepHook("make", plugins, env);
+	addStepHook("afterCompile", plugins, env);
+	addStepHook("shouldEmit", plugins, env);
+	addStepHook("emit", plugins, env);
+	addStepHook("afterEmit", plugins, env);
+	addStepHookAsync("assetEmitted", plugins, env);
+	addStepHook("emit", plugins, env);
+	addStepHook("done", plugins, env);
+	addStepHook("afterDone", plugins, env);
+	addStepHook("additionalPass", plugins, env);
+	addStepHook("failed", plugins, env);
+	addStepHook("invalid", plugins, env);
+	addStepHook("watchClose", plugins, env);
+	addStepHook("shutdown", plugins, env);
 	return plugins;
 };
 

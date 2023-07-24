@@ -55,24 +55,15 @@ declare interface WebpackBuildPaths
     temp: string;                         // operating system temp directory
 }
 
-declare interface WebpackEnvHashState
+declare interface WebpackHashState
 {
     current: Record<string, string>;  // Content hash from previous output chunk
     next: Record<string, string>;      // Content hash for new output chunk
 }
 
-declare interface WebpackHashState extends Readonly<Record<WebpackBuildEnvironment, WebpackEnvHashState>>
-{
-    browser: WebpackEnvHashState;
-    dev: WebpackEnvHashState;
-    prod: WebpackEnvHashState;
-    test: WebpackEnvHashState;
-    testprod: WebpackEnvHashState;
-}
-
 declare interface WebpackBuildState
 {
-    hash: Partial<WebpackHashState>;
+    hash: WebpackHashState;
 }
 
 declare interface WebpackEnvironmentInternal
@@ -98,7 +89,6 @@ export {
     WebpackBuildState,
     WebpackCompiler,
     WebpackConfig,
-    WebpackEnvHashState,
     WebpackHashState,
     WebpackPluginInstance,
     WebpackOptimization,

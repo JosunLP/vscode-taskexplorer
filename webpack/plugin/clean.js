@@ -21,6 +21,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
  */
 const clean = (env, wpConfig) =>
 {
+    /** @type {CleanWebpackPlugin | undefined} */
 	let plugin;
 	if (env.clean === true)
 	{

@@ -12,7 +12,6 @@ const { writeInfo, figures } = require("../console");
 const { writeFile, rename, unlink } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackAssetEmittedInfo} WebpackAssetEmittedInfo */
@@ -30,18 +29,17 @@ const asset = (env, wpConfig) =>
     let plugin;
     if (env.build === "extension")
     {
-        const _env = { ...env };
         plugin =
-        {   /** @param {WebpackCompiler} compiler Compiler */
+        {
             apply: (compiler) =>
             {
                 compiler.hooks.assetEmitted.tapPromise("AssetBeforeEmitPlugin", async (file, /** @type {WebpackAssetEmittedInfo} */info) =>
                 {
-                    if (_env.environment === "test") {
-                        // await istanbulTags(file, info.content, _env);
+                    if (env.environment === "test") {
+                        await istanbulTags(file, info.content, env);
                     }
                     else if (env.environment === "prod") {
-                        // await renameLicense(file, _env);
+                        await licenseFiles(file);
                     }
                 });
             }
@@ -53,7 +51,7 @@ const asset = (env, wpConfig) =>
 
 /**
  * @method istanbulFileTags
- * @param {String} filePath filename e.g. `taskexplorer.[hash].js`
+ * @param {String} filePath  file full path
  * @param {Buffer} content
  * @param {WebpackEnvironment} env
  */
@@ -64,9 +62,7 @@ const istanbulTags = async (filePath, content, env) =>
     {
         try {
             const regex = /\n[ \t]*module\.exports \= require\(/mg,
-                  content = readFileSync(outFile, "utf8"),
                   newContent = content.toString().replace(regex, (v) => "/* istanbul ignore next */" + v);
-            // writeFileSync(outFile, newContent);
             await writeFile(filePath, newContent);
         } catch {}
         if (content.includes("/* istanbul ignore file */")) {
@@ -78,16 +74,17 @@ const istanbulTags = async (filePath, content, env) =>
 
 /**
  * @method licenseFiles
- * @param {String} file filename e.g. `taskexplorer.[hash].js`
- * @param {WebpackEnvironment} env
+ * @param {String} filePath file full path
  */
-const renameLicense = async (file, env) =>
+const licenseFiles = async (filePath) =>
 {
     try {
-        await rename(
-            join(env.paths.dist, `${file}.LICENSE.txt`),
-            join(env.paths.dist, `${file.replace(".js", "")}.LICENSE`))
-        ;
+        if (!filePath.includes(".debug")) {
+            await rename(filePath, `${filePath.replace("js.LICENSE.txt", "LICENSE")}`);
+        }
+        else {
+            await unlink(filePath);
+        }
     } catch {}
 };
 

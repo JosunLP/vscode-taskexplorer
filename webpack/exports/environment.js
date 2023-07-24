@@ -24,7 +24,7 @@ const { readFileSync, existsSync, mkdirSync } = require("fs");
 const environment = (build, env, argv) =>
 {
 	env.build = build;
-	env.paths.build = resolve(__dirname, "..", "..");
+	env.paths.build = resolve(__dirname, "..", ".."); // build path must be set b4 proceeding...
 	env.isTests = env.environment.startsWith("test");
 	readPkgJson(env);
 	setPaths(env);
@@ -40,8 +40,7 @@ const environment = (build, env, argv) =>
  */
 const initState = (env) =>
 {
-	env.state = { hash: {} };
-	env.state.hash[env.environment] = { current: {}, next: {}};
+	env.state = { hash: { current: {}, next: {} } };
 };
 
 
@@ -65,7 +64,7 @@ const setPaths = (env) =>
 	env.paths.dist = join(env.paths.build, "dist");
 	env.paths.temp = resolve(process.env.TEMP || process.env.TMP  || ".", env.app.name, env.environment);
 	env.paths.cache = join(env.paths.build, "node_modules", ".cache", "webpack");
-	env.paths.files.hash = join(env.paths.cache, "hash.json");
+	env.paths.files.hash = join(env.paths.cache, `hash.${env.environment}${!env.stripLogging ? ".debug" : ""}.json`);
 	if (!existsSync(env.paths.cache)) {
 		mkdirSync(env.paths.cache, { recursive: true });
 	}

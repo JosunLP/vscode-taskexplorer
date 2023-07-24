@@ -20,9 +20,8 @@ const { renameSync, copyFileSync } = require("fs");
 const { writeInfo, figures } = require("../console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../types").WebpackHashState} WebpackHashState */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types").WebpackEnvHashState} WebpackEnvHashState */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
@@ -36,17 +35,16 @@ const upload = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build === "extension" && env.stripLogging)
+    if (env.build === "extension")
     {
-        const _env = { ...env };
         plugin =
         {
-            apply: /** @param {WebpackCompiler} compiler Compiler */(compiler) =>
+            apply: (compiler) =>
             {
                 compiler.hooks.afterDone.tap("AfterDoneUploadPlugin", () =>
                 {
-                    sourceMapFiles(_env);
-                    _upload(_env);
+                    sourceMapFiles(env);
+                    _upload(env);
                 });
             }
         };
@@ -80,13 +78,12 @@ const sourceMapFiles = (env) =>
 const _upload = (env) =>
 {
     const host = "app1.spmeesseman.com";
-    const hashInfo = /** @type {WebpackEnvHashState} */(env.state.hash[env.environment]);
-    if (hashInfo.current === hashInfo.current)
+    if (env.state.hash.current === env.state.hash.current)
     {
         writeInfo(`content hash unchanged, resource upload to ${host} will be skipped`);
         return;
     }
-console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+writeInfo(`content hash changed, start resource upload to ${host}`);
 return;
 
     const user = "smeesseman",

@@ -2,8 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+const { apply } = require("../utils");
 const { writeFileSync, readFileSync, existsSync } = require("fs");
-const { join } = require("path");
 const { writeInfo, withColor, figures, colors, write } = require("../console");
 
 /**
@@ -11,10 +11,9 @@ const { writeInfo, withColor, figures, colors, write } = require("../console");
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../types").WebpackHashState} WebpackHashState */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types").WebpackEnvHashState} WebpackEnvHashState */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackAssetEmittedInfo} WebpackAssetEmittedInfo */
 
@@ -31,13 +30,11 @@ const hash = (env, wpConfig) =>
     let plugin;
     if (env.build === "extension")
     {
-        const _env = { ...env },
-              _wpConfig = { ...wpConfig };
         plugin =
         {
-			apply: /** @param {WebpackCompiler} compiler */(compiler) =>
+			apply: (compiler) =>
             {
-                compiler.hooks.done.tap("HashCheckPlugin", (statsData) =>
+                compiler.hooks.done.tap("HashDonePlugin", (statsData) =>
                 {
                     if (statsData.hasErrors()) { return; }
                     const stats = statsData.toJson(),
@@ -48,12 +45,12 @@ const hash = (env, wpConfig) =>
                         Object.keys(assetChunks).forEach((k) =>
                         {
                             const asset = assets.find(a => a.name === assetChunks[k][0]);
-                            if (asset) {
-                                readAssetStates(asset.name, false, _env, _wpConfig);
-                                setAssetState(asset, _env);
+                            if (asset && asset.chunkNames)
+                            {
+                                setAssetState(asset, env, wpConfig);
                             }
                         });
-                        saveAssetState(_env);
+                        saveAssetState(env);
                     }
                 });
             }
@@ -65,15 +62,14 @@ const hash = (env, wpConfig) =>
 
 /**
  * @method readAssetStates
- * @param {String} assetFile
- * @param {WebpackEnvHashState} hashInfo
+ * @param {WebpackHashState} hashInfo
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  */
-const logAssetInfo = (assetFile, hashInfo, wpConfig) =>
+const logAssetInfo = (hashInfo, wpConfig) =>
 {
     const hashLength = /** @type {Number} */(wpConfig.output?.hashDigestLength);
-    write(" ");
-    write(withColor("read asset state info for " + assetFile, colors.white), figures.color.start);
+    // write(" ");
+   //  write(withColor("asset state info for " + wpConfig.name, colors.white), figures.color.start);
     writeInfo("   current:");
     Object.keys(hashInfo.current).forEach(
         (k) => writeInfo(`      ${k.padEnd(25 + hashLength)} : ` + withColor(hashInfo.current[k], colors.blue))
@@ -93,20 +89,15 @@ const logAssetInfo = (assetFile, hashInfo, wpConfig) =>
  */
 const prehash = (env, wpConfig) =>
 {
+    /** @type {WebpackPluginInstance | undefined} */
 	let plugin;
 	if (env.build === "extension")
 	{
-        const _env = { ...env },
-              _wpConfig = { ...wpConfig };
-		plugin =
+        plugin =
 		{
-			apply: /** @param {WebpackCompiler} compiler*/(compiler) =>
+			apply: (compiler) =>
 			{
-                compiler.hooks.assetEmitted.tap("PreHashCheckPlugin", (file, /** @type {WebpackAssetEmittedInfo} */info) =>
-                {
-console.log("prehash assetEmitted filename: " + file);
-                    readAssetStates(file, true, _env, _wpConfig);
-                });
+                compiler.hooks.initialize.tap("HashInitializePlugin", () => readAssetStates(env, wpConfig));
 			}
 		};
 	}
@@ -118,55 +109,45 @@ console.log("prehash assetEmitted filename: " + file);
  * @method saveAssetState
  * @param {WebpackEnvironment} env
  */
-const saveAssetState = (env) => writeFileSync(env.paths.files.hash, JSON.stringify(env.state, null, 4));
+const saveAssetState = (env) => writeFileSync(env.paths.files.hash, JSON.stringify(env.state.hash, null, 4));
 
 
 /**
  * @method setAssetState
  * @param {WebpackStatsAsset} asset
  * @param {WebpackEnvironment} env
+ * @param {WebpackConfig} wpConfig Webpack `exports` config object
  */
-const setAssetState = (asset, env) =>
+const setAssetState = (asset, env, wpConfig) =>
 {
     write(" ");
     write(withColor(`set asset state info for ${asset.name}`, colors.white), figures.color.start);
     if (asset.chunkNames && asset.info.contenthash)
     {
-        const hashInfo = /** @type {WebpackEnvHashState} */(env.state.hash[env.environment]),
-              chunkName = /** @type {String}*/(asset.chunkNames[0]);
-        hashInfo.next[asset.name] = asset.info.contenthash.toString();
-        writeInfo("   chunk         : " + chunkName);
-        writeInfo("   size          : " + asset.info.size);
-        writeInfo("   content hash  : " + hashInfo.next[asset.name]);
-    }
-    else {
-        writeInfo("   invalid asset info", figures.color.warning);
+        const chunkName = /** @type {String}*/(asset.chunkNames[0]);
+        env.state.hash.next[chunkName] = asset.info.contenthash.toString();
+        logAssetInfo(env.state.hash, wpConfig);
     }
 };
 
 
 /**
- * @method readAssetStates
- * @param {String} assetFile
- * @param {Boolean} rotate
- * @param {WebpackEnvironment} env
+ * @method readAssetStatesv
+ * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  */
-const readAssetStates = (assetFile, rotate, env, wpConfig) =>
+const readAssetStates = (env, wpConfig) =>
 {
+    write(withColor(`read asset state info from ${env.paths.files.hash}`, colors.white), figures.color.start);
+	env.state = { hash: { current: {}, next: {} } };
     if (existsSync(env.paths.files.hash))
     {
-        const hashInfo = /** @type {WebpackEnvHashState} */(env.state.hash[env.environment]);
         try {
-            Object.assign(env.state, JSON.parse(readFileSync(env.paths.files.hash, "utf8")));
-            if (rotate)
-            {
-                Object.keys(hashInfo.current).forEach(k => delete hashInfo.current[k]);
-                Object.assign(hashInfo.current, { ...hashInfo.next });
-                Object.keys(hashInfo.next).forEach(k => delete hashInfo.next[k]);
-                saveAssetState(env);
-            }
-            logAssetInfo(assetFile, hashInfo, wpConfig);
+            apply(env.state.hash, JSON.parse(readFileSync(env.paths.files.hash, "utf8")));
+			env.state.hash.current = {};
+			apply(env.state.hash.current, { ...env.state.hash.next });
+			env.state.hash.next = {};
+            logAssetInfo(env.state.hash, wpConfig);
         }
         catch {}
     }

@@ -22,21 +22,20 @@ const { spawnSync } = require("child_process");
  */
 const build = (env, wpConfig) =>
 {
-	const isTestsBuild = (env.build === "tests" || env.environment.startsWith("test"));
+    /** @type {WebpackPluginInstance | undefined} */
 	let plugin;
 	if (env.build !== "webview")
 	{
-		const _env = { ...env };
 		plugin =
-		{   /** @param {import("webpack").Compiler} compiler Compiler */
+		{
 			apply: (compiler) =>
 			{
 				compiler.hooks.beforeCompile.tap("BeforeCompilePlugin", () =>
 				{
 					try {
-						tsc.buildTypes(_env);
-						if (isTestsBuild) {
-							tsc.buildTests(_env);
+						tsc.buildTypes(env);
+						if (env.isTests) {
+							tsc.buildTests(env);
 						}
 					} catch {}
 				});
