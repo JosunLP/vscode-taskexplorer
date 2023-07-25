@@ -84,6 +84,7 @@ module.exports = (env, argv) =>
 	return [ ...extBuild, getWebpackConfig("webview", { ...env }, gEnv, argv) ];
 };
 
+
 /**
  * @method getWebpackConfig
  * @param {WebpackBuild} buildTarget
@@ -100,22 +101,22 @@ const getWebpackConfig = (buildTarget, env, gEnv, argv) =>
 	const lEnv = merge({}, env);
 	/** @type {WebpackConfig}*/
 	const wpConfig = {};
-	environment(buildTarget, lEnv, argv);  // Base path / Build path
-	mode(lEnv, argv, wpConfig);            // Mode i.e. "production", "development", "none"
-	name(buildTarget, lEnv, wpConfig);     // Build name / label
-	target(lEnv, wpConfig);                // Target i.e. "node", "webworker", "tests"
-	context(lEnv, wpConfig);               // Context for build
-	entry(lEnv, wpConfig);                 // Entry points for built output
-	externals(lEnv, wpConfig);             // External modules
-	ignorewarnings(lEnv, wpConfig);        // Warnings from the compiler to ignore
-	optimization(lEnv, wpConfig);          // Build optimization
-	minification(lEnv, wpConfig);          // Minification / Terser plugin options
-	output(lEnv, wpConfig);                // Output specifications
-	devtool(lEnv, wpConfig);               // Dev tool / sourcemap control
-	resolve(lEnv, wpConfig);               // Resolve config
-	rules(lEnv, wpConfig);                 // Loaders & build rules
-	stats(lEnv, wpConfig);                 // Stats i.e. console output & verbosity
-	watch(lEnv, wpConfig, argv);		   // Watch-mode options
-	plugins(lEnv, gEnv, wpConfig);          // Plugins - call last as `env` and `wpConfig` are cloned for hooks
+	environment(buildTarget, lEnv, gEnv, argv); // Base path / Build path
+	mode(lEnv, argv, wpConfig);                 // Mode i.e. "production", "development", "none"
+	name(buildTarget, lEnv, wpConfig);          // Build name / label
+	target(lEnv, wpConfig);                     // Target i.e. "node", "webworker", "tests"
+	context(lEnv, wpConfig);                    // Context for build
+	entry(lEnv, wpConfig);                      // Entry points for built output
+	externals(lEnv, wpConfig);                  // External modules
+	ignorewarnings(lEnv, wpConfig);             // Warnings from the compiler to ignore
+	optimization(lEnv, wpConfig);               // Build optimization
+	minification(lEnv, wpConfig);               // Minification / Terser plugin options
+	output(lEnv, wpConfig);                     // Output specifications
+	devtool(lEnv, wpConfig);                    // Dev tool / sourcemap control
+	resolve(lEnv, wpConfig);                    // Resolve config
+	rules(lEnv, wpConfig);                      // Loaders & build rules
+	stats(lEnv, wpConfig);                      // Stats i.e. console output & verbosity
+	watch(lEnv, wpConfig, argv);		        // Watch-mode options
+	plugins(lEnv, gEnv, wpConfig);              // Plugins - call last as `env` and `wpConfig` are cloned for hooks
 	return wpConfig;
 };

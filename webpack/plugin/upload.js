@@ -14,9 +14,10 @@
  *
  */
 
-const { join, extname } = require("path");
+const { join } = require("path");
 const { spawnSync } = require("child_process");
 const { writeInfo, figures } = require("../console");
+const { initGlobalEnvObject, globalEnv } = require("../utils");
 const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -30,11 +31,10 @@ const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync } = require("fs"
 /**
  * @method upload
  * @param {WebpackEnvironment} env
- * @param {WebpackGlobalEnvironment} gEnv Webpack global environment
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
-const upload = (env, gEnv, wpConfig) =>
+const upload = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
@@ -51,12 +51,10 @@ const upload = (env, gEnv, wpConfig) =>
                     }
                     const stats = statsData.toJson(),
                           assets = stats.assets?.filter(a => a.type === "asset");
-                    if (!gEnv.uploadCount) {
-                        gEnv.uploadCount = 0;
-                    }
-                    ++gEnv.uploadCount;
+                    initGlobalEnvObject("upload", 0, "callCount", "readyCount");
+                    ++globalEnv.upload.callCount;
                     if (assets) {
-                        _upload(assets, env, gEnv);
+                        _upload(assets, env);
                     }
                 });
             }
@@ -70,13 +68,12 @@ const upload = (env, gEnv, wpConfig) =>
  * @method _upload
  * @param {WebpackStatsAsset[]} assets
  * @param {WebpackEnvironment} env
- * @param {WebpackGlobalEnvironment} gEnv Webpack global environment
  */
-const _upload = (assets, env, gEnv) =>
+const _upload = (assets, env) =>
 {
     const lBasePath = join(env.paths.temp, env.environment);
 
-    if (gEnv.uploadCount === 1)
+    if (globalEnv.upload.callCount === 1)
     {
         if (!existsSync(lBasePath)) {
             mkdirSync(lBasePath);
@@ -84,7 +81,7 @@ const _upload = (assets, env, gEnv) =>
         copyFileSync(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(lBasePath, "mappings.wasm"));
     }
 
-    assets.filter(a => !!a.chunkNames).forEach((a) =>
+    assets.filter(a => !!a.chunkNames && a.chunkNames.length > 0).forEach((a) =>
     {
         const chunkName = /** @type {String}*/(/** @type {String[]}*/(a.chunkNames)[0]);
         if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName] && a.info.related)
@@ -99,13 +96,14 @@ const _upload = (assets, env, gEnv) =>
             else {
                 copyFileSync(join(distPath, fileNameSourceMap), join(lBasePath, fileNameSourceMap));
             }
+            ++globalEnv.upload.readyCount;
         }
         else {
             writeInfo(`content in resource ${chunkName} unchanged, skip upload`, figures.color.star);
         }
     });
 
-    if (gEnv.uploadCount === 2)
+    if (globalEnv.upload.callCount === 2 && globalEnv.upload.readyCount > 0)
     {
         const host = "app1.spmeesseman.com",
               user = "smeesseman",

@@ -17,14 +17,16 @@ const webpack = require("webpack");
  */
 const ignore = (env, wpConfig) =>
 {
+    /** @type {webpack.IgnorePlugin | undefined} */
     let plugin;
-    if (wpConfig.mode === "production")
-    {
-        plugin = new webpack.IgnorePlugin({
-            resourceRegExp: /^\.\/locale$/,
-            contextRegExp: /moment$/,
-          });
-    }
+    // if (wpConfig.mode === "production")
+    // {
+    //     plugin = new webpack.IgnorePlugin(
+    //     {
+    //         resourceRegExp: /^\.\/locale$/,
+    //         contextRegExp: /moment$/,
+    //     });
+    // }
     return plugin;
 };
 

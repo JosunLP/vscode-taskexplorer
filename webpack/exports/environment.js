@@ -8,25 +8,33 @@
 const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
+const { apply } = require("../utils");
 
 /** @typedef {import("..//types").WebpackArgs} WebpackArgs */
+/** @typedef {import("../types").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types").WebpackBuild} WebpackBuild */
+/** @typedef {import("../types").WebpackGlobalEnvironment} WebpackGlobalEnvironment */
+
+
+/** @type {WebpackGlobalEnvironment} */
+const globalEnv = { buildCount: 0 };
 
 
 /**
  * @method environment
  * @param {WebpackBuild} build
  * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackGlobalEnvironment} gEnv Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  */
-const environment = (build, env, argv) =>
+const environment = (build, env, gEnv, argv) =>
 {
+	apply(globalEnv, gEnv);
 	env.build = build;
 	env.paths.build = resolve(__dirname, "..", ".."); // build path must be set b4 proceeding...
 	env.isTests = env.environment.startsWith("test");
-	readPkgJson(env);
+	setApp(env);
 	setPaths(env);
 	initState(env);
 	setVersion(env);
@@ -48,10 +56,19 @@ const initState = (env) =>
  * @method readPkgJson
  * @param {WebpackEnvironment} env Webpack build environment
  */
-const readPkgJson = (env) =>
+const setApp = (env) =>
 {
 	const pkgJson = JSON.parse(readFileSync(join(env.paths.build, "package.json"), "utf8"));
-	Object.assign(env, { app: { name: pkgJson.name, version: pkgJson.version, pkgJson }});
+	apply(env,
+	{
+		/** @type {import("..//types").WebpackApp} */
+		app: {
+			mainChunk: "taskexplorer",
+			name: pkgJson.name,
+			version: pkgJson.version,
+			pkgJson
+		}
+	});
 };
 
 
@@ -117,4 +134,4 @@ const writeEnvironment = (env, argv) =>
 };
 
 
-module.exports = environment;
+module.exports = { environment, globalEnv };

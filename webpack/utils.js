@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const gradient = require("gradient-string");
+const { globalEnv } = require("./exports");
 
 
 /**
@@ -23,6 +24,15 @@ const apply = (object, config, defaults) =>
     }
     return object;
 };
+
+
+/**
+ * @param v Variable to check to see if it's an array
+ * @param [shallow] If `true`, and  `arr` is an array, return a shallow copy
+ * @param [allowEmpStr] If `false`, return empty array if isString(v) and isEmpty(v)
+ * @returns {any[]}
+ */
+const asArray = (v, shallow, allowEmpStr) => (isArray<T>(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
 
 
 /**
@@ -58,6 +68,15 @@ const clone = (item) =>
 };
 
 
+const initGlobalEnvObject = (baseObj, initialValue, ...props) =>
+{
+    if (!globalEnv[baseObj]) {
+        globalEnv[baseObj] = {};
+    }
+    props.filter(p => !globalEnv[baseObj][p]).forEach((p) => { globalEnv[baseObj][p] = initialValue; });
+};
+
+
 const isObject = (v, allowArray) => !!v && (v instanceof Object || typeof v === "object") && (allowArray || !isArray(v));
 
 
@@ -65,6 +84,12 @@ const isArray = (v, allowEmp) => !!v && Array.isArray(v) && (allowEmp !== false 
 
 
 const isDate = (v) => !!v && Object.prototype.toString.call(v) === "[object Date]";
+
+/**
+ * @param v Variable to check to see if it's an array
+ * @param [allowEmpStr] If `true`, return non-empty if isString(v) and v === ""
+ */
+const isEmpty = (v, allowEmpStr) => v === null || v === undefined || (!allowEmpStr ? v === "" : false) || (isArray(v) && v.length === 0) || (isObject(v) && isObjectEmpty(v));
 
 
 const isObjectEmpty = (v) => { if (v) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };
@@ -176,6 +201,6 @@ const spmBanner = (version) =>
 
 
 module.exports = {
-    apply, clone, isArray, isDate, isObject, isObjectEmpty, merge, mergeIf,
-    pick, pickBy, pickNot, printSpmBanner, spmBanner
+    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, globalEnv,
+    initGlobalEnvObject, merge, mergeIf, pick, pickBy, pickNot, printSpmBanner, spmBanner
 };

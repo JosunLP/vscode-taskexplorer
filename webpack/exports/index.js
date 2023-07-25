@@ -3,7 +3,7 @@
 const context = require("./context");
 const devtool = require("./devtool");
 const entry = require("./entry");
-const environment = require("./environment");
+const { environment, globalEnv } = require("./environment");
 const externals = require("./externals");
 const ignorewarnings = require("./ignorewarnings");
 const minification = require("./minification");
@@ -25,6 +25,7 @@ module.exports = {
     environment,
     externals,
     getMode,
+    globalEnv,
     ignorewarnings,
     minification,
     mode,

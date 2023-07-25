@@ -68,7 +68,7 @@ const hash = (env, wpConfig) =>
 const logAssetInfo = (hashInfo, wpConfig) =>
 {
     const // hashLength = /** @type {Number} */(wpConfig.output?.hashDigestLength),
-          labelLength = 25; //  + hashLength;
+          labelLength = 18; //  + hashLength;
     // write(" ");
    //  write(withColor("asset state info for " + wpConfig.name, colors.white), figures.color.start);
     writeInfo("   current:");

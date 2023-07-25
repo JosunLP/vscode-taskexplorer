@@ -39,10 +39,11 @@ declare interface WebpackGlobalEnvironment extends Record<string, any>
     buildCount: number;
 }
 
-
 declare interface WebpackApp
 {
+    mainChunk: string | string[];         // main module name(s)
     name: string;                         // app name (read from package.json)
+    pkgJson: Record<string, any>;
     version: string;                      // app version (read from package.json)
 }
 

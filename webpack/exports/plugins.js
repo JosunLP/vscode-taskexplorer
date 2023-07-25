@@ -7,69 +7,74 @@
 
 const webviewApps = require("../webviewApps");
 const {
-	analyze, asset, banner, build, clean, copy, hash, hookSteps, ignore, optimization, prehash, /* progress, */
-	sourcemaps, tscheck, upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps
+	analyze, banner, build, clean, compile, copy, finalize, hash, hookSteps,
+	ignore, optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract,
+	htmlcsp, imageminimizer, htmlinlinechunks, webviewapps
 } = require("../plugin");
 
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {import("../types").WebpackGlobalEnvironment} WebpackGlobalEnvironment */
 
 
 /**
  * @method
  * @param {WebpackEnvironment} env Webpack build specific environment
- * @param {WebpackGlobalEnvironment} gEnv Webpack global environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const plugins = (env, gEnv, wpConfig) =>
+const plugins = (env, wpConfig) =>
 {
-	wpConfig.plugins = [
-		// progress(env, wpConfig),
-		prehash(env, wpConfig),
-		clean(env, wpConfig),
-		build(env, wpConfig),
-		ignore(env, wpConfig),
-		...tscheck(env, wpConfig),
-		...hookSteps(env, wpConfig)
-	];
+	wpConfig.plugins = [];
 
-	if (env.build !== "tests")
+	if (env.verbosity &&  env.verbosity !== "none")
 	{
-		if (env.build === "webview")
-		{
-			const apps = Object.keys(webviewApps);
-			wpConfig.plugins.push(
-				cssextract(env, wpConfig),
-				...webviewapps(apps, env, wpConfig),
-				// @ts-ignore
-				htmlcsp(env, wpConfig),
-				htmlinlinechunks(env, wpConfig),
-				copy(apps, env, wpConfig),
-				imageminimizer(env, wpConfig)
-			);
-		}
-		else
-		{
-			wpConfig.plugins.push(
-				sourcemaps(env, wpConfig),
-				copy([], env, wpConfig),
-				analyze.bundle(env, wpConfig),
-				analyze.visualizer(env, wpConfig),
-				analyze.circular(env, wpConfig),
-				banner(env, wpConfig)
-			);
-		}
-
 		wpConfig.plugins.push(
-			...optimization(env, wpConfig),
-			hash(env, wpConfig),
-			asset(env, wpConfig),
-			upload(env, gEnv, wpConfig)
+			progress(env, wpConfig)
 		);
 	}
+
+	wpConfig.plugins.push(
+		prehash(env, wpConfig),                  // compiler.hooks.initialize
+		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done
+		build(env, wpConfig),                    // compiler.hooks.beforeCompile
+		compile(env, wpConfig),                  // compiler.hooks.emit
+		ignore(env, wpConfig),                   // compiler.hooks.normalModuleFactory
+		...tscheck(env, wpConfig),               // compiler.hooks.afterEnvironment, hooks.afterCompile
+		...hookSteps(env, wpConfig)              // compiler.hooks.*
+	);
+
+	if (env.build === "webview")
+	{
+		const apps = Object.keys(webviewApps);
+		wpConfig.plugins.push(
+			cssextract(env, wpConfig),           //
+			...webviewapps(apps, env, wpConfig), //
+			// @ts-ignore
+			htmlcsp(env, wpConfig),              //
+			htmlinlinechunks(env, wpConfig),     //
+			copy(apps, env, wpConfig),           // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
+			imageminimizer(env, wpConfig)        //
+		);
+	}
+	else if (env.build !== "tests")
+	{
+		wpConfig.plugins.push(
+			sourcemaps(env, wpConfig),           // compiler.hooks.compilation -> compilation.hooks.processAssets
+			banner(env, wpConfig),               // compiler.hooks.compilation -> compilation.hooks.processAssets
+			copy([], env, wpConfig),             // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
+			analyze.bundle(env, wpConfig),       // compiler.hooks.done
+			analyze.visualizer(env, wpConfig),   // compiler.hooks.emit
+			analyze.circular(env, wpConfig)      // compiler.hooks.compilation -> compilation.hooks.optimizeModules
+		);
+	}
+
+	wpConfig.plugins.push(                       // ^ compiler.hooks.compilation -> compilation.hooks.optimizeChunks, ...
+		...optimization(env, wpConfig),          // ^ compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
+		hash(env, wpConfig),                     // compiler.hooks.done      //
+		upload(env, wpConfig),                   // compiler.hooks.afterDone
+		finalize(env, wpConfig)                  // compiler.hooks.shutdown
+	);
 
 	wpConfig.plugins.slice().reverse().forEach((p, index, object) =>
 	{
