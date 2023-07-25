@@ -56,8 +56,8 @@ const copy = (apps, env, wpConfig) =>
 			patterns.push(
 			{
 				from: posix.join(psxDistPath, `${chunk}.*.js`),
-				to: psxDistPath,
-				context: psxBuildPath,
+				to: posix.join(psxDistPath, `${chunk}.js`),
+				context: psxDistPath,
 				// transform: (content, absoluteFrom) => content
 				// transform: {
 				//     transformer: (content, absoluteFrom) => content
