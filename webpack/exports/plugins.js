@@ -7,9 +7,9 @@
 
 const webviewApps = require("../webviewApps");
 const {
-	analyze, banner, build, clean, compile, copy, finalize, hash, hookSteps,
-	ignore, optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract,
-	htmlcsp, imageminimizer, htmlinlinechunks, webviewapps
+	analyze, banner, build, clean, compile, copy, finalize, hash, hookSteps, ignore,
+	optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, htmlcsp,
+	imageminimizer, htmlinlinechunks, webviewapps
 } = require("../plugin");
 
 
@@ -71,7 +71,7 @@ const plugins = (env, wpConfig) =>
 
 	wpConfig.plugins.push(                       // ^ compiler.hooks.compilation -> compilation.hooks.optimizeChunks, ...
 		...optimization(env, wpConfig),          // ^ compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
-		hash(env, wpConfig),                     // compiler.hooks.done      //
+		hash(env, wpConfig),                     // compiler.hooks.done
 		upload(env, wpConfig),                   // compiler.hooks.afterDone
 		finalize(env, wpConfig)                  // compiler.hooks.shutdown
 	);

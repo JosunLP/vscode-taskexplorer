@@ -11,7 +11,7 @@
 
 /**
  * @method
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {Partial<WebpackEnvironment>} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  * @param {WebpackConfig} wpConfig Webpack config object
  */
@@ -35,7 +35,7 @@ const mode = (env, argv, wpConfig) =>
 
 /**
  * @method
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {Partial<WebpackEnvironment>} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  */
 const getMode = (env, argv) =>

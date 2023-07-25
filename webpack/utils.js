@@ -55,7 +55,7 @@ const clone = (item) =>
         while (i--) { c[i] = clone(item[i]); }
         return c;
     }
-    else if (isObject(item))
+    if (isObject(item))
     {
         const c = {};
         Object.keys((item)).forEach((key) =>
@@ -99,7 +99,7 @@ const isObjectEmpty = (v) => { if (v) { return Object.keys(v).filter(k => ({}.ha
 /**
  * @method merge
  * @param  {...Record<string, any>} destination
- * @returns {any}
+ * @returns {Record<string, any>}
  */
 const merge = (...destination) =>
 {

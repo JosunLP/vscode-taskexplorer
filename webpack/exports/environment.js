@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
@@ -7,8 +8,9 @@
 
 const globalEnv = require("../global");
 const { join, resolve } = require("path");
-const { writeInfo } = require("../console");
+const { WebpackError } = require("webpack");
 const { apply, merge } = require("../utils");
+const { writeInfo, figures } = require("../console");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
 
 /** @typedef {import("..//types").WebpackArgs} WebpackArgs */
@@ -22,12 +24,13 @@ const { readFileSync, existsSync, mkdirSync } = require("fs");
  * @param {WebpackBuild} build
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
+ * @param {WebpackConfig} wpConfig Webpack config object
  */
-const environment = (build, env, argv) =>
+const environment = (build, env, argv, wpConfig) =>
 {
 	env.build = build;
-	env.paths.build = resolve(__dirname, "..", ".."); // root build path must be set 1st...
-	env.isTests = env.environment.startsWith("test");
+	env.paths.build = resolve(__dirname, "..", "..");
+	setEnvironment(env, argv, wpConfig);
 	setApp(env);
 	setPaths(env);
 	initState(env);
@@ -60,6 +63,35 @@ const setApp = (env) =>
 			pkgJson
 		}
 	});
+};
+
+
+/**
+ * @method setEnvironment
+ * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackArgs} argv Webpack command line args
+ * @param {WebpackConfig} wpConfig Webpack config object
+ */
+const setEnvironment = (env, argv, wpConfig) =>
+{
+	if (!env.environment)
+	{
+		if (wpConfig.mode === "development" || argv.mode === "development") {
+			env.environment = "dev";
+		}
+		else if (wpConfig.mode === "production" || argv.mode === "production") {
+			env.environment = "prod";
+		}
+		else if (wpConfig.mode === "none" || argv.mode === "none") {
+			env.environment = "test";
+		}
+		else {
+			const eMsg = "Could not detect build environment";
+			writeInfo("Could not detect build environment", figures.color.error);
+			throw new WebpackError(eMsg);
+		}
+	}
+	env.isTests = env.environment.startsWith("test");
 };
 
 

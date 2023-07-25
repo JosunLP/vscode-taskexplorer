@@ -7,7 +7,6 @@
  */
 
 const { existsSync } = require("fs");
-const { asArray } = require("../utils");
 const { join, posix } = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 
@@ -27,7 +26,6 @@ const copy = (apps, env, wpConfig) =>
 	const /** @type {CopyPlugin.Pattern[]} */patterns = [],
 		  psxBuildPath = env.paths.build.replace(/\\/g, "/"),
 		  psxBasePath = env.paths.base.replace(/\\/g, "/"),
-		  psxDistPath = env.paths.dist.replace(/\\/g, "/"),
 		  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
 	if (env.build === "webview")
@@ -51,19 +49,25 @@ const copy = (apps, env, wpConfig) =>
 	}
 	else if ((env.build === "extension" || env.build === "browser") && env.stripLogging)
 	{
-		asArray(env.app.mainChunk).forEach((chunk) =>
-		{
-			patterns.push(
-			{
-				from: posix.join(psxDistPath, `${chunk}.*.js`),
-				to: posix.join(psxDistPath, `${chunk}.js`),
-				context: psxDistPath,
-				// transform: (content, absoluteFrom) => content
-				// transform: {
-				//     transformer: (content, absoluteFrom) => content
-				// }
-			});
-		});
+		//
+		// NOTE THAT THIS F'NG COPYPLUGIN BLOWS F'NG BALLS.  REALLY? COULD YOU MAKE
+		// SOMETHING SO SIMPLE ANY MORE COMPLICATED??!?! ASS HOLE.  FIND A NEW CAREER.
+		// ALMOST AS BAD AS THAT DUMB F'R WHO INCLUDED THE ENTIRE MOMENT PACKAGE FOR 1 FUNCTION.
+		//
+
+		// asArray(env.app.mainChunk).forEach((chunk) =>
+		// {
+		// 	patterns.push(
+		// 	{
+		// 		from: posix.join(psxDistPath, `${chunk}.*.js`),
+		// 		to: posix.join(psxDistPath, `${chunk}.js`),
+		// 		// context: psxDistPath,
+		// 		// transform: (content, absoluteFrom) => content
+		// 		// transform: {
+		// 		//     transformer: (content, absoluteFrom) => content
+		// 		// }
+		// 	});
+		// });
 
 		if (wpConfig.mode === "production")
 		{

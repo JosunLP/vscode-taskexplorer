@@ -6,9 +6,10 @@
  * @module webpack.plugin.asset
  */
 
-const { join } = require("path");
-const { readdirSync } = require("fs");
-const { rename, unlink } = require("fs/promises");
+const { join, resolve } = require("path");
+const { existsSync, copyFileSync, readdirSync } = require("fs");
+const { rename, unlink, readdir } = require("fs/promises");
+const { asArray } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
@@ -31,7 +32,7 @@ const finalize = (env, wpConfig) =>
         plugin =
         {
             apply: (compiler) => {
-                compiler.hooks.shutdown.tapPromise("FinalizeShutdownPlugin", () => licenseFiles(env));
+                compiler.hooks.shutdown.tapPromise("FinalizeShutdownPlugin", async () => { dupHashFile(env); await licenseFiles(env); });
             }
         };
     }
@@ -40,19 +41,21 @@ const finalize = (env, wpConfig) =>
 
 
 
-// /**
-//  * @method _upload
-//  * @param {WebpackStatsAsset[]} assets
-//  * @param {WebpackEnvironment} env
-//  */
-// const dupHashFile= (assets, env) =>
-// {
-//     const items = readdirSync(resolve("..", "dist")),
-//           teModule = assets.find(a => a.startsWith("taskexplorer") && a.endsWith(".js"));
-//     if (teModule) {
-//         copyFileSync(teModule.name, "taskexplorer.js");
-//     }
-// };
+/**
+ * @method _upload
+ * @param {WebpackEnvironment} env
+ */
+const dupHashFile= (env) =>
+{
+    asArray(env.app.mainChunk).forEach((chunk) =>
+    {
+        const items = readdirSync(resolve("..", "dist")),
+            teModule = items.find(a => a.startsWith(chunk) && a.endsWith(".js"));
+        if (teModule) {
+            copyFileSync(join(env.paths.dist, teModule), join(env.paths.dist, `${chunk}.js`));
+        }
+    });
+};
 
 
 
@@ -64,7 +67,7 @@ const finalize = (env, wpConfig) =>
 const licenseFiles = async (env) =>
 {
     const distPath = env.stripLogging ? env.paths.dist : env.paths.temp,
-          items = readdirSync(distPath);
+          items = existsSync(distPath) ? await readdir(distPath) : [];
     for (const file of items.filter(i => i.includes("LICENSE")))
     {
         try {

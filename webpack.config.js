@@ -3,12 +3,14 @@
 // @ts-check
 
 const globalEnv = require("./webpack/global");
-const { writeInfo } = require("./webpack/console");
+const { writeInfo, write } = require("./webpack/console");
 const { merge, printSpmBanner } = require("./webpack/utils");
 const {
 	context, devtool, entry, externals, ignorewarnings, minification, mode, name, plugins,
 	optimization, output, resolve, rules, stats, target, watch, environment, getMode
 } = require("./webpack/exports");
+const gradient = require("gradient-string");
+const { colors, withColor } = require("@spmeesseman/test-utils");
 
 /** @typedef {import("./webpack/types").WebpackArgs} WebpackArgs */
 /** @typedef {import("./webpack/types").WebpackBuild} WebpackBuild */
@@ -20,7 +22,7 @@ const {
 /**
  * Webpack Export
  *
- * @param {WebpackEnvironment} env Environment variable containing runtime options passed
+ * @param {Partial<WebpackEnvironment>} env Environment variable containing runtime options passed
  * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`).
  * @param {WebpackArgs} argv Webpack command line args
  * @returns {WebpackConfig|WebpackConfig[]}
@@ -32,18 +34,17 @@ module.exports = (env, argv) =>
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
 	printSpmBanner("0.0.1");
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
-	writeInfo(" Start Task Explorer VSCode Extension Webpack Build");
+	write(gradient.fruit(" Start Task Explorer VSCode Extension Webpack Build"));
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
-	writeInfo("   Mode  : " + mode);
-	writeInfo("   Argv  : " + JSON.stringify(argv));
-	writeInfo("   Env   : " + JSON.stringify(env));
+	write(withColor("   Mode  : ", colors.white) + withColor(mode, colors.grey));
+	write(withColor("   Argv  : ", colors.white) + withColor(JSON.stringify(argv), colors.grey));
+	write(withColor("   Env   : ", colors.white) + withColor(JSON.stringify(env), colors.grey));
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
 
 	env = merge(
 	{
 		clean: false,
 		analyze: false,
-		environment: "prod",
 		esbuild: false,
 		fa: "custom",
 		imageOpt: true,
@@ -86,35 +87,36 @@ module.exports = (env, argv) =>
 
 /**
  * @method getWebpackConfig
- * @param {WebpackBuild} buildTarget
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WebpackBuild} build
+ * @param {Partial<WebpackEnvironment>} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  * @returns {WebpackConfig}
  */
-const getWebpackConfig = (buildTarget, env, argv) =>
+const getWebpackConfig = (build, env, argv) =>
 {
 	if (globalEnv.buildCount > 0) { console.log(""); }
 	writeInfo(`Start Webpack build step ${++globalEnv.buildCount }`);
 	/** @type {WebpackEnvironment}*/
+	// @ts-ignore
 	const lEnv = merge({}, env);
 	/** @type {WebpackConfig}*/
 	const wpConfig = {};
-	environment(buildTarget, lEnv, argv);  // Base path / Build path
-	mode(lEnv, argv, wpConfig);            // Mode i.e. "production", "development", "none"
-	name(buildTarget, lEnv, wpConfig);     // Build name / label
-	target(lEnv, wpConfig);                // Target i.e. "node", "webworker", "tests"
-	context(lEnv, wpConfig);               // Context for build
-	entry(lEnv, wpConfig);                 // Entry points for built output
-	externals(lEnv, wpConfig);             // External modules
-	ignorewarnings(lEnv, wpConfig);        // Warnings from the compiler to ignore
-	optimization(lEnv, wpConfig);          // Build optimization
-	minification(lEnv, wpConfig);          // Minification / Terser plugin options
-	output(lEnv, wpConfig);                // Output specifications
-	devtool(lEnv, wpConfig);               // Dev tool / sourcemap control
-	resolve(lEnv, wpConfig);               // Resolve config
-	rules(lEnv, wpConfig);                 // Loaders & build rules
-	stats(lEnv, wpConfig);                 // Stats i.e. console output & verbosity
-	watch(lEnv, wpConfig, argv);		   // Watch-mode options
-	plugins(lEnv, wpConfig);               // Plugins - call last as `env` and `wpConfig` are cloned for hooks
+	environment(build, lEnv, argv, wpConfig); // Base path / Build path
+	mode(lEnv, argv, wpConfig);               // Mode i.e. "production", "development", "none"
+	name(build, lEnv, wpConfig);              // Build name / label
+	target(lEnv, wpConfig);                   // Target i.e. "node", "webworker", "tests"
+	context(lEnv, wpConfig);                  // Context for build
+	entry(lEnv, wpConfig);                    // Entry points for built output
+	externals(lEnv, wpConfig);                // External modules
+	ignorewarnings(lEnv, wpConfig);           // Warnings from the compiler to ignore
+	optimization(lEnv, wpConfig);             // Build optimization
+	minification(lEnv, wpConfig);             // Minification / Terser plugin options
+	output(lEnv, wpConfig);                   // Output specifications
+	devtool(lEnv, wpConfig);                  // Dev tool / sourcemap control
+	resolve(lEnv, wpConfig);                  // Resolve config
+	rules(lEnv, wpConfig);                    // Loaders & build rules
+	stats(lEnv, wpConfig);                    // Stats i.e. console output & verbosity
+	watch(lEnv, wpConfig, argv);		      // Watch-mode options
+	plugins(lEnv, wpConfig);                  // Plugins - call last as `env` and `wpConfig` are cloned for hooks
 	return wpConfig;
 };
