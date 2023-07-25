@@ -68,12 +68,18 @@ const clone = (item) =>
 };
 
 
-const initGlobalEnvObject = (baseObj, initialValue, ...props) =>
+/**
+ * @method initGlobalEnvObject
+ * @param {String} baseProp
+ * @param {any} [initialValue]
+ * @param  {...any} [props]
+ */
+const initGlobalEnvObject = (baseProp, initialValue, ...props) =>
 {
-    if (!globalEnv[baseObj]) {
-        globalEnv[baseObj] = {};
+    if (!globalEnv[baseProp]) {
+        globalEnv[baseProp] = {};
     }
-    props.filter(p => !globalEnv[baseObj][p]).forEach((p) => { globalEnv[baseObj][p] = initialValue; });
+    props.filter(p => !globalEnv[baseProp][p]).forEach((p) => { globalEnv[baseProp][p] = initialValue; });
 };
 
 

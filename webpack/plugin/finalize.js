@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.asset
+ * @module webpack.plugin.finalize
  */
 
 const { join, resolve } = require("path");
@@ -18,7 +18,7 @@ const { asArray } = require("../utils");
 
 
 /**
- * @method beforeemit
+ * @method finalize
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
@@ -31,8 +31,26 @@ const finalize = (env, wpConfig) =>
     {
         plugin =
         {
-            apply: (compiler) => {
-                compiler.hooks.shutdown.tapPromise("FinalizeShutdownPlugin", async () => { dupHashFile(env); await licenseFiles(env); });
+            apply: (compiler) =>
+            {
+                compiler.hooks.shutdown.tapPromise("FinalizeShutdownPlugin", async () =>
+                {
+                    dupHashFile(env, wpConfig);
+                    await licenseFiles(env);
+                });
+                // if (compilation.hooks.statsPrinter)
+                // {
+                //     compilation.hooks.statsPrinter.tap("FinalizeShutdownPlugin", stats => {
+                //         stats.hooks.print.for("asset.info.copied").tap("FinalizeShutdownPluginPrint", (copied, {
+                //         green,
+                //         formatFlag
+                //         }) => copied ?
+                //         /** @type {Function} */
+                //         green(
+                //         /** @type {Function} */
+                //         formatFlag("copied")) : "");
+                //     });
+                // }
             }
         };
     }
@@ -44,13 +62,16 @@ const finalize = (env, wpConfig) =>
 /**
  * @method _upload
  * @param {WebpackEnvironment} env
+ * @param {WebpackConfig} wpConfig Webpack config object
  */
-const dupHashFile= (env) =>
+const dupHashFile= (env, wpConfig) =>
 {
     asArray(env.app.mainChunk).forEach((chunk) =>
     {
-        const items = readdirSync(resolve("..", "dist")),
-            teModule = items.find(a => a.startsWith(chunk) && a.endsWith(".js"));
+        const items = readdirSync(env.paths.dist),
+              digestLen = /** @type {Number} */(wpConfig.output.hashDigestLength),
+              testRgx = new RegExp(`${chunk}\\.[0-9a-f]{${digestLen}}\\.js`),
+              teModule = items.find(a => testRgx.test(a));
         if (teModule) {
             copyFileSync(join(env.paths.dist, teModule), join(env.paths.dist, `${chunk}.js`));
         }

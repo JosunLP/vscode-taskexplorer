@@ -4,6 +4,7 @@
 
 const globalEnv = require("../global");
 const { writeInfo, withColor, figures, colors } = require("../console");
+const { initGlobalEnvObject } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -25,7 +26,15 @@ const addStepHook = (hook, plugins, env, wpConfig) =>
 		{
 			const buildName = withColor(/** @type {String} */(wpConfig.name), colors.grey),
 				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`Build step: ${hookName.padEnd(globalEnv.valuePad)} ${buildName}`));
+			compiler.hooks[hook].tap(`${hook}StepPlugin`, () =>
+			{
+				const key = hook + wpConfig.name;
+				if (!globalEnv.hooksLog[key])
+				{
+					globalEnv.hooksLog[key] = true;
+					writeInfo(`Build step: ${hookName.padEnd(globalEnv.valuePad)} ${buildName}`);
+				}
+			});
 			// compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`${hookName} ${buildName}`));
 		}
 	});
@@ -39,14 +48,22 @@ const addStepHook = (hook, plugins, env, wpConfig) =>
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const addStepHookAsync = (hook, plugins, env, wpConfig) =>
+const addStepHookPromise = (hook, plugins, env, wpConfig) =>
 {
 	plugins.push({
 		apply: (compiler) =>
 		{
 			const buildName = withColor(/** @type {String} */(wpConfig.name), colors.grey),
 				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () => writeInfo(`Build step: ${hookName.padEnd(globalEnv.valuePad)} ${buildName}`));
+			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () =>
+			{
+				const key = hook + wpConfig.name;
+				if (!globalEnv.hooksLog[key])
+				{
+					globalEnv.hooksLog[key] = true;
+					writeInfo(`Build step: ${hookName.padEnd(globalEnv.valuePad)} ${buildName}`);
+				}
+			});
 		}
 	});
 };
@@ -62,6 +79,7 @@ const hookSteps = (env, wpConfig) =>
 {
 	/** @type {WebpackPluginInstance[]} */
 	const plugins = [];
+	initGlobalEnvObject("hooksLog");
 	addStepHook("environment", plugins, env, wpConfig);
 	addStepHook("afterEnvironment", plugins, env, wpConfig);
 	addStepHook("entryOption", plugins, env, wpConfig);
@@ -82,7 +100,7 @@ const hookSteps = (env, wpConfig) =>
 	addStepHook("shouldEmit", plugins, env, wpConfig);
 	addStepHook("emit", plugins, env, wpConfig);
 	addStepHook("afterEmit", plugins, env, wpConfig);
-	addStepHookAsync("assetEmitted", plugins, env, wpConfig);
+	addStepHookPromise("assetEmitted", plugins, env, wpConfig);
 	addStepHook("emit", plugins, env, wpConfig);
 	addStepHook("done", plugins, env, wpConfig);
 	addStepHook("afterDone", plugins, env, wpConfig);
