@@ -18,7 +18,7 @@ const { join } = require("path");
 const globalEnv = require("../global");
 const { spawnSync } = require("child_process");
 const { initGlobalEnvObject } = require("../utils");
-const { writeInfo, figures } = require("../console");
+const { writeInfo, figures, withColor, colors } = require("../console");
 const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -99,7 +99,7 @@ const _upload = (assets, env) =>
             ++globalEnv.upload.readyCount;
         }
         else {
-            writeInfo(`${figures.color.star} content in resource ${chunkName} unchanged, skip upload`);
+            writeInfo(`${figures.color.star} ${withColor(` content in resource ${chunkName} unchanged, skip upload`, colors.grey)}`);
         }
     });
 
@@ -129,7 +129,7 @@ const _upload = (assets, env) =>
             `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"`
         ];
 
-        writeInfo(`${figures.color.star} upload resource files to ${host}`);
+        writeInfo(`${figures.color.star} ${withColor(` upload resource files to ${host}`, colors.grey)}`);
         try {
             const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
             writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
@@ -138,7 +138,7 @@ const _upload = (assets, env) =>
             spawnSync("plink", plinkArgsFull, spawnSyncOpts);
             writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
-            writeInfo(`${figures.color.star} successfully uploaded resource files`);
+            writeInfo(`${figures.color.star} ${withColor(" successfully uploaded resource files", colors.grey)}`);
         }
         catch (e) {
             writeInfo("error uploading resource files:", figures.color.error);

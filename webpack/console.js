@@ -24,6 +24,33 @@ const consoleWrite = (msg, icon, pad = "") =>
 const consoleWriteInfo = (msg, icon, pad = "") =>
     console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
 
+/*
+const consoleWriteInfo = (msg, icon, forceGrey = true, pad = "") =>
+{
+    if (!msg) {
+        console.log(`     ${pad}${icon || figures.color.info}`);
+    }
+    else if (forceGrey === false || !msg.includes("\x1B")) {
+        console.log(`     ${pad}${icon || figures.color.info} ${figures.withColor(msg, figures.colors.grey)}`);
+    }
+    else {
+        const msgParts = [];
+        let idx = msg.indexOf("\x1B");
+        while (idx !== -1)
+        {
+            const idx2 = msg.indexOf("\x1B", idx + 1) + 5;
+            msgParts.push(msg.substring(idx, idx2));
+            idx = msg.indexOf("\x1B", idx2);
+        }
+        const sIdx = msg.indexOf("\x1B"), // msg.indexOf("\x1B", msg.indexOf("\x1B") + 1,) + 5,
+              eIdx = msg.lastIndexOf("\x1B") + 5,
+              msg0 = msg.substring(0, sIdx),
+              msg1 = msg.substring(0, eIdx),
+              msg2 = msg.substring(eIdx);
+        console.log(`     ${pad}${icon || figures.color.info} ${msg1}${figures.withColor(msg2, figures.colors.grey)}`);
+    }
+};
+*/
 
 const figures =
 {
