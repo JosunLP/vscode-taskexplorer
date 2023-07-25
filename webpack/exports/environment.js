@@ -5,6 +5,7 @@
  * @module webpack.exports.environment
  */
 
+const globalEnv = require("../global");
 const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
 const { apply, merge } = require("../utils");
@@ -106,8 +107,12 @@ const setVersion = (env) =>
  */
 const writeEnvironment = (env, argv) =>
 {
-	writeInfo("Environment:");
+	writeInfo("Build Environment:");
 	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
+		(k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`)
+	);
+	writeInfo("Global Environment:");
+	Object.keys(globalEnv).filter(k => typeof env[k] !== "object").forEach(
 		(k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`)
 	);
 	if (argv)

@@ -6,9 +6,9 @@
  * @module webpack.plugin.copy
  */
 
-const fs = require("fs");
-const path = require("path");
+const { existsSync } = require("fs");
 const { asArray } = require("../utils");
+const { join, posix } = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -28,23 +28,23 @@ const copy = (apps, env, wpConfig) =>
 		  psxBuildPath = env.paths.build.replace(/\\/g, "/"),
 		  psxBasePath = env.paths.base.replace(/\\/g, "/"),
 		  psxDistPath = env.paths.dist.replace(/\\/g, "/"),
-		  psxBaseCtxPath = path.posix.join(psxBasePath, "res");
+		  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
 	if (env.build === "webview")
 	{
-		apps.filter(app => fs.existsSync(path.join(env.paths.base, app, "res"))).forEach(
+		apps.filter(app => existsSync(join(env.paths.base, app, "res"))).forEach(
 			(app) => patterns.push(
 			{
-				from: path.posix.join(psxBasePath, app, "res", "*.*"),
-				to: path.posix.join(psxBuildPath, "res", "webview"),
-				context: path.posix.join(psxBasePath, app, "res")
+				from: posix.join(psxBasePath, app, "res", "*.*"),
+				to: posix.join(psxBuildPath, "res", "webview"),
+				context: posix.join(psxBasePath, app, "res")
 			})
 		);
-		if (fs.existsSync(path.join(env.paths.base, "res")))
+		if (existsSync(join(env.paths.base, "res")))
 		{
 			patterns.push({
-				from: path.posix.join(psxBasePath, "res", "*.*"),
-				to: path.posix.join(psxBuildPath, "res", "webview"),
+				from: posix.join(psxBasePath, "res", "*.*"),
+				to: posix.join(psxBuildPath, "res", "webview"),
 				context: psxBaseCtxPath
 			});
 		}
@@ -53,57 +53,50 @@ const copy = (apps, env, wpConfig) =>
 	{
 		asArray(env.app.mainChunk).forEach((chunk) =>
 		{
-			if (env.state.hash.next[chunk] !== env.state.hash.current[chunk] || !fs.existsSync(path.join(env.paths.dist, `${chunk}.js`)))
+			patterns.push(
 			{
-				 const teModule = path.join(env.paths.dist, `${chunk}.${env.state.hash.next[chunk]}.js`);
-				 if (fs.existsSync(teModule))
-				 {
-					patterns.push(
-					{
-						from: path.posix.join(psxDistPath, teModule),
-						to: path.posix.join(psxDistPath, `${env.app.mainChunk}.js`),
-						context: psxBasePath,
-						// transform: (content, absoluteFrom) => content
-						// transform: {
-						//     transformer: (content, absoluteFrom) => content
-						// }
-					});
-			  }
-			}
+				from: posix.join(psxDistPath, `${chunk}.*.js`),
+				to: psxDistPath,
+				context: psxBuildPath,
+				// transform: (content, absoluteFrom) => content
+				// transform: {
+				//     transformer: (content, absoluteFrom) => content
+				// }
+			});
 		});
 
 		if (wpConfig.mode === "production")
 		{
-			const psxDirInfoProj = path.posix.resolve(path.posix.join(psxBuildPath, "..", "vscode-taskexplorer-info"));
+			const psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, "..", `${env.app.name}-info`));
 			patterns.push(
 			{
-				from: path.posix.join(psxBasePath, "res", "img", "**"),
-				to: path.posix.join(psxDirInfoProj, "res"),
+				from: posix.join(psxBasePath, "res", "img", "**"),
+				to: posix.join(psxDirInfoProj, "res"),
 				context: psxBaseCtxPath
 			},
 			{
-				from: path.posix.join(psxBasePath, "res", "readme", "*.png"),
-				to: path.posix.join(psxDirInfoProj, "res"),
+				from: posix.join(psxBasePath, "res", "readme", "*.png"),
+				to: posix.join(psxDirInfoProj, "res"),
 				context: psxBaseCtxPath
 			},
 			{
-				from: path.posix.join(psxBasePath, "doc", ".todo"),
-				to: path.posix.join(psxDirInfoProj, "doc"),
+				from: posix.join(psxBasePath, "doc", ".todo"),
+				to: posix.join(psxDirInfoProj, "doc"),
 				context: psxBaseCtxPath
 			},
 			{
-				from: path.posix.join(psxBasePath, "res", "walkthrough", "welcome", "*.md"),
-				to: path.posix.join(psxDirInfoProj, "doc"),
+				from: posix.join(psxBasePath, "res", "walkthrough", "welcome", "*.md"),
+				to: posix.join(psxDirInfoProj, "doc"),
 				context: psxBaseCtxPath
 			},
 			{
-				from: path.posix.join(psxBasePath, "*.md"),
-				to: path.posix.join(psxDirInfoProj),
+				from: posix.join(psxBasePath, "*.md"),
+				to: posix.join(psxDirInfoProj),
 				context: psxBaseCtxPath
 			},
 			{
-				from: path.posix.join(psxBasePath, "LICENSE*"),
-				to: path.posix.join(psxDirInfoProj),
+				from: posix.join(psxBasePath, "LICENSE*"),
+				to: posix.join(psxDirInfoProj),
 				context: psxBaseCtxPath
 			});
 		}

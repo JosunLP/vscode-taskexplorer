@@ -121,8 +121,7 @@ const saveAssetState = (env) => writeFileSync(env.paths.files.hash, JSON.stringi
  */
 const setAssetState = (asset, env, wpConfig) =>
 {
-    write(" ");
-    write(withColor(`set asset state for ${withColor(asset.name, colors.blue)}`, colors.white), figures.color.start);
+    write(withColor(`set asset state for ${withColor(asset.name, colors.white)}`, colors.grey), figures.color.start);
     if (asset.chunkNames && asset.info.contenthash)
     {
         const chunkName = /** @type {String}*/(asset.chunkNames[0]);

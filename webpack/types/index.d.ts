@@ -38,6 +38,7 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
 declare interface WebpackGlobalEnvironment extends Record<string, any>
 {
     buildCount: number;
+    valuePad: number;
 }
 
 declare interface WebpackApp
