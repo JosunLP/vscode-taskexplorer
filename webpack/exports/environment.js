@@ -5,32 +5,25 @@
  * @module webpack.exports.environment
  */
 
+const { apply } = require("../utils");
 const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
-const { apply } = require("../utils");
 
 /** @typedef {import("..//types").WebpackArgs} WebpackArgs */
 /** @typedef {import("../types").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {import("../types").WebpackGlobalEnvironment} WebpackGlobalEnvironment */
-
-
-/** @type {WebpackGlobalEnvironment} */
-const globalEnv = { buildCount: 0 };
 
 
 /**
  * @method environment
  * @param {WebpackBuild} build
  * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackGlobalEnvironment} gEnv Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  */
-const environment = (build, env, gEnv, argv) =>
+const environment = (build, env, argv) =>
 {
-	apply(globalEnv, gEnv);
 	env.build = build;
 	env.paths.build = resolve(__dirname, "..", ".."); // build path must be set b4 proceeding...
 	env.isTests = env.environment.startsWith("test");
@@ -134,4 +127,4 @@ const writeEnvironment = (env, argv) =>
 };
 
 
-module.exports = { environment, globalEnv };
+module.exports = environment;

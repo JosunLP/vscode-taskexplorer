@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
+const globalEnv = require("./global");
 const gradient = require("gradient-string");
-const { globalEnv } = require("./exports");
 
 
 /**
@@ -32,7 +32,7 @@ const apply = (object, config, defaults) =>
  * @param [allowEmpStr] If `false`, return empty array if isString(v) and isEmpty(v)
  * @returns {any[]}
  */
-const asArray = (v, shallow, allowEmpStr) => (isArray<T>(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
+const asArray = (v, shallow, allowEmpStr) => (isArray(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
 
 
 /**
@@ -88,6 +88,7 @@ const isDate = (v) => !!v && Object.prototype.toString.call(v) === "[object Date
 /**
  * @param v Variable to check to see if it's an array
  * @param [allowEmpStr] If `true`, return non-empty if isString(v) and v === ""
+ * @returns {Boolean}
  */
 const isEmpty = (v, allowEmpStr) => v === null || v === undefined || (!allowEmpStr ? v === "" : false) || (isArray(v) && v.length === 0) || (isObject(v) && isObjectEmpty(v));
 
@@ -201,6 +202,6 @@ const spmBanner = (version) =>
 
 
 module.exports = {
-    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, globalEnv,
+    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty,
     initGlobalEnvObject, merge, mergeIf, pick, pickBy, pickNot, printSpmBanner, spmBanner
 };

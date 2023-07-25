@@ -15,9 +15,10 @@
  */
 
 const { join } = require("path");
+const globalEnv = require("../global");
 const { spawnSync } = require("child_process");
+const { initGlobalEnvObject } = require("../utils");
 const { writeInfo, figures } = require("../console");
-const { initGlobalEnvObject, globalEnv } = require("../utils");
 const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -25,7 +26,6 @@ const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync } = require("fs"
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {import("../types").WebpackGlobalEnvironment} WebpackGlobalEnvironment */
 
 
 /**

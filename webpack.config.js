@@ -2,6 +2,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+const globalEnv = require("./webpack/globalEnv");
 const { writeInfo } = require("./webpack/console");
 const { merge, printSpmBanner } = require("./webpack/utils");
 const {
@@ -26,8 +27,6 @@ const {
  */
 module.exports = (env, argv) =>
 {
-	/** @type {WebpackGlobalEnvironment} */
-	const gEnv = { buildCount: 0 };
 	const mode = getMode(env, argv);
 
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
@@ -61,27 +60,27 @@ module.exports = (env, argv) =>
 	});
 
 	const extBuild = [
-		getWebpackConfig("extension", { ...env, ...{ stripLogging: false /* , clean: true */ }}, gEnv, argv),
-		getWebpackConfig("extension", { ...env, ...{ stripLogging: true }}, gEnv, argv)
+		getWebpackConfig("extension", { ...env, ...{ stripLogging: false /* , clean: true */ }}, argv),
+		getWebpackConfig("extension", { ...env, ...{ stripLogging: true }}, argv)
 	];
 
 	if (env.build)
 	{
 		if (env.build !== "extension") {
-			return getWebpackConfig(env.build, env, gEnv, argv);
+			return getWebpackConfig(env.build, env, argv);
 		}
 		return extBuild;
 	}
 
 	if (env.environment === "test") {
-		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "dev" }}, gEnv, argv) ];
+		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "dev" }}, argv) ];
 	}
 
 	if (env.environment === "testprod") {
-		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, gEnv, argv) ];
+		return [ ...extBuild, getWebpackConfig("webview", { ...env, ...{ environment: "prod" }}, argv) ];
 	}
 
-	return [ ...extBuild, getWebpackConfig("webview", { ...env }, gEnv, argv) ];
+	return [ ...extBuild, getWebpackConfig("webview", { ...env }, argv) ];
 };
 
 
@@ -89,34 +88,33 @@ module.exports = (env, argv) =>
  * @method getWebpackConfig
  * @param {WebpackBuild} buildTarget
  * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackGlobalEnvironment} gEnv Webpack global environment
  * @param {WebpackArgs} argv Webpack command line args
  * @returns {WebpackConfig}
  */
-const getWebpackConfig = (buildTarget, env, gEnv, argv) =>
+const getWebpackConfig = (buildTarget, env, argv) =>
 {
-	if (gEnv.buildCount > 0) { console.log(""); }
-	writeInfo(`Start Webpack build step ${++gEnv.buildCount }`);
+	if (globalEnv.buildCount > 0) { console.log(""); }
+	writeInfo(`Start Webpack build step ${++globalEnv.buildCount }`);
 	/** @type {WebpackEnvironment}*/
 	const lEnv = merge({}, env);
 	/** @type {WebpackConfig}*/
 	const wpConfig = {};
-	environment(buildTarget, lEnv, gEnv, argv); // Base path / Build path
-	mode(lEnv, argv, wpConfig);                 // Mode i.e. "production", "development", "none"
-	name(buildTarget, lEnv, wpConfig);          // Build name / label
-	target(lEnv, wpConfig);                     // Target i.e. "node", "webworker", "tests"
-	context(lEnv, wpConfig);                    // Context for build
-	entry(lEnv, wpConfig);                      // Entry points for built output
-	externals(lEnv, wpConfig);                  // External modules
-	ignorewarnings(lEnv, wpConfig);             // Warnings from the compiler to ignore
-	optimization(lEnv, wpConfig);               // Build optimization
-	minification(lEnv, wpConfig);               // Minification / Terser plugin options
-	output(lEnv, wpConfig);                     // Output specifications
-	devtool(lEnv, wpConfig);                    // Dev tool / sourcemap control
-	resolve(lEnv, wpConfig);                    // Resolve config
-	rules(lEnv, wpConfig);                      // Loaders & build rules
-	stats(lEnv, wpConfig);                      // Stats i.e. console output & verbosity
-	watch(lEnv, wpConfig, argv);		        // Watch-mode options
-	plugins(lEnv, gEnv, wpConfig);              // Plugins - call last as `env` and `wpConfig` are cloned for hooks
+	environment(buildTarget, lEnv, argv);  // Base path / Build path
+	mode(lEnv, argv, wpConfig);            // Mode i.e. "production", "development", "none"
+	name(buildTarget, lEnv, wpConfig);     // Build name / label
+	target(lEnv, wpConfig);                // Target i.e. "node", "webworker", "tests"
+	context(lEnv, wpConfig);               // Context for build
+	entry(lEnv, wpConfig);                 // Entry points for built output
+	externals(lEnv, wpConfig);             // External modules
+	ignorewarnings(lEnv, wpConfig);        // Warnings from the compiler to ignore
+	optimization(lEnv, wpConfig);          // Build optimization
+	minification(lEnv, wpConfig);          // Minification / Terser plugin options
+	output(lEnv, wpConfig);                // Output specifications
+	devtool(lEnv, wpConfig);               // Dev tool / sourcemap control
+	resolve(lEnv, wpConfig);               // Resolve config
+	rules(lEnv, wpConfig);                 // Loaders & build rules
+	stats(lEnv, wpConfig);                 // Stats i.e. console output & verbosity
+	watch(lEnv, wpConfig, argv);		   // Watch-mode options
+	plugins(lEnv, wpConfig);               // Plugins - call last as `env` and `wpConfig` are cloned for hooks
 	return wpConfig;
 };
