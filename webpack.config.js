@@ -49,7 +49,7 @@ module.exports = (env, argv) =>
 		fa: "custom",
 		imageOpt: true,
 		preRelease: true,
-		stripLogging: true,
+		buildMode: "release",
 		target: "node",
 		paths: { files: { hash: "" }, cache: "" },
 		state: { hash: { current: {}, next: {} } }
@@ -61,8 +61,8 @@ module.exports = (env, argv) =>
 	});
 
 	const extBuild = [
-		getWebpackConfig("extension", { ...env, ...{ stripLogging: false /* , clean: true */ }}, argv),
-		getWebpackConfig("extension", { ...env, ...{ stripLogging: true }}, argv)
+		getWebpackConfig("extension", { ...env, ...{ buildMode: "debug" /* , clean: true */ }}, argv),
+		getWebpackConfig("extension", { ...env, ...{ buildMode: "release" }}, argv)
 	];
 
 	if (env.build)
@@ -100,7 +100,7 @@ const getWebpackConfig = (build, env, argv) =>
 	// @ts-ignore
 	const lEnv = merge({}, env);
 	/** @type {WebpackConfig}*/
-	const wpConfig = {};
+	const wpConfig = /** @type {WebpackConfig} */({});
 	environment(build, lEnv, argv, wpConfig); // Base path / Build path
 	mode(lEnv, argv, wpConfig);               // Mode i.e. "production", "development", "none"
 	name(build, lEnv, wpConfig);              // Build name / label
