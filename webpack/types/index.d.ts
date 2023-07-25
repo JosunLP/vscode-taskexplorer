@@ -3,11 +3,11 @@
 
 
 declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
-declare type WebpackBuild = "browser" | "common" | "extension" | "tests" | "webview" | undefined;
+declare type WebpackBuild = "browser" | "common" | "extension" | "tests" | "webview";
+declare type WebpackBuildMode = "debug" | "release";
 declare type WebpackBuildEnvironment= "dev" | "prod" | "test" | "testprod";
 declare type WebpackMode = "none" | "development" | "production";
 declare type WebpakTarget = "webworker" | "node" | "web";
-declare type WebpackBuildOrUndefined = WebpackBuild | undefined;
 declare type WebpackConfig = import("webpack").Configuration;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
@@ -20,6 +20,7 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     analyze: boolean;                     // parform analysis after build
     app: WebpackApp;                      // target js app info
     build: WebpackBuild;
+    buildMode: WebpackBuildMode;
     clean: boolean;
     environment: WebpackBuildEnvironment;
     esbuild: boolean;                     // Use esbuild and esloader
@@ -50,6 +51,7 @@ declare interface WebpackApp
 declare interface WebpackBuildFilePaths
 {
     hash: string;
+    sourceMapWasm: string;
 }
 
 declare interface WebpackBuildPaths
@@ -91,7 +93,7 @@ export {
     WebpackArgs,
     WebpackAssetEmittedInfo,
     WebpackBuild,
-    WebpackBuildOrUndefined,
+    WebpackBuildMode,
     WebpackBuildPaths,
     WebpackBuildState,
     WebpackCompiler,

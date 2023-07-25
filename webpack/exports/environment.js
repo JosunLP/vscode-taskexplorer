@@ -5,9 +5,9 @@
  * @module webpack.exports.environment
  */
 
-const { apply } = require("../utils");
 const { join, resolve } = require("path");
 const { writeInfo } = require("../console");
+const { apply, merge } = require("../utils");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
 
 /** @typedef {import("..//types").WebpackArgs} WebpackArgs */
@@ -71,18 +71,19 @@ const setApp = (env) =>
  */
 const setPaths = (env) =>
 {
-	env.paths.dist = join(env.paths.build, "dist");
-	env.paths.temp = resolve(process.env.TEMP || process.env.TMP  || ".", env.app.name, env.environment);
-	env.paths.cache = join(env.paths.build, "node_modules", ".cache", "webpack");
-	env.paths.files.hash = join(env.paths.cache, `hash.${env.environment}${!env.stripLogging ? ".debug" : ""}.json`);
+	merge(env.paths,
+	{
+		base: env.build !== "webview" ? env.paths.build : join(env.paths.build, "src", "webview", "app"),
+		dist: join(env.paths.build, "dist"),
+		temp: resolve(process.env.TEMP || process.env.TMP  || ".", env.app.name, env.environment),
+		cache: join(env.paths.build, "node_modules", ".cache", "webpack"),
+		files: {
+			sourceMapWasm: "node_modules/source-map/lib/mappings.wasm",
+			hash: join(env.paths.cache, `hash.${env.environment}${!env.stripLogging ? ".debug" : ""}.json`)
+		}
+	});
 	if (!existsSync(env.paths.cache)) {
 		mkdirSync(env.paths.cache, { recursive: true });
-	}
-	if (env.build === "webview") {
-		env.paths.base = join(env.paths.build, "src", "webview", "app");
-	}
-	else {
-		env.paths.base = env.paths.build;
 	}
 };
 

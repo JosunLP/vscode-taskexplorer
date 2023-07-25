@@ -2,7 +2,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const globalEnv = require("./webpack/globalEnv");
+const globalEnv = require("./webpack/global");
 const { writeInfo } = require("./webpack/console");
 const { merge, printSpmBanner } = require("./webpack/utils");
 const {
