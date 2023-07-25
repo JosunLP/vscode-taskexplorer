@@ -99,7 +99,7 @@ const _upload = (assets, env) =>
             ++globalEnv.upload.readyCount;
         }
         else {
-            writeInfo(`content in resource ${chunkName} unchanged, skip upload`, figures.color.star);
+            writeInfo(`${figures.color.star} content in resource ${chunkName} unchanged, skip upload`);
         }
     });
 
@@ -129,7 +129,7 @@ const _upload = (assets, env) =>
             `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"`
         ];
 
-        writeInfo(`upload resource files to ${host}`, figures.color.star);
+        writeInfo(`${figures.color.star} upload resource files to ${host}`);
         try {
             const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
             writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
@@ -138,7 +138,7 @@ const _upload = (assets, env) =>
             spawnSync("plink", plinkArgsFull, spawnSyncOpts);
             writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
-            writeInfo("successfully uploaded resource files", figures.color.star);
+            writeInfo(`${figures.color.star} successfully uploaded resource files`);
         }
         catch (e) {
             writeInfo("error uploading resource files:", figures.color.error);

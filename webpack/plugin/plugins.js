@@ -2,17 +2,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+const globalEnv = require("../global");
 const { writeInfo, withColor, figures, colors } = require("../console");
-
-// const TerserPlugin = require("terser-webpack-plugin");
-// const ShebangPlugin = require("webpack-shebang-plugin");
-// const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-// const FilterWarningsPlugin = require("webpack-filter-warnings-plugin");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+
+const hookNamePad = 46;
 
 
 /**
@@ -29,7 +27,8 @@ const addStepHook = (hook, plugins, env, wpConfig) =>
 		{
 			const buildName = withColor(/** @type {String} */(wpConfig.name), colors.grey),
 				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`Build step: ${hookName} ${buildName}`));
+			compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`Build step: ${hookName.padEnd(hookNamePad)} ${buildName}`));
+			// compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`${hookName} ${buildName}`));
 		}
 	});
 };
@@ -49,7 +48,7 @@ const addStepHookAsync = (hook, plugins, env, wpConfig) =>
 		{
 			const buildName = withColor(/** @type {String} */(wpConfig.name), colors.grey),
 				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () => writeInfo(`Build step: ${hookName} ${buildName}`));
+			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () => writeInfo(`Build step: ${hookName.padEnd(hookNamePad)} ${buildName}`));
 		}
 	});
 };

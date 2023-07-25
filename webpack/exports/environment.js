@@ -25,7 +25,7 @@ const { readFileSync, existsSync, mkdirSync } = require("fs");
 const environment = (build, env, argv) =>
 {
 	env.build = build;
-	env.paths.build = resolve(__dirname, "..", ".."); // build path must be set b4 proceeding...
+	env.paths.build = resolve(__dirname, "..", ".."); // root build path must be set 1st...
 	env.isTests = env.environment.startsWith("test");
 	setApp(env);
 	setPaths(env);
@@ -39,10 +39,7 @@ const environment = (build, env, argv) =>
  * @method setState
  * @param {WebpackEnvironment} env Webpack build environment
  */
-const initState = (env) =>
-{
-	env.state = { hash: { current: {}, next: {} } };
-};
+const initState = (env) => { env.state = { hash: { current: {}, next: {} } }; };
 
 
 /**
@@ -54,7 +51,7 @@ const setApp = (env) =>
 	const pkgJson = JSON.parse(readFileSync(join(env.paths.build, "package.json"), "utf8"));
 	apply(env,
 	{
-		/** @type {import("..//types").WebpackApp} */
+		/** @type {import("../types").WebpackApp} */
 		app: {
 			mainChunk: "taskexplorer",
 			name: pkgJson.name,
@@ -76,11 +73,12 @@ const setPaths = (env) =>
 		base: env.build !== "webview" ? env.paths.build : join(env.paths.build, "src", "webview", "app"),
 		dist: join(env.paths.build, "dist"),
 		temp: resolve(process.env.TEMP || process.env.TMP  || ".", env.app.name, env.environment),
-		cache: join(env.paths.build, "node_modules", ".cache", "webpack"),
-		files: {
-			sourceMapWasm: "node_modules/source-map/lib/mappings.wasm",
-			hash: join(env.paths.cache, `hash.${env.environment}${!env.stripLogging ? ".debug" : ""}.json`)
-		}
+		cache: join(env.paths.build, "node_modules", ".cache", "webpack")
+	});
+	merge(env.paths.files,
+	{
+		sourceMapWasm: "node_modules/source-map/lib/mappings.wasm",
+		hash: join(env.paths.cache, `hash.${env.environment}${!env.stripLogging ? ".debug" : ""}.json`)
 	});
 	if (!existsSync(env.paths.cache)) {
 		mkdirSync(env.paths.cache, { recursive: true });
