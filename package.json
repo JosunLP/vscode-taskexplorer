@@ -48,7 +48,7 @@
 		"bamtch",
 		"bash"
 	],
-	"main": "./dist/taskexplorer",
+	"main": "./dist/taskexplorer.js",
 	"activationEvents": [
 		"*"
 	],
@@ -280,7 +280,7 @@
 		"eslint": "^7.32.0",
 		"eslint-plugin-anti-trojan-source": "^1.1.1",
 		"eslint-plugin-import": "^2.22.1",
-		"eslint-plugin-jsdoc": "^31.6.0",
+		"eslint-plugin-jsdoc": "^46.4.4",
 		"eslint-plugin-no-null": "^1.0.2",
 		"eslint-plugin-prefer-arrow": "^1.2.3",
 		"eslint-plugin-prettier": "^3.3.1",

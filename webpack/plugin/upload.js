@@ -29,10 +29,10 @@ const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync } = require("fs"
 
 
 /**
- * @method upload
+ * @function upload
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {WebpackPluginInstance | undefined}
+ * @returns {WebpackPluginInstance | undefined} plugin instance
  */
 const upload = (env, wpConfig) =>
 {
@@ -65,7 +65,7 @@ const upload = (env, wpConfig) =>
 
 
 /**
- * @method uploadAssets
+ * @function uploadAssets
  * @param {WebpackStatsAsset[]} assets
  * @param {WebpackEnvironment} env
  */
@@ -85,7 +85,7 @@ const uploadAssets = (assets, env) =>
 
     assets.filter(a => !!a.chunkNames && a.chunkNames.length > 0).forEach((a) =>
     {
-        const chunkName = /** @type {String}*/(/** @type {String[]}*/(a.chunkNames)[0]);
+        const chunkName = /** @type {string}*/(/** @type {string[]}*/(a.chunkNames)[0]);
         if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName] && a.info.related)
         {
             const fileNameNoHash = a.name.replace(`.${a.info.contenthash}`, ""),
@@ -101,7 +101,7 @@ const uploadAssets = (assets, env) =>
             ++globalEnv.upload.readyCount;
         }
         else {
-            writeInfo(`${figures.color.star} ${withColor(` content in resource ${chunkName} unchanged, skip upload`, colors.grey)}`);
+            writeInfo(`${figures.color.star} ${withColor(`content in resource ${chunkName} unchanged, skip upload`, colors.grey)}`);
         }
     });
 
@@ -131,7 +131,7 @@ const uploadAssets = (assets, env) =>
             `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"`
         ];
 
-        writeInfo(`${figures.color.star }${withColor(` upload resource files to ${host}`, colors.grey)}`);
+        writeInfo(`${figures.color.star } ${withColor(`upload resource files to ${host}`, colors.grey)}`);
         try {
             const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
             writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
@@ -140,7 +140,7 @@ const uploadAssets = (assets, env) =>
             spawnSync("plink", plinkArgsFull, spawnSyncOpts);
             writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
-            writeInfo(`${figures.color.star} ${withColor(" successfully uploaded resource files", colors.grey)}`);
+            writeInfo(`${figures.color.star} ${withColor("successfully uploaded resource files", colors.grey)}`);
         }
         catch (e) {
             writeInfo("error uploading resource files:", figures.color.error);
