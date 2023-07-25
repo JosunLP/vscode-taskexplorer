@@ -113,9 +113,8 @@ const setPaths = (env) =>
 		sourceMapWasm: "node_modules/source-map/lib/mappings.wasm",
 		hash: join(env.paths.cache, `hash.${env.environment}${!env.stripLogging ? ".debug" : ""}.json`)
 	});
-	if (!existsSync(env.paths.cache)) {
-		mkdirSync(env.paths.cache, { recursive: true });
-	}
+	if (!existsSync(env.paths.cache)) { mkdirSync(env.paths.cache, { recursive: true }); }
+	if (!existsSync(env.paths.temp)) { mkdirSync(env.paths.temp, { recursive: true }); }
 };
 
 

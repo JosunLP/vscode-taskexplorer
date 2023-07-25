@@ -40,6 +40,7 @@ const upload = (env, wpConfig) =>
     let plugin;
     if (env.build === "extension")
     {
+        initGlobalEnvObject("upload", 0, "callCount", "readyCount");
         plugin =
         {
             apply: (compiler) =>
@@ -51,10 +52,9 @@ const upload = (env, wpConfig) =>
                     }
                     const stats = statsData.toJson(),
                           assets = stats.assets?.filter(a => a.type === "asset");
-                    initGlobalEnvObject("upload", 0, "callCount", "readyCount");
                     ++globalEnv.upload.callCount;
                     if (assets) {
-                        _upload(assets, env);
+                        uploadAssets(assets, env);
                     }
                 });
             }
@@ -65,19 +65,21 @@ const upload = (env, wpConfig) =>
 
 
 /**
- * @method _upload
+ * @method uploadAssets
  * @param {WebpackStatsAsset[]} assets
  * @param {WebpackEnvironment} env
  */
-const _upload = (assets, env) =>
-{
+const uploadAssets = (assets, env) =>
+{   //
+    // `The lBasePath` variable is a temp directory that we will create in the in
+    // the OS/env temp dir.  We will move only files that have changed content there,
+    // and perform only one upload when all builds have completed.
+    //
     const lBasePath = join(env.paths.temp, env.environment);
 
     if (globalEnv.upload.callCount === 1)
     {
-        if (!existsSync(lBasePath)) {
-            mkdirSync(lBasePath);
-        }
+        if (!existsSync(lBasePath)) { mkdirSync(lBasePath); }
         copyFileSync(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(lBasePath, "mappings.wasm"));
     }
 
@@ -129,7 +131,7 @@ const _upload = (assets, env) =>
             `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"`
         ];
 
-        writeInfo(`${figures.color.star} ${withColor(` upload resource files to ${host}`, colors.grey)}`);
+        writeInfo(`${figures.color.star }${withColor(` upload resource files to ${host}`, colors.grey)}`);
         try {
             const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
             writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);

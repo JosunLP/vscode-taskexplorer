@@ -7,7 +7,7 @@
  */
 
 const path = require("path");
-const { unlinkSync, existsSync } = require("fs");
+const { unlinkSync, existsSync, rmSync } = require("fs");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -43,7 +43,7 @@ const clean = (env, wpConfig) =>
 		{
 			if (!env.stripLogging && existsSync(env.paths.temp))
 			{
-				unlinkSync(env.paths.temp);
+				rmSync(env.paths.temp, { recursive: true, force: true});
 			}
 			// if (existsSync(env.paths.files.hash)) {
 			// 	unlinkSync(env.paths.files.hash);
