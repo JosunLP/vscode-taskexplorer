@@ -90,7 +90,7 @@ const uploadAssets = (assets, env) =>
         {
             const fileNameNoHash = a.name.replace(`.${a.info.contenthash}`, ""),
                   fileNameSourceMap = a.info.related.sourceMap.toString(),
-                  distPath = env.stripLogging ? env.paths.dist : env.paths.temp;
+                  distPath = env.buildMode === "release" ? env.paths.dist : env.paths.temp;
             copyFileSync(join(distPath, a.name), join(lBasePath, fileNameNoHash));
             if (env.environment === "prod") {
                 renameSync(join(distPath, fileNameSourceMap), join(lBasePath, fileNameSourceMap));

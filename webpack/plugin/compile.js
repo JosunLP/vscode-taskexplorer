@@ -50,7 +50,7 @@ const compile = (env, wpConfig) =>
 
                 // compiler.hooks.thisCompilation.tap("CompileThisCompilationPlugin", (compilation) =>
                 // {
-                //     if (env.environment !== "prod" && !env.stripLogging)
+                //     if (env.environment !== "prod" && env.buildMode === "debug")
                 //     {
                 //     }
                 //     const logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");

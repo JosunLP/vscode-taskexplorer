@@ -111,7 +111,7 @@ const setPaths = (env) =>
 	merge(env.paths.files,
 	{
 		sourceMapWasm: "node_modules/source-map/lib/mappings.wasm",
-		hash: join(env.paths.cache, `hash.${env.environment}${!env.stripLogging ? ".debug" : ""}.json`)
+		hash: join(env.paths.cache, `hash.${env.environment}${env.buildMode === "debug" ? ".debug" : ""}.json`)
 	});
 	if (!existsSync(env.paths.cache)) { mkdirSync(env.paths.cache, { recursive: true }); }
 	if (!existsSync(env.paths.temp)) { mkdirSync(env.paths.temp, { recursive: true }); }
@@ -124,7 +124,7 @@ const setPaths = (env) =>
  */
 const setVersion = (env) =>
 {
-    if (env.build === "extension" && env.environment === "prod" && env.stripLogging)
+    if (env.build === "extension" && env.environment === "prod" && env.buildMode === "release")
     {
         // let version = env.app.version;
     }

@@ -47,7 +47,7 @@ const copy = (apps, env, wpConfig) =>
 			});
 		}
 	}
-	else if ((env.build === "extension" || env.build === "browser") && env.stripLogging)
+	else if ((env.build === "extension" || env.build === "browser") && env.buildMode === "release")
 	{
 		//
 		// NOTE THAT THIS F'NG COPYPLUGIN BLOWS F'NG BALLS.  REALLY? COULD YOU MAKE

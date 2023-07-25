@@ -41,7 +41,7 @@ const clean = (env, wpConfig) =>
 		}
 		else if (env.build === "extension")
 		{
-			if (!env.stripLogging && existsSync(env.paths.temp))
+			if (env.buildMode === "debug" && existsSync(env.paths.temp))
 			{
 				rmSync(env.paths.temp, { recursive: true, force: true});
 			}

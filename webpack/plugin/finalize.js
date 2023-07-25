@@ -87,7 +87,7 @@ const dupHashFile= (env, wpConfig) =>
  */
 const licenseFiles = async (env) =>
 {
-    const distPath = env.stripLogging ? env.paths.dist : env.paths.temp,
+    const distPath = env.buildMode === "release" ? env.paths.dist : env.paths.temp,
           items = existsSync(distPath) ? await readdir(distPath) : [];
     for (const file of items.filter(i => i.includes("LICENSE")))
     {

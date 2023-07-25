@@ -111,7 +111,7 @@ const rules = (env, wpConfig) =>
 	{
 		const configFile = env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json";
 
-		if (env.stripLogging)
+		if (env.buildMode === "release")
 		{
 			wpConfig.module.rules.push(...[{
 				test: /\.ts$/,

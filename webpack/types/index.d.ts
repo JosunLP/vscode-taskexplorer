@@ -30,7 +30,6 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     pkgJson: Record<string, any>;         // package.json parsed object
     preRelease: boolean;
     state: WebpackBuildState;
-    stripLogging: boolean;
     target: WebpakTarget;
     verbosity: WebpackLogLevel;
 }

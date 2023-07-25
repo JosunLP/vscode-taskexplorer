@@ -57,7 +57,7 @@ const output = (env, wpConfig) =>
 	{
 		let outPath;
 		const rtRelPath = env.build === "browser" ? "browser" : ".";
-		if (env.stripLogging) {
+		if (env.buildMode === "release") {
 			outPath = resolve(env.paths.dist, rtRelPath);
 		}
 		else {
@@ -67,8 +67,8 @@ const output = (env, wpConfig) =>
 		{
 			clean: env.clean === true ? (env.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
 			path: outPath,
-			// filename: env.stripLogging ? "[name].js" : "[name].debug.js",
-			filename: env.stripLogging ? "[name].[contenthash].js" : "[name].debug.[contenthash].js",
+			// filename: env.buildMode === "release" ? "[name].js" : "[name].debug.js",
+			filename: env.buildMode === "release" ? "[name].[contenthash].js" : "[name].debug.[contenthash].js",
 			libraryTarget: "commonjs2"
 		};
 	}
