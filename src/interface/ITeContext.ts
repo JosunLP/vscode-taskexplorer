@@ -38,8 +38,8 @@ export enum ContextKeys
 
 export interface ITeContext
 {
-	getContext<T>(key: string, defaultValue?: T): T;
 	getContext<T>(key: string): T | undefined;
+    getContext<T>(key: string, defaultValue?: T): T;
 	setContext(key: string, value: unknown): Promise<void>;
 }
 

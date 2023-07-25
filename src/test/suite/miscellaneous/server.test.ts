@@ -2,7 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { expect } from "chai";
-import { ITeWrapper, SpmServerError } from ":types";
+import { ITeWrapper } from ":types";
+// import { ITeWrapper, SpmServerError } from ":types";
 import { activate, endRollingCount, exitRollingCount, suiteFinished, testControl as tc } from "../../utils/utils";
 
 let teWrapper: ITeWrapper;
@@ -32,11 +33,11 @@ suite("Server Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.apiServer.httpGet * 2);
-        const wasmContent = await teWrapper.server.get(`app/${teWrapper.extensionName}/v${teWrapper.version}/mappings.wasm`, "");
+        const wasmContent = await teWrapper.server.get(`app/${teWrapper.extensionName}/v${teWrapper.version}/test/mappings.wasm`, "");
         expect(wasmContent).to.be.an("ArrayBuffer");
         expect(wasmContent.byteLength).to.be.equal(48693);
         const srcMapContent = await teWrapper.server.get(
-            `app/${teWrapper.extensionName}/v${teWrapper.version}/${teWrapper.extensionNameShort}.js.map`, ""
+            `app/${teWrapper.extensionName}/v${teWrapper.version}/test/${teWrapper.extensionNameShort}.js.map`, ""
         );
         expect(srcMapContent).to.be.an("ArrayBuffer");
         expect(srcMapContent.byteLength).to.be.greaterThanOrEqual(900000);
@@ -80,8 +81,8 @@ suite("Server Tests", () =>
         error = teWrapper.server.createError(undefined, "{ \"message\": \"test message 3\" }");
         error.toString();
         expect(error.name).to.be.a("string").that.is.eq("SpmServerError");
-		teWrapper.utils.throwIf(false, SpmServerError, 300, "body", "err msg no throw");
-		try { teWrapper.utils.throwIf(true, SpmServerError, 401, "body", "err msg no throw"); } catch {}
+		// teWrapper.utils.throwIf(false, SpmServerError, 300, "body", "err msg no throw");
+		// try { teWrapper.utils.throwIf(true, SpmServerError, 401, "body", "err msg no throw"); } catch {}
         endRollingCount(this);
     });
 

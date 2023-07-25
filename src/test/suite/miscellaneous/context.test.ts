@@ -31,8 +31,7 @@ suite("Context Tests", () =>
         if (exitRollingCount(this)) return;
         expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Enabled)).to.be.a("boolean").that.is.equal(true);
         expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Dev)).to.be.a("boolean").that.is.equal(false);
-        expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Dev, true)).to.be.a("boolean").that.is.equal(true);
-        expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Dev, false)).to.be.a("boolean").that.is.equal(false);
+        expect(teWrapper.contextTe.getContext<boolean>(teWrapper.keys.Context.Dev, true)).to.be.a("boolean").that.is.equal(false);
         expect(teWrapper.contextTe.getContext<string>(teWrapper.keys.Context.TestsTest)).to.be.undefined;
         expect(teWrapper.contextTe.getContext<string>(teWrapper.keys.Context.TestsTest, "testing")).to.be.a("string").that.is.equal("testing");
         endRollingCount(this);

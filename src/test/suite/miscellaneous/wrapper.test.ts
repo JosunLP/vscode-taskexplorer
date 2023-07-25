@@ -36,7 +36,7 @@ suite("Wrapper Tests", () =>
     test("Access Getter Properties", async function()
     {
         if (exitRollingCount(this)) return;
-        expect(teWrapper.env).to.equal("tests");
+        expect(teWrapper.env).to.equal("test");
         expect(teWrapper.taskManager).to.not.be.undefined;
         expect(teWrapper.taskUsageView).to.not.be.undefined;
         expect(teWrapper.dev).to.equal(false);
