@@ -16,7 +16,7 @@ const { join, resolve } = require("path");
 
 
 /**
- * @method beforeemit
+ * @function beforeemit
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
@@ -31,18 +31,17 @@ const compile = (env, wpConfig) =>
         {
             apply: (compiler) =>
             {
-
                 compiler.hooks.emit.tap("CompileEmitPlugin", (compilation) =>
                 {
                     Object.keys(compilation.assets).forEach((basename) =>
                     {
-                        if (/taskexplorer\./.test(basename))
+                        if (/taskexplorer\.[0-9a-f]{20,}\.js/.test(basename))
                         {
                             const asset = compilation.assets[basename],
-                                  content= asset.source().toString(),
-                                  regex = /\n[ \t]*module\.exports \= require\(/mg,
+                                  content= asset.source().toString();
+                                  const regex = /\n[ \t]*module\.exports \= require\(/mg,
                                   newContent = content.replace(regex, (v) => "/* istanbul ignore next */" + v);
-                            asset.source = () => { return newContent; };
+                            asset.source = () => { console.log("l333:" + newContent.length);  return newContent; };
                             asset.size = () => asset.source().length;
                         }
                     });
@@ -92,7 +91,7 @@ const compile = (env, wpConfig) =>
 
 
 /**
- * @method _upload
+ * @function _upload
  * @param {WebpackStatsAsset[]} assets
  * @param {WebpackEnvironment} env
  */

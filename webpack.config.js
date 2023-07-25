@@ -20,7 +20,7 @@ const { colors, withColor } = require("@spmeesseman/test-utils");
 
 
 /**
- * Webpack Export
+ * Webpack exports.
  *
  * @param {Partial<WebpackEnvironment>} env Environment variable containing runtime options passed
  * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`).
@@ -86,7 +86,7 @@ module.exports = (env, argv) =>
 
 
 /**
- * @method getWebpackConfig
+ * @function getWebpackConfig
  * @param {WebpackBuild} build
  * @param {Partial<WebpackEnvironment>} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args

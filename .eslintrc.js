@@ -218,7 +218,10 @@ module.exports = {
         "jsdoc/empty-tags": 1, // Recommended
         "jsdoc/implements-on-classes": 1, // Recommended
         "jsdoc/informative-docs": 1,
-        "jsdoc/match-description": 1,
+        "jsdoc/match-description": [
+            "error",
+            { matchDescription: '^\n?([A-Z`\\d_][\\s\\S]*\\s*)?$'
+        }],
         "jsdoc/multiline-blocks": 1, // Recommended
         "jsdoc/no-bad-blocks": 1,
         "jsdoc/no-blank-block-descriptions": 1,
@@ -245,7 +248,7 @@ module.exports = {
         "jsdoc/require-property-type": 1, // Recommended
         "jsdoc/require-returns": 1, // Recommended
         "jsdoc/require-returns-check": 1, // Recommended
-        "jsdoc/require-returns-description": 1, // Recommended
+        "jsdoc/require-returns-description": 0, // Recommended
         "jsdoc/require-returns-type": 1, // Recommended
         "jsdoc/require-throws": 1,
         "jsdoc/require-yields": 1, // Recommended

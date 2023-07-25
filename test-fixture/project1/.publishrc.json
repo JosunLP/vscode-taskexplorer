@@ -1,0 +1,10 @@
+{
+    "version": "1.0.0",
+    "branch": "trunk",
+    "buildCommand": [],
+    "disableTaskExplorer": "N",
+    "mantisbtRelease": "Y",
+    "mantisbtChglogEdit": "N",
+    "mantisbtProject": "",
+    "repoType": "svn"
+}

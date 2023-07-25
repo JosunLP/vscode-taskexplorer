@@ -18,7 +18,7 @@ const { writeFile, rename, unlink } = require("fs/promises");
 
 
 /**
- * @method beforeemit
+ * @function beforeemit
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
@@ -35,7 +35,10 @@ const asset = (env, wpConfig) =>
             {
                 compiler.hooks.assetEmitted.tapPromise("AssetBeforeEmitPlugin", async (file, /** @type {WebpackAssetEmittedInfo} */info) =>
                 {
+        console.log("1: " + file);
+        console.log("2: " + info.targetPath);
                     if (env.environment === "test") {
+                        console.log("2: " + info.targetPath);
                         await istanbulTags(info.targetPath, info.content, env);
                     }
                     else if (env.environment === "prod") {
@@ -50,8 +53,8 @@ const asset = (env, wpConfig) =>
 
 
 /**
- * @method istanbulFileTags
- * @param {String} filePath  file full path
+ * @function istanbulFileTags
+ * @param {string} filePath file full path
  * @param {Buffer} content
  * @param {WebpackEnvironment} env
  */
@@ -69,8 +72,8 @@ const istanbulTags = async (filePath, content, env) =>
 
 
 /**
- * @method licenseFiles
- * @param {String} filePath file full path
+ * @function licenseFiles
+ * @param {string} filePath file full path
  */
 const licenseFiles = async (filePath) =>
 {
