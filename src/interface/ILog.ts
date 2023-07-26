@@ -4,6 +4,9 @@ export type LogLevel = number; // 1 | 2 | 3 | 4 | 5;
 export type LogType = "global";
 export type LogColor = [ number, number ];
 
+
+export interface ILogDisposable { dispose: () => any }
+
 export interface ILogQueueItem
 {
     fn: any;
@@ -36,15 +39,25 @@ export interface ILogSymbols
     color: { end: "◀"; error: "✘"; info: "ℹ"; pointer: "❯"; start: "▶"; success: "✔"; up: "△"; warning: "⚠" };
 }
 
+export interface ILogOutputChannel
+{
+    clear: () => void;
+    dispose: () => void;
+    hide: () => void;
+    show: () => void;
+    write: (message: string) => void;
+}
+
 export interface ILogConfig
 {
-    channelWriteFn: string;
+    contentHash?: string;
     dirPath: string;
-    errorChannel: OutputChannel;
-    extensionAuthor: string;
-    extensionId: string;
+    errorChannel?: ILogOutputChannel;
     isTests: boolean;
-    outputChannel: OutputChannel;
+    modulePath: string;
+    outputChannel?: ILogOutputChannel;
+    storageDirectory: string;
+    version: string;
 }
 
 export interface ILogControl

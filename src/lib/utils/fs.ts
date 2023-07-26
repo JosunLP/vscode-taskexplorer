@@ -182,10 +182,6 @@ export const deleteFile = (file: string): Promise<void> =>
 export const deleteFileSync = (file: string): void => wrap(() => fs.unlinkSync(path.resolve(cwd, file)), [ emptyFn ]);
 
 
-/**
- * @method findFiles
- * @since 3.0.0
- */
 export const findFiles = (pattern: string, options: any): Promise<string[]> =>
 {
     return new Promise((resolve, reject) =>
@@ -193,7 +189,6 @@ export const findFiles = (pattern: string, options: any): Promise<string[]> =>
         glob(pattern, options, (err, files) => execIf2(!err, resolve, this, [ reject, err ], files));
     });
 };
-
 
 
 export const getDateModified = (file: string) =>

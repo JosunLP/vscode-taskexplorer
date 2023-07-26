@@ -347,7 +347,7 @@ suite("Logging Tests", () =>
 		log.value("null value", null);
 		log.value("empty array", []);
 		log.value("empty object", {});
-		log.value("empty string value", "");
+		log.value("empty string value", teWrapper.log.state.lastLogPad);
 		log.value("line break lf value", "line1\nline2");
 		log.value("line break crlf value", "line1\r\nline2");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, false);
@@ -419,10 +419,12 @@ suite("Logging Tests", () =>
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.warn("test1");
 		log.warn("test2");
+		log.withColor("a", log.colors.grey);
 		//
 		// Re-enable logging
 		//
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+		log.withColor("a", log.colors.grey);
         endRollingCount(this);
     });
 
@@ -475,11 +477,24 @@ suite("Logging Tests", () =>
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.blank(1);
 		log.dequeue("");
+		log.value("a", "a");
+		log.value("a", "a", 1);
+		log.value("a", "a", 1, "   ");
+		log.values(1, "", [[ "a", 1 ]]);
+		log.values(1, "", [[ "a", 1 ]]);
+		log.methodEvent("a", "a");
+		log.methodEvent("a", "a", 1);
+		log.methodStart("a",  1);
+		log.methodDone("a",  1);
 		log.write("test");
+		log.write2("test2", "sa");
+		log.write2("test2", "");
 		log.write("Test1", 1);
+		log.info("Test1", 1);
+		log.withColor("a", log.colors.blue);
 		log.write("Test1", 1);
 		log.write2("Test1", "Test1", 1);
-		log.write2("Test1", "Test1", 1, "", [[ "t", 1 ]]);
+		log.write2("Test1", "Test1", 1, teWrapper.log.state.lastLogPad, [[ "t", 1 ]]);
 		log.info("test");
 		log.info("");
 		log.withColor("Test1", teWrapper.log.colors.blue);

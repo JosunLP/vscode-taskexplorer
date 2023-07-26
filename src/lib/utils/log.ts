@@ -4,16 +4,16 @@
 import { apply } from "./object";
 import { basename, dirname, join } from "path";
 import { execIf, popIfExistsBy, wrap } from "./utils";
+import { commands, ConfigurationChangeEvent, window } from "vscode";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
-import { appendFileSync, copyFile, createDirSync, deleteFileSync, pathExistsSync, readJsonAsync, writeFile } from "./fs";
-import { commands, ConfigurationChangeEvent, Disposable, ExtensionContext, ExtensionMode, OutputChannel, window } from "vscode";
+import { appendFileSync, copyFile, createDirSync, deleteDir, deleteFileSync, pathExistsSync, readJsonAsync, writeFile } from "./fs";
 import {
-    Commands, IConfiguration, ConfigKeys, ILog, ILogConfig, ILogControl, ILogState, ITeWrapper, LogLevel, VsCodeCommands,
-    SpmServerResource, ILogSymbols, LogColor, ILogColors
+    Commands, IConfiguration, ILog, ILogConfig, ILogControl, ILogState, ITeWrapper, LogLevel, VsCodeCommands,
+    SpmServerResource, ILogSymbols, LogColor, ILogColors, ILogOutputChannel, ILogDisposable
 } from "../../interface";
+import { readdir } from "fs/promises";
 
-interface IDisposable { dispose: () => any }
 
 type HttpGetFunction = (url: SpmServerResource, ...args: any[]) => Promise<ArrayBuffer>;
 
@@ -22,33 +22,35 @@ type HttpGetFunction = (url: SpmServerResource, ...args: any[]) => Promise<Array
  * @class TeLog
  * @since 3.0.0
  */
-export class TeLog implements ILog, Disposable
+export class TeLog implements ILog, ILogDisposable
 {
     protected readonly _logState: ILogState;
     protected readonly _logConfig: ILogConfig;
     protected readonly _logControl: ILogControl;
 
+    private _debugMode = false;
     private _errorsWritten = 0;
-    private _fileNameTimer: NodeJS.Timeout;
     private _wrapper: ITeWrapper | undefined;
     private _httpGetFn: HttpGetFunction | undefined;
+    private _fileNameTimer: NodeJS.Timeout | undefined;
     private _srcMapConsumer: BasicSourceMapConsumer | undefined;
 
-    private readonly _wasmPath: string;
-    private readonly _wasmRtPath: string;
-    private readonly _srcMapPath: string;
-    private readonly _moduleFile: string;
-    private readonly _moduleName: string;
-    private readonly _modulePath: string;
-    private readonly _runtimeDir: string;
-    private readonly _dbgModuleDir: string;
     private readonly _symbols: ILogSymbols;
     private readonly _config: IConfiguration;
-    private readonly _context: ExtensionContext;
-    private readonly _disposables: IDisposable[];
+    private readonly _disposables: ILogDisposable[];
     private readonly _separator = "-----------------------------------------------------------------------------------------";
     private readonly _stackLineParserRgx = /at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i;
     private readonly _stackLineFilterRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
+
+    private readonly _paths: {
+        srcMapPath: string;
+        moduleFile: string;
+        moduleName: string;
+        modulePath: string;
+        runtimeDir: string;
+        dbgModuleDir: string;
+    };
+
     private readonly _colors: ILogColors =
     {
         bold: [ 1, 22 ],
@@ -66,50 +68,35 @@ export class TeLog implements ILog, Disposable
         yellow: [ 33, 39 ]
     };
 
-    constructor(context: ExtensionContext, config: IConfiguration, logConfig?: Partial<ILogConfig>, logControl?: Partial<ILogControl>)
+
+    constructor(logConfig: ILogConfig, logControl: ILogControl, config: IConfiguration)
     {
         this.enable(false);
         this._config = config;
-        this._context = context;
         this._disposables = [];
         this._symbols = this.getSymbols();
-        this._modulePath = join(this._context.extensionUri.fsPath, "dist", "taskexplorer.js");
-        this._runtimeDir = dirname(this._modulePath);
-        this._moduleFile = basename(this._modulePath);
-        this._moduleName = this._moduleFile.replace(".js", "");
-        this._dbgModuleDir = join(this._context.globalStorageUri.fsPath, "debug");
-        this._wasmRtPath = join(this._runtimeDir, "mappings.wasm");
-        this._wasmPath = join(this._dbgModuleDir, "mappings.wasm");
-        this._srcMapPath = join(this._dbgModuleDir, `${this._moduleFile}.map`);
-        this._fileNameTimer = 0 as unknown as NodeJS.Timeout;
+        this._paths = this.getPaths(logConfig);
         this._logState = this.getDefaultState();
-        this._logConfig = apply(this.getDefaultConfig(context), logConfig!);
-        this._logControl = apply(this.getDefaultControl(context.extensionMode === ExtensionMode.Test, config), logControl!);
-        createDirSync(this._dbgModuleDir);
+        this._logConfig = apply({}, logConfig);
+        this._logControl = apply({}, logControl);
+        createDirSync(this._paths.dbgModuleDir);
         createDirSync(this._logConfig.dirPath);
         this.writeErrorChannelHeader();
         this.writeOutputChannelHeader();
         this.setFileName();
-		context.subscriptions.push(this);
-        execIf(this._logConfig.errorChannel, this._disposables.push, this, null, this._logConfig.errorChannel);
-        execIf(this._logConfig.outputChannel, this._disposables.push, this, null, this._logConfig.outputChannel);
-        this._disposables.push(
-            config.onDidChange(this.processConfigChanges, this),
-            commands.registerCommand(Commands.ShowOutputWindow, (show: boolean) => this.showOutput(show, this._logConfig.outputChannel), this),
-            commands.registerCommand(Commands.ShowErrorOutputWindow, (show: boolean) => this.showOutput(show, this._logConfig.errorChannel), this)
-        );
+        this.setAppSpecifics(config); // TODO =- Move to app-level code when move to standalone log module
     }
 
     dispose = () =>
     {
         clearTimeout(this._fileNameTimer);
         this._disposables.splice(0).forEach(d => d.dispose());
-        try { deleteFileSync(this._wasmRtPath); } catch {}
+        //
+        // TODO - Delete depending on config setting ModuleReplace?
+        //
+        // try { deleteFileSync(join(this._runtimeDir, "mappings.wasm")); } catch {}
     };
 
-
-    private get allowScaryColors(): boolean { return !this._logConfig.isTests || !this._logControl.blockScaryColors; }
-    private get httpGet(): HttpGetFunction { return <HttpGetFunction>this._httpGetFn; }
 
     get colors(): ILogColors { return this._colors; }
     get control(): ILogControl { return this._logControl; }
@@ -117,6 +104,10 @@ export class TeLog implements ILog, Disposable
     get state(): ILogState { return this._logState; }
     get symbols(): ILogSymbols { return this._symbols; }
     get wrapper(): ITeWrapper { return <ITeWrapper>this._wrapper; }
+
+    private get allowScaryColors(): boolean { return !this._logConfig.isTests || !this._logControl.blockScaryColors; }
+    private get httpGet(): HttpGetFunction { return <HttpGetFunction>this._httpGetFn; }
+
 
     private _blank = (level?: LogLevel, queueId?: string) => this._write("", level, "", queueId);
 
@@ -145,7 +136,6 @@ export class TeLog implements ILog, Disposable
             value: enable ? this._value : () => {},
             values: enable ? this._values : () => {},
             warn: enable ? this._warn : () => {},
-            withColor: enable ? this._withColor : () => {},
             write: enable ? this._write : () => {},
             write2: enable ? this._write2 : () => {}
         });
@@ -278,49 +268,20 @@ export class TeLog implements ILog, Disposable
 
     private errorWriteChannelInfo = (symbols: [ string, string ]) =>
     {
-        const sInfo = this.getStamp(true);
-        const ts = `${sInfo.stamp} ${this.symbols.pointer} ${symbols[1]}`;
-        this._logConfig.errorChannel.appendLine(`${ts} --- ERROR ${this._errorsWritten} ${this._separator}`);
-        this._logConfig.errorChannel.appendLine(ts);
-        this._logConfig.errorChannel.appendLine(`${ts} line          : ${sInfo.line}`);
-        this._logConfig.errorChannel.appendLine(`${ts} column        : ${sInfo.column}`);
-        this._logConfig.errorChannel.appendLine(`${ts} name          : ${sInfo.name}`);
-        this._logConfig.errorChannel.appendLine(`${ts} file          : ${sInfo.source}`);
-        this._logConfig.errorChannel.appendLine(ts);
-        this._logConfig.errorChannel.appendLine(`${ts} error message :`);
-        this._logConfig.errorChannel.appendLine(ts);
-    };
-
-
-    private getDefaultConfig = (context: ExtensionContext): ILogConfig =>
-    {
-        const pkgJson = context.extension.packageJSON;
-        return {
-            channelWriteFn: "appendLine",
-            dirPath: context.logUri.fsPath,
-            errorChannel: window.createOutputChannel(`${context.extension.packageJSON.displayName} (Errors)`),
-            extensionAuthor: isObject(pkgJson.author) ? pkgJson.author.name : pkgJson.name,
-            extensionId: context.extension.id,
-            isTests: context.extensionMode === ExtensionMode.Test,
-            outputChannel: window.createOutputChannel(context.extension.packageJSON.displayName)
-        };
-    };
-
-
-    private getDefaultControl = (isTests: boolean, config: IConfiguration): ILogControl =>
-    {
-        return {
-            blockScaryColors: isTests,
-            enable: config.get<boolean>(ConfigKeys.LogEnable, false),
-            enableOutputWindow: config.get<boolean>(ConfigKeys.LogEnableOutputWindow, true),
-            enableFile: config.get<boolean>(ConfigKeys.LogEnableFile, false),
-            enableModuleReload: config.get<boolean>(ConfigKeys.LogEnableModuleReload, false),
-            level: config.get<LogLevel>(ConfigKeys.LogLevel, 1),
-            trace: false,
-            valueWhiteSpace: 45,
-            writeToConsole: false,
-            writeToConsoleLevel: 2
-        };
+        execIf(this._logConfig.errorChannel, (c) =>
+        {
+            const sInfo = this.getStamp(true);
+            const ts = `${sInfo.stamp} ${this.symbols.pointer} ${symbols[1]}`;
+            c.write(`${ts} --- ERROR ${this._errorsWritten} ${this._separator}`);
+            c.write(ts);
+            c.write(`${ts} line          : ${sInfo.line}`);
+            c.write(`${ts} column        : ${sInfo.column}`);
+            c.write(`${ts} name          : ${sInfo.name}`);
+            c.write(`${ts} file          : ${sInfo.source}`);
+            c.write(ts);
+            c.write(`${ts} error message :`);
+            c.write(ts);
+        }, this);
     };
 
 
@@ -329,7 +290,7 @@ export class TeLog implements ILog, Disposable
         const timeTags = (new Date(Date.now() - this._logState.tzOffset)).toISOString().slice(0, -1).split("T");
         return {
             column: 1,
-            source: this._moduleFile,
+            source: this._paths.moduleFile,
             line: 1,
             name: "anonymous",
             stamp: timeTags.join(" "),
@@ -350,6 +311,21 @@ export class TeLog implements ILog, Disposable
             lastWriteToConsoleWasBlank: false,
             msgQueue: {},
             tzOffset: (new Date()).getTimezoneOffset() * 60000,
+        };
+    };
+
+
+    private getPaths = (logConfig: ILogConfig) =>
+    {
+        const moduleFile = basename(logConfig.modulePath),
+              dbgModuleDir = join(logConfig.storageDirectory, "debug");
+        return {
+            moduleFile,
+            dbgModuleDir,
+            modulePath: logConfig.modulePath,
+            runtimeDir: dirname(logConfig.modulePath),
+            moduleName: moduleFile.replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
+            srcMapPath: join(dbgModuleDir, `${moduleFile}.map`)
         };
     };
 
@@ -402,21 +378,21 @@ export class TeLog implements ILog, Disposable
         up: "△",
         blue:
         {
-            error: <"✘">this._withColor("✘", this._colors.blue),
-            info: <"ℹ">this._withColor("ℹ", this._colors.blue),
-            success: <"✔">this._withColor("✔", this._colors.blue),
-            warning: <"⚠">this._withColor("⚠", this._colors.blue),
+            error: <"✘">this.withColor("✘", this._colors.blue),
+            info: <"ℹ">this.withColor("ℹ", this._colors.blue),
+            success: <"✔">this.withColor("✔", this._colors.blue),
+            warning: <"⚠">this.withColor("⚠", this._colors.blue),
         },
         color:
         {
-            success: <"✔">this._withColor("✔", this._colors.green),
-            info: <"ℹ">this._withColor("ℹ", this._colors.magenta),
-            warning: <"⚠">this._withColor("⚠", this._colors.yellow),
-            error: <"✘">this._withColor("✘", this._colors.red),
-            start: <"▶">this._withColor("▶", this._colors.green),
-            end: <"◀">this._withColor("◀", this._colors.green),
-            pointer: <"❯">this._withColor("❯", this._colors.grey),
-            up: <"△">this._withColor("△", this._colors.green),
+            success: <"✔">this.withColor("✔", this._colors.green),
+            info: <"ℹ">this.withColor("ℹ", this._colors.magenta),
+            warning: <"⚠">this.withColor("⚠", this._colors.yellow),
+            error: <"✘">this.withColor("✘", this._colors.red),
+            start: <"▶">this.withColor("▶", this._colors.green),
+            end: <"◀">this.withColor("◀", this._colors.green),
+            pointer: <"❯">this.withColor("❯", this._colors.grey),
+            up: <"△">this.withColor("△", this._colors.green),
         }
     });
 
@@ -446,28 +422,35 @@ export class TeLog implements ILog, Disposable
 
     private installDebugSupport = (version: string, env: string, clean?: boolean, swap?: boolean): Promise<void> =>
     {
+        const copyDbgFile = (name: string) =>
+        {
+
+        };
+
         return wrap(async () =>
         {
             const enable = this._logControl.enable,
-                  teRelModulePath = join(this._dbgModuleDir, "taskexplorer.js"),
-                  rtRelModulePath = join(this._dbgModuleDir, "runtime.js"),
-                  vendorRelModulePath = join(this._dbgModuleDir, "vendor.js"),
-                  teDbgModulePath = join(this._dbgModuleDir, "taskexplorer.debug.js"),
-                  rtDbgModulePath = join(this._dbgModuleDir, "runtime.debug.js"),
-                  vendorDbgModulePath = join(this._dbgModuleDir, "vendor.debug.js"),
-                  tePath = join(this._runtimeDir, "taskexplorer.js"),
-                  rtPath = join(this._runtimeDir, "runtime.js"),
-                  vendorPath = join(this._runtimeDir, "vendor.js"),
-                  remoteBasePath: `app/${string}/v${string}` = `app/vscode-taskexplorer/v${version}/${env}`;
+                  rtFiles = await readdir(this._paths.runtimeDir);
+
+            const teRelModulePath = join(this._paths.dbgModuleDir, "taskexplorer.js"),
+                  rtRelModulePath = join(this._paths.dbgModuleDir, "runtime.js"),
+                  vendorRelModulePath = join(this._paths.dbgModuleDir, "vendor.js"),
+                  teDbgModulePath = join(this._paths.dbgModuleDir, "taskexplorer.debug.js"),
+                  rtDbgModulePath = join(this._paths.dbgModuleDir, "runtime.debug.js"),
+                  vendorDbgModulePath = join(this._paths.dbgModuleDir, "vendor.debug.js"),
+                  remoteBasePath: `app/${string}/v${string}` = `app/vscode-taskexplorer/v${version}/${env}`,
+                  tePath = <string>rtFiles.find(f => /taskexplorer\.[a-z0-9]{20,}\.js/.test(f)),
+                  rtPath = <string>rtFiles.find(f => /runtime\.[a-z0-9]{20,}\.js/.test(f)),
+                  vendorPath = <string>rtFiles.find(f => /vendor\.[a-z0-9]{20,}\.js/.test(f));
             if (clean)
             {
-                deleteFileSync(teRelModulePath);
-                deleteFileSync(rtRelModulePath);
-                deleteFileSync(vendorRelModulePath);
-                deleteFileSync(teDbgModulePath);
-                deleteFileSync(rtDbgModulePath);
-                deleteFileSync(vendorDbgModulePath);
+                await deleteDir(this._paths.dbgModuleDir);
+                createDirSync(this._paths.dbgModuleDir);
             }
+            //
+            // Retrieve the `debug` modules from the server if not already downloaded and save
+            // them to the globalStorage directory (full path defined as *DbgModulePath)
+            //
             await execIf(!pathExistsSync(teDbgModulePath), async () =>
             {
                 const moduleContent = await this.httpGet(`${remoteBasePath}/taskexplorer.debug.js`);
@@ -483,9 +466,25 @@ export class TeLog implements ILog, Disposable
                 const moduleContent = await this.httpGet(`${remoteBasePath}/vendor.debug.js`);
                 await writeFile(vendorDbgModulePath, Buffer.from(moduleContent));
             });
-            await execIf(!pathExistsSync(teRelModulePath), () => copyFile(tePath, teRelModulePath), this);
-            await execIf(!pathExistsSync(rtRelModulePath), () => copyFile(rtPath, rtRelModulePath), this);
-            await execIf(!pathExistsSync(vendorRelModulePath), () => copyFile(vendorPath, vendorRelModulePath), this);
+            //
+            // Make a copy of the `release` modules currently in the runtime directory if they're
+            // not already stored @ globslStorage/extension_name (full path defined as *RelModulePath)
+            //
+            await execIf(
+                !pathExistsSync(teRelModulePath) && pathExistsSync(tePath),
+                () => copyFile(tePath, teRelModulePath), this, [ this.warn, "could not load main debug module" ]
+            );
+            await execIf(
+                !pathExistsSync(rtRelModulePath) && pathExistsSync(rtPath),
+                () => copyFile(rtPath, rtRelModulePath), this, [ this.warn, "could not load runtime debug module" ]
+            );
+            await execIf(
+                !pathExistsSync(vendorRelModulePath) && pathExistsSync(vendorPath),
+                () => copyFile(vendorPath, vendorRelModulePath), this, [ this.warn, "could not load vendor debug module" ]
+            );
+            //
+            // Swap release / debug modules i.e. overwrite the current runtime files in /dist
+            //
             if (swap)
             {
                 await copyFile(!enable ? teRelModulePath : teDbgModulePath, tePath);
@@ -501,32 +500,45 @@ export class TeLog implements ILog, Disposable
     {
         return wrap(async () =>
         {
-            const downloadWasm = !pathExistsSync(this._wasmPath),
-                  downloadSourceMap = !pathExistsSync(this._srcMapPath),
+            const wasmRtPath = join(this._paths.runtimeDir, "mappings.wasm"),
+                  wasmPath = join(this._paths.dbgModuleDir, "mappings.wasm"),
+                  downloadWasm = !pathExistsSync(wasmPath),
+                  downloadSourceMap = !pathExistsSync(this._paths.srcMapPath),
                   remoteBasePath: `app/vscode-taskexplorer/v${string}` = `app/vscode-taskexplorer/v${version}/${env}`;
             if (clean)
             {
-                deleteFileSync(this._wasmPath);
-                deleteFileSync(this._srcMapPath);
+                deleteFileSync(wasmPath);
+                deleteFileSync(this._paths.srcMapPath);
             }
-            await execIf(downloadWasm, async () =>
+            //
+            // Retrieve the sourcemap support files from the server if not already downloaded and save
+            // them to the globalStorage directory (full path defined as *DbgModulePath).  This includes
+            // the <module>.js.map file and the assembly file from the `source-map` package `mappings.wasm`.
+            //
+            await execIf(downloadWasm, async () => // Assembly file `mappings.wasm`
             {
                 const wasmContent = await this.httpGet(`${remoteBasePath}/mappings.wasm`);
-                await writeFile(this._wasmPath, Buffer.from(wasmContent));
+                await writeFile(wasmPath, Buffer.from(wasmContent));
             });
-            await execIf(downloadSourceMap, async () =>
+            await execIf(downloadSourceMap, async () => // Sourcemap file `<module>.js.map`
             {
-                const srcMapContent = await this.httpGet(`${remoteBasePath}/${this._moduleName}.js.map`);
-                await writeFile(this._srcMapPath, Buffer.from(srcMapContent));
+                const srcMapContent = await this.httpGet(`${remoteBasePath}/${this._paths.moduleName}.js.map`);
+                await writeFile(this._paths.srcMapPath, Buffer.from(srcMapContent));
             });
-            await copyFile(this._wasmPath, this._wasmRtPath);
-            const srcMap = await readJsonAsync<RawSourceMap>(this._srcMapPath);
+            //
+            // Assembly file must reside in the same directory as the sourcemap file, copy it there
+            //
+            await copyFile(wasmPath, wasmRtPath);
+            //
+            // Create SourceMap instance and register it's destroy call as a disposable
+            //
+            const srcMap = await readJsonAsync<RawSourceMap>(this._paths.srcMapPath);
             this._srcMapConsumer = await new SourceMapConsumer(srcMap);
             this._disposables.push({
                 dispose: () => wrap(c => c.destroy(), [ this._error ], this, this._srcMapConsumer)
             });
         },
-        [ this._error, "Unable to install source map supprt for error tracing" ], this);
+        [ this._error, "Unable to install source map support for error tracing" ], this);
     };
 
 
@@ -687,7 +699,7 @@ export class TeLog implements ILog, Disposable
     private processLogEnableChange = async () =>
     {
         const enable = this._logControl.enable,
-              enabledPreviously = enable && pathExistsSync(join(this._dbgModuleDir, "taskexplorer.js"));
+              enabledPreviously = enable && pathExistsSync(join(this._paths.dbgModuleDir, "taskexplorer.js"));
         if (this._logControl.enableModuleReload || !enabledPreviously)
         {
             const msg = `To ${enable ? "enable" : "disable"} logging ${enabledPreviously ? "for the 1st time" : ""}, ` +
@@ -704,10 +716,30 @@ export class TeLog implements ILog, Disposable
     };
 
 
+    private setAppSpecifics = (config: IConfiguration) =>
+    {
+        execIf(this._logConfig.errorChannel, (c) =>
+        {
+            this._disposables.push(
+                c, commands.registerCommand(Commands.ShowOutputWindow, (show: boolean) => this.showOutput(show, c))
+            );
+        }, this);
+        execIf(this._logConfig.outputChannel, (c) =>
+        {
+            this._disposables.push(
+                c, commands.registerCommand(Commands.ShowErrorOutputWindow, (show: boolean) => this.showOutput(show, c), this)
+            );
+        }, this);
+        this._disposables.push(
+            config.onDidChange(this.processConfigChanges, this)
+        );
+    };
+
+
     private setFileName = () =>
     {
         const locISOTime = (new Date(Date.now() - this._logState.tzOffset)).toISOString().slice(0, -1).split("T")[0].replace(/[\-]/g, "");
-        this._logState.fileName = join(this._logConfig.dirPath, `vscode-${this._moduleName}-${locISOTime}.log`);
+        this._logState.fileName = join(this._logConfig.dirPath, `vscode-${this._paths.moduleName}-${locISOTime}.log`);
         if (this._logControl.enableFile) {
             this.writeLogFileLocation();
         }
@@ -718,7 +750,7 @@ export class TeLog implements ILog, Disposable
     };
 
 
-    private showOutput = async(show: boolean, channel: OutputChannel) =>
+    private showOutput = async(show: boolean, channel: ILogOutputChannel) =>
     {
         if (show) {
             await commands.executeCommand<void>(VsCodeCommands.FocusOutputWindowPanel);
@@ -753,37 +785,48 @@ export class TeLog implements ILog, Disposable
 
 
     private _warn = (msg: any, params?: (string|any)[][], queueId?: string) =>
+    {
         this._error(msg, params, queueId, [ this.allowScaryColors ? this.symbols.color.warning : this.symbols.blue.warning, this.symbols.warning ]);
+    };
 
 
-    private _withColor = (msg: string, color: LogColor) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
+    withColor = (msg: string, color: LogColor) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
 
 
     private writeErrorChannelHeader = () =>
     {
-        this._logConfig.errorChannel.appendLine("");
-        this._logConfig.errorChannel.appendLine("****************************************************************************************************");
-        this._logConfig.errorChannel.appendLine(" Task Explorer Error Logging Channel");
-        this._logConfig.errorChannel.appendLine("****************************************************************************************************");
-        this._logConfig.errorChannel.appendLine("");
+        execIf(this._logConfig.errorChannel, (c) =>
+        {
+            c.write("");
+            c.write("****************************************************************************************************");
+            c.write(" Task Explorer Error Logging Channel");
+            c.write("****************************************************************************************************");
+            c.write("");
+        }, this);
     };
 
 
     private writeOutputChannelHeader = () =>
     {
-        this._logConfig.outputChannel.appendLine("");
-        this._logConfig.outputChannel.appendLine("****************************************************************************************************");
-        this._logConfig.errorChannel.appendLine(" Task Explorer Error Logging Channel");
-        this._logConfig.outputChannel.appendLine("****************************************************************************************************");
-        this._logConfig.outputChannel.appendLine("");
+        execIf(this._logConfig.outputChannel, (c) =>
+        {
+            c.write("");
+            c.write("****************************************************************************************************");
+            c.write(" Task Explorer Error Logging Channel");
+            c.write("****************************************************************************************************");
+            c.write("");
+        }, this);
     };
 
 
     private writeLogFileLocation = () =>
     {
-        this._logConfig.outputChannel.appendLine("***********************************************************************************************");
-        this._logConfig.outputChannel.appendLine(` Task Explorer Log File: ${this._logState.fileName}`);
-        this._logConfig.outputChannel.appendLine("***********************************************************************************************");
+        execIf(this._logConfig.outputChannel, (c) =>
+        {
+            c.write("***********************************************************************************************");
+            c.write(` Task Explorer Log File: ${this._logState.fileName}`);
+            c.write("***********************************************************************************************");
+        }, this);
         console.log(`    ${this.symbols.color.info} ${this.withColor("*************************************************************************************", this.colors.grey)}`);
         console.log(`    ${this.symbols.color.info} ${this.withColor(` Task Explorer Log File: ${this._logState.fileName}`, this.colors.grey)}`);
         console.log(`    ${this.symbols.color.info} ${this.withColor("*************************************************************************************", this.colors.grey)}`);
@@ -876,12 +919,12 @@ export class TeLog implements ILog, Disposable
         } //
          // VSCODE OUTPUT WINDOW LOGGING
         //
-        if (this._logControl.enableOutputWindow && (isMinLevel || isError))
+        if (this._logControl.enableOutputWindow && this._logConfig.outputChannel && (isMinLevel || isError))
         {
             const ts = this.getStamp().stamp  + " " + this.symbols.pointer;
-            this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logConfig.outputChannel.appendLine, this._logConfig.outputChannel, ts, false);
-            if (isError && this._srcMapConsumer && (!this._errorsWritten || msg)) {
-                this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logConfig.errorChannel.appendLine, this._logConfig.errorChannel, ts, false);
+            this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logConfig.outputChannel.write, this._logConfig.outputChannel, ts, false);
+            if (isError && this._logConfig.errorChannel && this._srcMapConsumer && (!this._errorsWritten || msg)) {
+                this.writeInternal(msg, logPad, queueId, !!isValue, !!isError, this._logConfig.errorChannel.write, this._logConfig.errorChannel, ts, false);
             }
         } //
          // CONSOLE LOGGING
@@ -933,7 +976,6 @@ export class TeLog implements ILog, Disposable
     value = this._value;
     values = this._values;
     warn = this._warn;
-    withColor = this._withColor;
     write = this._write;
     write2 = this._write2;
 

@@ -59,13 +59,14 @@ import { AppPublisherTaskProvider } from "../task/provider/appPublisher";
 import { RemoveFromExcludesCommand } from "./command/removeFromExcludes";
 import {
 	ExtensionContext, ExtensionMode, tasks, workspace, WorkspaceFolder, env, TreeItem, TreeView, window,
-	Disposable, EventEmitter, Event
+	Disposable, EventEmitter, Event, LogLevel
 } from "vscode";
 import {
 	IConfiguration, ITaskExplorerProvider, IStorage, ITaskTreeView, ITeFilesystem, ITePathUtilities, ILog,
 	ITePromiseUtilities, ITeStatusBar, ITeTaskTree, ITeTaskUtilities, ITeTypeUtilities, ITeUtilities, ITeKeys,
-	ITeWrapper, TeRuntimeEnvironment, ILogControl, ITeObjectUtilities, ISpmServer, CallbackOptions
+	ITeWrapper, TeRuntimeEnvironment, ILogControl, ITeObjectUtilities, ISpmServer, CallbackOptions, ILogConfig
 } from "../interface";
+import { join } from "path";
 
 
 export class TeWrapper implements ITeWrapper, Disposable
@@ -128,6 +129,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._context = context;
         this._storage = storage;
         this._configuration = configuration;
+		this.initLocalization();
 		this._eventQueue = new EventQueue(this);
 		this._onReady = new EventEmitter<void>();
 		this._onInitialized = new EventEmitter<void>();
@@ -135,12 +137,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
 		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
-		Object.entries<string>(AllConstants.Strings).filter(s => s[1].includes("|")).forEach(e =>
-		{   // TODO - Localization
-			const lPair = e[1].split("|");
-			AllConstants.Strings[e[0]] = this.localize(lPair[0], lPair[1]);
-		});
-		this._log = new TeLog(context, configuration);
+		this._log = this.createLog();
 		this._statusBar = new TeStatusBar(this);
 		this._teContext = new TeContext();
 		this._server = new TeServer(this);
@@ -198,12 +195,22 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._licenseManager,
 			this._welcomePage,
 			this._releaseNotesPage,
-			this._parsingReportPage
+			this._parsingReportPage,
+			this._log
 		];
 	}
 
 
 	dispose = (): void => this._disposables.splice(0).forEach(d => d.dispose());
+
+
+	createLog = (): TeLog =>
+	{
+		const sPath = this._context.globalStorageUri.fsPath,
+			  mPath = join(this._context.extensionUri.fsPath, "dist", "taskexplorer.js"),
+			  pkgJson = this._context.extension.packageJSON;
+		return new TeLog(mPath, sPath, pkgJson, this.logGetConfig(), this.logGetControl(), this._configuration);
+	};
 
 
 	init = async(): Promise<void> =>
@@ -227,33 +234,82 @@ export class TeWrapper implements ITeWrapper, Disposable
 		await this._teContext.setContext(AllConstants.Context.Dev, this.dev);
 		await this._teContext.setContext(AllConstants.Context.Tests, this.tests);
         await this._teContext.setContext(AllConstants.Context.Enabled, this.utils.isTeEnabled());
-		if (!workspace.isTrusted) {
-			await this._teContext.setContext(AllConstants.Context.Untrusted, true);
-		}
+		await this._teContext.setContext(AllConstants.Context.Untrusted, !workspace.isTrusted);
 		this._disposables.push(
 			this._teContext.onDidChangeContext(() => {}, this) // cover until used somewhere
 		);
 	};
 
 
+	private initLocalization = () =>
+	{
+		Object.entries<string>(AllConstants.Strings).filter(s => s[1].includes("|")).forEach(e =>
+		{   // TODO - Localization
+			const lPair = e[1].split("|");
+			AllConstants.Strings[e[0]] = this.localize(lPair[0], lPair[1]);
+		});
+	};
+
+
 	private initLog = async (): Promise<void> =>
 	{
-		const isNewVersionOrInstall = this.isNewInstall || this.versionChanged;
+		const prompt = utilities.promptRestart;
 		let sb: any = { dispose: utilities.emptyFn, hide: utilities.emptyFn };
-		const eMsg = "Unable to install logging support files",
-			  wrapCbOpts: CallbackOptions = [ /* catch */window.showErrorMessage, /* finally */() => { sb.hide(); sb.dispose(); }, eMsg ];
-		if (isNewVersionOrInstall)
+		const wrapOpts: CallbackOptions = [
+			/* catch   */window.showErrorMessage,
+			/* finally */() => { sb.hide(); sb.dispose(); },
+			/* err msg */"Unable to install logging support files"
+		];
+		utilities.execIf(this.versionChanged, () =>
 		{
 			sb = window.createStatusBarItem(1, 100);
 			sb.text = `$(loading~spin) ${this.extensionTitleShort}: Installing debug support files`;
 			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
 			sb.show();
-		}
-		await this.utils.wrap(this._log.init, wrapCbOpts, this, this, this._version, this.env, isNewVersionOrInstall, this.server.get, utilities.promptRestart);
+		});
+		await this.utils.wrap(
+			this._log.init, wrapOpts, this, this, this._version, this.env, this.versionChanged, this.server.get, prompt
+		);
 		this.log.methodEvent("initializing extension", "wrapper", 1, [
 			[ "version", this._version ], [ "previous version", this._previousVersion  ],
 		]);
 	};
+
+
+	localize = (_key: string, defaultMessage: string): string => defaultMessage; // this._localize(key, defaultMessage);
+
+
+    private logGetConfig = (): ILogConfig =>
+    {
+        const context = this._context,
+			  pkgJson = context.extension.packageJSON;
+        return {
+            channelWriteFn: "appendLine",
+            dirPath: context.logUri.fsPath,
+            errorChannel: window.createOutputChannel(`${context.extension.packageJSON.displayName} (Errors)`),
+            extensionAuthor: typeUtils.isObject(pkgJson.author) ? pkgJson.author.name : pkgJson.name,
+            extensionId: context.extension.id,
+            isTests: context.extensionMode === ExtensionMode.Test,
+            outputChannel: window.createOutputChannel(context.extension.packageJSON.displayName)
+        };
+    };
+
+
+    private logGetControl = (): ILogControl =>
+    {
+        return {
+            blockScaryColors: this.tests,
+            enable: this._configuration.get<boolean>(AllConstants.Config.LogEnable, false),
+            enableOutputWindow: this._configuration.get<boolean>(AllConstants.Config.LogEnableOutputWindow, true),
+            enableFile: this._configuration.get<boolean>(AllConstants.Config.LogEnableFile, false),
+            enableModuleReload: this._configuration.get<boolean>(AllConstants.Config.LogEnableModuleReload, false),
+            level: this._configuration.get<LogLevel>(AllConstants.Config.LogLevel, 1),
+            trace: false,
+            valueWhiteSpace: 45,
+            writeToConsole: false,
+            writeToConsoleLevel: 2
+        };
+    };
 
 
 	private migrate = () =>
@@ -482,10 +538,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 	get keys(): ITeKeys { return AllConstants; }
 	get licenseManager(): LicenseManager { return this._licenseManager; }
 	get licensePage(): LicensePage { return this._licensePage; }
-	//
-	// TODO - Localization
-	//
-	localize = (_key: string, defaultMessage: string): string => defaultMessage; // this._localize(key, defaultMessage);
 	get log(): ILog { return this._log; }
 	get logControl(): ILogControl { return this._log.control; }
 	get objUtils(): ITeObjectUtilities { return objUtils; }

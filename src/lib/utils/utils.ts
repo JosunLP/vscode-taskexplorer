@@ -1,3 +1,6 @@
+/* eslint-disable jsdoc/require-returns */
+/* eslint-disable jsdoc/require-param */
+/* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable no-redeclare */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
@@ -153,8 +156,8 @@ export const getPackageManager = () =>
  * Get a random integer betwen min and max, inclusive
  *
  * @since 3.0.0
- * @param [max=100000] The maximum number to return
- * @param [min=0] The minimum number to return
+ * @param [max] The maximum number to return
+ * @param [min] The minimum number to return
  */
 export const getRandomNumber = (max = 100000, min = 0) =>
 {
