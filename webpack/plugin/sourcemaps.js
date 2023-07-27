@@ -3,6 +3,11 @@
 
 /**
  * @module webpack.plugin.sourcemaps
+ *
+ * IMPORTANT NOTE:
+ *
+ * This module contains project specifc code and the sync script should be modified
+ * if necessary when changes are made to this file.
  */
 
 const webpack = require("webpack");

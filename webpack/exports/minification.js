@@ -75,5 +75,4 @@ const minification = (env, wpConfig) =>
 };
 
 
-
 module.exports = minification;
