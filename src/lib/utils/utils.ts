@@ -303,10 +303,11 @@ export const popObjIfExistsBy = <T>(rec: Record<string, T> | undefined, fn: (k: 
 // export const pluralize = (s: string, count: number) => `${count} ${s}${count === 1 ? "" : "s"}`;
 
 
-export const promptRestart = async (message: string): Promise<boolean> =>
+export const promptRestart = async (message: string, callback: () => void | PromiseLike<void>): Promise<boolean> =>
 {
     const action = await window.showInformationMessage(message, "Cancel", "Restart");
     if (action === "Restart") {
+        await callback();
         return new Promise(resolve => setTimeout(c => { commands.executeCommand(c); resolve(true); }, 1, VsCodeCommands.Reload));
     }
     return false;

@@ -156,9 +156,9 @@ suite("Util Tests", () =>
 		try {
 			commands.executeCommand = async <T>(args: any) => { return args as T; };
 			overrideNextShowInputBox("Restart", true);
-			await teWrapper.utils.promptRestart("Test restart message 1");
+			await teWrapper.utils.promptRestart("Test restart message 1", () => {});
 			overrideNextShowInputBox("Cancel");
-			await teWrapper.utils.promptRestart("Test restart message 2");
+			await teWrapper.utils.promptRestart("Test restart message 2", async () => { await teWrapper.utils.sleep(1); });
 		}
 		finally {
 			commands.executeCommand = originalFn;

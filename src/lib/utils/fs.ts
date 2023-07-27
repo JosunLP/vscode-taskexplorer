@@ -8,7 +8,7 @@
  */
 
 import * as fs from "fs";
-import { glob } from "glob";
+import { glob, IOptions } from "glob";
 import * as path from "path";
 import { emptyFn, execIf, execIf2, wrap } from "./utils";
 
@@ -182,7 +182,7 @@ export const deleteFile = (file: string): Promise<void> =>
 export const deleteFileSync = (file: string): void => wrap(() => fs.unlinkSync(path.resolve(cwd, file)), [ emptyFn ]);
 
 
-export const findFiles = (pattern: string, options: any): Promise<string[]> =>
+export const findFiles = (pattern: string, options: IOptions): Promise<string[]> =>
 {
     return new Promise((resolve, reject) =>
     {

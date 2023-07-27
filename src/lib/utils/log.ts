@@ -4,40 +4,36 @@
 import { apply } from "./object";
 import { basename, dirname, join } from "path";
 import { execIf, popIfExistsBy, wrap } from "./utils";
-import { commands, ConfigurationChangeEvent, window } from "vscode";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
-import { appendFileSync, copyFile, createDirSync, deleteDir, deleteFileSync, pathExistsSync, readJsonAsync, writeFile } from "./fs";
 import {
-    Commands, IConfiguration, ILog, ILogConfig, ILogControl, ILogState, ITeWrapper, LogLevel, VsCodeCommands,
-    SpmServerResource, ILogSymbols, LogColor, ILogColors, ILogOutputChannel, ILogDisposable
+    appendFileSync, copyFile, createDirSync, deleteDir, deleteFileSync, findFiles, pathExistsSync, readJsonAsync, writeFile
+} from "./fs";
+import {
+    ILog, ILogConfig, ILogControl, ILogState, LogLevel, ILogSymbols, LogColor, ILogColors, ILogDisposable, LogPromptRestartFn, LogHttpGetFn
 } from "../../interface";
-import { readdir } from "fs/promises";
 
-
-type HttpGetFunction = (url: SpmServerResource, ...args: any[]) => Promise<ArrayBuffer>;
+// export class LogOutputChannel implements ILogOutputChannel
+// {
+//     constructor(writeFn: (message: string) => void) {}
+// }
 
 
 /**
- * @class TeLog
- * @since 3.0.0
+ * @class Log
  */
-export class TeLog implements ILog, ILogDisposable
+export class Log implements ILog, ILogDisposable
 {
-    protected readonly _logState: ILogState;
-    protected readonly _logConfig: ILogConfig;
-    protected readonly _logControl: ILogControl;
-
-    private _debugMode = false;
     private _errorsWritten = 0;
-    private _wrapper: ITeWrapper | undefined;
-    private _httpGetFn: HttpGetFunction | undefined;
     private _fileNameTimer: NodeJS.Timeout | undefined;
     private _srcMapConsumer: BasicSourceMapConsumer | undefined;
 
+    private readonly _logState: ILogState;
     private readonly _symbols: ILogSymbols;
-    private readonly _config: IConfiguration;
-    private readonly _disposables: ILogDisposable[];
+    private readonly _logConfig: ILogConfig;
+    private readonly _logControl: ILogControl;
+    private readonly _logControlPrev: ILogControl;
+    private readonly _baseDisposables: ILogDisposable[];
     private readonly _separator = "-----------------------------------------------------------------------------------------";
     private readonly _stackLineParserRgx = /at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i;
     private readonly _stackLineFilterRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
@@ -49,6 +45,7 @@ export class TeLog implements ILog, ILogDisposable
         modulePath: string;
         runtimeDir: string;
         dbgModuleDir: string;
+        dbgModuleFile: string;
     };
 
     private readonly _colors: ILogColors =
@@ -69,28 +66,25 @@ export class TeLog implements ILog, ILogDisposable
     };
 
 
-    constructor(logConfig: ILogConfig, logControl: ILogControl, config: IConfiguration)
+    constructor(logConfig: ILogConfig, logControl: ILogControl)
     {
         this.enable(false);
-        this._config = config;
-        this._disposables = [];
+        this._baseDisposables = [];
         this._symbols = this.getSymbols();
         this._paths = this.getPaths(logConfig);
         this._logState = this.getDefaultState();
         this._logConfig = apply({}, logConfig);
         this._logControl = apply({}, logControl);
-        createDirSync(this._paths.dbgModuleDir);
-        createDirSync(this._logConfig.dirPath);
+        this._logControlPrev = apply({}, logControl);
         this.writeErrorChannelHeader();
         this.writeOutputChannelHeader();
         this.setFileName();
-        this.setAppSpecifics(config); // TODO =- Move to app-level code when move to standalone log module
     }
 
     dispose = () =>
     {
         clearTimeout(this._fileNameTimer);
-        this._disposables.splice(0).forEach(d => d.dispose());
+        this._baseDisposables.splice(0).forEach(d => d.dispose());
         //
         // TODO - Delete depending on config setting ModuleReplace?
         //
@@ -98,15 +92,14 @@ export class TeLog implements ILog, ILogDisposable
     };
 
 
-    get colors(): ILogColors { return this._colors; }
+    get colors(): Readonly<ILogColors> { return this._colors; }
+    get config(): Readonly<ILogConfig> { return this._logConfig; }
     get control(): ILogControl { return this._logControl; }
     get lastPad(): string { return this._logState.lastLogPad; }
-    get state(): ILogState { return this._logState; }
-    get symbols(): ILogSymbols { return this._symbols; }
-    get wrapper(): ITeWrapper { return <ITeWrapper>this._wrapper; }
+    get state(): Readonly<ILogState> { return this._logState; }
+    get symbols(): Readonly<ILogSymbols> { return this._symbols; }
 
     private get allowScaryColors(): boolean { return !this._logConfig.isTests || !this._logControl.blockScaryColors; }
-    private get httpGet(): HttpGetFunction { return <HttpGetFunction>this._httpGetFn; }
 
 
     private _blank = (level?: LogLevel, queueId?: string) => this._write("", level, "", queueId);
@@ -122,7 +115,7 @@ export class TeLog implements ILog, ILogDisposable
     };
 
 
-    protected enable = (enable: boolean) =>
+    private enable = (enable: boolean) =>
     {
         apply(this,
         {
@@ -244,7 +237,7 @@ export class TeLog implements ILog, ILogDisposable
     };
 
 
-    private errorFile = (msg: string, symbols: [ string, string ]) =>
+    private errorFile = (msg: string) =>
     {
         apply(this._logControl, { writeToConsole: false, enableFile: true, enableOutputWindow: false });
         this._write(`*** ${msg}`, 1, "", undefined, false, true);
@@ -261,7 +254,7 @@ export class TeLog implements ILog, ILogDisposable
     private errorWriteLogs = (lMsg: string, fileOn: boolean, symbols: [ string, string ], queueId?: string) =>
     {
         this.errorConsole(lMsg, symbols, queueId); // always write errors to console
-        if (fileOn) this.errorFile(lMsg, symbols);
+        if (fileOn) this.errorFile(lMsg);
         this.errorOutputWindow(lMsg, symbols);     // always write errors to output window
     };
 
@@ -318,13 +311,17 @@ export class TeLog implements ILog, ILogDisposable
     private getPaths = (logConfig: ILogConfig) =>
     {
         const moduleFile = basename(logConfig.modulePath),
+              moduleName = moduleFile.replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
               dbgModuleDir = join(logConfig.storageDirectory, "debug");
+        createDirSync(dbgModuleDir);
+        createDirSync(logConfig.logDirectory);
         return {
             moduleFile,
+            moduleName,
             dbgModuleDir,
+            dbgModuleFile: `${moduleFile}.debug.js`,
             modulePath: logConfig.modulePath,
             runtimeDir: dirname(logConfig.modulePath),
-            moduleName: moduleFile.replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
             srcMapPath: join(dbgModuleDir, `${moduleFile}.map`)
         };
     };
@@ -397,21 +394,15 @@ export class TeLog implements ILog, ILogDisposable
     });
 
 
-    init = async (wrapper: ITeWrapper, version: string, env: string, newVersionOrInstall: boolean, httpGetFn: HttpGetFunction, promptRestartFn: (...args: any[]) => any) =>
+    init = async (isNewInstallOrVersion: boolean) =>
     {
-        this._wrapper = wrapper;
-        this._httpGetFn = httpGetFn;
-        await this.installDebugSupport(version, env, newVersionOrInstall);
-        await this.installSourceMapSupport(version, env, newVersionOrInstall);
-        //
-        // Logging is disabled by default in construction of the logging module, take any
-        // necessary actions if it's enabled in user settings
-        //
+        await this.installDebugSupport(isNewInstallOrVersion);
+        await this.installSourceMapSupport(isNewInstallOrVersion);
         if (this._logControl.enable)
         {
-            if (newVersionOrInstall) {
-                const msg = "New debug support files have been installed, a restart is required to re-enable logging";
-                queueMicrotask(() => promptRestartFn(msg));
+            if (isNewInstallOrVersion) {
+                const msg = "Debug support files have been installed, a restart is required to re-enable logging";
+                void this._logConfig.promptRestartFn(msg);
             }
             else {
                 this.enable(this._logControl.enable);
@@ -420,83 +411,77 @@ export class TeLog implements ILog, ILogDisposable
     };
 
 
-    private installDebugSupport = (version: string, env: string, clean?: boolean, swap?: boolean): Promise<void> =>
+    private installDebugSupport = (clean: boolean, swap?: boolean): Promise<void> =>
     {
-        const copyDbgFile = (name: string) =>
-        {
-
-        };
-
         return wrap(async () =>
         {
             const enable = this._logControl.enable,
-                  rtFiles = await readdir(this._paths.runtimeDir);
-
-            const teRelModulePath = join(this._paths.dbgModuleDir, "taskexplorer.js"),
-                  rtRelModulePath = join(this._paths.dbgModuleDir, "runtime.js"),
-                  vendorRelModulePath = join(this._paths.dbgModuleDir, "vendor.js"),
-                  teDbgModulePath = join(this._paths.dbgModuleDir, "taskexplorer.debug.js"),
-                  rtDbgModulePath = join(this._paths.dbgModuleDir, "runtime.debug.js"),
-                  vendorDbgModulePath = join(this._paths.dbgModuleDir, "vendor.debug.js"),
-                  remoteBasePath: `app/${string}/v${string}` = `app/vscode-taskexplorer/v${version}/${env}`,
-                  tePath = <string>rtFiles.find(f => /taskexplorer\.[a-z0-9]{20,}\.js/.test(f)),
-                  rtPath = <string>rtFiles.find(f => /runtime\.[a-z0-9]{20,}\.js/.test(f)),
-                  vendorPath = <string>rtFiles.find(f => /vendor\.[a-z0-9]{20,}\.js/.test(f));
+                  rtFiles = await findFiles("*.js", { cwd: this._paths.runtimeDir }),
+                  rtReleaseFiles = rtFiles.map(f => basename(f.replace("debug.", ""))),
+                  rtDebugFiles = rtFiles.map(f => basename(f.replace(".js", ".debug.js"))),
+                  isCurrentlyDbg = !!rtFiles.find(f => f.includes(".debug")),
+                  remotePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._logConfig.version}/${this._logConfig.env}`;
+            //
+            // Calling application should `clean` when there is a version change or for a new install
+            // (as user may have uninstalled and reinstralled, there's no way for the app to perform
+            // cleanup when unsinstalled in some cases)
+            //
             if (clean)
             {
                 await deleteDir(this._paths.dbgModuleDir);
                 createDirSync(this._paths.dbgModuleDir);
             }
             //
-            // Retrieve the `debug` modules from the server if not already downloaded and save
+            // Retrieve the debug modules from the server if not already downloaded and save
             // them to the globalStorage directory (full path defined as *DbgModulePath)
             //
-            await execIf(!pathExistsSync(teDbgModulePath), async () =>
+            if ((!isCurrentlyDbg && swap === true) || swap === undefined)
             {
-                const moduleContent = await this.httpGet(`${remoteBasePath}/taskexplorer.debug.js`);
-                await writeFile(teDbgModulePath, Buffer.from(moduleContent));
-            });
-            await execIf(!pathExistsSync(rtDbgModulePath), async () =>
-            {
-                const moduleContent = await this.httpGet(`${remoteBasePath}/runtime.debug.js`);
-                await writeFile(rtDbgModulePath, Buffer.from(moduleContent));
-            });
-            await execIf(!pathExistsSync(vendorDbgModulePath), async () =>
-            {
-                const moduleContent = await this.httpGet(`${remoteBasePath}/vendor.debug.js`);
-                await writeFile(vendorDbgModulePath, Buffer.from(moduleContent));
-            });
+                for (const file of rtDebugFiles)
+                {
+                    const storageFilePath = join(this._paths.dbgModuleDir, file);
+                    await execIf(
+                        !pathExistsSync(storageFilePath),
+                        async () => {
+                            const content = await this._logConfig.httpGetFn(`${remotePath}/${file}`);
+                            await writeFile(storageFilePath, Buffer.from(content));
+                        },
+                        this, [ this.warn, `could not copy module ${file}` ]
+                    );
+                }
+            }
             //
-            // Make a copy of the `release` modules currently in the runtime directory if they're
+            // Make a copy of the release modules currently in the runtime directory if they're
             // not already stored @ globslStorage/extension_name (full path defined as *RelModulePath)
             //
-            await execIf(
-                !pathExistsSync(teRelModulePath) && pathExistsSync(tePath),
-                () => copyFile(tePath, teRelModulePath), this, [ this.warn, "could not load main debug module" ]
-            );
-            await execIf(
-                !pathExistsSync(rtRelModulePath) && pathExistsSync(rtPath),
-                () => copyFile(rtPath, rtRelModulePath), this, [ this.warn, "could not load runtime debug module" ]
-            );
-            await execIf(
-                !pathExistsSync(vendorRelModulePath) && pathExistsSync(vendorPath),
-                () => copyFile(vendorPath, vendorRelModulePath), this, [ this.warn, "could not load vendor debug module" ]
-            );
+            if ((isCurrentlyDbg && swap === true) || swap === undefined)
+            {
+                for (const file of rtReleaseFiles)
+                {
+                    const storageFilePath = join(this._paths.dbgModuleDir, file);
+                    await execIf(
+                        !pathExistsSync(join(this._paths.dbgModuleDir, file)),
+                        () => copyFile(storageFilePath, storageFilePath),
+                        this, [ this.warn, `could not load debug module ${file}` ]
+                    );
+                }
+            }
             //
             // Swap release / debug modules i.e. overwrite the current runtime files in /dist
             //
             if (swap)
             {
-                await copyFile(!enable ? teRelModulePath : teDbgModulePath, tePath);
-                await copyFile(!enable ? rtRelModulePath : rtDbgModulePath, rtPath);
-                await copyFile(!enable ? vendorRelModulePath : vendorDbgModulePath, vendorPath);
+                const rtFiles = !enable ? rtReleaseFiles : rtDebugFiles;
+                for (const file of rtFiles) {
+                    await copyFile(join(this._paths.dbgModuleDir, file), join(this._paths.runtimeDir, file));
+                }
             }
         },
         [ this._error, "Unable to install logging supprt" ], this);
     };
 
 
-    private installSourceMapSupport = (version: string, env: string, clean?: boolean): Promise<void> =>
+    private installSourceMapSupport = (clean?: boolean): Promise<void> =>
     {
         return wrap(async () =>
         {
@@ -504,7 +489,7 @@ export class TeLog implements ILog, ILogDisposable
                   wasmPath = join(this._paths.dbgModuleDir, "mappings.wasm"),
                   downloadWasm = !pathExistsSync(wasmPath),
                   downloadSourceMap = !pathExistsSync(this._paths.srcMapPath),
-                  remoteBasePath: `app/vscode-taskexplorer/v${string}` = `app/vscode-taskexplorer/v${version}/${env}`;
+                  remoteBasePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._logConfig.version}/${this._logConfig.env}`;
             if (clean)
             {
                 deleteFileSync(wasmPath);
@@ -517,12 +502,12 @@ export class TeLog implements ILog, ILogDisposable
             //
             await execIf(downloadWasm, async () => // Assembly file `mappings.wasm`
             {
-                const wasmContent = await this.httpGet(`${remoteBasePath}/mappings.wasm`);
+                const wasmContent = await this._logConfig.httpGetFn(`${remoteBasePath}/mappings.wasm`);
                 await writeFile(wasmPath, Buffer.from(wasmContent));
             });
             await execIf(downloadSourceMap, async () => // Sourcemap file `<module>.js.map`
             {
-                const srcMapContent = await this.httpGet(`${remoteBasePath}/${this._paths.moduleName}.js.map`);
+                const srcMapContent = await this._logConfig.httpGetFn(`${remoteBasePath}/${this._paths.moduleName}.js.map`);
                 await writeFile(this._paths.srcMapPath, Buffer.from(srcMapContent));
             });
             //
@@ -534,7 +519,7 @@ export class TeLog implements ILog, ILogDisposable
             //
             const srcMap = await readJsonAsync<RawSourceMap>(this._paths.srcMapPath);
             this._srcMapConsumer = await new SourceMapConsumer(srcMap);
-            this._disposables.push({
+            this._baseDisposables.push({
                 dispose: () => wrap(c => c.destroy(), [ this._error ], this, this._srcMapConsumer)
             });
         },
@@ -657,89 +642,32 @@ export class TeLog implements ILog, ILogDisposable
     };
 
 
-    private processConfigChanges = async (e: ConfigurationChangeEvent) =>
-    {
-        const cfgBaseKey = this.wrapper.config.baseSection,
-              cfgKeys = this.wrapper.keys.Config;
-        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogEnable}`))
-        {
-            this._logControl.enable = this._config.get<boolean>(cfgKeys.LogEnable, false);
-            void this.processLogEnableChange();
-        }
-        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogEnableOutputWindow}`))
-        {
-            this._logControl.enableOutputWindow = this._config.get<boolean>(cfgKeys.LogEnableOutputWindow, true);
-            if (this._logControl.enableOutputWindow && !this._logControl.enable) {
-                await this._config.update(cfgKeys.LogEnable, this._logControl.enableOutputWindow);
-            }
-        }
-        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogEnableFile}`))
-        {
-            this._logControl.enableFile = this._config.get<boolean>(cfgKeys.LogEnableFile, false);
-            if (this._logControl.enableFile)
-            {
-                this.writeLogFileLocation();
-                window.showInformationMessage("Log file location: " + this._logState.fileName);
-                if (!this._logControl.enable) {
-                    await this._config.update(cfgKeys.LogEnable, this._logControl.enableFile);
-                }
-            }
-        }
-        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogEnableModuleReload}`))
-        {
-            this._logControl.enableModuleReload = this._config.get<boolean>(cfgKeys.LogEnableModuleReload, false);
-        }
-        if (e.affectsConfiguration(`${cfgBaseKey}.${cfgKeys.LogLevel}`))
-        {
-            this._logControl.level = this._config.get<LogLevel>(cfgKeys.LogLevel, 1);
-        }
-    };
-
-
-    private processLogEnableChange = async () =>
+    reset = async () =>
     {
         const enable = this._logControl.enable,
-              enabledPreviously = enable && pathExistsSync(join(this._paths.dbgModuleDir, "taskexplorer.js"));
+              enabledPreviously = enable && !this._logControlPrev.enable,
+              fileEnablePreviously = this._logControl.enableFile && !this._logControlPrev.enableFile;
         if (this._logControl.enableModuleReload || !enabledPreviously)
         {
             const msg = `To ${enable ? "enable" : "disable"} logging ${enabledPreviously ? "for the 1st time" : ""}, ` +
                         `the ${enable ? "debug" : "release"} module must be ${!enabledPreviously ? "activated" : "installed"} ` +
                         "and will require a restart";
-            const action = await window.showInformationMessage(msg, "Restart", "Cancel");
-            if (action === "Restart")
-            {
-                await this.installDebugSupport(this.wrapper.version, this.wrapper.env, false, true);
-                void commands.executeCommand<void>(this.wrapper.keys.VsCodeCommands.Reload);
-            }
+            this._logConfig.promptRestartFn(msg, () => this.installDebugSupport(false, true));
         }
-        else { this.enable(enable); }
-    };
-
-
-    private setAppSpecifics = (config: IConfiguration) =>
-    {
-        execIf(this._logConfig.errorChannel, (c) =>
+        if (this._logControl.enableFile && !fileEnablePreviously)
         {
-            this._disposables.push(
-                c, commands.registerCommand(Commands.ShowOutputWindow, (show: boolean) => this.showOutput(show, c))
-            );
-        }, this);
-        execIf(this._logConfig.outputChannel, (c) =>
-        {
-            this._disposables.push(
-                c, commands.registerCommand(Commands.ShowErrorOutputWindow, (show: boolean) => this.showOutput(show, c), this)
-            );
-        }, this);
-        this._disposables.push(
-            config.onDidChange(this.processConfigChanges, this)
-        );
+            this.writeLogFileLocation();
+        }
+        else {
+            this.enable(enable);
+        }
     };
 
 
     private setFileName = () =>
     {
         const locISOTime = (new Date(Date.now() - this._logState.tzOffset)).toISOString().slice(0, -1).split("T")[0].replace(/[\-]/g, "");
-        this._logState.fileName = join(this._logConfig.dirPath, `vscode-${this._paths.moduleName}-${locISOTime}.log`);
+        this._logState.fileName = join(this._logConfig.logDirectory, `vscode-${this._paths.moduleName}-${locISOTime}.log`);
         if (this._logControl.enableFile) {
             this.writeLogFileLocation();
         }
@@ -747,18 +675,6 @@ export class TeLog implements ILog, ILogDisposable
             clearTimeout(this._fileNameTimer);
         }
         this._fileNameTimer = setTimeout(this.setFileName, this.msUntilMidnight());
-    };
-
-
-    private showOutput = async(show: boolean, channel: ILogOutputChannel) =>
-    {
-        if (show) {
-            await commands.executeCommand<void>(VsCodeCommands.FocusOutputWindowPanel);
-            channel.show();
-        }
-        else {
-            channel.hide();
-        }
     };
 
 

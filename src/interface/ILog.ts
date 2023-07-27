@@ -1,9 +1,9 @@
-import { OutputChannel } from "vscode";
 
 export type LogLevel = number; // 1 | 2 | 3 | 4 | 5;
 export type LogType = "global";
 export type LogColor = [ number, number ];
-
+export type LogHttpGetFn = (url: string, ...args: any[]) => PromiseLike<ArrayBuffer>;
+export type LogPromptRestartFn = (message: string, ...args: any[]) => PromiseLike<boolean>;
 
 export interface ILogDisposable { dispose: () => any }
 
@@ -41,21 +41,34 @@ export interface ILogSymbols
 
 export interface ILogOutputChannel
 {
-    clear: () => void;
-    dispose: () => void;
-    hide: () => void;
-    show: () => void;
+    clear?: () => void;
+    dispose?: () => void;
+    hide?: () => void;
+    show?: () => void;
     write: (message: string) => void;
 }
 
+export interface ILogPackageJson extends Record<string, any>
+{
+    main: string;
+    name: string;
+    author?: string | { name: string; email?: string };
+    version: string;
+}
+
+
 export interface ILogConfig
 {
+    app: string;
     contentHash?: string;
-    dirPath: string;
+    logDirectory: string;
+    env: string;
     errorChannel?: ILogOutputChannel;
+    httpGetFn: LogHttpGetFn;
     isTests: boolean;
     modulePath: string;
     outputChannel?: ILogOutputChannel;
+    promptRestartFn: LogPromptRestartFn;
     storageDirectory: string;
     version: string;
 }
@@ -88,11 +101,12 @@ export interface ILogState
 
 export interface ILog
 {
-    readonly colors: ILogColors;
+    readonly colors: Readonly<ILogColors>;
+    readonly config: Readonly<ILogConfig>;
     readonly control: ILogControl;
     readonly lastPad: string;
-    readonly state: ILogState;
-    readonly symbols: ILogSymbols;
+    readonly state: Readonly<ILogState>;
+    readonly symbols: Readonly<ILogSymbols>;
     blank(level?: LogLevel, queueId?: string): void;
     dequeue(queueId: string): void;
     dispose(): void;
