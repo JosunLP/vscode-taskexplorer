@@ -2,7 +2,7 @@
 import { TeApi } from "./api";
 import { Usage } from "./usage";
 import * as fs from "./utils/fs";
-import { TeLog } from "./utils/log";
+import { TeLog } from ":env/log";
 import { TeServer } from "./server";
 import { getUuid } from ":env/crypto";
 import { TeContext } from "./context";
@@ -129,7 +129,6 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._context = context;
         this._storage = storage;
         this._configuration = configuration;
-		this.initLocalization();
 		this._eventQueue = new EventQueue(this);
 		this._onReady = new EventEmitter<void>();
 		this._onInitialized = new EventEmitter<void>();
@@ -137,10 +136,11 @@ export class TeWrapper implements ITeWrapper, Disposable
 		this._version = this._context.extension.packageJSON.version;
 		this._previousVersion = this._storage.get<string>("taskexplorer.version");
 		this._cacheBuster = this._storage.get<string>("taskexplorer.cacheBuster", getUuid());
-		this._log = this.createLog();
+		this.initLocalization();
+		this._server = new TeServer(this);
+		this._log = new TeLog(this);
 		this._statusBar = new TeStatusBar(this);
 		this._teContext = new TeContext();
-		this._server = new TeServer(this);
         this._taskManager = new TaskManager(this);
 		this._treeManager = new TaskTreeManager(this);
 		this._licenseManager = new LicenseManager(this, this._server);
@@ -196,6 +196,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 			this._welcomePage,
 			this._releaseNotesPage,
 			this._parsingReportPage,
+			this._server,
 			this._log
 		];
 	}
@@ -204,19 +205,13 @@ export class TeWrapper implements ITeWrapper, Disposable
 	dispose = (): void => this._disposables.splice(0).forEach(d => d.dispose());
 
 
-	createLog = (): TeLog =>
-	{
-		const sPath = this._context.globalStorageUri.fsPath,
-			  mPath = join(this._context.extensionUri.fsPath, "dist", "taskexplorer.js"),
-			  pkgJson = this._context.extension.packageJSON;
-		return new TeLog(mPath, sPath, pkgJson, this.logGetConfig(), this.logGetControl(), this._configuration);
-	};
-
-
-	init = async(): Promise<void> =>
+	init = async (): Promise<void> =>
 	{
 		await this.storage.update(AllConstants.Storage.Version, this._version);
-		await this.initLog();
+		await this._log.init();
+		this.log.methodEvent("initializing extension", "wrapper", 1, [
+			[ "version", this._version ], [ "previous version", this._previousVersion  ],
+		]);
 		await this.migrate();
 		this.registerBusyCompleteEvent();
 		this.registerGlobalCommands();
@@ -251,65 +246,7 @@ export class TeWrapper implements ITeWrapper, Disposable
 	};
 
 
-	private initLog = async (): Promise<void> =>
-	{
-		const prompt = utilities.promptRestart;
-		let sb: any = { dispose: utilities.emptyFn, hide: utilities.emptyFn };
-		const wrapOpts: CallbackOptions = [
-			/* catch   */window.showErrorMessage,
-			/* finally */() => { sb.hide(); sb.dispose(); },
-			/* err msg */"Unable to install logging support files"
-		];
-		utilities.execIf(this.versionChanged, () =>
-		{
-			sb = window.createStatusBarItem(1, 100);
-			sb.text = `$(loading~spin) ${this.extensionTitleShort}: Installing debug support files`;
-			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
-			sb.show();
-		});
-		await this.utils.wrap(
-			this._log.init, wrapOpts, this, this, this._version, this.env, this.versionChanged, this.server.get, prompt
-		);
-		this.log.methodEvent("initializing extension", "wrapper", 1, [
-			[ "version", this._version ], [ "previous version", this._previousVersion  ],
-		]);
-	};
-
-
 	localize = (_key: string, defaultMessage: string): string => defaultMessage; // this._localize(key, defaultMessage);
-
-
-    private logGetConfig = (): ILogConfig =>
-    {
-        const context = this._context,
-			  pkgJson = context.extension.packageJSON;
-        return {
-            channelWriteFn: "appendLine",
-            dirPath: context.logUri.fsPath,
-            errorChannel: window.createOutputChannel(`${context.extension.packageJSON.displayName} (Errors)`),
-            extensionAuthor: typeUtils.isObject(pkgJson.author) ? pkgJson.author.name : pkgJson.name,
-            extensionId: context.extension.id,
-            isTests: context.extensionMode === ExtensionMode.Test,
-            outputChannel: window.createOutputChannel(context.extension.packageJSON.displayName)
-        };
-    };
-
-
-    private logGetControl = (): ILogControl =>
-    {
-        return {
-            blockScaryColors: this.tests,
-            enable: this._configuration.get<boolean>(AllConstants.Config.LogEnable, false),
-            enableOutputWindow: this._configuration.get<boolean>(AllConstants.Config.LogEnableOutputWindow, true),
-            enableFile: this._configuration.get<boolean>(AllConstants.Config.LogEnableFile, false),
-            enableModuleReload: this._configuration.get<boolean>(AllConstants.Config.LogEnableModuleReload, false),
-            level: this._configuration.get<LogLevel>(AllConstants.Config.LogLevel, 1),
-            trace: false,
-            valueWhiteSpace: 45,
-            writeToConsole: false,
-            writeToConsoleLevel: 2
-        };
-    };
 
 
 	private migrate = () =>

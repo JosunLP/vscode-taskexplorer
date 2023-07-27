@@ -73,7 +73,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method addFileToCache
      * @since 3.0.0
      */
     addFileToCache = (taskType: string, uri: Uri, logPad: string) =>
@@ -98,14 +97,11 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method addFolderToCache
-     *
+     * @since 3.0.0
      * @param folder The folder to be added to the cache.  This folder should be a sub-folder within
      * a workspace folder.  Workspace folders are handled differently and are handled by the
      * 'addWsFolderToCache()` function.  This function is calledfrom thefileWatcher instance when
      * a new folder is created, or copied into a workspace.
-     *
-     * @since 3.0.0
      */
     addFolder = async(folder: Uri, logPad: string) =>
     {
@@ -249,7 +245,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method addToMappings
      * @since 3.0.0
      */
     private addToMappings = (taskType: string, item: ICacheItem, logPad: string) =>
@@ -405,7 +400,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method clearMaps
      * @since 3.0.0
      */
     private clearMaps = () =>
@@ -431,7 +425,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method getExcludesPatternGlob
      * @since 3.0.0
      */
     private getExcludesGlobs = () =>
@@ -442,7 +435,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method getTaskFileCount
      * @since 3.0.0
      */
     getTaskFileCount = () =>
@@ -457,7 +449,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method initMaps
      * @since 3.0.0
      */
     private initMaps = (taskType: string, project: string) =>
@@ -481,7 +472,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method isFsChanged
      * @since 3.0.0
      */
     private isFsChanged = (taskType: string, project: string) =>
@@ -496,7 +486,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method isGlobChanged
      * @since 3.0.0
      */
     private isGlobChanged = (taskType: string, fileGlob: string) =>
@@ -526,7 +515,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method persistCache
      * @since 3.0.0
      */
     persistCache = (clear?: boolean, force?: boolean) =>
@@ -557,7 +545,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method registerFileCache
      * Clears the file cache, and either performs the workspace file scan to build/rebuild it,
      * or loads it from storage.
      */
@@ -616,13 +603,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method removeFolderFromCache
-     *
-     * @param folder The folder to be removed from the cache.  This folder should be a sub-folder within
-     * a workspace folder.  Workspace folders are handled differently and are handled by the
-     * 'removeWsFolders()` function.  This function is calledfrom the fileWatcher instance when
-     * a new folder is deleted or renamed.
-     *
      * @since 3.0.0
      */
     removeFolderFromCache = (uri: Uri, logPad: string) =>
@@ -640,7 +620,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method removeTaskTypeFromCache
      * @since 3.0.0
      */
     removeTaskTypeFromCache = (taskType: string, logPad: string) =>
@@ -653,7 +632,6 @@ export class TeFileCache implements ITeFileCache, Disposable
 
 
     /**
-     * @method removeFromMappings
      * @since 3.0.0
      */
     private removeFromMappings = (taskType: string, uri: Uri | WorkspaceFolder | undefined, isFolder: boolean, logPad: string) =>

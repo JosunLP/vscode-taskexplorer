@@ -1,21 +1,24 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { env } from "vscode";
 import { TeWrapper } from "./wrapper";
 import { IncomingMessage } from "http";
 import { request as httpsRequest } from "https";
 import { fetch, getProxyAgent } from ":env/fetch";
+import { Disposable, env, EventEmitter } from "vscode";
 import { SpmApiEndpoint, ISpmServer, SpmServerResource, TeRuntimeEnvironment, SpmServerError } from "../interface";
 
 
 /* TEMP */ /* istanbul ignore next */
-export class TeServer implements ISpmServer
+export class TeServer implements ISpmServer, Disposable
 {
 	private readonly _spmApiPort = 443;
 	private readonly _spmApiVersion = 1;
 	private readonly _requestTimeout = 7500;
+	private readonly _disposables: Disposable[];
 	private readonly _spmApiServer = "license.spmeesseman.com";
 	private readonly _spmResourceServer = "app1.spmeesseman.com";
+    private readonly _onRequestCancel = new EventEmitter<void>();
+    private readonly _onRequestComplete = new EventEmitter<void>();
 	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
 		dev: "1Ac4qiBjXsNQP82FqmeJ5k0/oMEmjR6Dx9fw1ojUO9//Z4MS6gdHvmzPYY+tuhp3UV/xILD301dQZpeAt+YZzY+Lnh8DlVCPjc0B4pdP84XazzZ+c3JN0vNN4cIfa+fsyPAEDzcsFUWf3z04kMyDXktZU7EiJ4vBU89qAbjOX9I=",
 		test: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcOBrbGCpyITCp0Wm19f8gdI1hNJttkARO5Unac4LA2g7RmT/kdXSsz64zNjB9FrvrzHe97tLBHRGorwcOx/K/hQ==",
@@ -23,7 +26,19 @@ export class TeServer implements ISpmServer
 	};
 
 
-    constructor(private readonly wrapper: TeWrapper) {}
+    constructor(private readonly wrapper: TeWrapper)
+	{
+		this._onRequestCancel = new EventEmitter<any>();
+		this._disposables = [
+			this._onRequestCancel
+		];
+	}
+
+	dispose = async () =>
+	{
+		this._onRequestCancel.fire();
+		this._disposables.splice(0).forEach(d => d.dispose());
+	};
 
 
 	private get productName(): string { return `${this.wrapper.extensionName}-${this.wrapper.env}`.replace("-prod", ""); };
@@ -44,9 +59,10 @@ export class TeServer implements ISpmServer
 	// get = async <T = string | ArrayBuffer | Record<string, any>>(ep: SpmServerResource, raw: boolean, logPad: string) =>
 	get = async(ep: SpmServerResource, logPad = ""): Promise<ArrayBuffer> =>
 	{
-		return Promise.race<ArrayBuffer>(
+	    return Promise.race<ArrayBuffer>(
 		[
 			this._get(ep, logPad),
+			this.wrapper.promiseUtils.promiseFromEvent<void, ArrayBuffer>(this._onRequestCancel.event).promise,
 			new Promise<ArrayBuffer>((_, r) => setTimeout(r, this._requestTimeout, new SpmServerError(408, undefined, "Timeout")))
 		]);
 	};
@@ -54,6 +70,7 @@ export class TeServer implements ISpmServer
 
 	private _get = async (ep: SpmServerResource, logPad: string): Promise<ArrayBuffer> =>
 	{
+		let rspBody: ArrayBuffer = new ArrayBuffer(0);
 		this.wrapper.log.methodStart("server resource request", 1, logPad, false, [[ "endpoint", ep ]]);
 		const rsp = await this.wrapRequest(() => fetch(this.getResourcPath(ep),
 		{
@@ -67,7 +84,6 @@ export class TeServer implements ISpmServer
 				"content-type": "text/plain"
 			}
 		}));
-		let rspBody: ArrayBuffer;
 		switch (rsp.headers.get("content-type"))
 		{   //
 			// case "text/html":
@@ -168,6 +184,7 @@ export class TeServer implements ISpmServer
 		return Promise.race<T>(
 		[
 			this._request<T>(endpoint, token, logPad, params),
+			this.wrapper.promiseUtils.promiseFromEvent<void, T>(this._onRequestCancel.event).promise,
 			new Promise<T>((_resolve, reject) => {
 				setTimeout(reject, this._requestTimeout, <SpmServerError>{ message: "Timed out", status: 408 });
 			})

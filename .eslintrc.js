@@ -16,7 +16,7 @@ module.exports = {
     },
     ignorePatterns: [
         "**/test-fixture/**/*.js", "types/**", "*.json", "node_modules", "node_modules/**",
-        "**/node_modules/**", "**/.eslint*", "dist/**", ".vscode-test/**"
+        "**/node_modules/**", "**/.eslint*", "dist/**", ".vscode-test/**", "*.d.ts"
     ],
     overrides: [
     {
@@ -24,7 +24,8 @@ module.exports = {
             "src/**/*.ts", "script/**/*.js", "./webpack.*.js", "webpack/**/*.js"
         ],
         excludedFiles: [
-            "test-fixture/**", "types/**", "*.json", "dist/**", "node_modules/**", "res/**", ".vscode-test/**"
+            "test-fixture/**", "types/**", "*.json", "dist/**", "node_modules/**",
+            "**/node_modules/**", "res/**", ".vscode-test/**"
         ]
     }],
     plugins: [
@@ -238,7 +239,7 @@ module.exports = {
         "jsdoc/require-file-overview": 0,
         "jsdoc/require-hyphen-before-param-description": 0,
         "jsdoc/require-jsdoc": 1, // Recommended
-        "jsdoc/require-param": 1, // Recommended
+        "jsdoc/require-param": 0, // Recommended
         "jsdoc/require-param-description": 0, // Recommended
         "jsdoc/require-param-name": 1, // Recommended
         "jsdoc/require-param-type": 0, // Recommended
@@ -246,7 +247,7 @@ module.exports = {
         "jsdoc/require-property-description": 1, // Recommended
         "jsdoc/require-property-name": 1, // Recommended
         "jsdoc/require-property-type": 1, // Recommended
-        "jsdoc/require-returns": 1, // Recommended
+        "jsdoc/require-returns": 0, // Recommended
         "jsdoc/require-returns-check": 1, // Recommended
         "jsdoc/require-returns-description": 0, // Recommended
         "jsdoc/require-returns-type": 1, // Recommended
