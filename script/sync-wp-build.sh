@@ -61,4 +61,4 @@ function sync_wp_build_files {
 
 sync_wp_build_files ../../vscode-extjs
 sync_wp_build_files ../../@spmeesseman/logger
-sync_wp_build_files ../../@spmeesseman/testutils
+sync_wp_build_files ../../@spmeesseman/test-utils
