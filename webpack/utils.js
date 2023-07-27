@@ -2,6 +2,7 @@
 
 const globalEnv = require("./global");
 const gradient = require("gradient-string");
+const { withColor, figures, colors } = require("@spmeesseman/test-utils");
 
 
 /**
@@ -199,11 +200,12 @@ const printSpmBanner = (version) =>
 
 const spmBanner = (version) =>
 {
-    return `            ___ ___ /^\\  ____ __  _  _ __   _ __  _________________
-           (  /' _ \\|  \\/  | / _/' || '_ \\ | '_ \\(  _____________  )
-           \\ (| |_) | |\\/| |(  (_| || |_) )| |_) )\\ \\         /\\/ /
-         ___)  ) __/|_|  |  //\\__\\__| /__/ | /__/__) )        \\  /
-        (_____/|_|       |_/        |_|    |_| (____/  v${version}  \\/`;
+    return `     ${figures.info}       ___ ___ /^\\  ____ __  _  _ __   _ __  _________________
+     ${figures.info}      (  /' _ \\|  \\/  | / _/' || '_ \\ | '_ \\(  _____________  )
+     ${figures.info}      \\ (| |_) | |\\/| |(  (_| || |_) )| |_) )\\ \\         /\\/ /
+     ${figures.info}    ___)  ) __/|_|  |  /^\\__\\__| /__/ | /__/__) )        \\  /
+     ${figures.info}   (_____/|_|       | /        |_|    |_| (____/  v${version}  \\/
+     ${figures.info}                    |/`;
 };
 
 
