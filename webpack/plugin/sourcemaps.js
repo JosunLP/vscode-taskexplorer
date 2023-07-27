@@ -26,7 +26,7 @@ const sourcemaps = (env, wpConfig) =>
         {
             test: /\.(js|jsx)($|\?)/i,
             exclude: /((vendor|runtime|tests)(?:\.debug|)\.js|node_modules)/,
-            filename: env.buildMode === "release" ? "[name].js.map" : "[name].debug.js.map",
+            filename: env.buildMode === "release" ? "[name].[contenthash].js.map" : "[name].debug.[contenthash].js.map",
             //
             // The bundled node_modules will produce reference tags within the main entry point
             // files in the form:
@@ -46,7 +46,7 @@ const sourcemaps = (env, wpConfig) =>
                 }
                 return `${info.absoluteResourcePath}`;
             },
-            fallbackModuleFilenameTemplate: "[absolute-resource-path]?[hash]"
+            fallbackModuleFilenameTemplate: "[absolute-resource-path]?[contenthash]"
         };
         if (isTests) {
             options.exclude = /((vendor|runtime)(?:\.debug|)\.js|node_modules)/;

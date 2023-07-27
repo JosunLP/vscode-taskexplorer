@@ -18,7 +18,7 @@ const { asArray } = require("../utils");
 
 
 /**
- * @method finalize
+ * @function finalize
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
@@ -60,7 +60,7 @@ const finalize = (env, wpConfig) =>
 
 
 /**
- * @method _upload
+ * @function _upload
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  */
@@ -68,8 +68,8 @@ const dupHashFile= (env, wpConfig) =>
 {
     asArray(env.app.mainChunk).forEach((chunk) =>
     {
-        const items = readdirSync(env.paths.dist),
-              digestLen = /** @type {Number} */(wpConfig.output.hashDigestLength),
+        const items = existsSync(env.paths.dist) ? readdirSync(env.paths.dist) : [],
+              digestLen = /** @type {number} */(wpConfig.output.hashDigestLength),
               testRgx = new RegExp(`${chunk}\\.[0-9a-f]{${digestLen}}\\.js`),
               teModule = items.find(a => testRgx.test(a));
         if (teModule) {
@@ -81,7 +81,7 @@ const dupHashFile= (env, wpConfig) =>
 
 
 /**
- * @method licenseFiles
+ * @function licenseFiles
  * @param {WebpackEnvironment} env
  * @returns {Promise<void>}
  */

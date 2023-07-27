@@ -8,7 +8,7 @@
  * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
  *
  * !!! For first time build on fresh os install:
- * !!!   - create the environment variable SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN
+ * !!!   - create the environment variables WPBUILD_APP1_SSH_AUTH_*
  * !!!   - run a plink command manually to generate and trust the fingerprints:
  * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
  *
@@ -88,15 +88,20 @@ const uploadAssets = (assets, env) =>
         const chunkName = /** @type {string}*/(/** @type {string[]}*/(a.chunkNames)[0]);
         if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName] && a.info.related)
         {
-            const fileNameNoHash = a.name.replace(`.${a.info.contenthash}`, ""),
+            const // fileNameNoHash = a.name.replace(`.${a.info.contenthash}`, ""),
                   fileNameSourceMap = a.info.related.sourceMap.toString(),
                   distPath = env.buildMode === "release" ? env.paths.dist : env.paths.temp;
-            copyFileSync(join(distPath, a.name), join(lBasePath, fileNameNoHash));
-            if (env.environment === "prod") {
-                renameSync(join(distPath, fileNameSourceMap), join(lBasePath, fileNameSourceMap));
-            }
-            else {
-                copyFileSync(join(distPath, fileNameSourceMap), join(lBasePath, fileNameSourceMap));
+                  // srcFilePath = join(distPath, a.name);
+            copyFileSync(join(distPath, a.name), join(lBasePath, a.name));
+            // copyFileSync(srcFilePath, join(lBasePath, fileNameNoHash));
+            if (fileNameSourceMap)
+            {
+                if (env.environment === "prod") {
+                    renameSync(join(distPath, fileNameSourceMap), join(lBasePath, fileNameSourceMap));
+                }
+                else {
+                    copyFileSync(join(distPath, fileNameSourceMap), join(lBasePath, fileNameSourceMap));
+                }
             }
             ++globalEnv.upload.readyCount;
         }
@@ -107,12 +112,12 @@ const uploadAssets = (assets, env) =>
 
     if (globalEnv.upload.callCount === 2 && globalEnv.upload.readyCount > 0)
     {
-        const host = "app1.spmeesseman.com",
-              user = "smeesseman",
-              rBasePath = "/var/www/app1/res/app",
+        const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
+              user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
+              rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
               /** @type {import("child_process").SpawnSyncOptions} */
               spawnSyncOpts = { cwd: env.paths.build, encoding: "utf8", shell: true },
-              sshAuth = process.env.SPMEESSEMAN_COM_APP1_SSH_AUTH_SMEESSEMAN || "InvalidAuth";
+              sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH || "InvalidAuth";
 
         const plinkArgs = [
             "-ssh",   // force use of ssh protocol
@@ -131,12 +136,19 @@ const uploadAssets = (assets, env) =>
             `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"`
         ];
 
+        const plinkDirCmds = [
+            `mkdir ${rBasePath}/${env.app.name}`,
+            `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}`,
+            `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}`
+        ];
+        if (env.environment !== "prod") {
+            plinkDirCmds.push(`rm -f ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}/*.*`);
+        }
+        const plinkArgsFull = [ ...plinkArgs, plinkDirCmds.join(";") ];
+
         writeInfo(`${figures.color.star } ${withColor(`upload resource files to ${host}`, colors.grey)}`);
         try {
-            const plinkArgsFull = [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}` ];
-            writeInfo(`   create dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
-            spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}` ], spawnSyncOpts);
-            spawnSync("plink", [ ...plinkArgs, `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}` ], spawnSyncOpts);
+            writeInfo(`   create / clear dir    : plink ${plinkArgsFull.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
             spawnSync("plink", plinkArgsFull, spawnSyncOpts);
             writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
