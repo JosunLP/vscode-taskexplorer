@@ -36,7 +36,7 @@ module.exports = (env, argv) =>
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
 	printSpmBanner(appName, "0.0.1");
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
-	write(gradient.fruit(` Start ${appDetailName} Webpack Build`));
+	write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${appDetailName} Webpack Build`));
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
 	write(withColor("   Mode  : ", colors.white) + withColor(mode, colors.grey));
 	write(withColor("   Argv  : ", colors.white) + withColor(JSON.stringify(argv), colors.grey));
