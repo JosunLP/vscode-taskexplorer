@@ -191,21 +191,27 @@ const pickNot = (obj, ...keys) =>
 };
 
 
-const printSpmBanner = (version) =>
+const printSpmBanner = (app, version) =>
 {
     // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
-    console.log(gradient("red", "cyan", "pink", "orange", "blue").multiline(spmBanner(version), {interpolation: "hsv"}));
+    console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(spmBanner(app, version), {interpolation: "hsv"}));
 };
 
 
-const spmBanner = (version) =>
+/**
+ * @function
+ * @param {string} app Application name
+ * @param {string} version Application version
+ * @returns {string}
+ */
+const spmBanner = (app, version) =>
 {
-    return `     ${figures.info}       ___ ___ /^\\  ____ __  _  _ __   _ __  _________________
-     ${figures.info}      (  /' _ \\|  \\/  | / _/' || '_ \\ | '_ \\(  _____________  )
-     ${figures.info}      \\ (| |_) | |\\/| |(  (_| || |_) )| |_) )\\ \\         /\\/ /
-     ${figures.info}    ___)  ) __/|_|  |  /^\\__\\__| /__/ | /__/__) )        \\  /
-     ${figures.info}   (_____/|_|       | /        |_|    |_| (____/  v${version}  \\/
-     ${figures.info}                    |/`;
+    return `     ${figures.info}       ___ ___ /^\\  ____ __  _  _ __   _ __  __________________
+     ${figures.info}      (  /' _ \\|  \\/  | / _/' || '_ \\ | '_ \\(  ______________  )
+     ${figures.info}      \\ (| |_) | |\\/| |(  (_| || |_) )| |_) )\\ \\          /\\/ /
+     ${figures.info}    ___)  ) __/|_|  | '/^\\__\\__| /__/ | /__/__) ) Version \\  /
+     ${figures.info}   (_____/|_|       | /        |_|    |_| (____/   ${version}   \\/
+     ${figures.info}                    |/${app.padStart(51 - app.length)}`;
 };
 
 

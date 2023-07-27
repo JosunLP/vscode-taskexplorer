@@ -29,12 +29,14 @@ const { colors, withColor } = require("@spmeesseman/test-utils");
  */
 module.exports = (env, argv) =>
 {
-	const mode = getMode(env, argv);
+	const appName = "Task Explorer",
+		  appDetailName = `${appName} VSCode Extension`,
+		  mode = getMode(env, argv);
 
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
-	printSpmBanner("0.0.1");
+	printSpmBanner(appName, "0.0.1");
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
-	write(gradient.fruit(" Start Task Explorer VSCode Extension Webpack Build"));
+	write(gradient.fruit(` Start ${appDetailName} Webpack Build`));
 	writeInfo("------------------------------------------------------------------------------------------------------------------------");
 	write(withColor("   Mode  : ", colors.white) + withColor(mode, colors.grey));
 	write(withColor("   Argv  : ", colors.white) + withColor(JSON.stringify(argv), colors.grey));
