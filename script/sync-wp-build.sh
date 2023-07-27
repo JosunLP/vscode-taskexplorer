@@ -3,9 +3,9 @@
 
 cd "$(dirname ${BASH_SOURCE[0]})"
 
-$DEST=../../vscode-extjs
+DEST=../../vscode-extjs
 
-cp ../webpack.config.json 
+# cp ../webpack.config.js $DEST
 
 cp ../webpack/console.js $DEST/webpack
 cp ../webpack/global.js $DEST/webpack
