@@ -206,7 +206,7 @@ const printSpmBanner = (app, version) =>
  */
 const spmBanner = (app, version) =>
 {
-    return `     ${figures.info}       ___ ___  /\\  ____ __ _|\\_ __   _ __  __________________
+    return `     ${figures.info}       ___ ___ _/\\  ___  __ _/^\\_ __  _ __  __________________
      ${figures.info}      (   ) _ \\|  \\/  | /  _^ || '_ \\| '_ \\(  ______________  )
      ${figures.info}      \\ (| |_) | |\\/| |(  (_| || |_) ) |_) )\\ \\          /\\/ /
      ${figures.info}    ___)  ) __/|_|  | '/^\\__\\__| /__/| /__/__) ) Version \\  /
