@@ -1,0 +1,56 @@
+{
+    "name": "Task Explorer",
+    "nameDetail": "Task Explorer VSCode Extension",
+    "module": false,
+    "exports": {
+        "context": true,
+        "devtool": true,
+        "entry": true,
+        "externals": true,
+        "ignorewarnings": true,
+        "index": true,
+        "minification": true,
+        "mode": true,
+        "name": true,
+        "optimization": true,
+        "output": true,
+        "plugins": true,
+        "resolve": true,
+        "rules": true,
+        "stats": true,
+        "target": true,
+        "watch": true
+    },
+    "plugins": {
+        "analyze": true,
+        "asset": true,
+        "banner": true,
+        "build": true,
+        "clean": true,
+        "compile": true,
+        "copy": true,
+        "finalize": true,
+        "hash": true,
+        "html": true,
+        "ignore": true,
+        "index": true,
+        "optimization": true,
+        "plugins": true,
+        "progress": true,
+        "tscheck": true,
+        "upload": false
+    },
+    "vscode": {
+        "webview": {
+            "home": "./home/home.ts",
+            "license": "./license/license.ts",
+            "monitor": "./monitor/monitor.tsx",
+            "parsingReport": "./parsingReport/parsingReport.ts",
+            "releaseNotes": "./releaseNotes/releaseNotes.ts",
+            "taskCount": "./taskCount/taskCount.ts",
+            "taskDetails": "./taskDetails/taskDetails.ts",
+            "taskUsage": "./taskUsage/taskUsage.ts",
+            "welcome": "./welcome/welcome.ts"
+        }
+    }
+}

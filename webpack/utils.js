@@ -1,12 +1,19 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 
+const { resolve } = require("path");
 const globalEnv = require("./global");
+const { readFileSync, existsSync } = require("fs");
 const gradient = require("gradient-string");
+const { WebpackError } = require("webpack");
 const { withColor, figures, colors } = require("@spmeesseman/test-utils");
+
+/** @typedef {import("./types").IWebpackApp} IWebpackApp */
+/** @typedef {import("./types").IWebpackPackageJson} IWebpackPackageJson */
 
 
 /**
- * @method apply
+ * @function apply
  * @param {Record<string, any>} object
  * @param {Record<string, any>} config
  * @param {Record<string, any>} [defaults]
@@ -37,7 +44,7 @@ const asArray = (v, shallow, allowEmpStr) => (isArray(v) ? (shallow !== true ? v
 
 
 /**
- * @method clone
+ * @function clone
  * @param {any} item
  * @returns {any}
  */
@@ -70,10 +77,10 @@ const clone = (item) =>
 
 
 /**
- * @method initGlobalEnvObject
- * @param {String} baseProp
+ * @function initGlobalEnvObject
+ * @param {string} baseProp
  * @param {any} [initialValue]
- * @param  {...any} [props]
+ * @param {...any} [props]
  */
 const initGlobalEnvObject = (baseProp, initialValue, ...props) =>
 {
@@ -95,7 +102,7 @@ const isDate = (v) => !!v && Object.prototype.toString.call(v) === "[object Date
 /**
  * @param v Variable to check to see if it's an array
  * @param [allowEmpStr] If `true`, return non-empty if isString(v) and v === ""
- * @returns {Boolean}
+ * @returns {boolean}
  */
 const isEmpty = (v, allowEmpStr) => v === null || v === undefined || (!allowEmpStr ? v === "" : false) || (isArray(v) && v.length === 0) || (isObject(v) && isObjectEmpty(v));
 
@@ -104,8 +111,8 @@ const isObjectEmpty = (v) => { if (v) { return Object.keys(v).filter(k => ({}.ha
 
 
 /**
- * @method merge
- * @param  {...Record<string, any>} destination
+ * @function merge
+ * @param {...Record<string, any>} destination
  * @returns {Record<string, any>}
  */
 const merge = (...destination) =>
@@ -138,8 +145,8 @@ const merge = (...destination) =>
 
 
 /**
- * @method merge
- * @param  {...Record<string, any>} destination
+ * @function merge
+ * @param {...Record<string, any>} destination
  * @returns {any}
  */
 const mergeIf = (...destination) =>
@@ -191,10 +198,88 @@ const pickNot = (obj, ...keys) =>
 };
 
 
-const printSpmBanner = (app, version) =>
+const printLineSep = () =>
 {
+    writeInfo("------------------------------------------------------------------------------------------------------------------------");
+};
+
+
+const printBanner = (app, appDetailName, version, mode, env, argv) =>
+{
+    printLineSep();
     // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
     console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(spmBanner(app, version), {interpolation: "hsv"}));
+    printLineSep();
+    write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${appDetailName} Webpack Build`));
+    printLineSep();
+	write(withColor("   Mode  : ", colors.white) + withColor(mode, colors.grey));
+	write(withColor("   Argv  : ", colors.white) + withColor(JSON.stringify(argv), colors.grey));
+	write(withColor("   Env   : ", colors.white) + withColor(JSON.stringify(env), colors.grey));
+    printLineSep();
+};
+
+
+/**
+ * @function
+ * @throws {WebpackError}
+ * @returns {IWebpackApp}
+ */
+const readConfigFiles = () =>
+{
+    /** @type {IWebpackApp} */
+    const rc = {},
+          rcPath = join(__dirname, ".wpbuildrc"),
+          pkgJsonPath = resolve(__dirname, "..", "package.json");
+
+    try
+    {   if (existsSync(rcPath))
+        {
+            merge(rc, JSON.parse(readFileSync(rcPath)));
+        }
+        else {
+            throw new WebpackError("Could not locate .wpbuildrc.json");
+        }
+    }
+    catch {
+        throw new WebpackError("Could not parse .wpbuildrc.json, check syntax");
+    }
+
+    try
+    {   if (existsSync(pkgJsonPath))
+        {
+            const props = [ // needs to be in sync with the properties of `IWebpackPackageJson`
+                "author", "displayName", "name", "description", "main", "module", "publisher", "version"
+            ];
+            /** @type {IWebpackPackageJson} */
+            const pkgJso = JSON.parse(readFileSync(pkgJsonPath)),
+                  pkgJsoPartial = pickBy(pkgJso, p => props.includes(p));
+            merge(rc, { pkgJson: pkgJsoPartial });
+        }
+        else {
+            throw new WebpackError("Could not locate package.json");
+        }
+    }
+    catch {
+        throw new WebpackError("Could not parse package.json, check syntax");
+    }
+
+    if (!rc.name) {
+        rc.name = rc.pkgJson.name;
+    }
+
+    if (!rc.nameDetail) {
+        rc.nameDetail = rc.name;
+    }
+
+    if (!rc.vscode) {
+        rc.vscode = {};
+    }
+
+    if (!rc.vscode.webview) {
+        rc.vscode.webview = {};
+    }
+
+    return rc;
 };
 
 
@@ -216,6 +301,6 @@ const spmBanner = (app, version) =>
 
 
 module.exports = {
-    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty,
-    initGlobalEnvObject, merge, mergeIf, pick, pickBy, pickNot, printSpmBanner, spmBanner
+    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, printLineSep,
+    initGlobalEnvObject, merge, mergeIf, pick, pickBy, pickNot, printBanner, readConfigFiles, spmBanner
 };

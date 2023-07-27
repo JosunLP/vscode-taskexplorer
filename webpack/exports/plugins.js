@@ -5,20 +5,20 @@
  * @module webpack.exports.plugins
  */
 
-const webviewApps = require("../webviewApps");
 const {
 	analyze, banner, build, clean, compile, copy, finalize, hash, hookSteps, ignore,
 	optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, htmlcsp,
 	imageminimizer, htmlinlinechunks, webviewapps, asset, scm
 } = require("../plugin");
 
+/** @typedef {import("../types").IWebpackApp} IWebpackApp */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
- * @method
+ * @function
  * @param {WebpackEnvironment} env Webpack build specific environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
@@ -45,7 +45,7 @@ const plugins = (env, wpConfig) =>
 
 	if (env.build === "webview")
 	{
-		const apps = Object.keys(webviewApps);
+		const apps = Object.keys(env.app.vscode.webview);
 		wpConfig.plugins.push(
 			cssextract(env, wpConfig),           //
 			...webviewapps(apps, env, wpConfig), //

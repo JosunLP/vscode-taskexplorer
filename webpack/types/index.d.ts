@@ -7,7 +7,7 @@ declare type WebpackBuild = "browser" | "common" | "extension" | "tests" | "webv
 declare type WebpackBuildMode = "debug" | "release";
 declare type WebpackBuildEnvironment= "dev" | "prod" | "test" | "testprod";
 declare type WebpackMode = "none" | "development" | "production";
-declare type WebpakTarget = "webworker" | "node" | "web";
+declare type WebpackTarget = "webworker" | "node" | "web";
 declare type WebpackConfig = Required<import("webpack").Configuration>;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
@@ -18,7 +18,7 @@ declare type WebpackOptimization = any;
 declare interface WebpackEnvironment extends WebpackEnvironmentInternal
 {
     analyze: boolean;                     // parform analysis after build
-    app: WebpackApp;                      // target js app info
+    app: IWebpackApp;                      // target js app info
     build: WebpackBuild;
     buildMode: WebpackBuildMode;
     clean: boolean;
@@ -27,25 +27,42 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     imageOpt: boolean;                    // Perform image optimization
     isTests: boolean;
     paths: WebpackBuildPaths;
-    pkgJson: Record<string, any>;         // package.json parsed object
+    pkgJson: IWebpackPackageJson;         // package.json parsed object
     preRelease: boolean;
     state: WebpackBuildState;
     target: WebpakTarget;
     verbosity: WebpackLogLevel;
 }
 
+declare interface IWebpackPackageJson extends Record<string, any>
+{
+    author: string | { name: string };
+    description: string;
+    displayName: string;
+    main: string;
+    module: boolean;
+    name: string;
+    publisher: string;
+    version: string;
+}
+
 declare interface WebpackGlobalEnvironment extends Record<string, any>
 {
     buildCount: number;
+    pkgJson: Record<string, any>;
     valuePad: number;
 }
 
-declare interface WebpackApp
+declare interface IWebpackApp
 {
+    exports: Record<string, boolean>;
     mainChunk: string | string[];         // main module name(s)
     name: string;                         // app name (read from package.json)
+    nameDetail: string;
     pkgJson: Record<string, any>;
+    plugins: Record<string, boolean>;
     version: string;                      // app version (read from package.json)
+    vscode: IWebpackVsCodeBuild
 }
 
 declare interface WebpackBuildFilePaths
@@ -53,6 +70,11 @@ declare interface WebpackBuildFilePaths
     hash: string;
     sourceMapWasm: string;
 }
+declare interface IWebpackVsCodeBuild
+{
+    webview: Record<string, string>; // webviewsapp: "path/to/app"
+}
+
 
 declare interface WebpackBuildPaths
 {
@@ -90,7 +112,7 @@ declare interface WebpackArgs
 }
 
 export {
-    WebpackApp,
+    IWebpackApp,
     WebpackArgs,
     WebpackAssetEmittedInfo,
     WebpackBuild,
@@ -101,11 +123,13 @@ export {
     WebpackConfig,
     WebpackGlobalEnvironment,
     WebpackHashState,
+    IWebpackPackageJson,
     WebpackPluginInstance,
     WebpackOptimization,
     WebpackEnvironment,
     WebpackLogLevel,
     WebpackStatsAsset,
-    WebpakTarget,
-    WebpackBuildEnvironment
+    WebpackTarget,
+    WebpackBuildEnvironment,
+    IWebpackVsCodeBuild
 };

@@ -3,23 +3,37 @@
 
 cd "$(dirname ${BASH_SOURCE[0]})"
 
+
 function cp_wp_build_file {
 
     cp "../$3/$2" "../../$1/$3"
 
-    if [ $1 = "@spmeesseman/test-utils" ] || [ $1 = "@spmeesseman/logger" ] ; then
-        sed -i 's/module\.exports =/export default/g' "../../$1/$3/$2"
+    if [[ "$1" == *"@spmeesseman/"* ]]; then
+        # TABS=$(find . -maxdepth 1 -name "../../$1/$3/$2" | xargs egrep ".*\t{2,}")
+        # if [ -z "$TABS" ]; then
+            sed -i ':a;N;$!ba;s/const {\([\r\n\s]*\)/import {\1/g' "../../$1/$3/$2"
+            sed -i ':a;N;$!ba;s/\} = require("\([a-z\.\/]*\)");/} from "\1";/g' "../../$1/$3/$2"
+        # fi
+        # if [ ! -z "$TABS" ]; then
+        #     sed -i ':a;N;$!ba;s/const \{[\r\n]/import \{/g' "../../$1/$3/$2"
+        #     sed -i ':a;N;$!ba;s/\} = require("\(\w\w*\)");?/} from "\1";/g' "../../$1/$3/$2"
+        # fi
+        sed -i 's/module\.exports = \(\w\w*\)/export default \1/g' "../../$1/$3/$2"
+        sed -i 's/module\.exports = {/export {/g' "../../$1/$3/$2"
         # = require("webpack");
-       # sed -i 's/const ([a-zA-Z]+) = require\("([a-zA-Z]+)"\);/import \1 from ""/g' "../../$1/$3/$2"
-        sed -i 's/const \(\w\w*\) = require("\(\w\w*\)");/import \1 from "\2";/g' "../../$1/$3/$2"
+        # sed -i 's/const ([a-zA-Z]+) = require\("([a-zA-Z]+)"\);/import \1 from ""/g' "../../$1/$3/$2"
+        sed -i 's/const \(\w\w*\) = require("\([a-z\.\/]*\)");/import \1 from "\2";/g' "../../$1/$3/$2"
     fi
 }
 
+
 function sync_wp_build_files {
 
-    # cp ./sync-wp-build.sh $DESTPROJECT
+    # cp_wp_build_file $1 sync-wp-build.sh script
 
-    # cp_wp_build_file $1 ../webpack.config.js $DESTPROJECT
+    # cp_wp_build_file $1 webpack.config.js .
+
+    # cp_wp_build_file $1 .wpbuildrc.json webpack
 
     cp_wp_build_file $1 console.js webpack
     cp_wp_build_file $1 global.js webpack
@@ -75,6 +89,6 @@ function sync_wp_build_files {
     fi
 }
 
-sync_wp_build_files "vscode-extjs"
-sync_wp_build_files "@spmeesseman/logger"
+#sync_wp_build_files "vscode-extjs"
+#sync_wp_build_files "@spmeesseman/logger"
 sync_wp_build_files "@spmeesseman/test-utils"

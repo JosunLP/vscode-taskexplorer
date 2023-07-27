@@ -9,11 +9,12 @@
 const globalEnv = require("../global");
 const { join, resolve } = require("path");
 const { WebpackError } = require("webpack");
-const { apply, merge } = require("../utils");
 const { writeInfo, figures } = require("../console");
+const { merge, isObjectEmpty } = require("../utils");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
 
-/** @typedef {import("..//types").WebpackArgs} WebpackArgs */
+/** @typedef {import("../types").IWebpackApp} IWebpackApp */
+/** @typedef {import("../types").WebpackArgs} WebpackArgs */
 /** @typedef {import("../types").WebpackBuild} WebpackBuild */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
@@ -22,16 +23,17 @@ const { readFileSync, existsSync, mkdirSync } = require("fs");
 /**
  * @function environment
  * @param {WebpackBuild} build
+ * @param {IWebpackApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const environment = (build, env, argv, wpConfig) =>
+const environment = (build, app, env, argv, wpConfig) =>
 {
 	env.build = build;
 	env.paths.build = resolve(__dirname, "..", "..");
-	setEnvironment(env, argv, wpConfig);
-	setApp(env);
+	setEnvironment(env, argv, wpConfig); // i.e. env.environment = < `prod`, `dev`, or `test` >
+	setApp(app, env);
 	setPaths(env);
 	initState(env);
 	setVersion(env);
@@ -48,21 +50,20 @@ const initState = (env) => { env.state = { hash: { current: {}, next: {} } }; };
 
 /**
  * @function readPkgJson
+ * @param {IWebpackApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
  * @param {WebpackEnvironment} env Webpack build environment
  */
-const setApp = (env) =>
+const setApp = (app, env) =>
 {
-	const pkgJson = JSON.parse(readFileSync(join(env.paths.build, "package.json"), "utf8"));
-	apply(env,
+	merge(env, { app });
+	if (!env.app.pkgJson || isObjectEmpty(env.app.pkgJson))
 	{
-		/** @type {import("../types").WebpackApp} */
-		app: {
-			mainChunk: "taskexplorer",
-			name: pkgJson.name,
-			version: pkgJson.version,
-			pkgJson
+		const pkgJsonPath = join(env.paths.build, "package.json");
+		env.app.pkgJson = {};
+		if (existsSync(pkgJsonPath)) {
+			Object.assign(env.app.pkgJson, JSON.parse(readFileSync(pkgJsonPath, "utf8")));
 		}
-	});
+	}
 };
 
 
