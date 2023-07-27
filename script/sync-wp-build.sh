@@ -3,62 +3,78 @@
 
 cd "$(dirname ${BASH_SOURCE[0]})"
 
-DEST=../../vscode-extjs
+function cp_wp_build_file {
 
-# cp ./sync-wp-build.sh $DEST
+    cp "../$3/$2" "../../$1/$3"
 
-# cp ../webpack.config.js $DEST
+    if [ $1 = "@spmeesseman/test-utils" ] || [ $1 = "@spmeesseman/logger" ] ; then
+        sed -i 's/module\.exports =/export default/g' "../../$1/$3/$2"
+        # = require("webpack");
+       # sed -i 's/const ([a-zA-Z]+) = require\("([a-zA-Z]+)"\);/import \1 from ""/g' "../../$1/$3/$2"
+        sed -i 's/const \(\w\w*\) = require("\(\w\w*\)");/import \1 from "\2";/g' "../../$1/$3/$2"
+    fi
+}
 
 function sync_wp_build_files {
 
-    DEST=$1
+    # cp ./sync-wp-build.sh $DESTPROJECT
 
-    cp ../webpack/console.js $DEST/webpack
-    cp ../webpack/global.js $DEST/webpack
-    cp ../webpack/utils.js $DEST/webpack
+    # cp_wp_build_file $1 ../webpack.config.js $DESTPROJECT
 
-    cp ../webpack/types/*.*  $DEST/webpack/types
+    cp_wp_build_file $1 console.js webpack
+    cp_wp_build_file $1 global.js webpack
+    cp_wp_build_file $1 utils.js webpack
 
-    # cp ../webpack/exports/context.js $DEST/webpack/exports
-    cp ../webpack/exports/devtool.js $DEST/webpack/exports
-    # cp ../webpack/exports/entry.js $DEST/webpack/exports
-    # cp ../webpack/exports/externals.js $DEST/webpack/exports
-    cp ../webpack/exports/ignorewarnings.js $DEST/webpack/exports
-    cp ../webpack/exports/index.js $DEST/webpack/exports
-    cp ../webpack/exports/minification.js $DEST/webpack/exports
-    cp ../webpack/exports/mode.js $DEST/webpack/exports
-    cp ../webpack/exports/name.js $DEST/webpack/exports
-    # cp ../webpack/exports/optimization.js $DEST/webpack/exports
-    # cp ../webpack/exports/output.js $DEST/webpack/exports
-    cp ../webpack/exports/plugins.js $DEST/webpack/exports
-    # cp ../webpack/exports/resolve.js $DEST/webpack/exports
-    # cp ../webpack/exports/rules.js $DEST/webpack/exports
-    cp ../webpack/exports/stats.js $DEST/webpack/exports
-    cp ../webpack/exports/target.js $DEST/webpack/exports
-    cp ../webpack/exports/watch.js $DEST/webpack/exports
+    cp_wp_build_file $1 index.d.ts  webpack/types
 
-    cp ../webpack/plugin/analyze.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/asset.js $DEST/webpack/plugin
-    cp ../webpack/plugin/banner.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/build.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/clean.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/compile.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/copy.js $DEST/webpack/plugin
-    cp ../webpack/plugin/finalize.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/hash.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/html.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/ignore.js $DEST/webpack/plugin
-    cp ../webpack/plugin/index.js $DEST/webpack/plugin
-    cp ../webpack/plugin/optimization.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/plugins.js $DEST/webpack/plugin
-    cp ../webpack/plugin/progress.js $DEST/webpack/plugin
-    # cp ../webpack/plugin/tscheck.js $DEST/webpack/plugin
-    cp ../webpack/plugin/upload.js $DEST/webpack/plugin
+    # cp_wp_build_file $1 context.js webpack/exports
+    cp_wp_build_file $1 devtool.js webpack/exports
+    # cp_wp_build_file $1 entry.js webpack/exports
+    # cp_wp_build_file $1 externals.js webpack/exports
+    cp_wp_build_file $1 ignorewarnings.js webpack/exports
+    cp_wp_build_file $1 index.js webpack/exports
+    cp_wp_build_file $1 minification.js webpack/exports
+    cp_wp_build_file $1 mode.js webpack/exports
+    cp_wp_build_file $1 name.js webpack/exports
+    # cp_wp_build_file $1 optimization.js webpack/exports
+    # cp_wp_build_file $1 output.js webpack/exports
+    cp_wp_build_file $1 plugins.js webpack/exports
+    # cp_wp_build_file $1 resolve.js webpack/exports
+    # cp_wp_build_file $1 rules.js webpack/exports
+    cp_wp_build_file $1 stats.js webpack/exports
+    cp_wp_build_file $1 target.js webpack/exports
+    cp_wp_build_file $1 watch.js webpack/exports
 
-    cp ../webpack/plugin/sourcemaps.js $DEST/webpack/plugin
-    sed -i 's/vendor|runtime|tests/vendor|runtime|tests|serverInterface/g' $DEST/webpack/plugin/sourcemaps.js
+    cp_wp_build_file $1 analyze.js webpack/plugin
+    # cp_wp_build_file $1 asset.js webpack/plugin
+    cp_wp_build_file $1 banner.js webpack/plugin
+    # cp_wp_build_file $1 build.js webpack/plugin
+    # cp_wp_build_file $1 clean.js webpack/plugin
+    # cp_wp_build_file $1 compile.js webpack/plugin
+    # cp_wp_build_file $1 copy.js webpack/plugin
+    cp_wp_build_file $1 finalize.js webpack/plugin
+    # cp_wp_build_file $1 hash.js webpack/plugin
+    # cp_wp_build_file $1 html.js webpack/plugin
+    # cp_wp_build_file $1 ignore.js webpack/plugin
+    cp_wp_build_file $1 index.js webpack/plugin
+    cp_wp_build_file $1 optimization.js webpack/plugin
+    # cp_wp_build_file $1 plugins.js webpack/plugin
+    cp_wp_build_file $1 progress.js webpack/plugin
+
+    # if [ $1 = "../../vscode-extjs" ] ; then
+    #    cp_wp_build_file $1 tscheck.js webpack/plugin
+    # fi
+
+    if [ $1 = "vscode-extjs" ] ; then
+        cp_wp_build_file $1 upload.js webpack/plugin
+    fi
+
+    cp_wp_build_file $1 sourcemaps.js webpack/plugin
+    if [ $1 = "vscode-extjs" ] ; then
+        sed -i 's/vendor|runtime|tests/vendor|runtime|tests|serverInterface/g' "../../$1/webpack/plugin/sourcemaps.js"
+    fi
 }
 
-sync_wp_build_files ../../vscode-extjs
-sync_wp_build_files ../../@spmeesseman/logger
-sync_wp_build_files ../../@spmeesseman/test-utils
+sync_wp_build_files "vscode-extjs"
+sync_wp_build_files "@spmeesseman/logger"
+sync_wp_build_files "@spmeesseman/test-utils"
