@@ -54,7 +54,7 @@ const upload = (env, wpConfig) =>
                           assets = stats.assets?.filter(a => a.type === "asset");
                     ++globalEnv.upload.callCount;
                     if (assets) {
-                        uploadAssets(assets, env);
+                       //  uploadAssets(assets, env);
                     }
                 });
             }

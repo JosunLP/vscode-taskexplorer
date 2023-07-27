@@ -13,6 +13,7 @@ const ignore = require("./ignore");
 const optimization = require("./optimization");
 const hookSteps = require("./plugins");
 const progress = require("./progress");
+const scm = require("./scm");
 const sourcemaps = require("./sourcemaps");
 const tscheck = require("./tscheck");
 const upload = require("./upload");
@@ -37,6 +38,7 @@ module.exports = {
     optimization,
     prehash,
     progress,
+    scm,
     sourcemaps,
     tscheck,
     upload,

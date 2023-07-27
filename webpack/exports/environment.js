@@ -20,7 +20,7 @@ const { readFileSync, existsSync, mkdirSync } = require("fs");
 
 
 /**
- * @method environment
+ * @function environment
  * @param {WebpackBuild} build
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
@@ -40,14 +40,14 @@ const environment = (build, env, argv, wpConfig) =>
 
 
 /**
- * @method setState
+ * @function setState
  * @param {WebpackEnvironment} env Webpack build environment
  */
 const initState = (env) => { env.state = { hash: { current: {}, next: {} } }; };
 
 
 /**
- * @method readPkgJson
+ * @function readPkgJson
  * @param {WebpackEnvironment} env Webpack build environment
  */
 const setApp = (env) =>
@@ -67,10 +67,11 @@ const setApp = (env) =>
 
 
 /**
- * @method setEnvironment
+ * @function setEnvironment
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  * @param {WebpackConfig} wpConfig Webpack config object
+ * @throws {Error}
  */
 const setEnvironment = (env, argv, wpConfig) =>
 {
@@ -96,7 +97,7 @@ const setEnvironment = (env, argv, wpConfig) =>
 
 
 /**
- * @method setPaths
+ * @function setPaths
  * @param {WebpackEnvironment} env Webpack build environment
  */
 const setPaths = (env) =>
@@ -113,13 +114,14 @@ const setPaths = (env) =>
 		sourceMapWasm: "node_modules/source-map/lib/mappings.wasm",
 		hash: join(env.paths.cache, `hash.${env.environment}${env.buildMode === "debug" ? ".debug" : ""}.json`)
 	});
+	env.paths.distBuild = env.buildMode !== "debug" ? env.paths.dist : env.paths.temp;
 	if (!existsSync(env.paths.cache)) { mkdirSync(env.paths.cache, { recursive: true }); }
 	if (!existsSync(env.paths.temp)) { mkdirSync(env.paths.temp, { recursive: true }); }
 };
 
 
 /**
- * @method version
+ * @function setVersion
  * @param {WebpackEnvironment} env
  */
 const setVersion = (env) =>
@@ -132,7 +134,7 @@ const setVersion = (env) =>
 
 
 /**
- * @method writeEnvironment
+ * @function writeEnvironment
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  */

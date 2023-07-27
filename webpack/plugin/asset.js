@@ -35,10 +35,8 @@ const asset = (env, wpConfig) =>
             {
                 compiler.hooks.assetEmitted.tapPromise("AssetBeforeEmitPlugin", async (file, /** @type {WebpackAssetEmittedInfo} */info) =>
                 {
-        console.log("1: " + file);
-        console.log("2: " + info.targetPath);
+console.log("AssetBeforeEmitPlugin: " + file);
                     if (env.environment === "test") {
-                        console.log("2: " + info.targetPath);
                         await istanbulTags(info.targetPath, info.content, env);
                     }
                     else if (env.environment === "prod") {

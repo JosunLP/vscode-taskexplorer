@@ -13,8 +13,8 @@ const { initGlobalEnvObject } = require("../utils");
 
 
 /**
- * @method addStepHook
- * @param {String} hook
+ * @function addStepHook
+ * @param {string} hook
  * @param {WebpackPluginInstance[]} plugins
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
@@ -24,7 +24,7 @@ const addStepHook = (hook, plugins, env, wpConfig) =>
 	plugins.push({
 		apply: (compiler) =>
 		{
-			const buildName = withColor(/** @type {String} */(wpConfig.name), colors.grey),
+			const buildName = withColor(/** @type {string} */(wpConfig.name), colors.grey),
 				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
 			compiler.hooks[hook].tap(`${hook}StepPlugin`, () =>
 			{
@@ -42,8 +42,8 @@ const addStepHook = (hook, plugins, env, wpConfig) =>
 
 
 /**
- * @method addStepHook
- * @param {String} hook
+ * @function addStepHook
+ * @param {string} hook
  * @param {WebpackPluginInstance[]} plugins
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
@@ -53,7 +53,7 @@ const addStepHookPromise = (hook, plugins, env, wpConfig) =>
 	plugins.push({
 		apply: (compiler) =>
 		{
-			const buildName = withColor(/** @type {String} */(wpConfig.name), colors.grey),
+			const buildName = withColor(/** @type {string} */(wpConfig.name), colors.grey),
 				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
 			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () =>
 			{
@@ -70,7 +70,7 @@ const addStepHookPromise = (hook, plugins, env, wpConfig) =>
 
 
 /**
- * @method hookSteps
+ * @function hookSteps
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance[]}

@@ -2,8 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const { apply } = require("../utils");
-const { writeFileSync, readFileSync, existsSync } = require("fs");
+const { apply, isObjectEmpty } = require("../utils");
+const { writeFileSync, readFileSync, existsSync, unlinkSync } = require("fs");
 const { writeInfo, withColor, figures, colors, write } = require("../console");
 
 /**
@@ -19,7 +19,7 @@ const { writeInfo, withColor, figures, colors, write } = require("../console");
 
 
 /**
- * @method hash
+ * @function hash
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  * @returns {WebpackPluginInstance | undefined}
@@ -61,11 +61,13 @@ const hash = (env, wpConfig) =>
 
 
 /**
- * @method readAssetStates
+ * @function readAssetStates
  * @param {WebpackHashState} hashInfo
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
+ * @param {boolean} [rotated] `true` indicates that values were read and rotated
+ * i.e. `next` values were moved to `current`, and `next` is now blank
  */
-const logAssetInfo = (hashInfo, wpConfig) =>
+const logAssetInfo = (hashInfo, wpConfig, rotated) =>
 {
     const // hashLength = /** @type {Number} */(wpConfig.output?.hashDigestLength),
           labelLength = 18; //  + hashLength;
@@ -76,14 +78,20 @@ const logAssetInfo = (hashInfo, wpConfig) =>
         (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.current[k], colors.blue))
     );
     writeInfo("   next:");
-    Object.keys(hashInfo.next).forEach(
-        (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.next[k], colors.blue))
-    );
+    if (!isObjectEmpty(hashInfo.next))
+    {
+        Object.keys(hashInfo.next).forEach(
+            (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.next[k], colors.blue))
+        );
+    }
+    else if (!isObjectEmpty(hashInfo.current) && rotated === true) {
+        writeInfo("      values cleared and moved to 'current'");
+    }
 };
 
 
 /**
- * @method prehash
+ * @function prehash
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  * @returns {WebpackPluginInstance | undefined}
@@ -107,14 +115,14 @@ const prehash = (env, wpConfig) =>
 
 
 /**
- * @method saveAssetState
+ * @function saveAssetState
  * @param {WebpackEnvironment} env
  */
 const saveAssetState = (env) => writeFileSync(env.paths.files.hash, JSON.stringify(env.state.hash, null, 4));
 
 
 /**
- * @method setAssetState
+ * @function setAssetState
  * @param {WebpackStatsAsset} asset
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
@@ -124,15 +132,26 @@ const setAssetState = (asset, env, wpConfig) =>
     write(withColor(`set asset state for ${withColor(asset.name, colors.white)}`, colors.grey), figures.color.start);
     if (asset.chunkNames && asset.info.contenthash)
     {
-        const chunkName = /** @type {String}*/(asset.chunkNames[0]);
+        const chunkName = /** @type {string}*/(asset.chunkNames[0]);
         env.state.hash.next[chunkName] = asset.info.contenthash.toString();
+        if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName])
+        {
+            let p = `${chunkName}.${env.buildMode !== "debug" ? "" : "debug."}${env.state.hash.current[chunkName]}.js`;
+            if (existsSync(p)) {
+                unlinkSync(p);
+            }
+            p = `${p}.map`;
+            if (existsSync(p)) {
+                unlinkSync(p);
+            }
+        }
         logAssetInfo(env.state.hash, wpConfig);
     }
 };
 
 
 /**
- * @method readAssetStatesv
+ * @function readAssetStatesv
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  */
@@ -146,7 +165,7 @@ const readAssetStates = (env, wpConfig) =>
         env.state.hash.current = {};
         apply(env.state.hash.current, { ...env.state.hash.next });
         env.state.hash.next = {};
-        logAssetInfo(env.state.hash, wpConfig);
+        logAssetInfo(env.state.hash, wpConfig, true);
     }
     else {
         writeInfo("   asset state cache file does not exist");

@@ -13,7 +13,7 @@ const webpack = require("webpack");
 
 
 /**
- * @method optimization
+ * @function optimization
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance[]}

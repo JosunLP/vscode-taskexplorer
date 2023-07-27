@@ -59,7 +59,8 @@ declare interface WebpackBuildPaths
     base: string;                         // context base dir path
     build: string;                        // base/root level dir path of project
     cache: string;
-    dist: string;
+    dist: string;                         // main distribution path
+    distBuild: string;                    // distribution path - release/debug mode specific
     files: WebpackBuildFilePaths;
     temp: string;                         // operating system temp directory
 }

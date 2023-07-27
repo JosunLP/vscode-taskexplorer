@@ -9,9 +9,8 @@ const webviewApps = require("../webviewApps");
 const {
 	analyze, banner, build, clean, compile, copy, finalize, hash, hookSteps, ignore,
 	optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, htmlcsp,
-	imageminimizer, htmlinlinechunks, webviewapps, asset
+	imageminimizer, htmlinlinechunks, webviewapps, asset, scm
 } = require("../plugin");
-
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
@@ -69,18 +68,19 @@ const plugins = (env, wpConfig) =>
 		);
 	}
 
-	wpConfig.plugins.push(                       // ^ compiler.hooks.compilation -> compilation.hooks.optimizeChunks, ...
+	wpConfig.plugins.push(                       // compiler.hooks.compilation -> compilation.hooks.optimizeChunks, ...
 		...optimization(env, wpConfig),          // ^ compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
 		hash(env, wpConfig),                     // compiler.hooks.done
 		upload(env, wpConfig),                   // compiler.hooks.afterDone
 		asset(env, wpConfig),                    //
-		finalize(env, wpConfig)                  // compiler.hooks.shutdown
+		finalize(env, wpConfig),                 // compiler.hooks.shutdown
+		scm(env, wpConfig)                       // compiler.hooks.shutdown
 	);
 
-	wpConfig.plugins.slice().reverse().forEach((p, index, object) =>
+	wpConfig.plugins.slice().reverse().forEach((p, i, a) =>
 	{
 		if (!p) {
-			/** @type {(WebpackPluginInstance|undefined)[]} */(wpConfig.plugins).splice(object.length - 1 - index, 1);
+			wpConfig.plugins.splice(a.length - 1 - i, 1);
 		}
 	});
 };
