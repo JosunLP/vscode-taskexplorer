@@ -23,11 +23,11 @@ const colors = {
 const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
 
 
-const consoleWrite = (msg, icon, pad = "") =>
+const write = (msg, icon, pad = "") =>
     console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + msg : ""}`);
 
 
-const consoleWriteInfo = (msg, icon, pad = "") =>
+const writeInfo = (msg, icon, pad = "") =>
     console.log(`     ${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
 
 /*
@@ -91,12 +91,11 @@ const figures =
     }
 };
 
-const wpConsole = {
+
+module.exports = {
     colors,
     figures,
     withColor,
-    write: consoleWrite,
-    writeInfo: consoleWriteInfo
+    write,
+    writeInfo
 };
-
-module.exports = wpConsole;

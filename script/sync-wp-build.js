@@ -4,7 +4,6 @@
 if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
 const { glob } = require("glob");
-const { basename } = require("path");
 const { existsSync, copyFileSync, readFileSync, writeFileSync } = require("fs");
 
 /** @type {string[]} */
@@ -23,10 +22,11 @@ const copyWpBuildFile = (project, file, dir) =>
         {
             const contents = readFileSync(destFile, "utf8")
                              .replace(/const \{([\r\n\s]+)/gi, (_r, g1) => `import {${g1}`)
-                             .replace(/\} = require\("([a-z\.\/]+)"\);/gi, (_r, g1) => `} from "${g1}";`)
+                             .replace(/\} = require\("([a-z0-9\.\/\-_]+)"\);/gi, (_r, g1) => `} from "${g1}";`)
+                             .replace(/\} = require\("([a-z0-9\.\/\-_]+)"\)\.(\w+)/gi, (_r, g1, g2) => `.${g2} } from "${g1}";`)
                              .replace(/module\.exports = (\w+)/gi, (_r, g1) => `export default ${g1}`)
                              .replace(/module\.exports = \{/gi, "export {")
-                             .replace(/const (\w+) = require\("([a-z\.\/]+)"\);/gi, (_r, g1, g2) => `import ${g1} from "${g2}";`);
+                             .replace(/const (\w+) = require\("([a-z\.\/\-_]+)"\);/gi, (_r, g1, g2) => `import ${g1} from "${g2}";`);
             writeFileSync(destFile, contents);
         }
     }
