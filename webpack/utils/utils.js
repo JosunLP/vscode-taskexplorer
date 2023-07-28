@@ -3,9 +3,9 @@
 
 const { resolve } = require("path");
 const globalEnv = require("./global");
-const { readFileSync, existsSync } = require("fs");
 const gradient = require("gradient-string");
 const { WebpackError } = require("webpack");
+const { readFileSync, existsSync } = require("fs");
 const { withColor, figures, colors } = require("@spmeesseman/test-utils");
 
 /** @typedef {import("./types").IWebpackApp} IWebpackApp */

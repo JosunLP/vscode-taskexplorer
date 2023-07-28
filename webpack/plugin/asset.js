@@ -6,9 +6,7 @@
  * @module webpack.plugin.asset
  */
 
-const { join } = require("path");
-const { existsSync, readFileSync } = require("fs");
-const { writeInfo, figures } = require("../console");
+const { writeInfo, figures } = require("../utils/console");
 const { writeFile, rename, unlink } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */

@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-const globalEnv = require("../global");
-const { writeInfo, withColor, figures, colors } = require("../console");
-const { initGlobalEnvObject } = require("../utils");
+const globalEnv = require("../utils/global");
+const { initGlobalEnvObject } = require("../utils/utils");
+const { writeInfo, withColor, figures, colors } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */

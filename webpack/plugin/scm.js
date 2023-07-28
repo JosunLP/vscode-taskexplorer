@@ -5,10 +5,9 @@
  * @module webpack.plugin.banner
  */
 
+const globalEnv = require("../utils/global");
 const { spawnSync } = require("child_process");
-const webpack = require("webpack");
-const { writeInfo, figures, withColor, colors } = require("../console");
-const globalEnv = require("../global");
+const { writeInfo, figures, withColor, colors } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */

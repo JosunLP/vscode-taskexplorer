@@ -11,8 +11,8 @@ const colors = {
 };
 
 /**
- * @param {String} msg
- * @param {Number[]} color Webpack config object
+ * @param {string} msg
+ * @param {number[]} color Webpack config object
  */
 const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
 

@@ -1,7 +1,7 @@
 // @ts-check
 
-const { apply } = require("../utils");
 const { join, resolve } = require("path");
+const { apply } = require("../utils/utils");
 
 /**
  * @module webpack.exports.output

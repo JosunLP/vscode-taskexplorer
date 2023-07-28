@@ -15,10 +15,10 @@
  */
 
 const { join } = require("path");
-const globalEnv = require("../global");
+const globalEnv = require("../utils/global");
 const { spawnSync } = require("child_process");
-const { initGlobalEnvObject } = require("../utils");
-const { writeInfo, figures, withColor, colors } = require("../console");
+const { initGlobalEnvObject } = require("../utils/utils");
+const { writeInfo, figures, withColor, colors } = require("../utils/console");
 const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */

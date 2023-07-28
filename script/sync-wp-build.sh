@@ -35,11 +35,11 @@ function sync_wp_build_files {
 
     # cp_wp_build_file $1 .wpbuildrc.json webpack
 
-    cp_wp_build_file $1 console.js webpack
-    cp_wp_build_file $1 global.js webpack
-    cp_wp_build_file $1 utils.js webpack
-
     cp_wp_build_file $1 index.d.ts  webpack/types
+
+    cp_wp_build_file $1 console.js webpack/utils
+    cp_wp_build_file $1 global.js webpack/utils
+    cp_wp_build_file $1 utils.js webpack/utils
 
     # cp_wp_build_file $1 context.js webpack/exports
     cp_wp_build_file $1 devtool.js webpack/exports

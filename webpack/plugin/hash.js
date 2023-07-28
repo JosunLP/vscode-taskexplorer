@@ -2,9 +2,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const { apply, isObjectEmpty } = require("../utils");
+const { apply, isObjectEmpty } = require("../utils/utils");
 const { writeFileSync, readFileSync, existsSync, unlinkSync } = require("fs");
-const { writeInfo, withColor, figures, colors, write } = require("../console");
+const { writeInfo, withColor, figures, colors, write } = require("../utils/console");
 
 /**
  * @module webpack.plugin.hash

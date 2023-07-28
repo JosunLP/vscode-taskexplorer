@@ -6,11 +6,11 @@
  * @module webpack.exports.environment
  */
 
-const globalEnv = require("../global");
 const { join, resolve } = require("path");
 const { WebpackError } = require("webpack");
-const { writeInfo, figures } = require("../console");
-const { merge, isObjectEmpty } = require("../utils");
+const globalEnv = require("../utils/global");
+const { writeInfo, figures } = require("../utils/console");
+const { merge, isObjectEmpty } = require("../utils/utils");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
 
 /** @typedef {import("../types").IWebpackApp} IWebpackApp */
