@@ -21,6 +21,7 @@ const { initGlobalEnvObject } = require("../utils/utils");
 const { writeInfo, figures, withColor, colors } = require("../utils/console");
 const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync, readdirSync } = require("fs");
 const { WebpackError } = require("webpack");
+const { info } = require("console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackHashState} WebpackHashState */
@@ -106,7 +107,7 @@ const uploadAssets = (assets, env) =>
         }
         else {
             const fileNameNoHash = a.name.replace(`.${a.info.contenthash}`, "");
-            writeInfo(`resource '${fileNameNoHash}' unchanged, skip upload [${a.info.contenthash}]`, withColor(figures.info, colors.yellow));
+            writeInfo(`resource '${chunkName}|${fileNameNoHash}' unchanged, skip upload [${a.info.contenthash}]`, withColor(figures.info, colors.yellow));
         }
     });
 

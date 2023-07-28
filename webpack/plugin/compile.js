@@ -6,9 +6,8 @@
  * @module webpack.plugin.compile
  */
 
-const { readdirSync, copyFileSync } = require("fs");
-const { join, resolve } = require("path");
-const { Compiler, Compilation, sources } =  require("webpack");
+const { join } = require("path");
+const { copyFileSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
@@ -26,49 +25,85 @@ const compile = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build === "extension")
+    if (env.build === "extension" && env.environment === "test")
     {
         plugin =
         {
             apply: (compiler) =>
             {
-                compiler.hooks.compilation.tap("CompileThisCompilationPlugin", (compilation) =>
+                compiler.hooks.compilation.tap("CompileThisCompilationPlugin_STAGE_ADDITIONS", (compilation) =>
                 {
-                    const logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
-                    const cache = compilation.getCache("CompileThisCompilationPlugin");
-                    // if (env.environment !== "prod" && env.buildMode === "debug")
-                    // {
-                    // }
+                    // const cache = compilation.getCache("CompileThisCompilationPlugin"),
+                    //       logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
 
                     compilation.hooks.processAssets.tap(
                     {
-                        name: "CompileProcessAssetsCompilationPlugin",
+                        name: "CompileProcessAssets_STAGE_ADDITIONS",
                         stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS
                     },
                     (assets) =>
                     {
-                        Object.entries(assets).forEach(a =>
+                        const entriesRgx = `(?:${Object.keys(wpConfig.entry).reduce((e, c) => `${!!c ? `${c}|` : c}${e}`, "")})`;
+                        Object.entries(assets).filter(a => new RegExp(entriesRgx).test(a[0])).forEach(a =>
                         {
-                            const asset = /** @type {Readonly<import("webpack").Asset>} */(compilation.getAsset(a[0])),
-                                source = a[1],
-                                content= source.source().toString(),
-                                regex = /\n[ \t]*module\.exports \= require\(/gm,
-                                newContent = content.replace(regex, (v) => "/* istanbul ignore next */" + v);
-                            compilation.updateAsset(a[0], new sources.RawSource(newContent), { ...asset.info, ...{ contenthash: "GGGG" } });
+                            const fileName = a[0],
+                                  { source, map } = a[1].sourceAndMap(),
+                                  content= source.toString(),
+                                  regex = /\n[ \t]*module\.exports \= require\(/gm,
+                                  newContent = content.replace(regex, (v) => "/* istanbul ignore next */" + v);
+                            // asset = /** @type {Readonly<import("webpack").Asset>} */(compilation.getAsset(fileName));
+                            // asset2 = /** @type {{ path: string; info: import("webpack").AssetInfo}} */(compilation.getAssetPathWithInfo(fileName, {}));
+                            compilation.updateAsset(fileName, new compiler.webpack.sources.SourceMapSource(newContent, fileName, map));
+                            // new compiler.webpack.sources.RawSource(newContent)); // , { ...asset.info, related: { sourceMap: map.toString() }});
                         });
 
-                        if (compilation.hooks.statsPrinter)
-                        {
-                            compilation.hooks.statsPrinter.tap("CompileThisCompilationPlugin", (stats) =>
-                            {
-                                stats.hooks.print.for("asset.info.copied").tap(
-                                    "CompileProcessAssetsCompilationPlugin",
-                                    (copied, { green, formatFlag }) => {
-                                        return copied ? /** @type {Function} */(green)(/** @type {Function} */(formatFlag)("copied")) : ""
-                                    }
-                                );
-                            });
-                        }
+                        // if (compilation.hooks.statsPrinter)
+                        // {
+                        //     compilation.hooks.statsPrinter.tap("CompileThisCompilationPlugin", (stats) =>
+                        //     {
+                        //         stats.hooks.print.for("asset.info.copied").tap(
+                        //             "CompileProcessAssetsCompilationPlugin",
+                        //             (copied, { green, formatFlag }) => {
+                        //                 return copied ? /** @type {Function} */(green)(/** @type {Function} */(formatFlag)("copied")) : ""
+                        //             }
+                        //         );
+                        //     });
+                        // }
+                    });
+                });
+
+                compiler.hooks.compilation.tap("CompileThisCompilationPlugin_STAGE_ADDITIONAL", (compilation) =>
+                {
+                    // const cache = compilation.getCache("CompileThisCompilationPlugin"),
+                    //       logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
+
+                    compilation.hooks.processAssets.tap(
+                    {
+                        name: "CompileProcessAssets_STAGE_ADDITIONAL",
+                        stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
+                    },
+                    (assets) =>
+                    {
+                        // const entriesRgx = `(?:${Object.keys(wpConfig.entry).reduce((e, c) => `${!!c ? `${c}|` : c}${e}`, "")})`;
+                        // Object.entries(assets).filter(a => new RegExp(entriesRgx).test(a[0])).forEach(a =>
+                        // {
+                        //     const fileName = a[0],
+                        //           { source, map } = a[1].sourceAndMap(),
+                        //           content= source.toString();
+                        //     compilation.emitAsset(fileName, new compiler.webpack.sources.SourceMapSource(content, fileName, map));
+                        // });
+                        // if (compilation.hooks.statsPrinter)
+                        // {
+                        //     compilation.hooks.statsPrinter.tap("CompileThisCompilationPlugin_STAGE_ADDITIONAL", (stats) =>
+                        //     {
+                        //         stats.hooks.print.for("asset.info.copied").tap(
+                        //             "CompileProcessAssets_STAGE_ADDITIONAL",
+                        //             (copied, { green, formatFlag }) => {
+                        //                 return copied ? /** @type {Function} */(green)(/** @type {Function} */(formatFlag)("copied")) : "";
+                        //             }
+                        //         );
+                        //     });
+                        // }
                     });
                 });
             }
