@@ -265,8 +265,8 @@ const readConfigFiles = () =>
             /** @type {IWebpackPackageJson} */
             const pkgJso = JSON.parse(readFileSync(pkgJsonPath, "utf8")),
                   pkgJsoPartial = pickBy(pkgJso, p => props.includes(p));
-            merge(appRc, { pkgJson: { ...pkgJsoPartial }});
-            merge(globalEnv, { pkgJson: { ...pkgJsoPartial }});
+            merge(appRc, {}, { pkgJson: pkgJsoPartial });
+            merge(globalEnv, {}, { pkgJson: pkgJsoPartial });
         }
         else {
             throw new WebpackError("Could not locate package.json");
@@ -280,8 +280,16 @@ const readConfigFiles = () =>
         appRc.name = appRc.pkgJson.name;
     }
 
-    if (!appRc.nameDetail) {
-        appRc.nameDetail = appRc.name;
+    if (!appRc.displayName) {
+        appRc.name = appRc.pkgJson.displayName;
+    }
+
+    if (!appRc.description) {
+        appRc.description = appRc.name;
+    }
+
+    if (!appRc.version) {
+        appRc.version = appRc.pkgJson.version;
     }
 
     if (!appRc.vscode) {
@@ -290,10 +298,6 @@ const readConfigFiles = () =>
 
     if (!appRc.vscode.webview) {
         appRc.vscode.webview = {};
-    }
-
-    if (!appRc.name) {
-        appRc.version = appRc.pkgJson.version;
     }
 
     return appRc;

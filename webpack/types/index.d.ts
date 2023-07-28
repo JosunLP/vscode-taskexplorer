@@ -56,8 +56,9 @@ declare interface WebpackGlobalEnvironment extends Record<string, any>
 declare interface IWebpackApp
 {
     exports: Record<string, boolean>;
-    name: string;                         // app name (read from package.json)
-    nameDetail: string;
+    name: string;                         // project name (read from package.json)
+    displayName: string;                  // displayName (read from package.json)
+    description: string;                  // description (read from package.json)
     pkgJson: Record<string, any>;
     plugins: Record<string, boolean>;
     version: string;                      // app version (read from package.json)

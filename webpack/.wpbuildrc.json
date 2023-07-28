@@ -1,6 +1,7 @@
 {
-    "name": "Task Explorer",
-    "nameDetail": "Task Explorer VSCode Extension",
+    "name": "vscode-taskexplorer",
+    "displayName": "Task Explorer",
+    "description": "Task Explorer VSCode Extension",
     "module": false,
     "exports": {
         "context": true,
