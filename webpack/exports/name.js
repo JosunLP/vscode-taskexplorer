@@ -10,8 +10,8 @@
 
 
 /**
- * @method
- * @param {WebpackBuild} buildTarget Build target
+ * @function
+ * @param {WebpackBuild} buildTarget Build target e.g. `extension`, `webview` etc
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */

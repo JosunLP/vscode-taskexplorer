@@ -9,6 +9,7 @@ const copy = require("./copy");
 const finalize = require("./finalize");
 const { hash, prehash } = require("./hash");
 const ignore = require("./ignore");
+const istanbul = require("./istanbul");
 const optimization = require("./optimization");
 const loghooks = require("./loghooks");
 const progress = require("./progress");
@@ -32,6 +33,7 @@ module.exports = {
     htmlinlinechunks,
 	ignore,
     imageminimizer,
+    istanbul,
     loghooks,
     optimization,
     prehash,

@@ -1,3 +1,4 @@
+// @ts-check
 
 const colors = {
     black: [ 0, 39 ],
