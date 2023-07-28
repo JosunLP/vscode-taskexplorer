@@ -4,33 +4,20 @@
  * @module webpack.exports.entry
  */
 
-const webviewApps = require("../webviewApps");
-
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 
 /**
- * @method entry
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
- */
-
-//
-// *************************************************************
-// *** ENTRY POINTS                                          ***
-// *************************************************************
-//
-/**
- * @method
+ * @function entry
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const entry = (env, wpConfig) =>
 {
-	if (env.build === "webview")
+	if (env.build === "webview" && env.app.vscode)
 	{
-		wpConfig.entry = webviewApps;
+		wpConfig.entry = env.app.vscode.webview;
 		// exports.output() will set filename
 	}
 	else if (env.build === "tests")
@@ -61,5 +48,6 @@ const entry = (env, wpConfig) =>
 		};
 	}
 };
+
 
 module.exports = entry;

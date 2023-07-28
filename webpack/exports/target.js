@@ -9,7 +9,7 @@
 
 
 /**
- * @method target
+ * @function target
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */

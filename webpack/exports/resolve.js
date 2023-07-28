@@ -12,7 +12,7 @@ const path = require("path");
 
 
 /**
- * @method
+ * @function
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */

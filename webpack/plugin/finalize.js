@@ -6,10 +6,10 @@
  * @module webpack.plugin.finalize
  */
 
-const { join, resolve } = require("path");
-const { existsSync, copyFileSync, readdirSync } = require("fs");
+const { join } = require("path");
+const { asArray } = require("..//utils/utils");
 const { rename, unlink, readdir } = require("fs/promises");
-const { asArray } = require("../utils");
+const { existsSync, copyFileSync, readdirSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
@@ -65,17 +65,17 @@ const finalize = (env, wpConfig) =>
 
 
 /**
- * @function _upload
+ * @function dupHashFile
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const dupHashFile= (env, wpConfig) =>
 {
-    asArray(env.app.mainChunk).forEach((chunk) =>
+    Object.keys(wpConfig.entry).forEach((chunk) =>
     {
         const items = existsSync(env.paths.dist) ? readdirSync(env.paths.dist) : [],
               digestLen = /** @type {number} */(wpConfig.output.hashDigestLength),
-              testRgx = new RegExp(`${chunk}\\.[0-9a-f]{${digestLen}}\\.js`),
+              testRgx = new RegExp(`${chunk}\\.[0-9a-f]{${digestLen},}\\.js`),
               teModule = items.find(a => testRgx.test(a));
         if (teModule) {
             copyFileSync(join(env.paths.dist, teModule), join(env.paths.dist, `${chunk}.js`));

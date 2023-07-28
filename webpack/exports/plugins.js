@@ -8,7 +8,7 @@
 const {
 	analyze, banner, build, clean, compile, copy, finalize, hash, loghooks, ignore,
 	optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, htmlcsp,
-	imageminimizer, htmlinlinechunks, webviewapps, asset, scm
+	imageminimizer, htmlinlinechunks, webviewapps, scm
 } = require("../plugin");
 
 /** @typedef {import("../types").IWebpackApp} IWebpackApp */
@@ -72,7 +72,6 @@ const plugins = (env, wpConfig) =>
 		...optimization(env, wpConfig),          // ^ compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
 		hash(env, wpConfig),                     // compiler.hooks.done
 		upload(env, wpConfig),                   // compiler.hooks.afterDone
-		asset(env, wpConfig),                    //
 		finalize(env, wpConfig),                 // compiler.hooks.shutdown
 		scm(env, wpConfig)                       // compiler.hooks.shutdown
 	);

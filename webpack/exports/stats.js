@@ -8,7 +8,7 @@
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 /**
- * @method stats
+ * @function stats
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */

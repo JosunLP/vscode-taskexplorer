@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 
-const { resolve } = require("path");
 const globalEnv = require("./global");
+const { resolve } = require("path");
 const gradient = require("gradient-string");
 const { WebpackError } = require("webpack");
 const { readFileSync, existsSync } = require("fs");
-const { withColor, figures, colors } = require("@spmeesseman/test-utils");
+const { write, writeInfo, withColor, figures, colors } = require("./console");
 
 /** @typedef {import("./types").IWebpackApp} IWebpackApp */
 /** @typedef {import("./types").IWebpackPackageJson} IWebpackPackageJson */
@@ -228,8 +228,8 @@ const readConfigFiles = () =>
 {
     /** @type {IWebpackApp} */
     const rc = {},
-          rcPath = join(__dirname, ".wpbuildrc"),
-          pkgJsonPath = resolve(__dirname, "..", "package.json");
+          rcPath = resolve(__dirname, "..", ".wpbuildrc.json"),
+          pkgJsonPath = resolve(__dirname, "..", "..", "package.json");
 
     try
     {   if (existsSync(rcPath))

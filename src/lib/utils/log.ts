@@ -7,11 +7,11 @@ import { execIf, popIfExistsBy, wrap } from "./utils";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
 import {
+    ILog, ILogConfig, ILogControl, ILogState, LogLevel, ILogSymbols, LogColor, ILogColors, ILogDisposable
+} from "../../interface";
+import {
     appendFileSync, copyFile, createDirSync, deleteDir, deleteFileSync, findFiles, pathExistsSync, readJsonAsync, writeFile
 } from "./fs";
-import {
-    ILog, ILogConfig, ILogControl, ILogState, LogLevel, ILogSymbols, LogColor, ILogColors, ILogDisposable, LogPromptRestartFn, LogHttpGetFn
-} from "../../interface";
 
 // export class LogOutputChannel implements ILogOutputChannel
 // {

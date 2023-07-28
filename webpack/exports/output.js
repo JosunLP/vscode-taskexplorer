@@ -12,7 +12,7 @@ const { apply } = require("../utils/utils");
 
 
 /**
- * @method
+ * @function
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */

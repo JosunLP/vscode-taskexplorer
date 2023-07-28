@@ -16,7 +16,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 
 /**
- * @param {String[]} apps
+ * @param {string[]} apps
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {CopyPlugin | undefined}
@@ -55,7 +55,7 @@ const copy = (apps, env, wpConfig) =>
 		// ALMOST AS BAD AS THAT DUMB F'R WHO INCLUDED THE ENTIRE MOMENT PACKAGE FOR 1 FUNCTION.
 		//
 
-		// asArray(env.app.mainChunk).forEach((chunk) =>
+		// asArray(wpConfig.entry).forEach((chunk) =>
 		// {
 		// 	patterns.push(
 		// 	{

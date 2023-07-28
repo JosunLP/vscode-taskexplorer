@@ -2,9 +2,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const globalEnv = require("./webpack/global");
-const { writeInfo } = require("./webpack/console");
-const { merge, printBanner, readConfigFiles } = require("./webpack/utils");
+const globalEnv = require("./webpack/utils/global");
+const { writeInfo } = require("./webpack/utils/console");
+const { merge, printBanner, readConfigFiles } = require("./webpack/utils/utils");
 const {
 	context, devtool, entry, externals, ignorewarnings, minification, mode, name, plugins,
 	optimization, output, resolve, rules, stats, target, watch, environment, getMode

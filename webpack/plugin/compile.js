@@ -8,6 +8,7 @@
 
 const { readdirSync, copyFileSync } = require("fs");
 const { join, resolve } = require("path");
+const { Compiler, Compilation, sources } =  require("webpack");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
@@ -31,58 +32,45 @@ const compile = (env, wpConfig) =>
         {
             apply: (compiler) =>
             {
-                compiler.hooks.emit.tap("CompileEmitPlugin", (compilation) =>
+                compiler.hooks.compilation.tap("CompileThisCompilationPlugin", (compilation) =>
                 {
-                    Object.keys(compilation.assets).forEach((basename) =>
+                    const logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
+                    const cache = compilation.getCache("CompileThisCompilationPlugin");
+                    // if (env.environment !== "prod" && env.buildMode === "debug")
+                    // {
+                    // }
+
+                    compilation.hooks.processAssets.tap(
                     {
-                        if (/taskexplorer\.[0-9a-f]{20,}\.js/.test(basename))
+                        name: "CompileProcessAssetsCompilationPlugin",
+                        stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS
+                    },
+                    (assets) =>
+                    {
+                        Object.entries(assets).forEach(a =>
                         {
-                            const asset = compilation.assets[basename],
-                                  content= asset.source().toString();
-                                  const regex = /\n[ \t]*module\.exports \= require\(/mg,
-                                  newContent = content.replace(regex, (v) => "/* istanbul ignore next */" + v);
-                            asset.source = () => { console.log("l333:" + newContent.length);  return newContent; };
-                            asset.size = () => asset.source().length;
+                            const asset = /** @type {Readonly<import("webpack").Asset>} */(compilation.getAsset(a[0])),
+                                source = a[1],
+                                content= source.source().toString(),
+                                regex = /\n[ \t]*module\.exports \= require\(/gm,
+                                newContent = content.replace(regex, (v) => "/* istanbul ignore next */" + v);
+                            compilation.updateAsset(a[0], new sources.RawSource(newContent), { ...asset.info, ...{ contenthash: "GGGG" } });
+                        });
+
+                        if (compilation.hooks.statsPrinter)
+                        {
+                            compilation.hooks.statsPrinter.tap("CompileThisCompilationPlugin", (stats) =>
+                            {
+                                stats.hooks.print.for("asset.info.copied").tap(
+                                    "CompileProcessAssetsCompilationPlugin",
+                                    (copied, { green, formatFlag }) => {
+                                        return copied ? /** @type {Function} */(green)(/** @type {Function} */(formatFlag)("copied")) : ""
+                                    }
+                                );
+                            });
                         }
                     });
                 });
-
-                // compiler.hooks.thisCompilation.tap("CompileThisCompilationPlugin", (compilation) =>
-                // {
-                //     if (env.environment !== "prod" && env.buildMode === "debug")
-                //     {
-                //     }
-                //     const logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
-                //     const cache = compilation.getCache("CompileThisCompilationPlugin");
-
-                //     compilation.hooks.processAssets.tapAsync(
-                //     {
-                //         name: "CompileProcessAssetsCompilationPlugin",
-                //         // stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
-                //         stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS
-                //     },
-                //     async (unusedAssets, callback) =>
-                //     {
-                //         // const existingAsset = compilation.getAsset(filename);
-                //         // compilation.emitAsset(filename, source, { ...info,
-                //         //   ..result.info
-                //         // });
-                //         callback();
-                //     });
-
-                //     if (compilation.hooks.statsPrinter)
-                //     {
-                //         compilation.hooks.statsPrinter.tap("CompileThisCompilationPlugin", (stats) =>
-                //         {
-                //             stats.hooks.print.for("asset.info.copied").tap(
-                //                 "CompileProcessAssetsCompilationPlugin",
-                //                 (copied, { green, formatFlag }) => {
-                //                     return copied ? /** @type {Function} */(green)(/** @type {Function} */(formatFlag)("copied")) : ""
-                //                 }
-                //             );
-                //         });
-                //     }
-                // });
             }
         };
     }

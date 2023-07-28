@@ -32,10 +32,9 @@ const addStepHook = (hook, plugins, env, wpConfig) =>
 				if (!globalEnv.hooksLog[key])
 				{
 					globalEnv.hooksLog[key] = true;
-					writeInfo(`Build step: ${hookName.padEnd(globalEnv.valuePad)} ${buildName}`);
+					writeInfo(`[${env.build}]`.padEnd(12) + ` ${hookName.padEnd(globalEnv.valuePad)}`);
 				}
 			});
-			// compiler.hooks[hook].tap(`${hook}StepPlugin`, () => writeInfo(`${hookName} ${buildName}`));
 		}
 	});
 };

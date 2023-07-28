@@ -1,12 +1,17 @@
 
 const colors = {
-	white: [ 37, 39 ],
-	grey: [ 90, 39 ],
+    black: [ 0, 39 ],
 	blue: [ 34, 39 ],
+    bold: [ 1, 22 ],
 	cyan: [ 36, 39 ],
 	green: [ 32, 39 ],
+	grey: [ 90, 39 ],
+    inverse: [ 7, 27 ],
+    italic: [ 3, 23 ],
 	magenta: [ 35, 39 ],
 	red: [ 31, 39 ],
+    underline: [ 4, 24 ],
+	white: [ 37, 39 ],
 	yellow: [ 33, 39 ]
 };
 
@@ -55,11 +60,13 @@ const consoleWriteInfo = (msg, icon, forceGrey = true, pad = "") =>
 const figures =
 {
     colors,
+    bullet: "●",
     error: "✘",
     info: "ℹ",
     star: "★",
     start: "▶",
     success: "✔",
+    up: "△",
     warning: "⚠",
     withColor,
     blue:
@@ -71,10 +78,13 @@ const figures =
     },
     color:
     {
+        bullet: withColor("●", colors.white),
         info: withColor("ℹ", colors.magenta),
         star: withColor("★", colors.yellow),
         start: withColor("▶", colors.green),
         success: withColor("✔", colors.green),
+        successTag: `[${withColor("SUCCESS", colors.green)}]`,
+        up: withColor("△", colors.white),
         warning: withColor("⚠", colors.yellow),
         error: withColor("✘", colors.red)
     }

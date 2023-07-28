@@ -1,7 +1,6 @@
 // @ts-check
 
 const analyze = require("./analyze");
-const asset = require("./asset");
 const banner = require("./banner");
 const build = require("./build");
 const clean = require("./clean");
@@ -21,7 +20,6 @@ const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = r
 
 module.exports = {
     analyze,
-    asset,
     banner,
     build,
     clean,

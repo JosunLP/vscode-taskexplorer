@@ -17,7 +17,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
 /**
- * @method
+ * @function
  * @param {WebpackEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
@@ -121,7 +121,7 @@ const rules = (env, wpConfig) =>
 					multiple: [
 					{
 						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*\}\);/g,
-						replace: (/** @type {String} */r) => {
+						replace: (/** @type {string} */r) => {
 							return "=> {}\r\n" + r.substring(r.slice(0, r.length - 3).lastIndexOf(")") + 1);
 						}
 					},
@@ -207,8 +207,8 @@ const rules = (env, wpConfig) =>
 
 /**
  * @param {WebpackEnvironment} env Webpack build environment
- * @param {String} tsConfigFile
- * @returns {String}
+ * @param {string} tsConfigFile
+ * @returns {string}
  */
 const getTsConfig = (env, tsConfigFile) =>
 {
