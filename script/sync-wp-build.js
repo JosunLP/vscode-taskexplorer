@@ -1,44 +1,37 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/naming-convention */
 
-// cd __dirname
+if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
-
-const { glob, IOptions } = "glob";
-const { existsSync, copyFileSync, readFileSync, writeFileSync, readdirSync } = require("fs");
+const { glob } = require("glob");
 const { basename } = require("path");
+const { existsSync, copyFileSync, readFileSync, writeFileSync } = require("fs");
 
 /** @type {string[]} */
 const notExists = [];
 
 
-syncWpBuildFiles("vscode-extjs");
-syncWpBuildFiles("@spmeesseman/logger");
-syncWpBuildFiles("@spmeesseman/test-utils");
-
-
 const copyWpBuildFile = (project, file, dir) =>
 {
-    const SRCFILE=`../${dir}/${file}`,
-          DESTFOLDER=`../../${project}/${dir}`,
-          DESTFILE=`../../${project}/${dir}/${file}`;
+    const srcFile=`../${dir}/${file}`,
+          destFile=`../../${project}/${dir}/${file}`;
 
     if (existsSync)
     {
-        copyFileSync(SRCFILE, DESTFOLDER);
-        if (DESTPROJECT.includes("@spmeesseman/"))
+        copyFileSync(srcFile, destFile);
+        if (project.includes("@spmeesseman/"))
         {
-            const contents = readFileSync(DESTFILE, "utf8")
+            const contents = readFileSync(destFile, "utf8")
                              .replace(/const \{([\r\n\s]+)/gi, (_r, g1) => `import {${g1}`)
                              .replace(/\} = require\("([a-z\.\/]+)"\);/gi, (_r, g1) => `} from "${g1}";`)
                              .replace(/module\.exports = (\w+)/gi, (_r, g1) => `export default ${g1}`)
                              .replace(/module\.exports = \{/gi, "export {")
-                             .replace(/const (\w+) = require\("([a-z\.\/]+)"\);/gi, (_r, g1) => `import ${g1} from "${g2}";`);
-            writeFileSync(SRCFILE, contents);
+                             .replace(/const (\w+) = require\("([a-z\.\/]+)"\);/gi, (_r, g1, g2) => `import ${g1} from "${g2}";`);
+            writeFileSync(destFile, contents);
         }
     }
     else {
-        notExists.push(DESTFILE);
+        notExists.push(destFile);
     }
 };
 
@@ -47,9 +40,9 @@ const doCustomFileActions = (project) =>
 {
     glob("**/*.js", { cwd: `../../${project}/webpack` }, (err, files) =>
     {
-        const contents = readFileSync(file);
         for (const file of notExists)
         {
+            // const contents = readFileSync(file);
             for (const eFile of files)
             {
                 // const contents = readFileSync(file);
@@ -111,9 +104,10 @@ const syncWpBuildPlugins = (project) =>
         copyWpBuildFile(project, "copy.js", "webpack/plugin");
         copyWpBuildFile(project, "html.js", "webpack/plugin");
         copyWpBuildFile(project, "sourcemaps.js", "webpack/plugin");
-        const contents = readFileSync(DESTFILE, "utf8")
+        const destFile=`../../${project}//webpack/plugin/sourcemaps.js`,
+              contents = readFileSync(destFile, "utf8")
                          .replace(/vendor\|runtime\|tests/gi, "vendor|runtime|tests|serverInterface");
-        writeFileSync(`../../${project}/webpack/plugin/sourcemaps.js`, contents);
+        writeFileSync(destFile, contents);
     }
 };
 
@@ -137,3 +131,8 @@ const syncWpBuildFiles = (project) =>
     syncWpBuildPlugins(project);
     doCustomFileActions(project);
 };
+
+
+syncWpBuildFiles("vscode-extjs");
+syncWpBuildFiles("@spmeesseman/logger");
+syncWpBuildFiles("@spmeesseman/test-utils");
