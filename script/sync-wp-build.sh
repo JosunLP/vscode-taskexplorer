@@ -69,21 +69,18 @@ function sync_wp_build_files {
     cp_wp_build_file $1 finalize.js webpack/plugin
     # cp_wp_build_file $1 hash.js webpack/plugin
     # cp_wp_build_file $1 html.js webpack/plugin
-    # cp_wp_build_file $1 ignore.js webpack/plugin
+    cp_wp_build_file $1 ignore.js webpack/plugin
     cp_wp_build_file $1 index.js webpack/plugin
+    cp_wp_build_file $1 loghooks.js webpack/plugin
     cp_wp_build_file $1 optimization.js webpack/plugin
-    # cp_wp_build_file $1 plugins.js webpack/plugin
     cp_wp_build_file $1 progress.js webpack/plugin
 
     # if [ $1 = "../../vscode-extjs" ] ; then
     #    cp_wp_build_file $1 tscheck.js webpack/plugin
     # fi
-
-    if [ $1 = "vscode-extjs" ] ; then
-        cp_wp_build_file $1 upload.js webpack/plugin
-    fi
-
+    cp_wp_build_file $1 upload.js webpack/plugin
     cp_wp_build_file $1 sourcemaps.js webpack/plugin
+
     if [ $1 = "vscode-extjs" ] ; then
         sed -i 's/vendor|runtime|tests/vendor|runtime|tests|serverInterface/g' "../../$1/webpack/plugin/sourcemaps.js"
     fi

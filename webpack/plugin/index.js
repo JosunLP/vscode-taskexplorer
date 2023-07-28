@@ -11,7 +11,7 @@ const finalize = require("./finalize");
 const { hash, prehash } = require("./hash");
 const ignore = require("./ignore");
 const optimization = require("./optimization");
-const hookSteps = require("./plugins");
+const loghooks = require("./loghooks");
 const progress = require("./progress");
 const scm = require("./scm");
 const sourcemaps = require("./sourcemaps");
@@ -34,7 +34,7 @@ module.exports = {
     htmlinlinechunks,
 	ignore,
     imageminimizer,
-    hookSteps,
+    loghooks,
     optimization,
     prehash,
     progress,
