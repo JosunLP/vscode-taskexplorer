@@ -11,7 +11,7 @@ const { write, writeInfo, withColor, figures, colors } = require("./console");
 
 /** @typedef {import("../types").IWebpackApp} IWebpackApp */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").IWebpackPackageJson} IWebpackPackageJson */
+/** @typedef {import("../types").WebpackPackageJson} WebpackPackageJson */
 
 
 /**
@@ -262,7 +262,7 @@ const readConfigFiles = () =>
             const props = [ // needs to be in sync with the properties of `IWebpackPackageJson`
                 "author", "displayName", "name", "description", "main", "module", "publisher", "version"
             ];
-            /** @type {IWebpackPackageJson} */
+            /** @type {WebpackPackageJson} */
             const pkgJso = JSON.parse(readFileSync(pkgJsonPath, "utf8")),
                   pkgJsoPartial = pickBy(pkgJso, p => props.includes(p));
             merge(appRc, {}, { pkgJson: pkgJsoPartial });

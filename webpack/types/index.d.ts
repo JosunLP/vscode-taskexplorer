@@ -15,7 +15,7 @@ declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
 declare type WebpackCompiler = import("webpack").Compiler;
 declare type WebpackOptimization = any;
 
-declare interface WebpackEnvironment extends WebpackEnvironmentInternal
+declare interface IWebpackEnvironment extends WebpackEnvironmentInternal
 {
     analyze: boolean;                     // parform analysis after build
     app: IWebpackApp;                      // target js app info
@@ -27,14 +27,15 @@ declare interface WebpackEnvironment extends WebpackEnvironmentInternal
     imageOpt: boolean;                    // Perform image optimization
     isTests: boolean;
     paths: WebpackBuildPaths;
-    pkgJson: IWebpackPackageJson;         // package.json parsed object
     preRelease: boolean;
     state: WebpackBuildState;
     target: WebpackTarget;
     verbosity: WebpackLogLevel;
 }
 
-declare interface IWebpackPackageJson extends Record<string, any>
+type WebpackEnvironment = IWebpackEnvironment & Record<string, any>;
+
+declare interface IWebpackPackageJson
 {
     author: string | { name: string };
     description: string;
@@ -46,12 +47,16 @@ declare interface IWebpackPackageJson extends Record<string, any>
     version: string;
 }
 
-declare interface WebpackGlobalEnvironment extends Record<string, any>
+type WebpackPackageJson = IWebpackPackageJson & Record<string, any>;
+
+declare interface IWebpackGlobalEnvironment
 {
     buildCount: number;
-    pkgJson: Record<string, any>; 
+    pkgJson: WebpackPackageJson; 
     valuePad: number;
 }
+
+type WebpackGlobalEnvironment = IWebpackGlobalEnvironment & Record<string, any>;
 
 declare interface IWebpackApp
 {
@@ -59,7 +64,7 @@ declare interface IWebpackApp
     name: string;                         // project name (read from package.json)
     displayName: string;                  // displayName (read from package.json)
     description: string;                  // description (read from package.json)
-    pkgJson: Record<string, any>;
+    pkgJson: WebpackPackageJson;
     plugins: Record<string, boolean>;
     version: string;                      // app version (read from package.json)
     vscode: IWebpackVsCodeBuild
@@ -70,11 +75,11 @@ declare interface WebpackBuildFilePaths
     hash: string;
     sourceMapWasm: string;
 }
+
 declare interface IWebpackVsCodeBuild
 {
     webview: Record<string, string>; // webviewsapp: "path/to/app"
 }
-
 
 declare interface WebpackBuildPaths
 {
@@ -123,7 +128,7 @@ export {
     WebpackConfig,
     WebpackGlobalEnvironment,
     WebpackHashState,
-    IWebpackPackageJson,
+    WebpackPackageJson,
     WebpackPluginInstance,
     WebpackOptimization,
     WebpackEnvironment,
