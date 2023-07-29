@@ -4,7 +4,7 @@ const analyze = require("./analyze");
 const banner = require("./banner");
 const build = require("./build");
 const clean = require("./clean");
-const compiletest = require("./compiletest");
+const compilation = require("./compilation");
 const copy = require("./copy");
 const finalize = require("./finalize");
 const { hash, prehash } = require("./hash");
@@ -24,7 +24,7 @@ module.exports = {
     banner,
     build,
     clean,
-    compiletest,
+    compilation,
     copy,
     cssextract,
     finalize,

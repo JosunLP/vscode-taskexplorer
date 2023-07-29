@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.compiletest
+ * @module webpack.plugin.compilation
  */
 
 const { getEntriesRegex, tapStatsPrinter } = require("../utils/utils");
@@ -22,7 +22,7 @@ const { getEntriesRegex, tapStatsPrinter } = require("../utils/utils");
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
-const compiletest = (env, wpConfig) =>
+const compilation = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
@@ -79,4 +79,4 @@ const istanbulTags = (compiler, compilation, wpConfig) =>
 };
 
 
-module.exports = compiletest;
+module.exports = compilation;

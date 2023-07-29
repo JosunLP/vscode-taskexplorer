@@ -6,7 +6,7 @@
  */
 
 const {
-	analyze, banner, build, clean, compiletest, copy, finalize, hash, instrument, loghooks,
+	analyze, banner, build, clean, compilation, copy, finalize, hash, instrument, loghooks,
 	ignore,optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, htmlcsp,
 	imageminimizer, htmlinlinechunks, webviewapps, scm
 } = require("../plugin");
@@ -38,7 +38,7 @@ const plugins = (env, wpConfig) =>
 		prehash(env, wpConfig),                  // compiler.hooks.initialize
 		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done
 		build(env, wpConfig),                    // compiler.hooks.beforeCompile
-		compiletest(env, wpConfig),              // compiler.hooks.compilation - adds istanbul ignore tags to node requires
+		compilation(env, wpConfig),              // compiler.hooks.compilation - e.g. adds istanbul ignore tags to node requires
 		instrument(env, wpConfig),               // ? - TODO -?
 		ignore(env, wpConfig),                   // compiler.hooks.normalModuleFactory
 		...tscheck(env, wpConfig),               // compiler.hooks.afterEnvironment, hooks.afterCompile
