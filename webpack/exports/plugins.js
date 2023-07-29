@@ -6,8 +6,8 @@
  */
 
 const {
-	analyze, banner, build, clean, compile, copy, finalize, hash, loghooks, ignore,
-	optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, htmlcsp,
+	analyze, banner, build, clean, compiletest, copy, finalize, hash, instrument, loghooks,
+	ignore,optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, htmlcsp,
 	imageminimizer, htmlinlinechunks, webviewapps, scm
 } = require("../plugin");
 
@@ -26,7 +26,7 @@ const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [];
 
-	if (env.verbosity &&  env.verbosity !== "none")
+	if (env.verbosity && env.verbosity !== "none")
 	{
 		wpConfig.plugins.push(
 			progress(env, wpConfig)
@@ -34,13 +34,14 @@ const plugins = (env, wpConfig) =>
 	}
 
 	wpConfig.plugins.push(
+		...loghooks(env, wpConfig),              // logs all compiler.hooks.* when they run
 		prehash(env, wpConfig),                  // compiler.hooks.initialize
 		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done
 		build(env, wpConfig),                    // compiler.hooks.beforeCompile
-		compile(env, wpConfig),                  // compiler.hooks.emit
+		compiletest(env, wpConfig),              // compiler.hooks.compilation - adds istanbul ignore tags to node requires
+		instrument(env, wpConfig),               // ? - TODO -?
 		ignore(env, wpConfig),                   // compiler.hooks.normalModuleFactory
 		...tscheck(env, wpConfig),               // compiler.hooks.afterEnvironment, hooks.afterCompile
-		...loghooks(env, wpConfig)               // logs all compiler.hooks.* when they run
 	);
 
 	if (env.build === "webview")
@@ -69,7 +70,7 @@ const plugins = (env, wpConfig) =>
 	}
 
 	wpConfig.plugins.push(                       // compiler.hooks.compilation -> compilation.hooks.optimizeChunks, ...
-		...optimization(env, wpConfig),          // ^ compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
+		...optimization(env, wpConfig),          // ^compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
 		hash(env, wpConfig),                     // compiler.hooks.done
 		upload(env, wpConfig),                   // compiler.hooks.afterDone
 		finalize(env, wpConfig),                 // compiler.hooks.shutdown

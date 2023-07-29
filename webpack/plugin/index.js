@@ -4,12 +4,12 @@ const analyze = require("./analyze");
 const banner = require("./banner");
 const build = require("./build");
 const clean = require("./clean");
-const compile = require("./compile");
+const compiletest = require("./compiletest");
 const copy = require("./copy");
 const finalize = require("./finalize");
 const { hash, prehash } = require("./hash");
 const ignore = require("./ignore");
-const istanbul = require("./istanbul");
+const instrument = require("./instrument");
 const optimization = require("./optimization");
 const loghooks = require("./loghooks");
 const progress = require("./progress");
@@ -24,7 +24,7 @@ module.exports = {
     banner,
     build,
     clean,
-    compile,
+    compiletest,
     copy,
     cssextract,
     finalize,
@@ -33,7 +33,7 @@ module.exports = {
     htmlinlinechunks,
 	ignore,
     imageminimizer,
-    istanbul,
+    instrument,
     loghooks,
     optimization,
     prehash,
