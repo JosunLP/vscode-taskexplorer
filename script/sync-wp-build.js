@@ -30,6 +30,13 @@ const copyWpBuildFile = (project, file, dir) =>
                              // .replace(/const (\w+) = require\("([a-z0-9\.\/\-_]+)"\)\.(\w+)/gi, (_r, g1, g2, g3) => `import ${g1}.${g3} from "${g2}";`);
             writeFileSync(destFile, contents);
         }
+        if (project === "vscode-extjs")
+        {
+            const contents = readFileSync(destFile, "utf8")
+                             .replace(/"src", "webview", "app"/gi, '"src", "client", "webview", "app"')
+                             .replace(/src([\\\/])webview[\\\/]app/gi, (_v, g) => `src${g}client${g}webview${g}app`);
+            writeFileSync(destFile, contents);
+        }
     }
     else {
         notExists.push(destFile);
@@ -61,6 +68,7 @@ const syncWpBuildExports = (project) =>
     copyWpBuildFile(project, "context.js", "webpack/exports");
     copyWpBuildFile(project, "devtool.js", "webpack/exports");
     // copyWpBuildFile(project, "entry.js", "webpack/exports");
+    copyWpBuildFile(project, "environment.js", "webpack/exports");
     copyWpBuildFile(project, "externals.js", "webpack/exports");
     copyWpBuildFile(project, "ignorewarnings.js", "webpack/exports");
     copyWpBuildFile(project, "index.js", "webpack/exports");
@@ -124,8 +132,8 @@ const syncWpBuildUtils = (project) =>
 const syncWpBuildFiles = (project) =>
 {
     copyWpBuildFile(project, "webpack.config.js", ".");
-    copyWpBuildFile(project, "sync-wp-build.js", "script");
-    copyWpBuildFile(project, "sync-wp-build.sh", "script");
+    // copyWpBuildFile(project, "sync-wp-build.js", "script");
+    // copyWpBuildFile(project, "sync-wp-build.sh", "script");
     copyWpBuildFile(project, ".wpbuildrc.json", "webpack");
     copyWpBuildFile(project, "index.d.ts", "webpack/types");
     syncWpBuildUtils(project);

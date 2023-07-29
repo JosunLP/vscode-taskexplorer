@@ -9,9 +9,9 @@
 const { join, resolve } = require("path");
 const { WebpackError } = require("webpack");
 const globalEnv = require("../utils/global");
-const { writeInfo, figures, write } = require("../utils/console");
 const { merge, isObjectEmpty } = require("../utils/utils");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
+const { writeInfo, figures, write } = require("../utils/console");
 
 /** @typedef {import("../types").IWebpackApp} IWebpackApp */
 /** @typedef {import("../types").WebpackArgs} WebpackArgs */
