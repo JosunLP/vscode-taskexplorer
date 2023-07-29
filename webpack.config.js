@@ -34,7 +34,7 @@ module.exports = (env, argv) =>
 	const appRc = readConfigFiles(),
 		  mode = getMode(env, argv);
 
-	printBanner(appRc.name, appRc.nameDetail, appRc.version, mode, env, argv);
+	printBanner(appRc, mode, env, argv);
 
 	const mEnv = merge(getDefaultBuildEnv(), env);
 

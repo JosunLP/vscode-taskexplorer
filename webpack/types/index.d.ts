@@ -13,6 +13,7 @@ declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
 declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
 declare type WebpackCompiler = import("webpack").Compiler;
+declare type WebpackCompilation = import("webpack").Compilation;
 declare type WebpackOptimization = any;
 
 declare interface IWebpackEnvironment extends WebpackEnvironmentInternal
@@ -37,7 +38,7 @@ type WebpackEnvironment = IWebpackEnvironment & Record<string, any>;
 
 declare interface IWebpackPackageJson
 {
-    author: string | { name: string };
+    author?: string | { name: string, email?: string };
     description: string;
     displayName: string; 
     main: string;
@@ -63,7 +64,9 @@ declare interface IWebpackApp
     exports: Record<string, boolean>;
     name: string;                         // project name (read from package.json)
     displayName: string;                  // displayName (read from package.json)
-    description: string;                  // description (read from package.json)
+    bannerName: string;                   // Displayed in startup banner detail line
+    bannerNameDetailed: string;           // Displayed in startup banner detail line
+    logPad: Record<string, any>;
     pkgJson: WebpackPackageJson;
     plugins: Record<string, boolean>;
     version: string;                      // app version (read from package.json)
@@ -125,9 +128,11 @@ export {
     WebpackBuildPaths,
     WebpackBuildState,
     WebpackCompiler,
+    WebpackCompilation,
     WebpackConfig,
     WebpackGlobalEnvironment,
     WebpackHashState,
+    WebpackMode,
     WebpackPackageJson,
     WebpackPluginInstance,
     WebpackOptimization,

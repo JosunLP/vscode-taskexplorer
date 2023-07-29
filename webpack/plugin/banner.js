@@ -6,7 +6,7 @@
  */
 
 const webpack = require("webpack");
-const { getEntriesRegex } = require("../utils/utils");
+const { getEntriesRegexString, isString } = require("../utils/utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
@@ -22,14 +22,19 @@ const banner = (env, wpConfig) =>
     let plugin;
 	if (wpConfig.mode === "production")
 	{
-		const entriesRgx = getEntriesRegex(wpConfig);
-		plugin = new webpack.BannerPlugin(
+		const entriesRgx = getEntriesRegexString(wpConfig),
+			  author = isString(env.app.pkgJson.author) ? env.app.pkgJson.author :
+			  		   /** @type {{ name: string; email?: string | undefined; }} */(env.app.pkgJson.author)?.name;
+		if (author)
 		{
-			banner: `Copyright ${(new Date()).getFullYear()} ${env.app.pkgJson.name || env.app.pkgJson.author?.name || "Scott P Meesseman"}`,
-			entryOnly: true,
-			test: new RegExp(`${entriesRgx}(?:\\.debug)?\\.js`)
-			// raw: true
-		});
+			plugin = new webpack.BannerPlugin(
+			{
+				banner: `Copyright ${(new Date()).getFullYear()} ${author}`,
+				entryOnly: true,
+				test: new RegExp(`${entriesRgx}(?:\\.debug)?\\.js`)
+				// raw: true
+			});
+		}
 	}
 	return plugin;
 };

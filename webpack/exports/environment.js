@@ -56,14 +56,11 @@ const initState = (env) => { env.state = { hash: { current: {}, next: {} } }; };
 const setApp = (app, env) =>
 {
 	merge(env, { app });
-console.log("set app");
-console.log(JSON.stringify(env, null, 4));
 	if (!env.app.pkgJson || isObjectEmpty(env.app.pkgJson))
 	{
 		const pkgJsonPath = join(env.paths.build, "package.json");
-		env.app.pkgJson = {};
 		if (existsSync(pkgJsonPath)) {
-			Object.assign(env.app.pkgJson, JSON.parse(readFileSync(pkgJsonPath, "utf8")));
+			merge(env.app, { pkgJson: JSON.parse(readFileSync(pkgJsonPath, "utf8")) });
 		}
 	}
 };

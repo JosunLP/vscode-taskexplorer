@@ -10,8 +10,11 @@ const { readFileSync, existsSync } = require("fs");
 const { write, writeInfo, withColor, figures, colors } = require("./console");
 
 /** @typedef {import("../types").IWebpackApp} IWebpackApp */
+/** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackArgs} WebpackArgs */
 /** @typedef {import("../types").WebpackPackageJson} WebpackPackageJson */
+/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
 
 /**
@@ -82,7 +85,7 @@ const clone = (item) =>
  * @function getEntriesRegex
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const getEntriesRegex = (wpConfig) =>
+const getEntriesRegexString = (wpConfig) =>
 {
 	return `(?:${Object.keys(wpConfig.entry).reduce((e, c) => `${!!e ? `${e}|` : e}${c}`, "")})`;
 };
@@ -120,6 +123,9 @@ const isEmpty = (v, allowEmpStr) => v === null || v === undefined || (!allowEmpS
 
 
 const isObjectEmpty = (v) => { if (v) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };
+
+
+const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanceof String || typeof v === "string");
 
 
 /**
@@ -216,13 +222,20 @@ const printLineSep = () =>
 };
 
 
-const printBanner = (app, appDetailName, version, mode, env, argv) =>
+/**
+ * @function
+ * @param {IWebpackApp} app
+ * @param {WebpackMode} mode Webpack command line args
+ * @param {Partial<WebpackEnvironment>} env Webpack build environment
+ * @param {WebpackArgs} argv Webpack command line args
+ */
+const printBanner = (app, mode, env, argv) =>
 {
     printLineSep();
     // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
-    console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(spmBanner(app, version), {interpolation: "hsv"}));
+    console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(spmBanner(app.displayName, app.version), {interpolation: "hsv"}));
     printLineSep();
-    write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${appDetailName} Webpack Build`));
+    write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${app.bannerNameDetailed} Webpack Build`));
     printLineSep();
 	write(withColor("   Mode  : ", colors.white) + withColor(mode, colors.grey));
 	write(withColor("   Argv  : ", colors.white) + withColor(JSON.stringify(argv), colors.grey));
@@ -284,8 +297,12 @@ const readConfigFiles = () =>
         appRc.name = appRc.pkgJson.displayName;
     }
 
-    if (!appRc.description) {
-        appRc.description = appRc.name;
+    if (!appRc.bannerName) {
+        appRc.bannerName = appRc.displayName;
+    }
+
+    if (!appRc.bannerNameDetailed) {
+        appRc.bannerNameDetailed = appRc.bannerName;
     }
 
     if (!appRc.version) {
@@ -300,8 +317,41 @@ const readConfigFiles = () =>
         appRc.vscode.webview = {};
     }
 
+    if (!appRc.logPad) {
+        appRc.logPad = {};
+    }
+
+    if (!appRc.logPad.plugin) {
+        appRc.logPad.plugin = {};
+    }
+
+    mergeIf(appRc.logPad.plugin,
+    {
+        compilation: 20,
+        loghooks: {
+            buildTag: 19
+        }
+    });
+
     return appRc;
 };
+
+
+// /**
+//  * @function
+//  * @param {string} app Application name
+//  * @param {string} version Application version
+//  * @returns {string}
+//  */
+// const spmBanner2 = (app, version) =>
+// {
+//     return `     ${figures.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________
+//      ${figures.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  )
+//      ${figures.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ /
+//      ${figures.info}    ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  /
+//      ${figures.info}   (_____/|_|       | /       |_|   |_| (____/   ${version}   \\/
+//      ${figures.info}                    |/${app.padStart(51 - app.length)}`;
+// };
 
 
 /**
@@ -312,16 +362,16 @@ const readConfigFiles = () =>
  */
 const spmBanner = (app, version) =>
 {
-    return `     ${figures.info}       ___ ___ _/\\  ___  __ _/^\\_ __  _ __  __________________
-     ${figures.info}      (   ) _ \\|  \\/  | /  _^ || '_ \\| '_ \\(  ______________  )
-     ${figures.info}      \\ (| |_) | |\\/| |(  (_| || |_) ) |_) )\\ \\          /\\/ /
-     ${figures.info}    ___)  ) __/|_|  | '/^\\__\\__| /__/| /__/__) ) Version \\  /
-     ${figures.info}   (_____/|_|       | /        |_|   |_| (____/   ${version}   \\/
-     ${figures.info}                    |/${app.padStart(51 - app.length)}`;
+    return `     ${figures.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
+     ${figures.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
+     ${figures.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
+     ${figures.info}    ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
+     ${figures.info}   (_____/|_|       | /       |_|   |_| (____/   ${version}  \\/ /        |/  \\:(           \\/           
+     ${figures.info}                    |/${app.padStart(50 - app.length)}`;
 };
 
 
 module.exports = {
-    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, printLineSep, getEntriesRegex,
+    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString, printLineSep, getEntriesRegexString,
     initGlobalEnvObject, merge, mergeIf, pick, pickBy, pickNot, printBanner, readConfigFiles, spmBanner
 };

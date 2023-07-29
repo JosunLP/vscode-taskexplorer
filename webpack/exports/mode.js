@@ -5,12 +5,13 @@
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
-/** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: String[] }} WebpackArgs */
+/** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WebpackEnvironment, config: string[] }} WebpackArgs */
 
 
 /**
- * @method
+ * @function
  * @param {Partial<WebpackEnvironment>} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
  * @param {WebpackConfig} wpConfig Webpack config object
@@ -34,9 +35,10 @@ const mode = (env, argv, wpConfig) =>
 
 
 /**
- * @method
+ * @function
  * @param {Partial<WebpackEnvironment>} env Webpack build environment
  * @param {WebpackArgs} argv Webpack command line args
+ * @returns {WebpackMode}
  */
 const getMode = (env, argv) =>
 {

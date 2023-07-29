@@ -24,16 +24,9 @@ const addStepHook = (hook, plugins, env, wpConfig) =>
 	plugins.push({
 		apply: (compiler) =>
 		{
-			const buildName = withColor(/** @type {string} */(wpConfig.name), colors.grey),
-				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
 			compiler.hooks[hook].tap(`${hook}StepPlugin`, () =>
 			{
-				const key = hook + wpConfig.name;
-				if (!globalEnv.hooksLog[key])
-				{
-					globalEnv.hooksLog[key] = true;
-					writeInfo(`[${env.build}]`.padEnd(12) + ` ${hookName.padEnd(globalEnv.valuePad)}`);
-				}
+				compiler.hooks[hook].tapPromise(`${hook}LogHookPlugin`, async () => writeBuildTag(hook, env, wpConfig));
 			});
 		}
 	});
@@ -52,17 +45,7 @@ const addStepHookPromise = (hook, plugins, env, wpConfig) =>
 	plugins.push({
 		apply: (compiler) =>
 		{
-			const buildName = withColor(/** @type {string} */(wpConfig.name), colors.grey),
-				  hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			compiler.hooks[hook].tapPromise(`${hook}StepPlugin`, async () =>
-			{
-				const key = hook + wpConfig.name;
-				if (!globalEnv.hooksLog[key])
-				{
-					globalEnv.hooksLog[key] = true;
-					writeInfo(`Build step: ${hookName.padEnd(globalEnv.valuePad)} ${buildName}`);
-				}
-			});
+			compiler.hooks[hook].tapPromise(`${hook}LogHookPromisePlugin`, async () => writeBuildTag(hook, env, wpConfig));
 		}
 	});
 };
@@ -109,6 +92,24 @@ const hookSteps = (env, wpConfig) =>
 	addStepHook("watchClose", plugins, env, wpConfig);
 	addStepHook("shutdown", plugins, env, wpConfig);
 	return plugins;
+};
+
+
+/**
+ * @function writeBuildTag
+ * @param {string} hook
+ * @param {WebpackEnvironment} env
+ * @param {WebpackConfig} wpConfig Webpack config object
+ */
+const writeBuildTag = (hook, env, wpConfig) =>
+{
+	const key = hook + wpConfig.name;
+	if (!globalEnv.hooksLog[key])
+	{
+		globalEnv.hooksLog[key] = true;
+		const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
+		writeInfo(`[${env.build}]`.padEnd(env.app.logPad.plugin.loghooks.buildTag) + ` ${hookName.padEnd(globalEnv.valuePad)}`);
+	}
 };
 
 

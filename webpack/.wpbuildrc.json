@@ -1,8 +1,16 @@
 {
     "name": "vscode-taskexplorer",
     "displayName": "Task Explorer",
-    "description": "Task Explorer VSCode Extension",
+    "detailedDisplayName": "Task Explorer VSCode Extension",
     "module": false,
+    "logPad": {
+        "plugin": {
+            "compilation": 20,
+            "loghooks": {
+                "buildTag": 19
+            }
+        }
+    },
     "exports": {
         "context": true,
         "devtool": true,
