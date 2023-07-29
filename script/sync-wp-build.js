@@ -123,9 +123,10 @@ const syncWpBuildUtils = (project) =>
 
 const syncWpBuildFiles = (project) =>
 {
-    // copyWpBuildFile(project, "webpack.config.js", ".
-    // copyWpBuildFile(project, "sync-wp-build.sh script
-    // copyWpBuildFile(project, ".wpbuildrc.json webpack
+    copyWpBuildFile(project, "webpack.config.js", ".");
+    copyWpBuildFile(project, "sync-wp-build.js", "script");
+    copyWpBuildFile(project, "sync-wp-build.sh", "script");
+    copyWpBuildFile(project, ".wpbuildrc.json", "webpack");
     copyWpBuildFile(project, "index.d.ts", "webpack/types");
     syncWpBuildUtils(project);
     syncWpBuildExports(project);

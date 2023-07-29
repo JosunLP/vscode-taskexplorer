@@ -3,7 +3,7 @@
 // @ts-check
 
 const globalEnv = require("./webpack/utils/global");
-const { writeInfo } = require("./webpack/utils/console");
+const { write, figures } = require("./webpack/utils/console");
 const { merge, printBanner, readConfigFiles } = require("./webpack/utils/utils");
 const {
 	context, devtool, entry, externals, ignorewarnings, minification, mode, name, plugins,
@@ -72,8 +72,7 @@ module.exports = (env, argv) =>
  */
 const getBuildConfig = (build, app, env, argv) =>
 {
-	if (globalEnv.buildCount > 0) { console.log(""); }
-	writeInfo(`Start Webpack build step ${++globalEnv.buildCount }`);
+	write(`Start Webpack build step ${++globalEnv.buildCount }`, figures.color.start);
 	/** @type {WebpackEnvironment}*/
 	// @ts-ignore
 	const lEnv = merge({}, env);

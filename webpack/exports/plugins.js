@@ -52,7 +52,7 @@ const plugins = (env, wpConfig) =>
 			// @ts-ignore
 			htmlcsp(env, wpConfig),              //
 			htmlinlinechunks(env, wpConfig),     //
-			copy(apps, env, wpConfig),           // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
+			...copy(apps, env, wpConfig),        // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
 			imageminimizer(env, wpConfig)        //
 		);
 	}
@@ -61,7 +61,7 @@ const plugins = (env, wpConfig) =>
 		wpConfig.plugins.push(
 			sourcemaps(env, wpConfig),           // compiler.hooks.compilation -> compilation.hooks.processAssets
 			banner(env, wpConfig),               // compiler.hooks.compilation -> compilation.hooks.processAssets
-			copy([], env, wpConfig),             // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
+			...copy([], env, wpConfig),          // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
 			analyze.bundle(env, wpConfig),       // compiler.hooks.done
 			analyze.visualizer(env, wpConfig),   // compiler.hooks.emit
 			analyze.circular(env, wpConfig)      // compiler.hooks.compilation -> compilation.hooks.optimizeModules

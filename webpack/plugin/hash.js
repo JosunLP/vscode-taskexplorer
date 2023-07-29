@@ -106,6 +106,8 @@ const prehash = (env, wpConfig) =>
 		{
 			apply: (compiler) =>
 			{
+                // const cache = compilation.getCache("CompileThisCompilationPlugin"),
+                //       logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
                 compiler.hooks.initialize.tap("HashInitializePlugin", () => readAssetStates(env, wpConfig));
 			}
 		};
@@ -136,6 +138,8 @@ const setAssetState = (asset, env, wpConfig) =>
         env.state.hash.next[chunkName] = asset.info.contenthash.toString();
         if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName])
         {
+            // const cache = compilation.getCache("CompileThisCompilationPlugin"),
+            //       logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
             let p = `${chunkName}.${env.buildMode !== "debug" ? "" : "debug."}${env.state.hash.current[chunkName]}.js`;
             if (existsSync(p)) {
                 unlinkSync(p);

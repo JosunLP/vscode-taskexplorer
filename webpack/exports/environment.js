@@ -9,7 +9,7 @@
 const { join, resolve } = require("path");
 const { WebpackError } = require("webpack");
 const globalEnv = require("../utils/global");
-const { writeInfo, figures } = require("../utils/console");
+const { writeInfo, figures, write } = require("../utils/console");
 const { merge, isObjectEmpty } = require("../utils/utils");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
 
@@ -140,17 +140,17 @@ const setVersion = (env) =>
  */
 const writeEnvironment = (env, argv) =>
 {
-	writeInfo("Build Environment:");
+	write("Build Environment:");
 	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
 		(k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`)
 	);
-	writeInfo("Global Environment:");
+	write("Global Environment:");
 	Object.keys(globalEnv).filter(k => typeof env[k] !== "object").forEach(
 		(k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`)
 	);
 	if (argv)
 	{
-		writeInfo("Arguments:");
+		write("Arguments:");
 		if (argv.mode) {
 			writeInfo(`   mode           : ${argv.mode}`);
 		}

@@ -1,5 +1,6 @@
 // @ts-check
 
+/** @type {Record<string, [number, number]>} */
 const colors = {
     black: [ 0, 39 ],
 	blue: [ 34, 39 ],
@@ -18,9 +19,17 @@ const colors = {
 
 /**
  * @param {string} msg
- * @param {number[]} color Webpack config object
+ * @param {[ number, number ]} color color value
  */
 const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
+
+
+/**
+ * @param {[ number, number ]} color color value
+ * @param {string} [msg] message to include in length calculation
+ * @returns {number}
+ */
+const withColorLength = (color, msg) => (2 + color[0].toString().length + 1 + (msg ? msg.length : 0) + 2 + color[1].toString().length + 1);
 
 
 const write = (msg, icon, pad = "") =>
@@ -96,6 +105,7 @@ module.exports = {
     colors,
     figures,
     withColor,
+    withColorLength,
     write,
     writeInfo
 };

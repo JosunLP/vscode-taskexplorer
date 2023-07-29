@@ -6,7 +6,7 @@
  */
 
 const webpack = require("webpack");
-const { getEntriesRegexString, isString } = require("../utils/utils");
+const { getEntriesRegex, isString } = require("../utils/utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
@@ -22,7 +22,7 @@ const banner = (env, wpConfig) =>
     let plugin;
 	if (wpConfig.mode === "production")
 	{
-		const entriesRgx = getEntriesRegexString(wpConfig),
+		const entriesRgx = getEntriesRegex(wpConfig, true, true),
 			  author = isString(env.app.pkgJson.author) ? env.app.pkgJson.author :
 			  		   /** @type {{ name: string; email?: string | undefined; }} */(env.app.pkgJson.author)?.name;
 		if (author)
@@ -31,7 +31,7 @@ const banner = (env, wpConfig) =>
 			{
 				banner: `Copyright ${(new Date()).getFullYear()} ${author}`,
 				entryOnly: true,
-				test: new RegExp(`${entriesRgx}(?:\\.debug)?\\.js`)
+				test: entriesRgx
 				// raw: true
 			});
 		}

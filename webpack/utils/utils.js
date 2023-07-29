@@ -13,6 +13,7 @@ const { write, writeInfo, withColor, figures, colors } = require("./console");
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackArgs} WebpackArgs */
+/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WebpackPackageJson} WebpackPackageJson */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
@@ -46,6 +47,16 @@ const apply = (object, config, defaults) =>
  * @returns {any[]}
  */
 const asArray = (v, shallow, allowEmpStr) => (isArray(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
+
+
+/**
+ * Break property name into separate spaced words at each camel cased character
+ *
+ * @private
+ * @param {string} prop
+ * @returns {string}
+ */
+const breakProp = (prop) => prop.replace(/[A-Z]/g, (v) => ` ${v.toLowerCase()}`);
 
 
 /**
@@ -84,10 +95,13 @@ const clone = (item) =>
 /**
  * @function getEntriesRegex
  * @param {WebpackConfig} wpConfig Webpack config object
+ * @param {boolean} [dbg]
+ * @param {boolean} [ext]
  */
-const getEntriesRegexString = (wpConfig) =>
+const getEntriesRegex = (wpConfig, dbg, ext) =>
 {
-	return `(?:${Object.keys(wpConfig.entry).reduce((e, c) => `${!!e ? `${e}|` : e}${c}`, "")})`;
+	return new RegExp(`(?:${Object.keys(wpConfig.entry)
+           .reduce((e, c) => `${!!e ? `${e}|` : e}${c}`, "")})${dbg ? "(?:\\.debug)?" : ""}${ext ? "\\.js" : ""}`);
 };
 
 
@@ -329,7 +343,7 @@ const readConfigFiles = () =>
     {
         compilation: 20,
         loghooks: {
-            buildTag: 19
+            buildTag: 23
         }
     });
 
@@ -371,7 +385,30 @@ const spmBanner = (app, version) =>
 };
 
 
+/**
+ * @function statsPrinter
+ * @param {string} infoProp
+ * @param {string} assetPluginName
+ * @param {WebpackCompilation} compilation
+ */
+const tapStatsPrinter = (infoProp, assetPluginName, compilation) =>
+{
+    if (compilation.hooks.statsPrinter)
+    {
+        compilation.hooks.statsPrinter.tap(assetPluginName, (stats) =>
+        {
+            stats.hooks.print.for(`asset.info.${infoProp}`).tap(
+                assetPluginName,
+                (istanbulTagged, { green, formatFlag }) => {
+                    return istanbulTagged ? /** @type {Function} */(green)(/** @type {Function} */(formatFlag)(breakProp(infoProp))) : "";
+                }
+            );
+        });
+    }
+};
+
+
 module.exports = {
-    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString, printLineSep, getEntriesRegexString,
-    initGlobalEnvObject, merge, mergeIf, pick, pickBy, pickNot, printBanner, readConfigFiles, spmBanner
+    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString, printLineSep, getEntriesRegex,
+    initGlobalEnvObject, merge, mergeIf, pick, pickBy, pickNot, printBanner, readConfigFiles, spmBanner, tapStatsPrinter
 };

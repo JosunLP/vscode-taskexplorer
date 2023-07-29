@@ -9,8 +9,11 @@
 const { existsSync } = require("fs");
 const { join, posix } = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const { getEntriesRegex, tapStatsPrinter } = require("../utils/utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
@@ -19,11 +22,14 @@ const CopyPlugin = require("copy-webpack-plugin");
  * @param {string[]} apps
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {CopyPlugin | undefined}
+ * @returns {(CopyPlugin | WebpackPluginInstance)[]}
  */
 const copy = (apps, env, wpConfig) =>
 {
-	const /** @type {CopyPlugin.Pattern[]} */patterns = [],
+	/** @type {(CopyPlugin | WebpackPluginInstance)[]} */
+	const plugins = [],
+		  /** @type {CopyPlugin.Pattern[]} */
+		  patterns = [],
 		  psxBuildPath = env.paths.build.replace(/\\/g, "/"),
 		  psxBasePath = env.paths.base.replace(/\\/g, "/"),
 		  psxBaseCtxPath = posix.join(psxBasePath, "res");
@@ -48,26 +54,24 @@ const copy = (apps, env, wpConfig) =>
 		}
 	}
 	else if ((env.build === "extension" || env.build === "browser") && env.buildMode === "release")
-	{
+	{   //
+		// NOTE THAT THIS F'NG COPYPLUGIN BLOWS F'NG BALLS.  REALLY? COULD YOU HAVE MADE
+		// SOMETHING SOOO SIMPLE ANY MORE COMPLICATED??!?! FIND A NEW CAREER MY FRIEND, JEBUS.
+		// ALMOST AS BAD AS THAT DUMB **** WHO INCLUDED THE ENTIRE MOMENT PACKAGE FOR ONE
+		// GOD DAMN TWO-LINE FUNCTION, IN WHATEVER THAT CRAP PACKAGE WAS FOR PARSING PIPENV TASKS.
 		//
-		// NOTE THAT THIS F'NG COPYPLUGIN BLOWS F'NG BALLS.  REALLY? COULD YOU MAKE
-		// SOMETHING SO SIMPLE ANY MORE COMPLICATED??!?! ASS HOLE.  FIND A NEW CAREER.
-		// ALMOST AS BAD AS THAT DUMB F'R WHO INCLUDED THE ENTIRE MOMENT PACKAGE FOR 1 FUNCTION.
+		// SOOOOO, LET'S DO WHAT THE THOUSANDS OF LINES OF CODE IN THE CRAP COPY PLUGIN TRIES TO DO
+		// IN OH MAYBE 30-ish LINES OR LESS...
 		//
-
-		// asArray(wpConfig.entry).forEach((chunk) =>
-		// {
-		// 	patterns.push(
-		// 	{
-		// 		from: posix.join(psxDistPath, `${chunk}.*.js`),
-		// 		to: posix.join(psxDistPath, `${chunk}.js`),
-		// 		// context: psxDistPath,
-		// 		// transform: (content, absoluteFrom) => content
-		// 		// transform: {
-		// 		//     transformer: (content, absoluteFrom) => content
-		// 		// }
-		// 	});
-		// });
+		plugins.push({
+			apply: (/** @type {WebpackCompiler} */compiler) =>
+			{
+				compiler.hooks.compilation.tap(
+					"CompileCompilationPlugin",
+					(compilation) => dupMainEntryFilesNoHash(compiler, compilation, wpConfig)
+				);
+			}
+		});
 
 		if (wpConfig.mode === "production")
 		{
@@ -106,8 +110,41 @@ const copy = (apps, env, wpConfig) =>
 		}
 	}
 	if (patterns.length > 0) {
-		return new CopyPlugin({ patterns });
+		plugins.push(new CopyPlugin({ patterns }));
 	}
+
+	return plugins;
+};
+
+
+/**
+ * @function dupMainEntryFilesNoHash
+ * @param {WebpackCompiler} compiler
+ * @param {WebpackCompilation} compilation
+ * @param {WebpackConfig} wpConfig Webpack config object
+ */
+const dupMainEntryFilesNoHash = (compiler, compilation, wpConfig) =>
+{
+    const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+          name = `CompileCompilationPlugin${stage}`;
+    compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
+    {
+        const entriesRgx = getEntriesRegex(wpConfig);
+        Object.entries(assets).filter(a => entriesRgx.test(a[0])).forEach(a =>
+        {
+            const fileName = a[0],
+                  { source, map } = a[1].sourceAndMap(),
+                  content= source.toString(),
+                  info = compilation.getAsset(fileName)?.info,
+                  cpFileName = fileName.replace(/\.[a-z0-9]{16,}/, "");
+            compilation.emitAsset(
+                cpFileName,
+                new compiler.webpack.sources.SourceMapSource(content, cpFileName, map),
+                { ...info, copied: true }
+            );
+        });
+    });
+    tapStatsPrinter("copied", name, compilation);
 };
 
 

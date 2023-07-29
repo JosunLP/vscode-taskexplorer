@@ -35,52 +35,15 @@ const finalize = (env, wpConfig) =>
             {
                 compiler.hooks.shutdown.tapPromise("FinalizeShutdownPlugin", async () =>
                 {
-                    if (env.environment !== "prod")
+                    if (env.environment === "prod")
                     {
-                        dupHashFile(env, wpConfig);
-                    }
-                    else {
                         await licenseFiles(env);
                     }
                 });
-                // if (compilation.hooks.statsPrinter)
-                // {
-                //     compilation.hooks.statsPrinter.tap("FinalizeShutdownPlugin", stats => {
-                //         stats.hooks.print.for("asset.info.copied").tap("FinalizeShutdownPluginPrint", (copied, {
-                //         green,
-                //         formatFlag
-                //         }) => copied ?
-                //         /** @type {Function} */
-                //         green(
-                //         /** @type {Function} */
-                //         formatFlag("copied")) : "");
-                //     });
-                // }
             }
         };
     }
     return plugin;
-};
-
-
-
-/**
- * @function dupHashFile
- * @param {WebpackEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
- */
-const dupHashFile= (env, wpConfig) =>
-{
-    Object.keys(wpConfig.entry).forEach((chunk) =>
-    {
-        const items = existsSync(env.paths.dist) ? readdirSync(env.paths.dist) : [],
-              digestLen = /** @type {number} */(wpConfig.output.hashDigestLength),
-              testRgx = new RegExp(`${chunk}\\.[0-9a-f]{${digestLen},}\\.js`),
-              teModule = items.find(a => testRgx.test(a));
-        if (teModule) {
-            copyFileSync(join(env.paths.dist, teModule), join(env.paths.dist, `${chunk}.js`));
-        }
-    });
 };
 
 

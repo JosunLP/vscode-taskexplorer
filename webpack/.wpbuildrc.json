@@ -7,7 +7,7 @@
         "plugin": {
             "compilation": 20,
             "loghooks": {
-                "buildTag": 19
+                "buildTag": 23
             }
         }
     },
@@ -32,7 +32,6 @@
     },
     "plugins": {
         "analyze": true,
-        "asset": true,
         "banner": true,
         "build": true,
         "clean": true,
@@ -43,11 +42,14 @@
         "html": true,
         "ignore": true,
         "index": true,
+        "istanbul": true,
+        "loghooks": true,
         "optimization": true,
-        "plugins": true,
         "progress": true,
+        "scm": true,
+        "sourcemaps": true,
         "tscheck": true,
-        "upload": false
+        "upload": true
     },
     "vscode": {
         "webview": {
