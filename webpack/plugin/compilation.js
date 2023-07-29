@@ -26,7 +26,7 @@ const compilation = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build === "extension" && env.environment === "test" && env.buildMode !== "debug")
+    if (env.app.plugins.compilation && env.build === "extension" && env.environment === "test" && env.buildMode !== "debug")
     {
         plugin =
         {

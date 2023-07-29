@@ -23,7 +23,7 @@ const clean = (env, wpConfig) =>
 {
     /** @type {CleanWebpackPlugin | undefined} */
 	let plugin;
-	if (env.clean === true)
+	if (env.app.plugins.clean && env.clean === true)
 	{
 		if (env.build === "webview")
 		{

@@ -24,7 +24,7 @@ const istanbul = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    // if (env.build === "extension" && env.environment === "test")
+    // if (env.app.plugins.instrument && env.build === "extension" && env.environment === "test")
     // {
     //     plugin =
     //     {

@@ -26,7 +26,7 @@ const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const html = (name, env, wpConfig) =>
 {
     let plugin;
-    if (env.build === "webview")
+    if (env.app.plugins.html && env.build === "webview")
     {
         const wwwName = name.replace(/[a-z]+([A-Z])/g, (substr, token) => substr.replace(token, "-" + token.toLowerCase()));
 		plugin = new HtmlPlugin(

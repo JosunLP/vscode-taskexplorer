@@ -24,7 +24,7 @@ const scm = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build === "extension" && env.environment === "prod")
+    if (env.app.plugins.scm && env.build === "extension" && env.environment === "prod")
     {
         plugin =
         {

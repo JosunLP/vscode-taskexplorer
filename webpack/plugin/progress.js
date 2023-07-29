@@ -19,8 +19,10 @@ const webpack = require("webpack");
  */
 const progress = (env, wpConfig) =>
 {
-	const plugin = new webpack.ProgressPlugin();
-	return plugin;
+	if (env.app.plugins.progress)
+	{
+		return new webpack.ProgressPlugin();
+	}
 };
 
 

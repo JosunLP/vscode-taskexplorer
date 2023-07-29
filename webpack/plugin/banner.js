@@ -20,7 +20,7 @@ const { getEntriesRegex, isString } = require("../utils/utils");
 const banner = (env, wpConfig) =>
 {
     let plugin;
-	if (wpConfig.mode === "production")
+	if (env.app.plugins.banner && wpConfig.mode === "production")
 	{
 		const entriesRgx = getEntriesRegex(wpConfig, true, true),
 			  author = isString(env.app.pkgJson.author) ? env.app.pkgJson.author :

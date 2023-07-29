@@ -34,83 +34,87 @@ const copy = (apps, env, wpConfig) =>
 		  psxBasePath = env.paths.base.replace(/\\/g, "/"),
 		  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
-	if (env.build === "webview")
+	if (env.app.plugins.copy)
 	{
-		apps.filter(app => existsSync(join(env.paths.base, app, "res"))).forEach(
-			(app) => patterns.push(
-			{
-				from: posix.join(psxBasePath, app, "res", "*.*"),
-				to: posix.join(psxBuildPath, "res", "webview"),
-				context: posix.join(psxBasePath, app, "res")
-			})
-		);
-		if (existsSync(join(env.paths.base, "res")))
+		if (env.build === "webview")
 		{
-			patterns.push({
-				from: posix.join(psxBasePath, "res", "*.*"),
-				to: posix.join(psxBuildPath, "res", "webview"),
-				context: psxBaseCtxPath
-			});
-		}
-	}
-	else if ((env.build === "extension" || env.build === "browser") && env.buildMode === "release")
-	{   //
-		// NOTE THAT THIS F'NG COPYPLUGIN BLOWS F'NG BALLS.  REALLY? COULD YOU HAVE MADE
-		// SOMETHING SOOO SIMPLE ANY MORE COMPLICATED??!?! FIND A NEW CAREER MY FRIEND, JEBUS.
-		// ALMOST AS BAD AS THAT DUMB **** WHO INCLUDED THE ENTIRE MOMENT PACKAGE FOR ONE
-		// GOD DAMN TWO-LINE FUNCTION, IN WHATEVER THAT CRAP PACKAGE WAS FOR PARSING PIPENV TASKS.
-		//
-		// SOOOOO, LET'S DO WHAT THE THOUSANDS OF LINES OF CODE IN THE CRAP COPY PLUGIN TRIES TO DO
-		// IN OH MAYBE 30-ish LINES OR LESS...
-		//
-		plugins.push({
-			apply: (/** @type {WebpackCompiler} */compiler) =>
+			apps.filter(app => existsSync(join(env.paths.base, app, "res"))).forEach(
+				(app) => patterns.push(
+				{
+					from: posix.join(psxBasePath, app, "res", "*.*"),
+					to: posix.join(psxBuildPath, "res", "webview"),
+					context: posix.join(psxBasePath, app, "res")
+				})
+			);
+			if (existsSync(join(env.paths.base, "res")))
 			{
-				compiler.hooks.compilation.tap(
-					"CompileCompilationPlugin",
-					(compilation) => dupMainEntryFilesNoHash(compiler, compilation, wpConfig)
-				);
+				patterns.push({
+					from: posix.join(psxBasePath, "res", "*.*"),
+					to: posix.join(psxBuildPath, "res", "webview"),
+					context: psxBaseCtxPath
+				});
 			}
-		});
-
-		if (wpConfig.mode === "production")
-		{
-			const psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, "..", `${env.app.name}-info`));
-			patterns.push(
-			{
-				from: posix.join(psxBasePath, "res", "img", "**"),
-				to: posix.join(psxDirInfoProj, "res"),
-				context: psxBaseCtxPath
-			},
-			{
-				from: posix.join(psxBasePath, "res", "readme", "*.png"),
-				to: posix.join(psxDirInfoProj, "res"),
-				context: psxBaseCtxPath
-			},
-			{
-				from: posix.join(psxBasePath, "doc", ".todo"),
-				to: posix.join(psxDirInfoProj, "doc"),
-				context: psxBaseCtxPath
-			},
-			{
-				from: posix.join(psxBasePath, "res", "walkthrough", "welcome", "*.md"),
-				to: posix.join(psxDirInfoProj, "doc"),
-				context: psxBaseCtxPath
-			},
-			{
-				from: posix.join(psxBasePath, "*.md"),
-				to: posix.join(psxDirInfoProj),
-				context: psxBaseCtxPath
-			},
-			{
-				from: posix.join(psxBasePath, "LICENSE*"),
-				to: posix.join(psxDirInfoProj),
-				context: psxBaseCtxPath
-			});
 		}
-	}
-	if (patterns.length > 0) {
-		plugins.push(new CopyPlugin({ patterns }));
+		else if ((env.build === "extension" || env.build === "browser") && env.buildMode === "release")
+		{   //
+			// NOTE THAT THIS F'NG COPYPLUGIN BLOWS F'NG BALLS.  REALLY? COULD YOU HAVE MADE
+			// SOMETHING SOOO SIMPLE ANY MORE COMPLICATED??!?! FIND A NEW CAREER MY FRIEND, JEBUS.
+			// ALMOST AS BAD AS THAT DUMB **** WHO INCLUDED THE ENTIRE MOMENT PACKAGE FOR ONE
+			// GOD DAMN TWO-LINE FUNCTION, IN WHATEVER THAT CRAP PACKAGE WAS FOR PARSING PIPENV TASKS.
+			//
+			// SOOOOO, LET'S DO WHAT THE THOUSANDS OF LINES OF CODE IN THE CRAP COPY PLUGIN TRIES TO DO
+			// IN OH MAYBE 30-ish LINES OR LESS...
+			//
+			plugins.push({
+				apply: (/** @type {WebpackCompiler} */compiler) =>
+				{
+					compiler.hooks.compilation.tap(
+						"CompileCompilationPlugin",
+						(compilation) => dupMainEntryFilesNoHash(compiler, compilation, wpConfig)
+					);
+				}
+			});
+
+			if (wpConfig.mode === "production")
+			{
+				const psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, "..", `${env.app.name}-info`));
+				patterns.push(
+				{
+					from: posix.join(psxBasePath, "res", "img", "**"),
+					to: posix.join(psxDirInfoProj, "res"),
+					context: psxBaseCtxPath
+				},
+				{
+					from: posix.join(psxBasePath, "res", "readme", "*.png"),
+					to: posix.join(psxDirInfoProj, "res"),
+					context: psxBaseCtxPath
+				},
+				{
+					from: posix.join(psxBasePath, "doc", ".todo"),
+					to: posix.join(psxDirInfoProj, "doc"),
+					context: psxBaseCtxPath
+				},
+				{
+					from: posix.join(psxBasePath, "res", "walkthrough", "welcome", "*.md"),
+					to: posix.join(psxDirInfoProj, "doc"),
+					context: psxBaseCtxPath
+				},
+				{
+					from: posix.join(psxBasePath, "*.md"),
+					to: posix.join(psxDirInfoProj),
+					context: psxBaseCtxPath
+				},
+				{
+					from: posix.join(psxBasePath, "LICENSE*"),
+					to: posix.join(psxDirInfoProj),
+					context: psxBaseCtxPath
+				});
+			}
+		}
+
+		if (patterns.length > 0) {
+			plugins.push(new CopyPlugin({ patterns }));
+		}
 	}
 
 	return plugins;

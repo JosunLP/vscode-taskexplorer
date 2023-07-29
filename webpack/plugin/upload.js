@@ -40,7 +40,7 @@ const upload = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build === "extension")
+    if (env.app.plugins.upload && env.build === "extension")
     {
         initGlobalEnvObject("upload", 0, "callCount", "readyCount");
         plugin =
@@ -163,7 +163,7 @@ const uploadAssets = (assets, env) =>
             writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`, null);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             filesToUpload.forEach((f) =>
-                writeInfo(`   ${figures.color.up} ${withColor(basename(f).padEnd(30), colors.grey)} ${figures.color.successTag}`, null)
+                writeInfo(`   ${figures.color.up} ${withColor(basename(f).padEnd(env.app.logPad.plugin.upload.fileList), colors.grey)} ${figures.color.successTag}`, null)
             );
             writeInfo(`${figures.color.star} ${withColor("successfully uploaded resource files", colors.grey)}`, null);
         }

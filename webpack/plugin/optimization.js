@@ -21,13 +21,16 @@ const webpack = require("webpack");
 const optimization = (env, wpConfig) =>
 {
 	const plugins = [];
-	if (env.build === "browser")
+	if (env.app.plugins.optimization)
 	{
-		plugins.push(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }));
-	}
-	if (env.build !== "webview")
-	{
-		plugins.push(new webpack.NoEmitOnErrorsPlugin());
+		if (env.build === "browser")
+		{
+			plugins.push(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }));
+		}
+		if (env.build !== "webview")
+		{
+			plugins.push(new webpack.NoEmitOnErrorsPlugin());
+		}
 	}
 	return plugins;
 };

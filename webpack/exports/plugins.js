@@ -26,14 +26,8 @@ const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [];
 
-	if (env.verbosity && env.verbosity !== "none")
-	{
-		wpConfig.plugins.push(
-			progress(env, wpConfig)
-		);
-	}
-
 	wpConfig.plugins.push(
+		progress(env, wpConfig),
 		...loghooks(env, wpConfig),              // logs all compiler.hooks.* when they run
 		prehash(env, wpConfig),                  // compiler.hooks.initialize
 		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done

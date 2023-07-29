@@ -46,7 +46,7 @@ const analyze =
 	bundle(env, wpConfig)
 	{
 		let plugin;
-		if (env.analyze === true)
+		if (env.app.plugins.analyze && env.analyze === true)
 		{
 			plugin = new BundleAnalyzerPlugin({
 				analyzerPort: "auto",
@@ -68,7 +68,7 @@ const analyze =
 	circular(env, wpConfig)
 	{
 		let plugin;
-		if (env.analyze === true)
+		if (env.app.plugins.analyze && env.analyze === true)
 		{
 			plugin = new CircularDependencyPlugin(
 			{
@@ -92,7 +92,7 @@ const analyze =
 	visualizer(env, wpConfig)
 	{
 		let plugin;
-		if (env.analyze === true) {
+		if (env.app.plugins.analyze && env.analyze === true) {
 			plugin = new VisualizerPlugin({ filename: "../.coverage/visualizer.html" });
 		}
 		return /** @type {VisualizerPlugin | undefined}) */(plugin);

@@ -10,6 +10,7 @@ const webpack = require("webpack");
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
 
+
 /**
  * @param {WebpackEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
@@ -19,15 +20,16 @@ const ignore = (env, wpConfig) =>
 {
     /** @type {webpack.IgnorePlugin | undefined} */
     let plugin;
-    // if (wpConfig.mode === "production")
-    // {
-    //     plugin = new webpack.IgnorePlugin(
-    //     {
-    //         resourceRegExp: /^\.\/locale$/,
-    //         contextRegExp: /moment$/,
-    //     });
-    // }
+    if (env.app.plugins.ignore && wpConfig.mode === "production")
+    {
+        plugin = new webpack.IgnorePlugin(
+        {
+            resourceRegExp: /^\.\/locale$/,
+            contextRegExp: /moment$/,
+        });
+    }
     return plugin;
 };
+
 
 module.exports = ignore;

@@ -24,7 +24,7 @@ const webpack = require("webpack");
 const sourcemaps = (env, wpConfig) =>
 {
     let plugin;
-    if (env.build !== "webview")
+    if (env.app.plugins.sourcemaps && env.build !== "webview")
     {
         const isTests = env.environment.startsWith("test");
         const options =

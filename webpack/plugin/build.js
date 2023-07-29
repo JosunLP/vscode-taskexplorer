@@ -24,7 +24,7 @@ const build = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
 	let plugin;
-	if (env.build !== "webview")
+	if (env.app.plugins.build && env.build !== "webview")
 	{
 		plugin =
 		{

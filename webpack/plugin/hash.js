@@ -28,7 +28,7 @@ const hash = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build === "extension")
+    if (env.app.plugins.hash && env.build === "extension")
     {
         plugin =
         {
@@ -100,7 +100,7 @@ const prehash = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
 	let plugin;
-	if (env.build === "extension")
+	if (env.app.plugins.hash && env.build === "extension")
 	{
         plugin =
 		{

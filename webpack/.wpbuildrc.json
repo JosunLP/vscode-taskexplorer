@@ -8,6 +8,9 @@
             "compilation": 20,
             "loghooks": {
                 "buildTag": 23
+            },
+            "upload": {
+                "fileList": 45
             }
         }
     },
@@ -35,17 +38,17 @@
         "banner": true,
         "build": true,
         "clean": true,
-        "compile": true,
+        "compilation": true,
         "copy": true,
         "finalize": true,
         "hash": true,
         "html": true,
-        "ignore": true,
+        "ignore": false,
         "index": true,
         "istanbul": true,
         "loghooks": true,
         "optimization": true,
-        "progress": true,
+        "progress": false,
         "scm": true,
         "sourcemaps": true,
         "tscheck": true,

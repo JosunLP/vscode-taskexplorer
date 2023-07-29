@@ -344,6 +344,9 @@ const readConfigFiles = () =>
         compilation: 20,
         loghooks: {
             buildTag: 23
+        },
+        upload: {
+            fileList: 45
         }
     });
 

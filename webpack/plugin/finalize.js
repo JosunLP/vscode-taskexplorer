@@ -27,7 +27,7 @@ const finalize = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.build === "extension")
+    if (env.app.plugins.finalize && env.build === "extension")
     {
         plugin =
         {
