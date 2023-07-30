@@ -21,14 +21,13 @@ const {
  * @function
  * @param {WpBuildEnvironment} env Webpack build specific environment
  * @param {WebpackConfig} wpConfig Webpack config object
- * @param {WpBuildWebpackArgs} argv Webpack command line args
  */
-const plugins = (env, wpConfig, argv) =>
+const plugins = (env, wpConfig) =>
 {
 	wpConfig.plugins = [];
 
 	wpConfig.plugins.push(
-		environment(env, wpConfig, argv),        // compiler.hooks.environment
+		environment(env, wpConfig),              // compiler.hooks.environment
 		customize(env, wpConfig),                // compiler.hooks.afterEnvironment - custom mods to installed plugins
 		progress(env, wpConfig),
 		...loghooks(env, wpConfig),              // logs all compiler.hooks.* when they run

@@ -242,9 +242,8 @@ const printLineSep = () =>
  * @param {WpBuildApp} app
  * @param {WebpackMode} mode Webpack command line args
  * @param {Partial<WpBuildEnvironment>} env Webpack build environment
- * @param {WpBuildWebpackArgs} argv Webpack command line args
  */
-const printBanner = (app, mode, env, argv) =>
+const printBanner = (app, mode, env) =>
 {
     printLineSep();
     // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
@@ -253,7 +252,7 @@ const printBanner = (app, mode, env, argv) =>
     write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${app.bannerNameDetailed} Webpack Build`));
     printLineSep();
 	write(withColor("   Mode  : ", colors.white) + withColor(mode, colors.grey));
-	write(withColor("   Argv  : ", colors.white) + withColor(JSON.stringify(argv), colors.grey));
+	write(withColor("   Argv  : ", colors.white) + withColor(JSON.stringify(env.argv), colors.grey));
 	write(withColor("   Env   : ", colors.white) + withColor(JSON.stringify(env), colors.grey));
     printLineSep();
 };

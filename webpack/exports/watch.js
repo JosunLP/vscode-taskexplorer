@@ -13,11 +13,10 @@
  * @function target
  * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
- * @param {WpBuildWebpackArgs} argv Webpack command line args
  */
-const watch = (env, wpConfig, argv) =>
+const watch = (env, wpConfig) =>
 {
-	wpConfig.watch = !!argv.watch;
+	wpConfig.watch = !!env.argv.watch || !!env.WEBPACK_WATCH;
 	if (wpConfig.watch)
 	{
 		wpConfig.watchOptions =

@@ -18,10 +18,9 @@ const { writeInfo, write } = require("../utils/console");
 /**
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @returns {WebpackPluginInstance | undefined}
  */
-const environment = (env, wpConfig, argv) =>
+const environment = (env, wpConfig) =>
 {
 	if (env.app.plugins.environment !== false)
 	{
@@ -31,7 +30,7 @@ const environment = (env, wpConfig, argv) =>
 				compiler.hooks.environment.tap("WpBuildCustomizePlugin", () =>
 				{
 					setVersion(env);
-					writeEnvironment(env, argv);
+					writeEnvironment(env);
 				});
 			}
 		};
@@ -55,9 +54,8 @@ const setVersion = (env) =>
 /**
  * @function writeEnvironment
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WpBuildWebpackArgs} argv Webpack command line args
  */
-const writeEnvironment = (env, argv) =>
+const writeEnvironment = (env) =>
 {
 	write("Build Environment:");
 	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
@@ -67,17 +65,17 @@ const writeEnvironment = (env, argv) =>
 	Object.keys(globalEnv).filter(k => typeof globalEnv[k] !== "object").forEach(
 		(k) => writeInfo(`   ${k.padEnd(15)}: ${globalEnv[k]}`)
 	);
-	if (argv)
+	if (env.argv)
 	{
 		write("Arguments:");
-		if (argv.mode) {
-			writeInfo(`   mode           : ${argv.mode}`);
+		if (env.argv.mode) {
+			writeInfo(`   mode           : ${env.argv.mode}`);
 		}
-		if (argv.watch) {
-			writeInfo(`   watch          : ${argv.config.join(", ")}`);
+		if (env.argv.watch) {
+			writeInfo(`   watch          : ${env.argv.watch}`);
 		}
-		if (argv.config) {
-			writeInfo(`   config         : ${argv.config.join(", ")}`);
+		if (env.argv.config) {
+			writeInfo(`   config         : ${env.argv.config.join(", ")}`);
 		}
 	}
 };

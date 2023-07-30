@@ -20,11 +20,13 @@ declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
 {
     analyze: boolean;                     // parform analysis after build
     app: WpBuildApp;                      // target js app info
+    argv: WpBuildWebpackArgs,
     build: WpBuildModule;
     clean: boolean;
     environment: WebpackBuildEnvironment;
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
+    isExtension: boolean;
     isTests: boolean;
     paths: WpBuildPaths;
     preRelease: boolean;
@@ -135,7 +137,7 @@ declare interface IWebpackEnvironmentInternal
     WEBPACK_WATCH: boolean;
 }
 
-type WebpackEnvironmentInternal = IWebpackEnvironmentInternal & Partial<string, any>;
+type WebpackEnvironmentInternal = Partial<IWebpackEnvironmentInternal>;
 
 
 declare interface IWpBuildWebpackArgs
@@ -146,7 +148,7 @@ declare interface IWpBuildWebpackArgs
     watch: boolean;
 }
 
-type WpBuildWebpackArgs = IWpBuildWebpackArgs & Record<string, any>;
+type WpBuildWebpackArgs = Readonly<Partial<IWpBuildWebpackArgs>>;
 
 
 export {

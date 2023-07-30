@@ -4,10 +4,10 @@
  * @module webpack.exports.mode
  */
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
+/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {{ mode: "none"|"development"|"production"|undefined, env: WpBuildEnvironment, config: string[] }} WpBuildWebpackArgs */
+/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 
 
 /**

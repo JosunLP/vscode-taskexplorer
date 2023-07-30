@@ -30,34 +30,34 @@ const {
  */
 module.exports = (env, argv) =>
 {
-	const appRc = readConfigFiles(),
+	const app = readConfigFiles(),
 		  mode = getMode(env, argv),
-		  mEnv = merge(getDefaultBuildEnv(), env);
+		  wpBuildEnv = merge(getDefaultWpBuildEnv(app, argv), env);
 
-	printBanner(appRc, mode, env, argv);
+	printBanner(app, mode, env);
 
-	if (mEnv.build)
+	if (wpBuildEnv.build)
 	{
-		return getBuildConfig(mEnv.build, appRc, mEnv, argv);
+		return getBuildConfig(wpBuildEnv.build, wpBuildEnv, argv);
 	}
-	else if (mEnv.environment === "test")
+	else if (wpBuildEnv.environment === "test")
 	{
 		return [
-			getBuildConfig("extension", appRc, { ...mEnv }, argv),
-			getBuildConfig("webview", appRc, { ...mEnv, environment: "dev" }, argv)
+			getBuildConfig("extension", { ...wpBuildEnv }, argv),
+			getBuildConfig("webview", { ...wpBuildEnv, environment: "dev" }, argv)
 		];
 	}
-	else if (mEnv.environment === "testprod")
+	else if (wpBuildEnv.environment === "testprod")
 	{
 		return [
-			getBuildConfig("extension", appRc, { ...mEnv }, argv),
-			getBuildConfig("webview", appRc, { ...mEnv, environment: "prod" }, argv)
+			getBuildConfig("extension", { ...wpBuildEnv }, argv),
+			getBuildConfig("webview", { ...wpBuildEnv, environment: "prod" }, argv)
 		];
 	}
 
 	return [
-		getBuildConfig("extension", appRc, { ...mEnv }, argv),
-		getBuildConfig("webview", appRc, { ...mEnv }, argv)
+		getBuildConfig("extension", { ...wpBuildEnv }, argv),
+		getBuildConfig("webview", { ...wpBuildEnv }, argv)
 	];
 };
 
@@ -65,12 +65,11 @@ module.exports = (env, argv) =>
 /**
  * @function getBuildConfig
  * @param {WpBuildModule} build
- * @param {WpBuildApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
  * @param {Partial<WpBuildEnvironment>} env Webpack build environment
  * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @returns {WebpackConfig}
  */
-const getBuildConfig = (build, app, env, argv) =>
+const getBuildConfig = (build, env, argv) =>
 {
 	const wpConfig = /** @type {WebpackConfig} */({}),
 		  lEnv = /** @type {WpBuildEnvironment} */(merge({}, env));
@@ -78,7 +77,7 @@ const getBuildConfig = (build, app, env, argv) =>
 	//
 	// Calling all exports.()...
 	//
-	environment(build, app, lEnv, argv, wpConfig); // Base path / Build path
+	environment(build, lEnv, wpConfig); // Base path / Build path
 	mode(lEnv, argv, wpConfig);     // Mode i.e. "production", "development", "none"
 	name(build, lEnv, wpConfig);    // Build name / label
 	target(lEnv, wpConfig);         // Target i.e. "node", "webworker", "tests"
@@ -94,27 +93,32 @@ const getBuildConfig = (build, app, env, argv) =>
 	resolve(lEnv, wpConfig);        // Resolve config
 	rules(lEnv, wpConfig);          // Loaders & build rules
 	stats(lEnv, wpConfig);          // Stats i.e. console output & verbosity
-	watch(lEnv, wpConfig, argv);    // Watch-mode options
+	watch(lEnv, wpConfig);          // Watch-mode options
 	//
 	// exports.plugins() calls all plugin.plugins...  last, when all env props are fully populated
 	//
-	plugins(lEnv, wpConfig, argv);  // Plugins
+	plugins(lEnv, wpConfig);        // Plugins
 	return wpConfig;
 };
 
 
 /**
  * @function getDefaultBuildEnv
+ * @param {WpBuildApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
+ * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @returns {Partial<WpBuildEnvironment>}
  */
-const getDefaultBuildEnv = () =>
+const getDefaultWpBuildEnv = (app, argv) =>
 {
 	/** @type {Partial<WpBuildEnvironment>} */
 	const env = {
 		analyze: false,
+		app: /** @type {WpBuildApp} */(merge({}, app)),
+		argv,
 		clean: false,
 		esbuild: false,
 		imageOpt: true,
+		isExtension: true,
 		isTests: false,
 		paths: /** @type {WpBuildPaths} */({}),
 		preRelease: true,

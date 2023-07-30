@@ -7,10 +7,10 @@
  */
 
 const { join, resolve } = require("path");
-const { merge } = require("../utils/utils");
 const { WebpackError } = require("webpack");
 const { existsSync, mkdirSync } = require("fs");
 const { globalEnv } = require("../utils/global");
+const { merge, apply } = require("../utils/utils");
 const { writeInfo, figures } = require("../utils/console");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
@@ -23,18 +23,17 @@ const { writeInfo, figures } = require("../utils/console");
 /**
  * @function environment
  * @param {WpBuildModule} build
- * @param {WpBuildApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const environment = (build, app, env, argv, wpConfig) =>
+const environment = (build, env, wpConfig) =>
 {
-	env.build = build;
-	env.paths.build = resolve(__dirname, "..", "..");
-	env.state = { hash: { current: {}, next: {} } };
-	merge(env, { app });
-	setEnvironment(env, argv, wpConfig);
+	merge(env, {
+		build,
+		paths: { build: resolve(__dirname, "..", "..") },
+		state: { hash: { current: {}, next: {} } }
+	});
+	setEnvironment(env, wpConfig);
 	setPaths(env);
 };
 
@@ -42,21 +41,20 @@ const environment = (build, app, env, argv, wpConfig) =>
 /**
  * @function setEnvironment
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @param {WebpackConfig} wpConfig Webpack config object
  * @throws {Error}
  */
-const setEnvironment = (env, argv, wpConfig) =>
+const setEnvironment = (env, wpConfig) =>
 {
 	if (!env.environment)
 	{
-		if (wpConfig.mode === "development" || argv.mode === "development") {
+		if (wpConfig.mode === "development" || env.argv.mode === "development") {
 			env.environment = "dev";
 		}
-		else if (wpConfig.mode === "production" || argv.mode === "production") {
+		else if (wpConfig.mode === "production" || env.argv.mode === "production") {
 			env.environment = "prod";
 		}
-		else if (wpConfig.mode === "none" || argv.mode === "none") {
+		else if (wpConfig.mode === "none" || env.argv.mode === "none") {
 			env.environment = "test";
 		}
 		else {
@@ -65,7 +63,10 @@ const setEnvironment = (env, argv, wpConfig) =>
 			throw new WebpackError(eMsg);
 		}
 	}
-	env.isTests = env.environment.startsWith("test");
+	apply(env, {
+		isTests: env.environment.startsWith("test"),
+		isExtension: env.build === "extension" || env.build === "browser"
+	});
 };
 
 
@@ -88,7 +89,9 @@ const setPaths = (env) =>
 			sourceMapWasm: "node_modules/source-map/lib/mappings.wasm"
 		}
 	});
-	if (!existsSync(env.paths.temp)) { mkdirSync(env.paths.temp, { recursive: true }); }
+	if (!existsSync(env.paths.temp)) {
+		mkdirSync(env.paths.temp, { recursive: true });
+	}
 };
 
 
