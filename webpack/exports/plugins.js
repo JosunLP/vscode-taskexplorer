@@ -6,33 +6,37 @@
  */
 
 const {
-	analyze, banner, build, clean, compilation, copy, finalize, hash, instrument, loghooks,
-	ignore,optimization, prehash, progress, sourcemaps, tscheck, upload, cssextract, htmlcsp,
-	imageminimizer, htmlinlinechunks, webviewapps, scm
+	analyze, banner, build, clean, compilation, copy, customize, define, environment, finalize,
+	hash, instrument, loghooks, ignore,optimization, prehash, progress, sourcemaps, tscheck,
+	upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps, scm
 } = require("../plugin");
 
-/** @typedef {import("../types").IWebpackApp} IWebpackApp */
+/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @function
- * @param {WebpackEnvironment} env Webpack build specific environment
+ * @param {WpBuildEnvironment} env Webpack build specific environment
  * @param {WebpackConfig} wpConfig Webpack config object
+ * @param {WpBuildWebpackArgs} argv Webpack command line args
  */
-const plugins = (env, wpConfig) =>
+const plugins = (env, wpConfig, argv) =>
 {
 	wpConfig.plugins = [];
 
 	wpConfig.plugins.push(
+		environment(env, wpConfig, argv),        // compiler.hooks.environment
+		customize(env, wpConfig),                // compiler.hooks.afterEnvironment - custom mods to installed plugins
 		progress(env, wpConfig),
 		...loghooks(env, wpConfig),              // logs all compiler.hooks.* when they run
 		prehash(env, wpConfig),                  // compiler.hooks.initialize
 		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done
 		build(env, wpConfig),                    // compiler.hooks.beforeCompile
-		compilation(env, wpConfig),              // compiler.hooks.compilation - e.g. adds istanbul ignore tags to node requires
+		compilation(env, wpConfig),              // compiler.hooks.compilation - e.g. add istanbul ignores to node-requires
+		define(env, wpConfig),                   // compiler.hooks.compilation
 		instrument(env, wpConfig),               // ? - TODO -?
 		ignore(env, wpConfig),                   // compiler.hooks.normalModuleFactory
 		...tscheck(env, wpConfig),               // compiler.hooks.afterEnvironment, hooks.afterCompile
@@ -40,7 +44,7 @@ const plugins = (env, wpConfig) =>
 
 	if (env.build === "webview")
 	{
-		const apps = Object.keys(env.app.vscode.webview);
+		const apps = Object.keys(env.app.vscode.webview.apps);
 		wpConfig.plugins.push(
 			cssextract(env, wpConfig),           //
 			...webviewapps(apps, env, wpConfig), //

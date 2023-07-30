@@ -7,15 +7,14 @@
  */
 
 const path = require("path");
-const { unlinkSync, existsSync, rmSync } = require("fs");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {CleanWebpackPlugin | undefined}
  */
@@ -23,7 +22,7 @@ const clean = (env, wpConfig) =>
 {
     /** @type {CleanWebpackPlugin | undefined} */
 	let plugin;
-	if (env.app.plugins.clean && env.clean === true)
+	if (env.app.plugins.clean !== false && env.clean === true)
 	{
 		if (env.build === "webview")
 		{
@@ -31,7 +30,6 @@ const clean = (env, wpConfig) =>
 			plugin = new CleanWebpackPlugin(
 			{
 				dry: false,
-				dangerouslyAllowCleanPatternsOutsideProject: true,
 				cleanOnceBeforeBuildPatterns: [
 					path.posix.join(basePath, "css", "**"),
 					path.posix.join(basePath, "js", "**"),
@@ -39,29 +37,17 @@ const clean = (env, wpConfig) =>
 				]
 			});
 		}
-		else if (env.build === "extension")
+		else if (env.build === "extension" || env.build === "browser")
 		{
-			if (env.buildMode === "debug" && existsSync(env.paths.temp))
+			plugin = new CleanWebpackPlugin(
 			{
-				rmSync(env.paths.temp, { recursive: true, force: true});
-			}
-			// if (existsSync(env.paths.files.hash)) {
-			// 	unlinkSync(env.paths.files.hash);
-			// }
-			// plugin = new CleanWebpackPlugin(
-			// {
-			// 	dry: false,
-			// 	dangerouslyAllowCleanPatternsOutsideProject: true,
-			// 	cleanOnceBeforeBuildPatterns: wpConfig.mode === "production" ? [
-			// 		path.posix.join(env.paths.build.replace(/\\/g, "/"), "dist", "**"),
-			// 		path.posix.join(env.paths.build.replace(/\\/g, "/"), ".coverage", "**"),
-			// 		path.posix.join(env.paths.build.replace(/\\/g, "/"), ".nyc-output", "**"),
-			// 		"!dist/webview/app/**"
-			// 	] : [
-			// 		path.posix.join(env.paths.build.replace(/\\/g, "/"), "dist", "**"),
-			// 		"!dist/webview/app/**"
-			// 	]
-			// });
+				dry: false,
+				cleanStaleWebpackAssets: true,
+				dangerouslyAllowCleanPatternsOutsideProject: true,
+				cleanOnceBeforeBuildPatterns: [
+					`${env.paths.temp}/**`
+				]
+			});
 		}
 	}
 	return plugin;

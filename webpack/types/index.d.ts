@@ -1,42 +1,42 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-
-declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
-declare type WebpackBuild = "browser" | "common" | "extension" | "tests" | "webview";
-declare type WebpackBuildMode = "debug" | "release";
-declare type WebpackBuildEnvironment= "dev" | "prod" | "test" | "testprod";
-declare type WebpackMode = "none" | "development" | "production";
-declare type WebpackTarget = "webworker" | "node" | "web";
-declare type WebpackConfig = Required<import("webpack").Configuration>;
-declare type WebpackStatsAsset = import("webpack").StatsAsset;
-declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
-declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
 declare type WebpackCompiler = import("webpack").Compiler;
+declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackCompilation = import("webpack").Compilation;
-declare type WebpackOptimization = any;
+declare type WebpackConfig = Required<import("webpack").Configuration>;
+declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
+declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
 
-declare interface IWebpackEnvironment extends WebpackEnvironmentInternal
+declare type WebpackTarget = "webworker" | "node" | "web";
+declare type WebpackMode = "none" | "development" | "production";
+declare type WebpackBuildEnvironment= "dev" | "prod" | "test" | "testprod";
+declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
+
+declare type WpBuildModule = "browser" | "common" | "extension" | "tests" | "webview";
+
+
+declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
 {
     analyze: boolean;                     // parform analysis after build
-    app: IWebpackApp;                      // target js app info
-    build: WebpackBuild;
-    buildMode: WebpackBuildMode;
+    app: WpBuildApp;                      // target js app info
+    build: WpBuildModule;
     clean: boolean;
     environment: WebpackBuildEnvironment;
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
     isTests: boolean;
-    paths: WebpackBuildPaths;
+    paths: WpBuildPaths;
     preRelease: boolean;
     state: WebpackBuildState;
     target: WebpackTarget;
     verbosity: WebpackLogLevel;
 }
 
-type WebpackEnvironment = IWebpackEnvironment & Record<string, any>;
+type WpBuildEnvironment = Required<IWpBuildEnvironment>;
 
-declare interface IWebpackPackageJson
+
+declare interface IWpBuildPackageJson
 {
     author?: string | { name: string, email?: string };
     description: string;
@@ -48,43 +48,60 @@ declare interface IWebpackPackageJson
     version: string;
 }
 
-type WebpackPackageJson = IWebpackPackageJson & Record<string, any>;
+type WpBuildPackageJson = IWpBuildPackageJson & Record<string, any>;
 
-declare interface IWebpackGlobalEnvironment
+
+declare interface IWpBuildGlobalEnvironment
 {
     buildCount: number;
-    pkgJson: WebpackPackageJson; 
+    cache: Record<string, any>;
+    cacheDir: string;
+    pkgJson: WpBuildPackageJson; 
     valuePad: number;
 }
 
-type WebpackGlobalEnvironment = IWebpackGlobalEnvironment & Record<string, any>;
+type WpBuildGlobalEnvironment = IWpBuildGlobalEnvironment & Record<string, any>;
+
 
 declare interface IWebpackApp
 {
-    exports: Record<string, boolean>;
-    name: string;                         // project name (read from package.json)
-    displayName: string;                  // displayName (read from package.json)
     bannerName: string;                   // Displayed in startup banner detail line
     bannerNameDetailed: string;           // Displayed in startup banner detail line
+    displayName: string;                  // displayName (read from package.json)
+    exports: Record<string, boolean>;
+    publicInfoProject: boolean | string;  // Project w/ private repo that maintains a public `info` project
     logPad: Record<string, any>;
-    pkgJson: WebpackPackageJson;
+    name: string;                         // project name (read from package.json)
+    pkgJson: WpBuildPackageJson;
     plugins: Record<string, boolean>;
     version: string;                      // app version (read from package.json)
-    vscode: IWebpackVsCodeBuild
+    vscode: WebpackVsCodeBuild
 }
 
-declare interface WebpackBuildFilePaths
+type WpBuildApp = IWebpackApp & Record<string, any>;
+
+
+declare interface IWebpackBuildFilePaths
 {
     hash: string;
     sourceMapWasm: string;
 }
 
+type WebpackBuildFilePaths = Required<IWebpackBuildFilePaths> & Record<string, any>;
+
+
 declare interface IWebpackVsCodeBuild
 {
-    webview: Record<string, string>; // webviewsapp: "path/to/app"
+    webview: {
+        baseDIr: string;
+        apps: Record<string, string>;     // in key/value for of `webviewsapp: "path/to/entry"`
+    }
 }
 
-declare interface WebpackBuildPaths
+type WebpackVsCodeBuild = IWebpackVsCodeBuild & Record<string, any>;
+
+
+declare interface IWpBuildPaths
 {
     base: string;                         // context base dir path
     build: string;                        // base/root level dir path of project
@@ -95,51 +112,62 @@ declare interface WebpackBuildPaths
     temp: string;                         // operating system temp directory
 }
 
-declare interface WebpackHashState
+type WpBuildPaths = Required<IWpBuildPaths> & Record<string, any>;
+
+declare interface IWpBuildHashState
 {
     current: Record<string, string>;  // Content hash from previous output chunk
     next: Record<string, string>;      // Content hash for new output chunk
 }
 
-declare interface WebpackBuildState
+type WpBuildHashState = Required<IWpBuildHashState>;
+
+declare interface IWebpackBuildState
 {
-    hash: WebpackHashState;
+    hash: WpBuildHashState;
 }
 
-declare interface WebpackEnvironmentInternal
+type WebpackBuildState = IWebpackBuildState & Record<string, any>;
+
+
+declare interface IWebpackEnvironmentInternal
 {
     WEBPACK_WATCH: boolean;
 }
 
-declare interface WebpackArgs
+type WebpackEnvironmentInternal = IWebpackEnvironmentInternal & Partial<string, any>;
+
+
+declare interface IWpBuildWebpackArgs
 {
     config: string[];
-    env: WebpackEnvironment;
+    env: WpBuildEnvironment;
     mode: WebpackMode;
     watch: boolean;
 }
 
+type WpBuildWebpackArgs = IWpBuildWebpackArgs & Record<string, any>;
+
+
 export {
-    IWebpackApp,
-    WebpackArgs,
     WebpackAssetEmittedInfo,
-    WebpackBuild,
-    WebpackBuildMode,
-    WebpackBuildPaths,
+    WpBuildModule,
     WebpackBuildState,
     WebpackCompiler,
     WebpackCompilation,
     WebpackConfig,
-    WebpackGlobalEnvironment,
-    WebpackHashState,
     WebpackMode,
-    WebpackPackageJson,
     WebpackPluginInstance,
-    WebpackOptimization,
-    WebpackEnvironment,
+    WpBuildEnvironment,
     WebpackLogLevel,
     WebpackStatsAsset,
     WebpackTarget,
     WebpackBuildEnvironment,
-    IWebpackVsCodeBuild
+    WebpackVsCodeBuild,
+    WpBuildApp,
+    WpBuildWebpackArgs,
+    WpBuildPaths,
+    WpBuildGlobalEnvironment,
+    WpBuildHashState,
+    WpBuildPackageJson
 };

@@ -11,12 +11,12 @@ const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const { existsSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {"write-tsbuildinfo" | "readonly" | "write-dts" | "write-references" | undefined} TsCheckMode */
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {(ForkTsCheckerPlugin)[]}
  */
@@ -25,7 +25,7 @@ const tscheck = (env, wpConfig) =>
 	/** @type {ForkTsCheckerPlugin[]} */const plugins = [];
 	/** @type {[ string, TsCheckMode, boolean? ][]} */const tsConfigs = [];
 
-	if (env.app.plugins.tscheck)
+	if (env.app.plugins.tscheck !== false)
 	{
 		if (env.build === "webview")
 		{

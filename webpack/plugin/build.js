@@ -11,12 +11,12 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
@@ -24,7 +24,7 @@ const build = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
 	let plugin;
-	if (env.app.plugins.build && env.build !== "webview")
+	if (env.app.plugins.build !== false && env.build !== "webview")
 	{
 		plugin =
 		{
@@ -49,7 +49,7 @@ const build = (env, wpConfig) =>
 // babel:
 // {
 // 	/**
-// 	 * @param {WebpackEnvironment} env
+// 	 * @param {WpBuildEnvironment} env
 // 	 * @returns {void}
 // 	 */
 // 	buildTests: (env) =>
@@ -76,7 +76,7 @@ const build = (env, wpConfig) =>
 const tsc =
 {
 	/**
-	 * @param {WebpackEnvironment} env
+	 * @param {WpBuildEnvironment} env
 	 * @returns {void}
 	 */
 	buildTests: (env) =>
@@ -88,7 +88,7 @@ const tsc =
 	},
 
 	/**
-	 * @param {WebpackEnvironment} env
+	 * @param {WpBuildEnvironment} env
 	 * @returns {void}
 	 */
 	buildTypes: (env) =>

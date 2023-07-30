@@ -11,14 +11,14 @@ const { getEntriesRegex, tapStatsPrinter } = require("../utils/utils");
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @function compile
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
@@ -26,7 +26,7 @@ const compilation = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.app.plugins.compilation && env.build === "extension" && env.environment === "test" && env.buildMode !== "debug")
+    if (env.app.plugins.compilation !== false && env.build === "extension" && env.environment === "test")
     {
         plugin =
         {
@@ -36,7 +36,7 @@ const compilation = (env, wpConfig) =>
                 {
                     // const cache = compilation.getCache("CompileThisCompilationPlugin"),
                     //       logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
-                    istanbulTags(compiler, compilation, wpConfig);
+                    istanbulTags(compiler, compilation, env, wpConfig);
                 });
             }
         };
@@ -49,9 +49,10 @@ const compilation = (env, wpConfig) =>
  * @function istanbulTags
  * @param {WebpackCompiler} compiler
  * @param {WebpackCompilation} compilation
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const istanbulTags = (compiler, compilation, wpConfig) =>
+const istanbulTags = (compiler, compilation, env, wpConfig) =>
 {
     const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
           name = `CompileCompilationPlugin${stage}`;
@@ -68,7 +69,7 @@ const istanbulTags = (compiler, compilation, wpConfig) =>
                   info = compilation.getAsset(fileName)?.info;
             compilation.updateAsset(
                 fileName,
-                compiler.options.devtool ?
+                compiler.options.devtool || env.app.plugins.sourcemaps ?
                     new compiler.webpack.sources.SourceMapSource(newContent, fileName, map) :
                     new compiler.webpack.sources.RawSource(newContent),
                 { ...info, istanbulTagged: true }

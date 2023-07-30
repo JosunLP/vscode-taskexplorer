@@ -5,7 +5,7 @@
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const nodeExternals = require("webpack-node-externals");
@@ -15,7 +15,7 @@ const nodeExternals = require("webpack-node-externals");
  * @method
  * The vscode-module is created on-the-fly and must be excluded. Add other modules that cannot
  * be webpack'ed, -> https://webpack.js.org/configuration/externals/
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const externals = (env, wpConfig) =>

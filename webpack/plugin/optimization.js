@@ -8,20 +8,20 @@
 const webpack = require("webpack");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @function optimization
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance[]}
  */
 const optimization = (env, wpConfig) =>
 {
 	const plugins = [];
-	if (env.app.plugins.optimization)
+	if (env.app.plugins.optimization !== false)
 	{
 		if (env.build === "browser")
 		{

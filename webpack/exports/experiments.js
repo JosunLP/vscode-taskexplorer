@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 /**
- * @module webpack.exports.context
+ * @module webpack.exports.experiments
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -9,14 +10,17 @@
 
 
 /**
- * @method
+ * @function entry
  * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const context = (env, wpConfig) =>
+const experiments = (env, wpConfig) =>
 {
-	wpConfig.context = env.paths.base;
+	if (env.build === "extension" || env.build === "browser")
+	{
+		wpConfig.experiments = { layers: true };
+	}
 };
 
 
-module.exports = context;
+module.exports = experiments;

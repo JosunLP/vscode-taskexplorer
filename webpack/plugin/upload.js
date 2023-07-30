@@ -15,8 +15,8 @@
  */
 
 const { join, basename } = require("path");
-const globalEnv = require("../utils/global");
 const { spawnSync } = require("child_process");
+const { globalEnv } = require("../utils/global");
 const { initGlobalEnvObject } = require("../utils/utils");
 const { writeInfo, figures, withColor, colors } = require("../utils/console");
 const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync, readdirSync } = require("fs");
@@ -24,15 +24,15 @@ const { WebpackError } = require("webpack");
 const { info } = require("console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackHashState} WebpackHashState */
+/** @typedef {import("../types").WpBuildHashState} WpBuildHashState */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @function upload
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined} plugin instance
  */
@@ -40,7 +40,7 @@ const upload = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.app.plugins.upload && env.build === "extension")
+    if (env.app.plugins.upload !== false && env.build === "extension")
     {
         initGlobalEnvObject("upload", 0, "callCount", "readyCount");
         plugin =
@@ -69,7 +69,7 @@ const upload = (env, wpConfig) =>
 /**
  * @function uploadAssets
  * @param {WebpackStatsAsset[]} assets
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @throws {WebpackError}
  */
 const uploadAssets = (assets, env) =>
@@ -91,16 +91,15 @@ const uploadAssets = (assets, env) =>
         const chunkName = /** @type {string}*/(/** @type {string[]}*/(a.chunkNames)[0]);
         if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName] && a.info.related)
         {
-            const distPath = env.buildMode === "release" ? env.paths.dist : env.paths.temp;
-            copyFileSync(join(distPath, a.name), join(toUploadPath, a.name));
+            copyFileSync(join(env.paths.dist, a.name), join(toUploadPath, a.name));
             if (a.info.related.sourceMap)
             {
                 const fileNameSourceMap = a.info.related.sourceMap.toString();
                 if (env.environment === "prod") {
-                    renameSync(join(distPath, fileNameSourceMap), join(toUploadPath, fileNameSourceMap));
+                    renameSync(join(env.paths.dist, fileNameSourceMap), join(toUploadPath, fileNameSourceMap));
                 }
                 else {
-                    copyFileSync(join(distPath, fileNameSourceMap), join(toUploadPath, fileNameSourceMap));
+                    copyFileSync(join(env.paths.dist, fileNameSourceMap), join(toUploadPath, fileNameSourceMap));
                 }
             }
             ++globalEnv.upload.readyCount;

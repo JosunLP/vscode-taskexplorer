@@ -38,6 +38,9 @@ module.exports = {
         "@typescript-eslint",
         "@typescript-eslint/tslint"
     ],
+    globals: {
+        __WPBUILD__: "readonly"
+    },
     rules: {
         "@spmeesseman/extjs-array-bracket-newline": 1,
 		"anti-trojan-source/no-bidi": "error",

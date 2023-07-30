@@ -5,12 +5,12 @@
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function optimization
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const optimization = (env, wpConfig) =>
@@ -51,17 +51,17 @@ const optimization = (env, wpConfig) =>
 /**
  * @function optimization
  * @private
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const parallelism = (env, wpConfig) =>
 {
 	if (env.build === "webview" && env.app.vscode)
 	{
-		wpConfig.parallelism = Object.keys(env.app.vscode.webview).length;
+		wpConfig.parallelism = 1 + Object.keys(env.app.vscode.webview.apps).length;
 	}
 	else {
-		wpConfig.parallelism = 4; // extension x 2 / vendor / runtime
+		wpConfig.parallelism = 3; // extension / vendor / runtime
 	}
 };
 

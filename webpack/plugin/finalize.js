@@ -13,13 +13,13 @@ const { existsSync, copyFileSync, readdirSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @function finalize
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
@@ -27,7 +27,7 @@ const finalize = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.app.plugins.finalize && env.build === "extension")
+    if (env.app.plugins.finalize !== false && env.build === "extension")
     {
         plugin =
         {
@@ -50,7 +50,7 @@ const finalize = (env, wpConfig) =>
 
 /**
  * @function licenseFiles
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @returns {Promise<void>}
  */
 const licenseFiles = async (env) =>

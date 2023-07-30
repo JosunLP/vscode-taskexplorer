@@ -8,19 +8,26 @@ const { apply } = require("../utils/utils");
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const output = (env, wpConfig) =>
 {
+	wpConfig.output =
+	{
+		compareBeforeEmit: true,
+		hashDigestLength: 20
+	};
+
 	if (env.build === "webview")
 	{
-		wpConfig.output = {
+		apply(wpConfig.output,
+		{
 			clean: env.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
 			path: join(env.paths.build, "res"),
 			publicPath: "#{webroot}/",
@@ -32,11 +39,12 @@ const output = (env, wpConfig) =>
 				}
 				return `js/${name}.js`;
 			}
-		};
+		});
 	}
 	else if (env.build === "tests")
 	{
-		wpConfig.output = {
+		apply(wpConfig.output,
+		{
 			// asyncChunks: true,
 			clean: env.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
 			// libraryExport: "run",
@@ -51,33 +59,18 @@ const output = (env, wpConfig) =>
 			// 	type: "commonjs2"
 			// },
 			libraryTarget: "commonjs2"
-		};
+		});
 	}
 	else
 	{
-		let outPath;
-		const rtRelPath = env.build === "browser" ? "browser" : ".";
-		if (env.buildMode === "release") {
-			outPath = resolve(env.paths.dist, rtRelPath);
-		}
-		else {
-			outPath = resolve(env.paths.temp, rtRelPath);
-		}
-		wpConfig.output =
+		apply(wpConfig.output,
 		{
 			clean: env.clean === true ? (env.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
-			path: outPath,
-			// filename: env.buildMode === "release" ? "[name].js" : "[name].debug.js",
-			filename: env.buildMode === "release" ? "[name].[contenthash].js" : "[name].debug.[contenthash].js",
+			path: resolve(env.paths.dist, env.build === "browser" ? "browser" : "."),
+			filename: "[name].[contenthash].js",
 			libraryTarget: "commonjs2"
-		};
+		});
 	}
-
-	apply(wpConfig.output,
-	{
-		compareBeforeEmit: true,
-		hashDigestLength: 20
-	});
 };
 
 

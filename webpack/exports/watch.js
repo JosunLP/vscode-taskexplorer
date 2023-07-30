@@ -4,16 +4,16 @@
  * @module webpack.exports.watch
  */
 
-/** @typedef {import("../types").WebpackArgs} WebpackArgs */
+/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function target
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
- * @param {WebpackArgs} argv Webpack command line args
+ * @param {WpBuildWebpackArgs} argv Webpack command line args
  */
 const watch = (env, wpConfig, argv) =>
 {

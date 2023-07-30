@@ -421,6 +421,9 @@ export class Log implements ILog, ILogDisposable
                   rtDebugFiles = rtFiles.map(f => basename(f.replace(".js", ".debug.js"))),
                   isCurrentlyDbg = !!rtFiles.find(f => f.includes(".debug")),
                   remotePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._logConfig.version}/${this._logConfig.env}`;
+            const files = [
+                ""
+            ];
             //
             // Calling application should `clean` when there is a version change or for a new install
             // (as user may have uninstalled and reinstralled, there's no way for the app to perform

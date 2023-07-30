@@ -7,69 +7,42 @@
  */
 
 const { join, resolve } = require("path");
+const { merge } = require("../utils/utils");
 const { WebpackError } = require("webpack");
-const globalEnv = require("../utils/global");
-const { merge, isObjectEmpty } = require("../utils/utils");
-const { readFileSync, existsSync, mkdirSync } = require("fs");
-const { writeInfo, figures, write } = require("../utils/console");
+const { existsSync, mkdirSync } = require("fs");
+const { globalEnv } = require("../utils/global");
+const { writeInfo, figures } = require("../utils/console");
 
-/** @typedef {import("../types").IWebpackApp} IWebpackApp */
-/** @typedef {import("../types").WebpackArgs} WebpackArgs */
-/** @typedef {import("../types").WebpackBuild} WebpackBuild */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
+/** @typedef {import("../types").WpBuildModule} WpBuildModule */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function environment
- * @param {WebpackBuild} build
- * @param {IWebpackApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackArgs} argv Webpack command line args
+ * @param {WpBuildModule} build
+ * @param {WpBuildApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
+ * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const environment = (build, app, env, argv, wpConfig) =>
 {
 	env.build = build;
 	env.paths.build = resolve(__dirname, "..", "..");
-	setEnvironment(env, argv, wpConfig); // i.e. env.environment = < `prod`, `dev`, or `test` >
-	setApp(app, env);
-	setPaths(env);
-	initState(env);
-	setVersion(env);
-	writeEnvironment(env, argv);
-};
-
-
-/**
- * @function setState
- * @param {WebpackEnvironment} env Webpack build environment
- */
-const initState = (env) => { env.state = { hash: { current: {}, next: {} } }; };
-
-
-/**
- * @function readPkgJson
- * @param {IWebpackApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
- * @param {WebpackEnvironment} env Webpack build environment
- */
-const setApp = (app, env) =>
-{
+	env.state = { hash: { current: {}, next: {} } };
 	merge(env, { app });
-	if (!env.app.pkgJson || isObjectEmpty(env.app.pkgJson))
-	{
-		const pkgJsonPath = join(env.paths.build, "package.json");
-		if (existsSync(pkgJsonPath)) {
-			merge(env.app, { pkgJson: JSON.parse(readFileSync(pkgJsonPath, "utf8")) });
-		}
-	}
+	setEnvironment(env, argv, wpConfig);
+	setPaths(env);
 };
 
 
 /**
  * @function setEnvironment
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackArgs} argv Webpack command line args
+ * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @param {WebpackConfig} wpConfig Webpack config object
  * @throws {Error}
  */
@@ -98,69 +71,24 @@ const setEnvironment = (env, argv, wpConfig) =>
 
 /**
  * @function setPaths
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  */
 const setPaths = (env) =>
 {
+	const wvBase = env.app.vscode.webview.baseDIr;
 	merge(env.paths,
 	{
-		base: env.build !== "webview" ? env.paths.build : join(env.paths.build, "src", "webview", "app"),
+		base: env.build !== "webview" ? env.paths.build : (wvBase ? resolve(env.paths.build, wvBase) :
+																	join(env.paths.build, "src", "webview", "app")),
 		dist: join(env.paths.build, "dist"),
 		temp: resolve(process.env.TEMP || process.env.TMP  || ".", env.app.name, env.environment),
-		cache: join(env.paths.build, "node_modules", ".cache", "webpack")
+		cache: globalEnv.cacheDir,
+		files: {
+			hash: join(globalEnv.cacheDir, `hash.${env.environment}.json`),
+			sourceMapWasm: "node_modules/source-map/lib/mappings.wasm"
+		}
 	});
-	merge(env.paths.files,
-	{
-		sourceMapWasm: "node_modules/source-map/lib/mappings.wasm",
-		hash: join(env.paths.cache, `hash.${env.environment}${env.buildMode === "debug" ? ".debug" : ""}.json`)
-	});
-	env.paths.distBuild = env.buildMode !== "debug" ? env.paths.dist : env.paths.temp;
-	if (!existsSync(env.paths.cache)) { mkdirSync(env.paths.cache, { recursive: true }); }
 	if (!existsSync(env.paths.temp)) { mkdirSync(env.paths.temp, { recursive: true }); }
-};
-
-
-/**
- * @function setVersion
- * @param {WebpackEnvironment} env
- */
-const setVersion = (env) =>
-{
-    if (env.build === "extension" && env.environment === "prod" && env.buildMode === "release")
-    {
-        // let version = env.app.version;
-    }
-};
-
-
-/**
- * @function writeEnvironment
- * @param {WebpackEnvironment} env Webpack build environment
- * @param {WebpackArgs} argv Webpack command line args
- */
-const writeEnvironment = (env, argv) =>
-{
-	write("Build Environment:");
-	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
-		(k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`)
-	);
-	write("Global Environment:");
-	Object.keys(globalEnv).filter(k => typeof env[k] !== "object").forEach(
-		(k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`)
-	);
-	if (argv)
-	{
-		write("Arguments:");
-		if (argv.mode) {
-			writeInfo(`   mode           : ${argv.mode}`);
-		}
-		if (argv.watch) {
-			writeInfo(`   watch          : ${argv.config.join(", ")}`);
-		}
-		if (argv.config) {
-			writeInfo(`   config         : ${argv.config.join(", ")}`);
-		}
-	}
 };
 
 

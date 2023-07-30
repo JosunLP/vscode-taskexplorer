@@ -6,6 +6,9 @@ const build = require("./build");
 const clean = require("./clean");
 const compilation = require("./compilation");
 const copy = require("./copy");
+const customize = require("./customize");
+const define = require("./define");
+const environment = require("./environment");
 const finalize = require("./finalize");
 const { hash, prehash } = require("./hash");
 const ignore = require("./ignore");
@@ -27,6 +30,9 @@ module.exports = {
     compilation,
     copy,
     cssextract,
+    customize,
+    define,
+    environment,
     finalize,
     hash,
     htmlcsp,

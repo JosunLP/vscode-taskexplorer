@@ -2,20 +2,21 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const globalEnv = require("./global");
 const { resolve } = require("path");
 const gradient = require("gradient-string");
 const { WebpackError } = require("webpack");
+const { globalEnv } = require("../utils/global");
 const { readFileSync, existsSync } = require("fs");
 const { write, writeInfo, withColor, figures, colors } = require("./console");
 
-/** @typedef {import("../types").IWebpackApp} IWebpackApp */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackArgs} WebpackArgs */
+/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WebpackPackageJson} WebpackPackageJson */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildPackageJson} WpBuildPackageJson */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WebpackVsCodeBuild} WebpackVsCodeBuild */
 
 
 /**
@@ -238,10 +239,10 @@ const printLineSep = () =>
 
 /**
  * @function
- * @param {IWebpackApp} app
+ * @param {WpBuildApp} app
  * @param {WebpackMode} mode Webpack command line args
- * @param {Partial<WebpackEnvironment>} env Webpack build environment
- * @param {WebpackArgs} argv Webpack command line args
+ * @param {Partial<WpBuildEnvironment>} env Webpack build environment
+ * @param {WpBuildWebpackArgs} argv Webpack command line args
  */
 const printBanner = (app, mode, env, argv) =>
 {
@@ -261,15 +262,17 @@ const printBanner = (app, mode, env, argv) =>
 /**
  * @function
  * @throws {WebpackError}
- * @returns {IWebpackApp}
+ * @returns {WpBuildApp}
  */
 const readConfigFiles = () =>
 {
-    /** @type {IWebpackApp} */
+    /** @type {WpBuildApp} */
     const appRc = {},
           rcPath = resolve(__dirname, "..", ".wpbuildrc.json"),
           pkgJsonPath = resolve(__dirname, "..", "..", "package.json");
-
+    //
+    // Read .wpbuildrc
+    //
     try
     {   if (existsSync(rcPath))
         {
@@ -283,13 +286,16 @@ const readConfigFiles = () =>
         throw new WebpackError("Could not parse .wpbuildrc.json, check syntax");
     }
 
+    //
+    // Read package.json
+    //
     try
     {   if (existsSync(pkgJsonPath))
         {
-            const props = [ // needs to be in sync with the properties of `IWebpackPackageJson`
+            const props = [ // needs to be in sync with the properties of `WpBuildPackageJson`
                 "author", "displayName", "name", "description", "main", "module", "publisher", "version"
             ];
-            /** @type {WebpackPackageJson} */
+            /** @type {WpBuildPackageJson} */
             const pkgJso = JSON.parse(readFileSync(pkgJsonPath, "utf8")),
                   pkgJsoPartial = pickBy(pkgJso, p => props.includes(p));
             merge(appRc, {}, { pkgJson: pkgJsoPartial });
@@ -303,42 +309,54 @@ const readConfigFiles = () =>
         throw new WebpackError("Could not parse package.json, check syntax");
     }
 
+    if (!appRc.plugins) {
+        appRc.plugins = {};
+    }
+
+    if (!appRc.exports) {
+        appRc.exports = {};
+    }
+
+    //
+    // PRIMITIVE PROPERTIES
+    //
     if (!appRc.name) {
         appRc.name = appRc.pkgJson.name;
     }
-
     if (!appRc.displayName) {
         appRc.name = appRc.pkgJson.displayName;
     }
-
     if (!appRc.bannerName) {
         appRc.bannerName = appRc.displayName;
     }
-
     if (!appRc.bannerNameDetailed) {
         appRc.bannerNameDetailed = appRc.bannerName;
     }
-
     if (!appRc.version) {
         appRc.version = appRc.pkgJson.version;
     }
 
+    //
+    // VSCODE PROPERTIES
+    //
     if (!appRc.vscode) {
-        appRc.vscode = {};
+        appRc.vscode = /** @type {WebpackVsCodeBuild} */({});
     }
+    mergeIf(appRc.vscode, { webview: { apps: {}, baseDIr: "" }});
+    mergeIf(appRc.vscode.webview, { apps: {}, baseDir: "" });
 
-    if (!appRc.vscode.webview) {
-        appRc.vscode.webview = {};
-    }
-
+    //
+    // LOGPAD PROPERTIES
+    //
     if (!appRc.logPad) {
-        appRc.logPad = {};
+        appRc.logPad = { plugin: {}, externals: {} };
     }
-
+    if (!appRc.logPad.externals) {
+        appRc.logPad.externals = {};
+    }
     if (!appRc.logPad.plugin) {
         appRc.logPad.plugin = {};
     }
-
     mergeIf(appRc.logPad.plugin,
     {
         compilation: 20,

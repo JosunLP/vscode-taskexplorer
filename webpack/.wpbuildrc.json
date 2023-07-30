@@ -2,7 +2,7 @@
     "name": "vscode-taskexplorer",
     "displayName": "Task Explorer",
     "detailedDisplayName": "Task Explorer VSCode Extension",
-    "module": false,
+    "publicInfoProject": true,
     "logPad": {
         "plugin": {
             "compilation": 20,
@@ -21,7 +21,7 @@
         "externals": true,
         "ignorewarnings": true,
         "index": true,
-        "minification": true,
+        "minification": false,
         "mode": true,
         "name": true,
         "optimization": true,
@@ -40,6 +40,9 @@
         "clean": true,
         "compilation": true,
         "copy": true,
+        "customize": true,
+        "define": true,
+        "environment": true,
         "finalize": true,
         "hash": true,
         "html": true,
@@ -56,15 +59,18 @@
     },
     "vscode": {
         "webview": {
-            "home": "./home/home.ts",
-            "license": "./license/license.ts",
-            "monitor": "./monitor/monitor.tsx",
-            "parsingReport": "./parsingReport/parsingReport.ts",
-            "releaseNotes": "./releaseNotes/releaseNotes.ts",
-            "taskCount": "./taskCount/taskCount.ts",
-            "taskDetails": "./taskDetails/taskDetails.ts",
-            "taskUsage": "./taskUsage/taskUsage.ts",
-            "welcome": "./welcome/welcome.ts"
+            "baseDir": "src/webview/app",
+            "apps": {
+                "home": "./home/home.ts",
+                "license": "./license/license.ts",
+                "monitor": "./monitor/monitor.tsx",
+                "parsingReport": "./parsingReport/parsingReport.ts",
+                "releaseNotes": "./releaseNotes/releaseNotes.ts",
+                "taskCount": "./taskCount/taskCount.ts",
+                "taskDetails": "./taskDetails/taskDetails.ts",
+                "taskUsage": "./taskUsage/taskUsage.ts",
+                "welcome": "./welcome/welcome.ts"
+            }
         }
     }
 }

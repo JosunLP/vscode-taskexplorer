@@ -13,20 +13,20 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @param { string } name
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {HtmlPlugin | undefined}
  */
 const html = (name, env, wpConfig) =>
 {
     let plugin;
-    if (env.app.plugins.html && env.build === "webview")
+    if (env.app.plugins.html !== false && env.build === "webview")
     {
         const wwwName = name.replace(/[a-z]+([A-Z])/g, (substr, token) => substr.replace(token, "-" + token.toLowerCase()));
 		plugin = new HtmlPlugin(
@@ -56,7 +56,7 @@ const html = (name, env, wpConfig) =>
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {MiniCssExtractPlugin}
  */
@@ -77,7 +77,7 @@ const cssextract = (env, wpConfig) =>
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {CspHtmlPlugin}
  */
@@ -126,7 +126,7 @@ const htmlcsp = (env, wpConfig) =>
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {InlineChunkHtmlPlugin | undefined}
  */
@@ -143,7 +143,7 @@ const htmlinlinechunks = (env, wpConfig) =>
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {ImageMinimizerPlugin | undefined}
  */
@@ -163,7 +163,7 @@ const imageminimizer = (env, wpConfig) =>
 
 /**
  * @param {String[]} apps
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {HtmlPlugin[]}
  */
@@ -231,7 +231,7 @@ class InlineChunkHtmlPlugin
 
 
 // /**
-//  * @param {WebpackEnvironment} env
+//  * @param {WpBuildEnvironment} env
 //  * @param {WebpackConfig} wpConfig Webpack config object
 //  * @returns { ImageMinimizerPlugin.Generator<any> }
 //  */

@@ -4,19 +4,17 @@
 /**
  * @module webpack.plugin.banner
  */
-
-const globalEnv = require("../utils/global");
-const { spawnSync } = require("child_process");
+const { globalEnv } = require("../utils/global");
 const { writeInfo, figures, withColor, colors } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @function finalize
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
@@ -24,7 +22,7 @@ const scm = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.app.plugins.scm && env.build === "extension" && env.environment === "prod")
+    if (env.app.plugins.scm !== false && env.build === "extension" && env.environment === "prod")
     {
         plugin =
         {
@@ -43,7 +41,7 @@ const scm = (env, wpConfig) =>
 
 /**
  * @function uploadAssets
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  */
 const checkin = (env) =>
 {

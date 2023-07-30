@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 /**
@@ -5,20 +6,19 @@
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function entry
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const entry = (env, wpConfig) =>
 {
 	if (env.build === "webview" && env.app.vscode)
 	{
-		wpConfig.entry = env.app.vscode.webview;
-		// exports.output() will set filename
+		wpConfig.entry = env.app.vscode.webview.apps;
 	}
 	else if (env.build === "tests")
 	{
@@ -32,7 +32,6 @@ const entry = (env, wpConfig) =>
 		wpConfig.entry =
 		{
 			runTest: "./src/test/runTest.ts"
-			// exports.output() will set filename
 			// "run/index": "./src/test/run/index.ts",
 			// ...testFiles
 		};
@@ -41,9 +40,13 @@ const entry = (env, wpConfig) =>
 	{
 		wpConfig.entry =
 		{
-			taskexplorer: {
-				import: "./src/taskexplorer.ts"
-				// exports.output() will set filename
+			"taskexplorer": {
+				import: "./src/taskexplorer.ts",
+				layer: "release"
+			},
+			"taskexplorer.debug": {
+				import: "./src/taskexplorer.ts",
+				layer: "debug"
 			}
 		};
 	}

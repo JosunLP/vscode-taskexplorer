@@ -50,6 +50,19 @@ export const isObject = <T = Record<string, any>>(v: any, allowArray?: boolean):
 
 export const isObjectEmpty = (v: Record<string, any>): boolean => { if (v) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };
 
+// var _path = _interopRequireDefault(require("path"));
+//
+// function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+//
+// // Copied from https://github.com/sindresorhus/is-plain-obj/blob/97480673cf12145b32ec2ee924980d66572e8a86/index.js
+// function isPlainObject(value) {
+//   if (Object.prototype.toString.call(value) !== '[object Object]') {
+//     return false;
+//   }
+//
+//   const prototype = Object.getPrototypeOf(value);
+//   return prototype === null || prototype === Object.getPrototypeOf({});
+// }
 
 export const isPrimitive = (v: any): v is Primitive => [ "boolean", "number", "string" ].includes(typeof v);
 

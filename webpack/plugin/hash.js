@@ -3,24 +3,24 @@
 // @ts-check
 
 const { apply, isObjectEmpty } = require("../utils/utils");
-const { writeFileSync, readFileSync, existsSync, unlinkSync } = require("fs");
-const { writeInfo, withColor, figures, colors, write } = require("../utils/console");
+const { writeFileSync, readFileSync, existsSync } = require("fs");
+const { writeInfo, withColor, colors, write } = require("../utils/console");
 
 /**
  * @module webpack.plugin.hash
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackHashState} WebpackHashState */
+/** @typedef {import("../types").WpBuildHashState} WpBuildHashState */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackAssetEmittedInfo} WebpackAssetEmittedInfo */
 
 
 /**
  * @function hash
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  * @returns {WebpackPluginInstance | undefined}
  */
@@ -28,7 +28,7 @@ const hash = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
-    if (env.app.plugins.hash && env.build === "extension")
+    if (env.app.plugins.hash !== false && env.build === "extension")
     {
         plugin =
         {
@@ -62,7 +62,7 @@ const hash = (env, wpConfig) =>
 
 /**
  * @function readAssetStates
- * @param {WebpackHashState} hashInfo
+ * @param {WpBuildHashState} hashInfo
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  * @param {boolean} [rotated] `true` indicates that values were read and rotated
  * i.e. `next` values were moved to `current`, and `next` is now blank
@@ -92,7 +92,7 @@ const logAssetInfo = (hashInfo, wpConfig, rotated) =>
 
 /**
  * @function prehash
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  * @returns {WebpackPluginInstance | undefined}
  */
@@ -117,46 +117,8 @@ const prehash = (env, wpConfig) =>
 
 
 /**
- * @function saveAssetState
- * @param {WebpackEnvironment} env
- */
-const saveAssetState = (env) => writeFileSync(env.paths.files.hash, JSON.stringify(env.state.hash, null, 4));
-
-
-/**
- * @function setAssetState
- * @param {WebpackStatsAsset} asset
- * @param {WebpackEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack `exports` config object
- */
-const setAssetState = (asset, env, wpConfig) =>
-{
-    write(withColor(`set asset state for ${withColor(asset.name, colors.italic)}`, colors.grey));
-    if (asset.chunkNames && asset.info.contenthash)
-    {
-        const chunkName = /** @type {string}*/(asset.chunkNames[0]);
-        env.state.hash.next[chunkName] = asset.info.contenthash.toString();
-        if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName])
-        {
-            // const cache = compilation.getCache("CompileThisCompilationPlugin"),
-            //       logger = compilation.getLogger("CompileProcessAssetsCompilationPlugin");
-            let p = `${chunkName}.${env.buildMode !== "debug" ? "" : "debug."}${env.state.hash.current[chunkName]}.js`;
-            if (existsSync(p)) {
-                unlinkSync(p);
-            }
-            p = `${p}.map`;
-            if (existsSync(p)) {
-                unlinkSync(p);
-            }
-        }
-        logAssetInfo(env.state.hash, wpConfig);
-    }
-};
-
-
-/**
  * @function readAssetStatesv
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  */
 const readAssetStates = (env, wpConfig) =>
@@ -173,6 +135,43 @@ const readAssetStates = (env, wpConfig) =>
     }
     else {
         writeInfo("   asset state cache file does not exist");
+    }
+};
+
+
+/**
+ * @function saveAssetState
+ * @param {WpBuildEnvironment} env
+ */
+const saveAssetState = (env) => writeFileSync(env.paths.files.hash, JSON.stringify(env.state.hash, null, 4));
+
+
+/**
+ * @function setAssetState
+ * @param {WebpackStatsAsset} asset
+ * @param {WpBuildEnvironment} env
+ * @param {WebpackConfig} wpConfig Webpack `exports` config object
+ */
+const setAssetState = (asset, env, wpConfig) =>
+{
+    write(withColor(`set asset state for ${withColor(asset.name, colors.italic)}`, colors.grey));
+    if (asset.chunkNames && asset.info.contenthash)
+    {
+        const chunkName = /** @type {string}*/(asset.chunkNames[0]);
+        env.state.hash.next[chunkName] = asset.info.contenthash.toString();
+        //
+        // Remove any old leftover builds in the dist directory
+        //
+        // if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName])
+        // {
+        //     readdirSync(env.paths.dist).filter(p => (/[a-f0-9]{16,}/).test(p)).forEach((p) =>
+        //     {
+        //         if (!p.includes(env.state.hash.next[chunkName])) {
+        //             unlinkSync(p);
+        //         }
+        //     });
+        // }
+        logAssetInfo(env.state.hash, wpConfig);
     }
 };
 

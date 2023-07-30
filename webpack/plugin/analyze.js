@@ -13,12 +13,12 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 // /**
-//  * @param {WebpackEnvironment} env
+//  * @param {WpBuildEnvironment} env
 //  * @param {WebpackConfig} wpConfig Webpack config object
 //  * @returns {(WebpackPluginInstance | undefined)[]}
 //  */
@@ -39,7 +39,7 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 const analyze =
 {
 	/**
-	 * @param {WebpackEnvironment} env
+	 * @param {WpBuildEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
 	 * @returns {BundleAnalyzerPlugin | undefined}
 	 */
@@ -61,7 +61,7 @@ const analyze =
 	},
 
 	/**
-	 * @param {WebpackEnvironment} env
+	 * @param {WpBuildEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
 	 * @returns {CircularDependencyPlugin | undefined}
 	 */
@@ -85,14 +85,14 @@ const analyze =
 	},
 
 	/**
-	 * @param {WebpackEnvironment} env
+	 * @param {WpBuildEnvironment} env
 	 * @param {WebpackConfig} wpConfig Webpack config object
 	 * @returns {VisualizerPlugin | undefined}
 	 */
 	visualizer(env, wpConfig)
 	{
 		let plugin;
-		if (env.app.plugins.analyze && env.analyze === true) {
+		if (env.app.plugins.analyze !== false && env.analyze === true) {
 			plugin = new VisualizerPlugin({ filename: "../.coverage/visualizer.html" });
 		}
 		return /** @type {VisualizerPlugin | undefined}) */(plugin);

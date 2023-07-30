@@ -13,25 +13,25 @@
 const webpack = require("webpack");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {webpack.SourceMapDevToolPlugin | undefined}
  */
 const sourcemaps = (env, wpConfig) =>
 {
     let plugin;
-    if (env.app.plugins.sourcemaps && env.build !== "webview")
+    if (env.app.plugins.sourcemaps !== false && env.build !== "webview")
     {
         const isTests = env.environment.startsWith("test");
         const options =
         {
             test: /\.(js|jsx)($|\?)/i,
             exclude: /((vendor|runtime|tests)(?:\.debug|)\.js|node_modules)/,
-            filename: env.buildMode === "release" ? "[name].js.map" : "[name].debug.js.map",
+            filename: "[name].js.map",
             //
             // The bundled node_modules will produce reference tags within the main entry point
             // files in the form:

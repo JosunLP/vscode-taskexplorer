@@ -2,42 +2,51 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-const globalEnv = require("../utils/global");
+const { globalEnv } = require("../utils/global");
 const { initGlobalEnvObject } = require("../utils/utils");
 const { writeInfo, withColor, figures, colors, withColorLength } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
- * @function addStepHook
+ * @function addCompilerHook
  * @param {string} hook
  * @param {WebpackPluginInstance[]} plugins
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
+ * @param {(arg: any) => void} [cb]
  */
-const addStepHook = (hook, plugins, env, wpConfig) =>
+const addCompilerHook = (hook, plugins, env, wpConfig, cb) =>
 {
 	plugins.push({
 		apply: (compiler) =>
 		{
-			compiler.hooks[hook].tap(`${hook}LogHookPlugin`, () => writeBuildTag(hook, env, wpConfig));
+			compiler.hooks[hook].tap(`${hook}LogHookPlugin`, (/** @type {any} */arg) =>
+			{
+				writeBuildTag(hook, env, wpConfig);
+				if (cb) {
+					cb(arg);
+				}
+			});
 		}
 	});
 };
 
 
+
 /**
- * @function addStepHook
+ * @function addCompilerHook
  * @param {string} hook
  * @param {WebpackPluginInstance[]} plugins
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const addStepHookPromise = (hook, plugins, env, wpConfig) =>
+const addCompilerHookPromise = (hook, plugins, env, wpConfig) =>
 {
 	plugins.push({
 		apply: (compiler) =>
@@ -50,7 +59,7 @@ const addStepHookPromise = (hook, plugins, env, wpConfig) =>
 
 /**
  * @function hookSteps
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance[]}
  */
@@ -58,38 +67,70 @@ const hookSteps = (env, wpConfig) =>
 {
 	/** @type {WebpackPluginInstance[]} */
 	const plugins = [];
-	if (env.app.plugins.loghooks)
+	if (env.app.plugins.loghooks !== false)
 	{
 		initGlobalEnvObject("hooksLog");
-		addStepHook("environment", plugins, env, wpConfig);
-		addStepHook("afterEnvironment", plugins, env, wpConfig);
-		addStepHook("entryOption", plugins, env, wpConfig);
-		addStepHook("afterPlugins", plugins, env, wpConfig);
-		addStepHook("afterResolvers", plugins, env, wpConfig);
-		addStepHook("initialize", plugins, env, wpConfig);
-		addStepHook("beforeRun", plugins, env, wpConfig);
-		addStepHook("run", plugins, env, wpConfig);
-		addStepHook("watchRun", plugins, env, wpConfig);
-		addStepHook("normalModuleFactory", plugins, env, wpConfig);
-		addStepHook("contextModuleFactory", plugins, env, wpConfig);
-		addStepHook("beforeCompile", plugins, env, wpConfig);
-		addStepHook("compile", plugins, env, wpConfig);
-		addStepHook("thisCompilation", plugins, env, wpConfig);
-		addStepHook("compilation", plugins, env, wpConfig);
-		addStepHook("make", plugins, env, wpConfig);
-		addStepHook("afterCompile", plugins, env, wpConfig);
-		addStepHook("shouldEmit", plugins, env, wpConfig);
-		addStepHook("emit", plugins, env, wpConfig);
-		addStepHook("afterEmit", plugins, env, wpConfig);
-		addStepHookPromise("assetEmitted", plugins, env, wpConfig);
-		addStepHook("emit", plugins, env, wpConfig);
-		addStepHook("done", plugins, env, wpConfig);
-		addStepHook("afterDone", plugins, env, wpConfig);
-		addStepHook("additionalPass", plugins, env, wpConfig);
-		addStepHook("failed", plugins, env, wpConfig);
-		addStepHook("invalid", plugins, env, wpConfig);
-		addStepHook("watchClose", plugins, env, wpConfig);
-		addStepHook("shutdown", plugins, env, wpConfig);
+		addCompilerHook("environment", plugins, env, wpConfig);
+		addCompilerHook("afterEnvironment", plugins, env, wpConfig);
+		addCompilerHook("entryOption", plugins, env, wpConfig);
+		addCompilerHook("afterPlugins", plugins, env, wpConfig);
+		addCompilerHook("afterResolvers", plugins, env, wpConfig);
+		addCompilerHook("initialize", plugins, env, wpConfig);
+		addCompilerHook("beforeRun", plugins, env, wpConfig);
+		addCompilerHook("run", plugins, env, wpConfig);
+		addCompilerHook("watchRun", plugins, env, wpConfig);
+		addCompilerHook("normalModuleFactory", plugins, env, wpConfig);
+		addCompilerHook("contextModuleFactory", plugins, env, wpConfig);
+		addCompilerHook("beforeCompile", plugins, env, wpConfig);
+		addCompilerHook("compile", plugins, env, wpConfig);
+		addCompilerHook("thisCompilation", plugins, env, wpConfig);
+		addCompilerHook("compilation", plugins, env, wpConfig, (compilation) =>
+		{
+			// if (hook === "compilation")
+			// {
+			// 	const compilation = /** @type {WebpackCompilation} */(arg);
+			// 	compilation.hooks.beforeModuleHash.tap(
+			// 		"LogCompilationHookBeforeModuleHashPlugin",
+			// 		() => writeBuildTag("compilation.beforeModuleHash", env, wpConfig)
+			// 	);
+			// 	compilation.hooks.afterModuleHash.tap(
+			// 		"LogCompilationHookAftereModuleHashPlugin",
+			// 		() => writeBuildTag("compilation.afterModuleHash", env, wpConfig)
+			// 	);
+			// 	compilation.hooks.processAssets.tap(
+			// 		{
+			// 			name: "LogCompilationHookPluginAdditions",
+			// 			stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS
+			// 		},
+			// 		() => writeBuildTag("compilation.additions", env, wpConfig)
+			// 	);
+			// 	compilation.hooks.processAssets.tap(
+			// 		{
+			// 			name: "LogCompilationHookPluginAdditional",
+			// 			stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
+			// 		},
+			// 		() => writeBuildTag("compilation.additional", env, wpConfig)
+			// 	);
+			// }
+		});
+		addCompilerHook("make", plugins, env, wpConfig);
+		addCompilerHook("afterCompile", plugins, env, wpConfig);
+		addCompilerHook("shouldEmit", plugins, env, wpConfig);
+		addCompilerHook("emit", plugins, env, wpConfig);
+		addCompilerHook("afterEmit", plugins, env, wpConfig);
+		addCompilerHookPromise("assetEmitted", plugins, env, wpConfig);
+		addCompilerHook("emit", plugins, env, wpConfig);
+		addCompilerHook("done", plugins, env, wpConfig);
+		addCompilerHook("afterDone", plugins, env, wpConfig);
+		addCompilerHook("additionalPass", plugins, env, wpConfig);
+		addCompilerHook("failed", plugins, env, wpConfig, /** @param {Error} e */(e) =>
+		{
+			writeInfo("Error Details:", figures.color.error);
+			writeInfo(e.message, figures.color.error, "   ");
+		});
+		addCompilerHook("invalid", plugins, env, wpConfig);
+		addCompilerHook("watchClose", plugins, env, wpConfig);
+		addCompilerHook("shutdown", plugins, env, wpConfig);
 	}
 	return plugins;
 };
@@ -98,7 +139,7 @@ const hookSteps = (env, wpConfig) =>
 /**
  * @function writeBuildTag
  * @param {string} hook
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const writeBuildTag = (hook, env, wpConfig) =>
@@ -108,7 +149,7 @@ const writeBuildTag = (hook, env, wpConfig) =>
 	{
 		globalEnv.hooksLog[key] = true;
 		const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-		writeInfo(`[${withColor(env.build, colors.italic)}][${withColor(env.buildMode, colors.italic)}]`
+		writeInfo(`[${withColor(env.build, colors.italic)}][${withColor(wpConfig.target.toString(), colors.italic)}]`
 				  .padEnd(env.app.logPad.plugin.loghooks.buildTag + (withColorLength(colors.italic) * 2)) + hookName);
 	}
 };

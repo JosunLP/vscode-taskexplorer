@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import { join } from "path";
 import { Log } from "../../utils/log";
@@ -9,12 +10,16 @@ import {
     ILogOutputChannel, CallbackOptions, LogHttpGetFn
 } from "../../../interface";
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
+declare const __WPBUILD__: any;
+
 /**
  * @class TeLog
  * @since 3.0.0
  */
 export class TeLog extends Log implements ILog, Disposable
 {
+
     private readonly _disposables: Disposable[];
 
 
@@ -48,6 +53,14 @@ export class TeLog extends Log implements ILog, Disposable
             isTests: wrapper.context.extensionMode === ExtensionMode.Test,
             logDirectory: wrapper.context.logUri.fsPath,
             modulePath: join(wrapper.context.extensionUri.fsPath, pkgJson.main),
+            moduleHash: {
+                "taskexplorer": "__WPBUILD__.contenthash.taskexplorer",
+                "taskexplorer.debug": "__WPBUILD__.contenthash.taskexplorer.debug",
+                "runtime": "__WPBUILD__.contenthash.runtime",
+                "runtime.debug": "__WPBUILD__.contenthash.runtime.debug",
+                "vendor": "__WPBUILD__.contenthash.vendor",
+                "vendor.debug": "__WPBUILD__.contenthash.vendor.debug"
+            },
             outputChannel: {
                 clear: oChannel.clear,
                 dispose: oChannel.dispose,

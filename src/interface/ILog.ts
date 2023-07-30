@@ -67,6 +67,7 @@ export interface ILogConfig
     httpGetFn: LogHttpGetFn;
     isTests: boolean;
     modulePath: string;
+    moduleHash: Record<string, string>;
     outputChannel?: ILogOutputChannel;
     promptRestartFn: LogPromptRestartFn;
     storageDirectory: string;

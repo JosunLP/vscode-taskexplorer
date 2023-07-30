@@ -9,18 +9,18 @@ const webpack = require("webpack");
 const { getEntriesRegex, isString } = require("../utils/utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
- * @param {WebpackEnvironment} env
+ * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {webpack.BannerPlugin | undefined}
  */
 const banner = (env, wpConfig) =>
 {
     let plugin;
-	if (env.app.plugins.banner && wpConfig.mode === "production")
+	if (env.app.plugins.banner !== false && wpConfig.mode === "production")
 	{
 		const entriesRgx = getEntriesRegex(wpConfig, true, true),
 			  author = isString(env.app.pkgJson.author) ? env.app.pkgJson.author :

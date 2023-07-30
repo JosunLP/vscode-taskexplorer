@@ -7,7 +7,7 @@
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WebpackEnvironment} WebpackEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 const path = require("path");
 const JSON5 = require("json5");
@@ -18,7 +18,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 /**
  * @function
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const rules = (env, wpConfig) =>
@@ -110,71 +110,68 @@ const rules = (env, wpConfig) =>
 	else // extension - node or browser
 	{
 		const configFile = env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json";
-
-		if (env.buildMode === "release")
-		{
-			wpConfig.module.rules.push(...[{
-				test: /\.ts$/,
-				include: path.join(env.paths.build, "src"),
-				loader: "string-replace-loader",
-				options: {
-					multiple: [
-					{
-						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*\}\);/g,
-						replace: (/** @type {string} */r) => {
-							return "=> {}\r\n" + r.substring(r.slice(0, r.length - 3).lastIndexOf(")") + 1);
-						}
-					},
-					{
-						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2|info|values?|method[A-Z][a-z]+)\s*\([^]*?\),/g,
-						replace: "=> {},"
-					},
-					{
-						search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\) *;/g,
-						replace: "=> {};"
-					},
-					{
-						search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*;\s*?(?:\r\n|$)/g,
-						replace: "\r\n"
-					},
-					{
-						search: /this\.wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
-						replace: "this.wrapper.emptyFn,"
-					},
-					{
-						search: /wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
-						replace: "wrapper.emptyFn,"
-					},
-					{
-						search: /w\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
-						replace: "w.emptyFn,"
-					},
-					{
-						search: /this\.wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
-						replace: "this.wrapper.emptyFn]"
-					},
-					{
-						search: /wrapper\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
-						replace: "wrapper.emptyFn]"
-					},
-					{
-						search: /w\.log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
-						replace: "w.emptyFn]"
-					}]
-				}
-			},
-			{
-				test: /wrapper\.ts$/,
-				include: path.join(env.paths.build, "src", "lib"),
-				loader: "string-replace-loader",
-				options: {
-					search: /^log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
-					replace: "() => {}]"
-				}
-			}]);
-		}
-
 		wpConfig.module.rules.push({
+			test: /\.ts$/,
+			// test: (filename, entry) => { console.log(entry); return (/\.ts$/).test(filename) && entry === "taskexplorer"; },
+			issuerLayer: "release",
+			include: path.join(env.paths.build, "src"),
+			loader: "string-replace-loader",
+			options: {
+				multiple: [
+				{
+					search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*\}\);/g,
+					replace: (/** @type {string} */r) => {
+						return "=> {}\r\n" + r.substring(r.slice(0, r.length - 3).lastIndexOf(")") + 1);
+					}
+				},
+				{
+					search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2|info|values?|method[A-Z][a-z]+)\s*\([^]*?\),/g,
+					replace: "=> {},"
+				},
+				{
+					search: /=>\s*(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\) *;/g,
+					replace: "=> {};"
+				},
+				{
+					search: /(?:this\.wrapper|this|wrapper|w)\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\s*\([^]*?\)\s*;\s*?(?:\r\n|$)/g,
+					replace: "\r\n"
+				},
+				{
+					search: /this\.wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
+					replace: "this.wrapper.emptyFn,"
+				},
+				{
+					search: /wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
+					replace: "wrapper.emptyFn,"
+				},
+				{
+					search: /w\.log\.(?:write2?|info|values?|method[A-Z][a-z]+),/g,
+					replace: "w.emptyFn,"
+				},
+				{
+					search: /this\.wrapper\.log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
+					replace: "this.wrapper.emptyFn]"
+				},
+				{
+					search: /wrapper\._?log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
+					replace: "wrapper.emptyFn]"
+				},
+				{
+					search: /w\.log\.(?:write2?|info|values?|method[A-Z][a-z]+)\]/g,
+					replace: "w.emptyFn]"
+				}]
+			}
+		},
+		{
+			test: /wrapper\.ts$/,
+			include: path.join(env.paths.build, "src", "lib"),
+			loader: "string-replace-loader",
+			options: {
+				search: /^log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+				replace: "() => {}]"
+			}
+		},
+		{
 			test: /\.ts$/,
 			include: path.join(env.paths.build, "src"),
 			exclude: [
@@ -206,7 +203,7 @@ const rules = (env, wpConfig) =>
 
 
 /**
- * @param {WebpackEnvironment} env Webpack build environment
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {string} tsConfigFile
  * @returns {string}
  */
