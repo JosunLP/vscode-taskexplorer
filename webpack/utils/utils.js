@@ -429,6 +429,7 @@ const tapStatsPrinter = (infoProp, assetPluginName, compilation) =>
 
 
 module.exports = {
-    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString, printLineSep, getEntriesRegex,
-    initGlobalEnvObject, merge, mergeIf, pick, pickBy, pickNot, printBanner, readConfigFiles, spmBanner, tapStatsPrinter
+    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString,
+    printLineSep, getEntriesRegex, initGlobalEnvObject, merge, mergeIf, pick, pickBy,
+    pickNot, printBanner, readConfigFiles, tapStatsPrinter
 };

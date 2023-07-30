@@ -6,9 +6,9 @@
  */
 
 const {
-	analyze, banner, build, clean, compilation, copy, customize, define, environment, finalize,
-	hash, instrument, loghooks, ignore,optimization, prehash, progress, sourcemaps, tscheck,
-	upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps, scm
+	analyze, banner, build, clean, compile, copy, customize, environment, finalize, hash,
+	instrument, loghooks, ignore,optimization, prehash, progress, runtimevars, sourcemaps,
+	tscheck, upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps, scm
 } = require("../plugin");
 
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
@@ -34,8 +34,8 @@ const plugins = (env, wpConfig) =>
 		prehash(env, wpConfig),                  // compiler.hooks.initialize
 		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done
 		build(env, wpConfig),                    // compiler.hooks.beforeCompile
-		compilation(env, wpConfig),              // compiler.hooks.compilation - e.g. add istanbul ignores to node-requires
-		define(env, wpConfig),                   // compiler.hooks.compilation
+		compile(env, wpConfig),                  // compiler.hooks.compilation - e.g. add istanbul ignores to node-requires
+		runtimevars(env, wpConfig),              // compiler.hooks.compilation
 		instrument(env, wpConfig),               // ? - TODO -?
 		ignore(env, wpConfig),                   // compiler.hooks.normalModuleFactory
 		...tscheck(env, wpConfig),               // compiler.hooks.afterEnvironment, hooks.afterCompile

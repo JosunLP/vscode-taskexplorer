@@ -3,15 +3,13 @@
 import { join } from "path";
 import { Log } from "../../utils/log";
 import { TeWrapper } from "../../wrapper";
+import { __WPBUILD__ } from ":types";
 import { executeCommand, registerCommand } from "../../command/command";
 import { window, ConfigurationChangeEvent, Disposable, ExtensionMode } from "vscode";
 import {
     Commands, ConfigKeys, VsCodeCommands, ILog, LogLevel, ILogConfig, ILogControl, ILogPackageJson,
     ILogOutputChannel, CallbackOptions, LogHttpGetFn
 } from "../../../interface";
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-declare const __WPBUILD__: any;
 
 /**
  * @class TeLog
@@ -54,12 +52,10 @@ export class TeLog extends Log implements ILog, Disposable
             logDirectory: wrapper.context.logUri.fsPath,
             modulePath: join(wrapper.context.extensionUri.fsPath, pkgJson.main),
             moduleHash: {
-                "taskexplorer": "__WPBUILD__.contenthash.taskexplorer",
-                "taskexplorer.debug": "__WPBUILD__.contenthash.taskexplorer.debug",
-                "runtime": "__WPBUILD__.contenthash.runtime",
-                "runtime.debug": "__WPBUILD__.contenthash.runtime.debug",
-                "vendor": "__WPBUILD__.contenthash.vendor",
-                "vendor.debug": "__WPBUILD__.contenthash.vendor.debug"
+                "taskexplorer": __WPBUILD__.contentHash.taskexplorer,
+                "taskexplorer.debug": __WPBUILD__.contentHash["taskexplorer.debug"],
+                "runtime": __WPBUILD__.contentHash.runtime,
+                "vendor": __WPBUILD__.contentHash.vendor
             },
             outputChannel: {
                 clear: oChannel.clear,

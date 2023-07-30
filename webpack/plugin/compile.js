@@ -22,7 +22,7 @@ const { getEntriesRegex, tapStatsPrinter } = require("../utils/utils");
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
-const compilation = (env, wpConfig) =>
+const compile = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
@@ -80,4 +80,4 @@ const istanbulTags = (compiler, compilation, env, wpConfig) =>
 };
 
 
-module.exports = compilation;
+module.exports = compile;

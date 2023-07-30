@@ -2,12 +2,13 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const { globalEnv } = require("./webpack/utils/global");
-const { write, figures } = require("./webpack/utils/console");
-const { merge, printBanner, readConfigFiles } = require("./webpack/utils/utils");
+const {
+	environment, figures, globalEnv, merge, printBanner, readConfigFiles, write
+} = require("./webpack/utils");
+
 const {
 	context, devtool, entry, experiments, externals, ignorewarnings, minification, mode, name,
-	plugins, optimization, output, resolve, rules, stats, target, watch, environment, getMode
+	plugins, optimization, output, resolve, rules, stats, target, watch, getMode
 } = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types").WpBuildApp} WpBuildApp */

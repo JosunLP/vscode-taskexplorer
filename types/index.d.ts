@@ -1,4 +1,6 @@
 
+import { WpBuildRuntimeVariables, __WPBUILD__ } from "../webpack/types";
+
 export * from "./dist/interface";
 export * from "./dist/lib/utils/log";
 export * from "./dist/lib/wrapper";
@@ -11,3 +13,5 @@ export * from "./dist/lib/utils/promiseUtils";
 export * from "./dist/tree/node/file";
 export * from "./dist/tree/node/folder";
 export * from "./dist/tree/node/item";
+
+export { WpBuildRuntimeVariables, __WPBUILD__ };

@@ -24,13 +24,13 @@ const { getEntriesRegex, tapStatsPrinter, isString, initGlobalEnvObject } = requ
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | webpack.DefinePlugin | undefined}
  */
-const define = (env, wpConfig) =>
+const runtimevars = (env, wpConfig) =>
 {
     /** @type {WebpackPluginInstance | webpack.DefinePlugin | undefined} */
     let plugin;
     if (env.app.plugins.define && env.build === "extension")
     {
-        initGlobalEnvObject("defines");
+        initGlobalEnvObject("runtimevars");
         // plugin = new webpack.DefinePlugin({
         //     `__WPBUILD__.contenthash.${chunkName}`: JSON.stringify(true)
         // });
@@ -65,14 +65,14 @@ const preprocess = (compiler, compilation, env, wpConfig) =>
           name = `CompileCompilationPlugin${stage}`;
     compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
     {
-        Object.entries(assets).forEach(asset =>
+        Object.entries(assets).forEach((asset) =>
         {
             const fileName = asset[0],
                   info = compilation.getAsset(fileName)?.info;
             if (info && !info.copied && isString(info.contenthash))
             {
  // console.log("preprocess: " + fileName + " - " + info.contenthash);
-                globalEnv.defines[fileName] = info.contenthash;
+                globalEnv.runtimevars[fileName] = info.contenthash;
             }
         });
     });
@@ -92,28 +92,24 @@ const defineVars = (compiler, compilation, env, wpConfig) =>
           name = `CompileCompilationPlugin${stage}`;
     compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
     {
-        const entriesRgx = getEntriesRegex(wpConfig, true, true);
-        // Object.entries(globalEnv.defines).forEach((a) =>
-        Object.entries(assets).filter(a => entriesRgx.test(a[0])).forEach((a) =>
+        // Object.entries(globalEnv.runtimevars).forEach((a) =>
+        Object.entries(assets).filter((a) => getEntriesRegex(wpConfig, true, true).test(a[0])).forEach(([ fileName, source ]) =>
         {
-            const fileName = a[0],
-                  info = compilation.getAsset(fileName)?.info;
+            const info = compilation.getAsset(fileName)?.info;
             if (info) // && !info.copied)
             {
-                const hash = /** @type {string} */(info.contenthash),
-                      { source, map } = a[1].sourceAndMap();
-                let content= source.toString();
-                Object.entries(globalEnv.defines).forEach((define) =>
+                let content= source.source.toString();
+                const hash = /** @type {string} */(info.contenthash);
+                Object.entries(globalEnv.runtimevars).forEach((define) =>
                 {
                     const chunkName = define[0].replace(/\.[a-f0-9]{16,}\.js/, ""),
-                          regex = new RegExp(`"__WPBUILD__.contenthash.${chunkName}" *(,|\r|\n)`, "gm");
-                    content = content.replace(regex, (_v, g) =>`"${hash}"${g}`); // .replace(/""/g, '"');
-// console.log(fileName + " : " + chunkName);
+                          regex = new RegExp(`__WPBUILD__\.contentHash(?:\.|\[")${chunkName}(?:"\])? *(,|\r|\n)`, "gm");
+                    content = content.replace(regex, (_v, g) =>`"${hash}"${g}`);
                 });
                 compilation.updateAsset(
                     fileName,
-                    compiler.options.devtool ?
-                        new compiler.webpack.sources.SourceMapSource(content, fileName, map) :
+                    compiler.options.devtool || env.app.plugins.sourcemaps ?
+                        new compiler.webpack.sources.SourceMapSource(content, fileName, source.map) :
                         new compiler.webpack.sources.RawSource(content),
                     { ...info, definesSet: true }
                 );
@@ -125,4 +121,4 @@ const defineVars = (compiler, compilation, env, wpConfig) =>
 };
 
 
-module.exports = define;
+module.exports = runtimevars;

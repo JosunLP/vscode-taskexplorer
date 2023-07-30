@@ -3,7 +3,6 @@
 const context = require("./context");
 const devtool = require("./devtool");
 const entry = require("./entry");
-const environment = require("./environment");
 const experiments = require("./experiments");
 const externals = require("./externals");
 const ignorewarnings = require("./ignorewarnings");
@@ -23,7 +22,6 @@ module.exports = {
     context,
     devtool,
 	entry,
-    environment,
     experiments,
     externals,
     getMode,

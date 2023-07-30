@@ -4,10 +4,10 @@ const analyze = require("./analyze");
 const banner = require("./banner");
 const build = require("./build");
 const clean = require("./clean");
-const compilation = require("./compilation");
+const compile = require("./compile");
 const copy = require("./copy");
 const customize = require("./customize");
-const define = require("./define");
+const runtimevars = require("./runtimevars");
 const environment = require("./environment");
 const finalize = require("./finalize");
 const { hash, prehash } = require("./hash");
@@ -23,30 +23,7 @@ const upload = require("./upload");
 const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = require("./html");
 
 module.exports = {
-    analyze,
-    banner,
-    build,
-    clean,
-    compilation,
-    copy,
-    cssextract,
-    customize,
-    define,
-    environment,
-    finalize,
-    hash,
-    htmlcsp,
-    htmlinlinechunks,
-	ignore,
-    imageminimizer,
-    instrument,
-    loghooks,
-    optimization,
-    prehash,
-    progress,
-    scm,
-    sourcemaps,
-    tscheck,
-    upload,
-    webviewapps
+    analyze, banner, build, clean, compile, copy, cssextract, customize, environment,
+    finalize, hash, htmlcsp, htmlinlinechunks,ignore, imageminimizer, instrument, loghooks,
+    optimization, prehash, progress, runtimevars, scm, sourcemaps, tscheck, upload, webviewapps
 };

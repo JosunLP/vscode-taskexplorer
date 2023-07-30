@@ -60,7 +60,7 @@ const copy = (apps, env, wpConfig) =>
 				plugins.push(new CopyPlugin({ patterns }));
 			}
 		}
-		else if (env.build === "extension" || env.build === "browser")
+		else if (env.isExtension)
 		{
 			//
 			// Make a copy of the main module when it has been compiled, without the content hash
@@ -91,43 +91,45 @@ const copy = (apps, env, wpConfig) =>
 						psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, infoPath));
 					}
 				}
-				else {
+				else /* env.app.publicInfoProject === true */ {
 					psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, "..", `${env.app.name}-info`));
 				}
-				plugins.push(new CopyPlugin(
-				{
-					patterns: [
+				plugins.push(
+					new CopyPlugin(
 					{
-						from: posix.join(psxBasePath, "res", "img", "**"),
-						to: posix.join(psxDirInfoProj, "res"),
-						context: psxBaseCtxPath
-					},
-					{
-						from: posix.join(psxBasePath, "res", "readme", "*.png"),
-						to: posix.join(psxDirInfoProj, "res"),
-						context: psxBaseCtxPath
-					},
-					{
-						from: posix.join(psxBasePath, "doc", ".todo"),
-						to: posix.join(psxDirInfoProj, "doc"),
-						context: psxBaseCtxPath
-					},
-					{
-						from: posix.join(psxBasePath, "res", "walkthrough", "welcome", "*.md"),
-						to: posix.join(psxDirInfoProj, "doc"),
-						context: psxBaseCtxPath
-					},
-					{
-						from: posix.join(psxBasePath, "*.md"),
-						to: posix.join(psxDirInfoProj),
-						context: psxBaseCtxPath
-					},
-					{
-						from: posix.join(psxBasePath, "LICENSE*"),
-						to: posix.join(psxDirInfoProj),
-						context: psxBaseCtxPath
-					}]
-				}));
+						patterns: [
+						{
+							from: posix.join(psxBasePath, "res", "img", "**"),
+							to: posix.join(psxDirInfoProj, "res"),
+							context: psxBaseCtxPath
+						},
+						{
+							from: posix.join(psxBasePath, "res", "readme", "*.png"),
+							to: posix.join(psxDirInfoProj, "res"),
+							context: psxBaseCtxPath
+						},
+						{
+							from: posix.join(psxBasePath, "doc", ".todo"),
+							to: posix.join(psxDirInfoProj, "doc"),
+							context: psxBaseCtxPath
+						},
+						{
+							from: posix.join(psxBasePath, "res", "walkthrough", "welcome", "*.md"),
+							to: posix.join(psxDirInfoProj, "doc"),
+							context: psxBaseCtxPath
+						},
+						{
+							from: posix.join(psxBasePath, "*.md"),
+							to: posix.join(psxDirInfoProj),
+							context: psxBaseCtxPath
+						},
+						{
+							from: posix.join(psxBasePath, "LICENSE*"),
+							to: posix.join(psxDirInfoProj),
+							context: psxBaseCtxPath
+						}]
+					})
+				);
 			}
 		}
 	}
@@ -150,15 +152,14 @@ const dupMainEntryFilesNoHash = (compiler, compilation, env, wpConfig) =>
     compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
     {
         const entriesRgx = getEntriesRegex(wpConfig);
-        Object.entries(assets).filter(a => entriesRgx.test(a[0])).forEach(a =>
+        Object.entries(assets).filter(a => entriesRgx.test(a[0])).forEach(([ fileName, source ]) =>
         {
-            const fileName = a[0],
-                  content= a[1].source.toString(),
+            const content= source.source.toString(),
                   info = compilation.getAsset(fileName)?.info || {},
                   cpFileName = fileName.replace(/\.[a-z0-9]{16,}/, "");
             compilation.emitAsset(
                 cpFileName,
-                new compiler.webpack.sources.SourceMapSource(content, cpFileName, a[1].map),
+                new compiler.webpack.sources.SourceMapSource(content, cpFileName, source.map),
                 { ...info, copied: true , immutable: false }
             );
         });

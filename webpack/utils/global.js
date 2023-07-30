@@ -18,6 +18,7 @@ if (!existsSync(cacheDir)) { mkdirSync(cacheDir, { recursive: true }); }
 const globalCacheFilePath = join(cacheDir, "global.json");
 if (!existsSync(globalCacheFilePath)) { writeFileSync(globalCacheFilePath, "{}"); }
 
+
 /** @type {WpBuildGlobalEnvironment} */
 const globalEnv = {
     buildCount: 0,

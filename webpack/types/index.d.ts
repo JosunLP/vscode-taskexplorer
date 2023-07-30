@@ -15,6 +15,14 @@ declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "ver
 
 declare type WpBuildModule = "browser" | "common" | "extension" | "tests" | "webview";
 
+declare interface IWpBuildRuntimeVariables
+{
+    contentHash: Record<string, string>
+}
+type WpBuildRuntimeVariables = Required<IWpBuildRuntimeVariables>;
+
+declare const __WPBUILD__: WpBuildRuntimeVariables;
+
 
 declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
 {
@@ -172,5 +180,7 @@ export {
     WpBuildPaths,
     WpBuildGlobalEnvironment,
     WpBuildHashState,
-    WpBuildPackageJson
+    WpBuildPackageJson,
+    WpBuildRuntimeVariables,
+    __WPBUILD__
 };
