@@ -122,7 +122,7 @@ const getDefaultWpBuildEnv = (app, argv) =>
 		isTests: false,
 		paths: /** @type {WpBuildPaths} */({}),
 		preRelease: true,
-		state: { hash: { current: {}, next: {} } },
+		state: { hash: { current: {}, next: {}, previous: {} } },
 		target: /** @type {WebpackTarget} */("node"),
 		verbosity: undefined
 	};

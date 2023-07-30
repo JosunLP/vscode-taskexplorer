@@ -118,8 +118,9 @@ type WpBuildPaths = Required<IWpBuildPaths> & Record<string, any>;
 
 declare interface IWpBuildHashState
 {
-    current: Record<string, string>;  // Content hash from previous output chunk
+    current: Record<string, string>;   // Content hash from last output chunks
     next: Record<string, string>;      // Content hash for new output chunk
+    previous: Record<string, string>;  // Content hash from previous build's output chunks (prior to `current`)
 }
 
 type WpBuildHashState = Required<IWpBuildHashState>;

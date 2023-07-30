@@ -71,12 +71,26 @@ const logAssetInfo = (hashInfo, wpConfig, rotated) =>
 {
     const // hashLength = /** @type {Number} */(wpConfig.output?.hashDigestLength),
           labelLength = 18; //  + hashLength;
-    // write(" ");
-   //  write(withColor("asset state info for " + wpConfig.name, colors.white), figures.color.start);
+    writeInfo("   previous:");
+    if (!isObjectEmpty(hashInfo.current))
+    {
+        Object.keys(hashInfo.previous).forEach(
+            (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.current[k], colors.blue))
+        );
+    }
+    else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
+        writeInfo("      there are no previous hashes stoerd");
+    }
     writeInfo("   current:");
-    Object.keys(hashInfo.current).forEach(
-        (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.current[k], colors.blue))
-    );
+    if (!isObjectEmpty(hashInfo.current))
+    {
+        Object.keys(hashInfo.current).forEach(
+            (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.current[k], colors.blue))
+        );
+    }
+    else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
+        writeInfo("      values cleared and moved to 'previous'");
+    }
     writeInfo("   next:");
     if (!isObjectEmpty(hashInfo.next))
     {
@@ -128,7 +142,7 @@ const readAssetStates = (env, wpConfig) =>
     {
         const hashJson = readFileSync(env.paths.files.hash, "utf8");
         apply(env.state.hash, JSON.parse(hashJson));
-        env.state.hash.current = {};
+        apply(env.state.hash.previous, { ...env.state.hash.current });
         apply(env.state.hash.current, { ...env.state.hash.next });
         env.state.hash.next = {};
         logAssetInfo(env.state.hash, wpConfig, true);
