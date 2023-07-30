@@ -22,14 +22,12 @@ const { writeInfo, figures } = require("../utils/console");
 
 /**
  * @function environment
- * @param {WpBuildModule} build
  * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const environment = (build, env, wpConfig) =>
+const environment = (env, wpConfig) =>
 {
 	merge(env, {
-		build,
 		paths: { build: resolve(__dirname, "..", "..") },
 		state: { hash: { current: {}, next: {} } }
 	});
@@ -65,6 +63,7 @@ const setEnvironment = (env, wpConfig) =>
 	}
 	apply(env, {
 		isTests: env.environment.startsWith("test"),
+		isWeb: env.target.startsWith("web"),
 		isExtension: env.build === "extension" || env.build === "browser"
 	});
 };

@@ -16,16 +16,17 @@
  */
 const target = (env, wpConfig) =>
 {
-	if (env.build === "webview") {
-		wpConfig.target = "webworker";
+	if (env.build === "webview")
+	{
+		wpConfig.target = env.target = "webworker";
 	}
-	else if (env.build === "browser") {
-		wpConfig.target = "web";
+	else if (env.build === "browser")
+	{
+		wpConfig.target = env.target = "web";
 	}
 	else {
-		wpConfig.target = "node";
+		wpConfig.target = env.target = "node";
 	}
-	env.target = /** @type {WebpackTarget} */(wpConfig.target);
 };
 
 

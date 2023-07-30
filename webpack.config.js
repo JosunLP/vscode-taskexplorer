@@ -34,43 +34,39 @@ module.exports = (env, argv) =>
 	const app = readConfigFiles(),
 		  mode = getMode(env, argv),
 		  wpBuildEnv = merge(getDefaultWpBuildEnv(app, argv), env);
-
 	printBanner(app, mode, env);
-
 	if (wpBuildEnv.build)
 	{
-		return getBuildConfig(wpBuildEnv.build, wpBuildEnv, argv);
+		return getBuildConfig(wpBuildEnv, argv);
 	}
 	else if (wpBuildEnv.environment === "test")
 	{
 		return [
-			getBuildConfig("extension", { ...wpBuildEnv }, argv),
-			getBuildConfig("webview", { ...wpBuildEnv, environment: "dev" }, argv)
+			getBuildConfig({ ...wpBuildEnv, build: "extension" }, argv),
+			getBuildConfig({ ...wpBuildEnv, build: "webview", environment: "dev" }, argv)
 		];
 	}
 	else if (wpBuildEnv.environment === "testprod")
 	{
 		return [
-			getBuildConfig("extension", { ...wpBuildEnv }, argv),
-			getBuildConfig("webview", { ...wpBuildEnv, environment: "prod" }, argv)
+			getBuildConfig({ ...wpBuildEnv, build: "extension" }, argv),
+			getBuildConfig({ ...wpBuildEnv, build: "webview", environment: "prod" }, argv)
 		];
 	}
-
 	return [
-		getBuildConfig("extension", { ...wpBuildEnv }, argv),
-		getBuildConfig("webview", { ...wpBuildEnv }, argv)
+		getBuildConfig({ ...wpBuildEnv, build: "extension" }, argv),
+		getBuildConfig({ ...wpBuildEnv, build: "webview" }, argv)
 	];
 };
 
 
 /**
  * @function getBuildConfig
- * @param {WpBuildModule} build
  * @param {Partial<WpBuildEnvironment>} env Webpack build environment
  * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @returns {WebpackConfig}
  */
-const getBuildConfig = (build, env, argv) =>
+const getBuildConfig = (env, argv) =>
 {
 	const wpConfig = /** @type {WebpackConfig} */({}),
 		  lEnv = /** @type {WpBuildEnvironment} */(merge({}, env));
@@ -78,10 +74,10 @@ const getBuildConfig = (build, env, argv) =>
 	//
 	// Calling all exports.()...
 	//
-	environment(build, lEnv, wpConfig); // Base path / Build path
-	mode(lEnv, argv, wpConfig);     // Mode i.e. "production", "development", "none"
-	name(build, lEnv, wpConfig);    // Build name / label
 	target(lEnv, wpConfig);         // Target i.e. "node", "webworker", "tests"
+	environment(lEnv, wpConfig);    // Base path / Build path
+	mode(lEnv, argv, wpConfig);     // Mode i.e. "production", "development", "none"
+	name(lEnv, wpConfig);           // Build name / label
 	context(lEnv, wpConfig);        // Context for build
 	experiments(lEnv, wpConfig);    // Set any experimental flags that will be used
 	entry(lEnv, wpConfig);          // Entry points for built output

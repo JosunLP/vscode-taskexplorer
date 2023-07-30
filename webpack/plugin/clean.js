@@ -37,7 +37,7 @@ const clean = (env, wpConfig) =>
 				]
 			});
 		}
-		else if (env.build === "extension" || env.build === "browser")
+		else if (env.isExtension)
 		{
 			plugin = new CleanWebpackPlugin(
 			{

@@ -16,10 +16,7 @@
  */
 const experiments = (env, wpConfig) =>
 {
-	if (env.build === "extension" || env.build === "browser")
-	{
-		wpConfig.experiments = { layers: true };
-	}
+	wpConfig.experiments = { layers: env.isExtension };
 };
 
 

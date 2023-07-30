@@ -17,7 +17,7 @@ const optimization = (env, wpConfig) =>
 {
 	parallelism(env, wpConfig);
 
-	if (env.build === "extension" || env.build === "browser")
+	if (env.isExtension)
 	{
 		wpConfig.optimization =
 		{

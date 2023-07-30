@@ -93,9 +93,9 @@ const defineVars = (compiler, compilation, env, wpConfig) =>
     compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
     {
         // Object.entries(globalEnv.runtimevars).forEach((a) =>
-        Object.entries(assets).filter((a) => getEntriesRegex(wpConfig, true, true).test(a[0])).forEach(([ fileName, sourceInfo ]) =>
+        Object.entries(assets).filter(([ file, _ ]) => getEntriesRegex(wpConfig, true, true).test(file)).forEach(([ file, sourceInfo ]) =>
         {
-            const info = compilation.getAsset(fileName)?.info || {},
+            const info = compilation.getAsset(file)?.info || {},
                   hash = /** @type {string} */(info.contenthash),
                   { source, map } = sourceInfo.sourceAndMap();
             let content= source.toString();
@@ -106,9 +106,9 @@ const defineVars = (compiler, compilation, env, wpConfig) =>
                 content = content.replace(regex, (_v, g) =>`"${hash}"${g}`);
             });
             compilation.updateAsset(
-                fileName,
+                file,
                 map && (compiler.options.devtool || env.app.plugins.sourcemaps) ?
-                    new compiler.webpack.sources.SourceMapSource(content, fileName, map) :
+                    new compiler.webpack.sources.SourceMapSource(content, file, map) :
                     new compiler.webpack.sources.RawSource(content),
                 { ...info, definesSet: true }
             );

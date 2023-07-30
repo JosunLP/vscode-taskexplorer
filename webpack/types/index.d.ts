@@ -36,6 +36,7 @@ declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
     imageOpt: boolean;                    // Perform image optimization
     isExtension: boolean;
     isTests: boolean;
+    isWeb: boolean;
     paths: WpBuildPaths;
     preRelease: boolean;
     state: WebpackBuildState;

@@ -58,17 +58,17 @@ const istanbulTags = (compiler, compilation, env, wpConfig) =>
           name = `CompileCompilationPlugin${stage}`;
     compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
     {
-        Object.entries(assets).filter(a => getEntriesRegex(wpConfig).test(a[0])).forEach(([ fileName, sourceInfo ]) =>
+        Object.entries(assets).filter(([ file, _ ]) => getEntriesRegex(wpConfig).test(file)).forEach(([ file, sourceInfo ]) =>
         {
             const { source, map } = sourceInfo.sourceAndMap(),
                   regex = /\n[ \t]*module\.exports \= require\(/gm,
-                  newContent = source.toString().replace(regex, (v) => "/* istanbul ignore next */" + v),
-                  info = compilation.getAsset(fileName)?.info || {};
+                  content = source.toString().replace(regex, (v) => "/* istanbul ignore next */" + v),
+                  info = compilation.getAsset(file)?.info || {};
             compilation.updateAsset(
-                fileName,
+                file,
                 map && (compiler.options.devtool || env.app.plugins.sourcemaps) ?
-                    new compiler.webpack.sources.SourceMapSource(newContent, fileName, map) :
-                    new compiler.webpack.sources.RawSource(newContent),
+                    new compiler.webpack.sources.SourceMapSource(content, file, map) :
+                    new compiler.webpack.sources.RawSource(content),
                 { ...info, istanbulTagged: true }
             );
         });
