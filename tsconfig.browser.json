@@ -2,16 +2,16 @@
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
 		"rootDir": "src",
-		"outDir": "dist/browser",
+		"outDir": "dist/web",
 		"lib": [
 			"dom", "dom.iterable", "es2020"
 		],
 		"paths": {
-			":env/*": ["src/lib/env/browser/*"],
+			":env/*": ["src/lib/env/web/*"],
 			":types": [ "types" ],
 			"path": ["node_modules/path-browserify"]
 		},
-		"tsBuildInfoFile": "node_modules/.cache/tsconfig.browser.tsbuildinfo"
+		"tsBuildInfoFile": "node_modules/.cache/tsconfig.web.tsbuildinfo"
 	},
     "exclude": [
         ".coverage",

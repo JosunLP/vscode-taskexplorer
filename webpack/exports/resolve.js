@@ -23,7 +23,7 @@ const resolve = (env, wpConfig) =>
 		wpConfig.resolve =
 		{
 			alias: {
-				":env": path.resolve(env.paths.build, "src", "lib", "env", env.build === "browser" ? "browser" : "node"),
+				":env": path.resolve(env.paths.build, "src", "lib", "env", env.target),
 				":types": path.resolve(env.paths.build, "types")
 			},
 			fallback: env.build === "browser" ? { path: require.resolve("path-browserify"), os: require.resolve("os-browserify/browser") } : undefined,
@@ -35,7 +35,7 @@ const resolve = (env, wpConfig) =>
 	{
 		wpConfig.resolve = {
 			alias: {
-				":env": path.resolve(env.paths.build, "src", "lib", "env", "browser"),
+				":env": path.resolve(env.paths.build, "src", "lib", "env", "web"),
 				":types": path.resolve(env.paths.build, "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],

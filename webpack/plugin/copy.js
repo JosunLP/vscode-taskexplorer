@@ -152,14 +152,16 @@ const dupMainEntryFilesNoHash = (compiler, compilation, env, wpConfig) =>
     compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
     {
         const entriesRgx = getEntriesRegex(wpConfig);
-        Object.entries(assets).filter(a => entriesRgx.test(a[0])).forEach(([ fileName, source ]) =>
+        Object.entries(assets).filter(a => entriesRgx.test(a[0])).forEach(([ fileName, sourceInfo ]) =>
         {
-            const content= source.source.toString(),
-                  info = compilation.getAsset(fileName)?.info || {},
-                  cpFileName = fileName.replace(/\.[a-z0-9]{16,}/, "");
+            const { source, map } = sourceInfo.sourceAndMap(),
+				  info = compilation.getAsset(fileName)?.info || {},
+                  ccFileName = fileName.replace(/\.[a-z0-9]{16,}/, "");
             compilation.emitAsset(
-                cpFileName,
-                new compiler.webpack.sources.SourceMapSource(content, cpFileName, source.map),
+                ccFileName,
+				map && (compiler.options.devtool || env.app.plugins.sourcemaps) ?
+                    new compiler.webpack.sources.SourceMapSource(source.toString(), ccFileName, map) :
+                    new compiler.webpack.sources.RawSource(source.toString()),
                 { ...info, copied: true , immutable: false }
             );
         });

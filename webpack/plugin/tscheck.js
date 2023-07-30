@@ -44,7 +44,7 @@ const tscheck = (env, wpConfig) =>
 			tsConfigs.push(
 				[ path.join(env.paths.build, "tsconfig.types.json"), "write-tsbuildinfo" ],
 				[ path.join(env.paths.build, "types", "tsconfig.json"), "write-tsbuildinfo" ],
-				[ path.join(env.paths.build, env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json"), "write-tsbuildinfo" ]
+				[ path.join(env.paths.build, env.build === "browser" ? "tsconfig.web.json" : "tsconfig.json"), "write-tsbuildinfo" ]
 			);
 			// if (env.paths.base !== env.paths.build)
 			// {

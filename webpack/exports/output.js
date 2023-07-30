@@ -66,7 +66,7 @@ const output = (env, wpConfig) =>
 		apply(wpConfig.output,
 		{
 			clean: env.clean === true ? (env.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
-			path: resolve(env.paths.dist, env.build === "browser" ? "browser" : "."),
+			path: resolve(env.paths.dist, env.build === "browser" ? "web" : "."),
 			filename: "[name].[contenthash].js",
 			libraryTarget: "commonjs2"
 		});

@@ -27,7 +27,7 @@
         "script",
         "src/test/**/*",
         "src/webview/app/**/*",
-        "src/lib/env/browser/**/*",
+        "src/lib/env/web/**/*",
         "test-fixture",
         "types"
     ]

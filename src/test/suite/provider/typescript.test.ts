@@ -31,7 +31,7 @@ suite("Typescript Tests", () =>
         rootPath = utils.getWsPath(".");
         dirName = join(rootPath, "tasks_test_ts_");
         fileUri = Uri.file(join(rootPath, "tsconfig.json"));
-        fileUriBrowser = Uri.file(join(rootPath, "tsconfig.browser.json"));
+        fileUriBrowser = Uri.file(join(rootPath, "tsconfig.web.json"));
         fileUriTest = Uri.file(join(rootPath, "tsconfig.test.json"));
         fileUri2 = Uri.file(join(dirName, "tsconfig.json"));
         await fsUtils.createDir(dirName);

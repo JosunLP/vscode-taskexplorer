@@ -11,14 +11,14 @@
 
 /**
  * @function
- * @param {WpBuildModule} buildTarget Build target e.g. `extension`, `webview` etc
+ * @param {WpBuildModule} buildName Build name e.g. `extension`, `webview` etc
  * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const name = (buildTarget, env, wpConfig) =>
+const name = (buildName, env, wpConfig) =>
 {
 	wpConfig.name = `${env.app.name}|${env.app.version}|${env.environment}|` +
-					`${buildTarget}|${wpConfig.mode}`;
+					`${buildName}|${env.target}|${wpConfig.mode}`;
 };
 
 

@@ -93,27 +93,25 @@ const defineVars = (compiler, compilation, env, wpConfig) =>
     compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
     {
         // Object.entries(globalEnv.runtimevars).forEach((a) =>
-        Object.entries(assets).filter((a) => getEntriesRegex(wpConfig, true, true).test(a[0])).forEach(([ fileName, source ]) =>
+        Object.entries(assets).filter((a) => getEntriesRegex(wpConfig, true, true).test(a[0])).forEach(([ fileName, sourceInfo ]) =>
         {
-            const info = compilation.getAsset(fileName)?.info;
-            if (info) // && !info.copied)
+            const info = compilation.getAsset(fileName)?.info || {},
+                  hash = /** @type {string} */(info.contenthash),
+                  { source, map } = sourceInfo.sourceAndMap();
+            let content= source.toString();
+            Object.entries(globalEnv.runtimevars).forEach((define) =>
             {
-                let content= source.source.toString();
-                const hash = /** @type {string} */(info.contenthash);
-                Object.entries(globalEnv.runtimevars).forEach((define) =>
-                {
-                    const chunkName = define[0].replace(/\.[a-f0-9]{16,}\.js/, ""),
-                          regex = new RegExp(`__WPBUILD__\.contentHash(?:\.|\[")${chunkName}(?:"\])? *(,|\r|\n)`, "gm");
-                    content = content.replace(regex, (_v, g) =>`"${hash}"${g}`);
-                });
-                compilation.updateAsset(
-                    fileName,
-                    compiler.options.devtool || env.app.plugins.sourcemaps ?
-                        new compiler.webpack.sources.SourceMapSource(content, fileName, source.map) :
-                        new compiler.webpack.sources.RawSource(content),
-                    { ...info, definesSet: true }
-                );
-            }
+                const chunkName = define[0].replace(/\.[a-f0-9]{16,}\.js/, ""),
+                        regex = new RegExp(`__WPBUILD__\.contentHash(?:\.|\[")${chunkName}(?:"\])? *(,|\r|\n)`, "gm");
+                content = content.replace(regex, (_v, g) =>`"${hash}"${g}`);
+            });
+            compilation.updateAsset(
+                fileName,
+                map && (compiler.options.devtool || env.app.plugins.sourcemaps) ?
+                    new compiler.webpack.sources.SourceMapSource(content, fileName, map) :
+                    new compiler.webpack.sources.RawSource(content),
+                { ...info, definesSet: true }
+            );
         });
         // }
     });

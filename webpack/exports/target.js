@@ -5,6 +5,7 @@
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
@@ -15,12 +16,16 @@
  */
 const target = (env, wpConfig) =>
 {
-	if (env.build === "webview"|| env.build === "browser") {
+	if (env.build === "webview") {
 		wpConfig.target = "webworker";
+	}
+	else if (env.build === "browser") {
+		wpConfig.target = "web";
 	}
 	else {
 		wpConfig.target = "node";
 	}
+	env.target = /** @type {WebpackTarget} */(wpConfig.target);
 };
 
 

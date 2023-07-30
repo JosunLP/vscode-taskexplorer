@@ -109,7 +109,7 @@ const rules = (env, wpConfig) =>
 	}
 	else // extension - node or browser
 	{
-		const configFile = env.build === "browser" ? "tsconfig.browser.json" : "tsconfig.json";
+		const configFile = env.build === "browser" ? "tsconfig.web.json" : "tsconfig.json";
 		wpConfig.module.rules.push({
 			test: /\.ts$/,
 			// test: (filename, entry) => { console.log(entry); return (/\.ts$/).test(filename) && entry === "taskexplorer"; },
