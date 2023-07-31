@@ -53,6 +53,12 @@ class WpBuildBasePlugin
 
     /**
      * @protected
+     * @type {string}
+     */
+    name;
+
+    /**
+     * @protected
      * @type {WpBuildPluginOptions}
      */
     options;
@@ -65,6 +71,7 @@ class WpBuildBasePlugin
      */
 	constructor(options, globalCache)
     {
+        this.name = this.constructor.name;
         this.options = /** @type {WpBuildPluginOptions} */(merge({}, options));
 		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, this.options);
         if (globalCache) {
@@ -113,15 +120,65 @@ class WpBuildBasePlugin
     /**
      * @function
      * @protected
-     * @param {string} name
      * @param {WebpackCompilation} compilation
      */
-    onCompilation(name, compilation)
+    onCompilation(compilation)
     {
         this.compilation = compilation;
-        this.cache = /** @type {WebpackCacheFacade} */(compilation.getCache(name));
-        this.logger = /** @type {WebpackLogger} */(compilation.getLogger(name));
+        this.cache = /** @type {WebpackCacheFacade} */(compilation.getCache(this.name));
+        this.logger = /** @type {WebpackLogger} */(compilation.getLogger(this.name));
     }
+
+
+    // /**
+    //  * @function Called by webpack runtime to apply this plugin
+    //  * @param {string} hook
+    //  * @param {WebpackCompiler} compiler the compiler instance
+    //  * @param {Function} callback
+    //  * @returns {void}
+    //  */
+    // tapCompilation(hook, compiler, callback)
+    // {
+	// 	this.onApply(compiler);
+    //     /** @type {SyncSeriesHook} */compiler.hooks[hook].tap(this.name, async (compilation) =>
+    //     {
+    //         this.onCompilation(compilation);
+    //         const stats = compilation.getStats();
+    //         if (stats.hasErrors()) {
+    //             return;
+    //         }
+    //         const statsJson = stats.toJson(),
+    //               assets = statsJson.assets?.filter(a => a.type === "asset");
+    //         if (assets) {
+    //             callback(assets);
+    //         }
+    //     });
+    // }
+
+
+    // /**
+    //  * @function Called by webpack runtime to apply this plugin
+    //  * @param {string} hook
+    //  * @param {WebpackCompiler} compiler the compiler instance
+    //  * @param {Function} callback
+    //  */
+    // tapCompilationPromise(hook, compiler, callback)
+    // {
+	// 	this.onApply(compiler);
+    //     compiler.hooks[hook].tapPromise(this.name, async (compilation) =>
+    //     {
+    //         this.onCompilation(compilation);
+    //         const stats = compilation.getStats();
+    //         if (stats.hasErrors()) {
+    //             return;
+    //         }
+    //         const statsJson = stats.toJson(),
+    //               assets = statsJson.assets?.filter(a => a.type === "asset");
+    //         if (assets) {
+    //             await callback(assets);
+    //         }
+    //     });
+    // }
 
 
     /**

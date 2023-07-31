@@ -33,9 +33,9 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
     apply(compiler)
     {
 		this.onApply(compiler);
-        compiler.hooks.compilation.tap(this.constructor.name, (compilation) =>
+        compiler.hooks.compilation.tap(this.name, (compilation) =>
         {
-            this.onCompilation(this.constructor.name, compilation);
+            this.onCompilation(compilation);
             this.istanbulTags();
         });
     }
@@ -57,7 +57,7 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
     {
         const compilation = this.compilation,
               stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-              name = `${this.constructor.name}${stage}`;
+              name = `${this.name}${stage}`;
         compilation.hooks.processAssets.tap({ name, stage }, (_assets) =>
         {
             for (const chunk of Array.from(compilation.chunks).filter(c => c.canBeInitial()))

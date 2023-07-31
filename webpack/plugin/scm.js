@@ -35,7 +35,7 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
     apply(compiler)
     {
 		this.onApply(compiler);
-        compiler.hooks.shutdown.tapPromise("ScmShutdownPlugin", this.checkin.bind(this));
+        compiler.hooks.shutdown.tapPromise(this.name, this.checkin.bind(this));
     }
 
 

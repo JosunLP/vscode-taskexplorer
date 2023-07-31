@@ -29,6 +29,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         super(options, "runtimevars");
     }
 
+
     /**
      * @function Called by webpack runtime to apply this plugin
      * @param {WebpackCompiler} compiler the compiler instance
@@ -39,7 +40,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
 		this.onApply(compiler);
         compiler.hooks.compilation.tap(this.constructor.name, (compilation) =>
         {
-            this.onCompilation(this.constructor.name, compilation);
+            this.onCompilation(compilation);
             this.preprocess();
             this.defineVars();
         });
@@ -52,7 +53,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     preprocess()
     {
         const stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_PRE_PROCESS,
-              name = `${this.constructor.name}${stage}`;
+              name = `${this.name}${stage}`;
               this.compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
         {
             Object.entries(assets).forEach(([ file, _ ]) =>
@@ -75,7 +76,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         const compiler = this.compiler,
               compilation = this.compilation,
               stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-              name = `${this.constructor.name}${stage}`;
+              name = `${this.name}${stage}`;
         compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
         {
             Object.entries(assets).filter(([ file, _ ]) => getEntriesRegex(this.options.wpConfig).test(file)).forEach(([ file, sourceInfo ]) =>

@@ -20,7 +20,7 @@ const WpBuildBasePlugin = require("./base");
 const { spawnSync } = require("child_process");
 const { mkdirSync, existsSync } = require("fs");
 const { globalEnv } = require("../utils/global");
-const { copyFile, rm, readdir, rename } = require("fs/promises");
+const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 const { writeInfo, figures, withColor, colors } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -51,14 +51,14 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
     apply(compiler)
     {
 		this.onApply(compiler);
-        compiler.hooks.done.tapPromise("AfterDoneUploadPlugin", async (statsData) =>
+        compiler.hooks.afterEmit.tapPromise(this.name, async (compilation) =>
         {
-            if (statsData.hasErrors()) {
+            const stats = compilation.getStats();
+            if (stats.hasErrors()) {
                 return;
             }
-            const stats = statsData.toJson(),
-                    assets = stats.assets?.filter(a => a.type === "asset");
-            ++globalEnv.upload.callCount;
+            const statsJson = stats.toJson(),
+                  assets = statsJson.assets?.filter(a => a.type === "asset");
             if (assets) {
                 await this.uploadAssets(assets);
             }
@@ -78,107 +78,108 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
         // and perform only one upload when all builds have completed.
         //
         const env = this.options.env,
+              compilation = this.compilation,
               toUploadPath = join(env.paths.temp, env.environment);
 
-        if (globalEnv.upload.callCount === 1)
-        {
-            if (!existsSync(toUploadPath)) { mkdirSync(toUploadPath); }
-            await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
+        if (!existsSync(toUploadPath)) {
+            await mkdir(toUploadPath);
         }
+        await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
-        for (const a of assets.filter(a => !!a.chunkNames && a.chunkNames.length > 0))
+        for (const chunk of Array.from(compilation.chunks).filter(c => c.canBeInitial()))
         {
-            const chunkName = /** @type {string}*/(/** @type {string[]}*/(a.chunkNames)[0]);
-            if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName] && a.info.related)
+            for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
             {
-                await copyFile(join(env.paths.dist, a.name), join(toUploadPath, a.name));
-                if (a.info.related.sourceMap)
+                const asset = compilation.getAsset(file);;
+                if (asset && asset.info.related && chunk.name && env.state.hash.next[chunk.name] !== env.state.hash.current[chunk.name])
                 {
-                    const fileNameSourceMap = a.info.related.sourceMap.toString();
-                    if (env.environment === "prod") {
-                        await rename(join(env.paths.dist, fileNameSourceMap), join(toUploadPath, fileNameSourceMap));
-                    }
-                    else {
-                        await copyFile(join(env.paths.dist, fileNameSourceMap), join(toUploadPath, fileNameSourceMap));
+                    await copyFile(join(env.paths.dist, file), join(toUploadPath, file));
+                    if (asset.info.related.sourceMap)
+                    {
+                        const sourceMapFile = asset.info.related.sourceMap.toString();
+                        if (env.environment === "prod") {
+                            await rename(join(env.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
+                        }
+                        else {
+                            await copyFile(join(env.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
+                        }
                     }
                 }
-                ++globalEnv.upload.readyCount;
-            }
-            else {
-                const fileNameNoHash = a.name.replace(`.${a.info.contenthash}`, "");
-                writeInfo(
-                    `resource '${chunkName}|${fileNameNoHash}' unchanged, skip upload [${a.info.contenthash}]`,
-                    withColor(figures.info, colors.yellow)
-                );
+                else if (asset)
+                {
+                    writeInfo(
+                        `resource ${withColor(`${chunk.name}|${file}`, colors.italic)} ` +
+                            `${withColor(`unchanged, skip upload [${asset.info.contenthash}`, colors.grey)}]`,
+                        withColor(figures.info, colors.yellow)
+                    );
+                }
             }
         }
 
-        if (globalEnv.upload.callCount === 2 && globalEnv.upload.readyCount > 0)
-        {
-            const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
-                  user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
-                  rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
-                  /** @type {import("child_process").SpawnSyncOptions} */
-                  spawnSyncOpts = { cwd: env.paths.build, encoding: "utf8", shell: true },
-                  sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
-                  sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
-                  filesToUpload = await readdir(toUploadPath);
+        const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
+              user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
+              rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
+              /** @type {import("child_process").SpawnSyncOptions} */
+              spawnSyncOpts = { cwd: env.paths.build, encoding: "utf8", shell: true },
+              sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
+              sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
+              filesToUpload = await readdir(toUploadPath);
 
-            if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag) {
-                // compilation.errors.push(new WebpackError("Required environment variables for upload are not set"));
-                // return;
-                throw new WebpackError("Required environment variables for upload are not set");
-            }
+        if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag) {
+            // compilation.errors.push(new WebpackError("Required environment variables for upload are not set"));
+            // return;
+            throw new WebpackError("Required environment variables for upload are not set");
+        }
 
-            if (filesToUpload.length !== globalEnv.upload.readyCount) {
-                writeInfo("stored resource count does not match upload directory file count", figures.colors.warning);
-            }
+        if (filesToUpload.length !== globalEnv.upload.readyCount) {
+            writeInfo("stored resource count does not match upload directory file count", figures.colors.warning);
+        }
 
-            const plinkCmds = [
-                `mkdir ${rBasePath}/${env.app.name}`,
-                `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}`,
-                `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}`,
-                `rm -f ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}/*.*`
-            ];
-            if (env.environment === "prod") { plinkCmds.pop(); }
+        const plinkCmds = [
+            `mkdir ${rBasePath}/${env.app.name}`,
+            `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}`,
+            `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}`,
+            `rm -f ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}/*.*`
+        ];
+        if (env.environment === "prod") { plinkCmds.pop(); }
 
-            const plinkArgs = [
-                "-ssh",       // force use of ssh protocol
-                "-batch",     // disable all interactive prompts
-                sshAuthFlag,  // auth flag
-                sshAuth,      // auth key
-                `${user}@${host}`,
-                plinkCmds.join(";")
-            ];
+        const plinkArgs = [
+            "-ssh",       // force use of ssh protocol
+            "-batch",     // disable all interactive prompts
+            sshAuthFlag,  // auth flag
+            sshAuth,      // auth key
+            `${user}@${host}`,
+            plinkCmds.join(";")
+        ];
 
-            const pscpArgs = [
-                sshAuthFlag,  // auth flag
-                sshAuth,      // auth key
-                "-q",         // quiet, don't show statistics
-                "-r",         // copy directories recursively
-                toUploadPath, // directory containing the files to upload, the "directpory" itself (prod/dev/test) will be
-                `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"` // uploaded, and created if not exists
-            ];
+        const pscpArgs = [
+            sshAuthFlag,  // auth flag
+            sshAuth,      // auth key
+            "-q",         // quiet, don't show statistics
+            "-r",         // copy directories recursively
+            toUploadPath, // directory containing the files to upload, the "directpory" itself (prod/dev/test) will be
+            `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"` // uploaded, and created if not exists
+        ];
 
-            writeInfo(`${figures.color.star } ${withColor(`upload resource files to ${host}`, colors.grey)}`);
-            try {
-                writeInfo(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
-                spawnSync("plink", plinkArgs, spawnSyncOpts);
-                writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
-                spawnSync("pscp", pscpArgs, spawnSyncOpts);
-                filesToUpload.forEach((f) =>
-                    writeInfo(`   ${figures.color.up} ${withColor(basename(f).padEnd(env.app.logPad.plugin.upload.fileList), colors.grey)} ${figures.color.successTag}`)
-                );
-                writeInfo(`${figures.color.star} ${withColor("successfully uploaded resource files", colors.grey)}`);
-            }
-            catch (e) {
-                writeInfo("error uploading resource files:", figures.color.error);
-                filesToUpload.forEach(f => writeInfo(`   ${withColor(figures.up, colors.red)} ${withColor(basename(f), colors.grey)}`, figures.color.error));
-                writeInfo(e.message.trim(), figures.color.error, "   ");
-            }
-            finally {
-                await rm(toUploadPath, { recursive: true, force: true });
-            }
+        writeInfo(`${figures.color.star } ${withColor(`upload resource files to ${host}`, colors.grey)}`);
+        try {
+            writeInfo(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
+            spawnSync("plink", plinkArgs, spawnSyncOpts);
+            writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
+            spawnSync("pscp", pscpArgs, spawnSyncOpts);
+            spawnSync("pscp", pscpArgs, spawnSyncOpts);
+            filesToUpload.forEach((f) =>
+                writeInfo(`   ${figures.color.up} ${withColor(basename(f).padEnd(env.app.logPad.plugin.upload.fileList), colors.grey)} ${figures.color.successTag}`)
+            );
+            writeInfo(`${figures.color.star} ${withColor("successfully uploaded resource files", colors.grey)}`);
+        }
+        catch (e) {
+            writeInfo("error uploading resource files:", figures.color.error);
+            filesToUpload.forEach(f => writeInfo(`   ${withColor(figures.up, colors.red)} ${withColor(basename(f), colors.grey)}`, figures.color.error));
+            writeInfo(e.message.trim(), figures.color.error, "   ");
+        }
+        finally {
+            await rm(toUploadPath, { recursive: true, force: true });
         }
     }
 

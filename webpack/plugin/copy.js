@@ -39,7 +39,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			{
 				const stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
 					  name = `${this.constructor.name}${stage}`;
-				this.onCompilation(this.constructor.name, compilation);
+				this.onCompilation(compilation);
 				compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
 				{
 					this.dupMainEntryFilesNoHash(assets);
