@@ -4,11 +4,14 @@
 declare type WebpackAsset = import("webpack").Asset;
 declare type WebpackAssetInfo = import("webpack").AssetInfo;
 declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
+declare type WebpackCache = import("webpack").Cache;
+declare type WebpackCacheFacade = Omit<import("webpack/lib/CacheFacade"), "_name" | "_cache" | "_hashFunction">;
 declare type WebpackChunk = import("webpack").Chunk;
 declare type WebpackCompilation = import("webpack").Compilation;
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
 declare type WebpackCompiler = import("webpack").Compiler;
 declare type WebpackConfig = Required<import("webpack").Configuration>;
+declare type WebpackLogger = import("webpack/lib/logging/Logger").Logger;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
 declare type WebpackSource = import("webpack").sources.Source;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
@@ -158,11 +161,14 @@ export {
     WebpackAssetEmittedInfo,
     WpBuildModule,
     WebpackBuildState,
+    WebpackCache,
+    WebpackCacheFacade,
     WebpackChunk,
     WebpackCompiler,
     WebpackCompilation,
     WebpackCompilationAssets,
     WebpackConfig,
+    WebpackLogger,
     WebpackMode,
     WebpackPluginInstance,
     WpBuildEnvironment,

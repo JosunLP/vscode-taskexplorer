@@ -9,7 +9,9 @@
 const { merge } = require("../utils");
 const { ModuleFilenameHelpers } = require("webpack");
 
+/** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../types").WebpackCacheFacade} WebpackCacheFacade */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
@@ -21,6 +23,12 @@ class WpBuildBasePlugin
 {
     /**
      * @protected
+     * @type {WebpackCacheFacade}
+     */
+    cache;
+
+    /**
+     * @protected
      * @type {WebpackCompilation}
      */
     compilation;
@@ -30,6 +38,12 @@ class WpBuildBasePlugin
      * @type {WebpackCompiler}
      */
     compiler;
+
+    /**
+     * @protected
+     * @type {WebpackLogger}
+     */
+    logger;
 
     /**
      * @protected
@@ -50,7 +64,7 @@ class WpBuildBasePlugin
 	constructor(options)
     {
         this.options = /** @type {WpBuildPluginOptions} */(merge({}, options));
-		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, this.options);
+		    this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, this.options);
     }
 
     /**
@@ -58,9 +72,20 @@ class WpBuildBasePlugin
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
-    apply(compiler)
+    onApply(compiler)
     {
 		this.compiler = compiler;
+    }
+
+    /**
+     * @param {string} name
+     * @param {WebpackCompilation} compilation
+     */
+    onCompilation(name, compilation)
+    {
+        this.compilation = compilation;
+        this.cache = /** @type {WebpackCacheFacade} */(compilation.getCache(name));
+        this.logger = /** @type {WebpackLogger} */(compilation.getLogger(name));
     }
 
 }

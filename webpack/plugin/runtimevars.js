@@ -37,11 +37,11 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-        compiler.hooks.compilation.tap(this.constructor.name, (compilation) =>
+        const name = this.constructor.name;
+		this.onApply(compiler);
+        compiler.hooks.compilation.tap(name, (compilation) =>
         {
-            this.compilation = compilation;
-            this.cache = compilation.getCache(this.constructor.name);
-            this.logger = compilation.getLogger(this.constructor.name);
+            this.onCompilation(name, compilation);
             this.preprocess(compiler, compilation);
             this.defineVars(compiler, compilation);
         });

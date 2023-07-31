@@ -9,7 +9,7 @@
 const { existsSync } = require("fs");
 const CopyPlugin = require("copy-webpack-plugin");
 const { join, posix, isAbsolute } = require("path");
-const { getEntriesRegex, tapStatsPrinter, isString } = require("../utils/utils");
+const { getEntriesRegex, tapStatsPrinter, isString, apply } = require("../utils/utils");
 const WpBuildBasePlugin = require("./base");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -33,7 +33,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		this.compiler = compiler;
+		this.onApply(compiler);
         compiler.hooks.compilation.tap(
 			this.constructor.name,
 			(compilation) =>
@@ -42,7 +42,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 					  name = `${this.constructor.name}${stage}`;
 				compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
 				{
-					this.compilation = compilation;
+					this.onCompilation(name, compilation);
 					this.dupMainEntryFilesNoHash(assets);
 				});
 				tapStatsPrinter("copied", name, compilation);
@@ -63,15 +63,25 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			const source = sourceInfo.source(),
 				  hashDigestLength = this.compiler.options.output.hashDigestLength ||  this.options.wpConfig.output.hashDigestLength || 20,
 				  ccFileName = file.replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}`), ""),
-				  existingAsset = this.compilation.getAsset(ccFileName);
-			if (!existingAsset)
+				  dstAsset = this.compilation.getAsset(ccFileName),
+				  srcAsset = this.compilation.getAsset(file),
+				  srcAssetInfo = apply({}, srcAsset?.info),
+				  newInfo = { ...srcAssetInfo, copied: true, sourceFilename: file };
+			// let cacheEntry;
+			// this.logger.debug(`getting cache for '${absoluteFilename}'...`);
+			// try {
+			// 	cacheEntry = this.cache.get(`${sourceFilename}|${index}`, null, () => {});
+			// }
+			// catch (/** @type {WebpackError} */e) {
+			// 	this.compilation.errors.push(e);
+			// 	return;
+			// }
+			if (!dstAsset)
 			{
-				const info = this.compilation.getAsset(file)?.info || {},
-					  newInfo = { ...info, copied: true, sourceFilename: file };
 				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
-			else {
-				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source));
+			else if (this.options.force) {
+				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 		});
 	}
@@ -126,7 +136,7 @@ const copy = (apps, env, wpConfig) =>
 			// Make a copy of the main module when it has been compiled, without the content hash
 			// in the filename.
 			//
-			plugins.push(new WpBuildCopyPlugin({ env, wpConfig }));
+			plugins.push(new WpBuildCopyPlugin({ env, wpConfig, force: true }));
 			//
 			// Copy resources to public `info` sub-project during compilation
 			//

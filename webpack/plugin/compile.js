@@ -7,7 +7,7 @@
  */
 
 const WpBuildBasePlugin = require("./base");
-const { tapStatsPrinter, apply, getEntriesRegex } = require("../utils");
+const { tapStatsPrinter, apply } = require("../utils");
 
 /** @typedef {import("../types").WebpackAsset} WebpackAsset */
 /** @typedef {import("../types").WebpackChunk} WebpackChunk */
@@ -32,14 +32,12 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-        this.compiler = compiler;
         const name = this.constructor.name;
+		this.onApply(compiler);
         compiler.hooks.compilation.tap(name, (compilation) =>
         {
-            this.compilation = compilation;
-            this.cache = compilation.getCache(name);
-            this.logger = compilation.getLogger(name);
-            this.istanbulTags(compiler, compilation);
+            this.onCompilation(name, compilation);
+            this.istanbulTags();
         });
     }
 
@@ -55,12 +53,11 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
     /**
      * @function
      * @private
-     * @param {WebpackCompiler} compiler
-     * @param {WebpackCompilation} compilation
      */
-    istanbulTags(compiler, compilation)
+    istanbulTags()
     {
-        const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+        const compilation = this.compilation,
+              stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
               name = `CompileCompilationPlugin${stage}`;
         tapStatsPrinter("istanbulTagged", name, compilation);
         compilation.hooks.processAssets.tap({ name, stage }, (_assets) =>
