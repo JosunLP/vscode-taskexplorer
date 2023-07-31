@@ -7,9 +7,9 @@
  */
 
 const { resolve } = require("path");
+const { globalEnv } = require("./global");
 const gradient = require("gradient-string");
 const { WebpackError } = require("webpack");
-const { globalEnv } = require("../utils/global");
 const { readFileSync, existsSync } = require("fs");
 const { write, writeInfo, withColor, figures, colors } = require("./console");
 
@@ -52,16 +52,6 @@ const apply = (object, config, defaults) =>
  * @returns {any[]}
  */
 const asArray = (v, shallow, allowEmpStr) => (isArray(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
-
-
-/**
- * Break property name into separate spaced words at each camel cased character
- *
- * @private
- * @param {string} prop
- * @returns {string}
- */
-const breakProp = (prop) => prop.replace(/[A-Z]/g, (v) => ` ${v.toLowerCase()}`);
 
 
 /**
@@ -111,21 +101,6 @@ const getEntriesRegex = (wpConfig, dbg, ext, hash) =>
         `(?:\\.debug)${!dbg ? "?" : ""}(?:\\.[a-z0-9]{${wpConfig.output.hashDigestLength || 20}})` +
         `${!hash ? "?" : ""}(?:\\.js|\\.js\\.map)${!ext ? "?" : ""}`
     );
-};
-
-
-/**
- * @function initGlobalEnvObject
- * @param {string} baseProp
- * @param {any} [initialValue]
- * @param {...any} props
- */
-const initGlobalEnvObject = (baseProp, initialValue, ...props) =>
-{
-    if (!globalEnv[baseProp]) {
-        globalEnv[baseProp] = {};
-    }
-    props.filter(p => !globalEnv[baseProp][p]).forEach((p) => { globalEnv[baseProp][p] = initialValue; });
 };
 
 
@@ -413,31 +388,7 @@ const spmBanner = (app, version) =>
 };
 
 
-/**
- * @function statsPrinter
- * @param {string} infoProp
- * @param {string} assetPluginName
- * @param {WebpackCompilation} compilation
- */
-const tapStatsPrinter = (infoProp, assetPluginName, compilation) =>
-{
-    if (compilation.hooks.statsPrinter)
-    {
-        compilation.hooks.statsPrinter.tap(assetPluginName, (stats) =>
-        {
-            stats.hooks.print.for(`asset.info.${infoProp}`).tap(
-                assetPluginName,
-                (istanbulTagged, { green, formatFlag }) => {
-                    return istanbulTagged ? /** @type {Function} */(green)(/** @type {Function} */(formatFlag)(breakProp(infoProp))) : "";
-                }
-            );
-        });
-    }
-};
-
-
 module.exports = {
     apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString,
-    printLineSep, getEntriesRegex, initGlobalEnvObject, merge, mergeIf, pick, pickBy,
-    pickNot, printBanner, readConfigFiles, tapStatsPrinter
+    printLineSep, getEntriesRegex, merge, mergeIf, pick, pickBy, pickNot, printBanner, readConfigFiles
 };

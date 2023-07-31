@@ -20,12 +20,6 @@ const { rename, unlink, readdir } = require("fs/promises");
 class WpBuildLicenseFilePlugin extends WpBuildBasePlugin
 {
     /**
-     * @class WpBuildLicenseFilePlugin
-     * @param {WpBuildPluginOptions} options Plugin options to be applied
-     */
-	constructor(options) { super(options); }
-
-    /**
      * @function Called by webpack runtime to apply this plugin
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}

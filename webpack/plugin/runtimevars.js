@@ -4,7 +4,7 @@
 
 const webpack = require("webpack");
 const WpBuildBasePlugin = require("./base");
-const { globalEnv, getEntriesRegex, tapStatsPrinter, isString, initGlobalEnvObject } = require("../utils");
+const { globalEnv, getEntriesRegex, isString } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -26,8 +26,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
 	constructor(options)
     {
-        super(options);
-        initGlobalEnvObject("runtimevars");
+        super(options, "runtimevars");
     }
 
     /**
@@ -37,31 +36,28 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-        const name = this.constructor.name;
 		this.onApply(compiler);
-        compiler.hooks.compilation.tap(name, (compilation) =>
+        compiler.hooks.compilation.tap(this.constructor.name, (compilation) =>
         {
-            this.onCompilation(name, compilation);
-            this.preprocess(compiler, compilation);
-            this.defineVars(compiler, compilation);
+            this.onCompilation(this.constructor.name, compilation);
+            this.preprocess();
+            this.defineVars();
         });
     }
 
 
     /**
      * @function Collects content hashes from compiled assets
-     * @param {WebpackCompiler} compiler
-     * @param {WebpackCompilation} compilation
      */
-    preprocess(compiler, compilation)
+    preprocess()
     {
-        const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_PRE_PROCESS,
+        const stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_PRE_PROCESS,
               name = `${this.constructor.name}${stage}`;
-        compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
+              this.compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
         {
             Object.entries(assets).forEach(([ file, _ ]) =>
             {
-                const info = compilation.getAsset(file)?.info;
+                const info = this.compilation.getAsset(file)?.info;
                 if (info && !info.copied && isString(info.contenthash))
                 {
                     globalEnv.runtimevars[file] = info.contenthash;
@@ -73,12 +69,12 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
 
     /**
      * @function
-     * @param {WebpackCompiler} compiler
-     * @param {WebpackCompilation} compilation
      */
-    defineVars(compiler, compilation)
+    defineVars()
     {
-        const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+        const compiler = this.compiler,
+              compilation = this.compilation,
+              stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
               name = `${this.constructor.name}${stage}`;
         compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
         {
@@ -104,7 +100,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
                 );
             });
         });
-        tapStatsPrinter("runtimeVars", name, compilation);
+        this.tapStatsPrinter("runtimeVars", name);
     };
 }
 

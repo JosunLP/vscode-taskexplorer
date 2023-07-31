@@ -7,10 +7,10 @@
  */
 
 const { existsSync } = require("fs");
+const WpBuildBasePlugin = require("./base");
 const CopyPlugin = require("copy-webpack-plugin");
 const { join, posix, isAbsolute } = require("path");
-const { getEntriesRegex, tapStatsPrinter, isString, apply } = require("../utils/utils");
-const WpBuildBasePlugin = require("./base");
+const { getEntriesRegex, isString, apply } = require("../utils/utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -25,7 +25,6 @@ const WpBuildBasePlugin = require("./base");
  */
 class WpBuildCopyPlugin extends WpBuildBasePlugin
 {
-
     /**
      * @function Called by webpack runtime to apply this plugin
      * @param {WebpackCompiler} compiler the compiler instance
@@ -40,16 +39,15 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			{
 				const stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
 					  name = `${this.constructor.name}${stage}`;
+				this.onCompilation(this.constructor.name, compilation);
 				compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
 				{
-					this.onCompilation(name, compilation);
 					this.dupMainEntryFilesNoHash(assets);
 				});
-				tapStatsPrinter("copied", name, compilation);
+				this.tapStatsPrinter("copied", name);
 			}
 		);
     }
-
 
 	/**
 	 * @function
@@ -85,7 +83,6 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			}
 		});
 	}
-
 }
 
 
