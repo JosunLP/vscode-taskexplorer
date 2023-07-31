@@ -57,6 +57,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             if (stats.hasErrors()) {
                 return;
             }
+            this.onCompilation(compilation);
             const statsJson = stats.toJson(),
                   assets = statsJson.assets?.filter(a => a.type === "asset");
             if (assets) {
@@ -80,6 +81,11 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
         const env = this.options.env,
               compilation = this.compilation,
               toUploadPath = join(env.paths.temp, env.environment);
+
+        // if (!compilation.chunks) {
+        //     writeInfo("There are no updated assets to upload");
+        //     return;
+        // }
 
         if (!existsSync(toUploadPath)) {
             await mkdir(toUploadPath);
@@ -108,7 +114,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                 else if (asset)
                 {
                     writeInfo(
-                        `resource ${withColor(`${chunk.name}|${file}`, colors.italic)} ` +
+                        `asset ${withColor(`${chunk.name}|${file}`, colors.italic)} ` +
                             `${withColor(`unchanged, skip upload [${asset.info.contenthash}`, colors.grey)}]`,
                         withColor(figures.info, colors.yellow)
                     );
@@ -129,10 +135,6 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             // compilation.errors.push(new WebpackError("Required environment variables for upload are not set"));
             // return;
             throw new WebpackError("Required environment variables for upload are not set");
-        }
-
-        if (filesToUpload.length !== globalEnv.upload.readyCount) {
-            writeInfo("stored resource count does not match upload directory file count", figures.colors.warning);
         }
 
         const plinkCmds = [
