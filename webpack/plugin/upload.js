@@ -14,12 +14,11 @@
  *
  */
 
+const { existsSync } = require("fs");
 const { join, basename } = require("path");
 const { WebpackError } = require("webpack");
 const WpBuildBasePlugin = require("./base");
 const { spawnSync } = require("child_process");
-const { mkdirSync, existsSync } = require("fs");
-const { globalEnv } = require("../utils/global");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 const { writeInfo, figures, withColor, colors } = require("../utils/console");
 
@@ -53,26 +52,19 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
 		this.onApply(compiler);
         compiler.hooks.afterEmit.tapPromise(this.name, async (compilation) =>
         {
-            const stats = compilation.getStats();
-            if (stats.hasErrors()) {
+            if (!this.onCompilation(compilation)) {
                 return;
             }
-            this.onCompilation(compilation);
-            const statsJson = stats.toJson(),
-                  assets = statsJson.assets?.filter(a => a.type === "asset");
-            if (assets) {
-                await this.uploadAssets(assets);
-            }
+            await this.debugSupportFiles();
         });
     }
 
     /**
      * @function
      * @private
-     * @param {WebpackStatsAsset[]} assets
      * @throws {WebpackError}
      */
-    async uploadAssets(assets)
+    async debugSupportFiles()
     {   //
         // `The lBasePath` variable is a temp directory that we will create in the in
         // the OS/env temp dir.  We will move only files that have changed content there,

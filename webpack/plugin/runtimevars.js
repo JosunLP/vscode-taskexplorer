@@ -40,7 +40,9 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
 		this.onApply(compiler);
         compiler.hooks.compilation.tap(this.constructor.name, (compilation) =>
         {
-            this.onCompilation(compilation);
+            if (!this.onCompilation(compilation)) {
+                return;
+            }
             this.preprocess();
             this.defineVars();
         });

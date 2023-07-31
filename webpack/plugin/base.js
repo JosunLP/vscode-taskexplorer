@@ -121,12 +121,17 @@ class WpBuildBasePlugin
      * @function
      * @protected
      * @param {WebpackCompilation} compilation
+     * @returns {boolean}
      */
     onCompilation(compilation)
     {
+        if (compilation.getStats().hasErrors()) {
+            return false;
+        }
         this.compilation = compilation;
         this.cache = /** @type {WebpackCacheFacade} */(compilation.getCache(this.name));
         this.logger = /** @type {WebpackLogger} */(compilation.getLogger(this.name));
+        return true;
     }
 
 

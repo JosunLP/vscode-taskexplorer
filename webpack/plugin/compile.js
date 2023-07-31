@@ -35,7 +35,9 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
 		this.onApply(compiler);
         compiler.hooks.compilation.tap(this.name, (compilation) =>
         {
-            this.onCompilation(compilation);
+            if (!this.onCompilation(compilation)) {
+                return;
+            }
             this.istanbulTags();
         });
     }
