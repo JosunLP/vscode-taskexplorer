@@ -3,7 +3,6 @@
 // @ts-check
 
 const { globalEnv } = require("../utils/global");
-const { initGlobalEnvObject } = require("../utils/utils");
 const { writeInfo, withColor, figures, colors, withColorLength } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -69,7 +68,7 @@ const hookSteps = (env, wpConfig) =>
 	const plugins = [];
 	if (env.app.plugins.loghooks !== false)
 	{
-		initGlobalEnvObject("hooksLog");
+		globalEnv.hooksLog = {};
 		addCompilerHook("environment", plugins, env, wpConfig);
 		addCompilerHook("afterEnvironment", plugins, env, wpConfig);
 		addCompilerHook("entryOption", plugins, env, wpConfig);
