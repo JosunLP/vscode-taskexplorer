@@ -5,7 +5,7 @@
         "declarationMap": false,
 		"emitDeclarationOnly": true,
 		"isolatedModules": false,
-		"outDir": "dist",
+		"outDir": "./dist",
         "paths": {
 			":env/*": [ "src/lib/env/node/*" ],
 			":types": [ "types" ]
@@ -31,6 +31,7 @@
         "../src/webview/**/*",
         "../src/lib/env/browser/*",
         "../test-fixture",
-        "../types"
+        "../types",
+        "**/dist/**/*"
     ]
 }

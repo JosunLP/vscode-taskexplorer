@@ -7,7 +7,7 @@
 
 const {
 	analyze, banner, build, clean, compile, copy, customize, environment, finalize, hash,
-	instrument, loghooks, ignore,optimization, prehash, progress, runtimevars, sourcemaps,
+	instrument, loghooks, ignore,optimization, progress, runtimevars, sourcemaps,
 	tscheck, upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps, scm
 } = require("../plugin");
 
@@ -31,7 +31,7 @@ const plugins = (env, wpConfig) =>
 		customize(env, wpConfig),                // compiler.hooks.afterEnvironment - custom mods to installed plugins
 		progress(env, wpConfig),
 		...loghooks(env, wpConfig),              // logs all compiler.hooks.* when they run
-		prehash(env, wpConfig),                  // compiler.hooks.initialize
+		hash(env, wpConfig),                     // compiler.hooks.initialize, compiler.hooks.done
 		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done
 		build(env, wpConfig),                    // compiler.hooks.beforeCompile
 		compile(env, wpConfig),                  // compiler.hooks.compilation - e.g. add istanbul ignores to node-requires
@@ -68,7 +68,6 @@ const plugins = (env, wpConfig) =>
 
 	wpConfig.plugins.push(                       // compiler.hooks.compilation -> compilation.hooks.optimizeChunks, ...
 		...optimization(env, wpConfig),          // ^compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
-		hash(env, wpConfig),                     // compiler.hooks.done
 		upload(env, wpConfig),                   // compiler.hooks.afterDone
 		finalize(env, wpConfig),                 // compiler.hooks.shutdown
 		scm(env, wpConfig)                       // compiler.hooks.shutdown

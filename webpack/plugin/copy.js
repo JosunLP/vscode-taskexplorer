@@ -19,6 +19,7 @@ const { getEntriesRegex, tapStatsPrinter, isString } = require("../utils/utils")
 
 
 /**
+ * @function
  * @param {string[]} apps
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
@@ -28,8 +29,6 @@ const copy = (apps, env, wpConfig) =>
 {
 	/** @type {(CopyPlugin | WebpackPluginInstance)[]} */
 	const plugins = [],
-		  /** @type {CopyPlugin.Pattern[]} */
-		  patterns = [],
 		  psxBuildPath = env.paths.build.replace(/\\/g, "/"),
 		  psxBasePath = env.paths.base.replace(/\\/g, "/"),
 		  psxBaseCtxPath = posix.join(psxBasePath, "res");
@@ -139,7 +138,7 @@ const copy = (apps, env, wpConfig) =>
 
 
 /**
- * @function dupMainEntryFilesNoHash
+ * @function
  * @param {WebpackCompiler} compiler
  * @param {WebpackCompilation} compilation
  * @param {WpBuildEnvironment} env
@@ -152,16 +151,14 @@ const dupMainEntryFilesNoHash = (compiler, compilation, env, wpConfig) =>
     compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
     {
         const entriesRgx = getEntriesRegex(wpConfig);
-        Object.entries(assets).filter(a => entriesRgx.test(a[0])).forEach(([ fileName, sourceInfo ]) =>
+        Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
         {
             const { source, map } = sourceInfo.sourceAndMap(),
-				  info = compilation.getAsset(fileName)?.info || {},
-                  ccFileName = fileName.replace(/\.[a-z0-9]{16,}/, "");
+				  info = compilation.getAsset(file)?.info || {},
+                  ccFileName = file.replace(/\.[a-z0-9]{16,}/, "");
             compilation.emitAsset(
                 ccFileName,
-				map && (compiler.options.devtool || env.app.plugins.sourcemaps) ?
-                    new compiler.webpack.sources.SourceMapSource(source.toString(), ccFileName, map) :
-                    new compiler.webpack.sources.RawSource(source.toString()),
+				new compiler.webpack.sources.RawSource(source),
                 { ...info, copied: true , immutable: false }
             );
         });

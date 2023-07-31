@@ -161,6 +161,15 @@ declare interface IWpBuildWebpackArgs
 type WpBuildWebpackArgs = Readonly<Partial<IWpBuildWebpackArgs>>;
 
 
+interface IWpBuildPluginOptions
+{
+    env: WpBuildEnvironment,
+    wpConfig: WebpackConfig
+}
+
+type WpBuildPluginOptions = Readonly<Required<IWpBuildPluginOptions>> & Record<string, any>;
+
+
 export {
     WebpackAssetEmittedInfo,
     WpBuildModule,
@@ -182,6 +191,7 @@ export {
     WpBuildGlobalEnvironment,
     WpBuildHashState,
     WpBuildPackageJson,
+    WpBuildPluginOptions,
     WpBuildRuntimeVariables,
     __WPBUILD__
 };

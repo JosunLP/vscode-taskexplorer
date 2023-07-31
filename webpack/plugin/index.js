@@ -10,7 +10,7 @@ const customize = require("./customize");
 const runtimevars = require("./runtimevars");
 const environment = require("./environment");
 const finalize = require("./finalize");
-const { hash, prehash } = require("./hash");
+const hash = require("./hash");
 const ignore = require("./ignore");
 const instrument = require("./instrument");
 const optimization = require("./optimization");
@@ -25,5 +25,5 @@ const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = r
 module.exports = {
     analyze, banner, build, clean, compile, copy, cssextract, customize, environment,
     finalize, hash, htmlcsp, htmlinlinechunks,ignore, imageminimizer, instrument, loghooks,
-    optimization, prehash, progress, runtimevars, scm, sourcemaps, tscheck, upload, webviewapps
+    optimization, progress, runtimevars, scm, sourcemaps, tscheck, upload, webviewapps
 };

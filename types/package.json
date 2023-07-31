@@ -20,11 +20,11 @@
     },
     "keywords": [
         "types",
-        "taskexplorer"
+        "taskexplorer",
+        "task explorer"
     ],
     "files": [
         "dist",
-        "index.js",
         "index.d.ts"
     ],
     "publishConfig": {

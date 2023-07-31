@@ -26,9 +26,14 @@ const resolve = (env, wpConfig) =>
 				":env": path.resolve(env.paths.build, "src", "lib", "env", env.target),
 				":types": path.resolve(env.paths.build, "types")
 			},
-			fallback: env.build === "browser" ? { path: require.resolve("path-browserify"), os: require.resolve("os-browserify/browser") } : undefined,
+			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
 			mainFields: env.build === "browser" ? [ "browser", "module", "main" ] : [ "module", "main" ],
-			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
+			fallback: env.build === "browser" ?
+					  {
+					  	  path: require.resolve("path-browserify"),
+					  	  os: require.resolve("os-browserify/browser")
+					  } :
+					  undefined
 		};
 	}
 	else

@@ -53,3 +53,14 @@ export { StorageKeys, StorageTarget } from "./IStorage";
 export { TeLicenseState, TeLicenseType } from "./ITeLicenseManager";
 export { ConfigDefaults, ConfigKeys, ConfigPrefix } from "./IConfiguration";
 export { TaskSource, /* TaskNonScriptType,*/ TaskScriptType } from "./ITeTask";
+
+
+// See ../../webpack/types
+export interface IWpBuildRuntimeVariables
+{
+    contentHash: Record<string, string>;
+}
+export type WpBuildRuntimeVariables = IWpBuildRuntimeVariables;
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export declare const __WPBUILD__: WpBuildRuntimeVariables;

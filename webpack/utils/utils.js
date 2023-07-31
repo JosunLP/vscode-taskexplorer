@@ -98,11 +98,14 @@ const clone = (item) =>
  * @param {WebpackConfig} wpConfig Webpack config object
  * @param {boolean} [dbg]
  * @param {boolean} [ext]
+ * @param {boolean} [hash]
  */
-const getEntriesRegex = (wpConfig, dbg, ext) =>
+const getEntriesRegex = (wpConfig, dbg, ext, hash) =>
 {
-	return new RegExp(`(?:${Object.keys(wpConfig.entry)
-           .reduce((e, c) => `${!!e ? `${e}|` : e}${c}`, "")})${dbg ? "(?:\\.debug)?" : ""}${ext ? "\\.js" : ""}`);
+	return new RegExp(
+        `(?:${Object.keys(wpConfig.entry).reduce((e, c) => `${e ? e + "|" : ""}${c}`, "")})` +
+        `(?:\\.debug)${!dbg ? "?" : ""}(?:\.[a-f0-9]{16,})${!hash ? "?" : ""}(?:\.js|\.js\.map)${!ext ? "?" : ""}`
+    );
 };
 
 

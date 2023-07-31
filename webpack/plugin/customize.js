@@ -52,10 +52,12 @@ const clean_webpack_plugin = (env) =>
 	const copyPlugin = join(env.paths.build, "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
 	if (existsSync(copyPlugin))
 	{
-		const distFiles = `"${readdirSync(env.paths.dist).map(f => basename(f)).join("\", \"")}"`;
-		const content = readFileSync(copyPlugin, "utf8")
-			  			.replace(/currentAssets = \[ "[\w"\., _\-]+" \]/, "currentAssets = []")
-						.replace("currentAssets = []", `currentAssets = [ ${distFiles} ]`);
+		let content = readFileSync(copyPlugin, "utf8").replace(/currentAssets = \[ "[\w"\., _\-]+" \]/, "currentAssets = []");
+		if (existsSync(env.paths.dist))
+		{
+			const distFiles = `"${readdirSync(env.paths.dist).map(f => basename(f)).join("\", \"")}"`;
+			content = content.replace("currentAssets = []", `currentAssets = [ ${distFiles} ]`);
+		}
 		writeFileSync(copyPlugin, content);
 	}
 };

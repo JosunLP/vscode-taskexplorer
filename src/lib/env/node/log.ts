@@ -3,13 +3,13 @@
 import { join } from "path";
 import { Log } from "../../utils/log";
 import { TeWrapper } from "../../wrapper";
-import { __WPBUILD__ } from ":types";
 import { executeCommand, registerCommand } from "../../command/command";
 import { window, ConfigurationChangeEvent, Disposable, ExtensionMode } from "vscode";
 import {
     Commands, ConfigKeys, VsCodeCommands, ILog, LogLevel, ILogConfig, ILogControl, ILogPackageJson,
-    ILogOutputChannel, CallbackOptions, LogHttpGetFn
+    ILogOutputChannel, CallbackOptions, LogHttpGetFn, __WPBUILD__
 } from "../../../interface";
+
 
 /**
  * @class TeLog

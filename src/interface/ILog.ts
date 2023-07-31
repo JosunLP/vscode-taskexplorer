@@ -56,7 +56,6 @@ export interface ILogPackageJson extends Record<string, any>
     version: string;
 }
 
-
 export interface ILogConfig
 {
     app: string;
