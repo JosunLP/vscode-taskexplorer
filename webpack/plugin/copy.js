@@ -10,12 +10,73 @@ const { existsSync } = require("fs");
 const CopyPlugin = require("copy-webpack-plugin");
 const { join, posix, isAbsolute } = require("path");
 const { getEntriesRegex, tapStatsPrinter, isString } = require("../utils/utils");
+const WpBuildBasePlugin = require("./base");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
+
+
+/**
+ * @class WpBuildRuntimeVarsPlugin
+ */
+class WpBuildCopyPlugin extends WpBuildBasePlugin
+{
+
+    /**
+     * @function Called by webpack runtime to apply this plugin
+     * @param {WebpackCompiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler)
+    {
+		this.compiler = compiler;
+        compiler.hooks.compilation.tap(
+			this.constructor.name,
+			(compilation) =>
+			{
+				const stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+					  name = `${this.constructor.name}${stage}`;
+				compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
+				{
+					this.compilation = compilation;
+					this.dupMainEntryFilesNoHash(assets);
+				});
+				tapStatsPrinter("copied", name, compilation);
+			}
+		);
+    }
+
+
+	/**
+	 * @function
+	 * @param {WebpackCompilationAssets} assets
+	 */
+	dupMainEntryFilesNoHash(assets)
+	{
+		const entriesRgx = getEntriesRegex(this.options.wpConfig);
+		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
+		{
+			const source = sourceInfo.source(),
+				  hashDigestLength = this.compiler.options.output.hashDigestLength ||  this.options.wpConfig.output.hashDigestLength || 20,
+				  ccFileName = file.replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}`), ""),
+				  existingAsset = this.compilation.getAsset(ccFileName);
+			if (!existingAsset)
+			{
+				const info = this.compilation.getAsset(file)?.info || {},
+					  newInfo = { ...info, copied: true, sourceFilename: file };
+				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
+			}
+			else {
+				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source));
+			}
+		});
+	}
+
+}
 
 
 /**
@@ -23,11 +84,11 @@ const { getEntriesRegex, tapStatsPrinter, isString } = require("../utils/utils")
  * @param {string[]} apps
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {(CopyPlugin | WebpackPluginInstance)[]}
+ * @returns {(CopyPlugin | WpBuildCopyPlugin)[]}
  */
 const copy = (apps, env, wpConfig) =>
 {
-	/** @type {(CopyPlugin | WebpackPluginInstance)[]} */
+	/** @type {(CopyPlugin | WpBuildCopyPlugin)[]} */
 	const plugins = [],
 		  psxBuildPath = env.paths.build.replace(/\\/g, "/"),
 		  psxBasePath = env.paths.base.replace(/\\/g, "/"),
@@ -65,15 +126,7 @@ const copy = (apps, env, wpConfig) =>
 			// Make a copy of the main module when it has been compiled, without the content hash
 			// in the filename.
 			//
-			plugins.push({
-				apply: (/** @type {WebpackCompiler} */compiler) =>
-				{
-					compiler.hooks.compilation.tap(
-						"CompileCompilationPlugin",
-						(compilation) => dupMainEntryFilesNoHash(compiler, compilation, env, wpConfig)
-					);
-				}
-			});
+			plugins.push(new WpBuildCopyPlugin({ env, wpConfig }));
 			//
 			// Copy resources to public `info` sub-project during compilation
 			//
@@ -134,36 +187,6 @@ const copy = (apps, env, wpConfig) =>
 	}
 
 	return plugins;
-};
-
-
-/**
- * @function
- * @param {WebpackCompiler} compiler
- * @param {WebpackCompilation} compilation
- * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
- */
-const dupMainEntryFilesNoHash = (compiler, compilation, env, wpConfig) =>
-{
-    const stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
-          name = `CompileCompilationPlugin${stage}`;
-    compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
-    {
-        const entriesRgx = getEntriesRegex(wpConfig);
-        Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
-        {
-            const { source, map } = sourceInfo.sourceAndMap(),
-				  info = compilation.getAsset(file)?.info || {},
-                  ccFileName = file.replace(/\.[a-z0-9]{16,}/, "");
-            compilation.emitAsset(
-                ccFileName,
-				new compiler.webpack.sources.RawSource(source),
-                { ...info, copied: true , immutable: false }
-            );
-        });
-    });
-    tapStatsPrinter("copied", name, compilation);
 };
 
 

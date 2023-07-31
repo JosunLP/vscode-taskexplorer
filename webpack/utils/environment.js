@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.exports.environment
+ * @module webpack.utils.environment
  */
 
 const { join, resolve } = require("path");
@@ -80,7 +80,7 @@ const setPaths = (env) =>
 	{
 		base: env.build !== "webview" ? env.paths.build : (wvBase ? resolve(env.paths.build, wvBase) :
 																	join(env.paths.build, "src", "webview", "app")),
-		dist: join(env.paths.build, "dist"),
+		dist: join(env.paths.build, "dist"), // = compiler.outputPath = compiler.options.output.path
 		temp: resolve(process.env.TEMP || process.env.TMP  || ".", env.app.name, env.environment),
 		cache: globalEnv.cacheDir,
 		files: {

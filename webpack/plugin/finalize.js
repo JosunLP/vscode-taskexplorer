@@ -2,71 +2,75 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-/**
- * @module webpack.plugin.finalize
- */
-
 const { join } = require("path");
-const { asArray } = require("..//utils/utils");
+const { existsSync } = require("fs");
+const WpBuildBasePlugin = require("./base");
 const { rename, unlink, readdir } = require("fs/promises");
-const { existsSync, copyFileSync, readdirSync } = require("fs");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
 /**
- * @function finalize
+ * @class WpBuildLicenseFilePlugin
+ */
+class WpBuildLicenseFilePlugin extends WpBuildBasePlugin
+{
+    /**
+     * @class WpBuildLicenseFilePlugin
+     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     */
+	constructor(options) { super(options); }
+
+    /**
+     * @function Called by webpack runtime to apply this plugin
+     * @param {WebpackCompiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler)
+    {
+        this.compiler = compiler;
+        compiler.hooks.shutdown.tapPromise(this.constructor.name, this.licenseFiles.bind(this));
+    }
+
+    /**
+     * @function licenseFiles
+     * @returns {Promise<void>}
+     */
+    async licenseFiles()
+    {
+        const distDir = this.compiler.options.output.path || this.compiler.outputPath,
+              items = existsSync(distDir) ? await readdir(distDir) : [];
+        for (const file of items.filter(i => i.includes("LICENSE")))
+        {
+            try {
+                if (!file.includes(".debug")) {
+                    await rename(join(distDir, file), join(distDir, file.replace("js.LICENSE.txt", "LICENSE")));
+                }
+                else {
+                    await unlink(join(distDir, file));
+                }
+            } catch {}
+        }
+    };
+}
+
+
+/**
+ * @function
+ * @module finalize
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {WebpackPluginInstance | undefined}
+ * @returns {WpBuildLicenseFilePlugin | undefined}
  */
 const finalize = (env, wpConfig) =>
 {
-    /** @type {WebpackPluginInstance | undefined} */
-    let plugin;
-    if (env.app.plugins.finalize !== false && env.build === "extension")
+    if (env.app.plugins.finalize !== false && env.build === "extension" && env.environment === "prod")
     {
-        plugin =
-        {
-            apply: (compiler) =>
-            {
-                compiler.hooks.shutdown.tapPromise("FinalizeShutdownPlugin", async () =>
-                {
-                    if (env.environment === "prod")
-                    {
-                        await licenseFiles(env);
-                    }
-                });
-            }
-        };
-    }
-    return plugin;
-};
-
-
-
-/**
- * @function licenseFiles
- * @param {WpBuildEnvironment} env
- * @returns {Promise<void>}
- */
-const licenseFiles = async (env) =>
-{
-    const distPath = env.paths.distBuild,
-          items = existsSync(distPath) ? await readdir(distPath) : [];
-    for (const file of items.filter(i => i.includes("LICENSE")))
-    {
-        try {
-            if (!file.includes(".debug")) {
-                await rename(join(distPath, file), join(distPath, file.replace("js.LICENSE.txt", "LICENSE")));
-            }
-            else {
-                await unlink(join(distPath, file));
-            }
-        } catch {}
+        return new WpBuildLicenseFilePlugin({ env, wpConfig });
     }
 };
 

@@ -2,6 +2,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+/**
+ * @module webpack.utils.utils
+ */
+
 const { resolve } = require("path");
 const gradient = require("gradient-string");
 const { WebpackError } = require("webpack");
@@ -22,7 +26,7 @@ const { write, writeInfo, withColor, figures, colors } = require("./console");
 /**
  * @function apply
  * @param {Record<string, any>} object
- * @param {Record<string, any>} config
+ * @param {Record<string, any> | undefined} config
  * @param {Record<string, any>} [defaults]
  * @returns {Record<string, any>}
  */
@@ -33,7 +37,7 @@ const apply = (object, config, defaults) =>
         if (defaults) {
             apply(object, defaults);
         }
-        if (isObject(config)) {
+        if (config && isObject(config)) {
             Object.keys(config).forEach((i) => { object[i] = config[i]; });
         }
     }
@@ -102,9 +106,10 @@ const clone = (item) =>
  */
 const getEntriesRegex = (wpConfig, dbg, ext, hash) =>
 {
-	return new RegExp(
+    return new RegExp(
         `(?:${Object.keys(wpConfig.entry).reduce((e, c) => `${e ? e + "|" : ""}${c}`, "")})` +
-        `(?:\\.debug)${!dbg ? "?" : ""}(?:\.[a-f0-9]{16,})${!hash ? "?" : ""}(?:\.js|\.js\.map)${!ext ? "?" : ""}`
+        `(?:\\.debug)${!dbg ? "?" : ""}(?:\\.[a-z0-9]{${wpConfig.output.hashDigestLength || 20}})` +
+        `${!hash ? "?" : ""}(?:\\.js|\\.js\\.map)${!ext ? "?" : ""}`
     );
 };
 

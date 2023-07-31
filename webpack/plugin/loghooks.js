@@ -78,7 +78,6 @@ const hookSteps = (env, wpConfig) =>
 		addCompilerHook("initialize", plugins, env, wpConfig);
 		addCompilerHook("beforeRun", plugins, env, wpConfig);
 		addCompilerHook("run", plugins, env, wpConfig);
-		addCompilerHook("watchRun", plugins, env, wpConfig);
 		addCompilerHook("normalModuleFactory", plugins, env, wpConfig);
 		addCompilerHook("contextModuleFactory", plugins, env, wpConfig);
 		addCompilerHook("beforeCompile", plugins, env, wpConfig);
@@ -86,41 +85,39 @@ const hookSteps = (env, wpConfig) =>
 		addCompilerHook("thisCompilation", plugins, env, wpConfig);
 		addCompilerHook("compilation", plugins, env, wpConfig, (compilation) =>
 		{
-			// if (hook === "compilation")
-			// {
-			// 	const compilation = /** @type {WebpackCompilation} */(arg);
-			// 	compilation.hooks.beforeModuleHash.tap(
-			// 		"LogCompilationHookBeforeModuleHashPlugin",
-			// 		() => writeBuildTag("compilation.beforeModuleHash", env, wpConfig)
-			// 	);
-			// 	compilation.hooks.afterModuleHash.tap(
-			// 		"LogCompilationHookAftereModuleHashPlugin",
-			// 		() => writeBuildTag("compilation.afterModuleHash", env, wpConfig)
-			// 	);
-			// 	compilation.hooks.processAssets.tap(
-			// 		{
-			// 			name: "LogCompilationHookPluginAdditions",
-			// 			stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS
-			// 		},
-			// 		() => writeBuildTag("compilation.additions", env, wpConfig)
-			// 	);
-			// 	compilation.hooks.processAssets.tap(
-			// 		{
-			// 			name: "LogCompilationHookPluginAdditional",
-			// 			stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
-			// 		},
-			// 		() => writeBuildTag("compilation.additional", env, wpConfig)
-			// 	);
-			// }
+			// const compilation = /** @type {WebpackCompilation} */(arg);
+			// compilation.hooks.beforeModuleHash.tap(
+			// 	"LogCompilationHookBeforeModuleHashPlugin",
+			// 	() => writeBuildTag("compilation.beforeModuleHash", env, wpConfig)
+			// );
+			// compilation.hooks.afterModuleHash.tap(
+			// 	"LogCompilationHookAftereModuleHashPlugin",
+			// 	() => writeBuildTag("compilation.afterModuleHash", env, wpConfig)
+			// );
+			// compilation.hooks.processAssets.tap(
+			// 	{
+			// 		name: "LogCompilationHookPluginAdditions",
+			// 		stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS
+			// 	},
+			// 	() => writeBuildTag("compilation.additions", env, wpConfig)
+			// );
+			// compilation.hooks.processAssets.tap(
+			// 	{
+			// 		name: "LogCompilationHookPluginAdditional",
+			// 		stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
+			// 	},
+			// 	() => writeBuildTag("compilation.additional", env, wpConfig)
+			// );
 		});
 		addCompilerHook("make", plugins, env, wpConfig);
 		addCompilerHook("afterCompile", plugins, env, wpConfig);
 		addCompilerHook("shouldEmit", plugins, env, wpConfig);
 		addCompilerHook("emit", plugins, env, wpConfig);
-		addCompilerHook("afterEmit", plugins, env, wpConfig);
 		addCompilerHookPromise("assetEmitted", plugins, env, wpConfig);
 		addCompilerHook("emit", plugins, env, wpConfig);
+		addCompilerHook("afterEmit", plugins, env, wpConfig);
 		addCompilerHook("done", plugins, env, wpConfig);
+		addCompilerHook("shutdown", plugins, env, wpConfig);
 		addCompilerHook("afterDone", plugins, env, wpConfig);
 		addCompilerHook("additionalPass", plugins, env, wpConfig);
 		addCompilerHook("failed", plugins, env, wpConfig, /** @param {Error} e */(e) =>
@@ -129,8 +126,8 @@ const hookSteps = (env, wpConfig) =>
 			writeInfo(e.message, figures.color.error, "   ");
 		});
 		addCompilerHook("invalid", plugins, env, wpConfig);
+		addCompilerHook("watchRun", plugins, env, wpConfig);
 		addCompilerHook("watchClose", plugins, env, wpConfig);
-		addCompilerHook("shutdown", plugins, env, wpConfig);
 	}
 	return plugins;
 };

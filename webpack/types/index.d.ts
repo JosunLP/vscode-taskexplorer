@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-declare type WebpackCompiler = import("webpack").Compiler;
-declare type WebpackStatsAsset = import("webpack").StatsAsset;
-declare type WebpackCompilation = import("webpack").Compilation;
-declare type WebpackConfig = Required<import("webpack").Configuration>;
+declare type WebpackAsset = import("webpack").Asset;
+declare type WebpackAssetInfo = import("webpack").AssetInfo;
 declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
+declare type WebpackChunk = import("webpack").Chunk;
+declare type WebpackCompilation = import("webpack").Compilation;
+declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
+declare type WebpackCompiler = import("webpack").Compiler;
+declare type WebpackConfig = Required<import("webpack").Configuration>;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
+declare type WebpackSource = import("webpack").sources.Source;
+declare type WebpackStatsAsset = import("webpack").StatsAsset;
 
 declare type WebpackTarget = "webworker" | "node" | "web";
 declare type WebpackMode = "none" | "development" | "production";
@@ -19,10 +24,9 @@ declare interface IWpBuildRuntimeVariables
 {
     contentHash: Record<string, string>
 }
-type WpBuildRuntimeVariables = Required<IWpBuildRuntimeVariables>;
+declare type WpBuildRuntimeVariables = Required<IWpBuildRuntimeVariables>;
 
 declare const __WPBUILD__: WpBuildRuntimeVariables;
-
 
 declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
 {
@@ -43,9 +47,7 @@ declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
     target: WebpackTarget;
     verbosity: WebpackLogLevel;
 }
-
-type WpBuildEnvironment = Required<IWpBuildEnvironment>;
-
+declare type WpBuildEnvironment = Required<IWpBuildEnvironment>;
 
 declare interface IWpBuildPackageJson
 {
@@ -58,9 +60,7 @@ declare interface IWpBuildPackageJson
     publisher: string;
     version: string;
 }
-
-type WpBuildPackageJson = IWpBuildPackageJson & Record<string, any>;
-
+declare type WpBuildPackageJson = IWpBuildPackageJson & Record<string, any>;
 
 declare interface IWpBuildGlobalEnvironment
 {
@@ -70,9 +70,7 @@ declare interface IWpBuildGlobalEnvironment
     pkgJson: WpBuildPackageJson; 
     valuePad: number;
 }
-
-type WpBuildGlobalEnvironment = IWpBuildGlobalEnvironment & Record<string, any>;
-
+declare type WpBuildGlobalEnvironment = IWpBuildGlobalEnvironment & Record<string, any>;
 
 declare interface IWebpackApp
 {
@@ -88,18 +86,14 @@ declare interface IWebpackApp
     version: string;                      // app version (read from package.json)
     vscode: WebpackVsCodeBuild
 }
-
-type WpBuildApp = IWebpackApp & Record<string, any>;
-
+declare type WpBuildApp = IWebpackApp & Record<string, any>;
 
 declare interface IWebpackBuildFilePaths
 {
     hash: string;
     sourceMapWasm: string;
 }
-
-type WebpackBuildFilePaths = Required<IWebpackBuildFilePaths> & Record<string, any>;
-
+declare type WebpackBuildFilePaths = Required<IWebpackBuildFilePaths> & Record<string, any>;
 
 declare interface IWebpackVsCodeBuild
 {
@@ -108,22 +102,19 @@ declare interface IWebpackVsCodeBuild
         apps: Record<string, string>;     // in key/value for of `webviewsapp: "path/to/entry"`
     }
 }
-
-type WebpackVsCodeBuild = IWebpackVsCodeBuild & Record<string, any>;
-
+declare type WebpackVsCodeBuild = IWebpackVsCodeBuild & Record<string, any>;
 
 declare interface IWpBuildPaths
 {
     base: string;                         // context base dir path
     build: string;                        // base/root level dir path of project
     cache: string;
-    dist: string;                         // main distribution path
+    dist: string;                         // output directory ~ wpConfig.output.path ~ compiler.options.output.path
     distBuild: string;                    // distribution path - release/debug mode specific
     files: WebpackBuildFilePaths;
     temp: string;                         // operating system temp directory
 }
-
-type WpBuildPaths = Required<IWpBuildPaths> & Record<string, any>;
+declare type WpBuildPaths = Required<IWpBuildPaths> & Record<string, any>;
 
 declare interface IWpBuildHashState
 {
@@ -131,24 +122,19 @@ declare interface IWpBuildHashState
     next: Record<string, string>;      // Content hash for new output chunk
     previous: Record<string, string>;  // Content hash from previous build's output chunks (prior to `current`)
 }
-
-type WpBuildHashState = Required<IWpBuildHashState>;
+declare type WpBuildHashState = Required<IWpBuildHashState>;
 
 declare interface IWebpackBuildState
 {
     hash: WpBuildHashState;
 }
-
-type WebpackBuildState = IWebpackBuildState & Record<string, any>;
-
+declare type WebpackBuildState = IWebpackBuildState & Record<string, any>;
 
 declare interface IWebpackEnvironmentInternal
 {
     WEBPACK_WATCH: boolean;
 }
-
-type WebpackEnvironmentInternal = Partial<IWebpackEnvironmentInternal>;
-
+declare type WebpackEnvironmentInternal = Partial<IWebpackEnvironmentInternal>;
 
 declare interface IWpBuildWebpackArgs
 {
@@ -157,30 +143,31 @@ declare interface IWpBuildWebpackArgs
     mode: WebpackMode;
     watch: boolean;
 }
-
-type WpBuildWebpackArgs = Readonly<Partial<IWpBuildWebpackArgs>>;
-
+declare type WpBuildWebpackArgs = Readonly<Partial<IWpBuildWebpackArgs>>;
 
 interface IWpBuildPluginOptions
 {
     env: WpBuildEnvironment,
     wpConfig: WebpackConfig
 }
-
-type WpBuildPluginOptions = Readonly<Required<IWpBuildPluginOptions>> & Record<string, any>;
-
+declare type WpBuildPluginOptions = Readonly<Required<IWpBuildPluginOptions>> & Record<string, any>;
 
 export {
+    WebpackAsset,
+    WebpackAssetInfo,
     WebpackAssetEmittedInfo,
     WpBuildModule,
     WebpackBuildState,
+    WebpackChunk,
     WebpackCompiler,
     WebpackCompilation,
+    WebpackCompilationAssets,
     WebpackConfig,
     WebpackMode,
     WebpackPluginInstance,
     WpBuildEnvironment,
     WebpackLogLevel,
+    WebpackSource,
     WebpackStatsAsset,
     WebpackTarget,
     WebpackBuildEnvironment,

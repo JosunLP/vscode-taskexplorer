@@ -15,13 +15,12 @@
  */
 
 const { join, basename } = require("path");
+const { WebpackError } = require("webpack");
 const { spawnSync } = require("child_process");
 const { globalEnv } = require("../utils/global");
 const { initGlobalEnvObject } = require("../utils/utils");
 const { writeInfo, figures, withColor, colors } = require("../utils/console");
 const { renameSync, copyFileSync, mkdirSync, existsSync, rmSync, readdirSync } = require("fs");
-const { WebpackError } = require("webpack");
-const { info } = require("console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildHashState} WpBuildHashState */
@@ -47,7 +46,7 @@ const upload = (env, wpConfig) =>
         {
             apply: (compiler) =>
             {
-                compiler.hooks.afterDone.tap("AfterDoneUploadPlugin", (statsData) =>
+                compiler.hooks.done.tap("AfterDoneUploadPlugin", (statsData) =>
                 {
                     if (statsData.hasErrors()) {
                         return;
@@ -122,6 +121,8 @@ const uploadAssets = (assets, env) =>
               filesToUpload = readdirSync(toUploadPath);
 
         if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag) {
+            // compilation.errors.push(new WebpackError("Required environment variables for upload are not set"));
+            // return;
             throw new WebpackError("Required environment variables for upload are not set");
         }
 

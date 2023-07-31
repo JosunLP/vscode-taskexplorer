@@ -2,12 +2,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+const WpBuildBasePlugin = require("./base");
 const { writeFileSync, readFileSync, existsSync } = require("fs");
-const { apply, isObjectEmpty, writeInfo, withColor, colors, write } = require("../utils");
-
-/**
- * @module webpack.plugin.hash
- */
+const { apply, isObjectEmpty, writeInfo, withColor, colors, write, merge } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -22,16 +19,16 @@ const { apply, isObjectEmpty, writeInfo, withColor, colors, write } = require(".
 /**
  * @class WpBuildHashPlugin
  */
-class WpBuildHashPlugin
+class WpBuildHashPlugin extends WpBuildBasePlugin
 {
+
     /**
      * @class
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options)
     {
-        this.env = options.env;
-        this.wpConfig = options.wpConfig;
+        super(options);
         this.readAssetStates();
     }
 
@@ -67,9 +64,9 @@ class WpBuildHashPlugin
     logAssetInfo(rotated)
     {
         const // hashLength = /** @type {Number} */(wpConfig.output?.hashDigestLength),
-              hashInfo = this.env.state.hash,
+              hashInfo = this.options.env.state.hash,
               labelLength = 18; //  + hashLength;
-        write(withColor(`final asset state for build environment ${withColor(this.env.environment, colors.italic)}`, colors.grey));
+        write(withColor(`final asset state for build environment ${withColor(this.options.env.environment, colors.italic)}`, colors.grey));
         writeInfo("   previous:");
         if (!isObjectEmpty(hashInfo.current))
         {
@@ -105,7 +102,7 @@ class WpBuildHashPlugin
 
     readAssetStates()
     {
-        const env = this.env;
+        const env = this.options.env;
         writeInfo(`read asset states from ${withColor(env.paths.files.hash, colors.italic)}`);
         if (existsSync(env.paths.files.hash))
         {
@@ -125,7 +122,7 @@ class WpBuildHashPlugin
     /**
      * @function saveAssetState
      */
-    saveAssetState() { writeFileSync(this.env.paths.files.hash, JSON.stringify(this.env.state.hash, null, 4)); }
+    saveAssetState() { writeFileSync(this.options.env.paths.files.hash, JSON.stringify(this.options.env.state.hash, null, 4)); }
 
 
     /**
@@ -143,13 +140,14 @@ class WpBuildHashPlugin
                 if (asset.chunkNames && asset.info.contenthash)
                 {
                     const chunkName = /** @type {string}*/(asset.chunkNames[0]);
-                    this.env.state.hash.next[chunkName] = asset.info.contenthash.toString();
+                    this.options.env.state.hash.next[chunkName] = asset.info.contenthash.toString();
                     //
                     // Remove any old leftover builds in the dist directory
                     //
                     // if (env.state.hash.next[chunkName] !== env.state.hash.current[chunkName])
                     // {
-                    //     readdirSync(env.paths.dist).filter(p => (/[a-f0-9]{16,}/).test(p)).forEach((p) =>
+                    //     const hashDigestLength = compiler.options.output.hashDigestLength || wpConfig.output.hashDigestLength || 20,
+                    //     readdirSync(env.paths.dist).filter(p => (new RegExp(`\\.[a-z0-9]{${hashDigestLength}}`).test(p)).forEach((p) =>
                     //     {
                     //         if (!p.includes(env.state.hash.next[chunkName])) {
                     //             unlinkSync(p);
@@ -163,11 +161,12 @@ class WpBuildHashPlugin
             }
         });
     };
+
 }
 
 
 /**
- * @function hash
+ * @module hash
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
  * @returns {WebpackPluginInstance | undefined}

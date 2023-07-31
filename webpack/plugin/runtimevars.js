@@ -2,11 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-/**
- * @module webpack.plugin.runtimevars
- */
-
 const webpack = require("webpack");
+const WpBuildBasePlugin = require("./base");
 const { globalEnv, getEntriesRegex, tapStatsPrinter, isString, initGlobalEnvObject } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -21,7 +18,7 @@ const { globalEnv, getEntriesRegex, tapStatsPrinter, isString, initGlobalEnvObje
 /**
  * @class WpBuildRuntimeVarsPlugin
  */
-class WpBuildRuntimeVarsPlugin
+class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
 {
     /**
      * @class
@@ -29,14 +26,12 @@ class WpBuildRuntimeVarsPlugin
      */
 	constructor(options)
     {
-        this.env = options.env;
-        this.wpConfig = options.wpConfig;
+        super(options);
         initGlobalEnvObject("runtimevars");
     }
 
     /**
      * @function Called by webpack runtime to apply this plugin
-     *
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
@@ -44,13 +39,14 @@ class WpBuildRuntimeVarsPlugin
     {
         compiler.hooks.compilation.tap(this.constructor.name, (compilation) =>
         {
+            this.compilation = compilation;
             this.cache = compilation.getCache(this.constructor.name);
             this.logger = compilation.getLogger(this.constructor.name);
             this.preprocess(compiler, compilation);
             this.defineVars(compiler, compilation);
         });
-
     }
+
 
     /**
      * @function Collects content hashes from compiled assets
@@ -86,7 +82,7 @@ class WpBuildRuntimeVarsPlugin
               name = `${this.constructor.name}${stage}`;
         compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
         {
-            Object.entries(assets).filter(([ file, _ ]) => getEntriesRegex(this.wpConfig).test(file)).forEach(([ file, sourceInfo ]) =>
+            Object.entries(assets).filter(([ file, _ ]) => getEntriesRegex(this.options.wpConfig).test(file)).forEach(([ file, sourceInfo ]) =>
             {
                 const info = compilation.getAsset(file)?.info || {},
                       hash = /** @type {string} */(info.contenthash),
@@ -94,20 +90,21 @@ class WpBuildRuntimeVarsPlugin
                 let content= source.toString();
                 Object.entries(globalEnv.runtimevars).forEach((define) =>
                 {
-                    const chunkName = define[0].replace(/\.[a-f0-9]{16,}\.js/, ""),
-                          regex = new RegExp(`(?:interface_[0-9]+\.)?__WPBUILD__\.contentHash(?:\.|\[")${chunkName}(?:"\])? *(,|\r|\n)`, "gm");
+                    const hashDigestLength = compiler.options.output.hashDigestLength || this.options.wpConfig.output.hashDigestLength || 20;
+                    const chunkName = define[0].replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}\\.js`), ""),
+                          regex = new RegExp(`(?:interface_[0-9]+\\.)?__WPBUILD__\\.contentHash(?:\\.|\\[")${chunkName}(?:"\\])? *(,|\r|\n)`, "gm");
                     content = content.replace(regex, (_v, g) =>`"${hash}"${g}`);
                 });
                 compilation.updateAsset(
                     file,
-                    map && (compiler.options.devtool || this.env.app.plugins.sourcemaps) ?
+                    map && (compiler.options.devtool || this.options.env.app.plugins.sourcemaps) ?
                         new compiler.webpack.sources.SourceMapSource(content, file, map) :
                         new compiler.webpack.sources.RawSource(content),
-                    { ...info, definesSet: true }
+                    { ...info, runtimeVars: true }
                 );
             });
         });
-        tapStatsPrinter("definesSet", name, compilation);
+        tapStatsPrinter("runtimeVars", name, compilation);
     };
 }
 
@@ -127,4 +124,7 @@ const runtimevars = (env, wpConfig) =>
 };
 
 
+/**
+ * @module runtimevars
+ */
 module.exports = runtimevars;
