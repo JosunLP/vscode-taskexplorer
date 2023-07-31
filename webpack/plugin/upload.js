@@ -82,15 +82,9 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
               compilation = this.compilation,
               toUploadPath = join(env.paths.temp, env.environment);
 
-        // if (!compilation.chunks) {
-        //     writeInfo("There are no updated assets to upload");
-        //     return;
-        // }
-
         if (!existsSync(toUploadPath)) {
             await mkdir(toUploadPath);
         }
-        await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
         for (const chunk of Array.from(compilation.chunks).filter(c => c.canBeInitial()))
         {
@@ -130,6 +124,13 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
               sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
               sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
               filesToUpload = await readdir(toUploadPath);
+
+        if (filesToUpload.length === 0) {
+            writeInfo("There were no updated assets found to upload");
+            return;
+        }
+
+        await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
         if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag) {
             // compilation.errors.push(new WebpackError("Required environment variables for upload are not set"));
