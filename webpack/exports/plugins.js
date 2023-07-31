@@ -6,9 +6,9 @@
  */
 
 const {
-	analyze, banner, build, clean, compile, copy, customize, environment, finalize, hash,
-	instrument, loghooks, ignore,optimization, progress, runtimevars, sourcemaps,
-	tscheck, upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps, scm
+	analyze, banner, build, clean, compile, copy, customize, environment, hash, instrument,
+	loghooks, ignore,optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck,
+	upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps, scm
 } = require("../plugin");
 
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
@@ -69,7 +69,7 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins.push(                       // compiler.hooks.compilation -> compilation.hooks.optimizeChunks, ...
 		...optimization(env, wpConfig),          // ^compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
 		upload(env, wpConfig),                   // compiler.hooks.afterDone
-		finalize(env, wpConfig),                 // compiler.hooks.shutdown
+		licensefiles(env, wpConfig),             // compiler.hooks.shutdown
 		scm(env, wpConfig)                       // compiler.hooks.shutdown
 	);
 

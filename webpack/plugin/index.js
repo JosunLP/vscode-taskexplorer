@@ -9,7 +9,7 @@ const copy = require("./copy");
 const customize = require("./customize");
 const runtimevars = require("./runtimevars");
 const environment = require("./environment");
-const finalize = require("./finalize");
+const licensefiles = require("./licensefiles");
 const hash = require("./hash");
 const ignore = require("./ignore");
 const instrument = require("./instrument");
@@ -24,6 +24,6 @@ const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = r
 
 module.exports = {
     analyze, banner, build, clean, compile, copy, cssextract, customize, environment,
-    finalize, hash, htmlcsp, htmlinlinechunks,ignore, imageminimizer, instrument, loghooks,
+    hash, htmlcsp, htmlinlinechunks,ignore, imageminimizer, instrument, licensefiles, loghooks,
     optimization, progress, runtimevars, scm, sourcemaps, tscheck, upload, webviewapps
 };

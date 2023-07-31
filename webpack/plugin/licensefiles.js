@@ -2,6 +2,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+/**
+ * @module wpbuild.plugin.licensefiles
+ */
+
 const { join } = require("path");
 const { existsSync } = require("fs");
 const WpBuildBasePlugin = require("./base");
@@ -55,12 +59,11 @@ class WpBuildLicenseFilePlugin extends WpBuildBasePlugin
 
 /**
  * @function
- * @module finalize
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WpBuildLicenseFilePlugin | undefined}
  */
-const finalize = (env, wpConfig) =>
+const licensefiles = (env, wpConfig) =>
 {
     if (env.app.plugins.finalize !== false && env.build === "extension" && env.environment === "prod")
     {
@@ -69,4 +72,4 @@ const finalize = (env, wpConfig) =>
 };
 
 
-module.exports = finalize;
+module.exports = licensefiles;
