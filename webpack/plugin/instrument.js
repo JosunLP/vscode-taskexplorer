@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.istanbul
+ * @module wpbuild.plugin.istanbul
  */
 
 const { createInstrumenter } = require("istanbul-lib-instrument");

@@ -4,7 +4,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.analyze
+ * @module wpbuild.plugin.analyze
  */
 
 const webpack = require("webpack");

@@ -4,7 +4,7 @@ const { resolve, join } = require("path");
 const { existsSync, readFileSync, mkdirSync, writeFileSync } = require("fs");
 
 /**
- * @module webpack.utils.global
+ * @module wpbuildutils.global
  */
 
 /** @typedef {import("../types").WpBuildPackageJson} WpBuildPackageJson */

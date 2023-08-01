@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.clean
+ * @module wpbuild.plugin.clean
  */
 
 const path = require("path");

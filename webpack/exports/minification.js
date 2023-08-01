@@ -6,7 +6,7 @@ const { merge } = require("../utils/utils");
 const TerserPlugin = require("terser-webpack-plugin");
 
 /**
- * @module webpack.exports.minification
+ * @module wpbuild.exports.minification
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */

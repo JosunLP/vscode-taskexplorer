@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.html
+ * @module wpbuild.plugin.html
  */
 
 const { posix } = require("path");

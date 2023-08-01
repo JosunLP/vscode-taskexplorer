@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.upload
+ * @module wpbuild.plugin.upload
  *
  * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
  *
@@ -24,8 +24,6 @@ const { writeInfo, figures, withColor, colors } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildHashState} WpBuildHashState */
-/** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
@@ -190,12 +188,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
  * @returns {WpBuildUploadPlugin | undefined} plugin instance
  */
 const upload = (env, wpConfig) =>
-{
-    if (env.app.plugins.upload !== false && env.build === "extension")
-    {
-        return new WpBuildUploadPlugin({ env, wpConfig });
-    }
-};
+    (env.app.plugins.upload !== false && env.isExtension ? new WpBuildUploadPlugin({ env, wpConfig }) : undefined);
 
 
 module.exports = upload;

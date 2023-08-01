@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @module webpack.utils.console
+ * @module wpbuildutils.console
  */
 
 const basePad = "";

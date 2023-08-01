@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.copy
+ * @module wpbuild.plugin.copy
  */
 
 const { existsSync } = require("fs");
@@ -49,11 +49,9 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 */
 	dupMainEntryFilesNoHash(assets)
 	{
-console.log("1111111111111111111111: " + this.options.force);
 		const entriesRgx = getEntriesRegex(this.options.wpConfig);
 		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
 		{
-console.log("2222222222222222222: " + file);
 			const source = sourceInfo.source(),
 				  hashDigestLength = this.compiler.options.output.hashDigestLength ||  this.options.wpConfig.output.hashDigestLength || 20,
 				  ccFileName = file.replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}`), ""),
@@ -72,11 +70,9 @@ console.log("2222222222222222222: " + file);
 			// }
 			if (!dstAsset)
 			{
-console.log("33333333333333333333: " + file);
 				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 			else if (this.options.force) {
-console.log("44444444444444444: " + file);
 				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 		});
@@ -105,7 +101,7 @@ const copy = (apps, env, wpConfig) =>
 		{
 			/** @type {CopyPlugin.Pattern[]} */
 			const patterns = [];
-			apps.filter(app => existsSync(join(env.paths.base, app, "res"))).forEach(
+			apps.filter((app) => existsSync(join(env.paths.base, app, "res"))).forEach(
 				(app) => patterns.push(
 				{
 					from: posix.join(psxBasePath, app, "res", "*.*"),

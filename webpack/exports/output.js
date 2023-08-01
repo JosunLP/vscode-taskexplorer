@@ -4,7 +4,7 @@ const { join, resolve } = require("path");
 const { apply } = require("../utils/utils");
 
 /**
- * @module webpack.exports.output
+ * @module wpbuild.exports.output
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */

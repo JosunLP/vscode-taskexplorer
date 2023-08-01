@@ -2,7 +2,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.sourcemaps
+ * @module wpbuild.plugin.sourcemaps
  *
  * IMPORTANT NOTE:
  *

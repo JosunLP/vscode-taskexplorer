@@ -2,7 +2,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.optimization
+ * @module wpbuild.plugin.optimization
  */
 
 const webpack = require("webpack");

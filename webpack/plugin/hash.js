@@ -4,7 +4,7 @@
 
 const WpBuildBasePlugin = require("./base");
 const { writeFileSync, readFileSync, existsSync } = require("fs");
-const { apply, isObjectEmpty, writeInfo, withColor, colors, write } = require("../utils");
+const { apply, colors, isObjectEmpty, writeInfo, withColor, write } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */

@@ -6,17 +6,13 @@
  * @module wpbuild.plugin.runtimevars
  */
 
-const webpack = require("webpack");
 const WpBuildBasePlugin = require("./base");
 const { globalEnv, getEntriesRegex, isString } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 
 
@@ -111,15 +107,10 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
  * @function compile
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {WebpackPluginInstance | webpack.DefinePlugin | undefined}
+ * @returns {WpBuildRuntimeVarsPlugin | undefined}
  */
 const runtimevars = (env, wpConfig) =>
-{
-    if (env.app.plugins.runtimevars !== false && env.isExtension)
-    {
-        return new WpBuildRuntimeVarsPlugin({ env, wpConfig });
-    }
-};
+    (env.app.plugins.runtimevars !== false && env.isExtension ? new WpBuildRuntimeVarsPlugin({ env, wpConfig }) : undefined);
 
 
 module.exports = runtimevars;

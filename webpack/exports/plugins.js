@@ -2,7 +2,7 @@
 // @ts-check
 
 /**
- * @module webpack.exports.plugins
+ * @module wpbuild.exports.plugins
  */
 
 const {
@@ -30,7 +30,7 @@ const plugins = (env, wpConfig) =>
 		environment(env, wpConfig),              // compiler.hooks.environment
 		customize(env, wpConfig),                // compiler.hooks.afterEnvironment - custom mods to installed plugins
 		progress(env, wpConfig),
-		...loghooks(env, wpConfig),              // logs all compiler.hooks.* when they run
+		loghooks(env, wpConfig),              // logs all compiler.hooks.* when they run
 		hash(env, wpConfig),                     // compiler.hooks.initialize, compiler.hooks.done
 		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done
 		build(env, wpConfig),                    // compiler.hooks.beforeCompile

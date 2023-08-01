@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.utils.environment
+ * @module wpbuildutils.environment
  */
 
 const { join, resolve } = require("path");
@@ -64,7 +64,9 @@ const setEnvironment = (env, wpConfig) =>
 	apply(env, {
 		isTests: env.environment.startsWith("test"),
 		isWeb: env.target.startsWith("web"),
-		isExtension: env.build === "extension" || env.build === "browser"
+		isExtension: env.build === "extension" || env.build === "browser",
+		isExtensionProd: env.build === "extension" || env.build === "browser" && env.environment === "prod",
+		isExtensionTests: env.build === "extension" || env.build === "browser" && env.environment.startsWith("test"),
 	});
 };
 

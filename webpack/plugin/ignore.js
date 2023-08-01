@@ -2,7 +2,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.ignore
+ * @module wpbuild.plugin.ignore
  */
 
 const webpack = require("webpack");

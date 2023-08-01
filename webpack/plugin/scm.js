@@ -3,12 +3,11 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.banner
+ * @module wpbuild.plugin.banner
  */
 
 const WpBuildBasePlugin = require("./base");
-const { globalEnv } = require("../utils/global");
-const { writeInfo, figures, withColor, colors } = require("../utils/console");
+const { colors, figures, globalEnv, writeInfo, withColor } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -22,10 +21,8 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
      * @class WpBuildLicenseFilePlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
-	constructor(options)
-    {
-        super(options, "scm");
-    }
+	constructor(options) { super(options, "scm"); }
+
 
     /**
      * @function Called by webpack runtime to apply this plugin
@@ -94,12 +91,7 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
  * @returns {WpBuildScmPlugin | undefined}
  */
 const scm = (env, wpConfig) =>
-{
-    if (env.app.plugins.scm !== false && env.build === "extension" && env.environment === "prod")
-    {
-        return new WpBuildScmPlugin({ env, wpConfig });
-    }
-};
+    (env.app.plugins.scm !== false && env.isExtensionProd ? new WpBuildScmPlugin({ env, wpConfig }) : undefined);
 
 
 module.exports = scm;

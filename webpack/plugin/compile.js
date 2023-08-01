@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.compile
+ * @module wpbuild.plugin.compile
  */
 
 const { apply } = require("../utils");
@@ -144,12 +144,7 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
  * @returns {WpBuildCompilePlugin | undefined}
  */
 const compile = (env, wpConfig) =>
-{
-    if (env.app.plugins.compilation !== false && env.build === "extension" && env.environment === "test")
-    {
-        return new WpBuildCompilePlugin({ env, wpConfig });
-    }
-};
+    (env.app.plugins.compile !== false && env.isExtensionTests ? new WpBuildCompilePlugin({ env, wpConfig }) : undefined);
 
 
 module.exports = compile;

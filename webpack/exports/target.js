@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @module webpack.exports.target
+ * @module wpbuild.exports.target
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */

@@ -2,7 +2,7 @@
 // @ts-check
 
 /**
- * @module webpack.exports.experiments
+ * @module wpbuild.exports.experiments
  */
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */

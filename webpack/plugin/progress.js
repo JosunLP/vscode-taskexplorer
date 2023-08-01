@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.progress
+ * @module wpbuild.plugin.progress
  */
 
 const webpack = require("webpack");

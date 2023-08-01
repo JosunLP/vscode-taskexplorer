@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.build
+ * @module wpbuild.plugin.build
  */
 
 const { basename, join } = require("path");

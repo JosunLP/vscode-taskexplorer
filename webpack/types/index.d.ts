@@ -44,6 +44,8 @@ declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
     isExtension: boolean;
+    isExtensionProd: boolean,
+    isExtensionTests: boolean;
     isTests: boolean;
     isWeb: boolean;
     paths: WpBuildPaths;

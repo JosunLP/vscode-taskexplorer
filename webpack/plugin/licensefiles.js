@@ -70,12 +70,7 @@ class WpBuildLicenseFilePlugin extends WpBuildBasePlugin
  * @returns {WpBuildLicenseFilePlugin | undefined}
  */
 const licensefiles = (env, wpConfig) =>
-{
-    if (env.app.plugins.finalize !== false && env.build === "extension" && env.environment === "prod")
-    {
-        return new WpBuildLicenseFilePlugin({ env, wpConfig });
-    }
-};
+    (env.app.plugins.licensefiles !== false && env.isExtensionProd ? new WpBuildLicenseFilePlugin({ env, wpConfig }) : undefined);
 
 
 module.exports = licensefiles;

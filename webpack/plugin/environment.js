@@ -3,14 +3,14 @@
 // @ts-check
 
 /**
- * @module webpack.plugin.environment
+ * @module wpbuild.plugin.environment
  */
 
 const { globalEnv } = require("../utils/global");
 const { writeInfo, write } = require("../utils/console");
 
-/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
@@ -27,7 +27,7 @@ const environment = (env, wpConfig) =>
 		return {
 			apply: (compiler) =>
 			{
-				compiler.hooks.environment.tap("WpBuildCustomizePlugin", () =>
+				compiler.hooks.environment.tap("WpBuildEnvironmentPlugin", () =>
 				{
 					setVersion(env);
 					writeEnvironment(env);
