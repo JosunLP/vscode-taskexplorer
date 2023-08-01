@@ -14,6 +14,16 @@ const { ModuleFilenameHelpers } = require("webpack");
 /** @typedef {import("../types").WebpackCacheFacade} WebpackCacheFacade */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("../types").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
+/** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
+/** @typedef {import("../types").WpBuildPluginApplyOptions} WpBuildPluginApplyOptions */
+/** @typedef {import("../types").WebpackSyncHook<WebpackCompiler>} WebpackSyncCompilerHook */
+/** @typedef {import("../types").WebpackAsyncHook<WebpackCompiler>} WebpackAsyncCompilerHook */
+/** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
+/** @typedef {import("../types").WpBuildPluginCompilationHookStage} WpBuildPluginCompilationHookStage */
+/** @typedef {import("../types").WebpackAsyncHook<WebpackCompilation>} WebpackAsyncCompilationHook */
+/** @typedef {import("../types").WpBuildPluginCompilerHookCallback} WpBuildPluginCompilerHookCallback */
+/** @typedef {import("../types").WpBuildPluginCompilationHookCallback} WpBuildPluginCompilationHookCallback */
 
 
 /**
@@ -66,13 +76,13 @@ class WpBuildBasePlugin
 
     /**
      * @class
-     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     * @param {Partial<WpBuildPluginOptions>} options Plugin options to be applied
      * @param {string} [globalCache]
      */
 	constructor(options, globalCache)
     {
         this.name = this.constructor.name;
-        this.options = /** @type {WpBuildPluginOptions} */(merge({}, options));
+        this.options = this.getOptions(options);
 		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, this.options);
         if (globalCache) {
             this.initGlobalEnvObject(globalCache);
@@ -87,6 +97,18 @@ class WpBuildBasePlugin
      * @returns {string}
      */
     breakProp(prop) { return prop.replace(/[A-Z]/g, (v) => ` ${v.toLowerCase()}`); }
+
+
+    /**
+     * @function
+     * @private
+     * @param {Partial<WpBuildPluginOptions>} options
+     * @returns {WpBuildPluginOptions}
+     */
+    getOptions(options)
+    {
+        return /** @type {WpBuildPluginOptions} */(merge({ env: {}, wpConfig: {}, hookCompiler: {}, hookCompilation: {}}, options));
+    }
 
 
     /**
@@ -109,11 +131,40 @@ class WpBuildBasePlugin
      * @function Called by extending class from apply()
      * @protected
      * @param {WebpackCompiler} compiler the compiler instance
+     * @param {WpBuildPluginApplyOptions} options
      * @returns {void}
      */
-    onApply(compiler)
+    onApply(compiler, options)
     {
-		this.compiler = compiler;
+        this.compiler = compiler;
+        const optionsArray = Object.entries(options),
+              compilationHook = optionsArray.find(([ _, tapOptions ]) => tapOptions.hook === "compilation");
+        if (compilationHook || optionsArray.every(([ _, tapOptions ]) => !!tapOptions.stage))
+        {
+            compiler.hooks.compilation.tap(this.name, (compilation) =>
+            {
+                if (!this.onCompilation(compilation)) {
+                    return;
+                }
+                optionsArray.filter(([ _, tapOptions ]) => tapOptions.hook !== "compilation" && tapOptions.stage).forEach(([ _, tapOptions ]) =>
+                {
+                    this.tapCompilationStage(
+                        /** @type {WpBuildPluginCompilationHookStage} */(tapOptions.stage),
+                        compiler,
+                        compilation,
+                        tapOptions.statsProperty,
+                        /** @type {WpBuildPluginCompilationHookCallback} */(tapOptions.callback)
+                    );
+                });
+            });
+        }
+        optionsArray.filter(([ k, v ]) => k !== "compilation" && !v.stage && v.hook).forEach(([ name, tapOptions ]) =>
+        {
+            /** @type {WebpackSyncCompilerHook} */(compiler.hooks[tapOptions.hook]).tap(`${this.name}_${name}`, (compiler) =>
+            {
+                /** @type {WpBuildPluginCompilerHookCallback} */(tapOptions.callback)(compiler);
+            });
+        });
     }
 
 
@@ -129,61 +180,51 @@ class WpBuildBasePlugin
             return false;
         }
         this.compilation = compilation;
-        this.cache = /** @type {WebpackCacheFacade} */(compilation.getCache(this.name));
         this.logger = /** @type {WebpackLogger} */(compilation.getLogger(this.name));
+        this.cache = /** @type {WebpackCacheFacade} */(compilation.getCache(this.name));
         return true;
     }
 
 
-    // /**
-    //  * @function Called by webpack runtime to apply this plugin
-    //  * @param {string} hook
-    //  * @param {WebpackCompiler} compiler the compiler instance
-    //  * @param {Function} callback
-    //  * @returns {void}
-    //  */
-    // tapCompilation(hook, compiler, callback)
-    // {
-	// 	this.onApply(compiler);
-    //     /** @type {SyncSeriesHook} */compiler.hooks[hook].tap(this.name, async (compilation) =>
-    //     {
-    //         this.onCompilation(compilation);
-    //         const stats = compilation.getStats();
-    //         if (stats.hasErrors()) {
-    //             return;
-    //         }
-    //         const statsJson = stats.toJson(),
-    //               assets = statsJson.assets?.filter(a => a.type === "asset");
-    //         if (assets) {
-    //             callback(assets);
-    //         }
-    //     });
-    // }
+    /**
+     * @function
+     * @protected
+     * @param {WpBuildPluginCompilationHookStage} stage
+     * @param {WebpackCompiler} compiler the compiler instance
+     * @param {WebpackCompilation} compilation the compiler instance
+     * @param {string | null | undefined} statsProp
+     * @param {(assets: WebpackCompilationAssets) => void} callback
+     * @returns {void}
+     */
+    tapCompilationStage(stage, compiler, compilation, statsProp, callback)
+    {
+        const stageEnum = compiler.webpack.Compilation[`PROCESS_ASSETS_STAGE_${stage}`],
+              name = `${this.name}_${stage}`;
+        compilation.hooks.processAssets.tap({ name, stage: stageEnum }, (assets) => callback(assets));
+        if (statsProp) {
+            this.tapStatsPrinter(statsProp, name);
+        }
+    }
 
 
-    // /**
-    //  * @function Called by webpack runtime to apply this plugin
-    //  * @param {string} hook
-    //  * @param {WebpackCompiler} compiler the compiler instance
-    //  * @param {Function} callback
-    //  */
-    // tapCompilationPromise(hook, compiler, callback)
-    // {
-	// 	this.onApply(compiler);
-    //     compiler.hooks[hook].tapPromise(this.name, async (compilation) =>
-    //     {
-    //         this.onCompilation(compilation);
-    //         const stats = compilation.getStats();
-    //         if (stats.hasErrors()) {
-    //             return;
-    //         }
-    //         const statsJson = stats.toJson(),
-    //               assets = statsJson.assets?.filter(a => a.type === "asset");
-    //         if (assets) {
-    //             await callback(assets);
-    //         }
-    //     });
-    // }
+    /**
+     * @function
+     * @protected
+     * @param {number} stage
+     * @param {WebpackCompiler} compiler the compiler instance
+     * @param {WebpackCompilation} compilation the compiler instance
+     * @param {string | null | undefined} statsProp
+     * @param {(assets: WebpackCompilationAssets) => void} callback
+     * @returns {void}
+     */
+    tapCompilationStagePromise(stage, compiler, compilation, statsProp, callback)
+    {
+        const name = `${this.name}${stage}`;
+        compilation.hooks.processAssets.tap({ name, stage }, callback.bind(this));
+        if (statsProp) {
+            this.tapStatsPrinter(statsProp, name);
+        }
+    }
 
 
     /**

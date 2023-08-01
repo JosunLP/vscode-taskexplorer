@@ -15,6 +15,8 @@ declare type WebpackLogger = import("webpack/lib/logging/Logger").Logger;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
 declare type WebpackSource = import("webpack").sources.Source;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
+declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
+declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
 
 declare type WebpackTarget = "webworker" | "node" | "web";
 declare type WebpackMode = "none" | "development" | "production";
@@ -151,15 +153,35 @@ declare type WpBuildWebpackArgs = Readonly<Partial<IWpBuildWebpackArgs>>;
 interface IWpBuildPluginOptions
 {
     env: WpBuildEnvironment,
-    wpConfig: WebpackConfig
+    wpConfig: WebpackConfig,
 }
-declare type WpBuildPluginOptions = Readonly<Required<IWpBuildPluginOptions>> & Record<string, any>;
+declare type WpBuildPluginOptions = Readonly<IWpBuildPluginOptions> & Record<string, any>;
+
+
+declare type WpBuildPluginCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIVED" | "ADDITIONS" |  "OPTIMIZE" |
+                                                 "OPTIMIZE_COUNT" | "OPTIMIZE_COMPATIBILITY" | "OPTIMIZE_SIZE" |
+                                                 "DEV_TOOLING" | "OPTIMIZE_INLINE" | "SUMMARIZE" | "OPTIMIZE_HASH" |
+                                                 "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT"
+declare type WpBuildPluginCompilationHookCallback = (assets: WebpackCompilationAssets) => void | Promise<void>;
+declare type WpBuildPluginCompilerHookCallback = (compiler: WebpackCompiler) => void | Promise<void>;
+interface IWpBuildPluginTapOptions
+{
+    async?: boolean;
+    hook: string | "compilation";
+    callback: WpBuildPluginCompilationHookCallback | WpBuildPluginCompilerHookCallback;
+    stage?: WpBuildPluginCompilationHookStage;
+    statsProperty?: string;
+}
+// declare type WpBuildPluginTapOptions = Readonly<IWpBuildPluginTapOptions>;
+declare type WpBuildPluginApplyOptions = Record<string, IWpBuildPluginTapOptions>
+declare type WpBuildPluginTapOptions = Record<string, IWpBuildPluginTapOptions>
 
 export {
     WebpackAsset,
     WebpackAssetInfo,
     WebpackAssetEmittedInfo,
-    WpBuildModule,
+    WebpackAsyncHook,
+    WebpackSyncHook,
     WebpackBuildState,
     WebpackCache,
     WebpackCacheFacade,
@@ -179,12 +201,18 @@ export {
     WebpackBuildEnvironment,
     WebpackVsCodeBuild,
     WpBuildApp,
-    WpBuildWebpackArgs,
+    WpBuildModule,
     WpBuildPaths,
     WpBuildGlobalEnvironment,
     WpBuildHashState,
     WpBuildPackageJson,
     WpBuildPluginOptions,
+    WpBuildPluginApplyOptions,
+    WpBuildPluginCompilationHookCallback,
+    WpBuildPluginCompilerHookCallback,
+    WpBuildPluginCompilationHookStage,
+    WpBuildPluginTapOptions,
     WpBuildRuntimeVariables,
+    WpBuildWebpackArgs,
     __WPBUILD__
 };

@@ -16,9 +16,8 @@ const WpBuildBasePlugin = require("./base");
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 
 
 /**
@@ -32,13 +31,13 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		this.onApply(compiler);
-        compiler.hooks.compilation.tap(this.name, (compilation) =>
+        this.onApply(compiler,
         {
-            if (!this.onCompilation(compilation)) {
-                return;
+            istanbul: {
+                hook: "compilation",
+                stage: "ADDITIONS",
+                callback: this.istanbulTags.bind(this)
             }
-            this.istanbulTags();
         });
     }
 
@@ -54,23 +53,17 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
     /**
      * @function
      * @private
+     * @param {WebpackCompilationAssets} _assets
      */
-    istanbulTags()
+    istanbulTags(_assets)
     {
-        const compilation = this.compilation,
-              stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-              name = `${this.name}${stage}`;
-        compilation.hooks.processAssets.tap({ name, stage }, (_assets) =>
+        for (const chunk of Array.from(this.compilation.chunks).filter(c => c.canBeInitial()))
         {
-            for (const chunk of Array.from(compilation.chunks).filter(c => c.canBeInitial()))
+            for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
             {
-                for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
-                {
-                    compilation.updateAsset(file, source => this.source(file, source), this.info.bind(this));
-                }
+                this.compilation.updateAsset(file, (source) => this.source(file, source), this.info.bind(this));
             }
-        });
-        this.tapStatsPrinter("istanbulTagged", name);
+        }
     }
 
 
@@ -148,7 +141,7 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
  * @function compile
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {WebpackPluginInstance | undefined}
+ * @returns {WpBuildCompilePlugin | undefined}
  */
 const compile = (env, wpConfig) =>
 {

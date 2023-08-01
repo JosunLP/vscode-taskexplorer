@@ -32,23 +32,15 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		this.onApply(compiler);
-        compiler.hooks.compilation.tap(
-			this.name,
-			(compilation) =>
-			{
-				if (!this.onCompilation(compilation)) {
-					return;
-				}
-				const stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
-					  name = `${this.name}${stage}`;
-				compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
-				{
-					this.dupMainEntryFilesNoHash(assets);
-				});
-				this.tapStatsPrinter("copied", name);
-			}
-		);
+        this.onApply(compiler,
+        {
+            dupMain: {
+                hook: "compilation",
+				stage: "ADDITIONAL",
+				statsProperty: "copied",
+                callback: this.dupMainEntryFilesNoHash.bind(this)
+            }
+        });
     }
 
 	/**

@@ -30,8 +30,14 @@ class WpBuildLicenseFilePlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		this.onApply(compiler);
-        compiler.hooks.shutdown.tapPromise(this.name, this.licenseFiles.bind(this));
+        this.onApply(compiler,
+        {
+            checkin: {
+                async: true,
+                hook: "shutdown",
+                callback: this.licenseFiles.bind(this)
+            }
+        });
     }
 
     /**

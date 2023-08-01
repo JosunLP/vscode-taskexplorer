@@ -4,16 +4,13 @@
 
 const WpBuildBasePlugin = require("./base");
 const { writeFileSync, readFileSync, existsSync } = require("fs");
-const { apply, isObjectEmpty, writeInfo, withColor, colors, write, merge } = require("../utils");
+const { apply, isObjectEmpty, writeInfo, withColor, colors, write } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildHashState} WpBuildHashState */
-/** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
+/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {import("../types").WebpackAssetEmittedInfo} WebpackAssetEmittedInfo */
 
 
 /**
@@ -41,16 +38,12 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-        compiler.hooks.done.tap(this.constructor.name, (statsData) =>
+        this.onApply(compiler,
         {
-            if (statsData.hasErrors()) { return; }
-            const stats = statsData.toJson(),
-                  assets = stats.assets?.filter(a => a.type === "asset"),
-                  assetChunks = stats.assetsByChunkName;
-            if (assets && assetChunks)
-            {
-                this.setAssetState(assets);
-                this.saveAssetState();
+            setAssetState: {
+                hook: "afterEmit",
+				statsProperty: "copied",
+                callback: this.setAssetState.bind(this)
             }
         });
     }
@@ -126,21 +119,20 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
 
 
     /**
-     * @function setAssetState
-     * @param {WebpackStatsAsset[]} assets
+     * @function
+     * @private
+     * @param {WebpackCompilation} compilation
      */
-    setAssetState(assets)
+    setAssetState(compilation)
     {
-        Object.keys(assets).forEach((k, i, a) =>
+        compilation.chunks.forEach((chunk) =>
         {
-            const asset = assets.find(a => a.name === assets[k][0]);
-            if (asset && asset.chunkNames)
+            Array.from(chunk.files).filter(f => this.matchObject(f)).forEach((file, idx, arr) =>
             {
-                // write(withColor(`set asset state for ${withColor(asset.name, colors.italic)}`, colors.grey));
-                if (asset.chunkNames && asset.info.contenthash)
+                const asset = compilation.getAsset(file);
+                if (chunk.name &&  asset?.info?.contenthash)
                 {
-                    const chunkName = /** @type {string}*/(asset.chunkNames[0]);
-                    this.options.env.state.hash.next[chunkName] = asset.info.contenthash.toString();
+                    this.options.env.state.hash.next[chunk.name] = asset.info.contenthash.toString();
                     //
                     // Remove any old leftover builds in the dist directory
                     //
@@ -154,11 +146,11 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
                     //         }
                     //     });
                     // }
-                    if (i === a.length - 1) {
+                    if (idx === arr.length - 1) {
                         this.logAssetInfo();
                     }
                 }
-            }
+            });
         });
     };
 
@@ -169,7 +161,7 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
  * @module hash
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack `exports` config object
- * @returns {WebpackPluginInstance | undefined}
+ * @returns {WpBuildHashPlugin | undefined}
  */
 const hash = (env, wpConfig) =>
 {

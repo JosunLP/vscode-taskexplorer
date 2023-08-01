@@ -2,6 +2,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+/**
+ * @module wpbuild.plugin.runtimevars
+ */
+
 const webpack = require("webpack");
 const WpBuildBasePlugin = require("./base");
 const { globalEnv, getEntriesRegex, isString } = require("../utils");
@@ -13,6 +17,7 @@ const { globalEnv, getEntriesRegex, isString } = require("../utils");
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 
 
 /**
@@ -24,10 +29,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      * @class
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
-	constructor(options)
-    {
-        super(options, "runtimevars");
-    }
+	constructor(options) { super(options); /* , "runtimevars"); */ }
 
 
     /**
@@ -37,74 +39,71 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		this.onApply(compiler);
-        compiler.hooks.compilation.tap(this.constructor.name, (compilation) =>
+        this.onApply(compiler,
         {
-            if (!this.onCompilation(compilation)) {
-                return;
+            preprocess: {
+                hook: "compilation",
+                stage: "PRE_PROCESS",
+                callback: this.preprocess.bind(this)
+            },
+            defineVars: {
+                hook: "compilation",
+                stage: "ADDITIONS",
+                statsProperty: "runtimeVars",
+                callback: this.defineVars.bind(this)
             }
-            this.preprocess();
-            this.defineVars();
         });
     }
 
 
     /**
      * @function Collects content hashes from compiled assets
+     * @param {WebpackCompilationAssets} assets
      */
-    preprocess()
+    preprocess(assets)
     {
-        const stage = this.compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_PRE_PROCESS,
-              name = `${this.name}${stage}`;
-              this.compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
+        Object.entries(assets).forEach(([ file, _ ]) =>
         {
-            Object.entries(assets).forEach(([ file, _ ]) =>
+            const info = this.compilation.getAsset(file)?.info;
+            if (info && !info.copied && isString(info.contenthash))
             {
-                const info = this.compilation.getAsset(file)?.info;
-                if (info && !info.copied && isString(info.contenthash))
-                {
-                    globalEnv.runtimevars[file] = info.contenthash;
-                }
-            });
+                globalEnv.runtimevars[file] = info.contenthash;
+            }
         });
     };
 
 
     /**
      * @function
+     * @param {WebpackCompilationAssets} assets
      */
-    defineVars()
+    defineVars(assets)
     {
         const compiler = this.compiler,
-              compilation = this.compilation,
-              stage = compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-              name = `${this.name}${stage}`;
-        compilation.hooks.processAssets.tap({ name, stage }, (assets) =>
+              compilation = this.compilation;
+        Object.entries(assets).filter(([ file, _ ]) => getEntriesRegex(this.options.wpConfig).test(file)).forEach(([ file, sourceInfo ]) =>
         {
-            Object.entries(assets).filter(([ file, _ ]) => getEntriesRegex(this.options.wpConfig).test(file)).forEach(([ file, sourceInfo ]) =>
+            const info = compilation.getAsset(file)?.info || {},
+                    hash = /** @type {string} */(info.contenthash),
+                    { source, map } = sourceInfo.sourceAndMap();
+            let content= source.toString();
+            Object.entries(globalEnv.runtimevars).forEach((define) =>
             {
-                const info = compilation.getAsset(file)?.info || {},
-                      hash = /** @type {string} */(info.contenthash),
-                      { source, map } = sourceInfo.sourceAndMap();
-                let content= source.toString();
-                Object.entries(globalEnv.runtimevars).forEach((define) =>
-                {
-                    const hashDigestLength = compiler.options.output.hashDigestLength || this.options.wpConfig.output.hashDigestLength || 20;
-                    const chunkName = define[0].replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}\\.js`), ""),
-                          regex = new RegExp(`(?:interface_[0-9]+\\.)?__WPBUILD__\\.contentHash(?:\\.|\\[")${chunkName}(?:"\\])? *(,|\r|\n)`, "gm");
-                    content = content.replace(regex, (_v, g) =>`"${hash}"${g}`);
-                });
-                compilation.updateAsset(
-                    file,
-                    map && (compiler.options.devtool || this.options.env.app.plugins.sourcemaps) ?
-                        new compiler.webpack.sources.SourceMapSource(content, file, map) :
-                        new compiler.webpack.sources.RawSource(content),
-                    { ...info, runtimeVars: true }
-                );
+                const hashDigestLength = compiler.options.output.hashDigestLength || this.options.wpConfig.output.hashDigestLength || 20;
+                const chunkName = define[0].replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}\\.js`), ""),
+                        regex = new RegExp(`(?:interface_[0-9]+\\.)?__WPBUILD__\\.contentHash(?:\\.|\\[")${chunkName}(?:"\\])? *(,|\r|\n)`, "gm");
+                content = content.replace(regex, (_v, g) =>`"${hash}"${g}`);
             });
+            compilation.updateAsset(
+                file,
+                map && (compiler.options.devtool || this.options.env.app.plugins.sourcemaps) ?
+                    new compiler.webpack.sources.SourceMapSource(content, file, map) :
+                    new compiler.webpack.sources.RawSource(content),
+                { ...info, runtimeVars: true }
+            );
         });
-        this.tapStatsPrinter("runtimeVars", name);
     };
+
 }
 
 
@@ -123,7 +122,4 @@ const runtimevars = (env, wpConfig) =>
 };
 
 
-/**
- * @module runtimevars
- */
 module.exports = runtimevars;

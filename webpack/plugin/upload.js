@@ -49,13 +49,13 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		this.onApply(compiler);
-        compiler.hooks.afterEmit.tapPromise(this.name, async (compilation) =>
+        this.onApply(compiler,
         {
-            if (!this.onCompilation(compilation)) {
-                return;
+            debugFiles: {
+                async: true,
+                hook: "afterEmit",
+                callback: this.debugSupportFiles.bind(this)
             }
-            await this.debugSupportFiles();
         });
     }
 
