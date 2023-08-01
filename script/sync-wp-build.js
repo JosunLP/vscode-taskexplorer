@@ -12,28 +12,20 @@ const { existsSync, copyFileSync, readFileSync, writeFileSync } = require("fs");
 const COPY_NON_EXISTING_FILES = false;
 const SYNC_PROJECTS = [ "vscode-extjs", "@spmeesseman/logger", "@spmeesseman/test-utils" ];
 
+/** @type {string[]} */
+const notExists = [];
+
+
 //
 // Run from script directtory so we work regardless of where cwd is set
 //
 if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
 
-/** @type {string[]} */
-const notExists = [];
-
-
-const cliWrapper = (execute) =>
-{
-    return (argv) =>
-    {
-        execute(argv).catch(error => {
-            try {
-            console.error(error.message);
-            } catch (_) { }
-            process.exit(1);
-        });
-    };
-};
+//
+// Command line runtime wrapper
+//
+const cliWrap = exe => argv => { exe(argv).catch(e => { try { console.error(e); } catch {} process.exit(1); }); };
 
 
 const copyWpBuildFile = (project, file, dir) =>
@@ -181,4 +173,4 @@ const syncWpBuildFiles = (project) =>
 };
 
 
-cliWrapper(async () => SYNC_PROJECTS.forEach(syncWpBuildFiles))();
+cliWrap(async () => SYNC_PROJECTS.forEach(syncWpBuildFiles))();
