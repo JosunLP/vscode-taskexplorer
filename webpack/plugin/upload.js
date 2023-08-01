@@ -99,12 +99,10 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                 }
                 else if (asset)
                 {
-                    writeInfo(
-                        "unchanged, skip upload ".padEnd(env.app.logPad.value) +
-                        tagColor(file, null, colors.grey).padEnd(env.app.logPad.uploadFileName + (withColorLength(colors.grey) * 2)) +
-                        tagColor(asset.info.contenthash?.toString() || ""),
-                        withColor(figures.info, colors.yellow)
-                    );
+                    const msg = "unchanged, skip upload ".padEnd(env.app.logPad.value),
+                          hash = asset.info.contenthash?.toString() || "",
+                          symbol = withColor(figures.info, colors.yellow);
+                    writeInfo(`${msg}${tagColor(hash)} ${tagColor(file, null, colors.grey)}`, symbol);
                 }
             }
         }
