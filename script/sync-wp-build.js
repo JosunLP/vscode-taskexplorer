@@ -132,7 +132,7 @@ const syncWpBuildPlugins = (project) =>
     //
     if (project.startsWith("vscode-"))
     {
-        copyWpBuildFile(project, "build.js", "webpack/plugin");
+        // copyWpBuildFile(project, "build.js", "webpack/plugin");
         copyWpBuildFile(project, "clean.js", "webpack/plugin");
         copyWpBuildFile(project, "compile.js", "webpack/plugin");
         // if [(project, "= "../../vscode-extjs" ] ; then
