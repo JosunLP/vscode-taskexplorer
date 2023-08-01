@@ -1,44 +1,38 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/naming-convention */
 
-// const COPY_WPBUILDRC = true;
-const COPY_NON_EXISTIN_FILES = true;
+const { glob } = require("glob");
+const { mergeIf } = require("../webpack/utils");
+const { existsSync, copyFileSync, readFileSync, writeFileSync } = require("fs");
 
 
+//
+// CONTROL FLAGS
+//
+const COPY_NON_EXISTING_FILES = false;
+const SYNC_PROJECTS = [ "vscode-extjs", "@spmeesseman/logger", "@spmeesseman/test-utils" ];
+
+//
+// Run from script directtory so we work regardless of where cwd is set
+//
 if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
-const { glob } = require("glob");
-const { existsSync, copyFileSync, readFileSync, writeFileSync } = require("fs");
 
 /** @type {string[]} */
 const notExists = [];
 
 
-const clone = (item) =>
+const cliWrapper = (execute) =>
 {
-    if (!item) {
-        return item;
-    }
-    if (isDate(item)) {
-        return new Date(item.getTime());
-    }
-    if (isArray(item))
+    return (argv) =>
     {
-        let i = item.length;
-        const c = [];
-        while (i--) { c[i] = clone(item[i]); }
-        return c;
-    }
-    if (isObject(item))
-    {
-        const c = {};
-        Object.keys((item)).forEach((key) =>
-        {
-            c[key] = clone(item[key]);
+        execute(argv).catch(error => {
+            try {
+            console.error(error.message);
+            } catch (_) { }
+            process.exit(1);
         });
-        return c;
-    }
-    return item;
+    };
 };
 
 
@@ -47,7 +41,7 @@ const copyWpBuildFile = (project, file, dir) =>
     const srcFile=`../${dir}/${file}`,
           destFile=`../../${project}/${dir}/${file}`;
 
-    if (COPY_NON_EXISTIN_FILES || existsSync(destFile))
+    if (COPY_NON_EXISTING_FILES || existsSync(destFile))
     {
         copyFileSync(srcFile, destFile);
         if (project.includes("@spmeesseman/"))
@@ -95,69 +89,6 @@ const doCustomFileActions = (project) =>
 };
 
 
-const isObject = (v, allowArray) => !!v && (v instanceof Object || typeof v === "object") && (allowArray || !isArray(v));
-
-
-const isArray = (v, allowEmp) => !!v && Array.isArray(v) && (allowEmp !== false || v.length > 0);
-
-
-const isDate = (v) => !!v && Object.prototype.toString.call(v) === "[object Date]";
-
-
-const merge = (...destination) =>
-{
-    const ln = destination.length;
-    for (let i = 1; i < ln; i++)
-    {
-        const object = destination[i];
-        Object.keys(object).forEach((key) =>
-        {
-            const value = object[key];
-            if (isObject(value))
-            {
-                const sourceKey = destination[0][key];
-                if (isObject(sourceKey))
-                {
-                    merge(sourceKey, value);
-                }
-                else {
-                    destination[0][key] = clone(value);
-                }
-            }
-            else {
-                destination[0][key] = value;
-            }
-        });
-    }
-    return destination[0];
-};
-
-
-const mergeIf = (...destination) =>
-{
-    const ln = destination.length;
-    for (let i = 1; i < ln; i++)
-    {
-        const object = destination[i];
-        for (const key in object)
-        {
-            if (!(key in destination[0]))
-            {
-                const value = object[key];
-                if (isObject(value))
-                {
-                    destination[0][key] = clone(value);
-                }
-                else {
-                    destination[0][key] = value;
-                }
-            }
-        }
-    }
-    return destination[0];
-};
-
-
 const syncWpBuildExports = (project) =>
 {
     copyWpBuildFile(project, "context.js", "webpack/exports");
@@ -201,9 +132,9 @@ const syncWpBuildPlugins = (project) =>
     //
     if (project.startsWith("vscode-"))
     {
-        // copyWpBuildFile(project, "build.js", "webpack/plugin");
-        // copyWpBuildFile(project, "clean.js", "webpack/plugin");
-        // copyWpBuildFile(project, "compile.js", "webpack/plugin");
+        copyWpBuildFile(project, "build.js", "webpack/plugin");
+        copyWpBuildFile(project, "clean.js", "webpack/plugin");
+        copyWpBuildFile(project, "compile.js", "webpack/plugin");
         // if [(project, "= "../../vscode-extjs" ] ; then
         //    copyWpBuildFile(project, "tscheck.js", "webpack/plugin");
         // fi
@@ -250,6 +181,4 @@ const syncWpBuildFiles = (project) =>
 };
 
 
-syncWpBuildFiles("vscode-extjs");
-syncWpBuildFiles("@spmeesseman/logger");
-syncWpBuildFiles("@spmeesseman/test-utils");
+cliWrapper(async () => SYNC_PROJECTS.forEach(syncWpBuildFiles))();

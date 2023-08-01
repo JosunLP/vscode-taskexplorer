@@ -6,6 +6,8 @@
 #
 #   > USE sync-wp-build.js
 #
+#   LEFT ONLY FOR BASH SCRIPT REFEREENCE
+#
 # DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!!
 #
 
