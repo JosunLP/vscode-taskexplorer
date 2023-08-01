@@ -1,6 +1,15 @@
 
 #!/bin/bash
 
+#
+# DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!
+#
+#   > USE sync-wp-build.js
+#
+# DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!!  DEPRECATED!!!!!!!
+#
+
+
 cd "$(dirname ${BASH_SOURCE[0]})"
 
 

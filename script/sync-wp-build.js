@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/naming-convention */
 
+// const COPY_WPBUILDRC = true;
+const COPY_NON_EXISTIN_FILES = true;
+
+
 if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
 const { glob } = require("glob");
@@ -15,7 +19,7 @@ const copyWpBuildFile = (project, file, dir) =>
     const srcFile=`../${dir}/${file}`,
           destFile=`../../${project}/${dir}/${file}`;
 
-    if (existsSync)
+    if (COPY_NON_EXISTIN_FILES || existsSync(destFile))
     {
         copyFileSync(srcFile, destFile);
         if (project.includes("@spmeesseman/"))
@@ -60,6 +64,60 @@ const doCustomFileActions = (project) =>
             }
         }
     });
+};
+
+
+const merge = (...destination) =>
+{
+    const ln = destination.length;
+    for (let i = 1; i < ln; i++)
+    {
+        const object = destination[i];
+        Object.keys(object).forEach((key) =>
+        {
+            const value = object[key];
+            if (isObject(value))
+            {
+                const sourceKey = destination[0][key];
+                if (isObject(sourceKey))
+                {
+                    merge(sourceKey, value);
+                }
+                else {
+                    destination[0][key] = clone(value);
+                }
+            }
+            else {
+                destination[0][key] = value;
+            }
+        });
+    }
+    return destination[0];
+};
+
+
+const mergeIf = (...destination) =>
+{
+    const ln = destination.length;
+    for (let i = 1; i < ln; i++)
+    {
+        const object = destination[i];
+        for (const key in object)
+        {
+            if (!(key in destination[0]))
+            {
+                const value = object[key];
+                if (isObject(value))
+                {
+                    destination[0][key] = clone(value);
+                }
+                else {
+                    destination[0][key] = value;
+                }
+            }
+        }
+    }
+    return destination[0];
 };
 
 
@@ -113,9 +171,8 @@ const syncWpBuildPlugins = (project) =>
         copyWpBuildFile(project, "copy.js", "webpack/plugin");
         copyWpBuildFile(project, "html.js", "webpack/plugin");
         copyWpBuildFile(project, "sourcemaps.js", "webpack/plugin");
-        const destFile=`../../${project}//webpack/plugin/sourcemaps.js`,
-              contents = readFileSync(destFile, "utf8")
-                         .replace(/vendor\|runtime\|tests/gi, "vendor|runtime|tests|serverInterface");
+        const destFile=`../../${project}/webpack/plugin/sourcemaps.js`,
+              contents = readFileSync(destFile, "utf8").replace(/vendor\|runtime\|tests/gi, "vendor|runtime|tests|serverInterface");
         writeFileSync(destFile, contents);
     }
 };
@@ -134,7 +191,15 @@ const syncWpBuildFiles = (project) =>
     copyWpBuildFile(project, "webpack.config.js", ".");
     // copyWpBuildFile(project, "sync-wp-build.js", "script");
     // copyWpBuildFile(project, "sync-wp-build.sh", "script");
-    copyWpBuildFile(project, ".wpbuildrc.json", "webpack");
+    // if (COPY_WPBUILDRC) {
+    // copyWpBuildFile(project, ".wpbuildrc.json", "webpack");
+    const srcFile="../webpack/.wpbuildrc.json",
+            destFile=`../../${project}/webpack/.wpbuildrc.json`,
+            srcRc = JSON.parse(readFileSync(srcFile, "utf8")),
+            destRc = JSON.parse(readFileSync(destFile, "utf8")),
+            newRc = mergeIf(destRc, srcRc);
+    writeFileSync(destFile, JSON.stringify(newRc, null, 4));
+    // }
     copyWpBuildFile(project, "index.d.ts", "webpack/types");
     syncWpBuildUtils(project);
     syncWpBuildExports(project);

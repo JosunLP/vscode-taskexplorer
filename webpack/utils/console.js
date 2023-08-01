@@ -33,6 +33,17 @@ const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + col
 
 
 /**
+ * @function
+ * @param {string} msg
+ * @param {[ number, number ]} [bracketColor] surrounding bracket color value
+ * @param {[ number, number ]} [msgColor] msg color value
+ * @returns {string}
+ */
+const tagColor = (msg, bracketColor, msgColor) => withColor("[", bracketColor || colors.blue) +
+                                                  withColor(msg, msgColor || colors.white)  +
+                                                  withColor("]", bracketColor || colors.blue);
+
+/**
  * @param {[ number, number ]} color color value
  * @param {string} [msg] message to include in length calculation
  * @returns {number}
@@ -131,6 +142,7 @@ const figures =
 module.exports = {
     colors,
     figures,
+    tagColor,
     withColor,
     withColorLength,
     write,

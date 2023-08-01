@@ -4,7 +4,7 @@
 
 const WpBuildBasePlugin = require("./base");
 const { writeFileSync, readFileSync, existsSync } = require("fs");
-const { apply, colors, isObjectEmpty, writeInfo, withColor, write } = require("../utils");
+const { apply, colors, isObjectEmpty, writeInfo, withColor, write, tagColor } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -63,7 +63,7 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.previous).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.current[k], colors.blue))
+                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + tagColor(hashInfo.current[k]))
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
@@ -73,7 +73,7 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.current).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + withColor(hashInfo.current[k], colors.blue))
+                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + tagColor(hashInfo.current[k]))
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
@@ -83,7 +83,7 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
         if (!isObjectEmpty(hashInfo.next))
         {
             Object.keys(hashInfo.next).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + hashInfo.next[k]) // withColor(hashInfo.next[k], colors.blue))
+                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + tagColor(hashInfo.next[k]))
             );
         }
         else if (!isObjectEmpty(hashInfo.current) && rotated === true) {
@@ -125,9 +125,9 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
     setAssetState(compilation)
     {
         this.compilation = compilation;
-        compilation.chunks.forEach((chunk) =>
+        Array.from(compilation.chunks).forEach((chunk, idx, arr) =>
         {
-            Array.from(chunk.files).filter(f => this.matchObject(f)).forEach((file, idx, arr) =>
+            Array.from(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
             {
                 const asset = compilation.getAsset(file);
                 if (chunk.name &&  asset?.info?.contenthash)
@@ -146,11 +146,9 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
                     //         }
                     //     });
                     // }
-                    if (idx === arr.length - 1) {
-                        this.logAssetInfo();
-                    }
                 }
             });
+            if (idx === arr.length - 1) { this.logAssetInfo(); }
         });
     };
 

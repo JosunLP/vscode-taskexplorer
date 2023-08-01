@@ -100,8 +100,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                 else if (asset)
                 {
                     writeInfo(
-                        `asset ${withColor(`${chunk.name}|${file}`, colors.italic)} ` +
-                            `${withColor(`unchanged, skip upload [${asset.info.contenthash}`, colors.grey)}]`,
+                        `asset '${chunk.name}|${file}' ${withColor(`unchanged, skip upload [${asset.info.contenthash}]`, colors.grey)}`,
                         withColor(figures.info, colors.yellow)
                     );
                 }

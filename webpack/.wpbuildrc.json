@@ -4,6 +4,7 @@
     "detailedDisplayName": "Task Explorer VSCode Extension",
     "publicInfoProject": true,
     "logPad": {
+        "values": 30,
         "plugin": {
             "compilation": 20,
             "loghooks": {
