@@ -27,6 +27,7 @@ const { writeInfo, figures, withColor, colors } = require("../utils/console");
 /** @typedef {import("../types").WpBuildHashState} WpBuildHashState */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
@@ -62,18 +63,19 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
     /**
      * @function
      * @private
+     * @param {WebpackCompilation} compilation
      * @throws {WebpackError}
      */
-    async debugSupportFiles()
+    async debugSupportFiles(compilation)
     {   //
         // `The lBasePath` variable is a temp directory that we will create in the in
         // the OS/env temp dir.  We will move only files that have changed content there,
         // and perform only one upload when all builds have completed.
         //
         const env = this.options.env,
-              compilation = this.compilation,
               toUploadPath = join(env.paths.temp, env.environment);
 
+        this.compilation = compilation;
         if (!existsSync(toUploadPath)) {
             await mkdir(toUploadPath);
         }

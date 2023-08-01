@@ -29,7 +29,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      * @class
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
-	constructor(options) { super(options); /* , "runtimevars"); */ }
+	constructor(options) { super(options, "runtimevars"); }
 
 
     /**

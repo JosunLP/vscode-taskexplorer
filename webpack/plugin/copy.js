@@ -49,9 +49,11 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 */
 	dupMainEntryFilesNoHash(assets)
 	{
+console.log("1111111111111111111111: " + this.options.force);
 		const entriesRgx = getEntriesRegex(this.options.wpConfig);
 		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
 		{
+console.log("2222222222222222222: " + file);
 			const source = sourceInfo.source(),
 				  hashDigestLength = this.compiler.options.output.hashDigestLength ||  this.options.wpConfig.output.hashDigestLength || 20,
 				  ccFileName = file.replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}`), ""),
@@ -70,9 +72,11 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			// }
 			if (!dstAsset)
 			{
+console.log("33333333333333333333: " + file);
 				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 			else if (this.options.force) {
+console.log("44444444444444444: " + file);
 				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 		});

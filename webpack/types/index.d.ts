@@ -162,19 +162,18 @@ declare type WpBuildPluginCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | 
                                                  "OPTIMIZE_COUNT" | "OPTIMIZE_COMPATIBILITY" | "OPTIMIZE_SIZE" |
                                                  "DEV_TOOLING" | "OPTIMIZE_INLINE" | "SUMMARIZE" | "OPTIMIZE_HASH" |
                                                  "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT"
-declare type WpBuildPluginCompilationHookCallback = (assets: WebpackCompilationAssets) => void | Promise<void>;
-declare type WpBuildPluginCompilerHookCallback = (compiler: WebpackCompiler) => void | Promise<void>;
 interface IWpBuildPluginTapOptions
 {
     async?: boolean;
     hook: string | "compilation";
-    callback: WpBuildPluginCompilationHookCallback | WpBuildPluginCompilerHookCallback;
+    callback: ((assets: WebpackCompilationAssets) => void | Promise<void>) | ((compiler: WebpackCompiler) => void | Promise<void>);
     stage?: WpBuildPluginCompilationHookStage;
     statsProperty?: string;
 }
-// declare type WpBuildPluginTapOptions = Readonly<IWpBuildPluginTapOptions>;
-declare type WpBuildPluginApplyOptions = Record<string, IWpBuildPluginTapOptions>
-declare type WpBuildPluginTapOptions = Record<string, IWpBuildPluginTapOptions>
+declare type WpBuildPluginApplyOptions = Readonly<IWpBuildPluginTapOptions>
+declare type WpBuildPluginTapOptions = Readonly<IWpBuildPluginTapOptions>
+declare type WpBuildPluginApplyOptionsHash = Record<string, IWpBuildPluginTapOptions>
+declare type WpBuildPluginTapOptionsHash  = Record<string, IWpBuildPluginTapOptions>
 
 export {
     WebpackAsset,
@@ -208,10 +207,10 @@ export {
     WpBuildPackageJson,
     WpBuildPluginOptions,
     WpBuildPluginApplyOptions,
-    WpBuildPluginCompilationHookCallback,
-    WpBuildPluginCompilerHookCallback,
+    WpBuildPluginApplyOptionsHash,
     WpBuildPluginCompilationHookStage,
     WpBuildPluginTapOptions,
+    WpBuildPluginTapOptionsHash,
     WpBuildRuntimeVariables,
     WpBuildWebpackArgs,
     __WPBUILD__

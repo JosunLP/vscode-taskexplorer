@@ -32,7 +32,6 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
 
     /**
      * @function Called by webpack runtime to apply this plugin
-     *
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
@@ -125,6 +124,7 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
      */
     setAssetState(compilation)
     {
+        this.compilation = compilation;
         compilation.chunks.forEach((chunk) =>
         {
             Array.from(chunk.files).filter(f => this.matchObject(f)).forEach((file, idx, arr) =>
