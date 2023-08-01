@@ -328,17 +328,13 @@ const readConfigFiles = () =>
     mergeIf(appRc.vscode.webview, { apps: {}, baseDir: "" });
 
     //
-    // LOGPAD PROPERTIES
+    // LOG PROPERTIES
     //
-    if (!appRc.logPad) {
-        appRc.logPad = { value: 30, uploadFileName: 50 };
-    }
-    if (!appRc.logPad.value) {
-        appRc.logPad.value = 30;
-    }
-    if (!appRc.logPad.uploadFileName) {
-        appRc.logPad.uploadFileName = 50;
-    }
+    appRc.logPad = mergeIf(appRc.logPad || {}, { value: 30, uploadFileName: 50 });
+    appRc.colors = mergeIf(appRc.colors || {}, {
+        default: "grey", stageBracket: "cyan", stageText: "white",
+        tagBracket: "blue", tagText: "white", uploadSymbol: "yellow"
+    });
 
     return appRc;
 };

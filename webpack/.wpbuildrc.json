@@ -5,7 +5,7 @@
     "publicInfoProject": true,
     "colors": {
         "default": "grey",
-        "stageBracket": "teal",
+        "stageBracket": "cyan",
         "stageText": "white",
         "tagBracket": "blue",
         "tagText": "white",

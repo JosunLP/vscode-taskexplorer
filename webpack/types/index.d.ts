@@ -79,14 +79,32 @@ declare interface IWpBuildGlobalEnvironment
 }
 declare type WpBuildGlobalEnvironment = IWpBuildGlobalEnvironment & Record<string, any>;
 
+declare type WpBuildLogColor = "black" | "blue" | "green" | "grey" | "red" | "cyan" | "white" | "yellow";
+declare interface IWpBuildLogColorMap
+{
+    default: WpBuildLogColor;
+    stageBracket: WpBuildLogColor;
+    stageText: WpBuildLogColor;
+    tagBracket: WpBuildLogColor;
+    tagText: WpBuildLogColor;
+    uploadSymbol: WpBuildLogColor;
+}
+declare type WpBuildLogColorMap = Required<IWpBuildLogColorMap>;
+declare interface IWpBuildLogPadMap
+{
+    value: number;
+    uploadFileName: number;
+}
+declare type WpBuildLogPadMap = Required<IWpBuildLogPadMap> & Record<string, number>;
 declare interface IWebpackApp
 {
     bannerName: string;                   // Displayed in startup banner detail line
     bannerNameDetailed: string;           // Displayed in startup banner detail line
+    colors: WpBuildLogColorMap;
     displayName: string;                  // displayName (read from package.json)
     exports: Record<string, boolean>;
     publicInfoProject: boolean | string;  // Project w/ private repo that maintains a public `info` project
-    logPad: Record<string, any>;
+    logPad: WpBuildLogPadMap;
     name: string;                         // project name (read from package.json)
     pkgJson: WpBuildPackageJson;
     plugins: Record<string, boolean>;
