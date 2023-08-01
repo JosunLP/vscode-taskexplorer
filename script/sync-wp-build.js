@@ -14,6 +14,34 @@ const { existsSync, copyFileSync, readFileSync, writeFileSync } = require("fs");
 const notExists = [];
 
 
+const clone = (item) =>
+{
+    if (!item) {
+        return item;
+    }
+    if (isDate(item)) {
+        return new Date(item.getTime());
+    }
+    if (isArray(item))
+    {
+        let i = item.length;
+        const c = [];
+        while (i--) { c[i] = clone(item[i]); }
+        return c;
+    }
+    if (isObject(item))
+    {
+        const c = {};
+        Object.keys((item)).forEach((key) =>
+        {
+            c[key] = clone(item[key]);
+        });
+        return c;
+    }
+    return item;
+};
+
+
 const copyWpBuildFile = (project, file, dir) =>
 {
     const srcFile=`../${dir}/${file}`,
@@ -65,6 +93,15 @@ const doCustomFileActions = (project) =>
         }
     });
 };
+
+
+const isObject = (v, allowArray) => !!v && (v instanceof Object || typeof v === "object") && (allowArray || !isArray(v));
+
+
+const isArray = (v, allowEmp) => !!v && Array.isArray(v) && (allowEmp !== false || v.length > 0);
+
+
+const isDate = (v) => !!v && Object.prototype.toString.call(v) === "[object Date]";
 
 
 const merge = (...destination) =>
@@ -126,7 +163,6 @@ const syncWpBuildExports = (project) =>
     copyWpBuildFile(project, "context.js", "webpack/exports");
     copyWpBuildFile(project, "devtool.js", "webpack/exports");
     // copyWpBuildFile(project, "entry.js", "webpack/exports");
-    copyWpBuildFile(project, "environment.js", "webpack/exports");
     copyWpBuildFile(project, "externals.js", "webpack/exports");
     copyWpBuildFile(project, "ignorewarnings.js", "webpack/exports");
     copyWpBuildFile(project, "index.js", "webpack/exports");
@@ -148,20 +184,23 @@ const syncWpBuildPlugins = (project) =>
 {
     copyWpBuildFile(project, "analyze.js", "webpack/plugin");
     copyWpBuildFile(project, "banner.js", "webpack/plugin");
-    copyWpBuildFile(project, "finalize.js", "webpack/plugin");
+    copyWpBuildFile(project, "base.js", "webpack/plugin");
+    copyWpBuildFile(project, "customize.js", "webpack/plugin");
+    copyWpBuildFile(project, "environment.js", "webpack/plugin");
     copyWpBuildFile(project, "hash.js", "webpack/plugin");
     copyWpBuildFile(project, "ignore.js", "webpack/plugin");
     copyWpBuildFile(project, "index.js", "webpack/plugin");
+    copyWpBuildFile(project, "licensefiles.js", "webpack/plugin");
     copyWpBuildFile(project, "loghooks.js", "webpack/plugin");
     copyWpBuildFile(project, "optimization.js", "webpack/plugin");
     copyWpBuildFile(project, "progress.js", "webpack/plugin");
+    copyWpBuildFile(project, "scm.js", "webpack/plugin");
     copyWpBuildFile(project, "upload.js", "webpack/plugin");
     //
     // Files for VSCode extension projects
     //
     if (project.startsWith("vscode-"))
     {
-        // copyWpBuildFile(project, "asset.js", "webpack/plugin");
         // copyWpBuildFile(project, "build.js", "webpack/plugin");
         // copyWpBuildFile(project, "clean.js", "webpack/plugin");
         // copyWpBuildFile(project, "compile.js", "webpack/plugin");
@@ -170,6 +209,7 @@ const syncWpBuildPlugins = (project) =>
         // fi
         copyWpBuildFile(project, "copy.js", "webpack/plugin");
         copyWpBuildFile(project, "html.js", "webpack/plugin");
+        copyWpBuildFile(project, "runtimevars.js", "webpack/plugin");
         copyWpBuildFile(project, "sourcemaps.js", "webpack/plugin");
         const destFile=`../../${project}/webpack/plugin/sourcemaps.js`,
               contents = readFileSync(destFile, "utf8").replace(/vendor\|runtime\|tests/gi, "vendor|runtime|tests|serverInterface");
@@ -181,7 +221,9 @@ const syncWpBuildPlugins = (project) =>
 const syncWpBuildUtils = (project) =>
 {
     copyWpBuildFile(project, "console.js", "webpack/utils");
+    copyWpBuildFile(project, "environment.js", "webpack/utils");
     copyWpBuildFile(project, "global.js", "webpack/utils");
+    copyWpBuildFile(project, "index.js", "webpack/utils");
     copyWpBuildFile(project, "utils.js", "webpack/utils");
 };
 
