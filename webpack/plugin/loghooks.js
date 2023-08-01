@@ -146,7 +146,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 			globalEnv.hooksLog[key] = true;
 			const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
 			writeInfo(`[${withColor(env.build, colors.italic)}][${withColor(wpConfig.target.toString(), colors.italic)}]`
-					  .padEnd(env.app.logPad.plugin.loghooks.buildTag + (withColorLength(colors.italic) * 2)) + hookName);
+					  .padEnd(env.app.logPad.value + (withColorLength(colors.italic) * 2)) + hookName);
 		}
 	};
 

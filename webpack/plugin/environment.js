@@ -57,25 +57,26 @@ const setVersion = (env) =>
  */
 const writeEnvironment = (env) =>
 {
+	const pad = env.app.logPad.value;
 	write("Build Environment:");
 	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
-		(k) => writeInfo(`   ${k.padEnd(15)}: ${env[k]}`)
+		(k) => writeInfo(`   ${k.padEnd(pad - 3)}: ${env[k]}`)
 	);
 	write("Global Environment:");
 	Object.keys(globalEnv).filter(k => typeof globalEnv[k] !== "object").forEach(
-		(k) => writeInfo(`   ${k.padEnd(15)}: ${globalEnv[k]}`)
+		(k) => writeInfo(`   ${k.padEnd(pad - 3)}: ${globalEnv[k]}`)
 	);
 	if (env.argv)
 	{
 		write("Arguments:");
 		if (env.argv.mode) {
-			writeInfo(`   mode           : ${env.argv.mode}`);
+			writeInfo(`   ${"mode".padEnd(pad - 3)}: ${env.argv.mode}`);
 		}
 		if (env.argv.watch) {
-			writeInfo(`   watch          : ${env.argv.watch}`);
+			writeInfo(`   ${"watch".padEnd(pad - 3)}: ${env.argv.watch}`);
 		}
 		if (env.argv.config) {
-			writeInfo(`   config         : ${env.argv.config.join(", ")}`);
+			writeInfo(`   ${"cfg".padEnd(pad - 3)}: ${env.argv.config.join(", ")}`);
 		}
 	}
 };

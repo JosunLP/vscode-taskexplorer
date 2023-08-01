@@ -35,8 +35,8 @@ const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + col
 /**
  * @function
  * @param {string} msg
- * @param {[ number, number ]} [bracketColor] surrounding bracket color value
- * @param {[ number, number ]} [msgColor] msg color value
+ * @param {[ number, number ] | undefined | null} [bracketColor] surrounding bracket color value
+ * @param {[ number, number ] | undefined | null} [msgColor] msg color value
  * @returns {string}
  */
 const tagColor = (msg, bracketColor, msgColor) => withColor("[", bracketColor || colors.blue) +

@@ -57,13 +57,13 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
     {
         const // hashLength = /** @type {Number} */(wpConfig.output?.hashDigestLength),
               hashInfo = this.options.env.state.hash,
-              labelLength = 18; //  + hashLength;
+              labelLength = this.options.env.app.logPad.value; //  + hashLength;
         write(withColor(`final asset state for build environment ${withColor(this.options.env.environment, colors.italic)}`, colors.grey));
         writeInfo("   previous:");
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.previous).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + tagColor(hashInfo.current[k]))
+                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.current[k]))
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
@@ -73,7 +73,7 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.current).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + tagColor(hashInfo.current[k]))
+                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.current[k]))
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
@@ -83,7 +83,7 @@ class WpBuildHashPlugin extends WpBuildBasePlugin
         if (!isObjectEmpty(hashInfo.next))
         {
             Object.keys(hashInfo.next).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength)} : ` + tagColor(hashInfo.next[k]))
+                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.next[k]))
             );
         }
         else if (!isObjectEmpty(hashInfo.current) && rotated === true) {

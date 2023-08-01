@@ -331,24 +331,14 @@ const readConfigFiles = () =>
     // LOGPAD PROPERTIES
     //
     if (!appRc.logPad) {
-        appRc.logPad = { plugin: {}, externals: {} };
+        appRc.logPad = { value: 30, uploadFileName: 50 };
     }
-    if (!appRc.logPad.externals) {
-        appRc.logPad.externals = {};
+    if (!appRc.logPad.value) {
+        appRc.logPad.value = 30;
     }
-    if (!appRc.logPad.plugin) {
-        appRc.logPad.plugin = {};
+    if (!appRc.logPad.uploadFileName) {
+        appRc.logPad.uploadFileName = 50;
     }
-    mergeIf(appRc.logPad.plugin,
-    {
-        compilation: 20,
-        loghooks: {
-            buildTag: 23
-        },
-        upload: {
-            fileList: 45
-        }
-    });
 
     return appRc;
 };

@@ -20,7 +20,7 @@ const { WebpackError } = require("webpack");
 const WpBuildBasePlugin = require("./base");
 const { spawnSync } = require("child_process");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
-const { writeInfo, figures, withColor, colors } = require("../utils/console");
+const { writeInfo, figures, withColor, colors, tagColor, withColorLength } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -100,7 +100,9 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                 else if (asset)
                 {
                     writeInfo(
-                        `asset '${chunk.name}|${file}' ${withColor(`unchanged, skip upload [${asset.info.contenthash}]`, colors.grey)}`,
+                        "unchanged, skip upload ".padEnd(env.app.logPad.value) +
+                        tagColor(file, null, colors.grey).padEnd(env.app.logPad.uploadFileName + (withColorLength(colors.grey) * 2)) +
+                        tagColor(asset.info.contenthash?.toString() || ""),
                         withColor(figures.info, colors.yellow)
                     );
                 }
@@ -163,7 +165,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             filesToUpload.forEach((f) =>
-                writeInfo(`   ${figures.color.up} ${withColor(basename(f).padEnd(env.app.logPad.plugin.upload.fileList), colors.grey)} ${figures.color.successTag}`)
+                writeInfo(`   ${figures.color.up} ${withColor(basename(f).padEnd(env.app.logPad.uploadFileName), colors.grey)} ${figures.color.successTag}`)
             );
             writeInfo(`${figures.color.star} ${withColor("successfully uploaded resource files", colors.grey)}`);
         }
