@@ -98,7 +98,7 @@ declare interface IWpBuildLogPadMap
     uploadFileName: number;
 }
 declare type WpBuildLogPadMap = Required<IWpBuildLogPadMap> & Record<string, number>;
-declare interface IWebpackApp
+declare interface IWpBuildApp
 {
     bannerName: string;                   // Displayed in startup banner detail line
     bannerNameDetailed: string;           // Displayed in startup banner detail line
@@ -113,7 +113,7 @@ declare interface IWebpackApp
     version: string;                      // app version (read from package.json)
     vscode: WebpackVsCodeBuild
 }
-declare type WpBuildApp = IWebpackApp & Record<string, any>;
+declare type WpBuildApp = IWpBuildApp & Record<string, any>;
 
 declare interface IWebpackBuildFilePaths
 {

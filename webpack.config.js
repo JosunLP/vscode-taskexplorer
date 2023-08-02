@@ -3,7 +3,7 @@
 // @ts-check
 
 const {
-	environment, figures, globalEnv, merge, printBanner, readConfigFiles, write, colors, withColor
+	environment, figures, globalEnv, merge, app, write, colors, withColor
 } = require("./webpack/utils");
 
 const {
@@ -31,33 +31,28 @@ const {
  */
 module.exports = (env, argv) =>
 {
-	const app = readConfigFiles();
-	printBanner(app, getMode(env, argv), env);
-
+	const wpa = new app(getMode(env, argv), env);
 	if (env.build)
 	{
-		return getBuildConfig(env, argv, app);
+		return getBuildConfig(env, argv, wpa.rc);
 	}
-
-	if (env.environment === "test")
+	else if (env.environment === "test")
 	{
 		return [
-			getBuildConfig({ ...env, build: "extension" }, argv, app),
-			getBuildConfig({ ...env, build: "webview", environment: "dev" }, argv, app)
+			getBuildConfig({ ...env, build: "extension" }, argv, wpa.rc),
+			getBuildConfig({ ...env, build: "webview", environment: "dev" }, argv, wpa.rc)
 		];
 	}
-
-	if (env.environment === "testprod")
+	else if (env.environment === "testprod")
 	{
 		return [
-			getBuildConfig({ ...env, build: "extension" }, argv, app),
-			getBuildConfig({ ...env, build: "webview", environment: "prod" }, argv, app)
+			getBuildConfig({ ...env, build: "extension" }, argv, wpa.rc),
+			getBuildConfig({ ...env, build: "webview", environment: "prod" }, argv, wpa.rc)
 		];
 	}
-
 	return [
-		getBuildConfig({ ...env, build: "extension" }, argv, app),
-		getBuildConfig({ ...env, build: "webview" }, argv, app)
+		getBuildConfig({ ...env, build: "extension" }, argv, wpa.rc),
+		getBuildConfig({ ...env, build: "webview" }, argv, wpa.rc)
 	];
 };
 
@@ -66,17 +61,17 @@ module.exports = (env, argv) =>
  * @function Calls all exports.* exported functions to cnostruct a build configuration
  * @param {Partial<WpBuildEnvironment>} env Webpack build environment
  * @param {WpBuildWebpackArgs} argv Webpack command line args
- * @param {WpBuildApp} app Webpack app config, read from `.wpbuildrc.json` and `package.json`
+ * @param {WpBuildApp} apprc Webpack app config, read from `.wpbuildrc.json` and `package.json`
  * @returns {WebpackConfig}
  */
-const getBuildConfig = (env, argv, app) =>
+const getBuildConfig = (env, argv, apprc) =>
 {
 	const wpc = /** @type {WebpackConfig} */({}),
-		  lApp = merge({}, app),
-		  lEnv = merge({ app: lApp, argv }, env);
-	target(lEnv, wpc);         // Target i.e. "node", "webworker", "tests"
+		  app = merge({}, apprc),
+		  lEnv = merge({ app, argv }, env);
+	target(lEnv, wpc);         // Target i.e. "node", "webworker", "web"
 	write(withColor(`Start Webpack build ${++globalEnv.buildCount } [${lEnv.build}][${lEnv.target}]`, colors.bold), null, false, figures.color.start);
-	environment(lEnv, wpc);    // Base path / Build path
+	environment(lEnv, wpc);    // Environment properties, e.g. paths, etc
 	mode(lEnv, argv, wpc);     // Mode i.e. "production", "development", "none"
 	name(lEnv, wpc);           // Build name / label
 	context(lEnv, wpc);        // Context for build
