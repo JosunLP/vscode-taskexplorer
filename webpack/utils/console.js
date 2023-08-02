@@ -69,12 +69,19 @@ const write = (msg, env, verbose, icon, pad = "") =>
     if (!verbose || globalEnv.verbose)
     {
         let envTag = "";
-        if (env) {
-			envTag = (`${withColor("[", colors.blue)}${env.build}${withColor("][", colors.blue)}` +
-                     `${env.target.toString()}${withColor("]", colors.blue)}`)
-                     .padEnd(env.app.logPad.envTag + (withColorLength(colors.blue) * 3));
+        if (env)
+        {
+            let envTagClr = colors.magenta;
+            if (icon) {
+                if (icon.includes(withColor(figures.info, colors.yellow))) {
+                    envTagClr = colors.yellow;
+                }
+            }
+			envTag = (`${withColor("[", envTagClr)}${env.build}${withColor("][", envTagClr)}` +
+                     `${env.target.toString()}${withColor("]", envTagClr)}`)
+                     .padEnd(env.app.logPad.envTag + (withColorLength(envTagClr) * 3));
         }
-        console.log(`${basePad}${pad}${icon || figures.color.info}${envTag}${msg ? " " + msg : ""}`);
+        console.log(`${basePad}${pad}${icon || figures.color.info}${envTag ? " " + envTag : ""}${msg ? " " + msg : ""}`);
     }
 };
 
@@ -93,12 +100,19 @@ const writeInfo = (msg, env, verbose, icon, pad = "") =>
     if (!verbose || globalEnv.verbose)
     {
         let envTag = "";
-        if (env) {
-			envTag = (`${withColor("[", colors.blue)}${env.build}${withColor("][", colors.blue)}` +
-                     `${env.target.toString()}${withColor("]", colors.blue)}`)
-                     .padEnd(env.app.logPad.envTag + (withColorLength(colors.blue) * 3));
+        if (env)
+        {
+            let envTagClr = colors.magenta;
+            if (icon) {
+                if (icon.includes(withColor(figures.info, colors.yellow))) {
+                    envTagClr = colors.yellow;
+                }
+            }
+			envTag = (`${withColor("[", envTagClr)}${env.build}${withColor("][", envTagClr)}` +
+                     `${env.target.toString()}${withColor("]", envTagClr)}`)
+                     .padEnd(env.app.logPad.envTag + (withColorLength(envTagClr) * 3));
         }
-        console.log(`${basePad}${pad}${icon || figures.color.info}${envTag}${msg ? " " + withColor(msg, colors.grey) : ""}`);
+        console.log(`${basePad}${pad}${icon || figures.color.info}${envTag ? " " + envTag : ""}${msg ? " " + withColor(msg, colors.grey) : ""}`);
     }
 };
 
