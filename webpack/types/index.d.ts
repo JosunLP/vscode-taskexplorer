@@ -55,7 +55,7 @@ declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
     target: WebpackTarget;
     verbosity: WebpackLogLevel;
 }
-declare type WpBuildEnvironment = Required<IWpBuildEnvironment>;
+declare type WpBuildEnvironment = IWpBuildEnvironment;
 
 declare interface IWpBuildPackageJson
 {
@@ -124,7 +124,7 @@ declare type WebpackBuildFilePaths = Required<IWebpackBuildFilePaths> & Record<s
 declare interface IWebpackVsCodeBuild
 {
     webview: {
-        baseDIr: string;
+        baseDir: string;
         apps: Record<string, string>;     // in key/value for of `webviewsapp: "path/to/entry"`
     }
 }
@@ -136,7 +136,6 @@ declare interface IWpBuildPaths
     build: string;                        // base/root level dir path of project
     cache: string;
     dist: string;                         // output directory ~ wpConfig.output.path ~ compiler.options.output.path
-    distBuild: string;                    // distribution path - release/debug mode specific
     files: WebpackBuildFilePaths;
     temp: string;                         // operating system temp directory
 }

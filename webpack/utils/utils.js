@@ -108,9 +108,10 @@ const getEntriesRegex = (wpConfig, dbg, ext, hash) =>
 
 
 /**
- * @param {any} v Variable to check to see if it's an array
+ * @template {{}} [T=Record<string, any>]
+ * @param {T} v Variable to check to see if it's an array
  * @param {boolean} [allowArray] If `true`, return true if v is an array
- * @returns {v is {}}
+ * @returns {v is T}
  */
 const isObject = (v, allowArray) => !!v && (v instanceof Object || typeof v === "object") && (allowArray || !isArray(v));
 
@@ -146,8 +147,8 @@ const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanc
 
 /**
  * @function
- * @template {Record<string, any>} [T=Record<string, any>]
- * @param {...Record<string, any>} destination
+ * @template {{}} [T=Record<string, any>]
+ * @param {...Partial<T>} destination
  * @returns {T}
  */
 const merge = (...destination) =>
@@ -267,15 +268,14 @@ const printBanner = (app, mode, env) =>
  */
 const readConfigFiles = () =>
 {
-    /** @type {WpBuildApp} */
-    const appRc = {},
-          rcPath = resolve(__dirname, "..", ".wpbuildrc.json"),
-          pkgJsonPath = resolve(__dirname, "..", "..", "package.json");
+    const appRc = /** @type {WpBuildApp} */({});
+    let rcPath = resolve(__dirname, "..", ".wpbuildrc.json"),
+        pkgJsonPath = resolve(__dirname, "..", "..", "package.json");
     //
     // Read .wpbuildrc
     //
     try
-    {   if (existsSync(rcPath))
+    {   if (existsSync(rcPath) || existsSync(rcPath = resolve(__dirname, "..", "..", ".wpbuildrc.json")))
         {
             merge(appRc, JSON.parse(readFileSync(rcPath, "utf8")));
         }
@@ -291,7 +291,7 @@ const readConfigFiles = () =>
     // Read package.json
     //
     try
-    {   if (existsSync(pkgJsonPath))
+    {   if (existsSync(pkgJsonPath) || existsSync(pkgJsonPath = resolve(__dirname, "..", "..", "..", "package.json")))
         {
             const props = [ // needs to be in sync with the properties of `WpBuildPackageJson`
                 "author", "displayName", "name", "description", "main", "module", "publisher", "version"
@@ -306,8 +306,8 @@ const readConfigFiles = () =>
             throw new WebpackError("Could not locate package.json");
         }
     }
-    catch {
-        throw new WebpackError("Could not parse package.json, check syntax");
+    catch (e) {
+        throw new WebpackError("Could not parse package.json, check syntax: " + e.message);
     }
 
     if (!appRc.plugins) {
@@ -343,7 +343,7 @@ const readConfigFiles = () =>
     if (!appRc.vscode) {
         appRc.vscode = /** @type {WebpackVsCodeBuild} */({});
     }
-    mergeIf(appRc.vscode, { webview: { apps: {}, baseDIr: "" }});
+    mergeIf(appRc.vscode, { webview: { apps: {}, baseDir: "" }});
     mergeIf(appRc.vscode.webview, { apps: {}, baseDir: "" });
 
     //
