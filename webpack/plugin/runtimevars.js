@@ -121,24 +121,26 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         const env = this.env,
               hashCurrent = env.state.hash.current;
         writeInfo(`check asset states from ${withColor(env.paths.files.hash, colors.italic)}`, true);
-        Object.entries(assets).forEach(([ file, _ ]) =>
+        asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
         {
-            const info = this.compilation.getAsset(file)?.info;
-            if (info && !info.copied && isString(info.contenthash))
+            const chunkName = /** @type {string} */(chunk.name);
+            asArray(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
             {
-                if (!hashCurrent[file]) {
-                    hashCurrent[file] = info.contenthash;
-                    writeInfo("   updated contenthash for " + withColor(file, colors.italic), true);
-                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}empty}`, true);
-                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${info.contenthash}`, true);
+                if (!hashCurrent[chunkName])
+                {
+                    hashCurrent[chunkName] = chunk.contentHash.javascript;
+                    writeInfo("updated contenthash for " + withColor(file, colors.italic));
+                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}empty}`);
+                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`);
                 }
-                if (hashCurrent[file] !==  info.contenthash) {
-                    hashCurrent[file] = info.contenthash;
-                    writeInfo("   updated stale contenthash for " + withColor(file, colors.italic), true);
-                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}${hashCurrent[file]}`, true);
-                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${info.contenthash}`, true);
+                if (hashCurrent[chunkName] !==  chunk.contentHash.javascript)
+                {
+                    hashCurrent[chunkName] = chunk.contentHash.javascript;
+                    writeInfo("updated stale contenthash for " + withColor(file, colors.italic));
+                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}${hashCurrent[file]}`);
+                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`);
                 }
-            }
+            });
         });
     };
 

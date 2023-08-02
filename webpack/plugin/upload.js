@@ -83,7 +83,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
             {
                 const asset = compilation.getAsset(file);;
-                if (asset && asset.info.related && chunk.name && env.state.hash.next[chunk.name] !== env.state.hash.current[chunk.name])
+                if (asset && asset.info.related && chunk.name && (env.state.hash.next[chunk.name] !== env.state.hash.current[chunk.name] || !env.state.hash.previous[chunk.name]))
                 {
                     await copyFile(join(env.paths.dist, file), join(toUploadPath, file));
                     if (asset.info.related.sourceMap)

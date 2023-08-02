@@ -9,7 +9,7 @@
 const path = require("path");
 const WpBuildBasePlugin = require("./base");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const { readdirSync, unlinkSync } = require("fs");
+const { readdirSync, unlinkSync, existsSync } = require("fs");
 const { join } = require("path");
 const { apply } = require("../utils");
 
@@ -80,15 +80,18 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
      */
 	staleAssets(stats)
 	{
-		const hashDigestLength = this.compiler.options.output.hashDigestLength || this.wpConfig.output.hashDigestLength || 20;
-		readdirSync(this.env.paths.dist).filter(p => (new RegExp(`\\.[a-z0-9]{${hashDigestLength},}`).test(p))).forEach((file) =>
+		if (existsSync(this.env.paths.dist))
 		{
-			const assets = stats.compilation.getAssets(),
-				  clean = !assets.find(a => a.name === file);
-			if (clean) {
-				unlinkSync(join(this.env.paths.dist, file));
-			}
-		});
+			const hashDigestLength = this.compiler.options.output.hashDigestLength || this.wpConfig.output.hashDigestLength || 20;
+			readdirSync(this.env.paths.dist).filter(p => (new RegExp(`\\.[a-z0-9]{${hashDigestLength},}`).test(p))).forEach((file) =>
+			{
+				const assets = stats.compilation.getAssets(),
+					clean = !assets.find(a => a.name === file);
+				if (clean) {
+					unlinkSync(join(this.env.paths.dist, file));
+				}
+			});
+		}
 	}
 
 }
