@@ -93,7 +93,7 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
     sourceObj(file, content, sourceInfo)
     {
         const { source, map } = sourceInfo.sourceAndMap();
-        return map && (this.compiler.options.devtool || this.options.env.app.plugins.sourcemaps) ?
+        return map && (this.compiler.options.devtool || this.env.app.plugins.sourcemaps) ?
                new this.compiler.webpack.sources.SourceMapSource(content, file, map, source) :
                new this.compiler.webpack.sources.RawSource(content);
     }
@@ -131,7 +131,7 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
     //     const { source, map } = osourceInfold.sourceAndMap(),
     //           regex = /\n[ \t]*module\.exports \= require\(/gm,
     //           content = source.toString().replace(regex, (v) => "/* istanbul ignore next */" + v);
-    //     return map && (compiler.options.devtool || this.options.env.app.plugins.sourcemaps) ?
+    //     return map && (compiler.options.devtool || this.env.app.plugins.sourcemaps) ?
     //            new compiler.webpack.sources.SourceMapSource(content, file, map) :
     //            new compiler.webpack.sources.RawSource(content);
     // }

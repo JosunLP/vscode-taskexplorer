@@ -70,7 +70,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
         // the OS/env temp dir.  We will move only files that have changed content there,
         // and perform only one upload when all builds have completed.
         //
-        const env = this.options.env,
+        const env = this.env,
               toUploadPath = join(env.paths.temp, env.environment);
 
         this.compilation = compilation;
@@ -82,7 +82,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
         {
             for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
             {
-                const asset = compilation.getAsset(file);;
+                const asset = compilation.getAsset(file);
                 if (asset && asset.info.related && chunk.name && (env.state.hash.next[chunk.name] !== env.state.hash.current[chunk.name] || !env.state.hash.previous[chunk.name]))
                 {
                     await copyFile(join(env.paths.dist, file), join(toUploadPath, file));

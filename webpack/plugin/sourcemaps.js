@@ -30,7 +30,7 @@ const sourcemaps = (env, wpConfig) =>
         const options =
         {
             test: /\.(js|jsx)($|\?)/i,
-            exclude: /((vendor|runtime|tests)(?:\.debug|)\.js|node_modules)/,
+            exclude: /(?:node_modules|(?:vendor|runtime|tests)(?:\.[a-f0-9]{16,})?\.js)/,
             filename: "[name].js.map",
             //
             // The bundled node_modules will produce reference tags within the main entry point
@@ -54,7 +54,7 @@ const sourcemaps = (env, wpConfig) =>
             fallbackModuleFilenameTemplate: "[absolute-resource-path]?[hash]"
         };
         if (isTests) {
-            options.exclude = /((vendor|runtime)(?:\.debug|)\.js|node_modules)/;
+            options.exclude = /(?:node_modules|(?:vendor|runtime)(?:\.[a-f0-9]{16,})?\.js)/;
         }
         plugin = new webpack.SourceMapDevToolPlugin(options);
     }

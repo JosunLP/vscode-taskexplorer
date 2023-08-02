@@ -37,7 +37,7 @@ class WpBuildPreBuildPlugin extends WpBuildBasePlugin
                 callback: () =>
 				{
 					this.buildTypes();
-					if (this.options.env.isTests) {
+					if (this.env.isTests) {
 						this.buildTests();
 					}
 				}

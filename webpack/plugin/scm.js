@@ -61,7 +61,7 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
                 // sshAuth,  // auth key
                 // "-q",  // quiet, don't show statistics
                 "-r",     // copy directories recursively
-                `${user}@${host}:${this.options.env.app.name}/v${this.options.env.app.version}"`
+                `${user}@${host}:${this.env.app.name}/v${this.env.app.version}"`
             ];
 
             writeInfo(`${figures.color.star } ${withColor(`check in resource files to ${host}`, colors.grey)}`);
