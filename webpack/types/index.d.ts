@@ -93,6 +93,7 @@ declare interface IWpBuildLogColorMap
 declare type WpBuildLogColorMap = Required<IWpBuildLogColorMap>;
 declare interface IWpBuildLogPadMap
 {
+    envTag: number;
     value: number;
     uploadFileName: number;
 }

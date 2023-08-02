@@ -2,8 +2,10 @@
 
 const { globalEnv } = require("./global");
 
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+
 /**
- * @module wpbuildutils.console
+ * @module wpbuild.utils.console
  */
 
 const basePad = "";
@@ -42,7 +44,7 @@ const withColor = (msg, color) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + col
  * @returns {string}
  */
 const tagColor = (msg, bracketColor, msgColor) => withColor("[", bracketColor || colors.blue) +
-                                                  withColor(msg, msgColor || colors.white)  +
+                                                  withColor(msg, msgColor || colors.grey)  +
                                                   withColor("]", bracketColor || colors.blue);
 
 /**
@@ -56,15 +58,23 @@ const withColorLength = (color, msg) => (2 + color[0].toString().length + 1 + (m
 /**
  * @function
  * @param {string} msg
+ * @param {WpBuildEnvironment | null} [env]
  * @param {boolean} [verbose]
  * @param {string} [icon]
  * @param {string} [pad]
  * @returns {void}
  */
-const write = (msg, verbose, icon, pad = "") =>
+const write = (msg, env, verbose, icon, pad = "") =>
 {
-    if (!verbose || globalEnv.verbose) {
-        console.log(`${basePad}${pad}${icon || figures.color.info}${msg ? " " + msg : ""}`);
+    if (!verbose || globalEnv.verbose)
+    {
+        let envTag = "";
+        if (env) {
+			envTag = (`${withColor("[", colors.blue)}${env.build}${withColor("][", colors.blue)}` +
+                     `${env.target.toString()}${withColor("]", colors.blue)}`)
+                     .padEnd(env.app.logPad.envTag + (withColorLength(colors.blue) * 3));
+        }
+        console.log(`${basePad}${pad}${icon || figures.color.info}${envTag}${msg ? " " + msg : ""}`);
     }
 };
 
@@ -72,15 +82,23 @@ const write = (msg, verbose, icon, pad = "") =>
 /**
  * @function
  * @param {string} msg
+ * @param {WpBuildEnvironment | null} [env]
  * @param {boolean} [verbose]
  * @param {string} [icon]
  * @param {string} [pad]
  * @returns {void}
  */
-const writeInfo = (msg, verbose, icon, pad = "") =>
+const writeInfo = (msg, env, verbose, icon, pad = "") =>
 {
-    if (!verbose || globalEnv.verbose) {
-        console.log(`${basePad}${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
+    if (!verbose || globalEnv.verbose)
+    {
+        let envTag = "";
+        if (env) {
+			envTag = (`${withColor("[", colors.blue)}${env.build}${withColor("][", colors.blue)}` +
+                     `${env.target.toString()}${withColor("]", colors.blue)}`)
+                     .padEnd(env.app.logPad.envTag + (withColorLength(colors.blue) * 3));
+        }
+        console.log(`${basePad}${pad}${icon || figures.color.info}${envTag}${msg ? " " + withColor(msg, colors.grey) : ""}`);
     }
 };
 

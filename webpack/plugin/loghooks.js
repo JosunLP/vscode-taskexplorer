@@ -121,10 +121,10 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 		this.addCompilerHook("additionalPass");
 		this.addCompilerHook("failed", /** @param {Error} e */(e) =>
 		{
-			writeInfo(" ", figures.color.error);
-			writeInfo("Error Details:", figures.color.error);
-			writeInfo(`   ${e.message}`, figures.color.error);
-			writeInfo(" ", figures.color.error);
+			writeInfo(" ", this.env, false, figures.color.error);
+			writeInfo("Error Details:", this.env, false, figures.color.error);
+			writeInfo(`   ${e.message}`, this.env, false, figures.color.error);
+			writeInfo(" ", this.env, false, figures.color.error);
 		});
 		this.addCompilerHook("invalid");
 		this.addCompilerHook("watchRun");
@@ -145,8 +145,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 		{
 			globalEnv.hooksLog[key] = true;
 			const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			writeInfo(`hook [${withColor(env.build, colors.italic)}][${withColor(wpConfig.target.toString(), colors.italic)}]`
-					  .padEnd(env.app.logPad.value + (withColorLength(colors.italic) * 2)) + hookName);
+			writeInfo("build stage started".padEnd(env.app.logPad.value) + hookName, env);
 		}
 	};
 

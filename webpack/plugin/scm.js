@@ -75,8 +75,8 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
                 writeInfo(`${figures.color.star} ${withColor("successfully checked in resource files", colors.grey)}`);
             }
             catch (e) {
-                writeInfo("error checking in resource files", figures.color.error);
-                writeInfo("   " + e.message.trim(), figures.color.error);
+                writeInfo("error checking in resource files", this.env, false, figures.color.error);
+                writeInfo("   " + e.message.trim(), this.env, false, figures.color.error);
             }
         }
     };

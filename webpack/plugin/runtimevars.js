@@ -77,36 +77,36 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     {
         const hashInfo = this.env.state.hash,
               labelLength = this.env.app.logPad.value;
-        writeInfo(`${rotated ? "read" : "saved"} asset state for build environment ${withColor(this.env.environment, colors.italic)}`);
-        writeInfo("   previous:");
+        writeInfo(`${rotated ? "read" : "saved"} asset state for build environment ${withColor(this.env.environment, colors.italic)}`, this.env);
+        writeInfo("   previous:", this.env);
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.previous).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.current[k]))
+                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.current[k]), this.env)
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
-            writeInfo("      there are no previous hashes stoerd");
+            writeInfo("      there are no previous hashes stoerd", this.env);
         }
-        writeInfo("   current:");
+        writeInfo("   current:", this.env);
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.current).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.current[k]))
+                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.current[k]), this.env)
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
-            writeInfo("      values cleared and moved to 'previous'");
+            writeInfo("      values cleared and moved to 'previous'", this.env);
         }
-        writeInfo("   next:");
+        writeInfo("   next:", this.env);
         if (!isObjectEmpty(hashInfo.next))
         {
             Object.keys(hashInfo.next).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.next[k]))
+                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.next[k]), this.env)
             );
         }
         else if (!isObjectEmpty(hashInfo.current) && rotated === true) {
-            writeInfo("      values cleared and moved to 'current'");
+            writeInfo("      values cleared and moved to 'current'", this.env);
         }
     };
 
@@ -120,7 +120,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     {
         const env = this.env,
               hashCurrent = env.state.hash.current;
-        writeInfo(`check asset states from ${withColor(env.paths.files.hash, colors.italic)}`, true);
+        writeInfo(`check asset states from ${withColor(env.paths.files.hash, colors.italic)}`, env, true);
         asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
         {
             const chunkName = /** @type {string} */(chunk.name);
@@ -129,16 +129,16 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
                 if (!hashCurrent[chunkName])
                 {
                     hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    writeInfo("updated contenthash for " + withColor(file, colors.italic));
-                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}empty}`);
-                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`);
+                    writeInfo("updated contenthash for " + withColor(file, colors.italic), env);
+                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}empty}`, env);
+                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`, env);
                 }
                 if (hashCurrent[chunkName] !==  chunk.contentHash.javascript)
                 {
                     hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    writeInfo("updated stale contenthash for " + withColor(file, colors.italic));
-                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}${hashCurrent[file]}`);
-                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`);
+                    writeInfo("updated stale contenthash for " + withColor(file, colors.italic), env);
+                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}${hashCurrent[file]}`, env);
+                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`, env);
                 }
             });
         });

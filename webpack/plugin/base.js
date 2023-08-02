@@ -6,7 +6,7 @@
  * @module wpbuild.plugin.WpBuildBasePlugin
  */
 
-const { globalEnv, merge, asArray } = require("../utils");
+const { globalEnv, merge, asArray, mergeIf } = require("../utils");
 const { ModuleFilenameHelpers } = require("webpack");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -116,13 +116,12 @@ class WpBuildBasePlugin
         this.env = options.env;
         this.wpConfig = options.wpConfig;
         this.name = this.constructor.name;
-        this.options = this.getOptions(options);
-		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, this.options);
+        this.options = mergeIf(options, { plugins: [] });
+		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, options);
         if (globalCache) {
             this.initGlobalEnvObject(globalCache);
         }
-        this._plugins = [ this ];
-        asArray(options.plugins || []).forEach((plugin) => this._plugins.push(new plugin.ctor(plugin.options)));
+        this._plugins = [ this, ...asArray(options.plugins).map(p => new p.ctor(p.options)) ];
     }
 
 
@@ -147,18 +146,6 @@ class WpBuildBasePlugin
      * @returns {string}
      */
     breakProp(prop) { return prop.replace(/[A-Z]/g, (v) => ` ${v.toLowerCase()}`); }
-
-
-    /**
-     * @function
-     * @private
-     * @param {Partial<WpBuildPluginOptions>} options
-     * @returns {WpBuildPluginOptions}
-     */
-    getOptions(options)
-    {
-        return merge({ env: {}, wpConfig: {}, hookCompiler: {}, hookCompilation: {}}, options);
-    }
 
 
     /**

@@ -12,7 +12,8 @@
         "uploadSymbol": "yellow"
     },
     "logPad": {
-        "value": 26,
+        "envTag": 22,
+        "value": 30,
         "uploadFileName": 50
     },
     "exports": {

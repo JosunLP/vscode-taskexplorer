@@ -3,7 +3,7 @@
 // @ts-check
 
 const {
-	environment, figures, globalEnv, merge, printBanner, readConfigFiles, write
+	environment, figures, globalEnv, merge, printBanner, readConfigFiles, write, colors, withColor
 } = require("./webpack/utils");
 
 const {
@@ -74,8 +74,8 @@ const getBuildConfig = (env, argv, app) =>
 	const wpc = /** @type {WebpackConfig} */({}),
 		  lApp = merge({}, app),
 		  lEnv = merge({ app: lApp, argv }, env);
-	write(`Start Webpack build step ${++globalEnv.buildCount }`, figures.color.start);
 	target(lEnv, wpc);         // Target i.e. "node", "webworker", "tests"
+	write(withColor(`Start Webpack build ${++globalEnv.buildCount } [${lEnv.build}][${lEnv.target}]`, colors.bold), null, false, figures.color.start);
 	environment(lEnv, wpc);    // Base path / Build path
 	mode(lEnv, argv, wpc);     // Mode i.e. "production", "development", "none"
 	name(lEnv, wpc);           // Build name / label

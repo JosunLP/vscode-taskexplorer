@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module wpbuildutils.utils
+ * @module wpbuild.utils.utils
  */
 
 const { resolve } = require("path");
@@ -51,7 +51,7 @@ const apply = (object, config, defaults) =>
  * @param {T | Set<T> | Array<T>} v Variable to check to see if it's an array
  * @param {boolean} [shallow] If `true`, and  `arr` is an array, return a shallow copy
  * @param {boolean} [allowEmpStr] If `false`, return empty array if isString(v) and isEmpty(v)
- * @returns {Array<T>}
+ * @returns {Array<NonNullable<T>>}
  */
 const asArray = (v, shallow, allowEmpStr) => /** @type {Array} */((v instanceof Set ? Array.from(v): (isArray(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []))));
 
@@ -109,7 +109,7 @@ const getEntriesRegex = (wpConfig, dbg, ext, hash) =>
 
 /**
  * @template {{}} [T=Record<string, any>]
- * @param {T} v Variable to check to see if it's an array
+ * @param {T | undefined} v Variable to check to see if it's an array
  * @param {boolean} [allowArray] If `true`, return true if v is an array
  * @returns {v is T}
  */
@@ -148,7 +148,7 @@ const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanc
 /**
  * @function
  * @template {{}} [T=Record<string, any>]
- * @param {...Partial<T>} destination
+ * @param {...(Partial<T>)} destination
  * @returns {T}
  */
 const merge = (...destination) =>
@@ -181,9 +181,10 @@ const merge = (...destination) =>
 
 
 /**
- * @function merge
- * @param {...Record<string, any>} destination
- * @returns {any}
+ * @function
+ * @template {{}} [T=Record<string, any>]
+ * @param {...(Partial<T>)} destination
+ * @returns {T}
  */
 const mergeIf = (...destination) =>
 {
@@ -195,7 +196,7 @@ const mergeIf = (...destination) =>
         {
             if (!(key in destination[0]))
             {
-                const value = object[key];
+                const value = /** @type {Partial<T>} */(object[key]);
                 if (isObject(value))
                 {
                     destination[0][key] = clone(value);
@@ -206,7 +207,7 @@ const mergeIf = (...destination) =>
             }
         }
     }
-    return destination[0];
+    return /** @type {T} */(destination[0]);
 };
 
 
@@ -349,7 +350,7 @@ const readConfigFiles = () =>
     //
     // LOG PROPERTIES
     //
-    appRc.logPad = mergeIf(appRc.logPad || {}, { value: 30, uploadFileName: 50 });
+    appRc.logPad = mergeIf(appRc.logPad || {}, { envTag: 25, value: 45, uploadFileName: 60 });
     appRc.colors = mergeIf(appRc.colors || {}, {
         default: "grey", stageBracket: "cyan", stageText: "white",
         tagBracket: "blue", tagText: "white", uploadSymbol: "yellow"

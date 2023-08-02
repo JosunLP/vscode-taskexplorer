@@ -102,7 +102,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                     const msg = "unchanged, skip upload ".padEnd(env.app.logPad.value),
                           hash = asset.info.contenthash?.toString() || "",
                           symbol = withColor(figures.info, colors.yellow);
-                    writeInfo(`${msg}${tagColor(hash)} ${tagColor(file, null, colors.grey)}`, false, symbol);
+                    writeInfo(`${msg}${tagColor(hash)} ${tagColor(file, null, colors.grey)}`, env, false, symbol);
                 }
             }
         }
@@ -117,7 +117,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
               filesToUpload = await readdir(toUploadPath);
 
         if (filesToUpload.length === 0) {
-            writeInfo("There were no updated assets found to upload");
+            writeInfo("There were no updated assets found to upload", env);
             return;
         }
 
@@ -155,22 +155,22 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"` // uploaded, and created if not exists
         ];
 
-        writeInfo(`${figures.color.star } ${withColor(`upload resource files to ${host}`, colors.grey)}`);
+        writeInfo(`${figures.color.star } ${withColor(`upload resource files to ${host}`, colors.grey)}`, env);
         try {
             writeInfo(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
             spawnSync("plink", plinkArgs, spawnSyncOpts);
-            writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
+            writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`, env);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             filesToUpload.forEach((f) =>
                 writeInfo(`   ${figures.color.up} ${withColor(basename(f).padEnd(env.app.logPad.uploadFileName), colors.grey)} ${figures.color.successTag}`)
             );
-            writeInfo(`${figures.color.star} ${withColor("successfully uploaded resource files", colors.grey)}`);
+            writeInfo(`${figures.color.star} ${withColor("successfully uploaded resource files", colors.grey)}`, env);
         }
         catch (e) {
-            writeInfo("error uploading resource files:", figures.color.error);
+            writeInfo("error uploading resource files:", env, false, figures.color.error);
             filesToUpload.forEach(f => writeInfo(`   ${withColor(figures.up, colors.red)} ${withColor(basename(f), colors.grey)}`, figures.color.error));
-            writeInfo(e.message.trim(), figures.color.error, "   ");
+            writeInfo(e.message.trim(), env, false, figures.color.error, "   ");
         }
         finally {
             await rm(toUploadPath, { recursive: true, force: true });

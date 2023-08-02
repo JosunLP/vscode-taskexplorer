@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @module wpbuildutils.environment
+ * @module wpbuild.utils.environment
  */
 
 const { mergeIf } = require("./utils");
