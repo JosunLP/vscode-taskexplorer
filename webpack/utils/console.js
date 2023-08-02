@@ -1,5 +1,7 @@
 // @ts-check
 
+const { globalEnv } = require("./global");
+
 /**
  * @module wpbuildutils.console
  */
@@ -54,23 +56,33 @@ const withColorLength = (color, msg) => (2 + color[0].toString().length + 1 + (m
 /**
  * @function
  * @param {string} msg
+ * @param {boolean} [verbose]
  * @param {string} [icon]
  * @param {string} [pad]
  * @returns {void}
  */
-const write = (msg, icon, pad = "") =>
-    console.log(`${basePad}${pad}${icon || figures.color.info}${msg ? " " + msg : ""}`);
+const write = (msg, verbose, icon, pad = "") =>
+{
+    if (!verbose || globalEnv.verbose) {
+        console.log(`${basePad}${pad}${icon || figures.color.info}${msg ? " " + msg : ""}`);
+    }
+};
 
 
 /**
  * @function
  * @param {string} msg
+ * @param {boolean} [verbose]
  * @param {string} [icon]
  * @param {string} [pad]
  * @returns {void}
  */
-const writeInfo = (msg, icon, pad = "") =>
-    console.log(`${basePad}${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
+const writeInfo = (msg, verbose, icon, pad = "") =>
+{
+    if (!verbose || globalEnv.verbose) {
+        console.log(`${basePad}${pad}${icon || figures.color.info}${msg ? " " + figures.withColor(msg, figures.colors.grey) : ""}`);
+    }
+};
 
 /*
 const consoleWriteInfo = (msg, icon, forceGrey = true, pad = "") =>

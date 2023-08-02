@@ -24,11 +24,12 @@ const { write, writeInfo, withColor, figures, colors } = require("./console");
 
 
 /**
- * @function apply
+ * @function
+ * @template {Record<string, any>} [T=Record<string, any>]
  * @param {Record<string, any>} object
  * @param {Record<string, any> | undefined} config
  * @param {Record<string, any>} [defaults]
- * @returns {Record<string, any>}
+ * @returns {T}
  */
 const apply = (object, config, defaults) =>
 {
@@ -41,23 +42,25 @@ const apply = (object, config, defaults) =>
             Object.keys(config).forEach((i) => { object[i] = config[i]; });
         }
     }
-    return object;
+    return /** @type {T} */(object);
 };
 
 
 /**
- * @param v Variable to check to see if it's an array
- * @param [shallow] If `true`, and  `arr` is an array, return a shallow copy
- * @param [allowEmpStr] If `false`, return empty array if isString(v) and isEmpty(v)
- * @returns {any[]}
+ * @template T
+ * @param {T | Set<T> | Array<T>} v Variable to check to see if it's an array
+ * @param {boolean} [shallow] If `true`, and  `arr` is an array, return a shallow copy
+ * @param {boolean} [allowEmpStr] If `false`, return empty array if isString(v) and isEmpty(v)
+ * @returns {Array<T>}
  */
-const asArray = (v, shallow, allowEmpStr) => (isArray(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
+const asArray = (v, shallow, allowEmpStr) => /** @type {Array} */((v instanceof Set ? Array.from(v): (isArray(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []))));
 
 
 /**
- * @function clone
+ * @function
+ * @template T
  * @param {any} item
- * @returns {any}
+ * @returns {T}
  */
 const clone = (item) =>
 {
@@ -65,14 +68,14 @@ const clone = (item) =>
         return item;
     }
     if (isDate(item)) {
-        return new Date(item.getTime());
+        return /** @type {T} */(new Date(item.getTime()));
     }
     if (isArray(item))
     {
         let i = item.length;
         const c = [];
         while (i--) { c[i] = clone(item[i]); }
-        return c;
+        return /** @type {T} */(c);
     }
     if (isObject(item))
     {
@@ -81,7 +84,7 @@ const clone = (item) =>
         {
             c[key] = clone(item[key]);
         });
-        return c;
+        return /** @type {T} */(c);
     }
     return item;
 };
@@ -104,18 +107,28 @@ const getEntriesRegex = (wpConfig, dbg, ext, hash) =>
 };
 
 
+/**
+ * @param {any} v Variable to check to see if it's an array
+ * @param {boolean} [allowArray] If `true`, return true if v is an array
+ * @returns {v is {}}
+ */
 const isObject = (v, allowArray) => !!v && (v instanceof Object || typeof v === "object") && (allowArray || !isArray(v));
 
 
+/**
+ * @param {any} v Variable to check to see if it's an array
+ * @param {boolean} [allowEmp] If `true`, return true if v is an empty array
+ * @returns {v is []}
+ */
 const isArray = (v, allowEmp) => !!v && Array.isArray(v) && (allowEmp !== false || v.length > 0);
 
 
 const isDate = (v) => !!v && Object.prototype.toString.call(v) === "[object Date]";
 
 /**
- * @param v Variable to check to see if it's an array
- * @param [allowEmpStr] If `true`, return non-empty if isString(v) and v === ""
- * @returns {boolean}
+ * @param {any} v Variable to check to see if it's an array
+ * @param {boolean} [allowEmpStr] If `true`, return non-empty if isString(v) and v === ""
+ * @returns {v is null | undefined | "" | []}
  */
 const isEmpty = (v, allowEmpStr) => v === null || v === undefined || (!allowEmpStr ? v === "" : false) || (isArray(v) && v.length === 0) || (isObject(v) && isObjectEmpty(v));
 
@@ -123,13 +136,19 @@ const isEmpty = (v, allowEmpStr) => v === null || v === undefined || (!allowEmpS
 const isObjectEmpty = (v) => { if (v) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };
 
 
+/**
+ * @param {any} v Variable to check to see if it's an array
+ * @param {boolean} [notEmpty] If `false`, return false if v is a string of 0-length
+ * @returns {v is string}
+ */
 const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanceof String || typeof v === "string");
 
 
 /**
- * @function merge
+ * @function
+ * @template {Record<string, any>} [T=Record<string, any>]
  * @param {...Record<string, any>} destination
- * @returns {Record<string, any>}
+ * @returns {T}
  */
 const merge = (...destination) =>
 {
@@ -156,7 +175,7 @@ const merge = (...destination) =>
             }
         });
     }
-    return destination[0];
+    return /** @type {T} */(destination[0]);
 };
 
 

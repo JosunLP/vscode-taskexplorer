@@ -6,13 +6,13 @@
  */
 
 const {
-	analyze, banner, build, clean, compile, copy, customize, environment, hash, instrument,
+	analyze, banner, build, clean, compile, copy, customize, environment, instrument,
 	loghooks, ignore,optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck,
 	upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps, scm
 } = require("../plugin");
 
-/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
@@ -27,12 +27,11 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins = [];
 
 	wpConfig.plugins.push(
+		loghooks(env, wpConfig),                 // logs all compiler.hooks.* when they run
 		environment(env, wpConfig),              // compiler.hooks.environment
 		customize(env, wpConfig),                // compiler.hooks.afterEnvironment - custom mods to installed plugins
 		progress(env, wpConfig),
-		loghooks(env, wpConfig),              // logs all compiler.hooks.* when they run
-		hash(env, wpConfig),                     // compiler.hooks.initialize, compiler.hooks.done
-		clean(env, wpConfig),                    // compiler.hooks.emit, compiler.hooks.done
+		...clean(env, wpConfig),                 // compiler.hooks.emit, compiler.hooks.done
 		build(env, wpConfig),                    // compiler.hooks.beforeCompile
 		compile(env, wpConfig),                  // compiler.hooks.compilation - e.g. add istanbul ignores to node-requires
 		runtimevars(env, wpConfig),              // compiler.hooks.compilation

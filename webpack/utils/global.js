@@ -24,7 +24,7 @@ const globalEnv = {
     buildCount: 0,
     cache: JSON.parse(readFileSync(globalCacheFilePath, "utf8")),
     cacheDir,
-    valuePad: 45,
+    verbose: false,
     pkgJson: /** @type {WpBuildPackageJson} */({})
 };
 

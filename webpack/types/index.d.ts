@@ -14,6 +14,7 @@ declare type WebpackConfig = Required<import("webpack").Configuration>;
 declare type WebpackLogger = import("webpack/lib/logging/Logger").Logger;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
 declare type WebpackSource = import("webpack").sources.Source;
+declare type WebpackStats = import("webpack").Stats;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
 declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
@@ -74,8 +75,8 @@ declare interface IWpBuildGlobalEnvironment
     buildCount: number;
     cache: Record<string, any>;
     cacheDir: string;
-    pkgJson: WpBuildPackageJson; 
-    valuePad: number;
+    pkgJson: WpBuildPackageJson;
+    verbose: boolean;
 }
 declare type WpBuildGlobalEnvironment = IWpBuildGlobalEnvironment & Record<string, any>;
 
@@ -170,12 +171,20 @@ declare interface IWpBuildWebpackArgs
 }
 declare type WpBuildWebpackArgs = Readonly<Partial<IWpBuildWebpackArgs>>;
 
+interface IWpBuildPluginVendorOptions
+{
+    ctor: new(...args: any[]) => WebpackPluginInstance,
+    options: Readonly<Record<string, any>>
+}
+declare type WpBuildPluginVendorOptions = Readonly<IWpBuildPluginVendorOptions> & Record<string, any>;
+
 interface IWpBuildPluginOptions
 {
     env: WpBuildEnvironment,
     wpConfig: WebpackConfig,
+    plugins?: WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[]
 }
-declare type WpBuildPluginOptions = Readonly<IWpBuildPluginOptions> & Record<string, any>;
+declare type WpBuildPluginOptions = IWpBuildPluginOptions & Record<string, any>;
 
 
 declare type WpBuildPluginCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIVED" | "ADDITIONS" |  "OPTIMIZE" |
@@ -215,6 +224,7 @@ export {
     WpBuildEnvironment,
     WebpackLogLevel,
     WebpackSource,
+    WebpackStats,
     WebpackStatsAsset,
     WebpackTarget,
     WebpackBuildEnvironment,
@@ -231,6 +241,7 @@ export {
     WpBuildPluginCompilationHookStage,
     WpBuildPluginTapOptions,
     WpBuildPluginTapOptionsHash,
+    WpBuildPluginVendorOptions,
     WpBuildRuntimeVariables,
     WpBuildWebpackArgs,
     __WPBUILD__

@@ -5,8 +5,9 @@ import { Uri, WorkspaceFolder } from "vscode";
 /**
  * @param v Variable to check to see if it's an array
  * @param shallow If `true`, and  `arr` is an array, return a shallow copy
+ * @param allowEmpStr Turn empty string into empty array
  */
-export const asArray = <T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[] => (isArray<T>(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []));
+export const asArray = <T>(v: T | T[] | undefined | null, shallow?: boolean, allowEmpStr?: boolean): T[] => (v instanceof Set ? Array.from<T>(v) : (isArray<T>(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : [])));
 
 
 // export const asObject = <T>(v: T | undefined | null): T => isObject<T>(v) ? v : <T>{};

@@ -12,12 +12,12 @@ const {
 } = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types").WpBuildApp} WpBuildApp */
-/** @typedef {import("./webpack/types").WpBuildWebpackArgs} WpBuildWebpackArgs */
+/** @typedef {import("./webpack/types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("./webpack/types").WpBuildModule} WpBuildModule */
 /** @typedef {import("./webpack/types").WebpackConfig} WebpackConfig */
 /** @typedef {import("./webpack/types").WebpackTarget} WebpackTarget */
-/** @typedef {import("./webpack/types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("./webpack/types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("./webpack/types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("./webpack/types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
 
 

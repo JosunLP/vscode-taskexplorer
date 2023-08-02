@@ -6,7 +6,7 @@
  * @module wpbuild.plugin.compile
  */
 
-const { apply } = require("../utils");
+const { apply, asArray } = require("../utils");
 const WpBuildBasePlugin = require("./base");
 
 /** @typedef {import("../types").WebpackAsset} WebpackAsset */
@@ -57,9 +57,9 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
      */
     istanbulTags(_assets)
     {
-        for (const chunk of Array.from(this.compilation.chunks).filter(c => c.canBeInitial()))
+        for (const chunk of asArray(this.compilation.chunks).filter(c => c.canBeInitial()))
         {
-            for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
+            for (const file of asArray(chunk.files).filter(f => this.matchObject(f)))
             {
                 this.compilation.updateAsset(file, (source) => this.source(file, source), this.info.bind(this));
             }

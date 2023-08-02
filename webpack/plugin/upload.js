@@ -102,7 +102,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                     const msg = "unchanged, skip upload ".padEnd(env.app.logPad.value),
                           hash = asset.info.contenthash?.toString() || "",
                           symbol = withColor(figures.info, colors.yellow);
-                    writeInfo(`${msg}${tagColor(hash)} ${tagColor(file, null, colors.grey)}`, symbol);
+                    writeInfo(`${msg}${tagColor(hash)} ${tagColor(file, null, colors.grey)}`, false, symbol);
                 }
             }
         }

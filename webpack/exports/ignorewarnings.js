@@ -8,14 +8,14 @@
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 /**
- * @method ignorewarnings
+ * @function ignorewarnings
  * https://webpack.js.org/configuration/other-options/#ignorewarnings
  * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
 const ignorewarnings = (env, wpConfig) =>
 {
-   if (!env.verbosity)
+   if (!env.verbosity || env.verbosity !== "none")
    {
 		wpConfig.ignoreWarnings = [
 			/Critical dependency\: the request of a dependency is an expression/,

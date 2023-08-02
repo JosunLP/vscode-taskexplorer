@@ -7,51 +7,99 @@
  */
 
 const path = require("path");
+const WpBuildBasePlugin = require("./base");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const { readdirSync, unlinkSync } = require("fs");
+const { join } = require("path");
+const { apply } = require("../utils");
 
+/** @typedef {import("../types").WebpackStats} WebpackStats */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
+/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+
+
+
+class WpBuildCleanPlugin extends WpBuildBasePlugin
+{
+    /**
+     * @class WpBuildLicenseFilePlugin
+     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     */
+	constructor(options)
+    {
+        super(
+			apply(options, options.env.clean !== true ? {} :
+			{
+				plugins: [ // Attach CleanWebpackPlugin instance if `options.env.clean` is set
+				{
+					ctor: CleanWebpackPlugin,
+					options: options.env.build === "webview" ? {
+						dry: false,
+						cleanOnceBeforeBuildPatterns: [
+							path.posix.join(options.env.paths.basePath, "css", "**"),
+							path.posix.join(options.env.paths.basePath, "js", "**"),
+							path.posix.join(options.env.paths.basePath, "page", "**")
+						]
+					} : {
+						dry: false,
+						cleanStaleWebpackAssets: true,
+						dangerouslyAllowCleanPatternsOutsideProject: true,
+						cleanOnceBeforeBuildPatterns: [
+							`${options.env.paths.temp}/**`
+						]
+					}
+				}],
+			})
+		);
+    }
+
+    /**
+     * @function Called by webpack runtime to apply this plugin
+     * @param {WebpackCompiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler)
+    {
+		this.onApply(compiler,
+		{
+			staleAssets: {
+				hook: "done",
+				callback: this.staleAssets.bind(this)
+			}
+		});
+	}
+
+
+    /**
+     * @function
+     * @param {WebpackStats} stats the compiler instance
+     * @returns {void}
+     */
+	staleAssets(stats)
+	{
+		const hashDigestLength = this.compiler.options.output.hashDigestLength || this.wpConfig.output.hashDigestLength || 20;
+		readdirSync(this.env.paths.dist).filter(p => (new RegExp(`\\.[a-z0-9]{${hashDigestLength},}`).test(p))).forEach((file) =>
+		{
+			const assets = stats.compilation.getAssets(),
+				  clean = !assets.find(a => a.name === file);
+			if (clean) {
+				unlinkSync(join(this.env.paths.dist, file));
+			}
+		});
+	}
+
+}
 
 
 /**
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {CleanWebpackPlugin | undefined}
+ * @returns {(WpBuildCleanPlugin | WebpackPluginInstance | CleanWebpackPlugin)[]}
  */
-const clean = (env, wpConfig) =>
-{
-    /** @type {CleanWebpackPlugin | undefined} */
-	let plugin;
-	if (env.app.plugins.clean !== false && env.clean === true)
-	{
-		if (env.build === "webview")
-		{
-			const basePath = path.posix.join(env.paths.build.replace(/\\/g, "/"), "res");
-			plugin = new CleanWebpackPlugin(
-			{
-				dry: false,
-				cleanOnceBeforeBuildPatterns: [
-					path.posix.join(basePath, "css", "**"),
-					path.posix.join(basePath, "js", "**"),
-					path.posix.join(basePath, "page", "**")
-				]
-			});
-		}
-		else if (env.isExtension)
-		{
-			plugin = new CleanWebpackPlugin(
-			{
-				dry: false,
-				cleanStaleWebpackAssets: true,
-				dangerouslyAllowCleanPatternsOutsideProject: true,
-				cleanOnceBeforeBuildPatterns: [
-					`${env.paths.temp}/**`
-				]
-			});
-		}
-	}
-	return plugin;
-};
+const clean = (env, wpConfig) => env.app.plugins.clean !== false ? new WpBuildCleanPlugin({ env, wpConfig }).getPlugins() : [];
 
 
 module.exports = clean;
