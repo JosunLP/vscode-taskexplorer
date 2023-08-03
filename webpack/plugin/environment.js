@@ -55,26 +55,26 @@ const setVersion = (env) =>
 const writeEnvironment = (env) =>
 {
 	const logger = env.logger,
-		  pad = env.app.logPad.value;
-		  logger.write("Build Environment:", env);
+		  pad = env.app.log.pad.value;
+		  logger.write("Build Environment:");
 	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
-		(k) => logger.writeInfo(`   ${k.padEnd(pad - 3)}: ${env[k]}`, env)
+		(k) => logger.writeInfo(`   ${k.padEnd(pad - 3)}: ${env[k]}`)
 	);
-	logger.write("Global Environment:", env);
+	logger.write("Global Environment:");
 	Object.keys(globalEnv).filter(k => typeof globalEnv[k] !== "object").forEach(
-		(k) => logger.writeInfo(`   ${k.padEnd(pad - 3)}: ${globalEnv[k]}`, env)
+		(k) => logger.writeInfo(`   ${k.padEnd(pad - 3)}: ${globalEnv[k]}`)
 	);
 	if (env.argv)
 	{
-		logger.write("Arguments:", env);
+		logger.write("Arguments:");
 		if (env.argv.mode) {
-			logger.writeInfo(`   ${"mode".padEnd(pad - 3)}: ${env.argv.mode}`, env);
+			logger.writeInfo(`   ${"mode".padEnd(pad - 3)}: ${env.argv.mode}`);
 		}
 		if (env.argv.watch) {
-			logger.writeInfo(`   ${"watch".padEnd(pad - 3)}: ${env.argv.watch}`, env);
+			logger.writeInfo(`   ${"watch".padEnd(pad - 3)}: ${env.argv.watch}`);
 		}
 		if (env.argv.config) {
-			logger.writeInfo(`   ${"cfg".padEnd(pad - 3)}: ${env.argv.config.join(", ")}`, env);
+			logger.writeInfo(`   ${"cfg".padEnd(pad - 3)}: ${env.argv.config.join(", ")}`);
 		}
 	}
 };

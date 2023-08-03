@@ -131,7 +131,9 @@ class WpBuildApplication
         //
         // LOG PROPERTIES
         //
-        appRc.logPad = mergeIf(appRc.logPad || {}, { base: 0, envTag: 25, value: 45, uploadFileName: 60 });
+        const pad = { base: 0, envTag: 25, value: 45, uploadFileName: 60 };
+        appRc.log = mergeIf(appRc.log || {}, { level: 1, pad: { ...pad } });
+        appRc.logPad = mergeIf(appRc.logPad || {}, { ...pad});
         appRc.colors = mergeIf(appRc.colors || {}, {
             buildBracket: "blue", buildText: "white", default: "grey", stageAsterisk: "cyan",
             stageText: "white", tagBracket: "blue", tagText: "white", uploadSymbol: "yellow"
@@ -183,12 +185,12 @@ class WpBuildApplication
     //  */
     // const spmBanner2 = (app, version) =>
     // {
-    //     return `     ${figures.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________
-    //      ${figures.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  )
-    //      ${figures.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ /
-    //      ${figures.info}    ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  /
-    //      ${figures.info}   (_____/|_|       | /       |_|   |_| (____/   ${version}   \\/
-    //      ${figures.info}                    |/${app.padStart(51 - app.length)}`;
+    //     return `     ${icons.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________
+    //      ${icons.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  )
+    //      ${icons.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ /
+    //      ${icons.info}    ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  /
+    //      ${icons.info}   (_____/|_|       | /       |_|   |_| (____/   ${version}   \\/
+    //      ${icons.info}                    |/${app.padStart(51 - app.length)}`;
     // };
 
 
@@ -200,13 +202,13 @@ class WpBuildApplication
      */
     spmBanner = (logger) =>
     {
-        const figures = logger.figures;
-        return `     ${figures.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
-        ${figures.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
-        ${figures.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
-        ${figures.info}    ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-        ${figures.info}   (_____/|_|       | /       |_|   |_| (____/   ${this.rc.version}  \\/ /        |/  \\:(           \\/           
-        ${figures.info}                    |/${this.rc.displayName.padStart(50 - this.rc.displayName.length)}`;
+        const icons = logger.icons;
+        return `     ${icons.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
+        ${icons.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
+        ${icons.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
+        ${icons.info}    ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
+        ${icons.info}   (_____/|_|       | /       |_|   |_| (____/   ${this.rc.version}  \\/ /        |/  \\:(           \\/           
+        ${icons.info}                    |/${this.rc.displayName.padStart(50 - this.rc.displayName.length)}`;
     };
 
 }

@@ -9,9 +9,10 @@
 const path = require("path");
 const { join } = require("path");
 const WpBuildBasePlugin = require("./base");
-const { spawnSync } = require("child_process");
+const { spawnSync, exec } = require("child_process");
 const { existsSync, unlinkSync } = require("fs");
 const { readdir, readFile, unlink } = require("fs/promises");
+const { WebpackError } = require("webpack");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -77,27 +78,35 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	 */
 	async buildTests(assets)
 	{
-		// const tscArgs = [ "tsc", "-p", "./src/test/tsconfig.json" ];
 		const logger = this.env.logger,
-			  npmArgs = [ "npm", "run", "build-test-suite" ],
-			  testsDir = join(this.env.paths.dist, "tests");
+			  bldDir = this.env.paths.build,
+			  npmArgs =  [ "npx", "tsc", "-p", "./src/test/tsconfig.json" ], // [ "npm", "run", "build-test-suite" ],
+			  testsDir = join(this.env.paths.dist, "test");
 
-		this.env.logger.writeInfo("build tests");
+		logger.writeInfo("build tests");
 
 		if (!existsSync(testsDir))
 		{
-			try { await unlink(path.join(this.env.paths.build, "node_modules", ".cache", "tsconfig.test.tsbuildinfo")); } catch {}
+			try { await unlink(path.join(bldDir, "node_modules", ".cache", "tsconfig.test.tsbuildinfo")); } catch {}
 		}
 
 		// spawnSync("npx", tscArgs, { cwd: env.paths.build, encoding: "utf8", shell: true });
-		spawnSync("npx", npmArgs, { cwd: this.env.paths.build, encoding: "utf8", shell: true });
+		// spawnSync("npx", npmArgs, { cwd: bldDir, encoding: "utf8", shell: true });
+		try {
+			await exec.__promisify__(npmArgs.join(" "), { cwd: bldDir, encoding: "utf8" /* , shell: true */ });
+		}
+		catch (e) {
+			this.compilation.errors.push(new WebpackError(e.message));
+			logger.error(e);
+			return;
+		}
 
 		if (existsSync(testsDir))
 		{
 			const files = await readdir(testsDir);
 			for (const file of files.filter(f => (/\.js/).test(f)))
 			{
-				const source = await readFile(join(this.env.paths.dist, "tests", file)),
+				const source = await readFile(join(testsDir, file)),
 					  dstAsset = this.compilation.getAsset(file);
 				// let cacheEntry;
 				// this.logger.debug(`getting cache for '${absoluteFilename}'...`);
@@ -110,17 +119,17 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 				// }
 				if (!dstAsset)
 				{
-					logger.writeInfo("   emit asset".padEnd(this.env.app.logPad.value) + file);
+					logger.value("   emit asset", file);
 					this.compilation.emitAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
 				}
 				else if (this.options.force) {
-					logger.writeInfo("   update asset".padEnd(this.env.app.logPad.value) + file);
+					logger.value("   update asset", file);
 					this.compilation.updateAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
 				}
 			}
 		}
 		else {
-			logger.writeInfo("build tests failed - output directory does not exist", null, this.env.logger.figures.color.warning);
+			logger.warning("build tests failed - output directory does not exist");
 		}
 	}
 

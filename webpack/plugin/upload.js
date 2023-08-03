@@ -95,10 +95,10 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                 }
                 else if (asset)
                 {
-                    const msg = "unchanged, skip upload ".padEnd(env.app.logPad.value),
+                    const msg = "unchanged, skip upload ".padEnd(env.app.log.pad.value),
                           hash = asset.info.contenthash?.toString() || "",
-                          symbol = logger.withColor(logger.figures.info, logger.colors.yellow);
-                    logger.writeInfo(`${msg}${logger.tagColor(hash)} ${logger.tagColor(file, null, logger.colors.grey)}`, env, false, symbol);
+                          icon = logger.withColor(logger.icons.info, logger.colors.yellow);
+                    logger.writeInfo(`${msg}${logger.tagColor(hash)} ${logger.tagColor(file, null, logger.colors.grey)}`, 1, "", icon);
                 }
             }
         }
@@ -113,16 +113,14 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
               filesToUpload = await readdir(toUploadPath);
 
         if (filesToUpload.length === 0) {
-            logger.writeInfo("There were no updated assets found to upload", env);
+            logger.writeInfo("There were no updated assets found to upload");
             return;
         }
 
-        await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
-
-        if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag) {
-            // compilation.errors.push(new WebpackError("Required environment variables for upload are not set"));
-            // return;
-            throw new WebpackError("Required environment variables for upload are not set");
+        if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag)
+        {
+            this.compilation.errors.push(new WebpackError("Required environment variables for upload are not set"));
+            return;
         }
 
         const plinkCmds = [
@@ -151,22 +149,24 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"` // uploaded, and created if not exists
         ];
 
-        logger.writeInfo(`${logger.figures.color.star } ${logger.withColor(`upload resource files to ${host}`, logger.colors.grey)}`, env);
+        await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
+
+        logger.writeInfo(`${logger.icons.color.star } ${logger.withColor(`upload resource files to ${host}`, logger.colors.grey)}`);
         try {
             logger.writeInfo(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
             spawnSync("plink", plinkArgs, spawnSyncOpts);
-            logger.writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`, env);
+            logger.writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             filesToUpload.forEach((f) =>
-                logger.writeInfo(`   ${logger.figures.color.up} ${logger.withColor(basename(f).padEnd(env.app.logPad.uploadFileName), logger.colors.grey)} ${logger.figures.color.successTag}`)
+                logger.writeInfo(`   ${logger.icons.color.up} ${logger.withColor(basename(f).padEnd(env.app.log.pad.uploadFileName), logger.colors.grey)} ${logger.icons.color.successTag}`)
             );
-            logger.writeInfo(`${logger.figures.color.star} ${logger.withColor("successfully uploaded resource files", logger.colors.grey)}`, env);
+            logger.writeInfo(`${logger.icons.color.star} ${logger.withColor("successfully uploaded resource files", logger.colors.grey)}`);
         }
         catch (e) {
-            logger.writeInfo("error uploading resource files:", env, false, logger.figures.color.error);
-            filesToUpload.forEach(f => logger.writeInfo(`   ${logger.withColor(logger.figures.up, logger.colors.red)} ${logger.withColor(basename(f), logger.colors.grey)}`, logger.figures.color.error));
-            logger.writeInfo(e.message.trim(), env, false, logger.figures.color.error, "   ");
+            logger.error("error uploading resource files:");
+            filesToUpload.forEach(f => logger.writeInfo(`   ${logger.withColor(logger.icons.up, logger.colors.red)} ${logger.withColor(basename(f), logger.colors.grey)}`, undefined, "", logger.icons.color.error));
+            logger.error(e);
         }
         finally {
             await rm(toUploadPath, { recursive: true, force: true });

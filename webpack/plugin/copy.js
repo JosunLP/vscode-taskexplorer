@@ -71,11 +71,11 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			// }
 			if (!dstAsset)
 			{
-				this.env.logger.writeInfo("   emit copied asset".padEnd(this.env.app.logPad.value) + ccFileName);
+				this.env.logger.value("   emit copied asset", ccFileName);
 				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 			else if (this.options.force) {
-				this.env.logger.writeInfo("   update copied asset".padEnd(this.env.app.logPad.value) + ccFileName);
+				this.env.logger.value("   update copied asset", ccFileName);
 				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 		});

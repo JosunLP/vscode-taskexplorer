@@ -61,7 +61,7 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
         {
             for (const file of asArray(chunk.files).filter(f => this.matchObject(f)))
             {
-				this.env.logger.writeInfo("   update asset".padEnd(this.env.app.logPad.value) + file);
+				this.env.logger.value("   update asset", file);
                 this.compilation.updateAsset(file, (source) => this.source(file, source), this.info.bind(this));
             }
         }

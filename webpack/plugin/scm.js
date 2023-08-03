@@ -48,7 +48,8 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
     {
         if (globalEnv.scm.callCount === 2 && globalEnv.scm.readyCount > 0)
         {
-            const provider = process.env.WPBUILD_SCM_PROVIDER || "git",
+            const logger = this.env.logger,
+                  provider = process.env.WPBUILD_SCM_PROVIDER || "git",
                   host = process.env.WPBUILD_SCM_HOST,
                   user = process.env.WPBUILD_SCM_USER; // ,
                   // /** @type {import("child_process").SpawnSyncOptions} */
@@ -62,8 +63,7 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
                 "-r",     // copy directories recursively
                 `${user}@${host}:${this.env.app.name}/v${this.env.app.version}"`
             ];
-            const logger = this.env.logger;
-            logger.writeInfo(`${logger.figures.color.star } ${logger.withColor(`check in resource files to ${host}`, logger.colors.grey)}`);
+            logger.writeInfo(`${logger.icons.color.star } ${logger.withColor(`check in resource files to ${host}`, logger.colors.grey)}`);
             try {
                 logger.writeInfo(`   full scm command      : ${provider} ${scmArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
                 //
@@ -71,11 +71,10 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
                 //        -*-and-*- package.json if we add content hash to "main" file name???
                 //
                 // spawnSync(provider, scmArgs, spawnSyncOpts);
-                logger.writeInfo(`${logger.figures.color.star} ${logger.withColor("successfully checked in resource files", logger.colors.grey)}`);
+                logger.writeInfo(`${logger.icons.color.star} ${logger.withColor("successfully checked in resource files", logger.colors.grey)}`);
             }
             catch (e) {
-                logger.writeInfo("error checking in resource files", this.env, false, logger.figures.color.error);
-                logger.writeInfo("   " + e.message.trim(), this.env, false, logger.figures.color.error);
+                logger.error(`error checking in resource files: ${e.message}`);
             }
         }
     };

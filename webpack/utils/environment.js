@@ -6,7 +6,7 @@
  * @module wpbuild.utils.environment
  */
 
-const { mergeIf } = require("./utils");
+const { mergeIf, apply } = require("./utils");
 const { globalEnv } = require("./global");
 const { join, resolve } = require("path");
 const { WebpackError } = require("webpack");
@@ -55,7 +55,7 @@ const setBuildEnvironment = (env) =>
 		}
 		else {
 			const eMsg = "Could not detect build environment";
-			logger.writeInfo("Could not detect build environment", logger.figures.color.error);
+			logger.error("Could not detect build environment");
 			throw new WebpackError(eMsg);
 		}
 	}
@@ -71,6 +71,7 @@ const setBuildEnvironment = (env) =>
 		isExtensionProd: env.build === "extension" || env.build === "browser" && env.environment === "prod",
 		isExtensionTests: env.build === "extension" || env.build === "browser" && env.environment.startsWith("test"),
 		global: globalEnv,
+		logLevel: env.app.log.level || 0,
 		paths: getPaths(env),
 		preRelease: true,
 		state: { hash: { current: {}, next: {}, previous: {} } },
@@ -110,17 +111,18 @@ const getPaths = (env) =>
 	if (!existsSync(temp)) {
 		mkdirSync(temp, { recursive: true });
 	}
-	return {
+	return apply({
 		build, temp,
 		base: env.build !== "webview" ? build : (wvBase ? resolve(build, wvBase) :
 													join(build, "src", "webview", "app")),
 		dist: join(build, "dist"), // = compiler.outputPath = compiler.options.output.path
+		distTests: join(build, "dist", "test"), // = compiler.outputPath = compiler.options.output.path
 		cache: globalEnv.cacheDir,
 		files: {
-			hash: join(globalEnv.cacheDir, `hash.${env.environment}.json`),
+			hashStoreJson: join(globalEnv.cacheDir, `hash.${env.environment}.json`),
 			sourceMapWasm: "node_modules/source-map/lib/mappings.wasm"
 		}
-	};
+	}, env.app.paths || {});
 };
 
 
