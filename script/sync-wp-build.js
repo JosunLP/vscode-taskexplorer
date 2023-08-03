@@ -9,7 +9,7 @@ const { existsSync, copyFileSync, readFileSync, writeFileSync } = require("fs");
 //
 // CONTROL FLAGS
 //
-const COPY_NON_EXISTING_FILES = false;
+const COPY_NON_EXISTING_FILES = true;
 const SYNC_PROJECTS = [ "vscode-extjs", "@spmeesseman/logger", "@spmeesseman/test-utils" ];
 
 /** @type {string[]} */
@@ -86,6 +86,7 @@ const syncWpBuildExports = (project) =>
     copyWpBuildFile(project, "context.js", "webpack/exports");
     copyWpBuildFile(project, "devtool.js", "webpack/exports");
     // copyWpBuildFile(project, "entry.js", "webpack/exports");
+    copyWpBuildFile(project, "experiments.js", "webpack/exports");
     copyWpBuildFile(project, "externals.js", "webpack/exports");
     copyWpBuildFile(project, "ignorewarnings.js", "webpack/exports");
     copyWpBuildFile(project, "index.js", "webpack/exports");
@@ -108,16 +109,24 @@ const syncWpBuildPlugins = (project) =>
     copyWpBuildFile(project, "analyze.js", "webpack/plugin");
     copyWpBuildFile(project, "banner.js", "webpack/plugin");
     copyWpBuildFile(project, "base.js", "webpack/plugin");
+    // copyWpBuildFile(project, "build.js", "webpack/plugin");
+    // copyWpBuildFile(project, "clean.js", "webpack/plugin");
+    // copyWpBuildFile(project, "compile.js", "webpack/plugin");
+    // copyWpBuildFile(project, "copy.js", "webpack/plugin");
     copyWpBuildFile(project, "customize.js", "webpack/plugin");
     copyWpBuildFile(project, "environment.js", "webpack/plugin");
-    copyWpBuildFile(project, "hash.js", "webpack/plugin");
+    // copyWpBuildFile(project, "html.js", "webpack/plugin");
     copyWpBuildFile(project, "ignore.js", "webpack/plugin");
     copyWpBuildFile(project, "index.js", "webpack/plugin");
+    copyWpBuildFile(project, "instrument.js", "webpack/plugin");
     copyWpBuildFile(project, "licensefiles.js", "webpack/plugin");
     copyWpBuildFile(project, "loghooks.js", "webpack/plugin");
     copyWpBuildFile(project, "optimization.js", "webpack/plugin");
     copyWpBuildFile(project, "progress.js", "webpack/plugin");
+    // copyWpBuildFile(project, "runtimevars.js", "webpack/plugin");
     copyWpBuildFile(project, "scm.js", "webpack/plugin");
+    // copyWpBuildFile(project, "sourcemaps.js", "webpack/plugin");
+    // copyWpBuildFile(project, "tscheck.js", "webpack/plugin");
     copyWpBuildFile(project, "upload.js", "webpack/plugin");
     //
     // Files for VSCode extension projects
