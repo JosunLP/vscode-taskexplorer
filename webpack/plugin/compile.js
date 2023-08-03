@@ -56,10 +56,12 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
      */
     istanbulTags(_assets)
     {
+		this.env.logger.writeInfo("perform istanbul tags tasks");
         for (const chunk of asArray(this.compilation.chunks).filter(c => c.canBeInitial()))
         {
             for (const file of asArray(chunk.files).filter(f => this.matchObject(f)))
             {
+				this.env.logger.writeInfo("   update asset".padEnd(this.env.app.logPad.value) + file);
                 this.compilation.updateAsset(file, (source) => this.source(file, source), this.info.bind(this));
             }
         }

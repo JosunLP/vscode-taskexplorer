@@ -44,11 +44,13 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 
 	/**
 	 * @function
+	 * @private
 	 * @param {WebpackCompilationAssets} assets
 	 */
 	dupMainEntryFilesNoHash(assets)
 	{
 		const entriesRgx = getEntriesRegex(this.wpConfig);
+		this.env.logger.writeInfo("duplicate entry modules without hash");
 		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
 		{
 			const source = sourceInfo.source(),
@@ -69,9 +71,11 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			// }
 			if (!dstAsset)
 			{
+				this.env.logger.writeInfo("   emit asset".padEnd(this.env.app.logPad.value) + file);
 				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 			else if (this.options.force) {
+				this.env.logger.writeInfo("   update asset".padEnd(this.env.app.logPad.value) + file);
 				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 		});

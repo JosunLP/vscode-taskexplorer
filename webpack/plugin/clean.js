@@ -85,7 +85,7 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 			readdirSync(this.env.paths.dist).filter(p => (new RegExp(`\\.[a-z0-9]{${hashDigestLength},}`).test(p))).forEach((file) =>
 			{
 				const assets = stats.compilation.getAssets(),
-					clean = !assets.find(a => a.name === file);
+					  clean = !assets.find(a => a.name === file);
 				if (clean) {
 					unlinkSync(join(this.env.paths.dist, file));
 				}

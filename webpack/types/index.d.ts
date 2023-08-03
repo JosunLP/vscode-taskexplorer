@@ -8,6 +8,8 @@ declare type WebpackCache = import("webpack").Cache;
 declare type WebpackCacheFacade = Omit<import("webpack/lib/CacheFacade"), "_name" | "_cache" | "_hashFunction">;
 declare type WebpackChunk = import("webpack").Chunk;
 declare type WebpackCompilation = import("webpack").Compilation;
+declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
+declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
 declare type WebpackCompiler = import("webpack").Compiler;
 declare type WebpackConfig = Required<import("webpack").Configuration>;
@@ -18,7 +20,11 @@ declare type WebpackStats = import("webpack").Stats;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
 declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
-
+declare interface WebpackCompilationParams {
+	normalModuleFactory: WebpackNormalModuleFactory;
+	contextModuleFactory: WebpackContextModuleFactoryy;
+}
+//WebpackCompilationParams
 declare type WebpackTarget = "webworker" | "node" | "web";
 declare type WebpackMode = "none" | "development" | "production";
 declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
@@ -216,7 +222,7 @@ interface IWpBuildPluginTapOptions
 {
     async?: boolean;
     hook: string | "compilation";
-    callback: ((assets: WebpackCompilationAssets) => void | Promise<void>) | ((compiler: WebpackCompiler) => void | Promise<void>);
+    callback: (arg: WebpackCompiler | WebpackCompilationAssets | WebpackCompilationParams) => void | Promise<void>;
     stage?: WpBuildPluginCompilationHookStage;
     statsProperty?: string;
 }
@@ -235,6 +241,7 @@ export {
     WebpackCache,
     WebpackCacheFacade,
     WebpackChunk,
+    WebpackCompilationParams,
     WebpackCompiler,
     WebpackCompilation,
     WebpackCompilationAssets,

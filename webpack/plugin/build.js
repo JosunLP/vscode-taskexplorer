@@ -6,22 +6,26 @@
  * @module wpbuild.plugin.build
  */
 
-const fs = require("fs");
 const path = require("path");
+const { join } = require("path");
 const WpBuildBasePlugin = require("./base");
 const { spawnSync } = require("child_process");
+const { existsSync, unlinkSync } = require("fs");
+const { readdir, readFile, unlink } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
+/** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
 
 
 
 /**
  * @class WpBuildCompilePlugin
  */
-class WpBuildPreBuildPlugin extends WpBuildBasePlugin
+class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 {
     /**
      * @function Called by webpack runtime to apply this plugin
@@ -31,15 +35,22 @@ class WpBuildPreBuildPlugin extends WpBuildBasePlugin
     {
         this.onApply(compiler,
         {
-            types: {
-                hook: "beforeCompile",
-                callback: () =>
-				{
-					this.buildTypes();
-					if (this.env.isTests) {
-						this.buildTests();
-					}
-				}
+            // types: {
+            //     hook: "beforeCompile",
+            //     callback: (params) =>
+			// 	{
+			// 		this.buildTypes(/** @type {WebpackCompilationParams} */(params));
+			// 		if (this.env.isTests) {
+			// 			this.buildTests(/** @type {WebpackCompilationParams} */(params));
+			// 		}
+			// 	}
+            // },
+			typesAndTests: {
+				async: true,
+                hook: "compilation",
+				stage: "ADDITIONAL",
+				statsProperty: "precompile",
+                callback: this.build.bind(this)
             }
         });
     }
@@ -48,30 +59,75 @@ class WpBuildPreBuildPlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
+	 * @param {WebpackCompilationAssets} assets
 	 */
-	buildTests()
+	async build(assets)
 	{
-		const { env } = this.options;
+		await this.buildTypes(assets);
+		if (this.env.isTests) {
+			await this.buildTests(assets);
+		}
+	};
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WebpackCompilationAssets} assets
+	 */
+	async buildTests(assets)
+	{
 		// const tscArgs = [ "tsc", "-p", "./src/test/tsconfig.json" ];
+		const npmArgs = [ "npm", "run", "build-test-suite" ],
+		testsDir = join(this.env.paths.dist, "tests");
+		this.env.logger.writeInfo("build tests");
 		// spawnSync("npx", tscArgs, { cwd: env.paths.build, encoding: "utf8", shell: true });
-		const npmArgs = [ "npm", "run", "build-test-suite" ];
-		spawnSync("npx", npmArgs, { cwd: env.paths.build, encoding: "utf8", shell: true });
+		spawnSync("npx", npmArgs, { cwd: this.env.paths.build, encoding: "utf8", shell: true });
+
+		if (existsSync(testsDir))
+		{
+			const files = await readdir(testsDir);
+			for (const file of files.filter(f => (/\.js/).test(f)))
+			{
+				const source = await readFile(join(this.env.paths.dist, "tests", file)),
+					  dstAsset = this.compilation.getAsset(file);
+				// let cacheEntry;
+				// this.logger.debug(`getting cache for '${absoluteFilename}'...`);
+				// try {
+				// 	cacheEntry = this.cache.get(`${sourceFilename}|${index}`, null, () => {});
+				// }
+				// catch (/** @type {WebpackError} */e) {
+				// 	this.compilation.errors.push(e);
+				// 	return;
+				// }
+				if (!dstAsset)
+				{
+					this.env.logger.writeInfo("   emit asset".padEnd(this.env.app.logPad.value) + file);
+					this.compilation.emitAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
+				}
+				else if (this.options.force) {
+					this.env.logger.writeInfo("   update asset".padEnd(this.env.app.logPad.value) + file);
+					this.compilation.updateAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
+				}
+			}
+		}
 	}
 
 
 	/**
 	 * @function
 	 * @private
+	 * @param {WebpackCompilationAssets} assets
 	 */
-	buildTypes()
+	async buildTypes(assets)
 	{
-		const { env } = this.options;
 		/** @type {import("child_process").SpawnSyncOptions} */
-		const spawnOptions = { cwd: env.paths.build, encoding: "utf8", shell: true };
-		if (!fs.existsSync(path.join(env.paths.build, "types", "dist")))
+		const spawnOptions = { cwd: this.env.paths.build, encoding: "utf8", shell: true };
+		this.env.logger.writeInfo("build types");
+		if (!existsSync(path.join(this.env.paths.build, "types", "dist")))
 		{
 			// try { fs.unlinkSync(path.join(env.paths.build, "node_modules", ".cache", "tsconfig.tsbuildinfo")); } catch {}
-			try { fs.unlinkSync(path.join(env.paths.build, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
+			try { await unlink(path.join(this.env.paths.build, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
 		}
 		// else if (!fs.existsSync(path.join(env.paths.build, "types", "dist", "lib")))
 		// {
@@ -112,10 +168,10 @@ class WpBuildPreBuildPlugin extends WpBuildBasePlugin
 
 /**
  * @param {WpBuildEnvironment} env
- * @returns {WpBuildPreBuildPlugin | undefined}
+ * @returns {WpBuildPreCompilePlugin | undefined}
  */
 const build = (env) =>
-	(env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildPreBuildPlugin({ env }) : undefined);
+	(env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildPreCompilePlugin({ env }) : undefined);
 
 
 module.exports = build;
