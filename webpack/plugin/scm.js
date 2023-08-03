@@ -6,8 +6,8 @@
  * @module wpbuild.plugin.banner
  */
 
-const WpBuildBasePlugin = require("./base");
 const { globalEnv } = require("../utils");
+const WpBuildBasePlugin = require("./base");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */

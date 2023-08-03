@@ -6,9 +6,9 @@
  */
 
 const {
-	analyze, banner, build, clean, compile, copy, customize, environment, instrument,
-	loghooks, ignore,optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck,
-	upload, cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps, scm
+	analyze, banner, build, clean, compile, copy, environment, instrument, loghooks, ignore,
+	optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload, cssextract,
+	htmlcsp, imageminimizer, htmlinlinechunks, vendormod, webviewapps, scm
 } = require("../plugin");
 
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
@@ -27,7 +27,7 @@ const plugins = (env) =>
 	env.wpc.plugins.push(
 		loghooks(env),                 // logs all compiler.hooks.* when they run
 		environment(env),              // compiler.hooks.environment
-		customize(env),                // compiler.hooks.afterEnvironment - custom mods to installed plugins
+		vendormod(env),                // compiler.hooks.afterEnvironment - mods to vendor plugins and/or modules
 		progress(env),                 //
 		...clean(env),                 // compiler.hooks.emit, compiler.hooks.done
 		build(env),                    // compiler.hooks.beforeCompile

@@ -5,9 +5,10 @@ declare type WebpackAsset = import("webpack").Asset;
 declare type WebpackAssetInfo = import("webpack").AssetInfo;
 declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
 declare type WebpackCache = import("webpack").Cache;
-declare type WebpackCacheFacade = Omit<import("webpack/lib/CacheFacade"), "_name" | "_cache" | "_hashFunction">;
+declare type WebpackCacheFacade = ReturnType<WebpackCompilation["getCache"]>;
 declare type WebpackChunk = import("webpack").Chunk;
 declare type WebpackCompilation = import("webpack").Compilation;
+declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
 declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
 declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
@@ -16,6 +17,7 @@ declare type WebpackConfig = Required<import("webpack").Configuration>;
 declare type WebpackLogger = import("webpack/lib/logging/Logger").Logger;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
 declare type WebpackSource = import("webpack").sources.Source;
+declare type WebpackSnapshot = ReturnType<Compilation["fileSystemInfo"]["mergeSnapshots"]>;
 declare type WebpackStats = import("webpack").Stats;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
@@ -257,11 +259,13 @@ export {
     WebpackCompilation,
     WebpackCompilationAssets,
     WebpackConfig,
+    WebpackEtag,
     WebpackLogger,
     WebpackMode,
     WebpackPluginInstance,
     WpBuildEnvironment,
     WebpackLogLevel,
+    WebpackSnapshot,
     WebpackSource,
     WebpackStats,
     WebpackStatsAsset,

@@ -17,6 +17,8 @@ const exec = promisify(require("child_process").exec);
 // const spawn = promisify(require("child_process").spawn);
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
+/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
@@ -115,6 +117,78 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 
 
 	/**
+	 * @private
+	 * @param {WebpackCompilation} compilation
+	 * @param {number} startTime
+	 * @param {string} dependency
+	 * @returns {Promise<WebpackSnapshot | undefined>}
+	 */
+	async createSnapshot(compilation, startTime, dependency)
+	{
+		return new Promise((resolve, reject) =>
+		{
+			compilation.fileSystemInfo.createSnapshot(
+				startTime, [ dependency ], // @ts-ignore
+				undefined, undefined, null,
+				(error, snapshot) =>
+				{
+					if (error) {
+						reject(error);
+					}
+					else {
+						resolve(/** @type {WebpackSnapshot} */snapshot);
+					}
+				}
+			);
+		});
+	}
+
+
+	/**
+	 * @private
+	 * @param {WebpackCompilation} compilation
+	 * @param {WebpackSnapshot} snapshot
+	 * @returns {Promise<boolean | undefined>}
+	 */
+	async checkSnapshotValid(compilation, snapshot)
+	{
+		return new Promise((resolve, reject) =>
+		{
+			compilation.fileSystemInfo.checkSnapshotValid(snapshot, (error, isValid) =>
+			{
+				if (error) {
+					reject(error);
+				}
+				else {
+					resolve(isValid);
+				}
+			});
+		});
+	}
+
+
+	/**
+	 * @private
+	 * @param {WebpackCompiler} compiler
+	 * @param {WebpackCompilation} compilation
+	 * @param {Buffer} source
+	 * @returns {string}
+	 */
+	getContentHash(compiler, compilation, source)
+	{
+		const { outputOptions } = compilation;
+		const {hashDigest, hashDigestLength, hashFunction, hashSalt } = outputOptions;
+		const hash = compiler.webpack.util.createHash(/** @type {string} */hashFunction);
+		if (hashSalt) {
+			hash.update(hashSalt);
+		}
+		hash.update(source);
+		const fullContentHash = hash.digest(hashDigest);
+		return fullContentHash.toString().slice(0, hashDigestLength);
+	}
+
+
+	/**
 	 * @function
 	 * @private
 	 * @param {string} dir
@@ -128,7 +202,7 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 		{
 			child.stdout?.on("data", (data) => void logger.value("   stdout", data));
 			child.stderr?.on("data", (data) => void logger.value("   stderr", data));
-			child.on("close", (code) => void logger.writeInfo(`   build completed with exit code bold(${code})`));
+			child.on("close", (code) => void logger.writeInfo(`   tsc build completed with exit code bold(${code})`));
 
 			const { stdout, stderr } = await procPromise;
 
@@ -141,26 +215,86 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 			for (const filePath of files)
 			{
 				const filePathRel = relative(dir, filePath),
-					  file = basename(filePathRel),
-					  source = await readFile(filePath),
-					  dstAsset = this.compilation.getAsset(file);
-				// let cacheEntry;
-				// this.logger.debug(`getting cache for '${absoluteFilename}'...`);
-				// try {
-				// 	cacheEntry = this.cache.get(`${sourceFilename}|${index}`, null, () => {});
-				// }
-				// catch (/** @type {WebpackError} */e) {
-				// 	this.compilation.errors.push(e);
-				// 	return;
-				// }
-				if (!dstAsset)
+					  file = basename(filePathRel);
+				let source,
+					cacheEntry;
+
+				logger.writeInfo(`   check cache for '${filePathRel}'...`);
+				try {
+					cacheEntry = await this.cache.getPromise(`${filePath}|${index}`, null);
+				}
+				catch (e) {
+					this.compilation.errors.push(e);
+					return;
+				}
+
+				if (cacheEntry)
+				{
+					let isValidSnapshot;
+					logger.writeInfo(`   checking snapshot on valid for '${filePathRel}'...`);
+					try {
+						isValidSnapshot = await this.checkSnapshotValid(this.compilation, cacheEntry.snapshot);
+					}
+					catch (e) {
+						this.compilation.errors.push(/** @type {WebpackError} */e);
+						return;
+					}
+					if (isValidSnapshot)
+					{
+						logger.writeInfo(`   snapshot for '${filePathRel}' is valid`);
+						({ source } = cacheEntry);
+					}
+					else {
+						logger.writeInfo(`   snapshot for '${filePathRel}' is invalid`);
+					}
+				}
+
+				if (!source)
+				{
+					let snapshot;
+					const startTime = Date.now();
+					const data = await readFile(filePath);
+					source = new this.compiler.webpack.sources.RawSource(data);
+					try {
+						snapshot = await this.createSnapshot(this.compilation, startTime, filePath);
+					}
+					catch (e) {
+						this.compilation.errors.push(/** @type {WebpackError} */e);
+						return;
+					}
+					if (snapshot) {
+						logger.writeInfo(`created snapshot for '${filePathRel}'`);
+						logger.writeInfo(`storing cache for '${filePathRel}'...`);
+						try {
+							await this.cache.storePromise(`${filePathRel}|${index}`, null, { source, snapshot });
+						}
+						catch (e) {
+							this.compilation.errors.push(/** @type {WebpackError} */e);
+							return;
+						}
+						logger.writeInfo(`stored cache for '${filePathRel}'`);
+					}
+				}
+
+				const info = {
+					absoluteFilename: filePath,
+					sourceFilename: file,
+					filename: file,
+					precompile: true,
+					development: true,
+					immutable: true
+				};
+
+				const existingAsset = this.compilation.getAsset(file);
+
+				if (!existingAsset)
 				{
 					logger.value("   emit asset", filePathRel);
-					this.compilation.emitAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
+					this.compilation.emitAsset(file, new this.compiler.webpack.sources.RawSource(source), info);
 				}
 				else if (this.options.force) {
 					logger.value("   update asset", filePathRel);
-					this.compilation.updateAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
+					this.compilation.updateAsset(file, new this.compiler.webpack.sources.RawSource(source), info);
 				}
 			}
 		}

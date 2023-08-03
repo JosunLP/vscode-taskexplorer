@@ -2,11 +2,32 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const { environment, globalEnv, merge, app, WpBuildConsoleLogger } = require("./webpack/utils");
+/**
+ * @module webpack.config
+ *
+ * The webpack build package files from the @spmeesseman/wpbuild package are a colleactive set of
+ * organized plugins and export configurations adaptable to a variety of different project builds.
+ *
+ * This file is the default Webpack configuration file that returns a webpack.Configuration object,
+ * or an array of webpack.Configuration objects, to the Webpack engine.
+ *
+ * This file calls calls into each module in exports/* to construct the build config for each
+ * that'sspecified build.  The call to the export/plugins.js module will itself call into each
+ * module located in plugin/*.
+ *
+ * Modules in the  exports directory are generally named to the export property on the webpack
+ * config object, e.g. ruls.js correspnds to the `riles` property, etc.
+ *
+ * Modules located in the plugin directory are generally named after the action that they are
+ * performing, e.g. `loghooks.js` logs each hook  when it starts.  If anything, logging each stage
+ * definitely to gives a good grasp on how a webpack build proceeds.
+ */
 
+
+const { environment, globalEnv, merge, app, WpBuildConsoleLogger } = require("./webpack/utils");
 const {
-	context, devtool, entry, experiments, externals, ignorewarnings, minification, mode, name,
-	plugins, optimization, output, resolve, rules, stats, target, watch, getMode
+	cache, context, devtool, entry, experiments, externals, ignorewarnings, minification,
+	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch, getMode
 } = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types").WpBuildApp} WpBuildApp */
@@ -42,7 +63,7 @@ module.exports = (env, argv) =>
 
 
 /**
- * @function Calls all exports.* exported functions to cnostruct a build configuration
+ * @function Calls all exports.* default expoirts to construct a {@link WebpackConfig webpack build configuration}
  * @param {WpBuildEnvironment} env Webpack build environment
  * @returns {WebpackConfig}
  */
@@ -53,6 +74,7 @@ const buildConfig = (env) =>
 	environment(env);    // Environment properties, e.g. paths, etc
 	mode(env);           // Mode i.e. "production", "development", "none"
 	name(env);           // Build name / label
+	cache(env);          // Asset cache
 	context(env);        // Context for build
 	experiments(env);    // Set any experimental flags that will be used
 	entry(env);          // Entry points for built output

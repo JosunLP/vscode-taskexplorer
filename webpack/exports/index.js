@@ -1,5 +1,6 @@
 // @ts-check
 
+const cache = require("./cache");
 const context = require("./context");
 const devtool = require("./devtool");
 const entry = require("./entry");
@@ -19,6 +20,7 @@ const target = require("./target");
 const watch = require("./watch");
 
 module.exports = {
+    cache,
     context,
     devtool,
 	entry,

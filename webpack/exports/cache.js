@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @module wpbuild.exports.context
+ * @module wpbuild.exports.cache
  */
 
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -11,10 +11,14 @@
  * @function
  * @param {WpBuildEnvironment} env Webpack build environment
  */
-const context = (env) =>
+const cache = (env) =>
 {
-	env.wpc.context = env.paths.base;
+	env.wpc.cache = {
+        type: "memory",
+        maxGenerations: Infinity,
+        cacheUnaffected: true
+    };
 };
 
 
-module.exports = context;
+module.exports = cache;
