@@ -8,9 +8,7 @@
 
 const WpBuildBasePlugin = require("./base");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
-const {
-    isString, apply, withColor, writeInfo, colors, isObjectEmpty, tagColor, asArray
-} = require("../utils");
+const { isString, apply, isObjectEmpty, asArray } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
@@ -75,38 +73,39 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     logAssetInfo(rotated)
     {
-        const hashInfo = this.env.state.hash,
+        const logger = this.env.logger,
+              hashInfo = this.env.state.hash,
               labelLength = this.env.app.logPad.value;
-        writeInfo(`${rotated ? "read" : "saved"} asset state for build environment ${withColor(this.env.environment, colors.italic)}`, this.env);
-        writeInfo("   previous:", this.env);
+        logger.writeInfo(`${rotated ? "read" : "saved"} asset state for build environment ${logger.withColor(this.env.environment, logger.colors.italic)}`, this.env);
+        logger.writeInfo("   previous:", this.env);
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.previous).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.current[k]), this.env)
+                (k) => logger.writeInfo(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.current[k]), this.env)
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
-            writeInfo("      there are no previous hashes stoerd", this.env);
+            logger.writeInfo("      there are no previous hashes stoerd", this.env);
         }
-        writeInfo("   current:", this.env);
+        logger.writeInfo("   current:", this.env);
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.current).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.current[k]), this.env)
+                (k) => logger.writeInfo(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.current[k]), this.env)
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
-            writeInfo("      values cleared and moved to 'previous'", this.env);
+            logger.writeInfo("      values cleared and moved to 'previous'", this.env);
         }
-        writeInfo("   next:", this.env);
+        logger.writeInfo("   next:", this.env);
         if (!isObjectEmpty(hashInfo.next))
         {
             Object.keys(hashInfo.next).forEach(
-                (k) => writeInfo(`      ${k.padEnd(labelLength - 7)} ` + tagColor(hashInfo.next[k]), this.env)
+                (k) => logger.writeInfo(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.next[k]), this.env)
             );
         }
         else if (!isObjectEmpty(hashInfo.current) && rotated === true) {
-            writeInfo("      values cleared and moved to 'current'", this.env);
+            logger.writeInfo("      values cleared and moved to 'current'", this.env);
         }
     };
 
@@ -119,8 +118,9 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     preprocess(assets)
     {
         const env = this.env,
+              logger = env.logger,
               hashCurrent = env.state.hash.current;
-        writeInfo(`check asset states from ${withColor(env.paths.files.hash, colors.italic)}`, env, true);
+        logger.writeInfo(`check asset states from ${logger.withColor(env.paths.files.hash, logger.colors.italic)}`, env, true);
         asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
         {
             const chunkName = /** @type {string} */(chunk.name);
@@ -129,16 +129,16 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
                 if (!hashCurrent[chunkName])
                 {
                     hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    writeInfo("updated contenthash for " + withColor(file, colors.italic), env);
-                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}empty}`, env);
-                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`, env);
+                    logger.writeInfo("updated contenthash for " + logger.withColor(file, logger.colors.italic), env);
+                    logger.writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}empty}`, env);
+                    logger.writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`, env);
                 }
                 if (hashCurrent[chunkName] !==  chunk.contentHash.javascript)
                 {
                     hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    writeInfo("updated stale contenthash for " + withColor(file, colors.italic), env);
-                    writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}${hashCurrent[file]}`, env);
-                    writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`, env);
+                    logger.writeInfo("updated stale contenthash for " + logger.withColor(file, logger.colors.italic), env);
+                    logger.writeInfo(`   ${"previous".padEnd(env.app.logPad.value)}${hashCurrent[file]}`, env);
+                    logger.writeInfo(`   ${"new".padEnd(env.app.logPad.value)}${chunk.contentHash.javascript}`, env);
                 }
             });
         });

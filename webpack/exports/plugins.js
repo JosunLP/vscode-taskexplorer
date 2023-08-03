@@ -27,7 +27,7 @@ const plugins = (env, wpConfig) =>
 	wpConfig.plugins = [];
 
 	wpConfig.plugins.push(
-		loghooks(env, wpConfig),                 // logs all compiler.hooks.* when they run
+		loghooks(env),                           // logs all compiler.hooks.* when they run
 		environment(env, wpConfig),              // compiler.hooks.environment
 		customize(env, wpConfig),                // compiler.hooks.afterEnvironment - custom mods to installed plugins
 		progress(env, wpConfig),

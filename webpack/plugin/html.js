@@ -162,7 +162,7 @@ const imageminimizer = (env, wpConfig) =>
 
 
 /**
- * @param {String[]} apps
+ * @param {string[]} apps
  * @param {WpBuildEnvironment} env
  * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {HtmlPlugin[]}

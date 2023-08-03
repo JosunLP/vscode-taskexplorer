@@ -7,7 +7,6 @@
  */
 
 const { globalEnv } = require("../utils/global");
-const { writeInfo, write } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
@@ -57,26 +56,27 @@ const setVersion = (env) =>
  */
 const writeEnvironment = (env) =>
 {
-	const pad = env.app.logPad.value;
-	write("Build Environment:", env);
+	const logger = env.logger,
+		  pad = env.app.logPad.value;
+		  logger.write("Build Environment:", env);
 	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
-		(k) => writeInfo(`   ${k.padEnd(pad - 3)}: ${env[k]}`, env)
+		(k) => logger.writeInfo(`   ${k.padEnd(pad - 3)}: ${env[k]}`, env)
 	);
-	write("Global Environment:", env);
+	logger.write("Global Environment:", env);
 	Object.keys(globalEnv).filter(k => typeof globalEnv[k] !== "object").forEach(
-		(k) => writeInfo(`   ${k.padEnd(pad - 3)}: ${globalEnv[k]}`, env)
+		(k) => logger.writeInfo(`   ${k.padEnd(pad - 3)}: ${globalEnv[k]}`, env)
 	);
 	if (env.argv)
 	{
-		write("Arguments:", env);
+		logger.write("Arguments:", env);
 		if (env.argv.mode) {
-			writeInfo(`   ${"mode".padEnd(pad - 3)}: ${env.argv.mode}`, env);
+			logger.writeInfo(`   ${"mode".padEnd(pad - 3)}: ${env.argv.mode}`, env);
 		}
 		if (env.argv.watch) {
-			writeInfo(`   ${"watch".padEnd(pad - 3)}: ${env.argv.watch}`, env);
+			logger.writeInfo(`   ${"watch".padEnd(pad - 3)}: ${env.argv.watch}`, env);
 		}
 		if (env.argv.config) {
-			writeInfo(`   ${"cfg".padEnd(pad - 3)}: ${env.argv.config.join(", ")}`, env);
+			logger.writeInfo(`   ${"cfg".padEnd(pad - 3)}: ${env.argv.config.join(", ")}`, env);
 		}
 	}
 };

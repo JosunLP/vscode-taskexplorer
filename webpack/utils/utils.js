@@ -6,13 +6,6 @@
  * @module wpbuild.utils.utils
  */
 
-const { resolve } = require("path");
-const { globalEnv } = require("./global");
-const gradient = require("gradient-string");
-const { WebpackError } = require("webpack");
-const { readFileSync, existsSync } = require("fs");
-const { write, writeInfo, withColor, figures, colors } = require("./console");
-
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
@@ -21,7 +14,6 @@ const { write, writeInfo, withColor, figures, colors } = require("./console");
 /** @typedef {import("../types").WpBuildPackageJson} WpBuildPackageJson */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackVsCodeBuild} WebpackVsCodeBuild */
-
 
 /**
  * @function

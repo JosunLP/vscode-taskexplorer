@@ -7,7 +7,7 @@
  */
 
 const WpBuildBasePlugin = require("./base");
-const { colors, figures, globalEnv, writeInfo, withColor } = require("../utils");
+const { globalEnv } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -63,20 +63,20 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
                 "-r",     // copy directories recursively
                 `${user}@${host}:${this.env.app.name}/v${this.env.app.version}"`
             ];
-
-            writeInfo(`${figures.color.star } ${withColor(`check in resource files to ${host}`, colors.grey)}`);
+            const logger = this.env.logger;
+            logger.writeInfo(`${logger.figures.color.star } ${logger.withColor(`check in resource files to ${host}`, logger.colors.grey)}`);
             try {
-                writeInfo(`   full scm command      : ${provider} ${scmArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
+                logger.writeInfo(`   full scm command      : ${provider} ${scmArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
                 //
                 // TODO - check in any project-info files that were copied
                 //        -*-and-*- package.json if we add content hash to "main" file name???
                 //
                 // spawnSync(provider, scmArgs, spawnSyncOpts);
-                writeInfo(`${figures.color.star} ${withColor("successfully checked in resource files", colors.grey)}`);
+                logger.writeInfo(`${logger.figures.color.star} ${logger.withColor("successfully checked in resource files", logger.colors.grey)}`);
             }
             catch (e) {
-                writeInfo("error checking in resource files", this.env, false, figures.color.error);
-                writeInfo("   " + e.message.trim(), this.env, false, figures.color.error);
+                logger.writeInfo("error checking in resource files", this.env, false, logger.figures.color.error);
+                logger.writeInfo("   " + e.message.trim(), this.env, false, logger.figures.color.error);
             }
         }
     };

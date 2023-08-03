@@ -4,14 +4,11 @@
 
 /**
  * @module wpbuild.plugin.upload
- *
- * Uses 'plink' and 'pscp' from PuTTY package: https://www.putty.org
- *
+ * !!! This module uses 'plink' and 'pscp' from the PuTTY package: https://www.putty.org
  * !!! For first time build on fresh os install:
  * !!!   - create the environment variables WPBUILD_APP1_SSH_AUTH_*
  * !!!   - run a plink command manually to generate and trust the fingerprints:
  * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
- *
  */
 
 const { existsSync } = require("fs");
@@ -20,7 +17,6 @@ const { WebpackError } = require("webpack");
 const WpBuildBasePlugin = require("./base");
 const { spawnSync } = require("child_process");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
-const { writeInfo, figures, withColor, colors, tagColor, withColorLength } = require("../utils/console");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -71,6 +67,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
         // and perform only one upload when all builds have completed.
         //
         const env = this.env,
+              logger = env.logger,
               toUploadPath = join(env.paths.temp, env.environment);
 
         this.compilation = compilation;
@@ -101,8 +98,8 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                 {
                     const msg = "unchanged, skip upload ".padEnd(env.app.logPad.value),
                           hash = asset.info.contenthash?.toString() || "",
-                          symbol = withColor(figures.info, colors.yellow);
-                    writeInfo(`${msg}${tagColor(hash)} ${tagColor(file, null, colors.grey)}`, env, false, symbol);
+                          symbol = logger.withColor(logger.figures.info, logger.colors.yellow);
+                    logger.writeInfo(`${msg}${logger.tagColor(hash)} ${logger.tagColor(file, null, logger.colors.grey)}`, env, false, symbol);
                 }
             }
         }
@@ -117,7 +114,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
               filesToUpload = await readdir(toUploadPath);
 
         if (filesToUpload.length === 0) {
-            writeInfo("There were no updated assets found to upload", env);
+            logger.writeInfo("There were no updated assets found to upload", env);
             return;
         }
 
@@ -155,22 +152,22 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"` // uploaded, and created if not exists
         ];
 
-        writeInfo(`${figures.color.star } ${withColor(`upload resource files to ${host}`, colors.grey)}`, env);
+        logger.writeInfo(`${logger.figures.color.star } ${logger.withColor(`upload resource files to ${host}`, logger.colors.grey)}`, env);
         try {
-            writeInfo(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
+            logger.writeInfo(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
             spawnSync("plink", plinkArgs, spawnSyncOpts);
-            writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`, env);
+            logger.writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`, env);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             filesToUpload.forEach((f) =>
-                writeInfo(`   ${figures.color.up} ${withColor(basename(f).padEnd(env.app.logPad.uploadFileName), colors.grey)} ${figures.color.successTag}`)
+                logger.writeInfo(`   ${logger.figures.color.up} ${logger.withColor(basename(f).padEnd(env.app.logPad.uploadFileName), logger.colors.grey)} ${logger.figures.color.successTag}`)
             );
-            writeInfo(`${figures.color.star} ${withColor("successfully uploaded resource files", colors.grey)}`, env);
+            logger.writeInfo(`${logger.figures.color.star} ${logger.withColor("successfully uploaded resource files", logger.colors.grey)}`, env);
         }
         catch (e) {
-            writeInfo("error uploading resource files:", env, false, figures.color.error);
-            filesToUpload.forEach(f => writeInfo(`   ${withColor(figures.up, colors.red)} ${withColor(basename(f), colors.grey)}`, figures.color.error));
-            writeInfo(e.message.trim(), env, false, figures.color.error, "   ");
+            logger.writeInfo("error uploading resource files:", env, false, logger.figures.color.error);
+            filesToUpload.forEach(f => logger.writeInfo(`   ${logger.withColor(logger.figures.up, logger.colors.red)} ${logger.withColor(basename(f), logger.colors.grey)}`, logger.figures.color.error));
+            logger.writeInfo(e.message.trim(), env, false, logger.figures.color.error, "   ");
         }
         finally {
             await rm(toUploadPath, { recursive: true, force: true });

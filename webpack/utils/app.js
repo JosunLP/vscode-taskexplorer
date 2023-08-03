@@ -10,12 +10,13 @@ const { resolve } = require("path");
 const { globalEnv } = require("./global");
 const gradient = require("gradient-string");
 const { WebpackError } = require("webpack");
+const WpBuildConsoleLogger = require("./console");
 const { readFileSync, existsSync } = require("fs");
 const { merge, pickBy, mergeIf } = require("./utils");
-const { write, writeInfo, withColor, figures, colors } = require("./console");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
+/** @typedef {import("../types").WpBuildAppRc} WpBuildAppRc */
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
@@ -24,10 +25,21 @@ const { write, writeInfo, withColor, figures, colors } = require("./console");
 /** @typedef {import("../types").WebpackVsCodeBuild} WebpackVsCodeBuild */
 
 
+/**
+ * @class
+ * @implements {WpBuildApp}
+ */
 class WpBuildApplication
 {
     /**
-     * @type {WpBuildApp}
+     * @member
+     * @private
+     * @type {WpBuildEnvironment}
+     */
+    env;
+
+    /**
+     * @type {WpBuildAppRc}
      */
     rc;
 
@@ -39,7 +51,7 @@ class WpBuildApplication
      */
     constructor(mode, env)
     {
-        const appRc = /** @type {WpBuildApp} */({});
+        const appRc = /** @type {WpBuildAppRc} */({});
         let rcPath = resolve(__dirname, "..", ".wpbuildrc.json"),
             pkgJsonPath = resolve(__dirname, "..", "..", "package.json");
         //
@@ -120,20 +132,26 @@ class WpBuildApplication
         //
         // LOG PROPERTIES
         //
-        appRc.logPad = mergeIf(appRc.logPad || {}, { envTag: 25, value: 45, uploadFileName: 60 });
+        appRc.logPad = mergeIf(appRc.logPad || {}, { base: 0, envTag: 25, value: 45, uploadFileName: 60 });
         appRc.colors = mergeIf(appRc.colors || {}, {
-            default: "grey", stageBracket: "cyan", stageText: "white",
-            tagBracket: "blue", tagText: "white", uploadSymbol: "yellow"
+            buildBracket: "blue", buildText: "white", default: "grey", stageAsterisk: "cyan",
+            stageText: "white", tagBracket: "blue", tagText: "white", uploadSymbol: "yellow"
         });
 
         this.rc = appRc;
-        this.printBanner(mode, env);
+        this.env = /** @type {WpBuildEnvironment} */(env);
+        this.printBanner(mode);
     };
 
 
-    printLineSep = () =>
+    /**
+     * @function
+     * @private
+     * @param {WpBuildConsoleLogger} logger
+     */
+    printLineSep = (logger) =>
     {
-        writeInfo("------------------------------------------------------------------------------------------------------------------------");
+        logger.writeInfo("------------------------------------------------------------------------------------------------------------------------");
     };
 
 
@@ -141,27 +159,27 @@ class WpBuildApplication
      * @function
      * @private
      * @param {WebpackMode} mode Webpack command line args
-     * @param {Partial<WpBuildEnvironment>} env Webpack build environment
      */
-    printBanner = (mode, env) =>
+    printBanner = (mode) =>
     {
-        this.printLineSep();
+        const logger = new WpBuildConsoleLogger(this.env);
+        this.printLineSep(logger);
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
-        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
-        this.printLineSep();
-        write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.rc.bannerNameDetailed} Webpack Build`));
-        this.printLineSep();
-        write(withColor("   Mode  : ", colors.white) + withColor(mode, colors.grey));
-        write(withColor("   Argv  : ", colors.white) + withColor(JSON.stringify(env.argv), colors.grey));
-        write(withColor("   Env   : ", colors.white) + withColor(JSON.stringify(env), colors.grey));
-        this.printLineSep();
+        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(logger), {interpolation: "hsv"}));
+        this.printLineSep(logger);
+        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.rc.bannerNameDetailed} Webpack Build`));
+        this.printLineSep(logger);
+        logger.write(logger.withColor("   Mode  : ", logger.colors.white) + logger.withColor(mode, logger.colors.grey));
+        logger.write(logger.withColor("   Argv  : ", logger.colors.white) + logger.withColor(JSON.stringify(this.env.argv), logger.colors.grey));
+        logger.write(logger.withColor("   Env   : ", logger.colors.white) + logger.withColor(JSON.stringify(this.env), logger.colors.grey));
+        this.printLineSep(logger);
     };
 
 
     // /**
     //  * @function
-    //  * @param {string} app Application name
-    //  * @param {string} version Application version
+    //  * @private
+    //  * @param {WpBuildConsoleLogger} logger
     //  * @returns {string}
     //  */
     // const spmBanner2 = (app, version) =>
@@ -178,10 +196,12 @@ class WpBuildApplication
     /**
      * @function
      * @private
+     * @param {WpBuildConsoleLogger} logger
      * @returns {string}
      */
-    spmBanner = () =>
+    spmBanner = (logger) =>
     {
+        const figures = logger.figures;
         return `     ${figures.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
         ${figures.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
         ${figures.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //

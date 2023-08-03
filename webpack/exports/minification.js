@@ -14,7 +14,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 
 /**
- * @method
+ * @function
  * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */

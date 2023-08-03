@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+const { globalEnv } = require("../utils");
 const WpBuildBasePlugin = require("./base");
-const { colors, figures, globalEnv, writeInfo, withColor, withColorLength } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -68,7 +68,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 	 */
 	hookSteps()
 	{
-		const { env, wpConfig } = this.options;
+		const logger = this.env.logger;
 		this.addCompilerHook("environment");
 		this.addCompilerHook("afterEnvironment");
 		this.addCompilerHook("entryOption");
@@ -121,10 +121,10 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 		this.addCompilerHook("additionalPass");
 		this.addCompilerHook("failed", /** @param {Error} e */(e) =>
 		{
-			writeInfo(" ", this.env, false, figures.color.error);
-			writeInfo("Error Details:", this.env, false, figures.color.error);
-			writeInfo(`   ${e.message}`, this.env, false, figures.color.error);
-			writeInfo(" ", this.env, false, figures.color.error);
+			logger.writeInfo(" ", this.env, false, logger.figures.color.error);
+			logger.writeInfo("Error Details:", this.env, false, logger.figures.color.error);
+			logger.writeInfo(`   ${e.message}`, this.env, false, logger.figures.color.error);
+			logger.writeInfo(" ", this.env, false, logger.figures.color.error);
 		});
 		this.addCompilerHook("invalid");
 		this.addCompilerHook("watchRun");
@@ -139,13 +139,14 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 	 */
 	writeBuildTag(hook)
 	{
-		const { env, wpConfig } = this.options,
-			  key = hook + wpConfig.name;
+		const logger = this.env.logger,
+			  key = hook +this.env.wpc.name;
 		if (!globalEnv.hooksLog[key])
 		{
 			globalEnv.hooksLog[key] = true;
-			const hookName = `${withColor(figures.star, colors.cyan)} ${hook} ${withColor(figures.star, colors.cyan)}`;
-			writeInfo("build stage started".padEnd(env.app.logPad.value) + hookName, env);
+			const star = logger.withColor(logger.figures.star, logger.colors.cyan),
+				  hookName = `${star} ${hook} ${star}`;
+			logger.writeInfo("build stage started".padEnd(this.env.app.logPad.value) + hookName, this.env);
 		}
 	};
 
@@ -155,11 +156,10 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 /**
  * @function hookSteps
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WpBuildLogHookStagesPlugin | undefined}
  */
-const loghooks = (env, wpConfig) =>
-	(env.app.plugins.loghooks !== false ? new WpBuildLogHookStagesPlugin({ env, wpConfig }) : undefined);
+const loghooks = (env) =>
+	(env.app.plugins.loghooks !== false ? new WpBuildLogHookStagesPlugin({ env, wpConfig: env.wpc }) : undefined);
 
 
 module.exports = loghooks;

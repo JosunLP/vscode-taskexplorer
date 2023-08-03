@@ -12,13 +12,12 @@
 
 /**
  * @function
- * @param {Partial<WpBuildEnvironment>} env Webpack build environment
- * @param {WpBuildWebpackArgs} argv Webpack command line args
+ * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
  */
-const mode = (env, argv, wpConfig) =>
+const mode = (env, wpConfig) =>
 {
-	wpConfig.mode = getMode(env, argv);
+	wpConfig.mode = getMode(env, env.argv);
 	if (!env.environment)
 	{
 		if (wpConfig.mode === "development") {

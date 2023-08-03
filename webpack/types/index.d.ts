@@ -21,10 +21,12 @@ declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
 
 declare type WebpackTarget = "webworker" | "node" | "web";
 declare type WebpackMode = "none" | "development" | "production";
-declare type WebpackBuildEnvironment= "dev" | "prod" | "test" | "testprod";
 declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
 
+declare type WpBuildConsoleLogger = import("../utils").WpBuildConsoleLogger;
+
 declare type WpBuildModule = "browser" | "common" | "extension" | "tests" | "webview";
+declare type WpBuildBuildEnvironment= "dev" | "prod" | "test" | "testprod";
 
 declare interface IWpBuildRuntimeVariables
 {
@@ -34,14 +36,20 @@ declare type WpBuildRuntimeVariables = Required<IWpBuildRuntimeVariables>;
 
 declare const __WPBUILD__: WpBuildRuntimeVariables;
 
-declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
+declare interface IWpBuildWebpackConfig extends WebpackConfig
+{
+
+}
+declare type WpBuildWebpackConfig = Required<IWpBuildWebpackConfig>;
+
+declare interface IWpBuildEnvironment extends IWebpackEnvironmentInternal
 {
     analyze: boolean;                     // parform analysis after build
-    app: WpBuildApp;                      // target js app info
+    app: WpBuildAppRc;                    // target js app info
     argv: WpBuildWebpackArgs,
     build: WpBuildModule;
     clean: boolean;
-    environment: WebpackBuildEnvironment;
+    environment: WpBuildBuildEnvironment;
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
     isExtension: boolean;
@@ -49,11 +57,14 @@ declare interface IWpBuildEnvironment extends WebpackEnvironmentInternal
     isExtensionTests: boolean;
     isTests: boolean;
     isWeb: boolean;
+    global: WpBuildGlobalEnvironment;
+    logger: WpBuildConsoleLogger;
     paths: WpBuildPaths;
     preRelease: boolean;
     state: WebpackBuildState;
     target: WebpackTarget;
     verbosity: WebpackLogLevel;
+    wpc: WpBuildWebpackConfig;
 }
 declare type WpBuildEnvironment = IWpBuildEnvironment;
 
@@ -84,7 +95,9 @@ declare type WpBuildLogColor = "black" | "blue" | "green" | "grey" | "red" | "cy
 declare interface IWpBuildLogColorMap
 {
     default: WpBuildLogColor;
-    stageBracket: WpBuildLogColor;
+    buildBracket: WpBuildLogColor,
+    buildText: WpBuildLogColor,
+    stageAsterisk: WpBuildLogColor;
     stageText: WpBuildLogColor;
     tagBracket: WpBuildLogColor;
     tagText: WpBuildLogColor;
@@ -93,15 +106,25 @@ declare interface IWpBuildLogColorMap
 declare type WpBuildLogColorMap = Required<IWpBuildLogColorMap>;
 declare interface IWpBuildLogPadMap
 {
+    base: number;
     envTag: number;
     value: number;
     uploadFileName: number;
 }
 declare type WpBuildLogPadMap = Required<IWpBuildLogPadMap> & Record<string, number>;
+declare type WpBuildModuleConfig = Record<WpBuildBuildEnvironment, Partial<WpBuildEnvironment>[]>;
+
 declare interface IWpBuildApp
+{
+    rc: WpBuildAppRc;
+}
+declare type WpBuildApp = Required<IWpBuildApp>;
+
+declare interface IWpBuildAppRc
 {
     bannerName: string;                   // Displayed in startup banner detail line
     bannerNameDetailed: string;           // Displayed in startup banner detail line
+    builds: WpBuildModuleConfig;
     colors: WpBuildLogColorMap;
     displayName: string;                  // displayName (read from package.json)
     exports: Record<string, boolean>;
@@ -113,7 +136,7 @@ declare interface IWpBuildApp
     version: string;                      // app version (read from package.json)
     vscode: WebpackVsCodeBuild
 }
-declare type WpBuildApp = IWpBuildApp & Record<string, any>;
+declare type WpBuildAppRc = IWpBuildAppRc & Record<string, any>;
 
 declare interface IWebpackBuildFilePaths
 {
@@ -160,7 +183,6 @@ declare interface IWebpackEnvironmentInternal
 {
     WEBPACK_WATCH: boolean;
 }
-declare type WebpackEnvironmentInternal = Partial<IWebpackEnvironmentInternal>;
 
 declare interface IWpBuildWebpackArgs
 {
@@ -227,9 +249,10 @@ export {
     WebpackStats,
     WebpackStatsAsset,
     WebpackTarget,
-    WebpackBuildEnvironment,
     WebpackVsCodeBuild,
     WpBuildApp,
+    WpBuildAppRc,
+    WpBuildBuildEnvironment,
     WpBuildModule,
     WpBuildPaths,
     WpBuildGlobalEnvironment,
@@ -244,5 +267,6 @@ export {
     WpBuildPluginVendorOptions,
     WpBuildRuntimeVariables,
     WpBuildWebpackArgs,
+    WpBuildWebpackConfig,
     __WPBUILD__
 };

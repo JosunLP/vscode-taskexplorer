@@ -11,7 +11,7 @@ const { globalEnv } = require("./global");
 const { join, resolve } = require("path");
 const { WebpackError } = require("webpack");
 const { existsSync, mkdirSync } = require("fs");
-const { writeInfo, figures } = require("./console");
+const WpBuildConsoleLogger = require("./console");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
@@ -20,7 +20,6 @@ const { writeInfo, figures } = require("./console");
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WebpackBuildEnvironment} WebpackBuildEnvironment */
 
 
 /**
@@ -40,11 +39,12 @@ const environment = (env, wpConfig) =>
  * @private
  * @param {WpBuildEnvironment} env Webpack build environment
  * @param {WebpackConfig} wpConfig Webpack config object
- * @returns {WpBuildEnvironment}
  * @throws {WebpackError}
  */
 const setBuildEnvironment = (env, wpConfig) =>
 {
+	const logger = env.logger = new WpBuildConsoleLogger(env);
+
 	if (!env.environment)
 	{
 		if (wpConfig.mode === "development" || env.argv.mode === "development") {
@@ -58,7 +58,7 @@ const setBuildEnvironment = (env, wpConfig) =>
 		}
 		else {
 			const eMsg = "Could not detect build environment";
-			writeInfo("Could not detect build environment", figures.color.error);
+			logger.writeInfo("Could not detect build environment", logger.figures.color.error);
 			throw new WebpackError(eMsg);
 		}
 	}
@@ -73,6 +73,7 @@ const setBuildEnvironment = (env, wpConfig) =>
 		isExtension: env.build === "extension" || env.build === "browser",
 		isExtensionProd: env.build === "extension" || env.build === "browser" && env.environment === "prod",
 		isExtensionTests: env.build === "extension" || env.build === "browser" && env.environment.startsWith("test"),
+		global: globalEnv,
 		paths: getPaths(env),
 		preRelease: true,
 		state: { hash: { current: {}, next: {}, previous: {} } },
@@ -84,8 +85,6 @@ const setBuildEnvironment = (env, wpConfig) =>
 	{
 		env[k] = env[k].toLowerCase() === "true"; // convert any string value `true` or `false` to actual boolean type
 	});
-
-	return env;
 };
 
 
