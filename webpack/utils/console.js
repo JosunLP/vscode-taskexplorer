@@ -89,7 +89,9 @@ class WpBuildConsoleLogger
         if (!verbose || globalEnv.verbose)
         {
             let envTag = "";
-            if (env)
+            env = env || this.env;
+            const envIsInitialized = env && env.app && env.logger;
+            if (envIsInitialized)
             {
                 let envTagClr = env ? this.colors[env.app.colors.buildBracket] : this.colors.cyan;
                 const envTagMsgClr = env ? this.colors[env.app.colors.buildText] : this.colors.white;
@@ -122,7 +124,9 @@ class WpBuildConsoleLogger
         if (!verbose || globalEnv.verbose)
         {
             let envTag = "";
-            if (env)
+            env = env || this.env;
+            const envIsInitialized = env && env.app && env.logger;
+            if (envIsInitialized)
             {
                 const colors = this.colors;
                 let envTagClr = env ? colors[env.app.colors.buildBracket] : colors.cyan;
@@ -136,7 +140,7 @@ class WpBuildConsoleLogger
                          this.withColor(env.target.toString(), envTagMsgClr) + this.withColor("]", envTagClr))
                         .padEnd(env.app.logPad.envTag + this.withColorLength(envTagMsgClr) + (this.withColorLength(envTagClr) * 3) - 1);
             }
-            const envMsgClr = env ? this.colors[env.app.colors.default] : this.colors.grey;
+            const envMsgClr = envIsInitialized ? this.colors[env.app.colors.default] : this.colors.grey;
             console.log(`${this.basePad}${pad}${icon || this.figures.color.info}${envTag ? " " + envTag : ""}${msg ? " " + this.withColor(msg, envMsgClr) : ""}`);
         }
     };

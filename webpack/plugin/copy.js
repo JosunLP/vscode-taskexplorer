@@ -55,7 +55,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 		{
 			const source = sourceInfo.source(),
 				  hashDigestLength = this.compiler.options.output.hashDigestLength ||  this.env.wpc.output.hashDigestLength || 20,
-				  ccFileName = file.replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}`), ""),
+				  ccFileName = file.replace(new RegExp(`\\.[a-f0-9]{${hashDigestLength}}`), ""),
 				  dstAsset = this.compilation.getAsset(ccFileName),
 				  srcAsset = this.compilation.getAsset(file),
 				  srcAssetInfo = apply({}, srcAsset?.info),
@@ -71,11 +71,11 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			// }
 			if (!dstAsset)
 			{
-				this.env.logger.writeInfo("   emit asset".padEnd(this.env.app.logPad.value) + file);
+				this.env.logger.writeInfo("   emit copied asset".padEnd(this.env.app.logPad.value) + ccFileName);
 				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 			else if (this.options.force) {
-				this.env.logger.writeInfo("   update asset".padEnd(this.env.app.logPad.value) + file);
+				this.env.logger.writeInfo("   update copied asset".padEnd(this.env.app.logPad.value) + ccFileName);
 				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 		});

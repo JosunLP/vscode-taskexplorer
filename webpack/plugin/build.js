@@ -78,9 +78,17 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	async buildTests(assets)
 	{
 		// const tscArgs = [ "tsc", "-p", "./src/test/tsconfig.json" ];
-		const npmArgs = [ "npm", "run", "build-test-suite" ],
-		testsDir = join(this.env.paths.dist, "tests");
+		const logger = this.env.logger,
+			  npmArgs = [ "npm", "run", "build-test-suite" ],
+			  testsDir = join(this.env.paths.dist, "tests");
+
 		this.env.logger.writeInfo("build tests");
+
+		if (!existsSync(testsDir))
+		{
+			try { await unlink(path.join(this.env.paths.build, "node_modules", ".cache", "tsconfig.test.tsbuildinfo")); } catch {}
+		}
+
 		// spawnSync("npx", tscArgs, { cwd: env.paths.build, encoding: "utf8", shell: true });
 		spawnSync("npx", npmArgs, { cwd: this.env.paths.build, encoding: "utf8", shell: true });
 
@@ -102,14 +110,17 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 				// }
 				if (!dstAsset)
 				{
-					this.env.logger.writeInfo("   emit asset".padEnd(this.env.app.logPad.value) + file);
+					logger.writeInfo("   emit asset".padEnd(this.env.app.logPad.value) + file);
 					this.compilation.emitAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
 				}
 				else if (this.options.force) {
-					this.env.logger.writeInfo("   update asset".padEnd(this.env.app.logPad.value) + file);
+					logger.writeInfo("   update asset".padEnd(this.env.app.logPad.value) + file);
 					this.compilation.updateAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
 				}
 			}
+		}
+		else {
+			logger.writeInfo("build tests failed - output directory does not exist", null, this.env.logger.figures.color.warning);
 		}
 	}
 
