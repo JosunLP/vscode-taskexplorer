@@ -4,7 +4,6 @@
  * @module wpbuild.exports.devtool
  */
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 /**
@@ -24,17 +23,16 @@
  *     inline-cheap-module-source-map
  *     source-map:                  : Recommended for prod builds w/ high quality SourceMaps
  *
- * @method
+ * @function
  * @private
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const devtool = (env, wpConfig) =>
+const devtool = (env) =>
 {   //
 	// Disabled for this build - Using source-map-plugin - see webpack.plugin.js#sourcemaps
 	// ann the plugins() function below
 	//
-	wpConfig.devtool = false;
+	env.wpc.devtool = false;
 };
 
 

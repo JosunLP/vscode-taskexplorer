@@ -5,7 +5,6 @@
  * @module wpbuild.exports.resolve
  */
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 const path = require("path");
@@ -14,13 +13,12 @@ const path = require("path");
 /**
  * @function
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const resolve = (env, wpConfig) =>
+const resolve = (env) =>
 {
 	if (env.build !== "webview")
 	{
-		wpConfig.resolve =
+		env.wpc.resolve =
 		{
 			alias: {
 				":env": path.resolve(env.paths.build, "src", "lib", "env", env.target),
@@ -38,7 +36,7 @@ const resolve = (env, wpConfig) =>
 	}
 	else
 	{
-		wpConfig.resolve = {
+		env.wpc.resolve = {
 			alias: {
 				":env": path.resolve(env.paths.build, "src", "lib", "env", "web"),
 				":types": path.resolve(env.paths.build, "types")

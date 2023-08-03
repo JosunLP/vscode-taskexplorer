@@ -5,18 +5,16 @@
  * @module wpbuild.exports.experiments
  */
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function entry
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const experiments = (env, wpConfig) =>
+const experiments = (env) =>
 {
-	wpConfig.experiments = { layers: env.isExtension };
+	env.wpc.experiments = { layers: env.isExtension };
 };
 
 

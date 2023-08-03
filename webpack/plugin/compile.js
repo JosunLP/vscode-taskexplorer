@@ -11,7 +11,6 @@ const WpBuildBasePlugin = require("./base");
 
 /** @typedef {import("../types").WebpackAsset} WebpackAsset */
 /** @typedef {import("../types").WebpackChunk} WebpackChunk */
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
@@ -140,11 +139,10 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
 /**
  * @function compile
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WpBuildCompilePlugin | undefined}
  */
-const compile = (env, wpConfig) =>
-    (env.app.plugins.compile !== false && env.isExtensionTests ? new WpBuildCompilePlugin({ env, wpConfig }) : undefined);
+const compile = (env) =>
+    (env.app.plugins.compile !== false && env.isExtensionTests ? new WpBuildCompilePlugin({ env }) : undefined);
 
 
 module.exports = compile;

@@ -203,7 +203,6 @@ declare type WpBuildPluginVendorOptions = Readonly<IWpBuildPluginVendorOptions> 
 interface IWpBuildPluginOptions
 {
     env: WpBuildEnvironment,
-    wpConfig: WebpackConfig,
     plugins?: WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[]
 }
 declare type WpBuildPluginOptions = IWpBuildPluginOptions & Record<string, any>;

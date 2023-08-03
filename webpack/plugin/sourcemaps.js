@@ -12,16 +12,14 @@
 
 const webpack = require("webpack");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {webpack.SourceMapDevToolPlugin | undefined}
  */
-const sourcemaps = (env, wpConfig) =>
+const sourcemaps = (env) =>
 {
     let plugin;
     if (env.app.plugins.sourcemaps !== false && env.build !== "webview")

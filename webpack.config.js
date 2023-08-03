@@ -48,25 +48,25 @@ module.exports = (env, argv) =>
  */
 const buildConfig = (env) =>
 {
-	target(env, env.wpc);         // Target i.e. "node", "webworker", "web"
-	write(env);                   // Log build start after target is known
-	environment(env, env.wpc);    // Environment properties, e.g. paths, etc
-	mode(env, env.wpc);           // Mode i.e. "production", "development", "none"
-	name(env, env.wpc);           // Build name / label
-	context(env, env.wpc);        // Context for build
-	experiments(env, env.wpc);    // Set any experimental flags that will be used
-	entry(env, env.wpc);          // Entry points for built output
-	externals(env, env.wpc);      // External modules
-	ignorewarnings(env, env.wpc); // Warnings from the compiler to ignore
-	optimization(env, env.wpc);   // Build optimization
-	minification(env, env.wpc);   // Minification / Terser plugin options
-	output(env, env.wpc);         // Output specifications
-	devtool(env, env.wpc);        // Dev tool / sourcemap control
-	resolve(env, env.wpc);        // Resolve config
-	rules(env, env.wpc);          // Loaders & build rules
-	stats(env, env.wpc);          // Stats i.e. console output & verbosity
-	watch(env, env.wpc);          // Watch-mode options
-	plugins(env, env.wpc);        // Plugins - exports.plugins() inits all plugin.plugins
+	target(env);         // Target i.e. "node", "webworker", "web"
+	write(env);          // Log build start after target is known
+	environment(env);    // Environment properties, e.g. paths, etc
+	mode(env);           // Mode i.e. "production", "development", "none"
+	name(env);           // Build name / label
+	context(env);        // Context for build
+	experiments(env);    // Set any experimental flags that will be used
+	entry(env);          // Entry points for built output
+	externals(env);      // External modules
+	ignorewarnings(env); // Warnings from the compiler to ignore
+	optimization(env);   // Build optimization
+	minification(env);   // Minification / Terser plugin options
+	output(env);         // Output specifications
+	devtool(env);        // Dev tool / sourcemap control
+	resolve(env);        // Resolve config
+	rules(env);          // Loaders & build rules
+	stats(env);          // Stats i.e. console output & verbosity
+	watch(env);          // Watch-mode options
+	plugins(env);        // Plugins - exports.plugins() inits all plugin.plugins
 	return env.wpc;
 };
 

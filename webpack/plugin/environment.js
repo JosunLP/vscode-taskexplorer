@@ -8,7 +8,6 @@
 
 const { globalEnv } = require("../utils/global");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
@@ -16,10 +15,9 @@ const { globalEnv } = require("../utils/global");
 
 /**
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
-const environment = (env, wpConfig) =>
+const environment = (env) =>
 {
 	if (env.app.plugins.environment !== false)
 	{

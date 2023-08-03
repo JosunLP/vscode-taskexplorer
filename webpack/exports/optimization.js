@@ -4,29 +4,27 @@
  * @module wpbuild.exports.optimization
  */
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function optimization
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const optimization = (env, wpConfig) =>
+const optimization = (env) =>
 {
-	parallelism(env, wpConfig);
+	parallelism(env);
 
 	if (env.isExtension)
 	{
-		wpConfig.optimization =
+		env.wpc.optimization =
 		{
 			runtimeChunk: "single",
 			splitChunks: false
 		};
 		if (env.build !== "browser")
 		{
-			wpConfig.optimization.splitChunks =
+			env.wpc.optimization.splitChunks =
 			{
 				cacheGroups: {
 					vendor: {
@@ -38,12 +36,12 @@ const optimization = (env, wpConfig) =>
 			};
 			if (env.environment === "prod")
 			{
-				wpConfig.optimization.chunkIds = "deterministic";
+				env.wpc.optimization.chunkIds = "deterministic";
 			}
 		}
 	}
 	else {
-		wpConfig.optimization = {};
+		env.wpc.optimization = {};
 	}
 };
 
@@ -52,16 +50,15 @@ const optimization = (env, wpConfig) =>
  * @function optimization
  * @private
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const parallelism = (env, wpConfig) =>
+const parallelism = (env) =>
 {
 	if (env.build === "webview" && env.app.vscode)
 	{
-		wpConfig.parallelism = 1 + Object.keys(env.app.vscode.webview.apps).length;
+		env.wpc.parallelism = 1 + Object.keys(env.app.vscode.webview.apps).length;
 	}
 	else {
-		wpConfig.parallelism = 3; // extension / vendor / runtime
+		env.wpc.parallelism = 3; // extension / vendor / runtime
 	}
 };
 

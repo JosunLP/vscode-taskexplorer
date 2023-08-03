@@ -16,7 +16,6 @@ const WpBuildConsoleLogger = require("./console");
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("../types").WpBuildModule} WpBuildModule */
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -25,12 +24,11 @@ const WpBuildConsoleLogger = require("./console");
 /**
  * @function Initializes the build-level and global environment objects
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const environment = (env, wpConfig) =>
+const environment = (env) =>
 {
-	setBuildEnvironment(env, wpConfig);
-	setGlobalEnvironment(env, wpConfig);
+	setBuildEnvironment(env);
+	setGlobalEnvironment(env);
 };
 
 
@@ -38,22 +36,21 @@ const environment = (env, wpConfig) =>
  * @function
  * @private
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  * @throws {WebpackError}
  */
-const setBuildEnvironment = (env, wpConfig) =>
+const setBuildEnvironment = (env) =>
 {
 	const logger = env.logger = new WpBuildConsoleLogger(env);
 
 	if (!env.environment)
 	{
-		if (wpConfig.mode === "development" || env.argv.mode === "development") {
+		if (env.wpc.mode === "development" || env.argv.mode === "development") {
 			env.environment = "dev";
 		}
-		else if (wpConfig.mode === "production" || env.argv.mode === "production") {
+		else if (env.wpc.mode === "production" || env.argv.mode === "production") {
 			env.environment = "prod";
 		}
-		else if (wpConfig.mode === "none" || env.argv.mode === "none") {
+		else if (env.wpc.mode === "none" || env.argv.mode === "none") {
 			env.environment = "test";
 		}
 		else {
@@ -92,9 +89,8 @@ const setBuildEnvironment = (env, wpConfig) =>
  * @function
  * @private
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const setGlobalEnvironment = (env, wpConfig) =>
+const setGlobalEnvironment = (env) =>
 {
 	globalEnv.verbose = !!env.verbosity && env.verbosity !== "none";
 };

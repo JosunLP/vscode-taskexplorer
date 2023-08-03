@@ -10,7 +10,6 @@ const WpBuildBasePlugin = require("./base");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
 const { isString, apply, isObjectEmpty, asArray } = require("../utils");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
@@ -253,11 +252,10 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
 /**
  * @function
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WpBuildRuntimeVarsPlugin | undefined}
  */
-const runtimevars = (env, wpConfig) =>
-    (env.app.plugins.runtimevars !== false && env.isExtension ? new WpBuildRuntimeVarsPlugin({ env, wpConfig }) : undefined);
+const runtimevars = (env) =>
+    (env.app.plugins.runtimevars !== false && env.isExtension ? new WpBuildRuntimeVarsPlugin({ env }) : undefined);
 
 
 module.exports = runtimevars;

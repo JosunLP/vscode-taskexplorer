@@ -7,18 +7,16 @@ const { apply } = require("../utils/utils");
  * @module wpbuild.exports.output
  */
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const output = (env, wpConfig) =>
+const output = (env) =>
 {
-	wpConfig.output =
+	env.wpc.output =
 	{
 		compareBeforeEmit: true,
 		hashDigestLength: 20
@@ -26,7 +24,7 @@ const output = (env, wpConfig) =>
 
 	if (env.build === "webview")
 	{
-		apply(wpConfig.output,
+		apply(env.wpc.output,
 		{
 			clean: env.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
 			path: join(env.paths.build, "res"),
@@ -43,7 +41,7 @@ const output = (env, wpConfig) =>
 	}
 	else if (env.build === "tests")
 	{
-		apply(wpConfig.output,
+		apply(env.wpc.output,
 		{
 			// asyncChunks: true,
 			clean: env.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
@@ -63,7 +61,7 @@ const output = (env, wpConfig) =>
 	}
 	else
 	{
-		apply(wpConfig.output,
+		apply(env.wpc.output,
 		{
 			clean: env.clean === true ? (env.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
 			path: resolve(env.paths.dist, env.build === "browser" ? "web" : "."),

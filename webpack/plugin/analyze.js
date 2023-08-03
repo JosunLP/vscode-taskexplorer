@@ -12,7 +12,6 @@ const VisualizerPlugin = require("webpack-visualizer-plugin2");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
@@ -40,10 +39,9 @@ const analyze =
 {
 	/**
 	 * @param {WpBuildEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
 	 * @returns {BundleAnalyzerPlugin | undefined}
 	 */
-	bundle(env, wpConfig)
+	bundle(env)
 	{
 		let plugin;
 		if (env.app.plugins.analyze && env.analyze === true)
@@ -62,10 +60,9 @@ const analyze =
 
 	/**
 	 * @param {WpBuildEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
 	 * @returns {CircularDependencyPlugin | undefined}
 	 */
-	circular(env, wpConfig)
+	circular(env)
 	{
 		let plugin;
 		if (env.app.plugins.analyze && env.analyze === true)
@@ -86,10 +83,9 @@ const analyze =
 
 	/**
 	 * @param {WpBuildEnvironment} env
-	 * @param {WebpackConfig} wpConfig Webpack config object
 	 * @returns {VisualizerPlugin | undefined}
 	 */
-	visualizer(env, wpConfig)
+	visualizer(env)
 	{
 		let plugin;
 		if (env.app.plugins.analyze !== false && env.analyze === true) {

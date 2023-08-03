@@ -18,7 +18,6 @@ const WpBuildBasePlugin = require("./base");
 const { spawnSync } = require("child_process");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
@@ -180,11 +179,10 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
 /**
  * @function upload
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WpBuildUploadPlugin | undefined} plugin instance
  */
-const upload = (env, wpConfig) =>
-    (env.app.plugins.upload !== false && env.isExtension ? new WpBuildUploadPlugin({ env, wpConfig }) : undefined);
+const upload = (env) =>
+    (env.app.plugins.upload !== false && env.isExtension ? new WpBuildUploadPlugin({ env }) : undefined);
 
 
 module.exports = upload;

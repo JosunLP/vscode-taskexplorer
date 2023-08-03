@@ -5,7 +5,6 @@
  */
 
 /** @typedef {import("../types").WebpackMode} WebpackMode */
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 
@@ -13,17 +12,16 @@
 /**
  * @function
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const mode = (env, wpConfig) =>
+const mode = (env) =>
 {
-	wpConfig.mode = getMode(env, env.argv);
+	env.wpc.mode = getMode(env, env.argv);
 	if (!env.environment)
 	{
-		if (wpConfig.mode === "development") {
+		if (env.wpc.mode === "development") {
 			env.environment = "dev";
 		}
-		else if (wpConfig.mode === "none") {
+		else if (env.wpc.mode === "none") {
 			env.environment = "test";
 		}
 		else {

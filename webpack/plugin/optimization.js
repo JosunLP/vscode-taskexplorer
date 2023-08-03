@@ -7,7 +7,6 @@
 
 const webpack = require("webpack");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
@@ -15,10 +14,9 @@ const webpack = require("webpack");
 /**
  * @function optimization
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance[]}
  */
-const optimization = (env, wpConfig) =>
+const optimization = (env) =>
 {
 	const plugins = [];
 	if (env.app.plugins.optimization !== false)

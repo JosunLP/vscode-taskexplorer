@@ -10,31 +10,29 @@ const webpack = require("webpack");
 const WpBuildBasePlugin = require("./base");
 const { getEntriesRegex, isString } = require("../utils/utils");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WpBuildBasePlugin | undefined}
  */
-const banner = (env, wpConfig) =>
+const banner = (env) =>
 {
-	if (env.app.plugins.banner !== false && wpConfig.mode === "production")
+	if (env.app.plugins.banner !== false && env.wpc.mode === "production")
 	{
 		const author = isString(env.app.pkgJson.author) ? env.app.pkgJson.author : env.app.pkgJson.author?.name;
 		if (author)
 		{
 			return new WpBuildBasePlugin({
-				env, wpConfig,
+				env,
 				plugins: [
 				{
 					ctor: webpack.BannerPlugin,
 					options: {
 						banner: `Copyright ${(new Date()).getFullYear()} ${author}`,
 						entryOnly: true,
-						test: getEntriesRegex(wpConfig, true, true)
+						test: getEntriesRegex(env.wpc, true, true)
 					}
 				}]
 			});

@@ -5,20 +5,18 @@
  * @module wpbuild.exports.entry
  */
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
 /**
  * @function entry
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const entry = (env, wpConfig) =>
+const entry = (env) =>
 {
 	if (env.build === "webview" && env.app.vscode)
 	{
-		wpConfig.entry = env.app.vscode.webview.apps;
+		env.wpc.entry = env.app.vscode.webview.apps;
 	}
 	else if (env.build === "tests")
 	{
@@ -29,7 +27,7 @@ const entry = (env, wpConfig) =>
 		// 		return obj;
 		// 	}, {}
 		// );
-		wpConfig.entry =
+		env.wpc.entry =
 		{
 			runTest: "./src/test/runTest.ts"
 			// "run/index": "./src/test/run/index.ts",
@@ -38,7 +36,7 @@ const entry = (env, wpConfig) =>
 	}
 	else
 	{
-		wpConfig.entry =
+		env.wpc.entry =
 		{
 			"taskexplorer": {
 				import: "./src/taskexplorer.ts",

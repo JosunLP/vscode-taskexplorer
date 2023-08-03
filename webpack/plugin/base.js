@@ -114,7 +114,7 @@ class WpBuildBasePlugin
 	constructor(options, globalCache)
     {
         this.env = options.env;
-        this.wpConfig = options.wpConfig;
+        this.wpConfig = options.env.wpc;
         this.name = this.constructor.name;
         this.options = mergeIf(options, { plugins: [] });
 		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, options);

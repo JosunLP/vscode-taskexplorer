@@ -11,7 +11,6 @@ const path = require("path");
 const WpBuildBasePlugin = require("./base");
 const { spawnSync } = require("child_process");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
@@ -113,11 +112,10 @@ class WpBuildPreBuildPlugin extends WpBuildBasePlugin
 
 /**
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WpBuildPreBuildPlugin | undefined}
  */
-const build = (env, wpConfig) =>
-	(env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildPreBuildPlugin({ env, wpConfig }) : undefined);
+const build = (env) =>
+	(env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildPreBuildPlugin({ env }) : undefined);
 
 
 module.exports = build;

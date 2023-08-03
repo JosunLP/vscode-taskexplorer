@@ -14,7 +14,6 @@ const { join } = require("path");
 const { apply } = require("../utils");
 
 /** @typedef {import("../types").WebpackStats} WebpackStats */
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
@@ -99,10 +98,9 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 
 /**
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {(WpBuildCleanPlugin | WebpackPluginInstance | CleanWebpackPlugin)[]}
  */
-const clean = (env, wpConfig) => env.app.plugins.clean !== false ? new WpBuildCleanPlugin({ env, wpConfig }).getPlugins() : [];
+const clean = (env) => env.app.plugins.clean !== false ? new WpBuildCleanPlugin({ env }).getPlugins() : [];
 
 
 module.exports = clean;

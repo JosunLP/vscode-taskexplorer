@@ -10,17 +10,15 @@ const path = require("path");
 const ForkTsCheckerPlugin = require("fork-ts-checker-webpack-plugin");
 const { existsSync } = require("fs");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {"write-tsbuildinfo" | "readonly" | "write-dts" | "write-references" | undefined} TsCheckMode */
 
 
 /**
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {(ForkTsCheckerPlugin)[]}
  */
-const tscheck = (env, wpConfig) =>
+const tscheck = (env) =>
 {
 	/** @type {ForkTsCheckerPlugin[]} */const plugins = [];
 	/** @type {[ string, TsCheckMode, boolean? ][]} */const tsConfigs = [];

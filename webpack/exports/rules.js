@@ -6,7 +6,6 @@
  * @module wpbuild.exports.rules
  */
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 const path = require("path");
@@ -19,16 +18,15 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 /**
  * @function
  * @param {WpBuildEnvironment} env Webpack build environment
- * @param {WebpackConfig} wpConfig Webpack config object
  */
-const rules = (env, wpConfig) =>
+const rules = (env) =>
 {
-	wpConfig.module = {};
-	wpConfig.module.rules = [];
+	env.wpc.module = {};
+	env.wpc.module.rules = [];
 
 	if (env.build === "webview")
 	{
-		wpConfig.module.rules.push(...[
+		env.wpc.module.rules.push(...[
 		{
 			test: /\.m?js/,
 			resolve: { fullySpecified: false },
@@ -65,14 +63,14 @@ const rules = (env, wpConfig) =>
 			{
 				loader: "css-loader",
 				options: {
-					sourceMap: wpConfig.mode !== "production",
+					sourceMap: env.wpc.mode !== "production",
 					url: false,
 				},
 			},
 			{
 				loader: "sass-loader",
 				options: {
-					sourceMap: wpConfig.mode !== "production",
+					sourceMap: env.wpc.mode !== "production",
 				},
 			}]
 		}]);
@@ -80,7 +78,7 @@ const rules = (env, wpConfig) =>
 	else if (env.build === "tests")
 	{
 		const testsRoot = path.join(env.paths.build, "src", "test");
-		wpConfig.module.rules.push(...[
+		env.wpc.module.rules.push(...[
 		{
 			test: /index\.js$/,
 			include: path.join(env.paths.build, "node_modules", "nyc"),
@@ -110,7 +108,7 @@ const rules = (env, wpConfig) =>
 	else // extension - node or browser
 	{
 		const configFile = env.build === "browser" ? "tsconfig.web.json" : "tsconfig.json";
-		wpConfig.module.rules.push({
+		env.wpc.module.rules.push({
 			test: /\.ts$/,
 			// test: (filename, entry) => { console.log(entry); return (/\.ts$/).test(filename) && entry === "taskexplorer"; },
 			issuerLayer: "release",

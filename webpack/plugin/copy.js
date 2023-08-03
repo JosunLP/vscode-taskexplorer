@@ -12,7 +12,6 @@ const CopyPlugin = require("copy-webpack-plugin");
 const { join, posix, isAbsolute } = require("path");
 const { getEntriesRegex, isString, apply } = require("../utils/utils");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -49,11 +48,11 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 */
 	dupMainEntryFilesNoHash(assets)
 	{
-		const entriesRgx = getEntriesRegex(this.options.wpConfig);
+		const entriesRgx = getEntriesRegex(this.wpConfig);
 		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
 		{
 			const source = sourceInfo.source(),
-				  hashDigestLength = this.compiler.options.output.hashDigestLength ||  this.options.wpConfig.output.hashDigestLength || 20,
+				  hashDigestLength = this.compiler.options.output.hashDigestLength ||  this.env.wpc.output.hashDigestLength || 20,
 				  ccFileName = file.replace(new RegExp(`\\.[a-z0-9]{${hashDigestLength}}`), ""),
 				  dstAsset = this.compilation.getAsset(ccFileName),
 				  srcAsset = this.compilation.getAsset(file),
@@ -84,10 +83,9 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
  * @function
  * @param {string[]} apps
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {(CopyPlugin | WpBuildCopyPlugin)[]}
  */
-const copy = (apps, env, wpConfig) =>
+const copy = (apps, env) =>
 {
 	/** @type {(CopyPlugin | WpBuildCopyPlugin)[]} */
 	const plugins = [],
@@ -127,11 +125,11 @@ const copy = (apps, env, wpConfig) =>
 			// Make a copy of the main module when it has been compiled, without the content hash
 			// in the filename.
 			//
-			plugins.push(new WpBuildCopyPlugin({ env, wpConfig, force: true }));
+			plugins.push(new WpBuildCopyPlugin({ env, force: true }));
 			//
 			// Copy resources to public `info` sub-project during compilation
 			//
-			if (wpConfig.mode === "production" && env.app.publicInfoProject)
+			if (env.wpc.mode === "production" && env.app.publicInfoProject)
 			{
 				let psxDirInfoProj;
 				if (isString(env.app.publicInfoProject))

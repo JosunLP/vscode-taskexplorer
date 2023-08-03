@@ -9,7 +9,6 @@
 const WpBuildBasePlugin = require("./base");
 const { globalEnv } = require("../utils");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
@@ -87,11 +86,10 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
 /**
  * @function finalize
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WpBuildScmPlugin | undefined}
  */
-const scm = (env, wpConfig) =>
-    (env.app.plugins.scm !== false && env.isExtensionProd ? new WpBuildScmPlugin({ env, wpConfig }) : undefined);
+const scm = (env) =>
+    (env.app.plugins.scm !== false && env.isExtensionProd ? new WpBuildScmPlugin({ env }) : undefined);
 
 
 module.exports = scm;

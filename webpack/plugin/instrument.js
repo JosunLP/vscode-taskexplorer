@@ -8,7 +8,6 @@
 
 const { createInstrumenter } = require("istanbul-lib-instrument");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
@@ -17,10 +16,9 @@ const { createInstrumenter } = require("istanbul-lib-instrument");
 /**
  * @function istanbul
  * @param {WpBuildEnvironment} env
- * @param {WebpackConfig} wpConfig Webpack config object
  * @returns {WebpackPluginInstance | undefined}
  */
-const istanbul = (env, wpConfig) =>
+const istanbul = (env) =>
 {
     /** @type {WebpackPluginInstance | undefined} */
     let plugin;
