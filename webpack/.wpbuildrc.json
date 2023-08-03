@@ -43,7 +43,7 @@
     "paths": {
         "build": ".",
         "cache": "node_modules/.cache/wpbuild",
-        "dist": "dist/test",
+        "dist": "dist",
         "distTests": "dist/test",
         "temp": null,
         "files": {

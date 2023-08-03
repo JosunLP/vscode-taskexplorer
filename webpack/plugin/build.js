@@ -6,13 +6,15 @@
  * @module wpbuild.plugin.build
  */
 
-const path = require("path");
-const { join } = require("path");
-const WpBuildBasePlugin = require("./base");
-const { spawnSync, exec } = require("child_process");
-const { existsSync, unlinkSync } = require("fs");
-const { readdir, readFile, unlink } = require("fs/promises");
+const { existsSync } = require("fs");
+const { promisify } = require("util");
+const { findFiles } = require("../utils");
 const { WebpackError } = require("webpack");
+const WpBuildBasePlugin = require("./base");
+const {readFile, unlink, access, statfs } = require("fs/promises");
+const { join, basename, relative } = require("path");
+const exec = promisify(require("child_process").exec);
+// const spawn = promisify(require("child_process").spawn);
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -20,7 +22,6 @@ const { WebpackError } = require("webpack");
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 /** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
-
 
 
 /**
@@ -74,39 +75,74 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {WebpackCompilationAssets} assets
+	 * @param {WebpackCompilationAssets} _assets
 	 */
-	async buildTests(assets)
+	async buildTests(_assets)
 	{
 		const logger = this.env.logger,
 			  bldDir = this.env.paths.build,
-			  npmArgs =  [ "npx", "tsc", "-p", "./src/test/tsconfig.json" ], // [ "npm", "run", "build-test-suite" ],
 			  testsDir = join(this.env.paths.dist, "test");
-
-		logger.writeInfo("build tests");
-
+		logger.writeInfo("build test suite");
 		if (!existsSync(testsDir))
 		{
-			try { await unlink(path.join(bldDir, "node_modules", ".cache", "tsconfig.test.tsbuildinfo")); } catch {}
+			try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.test.tsbuildinfo")); } catch {}
 		}
+		logger.writeInfo("   execute italic(tsc) build for tests suite");
+		const procPromise = exec("npx tsc -p ./src/test", { cwd: bldDir, encoding: "utf8" });
+		await this.postProcess(testsDir, procPromise);
+	}
 
-		// spawnSync("npx", tscArgs, { cwd: env.paths.build, encoding: "utf8", shell: true });
-		// spawnSync("npx", npmArgs, { cwd: bldDir, encoding: "utf8", shell: true });
-		try {
-			await exec.__promisify__(npmArgs.join(" "), { cwd: bldDir, encoding: "utf8" /* , shell: true */ });
-		}
-		catch (e) {
-			this.compilation.errors.push(new WebpackError(e.message));
-			logger.error(e);
-			return;
-		}
 
-		if (existsSync(testsDir))
+	/**
+	 * @function
+	 * @private
+	 * @param {WebpackCompilationAssets} _assets
+	 */
+	async buildTypes(_assets)
+	{
+		const logger = this.env.logger,
+			  bldDir = this.env.paths.build,
+			  typesDir = join(bldDir, "types", "dist");
+		this.env.logger.writeInfo("build types");
+		if (!existsSync(typesDir))
 		{
-			const files = await readdir(testsDir);
-			for (const file of files.filter(f => (/\.js/).test(f)))
+			try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
+		}
+		logger.writeInfo("   execute italic(tsc) build for types");
+		const procPromise = exec("npx tsc -p ./types", { cwd: bldDir, encoding: "utf8" });
+		await this.postProcess(typesDir, procPromise);
+	}
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {string} dir
+	 * @param {import("child_process").PromiseWithChild<{ stdout: string; stderr: string;}>} procPromise
+	 */
+	postProcess = async (dir, procPromise) =>
+	{
+		const logger = this.env.logger,
+			  child = procPromise.child;
+		try
+		{
+			child.stdout?.on("data", (data) => void logger.value("   stdout", data));
+			child.stderr?.on("data", (data) => void logger.value("   stderr", data));
+			child.on("close", (code) => void logger.writeInfo(`   build completed with exit code bold(${code})`));
+
+			const { stdout, stderr } = await procPromise;
+
+			logger.value("   tsc stdout", stdout);
+			logger.value("   tsc stderr", stderr);
+
+			await access(dir);
+
+			const files = await findFiles("**/*.js", { nocase: true, cwd: dir, absolute: true  });
+			for (const filePath of files)
 			{
-				const source = await readFile(join(testsDir, file)),
+				const filePathRel = relative(dir, filePath),
+					  file = basename(filePathRel),
+					  source = await readFile(filePath),
 					  dstAsset = this.compilation.getAsset(file);
 				// let cacheEntry;
 				// this.logger.debug(`getting cache for '${absoluteFilename}'...`);
@@ -119,46 +155,22 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 				// }
 				if (!dstAsset)
 				{
-					logger.value("   emit asset", file);
+					logger.value("   emit asset", filePathRel);
 					this.compilation.emitAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
 				}
 				else if (this.options.force) {
-					logger.value("   update asset", file);
+					logger.value("   update asset", filePathRel);
 					this.compilation.updateAsset(file, new this.compiler.webpack.sources.RawSource(source), { precompile: true, immutable: true });
 				}
 			}
 		}
-		else {
-			logger.warning("build tests failed - output directory does not exist");
+		catch (e) {
+			logger.warning(`build 'test suite' failed: ${e.message}`);
 		}
-	}
+	};
 
-
-	/**
-	 * @function
-	 * @private
-	 * @param {WebpackCompilationAssets} assets
-	 */
-	async buildTypes(assets)
-	{
-		/** @type {import("child_process").SpawnSyncOptions} */
-		const spawnOptions = { cwd: this.env.paths.build, encoding: "utf8", shell: true };
-		this.env.logger.writeInfo("build types");
-		if (!existsSync(path.join(this.env.paths.build, "types", "dist")))
-		{
-			// try { fs.unlinkSync(path.join(env.paths.build, "node_modules", ".cache", "tsconfig.tsbuildinfo")); } catch {}
-			try { await unlink(path.join(this.env.paths.build, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
-		}
-		// else if (!fs.existsSync(path.join(env.paths.build, "types", "dist", "lib")))
-		// {
-		// 	try { fs.unlinkSync(path.join(env.paths.build, "node_modules", ".cache", "tsconfig.tsbuildinfo")); } catch {}
-		// }
-		spawnSync("npx", [ "tsc", "-p", "./types" ], spawnOptions);
-		// spawnSync("npx", [ "tsc", "--emitDeclarationOnly", "-p", "./" ], spawnOptions);
-	}
 
 	// babel:
-	// {
 	// 	/**
 	// 	 * @param {WpBuildEnvironment} env
 	// 	 * @returns {void}
@@ -181,8 +193,6 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	// 		];
 	// 		spawnSync("npx", babel, { cwd: env.paths.build, encoding: "utf8", shell: true });
 	// 	}
-	// }
-
 }
 
 

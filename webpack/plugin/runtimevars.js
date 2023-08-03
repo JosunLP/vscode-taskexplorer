@@ -119,7 +119,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         const env = this.env,
               logger = env.logger,
               hashCurrent = env.state.hash.current;
-        logger.writeInfo(`check asset states from ${logger.withColor(env.paths.files.hash, logger.colors.italic)}`, 2);
+        logger.writeInfo(`validate hashes for assets in italic(${env.paths.files.hashStoreJson})`, 2);
         asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
         {
             const chunkName = /** @type {string} */(chunk.name);
@@ -128,16 +128,16 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
                 if (!hashCurrent[chunkName])
                 {
                     hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    logger.writeInfo("updated contenthash for " + logger.withColor(file, logger.colors.italic));
-                    logger.writeInfo(`   ${"previous".padEnd(env.app.log.pad.value)}empty}`);
-                    logger.writeInfo(`   ${"new".padEnd(env.app.log.pad.value)}${chunk.contentHash.javascript}`);
+                    logger.writeInfo(`updated contenthash for italic(${file})`, 2);
+                    logger.value("   previous", "n/a", 3);
+                    logger.value("   new", chunk.contentHash.javascript, 3);
                 }
                 if (hashCurrent[chunkName] !==  chunk.contentHash.javascript)
                 {
                     hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    logger.writeInfo("updated stale contenthash for " + logger.withColor(file, logger.colors.italic));
-                    logger.writeInfo(`   ${"previous".padEnd(env.app.log.pad.value)}${hashCurrent[file]}`);
-                    logger.writeInfo(`   ${"new".padEnd(env.app.log.pad.value)}${chunk.contentHash.javascript}`);
+                    logger.writeInfo(`updated stale contenthash for italic(${file})`, 2);
+                    logger.value("   previous", hashCurrent[file], 3);
+                    logger.value("   new", chunk.contentHash.javascript, 3);
                 }
             });
         });
@@ -151,9 +151,9 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     readAssetState()
     {
         const env = this.env;
-        if (existsSync(env.paths.files.hash))
+        if (existsSync(env.paths.files.hashStoreJson))
         {
-            const hashJson = readFileSync(env.paths.files.hash, "utf8");
+            const hashJson = readFileSync(env.paths.files.hashStoreJson, "utf8");
             apply(env.state.hash, JSON.parse(hashJson));
             apply(env.state.hash.previous, { ...env.state.hash.current });
             apply(env.state.hash.current, { ...env.state.hash.next });
@@ -194,7 +194,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     saveAssetState()
     {
         this.logAssetInfo();
-        writeFileSync(this.env.paths.files.hash, JSON.stringify(this.env.state.hash, null, 4));
+        writeFileSync(this.env.paths.files.hashStoreJson, JSON.stringify(this.env.state.hash, null, 4));
     }
 
 

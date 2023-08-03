@@ -73,7 +73,7 @@
 		"build-webviews-prod": "webpack --mode production --env build=webview --config ./webpack.config.js",
 		"build-webviews-dev": "webpack --mode development --env build=webview --config ./webpack.config.js",
 		"clean-all": "npm run clean-build && npm run clean-tests:build && npm run clean-types",
-		"clean-build": "npm run clean-extension-all:no_hash && npm run clean-webviewsn",
+		"clean-build": "npm run clean-extension-all:no_hash && npm run clean-webviews",
 		"clean-extension-all": "npm run clean-extension-all:no_hash && npm run clean-extension-hash_cache-all",
 		"clean-extension-all:no_hash": "rimraf dist && rimraf node_modules/.cache/tsconfig.tsbuildinfo && rimraf %TEMP%\\vscode-taskexplorer && rimraf node_modules/.cache/wpbuild/global.json",
 		"clean-extension-dev": "npm run clean-extension-all:no_hash && npm run clean-extension-hash_cache-dev",

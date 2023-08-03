@@ -6,9 +6,9 @@
  * @module wpbuild.utils.environment
  */
 
-const { mergeIf, apply } = require("./utils");
+const { mergeIf, apply, isString, merge, isObjectEmpty } = require("./utils");
 const { globalEnv } = require("./global");
-const { join, resolve } = require("path");
+const { join, resolve, isAbsolute } = require("path");
 const { WebpackError } = require("webpack");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
@@ -98,7 +98,7 @@ const setGlobalEnvironment = (env) =>
 
 
 /**
- * @function setPaths
+ * @function
  * @private
  * @param {WpBuildEnvironment} env Webpack build environment
  * @returns {WpBuildPaths}
@@ -111,18 +111,56 @@ const getPaths = (env) =>
 	if (!existsSync(temp)) {
 		mkdirSync(temp, { recursive: true });
 	}
-	return apply({
+	return merge(
+	{
 		build, temp,
 		base: env.build !== "webview" ? build : (wvBase ? resolve(build, wvBase) :
 													join(build, "src", "webview", "app")),
 		dist: join(build, "dist"), // = compiler.outputPath = compiler.options.output.path
-		distTests: join(build, "dist", "test"), // = compiler.outputPath = compiler.options.output.path
+		distTests: join(build, "dist", "test"),
 		cache: globalEnv.cacheDir,
 		files: {
 			hashStoreJson: join(globalEnv.cacheDir, `hash.${env.environment}.json`),
-			sourceMapWasm: "node_modules/source-map/lib/mappings.wasm"
+			sourceMapWasm: join(build, "node_modules", "source-map", "lib", "mappings.wasm")
 		}
-	}, env.app.paths || {});
+	}, resolveRcPaths(build, env.app.paths || {}));
+};
+
+
+/**
+ * @function
+ * @private
+ * @param {string} dir
+ * @param {WpBuildPaths} paths
+ * @returns {WpBuildPaths}
+ */
+const resolveRcPaths = (dir, paths) =>
+{
+	Object.entries(paths).forEach((e) =>
+	{
+		if (isString(e[1], true))
+		{
+			if (!isAbsolute(e[1])) {
+				paths[e[0]] = resolve(dir, e[1]);
+			}
+		}
+		else {
+			delete paths[e[0]];
+		}
+	});
+	Object.entries(paths.files || {}).forEach((e) =>
+	{
+		if (isString(e[1], true))
+		{
+			if (!isAbsolute(e[1])) {
+				paths.files[e[0]] = resolve(dir, e[1]);
+			}
+		}
+		else {
+			delete paths.files[e[0]];
+		}
+	});
+	return apply({}, paths, { files: { ...paths.files }});
 };
 
 

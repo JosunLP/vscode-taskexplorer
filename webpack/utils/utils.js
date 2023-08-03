@@ -2,6 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+const glob = require("glob");
+
 /**
  * @module wpbuild.utils.utils
  */
@@ -79,6 +81,21 @@ const clone = (item) =>
         return /** @type {T} */(c);
     }
     return item;
+};
+
+
+/**
+ * @function
+ * @param {string} pattern
+ * @param {import("glob").IOptions} options
+ * @returns {Promise<string[]>}
+ */
+const findFiles = (pattern, options) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        glob(pattern, options, (err, files) => { if(!err) resolve(files); else reject(err); });
+    });
 };
 
 
@@ -237,6 +254,6 @@ const pickNot = (obj, ...keys) =>
 
 
 module.exports = {
-    apply, asArray, clone, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString,
+    apply, asArray, clone, findFiles, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString,
     getEntriesRegex, merge, mergeIf, pick, pickBy, pickNot
 };
