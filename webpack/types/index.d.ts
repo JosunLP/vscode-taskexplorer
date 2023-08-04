@@ -14,14 +14,17 @@ declare type WebpackContextModuleFactoryy = import("webpack").Compilation.Contex
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
 declare type WebpackCompiler = import("webpack").Compiler;
 declare type WebpackConfig = Required<import("webpack").Configuration>;
-declare type WebpackLogger = import("webpack/lib/logging/Logger").Logger;
+// declare type WebpackLogger = import("webpack/lib/logging/Logger").Logger;
+declare type WebpackLogger = ReturnType<WebpackCompilation["getLogger"]>;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
+declare type WebpackSchema = import("schema-utils/declarations/validate").Schema;
 declare type WebpackSource = import("webpack").sources.Source;
-declare type WebpackSnapshot = ReturnType<Compilation["fileSystemInfo"]["mergeSnapshots"]>;
+declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["mergeSnapshots"]>;
 declare type WebpackStats = import("webpack").Stats;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
 declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
+
 declare interface WebpackCompilationParams {
 	normalModuleFactory: WebpackNormalModuleFactory;
 	contextModuleFactory: WebpackContextModuleFactoryy;
@@ -34,7 +37,7 @@ declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 declare type WpBuildConsoleLogger = import("../utils").WpBuildConsoleLogger;
 
-declare type WpBuildModule = "browser" | "common" | "extension" | "tests" | "webview";
+declare type WpBuildModule = "web" | "common" | "extension" | "tests" | "webview";
 declare type WpBuildBuildEnvironment= "dev" | "prod" | "test" | "testprod";
 
 declare interface IWpBuildRuntimeVariables
@@ -131,6 +134,30 @@ declare interface IWpBuildLogOptions
 declare type WpBuildLogOptions = Required<IWpBuildLogOptions>;
 declare type WpBuildModuleConfig = Record<WpBuildBuildEnvironment, Partial<WpBuildEnvironment>[]>;
 
+declare interface IWpBuildLogIconBaseSet
+{
+    bullet: string;
+    error: string;
+    info: string;
+    star: string;
+    start: string;
+    success: string;
+    up: string;
+    warning: string;
+}
+declare type WpBuildLogIconBlueSet= Pick<IWpBuildLogIconBaseSet, "error"|"info"|"success"|"warning">;
+declare interface IWpBuildLogIconActionSet extends IWpBuildLogIconBaseSet
+{
+    successTag: string;
+}
+declare type WpBuildLogIconActionSet = IWpBuildLogIconActionSet;
+declare interface IWpBuildLogIconSet extends IWpBuildLogIconBaseSet
+{
+    blue: WpBuildLogIconBlueSet;
+    color: WpBuildLogIconActionSet;
+}
+declare type WpBuildLogIconSet = Required<IWpBuildLogIconSet>;
+
 declare interface IWpBuildApp
 {
     rc: WpBuildAppRc;
@@ -226,6 +253,12 @@ interface IWpBuildPluginOptions
 }
 declare type WpBuildPluginOptions = IWpBuildPluginOptions & Record<string, any>;
 
+interface IWpBuildCacheOptions
+{
+    file: string;
+}
+declare type WpBuildCacheOptions = IWpBuildCacheOptions & Record<string, any>;
+
 
 declare type WpBuildPluginCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIVED" | "ADDITIONS" |  "OPTIMIZE" |
                                                  "OPTIMIZE_COUNT" | "OPTIMIZE_COMPATIBILITY" | "OPTIMIZE_SIZE" |
@@ -265,6 +298,7 @@ export {
     WebpackPluginInstance,
     WpBuildEnvironment,
     WebpackLogLevel,
+    WebpackSchema,
     WebpackSnapshot,
     WebpackSource,
     WebpackStats,
@@ -274,11 +308,13 @@ export {
     WpBuildApp,
     WpBuildAppRc,
     WpBuildBuildEnvironment,
+    WpBuildCacheOptions,
     WpBuildModule,
     WpBuildPaths,
     WpBuildGlobalEnvironment,
     WpBuildHashState,
     WpBuildLogColor,
+    WpBuildLogIconSet,
     WpBuildLogLevel,
     WpBuildLogOptions,
     WpBuildLogTrueColor,

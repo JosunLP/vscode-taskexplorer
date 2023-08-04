@@ -2,12 +2,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-const { isString, isObject } = require("./utils");
+const { isString, isObject, isPrimitive } = require("./utils");
 
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
 /** @typedef {import("../types").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("../types").WpBuildLogLevel}  WpBuildLogLevel */
+/** @typedef {import("../types").WpBuildLogIconSet}  WpBuildLogIconSet */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+
 
 /**
  * @module wpbuild.utils.console
@@ -28,19 +30,19 @@ class WpBuildConsoleLogger
      */
     env;
 
-    /**
-     * @member
-     * @private
-     * @type {WpBuildLogLevel}
-     */
-    level;
+    // /**
+    //  * @member
+    //  * @private
+    //  * @type {WpBuildLogLevel}
+    //  */
+    // level;
 
-    /**
-     * @member
-     * @private
-     * @type {WebpackLogLevel[]}
-     */
-    levelMap = [ "none", "error", "warn", "info", "log", "verbose" ];
+    // /**
+    //  * @member
+    //  * @private
+    //  * @type {WebpackLogLevel[]}
+    //  */
+    // levelMap = [ "none", "error", "warn", "info", "log", "verbose" ];
 
 
     /**
@@ -50,7 +52,7 @@ class WpBuildConsoleLogger
     constructor(env) { this.env = env; }
 
     /**
-     * @typedef {[number, number]} WpBuildLogColorMapping
+     * @typedef {[ number, number ]} WpBuildLogColorMapping
      */
     /** @type {Record<WpBuildLogColor, WpBuildLogColorMapping>} */
     colors = {
@@ -71,27 +73,7 @@ class WpBuildConsoleLogger
 
 
     /**
-     * @typedef {object} WpBuildLogIconSet
-     * @property {string} bullet
-     * @property {string} error
-     * @property {string} info
-     * @property {string} star
-     * @property {string} start
-     * @property {string} success
-     * @property {string} up
-     * @property {string} warning
-     */
-    /**
-     * @typedef {object} WpBuildLogColorIconSet
-     * @property {string} successTag
-     */
-    /**
-     * @typedef {object & WpBuildLogIconSet} WpBuildLogIcons
-     * @property {Pick<WpBuildLogIconSet, "error"|"info"|"success"|"warning">} blue
-     * @property {WpBuildLogIconSet & WpBuildLogColorIconSet} color
-     */
-    /**
-     * @type {WpBuildLogIcons}
+     * @type {WpBuildLogIconSet}
      */
     icons =
     {
@@ -126,6 +108,47 @@ class WpBuildConsoleLogger
 
 
     /**
+     * @function
+     * @param {any} msg
+     * @param {string} [pad]
+     */
+    error = (msg, pad) =>
+    {
+        let sMsg = msg;
+        if (msg)
+        {
+            if (isString(msg))
+            {
+                sMsg = msg;
+            }
+            else if (msg instanceof Error)
+            {
+                sMsg = msg.message.trim();
+                if (msg.stack) {
+                    sMsg += `\n${msg.stack.trim()}`;
+                }
+            }
+            else if (isObject<{}>(msg))
+            {
+                sMsg = "";
+                if (msg.message) {
+                    sMsg = msg.message;
+                }
+                if (msg.messageX) {
+                    sMsg += `\n${msg.messageX}`;
+                }
+                sMsg = sMsg || msg.toString();
+            }
+            else if (!isString(msg))
+            {
+                sMsg = msg.toString();
+            }
+            this.write(sMsg, undefined, pad, this.icons.color.error);
+        }
+    };
+
+
+    /**
      * @function Performs inline text coloring e.g. a message can contain ""..finished italic(main module) in 2.3s"
      * @param {string | undefined} msg
      * @returns {string}
@@ -136,7 +159,7 @@ class WpBuildConsoleLogger
         {
             for (const cKey of Object.keys(this.colors))
             {
-                msg = msg.replace(new RegExp(`${cKey}\\((.*?)\\)`, "g"), (_, g1) => this.withColor(g1, this.colors.italic));
+                msg = msg.replace(new RegExp(`${cKey}\\((.*?)\\)`, "g"), (_, g1) => this.withColor(g1, this.colors[cKey]));
             }
             return " " + msg;
         }
@@ -146,8 +169,33 @@ class WpBuildConsoleLogger
 
     /**
      * @function
+     * @param {string | undefined | null | 0 | false} icon
+     * @returns {WpBuildLogColorMapping}
+     */
+    getIconColorMapping = (icon) =>
+    {
+        const env = this.env,
+              colors = this.colors;
+        let envTagClr = env ? colors[env.app.colors.buildBracket] : colors.cyan;
+        if (icon) {
+            if (icon.includes(this.withColor(this.icons.info, colors.yellow))) {
+                envTagClr = colors.yellow;
+            }
+            else if (icon.includes(this.withColor(this.icons.warning, colors.yellow))) {
+                envTagClr = colors.red;
+            }
+            else if (icon.includes(this.withColor(this.icons.error, colors.red))) {
+                envTagClr = colors.red;
+            }
+        }
+        return envTagClr;
+    };
+
+
+    /**
+     * @function
      * @param {string} icon
-     * @param {[ number, number ]} color color value
+     * @param {WpBuildLogColorMapping} color color value
      * @returns {string}
      */
     iconColor(icon, color) { return this.withColor(icon, color); }
@@ -164,7 +212,7 @@ class WpBuildConsoleLogger
     /**
      * @function
      * @param {string | undefined} msg
-     * @param {[ number, number ]} color color value
+     * @param {WpBuildLogColorMapping} color color value
      * @returns {string}
      */
     withColor(msg, color) { return msg ? "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m" : ""; }
@@ -173,8 +221,8 @@ class WpBuildConsoleLogger
     /**
      * @function
      * @param {string | undefined} msg
-     * @param {[ number, number ] | undefined | null} [bracketColor] surrounding bracket color value
-     * @param {[ number, number ] | undefined | null} [msgColor] msg color value
+     * @param {WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
+     * @param {WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
      * @returns {string}
      */
     tagColor(msg, bracketColor, msgColor) { return msg ? (this.withColor("[", bracketColor || this.colors.blue) +
@@ -182,7 +230,7 @@ class WpBuildConsoleLogger
                                                 this.withColor("]", bracketColor || this.colors.blue)) : ""; }
 
     /**
-     * @param {[ number, number ]} color color value
+     * @param {WpBuildLogColorMapping} color color value
      * @param {string} [msg] message to include in length calculation
      * @returns {number}
      */
@@ -192,115 +240,31 @@ class WpBuildConsoleLogger
     /**
      * @function
      * @param {string} msg
-     * @param {WpBuildLogLevel} [level]
-     * @param {string} [pad]
-     * @param {string} [icon]
-     */
-    write = (msg, level, pad = "", icon) =>
-    {
-        // if (level === undefined || globalEnv.verbose)
-        if (level === undefined || level <= this.level)
-        {
-            let envTag = "";
-            const env = this.env,
-                  envIsInitialized = env && env.app && env.logger;
-            if (envIsInitialized)
-            {
-                const colors = this.colors,
-                      envTagMsgClr = env ? colors[env.app.colors.buildText] : colors.white;
-                let envTagClr = env ? colors[env.app.colors.buildBracket] : colors.cyan;
-                if (icon) {
-                    if (icon.includes(this.withColor(this.icons.info, colors.yellow))) {
-                        envTagClr = colors.yellow;
-                    }
-                    else if (icon.includes(this.withColor(this.icons.error, colors.red))) {
-                        envTagClr = colors.red;
-                    }
-                }
-                envTag = (
-                    " " + this.withColor("[", envTagClr) + env.build + this.withColor("][", envTagClr) +
-                    this.withColor(env.target.toString(), envTagMsgClr) + this.withColor("]", envTagClr)
-                )
-                .padEnd(env.app.log.pad.envTag + this.withColorLength(envTagMsgClr) + (this.withColorLength(envTagClr) * 3));
-            }
-            console.log(`${this.basePad}${pad}${icon || this.icons.color.info}${envTag}${this.format(msg)}`);
-        }
-    };
-
-
-    /**
-     * @function
-     * @param {any} msg
-     * @param {string} [pad]
-     */
-    error = (msg, pad) =>
-    {
-        let sMsg = msg;
-        if (msg)
-        {
-            if (isString(msg))
-            {
-                sMsg = msg;
-            }
-            else if (msg instanceof Error)
-            {
-                sMsg = msg.message;
-            }
-            else if (isObject<{}>(msg))
-            {
-                sMsg = "";
-                if (msg.message) {
-                    sMsg = msg.message;
-                }
-                if (msg.messageX) {
-                    sMsg += ("\n" + msg.messageX);
-                }
-                sMsg = sMsg || msg.toString();
-            }
-            else if (!isString(msg))
-            {
-                sMsg = msg.toString();
-            }
-            this.writeInfo(sMsg, undefined, pad, this.icons.color.error);
-        }
-    };
-
-
-    /**
-     * @function
-     * @param {string} msg
      * @param {number} [level]
      * @param {string} [pad]
-     * @param {string} [icon]
+     * @param {string | undefined | null | 0 | false} [icon]
+     * @param {WpBuildLogColorMapping} [color]
      */
-    writeInfo = (msg, level, pad = "", icon) =>
+    write = (msg, level, pad = "", icon, color) =>
     {
-        if (level === undefined || level <= this.level)
+        if (level === undefined || level <= this.env.logLevel)
         {
             let envTag = "";
             const env = this.env,
                   envIsInitialized = env && env.app && env.logger;
             if (envIsInitialized)
             {
-                const colors = this.colors,
-                      envTagMsgClr = env ? colors[env.app.colors.buildText] : colors.white;
-                let envTagClr = env ? colors[env.app.colors.buildBracket] : colors.cyan;
-                if (icon) {
-                    if (icon.includes(this.withColor(this.icons.info, colors.yellow))) {
-                        envTagClr = colors.yellow;
-                    }
-                    else if (icon.includes(this.withColor(this.icons.error, colors.red))) {
-                        envTagClr = colors.red;
-                    }
-                }
+                const envTagClr = this.getIconColorMapping(icon),
+                      envTagMsgClr = env ? this.colors[env.app.colors.buildText] : this.colors.white;
                 envTag = (
                     " " + this.withColor("[", envTagClr) + env.build + this.withColor("][", envTagClr) +
                     this.withColor(env.target.toString(), envTagMsgClr) + this.withColor("]", envTagClr)
                 )
                 .padEnd(env.app.log.pad.envTag + this.withColorLength(envTagMsgClr) + (this.withColorLength(envTagClr) * 3));
             }
-            const envMsgClr = envIsInitialized ? this.colors[env.app.colors.default] : this.colors.grey;
-            console.log(`${this.basePad}${pad}${icon || this.icons.color.info}${envTag}${this.withColor(this.format(msg), envMsgClr)}`);
+            const envMsgClr = color || (envIsInitialized ? this.colors[env.app.colors.default] : this.colors.grey),
+                  envMsg = color || !(/\x1B\[/).test(msg) ? this.withColor(this.format(msg), envMsgClr) : this.format(msg);
+            console.log(`${this.basePad}${pad}${icon || this.icons.color.info}${envTag}${envMsg}`);
         }
     };
 
@@ -314,14 +278,18 @@ class WpBuildConsoleLogger
      */
     value = (msg, val, level, pad, icon) =>
     {
-        if (level === undefined || level <= this.level)
+        if (level === undefined || level <= this.env.logLevel)
         {
-            let vMsg = msg || "";
-            vMsg.padEnd(this.env.app.log.pad.value - (pad || "").length);
-            if (val || val === 0 || val === "" || val === false)
+            let vMsg = (msg || ""),/** @type {RegExpExecArray | null} */
+                match, colorSpace = 0;
+            const rgx = /\x1B\[[0-9]{1,2}m(.*?)\x1B\[[0-9]{1,2}m/gi;
+            while ((match = rgx.exec(vMsg)) !== null) {
+                colorSpace += match[0].length - match[1].length;
+            }
+            vMsg = vMsg.padEnd(this.env.app.log.pad.value + colorSpace - (pad || "").length);
+            if (val || isPrimitive(val))
             {
-                vMsg += ": ";
-                vMsg += val.toString();
+                vMsg += (!isString(val) || !(/\x1B\[[0-9]{1,2}m/).test(val) ? ": " : "") + val;
             }
             else if (val === undefined) {
                 vMsg += ": undefined";
@@ -329,7 +297,7 @@ class WpBuildConsoleLogger
             else {
                 vMsg += ": null";
             }
-            this.writeInfo(vMsg, level, pad, icon);
+            this.write(vMsg, level, pad, icon, this.colors.grey);
         }
     };
 
@@ -339,7 +307,7 @@ class WpBuildConsoleLogger
      * @param {any} msg
      * @param {string} [pad]
      */
-    warning = (msg, pad = "") => void this.writeInfo(msg, undefined, pad, this.icons.color.warning);
+    warning = (msg, pad = "") => void this.write(msg, undefined, pad, this.icons.color.warning);
 
 }
 

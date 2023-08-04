@@ -152,7 +152,7 @@ class WpBuildApplication
      */
     printLineSep = (logger) =>
     {
-        logger.writeInfo("------------------------------------------------------------------------------------------------------------------------");
+        logger.write("------------------------------------------------------------------------------------------------------------------------");
     };
 
 
@@ -170,9 +170,9 @@ class WpBuildApplication
         this.printLineSep(logger);
         logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.rc.bannerNameDetailed} Webpack Build`));
         this.printLineSep(logger);
-        logger.write(logger.withColor("   Mode  : ", logger.colors.white) + logger.withColor(mode, logger.colors.grey));
-        logger.write(logger.withColor("   Argv  : ", logger.colors.white) + logger.withColor(JSON.stringify(this.env.argv), logger.colors.grey));
-        logger.write(logger.withColor("   Env   : ", logger.colors.white) + logger.withColor(JSON.stringify(this.env), logger.colors.grey));
+        logger.write("   Mode  : " + logger.withColor(mode, logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Argv  : " + logger.withColor(JSON.stringify(this.env.argv), logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Env   : " + logger.withColor(JSON.stringify(this.env), logger.colors.grey), 1, "", 0, logger.colors.white);
         this.printLineSep(logger);
     };
 
@@ -212,5 +212,6 @@ class WpBuildApplication
     };
 
 }
+
 
 module.exports = WpBuildApplication;

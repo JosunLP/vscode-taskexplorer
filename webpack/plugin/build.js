@@ -9,12 +9,11 @@
 const { existsSync } = require("fs");
 const { promisify } = require("util");
 const { findFiles } = require("../utils");
-const { WebpackError } = require("webpack");
 const WpBuildBasePlugin = require("./base");
-const {readFile, unlink, access, statfs } = require("fs/promises");
 const { join, basename, relative } = require("path");
 const exec = promisify(require("child_process").exec);
 // const spawn = promisify(require("child_process").spawn);
+const {readFile, unlink, access } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
@@ -26,9 +25,6 @@ const exec = promisify(require("child_process").exec);
 /** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
 
 
-/**
- * @class WpBuildCompilePlugin
- */
 class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 {
     /**
@@ -39,16 +35,6 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
     {
         this.onApply(compiler,
         {
-            // types: {
-            //     hook: "beforeCompile",
-            //     callback: (params) =>
-			// 	{
-			// 		this.buildTypes(/** @type {WebpackCompilationParams} */(params));
-			// 		if (this.env.isTests) {
-			// 			this.buildTests(/** @type {WebpackCompilationParams} */(params));
-			// 		}
-			// 	}
-            // },
 			typesAndTests: {
 				async: true,
                 hook: "compilation",
@@ -67,9 +53,9 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	 */
 	async build(assets)
 	{
-		await this.buildTypes(assets);
+		await this.types(assets);
 		if (this.env.isTests) {
-			await this.buildTests(assets);
+			// await this.testsuite(assets);
 		}
 	};
 
@@ -79,19 +65,16 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	 * @private
 	 * @param {WebpackCompilationAssets} _assets
 	 */
-	async buildTests(_assets)
+	async testsuite(_assets)
 	{
-		const logger = this.env.logger,
-			  bldDir = this.env.paths.build,
+		const bldDir = this.env.paths.build,
 			  testsDir = join(this.env.paths.dist, "test");
-		logger.writeInfo("build test suite");
+		this.env.logger.write("build test suite");
 		if (!existsSync(testsDir))
 		{
 			try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.test.tsbuildinfo")); } catch {}
 		}
-		logger.writeInfo("   execute italic(tsc) build for tests suite");
-		const procPromise = exec("npx tsc -p ./src/test", { cwd: bldDir, encoding: "utf8" });
-		await this.postProcess(testsDir, procPromise);
+		await this.execTsBuild("./src/test", 2, testsDir, true);
 	}
 
 
@@ -100,152 +83,129 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	 * @private
 	 * @param {WebpackCompilationAssets} _assets
 	 */
-	async buildTypes(_assets)
+	async types(_assets)
 	{
-		const logger = this.env.logger,
-			  bldDir = this.env.paths.build,
+		const bldDir = this.env.paths.build,
 			  typesDir = join(bldDir, "types", "dist");
-		this.env.logger.writeInfo("build types");
+		this.env.logger.write("build types");
 		if (!existsSync(typesDir))
 		{
 			try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
 		}
-		logger.writeInfo("   execute italic(tsc) build for types");
-		const procPromise = exec("npx tsc -p ./types", { cwd: bldDir, encoding: "utf8" });
-		await this.postProcess(typesDir, procPromise);
+		await this.execTsBuild("./types", 1, typesDir);
 	}
 
 
 	/**
+	 * @function Executes a typescript build using the specified tsconfig
 	 * @private
-	 * @param {WebpackCompilation} compilation
-	 * @param {number} startTime
-	 * @param {string} dependency
-	 * @returns {Promise<WebpackSnapshot | undefined>}
+	 * @param {string} tsConfig Path to tsconfig file or dir, relative to `env.paths.build`
+	 * @param {number} identifier Unique group identifier to associate with the file path
+	 * @param {string} outputDir Output directory of build
+	 * @param {boolean} [alias] Write alias paths with ``
 	 */
-	async createSnapshot(compilation, startTime, dependency)
+	execTsBuild = async (tsConfig, identifier, outputDir, alias) =>
 	{
-		return new Promise((resolve, reject) =>
-		{
-			compilation.fileSystemInfo.createSnapshot(
-				startTime, [ dependency ], // @ts-ignore
-				undefined, undefined, null,
-				(error, snapshot) =>
-				{
-					if (error) {
-						reject(error);
-					}
-					else {
-						resolve(/** @type {WebpackSnapshot} */snapshot);
-					}
-				}
-			);
-		});
-	}
+		// const babel = [
+		// 	"npx", "babel", tsConfig, "--out-dir", outputDir, "--extensions", ".ts",
+		// 	"--presets=@babel/preset-env,@babel/preset-typescript",
+		// ];
+		const logger = this.env.logger;
+		let command = `npx tsc -p ${tsConfig}`; // babel.join(" ");
+		logger.write(`   execute typescript build @ italic(${tsConfig})`, 1);
 
-
-	/**
-	 * @private
-	 * @param {WebpackCompilation} compilation
-	 * @param {WebpackSnapshot} snapshot
-	 * @returns {Promise<boolean | undefined>}
-	 */
-	async checkSnapshotValid(compilation, snapshot)
-	{
-		return new Promise((resolve, reject) =>
-		{
-			compilation.fileSystemInfo.checkSnapshotValid(snapshot, (error, isValid) =>
-			{
-				if (error) {
-					reject(error);
-				}
-				else {
-					resolve(isValid);
-				}
-			});
-		});
-	}
-
-
-	/**
-	 * @private
-	 * @param {WebpackCompiler} compiler
-	 * @param {WebpackCompilation} compilation
-	 * @param {Buffer} source
-	 * @returns {string}
-	 */
-	getContentHash(compiler, compilation, source)
-	{
-		const { outputOptions } = compilation;
-		const {hashDigest, hashDigestLength, hashFunction, hashSalt } = outputOptions;
-		const hash = compiler.webpack.util.createHash(/** @type {string} */hashFunction);
-		if (hashSalt) {
-			hash.update(hashSalt);
-		}
-		hash.update(source);
-		const fullContentHash = hash.digest(hashDigest);
-		return fullContentHash.toString().slice(0, hashDigestLength);
-	}
-
-
-	/**
-	 * @function
-	 * @private
-	 * @param {string} dir
-	 * @param {import("child_process").PromiseWithChild<{ stdout: string; stderr: string;}>} procPromise
-	 */
-	postProcess = async (dir, procPromise) =>
-	{
-		const logger = this.env.logger,
-			  child = procPromise.child;
 		try
 		{
-			child.stdout?.on("data", (data) => void logger.value("   stdout", data));
-			child.stderr?.on("data", (data) => void logger.value("   stderr", data));
-			child.on("close", (code) => void logger.writeInfo(`   tsc build completed with exit code bold(${code})`));
-
-			const { stdout, stderr } = await procPromise;
-
-			logger.value("   tsc stdout", stdout);
-			logger.value("   tsc stderr", stderr);
-
-			await access(dir);
-
-			const files = await findFiles("**/*.js", { nocase: true, cwd: dir, absolute: true  });
+			let procPromise = exec(command, { cwd: this.env.paths.build, encoding: "utf8" }),
+				child = procPromise.child;
+			child.stdout?.on("data", (data) => void logger.value("   tsc stdout", data));
+			child.stderr?.on("data", (data) => void logger.value("   tsc stderr", data));
+			child.on("close", (code) => void logger.write(`   typescript build completed with exit code bold(${code})`));
+			await procPromise;
+			//
+			// Ensure target directory exists
+			//
+			await access(outputDir);
+			//
+			// Run `tsc-alias` for path aliasing if specified.
+			//
+			if (alias)
+			{   //
+				// Note that `tsc-alias` requires a filename e.g. tsconfig.json in it's path argument
+				//
+				if (!(/tsconfig\.(?:[\w\-_\.]+\.)?json$/).test(tsConfig)) {
+					tsConfig = join(tsConfig, "tsconfig.json");
+				}
+				command = `tsc-alias -p ${tsConfig}`;
+				procPromise = exec(command, { cwd: this.env.paths.build, encoding: "utf8" });
+				child = procPromise.child;
+				child.stdout?.on("data", (data) => void logger.value("   tsc-alias stdout", data));
+				child.stderr?.on("data", (data) => void logger.value("   tsc-alias stderr", data));
+				child.on("close", (code) => void logger.write(`   typescript path aliasing completed with exit code bold(${code})`));
+				await procPromise;
+			}
+			//
+			// Process output files
+			//
+			const files = await findFiles("**/*.js", { nocase: true, cwd: outputDir, absolute: true });
 			for (const filePath of files)
 			{
-				const filePathRel = relative(dir, filePath),
+				let data, source, hash, cacheEntry, cacheEntry2;
+				const filePathRel = relative(outputDir, filePath),
 					  file = basename(filePathRel);
-				let source,
-					cacheEntry;
 
-				logger.writeInfo(`   check cache for '${filePathRel}'...`);
+				this.compilation.buildDependencies.add(file);
+
+				logger.value("   check cache", filePathRel, 3);
 				try {
-					cacheEntry = await this.cache.getPromise(`${filePath}|${index}`, null);
+					cacheEntry2 = this.cache2.get();
+					cacheEntry = await this.cache.getPromise(`${filePath}|${identifier}`, null);
 				}
 				catch (e) {
-					this.compilation.errors.push(e);
+					this.handleError(e, "failed while checking cache");
 					return;
+				}
+
+				if (cacheEntry2)
+				{
+					data = data || await readFile(filePath);
+					const newHash = this.getContentHash(data);
+					if (newHash === cacheEntry2[filePathRel])
+					{
+						logger.value("   asset unchanged", filePathRel, 3);
+						this.compilation.comparedForEmitAssets.add(file);
+						continue;
+					}
+					cacheEntry2[filePathRel] = newHash;
+					this.cache2.set(cacheEntry2);
 				}
 
 				if (cacheEntry)
 				{
 					let isValidSnapshot;
-					logger.writeInfo(`   checking snapshot on valid for '${filePathRel}'...`);
+					logger.value("   check snapshot valid", filePathRel, 3);
 					try {
-						isValidSnapshot = await this.checkSnapshotValid(this.compilation, cacheEntry.snapshot);
+						isValidSnapshot = await this.checkSnapshotValid(cacheEntry.snapshot);
 					}
 					catch (e) {
-						this.compilation.errors.push(/** @type {WebpackError} */e);
+						this.handleError(e, "failed while checking snapshot");
 						return;
 					}
 					if (isValidSnapshot)
 					{
-						logger.writeInfo(`   snapshot for '${filePathRel}' is valid`);
-						({ source } = cacheEntry);
+						logger.value("   snapshot valid", filePathRel, 3);
+						({ hash, source } = cacheEntry);
+						data = data || await readFile(filePath);
+						const newHash = this.getContentHash(data);
+						if (newHash === hash)
+						{
+							logger.value("   asset unchanged", filePathRel, 3);
+							this.compilation.comparedForEmitAssets.add(file);
+							return;
+						}
 					}
 					else {
-						logger.writeInfo(`   snapshot for '${filePathRel}' is invalid`);
+						logger.write(`   snapshot for '${filePathRel}' is invalid`, 3);
 					}
 				}
 
@@ -253,80 +213,77 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 				{
 					let snapshot;
 					const startTime = Date.now();
-					const data = await readFile(filePath);
+					data = data || await readFile(filePath);
 					source = new this.compiler.webpack.sources.RawSource(data);
+					logger.value("   create snapshot", filePathRel, 3);
 					try {
-						snapshot = await this.createSnapshot(this.compilation, startTime, filePath);
+						snapshot = await this.createSnapshot(startTime, filePath);
 					}
 					catch (e) {
-						this.compilation.errors.push(/** @type {WebpackError} */e);
+						this.handleError(e, "failed while creating snapshot");
 						return;
 					}
-					if (snapshot) {
-						logger.writeInfo(`created snapshot for '${filePathRel}'`);
-						logger.writeInfo(`storing cache for '${filePathRel}'...`);
+					if (snapshot)
+					{
+						// console.log("########: ");
+						// console.log("hasContextHashes: " + snapshot.hasContextHashes());
+						// console.log("hasFileHashes: " + snapshot.hasFileHashes());
+						// console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
+						// console.log("hasStartTime: " + snapshot.hasStartTime());
+
+						logger.value("   cache snapshot", filePathRel, 3);
 						try {
-							await this.cache.storePromise(`${filePathRel}|${index}`, null, { source, snapshot });
+							const hash = this.getContentHash(source.buffer());
+							snapshot.setFileHashes(hash);
+							await this.cache.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
+
+							cacheEntry = await this.cache.getPromise(`${filePath}|${identifier}`, null);
+							// if (cacheEntry)
+							// {
+							// 	console.log("!!!!!!!!!!: " + cacheEntry.hash);
+							// 	console.log("hasContextHashes: " + snapshot.hasContextHashes());
+							// 	console.log("hasFileHashes: " + snapshot.hasFileHashes());
+							// 	console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
+							// 	console.log("hasStartTime: " + snapshot.hasStartTime());
+							// }
 						}
 						catch (e) {
-							this.compilation.errors.push(/** @type {WebpackError} */e);
+							this.handleError(e, "failed while caching snapshot");
 							return;
 						}
-						logger.writeInfo(`stored cache for '${filePathRel}'`);
 					}
 				}
 
 				const info = {
 					absoluteFilename: filePath,
-					sourceFilename: file,
+					sourceFilename: filePathRel,
 					filename: file,
 					precompile: true,
 					development: true,
 					immutable: true
 				};
 
-				const existingAsset = this.compilation.getAsset(file);
-
+				const existingAsset = this.compilation.getAsset(filePathRel);
 				if (!existingAsset)
 				{
-					logger.value("   emit asset", filePathRel);
-					this.compilation.emitAsset(file, new this.compiler.webpack.sources.RawSource(source), info);
+					logger.value("   add asset", filePathRel, 2);
+					this.compilation.additionalChunkAssets.push(filePathRel);
+					// logger.value("   emit asset", filePathRel, 2);
+					// this.compilation.emitAsset(file, source, info);
 				}
-				else if (this.options.force) {
-					logger.value("   update asset", filePathRel);
-					this.compilation.updateAsset(file, new this.compiler.webpack.sources.RawSource(source), info);
-				}
+				// else if (this.options.force) {
+				// 	logger.value("   update asset", filePathRel, 2);
+				// 	this.compilation.updateAsset(file, source, info);
+				// }
+
+				this.compilation.comparedForEmitAssets.add(filePathRel);
 			}
 		}
 		catch (e) {
-			logger.warning(`build 'test suite' failed: ${e.message}`);
+			this.handleError(e, "typescript build failed");
 		}
 	};
 
-
-	// babel:
-	// 	/**
-	// 	 * @param {WpBuildEnvironment} env
-	// 	 * @returns {void}
-	// 	 */
-	// 	buildTests: (env) =>
-	// 	{
-	// 		// let babel = [
-	// 		// 	"babel", "./src/test/suite", "--out-dir", "./dist/test/suite", "--extensions", ".ts",
-	// 		// 	"--presets=@babel/preset-env,@babel/preset-typescript",
-	// 		// ];
-	// 		// spawnSync("npx", babel, { cwd: env.paths.build, encoding: "utf8", shell: true });
-	// 		// babel = [
-	// 		// 	"babel", "./src/test/run", "--out-dir", "./dist/test/run", "--extensions", ".ts",
-	// 		// 	"--presets=@babel/preset-env,@babel/preset-typescript",
-	// 		// ];
-	// 		// spawnSync("npx", babel, { cwd: env.paths.build, encoding: "utf8", shell: true });
-	// 		const babel = [
-	// 			"babel", "./src/test", "--out-dir", "./dist/test", "--extensions", ".ts",
-	// 			"--presets=@babel/preset-env,@babel/preset-typescript",
-	// 		];
-	// 		spawnSync("npx", babel, { cwd: env.paths.build, encoding: "utf8", shell: true });
-	// 	}
 }
 
 

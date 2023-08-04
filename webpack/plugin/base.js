@@ -6,12 +6,13 @@
  * @module wpbuild.plugin.WpBuildBasePlugin
  */
 
-const { globalEnv, merge, asArray, mergeIf } = require("../utils");
-const { ModuleFilenameHelpers } = require("webpack");
+const { WebpackError, ModuleFilenameHelpers } = require("webpack");
+const { globalEnv, asArray, mergeIf, WpBuildCache } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
 /** @typedef {import("../types").WebpackCacheFacade} WebpackCacheFacade */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -42,6 +43,13 @@ class WpBuildBasePlugin
      * @type {WebpackCacheFacade}
      */
     cache;
+
+    /**
+     * @member
+     * @protected
+     * @type {WpBuildCache}
+     */
+    cache2;
 
     /**
      * @member
@@ -87,6 +95,13 @@ class WpBuildBasePlugin
 
     /**
      * @member
+     * @private
+     * @type {string}
+     */
+    nameCompilation;
+
+    /**
+     * @member
      * @protected
      * @type {WpBuildPluginOptions}
      */
@@ -117,6 +132,7 @@ class WpBuildBasePlugin
         this.wpConfig = options.env.wpc;
         this.name = this.constructor.name;
         this.options = mergeIf(options, { plugins: [] });
+        this.cache2 = new WpBuildCache(this.env, { file: `cache_${this.name}.json` });
 		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, options);
         if (globalCache) {
             this.initGlobalEnvObject(globalCache);
@@ -133,19 +149,82 @@ class WpBuildBasePlugin
 
 
     /**
-     * @function
-     * @returns {WebpackPluginInstance[]}
-     */
-    getPlugins() { return this._plugins; }
-
-
-    /**
      * @function Break property name into separate spaced words at each camel cased character
      * @private
      * @param {string} prop
      * @returns {string}
      */
     breakProp(prop) { return prop.replace(/[A-Z]/g, (v) => ` ${v.toLowerCase()}`); }
+
+
+	/**
+	 * @function
+	 * @protected
+	 * @param {WebpackSnapshot} snapshot
+	 * @returns {Promise<boolean | undefined>}
+	 */
+	async checkSnapshotValid(snapshot)
+	{
+		return new Promise((resolve, reject) =>
+		{
+			this.compilation.fileSystemInfo.checkSnapshotValid(snapshot, (e, isValid) => { if (e) { reject(e); } else { resolve(isValid); }});
+		});
+	}
+
+
+	/**
+	 * @function
+	 * @protected
+	 * @param {number} startTime
+	 * @param {string} dependency
+	 * @returns {Promise<WebpackSnapshot | undefined | null>}
+	 */
+	async createSnapshot(startTime, dependency)
+	{
+		return new Promise((resolve, reject) =>
+		{
+			this.compilation.fileSystemInfo.createSnapshot(startTime, [ dependency ], // @ts-ignore
+				undefined, undefined, null, (e, snapshot) => { if (e) { reject(e); } else { resolve(snapshot); }}
+			);
+		});
+	}
+
+
+	/**
+	 * @function
+	 * @protected
+	 * @param {Buffer} source
+	 * @returns {string}
+	 */
+	getContentHash(source)
+	{
+		const {hashDigest, hashDigestLength, hashFunction, hashSalt } = this.compilation.outputOptions,
+			  hash = this.compiler.webpack.util.createHash(/** @type {string} */hashFunction);
+		if (hashSalt) {
+			hash.update(hashSalt);
+		}
+		return hash.update(source).digest(hashDigest).toString().slice(0, hashDigestLength);
+	}
+
+
+    /**
+     * @function
+     * @returns {WebpackPluginInstance[]}
+     */
+    getPlugins() { return this._plugins; }
+
+
+	/**
+	 * @function
+	 * @protected
+	 * @param {WebpackError} e
+	 * @param {string} msg
+	 */
+	handleError(e, msg)
+	{
+		this.env.logger.error(`${msg}: ${e.message.trim()}`);
+		this.compilation.errors.push(/** @type {WebpackError} */e);
+	}
 
 
     /**
@@ -217,8 +296,8 @@ class WpBuildBasePlugin
             return false;
         }
         this.compilation = compilation;
-        this.logger = /** @type {WebpackLogger} */(compilation.getLogger(this.name));
-        this.cache = /** @type {WebpackCacheFacade} */(compilation.getCache(this.name));
+        this.logger = compilation.getLogger(this.name);
+        this.cache = compilation.getCache(this.name);
         return true;
     }
 
@@ -279,6 +358,32 @@ class WpBuildBasePlugin
         }
     };
 
+    // /**
+    //  * @template T
+    //  * @function
+    //  * @protected
+    //  * @param {Function} fn
+    //  * @param {string} msg
+    //  * @param {...any} args
+    //  * @returns {PromiseLike<T> | T | Error}
+    //  */
+    // wrapTry = (fn, msg, ...args) =>
+    // {
+    //     this.env.logger.write(msg, 3);
+    //     try {
+    //         const r = fn.call(this, ...args);
+    //         if (isPromise(r)) {
+    //             return r.then((v) => v);
+    //         }
+    //         else {
+    //             return r;
+    //         }
+    //     }
+    //     catch (e) {
+    //         this.handleError(e, `Failed: ${msg}`);
+    //         return /** @type {Error} */(e);
+    //     }
+    // };
 }
 
 

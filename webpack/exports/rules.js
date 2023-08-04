@@ -105,12 +105,11 @@ const rules = (env) =>
 			}
 		}]);
 	}
-	else // extension - node or browser
+	else // extension - node or web
 	{
-		const configFile = env.build === "browser" ? "tsconfig.web.json" : "tsconfig.json";
+		const configFile = env.build === "web" ? "tsconfig.web.json" : "tsconfig.json";
 		env.wpc.module.rules.push({
 			test: /\.ts$/,
-			// test: (filename, entry) => { console.log(entry); return (/\.ts$/).test(filename) && entry === "taskexplorer"; },
 			issuerLayer: "release",
 			include: path.join(env.paths.build, "src"),
 			loader: "string-replace-loader",
@@ -162,6 +161,7 @@ const rules = (env) =>
 		},
 		{
 			test: /wrapper\.ts$/,
+			issuerLayer: "release",
 			include: path.join(env.paths.build, "src", "lib"),
 			loader: "string-replace-loader",
 			options: {

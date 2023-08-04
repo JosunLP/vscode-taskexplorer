@@ -18,7 +18,7 @@ const target = (env) =>
 	{
 		env.wpc.target = env.target = "webworker";
 	}
-	else if (env.build === "browser")
+	else if (env.build === "web")
 	{
 		env.wpc.target = env.target = "web";
 	}

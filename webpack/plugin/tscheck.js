@@ -42,7 +42,8 @@ const tscheck = (env) =>
 			tsConfigs.push(
 				[ path.join(env.paths.build, "tsconfig.types.json"), "write-tsbuildinfo" ],
 				[ path.join(env.paths.build, "types", "tsconfig.json"), "write-tsbuildinfo" ],
-				[ path.join(env.paths.build, env.build === "browser" ? "tsconfig.web.json" : "tsconfig.json"), "write-tsbuildinfo" ]
+				[ path.join(env.paths.build, `tsconfig.${env.target}.json`), "write-tsbuildinfo" ],
+				[ path.join(env.paths.build, env.build === "web" ? "tsconfig.web.json" : "tsconfig.json"), "write-tsbuildinfo" ]
 			);
 			// if (env.paths.base !== env.paths.build)
 			// {

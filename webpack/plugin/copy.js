@@ -50,7 +50,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	dupMainEntryFilesNoHash(assets)
 	{
 		const entriesRgx = getEntriesRegex(this.wpConfig);
-		this.env.logger.writeInfo("duplicate entry modules without hash");
+		this.env.logger.write("duplicate entry modules without hash");
 		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
 		{
 			const source = sourceInfo.source(),

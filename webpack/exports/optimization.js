@@ -22,7 +22,7 @@ const optimization = (env) =>
 			runtimeChunk: "single",
 			splitChunks: false
 		};
-		if (env.build !== "browser")
+		if (env.build !== "web")
 		{
 			env.wpc.optimization.splitChunks =
 			{

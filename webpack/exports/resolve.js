@@ -25,8 +25,8 @@ const resolve = (env) =>
 				":types": path.resolve(env.paths.build, "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			mainFields: env.build === "browser" ? [ "browser", "module", "main" ] : [ "module", "main" ],
-			fallback: env.build === "browser" ?
+			mainFields: env.build === "web" ? [ "web", "module", "main" ] : [ "module", "main" ],
+			fallback: env.build === "web" ?
 					  {
 					  	  path: require.resolve("path-browserify"),
 					  	  os: require.resolve("os-browserify/browser")

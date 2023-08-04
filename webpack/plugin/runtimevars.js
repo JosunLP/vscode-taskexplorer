@@ -75,36 +75,36 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         const logger = this.env.logger,
               hashInfo = this.env.state.hash,
               labelLength = this.env.app.log.pad.value;
-        logger.writeInfo(`${rotated ? "read" : "saved"} asset state for build environment ${logger.withColor(this.env.environment, logger.colors.italic)}`);
-        logger.writeInfo("   previous:");
+        logger.write(`${rotated ? "read" : "saved"} asset state for build environment ${logger.withColor(this.env.environment, logger.colors.italic)}`, 1);
+        logger.write("   previous:", 2);
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.previous).forEach(
-                (k) => logger.writeInfo(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.current[k]))
+                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.current[k]), 2, "", 0, logger.colors.grey)
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
-            logger.writeInfo("      there are no previous hashes stoerd");
+            logger.write("      there are no previous hashes stoerd", 2);
         }
-        logger.writeInfo("   current:");
+        logger.write("   current:", 2);
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.current).forEach(
-                (k) => logger.writeInfo(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.current[k]))
+                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.current[k]), 2, "", 0, logger.colors.grey)
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
-            logger.writeInfo("      values cleared and moved to 'previous'");
+            logger.write("      values cleared and moved to 'previous'", 2);
         }
-        logger.writeInfo("   next:");
+        logger.write("   next:", 2);
         if (!isObjectEmpty(hashInfo.next))
         {
             Object.keys(hashInfo.next).forEach(
-                (k) => logger.writeInfo(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.next[k]))
+                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.next[k]), 2, "", 0, logger.colors.grey)
             );
         }
         else if (!isObjectEmpty(hashInfo.current) && rotated === true) {
-            logger.writeInfo("      values cleared and moved to 'current'");
+            logger.write("      values cleared and moved to 'current'", 2);
         }
     };
 
@@ -119,7 +119,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         const env = this.env,
               logger = env.logger,
               hashCurrent = env.state.hash.current;
-        logger.writeInfo(`validate hashes for assets in italic(${env.paths.files.hashStoreJson})`, 2);
+        logger.write(`validate hashes for assets in italic(${env.paths.files.hashStoreJson})`, 2);
         asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
         {
             const chunkName = /** @type {string} */(chunk.name);
@@ -128,14 +128,14 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
                 if (!hashCurrent[chunkName])
                 {
                     hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    logger.writeInfo(`updated contenthash for italic(${file})`, 2);
+                    logger.write(`updated contenthash for italic(${file})`, 2);
                     logger.value("   previous", "n/a", 3);
                     logger.value("   new", chunk.contentHash.javascript, 3);
                 }
                 if (hashCurrent[chunkName] !==  chunk.contentHash.javascript)
                 {
                     hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    logger.writeInfo(`updated stale contenthash for italic(${file})`, 2);
+                    logger.write(`updated stale contenthash for italic(${file})`, 2);
                     logger.value("   previous", hashCurrent[file], 3);
                     logger.value("   new", chunk.contentHash.javascript, 3);
                 }

@@ -117,15 +117,6 @@ const getEntriesRegex = (wpConfig, dbg, ext, hash) =>
 
 
 /**
- * @template {{}} [T=Record<string, any>]
- * @param {T | undefined} v Variable to check to see if it's an array
- * @param {boolean} [allowArray] If `true`, return true if v is an array
- * @returns {v is T}
- */
-const isObject = (v, allowArray) => !!v && Object.prototype.toString.call(v) === "[object Object]" && (v instanceof Object || typeof v === "object") && (allowArray || !isArray(v));
-
-
-/**
  * @param {any} v Variable to check to see if it's an array
  * @param {boolean} [allowEmp] If `true`, return true if v is an empty array
  * @returns {v is []}
@@ -152,7 +143,38 @@ const isEmpty = (v, allowEmpStr) => v === null || v === undefined || (!allowEmpS
  * @param {any} v Variable to check to see if it's and empty object
  * @returns {boolean}
  */
+const isFunction = (v) => !!v && typeof v === "function";
+
+
+/**
+ * @template {{}} [T=Record<string, any>]
+ * @param {T | undefined} v Variable to check to see if it's an array
+ * @param {boolean} [allowArray] If `true`, return true if v is an array
+ * @returns {v is T}
+ */
+const isObject = (v, allowArray) => !!v && Object.prototype.toString.call(v) === "[object Object]" && (v instanceof Object || typeof v === "object") && (allowArray || !isArray(v));
+
+
+/**
+ * @param {any} v Variable to check to see if it's and empty object
+ * @returns {boolean}
+ */
 const isObjectEmpty = (v) => { if (v) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };
+
+
+/**
+ * @param {any} v Variable to check to see if it's a primitive type (i.e. boolean / number / string)
+ * @returns {v is boolean | number | string}
+ */
+const isPrimitive = (v) => [ "boolean", "number", "string" ].includes(typeof v);
+
+
+/**
+ * @template T
+ * @param {PromiseLike<T> | any} v Variable to check to see if it's a promise or thenable-type
+ * @returns {v is PromiseLike<T>}
+ */
+const isPromise = (v) => !!v && (v instanceof Promise || (isObject(v) && isFunction(v.then)));
 
 
 /**
@@ -254,6 +276,6 @@ const pickNot = (obj, ...keys) =>
 
 
 module.exports = {
-    apply, asArray, clone, findFiles, isArray, isDate, isEmpty, isObject, isObjectEmpty, isString,
-    getEntriesRegex, merge, mergeIf, pick, pickBy, pickNot
+    apply, asArray, clone, findFiles, isArray, isDate, isEmpty, isObject, isObjectEmpty, isPrimitive,
+    isPromise, isString, getEntriesRegex, merge, mergeIf, pick, pickBy, pickNot
 };

@@ -98,7 +98,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                     const msg = "unchanged, skip upload ".padEnd(env.app.log.pad.value),
                           hash = asset.info.contenthash?.toString() || "",
                           icon = logger.withColor(logger.icons.info, logger.colors.yellow);
-                    logger.writeInfo(`${msg}${logger.tagColor(hash)} ${logger.tagColor(file, null, logger.colors.grey)}`, 1, "", icon);
+                    logger.write(`${msg}${logger.tagColor(hash)} ${logger.tagColor(file, null, logger.colors.grey)}`, 1, "", icon);
                 }
             }
         }
@@ -113,7 +113,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
               filesToUpload = await readdir(toUploadPath);
 
         if (filesToUpload.length === 0) {
-            logger.writeInfo("There were no updated assets found to upload");
+            logger.write("There were no updated assets found to upload");
             return;
         }
 
@@ -151,21 +151,21 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
 
         await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
-        logger.writeInfo(`${logger.icons.color.star } ${logger.withColor(`upload resource files to ${host}`, logger.colors.grey)}`);
+        logger.write(`${logger.icons.color.star } ${logger.withColor(`upload resource files to ${host}`, logger.colors.grey)}`);
         try {
-            logger.writeInfo(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
+            logger.write(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
             spawnSync("plink", plinkArgs, spawnSyncOpts);
-            logger.writeInfo(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
+            logger.write(`   upload files  : pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             filesToUpload.forEach((f) =>
-                logger.writeInfo(`   ${logger.icons.color.up} ${logger.withColor(basename(f).padEnd(env.app.log.pad.uploadFileName), logger.colors.grey)} ${logger.icons.color.successTag}`)
+                logger.write(`   ${logger.icons.color.up} ${logger.withColor(basename(f).padEnd(env.app.log.pad.uploadFileName), logger.colors.grey)} ${logger.icons.color.successTag}`)
             );
-            logger.writeInfo(`${logger.icons.color.star} ${logger.withColor("successfully uploaded resource files", logger.colors.grey)}`);
+            logger.write(`${logger.icons.color.star} ${logger.withColor("successfully uploaded resource files", logger.colors.grey)}`);
         }
         catch (e) {
             logger.error("error uploading resource files:");
-            filesToUpload.forEach(f => logger.writeInfo(`   ${logger.withColor(logger.icons.up, logger.colors.red)} ${logger.withColor(basename(f), logger.colors.grey)}`, undefined, "", logger.icons.color.error));
+            filesToUpload.forEach(f => logger.write(`   ${logger.withColor(logger.icons.up, logger.colors.red)} ${logger.withColor(basename(f), logger.colors.grey)}`, undefined, "", logger.icons.color.error));
             logger.error(e);
         }
         finally {

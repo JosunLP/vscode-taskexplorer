@@ -21,7 +21,7 @@ const optimization = (env) =>
 	const plugins = [];
 	if (env.app.plugins.optimization !== false)
 	{
-		if (env.build === "browser")
+		if (env.build === "web")
 		{
 			plugins.push(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }));
 		}
