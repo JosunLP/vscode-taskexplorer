@@ -140,8 +140,8 @@ declare interface IWpBuildLogColorMap
     default: WpBuildLogTrueColor;
     buildBracket: WpBuildLogTrueColor,
     buildText: WpBuildLogTrueColor,
-    stageAsterisk: WpBuildLogTrueColor;
-    stageText: WpBuildLogTrueColor;
+    valueStar: WpBuildLogTrueColor;
+    valueStarText: WpBuildLogTrueColor;
     tagBracket: WpBuildLogTrueColor;
     tagText: WpBuildLogTrueColor;
     uploadSymbol: WpBuildLogTrueColor;
@@ -177,6 +177,7 @@ declare interface IWpBuildLogIconBaseSet
 declare type WpBuildLogIconBlueSet= Pick<IWpBuildLogIconBaseSet, "error"|"info"|"success"|"warning">;
 declare interface IWpBuildLogIconActionSet extends IWpBuildLogIconBaseSet
 {
+    starCyan: string;
     successTag: string;
 }
 declare type WpBuildLogIconActionSet = IWpBuildLogIconActionSet;

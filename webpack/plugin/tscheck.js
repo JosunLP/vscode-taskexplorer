@@ -27,6 +27,12 @@ const { join } = require("path");
 class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 {
 
+	/**
+	 * @private
+	 */
+	logTagFc = "tsforkchecker plugin hook";
+
+
     /**
      * @class WpBuildLicenseFilePlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
@@ -152,7 +158,7 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 * @function
 	 * @private
 	 */
-	tsForkCheckerError = () => { this.env.logger.write("bold(tsforkchecker): error"); };
+	tsForkCheckerError = () => this.logHook(this.logTagFc, "error");
 
 
 	/**
@@ -160,21 +166,25 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 * @private
 	 * @param {ForkTsCheckerIssue[]} issues
 	 */
-	tsForkCheckerIssues = (issues) => { this.env.logger.write("bold(tsforkchecker): filter issues"); return issues.filter((issue) => issue.severity === "error"); };
+	tsForkCheckerIssues = (issues) =>
+{
+		this.logHook(this.logTagFc, "filter issues");
+		return issues.filter(i => i.severity === "error");
+	};
 
 
 	/**
 	 * @function
 	 * @private
 	 */
-	tsForkCheckerStart = () => { this.env.logger.write("bold(tsforkchecker): start"); };
+	tsForkCheckerStart = () => this.logHook(this.logTagFc, "start");
 
 
 	/**
 	 * @function
 	 * @private
 	 */
-	tsForkCheckerWaiting = () => { this.env.logger.write("bold(tsforkchecker): waiting for issues"); };
+	tsForkCheckerWaiting = () => this.logHook(this.logTagFc, "waiting for issues");
 
 }
 

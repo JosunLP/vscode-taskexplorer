@@ -121,7 +121,7 @@
                         }
                     ]
                 },
-                "stageAsterisk": {
+                "valueStar": {
                     "type": "string",
                     "oneOf": [
                         {
@@ -153,7 +153,7 @@
                         }
                     ]
                 },
-                "stageText": {
+                "valueStarText": {
                     "type": "string",
                     "oneOf": [
                         {

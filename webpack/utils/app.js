@@ -135,8 +135,8 @@ class WpBuildApplication
         appRc.log = mergeIf(appRc.log || {}, { level: 1, pad: { ...pad } });
         appRc.logPad = mergeIf(appRc.logPad || {}, { ...pad});
         appRc.colors = mergeIf(appRc.colors || {}, {
-            buildBracket: "blue", buildText: "white", default: "grey", stageAsterisk: "cyan",
-            stageText: "white", tagBracket: "blue", tagText: "white", uploadSymbol: "yellow"
+            buildBracket: "blue", buildText: "white", default: "grey", valueStar: "cyan",
+            valueStarText: "white", tagBracket: "blue", tagText: "white", uploadSymbol: "yellow"
         });
 
         this.rc = appRc;

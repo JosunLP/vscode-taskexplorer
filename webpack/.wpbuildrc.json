@@ -23,10 +23,10 @@
     },
     "colors": {
         "default": "grey",
-        "buildBracket": "cyan",
+        "buildBracket": "blue",
         "buildText": "white",
-        "stageAsterisk": "cyan",
-        "stageText": "white",
+        "valueStar": "cyan",
+        "valueStarText": "white",
         "tagBracket": "blue",
         "tagText": "white",
         "uploadSymbol": "yellow"

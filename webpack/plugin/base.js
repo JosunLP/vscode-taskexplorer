@@ -156,9 +156,9 @@ class WpBuildBasePlugin
         this.name = this.constructor.name;
         this.logger = this.env.logger;
         this.options = mergeIf(options, { plugins: [] });
+        this.hashDigestLength = this.env.wpc.output.hashDigestLength || 20;
         this.cache = new WpBuildCache(this.env, { file: `cache_${this.name}.json` });
 		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, options);
-        this.hashDigestLength = this.env.wpc.output.hashDigestLength || 20;
         if (globalCache) {
             this.initGlobalEnvObject(globalCache);
         }
@@ -331,6 +331,15 @@ class WpBuildBasePlugin
      * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
      */
     isTapable = (hook) => isFunction(hook.tap) || isFunction(hook.tapPromise);
+
+
+    /**
+     * @function
+     * @protected
+     * @param {string} hookMsg
+     * @param {string} hookDsc
+     */
+    logHook = (hookMsg, hookDsc) => this.logger.valuestar(hookMsg, hookDsc);
 
 
     /**

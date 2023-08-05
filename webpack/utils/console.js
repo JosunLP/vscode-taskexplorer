@@ -98,6 +98,7 @@ class WpBuildConsoleLogger
             bullet: this.withColor("●", this.colors.white),
             info: this.withColor("ℹ", this.colors.magenta),
             star: this.withColor("★", this.colors.yellow),
+            starCyan: this.withColor("★", this.colors.cyan),
             start: this.withColor("▶", this.colors.green),
             success: this.withColor("✔", this.colors.green),
             successTag: `[${this.withColor("SUCCESS", this.colors.green)}]`,
@@ -299,6 +300,29 @@ class WpBuildConsoleLogger
                 vMsg += ": null";
             }
             this.write(vMsg, level, pad, icon, this.colors.grey);
+        }
+    };
+
+    /**
+     * @function
+     * @param {string} hookMsg
+     * @param {string} hookDsc
+     * @param {WpBuildLogColorMapping} [iconColor]
+     */
+    valuestar = (hookMsg, hookDsc, iconColor) =>
+    {
+        const icon = this.withColor(
+            this.icons.star,
+            iconColor ||
+            (this.env.app.colors.valueStar ? this.colors[this.env.app.colors.valueStar] : null) ||
+            this.colors.cyan
+        );
+        if (this.env.app.colors.valueStarText && this.env.app.colors.valueStarText !== "white")
+        {
+            this.value(this.withColor(hookMsg, this.colors[this.env.app.colors.valueStarText]), `${icon} ${hookDsc} ${icon}`);
+        }
+        else {
+            this.value(hookMsg, `${icon} ${hookDsc} ${icon}`);
         }
     };
 
