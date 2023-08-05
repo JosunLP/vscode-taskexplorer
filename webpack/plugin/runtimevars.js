@@ -84,7 +84,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
-            logger.write("      there are no previous hashes stoerd", 2);
+            logger.write("      there are no previous hashes stored", 2);
         }
         logger.write("   current:", 2);
         if (!isObjectEmpty(hashInfo.current))
@@ -172,18 +172,22 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     {
         const hashMap = this.env.state.hash.next,
               updates = /** @type {string[]} */([]);
+        this.logger.write("replace runtime variables", 1);
         asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
         {
             const chunkName = /** @type {string} */(chunk.name);
             asArray(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
             {
+                this.logger.value("   check file for variable replacement", file, 3);
                 hashMap[chunkName] = chunk.contentHash.javascript;
                 if (chunk.canBeInitial()) {
+                    this.logger.write(`   ${file} queued for variable replacement`, 2);
                     updates.push(file);
                 }
             });
         });
         updates.forEach((f) => this.compilation.updateAsset(f, (s) => this.source(f, s), this.info.bind(this)));
+        this.logger.write("runtime variable replacement completed", 2);
     };
 
 

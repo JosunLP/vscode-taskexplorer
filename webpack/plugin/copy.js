@@ -10,7 +10,7 @@ const { existsSync } = require("fs");
 const WpBuildBasePlugin = require("./base");
 const CopyPlugin = require("copy-webpack-plugin");
 const { join, posix, isAbsolute } = require("path");
-const { getEntriesRegex, isString, apply } = require("../utils/utils");
+const { isString, apply } = require("../utils/utils");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
@@ -23,7 +23,6 @@ const { getEntriesRegex, isString, apply } = require("../utils/utils");
 
 class WpBuildCopyPlugin extends WpBuildBasePlugin
 {
-
 	/**
 	 * @class WpBuildCopyPlugin
 	 * @param {WpBuildPluginOptions} options Plugin options to be applied
@@ -62,8 +61,8 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 */
 	entryModulesNoHash(assets)
 	{
-		const entriesRgx = getEntriesRegex(this.wpConfig);
-		this.env.logger.write("create copies of entry modules named without hash");
+		const entriesRgx = WpBuildBasePlugin.getEntriesRegex(this.wpConfig);
+		this.logger.write("create copies of entry modules named without hash");
 		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
 		{
 			const source = sourceInfo.source(),
@@ -84,11 +83,11 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			// }
 			if (!dstAsset)
 			{
-				this.env.logger.value("   emit copied asset", ccFileName);
+				this.logger.value("   emit copied asset", ccFileName);
 				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 			else if (this.options.force) {
-				this.env.logger.value("   update copied asset", ccFileName);
+				this.logger.value("   update copied asset", ccFileName);
 				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
 			}
 		});

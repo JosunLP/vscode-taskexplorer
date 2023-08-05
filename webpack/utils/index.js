@@ -9,11 +9,11 @@ const environment = require("./environment");
 const WpBuildConsoleLogger = require("./console");
 const {
     apply, asArray, clone, merge, mergeIf, isArray, isDate, isEmpty, isObject, isObjectEmpty,
-    isPrimitive, isPromise, isString, getEntriesRegex, pick, pickBy, pickNot, findFiles
+    isPrimitive, isPromise, isString, pick, pickBy, pickNot, findFiles
 } = require("./utils");
 
 module.exports = {
-    app, apply, asArray, clone, environment, findFiles, getEntriesRegex, globalEnv, isArray,
-    isDate, isEmpty, isObject, isObjectEmpty, isPrimitive, isPromise, isString, merge, mergeIf,
-    pick, pickBy, pickNot, WpBuildCache, WpBuildConsoleLogger
+    app, apply, asArray, clone, environment, findFiles, globalEnv, isArray, isDate, isEmpty,
+    isObject, isObjectEmpty, isPrimitive, isPromise, isString, merge, mergeIf, pick, pickBy,
+    pickNot, WpBuildCache, WpBuildConsoleLogger
 };

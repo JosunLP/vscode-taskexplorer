@@ -7,7 +7,7 @@
  */
 
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
-const { globalEnv, asArray, mergeIf, WpBuildCache } = require("../utils");
+const { globalEnv, asArray, mergeIf, WpBuildCache, WpBuildConsoleLogger } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
@@ -76,7 +76,7 @@ class WpBuildBasePlugin
     /**
      * @member
      * @protected
-     * @type {WebpackLogger}
+     * @type {WpBuildConsoleLogger}
      */
     logger;
 
@@ -121,6 +121,13 @@ class WpBuildBasePlugin
      */
     wpConfig;
 
+    /**
+     * @member
+     * @protected
+     * @type {WebpackLogger}
+     */
+    wpLogger;
+
 
     /**
      * @class
@@ -132,6 +139,7 @@ class WpBuildBasePlugin
         this.env = options.env;
         this.wpConfig = options.env.wpc;
         this.name = this.constructor.name;
+        this.logger = this.env.logger;
         this.options = mergeIf(options, { plugins: [] });
         this.cache2 = new WpBuildCache(this.env, { file: `cache_${this.name}.json` });
 		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, options);
@@ -209,6 +217,26 @@ class WpBuildBasePlugin
 
 
     /**
+     * @function getEntriesRegex
+     * @protected
+     * @static
+     * @param {WebpackConfig} wpConfig Webpack config object
+     * @param {boolean} [dbg]
+     * @param {boolean} [ext]
+     * @param {boolean} [hash]
+     * @returns {RegExp}
+     */
+    static getEntriesRegex = (wpConfig, dbg, ext, hash) =>
+    {
+        return new RegExp(
+            `(?:${Object.keys(wpConfig.entry).reduce((e, c) => `${e ? e + "|" : ""}${c}`, "")})` +
+            `(?:\\.debug)${!dbg ? "?" : ""}(?:\\.[a-z0-9]{${wpConfig.output.hashDigestLength || 20}})` +
+            `${!hash ? "?" : ""}(?:\\.js|\\.js\\.map)${!ext ? "?" : ""}`
+        );
+    };
+
+
+    /**
      * @function
      * @returns {WebpackPluginInstance[]}
      */
@@ -274,7 +302,7 @@ class WpBuildBasePlugin
             });
         }
         else {
-            // this.logger = compiler.getLogger(this.name);
+            // this.wpLogger = compiler.getLogger(this.name);
             this.cache = compiler.getCache(this.name);
         }
         optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook !== "compilation" && !tapOpts.stage && tapOpts.hook).forEach(([ name, tapOpts ]) =>
@@ -301,7 +329,7 @@ class WpBuildBasePlugin
             return false;
         }
         this.compilation = compilation;
-        this.logger = compilation.getLogger(this.name);
+        this.wpLlogger = compilation.getLogger(this.name);
         this.cache = compilation.getCache(this.name);
         return true;
     }

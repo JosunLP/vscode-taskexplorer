@@ -100,23 +100,6 @@ const findFiles = (pattern, options) =>
 
 
 /**
- * @function getEntriesRegex
- * @param {WebpackConfig} wpConfig Webpack config object
- * @param {boolean} [dbg]
- * @param {boolean} [ext]
- * @param {boolean} [hash]
- */
-const getEntriesRegex = (wpConfig, dbg, ext, hash) =>
-{
-    return new RegExp(
-        `(?:${Object.keys(wpConfig.entry).reduce((e, c) => `${e ? e + "|" : ""}${c}`, "")})` +
-        `(?:\\.debug)${!dbg ? "?" : ""}(?:\\.[a-z0-9]{${wpConfig.output.hashDigestLength || 20}})` +
-        `${!hash ? "?" : ""}(?:\\.js|\\.js\\.map)${!ext ? "?" : ""}`
-    );
-};
-
-
-/**
  * @param {any} v Variable to check to see if it's an array
  * @param {boolean} [allowEmp] If `true`, return true if v is an empty array
  * @returns {v is []}
@@ -277,5 +260,5 @@ const pickNot = (obj, ...keys) =>
 
 module.exports = {
     apply, asArray, clone, findFiles, isArray, isDate, isEmpty, isObject, isObjectEmpty,
-    isPrimitive, isPromise, isString, getEntriesRegex, merge, mergeIf, pick, pickBy, pickNot
+    isPrimitive, isPromise, isString, merge, mergeIf, pick, pickBy, pickNot
 };
