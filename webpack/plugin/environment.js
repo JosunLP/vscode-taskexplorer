@@ -56,7 +56,7 @@ const writeEnvironment = (env) =>
 {
 	const logger = env.logger,
 		  pad = env.app.log.pad.value;
-		  logger.write("Build Environment:", 1, "", 0, logger.colors.white);
+	logger.write("Build Environment:", 1, "", 0, logger.colors.white);
 	Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
 		(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${env[k]}`, 1)
 	);

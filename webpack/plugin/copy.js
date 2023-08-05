@@ -16,30 +16,43 @@ const { getEntriesRegex, isString, apply } = require("../utils/utils");
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
+/** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
 
 
-/**
- * @class WpBuildRuntimeVarsPlugin
- */
 class WpBuildCopyPlugin extends WpBuildBasePlugin
 {
+
+	/**
+	 * @class WpBuildCopyPlugin
+	 * @param {WpBuildPluginOptions} options Plugin options to be applied
+	 */
+	constructor(options)
+    {
+        super(apply(options, { plugins: WpBuildCopyPlugin.vendorPlugins(options.apps, options.env) }));
+    }
+
+
     /**
-     * @function Called by webpack runtime to apply this plugin
+     * @function Called by webpack runtime to initialize this plugin
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
     apply(compiler)
     {
-        this.onApply(compiler,
-        {
-            dupMain: {
-                hook: "compilation",
-				stage: "ADDITIONAL",
-				statsProperty: "copied",
-                callback: this.dupMainEntryFilesNoHash.bind(this)
-            }
-        });
+		if (this.env.isExtension)
+		{
+			this.onApply(compiler,
+			{
+				dupMain: {
+					hook: "compilation",
+					stage: "ADDITIONAL",
+					statsProperty: "copied",
+					callback: this.entryModulesNoHash.bind(this)
+				}
+			});
+		}
     }
 
 	/**
@@ -47,10 +60,10 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 * @private
 	 * @param {WebpackCompilationAssets} assets
 	 */
-	dupMainEntryFilesNoHash(assets)
+	entryModulesNoHash(assets)
 	{
 		const entriesRgx = getEntriesRegex(this.wpConfig);
-		this.env.logger.write("duplicate entry modules without hash");
+		this.env.logger.write("create copies of entry modules named without hash");
 		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
 		{
 			const source = sourceInfo.source(),
@@ -80,61 +93,53 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			}
 		});
 	}
-}
 
 
-/**
- * @function
- * @param {string[]} apps
- * @param {WpBuildEnvironment} env
- * @returns {(CopyPlugin | WpBuildCopyPlugin)[]}
- */
-const copy = (apps, env) =>
-{
-	/** @type {(CopyPlugin | WpBuildCopyPlugin)[]} */
-	const plugins = [],
-		  psxBuildPath = env.paths.build.replace(/\\/g, "/"),
-		  psxBasePath = env.paths.base.replace(/\\/g, "/"),
-		  psxBaseCtxPath = posix.join(psxBasePath, "res");
-
-	if (env.app.plugins.copy !== false)
+	/**
+	 * @function
+	 * @private
+	 * @param {string[]} apps
+	 * @param {WpBuildEnvironment} env
+	 * @returns {WpBuildPluginVendorOptions[]}
+	 */
+	static vendorPlugins = (apps, env) =>
 	{
-		if (env.build === "webview")
+		/** @type {WpBuildPluginVendorOptions[]} */
+		const plugins = [],
+			  psxBuildPath = env.paths.build.replace(/\\/g, "/"),
+			  psxBasePath = env.paths.base.replace(/\\/g, "/"),
+			  psxBaseCtxPath = posix.join(psxBasePath, "res");
+
+		if (env.app.plugins.copy !== false)
 		{
-			/** @type {CopyPlugin.Pattern[]} */
-			const patterns = [];
-			apps.filter((app) => existsSync(join(env.paths.base, app, "res"))).forEach(
-				(app) => patterns.push(
+			if (env.build === "webview")
+			{
+				/** @type {CopyPlugin.Pattern[]} */
+				const patterns = [];
+				apps.filter((app) => existsSync(join(env.paths.base, app, "res"))).forEach(
+					(app) => patterns.push(
+					{
+						from: posix.join(psxBasePath, app, "res", "*.*"),
+						to: posix.join(psxBuildPath, "res", "webview"),
+						context: posix.join(psxBasePath, app, "res")
+					})
+				);
+				if (existsSync(join(env.paths.base, "res")))
 				{
-					from: posix.join(psxBasePath, app, "res", "*.*"),
-					to: posix.join(psxBuildPath, "res", "webview"),
-					context: posix.join(psxBasePath, app, "res")
-				})
-			);
-			if (existsSync(join(env.paths.base, "res")))
-			{
-				patterns.push({
-					from: posix.join(psxBasePath, "res", "*.*"),
-					to: posix.join(psxBuildPath, "res", "webview"),
-					context: psxBaseCtxPath
-				});
+					patterns.push({
+						from: posix.join(psxBasePath, "res", "*.*"),
+						to: posix.join(psxBuildPath, "res", "webview"),
+						context: psxBaseCtxPath
+					});
+				}
+				if (patterns.length > 0) {
+					plugins.push(({ ctor: CopyPlugin, options: { patterns }}));
+				}
 			}
-			if (patterns.length > 0) {
-				plugins.push(new CopyPlugin({ patterns }));
-			}
-		}
-		else if (env.isExtension)
-		{
-			//
-			// Make a copy of the main module when it has been compiled, without the content hash
-			// in the filename.
-			//
-			plugins.push(new WpBuildCopyPlugin({ env, force: true }));
-			//
-			// Copy resources to public `info` sub-project during compilation
-			//
-			if (env.wpc.mode === "production" && env.app.publicInfoProject)
-			{
+			else if (env.isExtension && env.wpc.mode === "production" && env.app.publicInfoProject)
+			{   //
+				// Copy resources to public `info` sub-project during compilation
+				//
 				let psxDirInfoProj;
 				if (isString(env.app.publicInfoProject))
 				{
@@ -149,8 +154,9 @@ const copy = (apps, env) =>
 				else /* env.app.publicInfoProject === true */ {
 					psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, "..", `${env.app.name}-info`));
 				}
-				plugins.push(
-					new CopyPlugin(
+				plugins.push({
+					ctor: CopyPlugin,
+					options:
 					{
 						patterns: [
 						{
@@ -183,13 +189,26 @@ const copy = (apps, env) =>
 							to: posix.join(psxDirInfoProj),
 							context: psxBaseCtxPath
 						}]
-					})
-				);
+					}
+				});
 			}
 		}
-	}
 
-	return plugins;
+		return plugins;
+	};
+
+}
+
+
+/**
+ * @function
+ * @param {string[]} apps
+ * @param {WpBuildEnvironment} env
+ * @returns {(CopyPlugin | WpBuildCopyPlugin | WebpackPluginInstance)[]}
+ */
+const copy = (apps, env) =>
+{
+	return env.app.plugins.copy !== false ? new WpBuildCopyPlugin({ env, apps }).getPlugins() : [];
 };
 
 

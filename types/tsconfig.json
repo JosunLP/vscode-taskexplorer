@@ -11,11 +11,13 @@
 			":types": [ "types" ]
 		},
 		"rootDir": "../src",
+		// "rootDirs": [ "../src", "." ],
 		"sourceMap": false,
 		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.types.tsbuildinfo"
 	},
 	"include": [
-		"../src"
+		"../src",
+        // "./index.ts"
 	],
     "exclude": [
         "../.coverage",
@@ -31,7 +33,6 @@
         "../src/webview/**/*",
         "../src/lib/env/browser/*",
         "../test-fixture",
-        "../types",
         "**/dist/**/*"
     ]
 }

@@ -18,7 +18,7 @@ const { apply } = require("../utils");
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-
+/** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
 
 
 class WpBuildCleanPlugin extends WpBuildBasePlugin
@@ -32,31 +32,13 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
         super(
 			apply(options, options.env.clean !== true ? {} :
 			{
-				plugins: [ // Attach CleanWebpackPlugin instance if `options.env.clean` is set
-				{
-					ctor: CleanWebpackPlugin,
-					options: options.env.build === "webview" ? {
-						dry: false,
-						cleanOnceBeforeBuildPatterns: [
-							path.posix.join(options.env.paths.basePath, "css", "**"),
-							path.posix.join(options.env.paths.basePath, "js", "**"),
-							path.posix.join(options.env.paths.basePath, "page", "**")
-						]
-					} : {
-						dry: false,
-						cleanStaleWebpackAssets: true,
-						dangerouslyAllowCleanPatternsOutsideProject: true,
-						cleanOnceBeforeBuildPatterns: [
-							`${options.env.paths.temp}/**`
-						]
-					}
-				}],
+				plugins: WpBuildCleanPlugin.vendorPlugins(options.env),
 			})
 		);
     }
 
     /**
-     * @function Called by webpack runtime to apply this plugin
+     * @function Called by webpack runtime to initialize this plugin
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
@@ -92,6 +74,35 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 			});
 		}
 	}
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildEnvironment} env
+	 * @returns {WpBuildPluginVendorOptions[]}
+	 */
+	static vendorPlugins = (env) =>
+	{
+		return [{
+			ctor: CleanWebpackPlugin,
+			options: env.build === "webview" ? {
+				dry: false,
+				cleanOnceBeforeBuildPatterns: [
+					path.posix.join(env.paths.basePath, "css", "**"),
+					path.posix.join(env.paths.basePath, "js", "**"),
+					path.posix.join(env.paths.basePath, "page", "**")
+				]
+			} : {
+				dry: false,
+				cleanStaleWebpackAssets: true,
+				dangerouslyAllowCleanPatternsOutsideProject: true,
+				cleanOnceBeforeBuildPatterns: [
+					`${env.paths.temp}/**`
+				]
+			}
+		}];
+	};
 
 }
 

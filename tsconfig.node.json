@@ -2,8 +2,8 @@
     "extends": "./tsconfig.base.json",
     "compilerOptions": {
         "outDir": "dist",
-        // "declaration": true,
-        // "declarationDir": "types/dist",
+        "declaration": true,
+        "declarationDir": "types/dist",
         "paths": {
 			":env/*": [ "src/lib/env/node/*" ],
 			":types": [ "types" ]

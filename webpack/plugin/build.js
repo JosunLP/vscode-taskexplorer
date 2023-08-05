@@ -10,10 +10,11 @@ const { existsSync } = require("fs");
 const { promisify } = require("util");
 const { findFiles } = require("../utils");
 const WpBuildBasePlugin = require("./base");
-const { join, basename, relative } = require("path");
+const { WebpackError } = require("webpack");
 const exec = promisify(require("child_process").exec);
 // const spawn = promisify(require("child_process").spawn);
 const {readFile, unlink, access } = require("fs/promises");
+const { join, basename, relative, dirname } = require("path");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
@@ -28,7 +29,7 @@ const {readFile, unlink, access } = require("fs/promises");
 class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 {
     /**
-     * @function Called by webpack runtime to apply this plugin
+     * @function Called by webpack runtime to initialize this plugin
      * @param {WebpackCompiler} compiler the compiler instance
      */
     apply(compiler)
@@ -37,9 +38,10 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
         {
 			typesAndTests: {
 				async: true,
-                hook: "compilation",
-				stage: "ADDITIONAL",
-				statsProperty: "precompile",
+                hook: "afterCompile",
+                // hook: "compilation",
+				// stage: "ADDITIONAL",
+				statsProperty: "tests",
                 callback: this.build.bind(this)
             }
         });
@@ -49,13 +51,14 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {WebpackCompilationAssets} assets
+	 * @param {WebpackCompilation} compilation
 	 */
-	async build(assets)
+	async build(compilation)
 	{
-		await this.types(assets);
+		this.compilation = compilation;
+		// await this.types(assets);
 		if (this.env.isTests) {
-			// await this.testsuite(assets);
+			await this.testsuite();
 		}
 	};
 
@@ -63,9 +66,8 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {WebpackCompilationAssets} _assets
 	 */
-	async testsuite(_assets)
+	async testsuite()
 	{
 		const bldDir = this.env.paths.build,
 			  testsDir = join(this.env.paths.dist, "test");
@@ -78,22 +80,49 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	}
 
 
+	// /**
+	//  * @function
+	//  * @private
+	//  * @param {WebpackCompilationAssets} _assets
+	//  */
+	// async types(_assets)
+	// {
+	// 	const bldDir = this.env.paths.build,
+	// 		  typesDir = join(bldDir, "types", "dist");
+	// 	this.env.logger.write("build types");
+	// 	if (!existsSync(typesDir))
+	// 	{
+	// 		try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
+	// 	}
+	// 	await this.execTsBuild("./types", 1, typesDir);
+	// }
+
+
 	/**
-	 * @function
+	 * @function Executes a command via a promisified node exec()
 	 * @private
-	 * @param {WebpackCompilationAssets} _assets
+	 * @param {string} command
+	 * @param {string} dsc
+	 * @returns {Promise<number | null>}
 	 */
-	async types(_assets)
+	exec = async (command, dsc) =>
 	{
-		const bldDir = this.env.paths.build,
-			  typesDir = join(bldDir, "types", "dist");
-		this.env.logger.write("build types");
-		if (!existsSync(typesDir))
-		{
-			try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
+		let exitCode = null;
+		const logger = this.env.logger,
+			  procPromise = exec(command, { cwd: this.env.paths.build, encoding: "utf8" }),
+			  child = procPromise.child;
+		child.stdout?.on("data", (data) => void logger.value("   tsc stdout", data));
+		child.stderr?.on("data", (data) => void logger.value("   tsc stderr", data));
+		child.on("close", (code) => { exitCode = code; logger.write(`   ${dsc} completed with exit code bold(${code})`); });
+		const { stdout, stderr } = await procPromise;
+		if (stdout) {
+			logger.write(`   TODO - check ${dsc} accumulated stdout: ${stdout}`, undefined, "", logger.icons.color.star, logger.colors.yellow);
 		}
-		await this.execTsBuild("./types", 1, typesDir);
-	}
+		if (stderr) {
+			logger.write(`   TODO - check ${dsc} accumulated stderr: ${stderr}`, undefined, "", logger.icons.color.star, logger.colors.yellow);
+		}
+		return exitCode;
+	};
 
 
 	/**
@@ -116,12 +145,12 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 
 		try
 		{
-			let procPromise = exec(command, { cwd: this.env.paths.build, encoding: "utf8" }),
-				child = procPromise.child;
-			child.stdout?.on("data", (data) => void logger.value("   tsc stdout", data));
-			child.stderr?.on("data", (data) => void logger.value("   tsc stderr", data));
-			child.on("close", (code) => void logger.write(`   typescript build completed with exit code bold(${code})`));
-			await procPromise;
+			let code = await this.exec(command, "typescript build");
+			if (code !== 0)
+			{
+				this.compilation.errors.push(new WebpackError("typescript build failed for " + tsConfig));
+				return;
+			}
 			//
 			// Ensure target directory exists
 			//
@@ -133,21 +162,34 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 			{   //
 				// Note that `tsc-alias` requires a filename e.g. tsconfig.json in it's path argument
 				//
-				if (!(/tsconfig\.(?:[\w\-_\.]+\.)?json$/).test(tsConfig)) {
+				if (!(/tsconfig\.(?:[\w\-_\.]+\.)?json$/).test(tsConfig))
+				{
 					tsConfig = join(tsConfig, "tsconfig.json");
 				}
+				if (!existsSync(tsConfig))
+				{
+					const files = await findFiles("tsconfig.*", { cwd: dirname(tsConfig), absolute: true,  });
+					if (files.length === 1)
+					{
+						tsConfig = files[0];
+					}
+					else {
+						this.handleError(new WebpackError("Invalid path to tsconfig file"));
+						return;
+					}
+				}
 				command = `tsc-alias -p ${tsConfig}`;
-				procPromise = exec(command, { cwd: this.env.paths.build, encoding: "utf8" });
-				child = procPromise.child;
-				child.stdout?.on("data", (data) => void logger.value("   tsc-alias stdout", data));
-				child.stderr?.on("data", (data) => void logger.value("   tsc-alias stderr", data));
-				child.on("close", (code) => void logger.write(`   typescript path aliasing completed with exit code bold(${code})`));
-				await procPromise;
+				code = await this.exec(command, "typescript path aliasing");
+				if (code !== 0)
+				{
+					this.compilation.errors.push(new WebpackError("typescript path aliasing failed for " + tsConfig));
+					return;
+				}
 			}
 			//
 			// Process output files
 			//
-			const files = await findFiles("**/*.js", { nocase: true, cwd: outputDir, absolute: true });
+			const files = await findFiles("**/*.js", { cwd: outputDir, absolute: true });
 			for (const filePath of files)
 			{
 				let data, source, hash, cacheEntry, cacheEntry2;

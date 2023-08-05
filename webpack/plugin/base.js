@@ -34,6 +34,7 @@ const { globalEnv, asArray, mergeIf, WpBuildCache } = require("../utils");
 /**
  * @class WpBuildHashPlugin
  * @abstract
+ * @augments WebpackPluginInstance
  */
 class WpBuildBasePlugin
 {
@@ -142,7 +143,7 @@ class WpBuildBasePlugin
 
 
     /**
-     * @function Called by webpack runtime to apply this plugin.  To be overridden by inheriting class.
+     * @function Called by webpack runtime to initialize this plugin.  To be overridden by inheriting class.
      * @param {WebpackCompiler} compiler the compiler instance
      */
     apply(compiler) { this.compiler = compiler; }
@@ -271,6 +272,10 @@ class WpBuildBasePlugin
                     }
                 });
             });
+        }
+        else {
+            // this.logger = compiler.getLogger(this.name);
+            this.cache = compiler.getCache(this.name);
         }
         optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook !== "compilation" && !tapOpts.stage && tapOpts.hook).forEach(([ name, tapOpts ]) =>
         {

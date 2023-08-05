@@ -33,5 +33,5 @@
     "scripts": {
         "build": "npx tsc -p ./"
     },
-    "types": "index.d.ts"
+    "types": "dist/types.d.ts"
 }

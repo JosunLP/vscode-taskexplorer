@@ -166,7 +166,7 @@ class WpBuildApplication
         const logger = new WpBuildConsoleLogger(this.env);
         this.printLineSep(logger);
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
-        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(logger), {interpolation: "hsv"}));
+        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
         this.printLineSep(logger);
         logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.rc.bannerNameDetailed} Webpack Build`));
         this.printLineSep(logger);
@@ -197,18 +197,16 @@ class WpBuildApplication
     /**
      * @function
      * @private
-     * @param {WpBuildConsoleLogger} logger
      * @returns {string}
      */
-    spmBanner = (logger) =>
+    spmBanner = () =>
     {
-        const icons = logger.icons;
-        return `     ${icons.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
-        ${icons.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
-        ${icons.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
-        ${icons.info}    ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-        ${icons.info}   (_____/|_|       | /       |_|   |_| (____/   ${this.rc.version}  \\/ /        |/  \\:(           \\/           
-        ${icons.info}                    |/${this.rc.displayName.padStart(50 - this.rc.displayName.length)}`;
+        return `        ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
+          (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
+          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
+        ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
+       (_____/|_|       | /       |_|   |_| (____/   ${this.rc.version}  \\/ /        |/  \\:(           \\/           
+                        |/${this.rc.displayName.padStart(50 - this.rc.displayName.length)}`;
     };
 
 }

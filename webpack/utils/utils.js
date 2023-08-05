@@ -276,6 +276,6 @@ const pickNot = (obj, ...keys) =>
 
 
 module.exports = {
-    apply, asArray, clone, findFiles, isArray, isDate, isEmpty, isObject, isObjectEmpty, isPrimitive,
-    isPromise, isString, getEntriesRegex, merge, mergeIf, pick, pickBy, pickNot
+    apply, asArray, clone, findFiles, isArray, isDate, isEmpty, isObject, isObjectEmpty,
+    isPrimitive, isPromise, isString, getEntriesRegex, merge, mergeIf, pick, pickBy, pickNot
 };

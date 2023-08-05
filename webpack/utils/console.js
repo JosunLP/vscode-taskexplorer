@@ -4,16 +4,17 @@
 
 const { isString, isObject, isPrimitive } = require("./utils");
 
+/** @typedef {import("../types").WpBuildLogIcon} WpBuildLogIcon */
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
 /** @typedef {import("../types").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("../types").WpBuildLogLevel}  WpBuildLogLevel */
 /** @typedef {import("../types").WpBuildLogIconSet}  WpBuildLogIconSet */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
-
 /**
  * @module wpbuild.utils.console
  */
+
 
 class WpBuildConsoleLogger
 {
@@ -77,7 +78,7 @@ class WpBuildConsoleLogger
      */
     icons =
     {
-        bullet: "●}",
+        bullet: "●",
         error: "✘",
         info: "ℹ",
         star: "★",
@@ -264,7 +265,7 @@ class WpBuildConsoleLogger
             }
             const envMsgClr = color || (envIsInitialized ? this.colors[env.app.colors.default] : this.colors.grey),
                   envMsg = color || !(/\x1B\[/).test(msg) ? this.withColor(this.format(msg), envMsgClr) : this.format(msg);
-            console.log(`${this.basePad}${pad}${icon || this.icons.color.info}${envTag}${envMsg}`);
+            console.log(`${this.basePad}${pad}${isString(icon) ? icon : this.icons.color.info}${envTag}${envMsg}`);
         }
     };
 
@@ -274,7 +275,7 @@ class WpBuildConsoleLogger
      * @param {any} val
      * @param {number} [level]
      * @param {string} [pad] Message pre-padding
-     * @param {string} [icon]
+     * @param {WpBuildLogIcon} [icon]
      */
     value = (msg, val, level, pad, icon) =>
     {

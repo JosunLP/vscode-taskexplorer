@@ -9,8 +9,8 @@ declare type WebpackCacheFacade = ReturnType<WebpackCompilation["getCache"]>;
 declare type WebpackChunk = import("webpack").Chunk;
 declare type WebpackCompilation = import("webpack").Compilation;
 declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
-declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
-declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
+// declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
+// declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
 declare type WebpackCompiler = import("webpack").Compiler;
 declare type WebpackConfig = Required<import("webpack").Configuration>;
@@ -26,8 +26,8 @@ declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
 declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
 
 declare interface WebpackCompilationParams {
-	normalModuleFactory: WebpackNormalModuleFactory;
-	contextModuleFactory: WebpackContextModuleFactoryy;
+	normalModuleFactory: any; // WebpackNormalModuleFactory;
+	contextModuleFactory: any; // WebpackContextModuleFactoryy;
 }
 //WebpackCompilationParams
 declare type WebpackTarget = "webworker" | "node" | "web";
@@ -37,8 +37,14 @@ declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 declare type WpBuildConsoleLogger = import("../utils").WpBuildConsoleLogger;
 
-declare type WpBuildModule = "web" | "common" | "extension" | "tests" | "webview";
+declare type WpBuildModule = "web" | "common" | "extension" | "tests" | "types" | "webview";
 declare type WpBuildBuildEnvironment= "dev" | "prod" | "test" | "testprod";
+
+// declare interface IWpBuildPluginInstance extends WebpackPluginInstance
+// {
+// 
+// }
+// declare type WpBuildPluginInstance = IWpBuildPluginInstance;
 
 declare interface IWpBuildRuntimeVariables
 {
@@ -157,6 +163,7 @@ declare interface IWpBuildLogIconSet extends IWpBuildLogIconBaseSet
     color: WpBuildLogIconActionSet;
 }
 declare type WpBuildLogIconSet = Required<IWpBuildLogIconSet>;
+declare type WpBuildLogIcon = keyof Omit<WpBuildLogIconSet, "blue" | "color">;
 
 declare interface IWpBuildApp
 {
@@ -314,6 +321,7 @@ export {
     WpBuildGlobalEnvironment,
     WpBuildHashState,
     WpBuildLogColor,
+    WpBuildLogIcon,
     WpBuildLogIconSet,
     WpBuildLogLevel,
     WpBuildLogOptions,

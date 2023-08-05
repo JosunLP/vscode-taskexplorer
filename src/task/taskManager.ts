@@ -188,7 +188,7 @@ export class TaskManager implements ITeTaskManager, Disposable
      * The refresh() function will eventually be called by the VSCode task engine when
      * the task is launched
      *
-     * @param taskItem TaskItem instance
+     * @param item TaskItem instance
      * @param noTerminal Whether or not to show the terminal
      * Note that the terminal will be shown if there is an error
      * @param withArgs Whether or not to prompt for arguments

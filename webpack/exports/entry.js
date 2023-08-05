@@ -36,12 +36,12 @@ const entry = (env) =>
 	}
 	else if (env.build === "types")
 	{
-		env.wpc.entry =
-		{
-			types: {
-			 	import: "./types/index.ts"
-			}
-		};
+		// env.wpc.entry =
+		// {
+		// 	types: {
+		// 	 	import: "./types/index.ts"
+		// 	}
+		// };
 	}
 	else
 	{

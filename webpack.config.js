@@ -117,6 +117,6 @@ const write = (env) =>
 	l.write(
 		l.withColor(`Start Webpack build ${++globalEnv.buildCount} `, l.colors.bold).padEnd(pad) +
 		l.tagColor(env.build, l.colors.cyan, l.colors.white) + l.tagColor(env.target, l.colors.cyan, l.colors.white),
-		undefined, l.icons.color.start
+		undefined, "", l.icons.color.start
 	);
 };

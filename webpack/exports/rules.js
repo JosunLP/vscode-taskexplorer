@@ -220,7 +220,7 @@ const rules = (env) =>
 				loader: "ts-loader",
 				options: {
 					configFile: path.join(env.paths.build, `tsconfig.${env.target}.json`),
-					// experimentalWatchApi: true,
+					experimentalWatchApi: true,
 					transpileOnly: true
 				}
 			} ]

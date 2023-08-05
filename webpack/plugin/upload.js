@@ -37,7 +37,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
     }
 
     /**
-     * @function Called by webpack runtime to apply this plugin
+     * @function Called by webpack runtime to initialize this plugin
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
@@ -98,7 +98,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
                     const msg = "unchanged, skip upload ".padEnd(env.app.log.pad.value),
                           hash = asset.info.contenthash?.toString() || "",
                           icon = logger.withColor(logger.icons.info, logger.colors.yellow);
-                    logger.write(`${msg}${logger.tagColor(hash)} ${logger.tagColor(file, null, logger.colors.grey)}`, 1, "", icon);
+                    logger.write(`${msg}${logger.tagColor(hash)} ${logger.tagColor(file, null, logger.colors.grey)}`, 1, "", icon, logger.colors.grey);
                 }
             }
         }
