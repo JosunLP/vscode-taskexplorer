@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+declare type RequireKeys<T extends object, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
+
 declare type WebpackAsset = import("webpack").Asset;
 declare type WebpackAssetInfo = import("webpack").AssetInfo;
 declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
 declare type WebpackCache = import("webpack").Cache;
 declare type WebpackCacheFacade = ReturnType<WebpackCompilation["getCache"]>;
 declare type WebpackChunk = import("webpack").Chunk;
+declare type WebpackCompilation = import("webpack").Compilation;
 declare type WebpackCompilation = import("webpack").Compilation;
 declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
 // declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
@@ -15,6 +18,7 @@ declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
 declare type WebpackCompiler = import("webpack").Compiler;
 declare type WebpackConfig = Required<import("webpack").Configuration>;
 // declare type WebpackLogger = import("webpack/lib/logging/Logger").Logger;
+declare type WebpackHookMap<H> = import("tapable").HookMap<H>;
 declare type WebpackLogger = ReturnType<WebpackCompilation["getLogger"]>;
 declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
 declare type WebpackSchema = import("schema-utils/declarations/validate").Schema;
@@ -23,7 +27,26 @@ declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["
 declare type WebpackStats = import("webpack").Stats;
 declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
+declare type WebpackSyncBailHook<T, R> = import("tapable").SyncBailHook<T, R>;
 declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
+declare type WebpackCompilerHookName = keyof WebpackCompiler["hooks"];
+declare type WebpackCompilationHook = WebpackCompilation["hooks"];
+declare type WebpackCompilationHookName = keyof WebpackCompilationHook;
+declare type WebpackCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIVED" | "ADDITIONS" |  "OPTIMIZE" |
+                                           "OPTIMIZE_COUNT" | "OPTIMIZE_COMPATIBILITY" | "OPTIMIZE_SIZE" |
+                                           "DEV_TOOLING" | "OPTIMIZE_INLINE" | "SUMMARIZE" | "OPTIMIZE_HASH" |
+                                           "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT"
+declare type WebpackStatsPrinterHook =  WebpackCompilationHook["statsPrinter"];
+
+declare type WebpackStatsPrinterType<T> = T extends WebpackSyncHook<infer X> ? X : never;
+declare type WebpackStatsPrinter = WebpackStatsPrinterType<WebpackStatsPrinterHook>[0];
+declare type WebpackStatsPrinterPrintHookMap = WebpackStatsPrinterType<WebpackStatsPrinterHook>[0]["hooks"]["print"];
+declare type WebpackStatsPrinterPrint<T> =  T extends WebpackHookMap<infer X> ? X : never;
+declare type WebpackStatsPrinterContextHook<T> =  T extends WebpackSyncBailHook<infer X, Y> ? X : never;
+declare type WebpackStatsPrinterPrintBailHook =  WebpackStatsPrinterPrint<WebpackStatsPrinterPrintHookMap>;
+declare type WebpackStatsPrinterContext = WebpackStatsPrinterContextHook<WebpackStatsPrinterPrintBailHook>[1];
+
+
 
 declare interface WebpackCompilationParams {
 	normalModuleFactory: any; // WebpackNormalModuleFactory;
@@ -266,25 +289,22 @@ interface IWpBuildCacheOptions
 }
 declare type WpBuildCacheOptions = IWpBuildCacheOptions & Record<string, any>;
 
-
-declare type WpBuildPluginCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIVED" | "ADDITIONS" |  "OPTIMIZE" |
-                                                 "OPTIMIZE_COUNT" | "OPTIMIZE_COMPATIBILITY" | "OPTIMIZE_SIZE" |
-                                                 "DEV_TOOLING" | "OPTIMIZE_INLINE" | "SUMMARIZE" | "OPTIMIZE_HASH" |
-                                                 "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT"
 interface IWpBuildPluginTapOptions
 {
     async?: boolean;
-    hook: string | "compilation";
+    hook: WebpackCompilerHookName;
+    hookCompilation?: WebpackCompilationHookName;
     callback: (arg: WebpackCompiler | WebpackCompilationAssets | WebpackCompilationParams) => void | Promise<void>;
-    stage?: WpBuildPluginCompilationHookStage;
+    stage?: WebpackCompilationHookStage;
     statsProperty?: string;
 }
-declare type WpBuildPluginApplyOptions = Readonly<IWpBuildPluginTapOptions>
-declare type WpBuildPluginTapOptions = Readonly<IWpBuildPluginTapOptions>
-declare type WpBuildPluginApplyOptionsHash = Record<string, IWpBuildPluginTapOptions>
-declare type WpBuildPluginTapOptionsHash  = Record<string, IWpBuildPluginTapOptions>
+declare type WpBuildPluginApplyOptions = Readonly<IWpBuildPluginApplyOptions>
+declare type WpBuildPluginTapOptions = Readonly<Omit<IWpBuildPluginTapOptions, "hookCompilation">> & Pick<IWpBuildPluginTapOptions, "hookCompilation">;
+declare type WpBuildPluginApplyOptionsHash = Record<string, WpBuildPluginTapOptions>
+declare type WpBuildPluginTapOptionsHash  = Record<string, WpBuildPluginTapOptions>
 
 export {
+    RequireKeys,
     WebpackAsset,
     WebpackAssetInfo,
     WebpackAssetEmittedInfo,
@@ -294,10 +314,12 @@ export {
     WebpackCache,
     WebpackCacheFacade,
     WebpackChunk,
-    WebpackCompilationParams,
-    WebpackCompiler,
     WebpackCompilation,
     WebpackCompilationAssets,
+    WebpackCompilationHookName,
+    WebpackCompilationHookStage,
+    WebpackCompilationParams,
+    WebpackCompiler,
     WebpackConfig,
     WebpackEtag,
     WebpackLogger,
@@ -310,6 +332,9 @@ export {
     WebpackSource,
     WebpackStats,
     WebpackStatsAsset,
+    WebpackStatsPrinter,
+    WebpackStatsPrinterContext,
+    WebpackStatsPrinterHook,
     WebpackTarget,
     WebpackVsCodeBuild,
     WpBuildApp,
@@ -330,7 +355,6 @@ export {
     WpBuildPluginOptions,
     WpBuildPluginApplyOptions,
     WpBuildPluginApplyOptionsHash,
-    WpBuildPluginCompilationHookStage,
     WpBuildPluginTapOptions,
     WpBuildPluginTapOptionsHash,
     WpBuildPluginVendorOptions,

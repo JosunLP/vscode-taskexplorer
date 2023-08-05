@@ -55,7 +55,7 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	 */
 	async build(compilation)
 	{
-		this.compilation = compilation;
+		this.onCompilation(compilation);
 		// await this.types(assets);
 		if (this.env.isTests) {
 			await this.testsuite();
@@ -107,19 +107,28 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	 */
 	exec = async (command, dsc) =>
 	{
-		let exitCode = null;
+		let exitCode = null,
+			stdout = "", stderr = "";
 		const logger = this.env.logger,
 			  procPromise = exec(command, { cwd: this.env.paths.build, encoding: "utf8" }),
 			  child = procPromise.child;
-		child.stdout?.on("data", (data) => void logger.value("   tsc stdout", data));
-		child.stderr?.on("data", (data) => void logger.value("   tsc stderr", data));
+		child.stdout?.on("data", (data) => { stdout += data; });
+		child.stderr?.on("data", (data) => { stderr += data; });
 		child.on("close", (code) => { exitCode = code; logger.write(`   ${dsc} completed with exit code bold(${code})`); });
-		const { stdout, stderr } = await procPromise;
-		if (stdout) {
-			logger.write(`   TODO - check ${dsc} accumulated stdout: ${stdout}`, undefined, "", logger.icons.color.star, logger.colors.yellow);
-		}
-		if (stderr) {
-			logger.write(`   TODO - check ${dsc} accumulated stderr: ${stderr}`, undefined, "", logger.icons.color.star, logger.colors.yellow);
+		await procPromise;
+		if (stdout || stderr)
+		{
+			const match = (stdout || stderr).match(/error TS([0-9]{4})\:/);
+			if (match) {
+				const [ _, err ] = match;
+				logger.error(`   tsc failed with error: ${err}`);
+			}
+			if (stdout) {
+				logger.write(`   tsc stderr: ${stdout}`, 5, "", logger.icons.color.star, logger.colors.yellow);
+			}
+			if (stderr) {
+				logger.write(`   tsc stderr: ${stderr}`, 5, "", logger.icons.color.star, logger.colors.yellow);
+			}
 		}
 		return exitCode;
 	};
@@ -192,42 +201,42 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 			const files = await findFiles("**/*.js", { cwd: outputDir, absolute: true });
 			for (const filePath of files)
 			{
-				let data, source, hash, cacheEntry, cacheEntry2;
+				let data, source, hash, compilationCacheEntry, persistedCache;
 				const filePathRel = relative(outputDir, filePath),
 					  file = basename(filePathRel);
 
 				this.compilation.buildDependencies.add(file);
 
-				logger.value("   check cache", filePathRel, 3);
+				logger.value("   check cache", filePathRel, 4);
 				try {
-					cacheEntry2 = this.cache2.get();
-					cacheEntry = await this.cache.getPromise(`${filePath}|${identifier}`, null);
+					persistedCache = this.cache.get();
+					compilationCacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
 				}
 				catch (e) {
 					this.handleError(e, "failed while checking cache");
 					return;
 				}
 
-				if (cacheEntry2)
+				if (persistedCache)
 				{
 					data = data || await readFile(filePath);
 					const newHash = this.getContentHash(data);
-					if (newHash === cacheEntry2[filePathRel])
+					if (newHash === persistedCache[filePathRel])
 					{
-						logger.value("   asset unchanged", filePathRel, 3);
+						logger.value("   asset unchanged", filePathRel, 4);
 						this.compilation.comparedForEmitAssets.add(file);
 						continue;
 					}
-					cacheEntry2[filePathRel] = newHash;
-					this.cache2.set(cacheEntry2);
+					persistedCache[filePathRel] = newHash;
+					this.cache.set(persistedCache);
 				}
 
-				if (cacheEntry)
+				if (compilationCacheEntry)
 				{
 					let isValidSnapshot;
 					logger.value("   check snapshot valid", filePathRel, 3);
 					try {
-						isValidSnapshot = await this.checkSnapshotValid(cacheEntry.snapshot);
+						isValidSnapshot = await this.checkSnapshotValid(compilationCacheEntry.snapshot);
 					}
 					catch (e) {
 						this.handleError(e, "failed while checking snapshot");
@@ -235,19 +244,19 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 					}
 					if (isValidSnapshot)
 					{
-						logger.value("   snapshot valid", filePathRel, 3);
-						({ hash, source } = cacheEntry);
+						logger.value("   snapshot valid", filePathRel, 4);
+						({ hash, source } = compilationCacheEntry);
 						data = data || await readFile(filePath);
 						const newHash = this.getContentHash(data);
 						if (newHash === hash)
 						{
-							logger.value("   asset unchanged", filePathRel, 3);
+							logger.value("   asset unchanged", filePathRel, 4);
 							this.compilation.comparedForEmitAssets.add(file);
 							return;
 						}
 					}
 					else {
-						logger.write(`   snapshot for '${filePathRel}' is invalid`, 3);
+						logger.write(`   snapshot for '${filePathRel}' is invalid`, 4);
 					}
 				}
 
@@ -257,7 +266,7 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 					const startTime = Date.now();
 					data = data || await readFile(filePath);
 					source = new this.compiler.webpack.sources.RawSource(data);
-					logger.value("   create snapshot", filePathRel, 3);
+					logger.value("   create snapshot", filePathRel, 4);
 					try {
 						snapshot = await this.createSnapshot(startTime, filePath);
 					}
@@ -273,13 +282,13 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 						// console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
 						// console.log("hasStartTime: " + snapshot.hasStartTime());
 
-						logger.value("   cache snapshot", filePathRel, 3);
+						logger.value("   cache snapshot", filePathRel, 4);
 						try {
 							const hash = this.getContentHash(source.buffer());
 							snapshot.setFileHashes(hash);
-							await this.cache.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
+							await this.wpCacheCompilation.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
 
-							cacheEntry = await this.cache.getPromise(`${filePath}|${identifier}`, null);
+							compilationCacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
 							// if (cacheEntry)
 							// {
 							// 	console.log("!!!!!!!!!!: " + cacheEntry.hash);

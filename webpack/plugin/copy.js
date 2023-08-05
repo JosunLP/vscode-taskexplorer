@@ -48,11 +48,18 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 					hook: "compilation",
 					stage: "ADDITIONAL",
 					statsProperty: "copied",
+					hookCompilation: "processAssets",
 					callback: this.entryModulesNoHash.bind(this)
+				},
+				attachMap: {
+					hook: "compilation",
+					stage: "DEV_TOOLING",
+					callback: this.sourcemap.bind(this)
 				}
 			});
 		}
     }
+
 
 	/**
 	 * @function
@@ -61,17 +68,16 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 */
 	entryModulesNoHash(assets)
 	{
-		const entriesRgx = WpBuildBasePlugin.getEntriesRegex(this.wpConfig);
 		this.logger.write("create copies of entry modules named without hash");
-		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
+		Object.entries(assets).filter(([ file, _ ]) => this.canBeInitial(file)).forEach(([ file, sourceInfo ]) =>
 		{
-			const source = sourceInfo.source(),
-				  hashDigestLength = this.compiler.options.output.hashDigestLength ||  this.env.wpc.output.hashDigestLength || 20,
-				  ccFileName = file.replace(new RegExp(`\\.[a-f0-9]{${hashDigestLength}}`), ""),
+			const ccFileName = file.replace(new RegExp(`\\.[a-f0-9]{${this.hashDigestLength}}`), ""),
 				  dstAsset = this.compilation.getAsset(ccFileName),
 				  srcAsset = this.compilation.getAsset(file),
 				  srcAssetInfo = apply({}, srcAsset?.info),
-				  newInfo = { ...srcAssetInfo, copied: true, sourceFilename: file };
+				  newInfo = { ...srcAssetInfo, copied: true, sourceFilename: file },
+				  // mapURL = `\r\n//# sourceMappingURL=${ccFileName}.map`,
+				  sources = this.compiler.webpack.sources;
 			// let cacheEntry;
 			// this.logger.debug(`getting cache for '${absoluteFilename}'...`);
 			// try {
@@ -84,14 +90,42 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			if (!dstAsset)
 			{
 				this.logger.value("   emit copied asset", ccFileName);
-				this.compilation.emitAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
+				this.compilation.emitAsset(ccFileName, new sources.RawSource(sourceInfo.source()), newInfo);
 			}
-			else if (this.options.force) {
+			else { // if (this.options.force) {
 				this.logger.value("   update copied asset", ccFileName);
-				this.compilation.updateAsset(ccFileName, new this.compiler.webpack.sources.RawSource(source), newInfo);
+				this.compilation.updateAsset(ccFileName, new sources.RawSource(sourceInfo.source()), newInfo);
 			}
 		});
 	}
+
+
+    /**
+     * @function
+     * @private
+     * @param {WebpackCompilationAssets} assets
+     */
+    sourcemap = (assets) =>
+    {
+		this.logger.write("attach sourcemap to copied assets");
+		Object.entries(assets).filter(([ file, _ ]) => this.canBeInitial(file)).forEach(([ file, sourceInfo ]) =>
+		{
+			this.logger.value("check for file copied attribute", file);
+			const asset = this.compilation.getAsset(file);
+			if (asset && asset.info.copied)
+			{
+				this.logger.write("   found copied file, retrieve source asset", 3);
+				const srcAsset = this.compilation.getAsset(file.replace(".js", `.${asset.info.contenthash}.js`));
+				if (srcAsset && srcAsset.info.related?.sourceMap)
+				{
+					this.logger.value("   update copied asset with sourcemap", file);
+					const newInfo = { ...srcAsset, copied: true, sourceFilename: file };
+					this.compilation.updateAsset(file, srcAsset.source, newInfo);
+
+				}
+			}
+		});
+    };
 
 
 	/**

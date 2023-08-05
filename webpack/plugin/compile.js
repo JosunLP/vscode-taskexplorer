@@ -57,20 +57,11 @@ class WpBuildCompilePlugin extends WpBuildBasePlugin
     istanbulTags(assets)
     {
 		this.logger.write("istanbul ignore tag insertion for external requires");
-        const entriesRgx = WpBuildBasePlugin.getEntriesRegex(this.wpConfig);
-		this.logger.write("create copies of entry modules named without hash");
-		Object.entries(assets).filter(([ file, _ ]) => entriesRgx.test(file)).forEach(([ file, sourceInfo ]) =>
+		Object.entries(assets).filter(([ file, _ ]) => this.matchObject(file) && this.canBeInitial(file)).forEach(([ file, _ ]) =>
 		{
-
+            this.logger.value("   update asset with tag insertion", file);
+            this.compilation.updateAsset(file, (source) => this.source(file, source), this.info.bind(this));
         });
-        for (const chunk of asArray(this.compilation.chunks).filter(c => c.canBeInitial()))
-        {
-            for (const file of asArray(chunk.files).filter(f => this.matchObject(f)))
-            {
-				this.logger.value("   update asset with tag insertion", file);
-                this.compilation.updateAsset(file, (source) => this.source(file, source), this.info.bind(this));
-            }
-        }
     }
 
 

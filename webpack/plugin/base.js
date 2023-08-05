@@ -7,7 +7,7 @@
  */
 
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
-const { globalEnv, asArray, mergeIf, WpBuildCache, WpBuildConsoleLogger } = require("../utils");
+const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, WpBuildConsoleLogger } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
@@ -18,17 +18,18 @@ const { globalEnv, asArray, mergeIf, WpBuildCache, WpBuildConsoleLogger } = requ
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {new(...args: any[]) => WebpackPluginInstance} WbBuildPluginCtor */
 /** @typedef {import("../types").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 /** @typedef {import("../types").WpBuildPluginApplyOptions} WpBuildPluginApplyOptions */
+/** @typedef {import("../types").WebpackStatsPrinterContext} WebpackStatsPrinterContext */
+/** @typedef {import("../types").WebpackCompilationHookStage} WebpackCompilationHookStage */
 /** @typedef {import("../types").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompiler>} WebpackSyncCompilerHook */
 /** @typedef {import("../types").WebpackAsyncHook<WebpackCompiler>} WebpackAsyncCompilerHook */
 /** @typedef {import("../types").WpBuildPluginApplyOptionsHash} WpBuildPluginApplyOptionsHash */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
-/** @typedef {import("../types").WpBuildPluginCompilationHookStage} WpBuildPluginCompilationHookStage */
 /** @typedef {import("../types").WebpackAsyncHook<WebpackCompilation>} WebpackAsyncCompilationHook */
+/** @typedef {import("../types").RequireKeys<WpBuildPluginApplyOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
 
 
 /**
@@ -39,18 +40,11 @@ const { globalEnv, asArray, mergeIf, WpBuildCache, WpBuildConsoleLogger } = requ
 class WpBuildBasePlugin
 {
     /**
-     * @member
-     * @protected
-     * @type {WebpackCacheFacade}
-     */
-    cache;
-
-    /**
-     * @member
+     * @member cache Persisitnet storage cache
      * @protected
      * @type {WpBuildCache}
      */
-    cache2;
+    cache;
 
     /**
      * @member
@@ -72,6 +66,13 @@ class WpBuildBasePlugin
      * @type {WpBuildEnvironment}
      */
     env;
+
+    /**
+     * @member
+     * @protected
+     * @type {number}
+     */
+    hashDigestLength;
 
     /**
      * @member
@@ -115,6 +116,20 @@ class WpBuildBasePlugin
     _plugins;
 
     /**
+     * @member wpCache Runtime compiler cache
+     * @protected
+     * @type {WebpackCacheFacade}
+     */
+    wpCache;
+
+    /**
+     * @member wpCacheCompilation Runtime compilation cache
+     * @protected
+     * @type {WebpackCacheFacade}
+     */
+    wpCacheCompilation;
+
+    /**
      * @member
      * @protected
      * @type {WebpackConfig}
@@ -141,8 +156,9 @@ class WpBuildBasePlugin
         this.name = this.constructor.name;
         this.logger = this.env.logger;
         this.options = mergeIf(options, { plugins: [] });
-        this.cache2 = new WpBuildCache(this.env, { file: `cache_${this.name}.json` });
+        this.cache = new WpBuildCache(this.env, { file: `cache_${this.name}.json` });
 		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, options);
+        this.hashDigestLength = this.env.wpc.output.hashDigestLength || 20;
         if (globalCache) {
             this.initGlobalEnvObject(globalCache);
         }
@@ -164,6 +180,15 @@ class WpBuildBasePlugin
      * @returns {string}
      */
     breakProp(prop) { return prop.replace(/[A-Z]/g, (v) => ` ${v.toLowerCase()}`); }
+
+
+    /**
+     * @function
+     * @protected
+     * @param {string} file
+     * @returns {boolean}
+     */
+    canBeInitial = (file) => WpBuildBasePlugin.getEntriesRegex(this.wpConfig).test(file);
 
 
 	/**
@@ -202,6 +227,23 @@ class WpBuildBasePlugin
 	/**
 	 * @function
 	 * @protected
+	 * @param {string} file
+	 * @param {boolean} [rmvExt] Remove file extension
+	 * @returns {string}
+	 */
+    fileNameStrip = (file, rmvExt) => file.replace(new RegExp(`(?:\\.[a-f0-9]{${this.hashDigestLength},})?${rmvExt ? "\\.js" : ""}`), "");
+
+	/**
+	 * @function
+	 * @protected
+	 * @returns {RegExp}
+	 */
+    fileNameHashRegex = () => new RegExp(`\\.[a-z0-9]{${this.hashDigestLength},}`);
+
+
+	/**
+	 * @function
+	 * @protected
 	 * @param {Buffer} source
 	 * @returns {string}
 	 */
@@ -218,7 +260,6 @@ class WpBuildBasePlugin
 
     /**
      * @function getEntriesRegex
-     * @protected
      * @static
      * @param {WebpackConfig} wpConfig Webpack config object
      * @param {boolean} [dbg]
@@ -247,12 +288,13 @@ class WpBuildBasePlugin
 	 * @function
 	 * @protected
 	 * @param {WebpackError} e
-	 * @param {string} [msg]
+	 * @param {string | undefined | null | false | 0} [msg]
+	 * @throws WebpackError
 	 */
 	handleError(e, msg)
 	{
-		this.env.logger.error(`${msg || "Error"}: ${e.message.trim()}`);
-		this.compilation.errors.push(/** @type {WebpackError} */e);
+		this.env.logger.error((msg || "Error") + `: ${e.message.trim()}`);
+        this.compilation.errors.push(/** @type {WebpackError} */e);
 	}
 
 
@@ -272,48 +314,62 @@ class WpBuildBasePlugin
     };
 
 
+    // * @param {WebpackSyncCompilerHook | WebpackAsyncCompilerHook | WebpackSyncCompilationHook | WebpackAsyncCompilationHook} hook
+    /**
+     * @function
+     * @private
+     * @param {any} hook
+     * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
+     */
+    isAsync = (hook) => isFunction(hook.tapPromise);
+
+
+    /**
+     * @function
+     * @private
+     * @param {any} hook
+     * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
+     */
+    isTapable = (hook) => isFunction(hook.tap) || isFunction(hook.tapPromise);
+
+
     /**
      * @function Called by extending class from apply()
      * @protected
      * @param {WebpackCompiler} compiler the compiler instance
      * @param {WpBuildPluginApplyOptionsHash} options
+     * @throws {WebpackError}
      */
     onApply(compiler, options)
     {
+        const optionsArray = Object.entries(options);
         this.compiler = compiler;
-        const optionsArray = Object.entries(options),
-              compilationHook = optionsArray.find(([ _, tapOpts ]) => tapOpts.hook === "compilation");
-        if (compilationHook || optionsArray.every(([ _, tapOpts ]) => !!tapOpts.stage))
+        this.wpCache = compiler.getCache(this.name);
+        this.wpLogger = compiler.getInfrastructureLogger(this.name);
+        this.hashDigestLength = compiler.options.output.hashDigestLength || this.env.wpc.output.hashDigestLength || 20;
+        for (const [ name, tapOpts ] of optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook))
         {
-            compiler.hooks.compilation.tap(this.name, (compilation) =>
+            const hook = compiler.hooks[tapOpts.hook];
+            if (tapOpts.hook === "compilation")
             {
-                if (!this.onCompilation(compilation)) {
+                this.tapCompilationHooks(optionsArray);
+            }
+            else if (!tapOpts.async)
+            {
+                hook.tap(`${this.name}_${name}`, tapOpts.callback.bind(this));
+            }
+            else
+            {
+                if (this.isAsync(hook))
+                {
+                    hook.tapPromise(`${this.name}_${name}`, tapOpts.callback.bind(this));
+                }
+                else {
+                    this.handleError(new WebpackError(`Invalid async hook parameters specified: ${tapOpts.hook}`));
                     return;
                 }
-                optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook === "compilation" && tapOpts.stage).forEach(([ _, tapOpts ]) =>
-                {
-                    if (!tapOpts.async) {
-                        this.tapCompilationStage(tapOpts);
-                    }
-                    else {
-                        this.tapCompilationStagePromise(tapOpts);
-                    }
-                });
-            });
-        }
-        else {
-            // this.wpLogger = compiler.getLogger(this.name);
-            this.cache = compiler.getCache(this.name);
-        }
-        optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook !== "compilation" && !tapOpts.stage && tapOpts.hook).forEach(([ name, tapOpts ]) =>
-        {
-            if (!tapOpts.async) {
-                compiler.hooks[tapOpts.hook].tap(`${this.name}_${name}`, tapOpts.callback.bind(this));
             }
-            else {
-                compiler.hooks[tapOpts.hook].tapPromise(`${this.name}_${name}`, tapOpts.callback.bind(this));
-            }
-        });
+        }
     }
 
 
@@ -330,41 +386,86 @@ class WpBuildBasePlugin
         }
         this.compilation = compilation;
         this.wpLlogger = compilation.getLogger(this.name);
-        this.cache = compilation.getCache(this.name);
+        this.wpCacheCompilation = compilation.getCache(this.name);
         return true;
     }
 
 
     /**
      * @function
-     * @protected
-     * @param {WpBuildPluginApplyOptions} options
-     * @returns {void}
+     * @private
+     * @param {[string, WpBuildPluginTapOptions][]} optionsArray
      */
-    tapCompilationStage(options)
+    tapCompilationHooks(optionsArray)
     {
-        const stageEnum = this.compiler.webpack.Compilation[`PROCESS_ASSETS_STAGE_${options.stage}`],
-              name = `${this.name}_${options.stage}`;
-        this.compilation.hooks.processAssets.tap({ name, stage: stageEnum }, options.callback.bind(this));
-        if (options.statsProperty) {
-            this.tapStatsPrinter(options.statsProperty, name);
-        }
+        this.compiler.hooks.compilation.tap(this.name, (compilation) =>
+        {
+            if (!this.onCompilation(compilation)) {
+                return;
+            }
+            optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook === "compilation").forEach(([ _, tapOpts ]) =>
+            {
+                if (!tapOpts.hookCompilation)
+                {
+                    if (tapOpts.stage) {
+                        tapOpts.hookCompilation = "processAssets";
+                    }
+                    else {
+                        this.handleError(new WebpackError("Invalid hook parameters: stage and hookCompilation not specified"));
+                        return;
+                    }
+                }
+                else if (tapOpts.hookCompilation === "processAssets" && !tapOpts.stage)
+                {
+                    this.handleError(new WebpackError("Invalid hook parameters: stage not specified for processAssets"));
+                    return;
+                }
+                this.tapCompilationStage(/** @type {WpBuildPluginCompilationOptions} */(tapOpts));
+            });
+        });
     }
 
 
     /**
      * @function
      * @protected
-     * @param {WpBuildPluginApplyOptions} options
+     * @param {WpBuildPluginCompilationOptions} options
      * @returns {void}
+     * @throws {WebpackError}
      */
-    tapCompilationStagePromise(options)
+    tapCompilationStage(options)
     {
-        const stageEnum = this.compiler.webpack.Compilation[`PROCESS_ASSETS_STAGE_${options.stage}`],
-              name = `${this.name}_${options.stage}`;
-        this.compilation.hooks.processAssets.tapPromise({ name, stage: stageEnum }, options.callback.bind(this));
-        if (options.statsProperty) {
-            this.tapStatsPrinter(options.statsProperty, name);
+        const stageEnum = options.stage ? this.compiler.webpack.Compilation[`PROCESS_ASSETS_STAGE_${options.stage}`] : null,
+              name = `${this.name}_${options.stage}`,
+              hook = this.compilation.hooks[options.hookCompilation];
+        if (this.isTapable(hook))
+        {
+            if (stageEnum && options.hookCompilation === "processAssets")
+            {
+                if (!options.async) {
+                    hook.tap({ name, stage: stageEnum }, options.callback.bind(this));
+                }
+                else {
+                    hook.tapPromise({ name, stage: stageEnum }, options.callback.bind(this));
+                }
+            }
+            else
+            {   if (!options.async) {
+                    hook.tap(name, options.callback.bind(this));
+                }
+                else {
+                    if (this.isAsync(hook)) {
+                        hook.tapPromise(name, options.callback.bind(this));
+                    }
+                    else {
+                        this.handleError(new WebpackError(`Invalid async hook specified: ${options.hook}`));
+                        return;
+                    }
+                }
+            }
+            if (options.statsProperty) {
+                this.tapStatsPrinter(options.statsProperty, name);
+            }
         }
     }
 
@@ -377,19 +478,14 @@ class WpBuildBasePlugin
      */
     tapStatsPrinter(property, name)
     {
-        if (this.compilation.hooks.statsPrinter)
+        this.compilation.hooks.statsPrinter.tap(name, (stats) =>
         {
-            this.compilation.hooks.statsPrinter.tap(name, (stats) =>
-            {
-                stats.hooks.print.for(`asset.info.${property}`).tap(
-                    name,
-                    (istanbulTagged, { green, formatFlag }) => {
-                        return istanbulTagged ? green?.(formatFlag?.(this.breakProp(property)) || "") || "" : "";
-                    }
-                );
-            });
-        }
+            const printFn = (/** @type {{}} */prop, /** @type {WebpackStatsPrinterContext} */context) =>
+                prop ? context.green?.(context.formatFlag?.(this.breakProp(property)) || "") || "" : "";
+            stats.hooks.print.for(`asset.info.${property}`).tap(name, printFn);
+        });
     };
+
 
     // /**
     //  * @template T

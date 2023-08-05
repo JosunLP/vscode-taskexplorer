@@ -32,7 +32,7 @@
         "uploadSymbol": "yellow"
     },
     "log": {
-        "level": 2,
+        "level": 3,
         "pad": {
             "basePad": 0,
             "envTag": 23,

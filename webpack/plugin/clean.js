@@ -63,8 +63,7 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 	{
 		if (existsSync(this.env.paths.dist))
 		{
-			const hashDigestLength = this.compiler.options.output.hashDigestLength || this.wpConfig.output.hashDigestLength || 20;
-			readdirSync(this.env.paths.dist).filter(p => (new RegExp(`\\.[a-z0-9]{${hashDigestLength},}`).test(p))).forEach((file) =>
+			readdirSync(this.env.paths.dist).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
 			{
 				const assets = stats.compilation.getAssets(),
 					  clean = !assets.find(a => a.name === file);

@@ -79,10 +79,10 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
             {
                 const asset = compilation.getAsset(file);
-                if (asset && asset.info.related && chunk.name && (env.state.hash.next[chunk.name] !== env.state.hash.current[chunk.name] || !env.state.hash.previous[chunk.name]))
+                if (asset && chunk.name && (env.state.hash.next[chunk.name] !== env.state.hash.current[chunk.name] || !env.state.hash.previous[chunk.name]))
                 {
                     await copyFile(join(env.paths.dist, file), join(toUploadPath, file));
-                    if (asset.info.related.sourceMap)
+                    if (asset.info.related?.sourceMap)
                     {
                         const sourceMapFile = asset.info.related.sourceMap.toString();
                         if (env.environment === "prod") {
@@ -151,7 +151,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
 
         await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
-        logger.write(`${logger.icons.color.star } ${logger.withColor(`upload resource files to ${host}`, logger.colors.grey)}`);
+        logger.write(`upload resource files to ${host}`, 1, "", logger.icons.color.star);
         try {
             logger.write(`   create / clear dir    : plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`);
             spawnSync("plink", plinkArgs, spawnSyncOpts);
@@ -159,9 +159,9 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             spawnSync("pscp", pscpArgs, spawnSyncOpts);
             filesToUpload.forEach((f) =>
-                logger.write(`   ${logger.icons.color.up} ${logger.withColor(basename(f).padEnd(env.app.log.pad.uploadFileName), logger.colors.grey)} ${logger.icons.color.successTag}`)
+                logger.write(`   ${logger.icons.color.successTag} ${logger.withColor(`uploaded ${basename(f)}`, logger.colors.grey)}`, 1, "", logger.icons.color.up)
             );
-            logger.write(`${logger.icons.color.star} ${logger.withColor("successfully uploaded resource files", logger.colors.grey)}`);
+            logger.write("successfully uploaded resource files", 1, "", logger.icons.color.star);
         }
         catch (e) {
             logger.error("error uploading resource files:");

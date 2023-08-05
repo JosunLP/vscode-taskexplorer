@@ -166,26 +166,39 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function
      * @private
-     * @param {WebpackCompilationAssets} _assets
+     * @param {WebpackCompilationAssets} assets
      */
-    runtimeVars(_assets)
+    runtimeVars(assets)
     {
         const hashMap = this.env.state.hash.next,
               updates = /** @type {string[]} */([]);
         this.logger.write("replace runtime variables", 1);
-        asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
-        {
-            const chunkName = /** @type {string} */(chunk.name);
-            asArray(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
+		Object.entries(assets).filter(([ f, _ ]) => this.matchObject(f)).forEach(([ file, _ ]) =>
+		{
+            const asset = this.compilation.getAsset(file);
+            if (asset && isString(asset.info.contenthash))
             {
-                this.logger.value("   check file for variable replacement", file, 3);
-                hashMap[chunkName] = chunk.contentHash.javascript;
-                if (chunk.canBeInitial()) {
-                    this.logger.write(`   ${file} queued for variable replacement`, 2);
+                this.logger.value("   queued for variable replacement", file, 3);
+                this.logger.write(`   ${file} queued for variable replacement`, 2);
+                hashMap[this.fileNameStrip(file, true)] = asset.info.contenthash;
+                if (this.canBeInitial(file)) {
                     updates.push(file);
                 }
-            });
+            }
         });
+        // asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
+        // {
+        //     const chunkName = /** @type {string} */(chunk.name);
+        //     asArray(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
+        //     {
+        //         this.logger.value("   check file for variable replacement", file, 3);
+        //         hashMap[chunkName] = chunk.contentHash.javascript;
+        //         if (chunk.canBeInitial()) {
+        //             this.logger.write(`   ${file} queued for variable replacement`, 2);
+        //             updates.push(file);
+        //         }
+        //     });
+        // });
         updates.forEach((f) => this.compilation.updateAsset(f, (s) => this.source(f, s), this.info.bind(this)));
         this.logger.write("runtime variable replacement completed", 2);
     };
