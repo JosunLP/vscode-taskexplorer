@@ -218,11 +218,11 @@ class WpBuildBasePlugin
 	 * @function
 	 * @protected
 	 * @param {WebpackError} e
-	 * @param {string} msg
+	 * @param {string} [msg]
 	 */
 	handleError(e, msg)
 	{
-		this.env.logger.error(`${msg}: ${e.message.trim()}`);
+		this.env.logger.error(`${msg || "Error"}: ${e.message.trim()}`);
 		this.compilation.errors.push(/** @type {WebpackError} */e);
 	}
 

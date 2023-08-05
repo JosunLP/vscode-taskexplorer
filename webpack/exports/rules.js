@@ -105,9 +105,38 @@ const rules = (env) =>
 			}
 		}]);
 	}
+	else if (env.build === "types")
+	{
+		env.wpc.module.rules.push({
+			test: /\.ts$/,
+			include: path.join(env.paths.build),
+			exclude: [
+				/node_modules/, /test[\\/]/, /\.d\.ts$/
+			],
+			use: [ env.esbuild ?
+			{
+				loader: "esbuild-loader",
+				options: {
+					implementation: esbuild,
+					loader: "tsx",
+					target: [ "es2020", "chrome91", "node16.20" ],
+					tsconfigRaw: getTsConfig(
+						env, path.join(env.paths.build, "types", "tsconfig.json"),
+					)
+				}
+			} :
+			{
+				loader: "ts-loader",
+				options: {
+					configFile: path.join(env.paths.build, "types", "tsconfig.json"),
+					// experimentalWatchApi: true,
+					transpileOnly: true
+				}
+			} ]
+		});
+	}
 	else // extension - node or web
 	{
-		const configFile = env.build === "web" ? "tsconfig.web.json" : "tsconfig.json";
 		env.wpc.module.rules.push({
 			test: /\.ts$/,
 			issuerLayer: "release",
@@ -183,19 +212,51 @@ const rules = (env) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						env, path.join(env.paths.build, configFile),
+						env, path.join(env.paths.build, `tsconfig.${env.target}.json`),
 					)
 				}
 			} :
 			{
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(env.paths.build, configFile),
+					configFile: path.join(env.paths.build, `tsconfig.${env.target}.json`),
 					// experimentalWatchApi: true,
 					transpileOnly: true
 				}
 			} ]
 		});
+/*
+		if (env.isTests)
+		{
+			env.wpc.module.rules.push({
+				test: /\.ts$/,
+				include: path.join(env.paths.build, "src", "test"),
+				exclude: [
+					/node_modules/, /types[\\/]/, /\.d\.ts$/
+				],
+				use: [ env.esbuild ?
+				{
+					loader: "esbuild-loader",
+					options: {
+						implementation: esbuild,
+						loader: "tsx",
+						target: [ "es2020", "chrome91", "node16.20" ],
+						tsconfigRaw: getTsConfig(
+							env, path.join(env.paths.build, "src", "test", "tsconfig.json"),
+						)
+					}
+				} :
+				{
+					loader: "ts-loader",
+					options: {
+						configFile: path.join(env.paths.build, "src", "test", "tsconfig.json"),
+						// experimentalWatchApi: true,
+						transpileOnly: true
+					}
+				} ]
+			});
+		}
+*/
 	}
 };
 

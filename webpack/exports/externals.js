@@ -34,7 +34,7 @@ const externals = (env) =>
 				];
 			}
 		}
-		else if (env.build !== "tests")
+		else if (env.build !== "tests" && env.build !== "types")
 		{
 			env.wpc.externals = [
 				/** @type {import("webpack").WebpackPluginInstance}*/(nodeExternals())

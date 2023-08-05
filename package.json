@@ -69,6 +69,7 @@
 		"build-test-all": "webpack --env environment=test --config ./webpack.config.js",
 		"build-test-extension": "webpack --env build=extension --env environment=test --config ./webpack.config.js",
 		"build-test-suite": "tsc -b ./src/test && tsc-alias -p ./src/test/tsconfig.json",
+		"build-types:wp": "webpack --env build=types --env environment=test --config ./webpack.config.js",
 		"build-types": "tsc -p ./types",
 		"build-webviews-prod": "webpack --mode production --env build=webview --config ./webpack.config.js",
 		"build-webviews-dev": "webpack --mode development --env build=webview --config ./webpack.config.js",

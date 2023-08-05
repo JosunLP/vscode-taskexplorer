@@ -22,7 +22,7 @@ const webpack = require("webpack");
 const sourcemaps = (env) =>
 {
     let plugin;
-    if (env.app.plugins.sourcemaps !== false && env.build !== "webview")
+    if (env.app.plugins.sourcemaps !== false && env.build !== "webview" && env.build !== "types")
     {
         const isTests = env.environment.startsWith("test");
         const options =

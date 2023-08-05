@@ -59,6 +59,18 @@ const output = (env) =>
 			libraryTarget: "commonjs2"
 		});
 	}
+	else if (env.build === "types")
+	{
+		apply(env.wpc.output,
+		{
+			clean: env.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
+			path: join(env.paths.build, "types", "dist"),
+			filename: "[name].js",
+			// libraryTarget: "umd",
+    		// umdNamedDefine: true,
+			libraryTarget: "commonjs2"
+		});
+	}
 	else
 	{
 		apply(env.wpc.output,

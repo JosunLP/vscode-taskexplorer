@@ -34,6 +34,15 @@ const entry = (env) =>
 			// ...testFiles
 		};
 	}
+	else if (env.build === "types")
+	{
+		env.wpc.entry =
+		{
+			types: {
+			 	import: "./types/index.ts"
+			}
+		};
+	}
 	else
 	{
 		env.wpc.entry =

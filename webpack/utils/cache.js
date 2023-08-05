@@ -65,8 +65,6 @@ class WpBuildCache
         this.options = merge({}, options);
         this.options.file = join(this.env.global.cacheDir, options.file);
         this.cache = this.read();
-console.log("constructor: " + this.options.file);
-console.log("constructor: " + JSON.stringify(this.cache));
     }
 
 
