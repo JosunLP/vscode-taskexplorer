@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/no-undefined-types */
 /* eslint-disable jsdoc/require-property-description */
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
@@ -37,6 +38,13 @@ class WpBuildConsoleLogger
      */
     env;
 
+    /**
+     * @member
+     * @private
+     * @type {string}
+     */
+    infoIcon;
+
     // /**
     //  * @member
     //  * @private
@@ -53,12 +61,17 @@ class WpBuildConsoleLogger
     {
         this.env = env;
         this.env.disposables?.push(this);
-        if (env.app?.colors.default)
+        if (env.app)
         {
-            Object.keys(this.colors).filter(c => this.colors[c][1] === this.colors.system).forEach((c) =>
+            this.infoIcon = env.app.colors.infoIcon ?
+                            this.withColor(this.icons.info, this.colors[env.app.colors.infoIcon]) : this.icons.color.info;
+            if (env.app.colors.default)
             {
-                this.colors[c][1] = this.colorMap[env.app.colors.default];
-            });
+                Object.keys(this.colors).filter(c => this.colors[c][1] === this.colors.system).forEach((c) =>
+                {
+                    this.colors[c][1] = this.colorMap[env.app.colors.default];
+                });
+            }
         }
     }
 
@@ -297,13 +310,13 @@ class WpBuildConsoleLogger
             }
             const envMsgClr = color || (envIsInitialized ? this.colors[env.app.colors.default] : this.colors.grey),
                   envMsg = color || !(/\x1B\[/).test(msg) || envMsgClr[0] !== this.colorMap.system ? this.withColor(this.format(msg), envMsgClr) : this.format(msg);
-            console.log(`${this.basePad}${pad}${isString(icon) ? icon : this.icons.color.info}${envTag}${envMsg}`);
+            console.log(`${this.basePad}${pad}${isString(icon) ? icon : this.infoIcon}${envTag}${envMsg}`);
         }
     };
 
     /**
      * @function
-     * Write / log a message to the console.  This funvtion is just a wrapper for {@link write()} that
+     * Write / log a message to the console.  This function is just a wrapper for {@link write write()} that
      * satisfies the javascript `console` interface.
      * @inheritdoc
      */

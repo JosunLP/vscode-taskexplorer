@@ -6,9 +6,9 @@
  */
 
 const {
-	analyze, banner, build, clean, compile, copy, environment, instrument, loghooks, ignore,
-	optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload, cssextract,
-	htmlcsp, imageminimizer, htmlinlinechunks, vendormod, webviewapps, scm
+	analyze, banner, build, clean, compile, copy, dispose, environment, instrument, loghooks,
+	ignore, optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload,
+	cssextract, htmlcsp, imageminimizer, htmlinlinechunks, vendormod, webviewapps, scm
 } = require("../plugin");
 
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
@@ -67,7 +67,8 @@ const plugins = (env) =>
 		...optimization(env),          // ^compiler.hooks.shouldEmit, compiler.hooks.compilation -> compilation.hooks.shouldRecord
 		upload(env),                   // compiler.hooks.afterDone
 		licensefiles(env),             // compiler.hooks.shutdown
-		scm(env)                       // compiler.hooks.shutdown
+		scm(env),                      // compiler.hooks.shutdown
+		dispose(env)                   // perform cleanup, dispose registred disposables
 	);
 
 	env.wpc.plugins.slice().reverse().forEach((p, i, a) =>

@@ -25,6 +25,7 @@
         "default": "grey",
         "buildBracket": "blue",
         "buildText": "white",
+        "infoIcon": "magenta",
         "valueStar": "cyan",
         "valueStarText": "white",
         "tagBracket": "blue",

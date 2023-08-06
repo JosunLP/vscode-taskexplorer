@@ -147,11 +147,12 @@ declare interface IWpBuildLogColorMap
     default: WpBuildLogTrueColor;
     buildBracket: WpBuildLogTrueColor,
     buildText: WpBuildLogTrueColor,
-    valueStar: WpBuildLogTrueColor;
-    valueStarText: WpBuildLogTrueColor;
+    infoIcon: WpBuildLogTrueColor,
     tagBracket: WpBuildLogTrueColor;
     tagText: WpBuildLogTrueColor;
     uploadSymbol: WpBuildLogTrueColor;
+    valueStar: WpBuildLogTrueColor;
+    valueStarText: WpBuildLogTrueColor;
 }
 declare type WpBuildLogColorMap = Required<IWpBuildLogColorMap>;
 declare interface IWpBuildLogPadMap
