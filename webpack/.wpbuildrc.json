@@ -78,7 +78,6 @@
         "banner": true,
         "build": true,
         "clean": true,
-        "compilae": true,
         "copy": true,
         "environment": true,
         "hash": true,
@@ -93,6 +92,7 @@
         "runtimevars": true,
         "scm": true,
         "sourcemaps": true,
+        "testsuite": true,
         "tscheck": true,
         "upload": true,
         "vendormod": true

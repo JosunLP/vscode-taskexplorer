@@ -3,6 +3,8 @@
 // @ts-check
 
 const glob = require("glob");
+const JSON5 = require("json5");
+const { spawnSync } = require("child_process");
 
 /**
  * @module wpbuild.utils.utils
@@ -96,6 +98,25 @@ const findFiles = (pattern, options) =>
     {
         glob(pattern, options, (err, files) => { if(!err) resolve(files); else reject(err); });
     });
+};
+
+
+/**
+ * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {string} tsConfigFile
+ * @returns {Record<string, any>}
+ */
+const getTsConfig = (env, tsConfigFile) =>
+{
+	const result = spawnSync("npx", [ "tsc", `-p ${tsConfigFile}`, "--showConfig" ], {
+		cwd: env.paths.build,
+		encoding: "utf8",
+		shell: true,
+	});
+	const data = result.stdout,
+		  start = data.indexOf("{"),
+		  end = data.lastIndexOf("}") + 1;
+	return JSON5.parse(data.substring(start, end));
 };
 
 
@@ -259,6 +280,6 @@ const pickNot = (obj, ...keys) =>
 
 
 module.exports = {
-    apply, asArray, clone, findFiles, isArray, isDate, isEmpty, isFunction, isObject, isObjectEmpty,
-    isPrimitive, isPromise, isString, merge, mergeIf, pick, pickBy, pickNot
+    apply, asArray, clone, findFiles, getTsConfig, isArray, isDate, isEmpty, isFunction, isObject,
+    isObjectEmpty,isPrimitive, isPromise, isString, merge, mergeIf, pick, pickBy, pickNot
 };

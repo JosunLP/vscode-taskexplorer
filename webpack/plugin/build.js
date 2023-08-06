@@ -8,13 +8,13 @@
 
 const { existsSync } = require("fs");
 const { promisify } = require("util");
-const { findFiles } = require("../utils");
 const WpBuildBasePlugin = require("./base");
 const { WebpackError } = require("webpack");
 const exec = promisify(require("child_process").exec);
 // const spawn = promisify(require("child_process").spawn);
+const { findFiles, getTsConfig } = require("../utils");
 const {readFile, unlink, access } = require("fs/promises");
-const { join, basename, relative, dirname } = require("path");
+const { join, basename, relative, dirname, isAbsolute, resolve } = require("path");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
@@ -69,14 +69,48 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	 */
 	async testsuite()
 	{
-		const bldDir = this.env.paths.build,
-			  testsDir = join(this.env.paths.dist, "test");
-		this.env.logger.write("build test suite");
+		const testsDir = join(this.env.paths.dist, "test");
+		const globOptions = {
+			cwd: this.env.paths.build,
+			absolute: true,
+			allowWindowsEscape: true,
+			ignore: [ "**/node_modules", "**/.vscode*", "**/build*", "**/dist*", "**/res*", "**/doc*", "**/doc*" ]
+		};
+		this.env.logger.write("build test suite", 1);
+		let tsConfigFile,
+			files = await findFiles("**/src/**/test{,s}/tsconfig.*", globOptions);
+		if (files.length === 0)
+		{
+			files = await findFiles("**/src/**tsconfig.test{,s}.*", globOptions);
+		}
+		if (files.length >= 1)
+		{
+			tsConfigFile = files[0];
+		}
+		if (!tsConfigFile)
+		{
+			const eMsg = "Could not locate tsconfig file for tests suite - must be **/tests?/tsconfig.* or **/tsconfig.tests?.json";
+			this.handleError(new WebpackError(eMsg));
+			this.logger.warning("consider possible solutions:");
+			this.logger.warning("   (1) rename test suite config file according to convention");
+			this.logger.warning("   (2) disable testsuite plugin in italic(.wsbuildrc.plugins.testsuite)");
+			return;
+		}
+		this.env.logger.value("   found test suite tsconfig file", tsConfigFile, 2);
 		if (!existsSync(testsDir))
 		{
-			try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.test.tsbuildinfo")); } catch {}
+			this.env.logger.write("   checking for tsbuildinfo file path", 3);
+			const tsConfig = getTsConfig(this.env, tsConfigFile);
+			let buildInfoFile = tsConfig.compilerOptions.tsBuildInfoFile || join(dirname(tsConfigFile), "tsconfig.tsbuildinfo");
+			if (!isAbsolute(buildInfoFile)) {
+				buildInfoFile = resolve(dirname(tsConfigFile), buildInfoFile);
+			}
+			this.env.logger.value("   delete tsbuildinfo file", buildInfoFile, 3);
+			try {
+				await unlink(buildInfoFile);
+			} catch {}
 		}
-		await this.execTsBuild("./src/test", 2, testsDir, true);
+		await this.execTsBuild(relative(this.env.paths.build, tsConfigFile), 2, testsDir, true);
 	}
 
 
@@ -137,27 +171,27 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	/**
 	 * @function Executes a typescript build using the specified tsconfig
 	 * @private
-	 * @param {string} tsConfig Path to tsconfig file or dir, relative to `env.paths.build`
+	 * @param {string} tsConfigFile Path to tsconfig file or dir, relative to `env.paths.build`
 	 * @param {number} identifier Unique group identifier to associate with the file path
 	 * @param {string} outputDir Output directory of build
 	 * @param {boolean} [alias] Write alias paths with ``
 	 */
-	execTsBuild = async (tsConfig, identifier, outputDir, alias) =>
+	execTsBuild = async (tsConfigFile, identifier, outputDir, alias) =>
 	{
 		// const babel = [
 		// 	"npx", "babel", tsConfig, "--out-dir", outputDir, "--extensions", ".ts",
 		// 	"--presets=@babel/preset-env,@babel/preset-typescript",
 		// ];
 		const logger = this.env.logger;
-		let command = `npx tsc -p ${tsConfig}`; // babel.join(" ");
-		logger.write(`   execute typescript build @ italic(${tsConfig})`, 1);
+		let command = `npx tsc -p ${tsConfigFile}`; // babel.join(" ");
+		logger.write(`   execute typescript build @ italic(${tsConfigFile})`, 1);
 
 		try
 		{
 			let code = await this.exec(command, "typescript build");
 			if (code !== 0)
 			{
-				this.compilation.errors.push(new WebpackError("typescript build failed for " + tsConfig));
+				this.compilation.errors.push(new WebpackError("typescript build failed for " + tsConfigFile));
 				return;
 			}
 			//
@@ -171,27 +205,27 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 			{   //
 				// Note that `tsc-alias` requires a filename e.g. tsconfig.json in it's path argument
 				//
-				if (!(/tsconfig\.(?:[\w\-_\.]+\.)?json$/).test(tsConfig))
+				if (!(/tsconfig\.(?:[\w\-_\.]+\.)?json$/).test(tsConfigFile))
 				{
-					tsConfig = join(tsConfig, "tsconfig.json");
+					tsConfigFile = join(tsConfigFile, "tsconfig.json");
 				}
-				if (!existsSync(tsConfig))
+				if (!existsSync(tsConfigFile))
 				{
-					const files = await findFiles("tsconfig.*", { cwd: dirname(tsConfig), absolute: true,  });
+					const files = await findFiles("tsconfig.*", { cwd: dirname(tsConfigFile), absolute: true,  });
 					if (files.length === 1)
 					{
-						tsConfig = files[0];
+						tsConfigFile = files[0];
 					}
 					else {
 						this.handleError(new WebpackError("Invalid path to tsconfig file"));
 						return;
 					}
 				}
-				command = `tsc-alias -p ${tsConfig}`;
+				command = `tsc-alias -p ${tsConfigFile}`;
 				code = await this.exec(command, "typescript path aliasing");
 				if (code !== 0)
 				{
-					this.compilation.errors.push(new WebpackError("typescript path aliasing failed for " + tsConfig));
+					this.compilation.errors.push(new WebpackError("typescript path aliasing failed for " + tsConfigFile));
 					return;
 				}
 			}

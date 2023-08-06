@@ -113,7 +113,7 @@ const syncWpBuildPlugins = (project) =>
     // copyWpBuildFile(project, "clean.js", "webpack/plugin");
     // copyWpBuildFile(project, "compile.js", "webpack/plugin");
     // copyWpBuildFile(project, "copy.js", "webpack/plugin");
-    copyWpBuildFile(project, "customize.js", "webpack/plugin");
+    copyWpBuildFile(project, "dispose.js", "webpack/plugin");
     copyWpBuildFile(project, "environment.js", "webpack/plugin");
     // copyWpBuildFile(project, "html.js", "webpack/plugin");
     copyWpBuildFile(project, "ignore.js", "webpack/plugin");
@@ -126,8 +126,10 @@ const syncWpBuildPlugins = (project) =>
     // copyWpBuildFile(project, "runtimevars.js", "webpack/plugin");
     copyWpBuildFile(project, "scm.js", "webpack/plugin");
     // copyWpBuildFile(project, "sourcemaps.js", "webpack/plugin");
+    copyWpBuildFile(project, "testsuite.js", "webpack/plugin");
     // copyWpBuildFile(project, "tscheck.js", "webpack/plugin");
     copyWpBuildFile(project, "upload.js", "webpack/plugin");
+    copyWpBuildFile(project, "vendormod.js", "webpack/plugin");
     //
     // Files for VSCode extension projects
     //
@@ -135,7 +137,6 @@ const syncWpBuildPlugins = (project) =>
     {
         // copyWpBuildFile(project, "build.js", "webpack/plugin");
         copyWpBuildFile(project, "clean.js", "webpack/plugin");
-        copyWpBuildFile(project, "compile.js", "webpack/plugin");
         // if [(project, "= "../../vscode-extjs" ] ; then
         //    copyWpBuildFile(project, "tscheck.js", "webpack/plugin");
         // fi

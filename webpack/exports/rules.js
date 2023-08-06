@@ -9,9 +9,8 @@
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 const path = require("path");
-const JSON5 = require("json5");
 const esbuild = require("esbuild");
-const { spawnSync } = require("child_process");
+const { getTsConfig } = require("../utils");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
@@ -258,25 +257,6 @@ const rules = (env) =>
 		}
 */
 	}
-};
-
-
-/**
- * @param {WpBuildEnvironment} env Webpack build environment
- * @param {string} tsConfigFile
- * @returns {string}
- */
-const getTsConfig = (env, tsConfigFile) =>
-{
-	const result = spawnSync("npx", [ "tsc", `-p ${tsConfigFile}`, "--showConfig" ], {
-		cwd: env.paths.build,
-		encoding: "utf8",
-		shell: true,
-	});
-	const data = result.stdout,
-		  start = data.indexOf("{"),
-		  end = data.lastIndexOf("}") + 1;
-	return JSON5.parse(data.substring(start, end));
 };
 
 
