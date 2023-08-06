@@ -6,7 +6,7 @@
  */
 
 const {
-	analyze, banner, clean, compile, copy, dispose, environment, instrument, loghooks,
+	analyze, banner, clean, copy, dispose, environment, instrument, istanbul, loghooks,
 	ignore, optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload,
 	cssextract, htmlcsp, imageminimizer, htmlinlinechunks, testsuite, vendormod, webviewapps, scm
 } = require("../plugin");
@@ -31,7 +31,7 @@ const plugins = (env) =>
 		progress(env),                 //
 		...clean(env),                 // compiler.hooks.emit, compiler.hooks.done
 		testsuite(env),                // compiler.hooks.beforeCompile - build tests / test suite
-		compile(env),                  // compiler.hooks.compilation - e.g. add istanbul ignores to node-requires
+		istanbul(env),                 // compiler.hooks.compilation - add istanbul ignores to node-requires
 		runtimevars(env),              // compiler.hooks.compilation
 		instrument(env),               // ? - TODO -?
 		ignore(env),                   // compiler.hooks.normalModuleFactory

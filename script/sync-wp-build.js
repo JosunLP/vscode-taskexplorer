@@ -83,6 +83,7 @@ const doCustomFileActions = (project) =>
 
 const syncWpBuildExports = (project) =>
 {
+    copyWpBuildFile(project, "cache.js", "webpack/exports");
     copyWpBuildFile(project, "context.js", "webpack/exports");
     copyWpBuildFile(project, "devtool.js", "webpack/exports");
     // copyWpBuildFile(project, "entry.js", "webpack/exports");
@@ -117,6 +118,7 @@ const syncWpBuildPlugins = (project) =>
     copyWpBuildFile(project, "ignore.js", "webpack/plugin");
     copyWpBuildFile(project, "index.js", "webpack/plugin");
     copyWpBuildFile(project, "instrument.js", "webpack/plugin");
+    copyWpBuildFile(project, "istanbul.js", "webpack/plugin");
     copyWpBuildFile(project, "licensefiles.js", "webpack/plugin");
     copyWpBuildFile(project, "loghooks.js", "webpack/plugin");
     copyWpBuildFile(project, "optimization.js", "webpack/plugin");
@@ -133,11 +135,7 @@ const syncWpBuildPlugins = (project) =>
     //
     if (project.startsWith("vscode-"))
     {
-        // copyWpBuildFile(project, "build.js", "webpack/plugin");
         copyWpBuildFile(project, "clean.js", "webpack/plugin");
-        // if [(project, "= "../../vscode-extjs" ] ; then
-        //    copyWpBuildFile(project, "tscheck.js", "webpack/plugin");
-        // fi
         copyWpBuildFile(project, "copy.js", "webpack/plugin");
         copyWpBuildFile(project, "html.js", "webpack/plugin");
         copyWpBuildFile(project, "runtimevars.js", "webpack/plugin");
@@ -145,12 +143,15 @@ const syncWpBuildPlugins = (project) =>
         const destFile=`../../${project}/webpack/plugin/sourcemaps.js`,
               contents = readFileSync(destFile, "utf8").replace(/vendor\|runtime\|tests/gi, "vendor|runtime|tests|serverInterface");
         writeFileSync(destFile, contents);
+        // copyWpBuildFile(project, "tscheck.js", "webpack/plugin");
     }
 };
 
 
 const syncWpBuildUtils = (project) =>
 {
+    copyWpBuildFile(project, "app.js", "webpack/utils");
+    copyWpBuildFile(project, "cache.js", "webpack/utils");
     copyWpBuildFile(project, "console.js", "webpack/utils");
     copyWpBuildFile(project, "environment.js", "webpack/utils");
     copyWpBuildFile(project, "global.js", "webpack/utils");
