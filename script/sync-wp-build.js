@@ -109,9 +109,7 @@ const syncWpBuildPlugins = (project) =>
     copyWpBuildFile(project, "analyze.js", "webpack/plugin");
     copyWpBuildFile(project, "banner.js", "webpack/plugin");
     copyWpBuildFile(project, "base.js", "webpack/plugin");
-    // copyWpBuildFile(project, "build.js", "webpack/plugin");
     // copyWpBuildFile(project, "clean.js", "webpack/plugin");
-    // copyWpBuildFile(project, "compile.js", "webpack/plugin");
     // copyWpBuildFile(project, "copy.js", "webpack/plugin");
     copyWpBuildFile(project, "dispose.js", "webpack/plugin");
     copyWpBuildFile(project, "environment.js", "webpack/plugin");

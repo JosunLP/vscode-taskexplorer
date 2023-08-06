@@ -39,9 +39,12 @@ class WpBuildDisposePlugin extends WpBuildBasePlugin
         });
     }
 
-    dispose()
+    async dispose()
     {
-        this.env.disposables.forEach(async d => d.dispose());
+        this.logger.write("cleanup: call all registered disposables", 2);
+        for (const d of this.env.disposables.splice(0)) {
+            await d.dispose();
+        }
     }
 }
 

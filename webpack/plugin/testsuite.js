@@ -42,7 +42,7 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
                 // hook: "compilation",
 				// stage: "ADDITIONAL",
 				statsProperty: "tests",
-                callback: this.build.bind(this)
+                callback: this.testsuite.bind(this)
             }
         });
     }
@@ -53,30 +53,19 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 	 * @private
 	 * @param {WebpackCompilation} compilation
 	 */
-	async build(compilation)
+	async testsuite(compilation)
 	{
+		this.env.logger.write("build test suite", 1);
 		this.onCompilation(compilation);
-		// await this.types(assets);
-		if (this.env.isTests) {
-			await this.testsuite();
-		}
-	};
 
-
-	/**
-	 * @function
-	 * @private
-	 */
-	async testsuite()
-	{
 		const testsDir = join(this.env.paths.dist, "test");
 		const globOptions = {
 			cwd: this.env.paths.build,
 			absolute: true,
 			allowWindowsEscape: true,
-			ignore: [ "**/node_modules", "**/.vscode*", "**/build*", "**/dist*", "**/res*", "**/doc*", "**/doc*" ]
+			ignore: [ "**/node_modules/**", "**/.vscode*/**", "**/build/**", "**/dist/**", "**/res*/**", "**/doc*/**" ]
 		};
-		this.env.logger.write("build test suite", 1);
+
 		let tsConfigFile,
 			files = await findFiles("**/src/**/test{,s}/tsconfig.*", globOptions);
 		if (files.length === 0)
@@ -87,6 +76,7 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 		{
 			tsConfigFile = files[0];
 		}
+
 		if (!tsConfigFile)
 		{
 			const eMsg = "Could not locate tsconfig file for tests suite - must be **/tests?/tsconfig.* or **/tsconfig.tests?.json";
@@ -96,7 +86,9 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 			this.logger.warning("   (2) disable testsuite plugin in italic(.wsbuildrc.plugins.testsuite)");
 			return;
 		}
+
 		this.env.logger.value("   found test suite tsconfig file", tsConfigFile, 2);
+
 		if (!existsSync(testsDir))
 		{
 			this.env.logger.write("   checking for tsbuildinfo file path", 3);
@@ -110,6 +102,7 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 				await unlink(buildInfoFile);
 			} catch {}
 		}
+
 		await this.execTsBuild(relative(this.env.paths.build, tsConfigFile), 2, testsDir, true);
 	}
 
@@ -376,8 +369,8 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
  * @param {WpBuildEnvironment} env
  * @returns {WpBuildPreCompilePlugin | undefined}
  */
-const build = (env) =>
-	(env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildPreCompilePlugin({ env }) : undefined);
+const testsuite = (env) =>
+	(env.isTests && env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildPreCompilePlugin({ env }) : undefined);
 
 
-module.exports = build;
+module.exports = testsuite;

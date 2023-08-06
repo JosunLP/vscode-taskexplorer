@@ -6,9 +6,9 @@
  */
 
 const {
-	analyze, banner, build, clean, compile, copy, dispose, environment, instrument, loghooks,
+	analyze, banner, clean, compile, copy, dispose, environment, instrument, loghooks,
 	ignore, optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload,
-	cssextract, htmlcsp, imageminimizer, htmlinlinechunks, vendormod, webviewapps, scm
+	cssextract, htmlcsp, imageminimizer, htmlinlinechunks, testsuite, vendormod, webviewapps, scm
 } = require("../plugin");
 
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
@@ -30,7 +30,7 @@ const plugins = (env) =>
 		vendormod(env),                // compiler.hooks.afterEnvironment - mods to vendor plugins and/or modules
 		progress(env),                 //
 		...clean(env),                 // compiler.hooks.emit, compiler.hooks.done
-		build(env),                    // compiler.hooks.beforeCompile
+		testsuite(env),                // compiler.hooks.beforeCompile - build tests / test suite
 		compile(env),                  // compiler.hooks.compilation - e.g. add istanbul ignores to node-requires
 		runtimevars(env),              // compiler.hooks.compilation
 		instrument(env),               // ? - TODO -?

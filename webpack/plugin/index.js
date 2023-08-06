@@ -2,7 +2,6 @@
 
 const analyze = require("./analyze");
 const banner = require("./banner");
-const build = require("./build");
 const clean = require("./clean");
 const compile = require("./compile");
 const copy = require("./copy");
@@ -17,13 +16,14 @@ const loghooks = require("./loghooks");
 const progress = require("./progress");
 const scm = require("./scm");
 const sourcemaps = require("./sourcemaps");
+const testsuite = require("./testsuite");
 const tscheck = require("./tscheck");
 const upload = require("./upload");
 const vendormod = require("./vendormod");
 const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = require("./html");
 
 module.exports = {
-    analyze, banner, build, clean, compile, copy, cssextract, dispose, environment, htmlcsp,
-    htmlinlinechunks,ignore, imageminimizer, instrument, licensefiles, loghooks, optimization,
-    progress, runtimevars, scm, sourcemaps, tscheck, upload, vendormod, webviewapps
+    analyze, banner, clean, compile, copy, cssextract, dispose, environment, htmlcsp,
+    htmlinlinechunks, ignore, imageminimizer, instrument, licensefiles, loghooks, optimization,
+    progress, runtimevars, scm, sourcemaps, testsuite, tscheck, upload, vendormod, webviewapps
 };
