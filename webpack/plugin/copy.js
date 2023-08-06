@@ -69,7 +69,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	entryModulesNoHash(assets)
 	{
 		this.logger.write("create copies of entry modules named without hash");
-		Object.entries(assets).filter(([ file, _ ]) => this.canBeInitial(file)).forEach(([ file, sourceInfo ]) =>
+		Object.entries(assets).filter(([ file, _ ]) => this.isEntryAsset(file)).forEach(([ file, sourceInfo ]) =>
 		{
 			const ccFileName = file.replace(new RegExp(`\\.[a-f0-9]{${this.hashDigestLength}}`), ""),
 				  dstAsset = this.compilation.getAsset(ccFileName),
@@ -108,7 +108,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
     sourcemap = (assets) =>
     {
 		this.logger.write("attach sourcemap to copied assets");
-		Object.entries(assets).filter(([ file, _ ]) => this.canBeInitial(file)).forEach(([ file, sourceInfo ]) =>
+		Object.entries(assets).filter(([ file, _ ]) => this.isEntryAsset(file)).forEach(([ file, sourceInfo ]) =>
 		{
 			this.logger.value("check for file copied attribute", file);
 			const asset = this.compilation.getAsset(file);

@@ -33,10 +33,6 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     {
         this.onApply(compiler,
         {
-            readAsetState: {
-                hook: "afterPlugins",
-                callback: this.readAssetState.bind(this)
-            },
             preprocess: {
                 hook: "compilation",
                 stage: "PRE_PROCESS",
@@ -119,27 +115,43 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         const env = this.env,
               logger = env.logger,
               hashCurrent = env.state.hash.current;
+        this.readAssetState();
         logger.write(`validate hashes for assets in italic(${env.paths.files.hashStoreJson})`, 2);
-        asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
-        {
-            const chunkName = /** @type {string} */(chunk.name);
-            asArray(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
+        // asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
+        // {
+        //     const chunkName = /** @type {string} */(chunk.name);
+        //     asArray(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
+        //     {
+        //         if (!hashCurrent[chunkName])
+        //         {
+        //             hashCurrent[chunkName] = chunk.contentHash.javascript;
+        //             logger.write(`updated contenthash for italic(${file})`, 2);
+        //             logger.value("   previous", "n/a", 3);
+        //             logger.value("   new", chunk.contentHash.javascript, 3);
+        //         }
+        //         if (hashCurrent[chunkName] !==  chunk.contentHash.javascript)
+        //         {
+        //             hashCurrent[chunkName] = chunk.contentHash.javascript;
+        //             logger.write(`updated stale contenthash for italic(${file})`, 2);
+        //             logger.value("   previous", hashCurrent[file], 3);
+        //             logger.value("   new", chunk.contentHash.javascript, 3);
+        //         }
+        //     });
+        // });
+        Object.entries(assets).filter(([ file, _ ]) => this.matchObject(file) && this.isEntryAsset(file)).forEach(([ file, _ ]) =>
+		{
+            const chunkName = this.fileNameStrip(file, true),
+                  asset = this.compilation.getAsset(file);
+            if (asset && isString(asset.info.contenthash))
             {
-                if (!hashCurrent[chunkName])
+                if (!hashCurrent[chunkName] || hashCurrent[chunkName] !==  asset.info.contenthas)
                 {
-                    hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    logger.write(`updated contenthash for italic(${file})`, 2);
-                    logger.value("   previous", "n/a", 3);
-                    logger.value("   new", chunk.contentHash.javascript, 3);
+                    hashCurrent[chunkName] = asset.info.contenthash;
+                    logger.write(`updated ${hashCurrent[chunkName] ? "stale" : ""} contenthash for italic(${file})`, 2);
+                    logger.value("   previous", hashCurrent[chunkName] || "n/a", 3);
+                    logger.value("   new", asset.info.contenthash, 3);
                 }
-                if (hashCurrent[chunkName] !==  chunk.contentHash.javascript)
-                {
-                    hashCurrent[chunkName] = chunk.contentHash.javascript;
-                    logger.write(`updated stale contenthash for italic(${file})`, 2);
-                    logger.value("   previous", hashCurrent[file], 3);
-                    logger.value("   new", chunk.contentHash.javascript, 3);
-                }
-            });
+            }
         });
     };
 
@@ -178,10 +190,9 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
             const asset = this.compilation.getAsset(file);
             if (asset && isString(asset.info.contenthash))
             {
-                this.logger.value("   queued for variable replacement", file, 3);
-                this.logger.write(`   ${file} queued for variable replacement`, 2);
                 hashMap[this.fileNameStrip(file, true)] = asset.info.contenthash;
-                if (this.canBeInitial(file)) {
+                if (this.isEntryAsset(file)) {
+                    this.logger.write(`   ${file} queued for variable replacement`, 2);
                     updates.push(file);
                 }
             }

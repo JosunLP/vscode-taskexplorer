@@ -182,15 +182,6 @@ class WpBuildBasePlugin
     breakProp(prop) { return prop.replace(/[A-Z]/g, (v) => ` ${v.toLowerCase()}`); }
 
 
-    /**
-     * @function
-     * @protected
-     * @param {string} file
-     * @returns {boolean}
-     */
-    canBeInitial = (file) => WpBuildBasePlugin.getEntriesRegex(this.wpConfig).test(file);
-
-
 	/**
 	 * @function
 	 * @protected
@@ -322,6 +313,15 @@ class WpBuildBasePlugin
      * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
      */
     isAsync = (hook) => isFunction(hook.tapPromise);
+
+
+    /**
+     * @function
+     * @protected
+     * @param {string} file
+     * @returns {boolean}
+     */
+    isEntryAsset = (file) => WpBuildBasePlugin.getEntriesRegex(this.wpConfig).test(file);
 
 
     /**
