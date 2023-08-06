@@ -70,8 +70,8 @@ module.exports = (env, argv) =>
 const buildConfig = (env) =>
 {
 	target(env);         // Target i.e. "node", "webworker", "web"
-	write(env);          // Log build start after target is known
 	environment(env);    // Environment properties, e.g. paths, etc
+	write(env);          // Log build start after target and env is known
 	mode(env);           // Mode i.e. "production", "development", "none"
 	name(env);           // Build name / label
 	cache(env);          // Asset cache
@@ -112,11 +112,10 @@ const getEnv = (env, app, argv, opts) => /** @type {WpBuildEnvironment} */(
  */
 const write = (env) =>
 {
-	const l = new WpBuildConsoleLogger(env),
-		  pad = env.app.logPad.envTag + l.withColorLength(l.colors.bold);
-	l.write(
-		l.withColor(`Start Webpack build ${++globalEnv.buildCount} `, l.colors.bold).padEnd(pad) +
-		l.tagColor(env.build, l.colors.cyan, l.colors.white) + l.tagColor(env.target, l.colors.cyan, l.colors.white),
-		undefined, "", l.icons.color.start
+	const l = env.logger;
+	l.value(
+		`Start Webpack build ${++globalEnv.buildCount}`,
+		l.tagColor(env.build, l.colors.cyan, l.colors.white) + " " + l.tagColor(env.target, l.colors.cyan, l.colors.white),
+		undefined, undefined, l.icons.color.start, l.colors.white
 	);
 };

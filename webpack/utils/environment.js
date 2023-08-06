@@ -63,6 +63,7 @@ const setBuildEnvironment = (env) =>
 	mergeIf(env, {
 		analyze: false,
 		clean: false,
+		disposables: [],
 		esbuild: false,
 		imageOpt: true,
 		isTests: env.environment.startsWith("test"),

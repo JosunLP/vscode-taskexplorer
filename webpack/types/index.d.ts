@@ -83,6 +83,12 @@ declare interface IWpBuildWebpackConfig extends WebpackConfig
 }
 declare type WpBuildWebpackConfig = Required<IWpBuildWebpackConfig>;
 
+declare interface IDisposable
+{
+    dispose: () => void | PromiseLike<void>;
+}
+declare type Disposable = Required<IDisposable>
+
 declare interface IWpBuildEnvironment extends IWebpackEnvironmentInternal
 {
     analyze: boolean;                     // parform analysis after build
@@ -90,6 +96,7 @@ declare interface IWpBuildEnvironment extends IWebpackEnvironmentInternal
     argv: WpBuildWebpackArgs,
     build: WpBuildModule;
     clean: boolean;
+    disposables: Array<Disposable>;
     environment: WpBuildBuildEnvironment;
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
@@ -133,7 +140,7 @@ declare interface IWpBuildGlobalEnvironment
 }
 declare type WpBuildGlobalEnvironment = IWpBuildGlobalEnvironment & Record<string, any>;
 
-declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "white" | "yellow";
+declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
 declare type WpBuildLogColor = WpBuildLogTrueColor | "bold" | "inverse" | "italic" | "underline";
 declare interface IWpBuildLogColorMap
 {
