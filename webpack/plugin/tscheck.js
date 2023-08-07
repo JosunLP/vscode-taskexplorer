@@ -13,6 +13,7 @@ const { existsSync } = require("fs");
 const { apply } = require("../utils");
 const WpBuildBasePlugin = require("./base");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+const { join } = require("path");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -65,16 +66,19 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 */
 	bundle = () =>
 	{
-		dts.bundle({
-			name: "@spmeesseman/vscode-taskexplorer-types",
-			baseDir: "types/dist",
-			headerPath: "",
-			headerText: "",
-			main: "types/index.d.ts",
-			out: "types.d.ts",
-			outputAsModuleFolder: true,
-			verbose: false
-		});
+		if (existsSync(join(this.env.paths.build, "types")))
+		{
+			dts.bundle({
+				name: `@spmeesseman/${this.env.app.name}-types`,
+				baseDir: "types/dist",
+				headerPath: "",
+				headerText: "",
+				main: "types/index.d.ts",
+				out: "types.d.ts",
+				outputAsModuleFolder: true,
+				verbose: this.env.logLevel === 5
+			});
+		}
 	};
 
 
@@ -116,7 +120,7 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 				// [ path.join(env.paths.build, `tsconfig.${env.target}.json`), "readonly" ],
 				// [ path.join(env.paths.build, env.build === "web" ? "tsconfig.web.json" : "tsconfig.json"), "readonly" ],
 				[ path.join(env.paths.build, `tsconfig.${env.target}.json`), "write-dts" ],
-				[ path.join(env.paths.build, env.build === "web" ? "tsconfig.web.json" : "tsconfig.json"), "write-dts" ]
+				[ path.join(env.paths.build, "tsconfig.json"), "write-dts" ]
 			);
 			// if (env.environment === "test")
 			// {

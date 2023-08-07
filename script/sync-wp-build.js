@@ -117,7 +117,6 @@ const syncWpBuildPlugins = (project) =>
     // copyWpBuildFile(project, "html.js", "webpack/plugin");
     copyWpBuildFile(project, "ignore.js", "webpack/plugin");
     copyWpBuildFile(project, "index.js", "webpack/plugin");
-    copyWpBuildFile(project, "instrument.js", "webpack/plugin");
     copyWpBuildFile(project, "istanbul.js", "webpack/plugin");
     copyWpBuildFile(project, "licensefiles.js", "webpack/plugin");
     copyWpBuildFile(project, "loghooks.js", "webpack/plugin");
