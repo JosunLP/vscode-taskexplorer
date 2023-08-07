@@ -220,11 +220,12 @@ class WpBuildBasePlugin
      * @param {string} filePath
      * @param {string} identifier
      * @param {string} outputDir Output directory of build
+     * @param {WebpackRawSource | undefined} source
      * @returns {Promise<CacheResult>}
      */
-    async checkSnapshot(filePath, identifier, outputDir)
+    async checkSnapshot(filePath, identifier, outputDir, source)
     {
-        let data, /** @type {WebpackRawSource | undefined} */source, /** @type {CacheResult} */cacheEntry;
+        let data, /** @type {CacheResult} */cacheEntry;
         const logger = this.logger,
               filePathRel = relative(outputDir, filePath),
               /** @type {CacheResult} */result = { file: basename(filePathRel), snapshot: null, source };

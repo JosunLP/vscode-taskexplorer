@@ -64,7 +64,6 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 		const globOptions = {
 			cwd: this.env.paths.build,
 			absolute: true,
-			allowWindowsEscape: true,
 			ignore: [ "**/node_modules/**", "**/.vscode*/**", "**/build/**", "**/dist/**", "**/res*/**", "**/doc*/**" ]
 		};
 
@@ -181,187 +180,187 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 		let command = `npx tsc -p ${tsConfigFile}`; // babel.join(" ");
 		logger.write(`   execute typescript build @ italic(${tsConfigFile})`, 1);
 
-		try
+		let code = await this.exec(command, "typescript build");
+		if (code !== 0)
 		{
-			let code = await this.exec(command, "typescript build");
-			if (code !== 0)
-			{
-				this.compilation.errors.push(new WebpackError("typescript build failed for " + tsConfigFile));
-				return;
-			}
-			//
-			// Ensure target directory exists
-			//
+			this.compilation.errors.push(new WebpackError("typescript build failed for " + tsConfigFile));
+			return;
+		}
+		//
+		// Ensure target directory exists
+		//
+		try {
 			await access(outputDir);
-			//
-			// Run `tsc-alias` for path aliasing if specified.
-			//
-			if (alias)
-			{   //
-				// Note that `tsc-alias` requires a filename e.g. tsconfig.json in it's path argument
-				//
-				if (!(/tsconfig\.(?:[\w\-_\.]+\.)?json$/).test(tsConfigFile))
-				{
-					tsConfigFile = join(tsConfigFile, "tsconfig.json");
-				}
-				if (!existsSync(tsConfigFile))
-				{
-					const files = await findFiles("tsconfig.*", { cwd: dirname(tsConfigFile), absolute: true,  });
-					if (files.length === 1)
-					{
-						tsConfigFile = files[0];
-					}
-					else {
-						this.handleError(new WebpackError("Invalid path to tsconfig file"));
-						return;
-					}
-				}
-				command = `tsc-alias -p ${tsConfigFile}`;
-				code = await this.exec(command, "typescript path aliasing");
-				if (code !== 0)
-				{
-					this.compilation.errors.push(new WebpackError("typescript path aliasing failed for " + tsConfigFile));
-					return;
-				}
-			}
-			//
-			// Process output files
-			//
-			const files = await findFiles("**/*.js", { cwd: outputDir, absolute: true });
-			for (const filePath of files)
-			{
-				let data, source, hash, compilationCacheEntry, persistedCache;
-				const filePathRel = relative(outputDir, filePath),
-					  file = basename(filePathRel);
-
-				// this.compilation.buildDependencies.add(file);
-
-				logger.value("   check cache", filePathRel, 4);
-				try {
-					persistedCache = this.cache.get();
-					compilationCacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
-				}
-				catch (e) {
-					this.handleError(e, "failed while checking cache");
-					return;
-				}
-
-				if (persistedCache)
-				{
-					data = data || await readFile(filePath);
-					const newHash = this.getContentHash(data);
-					if (newHash === persistedCache[filePathRel])
-					{
-						logger.value("   asset unchanged", filePathRel, 4);
-						this.compilation.comparedForEmitAssets.add(file);
-						continue;
-					}
-					persistedCache[filePathRel] = newHash;
-					this.cache.set(persistedCache);
-				}
-
-				if (compilationCacheEntry)
-				{
-					let isValidSnapshot;
-					logger.value("   check snapshot valid", filePathRel, 3);
-					try {
-						isValidSnapshot = await this.checkSnapshotValid(compilationCacheEntry.snapshot);
-					}
-					catch (e) {
-						this.handleError(e, "failed while checking snapshot");
-						return;
-					}
-					if (isValidSnapshot)
-					{
-						logger.value("   snapshot valid", filePathRel, 4);
-						({ hash, source } = compilationCacheEntry);
-						data = data || await readFile(filePath);
-						const newHash = this.getContentHash(data);
-						if (newHash === hash)
-						{
-							logger.value("   asset unchanged", filePathRel, 4);
-							this.compilation.comparedForEmitAssets.add(file);
-							return;
-						}
-					}
-					else {
-						logger.write(`   snapshot for '${filePathRel}' is invalid`, 4);
-					}
-				}
-
-				if (!source)
-				{
-					let snapshot;
-					const startTime = Date.now();
-					data = data || await readFile(filePath);
-					source = new this.compiler.webpack.sources.RawSource(data);
-					logger.value("   create snapshot", filePathRel, 4);
-					try {
-						snapshot = await this.createSnapshot(startTime, filePath);
-					}
-					catch (e) {
-						this.handleError(e, "failed while creating snapshot");
-						return;
-					}
-					if (snapshot)
-					{
-						// console.log("########: ");
-						// console.log("hasContextHashes: " + snapshot.hasContextHashes());
-						// console.log("hasFileHashes: " + snapshot.hasFileHashes());
-						// console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
-						// console.log("hasStartTime: " + snapshot.hasStartTime());
-
-						logger.value("   cache snapshot", filePathRel, 4);
-						try {
-							const hash = this.getContentHash(source.buffer());
-							snapshot.setFileHashes(hash);
-							await this.wpCacheCompilation.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
-
-							compilationCacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
-							// if (cacheEntry)
-							// {
-							// 	console.log("!!!!!!!!!!: " + cacheEntry.hash);
-							// 	console.log("hasContextHashes: " + snapshot.hasContextHashes());
-							// 	console.log("hasFileHashes: " + snapshot.hasFileHashes());
-							// 	console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
-							// 	console.log("hasStartTime: " + snapshot.hasStartTime());
-							// }
-						}
-						catch (e) {
-							this.handleError(e, "failed while caching snapshot");
-							return;
-						}
-					}
-				}
-
-				const info = {
-					absoluteFilename: filePath,
-					sourceFilename: filePathRel,
-					filename: file,
-					precompile: true,
-					development: true,
-					immutable: true
-				};
-
-				const existingAsset = this.compilation.getAsset(filePathRel);
-				if (!existingAsset)
-				{
-					logger.value("   add asset", filePathRel, 2);
-					this.compilation.additionalChunkAssets.push(filePathRel);
-					// logger.value("   emit asset", filePathRel, 2);
-					// this.compilation.emitAsset(file, source, info);
-				}
-				// else if (this.options.force) {
-				// 	logger.value("   update asset", filePathRel, 2);
-				// 	this.compilation.updateAsset(file, source, info);
-				// }
-
-				this.compilation.comparedForEmitAssets.add(filePathRel);
-			}
 		}
 		catch (e) {
-			this.handleError(e, "typescript build failed");
+			this.handleError(new WebpackError("typescript build failed for " + tsConfigFile), "output directory doesn't exist");
+			return;
 		}
+		//
+		// Run `tsc-alias` for path aliasing if specified.
+		//
+		if (alias)
+		{   //
+			// Note that `tsc-alias` requires a filename e.g. tsconfig.json in it's path argument
+			//
+			if (!(/tsconfig\.(?:[\w\-_\.]+\.)?json$/).test(tsConfigFile))
+			{
+				tsConfigFile = join(tsConfigFile, "tsconfig.json");
+			}
+			if (!existsSync(tsConfigFile))
+			{
+				const files = await findFiles("tsconfig.*", { cwd: dirname(tsConfigFile), absolute: true,  });
+				if (files.length === 1)
+				{
+					tsConfigFile = files[0];
+				}
+				else {
+					this.handleError(new WebpackError("Invalid path to tsconfig file"));
+					return;
+				}
+			}
+			command = `tsc-alias -p ${tsConfigFile}`;
+			code = await this.exec(command, "typescript path aliasing");
+			if (code !== 0)
+			{
+				this.compilation.errors.push(new WebpackError("typescript path aliasing failed for " + tsConfigFile));
+				return;
+			}
+		}
+		//
+		// Process output files
+		//
+		// const files = await findFiles("**/*.js", { cwd: outputDir, absolute: true });
+		// for (const filePath of files)
+		// {
+		// 	let data, /* source, hash, compilationCacheEntry, */persistedCache;
+		// 	const filePathRel = relative(outputDir, filePath),
+		// 		  file = basename(filePathRel);
+
+		// 	// this.compilation.buildDependencies.add(file);
+
+		// 	logger.value("   check cache", filePathRel, 4);
+		// 	try {
+		// 		persistedCache = this.cache.get();
+		// 		// compilationCacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
+		// 	}
+		// 	catch (e) {
+		// 		this.handleError(e, "failed while checking cache");
+		// 		return;
+		// 	}
+
+		// 	if (persistedCache)
+		// 	{
+		// 		data = data || await readFile(filePath);
+		// 		const newHash = this.getContentHash(data);
+		// 		if (newHash === persistedCache[filePathRel])
+		// 		{
+		// 			logger.value("   asset unchanged", filePathRel, 4);
+		// 			// this.compilation.comparedForEmitAssets.add(file);
+		// 			continue;
+		// 		}
+		// 		persistedCache[filePathRel] = newHash;
+		// 		this.cache.set(persistedCache);
+		// 	}
+
+		// 	// if (compilationCacheEntry)
+		// 	// {
+		// 	// 	let isValidSnapshot;
+		// 	// 	logger.value("   check snapshot valid", filePathRel, 3);
+		// 	// 	try {
+		// 	// 		isValidSnapshot = await this.checkSnapshotValid(compilationCacheEntry.snapshot);
+		// 	// 	}
+		// 	// 	catch (e) {
+		// 	// 		this.handleError(e, "failed while checking snapshot");
+		// 	// 		return;
+		// 	// 	}
+		// 	// 	if (isValidSnapshot)
+		// 	// 	{
+		// 	// 		logger.value("   snapshot valid", filePathRel, 4);
+		// 	// 		({ hash, source } = compilationCacheEntry);
+		// 	// 		data = data || await readFile(filePath);
+		// 	// 		const newHash = this.getContentHash(data);
+		// 	// 		if (newHash === hash)
+		// 	// 		{
+		// 	// 			logger.value("   asset unchanged", filePathRel, 4);
+		// 	// 			this.compilation.comparedForEmitAssets.add(file);
+		// 	// 			return;
+		// 	// 		}
+		// 	// 	}
+		// 	// 	else {
+		// 	// 		logger.write(`   snapshot for '${filePathRel}' is invalid`, 4);
+		// 	// 	}
+		// 	// }
+
+		// 	// if (!source)
+		// 	// {
+		// 	// 	let snapshot;
+		// 	// 	const startTime = Date.now();
+		// 	// 	data = data || await readFile(filePath);
+		// 	// 	source = new this.compiler.webpack.sources.RawSource(data);
+		// 	// 	logger.value("   create snapshot", filePathRel, 4);
+		// 	// 	try {
+		// 	// 		snapshot = await this.createSnapshot(startTime, filePath);
+		// 	// 	}
+		// 	// 	catch (e) {
+		// 	// 		this.handleError(e, "failed while creating snapshot");
+		// 	// 		return;
+		// 	// 	}
+		// 	// 	if (snapshot)
+		// 	// 	{
+		// 	// 		// console.log("########: ");
+		// 	// 		// console.log("hasContextHashes: " + snapshot.hasContextHashes());
+		// 	// 		// console.log("hasFileHashes: " + snapshot.hasFileHashes());
+		// 	// 		// console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
+		// 	// 		// console.log("hasStartTime: " + snapshot.hasStartTime());
+
+		// 	// 		logger.value("   cache snapshot", filePathRel, 4);
+		// 	// 		try {
+		// 	// 			const hash = this.getContentHash(source.buffer());
+		// 	// 			snapshot.setFileHashes(hash);
+		// 	// 			await this.wpCacheCompilation.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
+
+		// 	// 			compilationCacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
+		// 	// 			// if (cacheEntry)
+		// 	// 			// {
+		// 	// 			// 	console.log("!!!!!!!!!!: " + cacheEntry.hash);
+		// 	// 			// 	console.log("hasContextHashes: " + snapshot.hasContextHashes());
+		// 	// 			// 	console.log("hasFileHashes: " + snapshot.hasFileHashes());
+		// 	// 			// 	console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
+		// 	// 			// 	console.log("hasStartTime: " + snapshot.hasStartTime());
+		// 	// 			// }
+		// 	// 		}
+		// 	// 		catch (e) {
+		// 	// 			this.handleError(e, "failed while caching snapshot");
+		// 	// 			return;
+		// 	// 		}
+		// 	// 	}
+		// 	// }
+
+		// 	// const info = {
+		// 	// 	absoluteFilename: filePath,
+		// 	// 	sourceFilename: filePathRel,
+		// 	// 	filename: file,
+		// 	// 	precompile: true,
+		// 	// 	development: true,
+		// 	// 	immutable: true
+		// 	// };
+
+		// 	// const existingAsset = this.compilation.getAsset(filePathRel);
+		// 	// if (!existingAsset)
+		// 	// {
+		// 	// 	logger.value("   add asset", filePathRel, 2);
+		// 	// 	// this.compilation.additionalChunkAssets.push(filePathRel);
+		// 	// 	// logger.value("   emit asset", filePathRel, 2);
+		// 	// 	// this.compilation.emitAsset(file, source, info);
+		// 	// }
+		// 	// else if (this.options.force) {
+		// 	// 	logger.value("   update asset", filePathRel, 2);
+		// 	// 	this.compilation.updateAsset(file, source, info);
+		// 	// }
+
+		// 	// this.compilation.comparedForEmitAssets.add(filePathRel);
+		// }
 	};
 
 }

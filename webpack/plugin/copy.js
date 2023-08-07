@@ -10,7 +10,7 @@
 const { existsSync } = require("fs");
 const WpBuildBasePlugin = require("./base");
 const CopyPlugin = require("copy-webpack-plugin");
-const { join, posix, isAbsolute } = require("path");
+const { join, posix, isAbsolute, relative, normalize } = require("path");
 const { isString, apply } = require("../utils/utils");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -47,6 +47,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			this.onApply(compiler,
 			{
 				copyModulesWithoutFilenameHash: {
+					async: true,
 					hook: "compilation",
 					stage: "ADDITIONAL",
 					statsProperty: "copied",
@@ -69,35 +70,60 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 * @private
 	 * @param {WebpackCompilationAssets} assets
 	 */
-	copyEntryModulesNoHash(assets)
+	async copyEntryModulesNoHash(assets)
 	{
-		this.logger.write("create copies of entry modules named without hash");
-		Object.entries(assets).filter(([ file, _ ]) => this.isEntryAsset(file)).forEach(([ file, sourceInfo ]) =>
+		this.logger.write("create copies of entry modules named without hash", 1);
+		for (const [ file, sourceInfo ] of Object.entries(assets).filter(([ file ]) => this.isEntryAsset(file)))
 		{
-			const ccFileName = file.replace(new RegExp(`\\.[a-f0-9]{${this.hashDigestLength}}`), ""),
-				  dstAsset = this.compilation.getAsset(ccFileName);
-			// let cacheEntry;
-			// this.logger.debug(`getting cache for '${absoluteFilename}'...`);
-			// try {
-			// 	cacheEntry = this.cache.get(`${sourceFilename}|${index}`, null, () => {});
-			// }
-			// catch (/** @type {WebpackError} */e) {
-			// 	this.compilation.errors.push(e);
-			// 	return;
-			// }
+			const ccFile = this.fileNameStrip(file),
+				  absFile = this.compilation.getPath(file),
+				  sourceFilename = file, // normalize(relative(this.compiler.context, absFile)),
+				  dstAsset = this.compilation.getAsset(ccFile);
 			if (!dstAsset)
 			{
+console.log("1");
 				const srcAsset = this.compilation.getAsset(file);
 				if (srcAsset)
 				{
+console.log("2");
 					const srcAssetInfo = apply({}, srcAsset.info),
 						  sources = this.compiler.webpack.sources,
-					      newInfo = { ...srcAssetInfo, copied: true, sourceFilename: file };
-					this.logger.value("   emit copied asset", ccFileName);
-					this.compilation.emitAsset(ccFileName, new sources.RawSource(sourceInfo.source()), newInfo);
+					      newInfo = { ...srcAssetInfo, copied: true, sourceFilename };
+					this.logger.value("   emit copied asset", ccFile, 2);
+console.log("2.1: " + srcAsset.info.contenthash);
+console.log("2.2: " + sourceInfo.source().toString().substring(sourceInfo.source().toString().length - 100));
+					this.compilation.emitAsset(ccFile, new sources.RawSource(sourceInfo.source()), newInfo);
+					try {
+						await this.wpCacheCompilation.storePromise(absFile, null, { hash: srcAsset.info.contenthash });
+					}
+					catch (e) {
+						this.handleError(e, "failed to cache copied asset");
+						return;
+					}
 				}
 			}
-		});
+			else
+			{
+console.log("3");
+				let cacheEntry;
+				this.logger.write(`getting cache for '${absFile}`);
+				try {
+					cacheEntry = await this.wpCacheCompilation.getPromise(absFile/* `${srcFile}|${id}`*/, null);
+console.log("4");
+				}
+				catch (e) {
+					this.compilation.errors.push(e);
+					return;
+				}
+				if (cacheEntry)
+				{
+console.log("!!!! IS CACHED");
+				}
+				else {
+console.log("!!!! NOTTTTTT CACHED");
+				}
+			}
+		}
 	}
 
 
