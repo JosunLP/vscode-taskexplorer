@@ -659,8 +659,8 @@ export abstract class Log implements ILog, ILogDisposable
 
     reset = async () =>
     {
-        const enable = this._logControl.enable,
-              enableChanged = enable !== this._logControlPrev.enable,
+        let enable = this._logControl.enable;
+        const enableChanged = enable !== this._logControlPrev.enable,
               fileEnableChanged = this._logControl.enableFile !== this._logControlPrev.enableFile;
         if (this._logControl.enableFile && fileEnableChanged)
         {
@@ -672,9 +672,7 @@ export abstract class Log implements ILog, ILogDisposable
             {
                 const msg = `To ${enable ? "enable" : "disable"} logging, the ${enable ? "debug" : "release"} ` +
                             "module must be activated and will require a restart";
-                if (await this._logConfig.promptRestartFn(msg, this.installDebugSupport, this, true)) {
-                    return;
-                }
+                enable = !(await this._logConfig.promptRestartFn(msg, this.installDebugSupport, this, true)) && enable;
             }
             this.enable(enable);
         }
