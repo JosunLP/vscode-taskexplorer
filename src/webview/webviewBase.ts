@@ -233,11 +233,6 @@ export abstract class TeWebviewBase<State, SerializedState> extends TeViewBase i
 	};
 
 
-	/**
-	 * @method getState
-	 * To initiate state on a webview, implement a includeBootstrap() override in the top
-	 * level webviewView / webviewPanel.
-	 */
 	protected getState(): BaseState
 	{
 		return {
@@ -360,11 +355,6 @@ export abstract class TeWebviewBase<State, SerializedState> extends TeViewBase i
 	};
 
 
-	/**
-	 * @method
-	 * @param force Force re-render of page, or is new instance
-	 * @param args Optional arguments to pass tp the html rendering callbacks
-	 */
 	protected async refresh(force: boolean, visibilityChanged: boolean, ...args: unknown[]): Promise<void>
     {
 		if (!this._view || (!force && !visibilityChanged && (!this._isReady || !this.visible))) {

@@ -31,7 +31,7 @@ export class TeLog extends Log implements ILog, Disposable
         ];
     }
 
-    override dispose = () => { this._disposables.splice(0).forEach(d => d.dispose()); super.dispose(); };
+    disposeApp = () => { this._disposables.splice(0).forEach(d => d.dispose()); };
 
 
     private static getConfig = (wrapper: TeWrapper): ILogConfig =>

@@ -1,6 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/naming-convention */
 
+/**
+ * @file lib/utils/log.ts
+ * @author @spmeesseman Scott Meesseman
+ */
+
 import { apply } from "./object";
 import { execIf, popIfExistsBy, wrap } from "./utils";
 import { basename, dirname, extname, join, resolve } from "path";
@@ -15,6 +20,7 @@ import {
     appendFileSync, copyFile, createDirSync, deleteDir, findFilesSync, pathExistsSync, readFileAsync,
     readFileSync, readJsonAsync, writeFile
 } from "./fs";
+import { isPromise } from "util/types";
 
 // export class LogOutputChannel implements ILogOutputChannel
 // {
@@ -25,8 +31,10 @@ import {
 /**
  * @class Log
  */
-export class Log implements ILog, ILogDisposable
+export abstract class Log implements ILog, ILogDisposable
 {
+    abstract disposeApp(): void | PromiseLike<void>;
+
     private _errorsWritten = 0;
     private _fileNameTimer: NodeJS.Timeout | undefined;
     private _srcMapConsumer: BasicSourceMapConsumer | undefined;
@@ -79,6 +87,8 @@ export class Log implements ILog, ILogDisposable
     dispose = () =>
     {
         clearTimeout(this._fileNameTimer);
+        const result = this.disposeApp();
+        execIf(isPromise(result), async () => { await result; }, this);
         this._baseDisposables.splice(0).forEach(d => d.dispose());
         //
         // TODO - Delete depending on config setting ModuleReplace?

@@ -107,8 +107,10 @@ export interface ILog
     readonly symbols: Readonly<ILogSymbols>;
     blank(level?: LogLevel, queueId?: string): void;
     dequeue(queueId: string): void;
-    dispose(): void;
+    dispose(): void | PromiseLike<void>;
+    disposeApp(): void | PromiseLike<void>;
     error(msg: any, params?: (string|any)[][], queueId?: string, symbols?: [ string, string ]): void;
+    initBase(isNewInstallOrVersion: boolean): Promise<void>;
     info(msg: string, level?: LogLevel, logPad?: string, queueId?: string): void;
     // method(fileTag: string, methodTag: string, msg: string, level: LogLevel, logPad: string, params?: (string|any)[][], queueId?: string): void;
     methodStart(msg: string, level?: LogLevel, logPad?: string, doLogBlank?: boolean, params?: (string|any)[][], queueId?: string): void;
