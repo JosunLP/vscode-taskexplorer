@@ -48,9 +48,9 @@ export class TeLog extends Log implements ILog, Disposable
                 write: eChannel.appendLine
             },
             httpGetFn: <LogHttpGetFn>wrapper.server.get,
+            installDirectory: wrapper.context.extensionUri.fsPath,
             isTests: wrapper.context.extensionMode === ExtensionMode.Test,
             logDirectory: wrapper.context.logUri.fsPath,
-            modulePath: join(wrapper.context.extensionUri.fsPath, pkgJson.main),
             moduleHash: {
                 "taskexplorer": __WPBUILD__.contentHash.taskexplorer,
                 "taskexplorer.debug": __WPBUILD__.contentHash["taskexplorer.debug"],
@@ -63,8 +63,7 @@ export class TeLog extends Log implements ILog, Disposable
                 write: oChannel.appendLine
             },
             promptRestartFn: wrapper.utils.promptRestart,
-            storageDirectory: wrapper.context.globalStorageUri.fsPath,
-            version: pkgJson.version
+            storageDirectory: wrapper.context.globalStorageUri.fsPath
         };
     };
 

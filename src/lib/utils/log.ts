@@ -2,15 +2,18 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { apply } from "./object";
-import { basename, dirname, join } from "path";
 import { execIf, popIfExistsBy, wrap } from "./utils";
+import { basename, dirname, extname, join, resolve } from "path";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
-import { asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString } from "./typeUtils";
+import {
+    asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString
+} from "./typeUtils";
 import {
     ILog, ILogConfig, ILogControl, ILogState, LogLevel, ILogSymbols, LogColor, ILogColors, ILogDisposable
 } from "../../interface";
 import {
-    appendFileSync, copyFile, createDirSync, deleteDir, deleteFileSync, findFiles, pathExistsSync, readJsonAsync, writeFile
+    appendFileSync, copyFile, createDirSync, deleteDir, findFilesSync, pathExistsSync, readFileAsync,
+    readFileSync, readJsonAsync, writeFile
 } from "./fs";
 
 // export class LogOutputChannel implements ILogOutputChannel
@@ -34,19 +37,10 @@ export class Log implements ILog, ILogDisposable
     private readonly _logControl: ILogControl;
     private readonly _logControlPrev: ILogControl;
     private readonly _baseDisposables: ILogDisposable[];
+    private readonly _moduleInfo = { dir: "", file: "", name: "", path: "", storageDir: "", version: "" };
     private readonly _separator = "-----------------------------------------------------------------------------------------";
     private readonly _stackLineParserRgx = /at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i;
     private readonly _stackLineFilterRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
-
-    private readonly _paths: {
-        srcMapPath: string;
-        moduleFile: string;
-        moduleName: string;
-        modulePath: string;
-        runtimeDir: string;
-        dbgModuleDir: string;
-        dbgModuleFile: string;
-    };
 
     private readonly _colors: ILogColors =
     {
@@ -70,12 +64,13 @@ export class Log implements ILog, ILogDisposable
     {
         this.enable(false);
         this._baseDisposables = [];
-        this._symbols = this.getSymbols();
-        this._paths = this.getPaths(logConfig);
-        this._logState = this.getDefaultState();
         this._logConfig = apply({}, logConfig);
+        this.verifyConfig();
+        this._symbols = this.getSymbols();
+        this._logState = this.getDefaultState();
         this._logControl = apply({}, logControl);
         this._logControlPrev = apply({}, logControl);
+        this.setModuleInfo();
         this.writeErrorChannelHeader();
         this.writeOutputChannelHeader();
         this.setFileName();
@@ -162,7 +157,7 @@ export class Log implements ILog, ILogDisposable
               currentWriteToFile = this._logControl.enableFile,
               currentWriteToOutputWindow = this._logControl.enableOutputWindow;
         //
-        // Write blank line
+        // Write error symbol only / blank line
         //
         if (!this._logState.lastWriteWasBlankError && !this._logState.lastWriteToConsoleWasBlank)
         {
@@ -206,17 +201,20 @@ export class Log implements ILog, ILogDisposable
             }
         }
         //
-        // Write blank line
+        // Write error symbol only / blank line
         //
         this.errorWriteLogs("", currentWriteToFile, symbols, queueId);
         //
-        // Reset channel configuration and save error state
+        // Reset channel configuration
         //
         apply(this._logControl, {
             enableFile: currentWriteToFile,
             writeToConsole: currentWriteToConsole,
             enableOutputWindow: currentWriteToOutputWindow
         });
+        //
+        // Save error state
+        //
         apply(this._logState, {
             lastWriteWasBlank: true,
             lastWriteWasBlankError: true,
@@ -283,7 +281,7 @@ export class Log implements ILog, ILogDisposable
         const timeTags = (new Date(Date.now() - this._logState.tzOffset)).toISOString().slice(0, -1).split("T");
         return {
             column: 1,
-            source: this._paths.moduleFile,
+            source: this._moduleInfo.file,
             line: 1,
             name: "anonymous",
             stamp: timeTags.join(" "),
@@ -304,25 +302,6 @@ export class Log implements ILog, ILogDisposable
             lastWriteToConsoleWasBlank: false,
             msgQueue: {},
             tzOffset: (new Date()).getTimezoneOffset() * 60000,
-        };
-    };
-
-
-    private getPaths = (logConfig: ILogConfig) =>
-    {
-        const moduleFile = basename(logConfig.modulePath),
-              moduleName = moduleFile.replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
-              dbgModuleDir = join(logConfig.storageDirectory, "debug");
-        createDirSync(dbgModuleDir);
-        createDirSync(logConfig.logDirectory);
-        return {
-            moduleFile,
-            moduleName,
-            dbgModuleDir,
-            dbgModuleFile: `${moduleFile}.debug.js`,
-            modulePath: logConfig.modulePath,
-            runtimeDir: dirname(logConfig.modulePath),
-            srcMapPath: join(dbgModuleDir, `${moduleFile}.debug.map`)
         };
     };
 
@@ -395,9 +374,18 @@ export class Log implements ILog, ILogDisposable
 
 
     init = async (isNewInstallOrVersion: boolean) =>
-    {
-        await this.installDebugSupport(isNewInstallOrVersion);
-        await this.installSourceMapSupport(isNewInstallOrVersion);
+    {   //
+        // Calling application should `clean` when there is a version change or for a new
+        // install (as user may have uninstalled and reinstralled, there's no way for the
+        // app to perform cleanup when unsinstalled in some cases)
+        //
+        if (isNewInstallOrVersion)
+        {
+            await deleteDir(this._moduleInfo.storageDir);
+            createDirSync(this._moduleInfo.storageDir);
+        }
+        await this.installDebugSupport();
+        await this.installSourceMapSupport();
         if (this._logControl.enable)
         {
             if (isNewInstallOrVersion) {
@@ -411,126 +399,111 @@ export class Log implements ILog, ILogDisposable
     };
 
 
-    private installDebugSupport = (clean: boolean, swap?: boolean): Promise<void> =>
+    private installDebugSupport = (swap?: boolean): Promise<void> =>
     {
+console.log("installDebugSupport 1");
         return wrap(async () =>
         {
+console.log("installDebugSupport 2");
             const enable = this._logControl.enable,
-                  rtFiles = await findFiles("*.js", { cwd: this._paths.runtimeDir }),
-                  isCurrentlyDbg = !!rtFiles.find(f => f.includes(".debug")),
-                  files = Object.entries(this._logConfig.moduleHash).map(([ chunk, hash ]) => `${chunk}.${hash}.js`),
-                  rtReleaseFiles = files.filter(f => !f.includes(".debug.")),
-                  rtDebugFiles = files.filter(f => f.includes(".debug.")),
-                  remotePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._logConfig.version}/${this._logConfig.env}`;
-console.log("remotePath: " + remotePath);
+                  dbgModuleStorageDir = this._moduleInfo.storageDir,
+                  curModuleContent = await readFileAsync(this._moduleInfo.path),
+                  relModuleHash = this._logConfig.moduleHash[this._moduleInfo.name],
+                  releaseFile = `${this._moduleInfo.name}.${relModuleHash}.js`,
+                  releaseFileNoHash = this._moduleInfo.file,
+                  dbgModuleHash = this._logConfig.moduleHash[this._moduleInfo.name + ".debug"],
+                  debugFile = `${this._moduleInfo.name}.debug.${dbgModuleHash}.js`,
+                  debugFileNoHash = `${this._moduleInfo.name}.debug.js`,
+                  isCurrentlyDbg = curModuleContent.substring(curModuleContent.length - 100).includes(`${debugFile}.map`);
+console.log("enable: " + enable);
+console.log("dbgModuleHash: " + dbgModuleStorageDir);
+console.log("dbgModuleHash: " + dbgModuleHash);
+console.log("debugFile: " + debugFile);
+console.log("releaseFile: " + releaseFile);
 console.log("isCurrentlyDbg: " + isCurrentlyDbg);
-console.log("rtFiles: " + rtFiles);
-console.log("rtReleaseFiles: " + rtReleaseFiles);
-console.log("rtDebugFiles: " + rtReleaseFiles);
-console.log("files: " + files);
             //
-            // Calling application should `clean` when there is a version change or for a new install
-            // (as user may have uninstalled and reinstralled, there's no way for the app to perform
-            // cleanup when unsinstalled in some cases)
-            //
-            if (clean)
-            {
-                await deleteDir(this._paths.dbgModuleDir);
-                createDirSync(this._paths.dbgModuleDir);
-            }
-            //
-            // Retrieve the debug modules from the server if not already downloaded and save
-            // them to the globalStorage directory (full path defined as *DbgModulePath)
+            // Retrieve the debug modules from the server if not already downloaded and save them
+            // to the configured storage directory
             //
             if ((!isCurrentlyDbg && swap === true) || swap === undefined)
             {
-                for (const file of files.filter(f => f.includes(".debug.")))
-                {
-                    const storageFilePath = join(this._paths.dbgModuleDir, file);
-console.log("storageFilePathDbg: " + storageFilePath);
-                    await execIf(
-                        !pathExistsSync(storageFilePath),
-                        async () => {
-console.log("storageFilePathDbg GET111 : " + `${remotePath}/${file}`);
-                            const content = await this._logConfig.httpGetFn(`${remotePath}/${file}`);
-                            await writeFile(storageFilePath, Buffer.from(content));
-                        },
-                        this, [ this.warn, `could not copy module ${file}` ]
-                    );
-console.log("storageFilePathDbg 222: " + storageFilePath);
-                }
+console.log("installDebugSupport 3");
+                const remotePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._moduleInfo.version}/${this._logConfig.env}`,
+                      storageFilePath = join(dbgModuleStorageDir, debugFileNoHash);
+                await execIf(
+                    !pathExistsSync(storageFilePath),
+                    async () => {
+console.log("storageFilePathDbg 4 GET : " + `${remotePath}/${debugFile}`);
+                        const content = await this._logConfig.httpGetFn(`${remotePath}/${debugFile}`);
+                        await writeFile(storageFilePath, Buffer.from(content));
+                    },
+                    this, [ this.warn, `could not download debug module ${debugFile}` ]
+                );
+console.log("installDebugSupport 5");
             }
             //
-            // Make a copy of the release modules currently in the runtime directory if they're
-            // not already stored @ globslStorage/extension_name (full path defined as *RelModulePath)
+            // Make a copy of the release modules currently in the runtime directory if not
+            // already saved to the configured storage directory
             //
             if ((isCurrentlyDbg && swap === true) || swap === undefined)
             {
-                for (const file of files.filter(f => !f.includes(".debug.")))
-                {
-                    const storageFilePath = join(this._paths.dbgModuleDir, file);
-console.log("storageFilePathRel: " + storageFilePath);
-                    await execIf(
-                        !pathExistsSync(join(this._paths.dbgModuleDir, file)),
-                        () => copyFile(storageFilePath, storageFilePath),
-                        this, [ this.warn, `could not load debug module ${file}` ]
-                    );
-console.log("storageFilePathRel222: " + storageFilePath);
-                }
+console.log("installDebugSupport 6: " + releaseFile);
+                const storageFilePath = join(dbgModuleStorageDir, this._moduleInfo.file);
+                await execIf(
+                    !pathExistsSync(storageFilePath),
+                    () => copyFile(this._moduleInfo.path, storageFilePath),
+                    this, [ this.warn, `could not load release module ${releaseFile}` ]
+                );
+console.log("installDebugSupport 7");
             }
             //
-            // Swap release / debug modules i.e. overwrite the current runtime files in /dist
+            // Swap release / debug modules i.e. overwrite the current runtime file in the
+            // configured module runtime directory
             //
-console.log("swap");
+console.log("installDebugSupport 8: swap");
             if (swap)
             {
-                const rtFiles = !enable ? rtReleaseFiles : rtDebugFiles;
-                for (const file of rtFiles) {
-                    await copyFile(join(this._paths.dbgModuleDir, file), join(this._paths.runtimeDir, file));
-                }
+                const cpFile = !enable ? releaseFileNoHash : debugFileNoHash;
+                await copyFile(join(dbgModuleStorageDir, cpFile), join(this._moduleInfo.dir, releaseFileNoHash));
             }
         },
         [ this._error, "Unable to install logging supprt" ], this);
     };
 
 
-    private installSourceMapSupport = (clean?: boolean): Promise<void> =>
+    private installSourceMapSupport = (): Promise<void> =>
     {
         return wrap(async () =>
         {
-            const wasmRtPath = join(this._paths.runtimeDir, "mappings.wasm"),
-                  wasmPath = join(this._paths.dbgModuleDir, "mappings.wasm"),
-                  downloadWasm = !pathExistsSync(wasmPath),
-                  downloadSourceMap = !pathExistsSync(this._paths.srcMapPath),
-                  remoteBasePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._logConfig.version}/${this._logConfig.env}`;
-            if (clean)
-            {
-                deleteFileSync(wasmPath);
-                deleteFileSync(this._paths.srcMapPath);
-            }
+            const wasmPath = join(this._moduleInfo.storageDir, "mappings.wasm"),
+                  dbgModuleHash = this._logConfig.moduleHash[this._moduleInfo.name + ".debug"],
+                  srcMapFile = `${this._moduleInfo.file}.debug.${dbgModuleHash}.js.map`,
+                  srcMapPath = join(this._moduleInfo.storageDir, srcMapFile),
+                  remoteBasePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._moduleInfo.version}/${this._logConfig.env}`;
             //
-            // Retrieve the sourcemap support files from the server if not already downloaded and save
-            // them to the globalStorage directory (full path defined as *DbgModulePath).  This includes
-            // the <module>.js.map file and the assembly file from the `source-map` package `mappings.wasm`.
+            // Retrieve the sourcemap support files from the server if not already downloaded and
+            // save them to the globalStorage directory (full path defined as *DbgModulePath).
+            // This includes the <module>.js.map file and the web assembly file from the third
+            // party vendor `source-map` npm package `mappings.wasm`.
             //
-            await execIf(downloadWasm, async () => // Assembly file `mappings.wasm`
+            await execIf(!pathExistsSync(wasmPath), async () => // Assembly file `mappings.wasm`
             {
-                const wasmContent = await this._logConfig.httpGetFn(`${remoteBasePath}/mappings.wasm`);
-                await writeFile(wasmPath, Buffer.from(wasmContent));
+                const content = await this._logConfig.httpGetFn(`${remoteBasePath}/mappings.wasm`);
+                await writeFile(wasmPath, Buffer.from(content));
             });
-            await execIf(downloadSourceMap, async () => // Sourcemap file `<module>.js.map`
+            await execIf(!pathExistsSync(srcMapPath), async () => // Sourcemap file `<module>.js.map`
             {
-                const srcMapContent = await this._logConfig.httpGetFn(`${remoteBasePath}/${this._paths.moduleName}.debug.js.map`);
-                await writeFile(this._paths.srcMapPath, Buffer.from(srcMapContent));
+                const content = await this._logConfig.httpGetFn(`${remoteBasePath}/${srcMapFile}`);
+                await writeFile(srcMapPath, Buffer.from(content));
             });
             //
             // Assembly file must reside in the same directory as the sourcemap file, copy it there
             //
-            await copyFile(wasmPath, wasmRtPath);
+            await copyFile(wasmPath, join(this._moduleInfo.storageDir, "mappings.wasm"));
             //
             // Create SourceMap instance and register it's destroy call as a disposable
             //
-            const srcMap = await readJsonAsync<RawSourceMap>(this._paths.srcMapPath);
+            const srcMap = await readJsonAsync<RawSourceMap>(srcMapPath);
             this._srcMapConsumer = await new SourceMapConsumer(srcMap);
             this._baseDisposables.push({
                 dispose: () => wrap(c => c.destroy(), [ this._error ], this, this._srcMapConsumer)
@@ -665,7 +638,7 @@ console.log("swap");
             const msg = `To ${enable ? "enable" : "disable"} logging ${enabledPreviously ? "for the 1st time" : ""}, ` +
                         `the ${enable ? "debug" : "release"} module must be ${!enabledPreviously ? "activated" : "installed"} ` +
                         "and will require a restart";
-            this._logConfig.promptRestartFn(msg, () => this.installDebugSupport(false, true));
+            this._logConfig.promptRestartFn(msg, () => this.installDebugSupport(true));
         }
         if (this._logControl.enableFile && !fileEnablePreviously)
         {
@@ -680,7 +653,7 @@ console.log("swap");
     private setFileName = () =>
     {
         const locISOTime = (new Date(Date.now() - this._logState.tzOffset)).toISOString().slice(0, -1).split("T")[0].replace(/[\-]/g, "");
-        this._logState.fileName = join(this._logConfig.logDirectory, `vscode-${this._paths.moduleName}-${locISOTime}.log`);
+        this._logState.fileName = join(this._logConfig.logDirectory, `vscode-${this._moduleInfo.name}-${locISOTime}.log`);
         if (this._logControl.enableFile) {
             this.writeLogFileLocation();
         }
@@ -688,6 +661,35 @@ console.log("swap");
             clearTimeout(this._fileNameTimer);
         }
         this._fileNameTimer = setTimeout(this.setFileName, this.msUntilMidnight());
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @throws {Error}
+     */
+    private setModuleInfo = () =>
+    {
+        const files = findFilesSync("package.json", { cwd: this._logConfig.installDirectory, absolute: true, allowWindowsEscape: true });
+        if (files.length > 0)
+        {
+            const pkgJson = JSON.parse(readFileSync(files[0]));
+            let path = resolve(this._logConfig.installDirectory, pkgJson.main);
+            if (extname(path) !== ".js") {
+                path = path + ".js";
+            }
+            const file = basename(path),
+                  name = file.replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
+                  storageDir = join(this._logConfig.storageDirectory, "debug");
+            apply(this._moduleInfo, { dir: dirname(path), file, name, path, storageDir, version: pkgJson.version });
+            createDirSync(this._logConfig.logDirectory);
+            createDirSync(this._logConfig.storageDirectory);
+            createDirSync(this._moduleInfo.storageDir);
+        }
+        else {
+            throw new Error("Could not find package.json");
+        }
     };
 
 
@@ -709,6 +711,53 @@ console.log("swap");
             for (const [ m, v ] of params) {
                 this._value(m, v, level, logPad, queueId);
             }
+        }
+    };
+
+
+    /* istanbul ignore next */
+    private verifyConfig = () =>
+    {
+        let errDsc = "";
+        const cfg = this._logConfig;
+        if (!cfg.installDirectory) {
+            errDsc = "Install directory not specified";
+        }
+        if (!cfg.logDirectory) {
+            errDsc = "Log file directory not specified";
+        }
+        if (!cfg.storageDirectory) {
+            errDsc = "Storage directory not specified";
+        }
+        if (!cfg.httpGetFn) {
+            errDsc = "Callback function for http get not specified";
+        }
+        if (!cfg.promptRestartFn) {
+            errDsc = "Callback function for prompt restart not specified";
+        }
+        if (!cfg.moduleHash) {
+            errDsc = "Module hash not specified";
+        }
+        else if (!isObject(cfg.moduleHash)) {
+            errDsc = "Module hash must be an object";
+        }
+        else if (isObjectEmpty(cfg.moduleHash)) {
+            errDsc = "Module hash object must not be empty";
+        }
+        else if (Object.keys(cfg.moduleHash).length < 2) {
+            errDsc = "Module hash object must contain at least two keys to indicate release and debug hash";
+        }
+        else {
+            for (const hash of Object.values(cfg.moduleHash))
+            {
+                if (hash.length < 16) {
+                    errDsc = "Module hash object must not be empty";
+                    break;
+                }
+            }
+        }
+        if (errDsc) {
+            throw new Error(errDsc);
         }
     };
 

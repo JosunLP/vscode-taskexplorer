@@ -8,11 +8,13 @@
  */
 
 import * as fs from "fs";
-import { glob, IOptions } from "glob";
 import * as path from "path";
+import { glob, IOptions } from "glob";
 import { emptyFn, execIf, execIf2, wrap } from "./utils";
 
 const cwd = process.cwd();
+const globIgnore = [ "**/node_modules/**", "**/.vscode*/**", "**/dist/**", "**/build/**", "**/res/**", "**/webpack/**" ];
+
 
 /*
 export const appendFile = (file: string, data: string): Promise<void> =>
@@ -186,9 +188,12 @@ export const findFiles = (pattern: string, options: IOptions): Promise<string[]>
 {
     return new Promise((resolve, reject) =>
     {
-        glob(pattern, options, (err, files) => execIf2(!err, resolve, this, [ reject, err ], files));
+        glob(pattern, { ignore: globIgnore, ...options }, (err, files) => execIf2(!err, resolve, this, [ reject, err ], files));
     });
 };
+
+
+export const findFilesSync = (pattern: string, options: IOptions): string[] => glob.sync(pattern, { ignore: globIgnore, ...options });
 
 
 export const getDateModified = (file: string) =>

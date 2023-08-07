@@ -1,3 +1,4 @@
+import { IOptions } from "glob";
 
 export interface ITeFilesystem
 {
@@ -10,6 +11,8 @@ export interface ITeFilesystem
     deleteFile(file: string): Promise<void>;
     deleteFileSync(file: string): void;
     isDirectory(dirPath: string): boolean;
+    findFiles(pattern: string, options: IOptions): Promise<string[]>;
+    findFilesSync(pattern: string, options: IOptions): string[];
     getDateModified(file: string): Promise<number>;
     getDateModifiedSync(file: string): number;
     numFilesInDirectory(dirPath: string): Promise<number>;
@@ -19,6 +22,9 @@ export interface ITeFilesystem
     readFileSync(file: string): string;
     readJsonAsync<T>(file: string): Promise<T>;
     readJsonSync<T>(file: string): T;
+    // renameFile(fileCurrent: string, fileNew: string): Promise<void>;
+    // replaceInFile(file: string, old: string, nu: string | ((m: RegExpExecArray) => string), caseSensitive?: boolean): Promise<boolean>;
+    // setCwd(dir: string): void;
     writeFile(file: string, data: string | Buffer): Promise<void>;
     writeFileSync(file: string, data: string): void;
 }

@@ -59,18 +59,16 @@ export interface ILogPackageJson extends Record<string, any>
 export interface ILogConfig
 {
     app: string;
-    contentHash?: string;
-    logDirectory: string;
     env: string;
     errorChannel?: ILogOutputChannel;
     httpGetFn: LogHttpGetFn;
+    installDirectory: string;
     isTests: boolean;
-    modulePath: string;
+    logDirectory: string;
     moduleHash: Record<string, string>;
     outputChannel?: ILogOutputChannel;
     promptRestartFn: LogPromptRestartFn;
     storageDirectory: string;
-    version: string;
 }
 
 export interface ILogControl
