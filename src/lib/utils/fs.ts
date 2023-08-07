@@ -342,14 +342,6 @@ export const renameFile = (fileCurrent: string, fileNew: string): Promise<void> 
 };
 */
 
-// /**
-//  * Replace text in a file, for use with version # replacement
-//  *
-//  * @param file The file
-//  * @param old Text or regex pattern to replace
-//  * @param nu Text to insert in place of 'old'
-//  * @param caseSensitive `true` to make the replacement case sensitive
-//  */
 // export async function replaceInFile(file: string, old: string, nu: string | ((m: RegExpExecArray) => string), caseSensitive = true)
 // {
 //     if (await pathExists(file))

@@ -105,7 +105,7 @@ class Configuration implements IConfiguration, Disposable
     /**
      * Include entire settings key.  This is just workspace.getConfiguration().
      * Example:
-     *     getGlobal<string>("terminal.integrated.shell.windows", "")
+     * getGlobal<string>("terminal.integrated.shell.windows", "")
      */
     getVs = <T>(key: string, defaultValue?: T) => this.configurationGlobal.get<T>(key, defaultValue!);
 

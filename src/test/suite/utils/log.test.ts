@@ -1,5 +1,6 @@
 
 import { join } from "path";
+import { expect } from "chai";
 import { ITeWrapper, ILog, ILogControl } from ":types";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import { activate, exitRollingCount, endRollingCount, suiteFinished, testControl } from "../../utils/utils";
@@ -90,18 +91,22 @@ suite("Logging Tests", () =>
     {
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 5) + 200);
-
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         teWrapper.log.error(`        ${teWrapper.extensionId}`);
         teWrapper.log.error([ `        ${teWrapper.extensionId}`,
                     `        ${teWrapper.extensionId}`,
                     `        ${teWrapper.extensionId}` ]);
-
+		teWrapper.log.error("");
 		teWrapper.log.error("Test5 error");
 		teWrapper.log.error(new Error("Test error object"));
 		teWrapper.log.error([ "Test error 1", "Test error 2" ]);
 		teWrapper.log.error([ "Test error 3", null, "Test error 4", "" ]);
-		teWrapper.log.error([ "Test error 3", "Test error 4" ]);
-		teWrapper.log.error([ "Test error 3", "Test error 4" ]);
+		teWrapper.log.error("Test error 3");
+		teWrapper.log.error("Test error 3");
+		teWrapper.log.error([ "Test error 3" ]);
+		teWrapper.log.error([ "Test error 3" ]);
+		teWrapper.log.error([ "Test error 2", "Test error 4" ]);
+		teWrapper.log.error([ "Test error 2", "Test error 4" ]);
 		teWrapper.log.error([ "Test error 5", "Test error 6" ]);
 		teWrapper.log.error([ "Test error 5", "Test error 7" ]);
 		teWrapper.log.error("Test error 5");
@@ -165,6 +170,9 @@ suite("Logging Tests", () =>
 		teWrapper.logControl.blockScaryColors = true;
 		teWrapper.log.error("Scary error");
 		teWrapper.logControl.blockScaryColors = scaryOff;
+		const err1 = new Error("Test error object no stack");
+		err1.stack = undefined;
+		teWrapper.log.error(err1);
 		//
 		// Disable logging
 		//
@@ -177,7 +185,7 @@ suite("Logging Tests", () =>
 		teWrapper.log.error([ "Test error 1",  new Error("Test error object") ]);
 		teWrapper.log.error([ "Test error 1", "Test error 2" ], [[ "Test param error", "Test param value" ]]);
 		teWrapper.log.error("this is a test4", [[ "test6", true ], [ "test6", false ], [ "test7", "1111" ], [ "test8", [ 1, 2, 3 ]]]);
-		const err2 = new Error("Test error object");
+		const err2 = new Error("Test error object 2 no stack");
 		err2.stack = undefined;
 		teWrapper.log.error(err2);
 		//
@@ -270,6 +278,16 @@ suite("Logging Tests", () =>
     });
 
 
+    test("Logging (Miscellaneous)", async function()
+    {
+        if (exitRollingCount(this)) return;
+		expect(teWrapper.log.config.app).to.be.a("string");
+		expect(teWrapper.log.control.enable).to.be.equal(true);
+		expect(teWrapper.log.state.lastLogPad).to.be.a("string");
+        endRollingCount(this);
+	});
+
+
 	test("Logging (Output Window)", async function()
     {
         if (exitRollingCount(this)) return;
@@ -318,8 +336,7 @@ suite("Logging Tests", () =>
 		log.write("line1\r\nline2", 1, "   ", "queueTestId");
 		log.error(new Error("Test error object"));
 		log.dequeue("queueTestId");
-
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
 		log.write("test1", 1, "", "queueTest2Id", false, false);
 		log.error("test4", undefined, "queueTest2Id");
 		log.value("test3", "value1", 1, "", "queueTest2Id");
@@ -327,8 +344,7 @@ suite("Logging Tests", () =>
 		log.error("error line1\nline2", undefined, "queueTest2Id");
 		log.write("line1\r\nline2", 1, "   ", "queueTest2Id");
 		log.dequeue("queueTest2Id");
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
-
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, true);
         endRollingCount(this);
 	});
 

@@ -17,19 +17,29 @@ import { ConfigKeys, CallbackOptions, CallbackArray, ILog, VsCodeCommands } from
 const tzOffset = (new Date()).getTimezoneOffset() * 60000;
 
 
+export async function awaitMaybe<R>(promise: R | PromiseLike<R>): Promise<R>
+{
+    let result = promise;
+    if (isPromise<R>(promise)) {
+        result = await promise;
+    }
+    return result;
+}
+
+
 export const cloneJsonObject = <T>(jso: any) => JSON.parse(JSON.stringify(jso)) as T;
 
 
 export const emptyFn = () => {};
 
 
-export function execIf<T, R>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions): R | undefined;
-export function execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
-export function execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
-export function execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
-export function execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
-export function execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
-export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
+export function execIf<T, R>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>) => R, thisArg?: any, elseOpts?: CallbackOptions): R | undefined;
+export function execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
+export function execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
+export function execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+export function execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+export function execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
 {
     if (checkValue) {
         return ifFn.call(thisArg, checkValue, arg1, arg2, arg3, arg4, arg5);
@@ -37,7 +47,7 @@ export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue:
     else if (isCallbackArray(elseOpts)) {
         return elseOpts.splice(0, 1)[0].call(thisArg, ...elseOpts, arg1, arg2, arg3, arg4, arg5);
     }
-};
+}
 /*
 export function execIf<T, R, A0>(checkValue: T | undefined, ifFn: (arg: T) => R, thisArg?: any, elseOpts?: CallbackOptions | A0 | null | undefined): R | undefined;
 export function execIf<T, R, A0, A1>(checkValue: T | undefined, ifFn: (arg: T, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions | A0 | null | undefined, arg1: A1): R | undefined;
@@ -94,7 +104,7 @@ export function execIf2<T, R, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1, A6 =
     else if (isCallbackArray(elseOpts)) {
         return elseOpts.splice(0, 1)[0].call(thisArg, ...elseOpts, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
     }
-};
+}
 
 
 export const formatDate = (epochMs: number, format?: "datetime" | "date" | "time") =>
@@ -307,7 +317,10 @@ export const promptRestart = async (message: string, callback: () => void | Prom
 {
     const action = await window.showInformationMessage(message, "Cancel", "Restart");
     if (action === "Restart") {
-        await callback();
+        const result = callback();
+        if (isPromise(result)) {
+            await result;
+        }
         return new Promise(resolve => setTimeout(c => { commands.executeCommand(c); resolve(true); }, 1, VsCodeCommands.Reload));
     }
     return false;
@@ -488,7 +501,7 @@ export function wrap<R, E = any, ER = any, A1 = any, A2 = A1, A3 = A1, A4 = A1, 
         }
     }
     return result;
-};
+}
 
 
 const wrapFinally = <E>(failed: boolean, catchFinallyOpts: any, thisArg: any) =>

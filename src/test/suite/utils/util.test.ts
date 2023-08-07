@@ -57,6 +57,18 @@ suite("Util Tests", () =>
 		this.slow((testControl.slowTime.config.event * 2) + 30);
 		teWrapper.utils.emptyFn();
 		//
+		// awaitMaybe
+		//
+		await teWrapper.utils.awaitMaybe(sleep(5));
+		await teWrapper.utils.awaitMaybe(5);
+		//
+		// Pick
+		//
+		const po = { a: 1, b: 2, c: 3, d: 4 };
+		// expect(teWrapper.objUtils.pick(po, "a", "c")).to.be.an("object");
+		// expect(teWrapper.objUtils.pickNot(po, "a", "c")).to.be.an("object");
+		expect(teWrapper.objUtils.pickBy(po, (k: any) => k === "a" || k === "c")).to.be.an("object");
+		//
 		// properCase
 		//
         expect(teWrapper.utils.properCase("taskexplorer")).to.be.equal("Taskexplorer");
@@ -618,6 +630,8 @@ suite("Util Tests", () =>
 		await teWrapper.fs.createDir(join(__dirname, "folder1"));
 		await teWrapper.fs.deleteFile(join(__dirname, "folder1", "file1.png"));
 		await teWrapper.fs.writeFile(join(__dirname, "folder1", "file1.png"), "");
+		teWrapper.fs.deleteFileSync(join(__dirname, "folder1", "file1.png"));
+		teWrapper.fs.writeFileSync(join(__dirname, "folder1", "file1.png"), "");
 		try { await teWrapper.fs.readFileAsync(join(__dirname, "folder1", "file1.png")); } catch {}
 		try { await teWrapper.fs.readJsonAsync(join(__dirname, "folder1", "file1.png")); } catch {}
 		try { teWrapper.fs.readFileSync(join(__dirname, "folder1", "file1.png")); } catch {}

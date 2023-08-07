@@ -7,8 +7,8 @@
  */
 
 import { apply } from "./object";
-import { execIf, popIfExistsBy, wrap } from "./utils";
-import { basename, dirname, extname, join, resolve } from "path";
+import { basename, dirname, join, resolve } from "path";
+import { awaitMaybe, execIf, popIfExistsBy, wrap } from "./utils";
 import { BasicSourceMapConsumer, RawSourceMap, SourceMapConsumer } from "source-map";
 import {
     asString, isArray, isEmpty, isError, isObject, isObjectEmpty, isPrimitive, isString
@@ -20,7 +20,6 @@ import {
     appendFileSync, copyFile, createDirSync, deleteDir, findFilesSync, pathExistsSync, readFileAsync,
     readFileSync, readJsonAsync, writeFile
 } from "./fs";
-import { isPromise } from "util/types";
 
 // export class LogOutputChannel implements ILogOutputChannel
 // {
@@ -40,15 +39,51 @@ export abstract class Log implements ILog, ILogDisposable
     private _srcMapConsumer: BasicSourceMapConsumer | undefined;
 
     private readonly _logState: ILogState;
-    private readonly _symbols: ILogSymbols;
     private readonly _logConfig: ILogConfig;
     private readonly _logControl: ILogControl;
     private readonly _logControlPrev: ILogControl;
-    private readonly _baseDisposables: ILogDisposable[];
+    private readonly _baseDisposables: ILogDisposable[] = [];
     private readonly _moduleInfo = { dir: "", file: "", name: "", path: "", storageDir: "", version: "" };
-    private readonly _separator = "-----------------------------------------------------------------------------------------";
+    private readonly _separator = "----------------------------------------------------------------------------------------------------";
     private readonly _stackLineParserRgx = /at (?:<anonymous>[\. ]|)+(.+?)(?:\.<anonymous> | )+\((.+)\:([0-9]+)\:([0-9]+)\)/i;
     private readonly _stackLineFilterRgx = /(?:^Error\: ?$|(?:(?:Object|[\/\\\(\[ \.])(?:getStamp|errorWrite[a-z]+?|write2?|_?error|warn(?:ing)?|values?|method[DS]|extensionHost|node\:internal)(?: |\]|\/)))/i;
+
+
+    constructor(logConfig: ILogConfig, logControl: ILogControl)
+    {
+        this.enable(false);
+        this.verifyConfig(logConfig);
+        this._logConfig = apply({}, logConfig);
+        this._logControl = apply({}, logControl);
+        this._logControlPrev = apply({}, logControl);
+        this._symbols = this.getSymbols();
+        this._logState = this.getDefaultState();
+        this.setModuleInfo();
+        this.writeErrorChannelHeader();
+        this.writeOutputChannelHeader();
+        this.setFileName();
+    }
+
+    dispose = async () =>
+    {
+        clearTimeout(this._fileNameTimer);
+        const result = this.disposeApp();
+        await awaitMaybe(result);
+        this._baseDisposables.splice(0).forEach(d => d.dispose());
+        //
+        // TODO - Delete depending on config setting ModuleReplace?
+        //
+        // try { deleteFileSync(join(this._runtimeDir, "mappings.wasm")); } catch {}
+    };
+
+    get colors(): Readonly<ILogColors> { return this._colors; }
+    get config(): Readonly<ILogConfig> { return this._logConfig; }
+    get control(): ILogControl { return this._logControl; }
+    get lastPad(): string { return this._logState.lastLogPad; }
+    get state(): Readonly<ILogState> { return this._logState; }
+    get symbols(): Readonly<ILogSymbols> { return this._symbols; }
+
+    private get allowScaryColors(): boolean { return !this._logConfig.isTests || !this._logControl.blockScaryColors; }
 
     private readonly _colors: ILogColors =
     {
@@ -67,44 +102,41 @@ export abstract class Log implements ILog, ILogDisposable
         yellow: [ 33, 39 ]
     };
 
-
-    constructor(logConfig: ILogConfig, logControl: ILogControl)
+    private readonly _symbols: ILogSymbols =
     {
-        this.enable(false);
-        this._baseDisposables = [];
-        this._logConfig = apply({}, logConfig);
-        this.verifyConfig();
-        this._symbols = this.getSymbols();
-        this._logState = this.getDefaultState();
-        this._logControl = apply({}, logControl);
-        this._logControlPrev = apply({}, logControl);
-        this.setModuleInfo();
-        this.writeErrorChannelHeader();
-        this.writeOutputChannelHeader();
-        this.setFileName();
-    }
-
-    dispose = () =>
-    {
-        clearTimeout(this._fileNameTimer);
-        const result = this.disposeApp();
-        execIf(isPromise(result), async () => { await result; }, this);
-        this._baseDisposables.splice(0).forEach(d => d.dispose());
-        //
-        // TODO - Delete depending on config setting ModuleReplace?
-        //
-        // try { deleteFileSync(join(this._runtimeDir, "mappings.wasm")); } catch {}
+        success: "✔",
+        info: "ℹ",
+        warning: "⚠",
+        error: "✘",
+        pointer: "❯",
+        start: "▶",
+        end: "◀",
+        star: "★",
+        checkboxOn: "☒",
+        checkboxOff: "☐",
+        pointerSmall: "›",
+        bullet: "●",
+        bulletBig: "⬢",
+        up: "△",
+        blue:
+        {
+            error: <"✘">this.withColor("✘", this._colors.blue),
+            info: <"ℹ">this.withColor("ℹ", this._colors.blue),
+            success: <"✔">this.withColor("✔", this._colors.blue),
+            warning: <"⚠">this.withColor("⚠", this._colors.blue),
+        },
+        color:
+        {
+            success: <"✔">this.withColor("✔", this._colors.green),
+            info: <"ℹ">this.withColor("ℹ", this._colors.magenta),
+            warning: <"⚠">this.withColor("⚠", this._colors.yellow),
+            error: <"✘">this.withColor("✘", this._colors.red),
+            start: <"▶">this.withColor("▶", this._colors.green),
+            end: <"◀">this.withColor("◀", this._colors.green),
+            pointer: <"❯">this.withColor("❯", this._colors.grey),
+            up: <"△">this.withColor("△", this._colors.green),
+        }
     };
-
-
-    get colors(): Readonly<ILogColors> { return this._colors; }
-    get config(): Readonly<ILogConfig> { return this._logConfig; }
-    get control(): ILogControl { return this._logControl; }
-    get lastPad(): string { return this._logState.lastLogPad; }
-    get state(): Readonly<ILogState> { return this._logState; }
-    get symbols(): Readonly<ILogSymbols> { return this._symbols; }
-
-    private get allowScaryColors(): boolean { return !this._logConfig.isTests || !this._logControl.blockScaryColors; }
 
 
     private _blank = (level?: LogLevel, queueId?: string) => this._write("", level, "", queueId);
@@ -273,7 +305,7 @@ export abstract class Log implements ILog, ILogDisposable
         {
             const sInfo = this.getStamp(true);
             const ts = `${sInfo.stamp} ${this.symbols.pointer} ${symbols[1]}`;
-            c.write(`${ts} --- ERROR ${this._errorsWritten} ${this._separator}`);
+            c.write(`${ts} --- ERROR ${this._errorsWritten} ${this._separator.substring(0, this._separator.length - 10 - this._errorsWritten.toString().length)}`);
             c.write(ts);
             c.write(`${ts} line          : ${sInfo.line}`);
             c.write(`${ts} column        : ${sInfo.column}`);
@@ -336,12 +368,12 @@ export abstract class Log implements ILog, ILogDisposable
             //     at TaskTreeDataProvider.<anonymous> (c:\\....\extension.js:1:col) // Prod / Webpack
             //
             const match = stackline.match(this._stackLineParserRgx);
-            if (match)
+            execIf(match, (m) =>
             {
-                const [ _, name, source, line, column ] = match;
+                const [ _, name, source, line, column ] = m;
                 apply(info, { source: basename(source), name, column: parseInt(column, 10), line: parseInt(line, 10) });
                 execIf(this._srcMapConsumer, c => apply(info, c.originalPositionFor({ line: info.line, column: info.column })));
-            }
+            }, this);
         }
         return info;
     };
@@ -389,13 +421,14 @@ export abstract class Log implements ILog, ILogDisposable
         // install (as user may have uninstalled and reinstralled, there's no way for the
         // app to perform cleanup when unsinstalled in some cases)
         //
-        if (isNewInstallOrVersion)
+        await execIf(isNewInstallOrVersion, async () =>
         {
             await deleteDir(this._moduleInfo.storageDir);
             createDirSync(this._moduleInfo.storageDir);
-        }
+        }, this);
         await this.installDebugSupport();
         await this.installSourceMapSupport();
+        /* istanbul ignore if */
         if (this._logControl.enable)
         {
             if (isNewInstallOrVersion) {
@@ -629,8 +662,9 @@ export abstract class Log implements ILog, ILogDisposable
     reset = async () =>
     {
         const enable = this._logControl.enable,
+              enableChanged = enable !== this._logControlPrev.enable,
               enabledPreviously = enable && !this._logControlPrev.enable,
-              fileEnablePreviously = this._logControl.enableFile && !this._logControlPrev.enableFile;
+              fileEnableChanged = this._logControl.enableFile !== this._logControlPrev.enableFile;
         if (this._logControl.enableModuleReload || !enabledPreviously)
         {
             const msg = `To ${enable ? "enable" : "disable"} logging ${enabledPreviously ? "for the 1st time" : ""}, ` +
@@ -638,13 +672,14 @@ export abstract class Log implements ILog, ILogDisposable
                         "and will require a restart";
             this._logConfig.promptRestartFn(msg, () => this.installDebugSupport(true));
         }
-        if (this._logControl.enableFile && !fileEnablePreviously)
+        if (this._logControl.enableFile && fileEnableChanged)
         {
             this.writeLogFileLocation();
         }
-        else {
+        if (enableChanged) {
             this.enable(enable);
         }
+        apply(this._logControlPrev, this._logControl);
     };
 
 
@@ -652,12 +687,8 @@ export abstract class Log implements ILog, ILogDisposable
     {
         const locISOTime = (new Date(Date.now() - this._logState.tzOffset)).toISOString().slice(0, -1).split("T")[0].replace(/[\-]/g, "");
         this._logState.fileName = join(this._logConfig.logDirectory, `vscode-${this._moduleInfo.name}-${locISOTime}.log`);
-        if (this._logControl.enableFile) {
-            this.writeLogFileLocation();
-        }
-        if (this._fileNameTimer) {
-            clearTimeout(this._fileNameTimer);
-        }
+        this.writeLogFileLocation();
+        clearTimeout(this._fileNameTimer);
         this._fileNameTimer = setTimeout(this.setFileName, this.msUntilMidnight());
     };
 
@@ -669,25 +700,24 @@ export abstract class Log implements ILog, ILogDisposable
      */
     private setModuleInfo = () =>
     {
-        const files = findFilesSync("package.json", { cwd: this._logConfig.installDirectory, absolute: true, allowWindowsEscape: true });
-        if (files.length > 0)
+        const files = findFilesSync("package.json", { cwd: this._logConfig.installDirectory, absolute: true });
+        execIf(files[0], (pkgJsonFile) =>
         {
-            const pkgJson = JSON.parse(readFileSync(files[0]));
-            let path = resolve(this._logConfig.installDirectory, pkgJson.main);
-            if (extname(path) !== ".js") {
-                path = path + ".js";
-            }
-            const file = basename(path),
-                  name = file.replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
-                  storageDir = join(this._logConfig.storageDirectory, "debug");
-            apply(this._moduleInfo, { dir: dirname(path), file, name, path, storageDir, version: pkgJson.version });
+            const pkgJson = JSON.parse(readFileSync(pkgJsonFile)),
+                  path = resolve(this._logConfig.installDirectory, pkgJson.main).replace(".js", "") + ".js";
+            apply(this._moduleInfo, {
+                path,
+                dir: dirname(path),
+                file: basename(path),
+                name: basename(path).replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
+                storageDir: join(this._logConfig.storageDirectory, "debug"),
+                version: pkgJson.version
+            });
+            createDirSync(this._moduleInfo.storageDir);
             createDirSync(this._logConfig.logDirectory);
             createDirSync(this._logConfig.storageDirectory);
-            createDirSync(this._moduleInfo.storageDir);
-        }
-        else {
-            throw new Error("Could not find package.json");
-        }
+        },
+        this, [ this._error, new Error("Could not find package.json") ]);
     };
 
 
@@ -714,10 +744,9 @@ export abstract class Log implements ILog, ILogDisposable
 
 
     /* istanbul ignore next */
-    private verifyConfig = () =>
+    private verifyConfig = (cfg: ILogConfig) =>
     {
         let errDsc = "";
-        const cfg = this._logConfig;
         if (!cfg.installDirectory) {
             errDsc = "Install directory not specified";
         }
@@ -766,7 +795,7 @@ export abstract class Log implements ILog, ILogDisposable
     };
 
 
-    withColor = (msg: string, color: LogColor) => "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m";
+    withColor(msg: string, color: LogColor) { return "\x1B[" + color[0] + "m" + msg + "\x1B[" + color[1] + "m"; };
 
 
     private writeErrorChannelHeader = () =>
@@ -774,9 +803,9 @@ export abstract class Log implements ILog, ILogDisposable
         execIf(this._logConfig.errorChannel, (c) =>
         {
             c.write("");
-            c.write("****************************************************************************************************");
+            c.write(this._separator);
             c.write(" Task Explorer Error Logging Channel");
-            c.write("****************************************************************************************************");
+            c.write(this._separator);
             c.write("");
         }, this);
     };
@@ -787,9 +816,9 @@ export abstract class Log implements ILog, ILogDisposable
         execIf(this._logConfig.outputChannel, (c) =>
         {
             c.write("");
-            c.write("****************************************************************************************************");
+            c.write(this._separator);
             c.write(" Task Explorer Error Logging Channel");
-            c.write("****************************************************************************************************");
+            c.write(this._separator);
             c.write("");
         }, this);
     };
@@ -797,15 +826,18 @@ export abstract class Log implements ILog, ILogDisposable
 
     private writeLogFileLocation = () =>
     {
-        execIf(this._logConfig.outputChannel, (c) =>
-        {
-            c.write("***********************************************************************************************");
-            c.write(` Task Explorer Log File: ${this._logState.fileName}`);
-            c.write("***********************************************************************************************");
+        execIf(this._logControl.enableFile, () =>
+        {   execIf(this._logConfig.outputChannel, (c) =>
+            {
+                c.write(this._separator);
+                c.write(` Task Explorer Log File: ${this._logState.fileName}`);
+                c.write(this._separator);
+            }, this);
+            const sep = `    ${this.symbols.color.info} ${this.withColor(this._separator, this.colors.grey)}`;
+            console.log(sep);
+            console.log(`    ${this.symbols.color.info} ${this.withColor(` Task Explorer Log File: ${this._logState.fileName}`, this.colors.grey)}`);
+            console.log(sep);
         }, this);
-        console.log(`    ${this.symbols.color.info} ${this.withColor("*************************************************************************************", this.colors.grey)}`);
-        console.log(`    ${this.symbols.color.info} ${this.withColor(` Task Explorer Log File: ${this._logState.fileName}`, this.colors.grey)}`);
-        console.log(`    ${this.symbols.color.info} ${this.withColor("*************************************************************************************", this.colors.grey)}`);
     };
 
 

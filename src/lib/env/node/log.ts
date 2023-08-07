@@ -153,9 +153,7 @@ export class TeLog extends Log implements ILog, Disposable
         //
         // Call super function `reset` after config changes
         //
-        if (cfgChanged) {
-            this.reset();
-        }
+        if (cfgChanged) { this.reset(); }
     };
 
 

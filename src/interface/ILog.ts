@@ -100,7 +100,7 @@ export interface ILogState
 export interface ILog
 {
     readonly colors: Readonly<ILogColors>;
-    readonly config: Readonly<ILogConfig>;
+    readonly config: Readonly<ILogConfig>
     readonly control: ILogControl;
     readonly lastPad: string;
     readonly state: Readonly<ILogState>;
