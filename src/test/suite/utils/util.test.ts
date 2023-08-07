@@ -54,7 +54,7 @@ suite("Util Tests", () =>
     test("Utilities", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 2) + 30);
+		this.slow((testControl.slowTime.config.event * 2) + 70);
 		teWrapper.utils.emptyFn();
 		//
 		// awaitMaybe
@@ -169,7 +169,11 @@ suite("Util Tests", () =>
 			commands.executeCommand = async <T>(args: any) => { return args as T; };
 			overrideNextShowInfoBox("Restart", true);
 			await teWrapper.utils.promptRestart("Test restart message 1", () => {});
+			await sleep(10);
 			overrideNextShowInfoBox("Cancel");
+			await teWrapper.utils.promptRestart("Test restart message 2", async () => { await teWrapper.utils.sleep(1); });
+			await sleep(10);
+			overrideNextShowInfoBox("Restart");
 			await teWrapper.utils.promptRestart("Test restart message 2", async () => { await teWrapper.utils.sleep(1); });
 		}
 		finally {
