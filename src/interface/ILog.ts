@@ -3,7 +3,7 @@ export type LogLevel = number; // 1 | 2 | 3 | 4 | 5;
 export type LogType = "global";
 export type LogColor = [ number, number ];
 export type LogHttpGetFn = (url: string, ...args: any[]) => PromiseLike<ArrayBuffer>;
-export type LogPromptRestartFn = (message: string, ...args: any[]) => PromiseLike<boolean>;
+export type LogPromptRestartFn = (message: string, callback?: (...args: any[]) => void | PromiseLike<void>, thisArg?: any, ...args: any[]) => Promise<boolean>;
 
 export interface ILogDisposable { dispose: () => any }
 
@@ -100,7 +100,7 @@ export interface ILogState
 export interface ILog
 {
     readonly colors: Readonly<ILogColors>;
-    readonly config: Readonly<ILogConfig>
+    readonly config: Readonly<ILogConfig>;
     readonly control: ILogControl;
     readonly lastPad: string;
     readonly state: Readonly<ILogState>;

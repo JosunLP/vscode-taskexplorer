@@ -3,7 +3,7 @@ import { join } from "path";
 import { expect } from "chai";
 import { ITeWrapper, ILog, ILogControl } from ":types";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { activate, exitRollingCount, endRollingCount, suiteFinished, testControl } from "../../utils/utils";
+import { activate, exitRollingCount, endRollingCount, suiteFinished, testControl, overrideNextShowInfoBox, clearOverrideShowInfoBox } from "../../utils/utils";
 
 let log: ILog;
 let writeConsole: boolean;
@@ -59,11 +59,13 @@ suite("Logging Tests", () =>
 		teWrapper.logControl.writeToConsole = writeConsole;
 		teWrapper.logControl.writeToConsoleLevel = writeConsoleLvl;
 		log.setWriteToConsole?.(writeConsole, writeConsoleLvl);
+		overrideNextShowInfoBox("Cancel", true);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, logControl.enable);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, logControl.enableFile);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, logControl.enableOutputWindow);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, logControl.enableModuleReload);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogLevel, logControl.level);
+		clearOverrideShowInfoBox();
         suiteFinished(this);
 	});
 
@@ -80,6 +82,7 @@ suite("Logging Tests", () =>
 			await teWrapper.fs.deleteFile(teDbgModulePath);
 			await teWrapper.fs.deleteFile(rtDbgModulePath);
 			await teWrapper.fs.deleteFile(vendorDbgModulePath);
+			overrideNextShowInfoBox("Cancel", true);
 			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
 			await teWrapper.utils.sleep(1000);
 		}
@@ -91,6 +94,7 @@ suite("Logging Tests", () =>
     {
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 5) + 200);
+		overrideNextShowInfoBox("Cancel", true);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         teWrapper.log.error(`        ${teWrapper.extensionId}`);
         teWrapper.log.error([ `        ${teWrapper.extensionId}`,
@@ -176,6 +180,7 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await executeSettingsUpdate(teWrapper.keys.Config.LogEnable, false);
 		teWrapper.log.error("Test5 error");
 		teWrapper.log.error("Test5 error");
@@ -191,6 +196,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await executeSettingsUpdate(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
@@ -200,10 +206,12 @@ suite("Logging Tests", () =>
     {
         if (exitRollingCount(this)) return;
 		this.slow((testControl.slowTime.config.event * 7) + 150);
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, true);
 		await teWrapper.utils.sleep(25);
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
 		log.write("Test1", 1);
 		log.write2("Test1", "Test1", 1);
@@ -220,10 +228,12 @@ suite("Logging Tests", () =>
 		log.error("Error1");
 		log.warn("Warning1");
 		log.value("Test3", "value3", 1);
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
 		//
 		// Disable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.error("Error1");
 		log.warn("Warning1");
@@ -231,6 +241,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
+		overrideNextShowInfoBox("Cancel", true);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
 	});
@@ -266,6 +277,7 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.methodStart("methodName");
 		log.methodDone("methodName");
@@ -273,6 +285,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
@@ -302,6 +315,7 @@ suite("Logging Tests", () =>
 		log.error([ "Test error 1", "Test error 2" ]);
 		log.error("Test4 error", [[ "p1", "e1" ]]);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, false);
+		overrideNextShowInfoBox("Cancel", true);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableOutputWindow, true);
 		log.write("Test1", 1);
@@ -332,19 +346,21 @@ suite("Logging Tests", () =>
 		log.error("test5", [[ "param1", 1 ]], "queueTestId");
 		log.error("error line1\nline2", undefined, "queueTestId");
 		log.error("error line1\r\nline2", undefined, "queueTestId");
-		log.error("error line1\r\nline2", undefined, "queueTestId");
+		log.write("line1\nline2", 1, "   ", "queueTestId");
 		log.write("line1\r\nline2", 1, "   ", "queueTestId");
 		log.error(new Error("Test error object"));
 		log.dequeue("queueTestId");
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, true);
 		log.write("test1", 1, "", "queueTest2Id", false, false);
 		log.error("test4", undefined, "queueTest2Id");
 		log.value("test3", "value1", 1, "", "queueTest2Id");
 		log.error("test5", [[ "param1", 1 ]], "queueTest2Id");
 		log.error("error line1\nline2", undefined, "queueTest2Id");
-		log.write("line1\r\nline2", 1, "   ", "queueTest2Id");
+		log.write("line1\nline2", 1, "   ", "queueTestId");
+		log.write("line1b\r\nline2b", 1, "   ", "queueTestId");
+		log.write("test6\ntest7\ntest8", 1, "", "queueTestId");
 		log.dequeue("queueTest2Id");
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableFile, false);
         endRollingCount(this);
 	});
 
@@ -397,6 +413,7 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
+		overrideNextShowInfoBox("Cancel", true);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.value("test", "1");
 		log.value(null as unknown as string, 1);
@@ -412,6 +429,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });
@@ -432,6 +450,7 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.warn("test1");
 		log.warn("test2");
@@ -439,6 +458,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
 		log.withColor("a", log.colors.grey);
         endRollingCount(this);
@@ -490,6 +510,7 @@ suite("Logging Tests", () =>
 		//
 		// Disable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
 		log.blank(1);
 		log.dequeue("");
@@ -517,6 +538,7 @@ suite("Logging Tests", () =>
 		//
 		// Re-enable logging
 		//
+		overrideNextShowInfoBox("Cancel");
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         endRollingCount(this);
     });

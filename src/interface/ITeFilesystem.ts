@@ -1,4 +1,4 @@
-import { IOptions } from "glob";
+import { GlobOptions } from "glob";
 
 export interface ITeFilesystem
 {
@@ -11,8 +11,8 @@ export interface ITeFilesystem
     deleteFile(file: string): Promise<void>;
     deleteFileSync(file: string): void;
     isDirectory(dirPath: string): boolean;
-    findFiles(pattern: string, options: IOptions): Promise<string[]>;
-    findFilesSync(pattern: string, options: IOptions): string[];
+    findFiles(pattern: string, options: GlobOptions): Promise<string[]>;
+    findFilesSync(pattern: string, options: GlobOptions): string[];
     getDateModified(file: string): Promise<number>;
     getDateModifiedSync(file: string): number;
     numFilesInDirectory(dirPath: string): Promise<number>;

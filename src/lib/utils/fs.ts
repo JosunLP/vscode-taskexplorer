@@ -9,11 +9,11 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { glob, IOptions } from "glob";
+import { glob, GlobOptions } from "glob";
 import { emptyFn, execIf, execIf2, wrap } from "./utils";
 
 const cwd = process.cwd();
-const globIgnore = [ "**/node_modules/**", "**/.vscode*/**", "**/dist/**", "**/build/**", "**/res/**", "**/webpack/**" ];
+const globIgnore = [ "**/node_modules/**", "**/.vscode-test/**", "**/dist/**", "**/build/**", "**/res/**", "**/webpack/**" ];
 
 
 /*
@@ -184,16 +184,14 @@ export const deleteFile = (file: string): Promise<void> =>
 export const deleteFileSync = (file: string): void => wrap(() => fs.unlinkSync(path.resolve(cwd, file)), [ emptyFn ]);
 
 
-export const findFiles = (pattern: string, options: IOptions): Promise<string[]> =>
+export const findFiles = async (pattern: string, options: GlobOptions): Promise<string[]> =>
 {
-    return new Promise((resolve, reject) =>
-    {
-        glob(pattern, { ignore: globIgnore, ...options }, (err, files) => execIf2(!err, resolve, this, [ reject, err ], files));
-    });
+    const files = await glob(pattern, {  ignore: globIgnore, ...options });
+    return files.map(f => f.toString());
 };
 
 
-export const findFilesSync = (pattern: string, options: IOptions): string[] => glob.sync(pattern, { ignore: globIgnore, ...options });
+export const findFilesSync = (pattern: string, options: GlobOptions): string[] => glob.sync(pattern, { ignore: globIgnore, ...options }).map(f => f.toString());
 
 
 export const getDateModified = (file: string) =>

@@ -150,13 +150,13 @@ export interface ITeUtilities
 	execIf<T, R, A1, A2, A3, A4>(checkValue: T, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
 	execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T, ifFn: (arg: T, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
 	*/
-	execIf2<T, R, A1>(checkValue: T | undefined, ifFn: (arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
-	execIf2<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
-	execIf2<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
-	execIf2<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
-	execIf2<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
-	execIf2<T, R, A1, A2, A3, A4, A5, A6>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6): R | undefined;
-	execIf2<T, R, A1, A2, A3, A4, A5, A6, A7>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7): R | undefined;
+	execIf2<T, R, A1>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
+	execIf2<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
+	execIf2<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+	execIf2<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+	execIf2<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+	execIf2<T, R, A1, A2, A3, A4, A5, A6>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6): R | undefined;
+	execIf2<T, R, A1, A2, A3, A4, A5, A6, A7>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7): R | undefined;
 	execIf2<T, R, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1, A6 = A1, A7 = A1>(checkValue: T | undefined, ifFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7): R | undefined;
 	formatDate(epochMs: number, format?: "datetime" | "date" | "time"): string;
 	getCombinedGlobPattern(defaultPattern: string, globs: string[]): string;
@@ -171,7 +171,7 @@ export interface ITeUtilities
 	popIfExists(arrOrRec: string[] | Record<string, string> | undefined, ...item: string[]): string[];
 	popIfExistsBy<T>(arr: T[] | undefined, fn: (v1: T) => boolean, thisArg?: any, single?: boolean): T[];
 	popObjIfExistsBy<T>(rec: Record<string, T> | undefined, fn: (k: string, v: T) => boolean, thisArg?: any, single?: boolean): T[];
-	promptRestart(message: string, callback: () => void | PromiseLike<void>): Promise<boolean>;
+	promptRestart(message: string, callback?: (...args: any[]) => void | PromiseLike<void>, thisArg?: any, ...args: any[]): Promise<boolean>;
 	properCase(name: string | undefined, removeSpaces?: boolean): string;
 	pushIfNotExists(arr: string[] | undefined, ...item: string[]): void;
     // pushIfNotExistsBy<T>(arr: T[] | undefined, fn: (v: T) => boolean, thisArg?: any, ...item: T[]): T[] | undefined;

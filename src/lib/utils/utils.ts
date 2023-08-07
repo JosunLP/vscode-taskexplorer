@@ -34,12 +34,12 @@ export const emptyFn = () => {};
 
 
 export function execIf<T, R>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>) => R, thisArg?: any, elseOpts?: CallbackOptions): R | undefined;
-export function execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
-export function execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
-export function execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
-export function execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
-export function execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
-export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
+export function execIf<T, R, A1>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: NonNullable<A1>) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
+export function execIf<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: NonNullable<A1>, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
+export function execIf<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: NonNullable<A1>, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+export function execIf<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: NonNullable<A1>, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+export function execIf<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg: NonNullable<T>, arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+export function execIf<T, R, A1, A2 = A1, A3 = A1, A4 = A1, A5 = A1>(checkValue: T | undefined, ifFn: (arg: T, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5): R | undefined
 {
     if (checkValue) {
         return ifFn.call(thisArg, checkValue, arg1, arg2, arg3, arg4, arg5);
@@ -89,13 +89,13 @@ export function execIf<T extends CheckValue, R, A1, A2 = A1, A3 = A1, A4 = A1, A
  * A version of execIf() where T is not returned as a callback argument.
  * Callback argumanets are A1, A2, A3... as opposed to T, A1, A2, A3...
  */
-export function execIf2<T, R, A1>(checkValue: T | undefined, ifFn: (arg1: A1) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
-export function execIf2<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
-export function execIf2<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
-export function execIf2<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
-export function execIf2<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
-export function execIf2<T, R, A1, A2, A3, A4, A5, A6>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6): R | undefined;
-export function execIf2<T, R, A1, A2, A3, A4, A5, A6, A7>(checkValue: T | undefined, ifFn: (arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7): R | undefined;
+export function execIf2<T, R, A1>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1): R | undefined;
+export function execIf2<T, R, A1, A2>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2): R | undefined;
+export function execIf2<T, R, A1, A2, A3>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3): R | undefined;
+export function execIf2<T, R, A1, A2, A3, A4>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4): R | undefined;
+export function execIf2<T, R, A1, A2, A3, A4, A5>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5): R | undefined;
+export function execIf2<T, R, A1, A2, A3, A4, A5, A6>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6): R | undefined;
+export function execIf2<T, R, A1, A2, A3, A4, A5, A6, A7>(checkValue: T | undefined, ifFn: (arg1: NonNullable<A1>, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7) => R, thisArg: any, elseOpts: CallbackOptions, arg1: A1, arg2: A2, arg3: A3, arg4: A4, arg5: A5, arg6: A6, arg7: A7): R | undefined;
 export function execIf2<T, R, A1 = any, A2 = A1, A3 = A1, A4 = A1, A5 = A1, A6 = A1, A7 = A1>(checkValue: T | undefined, ifFn: (arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7) => R, thisArg?: any, elseOpts?: CallbackOptions, arg1?: A1, arg2?: A2, arg3?: A3, arg4?: A4, arg5?: A5, arg6?: A6, arg7?: A7): R | undefined
 {
     if (checkValue) {
@@ -313,11 +313,11 @@ export const popObjIfExistsBy = <T>(rec: Record<string, T> | undefined, fn: (k: 
 // export const pluralize = (s: string, count: number) => `${count} ${s}${count === 1 ? "" : "s"}`;
 
 
-export const promptRestart = async (message: string, callback: () => void | PromiseLike<void>): Promise<boolean> =>
+export const promptRestart = async (message: string, callback?: (...args: any[]) => void | PromiseLike<void>, thisArg?: any, ...args: any[]): Promise<boolean> =>
 {
     const action = await window.showInformationMessage(message, "Cancel", "Restart");
     if (action === "Restart") {
-        const result = callback();
+        const result = callback?.call(thisArg, ...args);
         if (isPromise(result)) {
             await result;
         }

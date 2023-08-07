@@ -460,36 +460,33 @@ export abstract class Log implements ILog, ILogDisposable
             // Retrieve the debug modules from the server if not already downloaded and save them
             // to the configured storage directory
             //
-            if ((!isCurrentlyDbg && swap === true) || swap === undefined)
-            {
-                const remotePath = `res/app/${this._logConfig.app}/v${this._moduleInfo.version}/${this._logConfig.env}`,
-                      storageFilePath = join(dbgModuleStorageDir, debugFileNoHash);
-                await execIf(
-                    !pathExistsSync(storageFilePath),
-                    async () => {
-                        const content = await this._logConfig.httpGetFn(`${remotePath}/${debugFile}`);
-                        await writeFile(storageFilePath, Buffer.from(content));
-                    },
-                    this, [ this.warn, `could not download debug module ${debugFile}` ]
-                );
-            }
+            const remotePath = `res/app/${this._logConfig.app}/v${this._moduleInfo.version}/${this._logConfig.env}`;
+            let doSwap = (!isCurrentlyDbg && swap === true) || swap === undefined,
+                storageFilePath = join(dbgModuleStorageDir, debugFileNoHash);
+            await execIf(
+                doSwap && !pathExistsSync(storageFilePath),
+                async () => {
+                    const content = await this._logConfig.httpGetFn(`${remotePath}/${debugFile}`);
+                    await writeFile(storageFilePath, Buffer.from(content));
+                },
+                this, [ this.warn, `could not download debug module ${debugFile}` ]
+            );
             //
             // Make a copy of the release modules currently in the runtime directory if not
             // already saved to the configured storage directory
             //
-            if ((isCurrentlyDbg && swap === true) || swap === undefined)
-            {
-                const storageFilePath = join(dbgModuleStorageDir, this._moduleInfo.file);
-                await execIf(
-                    !pathExistsSync(storageFilePath),
-                    () => copyFile(this._moduleInfo.path, storageFilePath),
-                    this, [ this.warn, `could not load release module ${releaseFile}` ]
-                );
-            }
+            doSwap = (isCurrentlyDbg && swap === true) || swap === undefined;
+            storageFilePath = join(dbgModuleStorageDir, this._moduleInfo.file);
+            await execIf(
+                doSwap && !pathExistsSync(storageFilePath),
+                () => copyFile(this._moduleInfo.path, storageFilePath),
+                this, [ this.warn, `could not load release module ${releaseFile}` ]
+            );
             //
             // Swap release / debug modules i.e. overwrite the current runtime file in the
             // configured module runtime directory
             //
+            /* istanbul ignore if */
             if (swap)
             {
                 const cpFile = !enable ? releaseFileNoHash : debugFileNoHash;
@@ -663,14 +660,13 @@ export abstract class Log implements ILog, ILogDisposable
     {
         const enable = this._logControl.enable,
               enableChanged = enable !== this._logControlPrev.enable,
-              enabledPreviously = enable && !this._logControlPrev.enable,
               fileEnableChanged = this._logControl.enableFile !== this._logControlPrev.enableFile;
-        if (this._logControl.enableModuleReload || !enabledPreviously)
+        if (this._logControl.enableModuleReload && enableChanged)
         {
-            const msg = `To ${enable ? "enable" : "disable"} logging ${enabledPreviously ? "for the 1st time" : ""}, ` +
-                        `the ${enable ? "debug" : "release"} module must be ${!enabledPreviously ? "activated" : "installed"} ` +
+            const msg = `To ${enable ? "enable" : "disable"} logging ${enableChanged ? "for the 1st time" : ""}, ` +
+                        `the ${enable ? "debug" : "release"} module must be ${!enableChanged ? "activated" : "installed"} ` +
                         "and will require a restart";
-            this._logConfig.promptRestartFn(msg, () => this.installDebugSupport(true));
+            this._logConfig.promptRestartFn(msg, this.installDebugSupport, this, true);
         }
         if (this._logControl.enableFile && fileEnableChanged)
         {
@@ -700,16 +696,17 @@ export abstract class Log implements ILog, ILogDisposable
      */
     private setModuleInfo = () =>
     {
-        const files = findFilesSync("package.json", { cwd: this._logConfig.installDirectory, absolute: true });
+        const files = findFilesSync("package.json", { cwd: this._logConfig.installDirectory, absolute: true, maxDepth: 1 });
         execIf(files[0], (pkgJsonFile) =>
         {
             const pkgJson = JSON.parse(readFileSync(pkgJsonFile)),
-                  path = resolve(this._logConfig.installDirectory, pkgJson.main).replace(".js", "") + ".js";
+                  path = resolve(this._logConfig.installDirectory, pkgJson.main).replace(".js", "") + ".js",
+                  file = basename(path);
             apply(this._moduleInfo, {
+                file,
                 path,
                 dir: dirname(path),
-                file: basename(path),
-                name: basename(path).replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
+                name: file.replace(/(?:\.[a-f0-9]{16,})?\.js/, ""),
                 storageDir: join(this._logConfig.storageDirectory, "debug"),
                 version: pkgJson.version
             });
