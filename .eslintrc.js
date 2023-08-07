@@ -36,7 +36,7 @@ module.exports = {
         "anti-trojan-source",
         "@spmeesseman/eslint-plugin",
         "@typescript-eslint",
-        "@typescript-eslint/tslint"
+        // "@typescript-eslint/tslint"
     ],
     globals: {
         __WPBUILD__: "readonly"
@@ -322,25 +322,25 @@ module.exports = {
         ],
         "use-isnan": "warn",
         "valid-typeof": "off",
-        "@typescript-eslint/tslint/config": [
-            "error",
-            {
-                rules: {
-                    // ban: [
-                    //     true,
-                    //     "setInterval"
-                    // ],
-                    whitespace: [
-                        true,
-                        "check-branch",
-                        "check-decl",
-                        "check-operator",
-                        "check-module",
-                        "check-separator",
-                        "check-type"
-                    ]
-                }
-            }
-        ]
+        // "@typescript-eslint/tslint/config": [
+        //     "error",
+        //     {
+        //         rules: {
+        //             // ban: [
+        //             //     true,
+        //             //     "setInterval"
+        //             // ],
+        //             whitespace: [
+        //                 true,
+        //                 "check-branch",
+        //                 "check-decl",
+        //                 "check-operator",
+        //                 "check-module",
+        //                 "check-separator",
+        //                 "check-type"
+        //             ]
+        //         }
+        //     }
+        // ]
     }
 };

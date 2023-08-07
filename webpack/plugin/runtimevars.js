@@ -28,8 +28,10 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @public
+     * @override
+     * @member apply
      * @param {WebpackCompiler} compiler the compiler instance
-     * @returns {void}
      */
     apply(compiler)
     {
@@ -57,6 +59,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function
      * @private
+     * @member info
      * @param {WebpackAssetInfo} info
      */
     info = (info) => apply({ ...(info || {}) }, { runtimeVars: true });
@@ -65,6 +68,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function
      * @private
+     * @member logAssetInfo
      * @param {boolean} [rotated] `true` indicates that values were read and rotated
      * i.e. `next` values were moved to `current`, and `next` is now blank
      */
@@ -110,6 +114,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function Collects content hashes from compiled assets
      * @private
+     * @member preprocess
      * @param {WebpackCompilationAssets} assets
      */
     preprocess = (assets) =>
@@ -167,6 +172,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function Reads stored / cached content hashes from file
      * @private
+     * @member readAssetState
      */
     readAssetState()
     {
@@ -186,6 +192,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function
      * @private
+     * @member runtimeVars
      * @param {WebpackCompilationAssets} assets
      */
     runtimeVars(assets)
@@ -205,20 +212,9 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
                 }
             }
         });
-        // asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
-        // {
-        //     const chunkName = /** @type {string} */(chunk.name);
-        //     asArray(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
-        //     {
-        //         this.logger.value("   check file for variable replacement", file, 3);
-        //         hashMap[chunkName] = chunk.contentHash.javascript;
-        //         if (chunk.canBeInitial()) {
-        //             this.logger.write(`   ${file} queued for variable replacement`, 2);
-        //             updates.push(file);
-        //         }
-        //     });
-        // });
-        updates.forEach((f) => this.compilation.updateAsset(f, (s) => this.source(f, s), this.info.bind(this)));
+        updates.forEach(
+            (file) => this.compilation.updateAsset(file, source => this.source(file, source), this.info.bind(this))
+        );
         this.logger.write("runtime variable replacement completed", 2);
     };
 
@@ -226,6 +222,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function Writes / caches asset content hashes to file
      * @private
+     * @member saveAssetState
      */
     saveAssetState()
     {
@@ -237,6 +234,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function Performs all source code modifications
      * @private
+     * @member source
      * @param {string} file
      * @param {WebpackSource} sourceInfo
      * @returns {WebpackSource}
@@ -252,6 +250,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function
      * @private
+     * @member sourceObj
      * @param {string} file
      * @param {string | Buffer} content
      * @param {WebpackSource} sourceInfo
@@ -269,6 +268,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     /**
      * @function Performs source code modifications for \_\_WPBUILD\_\_[contentHash]
      * @private
+     * @member sourceUpdateHashVars
      * @param {string} sourceCode
      * @returns {string}
      */

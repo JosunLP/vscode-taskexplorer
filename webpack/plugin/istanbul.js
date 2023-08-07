@@ -28,6 +28,7 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
     /**
      * @function Called by webpack runtime to initialize this plugin
      * @override
+     * @member apply
      * @param {WebpackCompiler} compiler the compiler instance
      */
     apply(compiler)

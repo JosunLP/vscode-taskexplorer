@@ -31,47 +31,72 @@ const { merge, pickBy, mergeIf } = require("./utils");
 class WpBuildApplication
 {
     /**
-     * @member
-     * @private
-     * @type {WpBuildEnvironment}
-     */
-    env;
-
-    /**
-     * @type {WpBuildAppRc}
+     * @member {WpBuildAppRc} applyExportDefaults
+     * @memberof WpBuildApplication.prototype
+     * @public
      */
     rc;
+
 
     /**
      * @class WpBuildApplication
      * @param {WebpackMode} mode Webpack command line args
      * @param {Partial<WpBuildEnvironment>} env Webpack build environment
-     * @throws {WebpackError}
      */
     constructor(mode, env)
     {
-        const appRc = /** @type {WpBuildAppRc} */({});
-        let rcPath = resolve(__dirname, "..", ".wpbuildrc.json"),
-            pkgJsonPath = resolve(__dirname, "..", "..", "package.json");
-        //
-        // Read .wpbuildrc
-        //
-        try
-        {   if (existsSync(rcPath) || existsSync(rcPath = resolve(__dirname, "..", "..", ".wpbuildrc.json")))
-            {
-                merge(appRc, JSON.parse(readFileSync(rcPath, "utf8")));
-            }
-            else {
-                throw new WebpackError("Could not locate .wpbuildrc.json");
-            }
-        }
-        catch {
-            throw new WebpackError("Could not parse .wpbuildrc.json, check syntax");
-        }
+        this.rc = /** @type {WpBuildAppRc} */({});
+        this.applyWpBuildRc();
+        this.applyPackageJson();
+        this.applyPluginDefaults();
+        this.applyExportDefaults();
+        this.applyProperties();
+        this.applyVsCodeDefaults();
+        this.applyLogDefaults();
+        this.printBanner(mode, /** @type {WpBuildEnvironment} */(env));
+    };
 
-        //
-        // Read package.json
-        //
+
+    /**
+     * @function
+     * @private
+     * @member applyExportDefaults
+     */
+    applyExportDefaults = () =>
+    {
+        if (!this.rc.exports) {
+            this.rc.exports = {};
+        }
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @member applyLogDefaults
+     */
+    applyLogDefaults = () =>
+    {
+        const rc = this.rc,
+              pad = { base: 0, envTag: 25, value: 45, uploadFileName: 60 };
+        rc.log = mergeIf(rc.log || {}, { level: 1, pad: { ...pad } });
+        rc.logPad = mergeIf(rc.logPad || {}, { ...pad});
+        rc.colors = mergeIf(rc.colors || {}, {
+            buildBracket: "blue", buildText: "white", default: "grey", infoIcon: "magenta", tagBracket: "blue",
+            tagText: "white", uploadSymbol: "yellow", valueStar: "cyan", valueStarText: "white"
+        });
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @member applyPackageJson
+     * @throws {WebpackError}
+     */
+    applyPackageJson = () =>
+    {
+        let pkgJsonPath = resolve(__dirname, "..", "..", "package.json");
         try
         {   if (existsSync(pkgJsonPath) || existsSync(pkgJsonPath = resolve(__dirname, "..", "..", "..", "package.json")))
             {
@@ -80,8 +105,8 @@ class WpBuildApplication
                 ];
                 /** @type {WpBuildPackageJson} */
                 const pkgJso = JSON.parse(readFileSync(pkgJsonPath, "utf8")),
-                    pkgJsoPartial = pickBy(pkgJso, p => props.includes(p));
-                merge(appRc, {}, { pkgJson: pkgJsoPartial });
+                      pkgJsoPartial = pickBy(pkgJso, p => props.includes(p));
+                merge(this.rc, {}, { pkgJson: pkgJsoPartial });
                 merge(globalEnv, {}, { pkgJson: pkgJsoPartial });
             }
             else {
@@ -91,63 +116,91 @@ class WpBuildApplication
         catch (e) {
             throw new WebpackError("Could not parse package.json, check syntax: " + e.message);
         }
-
-        if (!appRc.plugins) {
-            appRc.plugins = {};
-        }
-
-        if (!appRc.exports) {
-            appRc.exports = {};
-        }
-
-        //
-        // PRIMITIVE PROPERTIES
-        //
-        if (!appRc.name) {
-            appRc.name = appRc.pkgJson.name;
-        }
-        if (!appRc.displayName) {
-            appRc.name = appRc.pkgJson.displayName;
-        }
-        if (!appRc.bannerName) {
-            appRc.bannerName = appRc.displayName;
-        }
-        if (!appRc.bannerNameDetailed) {
-            appRc.bannerNameDetailed = appRc.bannerName;
-        }
-        if (!appRc.version) {
-            appRc.version = appRc.pkgJson.version;
-        }
-
-        //
-        // VSCODE PROPERTIES
-        //
-        if (!appRc.vscode) {
-            appRc.vscode = /** @type {WebpackVsCodeBuild} */({});
-        }
-        mergeIf(appRc.vscode, { webview: { apps: {}, baseDir: "" }});
-        mergeIf(appRc.vscode.webview, { apps: {}, baseDir: "" });
-
-        //
-        // LOG PROPERTIES
-        //
-        const pad = { base: 0, envTag: 25, value: 45, uploadFileName: 60 };
-        appRc.log = mergeIf(appRc.log || {}, { level: 1, pad: { ...pad } });
-        appRc.logPad = mergeIf(appRc.logPad || {}, { ...pad});
-        appRc.colors = mergeIf(appRc.colors || {}, {
-            buildBracket: "blue", buildText: "white", default: "grey", infoIcon: "magenta", tagBracket: "blue",
-            tagText: "white", uploadSymbol: "yellow", valueStar: "cyan", valueStarText: "white"
-        });
-
-        this.rc = appRc;
-        this.env = /** @type {WpBuildEnvironment} */(env);
-        this.printBanner(mode);
     };
 
 
     /**
      * @function
      * @private
+     * @member applyProperties
+     */
+    applyProperties = () =>
+    {
+        const rc = this.rc;
+        if (!rc.name) {
+            rc.name = rc.pkgJson.name;
+        }
+        if (!rc.displayName) {
+            rc.name = rc.pkgJson.displayName;
+        }
+        if (!rc.bannerName) {
+            rc.bannerName = rc.displayName;
+        }
+        if (!rc.bannerNameDetailed) {
+            rc.bannerNameDetailed = rc.bannerName;
+        }
+        if (!rc.version) {
+            rc.version = rc.pkgJson.version;
+        }
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @member applyPluginDefaults
+     */
+    applyPluginDefaults = () =>
+    {
+        if (!this.rc.plugins) {
+            this.rc.plugins = {};
+        }
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @member applyVsCodeDefaults
+     */
+    applyVsCodeDefaults = () =>
+    {
+        const rc = this.rc;
+        if (!rc.vscode) {
+            rc.vscode = /** @type {WebpackVsCodeBuild} */({});
+        }
+        mergeIf(rc.vscode, { webview: { apps: {}, baseDir: "" }});
+        mergeIf(rc.vscode.webview, { apps: {}, baseDir: "" });
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @member applyWpBuildRc
+     */
+    applyWpBuildRc = () =>
+    {
+        let rcPath = resolve(__dirname, "..", ".wpbuildrc.json");
+        try
+        {   if (existsSync(rcPath) || existsSync(rcPath = resolve(__dirname, "..", "..", ".wpbuildrc.json")))
+            {
+                merge(this.rc, JSON.parse(readFileSync(rcPath, "utf8")));
+            }
+            else {
+                throw new WebpackError("Could not locate .wpbuildrc.json");
+            }
+        }
+        catch {
+            throw new WebpackError("Could not parse .wpbuildrc.json, check syntax");
+        }
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @member printLineSep
      * @param {WpBuildConsoleLogger} logger
      */
     printLineSep = (logger) =>
@@ -159,11 +212,13 @@ class WpBuildApplication
     /**
      * @function
      * @private
+     * @member printBanner
      * @param {WebpackMode} mode Webpack command line args
+     * @param {WpBuildEnvironment} env Webpack build environment
      */
-    printBanner = (mode) =>
+    printBanner = (mode, env) =>
     {
-        const logger = new WpBuildConsoleLogger(this.env);
+        const logger = new WpBuildConsoleLogger(env);
         this.printLineSep(logger);
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
         console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
@@ -171,8 +226,8 @@ class WpBuildApplication
         logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.rc.bannerNameDetailed} Webpack Build`));
         this.printLineSep(logger);
         logger.write("   Mode  : " + logger.withColor(mode, logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Argv  : " + logger.withColor(JSON.stringify(this.env.argv), logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Env   : " + logger.withColor(JSON.stringify(this.env), logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Argv  : " + logger.withColor(JSON.stringify(env.argv), logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Env   : " + logger.withColor(JSON.stringify(env), logger.colors.grey), 1, "", 0, logger.colors.white);
         this.printLineSep(logger);
     };
 
@@ -180,23 +235,25 @@ class WpBuildApplication
     // /**
     //  * @function
     //  * @private
+    //  * @member spmBanner
     //  * @param {WpBuildConsoleLogger} logger
     //  * @returns {string}
     //  */
-    // const spmBanner2 = (app, version) =>
+    // const spmBanner = (app, version) =>
     // {
-    //     return `     ${icons.info}       ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________
-    //      ${icons.info}      (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  )
-    //      ${icons.info}      \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ /
-    //      ${icons.info}    ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  /
-    //      ${icons.info}   (_____/|_|       | /       |_|   |_| (____/   ${version}   \\/
-    //      ${icons.info}                    |/${app.padStart(51 - app.length)}`;
+    //     return `        ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________
+    //       (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  )
+    //       \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ /
+    //     ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  /
+    //    (_____/|_|       | /       |_|   |_| (____/   ${version}   \\/
+    //                          |/${app.padStart(51 - app.length)}`;
     // };
 
 
     /**
      * @function
      * @private
+     * @member spmBanner
      * @returns {string}
      */
     spmBanner = () =>
