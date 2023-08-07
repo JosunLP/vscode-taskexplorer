@@ -145,8 +145,18 @@ declare interface IWpBuildLogColorMap
     uploadSymbol: WpBuildLogTrueColor;
     valueStar: WpBuildLogTrueColor;
     valueStarText: WpBuildLogTrueColor;
+    builds: WpBuildBuildLogColorMap;
 }
 declare type WpBuildLogColorMap = Required<IWpBuildLogColorMap>;
+declare interface IWpBuildBuildLogColorMap
+{
+    main: "blue",
+    tests: "white",
+    types: "magenta",
+    web: "cyan"
+}
+declare type WpBuildBuildLogColorMap = Required<IWpBuildBuildLogColorMap> & Record<string, WpBuildLogTrueColor>;
+
 declare interface IWpBuildLogPadMap
 {
     base: number;

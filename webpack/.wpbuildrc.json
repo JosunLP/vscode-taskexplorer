@@ -31,7 +31,13 @@
         "valueStarText": "white",
         "tagBracket": "blue",
         "tagText": "white",
-        "uploadSymbol": "yellow"
+        "uploadSymbol": "yellow",
+        "builds": {
+            "extension": "blue",
+            "tests": "white",
+            "types": "magenta",
+            "webview": "cyan"
+        }
     },
     "log": {
         "level": 3,

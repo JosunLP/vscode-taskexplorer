@@ -9,6 +9,8 @@
  * !!!   - create the environment variables WPBUILD_APP1_SSH_AUTH_*
  * !!!   - run a plink command manually to generate and trust the fingerprints:
  * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
+ * @version 0.0.1
+ * @license MIT
  * @author Scott Meesseman
  */
 
@@ -37,6 +39,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
         this.initGlobalEnvObject("upload", 0, "callCount", "readyCount");
     }
 
+
     /**
      * @function Called by webpack runtime to initialize this plugin
      * @override
@@ -55,6 +58,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             }
         });
     }
+
 
     /**
      * @function
@@ -135,11 +139,9 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             `mkdir ${rBasePath}/${env.app.name}`,
             `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}`,
             `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}`,
-            // `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}/${compilation.hash}`,
             `rm -f ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}/*.*`,
-            // `rm -f ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}/${compilation.hash}/*.*`
         ];
-        if (env.environment !== "prod") { plinkCmds.pop(); }
+        if (env.environment === "prod") { plinkCmds.pop(); }
 
         const plinkArgs = [
             "-ssh",       // force use of ssh protocol
@@ -187,7 +189,6 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             await rm(toUploadPath, { recursive: true, force: true });
         }
     }
-
 }
 
 

@@ -8,6 +8,8 @@
  * This module contains project specifc code and the sync script should be modified
  * if necessary when changes are made to this file.
  * TODO - Make it not project specific somehow
+ * @version 0.0.1
+ * @license MIT
  * @author Scott Meesseman
  */
 

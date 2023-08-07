@@ -3,6 +3,8 @@
 
 /**
  * @file plugin/optimization.js
+ * @version 0.0.1
+ * @license MIT
  * @author Scott Meesseman
  */
 

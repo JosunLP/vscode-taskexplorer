@@ -81,9 +81,23 @@ class WpBuildApplication
               pad = { base: 0, envTag: 25, value: 45, uploadFileName: 60 };
         rc.log = mergeIf(rc.log || {}, { level: 1, pad: { ...pad } });
         rc.logPad = mergeIf(rc.logPad || {}, { ...pad});
-        rc.colors = mergeIf(rc.colors || {}, {
-            buildBracket: "blue", buildText: "white", default: "grey", infoIcon: "magenta", tagBracket: "blue",
-            tagText: "white", uploadSymbol: "yellow", valueStar: "cyan", valueStarText: "white"
+        rc.colors = mergeIf(rc.colors || {},
+        {
+            buildBracket: "blue",
+            buildText: "white",
+            default: "grey",
+            infoIcon: "magenta",
+            tagBracket: "blue",
+            tagText: "white",
+            uploadSymbol: "yellow",
+            valueStar: "cyan",
+            valueStarText: "white",
+            builds: {
+                main: "blue",
+                tests: "white",
+                types: "magenta",
+                web: "cyan"
+            }
         });
     };
 

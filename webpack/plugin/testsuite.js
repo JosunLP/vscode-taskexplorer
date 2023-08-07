@@ -4,6 +4,8 @@
 
 /**
  * @file plugin/testsuite.js
+ * @version 0.0.1
+ * @license MIT
  * @author Scott Meesseman
  */
 

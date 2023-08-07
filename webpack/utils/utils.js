@@ -2,8 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
-const glob = require("glob");
 const JSON5 = require("json5");
+const { glob } = require("glob");
 const { spawnSync } = require("child_process");
 
 /**
@@ -89,15 +89,13 @@ const clone = (item) =>
 /**
  * @function
  * @param {string} pattern
- * @param {import("glob").IOptions} options
+ * @param {import("glob").GlobOptions} options
  * @returns {Promise<string[]>}
  */
-const findFiles = (pattern, options) =>
+const findFiles = async (pattern, options) =>
 {
-    return new Promise((resolve, reject) =>
-    {
-        glob(pattern, options, (err, files) => { if(!err) resolve(files); else reject(err); });
-    });
+    const files = await glob(pattern, options);
+    return files.map(f => f.toString());
 };
 
 
