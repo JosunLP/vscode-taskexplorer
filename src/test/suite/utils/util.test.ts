@@ -3,10 +3,10 @@ import { join } from "path";
 import { env } from "process";
 import { expect } from "chai";
 import { ITeWrapper } from ":types";
-import { commands, Uri, workspace, WorkspaceFolder } from "vscode";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
+import { commands, Uri, workspace, WorkspaceFolder } from "vscode";
 import {
-	activate, testControl, logErrorsAreFine, suiteFinished, exitRollingCount, getWsPath, endRollingCount, sleep, overrideNextShowInputBox
+	activate, testControl, suiteFinished, exitRollingCount, getWsPath, endRollingCount, sleep, overrideNextShowInfoBox
 } from "../../utils/utils";
 
 let rootUri: Uri;
@@ -167,9 +167,9 @@ suite("Util Tests", () =>
 		const originalFn = commands.executeCommand;
 		try {
 			commands.executeCommand = async <T>(args: any) => { return args as T; };
-			overrideNextShowInputBox("Restart", true);
+			overrideNextShowInfoBox("Restart", true);
 			await teWrapper.utils.promptRestart("Test restart message 1", () => {});
-			overrideNextShowInputBox("Cancel");
+			overrideNextShowInfoBox("Cancel");
 			await teWrapper.utils.promptRestart("Test restart message 2", async () => { await teWrapper.utils.sleep(1); });
 		}
 		finally {

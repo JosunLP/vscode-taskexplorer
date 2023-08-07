@@ -3,16 +3,17 @@ import { join } from "path";
 import { expect } from "chai";
 import { ITeWrapper, ILog, ILogControl } from ":types";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
-import { activate, exitRollingCount, endRollingCount, suiteFinished, testControl, overrideNextShowInfoBox, clearOverrideShowInfoBox } from "../../utils/utils";
+import {
+	activate, exitRollingCount, endRollingCount, suiteFinished, testControl, overrideNextShowInfoBox,
+	clearOverrideShowInfoBox
+} from "../../utils/utils";
 
-let log: ILog;
-let writeConsole: boolean;
-let writeConsoleLvl: number;
-let teWrapper: ITeWrapper;
-let logControl: ILogControl;
-
-
-let runtimeDir: string,
+let log: ILog,
+	writeConsole: boolean,
+	writeConsoleLvl: number,
+	teWrapper: ITeWrapper,
+	logControl: ILogControl,
+	runtimeDir: string,
 	dbgModuleDir: string,
 	teRelModulePath: string,
 	rtRelModulePath: string,
