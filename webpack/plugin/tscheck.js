@@ -92,44 +92,39 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 */
 	static getTsForkCheckerPlugins = (env) =>
 	{
+		let tsConfig;
 		const tsConfigs = /** @type {[ string, ForkTsCheckerMode, boolean? ][]} */([]);
 		if (env.build === "webview")
 		{
-			tsConfigs.push(
-				[ path.join(env.paths.base, "tsconfig.json"), "readonly" ]
-			);
+			tsConfig = path.join(env.paths.build, "tsconfig.webview.json");
+			if (!existsSync(tsConfig)) {
+				tsConfig = path.join(env.paths.base, "tsconfig.json");
+			}
+			tsConfigs.push([ tsConfig, "readonly" ]);
 		}
 		else if (env.build === "tests")
 		{
-			tsConfigs.push(
-				[ path.join(env.paths.build, "tsconfig.test.json"), "write-tsbuildinfo" ],
-				[ path.join(env.paths.build, "src", "test", "tsconfig.json"), "write-tsbuildinfo" ]
-			);
+			tsConfig = path.join(env.paths.build, "tsconfig.test.json");
+			if (!existsSync(tsConfig)) {
+				tsConfig = path.join(env.paths.build, "src", "test", "tsconfig.json");
+			}
+			tsConfigs.push([ tsConfig, "write-tsbuildinfo" ]);
 		}
 		else if (env.build === "types")
 		{
-			tsConfigs.push(
-				[ path.join(env.paths.build, "tsconfig.types.json"), "write-dts" ],
-				[ path.join(env.paths.build, "types", "tsconfig.json"), "write-dts" ]
-			);
+			tsConfig = path.join(env.paths.build, "tsconfig.types.json");
+			if (!existsSync(tsConfig)) {
+				tsConfig = path.join(env.paths.build, "types", "tsconfig.json");
+			}
+			tsConfigs.push([ tsConfig, "write-dts" ]);
 		}
 		else
 		{
-			tsConfigs.push(
-				// [ path.join(env.paths.build, "tsconfig.types.json"), "readonly" ],
-				// [ path.join(env.paths.build, "types", "tsconfig.json"), "readonly" ],
-				// [ path.join(env.paths.build, `tsconfig.${env.target}.json`), "readonly" ],
-				// [ path.join(env.paths.build, env.build === "web" ? "tsconfig.web.json" : "tsconfig.json"), "readonly" ],
-				[ path.join(env.paths.build, `tsconfig.${env.target}.json`), "write-dts" ],
-				[ path.join(env.paths.build, "tsconfig.json"), "write-dts" ]
-			);
-			// if (env.environment === "test")
-			// {
-			// 	tsConfigs.push(
-			// 		[ path.join(env.paths.build, "tsconfig.test.json"), "write-tsbuildinfo", true ],
-			// 		[ path.join(env.paths.build, "src", "test", "tsconfig.json"), "write-tsbuildinfo", true ]
-			// 	);
-			// }
+			tsConfig = path.join(env.paths.build, `tsconfig.${env.target}.json`);
+			if (!existsSync(tsConfig)) {
+				tsConfig = path.join(env.paths.build, "tsconfig.json");
+			}
+			tsConfigs.push([ tsConfig, "write-dts" ]);
 		}
 
 		return tsConfigs.filter(tsCfg => existsSync(tsCfg[0])).map((tsCfg) => (
