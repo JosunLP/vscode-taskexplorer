@@ -45,7 +45,9 @@ export class TeLog extends Log implements ILog, Disposable
             errorChannel: {
                 clear: eChannel.clear,
                 dispose: eChannel.dispose,
-                write: eChannel.appendLine
+                hide: eChannel.hide,
+                write: eChannel.appendLine,
+                show: eChannel.show
             },
             httpGetFn: <LogHttpGetFn>wrapper.server.get,
             installDirectory: wrapper.context.extensionUri.fsPath,
@@ -60,7 +62,9 @@ export class TeLog extends Log implements ILog, Disposable
             outputChannel: {
                 clear: oChannel.clear,
                 dispose: oChannel.dispose,
-                write: oChannel.appendLine
+                hide: eChannel.hide,
+                write: oChannel.appendLine,
+                show: eChannel.show
             },
             promptRestartFn: wrapper.utils.promptRestart,
             storageDirectory: wrapper.context.globalStorageUri.fsPath
@@ -85,7 +89,7 @@ export class TeLog extends Log implements ILog, Disposable
     };
 
 
-	override init = async (): Promise<void> =>
+	init = async (): Promise<void> =>
 	{
         const w = this.wrapper,
               clean = w.versionChanged,
@@ -104,7 +108,7 @@ export class TeLog extends Log implements ILog, Disposable
 			sb.tooltip = "Downloading a few support files for enhanced logging and error tracing";
 			sb.show();
 		});
-		await w.utils.wrap(super.init, wrapOpts, this, clean, httpGet, prompt);
+		await w.utils.wrap(this.initBase, wrapOpts, this, clean, httpGet, prompt);
 	};
 
 
@@ -149,7 +153,9 @@ export class TeLog extends Log implements ILog, Disposable
         //
         // Call super function `reset` after config changes
         //
-        this.reset();
+        if (cfgChanged) {
+            this.reset();
+        }
     };
 
 

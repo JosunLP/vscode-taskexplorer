@@ -1,5 +1,5 @@
 {
-    "extends": "../../tsconfig.base.json",
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
 		"isolatedModules": false,
         "outDir": "../../dist/test",
@@ -15,5 +15,6 @@
     },
 	"include": [
 		"./**/*"
-	]
+	],
+	"exclude": []
 }

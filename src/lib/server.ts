@@ -18,7 +18,6 @@ export class TeServer implements ISpmServer, Disposable
 	private readonly _spmApiServer = "license.spmeesseman.com";
 	private readonly _spmResourceServer = "app1.spmeesseman.com";
     private readonly _onRequestCancel = new EventEmitter<void>();
-    private readonly _onRequestComplete = new EventEmitter<void>();
 	private readonly _publicToken: Record<TeRuntimeEnvironment, string> = {
 		dev: "1Ac4qiBjXsNQP82FqmeJ5k0/oMEmjR6Dx9fw1ojUO9//Z4MS6gdHvmzPYY+tuhp3UV/xILD301dQZpeAt+YZzY+Lnh8DlVCPjc0B4pdP84XazzZ+c3JN0vNN4cIfa+fsyPAEDzcsFUWf3z04kMyDXktZU7EiJ4vBU89qAbjOX9I=",
 		test: "hkL89/b3ETjox/jZ+cPq5satV193yZUISaopzfpJKSHrh4ZzFkTXjJqawRNQFYWcOBrbGCpyITCp0Wm19f8gdI1hNJttkARO5Unac4LA2g7RmT/kdXSsz64zNjB9FrvrzHe97tLBHRGorwcOx/K/hQ==",
@@ -53,7 +52,7 @@ export class TeServer implements ISpmServer, Disposable
 	private getApiPath = (ep: SpmApiEndpoint) => `${ep !== "payment/paypal/hook" ? "/api" : ""}/${ep}/${this.productName}/v${this._spmApiVersion}`;
 
 
-	private getResourcPath = (ep: SpmServerResource) => `https://${this._spmResourceServer}/res/${ep}`;
+	private getResourcePath = (ep: SpmServerResource) => `https://${this._spmResourceServer}/${ep}`;
 
 
 	// get = async <T = string | ArrayBuffer | Record<string, any>>(ep: SpmServerResource, raw: boolean, logPad: string) =>
@@ -72,10 +71,10 @@ export class TeServer implements ISpmServer, Disposable
 	{
 		let rspBody: ArrayBuffer = new ArrayBuffer(0);
 		this.wrapper.log.methodStart("server resource request", 1, logPad, false, [[ "endpoint", ep ]]);
-		const rsp = await this.wrapRequest(() => fetch(this.getResourcPath(ep),
+		const rsp = await this.wrapRequest(() => fetch(this.getResourcePath(ep),
 		{
 			agent: getProxyAgent(),
-			hostname: this._spmApiServer,
+			hostname: this._spmResourceServer,
 			method: "GET",
 			port: 443,
 			headers: {
@@ -101,7 +100,11 @@ export class TeServer implements ISpmServer, Disposable
 		this.wrapper.log.methodDone("server resource request", 1, logPad, [
 			[ "response status", rsp.status ], [ "response size", rsp.size ]
 		]);
-		this.wrapper.utils.throwIf(rsp.status > 299, SpmServerError, rsp.status, rspBody, `HTTP error description: ${rsp.statusText}`);
+		this.wrapper.utils.throwIf(
+			rsp.status > 299, SpmServerError, rsp.status, rspBody,
+			`Received HTTP status ${rsp.status} (${rsp.statusText})` +
+			(rspBody ? `\n${Buffer.from(rspBody).toString().trim()}` : "Response body is 0 bytes")
+		);
 		return rspBody;
 	};
 

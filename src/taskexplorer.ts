@@ -7,7 +7,6 @@ let teWrapper: TeWrapper;
 
 export async function activate(context: ExtensionContext)
 {
-    console.log(" activate wtf 1");
     const isTests = context.extensionMode === ExtensionMode.Test;
     teWrapper = await TeWrapper.create(context);
     return isTests ? teWrapper : /* istanbul ignore next */teWrapper.api;

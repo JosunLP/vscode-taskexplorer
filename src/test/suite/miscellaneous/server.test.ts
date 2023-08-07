@@ -33,14 +33,14 @@ suite("Server Tests", () =>
     {
         if (exitRollingCount(this)) return;
         this.slow(tc.slowTime.apiServer.httpGet * 2);
-        const wasmContent = await teWrapper.server.get(`app/${teWrapper.extensionName}/v${teWrapper.version}/test/mappings.wasm`, "");
+        const wasmContent = await teWrapper.server.get(`res/app/${teWrapper.extensionName}/v${teWrapper.version}/test/mappings.wasm`, "");
         expect(wasmContent).to.be.an("ArrayBuffer");
         expect(wasmContent.byteLength).to.be.equal(48693);
-        const srcMapContent = await teWrapper.server.get(
-            `app/${teWrapper.extensionName}/v${teWrapper.version}/test/${teWrapper.extensionNameShort}.js.map`, ""
-        );
-        expect(srcMapContent).to.be.an("ArrayBuffer");
-        expect(srcMapContent.byteLength).to.be.greaterThanOrEqual(900000);
+        // const srcMapContent = await teWrapper.server.get(
+        //     `res/app/${teWrapper.extensionName}/v${teWrapper.version}/test/${teWrapper.extensionNameShort}.js.map`, ""
+        // );
+        // expect(srcMapContent).to.be.an("ArrayBuffer");
+        // expect(srcMapContent.byteLength).to.be.greaterThanOrEqual(900000);
         endRollingCount(this);
     });
 

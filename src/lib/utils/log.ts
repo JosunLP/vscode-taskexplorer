@@ -373,7 +373,7 @@ export class Log implements ILog, ILogDisposable
     });
 
 
-    init = async (isNewInstallOrVersion: boolean) =>
+    initBase = async (isNewInstallOrVersion: boolean) =>
     {   //
         // Calling application should `clean` when there is a version change or for a new
         // install (as user may have uninstalled and reinstralled, there's no way for the
@@ -401,10 +401,8 @@ export class Log implements ILog, ILogDisposable
 
     private installDebugSupport = (swap?: boolean): Promise<void> =>
     {
-console.log("installDebugSupport 1");
         return wrap(async () =>
         {
-console.log("installDebugSupport 2");
             const enable = this._logControl.enable,
                   dbgModuleStorageDir = this._moduleInfo.storageDir,
                   curModuleContent = await readFileAsync(this._moduleInfo.path),
@@ -415,31 +413,22 @@ console.log("installDebugSupport 2");
                   debugFile = `${this._moduleInfo.name}.debug.${dbgModuleHash}.js`,
                   debugFileNoHash = `${this._moduleInfo.name}.debug.js`,
                   isCurrentlyDbg = curModuleContent.substring(curModuleContent.length - 100).includes(`${debugFile}.map`);
-console.log("enable: " + enable);
-console.log("dbgModuleHash: " + dbgModuleStorageDir);
-console.log("dbgModuleHash: " + dbgModuleHash);
-console.log("debugFile: " + debugFile);
-console.log("releaseFile: " + releaseFile);
-console.log("isCurrentlyDbg: " + isCurrentlyDbg);
             //
             // Retrieve the debug modules from the server if not already downloaded and save them
             // to the configured storage directory
             //
             if ((!isCurrentlyDbg && swap === true) || swap === undefined)
             {
-console.log("installDebugSupport 3");
-                const remotePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._moduleInfo.version}/${this._logConfig.env}`,
+                const remotePath = `res/app/${this._logConfig.app}/v${this._moduleInfo.version}/${this._logConfig.env}`,
                       storageFilePath = join(dbgModuleStorageDir, debugFileNoHash);
                 await execIf(
                     !pathExistsSync(storageFilePath),
                     async () => {
-console.log("storageFilePathDbg 4 GET : " + `${remotePath}/${debugFile}`);
                         const content = await this._logConfig.httpGetFn(`${remotePath}/${debugFile}`);
                         await writeFile(storageFilePath, Buffer.from(content));
                     },
                     this, [ this.warn, `could not download debug module ${debugFile}` ]
                 );
-console.log("installDebugSupport 5");
             }
             //
             // Make a copy of the release modules currently in the runtime directory if not
@@ -447,20 +436,17 @@ console.log("installDebugSupport 5");
             //
             if ((isCurrentlyDbg && swap === true) || swap === undefined)
             {
-console.log("installDebugSupport 6: " + releaseFile);
                 const storageFilePath = join(dbgModuleStorageDir, this._moduleInfo.file);
                 await execIf(
                     !pathExistsSync(storageFilePath),
                     () => copyFile(this._moduleInfo.path, storageFilePath),
                     this, [ this.warn, `could not load release module ${releaseFile}` ]
                 );
-console.log("installDebugSupport 7");
             }
             //
             // Swap release / debug modules i.e. overwrite the current runtime file in the
             // configured module runtime directory
             //
-console.log("installDebugSupport 8: swap");
             if (swap)
             {
                 const cpFile = !enable ? releaseFileNoHash : debugFileNoHash;
@@ -477,9 +463,9 @@ console.log("installDebugSupport 8: swap");
         {
             const wasmPath = join(this._moduleInfo.storageDir, "mappings.wasm"),
                   dbgModuleHash = this._logConfig.moduleHash[this._moduleInfo.name + ".debug"],
-                  srcMapFile = `${this._moduleInfo.file}.debug.${dbgModuleHash}.js.map`,
+                  srcMapFile = `${this._moduleInfo.name}.debug.${dbgModuleHash}.js.map`,
                   srcMapPath = join(this._moduleInfo.storageDir, srcMapFile),
-                  remoteBasePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._moduleInfo.version}/${this._logConfig.env}`;
+                  remoteBasePath = `res/app/${this._logConfig.app}/v${this._moduleInfo.version}/${this._logConfig.env}`;
             //
             // Retrieve the sourcemap support files from the server if not already downloaded and
             // save them to the globalStorage directory (full path defined as *DbgModulePath).
@@ -497,9 +483,11 @@ console.log("installDebugSupport 8: swap");
                 await writeFile(srcMapPath, Buffer.from(content));
             });
             //
-            // Assembly file must reside in the same directory as the sourcemap file, copy it there
+            // Assembly file must reside in the same directory as the sourcemap file (update: same
+            // directory as module file?), copy it there
             //
-            await copyFile(wasmPath, join(this._moduleInfo.storageDir, "mappings.wasm"));
+            // await copyFile(wasmPath, join(this._moduleInfo.storageDir, "mappings.wasm"));
+            await copyFile(wasmPath, join(this._moduleInfo.dir, "mappings.wasm"));
             //
             // Create SourceMap instance and register it's destroy call as a disposable
             //

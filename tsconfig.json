@@ -14,11 +14,34 @@
 		"noImplicitOverride": true,
         "noUnusedLocals": false,
         "noEmitOnError": true,
+        "paths": {
+			":env/*": [ "src/lib/env/node/*" ],
+			":types": [ "types" ]
+		},
 		"skipLibCheck": true,
         "sourceMap": true,
         "strict": true,
         "target": "es2020",
 		"useDefineForClassFields": true,
 		"useUnknownInCatchVariables": false
-    }
+    },
+	"include": [
+		"src"
+	],
+    "exclude": [
+        ".coverage",
+        ".nyc_output",
+        ".vscode",
+        ".vscode-test",
+        "dist",
+        "doc",
+        "node_modules",
+        "res",
+        "script",
+        "src/test/**/*",
+        "src/webview/app/**/*",
+        "src/lib/env/web/**/*",
+        "test-fixture",
+        "types"
+    ]
 }
