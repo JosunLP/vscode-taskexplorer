@@ -79,7 +79,6 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 		{
 			const ccFile = this.fileNameStrip(file),
 				  absFile = this.compilation.getPath(file),
-				  sourceFilename = file, // normalize(relative(this.compiler.context, absFile)),
 				  dstAsset = this.compilation.getAsset(ccFile);
 			if (!dstAsset)
 			{
@@ -90,7 +89,7 @@ console.log("1");
 console.log("2");
 					const srcAssetInfo = apply({}, srcAsset.info),
 						  sources = this.compiler.webpack.sources,
-					      newInfo = { ...srcAssetInfo, copied: true, sourceFilename };
+					      newInfo = { ...srcAssetInfo, copied: true, sourceFilename: srcAsset.name };
 					this.logger.value("   emit copied asset", ccFile, 2);
 console.log("2.1: " + srcAsset.info.contenthash);
 console.log("2.2: " + sourceInfo.source().toString().substring(sourceInfo.source().toString().length - 100));
@@ -148,7 +147,7 @@ console.log("!!!! NOTTTTTT CACHED");
 				if (srcAsset && srcAsset.info.related?.sourceMap)
 				{
 					this.logger.value("   update copied asset with sourcemap", file);
-					const newInfo = { ...srcAsset.info, copied: true, sourceFilename: file };
+					const newInfo = { ...srcAsset.info, copied: true, sourceFilename: srcAsset.name };
 					this.compilation.updateAsset(file, srcAsset.source, newInfo);
 				}
 			}
