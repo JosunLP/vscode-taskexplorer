@@ -15,7 +15,7 @@ const optimization = (env) =>
 {
 	parallelism(env);
 
-	if (env.isExtension)
+	if (env.isMain)
 	{
 		env.wpc.optimization =
 		{

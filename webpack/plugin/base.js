@@ -161,7 +161,7 @@ class WpBuildBasePlugin
 
 
     /**
-     * @class
+     * @class WpBuildBasePlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      * @param {string} [globalCache]
      */
@@ -190,7 +190,8 @@ class WpBuildBasePlugin
 
     /**
      * @function Called by webpack runtime to initialize this plugin.  To be overridden by inheriting class.
-     * @memberof WpBuildBasePlugin.prototype
+     * @public
+     * @member apply
      * @param {WebpackCompiler} compiler the compiler instance
      */
     apply(compiler) { this.compiler = compiler; }
@@ -198,8 +199,8 @@ class WpBuildBasePlugin
 
     /**
      * @function Break property name into separate spaced words at each camel cased character
-     * @member breakProp
      * @private
+     * @member breakProp
      * @param {string} prop
      * @returns {string}
      */
@@ -213,8 +214,9 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member checkSnapshot
      * @protected
+     * @async
+     * @member checkSnapshot
      * @param {string} filePath
      * @param {string} identifier
      * @param {string} outputDir Output directory of build
@@ -293,8 +295,9 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member checkSnapshotExists
      * @protected
+     * @async
+     * @member checkSnapshotExists
      * @param {string} filePath
      * @param {string} identifier
      * @param {string} outputDir Output directory of build
@@ -318,8 +321,9 @@ class WpBuildBasePlugin
 
 	/**
 	 * @function
-	 * @member checkSnapshotValid
 	 * @protected
+	 * @async
+	 * @member checkSnapshotValid
 	 * @param {WebpackSnapshot} snapshot
 	 * @returns {Promise<boolean | undefined>}
 	 */
@@ -334,8 +338,9 @@ class WpBuildBasePlugin
 
 	/**
 	 * @function
-	 * @member createSnapshot
 	 * @protected
+	 * @async
+	 * @member createSnapshot
 	 * @param {number} startTime
 	 * @param {string} dependency
 	 * @returns {Promise<WebpackSnapshot | undefined | null>}
@@ -353,8 +358,8 @@ class WpBuildBasePlugin
 
 	/**
 	 * @function
-	 * @member fileNameStrip
 	 * @protected
+	 * @member fileNameStrip
 	 * @param {string} file
 	 * @param {boolean} [rmvExt] Remove file extension
 	 * @returns {string}
@@ -371,8 +376,8 @@ class WpBuildBasePlugin
 
 	/**
 	 * @function
-	 * @member fileNameHashRegex
 	 * @protected
+	 * @member fileNameHashRegex
 	 * @returns {RegExp}
 	 */
     fileNameHashRegex = () => new RegExp(`\\.[a-z0-9]{${this.hashDigestLength},}`);
@@ -398,8 +403,9 @@ class WpBuildBasePlugin
 
     /**
      * @function getEntriesRegex
-     * @member getEntriesRegex
+     * @public
      * @static
+     * @member getEntriesRegex
      * @param {WebpackConfig} wpConfig Webpack config object
      * @param {boolean} [dbg]
      * @param {boolean} [ext]
@@ -418,6 +424,7 @@ class WpBuildBasePlugin
 
     /**
      * @function
+     * @public
      * @member getPlugins
      * @returns {(WebpackPluginInstance | InstanceType<WpBuildBasePlugin>)[]}
      */
@@ -449,8 +456,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member initGlobalEnvObject
      * @protected
+     * @member initGlobalEnvObject
      * @param {string} baseProp
      * @param {any} [initialValue]
      * @param {...any} props
@@ -466,8 +473,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member isAsync
      * @private
+     * @member isAsync
      * @param {any} hook
      * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
      */
@@ -476,8 +483,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member isEntryAsset
      * @protected
+     * @member isEntryAsset
      * @param {string} file
      * @returns {boolean}
      */
@@ -486,8 +493,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member isTapable
      * @private
+     * @member isTapable
      * @param {any} hook
      * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
      */
@@ -496,8 +503,8 @@ class WpBuildBasePlugin
 
     /**
      * @function Called by extending class from apply()
-     * @member onApply
      * @protected
+     * @member onApply
      * @param {WebpackCompiler} compiler the compiler instance
      * @param {WpBuildPluginTapOptionsHash} options
      * @throws {WebpackError}
@@ -542,8 +549,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member onCompilation
      * @protected
+     * @member onCompilation
      * @param {WebpackCompilation} compilation
      * @returns {boolean}
      */
@@ -558,8 +565,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member tapCompilationHooks
      * @private
+     * @member tapCompilationHooks
      * @param {[string, WpBuildPluginTapOptions][]} optionsArray
      */
     tapCompilationHooks(optionsArray)
@@ -594,8 +601,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member tapCompilationStage
      * @protected
+     * @member tapCompilationStage
      * @param {string} optionName
      * @param {WpBuildPluginCompilationOptions} options
      * @returns {void}
@@ -642,8 +649,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member tapStatsPrinter
      * @protected
+     * @member tapStatsPrinter
      * @param {string} property
      * @param {string} name
      */
@@ -660,8 +667,8 @@ class WpBuildBasePlugin
 
     /**
      * @function
-     * @member wrapCallback
      * @private
+     * @member wrapCallback
      * @param {string} message If camel-cased, will be formatted with {@link breakProp}
      * @param {WpBuildPluginTapOptions} options
      * @returns {WpBuildPluginHookCallback}
@@ -681,8 +688,8 @@ class WpBuildBasePlugin
     // /**
     //  * @template T
     //  * @function
-    //  * @member wrapTry
     //  * @protected
+    //  * @member wrapTry
     //  * @param {Function} fn
     //  * @param {string} msg
     //  * @param {...any} args

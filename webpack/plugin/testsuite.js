@@ -12,7 +12,6 @@ const { promisify } = require("util");
 const WpBuildBasePlugin = require("./base");
 const { WebpackError } = require("webpack");
 const exec = promisify(require("child_process").exec);
-// const spawn = promisify(require("child_process").spawn);
 const { findFiles, getTsConfig } = require("../utils");
 const {readFile, unlink, access } = require("fs/promises");
 const { join, basename, relative, dirname, isAbsolute, resolve } = require("path");
@@ -31,6 +30,7 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @override
      * @param {WebpackCompiler} compiler the compiler instance
      */
     apply(compiler)

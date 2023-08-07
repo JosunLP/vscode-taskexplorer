@@ -40,6 +40,7 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @override
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
@@ -111,7 +112,7 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
  * @param {WpBuildEnvironment} env
  * @returns {(WpBuildCleanPlugin | CleanWebpackPlugin)[]}
  */
-const clean = (env) => env.app.plugins.clean !== false ? new WpBuildCleanPlugin({ env }).getPlugins() : [];
+const clean = (env) => env.app.plugins.clean && env.build !== "tests" ? new WpBuildCleanPlugin({ env }).getPlugins() : [];
 
 
 module.exports = clean;

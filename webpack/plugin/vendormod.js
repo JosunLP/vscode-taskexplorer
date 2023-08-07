@@ -21,6 +21,7 @@ class WpBuildVendorModPlugin extends WpBuildBasePlugin
 
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @override
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */

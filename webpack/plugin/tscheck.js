@@ -26,13 +26,6 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 {
-
-	/**
-	 * @private
-	 */
-	logTagFc = "tsforkchecker plugin hook";
-
-
     /**
      * @class WpBuildLicenseFilePlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
@@ -45,6 +38,7 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @override
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */

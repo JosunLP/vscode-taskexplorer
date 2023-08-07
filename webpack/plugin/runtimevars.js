@@ -10,6 +10,7 @@
 const WpBuildBasePlugin = require("./base");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
 const { isString, apply, isObjectEmpty, asArray } = require("../utils");
+const { WebpackError } = require("webpack");
 
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -143,14 +144,20 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
 		{
             const chunkName = this.fileNameStrip(file, true),
                   asset = this.compilation.getAsset(file);
-            if (asset && isString(asset.info.contenthash))
+            if (asset && asset.info.contenthash)
             {
-                if (!hashCurrent[chunkName] || hashCurrent[chunkName] !==  asset.info.contenthas)
+                if (isString(asset.info.contenthash))
                 {
-                    hashCurrent[chunkName] = asset.info.contenthash;
-                    logger.write(`updated ${hashCurrent[chunkName] ? "stale" : ""} contenthash for italic(${file})`, 2);
-                    logger.value("   previous", hashCurrent[chunkName] || "n/a", 3);
-                    logger.value("   new", asset.info.contenthash, 3);
+                    if (!hashCurrent[chunkName] || hashCurrent[chunkName] !==  asset.info.contenthas)
+                    {
+                        hashCurrent[chunkName] = asset.info.contenthash;
+                        logger.write(`updated ${hashCurrent[chunkName] ? "stale" : ""} contenthash for italic(${file})`, 2);
+                        logger.value("   previous", hashCurrent[chunkName] || "n/a", 3);
+                        logger.value("   new", asset.info.contenthash, 3);
+                    }
+                }
+                else {
+                    this.compilation.warnings.push(new WebpackError("Non-string content hash not supported yet: " + asset.name));
                 }
             }
         });
@@ -283,8 +290,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
  * @param {WpBuildEnvironment} env
  * @returns {WpBuildRuntimeVarsPlugin | undefined}
  */
-const runtimevars = (env) =>
-    (env.app.plugins.runtimevars !== false && env.isExtension ? new WpBuildRuntimeVarsPlugin({ env }) : undefined);
+const runtimevars = (env) => env.app.plugins.runtimevars && env.isMain ? new WpBuildRuntimeVarsPlugin({ env }) : undefined;
 
 
 module.exports = runtimevars;

@@ -46,7 +46,7 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		if (this.env.isExtension)
+		if (this.env.isMain)
 		{
 			this.onApply(compiler,
 			{
@@ -156,7 +156,7 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
  * @param {WpBuildEnvironment} env
  * @returns {(webpack.SourceMapDevToolPlugin | WpBuildSourceMapPlugin)[]}
  */
-const sourcemaps = (env) => env.app.plugins.sourcemaps &&  env.isExtension ?  new WpBuildSourceMapPlugin({ env }).getPlugins() : [];
+const sourcemaps = (env) => env.app.plugins.sourcemaps &&  env.isMain ?  new WpBuildSourceMapPlugin({ env }).getPlugins() : [];
 
 
 module.exports = sourcemaps;

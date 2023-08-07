@@ -7,8 +7,8 @@
  * @author Scott Meesseman
  */
 
-const WpBuildBasePlugin = require("./base");
 const { isPromise } = require("../utils");
+const WpBuildBasePlugin = require("./base");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
@@ -23,6 +23,7 @@ class WpBuildDisposePlugin extends WpBuildBasePlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @override
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */

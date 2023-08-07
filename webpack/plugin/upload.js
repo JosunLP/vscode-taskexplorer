@@ -39,6 +39,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
 
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @override
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
@@ -195,7 +196,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
  * @param {WpBuildEnvironment} env
  * @returns {WpBuildUploadPlugin | undefined} plugin instance
  */
-const upload = (env) => env.app.plugins.upload && env.isExtension ? new WpBuildUploadPlugin({ env }) : undefined;
+const upload = (env) => env.app.plugins.upload && env.isMain ? new WpBuildUploadPlugin({ env }) : undefined;
 
 
 module.exports = upload;

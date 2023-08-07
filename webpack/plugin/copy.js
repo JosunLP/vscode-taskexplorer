@@ -36,12 +36,13 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @override
      * @param {WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
     apply(compiler)
     {
-		if (this.env.isExtension)
+		if (this.env.isMain)
 		{
 			this.onApply(compiler,
 			{
@@ -168,7 +169,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 					plugins.push(({ ctor: CopyPlugin, options: { patterns }}));
 				}
 			}
-			else if (env.isExtension && env.wpc.mode === "production" && env.app.publicInfoProject)
+			else if (env.isMain && env.wpc.mode === "production" && env.app.publicInfoProject)
 			{   //
 				// Copy resources to public `info` sub-project during compilation
 				//

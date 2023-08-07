@@ -68,7 +68,7 @@ const setBuildEnvironment = (env) =>
 		imageOpt: true,
 		isTests: env.environment.startsWith("test"),
 		isWeb: env.target.startsWith("web"),
-		isExtension: env.build === "extension" || env.build === "web",
+		isMain: env.build === "extension" || env.build === "web",
 		isExtensionProd: env.build === "extension" || env.build === "web" && env.environment === "prod",
 		isExtensionTests: env.build === "extension" || env.build === "web" && env.environment.startsWith("test"),
 		global: globalEnv,

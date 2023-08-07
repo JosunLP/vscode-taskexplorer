@@ -14,7 +14,7 @@
  */
 const experiments = (env) =>
 {
-	env.wpc.experiments = { layers: env.isExtension };
+	env.wpc.experiments = { layers: env.isMain };
 };
 
 

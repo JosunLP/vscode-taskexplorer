@@ -26,8 +26,9 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
 
     /**
      * @function Called by webpack runtime to initialize this plugin
+     * @override
+     * @member apply
      * @param {WebpackCompiler} compiler the compiler instance
-     * @returns {void}
      */
     apply(compiler)
     {
@@ -43,7 +44,10 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
 
 
     /**
-     * @function uploadAssets
+     * @function
+     * @private
+     * @async
+     * @member commit
      */
     async commit()
     {
@@ -84,12 +88,11 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
 
 
 /**
- * @function finalize
+ * @function
  * @param {WpBuildEnvironment} env
  * @returns {WpBuildScmPlugin | undefined}
  */
-const scm = (env) =>
-    (env.app.plugins.scm !== false && env.isExtensionProd ? new WpBuildScmPlugin({ env }) : undefined);
+const scm = (env) => env.app.plugins.scm && env.isExtensionProd ? new WpBuildScmPlugin({ env }) : undefined;
 
 
 module.exports = scm;

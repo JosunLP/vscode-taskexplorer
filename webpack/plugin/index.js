@@ -1,5 +1,10 @@
 // @ts-check
 
+/**
+ * @file plugin/index.js
+ * @author Scott Meesseman
+ */
+
 const analyze = require("./analyze");
 const banner = require("./banner");
 const clean = require("./clean");
