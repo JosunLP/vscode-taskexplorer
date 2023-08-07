@@ -321,7 +321,7 @@ export const promptRestart = async (message: string, callback?: (...args: any[])
         if (isPromise(result)) {
             await result;
         }
-        return new Promise(resolve => setTimeout(c => { commands.executeCommand(c); resolve(true); }, 1, VsCodeCommands.Reload));
+        return new Promise(resolve => setTimeout(c => { queueMicrotask(() => commands.executeCommand(VsCodeCommands.Reload)); resolve(true); }, 1));
     }
     return false;
 };
