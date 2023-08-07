@@ -475,7 +475,8 @@ export abstract class Log implements ILog, ILogDisposable
             // Make a copy of the release modules currently in the runtime directory if not
             // already saved to the configured storage directory
             //
-            doSwap = (isCurrentlyDbg && swap === true) || swap === undefined;
+            /* istanbul ignore next */
+            doSwap = (swap === true && isCurrentlyDbg) || swap === undefined;
             storageFilePath = join(dbgModuleStorageDir, this._moduleInfo.file);
             await execIf(
                 doSwap && !pathExistsSync(storageFilePath),
@@ -661,18 +662,20 @@ export abstract class Log implements ILog, ILogDisposable
         const enable = this._logControl.enable,
               enableChanged = enable !== this._logControlPrev.enable,
               fileEnableChanged = this._logControl.enableFile !== this._logControlPrev.enableFile;
-        if (this._logControl.enableModuleReload && enableChanged)
-        {
-            const msg = `To ${enable ? "enable" : "disable"} logging ${enableChanged ? "for the 1st time" : ""}, ` +
-                        `the ${enable ? "debug" : "release"} module must be ${!enableChanged ? "activated" : "installed"} ` +
-                        "and will require a restart";
-            this._logConfig.promptRestartFn(msg, this.installDebugSupport, this, true);
-        }
         if (this._logControl.enableFile && fileEnableChanged)
         {
             this.writeLogFileLocation();
         }
-        if (enableChanged) {
+        if (enableChanged)
+        {
+            if (this._logControl.enableModuleReload)
+            {
+                const msg = `To ${enable ? "enable" : "disable"} logging, the ${enable ? "debug" : "release"} ` +
+                            "module must be activated and will require a restart";
+                if (await this._logConfig.promptRestartFn(msg, this.installDebugSupport, this, true)) {
+                    return;
+                }
+            }
             this.enable(enable);
         }
         apply(this._logControlPrev, this._logControl);

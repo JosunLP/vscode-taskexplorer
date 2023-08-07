@@ -1,11 +1,12 @@
 
 import { join } from "path";
 import { expect } from "chai";
+import { commands } from "vscode";
 import { ITeWrapper, ILog, ILogControl } from ":types";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import {
 	activate, exitRollingCount, endRollingCount, suiteFinished, testControl, overrideNextShowInfoBox,
-	clearOverrideShowInfoBox
+	clearOverrideShowInfoBox, sleep
 } from "../../utils/utils";
 
 let log: ILog,
@@ -86,6 +87,25 @@ suite("Logging Tests", () =>
 			overrideNextShowInfoBox("Cancel", true);
 			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
 			await teWrapper.utils.sleep(1000);
+		}
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, true);
+		overrideNextShowInfoBox("Cancel", true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
+		overrideNextShowInfoBox("Cancel");
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, false);
+		const originalFn = commands.executeCommand;
+		try {
+			commands.executeCommand = async <T>(args: any) => { return args as T; };
+			await sleep(25);
+			overrideNextShowInfoBox("Restart");
+			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
+			await sleep(25);
+			overrideNextShowInfoBox("Restart");
+			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+		}
+		finally {
+			commands.executeCommand = originalFn;
 		}
         endRollingCount(this);
 	});
