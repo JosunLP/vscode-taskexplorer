@@ -44,16 +44,17 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 		{
 			this.onApply(compiler,
 			{
-				dupMain: {
+				copyModulesWithoutFilenameHash: {
 					hook: "compilation",
 					stage: "ADDITIONAL",
 					statsProperty: "copied",
 					hookCompilation: "processAssets",
-					callback: this.entryModulesNoHash.bind(this)
+					callback: this.copyEntryModulesNoHash.bind(this)
 				},
-				attachMap: {
+				attachSourceMapsToCopiedModules: {
 					hook: "compilation",
 					stage: "DEV_TOOLING",
+					hookCompilation: "processAssets",
 					callback: this.sourcemap.bind(this)
 				}
 			});
@@ -66,18 +67,13 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 * @private
 	 * @param {WebpackCompilationAssets} assets
 	 */
-	entryModulesNoHash(assets)
+	copyEntryModulesNoHash(assets)
 	{
 		this.logger.write("create copies of entry modules named without hash");
 		Object.entries(assets).filter(([ file, _ ]) => this.isEntryAsset(file)).forEach(([ file, sourceInfo ]) =>
 		{
 			const ccFileName = file.replace(new RegExp(`\\.[a-f0-9]{${this.hashDigestLength}}`), ""),
-				  dstAsset = this.compilation.getAsset(ccFileName),
-				  srcAsset = this.compilation.getAsset(file),
-				  srcAssetInfo = apply({}, srcAsset?.info),
-				  newInfo = { ...srcAssetInfo, copied: true, sourceFilename: file },
-				  // mapURL = `\r\n//# sourceMappingURL=${ccFileName}.map`,
-				  sources = this.compiler.webpack.sources;
+				  dstAsset = this.compilation.getAsset(ccFileName);
 			// let cacheEntry;
 			// this.logger.debug(`getting cache for '${absoluteFilename}'...`);
 			// try {
@@ -89,12 +85,15 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			// }
 			if (!dstAsset)
 			{
-				this.logger.value("   emit copied asset", ccFileName);
-				this.compilation.emitAsset(ccFileName, new sources.RawSource(sourceInfo.source()), newInfo);
-			}
-			else { // if (this.options.force) {
-				this.logger.value("   update copied asset", ccFileName);
-				this.compilation.updateAsset(ccFileName, new sources.RawSource(sourceInfo.source()), newInfo);
+				const srcAsset = this.compilation.getAsset(file);
+				if (srcAsset)
+				{
+					const srcAssetInfo = apply({}, srcAsset.info),
+						  sources = this.compiler.webpack.sources,
+					      newInfo = { ...srcAssetInfo, copied: true, sourceFilename: file };
+					this.logger.value("   emit copied asset", ccFileName);
+					this.compilation.emitAsset(ccFileName, new sources.RawSource(sourceInfo.source()), newInfo);
+				}
 			}
 		});
 	}
@@ -107,21 +106,20 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
      */
     sourcemap = (assets) =>
     {
-		this.logger.write("attach sourcemap to copied assets");
-		Object.entries(assets).filter(([ file, _ ]) => this.isEntryAsset(file)).forEach(([ file, sourceInfo ]) =>
+		this.logger.write("attach sourcemap to copied assets", 1);
+		Object.entries(assets).filter(([ file, _ ]) => this.isEntryAsset(file)).forEach(([ file, _ ]) =>
 		{
-			this.logger.value("check for file copied attribute", file);
+			this.logger.value("check for file copied attribute with no attached sourcemap", file);
 			const asset = this.compilation.getAsset(file);
-			if (asset && asset.info.copied)
+			if (asset && asset.info.copied && !asset.info.related?.sourceMap)
 			{
-				this.logger.write("   found copied file, retrieve source asset", 3);
+				this.logger.write("   found copied file without sourcemap, retrieve source asset", 3);
 				const srcAsset = this.compilation.getAsset(file.replace(".js", `.${asset.info.contenthash}.js`));
 				if (srcAsset && srcAsset.info.related?.sourceMap)
 				{
 					this.logger.value("   update copied asset with sourcemap", file);
-					const newInfo = { ...srcAsset, copied: true, sourceFilename: file };
+					const newInfo = { ...srcAsset.info, copied: true, sourceFilename: file };
 					this.compilation.updateAsset(file, srcAsset.source, newInfo);
-
 				}
 			}
 		});
@@ -237,12 +235,10 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
  * @function
  * @param {string[]} apps
  * @param {WpBuildEnvironment} env
- * @returns {(CopyPlugin | WpBuildCopyPlugin | WebpackPluginInstance)[]}
+ * @returns {(CopyPlugin | WpBuildCopyPlugin)[]}
  */
 const copy = (apps, env) =>
-{
-	return env.app.plugins.copy !== false ? new WpBuildCopyPlugin({ env, apps }).getPlugins() : [];
-};
+	env.app.plugins.copy !== false && env.build !== "tests" && env.build !== "webview" ? new WpBuildCopyPlugin({ env, apps }).getPlugins() : [];
 
 
 module.exports = copy;

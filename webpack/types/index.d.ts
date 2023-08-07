@@ -3,71 +3,67 @@
 
 declare type RequireKeys<T extends object, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
 
+/**
+ * Webpack library types are prefixed with `Webpack` for convention.
+ */
 declare type WebpackAsset = import("webpack").Asset;
 declare type WebpackAssetInfo = import("webpack").AssetInfo;
 declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
+declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
 declare type WebpackCache = import("webpack").Cache;
 declare type WebpackCacheFacade = ReturnType<WebpackCompilation["getCache"]>;
 declare type WebpackChunk = import("webpack").Chunk;
 declare type WebpackCompilation = import("webpack").Compilation;
-declare type WebpackCompilation = import("webpack").Compilation;
-declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
 // declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
 // declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
-declare type WebpackCompiler = import("webpack").Compiler;
-declare type WebpackConfig = Required<import("webpack").Configuration>;
-// declare type WebpackLogger = import("webpack/lib/logging/Logger").Logger;
-declare type WebpackHookMap<H> = import("tapable").HookMap<H>;
-declare type WebpackLogger = ReturnType<WebpackCompilation["getLogger"]>;
-declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
-declare type WebpackSchema = import("schema-utils/declarations/validate").Schema;
-declare type WebpackSource = import("webpack").sources.Source;
-declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["mergeSnapshots"]>;
-declare type WebpackStats = import("webpack").Stats;
-declare type WebpackStatsAsset = import("webpack").StatsAsset;
-declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
-declare type WebpackSyncBailHook<T, R> = import("tapable").SyncBailHook<T, R>;
-declare type WebpackAsyncHook<T> = import("tapable").AsyncSeriesHook<T>;
-declare type WebpackCompilerHookName = keyof WebpackCompiler["hooks"];
 declare type WebpackCompilationHook = WebpackCompilation["hooks"];
 declare type WebpackCompilationHookName = keyof WebpackCompilationHook;
 declare type WebpackCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIVED" | "ADDITIONS" |  "OPTIMIZE" |
                                            "OPTIMIZE_COUNT" | "OPTIMIZE_COMPATIBILITY" | "OPTIMIZE_SIZE" |
                                            "DEV_TOOLING" | "OPTIMIZE_INLINE" | "SUMMARIZE" | "OPTIMIZE_HASH" |
                                            "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT"
+declare type WebpackCompiler = import("webpack").Compiler;
+declare type WebpackCompilerHookName = keyof WebpackCompiler["hooks"];
+declare type WebpackConfig = Required<import("webpack").Configuration>;
+declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
+declare type WebpackHookMap<H> = import("tapable").HookMap<H>;
+declare type WebpackLogger = ReturnType<WebpackCompilation["getLogger"]>;
+declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
+declare type WebpackMode = "none" | "development" | "production";
+declare type WebpackPluginInstance = import("webpack").WebpackPluginInstance;
+declare type WebpackRawSource = import("webpack").sources.RawSource;
+declare type WebpackSchema = import("schema-utils/declarations/validate").Schema;
+declare type WebpackSource = import("webpack").sources.Source;
+declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["mergeSnapshots"]>;
+declare type WebpackStats = import("webpack").Stats;
+declare type WebpackStatsAsset = import("webpack").StatsAsset;
 declare type WebpackStatsPrinterHook =  WebpackCompilationHook["statsPrinter"];
-
 declare type WebpackStatsPrinterType<T> = T extends WebpackSyncHook<infer X> ? X : never;
 declare type WebpackStatsPrinter = WebpackStatsPrinterType<WebpackStatsPrinterHook>[0];
 declare type WebpackStatsPrinterPrintHookMap = WebpackStatsPrinterType<WebpackStatsPrinterHook>[0]["hooks"]["print"];
 declare type WebpackStatsPrinterPrint<T> =  T extends WebpackHookMap<infer X> ? X : never;
-declare type WebpackStatsPrinterContextHook<T> =  T extends WebpackSyncBailHook<infer X, Y> ? X : never;
+declare type WebpackStatsPrinterContextHook<T, Y> =  T extends WebpackSyncBailHook<infer X, Y> ? X : never;
 declare type WebpackStatsPrinterPrintBailHook =  WebpackStatsPrinterPrint<WebpackStatsPrinterPrintHookMap>;
-declare type WebpackStatsPrinterContext = WebpackStatsPrinterContextHook<WebpackStatsPrinterPrintBailHook>[1];
-
-
-
+declare type WebpackStatsPrinterContext = WebpackStatsPrinterContextHook<WebpackStatsPrinterPrintBailHook, string>[1];
+declare type WebpackSyncHook<T> = import("tapable").SyncHook<T>;
+declare type WebpackSyncBailHook<T, R> = import("tapable").SyncBailHook<T, R>;
+declare type WebpackTarget = "webworker" | "node" | "web";
 declare interface WebpackCompilationParams {
 	normalModuleFactory: any; // WebpackNormalModuleFactory;
 	contextModuleFactory: any; // WebpackContextModuleFactoryy;
 }
-//WebpackCompilationParams
-declare type WebpackTarget = "webworker" | "node" | "web";
-declare type WebpackMode = "none" | "development" | "production";
-declare type WebpackLogLevel = "none" | "error" | "warn" | "info" | "log" | "verbose" | undefined;
-declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
-declare type WpBuildConsoleLogger = import("../utils").WpBuildConsoleLogger;
+/**
+ * End Webpack library types.
+ * 
+ * Defined types for this module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
+ */
 
-declare type WpBuildModule = "web" | "common" | "extension" | "tests" | "types" | "webview";
 declare type WpBuildBuildEnvironment= "dev" | "prod" | "test" | "testprod";
-
-// declare interface IWpBuildPluginInstance extends WebpackPluginInstance
-// {
-// 
-// }
-// declare type WpBuildPluginInstance = IWpBuildPluginInstance;
+declare type WpBuildConsoleLogger = import("../utils").WpBuildConsoleLogger;
+declare type WpBuildModule = "web" | "common" | "extension" | "tests" | "types" | "webview";
+declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 declare interface IWpBuildRuntimeVariables
 {
@@ -79,15 +75,11 @@ declare const __WPBUILD__: WpBuildRuntimeVariables;
 
 declare interface IWpBuildWebpackConfig extends WebpackConfig
 {
-
+    mode: WebpackMode;
 }
 declare type WpBuildWebpackConfig = Required<IWpBuildWebpackConfig>;
 
-declare interface IDisposable
-{
-    dispose: () => void | PromiseLike<void>;
-}
-declare type Disposable = Required<IDisposable>
+declare type Disposable = Required<{ dispose: () => void | PromiseLike<void>; }>;
 
 declare interface IWpBuildEnvironment extends IWebpackEnvironmentInternal
 {
@@ -185,6 +177,7 @@ declare interface IWpBuildLogIconBaseSet
 declare type WpBuildLogIconBlueSet= Pick<IWpBuildLogIconBaseSet, "error"|"info"|"success"|"warning">;
 declare interface IWpBuildLogIconActionSet extends IWpBuildLogIconBaseSet
 {
+    errorTag: string;
     starCyan: string;
     successTag: string;
 }
@@ -288,7 +281,8 @@ declare type WpBuildPluginVendorOptions = Readonly<IWpBuildPluginVendorOptions> 
 interface IWpBuildPluginOptions
 {
     env: WpBuildEnvironment,
-    plugins?: WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[]
+    plugins?: WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[],
+    registerVendorPluginsFirst?: boolean;
 }
 declare type WpBuildPluginOptions = IWpBuildPluginOptions & Record<string, any>;
 
@@ -307,9 +301,7 @@ interface IWpBuildPluginTapOptions
     stage?: WebpackCompilationHookStage;
     statsProperty?: string;
 }
-declare type WpBuildPluginApplyOptions = Readonly<IWpBuildPluginApplyOptions>
 declare type WpBuildPluginTapOptions = Readonly<Omit<IWpBuildPluginTapOptions, "hookCompilation">> & Pick<IWpBuildPluginTapOptions, "hookCompilation">;
-declare type WpBuildPluginApplyOptionsHash = Record<string, WpBuildPluginTapOptions>
 declare type WpBuildPluginTapOptionsHash  = Record<string, WpBuildPluginTapOptions>
 
 export {
@@ -336,6 +328,7 @@ export {
     WebpackPluginInstance,
     WpBuildEnvironment,
     WebpackLogLevel,
+    WebpackRawSource,
     WebpackSchema,
     WebpackSnapshot,
     WebpackSource,
@@ -362,8 +355,6 @@ export {
     WpBuildLogTrueColor,
     WpBuildPackageJson,
     WpBuildPluginOptions,
-    WpBuildPluginApplyOptions,
-    WpBuildPluginApplyOptionsHash,
     WpBuildPluginTapOptions,
     WpBuildPluginTapOptionsHash,
     WpBuildPluginVendorOptions,

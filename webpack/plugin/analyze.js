@@ -44,7 +44,7 @@ const analyze =
 	bundle(env)
 	{
 		let plugin;
-		if (env.app.plugins.analyze && env.analyze === true)
+		if (env.app.plugins.analyze !== false && env.analyze === true && env.build !== "tests" && env.build !== "webview")
 		{
 			plugin = new BundleAnalyzerPlugin({
 				analyzerPort: "auto",
@@ -65,7 +65,7 @@ const analyze =
 	circular(env)
 	{
 		let plugin;
-		if (env.app.plugins.analyze && env.analyze === true)
+		if (env.app.plugins.analyze !== false  && env.analyze === true && env.build !== "tests" && env.build !== "webview")
 		{
 			plugin = new CircularDependencyPlugin(
 			{
@@ -88,7 +88,7 @@ const analyze =
 	visualizer(env)
 	{
 		let plugin;
-		if (env.app.plugins.analyze !== false && env.analyze === true) {
+		if (env.app.plugins.analyze !== false && env.analyze === true && env.build !== "tests" && env.build !== "webview") {
 			plugin = new VisualizerPlugin({ filename: "../.coverage/visualizer.html" });
 		}
 		return /** @type {VisualizerPlugin | undefined}) */(plugin);

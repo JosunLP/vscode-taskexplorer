@@ -31,7 +31,7 @@ class WpBuildLicenseFilePlugin extends WpBuildBasePlugin
     {
         this.onApply(compiler,
         {
-            checkin: {
+            processLicenseFiles: {
                 async: true,
                 hook: "shutdown",
                 callback: this.licenseFiles.bind(this)

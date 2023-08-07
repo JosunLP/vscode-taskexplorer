@@ -278,6 +278,7 @@
 		"circular-dependency-plugin": "^5.2.2",
 		"clean-webpack-plugin": "^4.0.0",
 		"concurrently": "^7.6.0",
+		"copy-asset-in-memory-webpack-plugin": "^4.0.1",
 		"copy-webpack-plugin": "^11.0.0",
 		"csp-html-webpack-plugin": "^5.1.0",
 		"css-loader": "^6.7.3",

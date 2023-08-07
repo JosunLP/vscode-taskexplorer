@@ -33,18 +33,18 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     {
         this.onApply(compiler,
         {
-            preprocess: {
+            getContenthashInfo: {
                 hook: "compilation",
                 stage: "PRE_PROCESS",
                 callback: this.preprocess.bind(this)
             },
-            runtimeVars: {
+            replaceContenthashRuntimeVars: {
                 hook: "compilation",
                 stage: "ADDITIONS",
                 statsProperty: "runtimeVars",
                 callback: this.runtimeVars.bind(this)
             },
-            saveAssetState: {
+            saveNewContentHashInfo: {
                 hook: "afterEmit",
                 callback: this.saveAssetState.bind(this)
             }
@@ -57,7 +57,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      * @private
      * @param {WebpackAssetInfo} info
      */
-    info(info) { return apply(info || {}, { runtimeVars: true }); }
+    info = (info) => apply({ ...(info || {}) }, { runtimeVars: true });
 
 
     /**
@@ -66,7 +66,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      * @param {boolean} [rotated] `true` indicates that values were read and rotated
      * i.e. `next` values were moved to `current`, and `next` is now blank
      */
-    logAssetInfo(rotated)
+    logAssetInfo = (rotated) =>
     {
         const logger = this.env.logger,
               hashInfo = this.env.state.hash,
@@ -76,7 +76,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.previous).forEach(
-                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.current[k]), 2, "", 0, logger.colors.grey)
+                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tag(hashInfo.current[k]), 2, "", 0, logger.colors.grey)
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
@@ -86,7 +86,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         if (!isObjectEmpty(hashInfo.current))
         {
             Object.keys(hashInfo.current).forEach(
-                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.current[k]), 2, "", 0, logger.colors.grey)
+                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tag(hashInfo.current[k]), 2, "", 0, logger.colors.grey)
             );
         }
         else if (!isObjectEmpty(hashInfo.previous) && rotated === true) {
@@ -96,7 +96,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         if (!isObjectEmpty(hashInfo.next))
         {
             Object.keys(hashInfo.next).forEach(
-                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tagColor(hashInfo.next[k]), 2, "", 0, logger.colors.grey)
+                (k) => logger.write(`      ${k.padEnd(labelLength - 7)} ` + logger.tag(hashInfo.next[k]), 2, "", 0, logger.colors.grey)
             );
         }
         else if (!isObjectEmpty(hashInfo.current) && rotated === true) {
@@ -110,7 +110,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      * @private
      * @param {WebpackCompilationAssets} assets
      */
-    preprocess(assets)
+    preprocess = (assets) =>
     {
         const env = this.env,
               logger = env.logger,
@@ -221,8 +221,8 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     saveAssetState()
     {
-        this.logAssetInfo();
         writeFileSync(this.env.paths.files.hashStoreJson, JSON.stringify(this.env.state.hash, null, 4));
+        this.logAssetInfo();
     }
 
 

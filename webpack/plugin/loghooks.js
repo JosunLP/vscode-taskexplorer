@@ -136,7 +136,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 		if (!globalEnv.hooksLog[key])
 		{
 			globalEnv.hooksLog[key] = true;
-			this.logHook("build stage hook", hook);
+			this.logger.valuestar("build stage hook", hook);
 		}
 	};
 

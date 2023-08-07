@@ -46,7 +46,7 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
     {
 		this.onApply(compiler,
 		{
-			staleAssets: {
+			cleanStaleAssets: {
 				hook: "done",
 				callback: this.staleAssets.bind(this)
 			}
@@ -108,7 +108,7 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 
 /**
  * @param {WpBuildEnvironment} env
- * @returns {(WpBuildCleanPlugin | WebpackPluginInstance | CleanWebpackPlugin)[]}
+ * @returns {(WpBuildCleanPlugin | CleanWebpackPlugin)[]}
  */
 const clean = (env) => env.app.plugins.clean !== false ? new WpBuildCleanPlugin({ env }).getPlugins() : [];
 

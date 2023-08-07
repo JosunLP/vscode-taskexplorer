@@ -26,7 +26,7 @@ const { join, basename, relative, dirname, isAbsolute, resolve } = require("path
 /** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
 
 
-class WpBuildPreCompilePlugin extends WpBuildBasePlugin
+class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -36,7 +36,7 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
     {
         this.onApply(compiler,
         {
-			typesAndTests: {
+			buildTestsSuite: {
 				async: true,
                 hook: "afterCompile",
                 // hook: "compilation",
@@ -232,7 +232,7 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 				const filePathRel = relative(outputDir, filePath),
 					  file = basename(filePathRel);
 
-				this.compilation.buildDependencies.add(file);
+				// this.compilation.buildDependencies.add(file);
 
 				logger.value("   check cache", filePathRel, 4);
 				try {
@@ -367,10 +367,10 @@ class WpBuildPreCompilePlugin extends WpBuildBasePlugin
 
 /**
  * @param {WpBuildEnvironment} env
- * @returns {WpBuildPreCompilePlugin | undefined}
+ * @returns {WpBuildTestSuitePlugin | undefined}
  */
 const testsuite = (env) =>
-	(env.isTests && env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildPreCompilePlugin({ env }) : undefined);
+	(env.isTests && env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildTestSuitePlugin({ env }) : undefined);
 
 
 module.exports = testsuite;

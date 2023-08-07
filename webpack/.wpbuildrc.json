@@ -2,6 +2,7 @@
     "name": "vscode-taskexplorer",
     "displayName": "Task Explorer",
     "detailedDisplayName": "Task Explorer VSCode Extension",
+    "moduleName": "taskexplorer",
     "publicInfoProject": true,
     "builds": {
         "dev": [
@@ -37,7 +38,7 @@
         "pad": {
             "basePad": 0,
             "envTag": 23,
-            "value": 30,
+            "value": 40,
             "uploadFileName": 50
         }
     },

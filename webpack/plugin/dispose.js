@@ -6,10 +6,8 @@
  * @module wpbuild.plugin.licensefiles
  */
 
-const { join } = require("path");
-const { existsSync } = require("fs");
 const WpBuildBasePlugin = require("./base");
-const { rename, unlink, readdir } = require("fs/promises");
+const { isPromise } = require("../utils");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
@@ -18,7 +16,7 @@ const { rename, unlink, readdir } = require("fs/promises");
 
 
 /**
- * @class WpBuildLicenseFilePlugin
+ * @class WpBuildDisposePlugin
  */
 class WpBuildDisposePlugin extends WpBuildBasePlugin
 {
@@ -31,7 +29,7 @@ class WpBuildDisposePlugin extends WpBuildBasePlugin
     {
         this.onApply(compiler,
         {
-            checkin: {
+            cleanupRegisteredDisposables: {
                 async: true,
                 hook: "shutdown",
                 callback: this.dispose.bind(this)
@@ -42,8 +40,12 @@ class WpBuildDisposePlugin extends WpBuildBasePlugin
     async dispose()
     {
         this.logger.write("cleanup: call all registered disposables", 2);
-        for (const d of this.env.disposables.splice(0)) {
-            await d.dispose();
+        for (const d of this.env.disposables.splice(0))
+        {
+            const result = d.dispose();
+            if (isPromise(result)) {
+                await result;
+            }
         }
     }
 }

@@ -32,10 +32,10 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
     {
         this.onApply(compiler,
         {
-            checkin: {
+            commitSourceCodeChanges: {
                 async: true,
                 hook: "shutdown",
-                callback: this.checkin.bind(this)
+                callback: this.commit.bind(this)
             }
         });
     }
@@ -44,7 +44,7 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
     /**
      * @function uploadAssets
      */
-    async checkin()
+    async commit()
     {
         if (globalEnv.scm.callCount === 2 && globalEnv.scm.readyCount > 0)
         {

@@ -322,7 +322,7 @@ export class Log implements ILog, ILogDisposable
             dbgModuleFile: `${moduleFile}.debug.js`,
             modulePath: logConfig.modulePath,
             runtimeDir: dirname(logConfig.modulePath),
-            srcMapPath: join(dbgModuleDir, `${moduleFile}.map`)
+            srcMapPath: join(dbgModuleDir, `${moduleFile}.debug.map`)
         };
     };
 
@@ -417,13 +417,17 @@ export class Log implements ILog, ILogDisposable
         {
             const enable = this._logControl.enable,
                   rtFiles = await findFiles("*.js", { cwd: this._paths.runtimeDir }),
-                  rtReleaseFiles = rtFiles.map(f => basename(f.replace("debug.", ""))),
-                  rtDebugFiles = rtFiles.map(f => basename(f.replace(".js", ".debug.js"))),
                   isCurrentlyDbg = !!rtFiles.find(f => f.includes(".debug")),
+                  files = Object.entries(this._logConfig.moduleHash).map(([ chunk, hash ]) => `${chunk}.${hash}.js`),
+                  rtReleaseFiles = files.filter(f => !f.includes(".debug.")),
+                  rtDebugFiles = files.filter(f => f.includes(".debug.")),
                   remotePath: `app/${string}/v${string}` = `app/${this._logConfig.app}/v${this._logConfig.version}/${this._logConfig.env}`;
-            const files = [
-                ""
-            ];
+console.log("remotePath: " + remotePath);
+console.log("isCurrentlyDbg: " + isCurrentlyDbg);
+console.log("rtFiles: " + rtFiles);
+console.log("rtReleaseFiles: " + rtReleaseFiles);
+console.log("rtDebugFiles: " + rtReleaseFiles);
+console.log("files: " + files);
             //
             // Calling application should `clean` when there is a version change or for a new install
             // (as user may have uninstalled and reinstralled, there's no way for the app to perform
@@ -440,17 +444,20 @@ export class Log implements ILog, ILogDisposable
             //
             if ((!isCurrentlyDbg && swap === true) || swap === undefined)
             {
-                for (const file of rtDebugFiles)
+                for (const file of files.filter(f => f.includes(".debug.")))
                 {
                     const storageFilePath = join(this._paths.dbgModuleDir, file);
+console.log("storageFilePathDbg: " + storageFilePath);
                     await execIf(
                         !pathExistsSync(storageFilePath),
                         async () => {
+console.log("storageFilePathDbg GET111 : " + `${remotePath}/${file}`);
                             const content = await this._logConfig.httpGetFn(`${remotePath}/${file}`);
                             await writeFile(storageFilePath, Buffer.from(content));
                         },
                         this, [ this.warn, `could not copy module ${file}` ]
                     );
+console.log("storageFilePathDbg 222: " + storageFilePath);
                 }
             }
             //
@@ -459,19 +466,22 @@ export class Log implements ILog, ILogDisposable
             //
             if ((isCurrentlyDbg && swap === true) || swap === undefined)
             {
-                for (const file of rtReleaseFiles)
+                for (const file of files.filter(f => !f.includes(".debug.")))
                 {
                     const storageFilePath = join(this._paths.dbgModuleDir, file);
+console.log("storageFilePathRel: " + storageFilePath);
                     await execIf(
                         !pathExistsSync(join(this._paths.dbgModuleDir, file)),
                         () => copyFile(storageFilePath, storageFilePath),
                         this, [ this.warn, `could not load debug module ${file}` ]
                     );
+console.log("storageFilePathRel222: " + storageFilePath);
                 }
             }
             //
             // Swap release / debug modules i.e. overwrite the current runtime files in /dist
             //
+console.log("swap");
             if (swap)
             {
                 const rtFiles = !enable ? rtReleaseFiles : rtDebugFiles;
@@ -510,7 +520,7 @@ export class Log implements ILog, ILogDisposable
             });
             await execIf(downloadSourceMap, async () => // Sourcemap file `<module>.js.map`
             {
-                const srcMapContent = await this._logConfig.httpGetFn(`${remoteBasePath}/${this._paths.moduleName}.js.map`);
+                const srcMapContent = await this._logConfig.httpGetFn(`${remoteBasePath}/${this._paths.moduleName}.debug.js.map`);
                 await writeFile(this._paths.srcMapPath, Buffer.from(srcMapContent));
             });
             //

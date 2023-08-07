@@ -60,7 +60,7 @@ class WpBuildConsoleLogger
     constructor(env)
     {
         this.env = env;
-        this.env.disposables?.push(this);
+        this.infoIcon = this.icons.color.info;
         if (env.app)
         {
             this.infoIcon = env.app.colors.infoIcon ?
@@ -73,10 +73,11 @@ class WpBuildConsoleLogger
                 });
             }
         }
+        this.env.disposables?.push(this);
     }
 
-
     dispose = () => console.log(this.withColor("", this.colors.system, true));
+
 
     /**
      * @member
@@ -139,12 +140,13 @@ class WpBuildConsoleLogger
         color:
         {
             bullet: this.withColor("●", this.colors.white),
+            errorTag: this.withColor("[", this.colors.white) + this.withColor("ERROR", this.colors.red) + this.withColor("]", this.colors.white),
             info: this.withColor("ℹ", this.colors.magenta),
             star: this.withColor("★", this.colors.yellow),
             starCyan: this.withColor("★", this.colors.cyan),
             start: this.withColor("▶", this.colors.green),
             success: this.withColor("✔", this.colors.green),
-            successTag: `[${this.withColor("SUCCESS", this.colors.green)}]`,
+            successTag: this.withColor("[", this.colors.white) + this.withColor("SUCCESS", this.colors.green) + this.withColor("]", this.colors.white),
             up: this.withColor("△", this.colors.white),
             warning: this.withColor("⚠", this.colors.yellow),
             error: this.withColor("✘", this.colors.red)
@@ -243,7 +245,15 @@ class WpBuildConsoleLogger
      * @param {WpBuildLogColorMapping} color color value
      * @returns {string}
      */
-    iconColor(icon, color) { return this.withColor(icon, color); }
+    iconColor = (icon, color) => { return this.withColor(icon, color); };
+
+
+    /**
+     * @function
+     * @param {string | undefined} msg
+     * @param {WpBuildLogLevel} [level]
+     */
+    start = (msg, level) =>  this.write(this.icons.color.start + (msg ? "  " + msg : ""), level);
 
 
     /**
@@ -261,9 +271,13 @@ class WpBuildConsoleLogger
      * @param {WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
      * @returns {string}
      */
-    tagColor(msg, bracketColor, msgColor) { return msg ? (this.withColor("[", bracketColor || this.colors[this.env.app.colors.tagBracket] || this.colors.blue) +
-                                                   this.withColor(msg, msgColor || this.colors.grey)  +
-                                                   this.withColor("]", bracketColor || this.colors.blue)) : ""; }
+    tag = (msg, bracketColor, msgColor) =>
+    {
+        return msg ? (this.withColor("[", bracketColor || this.colors[this.env.app.colors.tagBracket] || this.colors.blue) +
+                     this.withColor(msg, msgColor || this.colors.grey)  +
+                     this.withColor("]", bracketColor || this.colors.blue)) : "";
+    };
+
 
     /**
      * @function
@@ -280,13 +294,13 @@ class WpBuildConsoleLogger
      * @param {string} [msg] message to include in length calculation
      * @returns {number}
      */
-    withColorLength(color, msg) { return (2 + color[0].toString().length + 1 + (msg ? msg.length : 0) + 2 + color[1].toString().length + 1); }
+    withColorLength = (color, msg) => (2 + color[0].toString().length + 1 + (msg ? msg.length : 0) + 2 + color[1].toString().length + 1);
 
 
     /**
      * @function Write / log a message to the console
      * @param {string} msg
-     * @param {number} [level]
+     * @param {WpBuildLogLevel} [level]
      * @param {string} [pad]
      * @param {string | undefined | null | 0 | false} [icon]
      * @param {WpBuildLogColorMapping} [color]
@@ -329,7 +343,7 @@ class WpBuildConsoleLogger
      * by .wpbuildrc.`log.pad.value` (defaults to 45)
      * @param {string} msg
      * @param {any} val
-     * @param {number} [level]
+     * @param {WpBuildLogLevel} [level]
      * @param {string} [pad] Message pre-padding
      * @param {string | undefined | null | 0 | false} [icon]
      * @param {WpBuildLogColorMapping} [color]
@@ -363,7 +377,7 @@ class WpBuildConsoleLogger
      * @function
      * @param {string} hookMsg
      * @param {string} hookDsc
-     * @param {number} [level]
+     * @param {WpBuildLogLevel} [level]
      * @param {string} [pad] Message pre-padding
      * @param {WpBuildLogColorMapping} [iconColor]
      * @param {WpBuildLogColorMapping} [msgColor]

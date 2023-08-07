@@ -57,7 +57,7 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 		tsForkCheckerHooks.issues.tap(this.name, this.tsForkCheckerIssues.bind(this));
 		this.onApply(compiler,
 		{
-			dtsBundle: {
+			bundleDtsFiles: {
 				hook: "done",
 				callback: this.bundle.bind(this)
 			}
@@ -72,13 +72,14 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	bundle = () =>
 	{
 		dts.bundle({
-			name: "@spmeesseman/vscode-taskexplorer-types", // "index.d.ts",
-			// name: "vscode-taskexplorer", // "index.d.ts",
+			name: "@spmeesseman/vscode-taskexplorer-types",
 			baseDir: "types/dist",
-			main: "types/index.d.ts", //  join(this.env.paths.build, "types", "dist", "types", "index.d.ts"),
+			headerPath: "",
+			headerText: "",
+			main: "types/index.d.ts",
 			out: "types.d.ts",
-			verbose: false,
-			outputAsModuleFolder: true
+			outputAsModuleFolder: true,
+			verbose: false
 		});
 	};
 
@@ -158,7 +159,7 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 * @function
 	 * @private
 	 */
-	tsForkCheckerError = () => this.logHook(this.logTagFc, "error");
+	tsForkCheckerError = () => this.logger.error("tsforkchecker error");
 
 
 	/**
@@ -168,7 +169,7 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 */
 	tsForkCheckerIssues = (issues) =>
 {
-		this.logHook(this.logTagFc, "filter issues");
+		this.logger.start("tsforkchecker filter issues");
 		return issues.filter(i => i.severity === "error");
 	};
 
@@ -177,21 +178,21 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 * @function
 	 * @private
 	 */
-	tsForkCheckerStart = () => this.logHook(this.logTagFc, "start");
+	tsForkCheckerStart = () => this.logger.start("tsforkchecker start");
 
 
 	/**
 	 * @function
 	 * @private
 	 */
-	tsForkCheckerWaiting = () => this.logHook(this.logTagFc, "waiting for issues");
+	tsForkCheckerWaiting = () => this.logger.start("tsforkchecker waiting for issues");
 
 }
 
 
 /**
  * @param {WpBuildEnvironment} env
- * @returns {(WpBuildTsCheckPlugin | ForkTsCheckerWebpackPlugin | WebpackPluginInstance)[]}
+ * @returns {(WpBuildTsCheckPlugin | ForkTsCheckerWebpackPlugin)[]}
  */
 const tscheck = (env) => env.app.plugins.tscheck !== false ? new WpBuildTsCheckPlugin({ env }).getPlugins() : [];
 

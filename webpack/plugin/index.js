@@ -10,7 +10,6 @@ const environment = require("./environment");
 const istanbul = require("./istanbul");
 const licensefiles = require("./licensefiles");
 const ignore = require("./ignore");
-const instrument = require("./instrument");
 const optimization = require("./optimization");
 const loghooks = require("./loghooks");
 const progress = require("./progress");
@@ -24,6 +23,6 @@ const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = r
 
 module.exports = {
     analyze, banner, clean, copy, cssextract, dispose, environment, htmlcsp, htmlinlinechunks,
-    ignore, imageminimizer, instrument, istanbul, licensefiles, loghooks, optimization,
-    progress, runtimevars, scm, sourcemaps, testsuite, tscheck, upload, vendormod, webviewapps
+    ignore, imageminimizer, istanbul, licensefiles, loghooks, optimization, progress,
+    runtimevars, scm, sourcemaps, testsuite, tscheck, upload, vendormod, webviewapps
 };

@@ -63,45 +63,11 @@ class WpBuildCache
     {
         this.env = env;
         this.options = merge({}, options);
-        this.options.file = join(this.env.global.cacheDir, options.file);
+        if (!isAbsolute(this.options.file)) {
+            this.options.file = resolve(this.env.global.cacheDir, options.file);
+        }
         this.cache = this.read();
     }
-
-
-    /**
-     * @function
-     * @returns {Promise<Record<string, any>>}
-     */
-    read = () =>
-    {
-        let jso;
-        if (existsSync(this.options.file)) {
-            try {
-                jso = JSON.parse(readFileSync(this.options.file, "utf8"));
-            }
-            catch (e) { jso = {}; }
-        }
-        return jso;
-    };
-
-
-    /**
-     * @function
-     * @returns {Promise<Record<string, any>>}
-     */
-    readAsync = async () =>
-    {
-        let jso;
-        try {
-            await access(this.options.file);
-        }
-        catch { return {}; }
-        try {
-            jso = JSON.parse(await readFile(this.options.file, "utf8"));
-        }
-        catch { jso = {};}
-        return jso;
-    };
 
 
     /**
@@ -117,6 +83,24 @@ class WpBuildCache
      * @returns {any}
      */
     getItem = (item) => clone(this.cache[item]);
+
+
+    /**
+     * @function
+     * @returns {Record<string, any>}
+     */
+    read = () =>
+    {
+        let jso;
+        if (!existsSync(this.options.file)) {
+            writeFileSync(this.options.file, "{}");
+        }
+        try {
+            jso = JSON.parse(readFileSync(this.options.file, "utf8"));
+        }
+        catch (e) { jso = {}; }
+        return jso;
+    };
 
 
     /**

@@ -27,9 +27,9 @@ class WpBuildVendorModPlugin extends WpBuildBasePlugin
     {
 		this.onApply(compiler,
         {
-            pluginClean: {
+            modifyVendorPlugins: {
                 hook: "afterEnvironment",
-                callback: this.pluginClean.bind(this)
+                callback: this.modifyVendorPlugins.bind(this)
             }
         });
     }
@@ -39,7 +39,7 @@ class WpBuildVendorModPlugin extends WpBuildBasePlugin
 	 * @function
 	 * @private
 	 */
-	pluginClean = () =>
+	modifyVendorPlugins = () =>
 	{   //
 		// Make a lil change to the copy-plugin to initialize the current assets array to
 		// the existing contents of the dist directory.  By default it's current assets list
