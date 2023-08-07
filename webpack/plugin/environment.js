@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.environment
+ * @file plugin/environment.js
+ * @author Scott Meesseman
  */
 
 const { globalEnv } = require("../utils/global");

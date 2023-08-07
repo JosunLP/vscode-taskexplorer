@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.vendormod
+ * @file vendormod.js
+ * @author Scott Meesseman
  */
 
 const { basename, join } = require("path");

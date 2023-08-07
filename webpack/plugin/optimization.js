@@ -2,7 +2,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.optimization
+ * @file plugin/optimization.js
+ * @author Scott Meesseman
  */
 
 const webpack = require("webpack");

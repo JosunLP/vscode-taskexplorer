@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.html
+ * @file plugin/html.js
+ * @author Scott Meesseman
  */
 
 const { posix } = require("path");

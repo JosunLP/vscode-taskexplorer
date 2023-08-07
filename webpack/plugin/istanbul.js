@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.compile
+ * @file plugin/istanbul.js
+ * @author Scott Meesseman
  */
 
 const { apply, asArray } = require("../utils");

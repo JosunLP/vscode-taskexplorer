@@ -2,6 +2,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+/**
+ * @file plugin/loghooks.js
+ * @author Scott Meesseman
+ */
+
 const { globalEnv } = require("../utils");
 const WpBuildBasePlugin = require("./base");
 

@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.progress
+ * @file plugin/progress.js
+ * @author Scott Meesseman
  */
 
 const webpack = require("webpack");

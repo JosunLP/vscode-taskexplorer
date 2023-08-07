@@ -3,12 +3,13 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.upload
+ * @file plugin/upload.js
  * !!! This module uses 'plink' and 'pscp' from the PuTTY package: https://www.putty.org
  * !!! For first time build on fresh os install:
  * !!!   - create the environment variables WPBUILD_APP1_SSH_AUTH_*
  * !!!   - run a plink command manually to generate and trust the fingerprints:
  * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
+ * @author Scott Meesseman
  */
 
 const { existsSync } = require("fs");
@@ -189,12 +190,12 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
 
 
 /**
+ * @module wpbuild.plugin.upload
  * @function upload
  * @param {WpBuildEnvironment} env
  * @returns {WpBuildUploadPlugin | undefined} plugin instance
  */
-const upload = (env) =>
-    (env.app.plugins.upload !== false && env.isExtension ? new WpBuildUploadPlugin({ env }) : undefined);
+const upload = (env) => env.app.plugins.upload && env.isExtension ? new WpBuildUploadPlugin({ env }) : undefined;
 
 
 module.exports = upload;

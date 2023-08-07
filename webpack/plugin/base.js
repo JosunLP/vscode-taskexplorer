@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.WpBuildBasePlugin
+ * @file plugin/base.js
+ * @author Scott Meesseman
  */
 
 const { readFile } = require("fs/promises");

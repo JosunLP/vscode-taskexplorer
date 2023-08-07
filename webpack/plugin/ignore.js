@@ -2,7 +2,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.ignore
+ * @file plugin/ignore.js
+ * @author Scott Meesseman
  */
 
 const webpack = require("webpack");

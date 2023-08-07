@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.build
+ * @file plugin/testsuite.js
+ * @author Scott Meesseman
  */
 
 const { existsSync } = require("fs");
@@ -370,7 +371,7 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
  * @returns {WpBuildTestSuitePlugin | undefined}
  */
 const testsuite = (env) =>
-	(env.isTests && env.app.plugins.build !== false && env.build !== "webview" ? new WpBuildTestSuitePlugin({ env }) : undefined);
+	env.isTests && env.app.plugins.build && env.build !== "webview" ? new WpBuildTestSuitePlugin({ env }) : undefined;
 
 
 module.exports = testsuite;

@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.banner
+ * @file plugin/banner.js
+ * @author Scott Meesseman
  */
 
 const webpack = require("webpack");

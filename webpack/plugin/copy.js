@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.copy
+ * @file plugin/copy.js
+ * @author Scott Meesseman
  */
 
 const { existsSync } = require("fs");

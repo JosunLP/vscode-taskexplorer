@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.licensefiles
+ * @file plugin/licensefiles.js
+ * @author Scott Meesseman
  */
 
 const { join } = require("path");

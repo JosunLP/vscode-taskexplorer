@@ -4,7 +4,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.analyze
+ * @file plugin/analyze.js
+ * @author Scott Meesseman
  */
 
 const webpack = require("webpack");

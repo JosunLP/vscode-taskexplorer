@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.clean
+ * @file plugin/clean.js
+ * @author Scott Meesseman
  */
 
 const path = require("path");

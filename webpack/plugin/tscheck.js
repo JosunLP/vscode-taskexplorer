@@ -3,16 +3,16 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.tscheck
+ * @file plugin/tscheck.js
+ * @author Scott Meesseman
  */
 
 const path = require("path");
 const dts = require("dts-bundle");
 const { existsSync } = require("fs");
-const { findFiles, apply } = require("../utils");
+const { apply } = require("../utils");
 const WpBuildBasePlugin = require("./base");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
-const { join } = require("path");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */

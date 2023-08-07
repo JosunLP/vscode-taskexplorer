@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.licensefiles
+ * @file plugin/dispose.js
+ * @author Scott Meesseman
  */
 
 const WpBuildBasePlugin = require("./base");

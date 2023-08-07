@@ -3,7 +3,8 @@
 // @ts-check
 
 /**
- * @module wpbuild.plugin.runtimevars
+ * @file plugin/runtimevars.js
+ * @author Scott Meesseman
  */
 
 const WpBuildBasePlugin = require("./base");
