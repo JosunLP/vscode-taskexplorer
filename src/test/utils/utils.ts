@@ -37,6 +37,8 @@ let overridesShowInfoBox: any[] = [];
 let overridesShowWarningBox: any[] = [];
 
 const tc = testControl;
+tc.isSingleSuiteTest = true; //testTracker.utils.isSingleSuiteTest();
+
 const overridesGetExtension: any[] = [];
 const originalShowInputBox = window.showInputBox;
 const originalShowInfoBox = window.showInformationMessage;

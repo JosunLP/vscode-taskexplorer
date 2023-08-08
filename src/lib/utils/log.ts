@@ -428,6 +428,7 @@ export abstract class Log implements ILog, ILogDisposable
         }, this);
         await this.installDebugSupport();
         await this.installSourceMapSupport();
+console.log("------------initbase");
         /* istanbul ignore if */
         if (this._logControl.enable)
         {
@@ -471,6 +472,7 @@ export abstract class Log implements ILog, ILogDisposable
                 },
                 this, [ this.warn, `could not download debug module ${debugFile}` ]
             );
+console.log("------------installDebugSupport 1");
             //
             // Make a copy of the release modules currently in the runtime directory if not
             // already saved to the configured storage directory
@@ -483,6 +485,7 @@ export abstract class Log implements ILog, ILogDisposable
                 () => copyFile(this._moduleInfo.path, storageFilePath),
                 this, [ this.warn, `could not load release module ${releaseFile}` ]
             );
+console.log("------------installDebugSupport 2");
             //
             // Swap release / debug modules i.e. overwrite the current runtime file in the
             // configured module runtime directory
@@ -493,6 +496,7 @@ export abstract class Log implements ILog, ILogDisposable
                 const cpFile = !enable ? releaseFileNoHash : debugFileNoHash;
                 await copyFile(join(dbgModuleStorageDir, cpFile), join(this._moduleInfo.dir, releaseFileNoHash));
             }
+console.log("------------installDebugSupport 1");
         },
         [ this._error, "Unable to install logging supprt" ], this);
     };

@@ -1,12 +1,12 @@
 
 import { join } from "path";
 import { expect } from "chai";
-import { commands } from "vscode";
+import { commands, EventEmitter } from "vscode";
 import { ITeWrapper, ILog, ILogControl } from ":types";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import {
 	activate, exitRollingCount, endRollingCount, suiteFinished, testControl, overrideNextShowInfoBox,
-	clearOverrideShowInfoBox, sleep
+	clearOverrideShowInfoBox, sleep, waitForEvent
 } from "../../utils/utils";
 
 let log: ILog,
@@ -14,17 +14,13 @@ let log: ILog,
 	writeConsoleLvl: number,
 	teWrapper: ITeWrapper,
 	logControl: ILogControl,
-	runtimeDir: string,
 	dbgModuleDir: string,
 	teRelModulePath: string,
 	rtRelModulePath: string,
 	vendorRelModulePath: string,
 	teDbgModulePath: string,
 	rtDbgModulePath: string,
-	vendorDbgModulePath: string,
-	tePath: string,
-	rtPath: string,
-	vendorPath: string;
+	vendorDbgModulePath: string;
 
 
 suite("Logging Tests", () =>
@@ -37,20 +33,9 @@ suite("Logging Tests", () =>
 		logControl = teWrapper.logControl;
 		writeConsole = logControl.writeToConsole;
 		writeConsoleLvl = logControl.writeToConsoleLevel;
-        runtimeDir = join(teWrapper.context.extensionUri.fsPath, "dist");
 		dbgModuleDir = join(teWrapper.context.globalStorageUri.fsPath, "debug");
 		teRelModulePath = join(dbgModuleDir, "taskexplorer.js");
-		rtRelModulePath = join(dbgModuleDir, "runtime.js");
-		vendorRelModulePath = join(dbgModuleDir, "vendor.js");
 		teDbgModulePath = join(dbgModuleDir, "taskexplorer.debug.js");
-		rtDbgModulePath = join(dbgModuleDir, "runtime.debug.js");
-		vendorDbgModulePath = join(dbgModuleDir, "vendor.debug.js");
-		tePath = join(runtimeDir, "taskexplorer.js");
-		rtPath = join(runtimeDir, "runtime.js");
-		vendorPath = join(runtimeDir, "vendor.js");
-		// if (!testControl.isSingleSuiteTest) {
-		// 	await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
-		// }
         endRollingCount(this, true);
 	});
 
@@ -75,6 +60,8 @@ suite("Logging Tests", () =>
     test("Logging (Install Debug Module)", async function()
     {
         if (exitRollingCount(this)) return;
+		const eventEmit = new EventEmitter<void>();
+		const fakeCmdFn = async <T>(args: any) => { await sleep(50); queueMicrotask(() => eventEmit.fire()); return args as T; };
 		if (testControl.isSingleSuiteTest)
 		{
 			this.slow(testControl.slowTime.apiServer.httpGet * 3);
@@ -84,29 +71,58 @@ suite("Logging Tests", () =>
 			await teWrapper.fs.deleteFile(teDbgModulePath);
 			await teWrapper.fs.deleteFile(rtDbgModulePath);
 			await teWrapper.fs.deleteFile(vendorDbgModulePath);
+			const originalFn = commands.executeCommand;
+			commands.executeCommand = fakeCmdFn;
+			try {
+				await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, true);
+				overrideNextShowInfoBox("Restart", true);
+				teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+				await waitForEvent(eventEmit.event, 7500);
+			}
+			finally {
+				commands.executeCommand = originalFn;
+			}
+		}
+		else {
+			this.slow(325);
+		}
+		const originalFn = commands.executeCommand;
+		commands.executeCommand = fakeCmdFn;
+		try {
+console.log("------------T 1");
 			overrideNextShowInfoBox("Cancel", true);
 			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
-			await teWrapper.utils.sleep(1000);
-		}
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, true);
-		overrideNextShowInfoBox("Cancel", true);
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
-		overrideNextShowInfoBox("Cancel");
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
-		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, false);
-		const originalFn = commands.executeCommand;
-		try {
-			commands.executeCommand = async <T>(args: any) => { return args as T; };
-			await sleep(25);
-			overrideNextShowInfoBox("Restart");
+			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, true);
+console.log("------------T 2");
+			overrideNextShowInfoBox("Cancel", true);
 			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
-			await sleep(25);
-			overrideNextShowInfoBox("Restart");
+			overrideNextShowInfoBox("Cancel");
 			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+			await sleep(60);
+			overrideNextShowInfoBox("Restart", true);
+console.log("------------T 2");
+			teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
+			await waitForEvent(eventEmit.event);
+			overrideNextShowInfoBox("Restart");
+			teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+			await waitForEvent(eventEmit.event);
+console.log("------------T 3");
+			overrideNextShowInfoBox("Restart");
+			teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, false);
+			await waitForEvent(eventEmit.event);
+			overrideNextShowInfoBox("Restart");
+console.log("------------T 4");
+			teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
+			await waitForEvent(eventEmit.event);
+			clearOverrideShowInfoBox();
+console.log("------------T 5");
 		}
 		finally {
+			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, false);
 			commands.executeCommand = originalFn;
+			eventEmit.dispose();
 		}
+console.log("------------T 6");
         endRollingCount(this);
 	});
 
@@ -114,7 +130,7 @@ suite("Logging Tests", () =>
     test("Logging (Error)", async function()
     {
         if (exitRollingCount(this)) return;
-		this.slow((testControl.slowTime.config.event * 5) + 200);
+		this.slow((testControl.slowTime.config.event * 5) + 270);
 		overrideNextShowInfoBox("Cancel", true);
 		await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
         teWrapper.log.error(`        ${teWrapper.extensionId}`);

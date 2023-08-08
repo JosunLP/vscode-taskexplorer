@@ -27,7 +27,7 @@ export class TeServer implements ISpmServer, Disposable
 
     constructor(private readonly wrapper: TeWrapper)
 	{
-		this._onRequestCancel = new EventEmitter<any>();
+		this._onRequestCancel = new EventEmitter<void>();
 		this._disposables = [
 			this._onRequestCancel
 		];
