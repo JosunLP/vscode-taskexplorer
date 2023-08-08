@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { ITeWrapper } from ":types";
-import { startupFocus } from "utils/suiteUtils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { executeSettingsUpdate } from "../../utils/commandUtils";
 import {
     activate, endRollingCount, exitRollingCount, getSuccessCount, suiteFinished, testControl as tc

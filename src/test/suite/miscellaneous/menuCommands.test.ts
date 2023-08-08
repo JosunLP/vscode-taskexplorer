@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ITeWrapper } from ":types";
 import { TaskExecution, Uri } from "vscode";
-import { startupFocus } from "utils/suiteUtils";
+import { startupFocus } from "../../utils/suiteUtils";
 import { executeTeCommand2 } from "../../utils/commandUtils";
 import {
     activate, clearOverrideShowInputBox, endRollingCount, exitRollingCount, getWsPath, overrideNextShowInfoBox,

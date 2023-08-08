@@ -2,7 +2,7 @@
 import { join } from "path";
 import fsUtils from "../../utils/fsUtils";
 import { refresh } from "../../utils/treeUtils";
-import { startupBuildTree } from "utils/suiteUtils";
+import { startupBuildTree } from "../../utils/suiteUtils";
 import { ITaskExplorerApi, ITeWrapper } from ":types";
 import { executeTeCommand } from "../../utils/commandUtils";
 import { ExternalTaskProvider1 } from "./externalProvider1";

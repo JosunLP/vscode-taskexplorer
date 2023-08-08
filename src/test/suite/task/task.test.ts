@@ -4,8 +4,10 @@ import { expect } from "chai";
 import { TaskExecution } from "vscode";
 import * as utils from "../../utils/utils";
 import { ITaskItem, ITeWrapper } from ":types";
-import { startupFocus } from "utils/suiteUtils";
-import { executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusExplorerView, focusSearchView } from "../../utils/commandUtils";
+import { startupFocus } from "../../utils/suiteUtils";
+import {
+    executeSettingsUpdate, executeTeCommand, executeTeCommand2, focusExplorerView, focusSearchView
+} from "../../utils/commandUtils";
 
 const tc = utils.testControl;
 const startTaskSlowTime = tc.slowTime.config.event + (tc.slowTime.config.showHideSpecialFolder * 2) + (tc.slowTime.commands.standard * 2);

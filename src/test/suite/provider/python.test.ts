@@ -2,6 +2,7 @@
 
 import * as path from "path";
 import { expect } from "chai";
+import { getTreeTasks } from "../../utils/treeUtils";
 import { ITaskExplorerApi, ITeWrapper } from ":types";
 import { startupFocus } from "../../utils/suiteUtils";
 import { Uri, workspace, WorkspaceFolder } from "vscode";
@@ -10,7 +11,6 @@ import {
     activate, endRollingCount, exitRollingCount, getWsPath, logErrorsAreFine, suiteFinished,
     testControl as tc, verifyTaskCount, waitForTeIdle
 } from "../../utils/utils";
-import { getTreeTasks } from "utils/treeUtils";
 
 const testsName = "python";
 const startTaskCount = 5;
