@@ -48,7 +48,7 @@ const output = (env) =>
 			// libraryExport: "run",
 			// globalObject: "this",
 			// libraryTarget: 'commonjs2',
-			path: join(env.paths.dist, "test"),
+			path: env.paths.distTests,
 			filename: "[name].js",
 			// module: true,
 			// chunkFormat: "commonjs",
@@ -56,7 +56,7 @@ const output = (env) =>
 			// library: {
 			// 	type: "commonjs2"
 			// },
-			libraryTarget: "commonjs2"
+			// libraryTarget: "commonjs2"
 		});
 	}
 	else if (env.build === "types")

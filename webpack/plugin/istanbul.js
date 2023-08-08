@@ -200,7 +200,7 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
  * @returns {WpBuildIstanbulPlugin | undefined}
  */
 const istanbul = (env) =>
-    (env.app.plugins.compile !== false && env.isExtensionTests ? new WpBuildIstanbulPlugin({ env }) : undefined);
+    (env.app.plugins.compile !== false && env.isMainTests ? new WpBuildIstanbulPlugin({ env }) : undefined);
 
 
 module.exports = istanbul;

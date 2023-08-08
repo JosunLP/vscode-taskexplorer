@@ -29,6 +29,7 @@ declare type WebpackCache = import("webpack").Cache;
 declare type WebpackCacheFacade = ReturnType<WebpackCompilation["getCache"]>;
 declare type WebpackChunk = import("webpack").Chunk;
 declare type WebpackCompilation = import("webpack").Compilation;
+declare type WebpackEntryObject = import("webpack").EntryObject;
 // declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
 // declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
@@ -125,8 +126,8 @@ declare interface IWpBuildEnvironment extends IWebpackEnvironmentInternal
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
     isMain: boolean;
-    isExtensionProd: boolean,
-    isExtensionTests: boolean;
+    isMainProd: boolean,
+    isMainTests: boolean;
     isTests: boolean;
     isWeb: boolean;
     global: WpBuildGlobalEnvironment;
@@ -374,6 +375,7 @@ export {
     WebpackCompilerSyncHook,
     WebpackCompilerSyncHookName,
     WebpackConfig,
+    WebpackEntryObject,
     WebpackEtag,
     WebpackLogger,
     WebpackMode,

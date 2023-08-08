@@ -69,8 +69,8 @@ const setBuildEnvironment = (env) =>
 		isTests: env.environment.startsWith("test"),
 		isWeb: env.target.startsWith("web"),
 		isMain: env.build === "extension" || env.build === "web",
-		isExtensionProd: env.build === "extension" || env.build === "web" && env.environment === "prod",
-		isExtensionTests: env.build === "extension" || env.build === "web" && env.environment.startsWith("test"),
+		isMainProd: (env.build === "extension" || env.build === "web") && env.environment === "prod",
+		isMainTests: (env.build === "extension" || env.build === "web") && env.environment.startsWith("test"),
 		global: globalEnv,
 		logLevel: env.app.log.level || 0,
 		paths: getPaths(env),
@@ -117,6 +117,9 @@ const getPaths = (env) =>
 		build, temp,
 		base: env.build !== "webview" ? build : (wvBase ? resolve(build, wvBase) :
 													join(build, "src", "webview", "app")),
+		// base: env.build !== "webview" && env.build !== "tests" ? build :
+		// 			(env.build === "webview" ? (wvBase ? resolve(build, wvBase) : join(build, "src", "webview", "app")) :
+		// 			join(build, "dist", "test")),
 		dist: join(build, "dist"), // = compiler.outputPath = compiler.options.output.path
 		distTests: join(build, "dist", "test"),
 		cache: globalEnv.cacheDir,

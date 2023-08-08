@@ -94,7 +94,7 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
  * @param {WpBuildEnvironment} env
  * @returns {WpBuildScmPlugin | undefined}
  */
-const scm = (env) => env.app.plugins.scm && env.isExtensionProd ? new WpBuildScmPlugin({ env }) : undefined;
+const scm = (env) => env.app.plugins.scm && env.isMainProd ? new WpBuildScmPlugin({ env }) : undefined;
 
 
 module.exports = scm;

@@ -47,6 +47,7 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
                 // hook: "compilation",
 				// stage: "ADDITIONAL",
 				statsProperty: "tests",
+				statsPropertyColor: "magenta",
                 callback: this.testsuite.bind(this)
             }
         });
@@ -145,7 +146,12 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 			  child = procPromise.child;
 		child.stdout?.on("data", (data) => { stdout += data; });
 		child.stderr?.on("data", (data) => { stderr += data; });
-		child.on("close", (code) => { exitCode = code; logger.write(`   ${dsc} completed with exit code bold(${code})`); });
+		child.on("close", (code) =>
+		{
+			const clrCode = logger.withColor(code?.toString(), code === 0 ? logger.colors.green : logger.colors.red);
+			exitCode = code;
+			logger.write(`   ${dsc} completed with exit code bold(${clrCode})`);
+		});
 		await procPromise;
 		if (stdout || stderr)
 		{
@@ -237,13 +243,10 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 		for (const filePath of files)
 		{
 			let data, source, hash, newHash, cacheEntry, persistedCache;
-			const filePathRel = relative(outputDir, filePath),
-				  file = basename(filePathRel);
+			const filePathRel = relative(this.compiler.outputPath, filePath);
 
-			// this.compilation.buildDependencies.add(file);
-
-			logger.value("   process output file", filePathRel, 3);
-			logger.value("   check compilation cache for snapshot", filePathRel, 3);
+			logger.value("   process test suite output file", filePathRel, 3);
+			logger.write("      check compilation cache for snapshot", 4);
 			try {
 				persistedCache = this.cache.get();
 				cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
@@ -256,7 +259,7 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 			if (cacheEntry)
 			{
 				let isValidSnapshot;
-				logger.value("   check snapshot valid", filePathRel, 3);
+				logger.write("      check snapshot valid", 4);
 				try {
 					isValidSnapshot = await this.checkSnapshotValid(cacheEntry.snapshot);
 				}
@@ -266,19 +269,20 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 				}
 				if (isValidSnapshot)
 				{
-					logger.value("   snapshot valid", filePathRel, 4);
+					logger.write("      snapshot is valid", 4);
 					({ hash, source } = cacheEntry);
 					data = data || await readFile(filePath);
 					newHash = newHash || this.getContentHash(data);
 					if (newHash === hash)
 					{
-						logger.value("   asset unchanged", filePathRel, 4);
-						this.compilation.comparedForEmitAssets.add(file);
-						return;
+						logger.write("      asset is unchanged since last snapshot", 4);
+					}
+					else {
+						logger.write("      asset has changed since last snapshot", 4);
 					}
 				}
 				else {
-					logger.write(`   snapshot for '${filePathRel}' is invalid`, 4);
+					logger.write("      snapshot is invalid", 4);
 				}
 			}
 
@@ -288,17 +292,17 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 				const startTime = Date.now();
 				data = data || await readFile(filePath);
 				source = new this.compiler.webpack.sources.RawSource(data);
-				logger.value("   create snapshot", filePathRel, 4);
+				logger.write("      create snapshot", 4);
 				try {
 					snapshot = await this.createSnapshot(startTime, filePath);
 				}
 				catch (e) {
-					this.handleError(e, "failed while creating snapshot");
+					this.handleError(e, "failed while creating snapshot for " + filePathRel);
 					return;
 				}
 				if (snapshot)
 				{
-					logger.value("   cache snapshot", filePathRel, 4);
+					logger.write("      cache snapshot", 4);
 					try {
 						newHash = newHash || this.getContentHash(source.buffer());
 						snapshot.setFileHashes(hash);
@@ -306,7 +310,7 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 						cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
 					}
 					catch (e) {
-						this.handleError(e, "failed while caching snapshot");
+						this.handleError(e, "failed while caching snapshot " + filePathRel);
 						return;
 					}
 				}
@@ -316,18 +320,20 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 			newHash = newHash || this.getContentHash(data);
 			if (newHash === persistedCache[filePathRel])
 			{
-				logger.value("   asset unchanged", filePathRel, 4);
-				this.compilation.buildDependencies.add(filePathRel);
-				this.compilation.comparedForEmitAssets.add(file);
-				continue;
+				logger.write("      asset is unchanged", 4);
 			}
-			persistedCache[filePathRel] = newHash;
-			this.cache.set(persistedCache);
+			else {
+				logger.write("      asset has changed, update hash in persistent cache", 4);
+				persistedCache[filePathRel] = newHash;
+				this.cache.set(persistedCache);
+			}
 
 			const info = /** @type {WebpackAssetInfo} */({
+				contenthash: newHash,
 				development: true,
-				immutable: true,
-				javascriptModule: false
+				immutable: newHash === persistedCache[filePathRel],
+				javascriptModule: false,
+				tests: true
 			});
 
 			// this.compilation.additionalChunkAssets.push(filePathRel);
@@ -335,20 +341,23 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 			const existingAsset = this.compilation.getAsset(filePathRel);
 			if (!existingAsset)
 			{
-				logger.value("   emit asset", filePathRel, 2);
-				this.compilation.emitAsset(file, source, info);
+				logger.write("      emit asset", 3);
+				this.compilation.emitAsset(filePathRel, source, info);
 			}
 			else if (this.options.force)
 			{
-				logger.value("   update asset", filePathRel, 2);
-				this.compilation.updateAsset(file, source, info);
+				logger.write("      update asset", 3);
+				this.compilation.updateAsset(filePathRel, source, info);
 			}
 			else {
-				logger.value("   asset compared for emit", filePathRel, 2);
+				logger.write("      asset compared for emit", 3);
 				this.compilation.buildDependencies.add(filePathRel);
 				this.compilation.comparedForEmitAssets.add(filePathRel);
+				this.compilation.compilationDependencies.add(filePathRel);
 			}
 		}
+
+		logger.write(`   finished execution of typescript build @ italic(${tsConfigFile})`, 3);
 	};
 
 }
@@ -359,7 +368,7 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
  * @returns {WpBuildTestSuitePlugin | undefined}
  */
 const testsuite = (env) =>
-	env.isTests && env.app.plugins.build && env.build !== "webview" ? new WpBuildTestSuitePlugin({ env }) : undefined;
+	env.isTests && env.app.plugins.build && env.isMain && false ? new WpBuildTestSuitePlugin({ env }) : undefined;
 
 
 module.exports = testsuite;

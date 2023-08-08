@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+const { glob } = require("glob");
+const { parse } = require("path");
+const { apply } = require("../utils");
+
 /**
  * @module wpbuild.exports.entry
  */
 
+/** @typedef {import("../types").WebpackEntryObject} WebpackEntryObject */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 
@@ -20,19 +25,8 @@ const entry = (env) =>
 	}
 	else if (env.build === "tests")
 	{
-		// const testFiles = glob.sync("./src/test/suite/**/*.{test,spec}.ts").reduce(
-		// 	(obj, e)=>
-		// 	{
-		// 		obj["suite/" + path.parse(e).name] = e;
-		// 		return obj;
-		// 	}, {}
-		// );
-		env.wpc.entry =
-		{
-			runTest: "./src/test/runTest.ts"
-			// "run/index": "./src/test/run/index.ts",
-			// ...testFiles
-		};
+		env.wpc.entry = {};
+		applyTestsEnties(env.wpc.entry);
 	}
 	else if (env.build === "types")
 	{
@@ -56,7 +50,41 @@ const entry = (env) =>
 				layer: "debug"
 			}
 		};
+		if (env.environment === "test") {
+			applyTestsEnties(env, env.wpc.entry);
+		}
 	}
+};
+
+
+/**
+ * @function entry
+ * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WebpackEntryObject} entry Webpack build environment
+ */
+const applyTestsEnties = (env, entry) =>
+{
+	const testFiles = glob.sync("./src/test/suite/**/*.{test,spec}.ts", { dotRelative: true, posix: true }).reduce(
+		(obj, e)=>
+		{
+			obj[parse(e).name] = {
+				import: e,
+				dependOn: "runTest"
+			};
+			return obj;
+		}, {}
+	);
+	apply(entry, {
+		"runTest": /** @type {WebpackEntryObject} */({
+			import: "./src/test/runTest.ts",
+			dependOn: env.build !== "tests" ? "taskexplorer" : undefined
+		}),
+		"suite/index": {
+			import: "./src/test/suite/index.ts",
+			dependOn: "runTest"
+		},
+		...testFiles
+	});
 };
 
 
