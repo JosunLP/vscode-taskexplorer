@@ -43,20 +43,11 @@ const output = (env) =>
 	{
 		apply(env.wpc.output,
 		{
-			// asyncChunks: true,
 			clean: env.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			// libraryExport: "run",
-			// globalObject: "this",
-			// libraryTarget: 'commonjs2',
 			path: env.paths.distTests,
 			filename: "[name].js",
-			// module: true,
-			// chunkFormat: "commonjs",
-			// scriptType: "text/javascript",
-			// library: {
-			// 	type: "commonjs2"
-			// },
-			// libraryTarget: "commonjs2"
+			libraryTarget: "umd",
+			umdNamedDefine: true
 		});
 	}
 	else if (env.build === "types")

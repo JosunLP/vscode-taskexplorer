@@ -137,68 +137,14 @@ const rules = (env) =>
 	else // extension - node or web
 	{
 
-		if (env.isTests)
-		{
-			env.wpc.module.rules.push(...[
-			{
-				test: /index\.js$/,
-				include: path.join(env.paths.build, "node_modules", "nyc"),
-				loader: "string-replace-loader",
-				options: {
-					search: "selfCoverageHelper = require('../self-coverage-helper')",
-					replace: "selfCoverageHelper = { onExit () {} }"
-				}
-			},
-			{
-				test: /\.ts$/,
-				include: path.join(env.paths.build, "src", "test"),
-				exclude: [
-					/node_modules/, /types[\\/]/, /\.d\.ts$/
-				],
-				use: {
-					loader: "babel-loader",
-					options: {
-						presets: [
-							[ "@babel/preset-env", { targets: "defaults" }],
-							[ "@babel/preset-typescript" ],
-						]
-					}
-				}
-			}]);
-			// env.wpc.module.rules.push({
-			// 	test: /\.ts$/,
-			// 	include: path.join(env.paths.build, "src", "test"),
-			// 	exclude: [
-			// 		/node_modules/, /types[\\/]/, /\.d\.ts$/
-			// 	],
-			// 	use: [ env.esbuild ?
-			// 	{
-			// 		loader: "esbuild-loader",
-			// 		options: {
-			// 			implementation: esbuild,
-			// 			loader: "tsx",
-			// 			target: [ "es2020", "chrome91", "node16.20" ],
-			// 			tsconfigRaw: getTsConfig(
-			// 				env, path.join(env.paths.build, "src", "test", "tsconfig.json"),
-			// 			)
-			// 		}
-			// 	} :
-			// 	{
-			// 		loader: "ts-loader",
-			// 		options: {
-			// 			configFile: path.join(env.paths.build, "src", "test", "tsconfig.json"),
-			// 			// experimentalWatchApi: true,
-			// 			transpileOnly: true
-			// 		}
-			// 	} ]
-			// });
-		}
-
 		env.wpc.module.rules.push({
 			test: /\.ts$/,
 			issuerLayer: "release",
 			include: path.join(env.paths.build, "src"),
 			loader: "string-replace-loader",
+			exclude: [
+				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
+			],
 			options: {
 				multiple: [
 				{
@@ -250,6 +196,9 @@ const rules = (env) =>
 			issuerLayer: "release",
 			include: path.join(env.paths.build, "src", "lib"),
 			loader: "string-replace-loader",
+			exclude: [
+				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
+			],
 			options: {
 				search: /^log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
 				replace: "() => {}]"
@@ -282,6 +231,66 @@ const rules = (env) =>
 				}
 			} ]
 		});
+
+		if (env.isTests)
+		{
+			env.wpc.module.rules.push(...[
+			{
+				test: /index\.js$/,
+				include: path.join(env.paths.build, "node_modules", "nyc"),
+				loader: "string-replace-loader",
+				options: {
+					search: "selfCoverageHelper = require('../self-coverage-helper')",
+					replace: "selfCoverageHelper = { onExit () {} }"
+				}
+			},
+			{
+				test: /\.ts$/,
+				include: path.join(env.paths.build, "src", "test"),
+				exclude: [
+					/node_modules/, /types[\\/]/, /\.d\.ts$/
+				],
+				use: {
+					loader: "babel-loader",
+					options: {
+						presets: [
+							[ "@babel/preset-env", { targets: "defaults" }],
+							[ "@babel/preset-typescript" ],
+						],
+						query: {
+							plugins: [ "transform-es2015-modules-commonjs" ]
+						}
+					}
+				}
+			}]);
+			// env.wpc.module.rules.push({
+			// 	test: /\.ts$/,
+			// 	include: path.join(env.paths.build, "src", "test"),
+			// 	exclude: [
+			// 		/node_modules/, /types[\\/]/, /\.d\.ts$/
+			// 	],
+			// 	use: [ env.esbuild ?
+			// 	{
+			// 		loader: "esbuild-loader",
+			// 		options: {
+			// 			implementation: esbuild,
+			// 			loader: "tsx",
+			// 			target: [ "es2020", "chrome91", "node16.20" ],
+			// 			tsconfigRaw: getTsConfig(
+			// 				env, path.join(env.paths.build, "src", "test", "tsconfig.json"),
+			// 			)
+			// 		}
+			// 	} :
+			// 	{
+			// 		loader: "ts-loader",
+			// 		options: {
+			// 			configFile: path.join(env.paths.build, "src", "test", "tsconfig.json"),
+			// 			// experimentalWatchApi: true,
+			// 			transpileOnly: true
+			// 		}
+			// 	} ]
+			// });
+		}
 	}
 };
 

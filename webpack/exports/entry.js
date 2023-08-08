@@ -26,7 +26,7 @@ const entry = (env) =>
 	else if (env.build === "tests")
 	{
 		env.wpc.entry = {};
-		applyTestsEnties(env.wpc.entry);
+		applyTestsEnties(env, env.wpc.entry);
 	}
 	else if (env.build === "types")
 	{
@@ -51,7 +51,7 @@ const entry = (env) =>
 			}
 		};
 		if (env.environment === "test") {
-			applyTestsEnties(env, env.wpc.entry);
+			//applyTestsEnties(env, env.wpc.entry);
 		}
 	}
 };
@@ -64,12 +64,11 @@ const entry = (env) =>
  */
 const applyTestsEnties = (env, entry) =>
 {
-	const testFiles = glob.sync("./src/test/suite/**/*.{test,spec}.ts", { dotRelative: true, posix: true }).reduce(
+	const testFiles = glob.sync("./src/test/suite/**/*.{test,spec}.ts", { dotRelative: false, posix: true }).reduce(
 		(obj, e)=>
 		{
-			obj[parse(e).name] = {
-				import: e,
-				dependOn: "runTest"
+			obj[e.replace("src/test/", "").replace(".ts", "")] = {
+				import: `./${e}`
 			};
 			return obj;
 		}, {}
@@ -79,9 +78,11 @@ const applyTestsEnties = (env, entry) =>
 			import: "./src/test/runTest.ts",
 			dependOn: env.build !== "tests" ? "taskexplorer" : undefined
 		}),
+		"control": /** @type {WebpackEntryObject} */({
+			import: "./src/test/control.ts"
+		}),
 		"suite/index": {
-			import: "./src/test/suite/index.ts",
-			dependOn: "runTest"
+			import: "./src/test/suite/index.ts"
 		},
 		...testFiles
 	});
