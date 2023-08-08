@@ -20,6 +20,7 @@ const { join, basename, relative, dirname, isAbsolute, resolve } = require("path
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
+/** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
@@ -232,137 +233,122 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 		//
 		// Process output files
 		//
-		// const files = await findFiles("**/*.js", { cwd: outputDir, absolute: true });
-		// for (const filePath of files)
-		// {
-		// 	let data, /* source, hash, compilationCacheEntry, */persistedCache;
-		// 	const filePathRel = relative(outputDir, filePath),
-		// 		  file = basename(filePathRel);
+		const files = await findFiles("**/*.js", { cwd: outputDir, absolute: true });
+		for (const filePath of files)
+		{
+			let data, source, hash, newHash, cacheEntry, persistedCache;
+			const filePathRel = relative(outputDir, filePath),
+				  file = basename(filePathRel);
 
-		// 	// this.compilation.buildDependencies.add(file);
+			// this.compilation.buildDependencies.add(file);
 
-		// 	logger.value("   check cache", filePathRel, 4);
-		// 	try {
-		// 		persistedCache = this.cache.get();
-		// 		// compilationCacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
-		// 	}
-		// 	catch (e) {
-		// 		this.handleError(e, "failed while checking cache");
-		// 		return;
-		// 	}
+			logger.value("   process output file", filePathRel, 3);
+			logger.value("   check compilation cache for snapshot", filePathRel, 3);
+			try {
+				persistedCache = this.cache.get();
+				cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
+			}
+			catch (e) {
+				this.handleError(e, "failed while checking cache");
+				return;
+			}
 
-		// 	if (persistedCache)
-		// 	{
-		// 		data = data || await readFile(filePath);
-		// 		const newHash = this.getContentHash(data);
-		// 		if (newHash === persistedCache[filePathRel])
-		// 		{
-		// 			logger.value("   asset unchanged", filePathRel, 4);
-		// 			// this.compilation.comparedForEmitAssets.add(file);
-		// 			continue;
-		// 		}
-		// 		persistedCache[filePathRel] = newHash;
-		// 		this.cache.set(persistedCache);
-		// 	}
+			if (cacheEntry)
+			{
+				let isValidSnapshot;
+				logger.value("   check snapshot valid", filePathRel, 3);
+				try {
+					isValidSnapshot = await this.checkSnapshotValid(cacheEntry.snapshot);
+				}
+				catch (e) {
+					this.handleError(e, "failed while checking snapshot");
+					return;
+				}
+				if (isValidSnapshot)
+				{
+					logger.value("   snapshot valid", filePathRel, 4);
+					({ hash, source } = cacheEntry);
+					data = data || await readFile(filePath);
+					newHash = newHash || this.getContentHash(data);
+					if (newHash === hash)
+					{
+						logger.value("   asset unchanged", filePathRel, 4);
+						this.compilation.comparedForEmitAssets.add(file);
+						return;
+					}
+				}
+				else {
+					logger.write(`   snapshot for '${filePathRel}' is invalid`, 4);
+				}
+			}
 
-		// 	// if (compilationCacheEntry)
-		// 	// {
-		// 	// 	let isValidSnapshot;
-		// 	// 	logger.value("   check snapshot valid", filePathRel, 3);
-		// 	// 	try {
-		// 	// 		isValidSnapshot = await this.checkSnapshotValid(compilationCacheEntry.snapshot);
-		// 	// 	}
-		// 	// 	catch (e) {
-		// 	// 		this.handleError(e, "failed while checking snapshot");
-		// 	// 		return;
-		// 	// 	}
-		// 	// 	if (isValidSnapshot)
-		// 	// 	{
-		// 	// 		logger.value("   snapshot valid", filePathRel, 4);
-		// 	// 		({ hash, source } = compilationCacheEntry);
-		// 	// 		data = data || await readFile(filePath);
-		// 	// 		const newHash = this.getContentHash(data);
-		// 	// 		if (newHash === hash)
-		// 	// 		{
-		// 	// 			logger.value("   asset unchanged", filePathRel, 4);
-		// 	// 			this.compilation.comparedForEmitAssets.add(file);
-		// 	// 			return;
-		// 	// 		}
-		// 	// 	}
-		// 	// 	else {
-		// 	// 		logger.write(`   snapshot for '${filePathRel}' is invalid`, 4);
-		// 	// 	}
-		// 	// }
+			if (!source)
+			{
+				let snapshot;
+				const startTime = Date.now();
+				data = data || await readFile(filePath);
+				source = new this.compiler.webpack.sources.RawSource(data);
+				logger.value("   create snapshot", filePathRel, 4);
+				try {
+					snapshot = await this.createSnapshot(startTime, filePath);
+				}
+				catch (e) {
+					this.handleError(e, "failed while creating snapshot");
+					return;
+				}
+				if (snapshot)
+				{
+					logger.value("   cache snapshot", filePathRel, 4);
+					try {
+						newHash = newHash || this.getContentHash(source.buffer());
+						snapshot.setFileHashes(hash);
+						await this.wpCacheCompilation.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
+						cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
+					}
+					catch (e) {
+						this.handleError(e, "failed while caching snapshot");
+						return;
+					}
+				}
+			}
 
-		// 	// if (!source)
-		// 	// {
-		// 	// 	let snapshot;
-		// 	// 	const startTime = Date.now();
-		// 	// 	data = data || await readFile(filePath);
-		// 	// 	source = new this.compiler.webpack.sources.RawSource(data);
-		// 	// 	logger.value("   create snapshot", filePathRel, 4);
-		// 	// 	try {
-		// 	// 		snapshot = await this.createSnapshot(startTime, filePath);
-		// 	// 	}
-		// 	// 	catch (e) {
-		// 	// 		this.handleError(e, "failed while creating snapshot");
-		// 	// 		return;
-		// 	// 	}
-		// 	// 	if (snapshot)
-		// 	// 	{
-		// 	// 		// console.log("########: ");
-		// 	// 		// console.log("hasContextHashes: " + snapshot.hasContextHashes());
-		// 	// 		// console.log("hasFileHashes: " + snapshot.hasFileHashes());
-		// 	// 		// console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
-		// 	// 		// console.log("hasStartTime: " + snapshot.hasStartTime());
+			data = data || await readFile(filePath);
+			newHash = newHash || this.getContentHash(data);
+			if (newHash === persistedCache[filePathRel])
+			{
+				logger.value("   asset unchanged", filePathRel, 4);
+				this.compilation.buildDependencies.add(filePathRel);
+				this.compilation.comparedForEmitAssets.add(file);
+				continue;
+			}
+			persistedCache[filePathRel] = newHash;
+			this.cache.set(persistedCache);
 
-		// 	// 		logger.value("   cache snapshot", filePathRel, 4);
-		// 	// 		try {
-		// 	// 			const hash = this.getContentHash(source.buffer());
-		// 	// 			snapshot.setFileHashes(hash);
-		// 	// 			await this.wpCacheCompilation.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
+			const info = /** @type {WebpackAssetInfo} */({
+				development: true,
+				immutable: true,
+				javascriptModule: false
+			});
 
-		// 	// 			compilationCacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
-		// 	// 			// if (cacheEntry)
-		// 	// 			// {
-		// 	// 			// 	console.log("!!!!!!!!!!: " + cacheEntry.hash);
-		// 	// 			// 	console.log("hasContextHashes: " + snapshot.hasContextHashes());
-		// 	// 			// 	console.log("hasFileHashes: " + snapshot.hasFileHashes());
-		// 	// 			// 	console.log("hasFileTimestamps: " + snapshot.hasFileTimestamps());
-		// 	// 			// 	console.log("hasStartTime: " + snapshot.hasStartTime());
-		// 	// 			// }
-		// 	// 		}
-		// 	// 		catch (e) {
-		// 	// 			this.handleError(e, "failed while caching snapshot");
-		// 	// 			return;
-		// 	// 		}
-		// 	// 	}
-		// 	// }
+			// this.compilation.additionalChunkAssets.push(filePathRel);
 
-		// 	// const info = {
-		// 	// 	absoluteFilename: filePath,
-		// 	// 	sourceFilename: filePathRel,
-		// 	// 	filename: file,
-		// 	// 	precompile: true,
-		// 	// 	development: true,
-		// 	// 	immutable: true
-		// 	// };
-
-		// 	// const existingAsset = this.compilation.getAsset(filePathRel);
-		// 	// if (!existingAsset)
-		// 	// {
-		// 	// 	logger.value("   add asset", filePathRel, 2);
-		// 	// 	// this.compilation.additionalChunkAssets.push(filePathRel);
-		// 	// 	// logger.value("   emit asset", filePathRel, 2);
-		// 	// 	// this.compilation.emitAsset(file, source, info);
-		// 	// }
-		// 	// else if (this.options.force) {
-		// 	// 	logger.value("   update asset", filePathRel, 2);
-		// 	// 	this.compilation.updateAsset(file, source, info);
-		// 	// }
-
-		// 	// this.compilation.comparedForEmitAssets.add(filePathRel);
-		// }
+			const existingAsset = this.compilation.getAsset(filePathRel);
+			if (!existingAsset)
+			{
+				logger.value("   emit asset", filePathRel, 2);
+				this.compilation.emitAsset(file, source, info);
+			}
+			else if (this.options.force)
+			{
+				logger.value("   update asset", filePathRel, 2);
+				this.compilation.updateAsset(file, source, info);
+			}
+			else {
+				logger.value("   asset compared for emit", filePathRel, 2);
+				this.compilation.buildDependencies.add(filePathRel);
+				this.compilation.comparedForEmitAssets.add(filePathRel);
+			}
+		}
 	};
 
 }

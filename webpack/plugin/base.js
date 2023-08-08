@@ -12,11 +12,12 @@
 const { readFile } = require("fs/promises");
 const { relative, basename } = require("path");
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
-const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, WpBuildConsoleLogger } = require("../utils");
+const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
+/** @typedef {import("../utils/console")} WpBuildConsoleLogger */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
 /** @typedef {import("../types").WebpackRawSource} WebpackRawSource */
@@ -28,13 +29,17 @@ const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, WpBuildConsoleLog
 /** @typedef {import("../types").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 /** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
+/** @typedef {import("../types").WebpackCompilerAsyncHook} WebpackCompilerAsyncHook */
 /** @typedef {import("../types").WebpackStatsPrinterContext} WebpackStatsPrinterContext */
 /** @typedef {import("../types").WebpackCompilationHookStage} WebpackCompilationHookStage */
 /** @typedef {import("../types").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
+/** @typedef {import("../types").WebpackCompilerSyncHookName} WebpackCompilerSyncHookName */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompiler>} WebpackSyncCompilerHook */
+/** @typedef {import("../types").WebpackCompilerAsyncHookName} WebpackCompilerAsyncHookName */
 /** @typedef {import("../types").WebpackAsyncHook<WebpackCompiler>} WebpackAsyncCompilerHook */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
 /** @typedef {import("../types").WebpackAsyncHook<WebpackCompilation>} WebpackAsyncCompilationHook */
+
 /** @typedef {{ file: string; snapshot?: WebpackSnapshot | null; source?: WebpackRawSource }} CacheResult */
 /** @typedef {import("../types").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
 
@@ -44,6 +49,25 @@ const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, WpBuildConsoleLog
  * @param {...any} args
  * @returns {any}
  */
+
+
+class WpBuildError extends WebpackError
+{
+    /**
+     * @class WpBuildError
+     * @param {string} message
+     * @param {string} file
+     * @param {string} [details]
+     */
+    constructor(message, file, details) { super(message); this.file = file; this.details = details; }
+
+    /**
+     * @param {string} file
+     * @param {string} message
+     * @returns {WpBuildError}
+     */
+    static get(file, message) { return new WpBuildError(file, message); }
+}
 
 
 /**
@@ -166,6 +190,7 @@ class WpBuildBasePlugin
      */
 	constructor(options, globalCache)
     {
+        this.validatePluginOptions(options);
         this.env = options.env;
         this.logger = this.env.logger;
         this.wpConfig = options.env.wpc;
@@ -437,19 +462,26 @@ class WpBuildBasePlugin
 	 * @function
 	 * @member handleError
 	 * @protected
-	 * @param {Error | WebpackError} e
-	 * @param {string | undefined | null | false | 0} [msg]
+	 * @param {Error | WebpackError | string} e
+	 * @param {string | undefined | null | false | 0} [msgOrFile]
+	 * @param {string | undefined} [fileOrDetails]
+	 * @param {string | undefined} [details]
 	 */
-	handleError(e, msg)
+	handleError(e, msgOrFile, fileOrDetails, details)
 	{
-		if (msg) {
-            this.env.logger.error(msg);
+        if (isString(e))
+        {
+            e = msgOrFile ? new WpBuildError(e, msgOrFile, fileOrDetails) : new WebpackError(e);
         }
-        else {
-            this.env.logger.error("an error has occurred");
-        }
-        if (!(e instanceof WebpackError)) {
-            e = new WebpackError(e.message);
+        else if (!(e instanceof WebpackError) && !(e instanceof WpBuildError))
+        {
+            this.env.logger.error(msgOrFile ?? "an error has occurred");
+            if (!fileOrDetails) {
+                e = new WebpackError(e.message);
+            }
+            else {
+                e = new WpBuildError(e.message, fileOrDetails, details);
+            }
         }
         this.env.logger.error(e);
         this.compilation.errors.push(/** @type {WebpackError} */(e));
@@ -481,6 +513,16 @@ class WpBuildBasePlugin
      * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
      */
     isAsync = (hook) => isFunction(hook.tapPromise);
+
+
+    /**
+     * @function
+     * @private
+     * @member isAsyncType
+     * @param {any} hook
+     * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
+     */
+    isAsyncType = (hook) => isFunction(hook.tapPromise);
 
 
     /**
@@ -526,30 +568,30 @@ class WpBuildBasePlugin
      */
     onApply(compiler, options)
     {
-        let compilationHookTapped = false;
-        const optionsArray = Object.entries(options);
+        this.validateApplyOptions(compiler, options);
 
+        const optionsArray = Object.entries(options);
         this.compiler = compiler;
         this.wpCache = compiler.getCache(this.name);
         this.wpLogger = compiler.getInfrastructureLogger(this.name);
         this.hashDigestLength = compiler.options.output.hashDigestLength || this.env.wpc.output.hashDigestLength || 20;
 
-        for (const [ name, tapOpts ] of optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook))
+        const hasCompilationHook = optionsArray.find(([ _, tapOpts ]) => tapOpts.hook === "compilation") ||
+                                   optionsArray.every(([ _, tapOpts ]) => !!tapOpts.stage);
+        if (hasCompilationHook)
         {
-            if (tapOpts.hook === "compilation" && !compilationHookTapped)
+            this.tapCompilationHooks(optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook === "compilation"));
+        }
+
+        for (const [ name, tapOpts ] of optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook && tapOpts.hook !== "compilation"))
+        {
+            const hook = compiler.hooks[tapOpts.hook];
+            if (!tapOpts.async)
             {
-                this.tapCompilationHooks(optionsArray);
-                compilationHookTapped = true;
-            }
-            else if (!tapOpts.async)
-            {
-                const hook = compiler.hooks[tapOpts.hook];
                 hook.tap(`${this.name}_${name}`, this.wrapCallback(name, tapOpts).bind(this));
             }
             else
-            {
-                const hook = compiler.hooks[tapOpts.hook];
-                if (this.isAsync(hook))
+            {   if (this.isAsync(hook))
                 {
                     hook.tapPromise(`${this.name}_${name}`, this.wrapCallback(name, tapOpts).bind(this));
                 }
@@ -591,7 +633,7 @@ class WpBuildBasePlugin
             if (!this.onCompilation(compilation)) {
                 return;
             }
-            optionsArray.filter(([ _, tapOpts ]) => tapOpts.hook === "compilation").forEach(([ name, tapOpts ]) =>
+            optionsArray.forEach(([ name, tapOpts ]) =>
             {
                 if (!tapOpts.hookCompilation)
                 {
@@ -676,10 +718,65 @@ class WpBuildBasePlugin
             this.compilation.hooks.statsPrinter.tap(name, (stats) =>
             {
                 const printFn = (/** @type {{}} */prop, /** @type {WebpackStatsPrinterContext} */context) =>
-                      prop ? context.green?.(context.formatFlag?.(this.breakProp(property)) || "") || "" : "";
+                      prop ? context[options.statsPropertyColor || "green"]?.(context.formatFlag?.(this.breakProp(property)) || "") || "" : "";
                 stats.hooks.print.for(`asset.info.${property}`).tap(name, printFn);
             });
         }
+    }
+
+
+    /**
+     * @function
+     * @private
+     * @member validateOptions
+     * @param {WebpackCompiler} compiler the compiler instance
+     * @param {WpBuildPluginTapOptionsHash} options Plugin options to be applied
+     * @throws {WpBuildError}
+     */
+	validateApplyOptions(compiler, options)
+    {
+        if (options)
+        {
+            Object.values(options).forEach((o) =>
+            {
+                if (o.async && !this.isAsync(compiler.hooks[o.hook]))
+                {
+                    throw new WebpackError(`Invalid hook parameters specified: ${o.hook} is not asynchronou`);
+                }
+            });
+            for (const o of Object.values(options).filter((tapOpts) => tapOpts.hook))
+            {
+                const hook = compiler.hooks[o.hook],
+                      isAsync = this.isAsync(hook);
+                if (o.async && !isAsync)
+                {
+                    this.handleError(new WebpackError(`Invalid hook parameters specified: ${o.hook} is not asynchronous`));
+                    return;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * @function
+     * @private
+     * @member validateOptions
+     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     * @throws {WpBuildError}
+     */
+	validatePluginOptions(options)
+    {
+        // if (options.plugins)
+        // {
+        //     Object.values(asArray(options.plugins)).forEach((o) =>
+        //     {
+        //         if (o.async && o.hook !== WebpackCompilerAsyncHookName)
+        //         {
+        //             throw new WebpackError(`Specified hook '${o.hook}' is not asynchronous`);
+        //         }
+        //     });
+        // }
     }
 
 
@@ -734,3 +831,4 @@ class WpBuildBasePlugin
 
 
 module.exports = WpBuildBasePlugin;
+module.exports.WpBuildError = WpBuildError;

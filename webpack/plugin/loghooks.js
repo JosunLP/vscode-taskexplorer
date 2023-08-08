@@ -15,11 +15,14 @@ const WpBuildBasePlugin = require("./base");
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WebpackCompilerHook} WebpackCompilerHook */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackCompilerSyncHook} WebpackCompilerSyncHook */
 /** @typedef {import("../types").WebpackCompilerHookName} WebpackCompilerHookName */
 /** @typedef {import("../types").WebpackCompilerSyncHookName} WebpackCompilerSyncHookName */
 /** @typedef {import("../types").WebpackCompilerAsyncHookName} WebpackCompilerAsyncHookName */
+/** @typedef {import("../types").WebpackSyncHook<any>} WebpackSyncHook */
 
 
 /**
@@ -119,14 +122,23 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 			// );
 		});
 		this.addCompilerHook("make");
-		this.addCompilerHook("afterCompile", (compilation) =>
+		this.addCompilerHook("afterCompile", /** @param {WebpackCompilation} compilation */(compilation) =>
 		{
+			// const stats = compilation.getStats();
+			// stats.toJson().
 			const assets = compilation.getAssets();
-			this.logger.write("---- Compilation completed -- Listing all assets ----------------------------------------", 2, "", null, this.logger.colors.white);
+			this.logger.write(
+				"---- Compilation step completed -- Listing all assets ----------------------------------------",
+				3, "", null, this.logger.colors.white
+			);
 			for (const asset of assets)
 			{
-				this.logger.write(this.logger.tag("ASSET", this.logger.colors.green, this.logger.colors.white) + " " + this.logger.withColor(asset.name, this.logger.colors.grey), 2);
-				this.logger.value("   asset info", JSON.stringify(asset.info), 2);
+				this.logger.write(
+					this.logger.tag("ASSET", this.logger.colors.green, this.logger.colors.white) + " " +
+					this.logger.withColor(asset.name, this.logger.colors.grey),
+					3
+				);
+				this.logger.value("   asset info", JSON.stringify(asset.info), 4);
 			}
 		});
 		this.addCompilerHook("shouldEmit");

@@ -10,6 +10,7 @@
  */
 
 const WpBuildBasePlugin = require("./base");
+const { WpBuildError } = require("./base");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
 const { isString, apply, isObjectEmpty, asArray } = require("../utils");
 const { WebpackError } = require("webpack");
@@ -126,27 +127,6 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
               hashCurrent = env.state.hash.current;
         this.readAssetState();
         logger.write(`validate hashes for assets in italic(${env.paths.files.hashStoreJson})`, 2);
-        // asArray(this.compilation.chunks).filter(c => isString(c.name)).forEach((chunk) =>
-        // {
-        //     const chunkName = /** @type {string} */(chunk.name);
-        //     asArray(chunk.files).filter(f => this.matchObject(f)).forEach((file) =>
-        //     {
-        //         if (!hashCurrent[chunkName])
-        //         {
-        //             hashCurrent[chunkName] = chunk.contentHash.javascript;
-        //             logger.write(`updated contenthash for italic(${file})`, 2);
-        //             logger.value("   previous", "n/a", 3);
-        //             logger.value("   new", chunk.contentHash.javascript, 3);
-        //         }
-        //         if (hashCurrent[chunkName] !==  chunk.contentHash.javascript)
-        //         {
-        //             hashCurrent[chunkName] = chunk.contentHash.javascript;
-        //             logger.write(`updated stale contenthash for italic(${file})`, 2);
-        //             logger.value("   previous", hashCurrent[file], 3);
-        //             logger.value("   new", chunk.contentHash.javascript, 3);
-        //         }
-        //     });
-        // });
         Object.entries(assets).filter(([ file, _ ]) => this.matchObject(file) && this.isEntryAsset(file)).forEach(([ file, _ ]) =>
 		{
             const chunkName = this.fileNameStrip(file, true),
@@ -164,7 +144,9 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
                     }
                 }
                 else {
-                    this.compilation.warnings.push(new WebpackError("Non-string content hash not supported yet: " + asset.name));
+                    this.compilation.warnings.push(
+                        new WpBuildError("Non-string content hash not supported yet: " + asset.name, "runtimevars.js")
+                    );
                 }
             }
         });
@@ -202,7 +184,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
         const hashMap = this.env.state.hash.next,
               updates = /** @type {string[]} */([]);
         this.logger.write("replace runtime placeholder variables", 1);
-		Object.entries(assets).filter(([ f, _ ]) => this.matchObject(f)).forEach(([ file, _ ]) =>
+		Object.entries(assets).filter(([ f ]) => this.matchObject(f)).forEach(([ file ]) =>
 		{
             const asset = this.compilation.getAsset(file);
             if (asset && isString(asset.info.contenthash))

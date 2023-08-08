@@ -40,19 +40,12 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
             performCodeCoverageTasks: {
                 hook: "compilation",
                 stage: "ADDITIONS",
-                statsProperty: "istanbulTagged",
+                statsProperty: "istanbul",
+                statsPropertyColor: "yellow",
                 callback: this.istanbulTags.bind(this)
             }
         });
     }
-
-
-    /**
-     * @function
-     * @private
-     * @param {WebpackAssetInfo} info
-     */
-    info(info) { return apply({ ...(info || {}) }, { istanbulTagged: true }); }
 
 
     /**
@@ -63,10 +56,12 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
     istanbulTags(assets)
     {
 		this.logger.write("istanbul ignore tag insertion for external requires");
-		Object.entries(assets).filter(([ file, _ ]) => this.matchObject(file) && this.isEntryAsset(file)).forEach(([ file, _ ]) =>
+		Object.keys(assets).filter(f => this.matchObject(f) && this.isEntryAsset(f)).forEach((file) =>
 		{
-            this.logger.value("   update asset with tag insertion", file);
-            this.compilation.updateAsset(file, (source) => this.source(file, source), this.info.bind(this));
+            this.logger.value("   update asset with tag insertion", file, 4);
+            this.compilation.updateAsset(
+                file, (source) => this.tagSource(file, source), (info) => apply({ ...(info || {}) }, { istanbul: true })
+            );
         });
     }
 
@@ -78,41 +73,14 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
      * @param {WebpackSource} sourceInfo
      * @returns {WebpackSource}
      */
-    source(file, sourceInfo)
+    tagSource(file, sourceInfo)
     {
-        let sourceCode = sourceInfo.source().toString();
-        sourceCode = this.sourceIstanbulTags(sourceCode);
-        return this.sourceObj(file, sourceCode, sourceInfo);
-    }
-
-
-    /**
-     * @function
-     * @private
-     * @param {string} file
-     * @param {string | Buffer} content
-     * @param {WebpackSource} sourceInfo
-     * @returns {WebpackSource}
-     */
-    sourceObj(file, content, sourceInfo)
-    {
-        const { source, map } = sourceInfo.sourceAndMap();
+        const regex = /\n[ \t]*module\.exports \= require\(/gm,
+              sourceCode = sourceInfo.source().toString().replace(regex, (v) => "/* istanbul ignore next */" + v),
+              { source, map } = sourceInfo.sourceAndMap();
         return map && (this.compiler.options.devtool || this.env.app.plugins.sourcemaps) ?
-               new this.compiler.webpack.sources.SourceMapSource(content, file, map, source) :
-               new this.compiler.webpack.sources.RawSource(content);
-    }
-
-
-    /**
-     * @function
-     * @private
-     * @param {string} sourceCode
-     * @returns {string}
-     */
-    sourceIstanbulTags(sourceCode)
-    {
-        const regex = /\n[ \t]*module\.exports \= require\(/gm;
-        return sourceCode.replace(regex, (v) => "/* istanbul ignore next */" + v);
+               new this.compiler.webpack.sources.SourceMapSource(sourceCode, file, map, source) :
+               new this.compiler.webpack.sources.RawSource(sourceCode);
     }
 
 

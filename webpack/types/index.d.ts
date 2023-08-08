@@ -1,6 +1,19 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+/**
+ * @file types/index.d.ts
+ * @version 0.0.1
+ * @license MIT
+ * @author @spmeesseman Scott Meesseman
+ * 
+ * Handy file links:
+ * 
+ * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
+ * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
+ */
+
+declare type AsArray<T = any> = T extends any[] ? T : [T];
 declare type PickByType<T, Value> = { [P in keyof T as T[P] extends Value | undefined ? P : never]: T[P] };
 declare type RequireKeys<T extends object, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
 
@@ -28,8 +41,10 @@ declare type WebpackCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIV
 declare type WebpackCompiler = import("webpack").Compiler;
 declare type WebpackCompilerHook = WebpackCompiler["hooks"];
 declare type WebpackCompilerHookName = keyof WebpackCompilerHook;
-declare type WebpackCompilerAsyncHookName = keyof PickByType<WebpackCompilerHook, import("tapable").AsyncSeriesHook<T>>;
-declare type WebpackCompilerSyncHookName = keyof PickByType<WebpackCompilerHook, import("tapable").SyncHook<T>>;
+declare type WebpackCompilerAsyncHook = PickByType<WebpackCompilerHook, import("tapable").AsyncSeriesHook<T>>;
+declare type WebpackCompilerAsyncHookName = keyof WebpackCompilerAsyncHook;
+declare type WebpackCompilerSyncHook = PickByType<WebpackCompilerHook, import("tapable").SyncHook<T>>;
+declare type WebpackCompilerSyncHookName = keyof WebpackCompilerSyncHook;
 declare type WebpackConfig = Required<import("webpack").Configuration>;
 declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
 declare type WebpackHookMap<H> = import("tapable").HookMap<H>;
@@ -328,11 +343,13 @@ interface IWpBuildPluginTapOptions
     callback: (arg: WebpackCompiler | WebpackCompilationAssets | WebpackCompilationParams) => void | Promise<void>;
     stage?: WebpackCompilationHookStage;
     statsProperty?: string;
+    statsPropertyColor?: Exclude<WpBuildLogTrueColor, "system">;
 }
 declare type WpBuildPluginTapOptions = Readonly<Omit<IWpBuildPluginTapOptions, "hookCompilation">> & Pick<IWpBuildPluginTapOptions, "hookCompilation">;
 declare type WpBuildPluginTapOptionsHash  = Record<string, WpBuildPluginTapOptions>
 
 export {
+    AsArray,
     RequireKeys,
     WebpackAsset,
     WebpackAssetInfo,
@@ -352,7 +369,9 @@ export {
     WebpackCompiler,
     WebpackCompilerHook,
     WebpackCompilerHookName,
+    WebpackCompilerAsyncHook,
     WebpackCompilerAsyncHookName,
+    WebpackCompilerSyncHook,
     WebpackCompilerSyncHookName,
     WebpackConfig,
     WebpackEtag,

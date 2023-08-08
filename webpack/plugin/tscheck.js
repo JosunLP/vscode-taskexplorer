@@ -9,13 +9,12 @@
  * @author Scott Meesseman
  */
 
-const path = require("path");
+const { join } = require("path");
 const dts = require("dts-bundle");
 const { existsSync } = require("fs");
 const { apply } = require("../utils");
 const WpBuildBasePlugin = require("./base");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
-const { join } = require("path");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -98,33 +97,33 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 		const tsConfigs = /** @type {[ string, ForkTsCheckerMode, boolean? ][]} */([]);
 		if (env.build === "webview")
 		{
-			tsConfig = path.join(env.paths.build, "tsconfig.webview.json");
+			tsConfig = join(env.paths.build, "tsconfig.webview.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = path.join(env.paths.base, "tsconfig.json");
+				tsConfig = join(env.paths.base, "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "readonly" ]);
 		}
 		else if (env.build === "tests")
 		{
-			tsConfig = path.join(env.paths.build, "tsconfig.test.json");
+			tsConfig = join(env.paths.build, "tsconfig.test.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = path.join(env.paths.build, "src", "test", "tsconfig.json");
+				tsConfig = join(env.paths.build, "src", "test", "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-tsbuildinfo" ]);
 		}
 		else if (env.build === "types")
 		{
-			tsConfig = path.join(env.paths.build, "tsconfig.types.json");
+			tsConfig = join(env.paths.build, "tsconfig.types.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = path.join(env.paths.build, "types", "tsconfig.json");
+				tsConfig = join(env.paths.build, "types", "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-dts" ]);
 		}
 		else
 		{
-			tsConfig = path.join(env.paths.build, `tsconfig.${env.target}.json`);
+			tsConfig = join(env.paths.build, `tsconfig.${env.target}.json`);
 			if (!existsSync(tsConfig)) {
-				tsConfig = path.join(env.paths.build, "tsconfig.json");
+				tsConfig = join(env.paths.build, "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-dts" ]);
 		}
