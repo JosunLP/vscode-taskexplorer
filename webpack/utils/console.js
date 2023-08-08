@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-const { isString, isObject, isPrimitive } = require("./utils");
+const { isString, isObject, isPrimitive, asArray } = require("./utils");
 
 /** @typedef {[ number, number ]} WpBuildLogColorMapping */
 /** @typedef {import("../types").WpBuildLogIcon} WpBuildLogIcon */
@@ -352,16 +352,80 @@ class WpBuildConsoleLogger
     {
         if (level === undefined || level <= this.env.logLevel)
         {
-            let vMsg = (msg || ""),/** @type {RegExpExecArray | null} */
-                match, colorSpace = 0;
-            const rgx = /\x1B\[[0-9]{1,2}m(.*?)\x1B\[[0-9]{1,2}m/gi;
-            while ((match = rgx.exec(vMsg)) !== null) {
+            let vMsg = (msg || ""),/** @type {RegExpExecArray | null} */match, colorSpace = 0;
+            const vPad = this.env.app.log.pad.value,
+                  rgxColorStartEnd = /\x1B\[[0-9]{1,2}m(.*?)\x1B\[[0-9]{1,2}m/gi;
+            while ((match = rgxColorStartEnd.exec(vMsg)) !== null) {
                 colorSpace += match[0].length - match[1].length;
             }
-            vMsg = vMsg.padEnd(this.env.app.log.pad.value + colorSpace - (pad || "").length);
+            vMsg = vMsg.padEnd(vPad + colorSpace - (pad || "").length);
             if (val || isPrimitive(val))
             {
-                vMsg += (!isString(val) || !(/\x1B\[[0-9]{1,2}m/).test(val) ? ": " : "") + val;
+                const rgxColorStart = /\x1B\[[0-9]{1,2}m/,
+                      maxLine = this.env.app.log.valueMaxLineLength;
+                vMsg += (!isString(val) || !rgxColorStart.test(val) ? ": " : "");
+                if (isString(val) && val.replace(rgxColorStart, "").length > maxLine && !val.trim().includes("\n"))
+                {
+                    let xPad, clrLen,
+                        v = val.substring(0, maxLine),
+                        lV = v.substring(v.length - 6);
+                    val = val.substring(maxLine);
+                    while ((match = rgxColorStartEnd.exec(v)) !== null)
+                    {
+                        clrLen = match[0].length - match[1].length;
+                        xPad = clrLen < val.length ? clrLen : val.length;
+                        v += val.substring(0, xPad);
+                        val = val.substring(xPad);
+                        lV = v.substring(v.length - 6);
+                    }
+                    while (/\x1B/.test(lV) && !rgxColorStart.test(lV))
+                    {
+                        v += val.substring(0, 1);
+                        val = val.substring(1);
+                        lV = v.substring(v.length - 6);
+                        if (rgxColorStart.test(lV) && val[0] === "]")
+                        {
+                            v += val.substring(0, 3);
+                            val = val.substring(3);
+                            lV = v.substring(v.length - 6);
+                        }
+                    }
+                    vMsg += v;
+                    this.write(vMsg, level, pad, icon, color);
+                    while (val.replace(rgxColorStart, "").length > maxLine)
+                    {
+                        vMsg = val.substring(0, maxLine);
+                        val = val.substring(maxLine);
+                        lV = vMsg.substring(vMsg.length - 6);
+                        while ((match = rgxColorStartEnd.exec(v)) !== null)
+                        {
+                            clrLen = match[0].length - match[1].length;
+                            xPad = clrLen < val.length ? clrLen : val.length;
+                            xPad = match[0].length - match[1].length < val.length ? match[0].length - match[1].length : val.length;
+                            vMsg += val.substring(0, xPad);
+                            val = val.substring(xPad);
+                            lV = vMsg.substring(vMsg.length - 6);
+                        }
+                        while (/\x1B/.test(lV) && !rgxColorStart.test(lV))
+                        {
+                            vMsg += val.substring(0, 1);
+                            val = val.substring(1);
+                            lV = vMsg.substring(vMsg.length - 6);
+                        }
+                        xPad = /\x1B/.test(vMsg) ? 0 : 2;
+                        vMsg = "".padStart(vPad + xPad) + vMsg;
+                        this.write(vMsg, level, pad, icon, color);
+                    }
+                    if (val.length > 0) {
+                        xPad = /\x1B/.test(val) ? 0 : 2;
+                        vMsg = "".padStart(vPad + xPad) + val;
+                        this.write(vMsg, level, pad, icon, color);
+                    }
+                    return;
+                }
+                else {
+                    vMsg += val;
+                }
             }
             else if (val === undefined) {
                 vMsg += ": undefined";

@@ -53,14 +53,16 @@ const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, WpBuildConsoleLog
 class WpBuildBasePlugin
 {
     /**
-     * @member {WpBuildCache} cache Persisitnet storage cache
+     * Persistent storage cache
+     * @member {WpBuildCache} cache
      * @memberof WpBuildBasePlugin.prototype
      * @protected
      */
     cache;
 
     /**
-     * @member {WebpackCompilation} compilation Webpack compilation instance
+     * Webpack compilation instance
+     * @member {WebpackCompilation} compilation
      * @memberof WpBuildBasePlugin.prototype
      * @type {WebpackCompilation}
      * @protected
@@ -96,13 +98,6 @@ class WpBuildBasePlugin
     logger;
 
     /**
-     * @member {(str: string) => boolean} matchObject
-     * @memberof WpBuildBasePlugin.prototype
-     * @protected
-     */
-    matchObject;
-
-    /**
      * @member {string} name
      * @memberof WpBuildBasePlugin.prototype
      * @protected
@@ -131,7 +126,8 @@ class WpBuildBasePlugin
     plugins;
 
     /**
-     * @member {WebpackCacheFacade} wpCache Runtime compiler cache
+     * Runtime compiler cache
+     * @member {WebpackCacheFacade} wpCache
      * @memberof WebpackCompiler.prototype
      * @protected
      * @type {WebpackCacheFacade}
@@ -139,7 +135,8 @@ class WpBuildBasePlugin
     wpCache;
 
     /**
-     * @member {WebpackCacheFacade} wpCacheCompilation Runtime compilation cache
+     * Runtime compilation cache
+     * @member {WebpackCacheFacade} wpCacheCompilation
      * @memberof WpBuildBasePlugin.prototype
      * @type {WebpackCacheFacade}
      * @protected
@@ -177,7 +174,6 @@ class WpBuildBasePlugin
         this.options = mergeIf(options, { plugins: [] });
         this.hashDigestLength = this.env.wpc.output.hashDigestLength || 20;
         this.cache = new WpBuildCache(this.env, { file: `cache_${this.name}.json` });
-		this.matchObject = ModuleFilenameHelpers.matchObject.bind(undefined, options);
         if (globalCache) {
             this.initGlobalEnvObject(globalCache);
         }
@@ -191,16 +187,19 @@ class WpBuildBasePlugin
 
 
     /**
-     * @function Called by webpack runtime to initialize this plugin.  To be overridden by inheriting class.
+     * Called by webpack runtime to initialize this plugin.  To be overridden by inheriting class.
+     * @function
      * @public
      * @member apply
+     * @abstract
      * @param {WebpackCompiler} compiler the compiler instance
      */
     apply(compiler) { this.compiler = compiler; }
 
 
     /**
-     * @function Break property name into separate spaced words at each camel cased character
+     * Break property name into separate spaced words at each camel cased character
+     * @function
      * @private
      * @member breakProp
      * @param {string} prop
@@ -208,9 +207,9 @@ class WpBuildBasePlugin
      */
     breakProp(prop)
     {
-        return (prop.replace(/_/g, "")
+        return prop.replace(/_/g, "")
                    .replace(/[A-Z]{2,}/g, (v) => v[0] + v.substring(1).toLowerCase())
-                   .replace(/[a-z][A-Z]/g, (v) => `${v[0]} ${v[1]}`).toLowerCase());
+                   .replace(/[a-z][A-Z]/g, (v) => `${v[0]} ${v[1]}`).toLowerCase();
     }
 
 
@@ -405,7 +404,7 @@ class WpBuildBasePlugin
 
 
     /**
-     * @function getEntriesRegex
+     * @function
      * @public
      * @static
      * @member getEntriesRegex
@@ -505,7 +504,20 @@ class WpBuildBasePlugin
 
 
     /**
-     * @function Called by extending class from apply()
+     * Webpack ModuleFilenameHelpers - matches properties `include`, `exclude`, and
+     * `test` on the plugin options object
+     * @function
+     * @protected
+     * @member matchObject
+     * @param {string} str
+     * @returns {boolean}
+     */
+    matchObject = (str) => ModuleFilenameHelpers.matchObject.bind(undefined, this.options, str);
+
+
+    /**
+     * Called by extending class from apply()
+     * @function
      * @protected
      * @member onApply
      * @param {WebpackCompiler} compiler the compiler instance
@@ -618,6 +630,7 @@ class WpBuildBasePlugin
               hook = this.compilation.hooks[options.hookCompilation];
         if (this.isTapable(hook))
         {
+            this.nameCompilation = name;
             if (stageEnum && options.hookCompilation === "processAssets")
             {
                 const logMsg = this.breakProp(optionName).padEnd(this.env.app.log.pad.value - 3) + this.logger.tag(`processassets: ${options.stage} stage`);
@@ -643,9 +656,7 @@ class WpBuildBasePlugin
                     }
                 }
             }
-            if (options.statsProperty) {
-                this.tapStatsPrinter(options.statsProperty, name);
-            }
+            this.tapStatsPrinter(name, options);
         }
     }
 
@@ -654,18 +665,22 @@ class WpBuildBasePlugin
      * @function
      * @protected
      * @member tapStatsPrinter
-     * @param {string} property
      * @param {string} name
+     * @param {WpBuildPluginCompilationOptions} options
      */
-    tapStatsPrinter(property, name)
+    tapStatsPrinter(name, options)
     {
-        this.compilation.hooks.statsPrinter.tap(name, (stats) =>
+        const property = options.statsProperty;
+        if (property)
         {
-            const printFn = (/** @type {{}} */prop, /** @type {WebpackStatsPrinterContext} */context) =>
-                prop ? context.green?.(context.formatFlag?.(this.breakProp(property)) || "") || "" : "";
-            stats.hooks.print.for(`asset.info.${property}`).tap(name, printFn);
-        });
-    };
+            this.compilation.hooks.statsPrinter.tap(name, (stats) =>
+            {
+                const printFn = (/** @type {{}} */prop, /** @type {WebpackStatsPrinterContext} */context) =>
+                      prop ? context.green?.(context.formatFlag?.(this.breakProp(property)) || "") || "" : "";
+                stats.hooks.print.for(`asset.info.${property}`).tap(name, printFn);
+            });
+        }
+    }
 
 
     /**

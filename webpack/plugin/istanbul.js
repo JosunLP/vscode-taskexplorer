@@ -40,6 +40,7 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
             performCodeCoverageTasks: {
                 hook: "compilation",
                 stage: "ADDITIONS",
+                statsProperty: "istanbulTagged",
                 callback: this.istanbulTags.bind(this)
             }
         });
@@ -51,7 +52,7 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
      * @private
      * @param {WebpackAssetInfo} info
      */
-    info(info) { return apply(info || {}, { istanbulTagged: true }); }
+    info(info) { return apply({ ...(info || {}) }, { istanbulTagged: true }); }
 
 
     /**

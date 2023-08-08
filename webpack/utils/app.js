@@ -79,7 +79,7 @@ class WpBuildApplication
     {
         const rc = this.rc,
               pad = { base: 0, envTag: 25, value: 45, uploadFileName: 60 };
-        rc.log = mergeIf(rc.log || {}, { level: 1, pad: { ...pad } });
+        rc.log = mergeIf(rc.log || {}, { level: 1, valueMaxLineLength: 100, pad: { ...pad } });
         rc.logPad = mergeIf(rc.logPad || {}, { ...pad});
         rc.colors = mergeIf(rc.colors || {},
         {

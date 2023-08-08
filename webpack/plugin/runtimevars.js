@@ -201,23 +201,23 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     {
         const hashMap = this.env.state.hash.next,
               updates = /** @type {string[]} */([]);
-        this.logger.write("replace runtime variables", 1);
+        this.logger.write("replace runtime placeholder variables", 1);
 		Object.entries(assets).filter(([ f, _ ]) => this.matchObject(f)).forEach(([ file, _ ]) =>
 		{
             const asset = this.compilation.getAsset(file);
             if (asset && isString(asset.info.contenthash))
             {
                 hashMap[this.fileNameStrip(file, true)] = asset.info.contenthash;
-                if (this.isEntryAsset(file)) {
-                    this.logger.write(`   ${file} queued for variable replacement`, 2);
-                    updates.push(file);
-                }
+            }
+            if (this.isEntryAsset(file)) {
+                this.logger.value("   queue asset for variable replacement", file, 3);
+                updates.push(file);
             }
         });
         updates.forEach(
             (file) => this.compilation.updateAsset(file, source => this.source(file, source), this.info.bind(this))
         );
-        this.logger.write("runtime variable replacement completed", 2);
+        this.logger.write("runtime placeholder variable replacement completed", 2);
     };
 
 

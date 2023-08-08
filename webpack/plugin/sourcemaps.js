@@ -93,9 +93,7 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
                     let newSource = source;
 					this.logger.write("   update source entry asset with new sourcemap filename", 2);
                     this.logger.value("   source entry asset info", JSON.stringify(srcAsset.info), 4);
-                    if (source.toString().includes("# sourceMappingURL=")) {
-                        newSource = source.toString().replace(file, newFile);
-                    }
+                    newSource = source.toString().replace(file, newFile);
                     this.compilation.updateAsset(srcAsset.name, new sources.SourceMapSource(newSource, srcAsset.name, map), newInfo);
                 }
 			}

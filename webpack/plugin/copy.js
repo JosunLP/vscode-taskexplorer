@@ -70,30 +70,85 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
+	 * @async
 	 * @param {WebpackCompilationAssets} assets
 	 */
 	async copyEntryModulesNoHash(assets)
 	{
 		this.logger.write("create copies of entry modules named without hash", 1);
-		for (const [ file, sourceInfo ] of Object.entries(assets).filter(([ file ]) => this.isEntryAsset(file)))
+		for (const [ file ] of Object.entries(assets).filter(([ file ]) => this.isEntryAsset(file)))
 		{
 			const ccFile = this.fileNameStrip(file),
 				  absFile = this.compilation.getPath(file),
 				  dstAsset = this.compilation.getAsset(ccFile);
 			if (!dstAsset)
 			{
-console.log("1");
 				const srcAsset = this.compilation.getAsset(file);
 				if (srcAsset)
 				{
-console.log("2");
+					// let cacheEntry;
+					// this.logger.write(`getting cache for '${absFile}`);
+					// try {
+					// 	cacheEntry = await this.wpCacheCompilation.getPromise(absFile/* `${srcFile}|${id}`*/, null);
+					// }
+					// catch (e) {
+					// 	this.compilation.errors.push(e);
+					// 	return;
+					// }
+					// if (cacheEntry)
+					// {
+					// 	console.log("!!!! IS CACHED");
+					// }
+					// else {
+					// 	console.log("!!!! NOTTTTTT CACHED");
+					// }
+
+					//
+					// Process output files
+					//
+					let data, /* source, hash, compilationCacheEntry, */persistedCache;
+
+					// this.compilation.buildDependencies.add(file);
+
+					this.logger.write("   check persistent cache for previous contenthash", 3);
+					try {
+						persistedCache = this.cache.get();
+					}
+					catch (e) {
+						this.handleError(e, "failed while checking cache");
+						return;
+					}
+
+					let immutable = false;
+					if (persistedCache)
+					{
+						immutable = srcAsset.info.contenthash === persistedCache[ccFile];
+						if (immutable)
+						{
+							this.logger.write("   copied asset content is italic(unchanged)", 3);
+							// this.compilation.comparedForEmitAssets.add(ccFile);
+							// continue;
+						}
+						else {
+							this.logger.write("   copied asset content has italic(changed)", 3);
+							persistedCache[ccFile] = srcAsset.info.contenthash;
+							await this.cache.setAsync(persistedCache);
+						}
+					}
+console.log("immutable is " + immutable);
+if (immutable === true) {
+	console.log("1qqqq");
+}else if (immutable === false) {
+	console.log("2wwwzzz");
+}
 					const srcAssetInfo = apply({}, srcAsset.info),
 						  sources = this.compiler.webpack.sources,
-					      newInfo = { ...srcAssetInfo, copied: true, sourceFilename: srcAsset.name };
+					      newInfo = { copied: true, immutable, sourceFilename: srcAsset.name, javascriptModule: false };
+					if (immutable) {
+						newInfo.contenthash = srcAsset.info.contenthash;
+					}
 					this.logger.value("   emit copied asset", ccFile, 2);
-console.log("2.1: " + srcAsset.info.contenthash);
-console.log("2.2: " + sourceInfo.source().toString().substring(sourceInfo.source().toString().length - 100));
-					this.compilation.emitAsset(ccFile, new sources.RawSource(sourceInfo.source()), newInfo);
+					this.compilation.emitAsset(ccFile, new sources.RawSource(srcAsset.source.source()), newInfo);
 					try {
 						await this.wpCacheCompilation.storePromise(absFile, null, { hash: srcAsset.info.contenthash });
 					}
@@ -105,12 +160,10 @@ console.log("2.2: " + sourceInfo.source().toString().substring(sourceInfo.source
 			}
 			else
 			{
-console.log("3");
 				let cacheEntry;
 				this.logger.write(`getting cache for '${absFile}`);
 				try {
 					cacheEntry = await this.wpCacheCompilation.getPromise(absFile/* `${srcFile}|${id}`*/, null);
-console.log("4");
 				}
 				catch (e) {
 					this.compilation.errors.push(e);
@@ -118,10 +171,8 @@ console.log("4");
 				}
 				if (cacheEntry)
 				{
-console.log("!!!! IS CACHED");
 				}
 				else {
-console.log("!!!! NOTTTTTT CACHED");
 				}
 			}
 		}
@@ -147,7 +198,7 @@ console.log("!!!! NOTTTTTT CACHED");
 				if (srcAsset && srcAsset.info.related?.sourceMap)
 				{
 					this.logger.value("   update copied asset with sourcemap", file);
-					const newInfo = { ...srcAsset.info, copied: true, sourceFilename: srcAsset.name };
+					const newInfo = apply({ ...asset.info }, { related: { sourceMap: srcAsset.info.related.sourceMap }});
 					this.compilation.updateAsset(file, srcAsset.source, newInfo);
 				}
 			}

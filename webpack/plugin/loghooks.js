@@ -17,6 +17,9 @@ const WpBuildBasePlugin = require("./base");
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../types").WebpackCompilerHookName} WebpackCompilerHookName */
+/** @typedef {import("../types").WebpackCompilerSyncHookName} WebpackCompilerSyncHookName */
+/** @typedef {import("../types").WebpackCompilerAsyncHookName} WebpackCompilerAsyncHookName */
 
 
 /**
@@ -46,15 +49,15 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {string} hook
-	 * @param {(arg: any) => void} [cb]
+	 * @param {WebpackCompilerHookName} hook
+	 * @param {(arg: any) => any} [cb]
 	 */
 	addCompilerHook(hook, cb)
 	{
 		this.compiler.hooks[hook].tap(`${this.name}_${hook}`, (/** @type {any} */arg) =>
 		{
 			this.writeBuildTag(hook);
-			cb?.(arg);
+			return cb?.(arg);
 		});
 	};
 
@@ -62,7 +65,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {string} hook
+	 * @param {WebpackCompilerAsyncHookName} hook
 	 */
 	addCompilerHookPromise(hook)
 	{
@@ -76,7 +79,6 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 	 */
 	hookSteps()
 	{
-		const logger = this.env.logger;
 		this.addCompilerHook("environment");
 		this.addCompilerHook("afterEnvironment");
 		this.addCompilerHook("entryOption");
@@ -117,7 +119,16 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 			// );
 		});
 		this.addCompilerHook("make");
-		this.addCompilerHook("afterCompile");
+		this.addCompilerHook("afterCompile", (compilation) =>
+		{
+			const assets = compilation.getAssets();
+			this.logger.write("---- Compilation completed -- Listing all assets ----------------------------------------", 2, "", null, this.logger.colors.white);
+			for (const asset of assets)
+			{
+				this.logger.write(this.logger.tag("ASSET", this.logger.colors.green, this.logger.colors.white) + " " + this.logger.withColor(asset.name, this.logger.colors.grey), 2);
+				this.logger.value("   asset info", JSON.stringify(asset.info), 2);
+			}
+		});
 		this.addCompilerHook("shouldEmit");
 		this.addCompilerHook("emit");
 		this.addCompilerHookPromise("assetEmitted");
@@ -127,7 +138,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 		this.addCompilerHook("shutdown");
 		this.addCompilerHook("afterDone");
 		this.addCompilerHook("additionalPass");
-		this.addCompilerHook("failed", /** @param {Error} e */(e) => void logger.error(e));
+		this.addCompilerHook("failed", /** @param {Error} e */(e) => void this.logger.error(e));
 		this.addCompilerHook("invalid");
 		this.addCompilerHook("watchRun");
 		this.addCompilerHook("watchClose");

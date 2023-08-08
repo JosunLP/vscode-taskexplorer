@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+declare type PickByType<T, Value> = { [P in keyof T as T[P] extends Value | undefined ? P : never]: T[P] };
 declare type RequireKeys<T extends object, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
 
 /**
  * Webpack library types are prefixed with `Webpack` for convention.
  */
+export * from "./webpack";
 declare type WebpackAsset = import("webpack").Asset;
 declare type WebpackAssetInfo = import("webpack").AssetInfo;
 declare type WebpackAssetEmittedInfo = import("webpack").AssetEmittedInfo;
@@ -24,7 +26,10 @@ declare type WebpackCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIV
                                            "DEV_TOOLING" | "OPTIMIZE_INLINE" | "SUMMARIZE" | "OPTIMIZE_HASH" |
                                            "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT"
 declare type WebpackCompiler = import("webpack").Compiler;
-declare type WebpackCompilerHookName = keyof WebpackCompiler["hooks"];
+declare type WebpackCompilerHook = WebpackCompiler["hooks"];
+declare type WebpackCompilerHookName = keyof WebpackCompilerHook;
+declare type WebpackCompilerAsyncHookName = keyof PickByType<WebpackCompilerHook, import("tapable").AsyncSeriesHook<T>>;
+declare type WebpackCompilerSyncHookName = keyof PickByType<WebpackCompilerHook, import("tapable").SyncHook<T>>;
 declare type WebpackConfig = Required<import("webpack").Configuration>;
 declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
 declare type WebpackHookMap<H> = import("tapable").HookMap<H>;
@@ -54,6 +59,18 @@ declare interface WebpackCompilationParams {
 	contextModuleFactory: any; // WebpackContextModuleFactoryy;
 }
 
+// declare type WpBuildPluginTapOptionsCallbackType<T> = T extends ReturnType<IWpBuildPluginTapOptions["callback"]> ? X : never;
+// declare type WpBuildPluginTapOptionsCallbackType2 = ReturnType<IWpBuildPluginTapOptions["callback"]>;
+// declare type WpBuildPluginTapOptionsCallbackType3<T> = T extends WpBuildPluginTapOptionsCallbackType2<infer X> ? X : never;
+// interface IWpBuildPluginTapOptions2
+// {
+//     async?: boolean;
+//     hook: WebpackCompilerHookName;
+//     hookCompilation?: WebpackCompilationHookName;
+//     callback: (arg: WebpackCompiler | WebpackCompilationAssets | WebpackCompilationParams) => void | Promise<void>;
+//     stage?: WebpackCompilationHookStage;
+//     statsProperty?: string;
+// }
 /**
  * End Webpack library types.
  * 
@@ -169,6 +186,7 @@ declare interface IWpBuildLogOptions
 {
     level: WpBuildLogLevel;
     pad: WpBuildLogPadMap;
+    valueMaxLineLength: number;
 }
 declare type WpBuildLogOptions = Required<IWpBuildLogOptions>;
 declare type WpBuildModuleConfig = Record<WpBuildBuildEnvironment, Partial<WpBuildEnvironment>[]>;
@@ -327,10 +345,15 @@ export {
     WebpackChunk,
     WebpackCompilation,
     WebpackCompilationAssets,
+    WebpackCompilationHook,
     WebpackCompilationHookName,
     WebpackCompilationHookStage,
     WebpackCompilationParams,
     WebpackCompiler,
+    WebpackCompilerHook,
+    WebpackCompilerHookName,
+    WebpackCompilerAsyncHookName,
+    WebpackCompilerSyncHookName,
     WebpackConfig,
     WebpackEtag,
     WebpackLogger,
