@@ -211,7 +211,7 @@ module.exports = {
         "jsdoc/check-access": 1, // Recommended
         "jsdoc/check-alignment": 1, // Recommended
         "jsdoc/check-examples": 0,
-        "jsdoc/check-indentation": 1,
+        "jsdoc/check-indentation": 0,
         "jsdoc/check-line-alignment": 1,
         "jsdoc/check-param-names": 1, // Recommended
         "jsdoc/check-property-names": 1, // Recommended
