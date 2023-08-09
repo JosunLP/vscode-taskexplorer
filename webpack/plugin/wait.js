@@ -3,7 +3,7 @@
 // @ts-check
 
 /**
- * @file plugin/dispose.js
+ * @file plugin/wait.js
  * @version 0.0.1
  * @license MIT
  * @author Scott Meesseman @spmeesseman
@@ -33,59 +33,108 @@
  *         file:///c:\Projects\vscode-taskexplorer\webpack\exports\plugins.js
  */
 
-const { isPromise } = require("../utils");
+const { existsSync } = require("fs");
 const WpBuildBasePlugin = require("./base");
+const { apply, WpBuildError } = require("../utils");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
-/**
- * @class WpBuildDisposePlugin
- */
-class WpBuildDisposePlugin extends WpBuildBasePlugin
+class WpBuildWaitPlugin extends WpBuildBasePlugin
 {
     /**
-     * @function Called by webpack runtime to initialize this plugin
+     * @member {string}
+     * @memberof WpBuildWaitPlugin.prototype
+     * @private
+     */
+    _file;
+
+    /**
+     * @member {number}
+     * @memberof WpBuildWaitPlugin.prototype
+     * @private
+     */
+    _interval;
+
+    /**
+     * @member {number}
+     * @memberof WpBuildWaitPlugin.prototype
+     * @private
+     */
+    _timeout;
+
+
+    /**
+     * @class WpBuildWaitPlugin
+     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     */
+	constructor(options)
+    {
+        super(options);
+        this._file = "";
+        this._interval = 150;
+        this._timeout = 15;
+    }
+
+    /**
+     * Called by webpack runtime to initialize this plugin
+     * @function
      * @override
-     * @member apply
+     * @member
      * @param {WebpackCompiler} compiler the compiler instance
-     * @returns {void}
      */
     apply(compiler)
     {
-        this.onApply(compiler,
+		this.onApply(compiler,
         {
-            cleanupRegisteredDisposables: {
+            run: {
                 async: true,
-                hook: "shutdown",
-                callback: this.dispose.bind(this)
+                hook: "run",
+                callback: this.poll.bind(this)
             }
         });
     }
 
-    async dispose()
+
+    /**
+     * @function
+     * @private
+     * @member
+     * @param {WebpackCompiler} _compiler
+     * @returns {Promise<void>}
+     */
+    poll(_compiler)
     {
-        this.logger.write("cleanup: call all registered disposables", 2);
-        for (const d of this.env.disposables.splice(0))
+        const start = Date.now();
+        /** @param {(value: void | PromiseLike<void>) => void} resolve @param {any} reject */
+        const _poll = (resolve, reject) =>
         {
-            const result = d.dispose();
-            if (isPromise(result)) {
-                await result;
+            if (existsSync(this._file))
+            {
+                resolve();
             }
-        }
+            else if (Date.now() - start > this._timeout)
+            {
+                reject(new WpBuildError(`Wait operation times out at ${this._timeout} ms`, "plugin/wait.js"));
+            }
+            else {
+                setTimeout(_poll, this._interval, resolve, reject);
+            }
+        };
+        return new Promise((resolve, reject) => _poll(resolve, reject));
     }
 }
 
 
 /**
  * @function
+ * @module
  * @param {WpBuildEnvironment} env
- * @returns {WpBuildDisposePlugin}
+ * @returns {WpBuildWaitPlugin | undefined}
  */
-const dispose = (env) => new WpBuildDisposePlugin({ env });
+const wait = (env) => env.app.plugins.wait && env.build === "tests" ? new WpBuildWaitPlugin({ env }) : undefined;
 
 
-module.exports = dispose;
+module.exports = wait;

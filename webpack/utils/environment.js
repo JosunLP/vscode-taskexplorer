@@ -3,7 +3,10 @@
 // @ts-check
 
 /**
- * @module wpbuild.utils.environment
+ * @file utils/environment.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
 const { mergeIf, apply, isString, merge, isObjectEmpty } = require("./utils");
@@ -122,11 +125,7 @@ const getPaths = (env) =>
 		// 			join(build, "dist", "test")),
 		dist: join(build, "dist"), // = compiler.outputPath = compiler.options.output.path
 		distTests: join(build, "dist", "test"),
-		cache: globalEnv.cacheDir,
-		files: {
-			hashStoreJson: join(globalEnv.cacheDir, `hash.${env.environment}.json`),
-			sourceMapWasm: join(build, "node_modules", "source-map", "lib", "mappings.wasm")
-		}
+		cache: globalEnv.cacheDir
 	}, resolveRcPaths(build, env.app.paths || {}));
 };
 

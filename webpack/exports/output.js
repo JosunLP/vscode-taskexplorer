@@ -4,7 +4,10 @@ const { join, resolve } = require("path");
 const { apply } = require("../utils/utils");
 
 /**
- * @module wpbuild.exports.output
+ * @file exports/output.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */

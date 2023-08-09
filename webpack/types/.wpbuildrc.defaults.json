@@ -51,14 +51,9 @@
     },
     "paths": {
         "build": ".",
-        "cache": "node_modules/.cache/wpbuild",
         "dist": "dist",
         "distTests": "dist/test",
-        "temp": null,
-        "files": {
-            "hashStore": "",
-            "sourceMapWasm": ""
-        }
+        "temp": null
     },
     "exports": {
         "cache": true,
@@ -103,7 +98,8 @@
         "testsuite": true,
         "tscheck": true,
         "upload": true,
-        "vendormod": true
+        "vendormod": true,
+        "wait": false
     },
     "vscode": {
         "webview": {

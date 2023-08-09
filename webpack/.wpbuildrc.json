@@ -10,8 +10,9 @@
             { "build": "webview" }
         ],
         "testprod": [
-            { "build": "extension" },
-            { "build": "webview", "environment": "prod "}
+            { "build": "extension", "environment": "prod " },
+            { "build": "webview", "environment": "prod " },
+            { "build": "tests" }
         ],
         "prod": [
             { "build": "extension" },
@@ -19,8 +20,50 @@
         ],
         "test": [
             { "build": "extension" },
-            { "build": "webview", "environment": "dev "}
+            { "build": "webview", "environment": "dev "},
+            { "build": "tests" }
         ]
+    },
+    "modules": {
+        "extension": "node",
+        "tests": "node",
+        "types": "node",
+        "web": "web",
+        "webview": "webworker"
+    },
+    "environment": {
+        "baseDir": "src",
+        "dev": {
+            "color": "yellow",
+            "build": [
+                { "build": "extension" },
+                { "build": "webview" }
+            ]
+        },
+        "testprod":  {
+            "color": "yellow",
+            "build": [
+                { "build": "extension", "environment": "prod " },
+                { "build": "webview", "environment": "prod " },
+                { "build": "tests" }
+            ]
+        },
+        "prod":  {
+            "color": "yellow",
+            "build": [
+                { "build": "extension" },
+                { "build": "webview" }
+            ]
+        },
+        "test":  {
+            "baseDir": "src/test",
+            "color": "yellow",
+            "build": [
+                { "build": "extension" },
+                { "build": "webview", "environment": "dev "},
+                { "build": "tests" }
+            ]
+        }
     },
     "colors": {
         "default": "grey",
@@ -36,6 +79,7 @@
             "extension": "blue",
             "tests": "white",
             "types": "magenta",
+            "web": "cyan",
             "webview": "cyan"
         }
     },
@@ -54,11 +98,7 @@
         "cache": "node_modules/.cache/wpbuild",
         "dist": "dist",
         "distTests": "dist/test",
-        "temp": null,
-        "files": {
-            "hashStore": "",
-            "sourceMapWasm": ""
-        }
+        "temp": null
     },
     "exports": {
         "cache": true,
@@ -92,7 +132,7 @@
         "html": true,
         "ignore": false,
         "index": true,
-        "instrument": true,
+        "istanbul": true,
         "licensefiles": true,
         "loghooks": true,
         "optimization": true,
@@ -103,7 +143,8 @@
         "testsuite": true,
         "tscheck": true,
         "upload": true,
-        "vendormod": true
+        "vendormod": true,
+        "wait": false
     },
     "vscode": {
         "webview": {

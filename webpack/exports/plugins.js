@@ -3,7 +3,7 @@
 
 const {
 	analyze, banner, clean, copy, dispose, environment, istanbul, loghooks,
-	ignore, optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload,
+	ignore, optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload, wait,
 	cssextract, htmlcsp, imageminimizer, htmlinlinechunks, testsuite, vendormod, webviewapps, scm
 } = require("../plugin");
 
@@ -23,6 +23,7 @@ const plugins = (env) =>
 		environment(env),        // compiler.hooks.environment
 		vendormod(env),          // compiler.hooks.afterEnvironment - mods to vendor plugins and/or modules
 		progress(env),           // n/a - reports progress from webpack engine
+		wait(env),               // compiler.run
 		...clean(env),           // compiler.hooks.emit, compiler.hooks.done
 		testsuite(env),          // compiler.hooks.beforeCompile - build tests / test suite
 		banner(env),             // compiler.hooks.compilation -> compilation.hooks.processAssets

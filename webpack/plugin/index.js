@@ -4,7 +4,7 @@
  * @file plugin/index.js
  * @version 0.0.1
  * @license MIT
- * @author Scott Meesseman
+ * @author Scott Meesseman @spmeesseman
  */
 
 const analyze = require("./analyze");
@@ -26,10 +26,11 @@ const testsuite = require("./testsuite");
 const tscheck = require("./tscheck");
 const upload = require("./upload");
 const vendormod = require("./vendormod");
+const wait = require("./wait");
 const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = require("./html");
 
 module.exports = {
     analyze, banner, clean, copy, cssextract, dispose, environment, htmlcsp, htmlinlinechunks,
     ignore, imageminimizer, istanbul, licensefiles, loghooks, optimization, progress,
-    runtimevars, scm, sourcemaps, testsuite, tscheck, upload, vendormod, webviewapps
+    runtimevars, scm, sourcemaps, testsuite, tscheck, upload, vendormod, webviewapps, wait
 };

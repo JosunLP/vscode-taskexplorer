@@ -6,7 +6,7 @@
  * @file plugin/tscheck.js
  * @version 0.0.1
  * @license MIT
- * @author Scott Meesseman
+ * @author Scott Meesseman @spmeesseman
  */
 
 const { join } = require("path");
@@ -186,6 +186,11 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 
 
 /**
+ * Returns a `WpBuildTsCheckPlugin` instance if appropriate for the current build
+ * environment. Can be enabled/disable in .wpconfigrc.json by setting the `plugins.tscheck`
+ * property to a boolean value of  `true` or `false`
+ * @function
+ * @module
  * @param {WpBuildEnvironment} env
  * @returns {(WpBuildTsCheckPlugin | ForkTsCheckerWebpackPlugin)[]}
  */

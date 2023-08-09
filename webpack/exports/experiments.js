@@ -2,7 +2,10 @@
 // @ts-check
 
 /**
- * @module wpbuild.exports.experiments
+ * @file exports/experimental.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */

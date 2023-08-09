@@ -6,13 +6,37 @@
  * @file plugin/base.js
  * @version 0.0.1
  * @license MIT
- * @author Scott Meesseman
+ * @author Scott Meesseman @spmeesseman
+ *
+ * @description
+ *
+ * When adding a new plugin, perform the following tasks:
+ *
+ *     1. Add the plugin filename (w/o extnsion) to the `WpBuildPluginName` type near the
+ *        top of the WpBuild types file
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\types\wpbuild.d.ts
+ *
+ *     2. Adjust the default application object's plugins hash by adding the plugin filename
+ *        (w/o/ extension) as a key of the `plugins()` return object
+ *        file:///:\Projects\vscode-taskexplorer\webpack\utils\environment.js
+ *
+ *     3. Adjust the rc configuration files by adding the plugin filename (w/o/ extension)
+ *        as a key of the `plugins` object
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\.wpbuildrc.json
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\types\.wpbuildrc.defaults.json
+ *
+ *     4. Add a module reference to plugin directory index file and add to it's module.exports
+ *        file://c:\Projects\vscode-taskexplorer\webpack\plugin\index.js
+ *
+ *     5.  Add the module into the modulke in the webpack exports byt importing and placing it
+ *         in an appropriate position in the configuraation plugin array.
+ *         file:///c:\Projects\vscode-taskexplorer\webpack\exports\plugins.js
  */
 
 const { readFile } = require("fs/promises");
 const { relative, basename } = require("path");
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
-const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString } = require("../utils");
+const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = require("../utils");
 
 /** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
@@ -49,25 +73,6 @@ const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString } = requ
  * @param {...any} args
  * @returns {any}
  */
-
-
-class WpBuildError extends WebpackError
-{
-    /**
-     * @class WpBuildError
-     * @param {string} message
-     * @param {string} file
-     * @param {string} [details]
-     */
-    constructor(message, file, details) { super(message); this.file = file; this.details = details; }
-
-    /**
-     * @param {string} file
-     * @param {string} message
-     * @returns {WpBuildError}
-     */
-    static get(file, message) { return new WpBuildError(file, message); }
-}
 
 
 /**

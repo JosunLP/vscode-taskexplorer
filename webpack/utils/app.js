@@ -3,25 +3,34 @@
 // @ts-check
 
 /**
- * @module wpbuild.utils.app
+ * @file utils/app.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
+const JSON5 = require("json5");
 const { resolve } = require("path");
-const { globalEnv } = require("./global");
 const gradient = require("gradient-string");
-const { WebpackError } = require("webpack");
 const WpBuildConsoleLogger = require("./console");
 const { readFileSync, existsSync } = require("fs");
-const { merge, pickBy, mergeIf } = require("./utils");
+const { merge, pickBy, WpBuildError, findFiles, findFilesSync } = require("./utils");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WpBuildAppRc} WpBuildAppRc */
+/** @typedef {import("../types").WpBuildLogLevel} WpBuildLogLevel */
+/** @typedef {import("../types").WpBuildLogOptions} WpBuildLogOptions */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPackageJson} WpBuildPackageJson */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WebpackVsCodeBuild} WebpackVsCodeBuild */
+/** @typedef {import("../types").WpBuildVsCodeBuild} WebpackVsCodeBuild */
+/** @typedef {import("../types").WpBuildLogColorMap} WpBuildLogColorMap */
+/** @typedef {import("../types").WpBuildExportsFlags} WpBuildExportsFlags */
+/** @typedef {import("../types").WpBuildPluginsFlags} WpBuildPluginsFlags */
+/** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
+/** @typedef {import("../types").WpBuildModuleConfig} WpBuildModuleConfig */
 
 
 /**
@@ -31,7 +40,7 @@ const { merge, pickBy, mergeIf } = require("./utils");
 class WpBuildApplication
 {
     /**
-     * @member {WpBuildAppRc} applyExportDefaults
+     * @member {WpBuildAppRc}
      * @memberof WpBuildApplication.prototype
      * @public
      */
@@ -45,14 +54,22 @@ class WpBuildApplication
      */
     constructor(mode, env)
     {
-        this.rc = /** @type {WpBuildAppRc} */({});
-        this.applyWpBuildRc();
-        this.applyPackageJson();
-        this.applyPluginDefaults();
-        this.applyExportDefaults();
-        this.applyProperties();
-        this.applyVsCodeDefaults();
-        this.applyLogDefaults();
+        this.rc = env.app = merge({
+            name: "",                    // project name (read from package.json)
+            bannerName: "",              // Displayed in startup banner detail line
+            bannerNameDetailed: "",      // Displayed in startup banner detail line
+            displayName: "",             // displayName (read from package.json)
+            publicInfoProject: false,    // Project w/ private repo that maintains a public `info` project
+            version: "",                 // app version (read from package.json)
+            builds: this.builds(),
+            colors: this.colors(),
+            log: this.log(),
+            pkgJson: this.packageJson(),
+            exports: this.exports(),
+            plugins: this.plugins(),
+            vscode: { webview: { apps: {}, baseDir: "" }}
+        }, this.wpBuildRc());
+
         this.printBanner(mode, /** @type {WpBuildEnvironment} */(env));
     };
 
@@ -60,154 +77,174 @@ class WpBuildApplication
     /**
      * @function
      * @private
-     * @member applyExportDefaults
+     * @member
+     * @returns {WpBuildModuleConfig}
      */
-    applyExportDefaults = () =>
-    {
-        if (!this.rc.exports) {
-            this.rc.exports = {};
+    builds = () => ({ baseDir: ".", dev: {}, prod: {}, test: {}, testprod: {}});
+
+
+    /**
+     * @function
+     * @private
+     * @member
+     * @returns {WpBuildLogColorMap}
+     */
+    colors = () => ({
+        buildBracket: "blue",
+        buildText: "white",
+        default: "grey",
+        infoIcon: "magenta",
+        tagBracket: "blue",
+        tagText: "white",
+        uploadSymbol: "yellow",
+        valueStar: "cyan",
+        valueStarText: "white",
+        builds: {
+            extension: "blue",
+            tests: "white",
+            types: "magenta",
+            web: "cyan",
+            webview: "cyan"
         }
-    };
+    });
 
 
     /**
      * @function
      * @private
-     * @member applyLogDefaults
+     * @member
+     * @returns {WpBuildExportsFlags}
      */
-    applyLogDefaults = () =>
-    {
-        const rc = this.rc,
-              pad = { base: 0, envTag: 25, value: 45, uploadFileName: 60 };
-        rc.log = mergeIf(rc.log || {}, { level: 1, valueMaxLineLength: 100, pad: { ...pad } });
-        rc.logPad = mergeIf(rc.logPad || {}, { ...pad});
-        rc.colors = mergeIf(rc.colors || {},
-        {
-            buildBracket: "blue",
-            buildText: "white",
-            default: "grey",
-            infoIcon: "magenta",
-            tagBracket: "blue",
-            tagText: "white",
-            uploadSymbol: "yellow",
-            valueStar: "cyan",
-            valueStarText: "white",
-            builds: {
-                main: "blue",
-                tests: "white",
-                types: "magenta",
-                web: "cyan"
-            }
-        });
-    };
+    exports = () => ({
+        cache: true,
+        context: true,
+        devtool: true,
+        entry: true,
+        experiments: true,
+        externals: true,
+        ignorewarnings: true,
+        minification: false,
+        mode: true,
+        name: true,
+        optimization: true,
+        output: true,
+        plugins: true,
+        resolve: true,
+        rules: true,
+        stats: true,
+        target: true,
+        watch: true
+    });
 
 
     /**
      * @function
      * @private
-     * @member applyPackageJson
-     * @throws {WebpackError}
+     * @member
+     * @returns {WpBuildLogOptions}
      */
-    applyPackageJson = () =>
+    log = () => ({
+        level: 2,
+        valueMaxLineLength: 100,
+        pad: {
+            base: 0,
+            envTag: 24,
+            value: 45,
+            uploadFileName: 50
+        }
+    });
+
+
+    /**
+     * @function
+     * @private
+     * @member
+     * @throws {WpBuildError}
+     */
+    packageJson = () =>
     {
+        const pkgJson = {
+            description: "",
+            displayName: "",
+            main: "",
+            module: false,
+            name: "",
+            publisher: "",
+            version: ""
+        };
         let pkgJsonPath = resolve(__dirname, "..", "..", "package.json");
-        try
-        {   if (existsSync(pkgJsonPath) || existsSync(pkgJsonPath = resolve(__dirname, "..", "..", "..", "package.json")))
-            {
-                const props = [ // needs to be in sync with the properties of `WpBuildPackageJson`
-                    "author", "displayName", "name", "description", "main", "module", "publisher", "version"
-                ];
-                /** @type {WpBuildPackageJson} */
-                const pkgJso = JSON.parse(readFileSync(pkgJsonPath, "utf8")),
-                      pkgJsoPartial = pickBy(pkgJso, p => props.includes(p));
-                merge(this.rc, {}, { pkgJson: pkgJsoPartial });
-                merge(globalEnv, {}, { pkgJson: pkgJsoPartial });
+        if (existsSync(pkgJsonPath) || existsSync(pkgJsonPath = resolve(__dirname, "..", "..", "..", "package.json")))
+        {
+            try {
+                merge(pkgJson, pickBy(JSON.parse(readFileSync(pkgJsonPath, "utf8")),
+                    (p) => [  "author", "displayName", "name", "description", "main", "module", "publisher", "version" ].includes(p))
+                );
             }
-            else {
-                throw new WebpackError("Could not locate package.json");
+            catch (e) {
+                throw new WpBuildError("Could not parse package.json, check syntax", "utils/app.js", e.message);
             }
         }
-        catch (e) {
-            throw new WebpackError("Could not parse package.json, check syntax: " + e.message);
-        }
+        else { throw new WpBuildError("Could not locate package.json", "utils/app.js"); }
+        return pkgJson;
     };
 
 
     /**
      * @function
      * @private
-     * @member applyProperties
+     * @member
+     * @returns {WpBuildPluginsFlags}
      */
-    applyProperties = () =>
-    {
-        const rc = this.rc;
-        if (!rc.name) {
-            rc.name = rc.pkgJson.name;
-        }
-        if (!rc.displayName) {
-            rc.name = rc.pkgJson.displayName;
-        }
-        if (!rc.bannerName) {
-            rc.bannerName = rc.displayName;
-        }
-        if (!rc.bannerNameDetailed) {
-            rc.bannerNameDetailed = rc.bannerName;
-        }
-        if (!rc.version) {
-            rc.version = rc.pkgJson.version;
-        }
-    };
+    plugins = () => ({
+        analyze: true,
+        banner: true,
+        build: false,
+        clean: true,
+        copy: true,
+        environment: true,
+        hash: false,
+        html: true,
+        ignore: true,
+        istanbul: false,
+        licensefiles: true,
+        loghooks: true,
+        optimization: true,
+        progress: false,
+        runtimevars: false,
+        scm: false,
+        sourcemaps: true,
+        testsuite: false,
+        tscheck: false,
+        upload: false,
+        vendormod: true,
+        wait: false
+    });
 
 
     /**
      * @function
      * @private
-     * @member applyPluginDefaults
+     * @member
+     * @returns {WpBuildAppRc}
+     * @throws {WpBuildError}
      */
-    applyPluginDefaults = () =>
+    wpBuildRc = () =>
     {
-        if (!this.rc.plugins) {
-            this.rc.plugins = {};
-        }
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @member applyVsCodeDefaults
-     */
-    applyVsCodeDefaults = () =>
-    {
-        const rc = this.rc;
-        if (!rc.vscode) {
-            rc.vscode = /** @type {WebpackVsCodeBuild} */({});
-        }
-        mergeIf(rc.vscode, { webview: { apps: {}, baseDir: "" }});
-        mergeIf(rc.vscode.webview, { apps: {}, baseDir: "" });
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @member applyWpBuildRc
-     */
-    applyWpBuildRc = () =>
-    {
-        let rcPath = resolve(__dirname, "..", ".wpbuildrc.json");
-        try
-        {   if (existsSync(rcPath) || existsSync(rcPath = resolve(__dirname, "..", "..", ".wpbuildrc.json")))
-            {
-                merge(this.rc, JSON.parse(readFileSync(rcPath, "utf8")));
+        const isNodeModule = __dirname.includes("node_modules"),
+              basePath = isNodeModule ? resolve(__dirname, "..", "..", "..") : resolve(__dirname, "..", "..");
+        const files = findFilesSync("**/{webpack,wpbuild}/{,.}wpbuildrc{,.json}", {
+            cwd: basePath, absolute: true, dot: true, maxDepth: 2, nocase: true
+        });
+        if (files.length > 0)
+        {
+            try {
+                return JSON5.parse(readFileSync(files[0], "utf8"));
             }
-            else {
-                throw new WebpackError("Could not locate .wpbuildrc.json");
+            catch (e) {
+                throw new WpBuildError("Could not parse .wpbuildrc.json, check syntax", "utils/app.js", e.message);
             }
         }
-        catch {
-            throw new WebpackError("Could not parse .wpbuildrc.json, check syntax");
-        }
+        throw new WpBuildError("Could not locate .wpbuildrc.json", "utils/app.js");
     };
 
 

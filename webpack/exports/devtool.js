@@ -1,7 +1,10 @@
 // @ts-check
 
 /**
- * @module wpbuild.exports.devtool
+ * @file exports/devtool.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -15,7 +18,7 @@
  *     inline-source-map:           : Possible when publishing a single file
  *     cheap-source-map
  *     cheap-module-source-map
- *     eval:                        : Recommended for de builds w/ max performance
+ *     eval:                        : Recommended for dev builds w/ max performance
  *     eval-source-map:             : Recommended for dev builds w/ high quality SourceMaps
  *     eval-cheap-module-source-map : Tradeoff for dev builds
  *     eval-cheap-source-map:       : Tradeoff for dev builds
@@ -32,7 +35,22 @@ const devtool = (env) =>
 	// Disabled for this build - Using source-map-plugin - see webpack.plugin.js#sourcemaps
 	// ann the plugins() function below
 	//
-	env.wpc.devtool = false;
+	if (env.app.plugins.sourcemaps)
+	{
+		env.wpc.devtool = false;
+	}
+	else
+	{
+		if (env.environment === "prod") {
+			env.wpc.devtool = "source-map";
+		}
+		else if (env.environment === "dev") {
+			env.wpc.devtool = "eval-source-map";
+		}
+		else if (env.isTests) {
+			env.wpc.devtool = "eval";
+		}
+	}
 };
 
 

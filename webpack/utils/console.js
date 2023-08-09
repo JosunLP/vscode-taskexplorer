@@ -307,7 +307,7 @@ class WpBuildConsoleLogger
      */
     write = (msg, level, pad = "", icon, color) =>
     {
-        if (level === undefined || level <= this.env.logLevel)
+        if (level === undefined || level <= this.env.app.log.level)
         {
             let envTag = "";
             const env = this.env,
@@ -350,7 +350,7 @@ class WpBuildConsoleLogger
      */
     value = (msg, val, level, pad, icon, color) =>
     {
-        if (level === undefined || level <= this.env.logLevel)
+        if (level === undefined || level <= this.env.app.log.level)
         {
             let vMsg = (msg || ""),/** @type {RegExpExecArray | null} */match, colorSpace = 0;
             const vPad = this.env.app.log.pad.value,

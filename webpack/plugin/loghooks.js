@@ -6,7 +6,7 @@
  * @file plugin/loghooks.js
  * @version 0.0.1
  * @license MIT
- * @author Scott Meesseman
+ * @author Scott Meesseman @spmeesseman
  */
 
 const { globalEnv } = require("../utils");
@@ -176,7 +176,11 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 
 
 /**
- * @function hookSteps
+ * Returns a `WpBuildLogHookStagesPlugin` instance if appropriate for the current build
+ * environment. Can be enabled/disable in .wpconfigrc.json by setting the `plugins.loghooks`
+ * property to a boolean value of  `true` or `false`
+ * @function
+ * @module
  * @param {WpBuildEnvironment} env
  * @returns {WpBuildLogHookStagesPlugin | undefined}
  */

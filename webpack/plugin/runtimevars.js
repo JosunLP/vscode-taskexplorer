@@ -6,14 +6,36 @@
  * @file plugin/runtimevars.js
  * @version 0.0.1
  * @license MIT
- * @author Scott Meesseman
+ * @author Scott Meesseman @spmeesseman
+ *
+ * @description
+ *
+ * When adding a new plugin, perform the following tasks:
+ *
+ *     1. Add the plugin filename (w/o extnsion) to the `WpBuildPluginName` type near the
+ *        top of the WpBuild types file
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\types\wpbuild.d.ts
+ *
+ *     2. Adjust the default application object's plugins hash by adding the plugin filename
+ *        (w/o/ extension) as a key of the `plugins()` return object
+ *        file:///:\Projects\vscode-taskexplorer\webpack\utils\environment.js
+ *
+ *     3. Adjust the rc configuration files by adding the plugin filename (w/o/ extension)
+ *        as a key of the `plugins` object
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\.wpbuildrc.json
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\types\.wpbuildrc.defaults.json
+ *
+ *     4. Add a module reference to plugin directory index file and add to it's module.exports
+ *        file://c:\Projects\vscode-taskexplorer\webpack\plugin\index.js
+ *
+ *     5.  Add the module into the webpack exports byt importing and placing it in a
+ *         appropriate-ish position in the exported plugin array.
+ *         file:///c:\Projects\vscode-taskexplorer\webpack\exports\plugins.js
  */
 
-const WpBuildBasePlugin = require("./base");
 const { WpBuildError } = require("./base");
-const { readFileSync, existsSync, writeFileSync } = require("fs");
-const { isString, apply, isObjectEmpty, asArray } = require("../utils");
-const { WebpackError } = require("webpack");
+const WpBuildBasePlugin = require("./base");
+const { isString, apply, isObjectEmpty, merge } = require("../utils");
 
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -21,6 +43,7 @@ const { WebpackError } = require("webpack");
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("../types").WpBuildBuildEnvironment} WpBuildBuildEnvironment */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 
 
@@ -160,16 +183,13 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     readAssetState()
     {
-        const env = this.env;
-        if (existsSync(env.paths.files.hashStoreJson))
-        {
-            const hashJson = readFileSync(env.paths.files.hashStoreJson, "utf8");
-            apply(env.state.hash, JSON.parse(hashJson));
-            apply(env.state.hash.previous, { ...env.state.hash.current });
-            apply(env.state.hash.current, { ...env.state.hash.next });
-            env.state.hash.next = {};
-            this.logAssetInfo(true);
-        }
+        const env = this.env,
+              cache = this.cache.get();
+        apply(env.state.hash, cache);
+        merge(env.state.hash.previous, { ...env.state.hash.current });
+        merge(env.state.hash.current, { ...env.state.hash.next });
+        env.state.hash.next = {};
+        this.logAssetInfo(true);
     };
 
 
@@ -210,7 +230,8 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     saveAssetState()
     {
-        writeFileSync(this.env.paths.files.hashStoreJson, JSON.stringify(this.env.state.hash, null, 4));
+        apply(this.cache.get(), this.env.state.hash);
+        this.cache.save();
         this.logAssetInfo();
     }
 
@@ -270,7 +291,11 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
 
 
 /**
+ * Returns a `WpBuildRuntimeVarsPlugin` instance if appropriate for the current build
+ * environment. Can be enabled/disable in .wpconfigrc.json by setting the `plugins.runtimevars`
+ * property to a boolean value of  `true` or `false`
  * @function
+ * @module
  * @param {WpBuildEnvironment} env
  * @returns {WpBuildRuntimeVarsPlugin | undefined}
  */

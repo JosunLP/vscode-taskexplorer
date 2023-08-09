@@ -4,6 +4,7 @@
 
 const JSON5 = require("json5");
 const { glob } = require("glob");
+const { WebpackError } = require("webpack");
 const { spawnSync } = require("child_process");
 
 /**
@@ -17,7 +18,7 @@ const { spawnSync } = require("child_process");
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPackageJson} WpBuildPackageJson */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WebpackVsCodeBuild} WebpackVsCodeBuild */
+/** @typedef {import("../types").WpBuildVsCodeBuild} WpBuildVsCodeBuild */
 
 /**
  * @function
@@ -49,7 +50,9 @@ const apply = (object, config, defaults) =>
  * @param {boolean} [allowEmpStr] If `false`, return empty array if isString(v) and isEmpty(v)
  * @returns {Array<NonNullable<T>>}
  */
-const asArray = (v, shallow, allowEmpStr) => /** @type {Array} */((v instanceof Set ? Array.from(v): (isArray(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : []))));
+const asArray = (v, shallow, allowEmpStr) => /** @type {Array} */(
+    (v instanceof Set ? Array.from(v): (isArray(v) ? (shallow !== true ? v : v.slice()) : (!isEmpty(v, allowEmpStr) ? [ v ] : [])))
+);
 
 
 /**
@@ -92,11 +95,16 @@ const clone = (item) =>
  * @param {import("glob").GlobOptions} options
  * @returns {Promise<string[]>}
  */
-const findFiles = async (pattern, options) =>
-{
-    const files = await glob(pattern, options);
-    return files.map(f => f.toString());
-};
+const findFiles = async (pattern, options) => (await glob(pattern, options)).map((/** @type {{ toString: () => any; }} */ f) => f.toString());
+
+
+/**
+ * @function
+ * @param {string} pattern
+ * @param {import("glob").GlobOptions} options
+ * @returns {string[]}
+ */
+const findFilesSync = (pattern, options) => glob.sync(pattern, options).map((/** @type {{ toString: () => any; }} */ f) => f.toString());
 
 
 /**
@@ -253,6 +261,13 @@ const mergeIf = (...destination) =>
 };
 
 
+/**
+ * @function
+ * @template {Record<string, T>} T
+ * @param {T} obj
+ * @param {...string} keys
+ * @returns {Partial<T>}
+ */
 const pick = (obj, ...keys) =>
 {
     const ret = {};
@@ -261,6 +276,13 @@ const pick = (obj, ...keys) =>
 };
 
 
+/**
+ * @function
+ * @template {Record<string, T>} T
+ * @param {T} obj
+ * @param {(arg: string) => boolean} pickFn
+ * @returns {Partial<T>}
+ */
 const pickBy = (obj, pickFn) =>
 {
     const ret = {};
@@ -269,15 +291,40 @@ const pickBy = (obj, pickFn) =>
 };
 
 
+/**
+ * @function
+ * @template {Record<string, T>} T
+ * @param {T} obj
+ * @param {...string} keys
+ * @returns {Partial<T>}
+ */
 const pickNot = (obj, ...keys) =>
 {
-    const ret = apply({}, obj);
+    const ret = { ...obj };
     keys.forEach(key => { delete ret[key]; });
     return ret;
 };
 
+class WpBuildError extends WebpackError
+{
+    /**
+     * @class WpBuildError
+     * @param {string} message
+     * @param {string} file
+     * @param {string} [details]
+     */
+    constructor(message, file, details) { super(message); this.file = file; this.details = details; }
+
+    /**
+     * @param {string} file
+     * @param {string} message
+     * @returns {WpBuildError}
+     */
+    static get(file, message) { return new WpBuildError(file, message); }
+}
 
 module.exports = {
-    apply, asArray, clone, findFiles, getTsConfig, isArray, isDate, isEmpty, isFunction, isObject,
-    isObjectEmpty,isPrimitive, isPromise, isString, merge, mergeIf, pick, pickBy, pickNot
+    apply, asArray, clone, findFiles, findFilesSync, getTsConfig, isArray, isDate, isEmpty, isFunction,
+    isObject, isObjectEmpty,isPrimitive, isPromise, isString, merge, mergeIf, pick, pickBy, pickNot,
+    WpBuildError
 };

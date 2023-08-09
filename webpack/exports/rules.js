@@ -3,7 +3,10 @@
 // @ts-check
 
 /**
- * @module wpbuild.exports.rules
+ * @file exports/rules.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
@@ -134,7 +137,7 @@ const rules = (env) =>
 			} ]
 		});
 	}
-	else // extension - node or web
+	else // main - all targets node / web / webworker
 	{
 
 		env.wpc.module.rules.push({
@@ -232,65 +235,6 @@ const rules = (env) =>
 			} ]
 		});
 
-		if (env.isTests)
-		{
-			env.wpc.module.rules.push(...[
-			{
-				test: /index\.js$/,
-				include: path.join(env.paths.build, "node_modules", "nyc"),
-				loader: "string-replace-loader",
-				options: {
-					search: "selfCoverageHelper = require('../self-coverage-helper')",
-					replace: "selfCoverageHelper = { onExit () {} }"
-				}
-			},
-			{
-				test: /\.ts$/,
-				include: path.join(env.paths.build, "src", "test"),
-				exclude: [
-					/node_modules/, /types[\\/]/, /\.d\.ts$/
-				],
-				use: {
-					loader: "babel-loader",
-					options: {
-						presets: [
-							[ "@babel/preset-env", { targets: "defaults" }],
-							[ "@babel/preset-typescript" ],
-						],
-						query: {
-							plugins: [ "transform-es2015-modules-commonjs" ]
-						}
-					}
-				}
-			}]);
-			// env.wpc.module.rules.push({
-			// 	test: /\.ts$/,
-			// 	include: path.join(env.paths.build, "src", "test"),
-			// 	exclude: [
-			// 		/node_modules/, /types[\\/]/, /\.d\.ts$/
-			// 	],
-			// 	use: [ env.esbuild ?
-			// 	{
-			// 		loader: "esbuild-loader",
-			// 		options: {
-			// 			implementation: esbuild,
-			// 			loader: "tsx",
-			// 			target: [ "es2020", "chrome91", "node16.20" ],
-			// 			tsconfigRaw: getTsConfig(
-			// 				env, path.join(env.paths.build, "src", "test", "tsconfig.json"),
-			// 			)
-			// 		}
-			// 	} :
-			// 	{
-			// 		loader: "ts-loader",
-			// 		options: {
-			// 			configFile: path.join(env.paths.build, "src", "test", "tsconfig.json"),
-			// 			// experimentalWatchApi: true,
-			// 			transpileOnly: true
-			// 		}
-			// 	} ]
-			// });
-		}
 	}
 };
 

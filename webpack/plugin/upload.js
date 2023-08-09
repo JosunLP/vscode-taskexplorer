@@ -11,7 +11,7 @@
  * !!!       plink -ssh -batch -pw <PWD> smeesseman@app1.spmeesseman.com "echo hello"
  * @version 0.0.1
  * @license MIT
- * @author Scott Meesseman
+ * @author Scott Meesseman @spmeesseman
  */
 
 const { existsSync } = require("fs");
@@ -193,6 +193,9 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
 
 
 /**
+ * Returns a `WpBuildUploadPlugin` instance if appropriate for the current build
+ * environment. Can be enabled/disable in .wpconfigrc.json by setting the `plugins.upload`
+ * property to a boolean value of `true` or `false`
  * @module wpbuild.plugin.upload
  * @function upload
  * @param {WpBuildEnvironment} env

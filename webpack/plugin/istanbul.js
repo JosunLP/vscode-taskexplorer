@@ -6,7 +6,7 @@
  * @file plugin/istanbul.js
  * @version 0.0.1
  * @license MIT
- * @author Scott Meesseman
+ * @author Scott Meesseman @spmeesseman
  */
 
 const { apply, asArray } = require("../utils");
