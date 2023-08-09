@@ -5,27 +5,27 @@
  */
 
 /** @typedef {import("../types").WebpackMode} WebpackMode */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const mode = (env) =>
+const mode = (app) =>
 {
-	env.wpc.mode = getMode(env, env.argv);
-	if (!env.environment)
+	app.wpc.mode = getMode(app, app.argv);
+	if (!app.environment)
 	{
-		if (env.wpc.mode === "development") {
-			env.environment = "dev";
+		if (app.wpc.mode === "development") {
+			app.environment = "dev";
 		}
-		else if (env.wpc.mode === "none") {
-			env.environment = "test";
+		else if (app.wpc.mode === "none") {
+			app.environment = "test";
 		}
 		else {
-			env.environment = "prod";
+			app.environment = "prod";
 		}
 	}
 };
@@ -33,19 +33,19 @@ const mode = (env) =>
 
 /**
  * @function
- * @param {Partial<WpBuildEnvironment>} env Webpack build environment
+ * @param {Partial<WpBuildApp>} app Webpack build environment
  * @param {WpBuildWebpackArgs} argv Webpack command line args
  * @returns {WebpackMode}
  */
-const getMode = (env, argv) =>
+const getMode = (app, argv) =>
 {
 	let mode = argv.mode;
 	if (!mode)
 	{
-		if (env.environment === "dev") {
+		if (app.environment === "dev") {
 			mode = "development";
 		}
-		else if (env.environment === "test" || env.build === "tests") {
+		else if (app.environment === "test" || app.build === "tests") {
 			mode = "none";
 		}
 		else {

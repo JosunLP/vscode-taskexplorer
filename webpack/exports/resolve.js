@@ -12,28 +12,28 @@
  * @module wpbuild.exports.resolve
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 const path = require("path");
 
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const resolve = (env) =>
+const resolve = (app) =>
 {
-	if (env.build !== "webview")
+	if (app.build !== "webview")
 	{
-		env.wpc.resolve =
+		app.wpc.resolve =
 		{
 			alias: {
-				":env": path.resolve(env.paths.build, "src", "lib", "env", env.target),
-				":types": path.resolve(env.paths.build, "types")
+				":env": path.resolve(app.paths.build, "src", "lib", "env", app.target),
+				":types": path.resolve(app.paths.build, "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			mainFields: env.build === "web" ? [ "web", "module", "main" ] : [ "module", "main" ],
-			fallback: env.build === "web" ?
+			mainFields: app.build === "web" ? [ "web", "module", "main" ] : [ "module", "main" ],
+			fallback: app.build === "web" ?
 					  {
 					  	  path: require.resolve("path-browserify"),
 					  	  os: require.resolve("os-browserify/browser")
@@ -43,13 +43,13 @@ const resolve = (env) =>
 	}
 	else
 	{
-		env.wpc.resolve = {
+		app.wpc.resolve = {
 			alias: {
-				":env": path.resolve(env.paths.build, "src", "lib", "env", "web"),
-				":types": path.resolve(env.paths.build, "types")
+				":env": path.resolve(app.paths.build, "src", "lib", "env", "web"),
+				":types": path.resolve(app.paths.build, "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			modules: [ env.paths.base, "node_modules" ],
+			modules: [ app.paths.base, "node_modules" ],
 		};
 	}
 };

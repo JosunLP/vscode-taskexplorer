@@ -15,15 +15,11 @@ const { readFileSync, existsSync, writeFileSync } = require("fs");
 const { merge, pickBy, mergeIf, clone } = require("./utils");
 const { access, readFile, writeFile } = require("fs/promises");
 
+/** @typedef {import("../types").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
-/** @typedef {import("../types").WpBuildAppRc} WpBuildAppRc */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildPackageJson} WpBuildPackageJson */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WebpackVsCodeBuild} WebpackVsCodeBuild */
-/** @typedef {import("../types").WpBuildCacheOptions} WpBuildCacheOptions */
 
 
 /**
@@ -41,30 +37,29 @@ class WpBuildCache
     /**
      * @member
      * @private
-     * @type {WpBuildEnvironment}
+     * @type {WpBuildApp}
      */
-    env;
+    app;
 
     /**
      * @member
-     * @protected
-     * @type {WpBuildCacheOptions}
+     * @private
+     * @type {string}
      */
-    options;
+    file;
 
 
     /**
      * @class WpBuildApplication
-     * @param {WpBuildEnvironment} env Webpack build environment
-     * @param {WpBuildCacheOptions} options Cache options to apply
+     * @param {WpBuildApp} app Webpack build environment
+     * @param {string} file Filename to read/write cache to
      * @throws {WebpackError}
      */
-    constructor(env, options)
+    constructor(app, file)
     {
-        this.env = env;
-        this.options = merge({}, options);
-        if (!isAbsolute(this.options.file)) {
-            this.options.file = resolve(this.env.global.cacheDir, options.file);
+        this.app = app;
+        if (!isAbsolute(file)) {
+            this.file = resolve(this.app.global.cacheDir, file);
         }
         this.cache = this.read();
     }
@@ -92,11 +87,11 @@ class WpBuildCache
     read = () =>
     {
         let jso;
-        if (!existsSync(this.options.file)) {
-            writeFileSync(this.options.file, "{}");
+        if (!existsSync(this.file)) {
+            writeFileSync(this.file, "{}");
         }
         try {
-            jso = JSON.parse(readFileSync(this.options.file, "utf8"));
+            jso = JSON.parse(readFileSync(this.file, "utf8"));
         }
         catch (e) { jso = {}; }
         return jso;
@@ -106,13 +101,13 @@ class WpBuildCache
     /**
      * @function
      */
-    save = () => writeFileSync(this.options.file, JSON.stringify(this.cache));
+    save = () => writeFileSync(this.file, JSON.stringify(this.cache));
 
 
     /**
      * @function
      */
-    saveAsync = () => writeFile(this.options.file, JSON.stringify(this.cache));
+    saveAsync = () => writeFile(this.file, JSON.stringify(this.cache));
 
 
     /**

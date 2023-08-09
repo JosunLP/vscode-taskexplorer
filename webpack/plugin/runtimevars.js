@@ -34,24 +34,33 @@
  */
 
 const { WpBuildError } = require("./base");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const { isString, apply, isObjectEmpty, merge } = require("../utils");
 
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
-/** @typedef {import("../types").WpBuildBuildEnvironment} WpBuildBuildEnvironment */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 
 
 /**
  * @class WpBuildRuntimeVarsPlugin
  */
-class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
+class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
 {
+    /**
+     * @class WpBuildLicenseFilePlugin
+     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     */
+	constructor(options)
+    {
+        super(options, "runtimeVars");
+    }
+
+
     /**
      * @function Called by webpack runtime to initialize this plugin
      * @public
@@ -100,10 +109,10 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     logAssetInfo = (rotated) =>
     {
-        const logger = this.env.logger,
-              hashInfo = this.env.state.hash,
-              labelLength = this.env.app.log.pad.value;
-        logger.write(`${rotated ? "read" : "saved"} asset state for build environment ${logger.withColor(this.env.environment, logger.colors.italic)}`, 1);
+        const logger = this.app.logger,
+              hashInfo = this.app.global.runtimeVars,
+              labelLength = this.app.rc.log.pad.value;
+        logger.write(`${rotated ? "read" : "saved"} asset state for build environment ${logger.withColor(this.app.environment, logger.colors.italic)}`, 1);
         logger.write("   previous:", 2);
         if (!isObjectEmpty(hashInfo.current))
         {
@@ -145,11 +154,11 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     preprocess = (assets) =>
     {
-        const env = this.env,
-              logger = env.logger,
-              hashCurrent = env.state.hash.current;
+        const app = this.app,
+              logger = app.logger,
+              hashCurrent = app.global.runtimeVars.current;
         this.readAssetState();
-        logger.write(`validate hashes for assets in italic(${env.paths.files.hashStoreJson})`, 2);
+        logger.write(`validate hashes for assets in italic(${app.paths.files.hashStoreJson})`, 2);
         Object.entries(assets).filter(([ file, _ ]) => this.matchObject(file) && this.isEntryAsset(file)).forEach(([ file, _ ]) =>
 		{
             const chunkName = this.fileNameStrip(file, true),
@@ -183,12 +192,12 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     readAssetState()
     {
-        const env = this.env,
+        const app = this.app,
               cache = this.cache.get();
-        apply(env.state.hash, cache);
-        merge(env.state.hash.previous, { ...env.state.hash.current });
-        merge(env.state.hash.current, { ...env.state.hash.next });
-        env.state.hash.next = {};
+        apply(app.global.runtimeVars, cache);
+        merge(app.global.runtimeVars.previous, { ...app.global.runtimeVars.current });
+        merge(app.global.runtimeVars.current, { ...app.global.runtimeVars.next });
+        app.global.runtimeVars.next = {};
         this.logAssetInfo(true);
     };
 
@@ -201,7 +210,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     runtimeVars(assets)
     {
-        const hashMap = this.env.state.hash.next,
+        const hashMap = this.app.global.runtimeVars.next,
               updates = /** @type {string[]} */([]);
         this.logger.write("replace runtime placeholder variables", 1);
 		Object.entries(assets).filter(([ f ]) => this.matchObject(f)).forEach(([ file ]) =>
@@ -230,7 +239,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     saveAssetState()
     {
-        apply(this.cache.get(), this.env.state.hash);
+        apply(this.cache.get(), this.app.global.runtimeVars.hash);
         this.cache.save();
         this.logAssetInfo();
     }
@@ -264,7 +273,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
     sourceObj(file, content, sourceInfo)
     {
         const { source, map } = sourceInfo.sourceAndMap();
-        return map && (this.compiler.options.devtool || this.env.app.plugins.sourcemaps) ?
+        return map && (this.compiler.options.devtool || this.app.rc.plugins.sourcemaps) ?
                new this.compiler.webpack.sources.SourceMapSource(content, file, map, source) :
                new this.compiler.webpack.sources.RawSource(content);
     }
@@ -279,7 +288,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
      */
     sourceUpdateHashVars(sourceCode)
     {
-        Object.entries(this.env.state.hash.next).forEach(([ chunkName, hash ]) =>
+        Object.entries(this.app.global.runtimeVars.next).forEach(([ chunkName, hash ]) =>
         {
             const regex = new RegExp(`(?:interface_[0-9]+\\.)?__WPBUILD__\\.contentHash(?:\\.|\\[")${chunkName}(?:"\\])? *(,|\r|\n)`, "gm");
             sourceCode = sourceCode.replace(regex, (_v, g) =>`"${hash}"${g}`);
@@ -296,10 +305,10 @@ class WpBuildRuntimeVarsPlugin extends WpBuildBasePlugin
  * property to a boolean value of  `true` or `false`
  * @function
  * @module
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildRuntimeVarsPlugin | undefined}
  */
-const runtimevars = (env) => env.app.plugins.runtimevars && env.isMain ? new WpBuildRuntimeVarsPlugin({ env }) : undefined;
+const runtimevars = (app) => app.rc.plugins.runtimevars && app.isMain ? new WpBuildRuntimeVarsPlugin({ app }) : undefined;
 
 
 module.exports = runtimevars;

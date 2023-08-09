@@ -4,7 +4,7 @@
  * @module wpbuild.exports.externals
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const nodeExternals = require("webpack-node-externals");
@@ -14,53 +14,53 @@ const nodeExternals = require("webpack-node-externals");
  * @function
  * The vscode-module is created on-the-fly and must be excluded. Add other modules that cannot
  * be webpack'ed, -> https://webpack.js.org/configuration/externals/
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const externals = (env) =>
+const externals = (app) =>
 {
-	if (env.app.exports.externals !== false)
+	if (app.rc.exports.externals !== false)
 	{
-		if (env.app.vscode)
+		if (app.rc.vscode)
 		{
-			if (env.build !== "tests")
+			if (app.build !== "tests")
 			{
-				env.wpc.externals = { vscode: "commonjs vscode" };
+				app.wpc.externals = { vscode: "commonjs vscode" };
 			}
 			else {
-				env.wpc.externals = [
+				app.wpc.externals = [
 					{ vscode: "commonjs vscode" },
 					// { nyc: "commonjs nyc" },
 					/** @type {import("webpack").WebpackPluginInstance}*/(nodeExternals())
 				];
 			}
 		}
-		else if (env.build !== "tests" && env.build !== "types")
+		else if (app.build !== "tests" && app.build !== "types")
 		{
-			env.wpc.externals = [
+			app.wpc.externals = [
 				/** @type {import("webpack").WebpackPluginInstance}*/(nodeExternals())
 			];
 		}
-		// if (env.build === "webview")
+		// if (app.build === "webview")
 		// {
-		// 	env.wpc.externals = { vscode: "commonjs vscode" };
+		// 	app.wpc.externals = { vscode: "commonjs vscode" };
 		// }
-		// else if (env.environment === "test")
+		// else if (app.environment === "test")
 		// {
-		// 	env.wpc.externals = [
+		// 	app.wpc.externals = [
 		// 		{ vscode: "commonjs vscode" },
 		// 		{ nyc: "commonjs nyc" },
 		// 		/** @type {import("webpack").WebpackPluginInstance}*/(nodeExternals())
 		// 	];
 		// }
 		// else {
-		// 	env.wpc.externals = { vscode: "commonjs vscode" };
+		// 	app.wpc.externals = { vscode: "commonjs vscode" };
 		// }
-		// env.wpc.externalsType = "commonjs2";
-		if (env.isWeb) {
-			env.wpc.externalsPresets = { web: true };
+		// app.wpc.externalsType = "commonjs2";
+		if (app.isWeb) {
+			app.wpc.externalsPresets = { web: true };
 		}
 		else {
-			env.wpc.externalsPresets = { node: true };
+			app.wpc.externalsPresets = { node: true };
 		}
 	}
 };

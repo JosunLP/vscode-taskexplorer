@@ -15,31 +15,31 @@ const CspHtmlPlugin = require("csp-html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @param { string } name
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {HtmlPlugin | undefined}
  */
-const html = (name, env) =>
+const html = (name, app) =>
 {
     let plugin;
-    if (env.app.plugins.html !== false && env.build === "webview")
+    if (app.rc.plugins.html !== false && app.build === "webview")
     {
         const wwwName = name.replace(/[a-z]+([A-Z])/g, (substr, token) => substr.replace(token, "-" + token.toLowerCase()));
 		plugin = new HtmlPlugin(
 		{
 			chunks: [ name, wwwName ],
-			filename: posix.join(env.paths.build, "res", "page", `${wwwName}.html`),
+			filename: posix.join(app.paths.build, "res", "page", `${wwwName}.html`),
 			inject: true,
-			inlineSource: env.wpc.mode === "production" ? ".css$" : undefined,
+			inlineSource: app.wpc.mode === "production" ? ".css$" : undefined,
 			// inlineSource: undefined,
 			scriptLoading: "module",
 			template: posix.join(name, `${wwwName}.html`),
-			minify: env.wpc.mode !== "production" ? false :
+			minify: app.wpc.mode !== "production" ? false :
 			{
 				removeComments: true,
 				collapseWhitespace: true,
@@ -57,10 +57,10 @@ const html = (name, env) =>
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {MiniCssExtractPlugin}
  */
-const cssextract = (env) =>
+const cssextract = (app) =>
 {
     return new MiniCssExtractPlugin(
     {
@@ -77,30 +77,30 @@ const cssextract = (env) =>
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {CspHtmlPlugin}
  */
-const htmlcsp = (env) =>
+const htmlcsp = (app) =>
 {
     const plugin = new CspHtmlPlugin(
     {
         // "connect-src":
-        // env.wpc.mode !== 'production'
+        // app.wpc.mode !== 'production'
         // 		 ? [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.sandbox.paypal.com", "https://www.paypal.com" ]
         // 		 : [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.paypal.com" ],
         "default-src": "'none'",
         "font-src": [ "#{cspSource}" ],
         // "frame-src":
-        // env.wpc.mode !== 'production'
+        // app.wpc.mode !== 'production'
         // 		 ? [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.sandbox.paypal.com", "https://www.paypal.com" ]
         // 		 : [ "#{cspSource}", "'nonce-#{cspNonce}'", "https://www.paypal.com" ],
         "img-src": [ "#{cspSource}", "https:", "data:" ],
         "script-src":
-        env.wpc.mode !== "production"
+        app.wpc.mode !== "production"
                 ? [ "#{cspSource}", "'nonce-#{cspNonce}'", "'unsafe-eval'" ]
                 : [ "#{cspSource}", "'nonce-#{cspNonce}'" ],
         "style-src":
-        env.wpc.mode === "production"
+        app.wpc.mode === "production"
                 ? [ "#{cspSource}", "'nonce-#{cspNonce}'", "'unsafe-hashes'" ]
                 : [ "#{cspSource}", "'unsafe-hashes'", "'unsafe-inline'" ]
     },
@@ -109,11 +109,11 @@ const htmlcsp = (env) =>
         hashingMethod: "sha256",
         hashEnabled: {
             "script-src": true,
-            "style-src": env.wpc.mode === "production",
+            "style-src": app.wpc.mode === "production",
         },
         nonceEnabled: {
             "script-src": true,
-            "style-src": env.wpc.mode === "production",
+            "style-src": app.wpc.mode === "production",
         }
     });
     //
@@ -125,15 +125,15 @@ const htmlcsp = (env) =>
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {InlineChunkHtmlPlugin | undefined}
  */
-const htmlinlinechunks = (env) =>
+const htmlinlinechunks = (app) =>
 {
     let plugin;
-    if (env.build === "webview")
+    if (app.build === "webview")
     {
-        // plugin = new InlineChunkHtmlPlugin(HtmlPlugin, env.wpc.mode === "production" ? ["\\.css$"] : []);
+        // plugin = new InlineChunkHtmlPlugin(HtmlPlugin, app.wpc.mode === "production" ? ["\\.css$"] : []);
         plugin = new InlineChunkHtmlPlugin(HtmlPlugin, []);
     }
     return plugin;
@@ -141,13 +141,13 @@ const htmlinlinechunks = (env) =>
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {ImageMinimizerPlugin | undefined}
  */
-const imageminimizer = (env) =>
+const imageminimizer = (app) =>
 {
     let plugin;
-    if (env.build === "webview" && env.wpc.mode !== "production")
+    if (app.build === "webview" && app.wpc.mode !== "production")
     {
         // plugin = new ImageMinimizerPlugin({
         // 	deleteOriginalAssets: true,
@@ -160,15 +160,15 @@ const imageminimizer = (env) =>
 
 /**
  * @param {string[]} apps
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {HtmlPlugin[]}
  */
-const webviewapps = (apps, env) =>
+const webviewapps = (apps, app) =>
 {
     const plugins = [];
-    if (env.build === "webview")
+    if (app.build === "webview")
     {
-        apps.forEach(k => plugins.push(html(k, env)));
+        apps.forEach(k => plugins.push(html(k, app)));
     }
     return plugins;
 };
@@ -227,7 +227,7 @@ class InlineChunkHtmlPlugin
 
 
 // /**
-//  * @param {WpBuildEnvironment} env
+//  * @param {WpBuildApp} app
 //  * @param {WebpackConfig} wpConfig Webpack config object
 //  * @returns { ImageMinimizerPlugin.Generator<any> }
 //  */
@@ -257,7 +257,7 @@ class InlineChunkHtmlPlugin
 // 					lossless: true,
 // 					nearLossless: 0,
 // 					quality: 100,
-// 					method: env.wpc.mode === "production" ? 4 : 0,
+// 					method: app.wpc.mode === "production" ? 4 : 0,
 // 				}
 // 			]]
 // 		}

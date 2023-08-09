@@ -4,19 +4,19 @@
  * @module wpbuild.exports.watch
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
  * @function target
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const watch = (env) =>
+const watch = (app) =>
 {
-	env.wpc.watch = !!env.argv.watch || !!env.WEBPACK_WATCH;
-	if (env.wpc.watch)
+	app.wpc.watch = !!app.argv.watch || !!app.argv.env?.WEBPACK_WATCH;
+	if (app.wpc.watch)
 	{
-		env.wpc.watchOptions =
+		app.wpc.watchOptions =
 		{
 			poll: true,
 			stdin: true,

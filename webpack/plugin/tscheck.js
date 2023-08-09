@@ -13,11 +13,11 @@ const { join } = require("path");
 const dts = require("dts-bundle");
 const { existsSync } = require("fs");
 const { apply } = require("../utils");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
@@ -26,7 +26,7 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 /** @typedef {import("fork-ts-checker-webpack-plugin/lib/plugin-options").ForkTsCheckerWebpackPluginOptions} ForkTsCheckerOptions */
 
 
-class WpBuildTsCheckPlugin extends WpBuildBasePlugin
+class WpBuildTsCheckPlugin extends WpBuildPlugin
 {
     /**
      * @class WpBuildLicenseFilePlugin
@@ -34,7 +34,7 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
      */
 	constructor(options)
     {
-        super(apply(options, { plugins: WpBuildTsCheckPlugin.getTsForkCheckerPlugins(options.env) }));
+        super(apply(options, { plugins: WpBuildTsCheckPlugin.getTsForkCheckerPlugins(options.app) }));
     }
 
 
@@ -68,17 +68,17 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 */
 	bundle = () =>
 	{
-		if (existsSync(join(this.env.paths.build, "types")))
+		if (existsSync(join(this.app.paths.build, "types")))
 		{
 			dts.bundle({
-				name: `@spmeesseman/${this.env.app.name}-types`,
+				name: `@spmeesseman/${this.app.rc.name}-types`,
 				baseDir: "types/dist",
 				headerPath: "",
 				headerText: "",
 				main: "types/index.d.ts",
 				out: "types.d.ts",
 				outputAsModuleFolder: true,
-				verbose: this.env.logLevel === 5
+				verbose: this.app.rc.log.level === 5
 			});
 		}
 	};
@@ -88,42 +88,42 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 	 * @function
 	 * @private
 	 * @static
-	 * @param {WpBuildEnvironment} env
+	 * @param {WpBuildApp} app
 	 * @returns {WpBuildPluginVendorOptions[]}
 	 */
-	static getTsForkCheckerPlugins = (env) =>
+	static getTsForkCheckerPlugins = (app) =>
 	{
 		let tsConfig;
 		const tsConfigs = /** @type {[ string, ForkTsCheckerMode, boolean? ][]} */([]);
-		if (env.build === "webview")
+		if (app.build === "webview")
 		{
-			tsConfig = join(env.paths.build, "tsconfig.webview.json");
+			tsConfig = join(app.paths.build, "tsconfig.webview.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(env.paths.base, "tsconfig.json");
+				tsConfig = join(app.paths.base, "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "readonly" ]);
 		}
-		else if (env.build === "tests")
+		else if (app.build === "tests")
 		{
-			tsConfig = join(env.paths.build, "tsconfig.test.json");
+			tsConfig = join(app.paths.build, "tsconfig.test.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(env.paths.build, "src", "test", "tsconfig.json");
+				tsConfig = join(app.paths.build, "src", "test", "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-tsbuildinfo" ]);
 		}
-		else if (env.build === "types")
+		else if (app.build === "types")
 		{
-			tsConfig = join(env.paths.build, "tsconfig.types.json");
+			tsConfig = join(app.paths.build, "tsconfig.types.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(env.paths.build, "types", "tsconfig.json");
+				tsConfig = join(app.paths.build, "types", "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-dts" ]);
 		}
 		else
 		{
-			tsConfig = join(env.paths.build, `tsconfig.${env.target}.json`);
+			tsConfig = join(app.paths.build, `tsconfig.${app.target}.json`);
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(env.paths.build, "tsconfig.json");
+				tsConfig = join(app.paths.build, "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-dts" ]);
 		}
@@ -141,9 +141,9 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
 					configFile: tsCfg[0]
 				},
 				logger: {
-					error: env.logger.error,
+					error: app.logger.error,
 					/** @param {string} msg */
-					log: (msg) => env.logger.write("bold(tsforkchecker): " + msg)
+					log: (msg) => app.logger.write("bold(tsforkchecker): " + msg)
 				}
 			}
 		}));
@@ -191,10 +191,10 @@ class WpBuildTsCheckPlugin extends WpBuildBasePlugin
  * property to a boolean value of  `true` or `false`
  * @function
  * @module
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {(WpBuildTsCheckPlugin | ForkTsCheckerWebpackPlugin)[]}
  */
-const tscheck = (env) => env.app.plugins.tscheck !== false ? new WpBuildTsCheckPlugin({ env }).getPlugins() : [];
+const tscheck = (app) => app.rc.plugins.tscheck !== false ? new WpBuildTsCheckPlugin({ app }).getPlugins() : [];
 
 
 module.exports = tscheck;

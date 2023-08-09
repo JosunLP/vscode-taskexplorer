@@ -10,14 +10,14 @@
  */
 
 const { globalEnv } = require("../utils");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
-class WpBuildScmPlugin extends WpBuildBasePlugin
+class WpBuildScmPlugin extends WpBuildPlugin
 {
     /**
      * @class WpBuildLicenseFilePlugin
@@ -55,12 +55,12 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
     {
         if (globalEnv.scm.callCount === 2 && globalEnv.scm.readyCount > 0)
         {
-            const logger = this.env.logger,
+            const logger = this.app.logger,
                   provider = process.env.WPBUILD_SCM_PROVIDER || "git",
                   host = process.env.WPBUILD_SCM_HOST,
                   user = process.env.WPBUILD_SCM_USER; // ,
                   // /** @type {import("child_process").SpawnSyncOptions} */
-                  // spawnSyncOpts = { cwd: env.paths.build, encoding: "utf8", shell: true },
+                  // spawnSyncOpts = { cwd: app.paths.build, encoding: "utf8", shell: true },
                   // sshAuth = process.env.WPBUILD_SCM_AUTH || "InvalidAuth";
 
             const scmArgs = [
@@ -68,7 +68,7 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
                 // sshAuth,  // auth key
                 // "-q",  // quiet, don't show statistics
                 "-r",     // copy directories recursively
-                `${user}@${host}:${this.env.app.name}/v${this.env.app.version}"`
+                `${user}@${host}:${this.app.rc.name}/v${this.app.rc.version}"`
             ];
             logger.write(`${logger.icons.color.star } ${logger.withColor(`check in resource files to ${host}`, logger.colors.grey)}`);
             try {
@@ -91,10 +91,10 @@ class WpBuildScmPlugin extends WpBuildBasePlugin
 
 /**
  * @function
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildScmPlugin | undefined}
  */
-const scm = (env) => env.app.plugins.scm && env.isMainProd ? new WpBuildScmPlugin({ env }) : undefined;
+const scm = (app) => app.rc.plugins.scm && app.isMainProd ? new WpBuildScmPlugin({ app }) : undefined;
 
 
 module.exports = scm;

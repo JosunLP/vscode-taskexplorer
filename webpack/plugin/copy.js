@@ -10,21 +10,21 @@
  */
 
 const { existsSync } = require("fs");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const CopyPlugin = require("copy-webpack-plugin");
 const { join, posix, isAbsolute, relative, normalize } = require("path");
 const { isString, apply } = require("../utils/utils");
 
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 /** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
 
 
-class WpBuildCopyPlugin extends WpBuildBasePlugin
+class WpBuildCopyPlugin extends WpBuildPlugin
 {
 	/**
 	 * @class WpBuildCopyPlugin
@@ -32,7 +32,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 */
 	constructor(options)
     {
-        super(apply(options, { plugins: WpBuildCopyPlugin.vendorPlugins(options.apps, options.env) }));
+        super(apply(options, { plugins: WpBuildCopyPlugin.vendorPlugins(options.apps, options.app) }));
     }
 
 
@@ -44,7 +44,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		if (this.env.isMain)
+		if (this.app.isMain)
 		{
 			this.onApply(compiler,
 			{
@@ -126,7 +126,7 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 			if (asset && asset.info.copied && !asset.info.related?.sourceMap)
 			{
 				const chunkName = this.fileNameStrip(file, true),
-					  srcAssetFile = `${chunkName}.${this.env.state.hash.next[chunkName]}.js`,
+					  srcAssetFile = `${chunkName}.${this.app.global.runtimeVars.next[chunkName]}.js`,
 					  srcAsset = this.compilation.getAsset(srcAssetFile);
 				this.logger.value("   copied file without sourcemap", true, 2);
 				this.logger.value("   chunk name", srcAssetFile, 3);
@@ -148,32 +148,32 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 	 * @function
 	 * @private
 	 * @param {string[]} apps
-	 * @param {WpBuildEnvironment} env
+	 * @param {WpBuildApp} app
 	 * @returns {WpBuildPluginVendorOptions[]}
 	 */
-	static vendorPlugins = (apps, env) =>
+	static vendorPlugins = (apps, app) =>
 	{
 		/** @type {WpBuildPluginVendorOptions[]} */
 		const plugins = [],
-			  psxBuildPath = env.paths.build.replace(/\\/g, "/"),
-			  psxBasePath = env.paths.base.replace(/\\/g, "/"),
+			  psxBuildPath = app.paths.build.replace(/\\/g, "/"),
+			  psxBasePath = app.paths.base.replace(/\\/g, "/"),
 			  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
-		if (env.app.plugins.copy !== false)
+		if (app.rc.plugins.copy !== false)
 		{
-			if (env.build === "webview")
+			if (app.build === "webview")
 			{
 				/** @type {CopyPlugin.Pattern[]} */
 				const patterns = [];
-				apps.filter((app) => existsSync(join(env.paths.base, app, "res"))).forEach(
-					(app) => patterns.push(
+				apps.filter((appName) => existsSync(join(app.paths.base, appName, "res"))).forEach(
+					(appName) => patterns.push(
 					{
-						from: posix.join(psxBasePath, app, "res", "*.*"),
+						from: posix.join(psxBasePath, appName, "res", "*.*"),
 						to: posix.join(psxBuildPath, "res", "webview"),
-						context: posix.join(psxBasePath, app, "res")
+						context: posix.join(psxBasePath, appName, "res")
 					})
 				);
-				if (existsSync(join(env.paths.base, "res")))
+				if (existsSync(join(app.paths.base, "res")))
 				{
 					patterns.push({
 						from: posix.join(psxBasePath, "res", "*.*"),
@@ -185,14 +185,14 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 					plugins.push(({ ctor: CopyPlugin, options: { patterns }}));
 				}
 			}
-			else if (env.isMain && env.wpc.mode === "production" && env.app.publicInfoProject)
+			else if (app.isMain && app.wpc.mode === "production" && app.rc.publicInfoProject)
 			{   //
 				// Copy resources to public `info` sub-project during compilation
 				//
 				let psxDirInfoProj;
-				if (isString(env.app.publicInfoProject))
+				if (isString(app.rc.publicInfoProject))
 				{
-					const infoPath = /** @type {string} */(env.app.publicInfoProject);
+					const infoPath = /** @type {string} */(app.rc.publicInfoProject);
 					if (isAbsolute(infoPath)) {
 						psxDirInfoProj = infoPath;
 					}
@@ -200,8 +200,8 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 						psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, infoPath));
 					}
 				}
-				else /* env.app.publicInfoProject === true */ {
-					psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, "..", `${env.app.name}-info`));
+				else /* app.rc.publicInfoProject === true */ {
+					psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, "..", `${app.rc.name}-info`));
 				}
 				plugins.push({
 					ctor: CopyPlugin,
@@ -252,11 +252,11 @@ class WpBuildCopyPlugin extends WpBuildBasePlugin
 /**
  * @function
  * @param {string[]} apps
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {(CopyPlugin | WpBuildCopyPlugin)[]}
  */
-const copy = (apps, env) =>
-	env.app.plugins.copy !== false && env.build !== "tests" && env.build !== "webview" ? new WpBuildCopyPlugin({ env, apps }).getPlugins() : [];
+const copy = (apps, app) =>
+	app.rc.plugins.copy !== false && app.build !== "tests" && app.build !== "webview" ? new WpBuildCopyPlugin({ app, apps }).getPlugins() : [];
 
 
 module.exports = copy;

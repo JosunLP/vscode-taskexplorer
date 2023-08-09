@@ -10,25 +10,25 @@
 
 const webpack = require("webpack");
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
  * @function optimization
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  * @returns {WebpackPluginInstance[]}
  */
-const optimization = (env) =>
+const optimization = (app) =>
 {
 	const plugins = [];
-	if (env.app.plugins.optimization)
+	if (app.rc.plugins.optimization)
 	{
-		if (env.build === "web")
+		if (app.build === "web")
 		{
 			plugins.push(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }));
 		}
-		if (env.build !== "webview")
+		if (app.build !== "webview")
 		{
 			plugins.push(new webpack.NoEmitOnErrorsPlugin());
 		}

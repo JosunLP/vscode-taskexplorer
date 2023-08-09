@@ -9,7 +9,7 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 const path = require("path");
 const esbuild = require("esbuild");
@@ -19,37 +19,37 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const rules = (env) =>
+const rules = (app) =>
 {
-	env.wpc.module = {};
-	env.wpc.module.rules = [];
+	app.wpc.module = {};
+	app.wpc.module.rules = [];
 
-	if (env.build === "webview")
+	if (app.build === "webview")
 	{
-		env.wpc.module.rules.push(...[
+		app.wpc.module.rules.push(...[
 		{
 			test: /\.m?js/,
 			resolve: { fullySpecified: false },
 		},
 		{
 			exclude: /\.d\.ts$/,
-			include: path.join(env.paths.build, "src"),
+			include: path.join(app.paths.build, "src"),
 			test: /\.tsx?$/,
-			use: [ env.esbuild ?
+			use: [ app.esbuild ?
 			{
 				loader: "esbuild-loader",
 				options: {
 					implementation: esbuild,
 					loader: "tsx",
 					target: "es2020",
-					tsconfigRaw: getTsConfig(env, path.join(env.paths.base, "tsconfig.json")),
+					tsconfigRaw: getTsConfig(app, path.join(app.paths.base, "tsconfig.json")),
 				},
 			} : {
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(env.paths.base, "tsconfig.json"),
+					configFile: path.join(app.paths.base, "tsconfig.json"),
 					// experimentalWatchApi: true,
 					transpileOnly: true,
 				},
@@ -65,25 +65,25 @@ const rules = (env) =>
 			{
 				loader: "css-loader",
 				options: {
-					sourceMap: env.wpc.mode !== "production",
+					sourceMap: app.wpc.mode !== "production",
 					url: false,
 				},
 			},
 			{
 				loader: "sass-loader",
 				options: {
-					sourceMap: env.wpc.mode !== "production",
+					sourceMap: app.wpc.mode !== "production",
 				},
 			}]
 		}]);
 	}
-	else if (env.build === "tests")
+	else if (app.build === "tests")
 	{
-		const testsRoot = path.join(env.paths.build, "src", "test");
-		env.wpc.module.rules.push(...[
+		const testsRoot = path.join(app.paths.build, "src", "test");
+		app.wpc.module.rules.push(...[
 		{
 			test: /index\.js$/,
-			include: path.join(env.paths.build, "node_modules", "nyc"),
+			include: path.join(app.paths.build, "node_modules", "nyc"),
 			loader: "string-replace-loader",
 			options: {
 				search: "selfCoverageHelper = require('../self-coverage-helper')",
@@ -107,15 +107,15 @@ const rules = (env) =>
 			}
 		}]);
 	}
-	else if (env.build === "types")
+	else if (app.build === "types")
 	{
-		env.wpc.module.rules.push({
+		app.wpc.module.rules.push({
 			test: /\.ts$/,
-			include: path.join(env.paths.build),
+			include: path.join(app.paths.build),
 			exclude: [
 				/node_modules/, /test[\\/]/, /\.d\.ts$/
 			],
-			use: [ env.esbuild ?
+			use: [ app.esbuild ?
 			{
 				loader: "esbuild-loader",
 				options: {
@@ -123,14 +123,14 @@ const rules = (env) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						env, path.join(env.paths.build, "types", "tsconfig.json"),
+						app, path.join(app.paths.build, "types", "tsconfig.json"),
 					)
 				}
 			} :
 			{
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(env.paths.build, "types", "tsconfig.json"),
+					configFile: path.join(app.paths.build, "types", "tsconfig.json"),
 					// experimentalWatchApi: true,
 					transpileOnly: true
 				}
@@ -140,10 +140,10 @@ const rules = (env) =>
 	else // main - all targets node / web / webworker
 	{
 
-		env.wpc.module.rules.push({
+		app.wpc.module.rules.push({
 			test: /\.ts$/,
 			issuerLayer: "release",
-			include: path.join(env.paths.build, "src"),
+			include: path.join(app.paths.build, "src"),
 			loader: "string-replace-loader",
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
@@ -197,7 +197,7 @@ const rules = (env) =>
 		{
 			test: /wrapper\.ts$/,
 			issuerLayer: "release",
-			include: path.join(env.paths.build, "src", "lib"),
+			include: path.join(app.paths.build, "src", "lib"),
 			loader: "string-replace-loader",
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
@@ -209,11 +209,11 @@ const rules = (env) =>
 		},
 		{
 			test: /\.ts$/,
-			include: path.join(env.paths.build, "src"),
+			include: path.join(app.paths.build, "src"),
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
 			],
-			use: [ env.esbuild ?
+			use: [ app.esbuild ?
 			{
 				loader: "esbuild-loader",
 				options: {
@@ -221,14 +221,14 @@ const rules = (env) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						env, path.join(env.paths.build, `tsconfig.${env.target}.json`),
+						app, path.join(app.paths.build, `tsconfig.${app.target}.json`),
 					)
 				}
 			} :
 			{
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(env.paths.build, `tsconfig.${env.target}.json`),
+					configFile: path.join(app.paths.build, `tsconfig.${app.target}.json`),
 					experimentalWatchApi: true,
 					transpileOnly: true
 				}

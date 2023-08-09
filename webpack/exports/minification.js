@@ -9,26 +9,26 @@ const TerserPlugin = require("terser-webpack-plugin");
  * @module wpbuild.exports.minification
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const minification = (env) =>
+const minification = (app) =>
 {   //
 	// NOTE:  Webpack 5 performs minification built-in now for production builds.
 	// Most likely, set app.exports.minification=false
 	//
-	if (env.app.exports.minification !== false && env.wpc.mode === "production")
+	if (app.rc.exports.minification !== false && app.wpc.mode === "production")
 	{
-		env.wpc.optimization = merge(env.wpc.optimization || {},
+		app.wpc.optimization = merge(app.wpc.optimization || {},
 		{
 			minimize: true,
 			minimizer: [
 				new TerserPlugin(
-				env.esbuild ?
+				app.esbuild ?
 				{
 					minify: TerserPlugin.esbuildMinify,
 					terserOptions: {

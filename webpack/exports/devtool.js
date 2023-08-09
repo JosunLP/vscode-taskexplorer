@@ -7,7 +7,7 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 /**
  * Adds library mode webpack config `output` object.
@@ -28,27 +28,27 @@
  *
  * @function
  * @private
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const devtool = (env) =>
+const devtool = (app) =>
 {   //
 	// Disabled for this build - Using source-map-plugin - see webpack.plugin.js#sourcemaps
 	// ann the plugins() function below
 	//
-	if (env.app.plugins.sourcemaps)
+	if (app.rc.plugins.sourcemaps)
 	{
-		env.wpc.devtool = false;
+		app.wpc.devtool = false;
 	}
 	else
 	{
-		if (env.environment === "prod") {
-			env.wpc.devtool = "source-map";
+		if (app.environment === "prod") {
+			app.wpc.devtool = "source-map";
 		}
-		else if (env.environment === "dev") {
-			env.wpc.devtool = "eval-source-map";
+		else if (app.environment === "dev") {
+			app.wpc.devtool = "eval-source-map";
 		}
-		else if (env.isTests) {
-			env.wpc.devtool = "eval";
+		else if (app.isTests) {
+			app.wpc.devtool = "eval";
 		}
 	}
 };

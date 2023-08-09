@@ -11,16 +11,16 @@
 
 const webpack = require("webpack");
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {webpack.ProgressPlugin | undefined}
  */
-const progress = (env) =>
+const progress = (app) =>
 {
-	if (env.app.plugins.progress !== false)
+	if (app.rc.plugins.progress !== false)
 	{
 		return new webpack.ProgressPlugin();
 	}

@@ -4,16 +4,16 @@
  * @module wpbuild.exports.cache
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const cache = (env) =>
+const cache = (app) =>
 {
-	env.wpc.cache = {
+	app.wpc.cache = {
         type: "memory",
         maxGenerations: Infinity,
         cacheUnaffected: true

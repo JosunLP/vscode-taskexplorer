@@ -4,15 +4,15 @@
  * @module wpbuild.exports.stats
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 /**
  * @function stats
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const stats = (env) =>
+const stats = (app) =>
 {
-	env.wpc.stats = {
+	app.wpc.stats = {
 		preset: "errors-warnings",
 		assets: true,
 		colors: true,
@@ -23,9 +23,9 @@ const stats = (env) =>
 		// warningsFilter: /Cannot find module \'common\' or its corresponding type declarations/
 	};
 
-	env.wpc.infrastructureLogging = {
+	app.wpc.infrastructureLogging = {
 		colors: true,
-		level: env.verbosity || "none"
+		level: app.verbosity || "none"
 	};
 };
 

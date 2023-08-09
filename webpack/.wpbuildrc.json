@@ -20,7 +20,7 @@
         ],
         "test": [
             { "build": "extension" },
-            { "build": "webview", "environment": "dev "},
+            { "build": "webview", "environment": "dev" },
             { "build": "tests" }
         ]
     },

@@ -12,20 +12,14 @@ const { spawnSync } = require("child_process");
  */
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackMode} WebpackMode */
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
-/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildPackageJson} WpBuildPackageJson */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("../types").WpBuildVsCodeBuild} WpBuildVsCodeBuild */
+
 
 /**
  * @function
- * @template {Record<string, any>} [T=Record<string, any>]
- * @param {Record<string, any>} object
- * @param {Record<string, any> | undefined} config
- * @param {Record<string, any>} [defaults]
+ * @template {{}} [T=Record<string, any>]
+ * @param {T | Partial<T>} object
+ * @param {T | Partial<T> | undefined} config
+ * @param {T | Partial<T> | undefined} [defaults]
  * @returns {T}
  */
 const apply = (object, config, defaults) =>
@@ -44,6 +38,7 @@ const apply = (object, config, defaults) =>
 
 
 /**
+ * @function
  * @template T
  * @param {T | Set<T> | Array<T>} v Variable to check to see if it's an array
  * @param {boolean} [shallow] If `true`, and  `arr` is an array, return a shallow copy
@@ -108,14 +103,14 @@ const findFilesSync = (pattern, options) => glob.sync(pattern, options).map((/**
 
 
 /**
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  * @param {string} tsConfigFile
  * @returns {Record<string, any>}
  */
-const getTsConfig = (env, tsConfigFile) =>
+const getTsConfig = (app, tsConfigFile) =>
 {
 	const result = spawnSync("npx", [ "tsc", `-p ${tsConfigFile}`, "--showConfig" ], {
-		cwd: env.paths.build,
+		cwd: app.paths.build,
 		encoding: "utf8",
 		shell: true,
 	});
@@ -198,7 +193,7 @@ const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanc
 /**
  * @function
  * @template {{}} [T=Record<string, any>]
- * @param {...(Partial<T>)} destination
+ * @param {...(T | Partial<T>)} destination
  * @returns {T}
  */
 const merge = (...destination) =>
@@ -233,7 +228,7 @@ const merge = (...destination) =>
 /**
  * @function
  * @template {{}} [T=Record<string, any>]
- * @param {...(Partial<T>)} destination
+ * @param {...(T | Partial<T>)} destination
  * @returns {T}
  */
 const mergeIf = (...destination) =>

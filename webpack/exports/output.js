@@ -10,27 +10,27 @@ const { apply } = require("../utils/utils");
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const output = (env) =>
+const output = (app) =>
 {
-	env.wpc.output =
+	app.wpc.output =
 	{
 		compareBeforeEmit: true,
 		hashDigestLength: 20
 	};
 
-	if (env.build === "webview")
+	if (app.build === "webview")
 	{
-		apply(env.wpc.output,
+		apply(app.wpc.output,
 		{
-			clean: env.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
-			path: join(env.paths.build, "res"),
+			clean: app.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
+			path: join(app.paths.build, "res"),
 			publicPath: "#{webroot}/",
 			filename: (pathData, _assetInfo) =>
 			{
@@ -42,23 +42,23 @@ const output = (env) =>
 			}
 		});
 	}
-	else if (env.build === "tests")
+	else if (app.build === "tests")
 	{
-		apply(env.wpc.output,
+		apply(app.wpc.output,
 		{
-			clean: env.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			path: env.paths.distTests,
+			clean: app.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
+			path: app.paths.distTests,
 			filename: "[name].js",
 			libraryTarget: "umd",
 			umdNamedDefine: true
 		});
 	}
-	else if (env.build === "types")
+	else if (app.build === "types")
 	{
-		apply(env.wpc.output,
+		apply(app.wpc.output,
 		{
-			clean: env.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			path: join(env.paths.build, "types", "dist"),
+			clean: app.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
+			path: join(app.paths.build, "types", "dist"),
 			filename: "[name].js",
 			// libraryTarget: "umd",
     		// umdNamedDefine: true,
@@ -67,10 +67,10 @@ const output = (env) =>
 	}
 	else
 	{
-		apply(env.wpc.output,
+		apply(app.wpc.output,
 		{
-			clean: env.clean === true ? (env.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
-			path: resolve(env.paths.dist, env.build === "web" ? "web" : "."),
+			clean: app.clean === true ? (app.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
+			path: resolve(app.paths.dist, app.build === "web" ? "web" : "."),
 			filename: "[name].[contenthash].js",
 			libraryTarget: "commonjs2"
 		});

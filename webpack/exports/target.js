@@ -5,25 +5,25 @@
  */
 
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
  * @function target
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const target = (env) =>
+const target = (app) =>
 {
-	if (env.build === "webview")
+	if (app.build === "webview")
 	{
-		env.wpc.target = env.target = "webworker";
+		app.wpc.target = app.target = "webworker";
 	}
-	else if (env.build === "web")
+	else if (app.build === "web")
 	{
-		env.wpc.target = env.target = "web";
+		app.wpc.target = app.target = "web";
 	}
 	else {
-		env.wpc.target = env.target = "node";
+		app.wpc.target = app.target = "node";
 	}
 };
 

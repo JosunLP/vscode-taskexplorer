@@ -5,16 +5,16 @@
  */
 
 /** @typedef {import("../types").WpBuildModule} WpBuildModule */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const name = (env) =>
+const name = (app) =>
 {
-	env.wpc.name = `${env.app.name}|${env.app.version}|${env.build}|${env.environment}|${env.target}|${env.wpc.mode}`;
+	app.wpc.name = `${app.rc.name}|${app.rc.version}|${app.build}|${app.environment}|${app.target}|${app.wpc.mode}`;
 };
 
 

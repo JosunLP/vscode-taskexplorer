@@ -11,7 +11,7 @@
 
 const { existsSync } = require("fs");
 const { promisify } = require("util");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const { WebpackError } = require("webpack");
 const exec = promisify(require("child_process").exec);
 const { findFiles, getTsConfig } = require("../utils");
@@ -22,14 +22,14 @@ const { join, basename, relative, dirname, isAbsolute, resolve } = require("path
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 /** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
 
 
-class WpBuildTestSuitePlugin extends WpBuildBasePlugin
+class WpBuildTestSuitePlugin extends WpBuildPlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -61,12 +61,12 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 	 */
 	async testsuite(compilation)
 	{
-		this.env.logger.write("build test suite", 1);
+		this.app.logger.write("build test suite", 1);
 		this.onCompilation(compilation);
 
-		const testsDir = join(this.env.paths.dist, "test");
+		const testsDir = join(this.app.paths.dist, "test");
 		const globOptions = {
-			cwd: this.env.paths.build,
+			cwd: this.app.paths.build,
 			absolute: true,
 			ignore: [ "**/node_modules/**", "**/.vscode*/**", "**/build/**", "**/dist/**", "**/res*/**", "**/doc*/**" ]
 		};
@@ -92,23 +92,23 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 			return;
 		}
 
-		this.env.logger.value("   found test suite tsconfig file", tsConfigFile, 2);
+		this.app.logger.value("   found test suite tsconfig file", tsConfigFile, 2);
 
 		if (!existsSync(testsDir))
 		{
-			this.env.logger.write("   checking for tsbuildinfo file path", 3);
-			const tsConfig = getTsConfig(this.env, tsConfigFile);
+			this.app.logger.write("   checking for tsbuildinfo file path", 3);
+			const tsConfig = getTsConfig(this.app, tsConfigFile);
 			let buildInfoFile = tsConfig.compilerOptions.tsBuildInfoFile || join(dirname(tsConfigFile), "tsconfig.tsbuildinfo");
 			if (!isAbsolute(buildInfoFile)) {
 				buildInfoFile = resolve(dirname(tsConfigFile), buildInfoFile);
 			}
-			this.env.logger.value("   delete tsbuildinfo file", buildInfoFile, 3);
+			this.app.logger.value("   delete tsbuildinfo file", buildInfoFile, 3);
 			try {
 				await unlink(buildInfoFile);
 			} catch {}
 		}
 
-		await this.execTsBuild(relative(this.env.paths.build, tsConfigFile), 2, testsDir, true);
+		await this.execTsBuild(relative(this.app.paths.build, tsConfigFile), 2, testsDir, true);
 	}
 
 
@@ -119,9 +119,9 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 	//  */
 	// async types(_assets)
 	// {
-	// 	const bldDir = this.env.paths.build,
+	// 	const bldDir = this.app.paths.build,
 	// 		  typesDir = join(bldDir, "types", "dist");
-	// 	this.env.logger.write("build types");
+	// 	this.app.logger.write("build types");
 	// 	if (!existsSync(typesDir))
 	// 	{
 	// 		try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
@@ -141,8 +141,8 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 	{
 		let exitCode = null,
 			stdout = "", stderr = "";
-		const logger = this.env.logger,
-			  procPromise = exec(command, { cwd: this.env.paths.build, encoding: "utf8" }),
+		const logger = this.app.logger,
+			  procPromise = exec(command, { cwd: this.app.paths.build, encoding: "utf8" }),
 			  child = procPromise.child;
 		child.stdout?.on("data", (data) => { stdout += data; });
 		child.stderr?.on("data", (data) => { stderr += data; });
@@ -174,7 +174,7 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 	/**
 	 * @function Executes a typescript build using the specified tsconfig
 	 * @private
-	 * @param {string} tsConfigFile Path to tsconfig file or dir, relative to `env.paths.build`
+	 * @param {string} tsConfigFile Path to tsconfig file or dir, relative to `app.paths.build`
 	 * @param {number} identifier Unique group identifier to associate with the file path
 	 * @param {string} outputDir Output directory of build
 	 * @param {boolean} [alias] Write alias paths with ``
@@ -185,7 +185,7 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 		// 	"npx", "babel", tsConfig, "--out-dir", outputDir, "--extensions", ".ts",
 		// 	"--presets=@babel/preset-env,@babel/preset-typescript",
 		// ];
-		const logger = this.env.logger;
+		const logger = this.app.logger;
 		let command = `npx tsc -p ${tsConfigFile}`; // babel.join(" ");
 		logger.write(`   execute typescript build @ italic(${tsConfigFile})`, 1);
 
@@ -364,11 +364,11 @@ class WpBuildTestSuitePlugin extends WpBuildBasePlugin
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildTestSuitePlugin | undefined}
  */
-const testsuite = (env) =>
-	env.isTests && env.app.plugins.build && env.isMain && false ? new WpBuildTestSuitePlugin({ env }) : undefined;
+const testsuite = (app) =>
+	app.isTests && app.rc.plugins.build && app.isMain && false ? new WpBuildTestSuitePlugin({ app }) : undefined;
 
 
 module.exports = testsuite;

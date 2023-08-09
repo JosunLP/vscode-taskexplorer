@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-// @ts-check
 
 /**
  * @file types/index.d.ts
@@ -11,12 +9,23 @@
  * 
  * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
  * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
+ * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
  */
+
+/**
+ * App typings
+ */
+export * from "./app";
 
 /**
  * Generic typings
  */
 export * from "./generic";
+
+/**
+ * WpBuild application specific types library
+ */
+export * from "./plugin";
 
 /**
  * WpBuild application specific types library

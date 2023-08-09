@@ -15,19 +15,19 @@ const VisualizerPlugin = require("webpack-visualizer-plugin2");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 // /**
-//  * @param {WpBuildEnvironment} env
+//  * @param {WpBuildApp} app
 //  * @param {WebpackConfig} wpConfig Webpack config object
 //  * @returns {(WebpackPluginInstance | undefined)[]}
 //  */
 // const analyze = (env, wpConfig) =>
 // {
 //     const plugins = [];
-// 	if (env.build !== "tests")
+// 	if (app.build !== "tests")
 // 	{
 // 		plugins.push(
 // 			bundle(env, wpConfig),
@@ -41,13 +41,13 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 const analyze =
 {
 	/**
-	 * @param {WpBuildEnvironment} env
+	 * @param {WpBuildApp} app
 	 * @returns {BundleAnalyzerPlugin | undefined}
 	 */
-	bundle(env)
+	bundle(app)
 	{
 		let plugin;
-		if (env.app.plugins.analyze !== false && env.analyze === true && env.build !== "tests" && env.build !== "webview")
+		if (app.rc.plugins.analyze !== false && app.analyze === true && app.build !== "tests" && app.build !== "webview")
 		{
 			plugin = new BundleAnalyzerPlugin({
 				analyzerPort: "auto",
@@ -62,17 +62,17 @@ const analyze =
 	},
 
 	/**
-	 * @param {WpBuildEnvironment} env
+	 * @param {WpBuildApp} app
 	 * @returns {CircularDependencyPlugin | undefined}
 	 */
-	circular(env)
+	circular(app)
 	{
 		let plugin;
-		if (env.app.plugins.analyze !== false  && env.analyze === true && env.build !== "tests" && env.build !== "webview")
+		if (app.rc.plugins.analyze !== false  && app.analyze === true && app.build !== "tests" && app.build !== "webview")
 		{
 			plugin = new CircularDependencyPlugin(
 			{
-				cwd: env.paths.build,
+				cwd: app.paths.build,
 				exclude: /node_modules/,
 				failOnError: false,
 				onDetected: ({ module: _webpackModuleRecord, paths, compilation }) =>
@@ -85,13 +85,13 @@ const analyze =
 	},
 
 	/**
-	 * @param {WpBuildEnvironment} env
+	 * @param {WpBuildApp} app
 	 * @returns {VisualizerPlugin | undefined}
 	 */
-	visualizer(env)
+	visualizer(app)
 	{
 		let plugin;
-		if (env.app.plugins.analyze !== false && env.analyze === true && env.build !== "tests" && env.build !== "webview") {
+		if (app.rc.plugins.analyze !== false && app.analyze === true && app.build !== "tests" && app.build !== "webview") {
 			plugin = new VisualizerPlugin({ filename: "../.coverage/visualizer.html" });
 		}
 		return /** @type {VisualizerPlugin | undefined}) */(plugin);

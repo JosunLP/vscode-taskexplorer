@@ -6,21 +6,64 @@
     "publicInfoProject": true,
     "builds": {
         "dev": [
-            { "build": "extension" },
-            { "build": "webview" }
+            { "build": "extension", "environment": "dev", "mode": "development" },
+            { "build": "webview", "environment": "dev", "mode": "development" }
         ],
         "testprod": [
-            { "build": "extension" },
-            { "build": "webview", "environment": "prod "}
+            { "build": "extension", "environment": "prod", "mode": "production" },
+            { "build": "webview", "environment": "prod", "mode": "production" },
+            { "build": "tests", "environment": "test", "mode": "none" }
         ],
         "prod": [
-            { "build": "extension" },
-            { "build": "webview" }
+            { "build": "extension", "environment": "prod", "mode": "production" },
+            { "build": "webview", "environment": "prod", "mode": "production" }
         ],
         "test": [
-            { "build": "extension" },
-            { "build": "webview", "environment": "dev "}
+            { "build": "extension", "environment": "test", "mode": "none" },
+            { "build": "webview", "environment": "dev", "mode": "none" },
+            { "build": "tests", "environment": "test", "mode": "none" }
         ]
+    },
+    "modules": {
+        "extension": "node",
+        "tests": "node",
+        "types": "node",
+        "web": "web",
+        "webview": "webworker"
+    },
+    "environment": {
+        "baseDir": "src",
+        "dev": {
+            "color": "yellow",
+            "build": [
+                { "build": "extension" },
+                { "build": "webview" }
+            ]
+        },
+        "testprod":  {
+            "color": "yellow",
+            "build": [
+                { "build": "extension", "environment": "prod " },
+                { "build": "webview", "environment": "prod " },
+                { "build": "tests" }
+            ]
+        },
+        "prod":  {
+            "color": "yellow",
+            "build": [
+                { "build": "extension" },
+                { "build": "webview" }
+            ]
+        },
+        "test":  {
+            "baseDir": "src/test",
+            "color": "yellow",
+            "build": [
+                { "build": "extension" },
+                { "build": "webview", "environment": "dev "},
+                { "build": "tests" }
+            ]
+        }
     },
     "colors": {
         "default": "grey",
@@ -36,12 +79,13 @@
             "extension": "blue",
             "tests": "white",
             "types": "magenta",
+            "web": "cyan",
             "webview": "cyan"
         }
     },
     "log": {
         "level": 3,
-        "maxValueLineLength": 100,
+        "valueMaxLineLength": 100,
         "pad": {
             "basePad": 0,
             "envTag": 22,
@@ -51,6 +95,7 @@
     },
     "paths": {
         "build": ".",
+        "cache": "node_modules/.cache/wpbuild",
         "dist": "dist",
         "distTests": "dist/test",
         "temp": null
@@ -87,7 +132,7 @@
         "html": true,
         "ignore": false,
         "index": true,
-        "instrument": true,
+        "istanbul": true,
         "licensefiles": true,
         "loghooks": true,
         "optimization": true,

@@ -34,18 +34,18 @@
  */
 
 const { isPromise } = require("../utils");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
 /**
  * @class WpBuildDisposePlugin
  */
-class WpBuildDisposePlugin extends WpBuildBasePlugin
+class WpBuildDisposePlugin extends WpBuildPlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -69,7 +69,7 @@ class WpBuildDisposePlugin extends WpBuildBasePlugin
     async dispose()
     {
         this.logger.write("cleanup: call all registered disposables", 2);
-        for (const d of this.env.disposables.splice(0))
+        for (const d of this.app.disposables.splice(0))
         {
             const result = d.dispose();
             if (isPromise(result)) {
@@ -82,10 +82,10 @@ class WpBuildDisposePlugin extends WpBuildBasePlugin
 
 /**
  * @function
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildDisposePlugin}
  */
-const dispose = (env) => new WpBuildDisposePlugin({ env });
+const dispose = (app) => new WpBuildDisposePlugin({ app });
 
 
 module.exports = dispose;

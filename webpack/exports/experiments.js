@@ -8,16 +8,16 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
  * @function entry
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const experiments = (env) =>
+const experiments = (app) =>
 {
-	env.wpc.experiments = { layers: env.isMain };
+	app.wpc.experiments = { layers: app.isMain };
 };
 
 

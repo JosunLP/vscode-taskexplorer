@@ -16,19 +16,19 @@
 const webpack = require("webpack");
 const { apply, isString } = require("../utils");
 // const { Compilation } = require("webpack");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 // const CopyInMemoryPlugin = require("copy-asset-in-memory-webpack-plugin");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 /** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
 
 
-class WpBuildSourceMapPlugin extends WpBuildBasePlugin
+class WpBuildSourceMapPlugin extends WpBuildPlugin
 {
 	/**
 	 * @class WpBuildCopyPlugin
@@ -36,7 +36,7 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
 	 */
 	constructor(options)
     {
-        super(apply(options, { plugins: WpBuildSourceMapPlugin.vendorPlugins(options.env), registerVendorPluginsFirst: true }));
+        super(apply(options, { plugins: WpBuildSourceMapPlugin.vendorPlugins(options.app), registerVendorPluginsFirst: true }));
     }
 
 
@@ -49,7 +49,7 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
      */
     apply(compiler)
     {
-		if (this.env.isMain)
+		if (this.app.isMain)
 		{
 			this.onApply(compiler,
 			{
@@ -77,7 +77,7 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
 			const asset = this.compilation.getAsset(file);
 			if (asset)
 			{
-                const entryHash = this.env.state.hash.next[this.fileNameStrip(file, true)],
+                const entryHash = this.app.global.runtimeVars.next[this.fileNameStrip(file, true)],
                       newFile = this.fileNameStrip(file).replace(".js.map", `.${entryHash}.js.map`);
 				this.logger.write(`found sourcemap ${asset.name}, rename using contenthash italic(${entryHash})`, 2);
 				this.logger.value("   current filename", file, 3);
@@ -104,17 +104,17 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildEnvironment} env
+	 * @param {WpBuildApp} app
 	 * @returns {WpBuildPluginVendorOptions[]}
 	 */
-	static vendorPlugins = (env) =>
+	static vendorPlugins = (app) =>
 	{
 		return [
         {
             ctor: webpack.SourceMapDevToolPlugin,
             options: {
                 test: /\.(js|jsx)($|\?)/i,
-                exclude: !env.isTests ? /(?:node_modules|(?:vendor|runtime|tests)(?:\.[a-f0-9]{16,})?\.js)/ :
+                exclude: !app.isTests ? /(?:node_modules|(?:vendor|runtime|tests)(?:\.[a-f0-9]{16,})?\.js)/ :
                                         /(?:node_modules|(?:vendor|runtime)(?:\.[a-f0-9]{16,})?\.js)/,
                 // filename: "[name].js.map",
                 filename: "[name].[contenthash].js.map",
@@ -145,7 +145,7 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
         //     options: {
         //         test: /.js.map$/,
         //         stage: Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE, // Default
-        //         to: (fileName) => fileName.replace(/[a-f0-9]{16,}\./, env.state.hash.next[fileName.replace(/[a-f0-9]{16,}\.js/, "")] + "."),
+        //         to: (fileName) => fileName.replace(/[a-f0-9]{16,}\./, app.global.runtimeVars.next[fileName.replace(/[a-f0-9]{16,}\.js/, "")] + "."),
         //         deleteOriginalAssets: true
         //     }
         // }];
@@ -154,10 +154,10 @@ class WpBuildSourceMapPlugin extends WpBuildBasePlugin
 }
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {(webpack.SourceMapDevToolPlugin | WpBuildSourceMapPlugin)[]}
  */
-const sourcemaps = (env) => env.app.plugins.sourcemaps &&  env.isMain ?  new WpBuildSourceMapPlugin({ env }).getPlugins() : [];
+const sourcemaps = (app) => app.rc.plugins.sourcemaps &&  app.isMain ?  new WpBuildSourceMapPlugin({ app }).getPlugins() : [];
 
 
 module.exports = sourcemaps;

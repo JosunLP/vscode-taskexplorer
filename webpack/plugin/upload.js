@@ -17,17 +17,17 @@
 const { existsSync } = require("fs");
 const { join, basename } = require("path");
 const { WebpackError } = require("webpack");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const { spawnSync } = require("child_process");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
-class WpBuildUploadPlugin extends WpBuildBasePlugin
+class WpBuildUploadPlugin extends WpBuildPlugin
 {
     /**
      * @class WpBuildLicenseFilePlugin
@@ -72,9 +72,9 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
         // the OS/env temp dir.  We will move only files that have changed content there,
         // and perform only one upload when all builds have completed.
         //
-        const env = this.env,
-              logger = env.logger,
-              toUploadPath = join(env.paths.temp, env.environment), // /temp/<env>/<env>
+        const app = this.app,
+              logger = app.logger,
+              toUploadPath = join(app.paths.temp, app.environment), // /temp/<env>/<env>
               logIcon = logger.withColor(logger.icons.info, logger.colors.yellow);
 
         logger.write("upload debug support files", 1, "", logIcon);
@@ -88,21 +88,21 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
             {
                 const asset = compilation.getAsset(file);
-                if (asset && chunk.name && (env.state.hash.next[chunk.name] !== env.state.hash.current[chunk.name] || !env.state.hash.previous[chunk.name]))
+                if (asset && chunk.name && (app.global.runtimeVars.next[chunk.name] !== app.global.runtimeVars.current[chunk.name] || !app.global.runtimeVars.previous[chunk.name]))
                 {
                     logger.value("   queue asset for upload", logger.tag(file), 2, "", logIcon);
                     logger.value("      asset info", JSON.stringify(asset.info), 4);
-                    await copyFile(join(env.paths.dist, file), join(toUploadPath, file));
+                    await copyFile(join(app.paths.dist, file), join(toUploadPath, file));
                     if (asset.info.related?.sourceMap)
                     {
                         const sourceMapFile = asset.info.related.sourceMap.toString();
                         logger.value("   queue sourcemap for upload", logger.tag(sourceMapFile), 2, "", logIcon);
-                        if (env.environment === "prod") {
+                        if (app.environment === "prod") {
                             logger.value("   remove production sourcemap from distribution", sourceMapFile, 3);
-                            await rename(join(env.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
+                            await rename(join(app.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
                         }
                         else {
-                            await copyFile(join(env.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
+                            await copyFile(join(app.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
                         }
                     }
                 }
@@ -119,7 +119,7 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
               user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
               rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
               /** @type {import("child_process").SpawnSyncOptions} */
-              spawnSyncOpts = { cwd: env.paths.build, encoding: "utf8", shell: true },
+              spawnSyncOpts = { cwd: app.paths.build, encoding: "utf8", shell: true },
               sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
               sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
               filesToUpload = await readdir(toUploadPath);
@@ -136,12 +136,12 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
         }
 
         const plinkCmds = [
-            `mkdir ${rBasePath}/${env.app.name}`,
-            `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}`,
-            `mkdir ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}`,
-            `rm -f ${rBasePath}/${env.app.name}/v${env.app.version}/${env.environment}/*.*`,
+            `mkdir ${rBasePath}/${app.rc.name}`,
+            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.version}`,
+            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.version}/${app.environment}`,
+            `rm -f ${rBasePath}/${app.rc.name}/v${app.rc.version}/${app.environment}/*.*`,
         ];
-        if (env.environment === "prod") { plinkCmds.pop(); }
+        if (app.environment === "prod") { plinkCmds.pop(); }
 
         const plinkArgs = [
             "-ssh",       // force use of ssh protocol
@@ -158,10 +158,10 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
             "-q",         // quiet, don't show statistics
             "-r",         // copy directories recursively
             toUploadPath, // directory containing the files to upload, the "directpory" itself (prod/dev/test) will be
-            `${user}@${host}:"${rBasePath}/${env.app.name}/v${env.app.version}"` // uploaded, and created if not exists
+            `${user}@${host}:"${rBasePath}/${app.rc.name}/v${app.rc.version}"` // uploaded, and created if not exists
         ];
 
-        await copyFile(join(env.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
+        await copyFile(join(app.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
         logger.write(`   upload resource files to ${host}`, 1, "", logIcon);
         try
@@ -198,10 +198,10 @@ class WpBuildUploadPlugin extends WpBuildBasePlugin
  * property to a boolean value of `true` or `false`
  * @module wpbuild.plugin.upload
  * @function upload
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildUploadPlugin | undefined} plugin instance
  */
-const upload = (env) => env.app.plugins.upload && env.isMain ? new WpBuildUploadPlugin({ env }) : undefined;
+const upload = (app) => app.rc.plugins.upload && app.isMain ? new WpBuildUploadPlugin({ app }) : undefined;
 
 
 module.exports = upload;

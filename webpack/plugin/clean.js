@@ -10,7 +10,7 @@
  */
 
 const path = require("path");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const { readdirSync, unlinkSync, existsSync } = require("fs");
 const { join } = require("path");
@@ -18,13 +18,13 @@ const { apply } = require("../utils");
 
 /** @typedef {import("../types").WebpackStats} WebpackStats */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
 
 
-class WpBuildCleanPlugin extends WpBuildBasePlugin
+class WpBuildCleanPlugin extends WpBuildPlugin
 {
     /**
      * @class WpBuildLicenseFilePlugin
@@ -33,9 +33,9 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 	constructor(options)
     {
         super(
-			apply(options, options.env.clean !== true ? {} :
+			apply(options, options.app.clean !== true ? {} :
 			{
-				plugins: WpBuildCleanPlugin.vendorPlugins(options.env),
+				plugins: WpBuildCleanPlugin.vendorPlugins(options.app),
 			})
 		);
     }
@@ -66,14 +66,14 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
      */
 	staleAssets(stats)
 	{
-		if (existsSync(this.env.paths.dist))
+		if (existsSync(this.app.paths.dist))
 		{
-			readdirSync(this.env.paths.dist).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
+			readdirSync(this.app.paths.dist).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
 			{
 				const assets = stats.compilation.getAssets(),
 					  clean = !assets.find(a => a.name === file);
 				if (clean) {
-					unlinkSync(join(this.env.paths.dist, file));
+					unlinkSync(join(this.app.paths.dist, file));
 				}
 			});
 		}
@@ -83,26 +83,26 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildEnvironment} env
+	 * @param {WpBuildApp} app
 	 * @returns {WpBuildPluginVendorOptions[]}
 	 */
-	static vendorPlugins = (env) =>
+	static vendorPlugins = (app) =>
 	{
 		return [{
 			ctor: CleanWebpackPlugin,
-			options: env.build === "webview" ? {
+			options: app.build === "webview" ? {
 				dry: false,
 				cleanOnceBeforeBuildPatterns: [
-					path.posix.join(env.paths.basePath, "css", "**"),
-					path.posix.join(env.paths.basePath, "js", "**"),
-					path.posix.join(env.paths.basePath, "page", "**")
+					path.posix.join(app.paths.basePath, "css", "**"),
+					path.posix.join(app.paths.basePath, "js", "**"),
+					path.posix.join(app.paths.basePath, "page", "**")
 				]
 			} : {
 				dry: false,
 				cleanStaleWebpackAssets: true,
 				dangerouslyAllowCleanPatternsOutsideProject: true,
 				cleanOnceBeforeBuildPatterns: [
-					`${env.paths.temp}/**`
+					`${app.paths.temp}/**`
 				]
 			}
 		}];
@@ -112,10 +112,10 @@ class WpBuildCleanPlugin extends WpBuildBasePlugin
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {(WpBuildCleanPlugin | CleanWebpackPlugin)[]}
  */
-const clean = (env) => env.app.plugins.clean && env.build !== "tests" ? new WpBuildCleanPlugin({ env }).getPlugins() : [];
+const clean = (app) => app.rc.plugins.clean && app.build !== "tests" ? new WpBuildCleanPlugin({ app }).getPlugins() : [];
 
 
 module.exports = clean;

@@ -4,16 +4,16 @@
  * @module wpbuild.exports.context
  */
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const context = (env) =>
+const context = (app) =>
 {
-	env.wpc.context = env.paths.base;
+	app.wpc.context = app.paths.base;
 };
 
 

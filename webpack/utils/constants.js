@@ -2,7 +2,7 @@
 // @ts-check
 
 /** @typedef {import("../types").WpBuildModule} WpBuildModule */
-/** @typedef {import("../types").WpBuildBuildEnvironment} WpBuildBuildEnvironment */
+/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 
 /**
  * @type {WpBuildModule[]}
@@ -10,7 +10,7 @@
 const WpBuildModuleTypes = [ "web" , "common", "extension", "tests", "types", "webview" ];
 
 /**
- * @type {WpBuildBuildEnvironment[]}
+ * @type {WpBuildEnvironment[]}
  */
 const WpBuildBuildEnvironmentTypes = [ "dev" , "prod", "test", "testprod" ];
 

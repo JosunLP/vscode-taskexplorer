@@ -10,32 +10,32 @@
  */
 
 const webpack = require("webpack");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const { isString } = require("../utils/utils");
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
- * @param {WpBuildEnvironment} env
- * @returns {WpBuildBasePlugin | undefined}
+ * @param {WpBuildApp} app
+ * @returns {WpBuildPlugin | undefined}
  */
-const banner = (env) =>
+const banner = (app) =>
 {
-	if (env.app.plugins.banner !== false && env.build !== "tests" && env.wpc.mode === "production")
+	if (app.rc.plugins.banner !== false && app.build !== "tests" && app.wpc.mode === "production")
 	{
-		const author = isString(env.app.pkgJson.author) ? env.app.pkgJson.author : env.app.pkgJson.author?.name;
+		const author = isString(app.rc.pkgJson.author) ? app.rc.pkgJson.author : app.rc.pkgJson.author?.name;
 		if (author)
 		{
-			return new WpBuildBasePlugin({
-				env,
+			return new WpBuildPlugin({
+				app,
 				plugins: [
 				{
 					ctor: webpack.BannerPlugin,
 					options: {
 						banner: `Copyright ${(new Date()).getFullYear()} ${author}`,
 						entryOnly: true,
-						test: WpBuildBasePlugin.getEntriesRegex(env.wpc, true, true)
+						test: WpBuildPlugin.getEntriesRegex(app.wpc, true, true)
 					}
 				}]
 			});

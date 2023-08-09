@@ -10,11 +10,11 @@
  */
 
 const { globalEnv } = require("../utils");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompilerHook} WebpackCompilerHook */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
@@ -28,7 +28,7 @@ const WpBuildBasePlugin = require("./base");
 /**
  * @class WpBuildLogHookStagesPlugin
  */
-class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
+class WpBuildLogHookStagesPlugin extends WpBuildPlugin
 {
     /**
      * @class WpBuildLicenseFilePlugin
@@ -164,7 +164,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
 	 */
 	writeBuildTag(hook)
 	{
-		const key = hook +this.env.wpc.name;
+		const key = hook +this.app.wpc.name;
 		if (!globalEnv.hooksLog[key])
 		{
 			globalEnv.hooksLog[key] = true;
@@ -181,11 +181,11 @@ class WpBuildLogHookStagesPlugin extends WpBuildBasePlugin
  * property to a boolean value of  `true` or `false`
  * @function
  * @module
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildLogHookStagesPlugin | undefined}
  */
-const loghooks = (env) =>
-	(env.app.plugins.loghooks !== false ? new WpBuildLogHookStagesPlugin({ env, wpConfig: env.wpc }) : undefined);
+const loghooks = (app) =>
+	(app.rc.plugins.loghooks !== false ? new WpBuildLogHookStagesPlugin({ app }) : undefined);
 
 
 module.exports = loghooks;

@@ -10,18 +10,18 @@
 
 const webpack = require("webpack");
 
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {webpack.IgnorePlugin | undefined}
  */
-const ignore = (env) =>
+const ignore = (app) =>
 {
     /** @type {webpack.IgnorePlugin | undefined} */
     let plugin;
-    if (env.app.plugins.ignore !== false && env.wpc.mode === "production")
+    if (app.rc.plugins.ignore !== false && app.wpc.mode === "production")
     {
         plugin = new webpack.IgnorePlugin(
         {

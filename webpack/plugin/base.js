@@ -38,7 +38,6 @@ const { relative, basename } = require("path");
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
 const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = require("../utils");
 
-/** @typedef {import("../types").WebpackConfig} WebpackConfig */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../utils/console")} WpBuildConsoleLogger */
@@ -47,8 +46,9 @@ const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuild
 /** @typedef {import("../types").WebpackRawSource} WebpackRawSource */
 /** @typedef {import("../types").WebpackCacheFacade} WebpackCacheFacade */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
@@ -79,12 +79,12 @@ const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuild
  * @class WpBuildHashPlugin
  * @augments WebpackPluginInstance
  */
-class WpBuildBasePlugin
+class WpBuildPlugin
 {
     /**
      * Persistent storage cache
      * @member {WpBuildCache} cache
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @protected
      */
     cache;
@@ -92,7 +92,7 @@ class WpBuildBasePlugin
     /**
      * Webpack compilation instance
      * @member {WebpackCompilation} compilation
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @type {WebpackCompilation}
      * @protected
      */
@@ -106,50 +106,50 @@ class WpBuildBasePlugin
     compiler;
 
     /**
-     * @member {WpBuildEnvironment} env
-     * @memberof WpBuildBasePlugin.prototype
+     * @member {WpBuildApp} app
+     * @memberof WpBuildPlugin.prototype
      * @protected
      */
-    env;
+    app;
 
     /**
      * @member {number} hashDigestLength
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @protected
      */
     hashDigestLength;
 
     /**
      * @member {WpBuildConsoleLogger} logger
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @protected
      */
     logger;
 
     /**
      * @member {string} name
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @protected
      */
     name;
 
     /**
      * @member {string} nameCompilation
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @private
      */
     nameCompilation;
 
     /**
      * @member {WpBuildPluginOptions} options
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @protected
      */
     options;
 
     /**
      * @member {WebpackPluginInstance[]} _plugins
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @private
      */
     plugins;
@@ -166,22 +166,22 @@ class WpBuildBasePlugin
     /**
      * Runtime compilation cache
      * @member {WebpackCacheFacade} wpCacheCompilation
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @type {WebpackCacheFacade}
      * @protected
      */
     wpCacheCompilation;
 
     /**
-     * @member {WebpackConfig} wpConfig
-     * @memberof WpBuildBasePlugin.prototype
+     * @member {WpBuildWebpackConfig} wpConfig
+     * @memberof WpBuildPlugin.prototype
      * @protected
      */
     wpConfig;
 
     /**
      * @member {WebpackLogger} wpLogger
-     * @memberof WpBuildBasePlugin.prototype
+     * @memberof WpBuildPlugin.prototype
      * @type {WebpackLogger}
      * @protected
      */
@@ -189,21 +189,21 @@ class WpBuildBasePlugin
 
 
     /**
-     * @class WpBuildBasePlugin
+     * @class WpBuildPlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      * @param {string} [globalCache]
      */
 	constructor(options, globalCache)
     {
         this.validatePluginOptions(options);
-        this.env = options.env;
-        this.logger = this.env.logger;
-        this.wpConfig = options.env.wpc;
+        this.app = options.app;
+        this.logger = this.app.logger;
+        this.wpConfig = options.app.wpc;
         this.name = this.constructor.name;
         this.nameCompilation = this.constructor.name + "_";
         this.options = mergeIf(options, { plugins: [] });
-        this.hashDigestLength = this.env.wpc.output.hashDigestLength || 20;
-        this.cache = new WpBuildCache(this.env, { file: `cache_${this.name}.json` });
+        this.hashDigestLength = this.app.wpc.output.hashDigestLength || 20;
+        this.cache = new WpBuildCache(this.app, `cache_${this.name}.json`);
         if (globalCache) {
             this.initGlobalEnvObject(globalCache);
         }
@@ -438,7 +438,7 @@ class WpBuildBasePlugin
      * @public
      * @static
      * @member getEntriesRegex
-     * @param {WebpackConfig} wpConfig Webpack config object
+     * @param {WpBuildWebpackConfig} wpConfig Webpack config object
      * @param {boolean} [dbg]
      * @param {boolean} [ext]
      * @param {boolean} [hash]
@@ -458,7 +458,7 @@ class WpBuildBasePlugin
      * @function
      * @public
      * @member getPlugins
-     * @returns {(WebpackPluginInstance | InstanceType<WpBuildBasePlugin>)[]}
+     * @returns {(WebpackPluginInstance | InstanceType<WpBuildPlugin>)[]}
      */
     getPlugins() { return this.plugins; }
 
@@ -480,7 +480,7 @@ class WpBuildBasePlugin
         }
         else if (!(e instanceof WebpackError) && !(e instanceof WpBuildError))
         {
-            this.env.logger.error(msgOrFile ?? "an error has occurred");
+            this.app.logger.error(msgOrFile ?? "an error has occurred");
             if (!fileOrDetails) {
                 e = new WebpackError(e.message);
             }
@@ -488,7 +488,7 @@ class WpBuildBasePlugin
                 e = new WpBuildError(e.message, fileOrDetails, details);
             }
         }
-        this.env.logger.error(e);
+        this.app.logger.error(e);
         this.compilation.errors.push(/** @type {WebpackError} */(e));
 	}
 
@@ -537,7 +537,7 @@ class WpBuildBasePlugin
      * @param {string} file
      * @returns {boolean}
      */
-    isEntryAsset = (file) => WpBuildBasePlugin.getEntriesRegex(this.wpConfig).test(file);
+    isEntryAsset = (file) => WpBuildPlugin.getEntriesRegex(this.wpConfig).test(file);
 
 
     /**
@@ -579,7 +579,7 @@ class WpBuildBasePlugin
         this.compiler = compiler;
         this.wpCache = compiler.getCache(this.name);
         this.wpLogger = compiler.getInfrastructureLogger(this.name);
-        this.hashDigestLength = compiler.options.output.hashDigestLength || this.env.wpc.output.hashDigestLength || 20;
+        this.hashDigestLength = compiler.options.output.hashDigestLength || this.app.wpc.output.hashDigestLength || 20;
 
         const hasCompilationHook = optionsArray.find(([ _, tapOpts ]) => tapOpts.hook === "compilation") ||
                                    optionsArray.every(([ _, tapOpts ]) => !!tapOpts.stage);
@@ -680,7 +680,7 @@ class WpBuildBasePlugin
             this.nameCompilation = name;
             if (stageEnum && options.hookCompilation === "processAssets")
             {
-                const logMsg = this.breakProp(optionName).padEnd(this.env.app.log.pad.value - 3) + this.logger.tag(`processassets: ${options.stage} stage`);
+                const logMsg = this.breakProp(optionName).padEnd(this.app.rc.log.pad.value - 3) + this.logger.tag(`processassets: ${options.stage} stage`);
                 if (!options.async) {
                     hook.tap({ name, stage: stageEnum }, this.wrapCallback(logMsg, options).bind(this));
                 }
@@ -817,7 +817,7 @@ class WpBuildBasePlugin
     //  */
     // wrapTry = (fn, msg, ...args) =>
     // {
-    //     this.env.logger.write(msg, 3);
+    //     this.app.logger.write(msg, 3);
     //     try {
     //         const r = fn.call(this, ...args);
     //         if (isPromise(r)) {
@@ -835,5 +835,5 @@ class WpBuildBasePlugin
 }
 
 
-module.exports = WpBuildBasePlugin;
+module.exports = WpBuildPlugin;
 module.exports.WpBuildError = WpBuildError;

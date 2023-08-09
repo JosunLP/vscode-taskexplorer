@@ -9,20 +9,20 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const { globalEnv } = require("../utils/global");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
 /** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
 /**
  * @class WpBuildDisposePlugin
  */
-class WpBuildENvironmentPlugin extends WpBuildBasePlugin
+class WpBuildENvironmentPlugin extends WpBuildPlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -62,13 +62,13 @@ class WpBuildENvironmentPlugin extends WpBuildBasePlugin
 	 */
 	logEnvironment = () =>
 	{
-		const env = this.env,
-			  logger = env.logger,
-			  pad = env.app.log.pad.value;
+		const app = this.app,
+			  logger = app.logger,
+			  pad = app.rc.log.pad.value;
 
 		logger.write("Build Environment:", 1, "", 0, logger.colors.white);
-		Object.keys(env).filter(k => typeof env[k] !== "object").forEach(
-			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${env[k]}`, 1)
+		Object.keys(app).filter(k => typeof app[k] !== "object").forEach(
+			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${app[k]}`, 1)
 		);
 
 		logger.write("Global Environment:", 1, "", 0, logger.colors.white);
@@ -76,17 +76,17 @@ class WpBuildENvironmentPlugin extends WpBuildBasePlugin
 			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${globalEnv[k]}`, 1)
 		);
 
-		if (env.argv)
+		if (app.argv)
 		{
 			logger.write("Arguments:", 1, "", 0, logger.colors.white);
-			if (env.argv.mode) {
-				logger.write(`   ${"mode".padEnd(pad - 3)}: ${env.argv.mode}`, 1);
+			if (app.argv.mode) {
+				logger.write(`   ${"mode".padEnd(pad - 3)}: ${app.argv.mode}`, 1);
 			}
-			if (env.argv.watch) {
-				logger.write(`   ${"watch".padEnd(pad - 3)}: ${env.argv.watch}`, 1);
+			if (app.argv.watch) {
+				logger.write(`   ${"watch".padEnd(pad - 3)}: ${app.argv.watch}`, 1);
 			}
-			if (env.argv.config) {
-				logger.write(`   ${"cfg".padEnd(pad - 3)}: ${env.argv.config.join(", ")}`, 1);
+			if (app.argv.config) {
+				logger.write(`   ${"cfg".padEnd(pad - 3)}: ${app.argv.config.join(", ")}`, 1);
 			}
 		}
 	};
@@ -99,9 +99,9 @@ class WpBuildENvironmentPlugin extends WpBuildBasePlugin
 	 */
 	setVersion = () =>
 	{
-		if (this.env.isMain && this.env.environment === "prod")
+		if (this.app.isMain && this.app.environment === "prod")
 		{
-			// let version = env.app.version;
+			// let version = app.rc.version;
 		}
 	};
 
@@ -109,10 +109,10 @@ class WpBuildENvironmentPlugin extends WpBuildBasePlugin
 
 
 /**
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildENvironmentPlugin | undefined}
  */
-const environment = (env) => env.app.plugins.environment && env.environment === "prod" ? new WpBuildENvironmentPlugin({ env }) : undefined;
+const environment = (app) => app.rc.plugins.environment && app.environment === "prod" ? new WpBuildENvironmentPlugin({ app }) : undefined;
 
 
 module.exports = environment;

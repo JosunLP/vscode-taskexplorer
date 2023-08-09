@@ -1,15 +1,17 @@
 // @ts-check
 
+/**
+ * @file utils/global.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
+ */
+
 const { resolve, join } = require("path");
 const { existsSync, readFileSync, mkdirSync, writeFileSync } = require("fs");
 
-/**
- * @module wpbuild.utils.global
- */
 
-/** @typedef {import("../types").WpBuildPackageJson} WpBuildPackageJson */
 /** @typedef {import("../types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
-
 
 
 const cacheDir = resolve(__dirname, "..", "..", "node_modules", ".cache", "wpbuild");

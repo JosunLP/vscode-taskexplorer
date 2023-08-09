@@ -11,19 +11,19 @@
 
 const { join } = require("path");
 const { existsSync } = require("fs");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const { rename, unlink, readdir } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
 /**
  * @class WpBuildLicenseFilePlugin
  */
-class WpBuildLicenseFilePlugin extends WpBuildBasePlugin
+class WpBuildLicenseFilePlugin extends WpBuildPlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -69,11 +69,11 @@ class WpBuildLicenseFilePlugin extends WpBuildBasePlugin
 
 /**
  * @function
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildLicenseFilePlugin | undefined}
  */
-const licensefiles = (env) =>
-    (env.app.plugins.licensefiles !== false && env.isMainProd ? new WpBuildLicenseFilePlugin({ env }) : undefined);
+const licensefiles = (app) =>
+    (app.rc.plugins.licensefiles !== false && app.isMainProd ? new WpBuildLicenseFilePlugin({ app }) : undefined);
 
 
 module.exports = licensefiles;

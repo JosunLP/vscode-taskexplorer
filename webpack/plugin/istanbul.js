@@ -10,14 +10,14 @@
  */
 
 const { apply, asArray } = require("../utils");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 
 /** @typedef {import("../types").WebpackAsset} WebpackAsset */
 /** @typedef {import("../types").WebpackChunk} WebpackChunk */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 
@@ -25,7 +25,7 @@ const WpBuildBasePlugin = require("./base");
 /**
  * @class WpBuildCompilePlugin
  */
-class WpBuildIstanbulPlugin extends WpBuildBasePlugin
+class WpBuildIstanbulPlugin extends WpBuildPlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -78,7 +78,7 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
         const regex = /\n[ \t]*module\.exports \= require\(/gm,
               sourceCode = sourceInfo.source().toString().replace(regex, (v) => "/* istanbul ignore next */" + v),
               { source, map } = sourceInfo.sourceAndMap();
-        return map && (this.compiler.options.devtool || this.env.app.plugins.sourcemaps) ?
+        return map && (this.compiler.options.devtool || this.app.rc.plugins.sourcemaps) ?
                new this.compiler.webpack.sources.SourceMapSource(sourceCode, file, map, source) :
                new this.compiler.webpack.sources.RawSource(sourceCode);
     }
@@ -103,7 +103,7 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
     //     const { source, map } = osourceInfold.sourceAndMap(),
     //           regex = /\n[ \t]*module\.exports \= require\(/gm,
     //           content = source.toString().replace(regex, (v) => "/* istanbul ignore next */" + v);
-    //     return map && (compiler.options.devtool || this.env.app.plugins.sourcemaps) ?
+    //     return map && (compiler.options.devtool || this.app.rc.plugins.sourcemaps) ?
     //            new compiler.webpack.sources.SourceMapSource(content, file, map) :
     //            new compiler.webpack.sources.RawSource(content);
     // }
@@ -111,20 +111,20 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
     // const { createInstrumenter } = require("istanbul-lib-instrument");
     //
     // /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-    // /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+    // /** @typedef {import("../types").WpBuildApp} WpBuildApp */
     // /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
     //
     //
     // /**
     //  * @function istanbul
-    //  * @param {WpBuildEnvironment} env
+    //  * @param {WpBuildApp} app
     //  * @returns {WebpackPluginInstance | undefined}
     //  */
-    // const istanbul = (env) =>
+    // const istanbul = (app) =>
     // {
     //     /** @type {WebpackPluginInstance | undefined} */
     //     let plugin;
-    //     // if (env.app.plugins.instrument !== false && env.build === "extension" && env.environment === "test")
+    //     // if (app.rc.plugins.instrument !== false && app.build === "extension" && app.environment === "test")
     //     // {
     //     //     plugin =
     //     //     {
@@ -196,11 +196,11 @@ class WpBuildIstanbulPlugin extends WpBuildBasePlugin
 
 /**
  * @function compile
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildIstanbulPlugin | undefined}
  */
-const istanbul = (env) =>
-    (env.app.plugins.compile !== false && env.isMainTests ? new WpBuildIstanbulPlugin({ env }) : undefined);
+const istanbul = (app) =>
+    (app.rc.plugins.istanbul !== false && app.isMainTests ? new WpBuildIstanbulPlugin({ app }) : undefined);
 
 
 module.exports = istanbul;

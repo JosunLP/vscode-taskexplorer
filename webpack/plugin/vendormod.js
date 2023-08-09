@@ -34,15 +34,15 @@
  */
 
 const { basename, join } = require("path");
-const WpBuildBasePlugin = require("./base");
+const WpBuildPlugin = require("./base");
 const { existsSync, readFileSync, readdirSync, writeFileSync } = require("fs");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
-class WpBuildVendorModPlugin extends WpBuildBasePlugin
+class WpBuildVendorModPlugin extends WpBuildPlugin
 {
 
     /**
@@ -74,13 +74,13 @@ class WpBuildVendorModPlugin extends WpBuildBasePlugin
 		// the existing contents of the dist directory.  By default it's current assets list
 		// is empty, and thus will not work across IDE restarts
 		//
-		const copyPlugin = join(this.env.paths.build, "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
+		const copyPlugin = join(this.app.paths.build, "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
 		if (existsSync(copyPlugin))
 		{
 			let content = readFileSync(copyPlugin, "utf8").replace(/currentAssets = \[ "[\w"\., _\-]+" \]/, "currentAssets = []");
-			if (existsSync(this.env.paths.dist))
+			if (existsSync(this.app.paths.dist))
 			{
-				const distFiles = `"${readdirSync(this.env.paths.dist).map(f => basename(f)).join("\", \"")}"`;
+				const distFiles = `"${readdirSync(this.app.paths.dist).map(f => basename(f)).join("\", \"")}"`;
 				content = content.replace("currentAssets = []", `currentAssets = [ ${distFiles} ]`);
 			}
 			writeFileSync(copyPlugin, content);
@@ -96,10 +96,10 @@ class WpBuildVendorModPlugin extends WpBuildBasePlugin
  * property to a boolean value of  `true` or `false`
  * @function
  * @module
- * @param {WpBuildEnvironment} env
+ * @param {WpBuildApp} app
  * @returns {WpBuildVendorModPlugin | undefined}
  */
-const vendormod = (env) => env.app.plugins.vendormod && env.build !== "webview" ? new WpBuildVendorModPlugin({ env }) : undefined;
+const vendormod = (app) => app.rc.plugins.vendormod && app.build !== "webview" ? new WpBuildVendorModPlugin({ app }) : undefined;
 
 
 module.exports = vendormod;
