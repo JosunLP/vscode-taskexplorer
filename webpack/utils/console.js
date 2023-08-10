@@ -307,7 +307,7 @@ class WpBuildConsoleLogger
      */
     write = (msg, level, pad = "", icon, color) =>
     {
-        if (level === undefined || level <= this.app.rc.log.level)
+        if (level === undefined ||this.app.rc === undefined || level <= this.app.rc.log.level)
         {
             let envTag = "";
             const app = this.app,

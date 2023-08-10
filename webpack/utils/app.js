@@ -25,10 +25,11 @@ const { merge, WpBuildError, findFilesSync, apply } = require("./utils");
 /** @typedef {import("../types").WpBuildRcVsCode} WpBuildRcVsCode */
 /** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
-/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
+/** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("../types").WpBuildRcLogColorMap} WpBuildRcLogColorMap */
 /** @typedef {import("../types").WpBuildRcPackageJson} WpBuildRcPackageJson */
+/** @typedef {import("../types").WebpackRuntimeEnvArgs} WebpackRuntimeEnvArgs */
 
 
 /**
@@ -120,12 +121,13 @@ class WpBuildAppRc
     /**
      * @class WpBuildRclication
      * @param {WebpackMode} mode Webpack command line args
-     * @param {Partial<WpBuildApp>} app Webpack build environment
+     * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
+     * @param {WebpackRuntimeEnvArgs} env Webpack build environment
      */
-    constructor(mode, app)
+    constructor(mode, argv, env)
     {
-        apply(this, merge(this.wpBuildRc(), { pkgJson: this.packageJson() }));
-        this.printBanner(mode, /** @type {WpBuildApp} */(app));
+        apply(this, merge(this.wpBuildRc(), env, { pkgJson: this.packageJson() }));
+        this.printBanner(mode,argv, env);
     };
 
 
@@ -199,12 +201,13 @@ class WpBuildAppRc
      * @function
      * @private
      * @member printBanner
-     * @param {WebpackMode} mode Webpack command line args
-     * @param {WpBuildApp} app Webpack build environment
+     * @param {WebpackMode} mode Webpack co
+     * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
+     * @param {WebpackRuntimeEnvArgs} env Webpack build environment
      */
-    printBanner = (mode, app) =>
+    printBanner = (mode, argv, env) =>
     {
-        const logger = new WpBuildConsoleLogger(app);
+        const logger = new WpBuildConsoleLogger(argv, env);
         this.printLineSep(logger);
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
         console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
@@ -213,7 +216,7 @@ class WpBuildAppRc
         this.printLineSep(logger);
         logger.write("   Mode  : " + logger.withColor(mode, logger.colors.grey), 1, "", 0, logger.colors.white);
         logger.write("   Argv  : " + logger.withColor(JSON.stringify(app.argv), logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Env   : " + logger.withColor(JSON.stringify(app), logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Env   : " + logger.withColor(JSON.stringify(env), logger.colors.grey), 1, "", 0, logger.colors.white);
         this.printLineSep(logger);
     };
 

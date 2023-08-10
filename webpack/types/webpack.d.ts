@@ -1,21 +1,5 @@
 
-/**
- * @file types/webpack.d.ts
- * @version 0.0.1
- * @license MIT
- * @author @spmeesseman Scott Meesseman
- * 
- * Handy file links:
- * 
- * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
- * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
- * 
- * @description
- * 
- * Webpack library types are prefixed with `Webpack` for convention.
- * 
- */
-
+import { WpBuildApp } from "./app";
 import { PickByType } from "./generic";
 import { AsyncSeriesHook, HookMap, SyncHook, SyncBailHook } from "tapable"
 import { Schema as WebpackSchema } from "schema-utils/declarations/validate";
@@ -76,8 +60,30 @@ declare type WebpackCompilerHookName = keyof WebpackCompilerHook;
 declare type WebpackCompilerAsyncHookName = keyof WebpackCompilerAsyncHook;
 declare type WebpackCompilerSyncHookName = keyof WebpackCompilerSyncHook;
 
+declare interface IWpBuildWepbackEnvArgs
+{
+    WEBPACK_WATCH: boolean;
+}
+declare type WepbackRuntimeEnvArgs = IWpBuildWepbackEnvArgs & Partial<WpBuildApp>;
+
+// declare type RequireKeys2<T extends object, K extends keyof T> = Omit<T, K> & Pick<T, K>;
+// declare type WpBuildWebpackConfig = IWpBuildWebpackConfig;
+// declare type WpBuildWebpackConfig2 = Pick<import("webpack").Configuration, "mode">;
+// declare type WpBuildWebpackConfig3 = Exclude<import("webpack").Configuration, "mode">;
+// declare type WpBuildWebpackConfig4 = WpBuildWebpackConfig2 & WpBuildWebpackConfig3
+// declare type x = RequireKeys2<WebpackConfig, "mode">
+
+declare interface IWebpackRuntimeArgs extends Partial<WpBuildApp>
+{
+    config: string[];
+    mode: WebpackMode;
+    watch: boolean;
+}
+declare type WebpackRuntimeEnvArgs = Readonly<Partial<IWebpackRuntimeArgs>> & Record<string, string | boolean>;
 
 export {
+    WebpackRuntimeArgs,
+    WebpackRuntimeEnvArgs,
     WebpackAsset,
     WebpackAssetInfo,
     WebpackAssetEmittedInfo,

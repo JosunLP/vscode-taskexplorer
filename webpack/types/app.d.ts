@@ -18,7 +18,7 @@
  */
 
 import { WpBuildConsoleLogger } from "../utils";
-import { WpBuildRc, WpBuildEnvironment } from "./wpbuild";
+import { WpBuildRc, WpBuildEnvironment, WpBuildModule } from "./wpbuild";
 import { WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackTarget } from "./webpack"
 
 
@@ -31,28 +31,6 @@ declare interface IWpBuildWebpackConfig extends WebpackConfig
     output: WebpackOutput;
 }
 declare type WpBuildWebpackConfig = IWpBuildWebpackConfig;
-
-declare interface IWpBuildWepbackEnvArgs
-{
-    WEBPACK_WATCH: boolean;
-}
-declare type WpBuildWepbackEnvArgs = IWpBuildWepbackEnvArgs;
-
-// declare type RequireKeys2<T extends object, K extends keyof T> = Omit<T, K> & Pick<T, K>;
-// declare type WpBuildWebpackConfig = IWpBuildWebpackConfig;
-// declare type WpBuildWebpackConfig2 = Pick<import("webpack").Configuration, "mode">;
-// declare type WpBuildWebpackConfig3 = Exclude<import("webpack").Configuration, "mode">;
-// declare type WpBuildWebpackConfig4 = WpBuildWebpackConfig2 & WpBuildWebpackConfig3
-// declare type x = RequireKeys2<WebpackConfig, "mode">
-
-declare interface IWpBuildWebpackArgs
-{
-    config: string[];
-    env: WpBuildWepbackEnvArgs;
-    mode: WebpackMode;
-    watch: boolean;
-}
-declare type WpBuildWebpackArgs = Readonly<Partial<IWpBuildWebpackArgs>>;
 
 declare interface IWpBuildGlobalEnvironment
 {
@@ -117,7 +95,6 @@ export {
     WpBuildGlobalEnvironment,
     WpBuildRuntimeVariables,
     WpBuildVsCodeBuild,
-    WpBuildWebpackArgs,
     WpBuildWebpackConfig,
     __WPBUILD__
 };

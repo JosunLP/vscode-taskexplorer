@@ -23,6 +23,11 @@ export * from "./app";
 export * from "./generic";
 
 /**
+ * Log typings
+ */
+export * from "./log";
+
+/**
  * WpBuild application specific types library
  */
 export * from "./plugin";

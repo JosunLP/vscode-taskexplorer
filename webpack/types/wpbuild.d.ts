@@ -17,12 +17,10 @@
  * and `IWpBuild` (interface) for convention.
  */
 
+import { WpBuildLogTrueColor } from "./log";
 import WpBuildRc from "./.wpbuildrc.defaults.json";
 import { ConvertType, ConvertType2, PartialSome } from "./generic";
 
-declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
-declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
-declare type WpBuildLogColor = WpBuildLogTrueColor | "bold" | "inverse" | "italic" | "underline";
 
 // declare type WpBuildPluginTapOptionsCallbackType<T> = T extends ReturnType<IWpBuildPluginTapOptions["callback"]> ? X : never;
 // declare type WpBuildPluginTapOptionsCallbackType2 = ReturnType<IWpBuildPluginTapOptions["callback"]>;
@@ -38,41 +36,6 @@ declare type WpBuildLogColor = WpBuildLogTrueColor | "bold" | "inverse" | "itali
 // }
 /**
  * Defined types for this module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
- */
-
-/**
- * LOG
- */
-
-declare interface IWpBuildLogIconBaseSet
-{
-    bullet: string;
-    error: string;
-    info: string;
-    star: string;
-    start: string;
-    success: string;
-    up: string;
-    warning: string;
-}
-declare type WpBuildLogIconBlueSet= Pick<IWpBuildLogIconBaseSet, "error"|"info"|"success"|"warning">;
-declare interface IWpBuildLogIconActionSet extends IWpBuildLogIconBaseSet
-{
-    errorTag: string;
-    starCyan: string;
-    successTag: string;
-}
-declare type WpBuildLogIconActionSet = IWpBuildLogIconActionSet;
-declare interface IWpBuildLogIconSet extends IWpBuildLogIconBaseSet
-{
-    blue: WpBuildLogIconBlueSet;
-    color: WpBuildLogIconActionSet;
-}
-declare type WpBuildLogIconSet = Required<IWpBuildLogIconSet>;
-declare type WpBuildLogIcon = keyof Omit<WpBuildLogIconSet, "blue" | "color">;
-
-/**
- * APP RC
  */
 
 declare type WpBuildRcBuilds = typeof WpBuildRc.builds;
@@ -132,11 +95,6 @@ export {
     IWpBuildRc,
     WpBuildEnvironment,
     WpBuildModule,
-    WpBuildLogColor,
-    WpBuildLogIcon,
-    WpBuildLogIconSet,
-    WpBuildLogLevel,
-    WpBuildLogTrueColor,
     WpBuildRc,
     WpBuildRcBuild,
     WpBuildRcBuilds,
