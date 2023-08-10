@@ -66,14 +66,14 @@ class WpBuildCleanPlugin extends WpBuildPlugin
      */
 	staleAssets(stats)
 	{
-		if (existsSync(this.app.paths.dist))
+		if (existsSync(this.app.rc.paths.dist))
 		{
-			readdirSync(this.app.paths.dist).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
+			readdirSync(this.app.rc.paths.dist).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
 			{
 				const assets = stats.compilation.getAssets(),
 					  clean = !assets.find(a => a.name === file);
 				if (clean) {
-					unlinkSync(join(this.app.paths.dist, file));
+					unlinkSync(join(this.app.rc.paths.dist, file));
 				}
 			});
 		}
@@ -93,9 +93,9 @@ class WpBuildCleanPlugin extends WpBuildPlugin
 			options: app.build === "webview" ? {
 				dry: false,
 				cleanOnceBeforeBuildPatterns: [
-					path.posix.join(app.paths.basePath, "css", "**"),
-					path.posix.join(app.paths.basePath, "js", "**"),
-					path.posix.join(app.paths.basePath, "page", "**")
+					path.posix.join(app.paths.base, "css", "**"),
+					path.posix.join(app.paths.base, "js", "**"),
+					path.posix.join(app.paths.base, "page", "**")
 				]
 			} : {
 				dry: false,

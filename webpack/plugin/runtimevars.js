@@ -158,7 +158,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
               logger = app.logger,
               hashCurrent = app.global.runtimeVars.current;
         this.readAssetState();
-        logger.write(`validate hashes for assets in italic(${app.paths.files.hashStoreJson})`, 2);
+        logger.write(`validate hashes for assets in italic(${app.rc.paths.files.hashStoreJson})`, 2);
         Object.entries(assets).filter(([ file, _ ]) => this.matchObject(file) && this.isEntryAsset(file)).forEach(([ file, _ ]) =>
 		{
             const chunkName = this.fileNameStrip(file, true),

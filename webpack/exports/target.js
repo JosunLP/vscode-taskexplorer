@@ -1,11 +1,16 @@
 // @ts-check
 
 /**
- * @module wpbuild.exports.target
+ * @file exports/target.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../types").WebpackTarget} WebpackTarget */
+/** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
+/** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
 
 
 /**

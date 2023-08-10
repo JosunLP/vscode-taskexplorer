@@ -64,9 +64,9 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 		this.app.logger.write("build test suite", 1);
 		this.onCompilation(compilation);
 
-		const testsDir = join(this.app.paths.dist, "test");
+		const testsDir = join(this.app.rc.paths.dist, "test");
 		const globOptions = {
-			cwd: this.app.paths.build,
+			cwd: this.app.rc.paths.build,
 			absolute: true,
 			ignore: [ "**/node_modules/**", "**/.vscode*/**", "**/build/**", "**/dist/**", "**/res*/**", "**/doc*/**" ]
 		};
@@ -108,7 +108,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 			} catch {}
 		}
 
-		await this.execTsBuild(relative(this.app.paths.build, tsConfigFile), 2, testsDir, true);
+		await this.execTsBuild(relative(this.app.rc.paths.build, tsConfigFile), 2, testsDir, true);
 	}
 
 
@@ -119,7 +119,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 	//  */
 	// async types(_assets)
 	// {
-	// 	const bldDir = this.app.paths.build,
+	// 	const bldDir = this.app.rc.paths.build,
 	// 		  typesDir = join(bldDir, "types", "dist");
 	// 	this.app.logger.write("build types");
 	// 	if (!existsSync(typesDir))
@@ -142,7 +142,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 		let exitCode = null,
 			stdout = "", stderr = "";
 		const logger = this.app.logger,
-			  procPromise = exec(command, { cwd: this.app.paths.build, encoding: "utf8" }),
+			  procPromise = exec(command, { cwd: this.app.rc.paths.build, encoding: "utf8" }),
 			  child = procPromise.child;
 		child.stdout?.on("data", (data) => { stdout += data; });
 		child.stderr?.on("data", (data) => { stderr += data; });
@@ -174,7 +174,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 	/**
 	 * @function Executes a typescript build using the specified tsconfig
 	 * @private
-	 * @param {string} tsConfigFile Path to tsconfig file or dir, relative to `app.paths.build`
+	 * @param {string} tsConfigFile Path to tsconfig file or dir, relative to `app.rc.paths.build`
 	 * @param {number} identifier Unique group identifier to associate with the file path
 	 * @param {string} outputDir Output directory of build
 	 * @param {boolean} [alias] Write alias paths with ``

@@ -94,11 +94,10 @@
         }
     },
     "paths": {
-        "build": ".",
-        "cache": "node_modules/.cache/wpbuild",
         "dist": "dist",
         "distTests": "dist/test",
-        "temp": null
+        "src": "src",
+        "srcTests": "src/test"
     },
     "exports": {
         "cache": true,

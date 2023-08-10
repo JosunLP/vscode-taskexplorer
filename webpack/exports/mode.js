@@ -1,12 +1,16 @@
 // @ts-check
 
 /**
- * @module wpbuild.exports.mode
+ * @file exports/mode.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
+/** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
+/** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
 
 
 /**
@@ -15,7 +19,7 @@
  */
 const mode = (app) =>
 {
-	app.wpc.mode = getMode(app, app.argv);
+	app.wpc.mode = getMode(app.arge, app.argv);
 	if (!app.environment)
 	{
 		if (app.wpc.mode === "development") {
@@ -33,19 +37,19 @@ const mode = (app) =>
 
 /**
  * @function
- * @param {Partial<WpBuildApp>} app Webpack build environment
- * @param {WpBuildWebpackArgs} argv Webpack command line args
+ * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
+ * @param {WebpackRuntimeArgs} argv Webpack command line args
  * @returns {WebpackMode}
  */
-const getMode = (app, argv) =>
+const getMode = (env, argv) =>
 {
 	let mode = argv.mode;
 	if (!mode)
 	{
-		if (app.environment === "dev") {
+		if (env.environment === "dev") {
 			mode = "development";
 		}
-		else if (app.environment === "test" || app.build === "tests") {
+		else if (env.environment === "test" || env.build === "tests") {
 			mode = "none";
 		}
 		else {

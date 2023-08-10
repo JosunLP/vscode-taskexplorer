@@ -6,22 +6,22 @@
     "publicInfoProject": true,
     "builds": {
         "dev": [
-            { "build": "extension", "environment": "dev", "mode": "development" },
-            { "build": "webview", "environment": "dev", "mode": "development" }
+            { "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
+            { "build": "webview", "environment": "dev", "mode": "development", "target": "webworker" }
         ],
         "testprod": [
-            { "build": "extension", "environment": "prod", "mode": "production" },
-            { "build": "webview", "environment": "prod", "mode": "production" },
-            { "build": "tests", "environment": "test", "mode": "none" }
+            { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
+            { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" },
+            { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
         ],
         "prod": [
-            { "build": "extension", "environment": "prod", "mode": "production" },
-            { "build": "webview", "environment": "prod", "mode": "production" }
+            { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
+            { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" }
         ],
         "test": [
-            { "build": "extension", "environment": "test", "mode": "none" },
-            { "build": "webview", "environment": "dev", "mode": "none" },
-            { "build": "tests", "environment": "test", "mode": "none" }
+            { "build": "extension", "environment": "test", "mode": "none", "target": "node" },
+            { "build": "webview", "environment": "dev", "mode": "none", "target": "webworker" },
+            { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
         ]
     },
     "modules": {
@@ -32,36 +32,34 @@
         "webview": "webworker"
     },
     "environment": {
-        "baseDir": "src",
         "dev": {
             "color": "yellow",
             "build": [
-                { "build": "extension" },
-                { "build": "webview" }
+                { "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
+                { "build": "webview", "environment": "dev", "mode": "development", "target": "webworker" }
             ]
         },
         "testprod":  {
             "color": "yellow",
             "build": [
-                { "build": "extension", "environment": "prod " },
-                { "build": "webview", "environment": "prod " },
-                { "build": "tests" }
+                { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
+                { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" },
+                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
             ]
         },
         "prod":  {
             "color": "yellow",
             "build": [
-                { "build": "extension" },
-                { "build": "webview" }
+                { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
+                { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" }
             ]
         },
         "test":  {
-            "baseDir": "src/test",
             "color": "yellow",
             "build": [
-                { "build": "extension" },
-                { "build": "webview", "environment": "dev "},
-                { "build": "tests" }
+                { "build": "extension", "environment": "test", "mode": "none", "target": "node" },
+                { "build": "webview", "environment": "dev", "mode": "none", "target": "webworker" },
+                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
             ]
         }
     },
@@ -94,11 +92,10 @@
         }
     },
     "paths": {
-        "build": ".",
-        "cache": "node_modules/.cache/wpbuild",
         "dist": "dist",
         "distTests": "dist/test",
-        "temp": null
+        "src": "src",
+        "srcTests": "src/test"
     },
     "exports": {
         "cache": true,

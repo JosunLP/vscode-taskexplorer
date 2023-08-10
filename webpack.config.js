@@ -24,42 +24,41 @@
  */
 
 
-const { environment, globalEnv, merge, WpBuildRc } = require("./webpack/utils");
+const { globalEnv, WpBuildApp } = require("./webpack/utils");
 const {
 	cache, context, devtool, entry, experiments, externals, ignorewarnings, minification,
-	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch, getMode
+	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch
 } = require("./webpack/exports");
 
-/** @typedef {import("./webpack/types").WpBuildApp} WpBuildApp */
 /** @typedef {import("./webpack/types").WebpackMode} WebpackMode */
 /** @typedef {import("./webpack/types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("./webpack/types").WpBuildModule} WpBuildModule */
 /** @typedef {import("./webpack/types").WebpackConfig} WebpackConfig */
 /** @typedef {import("./webpack/types").WebpackTarget} WebpackTarget */
+/** @typedef {import("./webpack/types").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("./webpack/types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("./webpack/types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("./webpack/types").WpBuildWebpackConfig} WpBuildWebpackConfig */
-/** @typedef {import("./webpack/types").WebpackRuntimeEnvArgs} WebpackRuntimeEnvArgs */
+/** @typedef {import("./webpack/types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
 /** @typedef {import("./webpack/types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
 
 
 /**
  * Export Webpack build config<WebpackConfig>(s)
  *
- * @param {WebpackRuntimeEnvArgs} env Environment variable containing runtime options passed
+ * @param {WpBuildRuntimeEnvArgs} env Environment variable containing runtime options passed
  * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`).
  * @param {WebpackRuntimeArgs} argv Webpack command line args
  * @returns {WebpackConfig|WebpackConfig[]}
  */
 module.exports = (env, argv) =>
 {
-	const mode = getMode(env, argv),
-		  rc = new WpBuildRc(mode, argv, env);
+	const app = new WpBuildApp(argv, env);
 	if (env.build) {
-		return buildConfig(getApp(mode, env, argv));
+		return buildConfig(new WpBuildApp(argv, env));
 	}
-	const envMode = env.environment || (mode === "development" ? "dev" : (mode === "production" ? "prod" : "test"));
-	return app.rc.builds[envMode].map(b => buildConfig(getApp(mode, env, argv, b)));
+	const envMode = env.environment || (app.wpc.mode === "development" ? "dev" : (app.wpc.mode === "production" ? "prod" : "test"));
+	return app.rc.builds[envMode].map(build => buildConfig(new WpBuildApp(argv, env, /** @type {WpBuildRcBuild} */(build))));
 };
 
 
@@ -71,7 +70,6 @@ module.exports = (env, argv) =>
 const buildConfig = (app) =>
 {
 	target(app);         // Target i.e. "node", "webworker", "web"
-	environment(app);    // Environment properties, e.g. paths, etc
 	write(app);          // Log build start after target and env is known
 	mode(app);           // Mode i.e. "production", "development", "none"
 	name(app);           // Build name / label
@@ -92,17 +90,6 @@ const buildConfig = (app) =>
 	plugins(app);        // Plugins - exports.plugins() inits all plugin.plugins
 	return app.wpc;
 };
-
-
-/**
- * @function
- * @param {WebpackMode} mode Webpack build environment
- * @param {WebpackRuntimeEnvArgs} env Webpack build environment
- * @param {WebpackRuntimeArgs} argv Webpack command line args
- * @param {Record<string, any>} [opts] Additional options too apply to WpBuildEnvironment
- * @returns {WpBuildApp}
- */
-const getApp = (mode, env, argv, opts) =>  new WpBuildRc(mode, argv, env);
 
 
 /**

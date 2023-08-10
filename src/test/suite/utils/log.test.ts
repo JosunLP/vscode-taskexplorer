@@ -115,7 +115,7 @@ console.log("------------T 4");
 			teWrapper.config.updateWs(teWrapper.keys.Config.LogEnable, true);
 			await waitForEvent(eventEmit.event);
 			clearOverrideShowInfoBox();
-console.log("------------T 5");
+console.log("------------T 55555");
 		}
 		finally {
 			await teWrapper.config.updateWs(teWrapper.keys.Config.LogEnableModuleReload, false);

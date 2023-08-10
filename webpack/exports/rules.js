@@ -35,7 +35,7 @@ const rules = (app) =>
 		},
 		{
 			exclude: /\.d\.ts$/,
-			include: path.join(app.paths.build, "src"),
+			include: path.join(app.rc.paths.build, "src"),
 			test: /\.tsx?$/,
 			use: [ app.esbuild ?
 			{
@@ -44,12 +44,12 @@ const rules = (app) =>
 					implementation: esbuild,
 					loader: "tsx",
 					target: "es2020",
-					tsconfigRaw: getTsConfig(app, path.join(app.paths.base, "tsconfig.json")),
+					tsconfigRaw: getTsConfig(app, path.join(app.rc.paths.base, "tsconfig.json")),
 				},
 			} : {
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(app.paths.base, "tsconfig.json"),
+					configFile: path.join(app.rc.paths.base, "tsconfig.json"),
 					// experimentalWatchApi: true,
 					transpileOnly: true,
 				},
@@ -79,11 +79,11 @@ const rules = (app) =>
 	}
 	else if (app.build === "tests")
 	{
-		const testsRoot = path.join(app.paths.build, "src", "test");
+		const testsRoot = path.join(app.rc.paths.build, "src", "test");
 		app.wpc.module.rules.push(...[
 		{
 			test: /index\.js$/,
-			include: path.join(app.paths.build, "node_modules", "nyc"),
+			include: path.join(app.rc.paths.build, "node_modules", "nyc"),
 			loader: "string-replace-loader",
 			options: {
 				search: "selfCoverageHelper = require('../self-coverage-helper')",
@@ -111,7 +111,7 @@ const rules = (app) =>
 	{
 		app.wpc.module.rules.push({
 			test: /\.ts$/,
-			include: path.join(app.paths.build),
+			include: path.join(app.rc.paths.build),
 			exclude: [
 				/node_modules/, /test[\\/]/, /\.d\.ts$/
 			],
@@ -123,14 +123,14 @@ const rules = (app) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						app, path.join(app.paths.build, "types", "tsconfig.json"),
+						app, path.join(app.rc.paths.build, "types", "tsconfig.json"),
 					)
 				}
 			} :
 			{
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(app.paths.build, "types", "tsconfig.json"),
+					configFile: path.join(app.rc.paths.build, "types", "tsconfig.json"),
 					// experimentalWatchApi: true,
 					transpileOnly: true
 				}
@@ -143,7 +143,7 @@ const rules = (app) =>
 		app.wpc.module.rules.push({
 			test: /\.ts$/,
 			issuerLayer: "release",
-			include: path.join(app.paths.build, "src"),
+			include: path.join(app.rc.paths.build, "src"),
 			loader: "string-replace-loader",
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
@@ -197,7 +197,7 @@ const rules = (app) =>
 		{
 			test: /wrapper\.ts$/,
 			issuerLayer: "release",
-			include: path.join(app.paths.build, "src", "lib"),
+			include: path.join(app.rc.paths.build, "src", "lib"),
 			loader: "string-replace-loader",
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
@@ -209,7 +209,7 @@ const rules = (app) =>
 		},
 		{
 			test: /\.ts$/,
-			include: path.join(app.paths.build, "src"),
+			include: path.join(app.rc.paths.build, "src"),
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
 			],
@@ -221,14 +221,14 @@ const rules = (app) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						app, path.join(app.paths.build, `tsconfig.${app.target}.json`),
+						app, path.join(app.rc.paths.build, `tsconfig.${app.target}.json`),
 					)
 				}
 			} :
 			{
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(app.paths.build, `tsconfig.${app.target}.json`),
+					configFile: path.join(app.rc.paths.build, `tsconfig.${app.target}.json`),
 					experimentalWatchApi: true,
 					transpileOnly: true
 				}

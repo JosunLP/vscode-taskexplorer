@@ -477,7 +477,6 @@ console.log("------------installDebugSupport 1");
             // Make a copy of the release modules currently in the runtime directory if not
             // already saved to the configured storage directory
             //
-            /* istanbul ignore next */
             doSwap = (swap === true && isCurrentlyDbg) || swap === undefined;
             storageFilePath = join(dbgModuleStorageDir, this._moduleInfo.file);
             await execIf(
@@ -496,7 +495,7 @@ console.log("------------installDebugSupport 2");
                 const cpFile = !enable ? releaseFileNoHash : debugFileNoHash;
                 await copyFile(join(dbgModuleStorageDir, cpFile), join(this._moduleInfo.dir, releaseFileNoHash));
             }
-console.log("------------installDebugSupport 1");
+console.log("------------installDebugSupport 3");
         },
         [ this._error, "Unable to install logging supprt" ], this);
     };

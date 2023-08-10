@@ -18,19 +18,25 @@
  */
 
 import { WpBuildConsoleLogger } from "../utils";
-import { WpBuildRc, WpBuildEnvironment, WpBuildModule } from "./wpbuild";
-import { WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackRuntimeArgs, WebpackTarget } from "./webpack"
+import { WpBuildRc, WpBuildEnvironment, WpBuildModule, WpBuildRcPaths, WpBuildRcBuild } from "./wpbuild";
+import { WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackRuntimeArgs, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode } from "./webpack"
 
 
 declare type Disposable = Required<{ dispose: () => void | PromiseLike<void>; }>;
 
-declare interface IWpBuildWebpackConfig extends WebpackConfig
-{
+declare type WpBuildConfig = {
     mode: WebpackMode;
     entry: WebpackEntry;
     output: WebpackOutput;
-}
-declare type WpBuildWebpackConfig = IWpBuildWebpackConfig;
+};
+declare type WpBuildWebpackConfig = Omit<WebpackConfig, WpBuildConfig> & WpBuildConfig;
+
+declare type WpBuildRuntimeEnvArgs =
+{
+    build: WpBuildModule;
+    environment: WpBuildEnvironment;
+    mode: WebpackMode;
+} & WebpackRuntimeEnvArgs;
 
 declare interface IWpBuildGlobalEnvironment
 {
@@ -41,21 +47,11 @@ declare interface IWpBuildGlobalEnvironment
 }
 declare type WpBuildGlobalEnvironment = IWpBuildGlobalEnvironment & Record<string, any>;
 
-declare interface IWpBuildPaths
-{
+declare type WpBuildPaths = {
     base: string;                         // context base dir path
     build: string;                        // base/root level dir path of project
-    dist: string;                         // output directory ~ wpConfig.output.path ~ compiler.options.output.path
-    distTests: string;                    // output directory ~ wpConfig.output.path ~ compiler.options.output.path
     temp: string;                         // operating system temp directory
-}
-declare type WpBuildPaths = Required<IWpBuildPaths> & Record<string, any>;
-
-declare interface IWpBuildRuntimeVariables
-{
-    contentHash: Record<string, string>
-}
-declare type WpBuildRuntimeVariables = Required<IWpBuildRuntimeVariables>;
+} & WpBuildRcPaths;
 
 declare const __WPBUILD__: WpBuildRuntimeVariables;
 
@@ -64,6 +60,7 @@ declare interface IWpBuildApp
     analyze: boolean;                     // parform analysis after build
     rc: WpBuildRc;                      // target js app info
     argv: WebpackRuntimeArgs,
+    arge: WpBuildRuntimeEnvArgs,
     build: WpBuildModule;
     clean: boolean;
     disposables: Array<Disposable>;
@@ -94,7 +91,7 @@ export {
     WpBuildModule,
     WpBuildPaths,
     WpBuildGlobalEnvironment,
-    WpBuildRuntimeVariables,
+    WpBuildRuntimeEnvArgs,
     WpBuildVsCodeBuild,
     WpBuildWebpackConfig,
     __WPBUILD__

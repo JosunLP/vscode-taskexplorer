@@ -12,17 +12,16 @@
 const WpBuildPlugin = require("./base");
 const { globalEnv } = require("../utils/global");
 
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
 /**
  * @class WpBuildDisposePlugin
  */
-class WpBuildENvironmentPlugin extends WpBuildPlugin
+class WpBuildEnvironmentPlugin extends WpBuildPlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -67,8 +66,8 @@ class WpBuildENvironmentPlugin extends WpBuildPlugin
 			  pad = app.rc.log.pad.value;
 
 		logger.write("Build Environment:", 1, "", 0, logger.colors.white);
-		Object.keys(app).filter(k => typeof app[k] !== "object").forEach(
-			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${app[k]}`, 1)
+		Object.keys(app.argv.env).filter(k => typeof app.argv.env[k] !== "object").forEach(
+			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${app.argv.env[k]}`, 1)
 		);
 
 		logger.write("Global Environment:", 1, "", 0, logger.colors.white);
@@ -110,9 +109,9 @@ class WpBuildENvironmentPlugin extends WpBuildPlugin
 
 /**
  * @param {WpBuildApp} app
- * @returns {WpBuildENvironmentPlugin | undefined}
+ * @returns {WpBuildEnvironmentPlugin | undefined}
  */
-const environment = (app) => app.rc.plugins.environment && app.environment === "prod" ? new WpBuildENvironmentPlugin({ app }) : undefined;
+const environment = (app) => app.rc.plugins.environment && app.environment === "prod" ? new WpBuildEnvironmentPlugin({ app }) : undefined;
 
 
 module.exports = environment;

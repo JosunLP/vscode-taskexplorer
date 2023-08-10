@@ -33,7 +33,7 @@ const html = (name, app) =>
 		plugin = new HtmlPlugin(
 		{
 			chunks: [ name, wwwName ],
-			filename: posix.join(app.paths.build, "res", "page", `${wwwName}.html`),
+			filename: posix.join(app.rc.paths.build, "res", "page", `${wwwName}.html`),
 			inject: true,
 			inlineSource: app.wpc.mode === "production" ? ".css$" : undefined,
 			// inlineSource: undefined,

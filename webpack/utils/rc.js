@@ -10,6 +10,7 @@
  */
 
 const JSON5 = require("json5");
+const WpBuildApp = require("./app");
 const { readFileSync } = require("fs");
 const gradient = require("gradient-string");
 const { resolve, basename } = require("path");
@@ -20,6 +21,7 @@ const { merge, WpBuildError, findFilesSync, apply } = require("./utils");
 /** @typedef {import("../types").IWpBuildRc} IWpBuildRc */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
+/** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
 /** @typedef {import("../types").WpBuildRcBuilds} WpBuildRcBuilds */
 /** @typedef {import("../types").WpBuildRcVsCode} WpBuildRcVsCode */
 /** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
@@ -86,6 +88,12 @@ class WpBuildRc
      */
     name;
     /**
+     * @member {WpBuildRcPaths} paths
+     * @memberof WpBuildRc.prototype
+     * @type {WpBuildRcPaths}
+     */
+    paths;
+    /**
      * @member {WpBuildRcPackageJson} pkgJson
      * @memberof WpBuildRc.prototype
      * @type {WpBuildRcPackageJson}
@@ -119,14 +127,12 @@ class WpBuildRc
 
     /**
      * @class WpBuildRc
-     * @param {WebpackMode} mode Webpack command line args
-     * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
-     * @param {WebpackRuntimeEnvArgs} env Webpack build environment
+     * @param {WpBuildApp} app
      */
-    constructor(mode, argv, env)
+    constructor(app)
     {
-        apply(this, merge(this.wpBuildRc(), env, { pkgJson: this.packageJson() }));
-        this.printBanner(mode,argv, env);
+        apply(this, merge(this.wpBuildRc(), { pkgJson: this.packageJson() }));
+        this.printBanner(app);
     };
 
 
@@ -200,22 +206,20 @@ class WpBuildRc
      * @function
      * @private
      * @member printBanner
-     * @param {WebpackMode} mode Webpack co
-     * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
-     * @param {WebpackRuntimeEnvArgs} env Webpack build environment
+     * @param {WpBuildApp} app
      */
-    printBanner = (mode, argv, env) =>
+    printBanner = (app) =>
     {
-        const logger = new WpBuildConsoleLogger(argv, env);
+        const logger = new WpBuildConsoleLogger(app);
         this.printLineSep(logger);
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
         console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
         this.printLineSep(logger);
         logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.bannerNameDetailed} Webpack Build`));
         this.printLineSep(logger);
-        logger.write("   Mode  : " + logger.withColor(mode, logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Mode  : " + logger.withColor(app.wpc.mode, logger.colors.grey), 1, "", 0, logger.colors.white);
         logger.write("   Argv  : " + logger.withColor(JSON.stringify(app.argv), logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Env   : " + logger.withColor(JSON.stringify(env), logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Env   : " + logger.withColor(JSON.stringify(app.argv.env), logger.colors.grey), 1, "", 0, logger.colors.white);
         this.printLineSep(logger);
     };
 

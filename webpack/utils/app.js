@@ -16,17 +16,21 @@ const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
 const { join, resolve, isAbsolute } = require("path");
 const { mergeIf, apply, isString, merge } = require("./utils");
+const { getMode } = require("../exports");
 
 
 /** @typedef {import("../types").Disposable} Disposable */
+/** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").IWpBuildApp} IWpBuildApp */
 /** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("../types").WpBuildModule} WpBuildModule */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
+/** @typedef {import("../types").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
+/** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
 /** @typedef {import("../types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
 
 
@@ -42,6 +46,12 @@ class WpBuildApp
      * @type {boolean}
      */
     analyze;
+    /**
+     * @member {WpBuildRuntimeEnvArgs} argv
+     * @memberof WpBuildApp.prototype
+     * @type {WpBuildRuntimeEnvArgs}
+     */
+    arge;
     /**
      * @member {WebpackRuntimeArgs} argv
      * @memberof WpBuildApp.prototype
@@ -165,144 +175,145 @@ class WpBuildApp
 
 
 	/**
-	 * @class WpBuildApps
-	 * @param {WpBuildApp} app Webpack build environment
+	 * @class WpBuildApp
+	 * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
+	 * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
+	 * @param {WpBuildRcBuild} [build]
 	 */
-	constructor(app)
+	constructor(argv, env, build)
 	{
-		this.setBuildEnvironment(app);
-		this.setGlobalEnvironment(app);
+		merge(this, this.wpApp(argv, env, build));
+		globalEnv.verbose = !!this.verbosity && this.verbosity !== "none";
 	}
 
 
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
+	 * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
+	 * @param {WpBuildRcBuild} [build]
+	 * @returns {WpBuildApp}
 	 * @throws {WebpackError}
 	 */
-	setBuildEnvironment = (app) =>
+	wpApp = (argv, env, build) =>
 	{
-		const logger = app.logger = new WpBuildConsoleLogger(app);
+		/** @type {WpBuildApp} */
+		const app = this;
+
+		Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
+		{
+			env[k] = env[k].toLowerCase() === "true"; // convert any string value `true` or `false` to actual boolean type
+		});
+
+		apply(app,
+		{
+			...env,
+			...build,
+			argv,
+			arge: env,
+			global: globalEnv,
+			disposables: [],
+			wpc: {
+				entry: {},
+				mode: getMode(env, argv),
+				output: {}
+			}
+		},
+		{
+			analyze: false,
+			clean: false,
+			esbuild: false,
+			imageOpt: true,
+			target: "node",
+			verbosity: undefined
+		});
+
+		this.logger = new WpBuildConsoleLogger(app);
 
 		if (!app.environment)
 		{
-			if (app.wpc.mode === "development" || app.argv.mode === "development") {
+			if (app.wpc.mode === "development" || argv.mode === "development") {
 				app.environment = "dev";
 			}
-			else if (app.wpc.mode === "production" || app.argv.mode === "production") {
+			else if (app.wpc.mode === "production" || argv.mode === "production") {
 				app.environment = "prod";
 			}
-			else if (app.wpc.mode === "none" || app.argv.mode === "none") {
+			else if (app.wpc.mode === "none" || argv.mode === "none") {
 				app.environment = "test";
 			}
 			else {
 				const eMsg = "Could not detect build environment";
-				logger.error("Could not detect build environment");
+				this.logger.error("Could not detect build environment");
 				throw new WebpackError(eMsg);
 			}
 		}
 
-		mergeIf(app, {
-			analyze: false,
-			clean: false,
-			disposables: [],
-			esbuild: false,
-			imageOpt: true,
-			isTests: app.environment.startsWith("test"),
+		this.rc = new WpBuildRc(app);
+
+		merge(app, {
+			isTests: this.environment.startsWith("test"),
 			isWeb: app.target.startsWith("web"),
 			isMain: app.build === "extension" || app.build === "web",
 			isMainProd: (app.build === "extension" || app.build === "web") && app.environment === "prod",
-			isMainTests: (app.build === "extension" || app.build === "web") && app.environment.startsWith("test"),
-			global: globalEnv,
-			paths: this.getPaths(app),
-			preRelease: true,
-			target: /** @type {WebpackTarget} */("node"),
-			verbosity: undefined
+			isMainTests: (app.build === "extension" || app.build === "web") && app.environment.startsWith("test")
 		});
 
-		Object.keys(app).filter(k => typeof app[k] === "string" && /(?:true|false)/i.test(app[k])).forEach((k) =>
-		{
-			app[k] = app[k].toLowerCase() === "true"; // convert any string value `true` or `false` to actual boolean type
-		});
+		app.paths = this.getPaths(app);
+
+		return app;
 	};
 
 
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
-	 */
-	setGlobalEnvironment = (app) =>
-	{
-		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
-	};
-
-
-	/**
-	 * @function
-	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {WpBuildApp} app
 	 * @returns {WpBuildPaths}
 	 */
 	getPaths = (app) =>
 	{
-		const wvBase = app.rc.vscode.webview.baseDir,
-			build = resolve(__dirname, "..", ".."),
-			temp = resolve(process.env.TEMP || process.env.TMP  || "dist", app.rc.name, app.environment);
+		const paths = /** @type {WpBuildPaths} */({}),
+			  wvBase = app.rc.vscode.webview.baseDir,
+			  baseDir = resolve(__dirname, "..", ".."),
+			  temp = resolve(process.env.TEMP || process.env.TMP  || "dist", app.rc.name, app.environment);
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
 		}
-		return merge(
+		return this.resolveRcPaths(baseDir, merge(paths, { ...this.rc.paths },
 		{
-			build, temp,
-			base: app.build !== "webview" ? build : (wvBase ? resolve(build, wvBase) :
-														join(build, "src", "webview", "app")),
-			// base: app.build !== "webview" && app.build !== "tests" ? build :
-			// 			(app.build === "webview" ? (wvBase ? resolve(build, wvBase) : join(build, "src", "webview", "app")) :
-			// 			join(build, "dist", "test")),
-			dist: join(build, "dist"), // = compiler.outputPath = compiler.options.output.path
-			distTests: join(build, "dist", "test"),
-			cache: globalEnv.cacheDir
-		}, this.resolveRcPaths(build, app.paths || {}));
+			temp,
+			build: baseDir,
+			base: app.build !== "webview" ? baseDir : (wvBase ? resolve(baseDir, wvBase) :
+													  join(baseDir, "src", "webview", "app"))
+		}));
 	};
 
 
 	/**
 	 * @function
 	 * @private
-	 * @param {string} dir
+	 * @param {string} baseDir
 	 * @param {WpBuildPaths} paths
 	 * @returns {WpBuildPaths}
 	 */
-	resolveRcPaths = (dir, paths) =>
+	resolveRcPaths = (baseDir, paths) =>
 	{
 		Object.entries(paths).forEach((e) =>
 		{
 			if (isString(e[1], true))
 			{
 				if (!isAbsolute(e[1])) {
-					paths[e[0]] = resolve(dir, e[1]);
+					paths[e[0]] = resolve(baseDir, e[1]);
 				}
 			}
 			else {
 				delete paths[e[0]];
 			}
 		});
-		Object.entries(paths.files || {}).forEach((e) =>
-		{
-			if (isString(e[1], true))
-			{
-				if (!isAbsolute(e[1])) {
-					paths.files[e[0]] = resolve(dir, e[1]);
-				}
-			}
-			else {
-				delete paths.files[e[0]];
-			}
-		});
-		return apply({}, paths, { files: { ...paths.files }});
+		return paths;
 	};
+
 
 }
 

@@ -74,13 +74,13 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
 		// the existing contents of the dist directory.  By default it's current assets list
 		// is empty, and thus will not work across IDE restarts
 		//
-		const copyPlugin = join(this.app.paths.build, "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
+		const copyPlugin = join(this.app.rc.paths.build, "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
 		if (existsSync(copyPlugin))
 		{
 			let content = readFileSync(copyPlugin, "utf8").replace(/currentAssets = \[ "[\w"\., _\-]+" \]/, "currentAssets = []");
-			if (existsSync(this.app.paths.dist))
+			if (existsSync(this.app.rc.paths.dist))
 			{
-				const distFiles = `"${readdirSync(this.app.paths.dist).map(f => basename(f)).join("\", \"")}"`;
+				const distFiles = `"${readdirSync(this.app.rc.paths.dist).map(f => basename(f)).join("\", \"")}"`;
 				content = content.replace("currentAssets = []", `currentAssets = [ ${distFiles} ]`);
 			}
 			writeFileSync(copyPlugin, content);

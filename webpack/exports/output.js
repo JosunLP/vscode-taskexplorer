@@ -30,7 +30,7 @@ const output = (app) =>
 		apply(app.wpc.output,
 		{
 			clean: app.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
-			path: join(app.paths.build, "res"),
+			path: join(app.rc.paths.build, "res"),
 			publicPath: "#{webroot}/",
 			filename: (pathData, _assetInfo) =>
 			{
@@ -47,7 +47,7 @@ const output = (app) =>
 		apply(app.wpc.output,
 		{
 			clean: app.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			path: app.paths.distTests,
+			path: app.rc.paths.distTests,
 			filename: "[name].js",
 			libraryTarget: "umd",
 			umdNamedDefine: true
@@ -58,7 +58,7 @@ const output = (app) =>
 		apply(app.wpc.output,
 		{
 			clean: app.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			path: join(app.paths.build, "types", "dist"),
+			path: join(app.rc.paths.build, "types", "dist"),
 			filename: "[name].js",
 			// libraryTarget: "umd",
     		// umdNamedDefine: true,
@@ -70,7 +70,7 @@ const output = (app) =>
 		apply(app.wpc.output,
 		{
 			clean: app.clean === true ? (app.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
-			path: resolve(app.paths.dist, app.build === "web" ? "web" : "."),
+			path: resolve(app.rc.paths.dist, app.build === "web" ? "web" : "."),
 			filename: "[name].[contenthash].js",
 			libraryTarget: "commonjs2"
 		});
