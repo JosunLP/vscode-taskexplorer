@@ -4,7 +4,7 @@
 const WpBuildCache = require("./cache");
 const { globalEnv } = require("./global");
 const environment = require("./environment");
-const WpBuildApplication = require("./app");
+const WpBuildRc = require("./rc");
 const WpBuildConsoleLogger = require("./console");
 
 const {
@@ -16,5 +16,5 @@ const {
 module.exports = {
     apply, asArray, clone, environment, findFiles, findFilesSync, getTsConfig, globalEnv,
     isArray, isDate, isEmpty, isFunction, isObject, isObjectEmpty, isPrimitive, isPromise, isString,
-    merge, mergeIf, pick, pickBy, pickNot, WpBuildCache, WpBuildConsoleLogger, WpBuildError, WpBuildApplication
+    merge, mergeIf, pick, pickBy, pickNot, WpBuildCache, WpBuildConsoleLogger, WpBuildError, WpBuildRc
 };

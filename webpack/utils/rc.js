@@ -18,7 +18,6 @@ const { merge, WpBuildError, findFilesSync, apply } = require("./utils");
 
 
 /** @typedef {import("../types").IWpBuildRc} IWpBuildRc */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
 /** @typedef {import("../types").WpBuildRcBuilds} WpBuildRcBuilds */
@@ -36,90 +35,90 @@ const { merge, WpBuildError, findFilesSync, apply } = require("./utils");
  * @class
  * @implements {IWpBuildRc}
  */
-class WpBuildAppRc
+class WpBuildRc
 {
     /**
      * @member {string} bannerName
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {string}
      */
     bannerName;
     /**
      * @member {string} vscode
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {string}
      */
     bannerNameDetailed;
     /**
      * @member {WpBuildRcBuilds} builds
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {WpBuildRcBuilds}
      */
     builds;
     /**
      * @member {WpBuildRcLogColorMap} colors
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {WpBuildRcLogColorMap}
      */
     colors;
     /**
      * @member {string} displayName
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {string}
      */
     displayName;
     /**
      * @member {WpBuildRcExports} exports
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {WpBuildRcExports}
      */
     exports;
     /**
      * @member {WpBuildRcLog} log
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {WpBuildRcLog}
      */
     log;
     /**
      * @member {string} name
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {string}
      */
     name;
     /**
      * @member {WpBuildRcPackageJson} pkgJson
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {WpBuildRcPackageJson}
      */
     pkgJson;
     /**
      * @member {WpBuildRcPlugins} plugins
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {WpBuildRcPlugins}
      */
     plugins;
     /**
      * @member {string | boolean} publicInfoProject
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {string | boolean}
      */
     publicInfoProject;
     /**
      * @member {string} version
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {string}
      */
     version;
     /**
      * @member {WpBuildRcVsCode} vscode
-     * @memberof WpBuildRclication.prototype
+     * @memberof WpBuildRc.prototype
      * @type {WpBuildRcVsCode}
      */
     vscode;
 
 
     /**
-     * @class WpBuildRclication
+     * @class WpBuildRc
      * @param {WebpackMode} mode Webpack command line args
      * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
      * @param {WebpackRuntimeEnvArgs} env Webpack build environment
@@ -162,7 +161,7 @@ class WpBuildAppRc
      * @function
      * @private
      * @member
-     * @returns {WpBuildAppRc}
+     * @returns {WpBuildRc}
      * @throws {WpBuildError}
      */
     wpBuildRc = () =>
@@ -258,4 +257,4 @@ class WpBuildAppRc
 }
 
 
-module.exports = WpBuildAppRc;
+module.exports = WpBuildRc;

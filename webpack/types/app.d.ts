@@ -19,7 +19,7 @@
 
 import { WpBuildConsoleLogger } from "../utils";
 import { WpBuildRc, WpBuildEnvironment, WpBuildModule } from "./wpbuild";
-import { WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackTarget } from "./webpack"
+import { WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackRuntimeArgs, WebpackTarget } from "./webpack"
 
 
 declare type Disposable = Required<{ dispose: () => void | PromiseLike<void>; }>;
@@ -63,7 +63,7 @@ declare interface IWpBuildApp
 {
     analyze: boolean;                     // parform analysis after build
     rc: WpBuildRc;                      // target js app info
-    argv: WpBuildWebpackArgs,
+    argv: WebpackRuntimeArgs,
     build: WpBuildModule;
     clean: boolean;
     disposables: Array<Disposable>;
@@ -87,6 +87,7 @@ declare type WpBuildApp = IWpBuildApp;
 
 
 export {
+    Disposable,
     IWpBuildApp,
     WpBuildApp,
     WpBuildExportsFlags,
