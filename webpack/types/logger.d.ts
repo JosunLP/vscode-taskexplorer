@@ -13,8 +13,7 @@
  * 
  * @description
  *
- * Defined types for internal WpBuild module are prefixed with `WpBuild` (type)
- * and `IWpBuild` (interface) for convention.
+ * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
 import { WpBuildApp } from "./app";

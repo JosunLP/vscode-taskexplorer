@@ -13,8 +13,7 @@
  * 
  * @description
  *
- * Defined types for internal WpBuild module are prefixed with `WpBuild` (type)
- * and `IWpBuild` (interface) for convention.
+ * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
 import { IDisposable } from "./generic";
@@ -29,6 +28,7 @@ declare type WpBuildConfig = {
     mode: WebpackMode;
     entry: WebpackEntry;
     output: WebpackOutput;
+    target: WebpackTarget;
 };
 declare type WpBuildWebpackConfig = Omit<WebpackConfig, WpBuildConfig> & WpBuildConfig;
 

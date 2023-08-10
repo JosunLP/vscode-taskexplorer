@@ -13,14 +13,12 @@
  * 
  * @description
  *
- * Defined types for internal WpBuild module are prefixed with `WpBuild` (type)
- * and `IWpBuild` (interface) for convention.
+ * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
-import { WpBuildApp } from "./app";
 import { WpBuildLogTrueColor } from "./logger";
 import WpBuildRcDefault from "./.wpbuildrc.defaults.json";
-import { ConvertType, ConvertType2, ConvertType3, IDisposable, RequireKeys } from "./generic";
+import { ConvertType, ConvertType2, ConvertType3, IDisposable } from "./generic";
 
 
 // declare type WpBuildPluginTapOptionsCallbackType<T> = T extends ReturnType<IWpBuildPluginTapOptions["callback"]> ? X : never;
@@ -35,12 +33,8 @@ import { ConvertType, ConvertType2, ConvertType3, IDisposable, RequireKeys } fro
 //     stage?: WebpackCompilationHookStage;
 //     statsProperty?: string;
 // }
-/**
- * Defined types for this module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
- */
 
 declare type WpBuildRcBuild = { build: WpBuildModule; environment: WpBuildEnvironment; mode: WebpackMode; target: WebpackTarget; };
-// declare type WpBuildRcBuild = ConvertType4<typeof WpBuildRcDefault.builds.dev[0], [ "build", "environment", "mode", "target" ] [ "WpBuildModule", "WpBuildEnvironment", "WebpackMode", "WebpackTarget" ]>;
 declare type WpBuildRcBuildSet = WpBuildRcBuild[];
 declare type WpBuildRcBuilds =  ConvertType3<typeof WpBuildRcDefault.builds, WpBuildEnvironment, WpBuildRcBuildSet>;
 declare type WpBuildRcEnvironment = typeof WpBuildRcDefault.environment;
@@ -55,8 +49,7 @@ declare type WpBuildRcVsCode= typeof WpBuildRcDefault.vscode;
 declare type WpBuildRcLogColorBuilds = ConvertType<WpBuildRcLogColorsBuild, string, WpBuildLogTrueColor>;
 declare type WpBuildRcLogColorMap = ConvertType2<WpBuildRcLogColors & { builds: WpBuildRcLogColorBuilds }, string, WpBuildLogTrueColor, WpBuildRcLogColorsBuild, WpBuildRcLogColorBuilds>;
 
-declare interface IWpBuildPackageJson
-{
+declare type WpBuildRcPackageJson = {
     author?: string | { name: string, email?: string };
     description: string;
     displayName: string; 
@@ -65,10 +58,10 @@ declare interface IWpBuildPackageJson
     name: string;
     publisher: string;
     version: string;
-}
-declare type WpBuildRcPackageJson = IWpBuildPackageJson & Record<string, any>;
+};
 
 // declare type WpBuildModule = PartialSome<typeof WpBuildRcDefault.builds.dev[0], "environment" | "mode" | "target">;
+// declare type WpBuildMainModule = ExtractValue<WpBuildRc, "name">["name"];
 declare type WpBuildModule = keyof WpBuildRcModules;
 declare type WpBuildEnvironment= keyof WpBuildRcEnvironment;
 declare type WpBuildRcExport = keyof WpBuildRcExports;
@@ -91,8 +84,6 @@ declare class WpBuildRc implements IDisposable
     version: string;                      // app version (read from package.json)
     vscode: WpBuildRcVsCode
 };
-
-// declare type ModuleName = ExtractValue<WpBuildRc, "name">["name"];
 
 
 export {

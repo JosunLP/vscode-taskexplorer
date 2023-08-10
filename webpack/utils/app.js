@@ -215,7 +215,8 @@ class WpBuildApp
 			wpc: {
 				entry: {},
 				mode: getMode(env, argv),
-				output: {}
+				output: {},
+                target: "node"
 			}
 		},
 		{

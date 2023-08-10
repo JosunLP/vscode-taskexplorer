@@ -13,8 +13,7 @@
  * 
  * @description
  *
- * Defined types for internal WpBuild module are prefixed with `WpBuild` (type)
- * and `IWpBuild` (interface) for convention.
+ * Generic types and typings
  */
 
 declare type AsArray<T = any> = T extends any[] ? T : [T];

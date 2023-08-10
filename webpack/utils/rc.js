@@ -10,9 +10,9 @@
  */
 
 const JSON5 = require("json5");
-const { readFileSync } = require("fs");
-const { resolve, basename } = require("path");
-const { WpBuildError, findFilesSync, apply } = require("./utils");
+const { readFileSync, existsSync } = require("fs");
+const { resolve, basename, join, dirname } = require("path");
+const { WpBuildError, findFilesSync, apply, pickBy, pick } = require("./utils");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").IDisposable} IDisposable */
@@ -119,12 +119,37 @@ class WpBuildRc
     /**
      * @class WpBuildRc
      */
-    constructor()
-    {
-        apply(this, WpBuildRc.wpBuildRc());
-    };
+    constructor() { apply(this, this.readWpBuildRc()); };
+
 
     dispose = () => {};
+
+
+    /**
+     * @template T
+     * @function
+     * @private
+     * @param {string} file
+     * @param {string} dirPath
+     * @param {(...args: any[]) => T} [caller]
+     * @returns {{ path: string; data: T }}
+     * @throws {WpBuildError}
+     */
+    find = (file, dirPath = resolve(), caller) =>
+    {
+        const path = join(dirPath, file);
+        try {
+            return { path, data: JSON.parse(readFileSync(path, "utf8")) };
+        }
+        catch (error)
+        {
+            const parentDir = dirname(dirPath);
+            if (parentDir === dirPath) {
+                throw new WpBuildError(`Could not locate or parse '${basename(file)}', check existence and syntax`, "utils/rc.js");
+            }
+            return this.find(file, parentDir, caller);
+        }
+    };
 
 
     /**
@@ -133,23 +158,10 @@ class WpBuildRc
      * @returns {WpBuildRcPackageJson}
      * @throws {WpBuildError}
      */
-    packageJson = () =>
+    readPackageJson = () =>
     {
-        const isNodeModule = __dirname.includes("node_modules"),
-              basePath = isNodeModule ? resolve(__dirname, "..", "..", "..") : resolve(__dirname, "..", "..");
-        const files = findFilesSync("**/package.json", {
-            cwd: basePath, absolute: true, maxDepth: 2, nocase: true
-        });
-        if (files.length > 0)
-        {
-            try {
-                return JSON5.parse(readFileSync(files[0], "utf8"));
-            }
-            catch (e) {
-                throw new WpBuildError("Could not parse package.json, check syntax", "utils/app.js", e.message);
-            }
-        }
-        throw new WpBuildError("Could not locate package.json", "utils/app.js");
+        const pkgJson = this.find("package.json", resolve(__dirname, "..", ".."), this.readPackageJson);
+        return pick(pkgJson.data, "author", "description", "main", "module", "name", "version", "publisher");
     };
 
 
@@ -159,25 +171,11 @@ class WpBuildRc
      * @returns {WpBuildRc}
      * @throws {WpBuildError}
      */
-    wpBuildRc = () =>
+    readWpBuildRc = () =>
     {
-        const isNodeModule = __dirname.includes("node_modules"),
-              basePath = isNodeModule ? resolve(__dirname, "..", "..", "..") : resolve(__dirname, "..", "..");
-        const files = findFilesSync("**/{webpack,wpbuild}/{,.}wpbuildrc{,.json}", {
-            cwd: basePath, absolute: true, dot: true, maxDepth: 2, nocase: true
-        });
-        if (files.length > 0)
-        {
-            try {
-                const rc = JSON5.parse(readFileSync(files[0], "utf8"));
-                rc.pkgJson = this.packageJson();
-                return rc;
-            }
-            catch (e) {
-                throw new WpBuildError(`Could not parse wpbuild config file ${basename(files[0])}, check syntax`, "utils/app.js", e.message);
-            }
-        }
-        throw new WpBuildError("Could not locate a wpbuild config file", "utils/app.js");
+        const rcJson = this.find(".wpbuildrc.json", resolve(__dirname, ".."), this.readWpBuildRc),
+              defRcPath = resolve("../types/.wpbuildrc.defaults.json");
+        return apply(rcJson.data, { pkgJson: this.readPackageJson() }, JSON5.parse(readFileSync(defRcPath, "utf8")));
     };
 
 }

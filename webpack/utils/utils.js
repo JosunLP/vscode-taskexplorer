@@ -258,16 +258,17 @@ const mergeIf = (...destination) =>
 
 /**
  * @function
- * @template {Record<string, T>} T
- * @param {T} obj
+ * @template {{}} [O=Record<string, any>]
+ * @template {Record<string, any>} [T=Record<string, any>]
+ * @param {O} obj
  * @param {...string} keys
- * @returns {Partial<T>}
+ * @returns {T}
  */
 const pick = (obj, ...keys) =>
 {
     const ret = {};
     keys.forEach(key => { ret[key] = obj[key]; });
-    return ret;
+    return /** @type {T} */(ret);
 };
 
 
