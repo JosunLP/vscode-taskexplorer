@@ -15,10 +15,11 @@
  */
 
 const { existsSync } = require("fs");
+const WpBuildPlugin = require("./base");
 const { join, basename } = require("path");
 const { WebpackError } = require("webpack");
-const WpBuildPlugin = require("./base");
 const { spawnSync } = require("child_process");
+const { RegexTestsChunk } = require("../utils");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -83,7 +84,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
             await mkdir(toUploadPath);
         }
 
-        for (const chunk of Array.from(compilation.chunks).filter(c => c.canBeInitial()))
+        for (const chunk of Array.from(compilation.chunks).filter(c => c.canBeInitial() && c.name && !RegexTestsChunk.test(c.name)))
         {
             for (const file of Array.from(chunk.files).filter(f => this.matchObject(f)))
             {
@@ -114,6 +115,12 @@ class WpBuildUploadPlugin extends WpBuildPlugin
                 }
             }
         }
+        const filesToUpload = await readdir(toUploadPath);
+        if (filesToUpload.length === 0)
+        {
+            logger.write("no assets to upload", 1, "", logIcon);
+            return;
+        }
 
         const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
               user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
@@ -121,13 +128,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
               /** @type {import("child_process").SpawnSyncOptions} */
               spawnSyncOpts = { cwd: app.paths.build, encoding: "utf8", shell: true },
               sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
-              sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
-              filesToUpload = await readdir(toUploadPath);
-
-        if (filesToUpload.length === 0) {
-            logger.write("no assets to upload", 1, "", logIcon);
-            return;
-        }
+              sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG;
 
         if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag)
         {

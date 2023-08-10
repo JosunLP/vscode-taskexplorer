@@ -474,7 +474,7 @@ class WpBuildConsoleLogger
      * @param {WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
      */
     writeMsgTag = (msg, tagMsg, bracketColor, msgColor) =>
-        this.write(msg + "  " + this.tag(tagMsg, bracketColor, msgColor), 2, "", this.app?.rc.colors.default);
+        this.write(msg + "  " + this.tag(tagMsg, bracketColor, msgColor), 2, "", null, this.colors[this.app?.rc.colors.default || "grey"]);
 
 
     /**

@@ -17,3 +17,10 @@ const WpBuildBuildEnvironmentTypes = [ "dev" , "prod", "test", "testprod" ];
 module.exports = {
     WpBuildModuleTypes, WpBuildBuildEnvironmentTypes
 };
+
+const RegexTestsChunk = (/[a-z]+\.(?:tests?|specs?)$|[\/\\]tests?|suite[\/\\]/i);
+
+
+module.exports = {
+    RegexTestsChunk
+};

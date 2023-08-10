@@ -5,6 +5,7 @@ const WpBuildRc = require("./rc");
 const WpBuildApp = require("./app");
 const WpBuildCache = require("./cache");
 const WpBuildConsoleLogger = require("./console");
+const { RegexTestsChunk } = require("./constants");
 
 const {
     apply, asArray, clone, getTsConfig, merge, mergeIf, isArray, isDate, isEmpty, isFunction,
@@ -15,5 +16,5 @@ const {
 module.exports = {
     apply, asArray, clone, WpBuildApp, findFiles, findFilesSync, getTsConfig, isArray, isDate,
     isEmpty, isFunction, isObject, isObjectEmpty, isPrimitive, isPromise, isString, merge, mergeIf,
-    pick, pickBy, pickNot, WpBuildCache, WpBuildConsoleLogger, WpBuildError, WpBuildRc
+    pick, pickBy, pickNot, WpBuildCache, WpBuildConsoleLogger, WpBuildError, WpBuildRc, RegexTestsChunk
 };

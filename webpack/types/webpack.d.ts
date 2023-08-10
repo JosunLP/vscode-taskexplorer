@@ -6,7 +6,7 @@ import {
     Asset as WebpackAsset, AssetInfo as WebpackAssetInfo, AssetEmittedInfo as WebpackAssetEmittedInfo,
     Cache as WebpackCache, Chunk as WebpackChunk, Configuration as WebpackConfig, Compilation as WebpackCompilation,
     Compiler as WebpackCompiler, EntryObject as WebpackEntryObject, sources as WebpackSources, Stats as WebpackStats,
-    StatsAsset as WebpackStatsAsset, WebpackPluginInstance, ModuleOptions, RuleSetRule
+    StatsAsset as WebpackStatsAsset, WebpackPluginInstance, ModuleOptions, RuleSetRule, PathData as WebpackPathData
 } from "webpack"
 
 
@@ -105,6 +105,7 @@ export {
     WebpackLogger,
     WebpackMode,
     WebpackModuleOptions,
+    WebpackPathData,
     WebpackPluginInstance,
     WebpackLogLevel,
     WebpackOutput,

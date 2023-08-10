@@ -18,7 +18,7 @@
 
 import { WpBuildLogTrueColor } from "./logger";
 import WpBuildRcDefault from "./.wpbuildrc.defaults.json";
-import { ConvertType, ConvertType2, ConvertType3, IDisposable } from "./generic";
+import { ConvertType, ConvertType2, ConvertType3 } from "./generic";
 
 
 // declare type WpBuildPluginTapOptionsCallbackType<T> = T extends ReturnType<IWpBuildPluginTapOptions["callback"]> ? X : never;
@@ -37,7 +37,9 @@ import { ConvertType, ConvertType2, ConvertType3, IDisposable } from "./generic"
 declare type WpBuildRcBuild = { build: WpBuildModule; environment: WpBuildEnvironment; mode: WebpackMode; target: WebpackTarget; };
 declare type WpBuildRcBuildSet = WpBuildRcBuild[];
 declare type WpBuildRcBuilds =  ConvertType3<typeof WpBuildRcDefault.builds, WpBuildEnvironment, WpBuildRcBuildSet>;
-declare type WpBuildRcEnvironment = typeof WpBuildRcDefault.environment;
+// declare type WpBuildRcEnvironments = typeof WpBuildRcDefault.environment;
+declare type WpBuildRcEnvironments = WpBuildRcEnvironment[];
+declare type WpBuildRcEnvironment = ConvertType3<ConvertType3<typeof WpBuildRcDefault.environment["dev"], "overrides", WpBuildOverrides>, "builds", WpBuildRcBuildSet>;
 declare type WpBuildRcExports =  typeof WpBuildRcDefault.exports;
 declare type WpBuildRcLog= typeof WpBuildRcDefault.log;
 declare type WpBuildRcLogColors = typeof WpBuildRcDefault.colors;
@@ -60,10 +62,13 @@ declare type WpBuildRcPackageJson = {
     version: string;
 };
 
+declare type WpBuildRcOverrides = Record<keyof typeof WpBuildRcDefault, any>;
+declare type WpBuildRcOverride = keyof WpBuildRcOverrides;
+
 // declare type WpBuildModule = PartialSome<typeof WpBuildRcDefault.builds.dev[0], "environment" | "mode" | "target">;
 // declare type WpBuildMainModule = ExtractValue<WpBuildRc, "name">["name"];
 declare type WpBuildModule = keyof WpBuildRcModules;
-declare type WpBuildEnvironment= keyof WpBuildRcEnvironment;
+declare type WpBuildEnvironment= keyof typeof WpBuildRcDefault.environment;
 declare type WpBuildRcExport = keyof WpBuildRcExports;
 declare type WpBuildRcPlugin = keyof WpBuildRcPlugins;
 
@@ -73,6 +78,8 @@ export {
     WpBuildRcBuild,
     WpBuildRcBuilds,
     WpBuildRcBuildSet,
+    WpBuildRcEnvironment,
+    WpBuildRcEnvironments,
     WpBuildRcExport,
     WpBuildRcExports,
     WpBuildRcLog,

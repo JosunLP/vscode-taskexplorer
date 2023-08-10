@@ -16,7 +16,7 @@ const WpBuildConsoleLogger = require("./console");
 const { WpBuildError, apply, pick } = require("./utils");
 const { resolve, basename, join, dirname } = require("path");
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
@@ -27,6 +27,7 @@ const { resolve, basename, join, dirname } = require("path");
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
+/** @typedef {import("../types").WpBuildRcEnvironment} WpBuildRcEnvironment */
 /** @typedef {import("../types").WpBuildRcLogColorMap} WpBuildRcLogColorMap */
 /** @typedef {import("../types").WpBuildRcPackageJson} WpBuildRcPackageJson */
 /** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
@@ -62,6 +63,12 @@ class WpBuildRc
      * @type {string}
      */
     displayName;
+    /**
+     * @member {WpBuildRcEnvironment} environment
+     * @memberof WpBuildRc.prototype
+     * @type {WpBuildRcEnvironment}
+     */
+    environment;
     /**
      * @member {WpBuildRcExports} exports
      * @memberof WpBuildRc.prototype

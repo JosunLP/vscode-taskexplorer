@@ -6,64 +6,25 @@
     "publicInfoProject": true,
     "builds": {
         "dev": [
-            { "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
-            { "build": "webview", "environment": "dev", "mode": "development", "target": "webworker" }
+            { "build": "extension", "environment": "dev" },
+            { "build": "webview", "environment": "dev", "target": "webworker" }
         ],
         "testprod": [
-            { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-            { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" },
-            { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
+            { "build": "extension", "environment": "prod" },
+            { "build": "webview", "environment": "prod", "target": "webworker" },
+            { "build": "tests", "environment": "test" }
         ],
         "prod": [
-            { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-            { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" }
+            { "build": "extension" },
+            { "build": "webview", "target": "webworker" }
         ],
         "test": [
-            { "build": "extension", "environment": "test", "mode": "none", "target": "node" },
-            { "build": "webview", "environment": "dev", "mode": "none", "target": "webworker" },
-            { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
+            { "build": "extension", "environment": "test" },
+            { "build": "webview", "environment": "dev", "target": "webworker" }
         ]
     },
-    "modules": {
-        "extension": "node",
-        "tests": "node",
-        "types": "node",
-        "web": "web",
-        "webview": "webworker"
-    },
-    "environment": {
-        "dev": {
-            "color": "yellow",
-            "build": [
-                { "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
-                { "build": "webview", "environment": "dev", "mode": "development", "target": "webworker" }
-            ]
-        },
-        "testprod":  {
-            "color": "yellow",
-            "build": [
-                { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-                { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" },
-                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
-            ]
-        },
-        "prod":  {
-            "color": "yellow",
-            "build": [
-                { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-                { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" }
-            ]
-        },
-        "test":  {
-            "color": "yellow",
-            "build": [
-                { "build": "extension", "environment": "test", "mode": "none", "target": "node" },
-                { "build": "webview", "environment": "dev", "mode": "none", "target": "webworker" },
-                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
-            ]
-        }
-    },
-    "colors": {
+    "colors":
+    {
         "default": "grey",
         "buildBracket": "blue",
         "buildText": "white",
@@ -81,9 +42,88 @@
             "webview": "cyan"
         }
     },
-    "log": {
+    "environment":
+    {
+        "dev":
+        {
+            "builds": [
+                { "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
+                { "build": "webview", "environment": "dev", "mode": "development", "target": "webworker" }
+            ],
+            "overrides": {
+                "colors": {
+                    "buildBracket": "yellow"
+                }
+            }
+        },
+        "testprod":
+        {
+            "builds": [
+                { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
+                { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" },
+                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
+            ],
+            "overrides": {
+                "log": {
+                    "pad": {
+                        "value": 60
+                    }
+                }
+            }
+        },
+        "prod":
+        {
+            "builds": [
+                { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
+                { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" }
+            ],
+            "overrides": {
+                "colors": {
+                    "buildBracket": "yellow"
+                }
+            }
+        },
+        "test":
+        {
+            "builds": [
+                { "build": "extension", "environment": "test" },
+                { "build": "webview", "environment": "dev", "target": "webworker" }
+            ],
+            "overrides": {
+                "colors": {
+                    "buildBracket": "yellow"
+                },
+                "log": {
+                    "pad": {
+                        "value": 60
+                    }
+                }
+            }
+        },
+        "test2":
+        {
+            "disabled": true,
+            "build": [
+                { "build": "extension", "environment": "test", "mode": "none", "target": "node" },
+                { "build": "webview", "environment": "dev", "mode": "none", "target": "webworker" },
+                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
+            ],
+            "overrides": {
+                "colors": {
+                    "buildBracket": "yellow"
+                },
+                "log": {
+                    "pad": {
+                        "value": 60
+                    }
+                }
+            }
+        }
+    },
+    "log":
+    {
         "level": 3,
-        "valueMaxLineLength": 100,
+        "maxValueLineLength": 100,
         "pad": {
             "basePad": 0,
             "envTag": 22,
@@ -91,13 +131,22 @@
             "uploadFileName": 50
         }
     },
-    "paths": {
+    "modules": {
+        "extension": "node",
+        "tests": "node",
+        "types": "node",
+        "web": "web",
+        "webview": "webworker"
+    },
+    "paths":
+    {
         "dist": "dist",
         "distTests": "dist/test",
         "src": "src",
         "srcTests": "src/test"
     },
-    "exports": {
+    "exports":
+    {
         "cache": true,
         "context": true,
         "devtool": true,
@@ -117,7 +166,8 @@
         "target": true,
         "watch": true
     },
-    "plugins": {
+    "plugins":
+    {
         "analyze": true,
         "banner": true,
         "build": true,
@@ -141,7 +191,8 @@
         "vendormod": true,
         "wait": false
     },
-    "vscode": {
+    "vscode":
+    {
         "webview": {
             "baseDir": "src/webview/app",
             "apps": {
