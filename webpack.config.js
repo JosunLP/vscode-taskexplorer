@@ -24,98 +24,97 @@
  */
 
 
-const { environment, globalEnv, merge, app, WpBuildConsoleLogger } = require("./webpack/utils");
+const { environment, globalEnv, merge, WpBuildRc } = require("./webpack/utils");
 const {
 	cache, context, devtool, entry, experiments, externals, ignorewarnings, minification,
 	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch, getMode
 } = require("./webpack/exports");
 
 /** @typedef {import("./webpack/types").WpBuildApp} WpBuildApp */
-/** @typedef {import("./webpack/types").WpBuildAppRc} WpBuildAppRc */
+/** @typedef {import("./webpack/types").WebpackMode} WebpackMode */
 /** @typedef {import("./webpack/types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("./webpack/types").WpBuildModule} WpBuildModule */
 /** @typedef {import("./webpack/types").WebpackConfig} WebpackConfig */
 /** @typedef {import("./webpack/types").WebpackTarget} WebpackTarget */
 /** @typedef {import("./webpack/types").WpBuildEnvironment} WpBuildEnvironment */
-/** @typedef {import("./webpack/types").WpBuildWebpackArgs} WpBuildWebpackArgs */
+/** @typedef {import("./webpack/types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("./webpack/types").WpBuildWebpackConfig} WpBuildWebpackConfig */
+/** @typedef {import("./webpack/types").WebpackRuntimeEnvArgs} WebpackRuntimeEnvArgs */
 /** @typedef {import("./webpack/types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
 
 
 /**
  * Export Webpack build config<WebpackConfig>(s)
  *
- * @param {Partial<WpBuildEnvironment>} env Environment variable containing runtime options passed
+ * @param {WebpackRuntimeEnvArgs} env Environment variable containing runtime options passed
  * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`).
- * @param {WpBuildWebpackArgs} argv Webpack command line args
+ * @param {WebpackRuntimeArgs} argv Webpack command line args
  * @returns {WebpackConfig|WebpackConfig[]}
  */
 module.exports = (env, argv) =>
 {
 	const mode = getMode(env, argv),
-		  wpa = new app(mode, env);
+		  rc = new WpBuildRc(mode, argv, env);
 	if (env.build) {
-		return buildConfig(getEnv(env, wpa.rc, argv));
+		return buildConfig(getApp(mode, env, argv));
 	}
 	const envMode = env.environment || (mode === "development" ? "dev" : (mode === "production" ? "prod" : "test"));
-	return wpa.rc.builds[envMode].map(b => buildConfig(getEnv(env, wpa.rc, argv, b)));
+	return app.rc.builds[envMode].map(b => buildConfig(getApp(mode, env, argv, b)));
 };
 
 
 /**
  * @function Calls all exports.* default expoirts to construct a {@link WebpackConfig webpack build configuration}
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  * @returns {WebpackConfig}
  */
-const buildConfig = (env) =>
+const buildConfig = (app) =>
 {
-	target(env);         // Target i.e. "node", "webworker", "web"
-	environment(env);    // Environment properties, e.g. paths, etc
-	write(env);          // Log build start after target and env is known
-	mode(env);           // Mode i.e. "production", "development", "none"
-	name(env);           // Build name / label
-	cache(env);          // Asset cache
-	context(env);        // Context for build
-	experiments(env);    // Set any experimental flags that will be used
-	entry(env);          // Entry points for built output
-	externals(env);      // External modules
-	ignorewarnings(env); // Warnings from the compiler to ignore
-	optimization(env);   // Build optimization
-	minification(env);   // Minification / Terser plugin options
-	output(env);         // Output specifications
-	devtool(env);        // Dev tool / sourcemap control
-	resolve(env);        // Resolve config
-	rules(env);          // Loaders & build rules
-	stats(env);          // Stats i.e. console output & verbosity
-	watch(env);          // Watch-mode options
-	plugins(env);        // Plugins - exports.plugins() inits all plugin.plugins
-	return env.wpc;
+	target(app);         // Target i.e. "node", "webworker", "web"
+	environment(app);    // Environment properties, e.g. paths, etc
+	write(app);          // Log build start after target and env is known
+	mode(app);           // Mode i.e. "production", "development", "none"
+	name(app);           // Build name / label
+	cache(app);          // Asset cache
+	context(app);        // Context for build
+	experiments(app);    // Set any experimental flags that will be used
+	entry(app);          // Entry points for built output
+	externals(app);      // External modules
+	ignorewarnings(app); // Warnings from the compiler to ignore
+	optimization(app);   // Build optimization
+	minification(app);   // Minification / Terser plugin options
+	output(app);         // Output specifications
+	devtool(app);        // Dev tool / sourcemap control
+	resolve(app);        // Resolve config
+	rules(app);          // Loaders & build rules
+	stats(app);          // Stats i.e. console output & verbosity
+	watch(app);          // Watch-mode options
+	plugins(app);        // Plugins - exports.plugins() inits all plugin.plugins
+	return app.wpc;
 };
 
 
 /**
  * @function
- * @param {Partial<WpBuildEnvironment>} env Webpack build environment
- * @param {WpBuildAppRc} app
- * @param {WpBuildWebpackArgs} argv Webpack command line args
+ * @param {WebpackMode} mode Webpack build environment
+ * @param {WebpackRuntimeEnvArgs} env Webpack build environment
+ * @param {WebpackRuntimeArgs} argv Webpack command line args
  * @param {Record<string, any>} [opts] Additional options too apply to WpBuildEnvironment
- * @returns {WpBuildEnvironment}
+ * @returns {WpBuildApp}
  */
-const getEnv = (env, app, argv, opts) => /** @type {WpBuildEnvironment} */(
-	merge({ app, argv, wpc: /** @type {WebpackConfig} */({}) }, { ...env, ...(opts || {}) })
-);
+const getApp = (mode, env, argv, opts) =>  new WpBuildRc(mode, argv, env);
 
 
 /**
  * @function
- * @param {WpBuildEnvironment} env Webpack build environment
+ * @param {WpBuildApp} app Webpack build environment
  */
-const write = (env) =>
+const write = (app) =>
 {
-	const l = env.logger;
+	const l = app.logger;
 	l.value(
 		`Start Webpack build ${++globalEnv.buildCount}`,
-		l.tag(env.build, l.colors.cyan, l.colors.white) + " " + l.tag(env.target, l.colors.cyan, l.colors.white),
+		l.tag(app.build, l.colors.cyan, l.colors.white) + " " + l.tag(app.target, l.colors.cyan, l.colors.white),
 		undefined, undefined, l.icons.color.start, l.colors.white
 	);
 };
