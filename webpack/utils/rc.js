@@ -11,9 +11,7 @@
 
 const JSON5 = require("json5");
 const { readFileSync } = require("fs");
-const gradient = require("gradient-string");
 const { resolve, basename } = require("path");
-const WpBuildConsoleLogger = require("./console");
 const { WpBuildError, findFilesSync, apply } = require("./utils");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
@@ -120,12 +118,10 @@ class WpBuildRc
 
     /**
      * @class WpBuildRc
-     * @param {WpBuildApp} app
      */
-    constructor(app)
+    constructor()
     {
-        apply(this, this.wpBuildRc());
-        this.printBanner(app);
+        apply(this, WpBuildRc.wpBuildRc());
     };
 
     dispose = () => {};
@@ -134,7 +130,6 @@ class WpBuildRc
     /**
      * @function
      * @private
-     * @member
      * @returns {WpBuildRcPackageJson}
      * @throws {WpBuildError}
      */
@@ -161,7 +156,6 @@ class WpBuildRc
     /**
      * @function
      * @private
-     * @member
      * @returns {WpBuildRc}
      * @throws {WpBuildError}
      */
@@ -184,75 +178,6 @@ class WpBuildRc
             }
         }
         throw new WpBuildError("Could not locate a wpbuild config file", "utils/app.js");
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @member printLineSep
-     * @param {WpBuildConsoleLogger} logger
-     */
-    printLineSep = (logger) =>
-    {
-        logger.write("------------------------------------------------------------------------------------------------------------------------");
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @member printBanner
-     * @param {WpBuildApp} app
-     */
-    printBanner = (app) =>
-    {
-        const logger = new WpBuildConsoleLogger(app);
-        this.printLineSep(logger);
-        // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
-        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
-        this.printLineSep(logger);
-        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.detailedDisplayName} Webpack Build`));
-        this.printLineSep(logger);
-        logger.write("   Mode  : " + logger.withColor(app.wpc.mode, logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Argv  : " + logger.withColor(JSON.stringify(app.argv), logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Env   : " + logger.withColor(JSON.stringify(app.argv.env), logger.colors.grey), 1, "", 0, logger.colors.white);
-        this.printLineSep(logger);
-    };
-
-
-    // /**
-    //  * @function
-    //  * @private
-    //  * @member spmBanner
-    //  * @param {WpBuildConsoleLogger} logger
-    //  * @returns {string}
-    //  */
-    // const spmBanner = (app, version) =>
-    // {
-    //     return `        ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________
-    //       (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  )
-    //       \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ /
-    //     ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  /
-    //    (_____/|_|       | /       |_|   |_| (____/   ${version}   \\/
-    //                          |/${app.padStart(51 - app.length)}`;
-    // };
-
-
-    /**
-     * @function
-     * @private
-     * @member spmBanner
-     * @returns {string}
-     */
-    spmBanner = () =>
-    {
-        return `        ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
-          (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
-          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
-        ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-       (_____/|_|       | /       |_|   |_| (____/   ${this.version}  \\/ /        |/  \\:(           \\/           
-                        |/${this.displayName.padStart(50 - this.displayName.length)}`;
     };
 
 }

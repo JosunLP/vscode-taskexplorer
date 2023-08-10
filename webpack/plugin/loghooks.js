@@ -9,7 +9,6 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { globalEnv } = require("../utils");
 const WpBuildPlugin = require("./base");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -165,9 +164,9 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
 	writeBuildTag(hook)
 	{
 		const key = hook +this.app.wpc.name;
-		if (!globalEnv.hooksLog[key])
+		if (!this.app.global.hooksLog[key])
 		{
-			globalEnv.hooksLog[key] = true;
+			this.app.global.hooksLog[key] = true;
 			this.logger.valuestar("build stage hook", hook);
 		}
 	};

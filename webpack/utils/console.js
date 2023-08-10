@@ -1,8 +1,10 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable jsdoc/no-undefined-types */
 /* eslint-disable jsdoc/require-property-description */
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+const gradient = require("gradient-string");
 const { isString, isObject, isPrimitive } = require("./utils");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
@@ -342,6 +344,68 @@ class WpBuildConsoleLogger
      * @inheritdoc
      */
     log = this.write;
+
+
+    /**
+     * @function
+     * @private
+     */
+    printLineSep = () =>
+    {
+        this.write("------------------------------------------------------------------------------------------------------------------------");
+    };
+
+
+    /**
+     * @function
+     */
+    printBanner = () =>
+    {
+        this.printLineSep();
+        // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
+        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
+        this.printLineSep();
+        this.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.app.rc.detailedDisplayName} Webpack Build`));
+        this.printLineSep();
+        this.write("   Mode  : " + this.withColor(this.app.wpc.mode, this.colors.grey), 1, "", 0, this.colors.white);
+        this.write("   Argv  : " + this.withColor(JSON.stringify(this.app.argv), this.colors.grey), 1, "", 0, this.colors.white);
+        this.write("   Env   : " + this.withColor(JSON.stringify(this.app.argv.env), this.colors.grey), 1, "", 0, this.colors.white);
+        this.printLineSep();
+    };
+
+
+    // /**
+    //  * @function
+    //  * @private
+    //  * @member spmBanner
+    //  * @param {WpBuildConsoleLogger} logger
+    //  * @returns {string}
+    //  */
+    // const spmBanner = (app, version) =>
+    // {
+    //     return `        ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________
+    //       (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  )
+    //       \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ /
+    //     ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  /
+    //    (_____/|_|       | /       |_|   |_| (____/   ${version}   \\/
+    //                          |/${app.padStart(51 - app.length)}`;
+    // };
+
+
+    /**
+     * @function
+     * @private
+     * @returns {string}
+     */
+    spmBanner = () =>
+    {
+        return `        ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
+          (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
+          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
+        ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
+       (_____/|_|       | /       |_|   |_| (____/   ${this.app.rc.version}  \\/ /        |/  \\:(           \\/           
+                        |/${this.app.rc.displayName.padStart(50 - this.app.rc.displayName.length)}`;
+    };
 
 
     /**

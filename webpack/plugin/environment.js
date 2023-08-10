@@ -10,7 +10,6 @@
  */
 
 const WpBuildPlugin = require("./base");
-const { globalEnv } = require("../utils/global");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -71,8 +70,8 @@ class WpBuildEnvironmentPlugin extends WpBuildPlugin
 		);
 
 		logger.write("Global Environment:", 1, "", 0, logger.colors.white);
-		Object.keys(globalEnv).filter(k => typeof globalEnv[k] !== "object").forEach(
-			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${globalEnv[k]}`, 1)
+		Object.keys(app.global).filter(k => typeof app.global[k] !== "object").forEach(
+			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${app.global[k]}`, 1)
 		);
 
 		if (app.argv)

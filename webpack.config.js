@@ -28,8 +28,9 @@ const WpBuildApp = require("./webpack/utils/app");
 const { globalEnv } = require("./webpack/utils/global");
 const {
 	cache, context, devtool, entry, experiments, externals, ignorewarnings, minification,
-	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch
+	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch, getMode
 } = require("./webpack/exports");
+const { WpBuildRc } = require("./webpack/types");
 
 /** @typedef {import("./webpack/types").WebpackMode} WebpackMode */
 /** @typedef {import("./webpack/types").WpBuildPaths} WpBuildPaths */
@@ -54,12 +55,13 @@ const {
  */
 module.exports = (env, argv) =>
 {
-	const app = new WpBuildApp(argv, env);
+	const rc = new WpBuildRc();
 	if (env.build) {
-		return buildConfig(getApp(env, argv));
+		return buildConfig(new WpBuildApp(argv, env, rc, globalEnv));
 	}
-	const envMode = env.environment || (app.wpc.mode === "development" ? "dev" : (app.wpc.mode === "production" ? "prod" : "test"));
-	return app.rc.builds[envMode].map(build => buildConfig(getApp(env, argv, /** @type {WpBuildRcBuild} */(build))));
+	const mode = getMode(env, argv),
+		  envMode = env.environment || (mode === "development" ? "dev" : (mode === "production" ? "prod" : "test"));
+	return rc.builds[envMode].map(build => buildConfig(getApp(env, argv, rc, build)));
 };
 
 
@@ -97,10 +99,11 @@ const buildConfig = (app) =>
  * @function
  * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
  * @param {WebpackRuntimeArgs} argv Webpack command line args
+ * @param {WpBuildRc} rc Webpack command line args
  * @param {WpBuildRcBuild} [build]
  * @returns {WpBuildApp}
  */
-const getApp = (env, argv, build) =>  new WpBuildApp(argv, env, build);
+const getApp = (env, argv, rc, build) =>  new WpBuildApp(argv, env, rc, globalEnv, build);
 
 
 /**
@@ -110,6 +113,7 @@ const getApp = (env, argv, build) =>  new WpBuildApp(argv, env, build);
 const write = (app) =>
 {
 	const l = app.logger;
+	l.printBanner();
 	l.value(
 		`Start Webpack build ${++globalEnv.buildCount}`,
 		l.tag(app.build, l.colors.cyan, l.colors.white) + " " + l.tag(app.target, l.colors.cyan, l.colors.white),

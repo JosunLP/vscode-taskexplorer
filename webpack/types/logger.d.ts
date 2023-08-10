@@ -61,6 +61,7 @@ declare class WpBuildConsoleLogger implements IDisposable
     icons: WpBuildLogIconSet;
     withColor(msg: string | undefined, color: WpBuildLogColorMapping, sticky?: boolean): string;
     error: (msg: any, pad?: string) => void;
+    printBanner: () => void;
     start: (msg: string, level?: WpBuildLogLevel) => void;
     tag: (msg: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
     value: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, icon: string | undefined | null | 0 | false, color: WpBuildLogColorMapping) => void;

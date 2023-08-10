@@ -9,16 +9,15 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const WpBuildRc = require("./rc");
 const { getMode } = require("../exports");
-const { globalEnv } = require("./global");
 const { WebpackError } = require("webpack");
+const { apply, isString } = require("./utils");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
 const { join, resolve, isAbsolute } = require("path");
-const { apply, isString, merge } = require("./utils");
 
 
+/** @typedef {import("../types").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").Disposable} Disposable */
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
@@ -172,12 +171,13 @@ class WpBuildApp
 	 * @class WpBuildApp
 	 * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
 	 * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
+	 * @param {WpBuildRc} rc wpbuild rc configuration
+	 * @param {any} globalEnv
 	 * @param {WpBuildRcBuild} [build]
 	 */
-	constructor(argv, env, build)
+	constructor(argv, env, rc, globalEnv, build)
 	{
-		apply(this, this.wpApp(argv, env, build));
-		globalEnv.verbose = !!this.verbosity && this.verbosity !== "none";
+		apply(this, this.wpApp(argv, env, rc, globalEnv, build));
 	}
 
     dispose = () => {};
@@ -188,14 +188,16 @@ class WpBuildApp
 	 * @private
 	 * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
 	 * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
+	 * @param {WpBuildRc} rc wpbuild rc configuration
+	 * @param {any} globalEnv
 	 * @param {WpBuildRcBuild} [build]
 	 * @returns {WpBuildApp}
 	 * @throws {WebpackError}
 	 */
-	wpApp = (argv, env, build) =>
+	wpApp = (argv, env, rc, globalEnv, build) =>
 	{
 		/** @type {WpBuildApp} */
-		const app = this;
+		const app = {};
 
 		Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
 		{
@@ -225,7 +227,9 @@ class WpBuildApp
 			verbosity: undefined
 		});
 
-		this.logger = new WpBuildConsoleLogger(app);
+        app.rc = rc;
+		app.logger = new WpBuildConsoleLogger(app);
+		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
 
 		if (!app.environment)
 		{
@@ -245,9 +249,8 @@ class WpBuildApp
 			}
 		}
 
-		app.rc = new WpBuildRc(app);
 
-		merge(app, {
+		apply(app, {
 			isTests: app.environment.startsWith("test"),
 			isWeb: app.target.startsWith("web"),
 			isMain: app.build === "extension" || app.build === "web",
@@ -275,7 +278,7 @@ class WpBuildApp
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
 		}
-		return this.resolveRcPaths(baseDir, merge(paths, { ...this.rc.paths },
+		return this.resolveRcPaths(baseDir, apply(paths, { ...this.rc.paths },
 		{
 			temp,
 			build: baseDir,

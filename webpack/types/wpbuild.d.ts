@@ -17,9 +17,10 @@
  * and `IWpBuild` (interface) for convention.
  */
 
+import { WpBuildApp } from "./app";
 import { WpBuildLogTrueColor } from "./logger";
 import WpBuildRcDefault from "./.wpbuildrc.defaults.json";
-import { ConvertType, ConvertType2, ConvertType3, IDisposable } from "./generic";
+import { ConvertType, ConvertType2, ConvertType3, IDisposable, RequireKeys } from "./generic";
 
 
 // declare type WpBuildPluginTapOptionsCallbackType<T> = T extends ReturnType<IWpBuildPluginTapOptions["callback"]> ? X : never;
@@ -38,9 +39,10 @@ import { ConvertType, ConvertType2, ConvertType3, IDisposable } from "./generic"
  * Defined types for this module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
-declare type WpBuildRcBuilds = typeof WpBuildRcDefault.builds;
-declare type WpBuildRcBuild = ConvertType3<ConvertType3<ConvertType3<ConvertType3<typeof WpBuildRcDefault.builds.dev[0], "build", WpBuildModule>, "environment", WpBuildEnvironment>, "mode", WebpackMode>, "target", WebpackTarget>;
+declare type WpBuildRcBuild = { build: WpBuildModule; environment: WpBuildEnvironment; mode: WebpackMode; target: WebpackTarget; };
+// declare type WpBuildRcBuild = ConvertType4<typeof WpBuildRcDefault.builds.dev[0], [ "build", "environment", "mode", "target" ] [ "WpBuildModule", "WpBuildEnvironment", "WebpackMode", "WebpackTarget" ]>;
 declare type WpBuildRcBuildSet = WpBuildRcBuild[];
+declare type WpBuildRcBuilds =  ConvertType3<typeof WpBuildRcDefault.builds, WpBuildEnvironment, WpBuildRcBuildSet>;
 declare type WpBuildRcEnvironment = typeof WpBuildRcDefault.environment;
 declare type WpBuildRcExports =  typeof WpBuildRcDefault.exports;
 declare type WpBuildRcLog= typeof WpBuildRcDefault.log;
@@ -74,6 +76,7 @@ declare type WpBuildRcPlugin = keyof WpBuildRcPlugins;
 
 declare class WpBuildRc implements IDisposable
 {
+    constructor();
     builds: WpBuildRcBuilds;
     colors: WpBuildRcLogColorMap;
     detailedDisplayName: string;           // Displayed in startup banner detail line

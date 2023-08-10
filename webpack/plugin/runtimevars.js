@@ -57,7 +57,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
      */
 	constructor(options)
     {
-        super(options, "runtimeVars");
+        super(options, [ "runtimeVars", {}, "current", "next", "previous" ]);
     }
 
 

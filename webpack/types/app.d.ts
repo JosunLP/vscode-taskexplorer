@@ -18,7 +18,7 @@
  */
 
 import { IDisposable } from "./generic";
-import { WpBuildRc, WpBuildEnvironment, WpBuildModule, WpBuildRcPaths } from "./wpbuild";
+import { WpBuildRc, WpBuildEnvironment, WpBuildModule, WpBuildRcPaths, WpBuildRcBuild } from "./wpbuild";
 import {
     WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackRuntimeArgs, WebpackRuntimeEnvArgs,
     WebpackTarget, WebpackMode
@@ -58,6 +58,7 @@ declare const __WPBUILD__: WpBuildRuntimeVariables;
 
 declare class WpBuildApp implements IDisposable
 {
+    constructor(argv: WebpackRuntimeArgs, env: WpBuildRuntimeEnvArgs, globalEnv: any, build: WpBuildRcBuild);
     analyze: boolean;                     // parform analysis after build
     rc: WpBuildRc;                        // target js app info
     argv: WebpackRuntimeArgs;

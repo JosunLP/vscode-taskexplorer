@@ -36,7 +36,7 @@
 const { readFile } = require("fs/promises");
 const { relative, basename } = require("path");
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
-const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = require("../utils");
+const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = require("../utils");
 
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
@@ -77,7 +77,7 @@ const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuild
 
 /**
  * @class WpBuildHashPlugin
- * @implements {WebpackPluginInstance}
+ * @augments WebpackPluginInstance
  */
 class WpBuildPlugin
 {
@@ -184,7 +184,7 @@ class WpBuildPlugin
     /**
      * @class WpBuildPlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
-     * @param {string} [globalCache]
+     * @param {string | [ string, any, ...any[] ]} [globalCache]
      */
 	constructor(options, globalCache)
     {
@@ -197,7 +197,8 @@ class WpBuildPlugin
         this.hashDigestLength = this.app.wpc.output.hashDigestLength || 20;
         this.cache = new WpBuildCache(this.app, `cache_${this.name}.json`);
         if (globalCache) {
-            this.initGlobalEnvObject(globalCache);
+            const aGLobalCache = asArray(globalCache);
+            this.initGlobalEnvObject(aGLobalCache[0], aGLobalCache[1], ...aGLobalCache.slice(2));
         }
         if (!options.registerVendorPluginsFirst) {
             this.plugins = [ this, ...asArray(options.plugins).map(p => new p.ctor(p.options)) ];
@@ -495,10 +496,10 @@ class WpBuildPlugin
      */
     initGlobalEnvObject(baseProp, initialValue, ...props)
     {
-        if (!globalEnv[baseProp]) {
-            globalEnv[baseProp] = {};
+        if (!this.app.global[baseProp]) {
+            this.app.global[baseProp] = {};
         }
-        props.filter(p => !globalEnv[baseProp][p]).forEach((p) => { globalEnv[baseProp][p] = initialValue; });
+        props.filter(p => !this.app.global[baseProp][p]).forEach((p) => { this.app.global[baseProp][p] = initialValue; });
     };
 
 

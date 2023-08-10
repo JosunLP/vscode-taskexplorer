@@ -3,7 +3,6 @@
 
 const WpBuildApp = require("./app");
 const WpBuildCache = require("./cache");
-const { globalEnv } = require("./global");
 const WpBuildConsoleLogger = require("./console");
 
 const {
@@ -13,7 +12,7 @@ const {
 } = require("./utils");
 
 module.exports = {
-    apply, asArray, clone, WpBuildApp, findFiles, findFilesSync, getTsConfig, globalEnv, isArray,
-    isDate, isEmpty, isFunction, isObject, isObjectEmpty, isPrimitive, isPromise, isString, merge,
-    mergeIf, pick, pickBy, pickNot, WpBuildCache, WpBuildConsoleLogger, WpBuildError
+    apply, asArray, clone, WpBuildApp, findFiles, findFilesSync, getTsConfig, isArray, isDate,
+    isEmpty, isFunction, isObject, isObjectEmpty, isPrimitive, isPromise, isString, merge, mergeIf,
+    pick, pickBy, pickNot, WpBuildCache, WpBuildConsoleLogger, WpBuildError
 };

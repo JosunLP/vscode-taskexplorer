@@ -9,7 +9,6 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { globalEnv } = require("../utils");
 const WpBuildPlugin = require("./base");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -53,7 +52,7 @@ class WpBuildScmPlugin extends WpBuildPlugin
      */
     async commit()
     {
-        if (globalEnv.scm.callCount === 2 && globalEnv.scm.readyCount > 0)
+        if (this.app.global.scm.callCount === 2 && this.app.global.scm.readyCount > 0)
         {
             const logger = this.app.logger,
                   provider = process.env.WPBUILD_SCM_PROVIDER || "git",
