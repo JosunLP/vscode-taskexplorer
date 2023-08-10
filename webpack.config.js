@@ -60,7 +60,7 @@ module.exports = (env, argv) =>
 		return buildConfig(new WpBuildApp(argv, env, rc, globalEnv));
 	}
 	const envMode = env.environment || (mode === "development" ? "dev" : (mode === "production" ? "prod" : "test"));
-	return rc.builds[envMode].map(build => buildConfig(getApp(env, argv, rc, build)));
+	return rc.environment[envMode].builds.map(build => buildConfig(getApp(env, argv, rc, build)));
 };
 
 

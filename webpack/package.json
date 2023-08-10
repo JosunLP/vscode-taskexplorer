@@ -1,0 +1,49 @@
+{
+    "name": "@spmeesseman/wpbuild",
+    "version": "0.0.1",
+    "displayName": "Webpack Build Wrapper",
+    "description": "Webpack Build Wrapper - Webpack build made easy, adapt new projects with ease",
+    "publisher": "spmeesseman",
+    "license": "MIT",
+    "homepage": "https://github.com/spmeesseman/wpbuild/blob/master/README.md",
+    "author": {
+        "name": "Scott Meesseman",
+        "email": "spmeesseman@v.com"
+    },
+    "bugs": {
+        "email": "spmeesseman@gmail.com",
+        "url": "https://github.com/spmeesseman/wpbuild/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/spmeesseman/wpbuild.git"
+    },
+    "scripts": {
+        "version": "npx wpbuild --version",
+        "build-typings-js_all": "npm run build-typings-rcjson && npm run build-typings-js_exports && npm run build-typings-js_plugins && npm run build-typings-js_utils",
+        "build-typings-js_exports": "json2ts --input 'exports/*.js' --output types/exprts.d.ts",
+        "build-typings-js_plugins": "json2ts --input 'exports/*.js' --output types/exprts.d.ts",
+        "build-typings-js_utils": "json2ts --input 'utils/*.js' --output types/exprts.d.ts",
+        "build-typings-rcjson": "json2ts --input types/.wpbuildrc.defaults.json --output types/rc.d.ts"
+    },
+    "dependencies": {
+        "json-schema-to-typescript": "^13.0.2"
+    },
+    "files": [
+        "exports",
+        "plugin",
+        "types",
+        "utils"
+    ],
+    "types": "types/index.d.ts",
+    "publishConfig": {
+        "access": "public"
+    },
+    "keywords": [
+        "webpack",
+        "wrapper",
+        "javascript",
+        "typescript"
+    ]
+     
+}
