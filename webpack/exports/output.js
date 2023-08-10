@@ -30,7 +30,7 @@ const output = (app) =>
 		apply(app.wpc.output,
 		{
 			clean: app.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
-			path: join(app.rc.paths.build, "res"),
+			path: join(app.paths.build, "res"),
 			publicPath: "#{webroot}/",
 			filename: (pathData, _assetInfo) =>
 			{
@@ -58,7 +58,7 @@ const output = (app) =>
 		apply(app.wpc.output,
 		{
 			clean: app.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			path: join(app.rc.paths.build, "types", "dist"),
+			path: join(app.paths.build, "types", "dist"),
 			filename: "[name].js",
 			// libraryTarget: "umd",
     		// umdNamedDefine: true,

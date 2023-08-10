@@ -224,7 +224,7 @@ class WpBuildApp
 			analyze: false,
 			clean: false,
 			esbuild: false,
-			imageOpt: true,
+			imageOpt: false,
 			target: "node",
 			verbosity: undefined
 		});

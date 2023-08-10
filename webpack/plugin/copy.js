@@ -155,8 +155,8 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 	{
 		/** @type {WpBuildPluginVendorOptions[]} */
 		const plugins = [],
-			  psxBuildPath = app.rc.paths.build.replace(/\\/g, "/"),
-			  psxBasePath = app.rc.paths.base.replace(/\\/g, "/"),
+			  psxBuildPath = app.paths.build.replace(/\\/g, "/"),
+			  psxBasePath = app.paths.base.replace(/\\/g, "/"),
 			  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
 		if (app.rc.plugins.copy !== false)
@@ -165,7 +165,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 			{
 				/** @type {CopyPlugin.Pattern[]} */
 				const patterns = [];
-				apps.filter((appName) => existsSync(join(app.rc.paths.base, appName, "res"))).forEach(
+				apps.filter((appName) => existsSync(join(app.paths.base, appName, "res"))).forEach(
 					(appName) => patterns.push(
 					{
 						from: posix.join(psxBasePath, appName, "res", "*.*"),
@@ -173,7 +173,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 						context: posix.join(psxBasePath, appName, "res")
 					})
 				);
-				if (existsSync(join(app.rc.paths.base, "res")))
+				if (existsSync(join(app.paths.base, "res")))
 				{
 					patterns.push({
 						from: posix.join(psxBasePath, "res", "*.*"),

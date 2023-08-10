@@ -28,8 +28,8 @@ const resolve = (app) =>
 		app.wpc.resolve =
 		{
 			alias: {
-				":env": path.resolve(app.rc.paths.build, "src", "lib", "env", app.target),
-				":types": path.resolve(app.rc.paths.build, "types")
+				":env": path.resolve(app.paths.build, "src", "lib", "env", app.target),
+				":types": path.resolve(app.paths.build, "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
 			mainFields: app.build === "web" ? [ "web", "module", "main" ] : [ "module", "main" ],
@@ -45,11 +45,11 @@ const resolve = (app) =>
 	{
 		app.wpc.resolve = {
 			alias: {
-				":env": path.resolve(app.rc.paths.build, "src", "lib", "env", "web"),
-				":types": path.resolve(app.rc.paths.build, "types")
+				":env": path.resolve(app.paths.build, "src", "lib", "env", "web"),
+				":types": path.resolve(app.paths.build, "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			modules: [ app.rc.paths.base, "node_modules" ],
+			modules: [ app.paths.base, "node_modules" ],
 		};
 	}
 };

@@ -13,7 +13,7 @@
  */
 const context = (app) =>
 {
-	app.wpc.context = app.rc.paths.base;
+	app.wpc.context = app.paths.base;
 };
 
 

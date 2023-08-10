@@ -68,7 +68,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	bundle = () =>
 	{
-		if (existsSync(join(this.app.rc.paths.build, "types")))
+		if (existsSync(join(this.app.paths.build, "types")))
 		{
 			dts.bundle({
 				name: `@spmeesseman/${this.app.rc.name}-types`,
@@ -97,33 +97,33 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		const tsConfigs = /** @type {[ string, ForkTsCheckerMode, boolean? ][]} */([]);
 		if (app.build === "webview")
 		{
-			tsConfig = join(app.rc.paths.build, "tsconfig.webview.json");
+			tsConfig = join(app.paths.build, "tsconfig.webview.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.rc.paths.base, "tsconfig.json");
+				tsConfig = join(app.paths.base, "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "readonly" ]);
 		}
 		else if (app.build === "tests")
 		{
-			tsConfig = join(app.rc.paths.build, "tsconfig.test.json");
+			tsConfig = join(app.paths.build, "tsconfig.test.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.rc.paths.build, "src", "test", "tsconfig.json");
+				tsConfig = join(app.paths.build, "src", "test", "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-tsbuildinfo" ]);
 		}
 		else if (app.build === "types")
 		{
-			tsConfig = join(app.rc.paths.build, "tsconfig.types.json");
+			tsConfig = join(app.paths.build, "tsconfig.types.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.rc.paths.build, "types", "tsconfig.json");
+				tsConfig = join(app.paths.build, "types", "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-dts" ]);
 		}
 		else
 		{
-			tsConfig = join(app.rc.paths.build, `tsconfig.${app.target}.json`);
+			tsConfig = join(app.paths.build, `tsconfig.${app.target}.json`);
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.rc.paths.build, "tsconfig.json");
+				tsConfig = join(app.paths.build, "tsconfig.json");
 			}
 			tsConfigs.push([ tsConfig, "write-dts" ]);
 		}

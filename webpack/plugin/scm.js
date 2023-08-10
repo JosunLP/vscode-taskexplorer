@@ -60,7 +60,7 @@ class WpBuildScmPlugin extends WpBuildPlugin
                   host = process.env.WPBUILD_SCM_HOST,
                   user = process.env.WPBUILD_SCM_USER; // ,
                   // /** @type {import("child_process").SpawnSyncOptions} */
-                  // spawnSyncOpts = { cwd: app.rc.paths.build, encoding: "utf8", shell: true },
+                  // spawnSyncOpts = { cwd: app.paths.build, encoding: "utf8", shell: true },
                   // sshAuth = process.env.WPBUILD_SCM_AUTH || "InvalidAuth";
 
             const scmArgs = [

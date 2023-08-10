@@ -74,7 +74,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
         //
         const app = this.app,
               logger = app.logger,
-              toUploadPath = join(app.rc.paths.temp, app.environment), // /temp/<env>/<env>
+              toUploadPath = join(app.paths.temp, app.environment), // /temp/<env>/<env>
               logIcon = logger.withColor(logger.icons.info, logger.colors.yellow);
 
         logger.write("upload debug support files", 1, "", logIcon);
@@ -119,7 +119,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
               user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
               rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
               /** @type {import("child_process").SpawnSyncOptions} */
-              spawnSyncOpts = { cwd: app.rc.paths.build, encoding: "utf8", shell: true },
+              spawnSyncOpts = { cwd: app.paths.build, encoding: "utf8", shell: true },
               sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
               sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
               filesToUpload = await readdir(toUploadPath);
@@ -161,7 +161,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
             `${user}@${host}:"${rBasePath}/${app.rc.name}/v${app.rc.version}"` // uploaded, and created if not exists
         ];
 
-        await copyFile(join(app.rc.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
+        await copyFile(join(app.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
         logger.write(`   upload resource files to ${host}`, 1, "", logIcon);
         try
