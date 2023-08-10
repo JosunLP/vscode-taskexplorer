@@ -15,7 +15,7 @@ const VisualizerPlugin = require("webpack-visualizer-plugin2");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 

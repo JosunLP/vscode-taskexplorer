@@ -13,7 +13,7 @@ const webpack = require("webpack");
 const WpBuildPlugin = require("./base");
 const { isString } = require("../utils/utils");
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 
 /**

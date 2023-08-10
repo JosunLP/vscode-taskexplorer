@@ -41,7 +41,7 @@ const { isString, apply, isObjectEmpty, merge } = require("../utils");
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 
@@ -194,7 +194,8 @@ class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
     {
         const app = this.app,
               cache = this.cache.get();
-        apply(app.global.runtimeVars, cache);
+        // apply(app.global.runtimeVars, cache);
+        merge(app.global.runtimeVars, cache);
         merge(app.global.runtimeVars.previous, { ...app.global.runtimeVars.current });
         merge(app.global.runtimeVars.current, { ...app.global.runtimeVars.next });
         app.global.runtimeVars.next = {};

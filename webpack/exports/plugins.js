@@ -14,7 +14,7 @@ const {
 	cssextract, htmlcsp, imageminimizer, htmlinlinechunks, testsuite, vendormod, webviewapps, scm
 } = require("../plugin");
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
 

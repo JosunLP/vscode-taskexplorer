@@ -11,7 +11,7 @@ const {  writeFile } = require("fs/promises");
 const { resolve, isAbsolute } = require("path");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").IDisposable} IDisposable */
 
 

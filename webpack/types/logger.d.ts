@@ -52,35 +52,31 @@ declare type WpBuildLogIcon = keyof Omit<WpBuildLogIconSet, "blue" | "color">;
 
 declare type WpBuildLogColorMapping = [ number, number ];
 
-declare class WpBuildConsoleLogger implements IDisposable
+declare interface IWpBuildLogger implements IDisposable
 {
-    constructor(app: WpBuildApp);
-    dispose: () => Promise<void>;
     colors: Record<WpBuildLogColor, WpBuildLogColorMapping>;
     icons: WpBuildLogIconSet;
+    private basePad: string;
+    private app: WpBuildApp;
+    private infoIcon: string;
     withColor(msg: string | undefined, color: WpBuildLogColorMapping, sticky?: boolean): string;
     error: (msg: any, pad?: string) => void;
-    printBanner: () => void;
     start: (msg: string, level?: WpBuildLogLevel) => void;
     tag: (msg: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
-    value: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, icon: string | undefined | null | 0 | false, color: WpBuildLogColorMapping) => void;
-    valuestar: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, icon: string | undefined | null | 0 | false, iconColor: WpBuildLogColorMapping, msgColor: WpBuildLogColorMapping) => void;
+    value: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, icon?: string | undefined | null | 0 | false, color?: WpBuildLogColorMapping | null) => void;
+    valuestar: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, iconColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
     warning: (msg: any, pad?: string) => void;
-    write: (msg: string, level?: WpBuildLogLevel, pad?: string, icon: string | undefined | null | 0 | false, color: WpBuildLogColorMapping) => void;
+    write: (msg: string, level?: WpBuildLogLevel, pad?: string, icon: string | undefined | null | 0 | false, color: WpBuildLogColorMapping | null) => void;
+    writeMsgTag: (msg: string, tagMsg: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
 }
 
-declare class WpBuildFileLogger extends WpBuildConsoleLogger
-{
-    file: string;
-}
 
 export {
+    IWpBuildLogger,
     WpBuildLogColor,
     WpBuildLogColorMapping,
     WpBuildLogIcon,
     WpBuildLogIconSet,
     WpBuildLogLevel,
-    WpBuildLogTrueColor,
-    WpBuildConsoleLogger,
-    WpBuildFileLogger
+    WpBuildLogTrueColor
 };

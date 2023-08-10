@@ -9,6 +9,7 @@
 		"inlineSourceMap": true,
 		"tsBuildInfoFile": "../../node_modules/.cache/tsconfig.test.tsbuildinfo",
         "paths": {
+			// "interface/*": [ "../../types" ],
 			":types": [ "../../types" ]
 		} // ,
 		// "typeRoots": [ "../../types/dist" ]

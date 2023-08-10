@@ -1,12 +1,10 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable jsdoc/no-undefined-types */
-/* eslint-disable jsdoc/require-property-description */
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable import/no-extraneous-dependencies */ /* eslint-disable jsdoc/no-undefined-types */
+/* eslint-disable jsdoc/require-property-description */ /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 const { isString, isObject, isPrimitive } = require("./utils");
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("./app")} WpBuildApp */
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WpBuildLogIcon} WpBuildLogIcon */
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
@@ -23,29 +21,26 @@ const { isString, isObject, isPrimitive } = require("./utils");
 class WpBuildConsoleLogger
 {
     /**
-     * @member
      * Can be used to adjust the leftmost character that console output should start at.  For example,
      * a logger implemented in a `Mocha` test would need to use a base pad of 6 characters to align
      * itself with Mocha's output.
+     * @member
      * @private
      */
     basePad = "";
-
     /**
-     * @member
      * The build environment that owns the WpBuildConsoleLogger instance
+     * @member
      * @private
      * @type {WpBuildApp | undefined}
      */
     app;
-
     /**
      * @member
      * @private
      * @type {string}
      */
     infoIcon;
-
     // /**
     //  * @member
     //  * @private
@@ -77,7 +72,11 @@ class WpBuildConsoleLogger
         }
     }
 
-    dispose = () => console.log(this.withColor("", this.colors.system, true));
+    dispose = () =>
+    {
+        const msg = this.withColor("force reset console color to system default", this.colors.grey);
+        this.write(msg + this.withColor("", this.colors.system, true));
+    };
 
 
     /**
@@ -272,80 +271,19 @@ class WpBuildConsoleLogger
 
     /**
      * @function
-     * @param {string | undefined} msg
+     * @param {string | undefined} tagMsg
      * @param {WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
      * @param {WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
      * @returns {string}
      */
-    tag = (msg, bracketColor, msgColor) =>
-    {
-        return msg ? (this.withColor("[", bracketColor || (this.app && this.app.rc ? this.colors[this.app.rc.colors.tagBracket] : null) || this.colors.blue) +
-                     this.withColor(msg, msgColor || this.colors.grey)  +
-                     this.withColor("]", bracketColor || this.colors.blue)) : "";
-    };
-
+    tag = (tagMsg, bracketColor, msgColor) =>
+        tagMsg ? (this.withColor("[", bracketColor || (this.app && this.app.rc ? this.colors[this.app.rc.colors.tagBracket] : null) || this.colors.blue) +
+                 this.withColor(tagMsg, msgColor || this.colors.grey)  +
+                 this.withColor("]", bracketColor || this.colors.blue)) : "";
 
     /**
      * @function
-     * @param {string | undefined} msg
-     * @param {WpBuildLogColorMapping} color color value
-     * @param {boolean} [sticky]
-     * @returns {string}
-     */
-    withColor(msg, color, sticky) { return ("\x1B[" + color[0] + "m" + msg + (!sticky ? "\x1B[" + color[1] + "m" : "")); }
-
-
-    /**
-     * @function
-     * @private
-     * @param {WpBuildLogColorMapping} color color value
-     * @param {string} [msg] message to include in length calculation
-     * @returns {number}
-     */
-    withColorLength = (color, msg) => (2 + color[0].toString().length + 1 + (msg ? msg.length : 0) + 2 + color[1].toString().length + 1);
-
-
-    /**
-     * @function Write / log a message to the console
-     * @param {string} msg
-     * @param {WpBuildLogLevel} [level]
-     * @param {string} [pad]
-     * @param {string | undefined | null | 0 | false} [icon]
-     * @param {WpBuildLogColorMapping} [color]
-     */
-    write = (msg, level, pad = "", icon, color) =>
-    {
-        if (level === undefined || !this.app || !this.app.rc || level <= this.app.rc.log.level)
-        {
-            let envTag = "";
-            const app = this.app;
-            if (app && app.rc)
-            {
-                const envTagClr = this.getIconColorMapping(icon),
-                      envTagMsgClr = app ? this.colors[app.rc.colors.buildText] : this.colors.white;
-                envTag = (
-                    " " + this.withColor("[", envTagClr) + app.build + this.withColor("][", envTagClr) +
-                    this.withColor(app.target.toString(), envTagMsgClr) + this.withColor("]", envTagClr)
-                )
-                .padEnd(app.rc.log.pad.envTag + this.withColorLength(envTagMsgClr) + (this.withColorLength(envTagClr) * 3));
-            }
-            const envMsgClr = color || (app ? this.colors[app.rc.colors.default] : this.colors.grey),
-                  envMsg = color || !(/\x1B\[/).test(msg) || envMsgClr[0] !== this.colorMap.system ? this.withColor(this.format(msg), envMsgClr) : this.format(msg);
-            console.log(`${this.basePad}${pad}${isString(icon) ? icon : this.infoIcon}${envTag}${envMsg}`);
-        }
-    };
-
-    /**
-     * @function
-     * Write / log a message to the console.  This function is just a wrapper for {@link write write()} that
-     * satisfies the javascript `console` interface.
-     * @inheritdoc
-     */
-    log = this.write;
-
-
-    /**
-     * @function
+     * @member
      * Write / log a message and an aligned value to the console.  The message pad space is defined
      * by .wpbuildrc.`log.pad.value` (defaults to 45)
      * @param {string} msg
@@ -353,7 +291,7 @@ class WpBuildConsoleLogger
      * @param {WpBuildLogLevel} [level]
      * @param {string} [pad] Message pre-padding
      * @param {string | undefined | null | 0 | false} [icon]
-     * @param {WpBuildLogColorMapping} [color]
+     * @param {WpBuildLogColorMapping | null} [color]
      */
     value = (msg, val, level, pad, icon, color) =>
     {
@@ -450,8 +388,8 @@ class WpBuildConsoleLogger
      * @param {string} dsc
      * @param {WpBuildLogLevel} [level]
      * @param {string} [pad] Message pre-padding
-     * @param {WpBuildLogColorMapping} [iconColor]
-     * @param {WpBuildLogColorMapping} [msgColor]
+     * @param {WpBuildLogColorMapping | null} [iconColor]
+     * @param {WpBuildLogColorMapping | null} [msgColor]
      */
     valuestar = (msg, dsc, level, pad, iconColor, msgColor) =>
     {
@@ -478,6 +416,74 @@ class WpBuildConsoleLogger
      */
     warning = (msg, pad) => this.write(msg, undefined, pad, this.icons.color.warning);
 
+    /**
+     * @function
+     * @param {string | undefined} msg
+     * @param {WpBuildLogColorMapping} color color value
+     * @param {boolean} [sticky]
+     * @returns {string}
+     */
+    withColor(msg, color, sticky) { return ("\x1B[" + color[0] + "m" + msg + (!sticky ? "\x1B[" + color[1] + "m" : "")); }
+
+
+    /**
+     * @function
+     * @private
+     * @param {WpBuildLogColorMapping} color color value
+     * @param {string} [msg] message to include in length calculation
+     * @returns {number}
+     */
+    withColorLength = (color, msg) => (2 + color[0].toString().length + 1 + (msg ? msg.length : 0) + 2 + color[1].toString().length + 1);
+
+
+    /**
+     * @function Write / log a message to the console
+     * @param {string} msg
+     * @param {WpBuildLogLevel} [level]
+     * @param {string} [pad]
+     * @param {string | undefined | null | 0 | false} [icon]
+     * @param {WpBuildLogColorMapping | null} [color]
+     */
+    write = (msg, level, pad = "", icon, color) =>
+    {
+        if (level === undefined || !this.app || !this.app.rc || level <= this.app.rc.log.level)
+        {
+            let envTag = "";
+            const app = this.app;
+            if (app && app.rc)
+            {
+                const envTagClr = this.getIconColorMapping(icon),
+                      envTagMsgClr = app ? this.colors[app.rc.colors.buildText] : this.colors.white;
+                envTag = (
+                    " " + this.withColor("[", envTagClr) + app.build + this.withColor("][", envTagClr) +
+                    this.withColor(app.target.toString(), envTagMsgClr) + this.withColor("]", envTagClr)
+                )
+                .padEnd(app.rc.log.pad.envTag + this.withColorLength(envTagMsgClr) + (this.withColorLength(envTagClr) * 3));
+            }
+            const envMsgClr = color || (app ? this.colors[app.rc.colors.default] : this.colors.grey),
+                  envMsg = color || !(/\x1B\[/).test(msg) || envMsgClr[0] !== this.colorMap.system ? this.withColor(this.format(msg), envMsgClr) : this.format(msg);
+            console.log(`${this.basePad}${pad}${isString(icon) ? icon : this.infoIcon}${envTag}${envMsg}`);
+        }
+    };
+
+    /**
+     * @function
+     * @param {string | undefined} msg
+     * @param {string | undefined} tagMsg
+     * @param {WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
+     * @param {WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
+     */
+    writeMsgTag = (msg, tagMsg, bracketColor, msgColor) =>
+        this.write(msg + "  " + this.tag(tagMsg, bracketColor, msgColor), 2, "", this.app?.rc.colors.default);
+
+
+    /**
+     * @function
+     * Write / log a message to the console.  This function is just a wrapper for {@link write write()} that
+     * satisfies the javascript `console` interface.
+     * @inheritdoc
+     */
+    log = this.write;
 }
 
 

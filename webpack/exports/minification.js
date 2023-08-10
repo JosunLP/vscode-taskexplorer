@@ -12,7 +12,7 @@ const TerserPlugin = require("terser-webpack-plugin");
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 
 /**

@@ -12,10 +12,10 @@
 const { existsSync } = require("fs");
 const WpBuildPlugin = require("./base");
 const CopyPlugin = require("copy-webpack-plugin");
-const { join, posix, isAbsolute, relative, normalize } = require("path");
+const { join, posix, isAbsolute } = require("path");
 const { isString, apply } = require("../utils/utils");
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
@@ -118,24 +118,28 @@ class WpBuildCopyPlugin extends WpBuildPlugin
      */
     sourcemap = (assets) =>
     {
-		this.logger.write("attach sourcemap to copied assets", 1);
+		const l = this.logger;
+		l.write("attach sourcemaps to all relative copied assets", 1);
 		Object.entries(assets).filter(([ file, _ ]) => this.isEntryAsset(file)).forEach(([ file, _ ]) =>
 		{
-			this.logger.value("check for file copied attribute with no attached sourcemap", file);
 			const asset = this.compilation.getAsset(file);
 			if (asset && asset.info.copied && !asset.info.related?.sourceMap)
 			{
 				const chunkName = this.fileNameStrip(file, true),
 					  srcAssetFile = `${chunkName}.${this.app.global.runtimeVars.next[chunkName]}.js`,
 					  srcAsset = this.compilation.getAsset(srcAssetFile);
-				this.logger.value("   copied file without sourcemap", true, 2);
-				this.logger.value("   chunk name", srcAssetFile, 3);
-				this.logger.value("   source asset filename", srcAssetFile, 3);
-				this.logger.value("   source asset found", !!srcAsset, 3);
-				this.logger.value("   source asset has sourcemap", !!srcAsset?.info.related?.sourceMap, 3);
+				l.writeMsgTag(file, "chunk: " + chunkName);
+				l.value("   source asset filename", srcAssetFile, 2);
+				l.value("   source asset found", !!srcAsset, 3);
+				l.value("   source asset has sourcemap", !!srcAsset?.info.related?.sourceMap, 3);
 				if (srcAsset && srcAsset.info.related?.sourceMap)
 				{
-					this.logger.value("   update copied asset with sourcemap", file, 3);
+					l.write("attaching sourcemap", 1);
+					l.value("   copied asset filename", srcAssetFile, 2);
+					l.value("   source asset filename", srcAssetFile, 2);
+					l.value("   chunk name", chunkName, 3);
+					l.value("   source asset found", !!srcAsset, 3);
+					l.value("   source asset has sourcemap", !!srcAsset?.info.related?.sourceMap, 3);
 					const newInfo = apply({ ...asset.info }, { related: { sourceMap: srcAsset.info.related.sourceMap }});
 					this.compilation.updateAsset(file, srcAsset.source, newInfo);
 				}

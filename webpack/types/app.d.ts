@@ -16,21 +16,21 @@
  * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
-import { IDisposable } from "./generic";
-import { WpBuildRc, WpBuildEnvironment, WpBuildModule, WpBuildRcPaths, WpBuildRcBuild } from "./wpbuild";
+import { WpBuildEnvironment, WpBuildModule, WpBuildRcPaths } from "./wpbuild";
 import {
-    WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackRuntimeArgs, WebpackRuntimeEnvArgs,
-    WebpackTarget, WebpackMode
-} from "./webpack"
+    WebpackConfig, WebpackEntry, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions
+} from "./webpack";
 
 
-declare type WpBuildConfig = {
+// declare type WpBuildConfig = {
+declare type WpBuildWebpackConfig = {
     mode: WebpackMode;
     entry: WebpackEntry;
     output: WebpackOutput;
     target: WebpackTarget;
-};
-declare type WpBuildWebpackConfig = Omit<WebpackConfig, WpBuildConfig> & WpBuildConfig;
+    module: WebpackModuleOptions;
+} & WebpackConfig;
+// declare type WpBuildWebpackConfig = Omit<WebpackConfig, WpBuildConfig> & WpBuildConfig;
 
 declare type WpBuildRuntimeEnvArgs =
 {
@@ -56,43 +56,11 @@ declare type WpBuildPaths = {
 
 declare const __WPBUILD__: WpBuildRuntimeVariables;
 
-declare class WpBuildApp implements IDisposable
-{
-    constructor(argv: WebpackRuntimeArgs, env: WpBuildRuntimeEnvArgs, globalEnv: any, build: WpBuildRcBuild);
-    analyze: boolean;                     // parform analysis after build
-    rc: WpBuildRc;                        // target js app info
-    argv: WebpackRuntimeArgs;
-    arge: WpBuildRuntimeEnvArgs;
-    build: WpBuildModule;
-    clean: boolean;
-    disposables: Array<Disposable>;
-    environment: WpBuildEnvironment;
-    esbuild: boolean;                     // Use esbuild and esloader
-    imageOpt: boolean;                    // Perform image optimization
-    isMain: boolean;
-    isMainProd: boolean;
-    isMainTests: boolean;
-    isTests: boolean;
-    isWeb: boolean;
-    global: WpBuildGlobalEnvironment;    // Accessible by all parallel builds
-    logger: WpBuildConsoleLogger;
-    paths: WpBuildPaths;
-    target: WebpackTarget;
-    verbosity: WebpackLogLevel;
-    wpc: WpBuildWebpackConfig;
-};
-
-
 export {
-    Disposable,
-    WpBuildApp,
-    WpBuildExportsFlags,
     WpBuildModule,
     WpBuildPaths,
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,
-    WpBuildVsCodeBuild,
     WpBuildWebpackConfig,
     __WPBUILD__
 };
-

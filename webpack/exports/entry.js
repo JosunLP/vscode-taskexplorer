@@ -16,7 +16,7 @@ const { apply } = require("../utils");
  */
 
 /** @typedef {import("../types").WebpackEntryObject} WebpackEntryObject */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 
 /**
@@ -41,9 +41,9 @@ const entry = (app) =>
 	else
 	{
 		mainEntry(app);
-		// if (app.environment === "test") {
-		// 	   testSuiteEntry(env, app.wpc.entry);
-		// }
+		if (app.environment === "test") {
+			testSuiteEntry(app);
+		}
 	}
 };
 
@@ -82,7 +82,8 @@ const testSuiteEntry = (app) =>
 		(obj, e)=>
 		{
 			obj[e.replace("src/test/", "").replace(".ts", "")] = {
-				import: `./${e}`
+				import: `./${e}`,
+				dependOn: "runTest"
 			};
 			return obj;
 		}, {}
@@ -90,13 +91,15 @@ const testSuiteEntry = (app) =>
 	app.wpc.entry = apply(entry, {
 		"runTest": {
 			import: "./src/test/runTest.ts",
-			dependOn: app.build !== "tests" ? "taskexplorer" : undefined
+			dependOn: [ "taskexplorer", "taskexplorer.debug" ]
 		},
 		"control": {
-			import: "./src/test/control.ts"
+			import: "./src/test/control.ts",
+			dependOn: "runTest"
 		},
 		"suite/index": {
-			import: "./src/test/suite/index.ts"
+			import: "./src/test/suite/index.ts",
+			dependOn: "runTest"
 		},
 		...testFiles
 	});

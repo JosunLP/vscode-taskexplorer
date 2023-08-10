@@ -17,7 +17,7 @@ const WpBuildPlugin = require("./base");
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 
@@ -111,7 +111,7 @@ class WpBuildIstanbulPlugin extends WpBuildPlugin
     // const { createInstrumenter } = require("istanbul-lib-instrument");
     //
     // /** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-    // /** @typedef {import("../types").WpBuildApp} WpBuildApp */
+    // /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
     // /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
     //
     //

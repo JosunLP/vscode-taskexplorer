@@ -6,22 +6,21 @@
     "publicInfoProject": true,
     "builds": {
         "dev": [
-            { "build": "extension" },
-            { "build": "webview" }
+            { "build": "extension", "environment": "dev" },
+            { "build": "webview", "environment": "dev", "target": "webworker" }
         ],
         "testprod": [
-            { "build": "extension", "environment": "prod " },
-            { "build": "webview", "environment": "prod " },
-            { "build": "tests" }
+            { "build": "extension", "environment": "prod" },
+            { "build": "webview", "environment": "prod", "target": "webworker" },
+            { "build": "tests", "environment": "test" }
         ],
         "prod": [
             { "build": "extension" },
-            { "build": "webview" }
+            { "build": "webview", "target": "webworker" }
         ],
         "test": [
-            { "build": "extension" },
-            { "build": "webview", "environment": "dev" },
-            { "build": "tests" }
+            { "build": "extension", "environment": "test" },
+            { "build": "webview", "environment": "dev", "target": "webworker" }
         ]
     },
     "modules": {
@@ -36,32 +35,32 @@
         "dev": {
             "color": "yellow",
             "build": [
-                { "build": "extension" },
-                { "build": "webview" }
+                { "build": "extension", "environment": "dev" },
+                { "build": "webview", "environment": "dev", "target": "webworker" }
             ]
         },
         "testprod":  {
             "color": "yellow",
             "build": [
-                { "build": "extension", "environment": "prod " },
-                { "build": "webview", "environment": "prod " },
-                { "build": "tests" }
+                { "build": "extension", "environment": "prod" },
+                { "build": "webview", "environment": "prod", "target": "webworker" },
+                { "build": "tests", "environment": "test" }
             ]
         },
         "prod":  {
             "color": "yellow",
             "build": [
                 { "build": "extension" },
-                { "build": "webview" }
+                { "build": "webview", "target": "webworker" }
             ]
         },
         "test":  {
             "baseDir": "src/test",
             "color": "yellow",
             "build": [
-                { "build": "extension" },
-                { "build": "webview", "environment": "dev "},
-                { "build": "tests" }
+                { "build": "extension", "environment": "test" },
+                { "build": "webview", "environment": "dev", "target": "webworker" },
+                { "build": "tests", "environment": "test" }
             ]
         }
     },

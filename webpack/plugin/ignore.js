@@ -10,7 +10,7 @@
 
 const webpack = require("webpack");
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 
 /**

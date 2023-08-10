@@ -21,8 +21,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
  */
 const rules = (app) =>
 {
-	app.wpc.module = {};
-	app.wpc.module.rules = [];
+	app.wpc.module = { rules: [] };
 
 	if (app.build === "webview")
 	{
@@ -77,33 +76,7 @@ const rules = (app) =>
 	}
 	else if (app.build === "tests")
 	{
-		const testsRoot = path.join(app.paths.build, "src", "test");
-		app.wpc.module.rules.push(...[
-		{
-			test: /index\.js$/,
-			include: path.join(app.paths.build, "node_modules", "nyc"),
-			loader: "string-replace-loader",
-			options: {
-				search: "selfCoverageHelper = require('../self-coverage-helper')",
-				replace: "selfCoverageHelper = { onExit () {} }"
-			}
-		},
-		{
-			test: /\.ts$/,
-			include: testsRoot,
-			exclude: [
-				/node_modules/, /types[\\/]/, /\.d\.ts$/
-			],
-			use: {
-				loader: "babel-loader",
-				options: {
-					presets: [
-						[ "@babel/preset-env", { targets: "defaults" }],
-						[ "@babel/preset-typescript" ],
-					]
-				}
-			}
-		}]);
+		rulesAddTestEntries(app);
 	}
 	else if (app.build === "types")
 	{
@@ -113,7 +86,7 @@ const rules = (app) =>
 			exclude: [
 				/node_modules/, /test[\\/]/, /\.d\.ts$/
 			],
-			use: [ app.esbuild ?
+			use: app.esbuild ?
 			{
 				loader: "esbuild-loader",
 				options: {
@@ -132,16 +105,20 @@ const rules = (app) =>
 					// experimentalWatchApi: true,
 					transpileOnly: true
 				}
-			} ]
+			}
 		});
 	}
 	else // main - all targets node / web / webworker
 	{
-
-		app.wpc.module.rules.push({
+		if (app.environment === "test")
+		{
+			rulesAddTestEntries(app);
+		}
+		app.wpc.module.rules.push(
+		{
 			test: /\.ts$/,
 			issuerLayer: "release",
-			include: path.join(app.paths.build, "src"),
+			include: app.paths.src,
 			loader: "string-replace-loader",
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
@@ -195,7 +172,7 @@ const rules = (app) =>
 		{
 			test: /wrapper\.ts$/,
 			issuerLayer: "release",
-			include: path.join(app.paths.build, "src", "lib"),
+			include: path.join(app.paths.src, "lib"),
 			loader: "string-replace-loader",
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
@@ -207,11 +184,11 @@ const rules = (app) =>
 		},
 		{
 			test: /\.ts$/,
-			include: path.join(app.paths.build, "src"),
+			include: app.paths.src,
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
 			],
-			use: [ app.esbuild ?
+			use: app.esbuild ?
 			{
 				loader: "esbuild-loader",
 				options: {
@@ -230,10 +207,44 @@ const rules = (app) =>
 					experimentalWatchApi: true,
 					transpileOnly: true
 				}
-			} ]
+			}
 		});
-
 	}
+};
+
+
+/**
+ * @function
+ * @param {WpBuildApp} app Webpack build environment
+ */
+const rulesAddTestEntries = (app) =>
+{
+	app.wpc.module.rules.push(
+	{
+		test: /index\.js$/,
+		include: path.join(app.paths.build, "node_modules", "nyc"),
+		loader: "string-replace-loader",
+		options: {
+			search: "selfCoverageHelper = require('../self-coverage-helper')",
+			replace: "selfCoverageHelper = { onExit () {} }"
+		}
+	},
+	{
+		test: /\.ts$/,
+		include: app.paths.srcTests,
+		exclude: [
+			/node_modules/, /types[\\/]/, /\.d\.ts$/
+		],
+		use: {
+			loader: "babel-loader",
+			options: {
+				presets: [
+					[ "@babel/preset-env", { targets: "defaults" }],
+					[ "@babel/preset-typescript" ]
+				]
+			}
+		}
+	});
 };
 
 

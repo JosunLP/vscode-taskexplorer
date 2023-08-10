@@ -22,7 +22,7 @@ const { spawnSync } = require("child_process");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
@@ -106,11 +106,11 @@ class WpBuildUploadPlugin extends WpBuildPlugin
                         }
                     }
                 }
-                else if (asset)
-                {
-                    const msg = "   unchanged, skip upload",
-                          hash = asset.info.contenthash?.toString() || "";
-                    logger.value(msg, logger.tag(hash) + " " + logger.tag(file), 2, "", logIcon);
+                else /* istanbul ignore else */if (asset) {
+                    logger.value("   unchanged, skip asset upload", logger.tag(file), 2, "", logIcon);
+                }
+                else {
+                    logger.value("   unknown error, skip asset upload", logger.tag(file), 2, "", logIcon);
                 }
             }
         }

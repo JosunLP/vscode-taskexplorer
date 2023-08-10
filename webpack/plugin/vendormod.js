@@ -38,7 +38,7 @@ const WpBuildPlugin = require("./base");
 const { existsSync, readFileSync, readdirSync, writeFileSync } = require("fs");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 

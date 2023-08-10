@@ -1,12 +1,12 @@
 
-import { PickByType } from "./generic";
+import { ConvertType, PickByType } from "./generic";
 import { AsyncSeriesHook, HookMap, SyncHook, SyncBailHook } from "tapable"
 import { Schema as WebpackSchema } from "schema-utils/declarations/validate";
 import {
     Asset as WebpackAsset, AssetInfo as WebpackAssetInfo, AssetEmittedInfo as WebpackAssetEmittedInfo,
     Cache as WebpackCache, Chunk as WebpackChunk, Configuration as WebpackConfig, Compilation as WebpackCompilation,
     Compiler as WebpackCompiler, EntryObject as WebpackEntryObject, sources as WebpackSources, Stats as WebpackStats,
-    StatsAsset as WebpackStatsAsset, WebpackPluginInstance
+    StatsAsset as WebpackStatsAsset, WebpackPluginInstance, ModuleOptions, RuleSetRule
 } from "webpack"
 
 
@@ -15,6 +15,9 @@ declare type WebpackMode = Exclude<WebpackConfig["mode"], undefined>;
 declare type WebpackEntry = Exclude<WebpackConfig["entry"], undefined>;
 declare type WebpackOutput = Exclude<WebpackConfig["output"], undefined>;
 declare type WebpackLogLevel = Exclude<WebpackConfig["infrastructureLogging"], undefined>["level"];
+
+declare type WebpackRuleSetRule = Exclude<ConvertType<RuleSetRule, (false | "" | 0 | RuleSetRule | "..." | null | undefined)[] , RuleSetRule[]>, undefined>;
+declare type WebpackModuleOptions = { rules: WebpackRuleSetRule[]; } & ModuleOptions;
 
 declare type WebpackSource = WebpackSources.Source;
 declare type WebpackRawSource = WebpackSources.RawSource;
@@ -101,10 +104,12 @@ export {
     WebpackEtag,
     WebpackLogger,
     WebpackMode,
+    WebpackModuleOptions,
     WebpackPluginInstance,
     WebpackLogLevel,
     WebpackOutput,
     WebpackRawSource,
+    WebpackRuleSetRule,
     WebpackSchema,
     WebpackSnapshot,
     WebpackSource,

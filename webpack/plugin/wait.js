@@ -38,7 +38,7 @@ const WpBuildPlugin = require("./base");
 const { apply, WpBuildError } = require("../utils");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
@@ -134,7 +134,7 @@ class WpBuildWaitPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildWaitPlugin | undefined}
  */
-const wait = (app) => app.rc.plugins.wait && app.build === "tests" ? new WpBuildWaitPlugin({ app }) : undefined;
+const wait = (app) => app.rc.plugins.wait && app.isTests ? new WpBuildWaitPlugin({ app }) : undefined;
 
 
 module.exports = wait;

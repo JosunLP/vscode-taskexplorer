@@ -17,7 +17,7 @@ const WpBuildConsoleLogger = require("./console");
 const { join, resolve, isAbsolute } = require("path");
 
 
-/** @typedef {import("../types").WpBuildRc} WpBuildRc */
+/** @typedef {import("../utils").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").Disposable} Disposable */
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
@@ -25,6 +25,7 @@ const { join, resolve, isAbsolute } = require("path");
 /** @typedef {import("../types").WpBuildModule} WpBuildModule */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildRcBuild} WpBuildRcBuild */
+/** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
 /** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
@@ -196,12 +197,11 @@ class WpBuildApp
 	 */
 	wpApp = (argv, env, rc, globalEnv, build) =>
 	{
-		/** @type {WpBuildApp} */
-		const app = {};
+		const app = /** @type {WpBuildApp} */({});
 
 		Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
-		{
-			env[k] = env[k].toLowerCase() === "true"; // convert any string value `true` or `false` to actual boolean type
+		{   // environment "flags" should be set on the cmd line like `--env=property`, as opposed to `--env property=true`
+			env[k] = env[k].toLowerCase() === "true"; // but convert any string values of `true` to a booleans just in case
 		});
 
 		apply(app,
@@ -211,10 +211,12 @@ class WpBuildApp
 			argv,
 			arge: env,
 			global: globalEnv,
-			disposables: [],
 			wpc: {
 				entry: {},
 				mode: getMode(env, argv),
+                module: {
+                    rules: []
+                },
 				output: {},
                 target: "node"
 			}
@@ -222,6 +224,7 @@ class WpBuildApp
 		{
 			analyze: false,
 			clean: false,
+			disposables: [],
 			esbuild: false,
 			imageOpt: false,
 			target: "node",
@@ -245,7 +248,7 @@ class WpBuildApp
 			}
 			else {
 				const eMsg = "Could not detect build environment";
-				this.logger.error("Could not detect build environment");
+				app.logger.error("Could not detect build environment");
 				throw new WebpackError(eMsg);
 			}
 		}
@@ -279,22 +282,27 @@ class WpBuildApp
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
 		}
-		return this.resolveRcPaths(baseDir, apply(paths, { ...app.rc.paths },
-		{
-			temp,
-			build: baseDir,
-			base: app.build !== "webview" ? baseDir : (wvBase ? resolve(baseDir, wvBase) :
-													  join(baseDir, "src", "webview", "app"))
-		}));
+		return apply(
+            this.resolveRcPaths(baseDir, paths),
+            this.resolveRcPaths(baseDir, app.rc.paths),
+            this.resolveRcPaths(baseDir, {
+                temp,
+                build: baseDir,
+                base: app.build !== "webview" ? baseDir : (wvBase ? resolve(baseDir, wvBase) :
+                                                        join(baseDir, "src", "webview", "app"))
+            })
+        );
 	};
 
 
 	/**
 	 * @function
 	 * @private
+	 * @template {WpBuildPaths} T
+	 * @template {WpBuildRcPaths} U
 	 * @param {string} baseDir
-	 * @param {WpBuildPaths} paths
-	 * @returns {WpBuildPaths}
+	 * @param {T | Partial<T> | U | Partial<U>} paths
+	 * @returns {T}
 	 */
 	resolveRcPaths = (baseDir, paths) =>
 	{
@@ -310,7 +318,7 @@ class WpBuildApp
 				delete paths[e[0]];
 			}
 		});
-		return paths;
+		return /** @type {T} */(paths);
 	};
 
 

@@ -38,17 +38,18 @@ const { relative, basename } = require("path");
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
 const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = require("../utils");
 
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
-/** @typedef {import("../utils/console")} WpBuildConsoleLogger */
+/** @typedef {import("../types").IWpBuildLogger} IWpBuildLogger */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
 /** @typedef {import("../types").WebpackRawSource} WebpackRawSource */
 /** @typedef {import("../types").WebpackCacheFacade} WebpackCacheFacade */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
+/** @typedef {import("../utils").WpBuildConsoleLogger} WpBuildConsoleLogger */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
@@ -63,7 +64,6 @@ const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = r
 /** @typedef {import("../types").WebpackAsyncHook<WebpackCompiler>} WebpackAsyncCompilerHook */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
 /** @typedef {import("../types").WebpackAsyncHook<WebpackCompilation>} WebpackAsyncCompilationHook */
-
 /** @typedef {{ file: string; snapshot?: WebpackSnapshot | null; source?: WebpackRawSource }} CacheResult */
 /** @typedef {import("../types").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
 
@@ -88,7 +88,6 @@ class WpBuildPlugin
      * @protected
      */
     cache;
-
     /**
      * Webpack compilation instance
      * @member {WebpackCompilation} compilation
@@ -97,56 +96,50 @@ class WpBuildPlugin
      * @protected
      */
     compilation;
-
     /**
      * @member {WebpackCompiler} compiler
      * @type {WebpackCompiler} compiler
      * @protected
      */
     compiler;
-
     /**
      * @member {WpBuildApp} app
      * @memberof WpBuildPlugin.prototype
+     * @type {WpBuildApp}
      * @protected
      */
     app;
-
     /**
      * @member {number} hashDigestLength
      * @memberof WpBuildPlugin.prototype
      * @protected
      */
     hashDigestLength;
-
     /**
      * @member {WpBuildConsoleLogger} logger
      * @memberof WpBuildPlugin.prototype
      * @protected
+     * @type {WpBuildConsoleLogger}
      */
     logger;
-
     /**
      * @member {string} name
      * @memberof WpBuildPlugin.prototype
      * @protected
      */
     name;
-
     /**
      * @member {WpBuildPluginOptions} options
      * @memberof WpBuildPlugin.prototype
      * @protected
      */
     options;
-
     /**
      * @member {WebpackPluginInstance[]} _plugins
      * @memberof WpBuildPlugin.prototype
      * @private
      */
     plugins;
-
     /**
      * Runtime compiler cache
      * @member {WebpackCacheFacade} wpCache
@@ -155,7 +148,6 @@ class WpBuildPlugin
      * @type {WebpackCacheFacade}
      */
     wpCache;
-
     /**
      * Runtime compilation cache
      * @member {WebpackCacheFacade} wpCacheCompilation
@@ -164,14 +156,12 @@ class WpBuildPlugin
      * @protected
      */
     wpCacheCompilation;
-
     /**
      * @member {WpBuildWebpackConfig} wpConfig
      * @memberof WpBuildPlugin.prototype
      * @protected
      */
     wpConfig;
-
     /**
      * @member {WebpackLogger} wpLogger
      * @memberof WpBuildPlugin.prototype
@@ -195,7 +185,7 @@ class WpBuildPlugin
         this.name = this.constructor.name;
         this.options = mergeIf(options, { plugins: [] });
         this.hashDigestLength = this.app.wpc.output.hashDigestLength || 20;
-        this.cache = new WpBuildCache(this.app, `cache_${this.name}.json`);
+        this.cache = new WpBuildCache(this.app, `plugincache_${this.app.environment}_${this.name.replace(/WpBuild|Plugin/g, "")}.json`);
         if (globalCache) {
             const aGLobalCache = asArray(globalCache);
             this.initGlobalEnvObject(aGLobalCache[0], aGLobalCache[1], ...aGLobalCache.slice(2));
@@ -228,13 +218,9 @@ class WpBuildPlugin
      * @param {string} prop
      * @returns {string}
      */
-    breakProp(prop)
-    {
-        return prop.replace(/_/g, "")
-                   .replace(/[A-Z]{2,}/g, (v) => v[0] + v.substring(1).toLowerCase())
-                   .replace(/[a-z][A-Z]/g, (v) => `${v[0]} ${v[1]}`).toLowerCase();
-    }
-
+    breakProp = (prop) => prop.replace(/_/g, "")
+                          .replace(/[A-Z]{2,}/g, (v) => v[0] + v.substring(1).toLowerCase())
+                          .replace(/[a-z][A-Z]/g, (v) => `${v[0]} ${v[1]}`).toLowerCase();
 
     /**
      * @function
@@ -247,7 +233,7 @@ class WpBuildPlugin
      * @param {WebpackRawSource | undefined} source
      * @returns {Promise<CacheResult>}
      */
-    async checkSnapshot(filePath, identifier, outputDir, source)
+    checkSnapshot = async (filePath, identifier, outputDir, source) =>
     {
         let data, /** @type {CacheResult} */cacheEntry;
         const logger = this.logger,
@@ -255,7 +241,6 @@ class WpBuildPlugin
               /** @type {CacheResult} */result = { file: basename(filePathRel), snapshot: null, source };
 
         logger.value("   check cache for existing asset", filePathRel, 3);
-
         try {
             cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
         }
@@ -328,7 +313,7 @@ class WpBuildPlugin
      * @param {string} outputDir Output directory of build
      * @returns {Promise<boolean>}
      */
-    async checkSnapshotExists(filePath, identifier, outputDir)
+    checkSnapshotExists = async (filePath, identifier, outputDir) =>
     {
         const logger = this.logger,
               filePathRel = relative(outputDir, filePath);
@@ -352,13 +337,13 @@ class WpBuildPlugin
 	 * @param {WebpackSnapshot} snapshot
 	 * @returns {Promise<boolean | undefined>}
 	 */
-	async checkSnapshotValid(snapshot)
+	checkSnapshotValid = async (snapshot) =>
 	{
 		return new Promise((resolve, reject) =>
 		{
 			this.compilation.fileSystemInfo.checkSnapshotValid(snapshot, (e, isValid) => { if (e) { reject(e); } else { resolve(isValid); }});
 		});
-	}
+	};
 
 
 	/**
@@ -370,7 +355,7 @@ class WpBuildPlugin
 	 * @param {string} dependency
 	 * @returns {Promise<WebpackSnapshot | undefined | null>}
 	 */
-	async createSnapshot(startTime, dependency)
+	createSnapshot = async (startTime, dependency) =>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -378,7 +363,7 @@ class WpBuildPlugin
 				undefined, undefined, null, (e, snapshot) => { if (e) { reject(e); } else { resolve(snapshot); }}
 			);
 		});
-	}
+	};
 
 
 	/**
@@ -828,4 +813,3 @@ class WpBuildPlugin
 
 
 module.exports = WpBuildPlugin;
-module.exports.WpBuildError = WpBuildError;

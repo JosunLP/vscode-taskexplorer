@@ -67,27 +67,7 @@ declare type WpBuildEnvironment= keyof WpBuildRcEnvironment;
 declare type WpBuildRcExport = keyof WpBuildRcExports;
 declare type WpBuildRcPlugin = keyof WpBuildRcPlugins;
 
-declare class WpBuildRc implements IDisposable
-{
-    constructor();
-    builds: WpBuildRcBuilds;
-    colors: WpBuildRcLogColorMap;
-    detailedDisplayName: string;           // Displayed in startup banner detail line
-    displayName: string;                  // displayName (read from package.json)
-    exports: WpBuildRcExports;
-    publicInfoProject: boolean | string;  // Project w/ private repo that maintains a public `info` project
-    log: WpBuildRcLog;
-    name: string;                         // project name (read from package.json)
-    paths: WpBuildRcPaths;
-    pkgJson: WpBuildRcPackageJson;
-    plugins: WpBuildRcPlugins;
-    version: string;                      // app version (read from package.json)
-    vscode: WpBuildRcVsCode
-};
-
-
 export {
-    WpBuildRc,
     WpBuildEnvironment,
     WpBuildModule,
     WpBuildRcBuild,

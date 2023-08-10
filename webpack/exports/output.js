@@ -10,7 +10,7 @@ const { apply } = require("../utils/utils");
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 
 /**
@@ -47,7 +47,7 @@ const output = (app) =>
 		apply(app.wpc.output,
 		{
 			clean: app.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			path: app.rc.paths.distTests,
+			path: app.paths.distTests,
 			filename: "[name].js",
 			libraryTarget: "umd",
 			umdNamedDefine: true

@@ -8,7 +8,7 @@
  */
 
 /** @typedef {import("../types").WpBuildModule} WpBuildModule */
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 
 /**

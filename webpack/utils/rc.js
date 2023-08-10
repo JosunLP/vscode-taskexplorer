@@ -219,7 +219,7 @@ class WpBuildRc
     {
         const rcJson = this.find(".wpbuildrc.json", resolve(__dirname, ".."), this.readWpBuildRc),
               defRcPath = resolve(__dirname, "..", "types", ".wpbuildrc.defaults.json");
-        return apply(rcJson.data, { pkgJson: this.readPackageJson() }, JSON5.parse(readFileSync(defRcPath, "utf8")));
+        return apply(JSON5.parse(readFileSync(defRcPath, "utf8")), rcJson.data, { pkgJson: this.readPackageJson() });
     };
 
 

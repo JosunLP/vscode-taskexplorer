@@ -40,7 +40,7 @@ export * from "./wpbuild";
 /**
  * WpBuild application specific types library
  */
-export * from "./wpbuildrc";
+export * from "./wpbuild";
 
 /**
  * Base webpack types library
