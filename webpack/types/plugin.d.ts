@@ -17,7 +17,7 @@
  */
 
 import { WpBuildApp } from "./app";
-import { WpBuildLogTrueColor } from "./wpbuild";
+import { WpBuildLogTrueColor } from "./logger";
 import {
     WebpackCompilationHookName, WebpackCompilerHookName, WebpackCompiler, WebpackCompilationAssets, WebpackCompilationParams,
     WebpackPluginInstance, WebpackCompilationHookStage

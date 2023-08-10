@@ -24,18 +24,17 @@
  */
 
 
+const WpBuildRc = require("./webpack/utils/rc");
 const WpBuildApp = require("./webpack/utils/app");
 const { globalEnv } = require("./webpack/utils/global");
 const {
 	cache, context, devtool, entry, experiments, externals, ignorewarnings, minification,
 	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch, getMode
 } = require("./webpack/exports");
-const { WpBuildRc } = require("./webpack/types");
 
 /** @typedef {import("./webpack/types").WebpackMode} WebpackMode */
 /** @typedef {import("./webpack/types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("./webpack/types").WpBuildModule} WpBuildModule */
-/** @typedef {import("./webpack/types").WebpackConfig} WebpackConfig */
 /** @typedef {import("./webpack/types").WebpackTarget} WebpackTarget */
 /** @typedef {import("./webpack/types").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("./webpack/types").WpBuildEnvironment} WpBuildEnvironment */
@@ -46,29 +45,29 @@ const { WpBuildRc } = require("./webpack/types");
 
 
 /**
- * Export Webpack build config<WebpackConfig>(s)
+ * Export Webpack build config<WpBuildWebpackConfig>(s)
  *
  * @param {WpBuildRuntimeEnvArgs} env Environment variable containing runtime options passed
  * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`).
  * @param {WebpackRuntimeArgs} argv Webpack command line args
- * @returns {WebpackConfig|WebpackConfig[]}
+ * @returns {WpBuildWebpackConfig|WpBuildWebpackConfig[]}
  */
 module.exports = (env, argv) =>
 {
-	const rc = new WpBuildRc();
+	const mode = getMode(env, argv),
+		  rc = new WpBuildRc(mode, argv, env);
 	if (env.build) {
 		return buildConfig(new WpBuildApp(argv, env, rc, globalEnv));
 	}
-	const mode = getMode(env, argv),
-		  envMode = env.environment || (mode === "development" ? "dev" : (mode === "production" ? "prod" : "test"));
+	const envMode = env.environment || (mode === "development" ? "dev" : (mode === "production" ? "prod" : "test"));
 	return rc.builds[envMode].map(build => buildConfig(getApp(env, argv, rc, build)));
 };
 
 
 /**
- * @function Calls all exports.* default expoirts to construct a {@link WebpackConfig webpack build configuration}
+ * @function Calls all exports.* default expoirts to construct a {@link WpBuildWebpackConfig webpack build configuration}
  * @param {WpBuildApp} app Webpack build environment
- * @returns {WebpackConfig}
+ * @returns {WpBuildWebpackConfig}
  */
 const buildConfig = (app) =>
 {
@@ -113,7 +112,6 @@ const getApp = (env, argv, rc, build) =>  new WpBuildApp(argv, env, rc, globalEn
 const write = (app) =>
 {
 	const l = app.logger;
-	l.printBanner();
 	l.value(
 		`Start Webpack build ${++globalEnv.buildCount}`,
 		l.tag(app.build, l.colors.cyan, l.colors.white) + " " + l.tag(app.target, l.colors.cyan, l.colors.white),

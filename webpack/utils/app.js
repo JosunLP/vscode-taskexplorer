@@ -279,7 +279,7 @@ class WpBuildApp
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
 		}
-		return this.resolveRcPaths(baseDir, apply(paths, { ...this.rc.paths },
+		return this.resolveRcPaths(baseDir, apply(paths, { ...app.rc.paths },
 		{
 			temp,
 			build: baseDir,

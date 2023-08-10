@@ -239,7 +239,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
      */
     saveAssetState()
     {
-        apply(this.cache.get(), this.app.global.runtimeVars.hash);
+        this.cache.set(this.app.global.runtimeVars);
         this.cache.save();
         this.logAssetInfo();
     }

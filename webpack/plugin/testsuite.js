@@ -97,7 +97,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 		if (!existsSync(testsDir))
 		{
 			this.app.logger.write("   checking for tsbuildinfo file path", 3);
-			const tsConfig = getTsConfig(this.app, tsConfigFile);
+			const tsConfig = getTsConfig(dirname(tsConfigFile), tsConfigFile);
 			let buildInfoFile = tsConfig.compilerOptions.tsBuildInfoFile || join(dirname(tsConfigFile), "tsconfig.tsbuildinfo");
 			if (!isAbsolute(buildInfoFile)) {
 				buildInfoFile = resolve(dirname(tsConfigFile), buildInfoFile);
