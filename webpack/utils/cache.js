@@ -6,24 +6,18 @@
  * @module wpbuild.utils.app
  */
 
-const { resolve, isAbsolute, join } = require("path");
-const { globalEnv } = require("./global");
-const gradient = require("gradient-string");
-const { WebpackError } = require("webpack");
-const WpBuildConsoleLogger = require("./console");
+const { merge, clone } = require("./utils");
+const {  writeFile } = require("fs/promises");
+const { resolve, isAbsolute } = require("path");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
-const { merge, pickBy, mergeIf, clone } = require("./utils");
-const { access, readFile, writeFile } = require("fs/promises");
 
-/** @typedef {import("../types").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackMode} WebpackMode */
-/** @typedef {import("../types").WpBuildWebpackArgs} WpBuildWebpackArgs */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
+/** @typedef {import("../types").IDisposable} IDisposable */
 
 
 /**
- * @class
+ * @class WpBuildCache
+ * @implements {IDisposable}
  */
 class WpBuildCache
 {
@@ -53,7 +47,6 @@ class WpBuildCache
      * @class WpBuildApplication
      * @param {WpBuildApp} app Webpack build environment
      * @param {string} file Filename to read/write cache to
-     * @throws {WebpackError}
      */
     constructor(app, file)
     {
@@ -63,6 +56,8 @@ class WpBuildCache
         }
         this.cache = this.read();
     }
+
+    dispose = () => this.saveAsync();
 
 
     /**

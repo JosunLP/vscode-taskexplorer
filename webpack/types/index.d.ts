@@ -25,7 +25,7 @@ export * from "./generic";
 /**
  * Log typings
  */
-export * from "./log";
+export * from "./logger";
 
 /**
  * WpBuild application specific types library

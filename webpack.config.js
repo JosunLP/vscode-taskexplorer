@@ -24,7 +24,8 @@
  */
 
 
-const { globalEnv, WpBuildApp } = require("./webpack/utils");
+const WpBuildApp = require("./webpack/utils/app");
+const { globalEnv } = require("./webpack/utils/global");
 const {
 	cache, context, devtool, entry, experiments, externals, ignorewarnings, minification,
 	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch
@@ -55,10 +56,10 @@ module.exports = (env, argv) =>
 {
 	const app = new WpBuildApp(argv, env);
 	if (env.build) {
-		return buildConfig(new WpBuildApp(argv, env));
+		return buildConfig(getApp(env, argv));
 	}
 	const envMode = env.environment || (app.wpc.mode === "development" ? "dev" : (app.wpc.mode === "production" ? "prod" : "test"));
-	return app.rc.builds[envMode].map(build => buildConfig(new WpBuildApp(argv, env, /** @type {WpBuildRcBuild} */(build))));
+	return app.rc.builds[envMode].map(build => buildConfig(getApp(env, argv, /** @type {WpBuildRcBuild} */(build))));
 };
 
 
@@ -90,6 +91,16 @@ const buildConfig = (app) =>
 	plugins(app);        // Plugins - exports.plugins() inits all plugin.plugins
 	return app.wpc;
 };
+
+
+/**
+ * @function
+ * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
+ * @param {WebpackRuntimeArgs} argv Webpack command line args
+ * @param {WpBuildRcBuild} [build]
+ * @returns {WpBuildApp}
+ */
+const getApp = (env, argv, build) =>  new WpBuildApp(argv, env, build);
 
 
 /**

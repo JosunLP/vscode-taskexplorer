@@ -10,15 +10,14 @@
  */
 
 const JSON5 = require("json5");
-const WpBuildApp = require("./app");
 const { readFileSync } = require("fs");
 const gradient = require("gradient-string");
 const { resolve, basename } = require("path");
 const WpBuildConsoleLogger = require("./console");
-const { merge, WpBuildError, findFilesSync, apply } = require("./utils");
+const { WpBuildError, findFilesSync, apply } = require("./utils");
 
-
-/** @typedef {import("../types").IWpBuildRc} IWpBuildRc */
+/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+/** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
 /** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
@@ -35,22 +34,10 @@ const { merge, WpBuildError, findFilesSync, apply } = require("./utils");
 
 /**
  * @class
- * @implements {IWpBuildRc}
+ * @implements {IDisposable}
  */
 class WpBuildRc
 {
-    /**
-     * @member {string} bannerName
-     * @memberof WpBuildRc.prototype
-     * @type {string}
-     */
-    bannerName;
-    /**
-     * @member {string} vscode
-     * @memberof WpBuildRc.prototype
-     * @type {string}
-     */
-    bannerNameDetailed;
     /**
      * @member {WpBuildRcBuilds} builds
      * @memberof WpBuildRc.prototype
@@ -63,6 +50,12 @@ class WpBuildRc
      * @type {WpBuildRcLogColorMap}
      */
     colors;
+    /**
+     * @member {string} detailedDisplayName
+     * @memberof WpBuildRc.prototype
+     * @type {string}
+     */
+    detailedDisplayName;
     /**
      * @member {string} displayName
      * @memberof WpBuildRc.prototype
@@ -131,9 +124,11 @@ class WpBuildRc
      */
     constructor(app)
     {
-        apply(this, merge(this.wpBuildRc(), { pkgJson: this.packageJson() }));
+        apply(this, this.wpBuildRc());
         this.printBanner(app);
     };
+
+    dispose = () => {};
 
 
     /**
@@ -180,7 +175,9 @@ class WpBuildRc
         if (files.length > 0)
         {
             try {
-                return JSON5.parse(readFileSync(files[0], "utf8"));
+                const rc = JSON5.parse(readFileSync(files[0], "utf8"));
+                rc.pkgJson = this.packageJson();
+                return rc;
             }
             catch (e) {
                 throw new WpBuildError(`Could not parse wpbuild config file ${basename(files[0])}, check syntax`, "utils/app.js", e.message);
@@ -215,7 +212,7 @@ class WpBuildRc
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
         console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
         this.printLineSep(logger);
-        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.bannerNameDetailed} Webpack Build`));
+        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.detailedDisplayName} Webpack Build`));
         this.printLineSep(logger);
         logger.write("   Mode  : " + logger.withColor(app.wpc.mode, logger.colors.grey), 1, "", 0, logger.colors.white);
         logger.write("   Argv  : " + logger.withColor(JSON.stringify(app.argv), logger.colors.grey), 1, "", 0, logger.colors.white);

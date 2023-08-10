@@ -17,9 +17,9 @@
  * and `IWpBuild` (interface) for convention.
  */
 
-import { WpBuildLogTrueColor } from "./log";
-import WpBuildRc from "./.wpbuildrc.defaults.json";
-import { ConvertType, ConvertType2, ConvertType3, PartialSome } from "./generic";
+import { WpBuildLogTrueColor } from "./logger";
+import WpBuildRcDefault from "./.wpbuildrc.defaults.json";
+import { ConvertType, ConvertType2, ConvertType3, IDisposable } from "./generic";
 
 
 // declare type WpBuildPluginTapOptionsCallbackType<T> = T extends ReturnType<IWpBuildPluginTapOptions["callback"]> ? X : never;
@@ -38,18 +38,18 @@ import { ConvertType, ConvertType2, ConvertType3, PartialSome } from "./generic"
  * Defined types for this module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
-declare type WpBuildRcBuilds = typeof WpBuildRc.builds;
-declare type WpBuildRcBuild = ConvertType3<ConvertType3<ConvertType3<ConvertType3<typeof WpBuildRc.builds.dev[0], "build", WpBuildModule>, "environment", WpBuildEnvironment>, "mode", WebpackMode>, "target", WebpackTarget>;
+declare type WpBuildRcBuilds = typeof WpBuildRcDefault.builds;
+declare type WpBuildRcBuild = ConvertType3<ConvertType3<ConvertType3<ConvertType3<typeof WpBuildRcDefault.builds.dev[0], "build", WpBuildModule>, "environment", WpBuildEnvironment>, "mode", WebpackMode>, "target", WebpackTarget>;
 declare type WpBuildRcBuildSet = WpBuildRcBuild[];
-declare type WpBuildRcEnvironment = typeof WpBuildRc.environment;
-declare type WpBuildRcExports =  typeof WpBuildRc.exports;
-declare type WpBuildRcLog= typeof WpBuildRc.log;
-declare type WpBuildRcLogColors = typeof WpBuildRc.colors;
-declare type WpBuildRcLogColorsBuild = typeof WpBuildRc.colors.builds;
-declare type WpBuildRcModules= typeof WpBuildRc.modules;
-declare type WpBuildRcPaths = typeof WpBuildRc.paths;
-declare type WpBuildRcPlugins = typeof WpBuildRc.plugins;
-declare type WpBuildRcVsCode= typeof WpBuildRc.vscode;
+declare type WpBuildRcEnvironment = typeof WpBuildRcDefault.environment;
+declare type WpBuildRcExports =  typeof WpBuildRcDefault.exports;
+declare type WpBuildRcLog= typeof WpBuildRcDefault.log;
+declare type WpBuildRcLogColors = typeof WpBuildRcDefault.colors;
+declare type WpBuildRcLogColorsBuild = typeof WpBuildRcDefault.colors.builds;
+declare type WpBuildRcModules= typeof WpBuildRcDefault.modules;
+declare type WpBuildRcPaths = typeof WpBuildRcDefault.paths;
+declare type WpBuildRcPlugins = typeof WpBuildRcDefault.plugins;
+declare type WpBuildRcVsCode= typeof WpBuildRcDefault.vscode;
 declare type WpBuildRcLogColorBuilds = ConvertType<WpBuildRcLogColorsBuild, string, WpBuildLogTrueColor>;
 declare type WpBuildRcLogColorMap = ConvertType2<WpBuildRcLogColors & { builds: WpBuildRcLogColorBuilds }, string, WpBuildLogTrueColor, WpBuildRcLogColorsBuild, WpBuildRcLogColorBuilds>;
 
@@ -66,18 +66,17 @@ declare interface IWpBuildPackageJson
 }
 declare type WpBuildRcPackageJson = IWpBuildPackageJson & Record<string, any>;
 
-// declare type WpBuildModule = PartialSome<typeof WpBuildRc.builds.dev[0], "environment" | "mode" | "target">;
+// declare type WpBuildModule = PartialSome<typeof WpBuildRcDefault.builds.dev[0], "environment" | "mode" | "target">;
 declare type WpBuildModule = keyof WpBuildRcModules;
 declare type WpBuildEnvironment= keyof WpBuildRcEnvironment;
-declare type WpBuildRcExport = Exclude<keyof WpBuildRcExports, "index">;
-declare type WpBuildRcPlugin = Exclude<keyof WpBuildRcPlugins, "index">;
+declare type WpBuildRcExport = keyof WpBuildRcExports;
+declare type WpBuildRcPlugin = keyof WpBuildRcPlugins;
 
-declare interface IWpBuildRc
+declare class WpBuildRc implements IDisposable
 {
-    bannerName: string;                   // Displayed in startup banner detail line
-    bannerNameDetailed: string;           // Displayed in startup banner detail line
     builds: WpBuildRcBuilds;
     colors: WpBuildRcLogColorMap;
+    detailedDisplayName: string;           // Displayed in startup banner detail line
     displayName: string;                  // displayName (read from package.json)
     exports: WpBuildRcExports;
     publicInfoProject: boolean | string;  // Project w/ private repo that maintains a public `info` project
@@ -88,17 +87,15 @@ declare interface IWpBuildRc
     plugins: WpBuildRcPlugins;
     version: string;                      // app version (read from package.json)
     vscode: WpBuildRcVsCode
-}
-declare type WpBuildRc = IWpBuildRc;
+};
 
 // declare type ModuleName = ExtractValue<WpBuildRc, "name">["name"];
 
 
 export {
-    IWpBuildRc,
+    WpBuildRc,
     WpBuildEnvironment,
     WpBuildModule,
-    WpBuildRc,
     WpBuildRcBuild,
     WpBuildRcBuilds,
     WpBuildRcBuildSet,

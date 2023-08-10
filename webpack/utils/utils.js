@@ -11,8 +11,6 @@ const { spawnSync } = require("child_process");
  * @module wpbuild.utils.utils
  */
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
-
 
 /**
  * @function
@@ -103,14 +101,14 @@ const findFilesSync = (pattern, options) => glob.sync(pattern, options).map((/**
 
 
 /**
- * @param {WpBuildApp} app Webpack build environment
+ * @param {string} baseDir Webpack build environment
  * @param {string} tsConfigFile
  * @returns {Record<string, any>}
  */
-const getTsConfig = (app, tsConfigFile) =>
+const getTsConfig = (baseDir, tsConfigFile) =>
 {
 	const result = spawnSync("npx", [ "tsc", `-p ${tsConfigFile}`, "--showConfig" ], {
-		cwd: app.paths.build,
+		cwd: baseDir,
 		encoding: "utf8",
 		shell: true,
 	});
@@ -193,66 +191,68 @@ const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanc
 /**
  * @function
  * @template {{}} [T=Record<string, any>]
- * @param {...(T | Partial<T>)} destination
+ * @param {...(T | Partial<T> | undefined)} destination
  * @returns {T}
  */
 const merge = (...destination) =>
 {
-    const ln = destination.length;
+    const ln = destination.length,
+          base = destination[0] || {};
     for (let i = 1; i < ln; i++)
     {
-        const object = destination[i];
+        const object = destination[i] || {};
         Object.keys(object).forEach((key) =>
         {
             const value = object[key];
             if (isObject(value))
             {
-                const sourceKey = destination[0][key];
+                const sourceKey = base[key];
                 if (isObject(sourceKey))
                 {
                     merge(sourceKey, value);
                 }
                 else {
-                    destination[0][key] = clone(value);
+                    base[key] = clone(value);
                 }
             }
             else {
-                destination[0][key] = value;
+                base[key] = value;
             }
         });
     }
-    return /** @type {T} */(destination[0]);
+    return /** @type {T} */(base);
 };
 
 
 /**
  * @function
  * @template {{}} [T=Record<string, any>]
- * @param {...(T | Partial<T>)} destination
+ * @param {...(T | Partial<T> | undefined)} destination
  * @returns {T}
  */
 const mergeIf = (...destination) =>
 {
-    const ln = destination.length;
+    const ln = destination.length,
+          base = destination[0] || {};
     for (let i = 1; i < ln; i++)
     {
-        const object = destination[i];
+        const object = destination[i] || {};
         for (const key in object)
         {
-            if (!(key in destination[0]))
+            if (!(key in base))
             {
                 const value = /** @type {Partial<T>} */(object[key]);
                 if (isObject(value))
                 {
-                    destination[0][key] = clone(value);
+                    base[key] = clone(value);
                 }
                 else {
-                    destination[0][key] = value;
+                    base[key] = value;
                 }
             }
         }
     }
-    return /** @type {T} */(destination[0]);
+    return /** @type {T} */(base);
 };
 
 

@@ -77,7 +77,7 @@ const { globalEnv, isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuild
 
 /**
  * @class WpBuildHashPlugin
- * @augments WebpackPluginInstance
+ * @implements {WebpackPluginInstance}
  */
 class WpBuildPlugin
 {
@@ -132,13 +132,6 @@ class WpBuildPlugin
      * @protected
      */
     name;
-
-    /**
-     * @member {string} nameCompilation
-     * @memberof WpBuildPlugin.prototype
-     * @private
-     */
-    nameCompilation;
 
     /**
      * @member {WpBuildPluginOptions} options
@@ -200,7 +193,6 @@ class WpBuildPlugin
         this.logger = this.app.logger;
         this.wpConfig = options.app.wpc;
         this.name = this.constructor.name;
-        this.nameCompilation = this.constructor.name + "_";
         this.options = mergeIf(options, { plugins: [] });
         this.hashDigestLength = this.app.wpc.output.hashDigestLength || 20;
         this.cache = new WpBuildCache(this.app, `cache_${this.name}.json`);
@@ -677,7 +669,6 @@ class WpBuildPlugin
               hook = this.compilation.hooks[options.hookCompilation];
         if (this.isTapable(hook))
         {
-            this.nameCompilation = name;
             if (stageEnum && options.hookCompilation === "processAssets")
             {
                 const logMsg = this.breakProp(optionName).padEnd(this.app.rc.log.pad.value - 3) + this.logger.tag(`processassets: ${options.stage} stage`);

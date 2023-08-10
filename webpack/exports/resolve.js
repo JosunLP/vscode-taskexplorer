@@ -8,10 +8,6 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-/**
- * @module wpbuild.exports.resolve
- */
-
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
 
 const path = require("path");

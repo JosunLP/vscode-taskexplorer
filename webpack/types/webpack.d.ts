@@ -1,14 +1,14 @@
 
-import { IWpBuildApp } from "./app";
 import { PickByType } from "./generic";
 import { AsyncSeriesHook, HookMap, SyncHook, SyncBailHook } from "tapable"
 import { Schema as WebpackSchema } from "schema-utils/declarations/validate";
 import {
     Asset as WebpackAsset, AssetInfo as WebpackAssetInfo, AssetEmittedInfo as WebpackAssetEmittedInfo,
     Cache as WebpackCache, Chunk as WebpackChunk, Configuration as WebpackConfig, Compilation as WebpackCompilation,
-    Compiler as WebpackCompiler, EntryObject as WebpackEntryObject,
-    sources as WebpackSources, Stats as WebpackStats, StatsAsset as WebpackStatsAsset, WebpackPluginInstance
+    Compiler as WebpackCompiler, EntryObject as WebpackEntryObject, sources as WebpackSources, Stats as WebpackStats,
+    StatsAsset as WebpackStatsAsset, WebpackPluginInstance
 } from "webpack"
+
 
 declare type WebpackTarget = "webworker" | "node" | "web";
 declare type WebpackMode = Exclude<WebpackConfig["mode"], undefined>;
@@ -62,7 +62,6 @@ declare type WebpackCompilerSyncHookName = keyof WebpackCompilerSyncHook;
 
 declare type WebpackRuntimeEnvArgs = { WEBPACK_WATCH?: boolean }
 
-
 declare type WebpackRuntimeArgs = {
     clean?: boolean;
     config: string[];
@@ -70,6 +69,7 @@ declare type WebpackRuntimeArgs = {
     mode?: WebpackMode;
     watch?: boolean;
 } & Record<string, string | boolean | WebpackRuntimeEnvArgs>;
+
 
 export {
     WebpackRuntimeArgs,

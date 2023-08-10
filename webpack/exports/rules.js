@@ -9,11 +9,9 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
-
 const path = require("path");
 const esbuild = require("esbuild");
-const { getTsConfig } = require("../utils");
+const { getTsConfig, WpBuildApp } = require("../utils");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
@@ -44,7 +42,7 @@ const rules = (app) =>
 					implementation: esbuild,
 					loader: "tsx",
 					target: "es2020",
-					tsconfigRaw: getTsConfig(app, path.join(app.paths.base, "tsconfig.json")),
+					tsconfigRaw: getTsConfig(app.paths.build, path.join(app.paths.base, "tsconfig.json")),
 				},
 			} : {
 				loader: "ts-loader",
@@ -123,7 +121,7 @@ const rules = (app) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						app, path.join(app.paths.build, "types", "tsconfig.json"),
+						app.paths.build, path.join(app.paths.build, "types", "tsconfig.json"),
 					)
 				}
 			} :
@@ -221,7 +219,7 @@ const rules = (app) =>
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
 					tsconfigRaw: getTsConfig(
-						app, path.join(app.paths.build, `tsconfig.${app.target}.json`),
+						app.paths.build, path.join(app.paths.build, `tsconfig.${app.target}.json`),
 					)
 				}
 			} :

@@ -10,18 +10,18 @@
  */
 
 const WpBuildRc = require("./rc");
+const { getMode } = require("../exports");
 const { globalEnv } = require("./global");
 const { WebpackError } = require("webpack");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
 const { join, resolve, isAbsolute } = require("path");
-const { mergeIf, apply, isString, merge } = require("./utils");
-const { getMode } = require("../exports");
+const { apply, isString, merge } = require("./utils");
 
 
 /** @typedef {import("../types").Disposable} Disposable */
+/** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
-/** @typedef {import("../types").IWpBuildApp} IWpBuildApp */
 /** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("../types").WpBuildModule} WpBuildModule */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
@@ -36,7 +36,7 @@ const { getMode } = require("../exports");
 
 /**
  * @class WpBuildApp
- * @implements {IWpBuildApp}
+ * @implements {IDisposable}
  */
 class WpBuildApp
 {
@@ -143,13 +143,7 @@ class WpBuildApp
      */
     paths;
     /**
-     * @member {boolean} preRelease
-     * @memberof WpBuildApp.prototype
-     * @type {boolean}
-     */
-    preRelease;
-    /**
-     * @member {WpBuildRc} analyze
+     * @member {WpBuildRc} rc
      * @memberof WpBuildApp.prototype
      * @type {WpBuildRc}
      */
@@ -182,9 +176,11 @@ class WpBuildApp
 	 */
 	constructor(argv, env, build)
 	{
-		merge(this, this.wpApp(argv, env, build));
+		apply(this, this.wpApp(argv, env, build));
 		globalEnv.verbose = !!this.verbosity && this.verbosity !== "none";
 	}
+
+    dispose = () => {};
 
 
 	/**
@@ -249,10 +245,10 @@ class WpBuildApp
 			}
 		}
 
-		this.rc = new WpBuildRc(app);
+		app.rc = new WpBuildRc(app);
 
 		merge(app, {
-			isTests: this.environment.startsWith("test"),
+			isTests: app.environment.startsWith("test"),
 			isWeb: app.target.startsWith("web"),
 			isMain: app.build === "extension" || app.build === "web",
 			isMainProd: (app.build === "extension" || app.build === "web") && app.environment === "prod",
@@ -260,7 +256,6 @@ class WpBuildApp
 		});
 
 		app.paths = this.getPaths(app);
-
 		return app;
 	};
 

@@ -1,5 +1,13 @@
 // @ts-check
 
+/**
+ * @file exports/index.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
+ */
+
+
 const cache = require("./cache");
 const context = require("./context");
 const devtool = require("./devtool");

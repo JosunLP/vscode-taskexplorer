@@ -3,22 +3,22 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-const { isString, isObject, isPrimitive, asArray } = require("./utils");
+const { isString, isObject, isPrimitive } = require("./utils");
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */
-/** @typedef {[ number, number ]} WpBuildLogColorMapping */
+/** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WpBuildLogIcon} WpBuildLogIcon */
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
 /** @typedef {import("../types").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("../types").WpBuildLogLevel}  WpBuildLogLevel */
 /** @typedef {import("../types").WpBuildLogIconSet}  WpBuildLogIconSet */
 /** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
+/** @typedef {import("../types").WpBuildLogColorMapping} WpBuildLogColorMapping */
 
 /**
- * @module wpbuild.utils.console
+ * @class WpBuildConsoleLogger
+ * @implements {IDisposable}
  */
-
-
 class WpBuildConsoleLogger
 {
     /**
@@ -196,7 +196,9 @@ class WpBuildConsoleLogger
 
 
     /**
-     * @function Performs inline text coloring e.g. a message can contain ""..finished italic(main module) in 2.3s"
+     * Performs inline text coloring e.g. a message can contain ""..finished italic(main module) in 2.3s"
+     * @function
+     * @private
      * @param {string | undefined} msg
      * @returns {string}
      */
@@ -216,6 +218,7 @@ class WpBuildConsoleLogger
 
     /**
      * @function
+     * @private
      * @param {string | undefined | null | 0 | false} icon
      * @returns {WpBuildLogColorMapping}
      */
@@ -241,6 +244,7 @@ class WpBuildConsoleLogger
 
     /**
      * @function
+     * @private
      * @param {string} icon
      * @param {WpBuildLogColorMapping} color color value
      * @returns {string}
@@ -256,12 +260,13 @@ class WpBuildConsoleLogger
     start = (msg, level) =>  this.write(this.icons.color.start + (msg ? "  " + msg : ""), level);
 
 
-    /**
-     * @function
-     * @param {WpBuildLogColor} color
-     * @returns {WpBuildLogColorMapping}
-     */
-    str2clr = (color) => this.colors[color];
+    // /**
+    //  * @function
+    //  * @private
+    //  * @param {WpBuildLogColor} color
+    //  * @returns {WpBuildLogColorMapping}
+    //  */
+    // str2clr = (color) => this.colors[color];
 
 
     /**
@@ -290,6 +295,8 @@ class WpBuildConsoleLogger
 
 
     /**
+     * @function
+     * @private
      * @param {WpBuildLogColorMapping} color color value
      * @param {string} [msg] message to include in length calculation
      * @returns {number}
@@ -439,14 +446,14 @@ class WpBuildConsoleLogger
 
     /**
      * @function
-     * @param {string} hookMsg
-     * @param {string} hookDsc
+     * @param {string} msg
+     * @param {string} dsc
      * @param {WpBuildLogLevel} [level]
      * @param {string} [pad] Message pre-padding
      * @param {WpBuildLogColorMapping} [iconColor]
      * @param {WpBuildLogColorMapping} [msgColor]
      */
-    valuestar = (hookMsg, hookDsc, level, pad, iconColor, msgColor) =>
+    valuestar = (msg, dsc, level, pad, iconColor, msgColor) =>
     {
         const icon = this.withColor(
             this.icons.star,
@@ -456,10 +463,10 @@ class WpBuildConsoleLogger
         );
         if (this.app.rc.colors.valueStarText && this.app.rc.colors.valueStarText !== "white")
         {
-            this.value(hookMsg, `${icon} ${this.withColor(hookDsc, this.colors[this.app.rc.colors.valueStarText])} ${icon}`, level, pad, 0, msgColor);
+            this.value(msg, `${icon} ${this.withColor(dsc, this.colors[this.app.rc.colors.valueStarText])} ${icon}`, level, pad, 0, msgColor);
         }
         else {
-            this.value(hookMsg, `${icon} ${hookDsc} ${icon}`, level, pad, undefined, msgColor);
+            this.value(msg, `${icon} ${dsc} ${icon}`, level, pad, undefined, msgColor);
         }
     };
 
@@ -469,7 +476,7 @@ class WpBuildConsoleLogger
      * @param {any} msg
      * @param {string} [pad]
      */
-    warning = (msg, pad = "") => this.write(msg, undefined, pad, this.icons.color.warning);
+    warning = (msg, pad) => this.write(msg, undefined, pad, this.icons.color.warning);
 
 }
 

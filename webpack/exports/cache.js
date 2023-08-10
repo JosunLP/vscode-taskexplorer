@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 /**
- * @module wpbuild.exports.cache
+ * @file exports/cache.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildApp} WpBuildApp */
+const { WpBuildApp } = require("../utils");
 
 
 /**

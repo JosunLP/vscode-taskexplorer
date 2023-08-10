@@ -17,12 +17,13 @@
  * and `IWpBuild` (interface) for convention.
  */
 
-import { WpBuildConsoleLogger } from "../utils";
-import { WpBuildRc, WpBuildEnvironment, WpBuildModule, WpBuildRcPaths, WpBuildRcBuild } from "./wpbuild";
-import { WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackRuntimeArgs, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode } from "./webpack"
+import { IDisposable } from "./generic";
+import { WpBuildRc, WpBuildEnvironment, WpBuildModule, WpBuildRcPaths } from "./wpbuild";
+import {
+    WebpackConfig, WebpackEntry, WebpackLogLevel, WebpackOutput, WebpackRuntimeArgs, WebpackRuntimeEnvArgs,
+    WebpackTarget, WebpackMode
+} from "./webpack"
 
-
-declare type Disposable = Required<{ dispose: () => void | PromiseLike<void>; }>;
 
 declare type WpBuildConfig = {
     mode: WebpackMode;
@@ -55,12 +56,12 @@ declare type WpBuildPaths = {
 
 declare const __WPBUILD__: WpBuildRuntimeVariables;
 
-declare interface IWpBuildApp
+declare class WpBuildApp implements IDisposable
 {
     analyze: boolean;                     // parform analysis after build
-    rc: WpBuildRc;                      // target js app info
-    argv: WebpackRuntimeArgs,
-    arge: WpBuildRuntimeEnvArgs,
+    rc: WpBuildRc;                        // target js app info
+    argv: WebpackRuntimeArgs;
+    arge: WpBuildRuntimeEnvArgs;
     build: WpBuildModule;
     clean: boolean;
     disposables: Array<Disposable>;
@@ -68,24 +69,21 @@ declare interface IWpBuildApp
     esbuild: boolean;                     // Use esbuild and esloader
     imageOpt: boolean;                    // Perform image optimization
     isMain: boolean;
-    isMainProd: boolean,
+    isMainProd: boolean;
     isMainTests: boolean;
     isTests: boolean;
     isWeb: boolean;
     global: WpBuildGlobalEnvironment;    // Accessible by all parallel builds
     logger: WpBuildConsoleLogger;
     paths: WpBuildPaths;
-    preRelease: boolean;
     target: WebpackTarget;
     verbosity: WebpackLogLevel;
     wpc: WpBuildWebpackConfig;
-}
-declare type WpBuildApp = IWpBuildApp;
+};
 
 
 export {
     Disposable,
-    IWpBuildApp,
     WpBuildApp,
     WpBuildExportsFlags,
     WpBuildModule,

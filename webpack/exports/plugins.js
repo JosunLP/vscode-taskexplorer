@@ -1,6 +1,13 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+/**
+ * @file exports/plugins.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
+ */
+
 const {
 	analyze, banner, clean, copy, dispose, environment, istanbul, loghooks,
 	ignore, optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload, wait,

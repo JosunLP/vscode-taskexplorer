@@ -1,7 +1,10 @@
 // @ts-check
 
 /**
- * @module wpbuild.exports.externals
+ * @file exports/extenals.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
  */
 
 /** @typedef {import("../types").WpBuildApp} WpBuildApp */

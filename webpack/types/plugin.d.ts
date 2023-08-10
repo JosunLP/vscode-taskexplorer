@@ -17,15 +17,12 @@
  * and `IWpBuild` (interface) for convention.
  */
 
+import { WpBuildApp } from "./app";
+import { WpBuildLogTrueColor } from "./wpbuild";
 import {
-    WebpackCompilationHookName, WebpackCompilerHookName, WebpackCompiler, WebpackCompilationAssets, WebpackCompilationParams, WebpackPluginInstance, WebpackCompilationHookStage
+    WebpackCompilationHookName, WebpackCompilerHookName, WebpackCompiler, WebpackCompilationAssets, WebpackCompilationParams,
+    WebpackPluginInstance, WebpackCompilationHookStage
 } from "./webpack";
-import {
-    WpBuildEnvironment, WpBuildLogTrueColor
-} from "./wpbuild";
-import {
-    WpBuildApp
-} from "./app";
 
 
 interface IWpBuildPluginVendorOptions

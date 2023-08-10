@@ -29,6 +29,8 @@ declare type ConvertType3<T, K extends keyof T, NewType> = { [P in keyof T]: P e
 /* WORKING ON */
 declare type PartialSome<T extends object, K extends keyof T> = (Partial<Pick<T, K>> & Omit<T, K>);
 
+declare interface IDisposable { dispose: () => void | PromiseLike<void>; };
+declare type Disposable = Required<{ dispose: () => void | PromiseLike<void>; }>;
 
 export {
     AsArray,
@@ -36,7 +38,9 @@ export {
     ConvertType2,
     ConvertType3,
     ConvertTypeExcludeNon,
+    Disposable,
     ExtractTypings,
+    IDisposable,
     PartialSome,
     PickByType,
     RequireKeys
