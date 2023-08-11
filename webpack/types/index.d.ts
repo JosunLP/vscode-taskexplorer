@@ -35,12 +35,7 @@ export * from "./plugin";
 /**
  * WpBuild application specific types library
  */
-export * from "./wpbuild";
-
-/**
- * WpBuild application specific types library
- */
-export * from "./wpbuild";
+export * from "./rc";
 
 /**
  * Base webpack types library

@@ -1,0 +1,816 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "minLength": 1
+        },
+        "displayName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "detailedDisplayName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "moduleName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "publicInfoProject": {
+            "type": "boolean"
+        },
+        "colors": {
+            "type": "object",
+            "properties": {
+                "default": {
+                    "type": "string"
+                },
+                "buildBracket": {
+                    "type": "string"
+                },
+                "buildText": {
+                    "type": "string"
+                },
+                "infoIcon": {
+                    "type": "string"
+                },
+                "valueStar": {
+                    "type": "string"
+                },
+                "valueStarText": {
+                    "type": "string"
+                },
+                "tagBracket": {
+                    "type": "string"
+                },
+                "tagText": {
+                    "type": "string"
+                },
+                "uploadSymbol": {
+                    "type": "string"
+                }
+            },
+            "oneOf": [
+                {
+                    "const": "black"
+                },
+                {
+                    "const": "blue"
+                },
+                {
+                    "const": "cyan"
+                },
+                {
+                    "const": "green"
+                },
+                {
+                    "const": "grey"
+                },
+                {
+                    "const": "magenta"
+                },
+                {
+                    "const": "red"
+                },
+                {
+                    "const": "white"
+                },
+                {
+                    "const": "yellow"
+                }
+            ],
+            "required": []
+        },
+        "environment": {
+            "type": "object",
+            "properties": {
+                "dev": {
+                    "type": "object",
+                    "properties": {
+                        "builds": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "minItems": 1,
+                            "items": {
+                                "required": [
+                                    "build"
+                                ],
+                                "properties": {
+                                    "build": {
+                                        "type": "string",
+                                        "minLength": 1
+                                    },
+                                    "mode": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "development"
+                                            },
+                                            {
+                                                "const": "production"
+                                            },
+                                            {
+                                                "const": "none"
+                                            }
+                                        ]
+                                    },
+                                    "environment": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "dev"
+                                            },
+                                            {
+                                                "const": "prod"
+                                            },
+                                            {
+                                                "const": "test"
+                                            },
+                                            {
+                                                "const": "testprod"
+                                            }
+                                        ]
+                                    },
+                                    "target": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "node"
+                                            },
+                                            {
+                                                "const": "web"
+                                            },
+                                            {
+                                                "const": "webworker"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "overrides": {}
+                    },
+                    "required": [
+                        "builds"
+                    ]
+                },
+                "testprod": {
+                    "type": "object",
+                    "properties": {
+                        "builds": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "minItems": 1,
+                            "items": {
+                                "required": [
+                                    "build"
+                                ],
+                                "properties": {
+                                    "build": {
+                                        "type": "string",
+                                        "minLength": 1
+                                    },
+                                    "mode": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "development"
+                                            },
+                                            {
+                                                "const": "production"
+                                            },
+                                            {
+                                                "const": "none"
+                                            }
+                                        ]
+                                    },
+                                    "environment": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "dev"
+                                            },
+                                            {
+                                                "const": "prod"
+                                            },
+                                            {
+                                                "const": "test"
+                                            },
+                                            {
+                                                "const": "testprod"
+                                            }
+                                        ]
+                                    },
+                                    "target": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "node"
+                                            },
+                                            {
+                                                "const": "web"
+                                            },
+                                            {
+                                                "const": "webworker"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "overrides": {}
+                    },
+                    "required": [
+                        "builds"
+                    ]
+                },
+                "prod": {
+                    "type": "object",
+                    "properties": {
+                        "builds": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "minItems": 1,
+                            "items": {
+                                "required": [
+                                    "build"
+                                ],
+                                "properties": {
+                                    "build": {
+                                        "type": "string",
+                                        "minLength": 1
+                                    },
+                                    "mode": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "development"
+                                            },
+                                            {
+                                                "const": "production"
+                                            },
+                                            {
+                                                "const": "none"
+                                            }
+                                        ]
+                                    },
+                                    "environment": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "dev"
+                                            },
+                                            {
+                                                "const": "prod"
+                                            },
+                                            {
+                                                "const": "test"
+                                            },
+                                            {
+                                                "const": "testprod"
+                                            }
+                                        ]
+                                    },
+                                    "target": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "node"
+                                            },
+                                            {
+                                                "const": "web"
+                                            },
+                                            {
+                                                "const": "webworker"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "overrides": {}
+                    },
+                    "required": [
+                        "builds"
+                    ]
+                },
+                "test": {
+                    "type": "object",
+                    "properties": {
+                        "builds": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "minItems": 1,
+                            "items": {
+                                "required": [
+                                    "build"
+                                ],
+                                "properties": {
+                                    "build": {
+                                        "type": "string",
+                                        "minLength": 1
+                                    },
+                                    "environment": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "dev"
+                                            },
+                                            {
+                                                "const": "prod"
+                                            },
+                                            {
+                                                "const": "test"
+                                            },
+                                            {
+                                                "const": "testprod"
+                                            }
+                                        ]
+                                    },
+                                    "mode": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "development"
+                                            },
+                                            {
+                                                "const": "production"
+                                            },
+                                            {
+                                                "const": "none"
+                                            }
+                                        ]
+                                    },
+                                    "target": {
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "node"
+                                            },
+                                            {
+                                                "const": "web"
+                                            },
+                                            {
+                                                "const": "webworker"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "overrides": {
+                            "type": "object",
+                            "properties": {
+                                "colors": {
+                                    "type": "object",
+                                    "properties": {
+                                        "buildBracket": {
+                                            "type": "string",
+                                            "minLength": 1
+                                        }
+                                    },
+                                    "required": []
+                                },
+                                "log": {
+                                    "type": "object",
+                                    "properties": {
+                                        "pad": {
+                                            "type": "object",
+                                            "properties": {
+                                                "value": {
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "required": []
+                                        }
+                                    },
+                                    "required": []
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    "required": [
+                        "builds"
+                    ]
+                }
+            },
+            "required": [
+                "dev",
+                "testprod",
+                "prod",
+                "test"
+            ]
+        },
+        "log": {
+            "type": "object",
+            "properties": {
+                "level": {
+                    "type": "number",
+                    "oneOf": [
+                        {
+                            "const": 0,
+                            "description": "No logging"
+                        },
+                        {
+                            "const": 1,
+                            "description": "Logging level 1 - Errors, warnings, and function start/end"
+                        },
+                        {
+                            "const": 2,
+                            "description": "Logging level 2 - Level 1 + parameter values"
+                        },
+                        {
+                            "const": 3,
+                            "description": "Logging level 3 - Level 2 + non-looping processing detail"
+                        },
+                        {
+                            "const": 4,
+                            "description": "Logging level 4 - Level 3 + looping processing detail"
+                        },
+                        {
+                            "const": 5,
+                            "description": "Logging level 5 - Verbose"
+                        }
+                    ]
+                },
+                "maxValueLineLength": {
+                    "type": "number"
+                },
+                "pad": {
+                    "type": "object",
+                    "properties": {
+                        "basePad": {
+                            "type": "number"
+                        },
+                        "envTag": {
+                            "type": "number"
+                        },
+                        "value": {
+                            "type": "number"
+                        },
+                        "uploadFileName": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "basePad",
+                        "envTag",
+                        "value",
+                        "uploadFileName"
+                    ]
+                }
+            },
+            "required": [
+                "level",
+                "maxValueLineLength",
+                "pad"
+            ]
+        },
+        "modules": {
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                  "anyOf": [
+                    {"type": "string"},
+                    {"type": "null"}
+                  ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "paths": {
+            "type": "object",
+            "properties": {
+                "dist": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "distTests": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "src": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "srcTests": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "dist",
+                "distTests",
+                "src",
+                "srcTests"
+            ]
+        },
+        "exports": {
+            "type": "object",
+            "properties": {
+                "cache": {
+                    "type": "boolean"
+                },
+                "context": {
+                    "type": "boolean"
+                },
+                "devtool": {
+                    "type": "boolean"
+                },
+                "entry": {
+                    "type": "boolean"
+                },
+                "experiments": {
+                    "type": "boolean"
+                },
+                "externals": {
+                    "type": "boolean"
+                },
+                "ignorewarnings": {
+                    "type": "boolean"
+                },
+                "minification": {
+                    "type": "boolean"
+                },
+                "mode": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "boolean"
+                },
+                "optimization": {
+                    "type": "boolean"
+                },
+                "output": {
+                    "type": "boolean"
+                },
+                "plugins": {
+                    "type": "boolean"
+                },
+                "resolve": {
+                    "type": "boolean"
+                },
+                "rules": {
+                    "type": "boolean"
+                },
+                "stats": {
+                    "type": "boolean"
+                },
+                "target": {
+                    "type": "boolean"
+                },
+                "watch": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "context",
+                "entry",
+                "mode",
+                "name",
+                "optimization",
+                "output",
+                "plugins",
+                "resolve",
+                "rules",
+                "target"
+            ]
+        },
+        "plugins": {
+            "type": "object",
+            "properties": {
+                "analyze": {
+                    "type": "boolean"
+                },
+                "banner": {
+                    "type": "boolean"
+                },
+                "build": {
+                    "type": "boolean"
+                },
+                "clean": {
+                    "type": "boolean"
+                },
+                "copy": {
+                    "type": "boolean"
+                },
+                "environment": {
+                    "type": "boolean"
+                },
+                "hash": {
+                    "type": "boolean"
+                },
+                "html": {
+                    "type": "boolean"
+                },
+                "ignore": {
+                    "type": "boolean"
+                },
+                "istanbul": {
+                    "type": "boolean"
+                },
+                "licensefiles": {
+                    "type": "boolean"
+                },
+                "loghooks": {
+                    "type": "boolean"
+                },
+                "optimization": {
+                    "type": "boolean"
+                },
+                "progress": {
+                    "type": "boolean"
+                },
+                "runtimevars": {
+                    "type": "boolean"
+                },
+                "scm": {
+                    "type": "boolean"
+                },
+                "sourcemaps": {
+                    "type": "boolean"
+                },
+                "testsuite": {
+                    "type": "boolean"
+                },
+                "tscheck": {
+                    "type": "boolean"
+                },
+                "upload": {
+                    "type": "boolean"
+                },
+                "vendormod": {
+                    "type": "boolean"
+                },
+                "wait": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "environment",
+                "optimization"
+            ]
+        },
+        "vscode": {
+            "type": "object",
+            "properties": {
+                "webview": {
+                    "type": "object",
+                    "properties": {
+                        "baseDir": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "apps": {
+                            "type": "object",
+                            "properties": {
+                                "home": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "license": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "monitor": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "parsingReport": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "releaseNotes": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "taskCount": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "taskDetails": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "taskUsage": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "welcome": {
+                                    "type": "string",
+                                    "minLength": 1
+                                }
+                            },
+                            "required": [
+                                "home",
+                                "license",
+                                "monitor",
+                                "parsingReport",
+                                "releaseNotes",
+                                "taskCount",
+                                "taskDetails",
+                                "taskUsage",
+                                "welcome"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "baseDir",
+                        "apps"
+                    ]
+                }
+            },
+            "required": [
+                "webview"
+            ]
+        }
+    },
+    "required": [
+        "name",
+        "displayName",
+        "detailedDisplayName",
+        "moduleName",
+        "environment",
+        "modules",
+        "paths",
+        "exports",
+        "plugins"
+    ],
+    "$defs":
+    {
+        "envDefinition": {
+            "type": "object",
+            "properties": {
+                "builds": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "items": {
+                        "required": [
+                            "build"
+                        ],
+                        "properties": {
+                            "build": {
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "mode": {
+                                "type": "string",
+                                "oneOf": [
+                                    {
+                                        "const": "development"
+                                    },
+                                    {
+                                        "const": "production"
+                                    },
+                                    {
+                                        "const": "none"
+                                    }
+                                ]
+                            },
+                            "environment": {
+                                "type": "string",
+                                "oneOf": [
+                                    {
+                                        "const": "dev"
+                                    },
+                                    {
+                                        "const": "prod"
+                                    },
+                                    {
+                                        "const": "test"
+                                    },
+                                    {
+                                        "const": "testprod"
+                                    }
+                                ]
+                            },
+                            "target": {
+                                "type": "string",
+                                "oneOf": [
+                                    {
+                                        "const": "node"
+                                    },
+                                    {
+                                        "const": "web"
+                                    },
+                                    {
+                                        "const": "webworker"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "overrides": {}
+            },
+            "required": [
+                "builds"
+            ]
+        }
+    }
+}

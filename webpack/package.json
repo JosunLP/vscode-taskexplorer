@@ -19,15 +19,9 @@
         "url": "https://github.com/spmeesseman/wpbuild.git"
     },
     "scripts": {
-        "version": "npx wpbuild --version",
-        "build-typings-js_all": "npm run build-typings-rcjson && npm run build-typings-js_exports && npm run build-typings-js_plugins && npm run build-typings-js_utils",
-        "build-typings-js_exports": "json2ts --input 'exports/*.js' --output types/exprts.d.ts",
-        "build-typings-js_plugins": "json2ts --input 'exports/*.js' --output types/exprts.d.ts",
-        "build-typings-js_utils": "json2ts --input 'utils/*.js' --output types/exprts.d.ts",
-        "build-typings-rcjson": "json2ts --input types/.wpbuildrc.defaults.json --output types/rc.d.ts"
-    },
-    "dependencies": {
-        "json-schema-to-typescript": "^13.0.2"
+        "build_typings:json2ts": "json2ts -f -i ./types/.wpbuildrc.schema.json -o types/wbbuildrc.tmp.d.ts",
+        "build_schema": "json-schema-generator -f ./types/.wpbuildrc.defaults.json -o types/.wpbuildrc.schema.tmp.json",
+        "build_schema:quicktype": "quicktype -o types/.wpbuildrc.schema.json --src-lang schema types/.wpbuildrc.schema.json"
     },
     "files": [
         "exports",
@@ -44,6 +38,12 @@
         "wrapper",
         "javascript",
         "typescript"
-    ]
-     
+    ],
+    "devDependencies": {
+        "generate-schema": "^2.6.0",
+        "json-schema-generator": "^2.0.6",
+        "json-schema-to-ts": "^2.9.1",
+        "json-schema-to-typescript": "^13.0.2",
+        "quicktype": "^23.0.65"
+    }
 }

@@ -1,4 +1,5 @@
 {
+    "$schema": "file:C:\\Projects\\vscode-taskexplorer\\webpack\\types\\.wpbuildrc.schema.json",
     "name": "vscode-taskexplorer",
     "displayName": "Task Explorer",
     "detailedDisplayName": "Task Explorer VSCode Extension",

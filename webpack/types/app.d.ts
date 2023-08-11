@@ -16,7 +16,7 @@
  * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
-import { WpBuildEnvironment, WpBuildModule, WpBuildRcPaths } from "./wpbuild";
+import { WpBuildEnvironment, WpBuildModule, WpBuildRcPaths } from "./rc";
 import {
     WebpackConfig, WebpackEntry, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions
 } from "./webpack";
