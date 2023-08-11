@@ -35,20 +35,23 @@ const devtool = (app) =>
 	// Disabled for this build - Using source-map-plugin - see webpack.plugin.js#sourcemaps
 	// ann the plugins() function below
 	//
-	if (app.rc.plugins.sourcemaps)
+	if (app.rc.exports.devtool)
 	{
-		app.wpc.devtool = false;
-	}
-	else
-	{
-		if (app.environment === "prod") {
-			app.wpc.devtool = "source-map";
+		if (app.rc.plugins.sourcemaps)
+		{
+			app.wpc.devtool = false;
 		}
-		else if (app.environment === "dev") {
-			app.wpc.devtool = "eval-source-map";
-		}
-		else if (app.isTests) {
-			app.wpc.devtool = "eval";
+		else
+		{
+			if (app.environment === "prod") {
+				app.wpc.devtool = "source-map";
+			}
+			else if (app.environment === "dev") {
+				app.wpc.devtool = "eval-source-map";
+			}
+			else if (app.isTests) {
+				app.wpc.devtool = "eval";
+			}
 		}
 	}
 };

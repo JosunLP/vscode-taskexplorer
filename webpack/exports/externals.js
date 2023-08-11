@@ -26,35 +26,38 @@ const nodeExternals = require("webpack-node-externals");
  */
 const externals = (app) =>
 {
-	if (app.rc.exports.externals || app.rc.vscode)
+	if (app.rc.exports.externals)
 	{
-		if (app.isWeb) {
-			app.wpc.externalsPresets = { web: true };
-		}
-		else {
-			app.wpc.externalsPresets = { node: true };
-		}
-	}
-	if (app.rc.vscode)
-	{
-		if (app.build !== "tests")
+		if (app.rc.exports.externals || app.rc.vscode)
 		{
-			app.wpc.externals = [
-				(data, callback) => callback(logAsset(data, app), { vscode: "commonjs vscode" }),
-				(data, callback) => callback(logAsset(data, app), !data.contextInfo?.issuerLayer ? nodeExternals() : undefined)
-			];
+			if (app.isWeb) {
+				app.wpc.externalsPresets = { web: true };
+			}
+			else {
+				app.wpc.externalsPresets = { node: true };
+			}
 		}
-		else {
-			app.wpc.externals = [
-				{ vscode: "commonjs vscode" },
-				// { nyc: "commonjs nyc" },
-				/** @type {NodeExternalsExternalItem}*/(nodeExternals())
-			];
+		if (app.rc.vscode)
+		{
+			if (app.build !== "tests")
+			{
+				app.wpc.externals = [
+					(data, callback) => callback(logAsset(data, app), { vscode: "commonjs vscode" }),
+					(data, callback) => callback(logAsset(data, app), !data.contextInfo?.issuerLayer ? nodeExternals() : undefined)
+				];
+			}
+			else {
+				app.wpc.externals = [
+					{ vscode: "commonjs vscode" },
+					// { nyc: "commonjs nyc" },
+					/** @type {NodeExternalsExternalItem}*/(nodeExternals())
+				];
+			}
 		}
-	}
-	else if (app.rc.exports.externals && app.build !== "tests" && app.build !== "types")
-	{
-		app.wpc.externals = /** @type {NodeExternalsExternalItem} */(nodeExternals());
+		else if (app.rc.exports.externals && app.build !== "tests" && app.build !== "types")
+		{
+			app.wpc.externals = /** @type {NodeExternalsExternalItem} */(nodeExternals());
+		}
 	}
 };
 

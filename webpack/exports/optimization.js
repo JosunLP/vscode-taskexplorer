@@ -19,29 +19,32 @@ const { apply } = require("../utils");
  */
 const optimization = (app) =>
 {
-	parallelism(app)
-	if (app.isMain)
+	if (app.rc.exports.optimization)
 	{
-		app.wpc.optimization =
+		parallelism(app)
+		if (app.isMain)
 		{
-			runtimeChunk: "single",
-			splitChunks: false
-		};
-		if (app.build !== "web")
-		{
-			app.wpc.optimization.splitChunks =
+			app.wpc.optimization =
 			{
-				cacheGroups: {
-					vendor: {
-						test: /node_modules/,
-						name: "vendor",
-						chunks: "all"
-					}
-				}
+				runtimeChunk: "single",
+				splitChunks: false
 			};
-			if (app.environment === "prod")
+			if (app.build !== "web")
 			{
-				app.wpc.optimization.chunkIds = "deterministic";
+				app.wpc.optimization.splitChunks =
+				{
+					cacheGroups: {
+						vendor: {
+							test: /node_modules/,
+							name: "vendor",
+							chunks: "all"
+						}
+					}
+				};
+				if (app.environment === "prod")
+				{
+					app.wpc.optimization.chunkIds = "deterministic";
+				}
 			}
 		}
 	}

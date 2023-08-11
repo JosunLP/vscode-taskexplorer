@@ -17,11 +17,14 @@ const { WpBuildApp } = require("../utils");
  */
 const cache = (app) =>
 {
-	app.wpc.cache = {
-        type: "memory",
-        maxGenerations: Infinity,
-        cacheUnaffected: true
-    };
+	if (app.rc.exports.cache)
+	{
+		app.wpc.cache = {
+            type: "memory",
+            maxGenerations: Infinity,
+            cacheUnaffected: true
+        };
+    }
 };
 
 
