@@ -187,7 +187,7 @@ const builds =
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
 	 */
-	webview: (app) =>
+	webapp: (app) =>
 	{
 		app.wpc.module.rules.push(...[
 		{
@@ -301,7 +301,7 @@ const stripLoggingOptions = () => ({
 const rules = (app) =>
 {
 	app.wpc.module = { rules: [] };
-	if (app.build === "webview" || app.build === "tests" || app.build === "types")
+	if (app.build === "webapp" || app.build === "tests" || app.build === "types")
 	{
 		builds[app.build](app);
 	}

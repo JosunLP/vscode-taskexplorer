@@ -27,19 +27,13 @@
             "type": "boolean"
         },
         "builds": {
-            "type": "object",
-            "patternProperties": {
-                "^.*$": {
-                  "anyOf": [
-                    {"type": "string"},
-                    {"type": "null"}
-                  ]
-                }
-            },
-            "additionalProperties": false
+            "$ref": "#/$defs/StringValueObject"
         },
         "colors": {
-            "$ref": "#/$defs/WpBuildColorsDefinition"
+            "$ref": "#/$defs/WpBuildColorsDefinition",
+            "required": [
+                "default"
+            ]
         },
         "environment": {
             "type": "object",
@@ -66,10 +60,15 @@
             ]
         },
         "log": {
-            "$ref": "#/$defs/WpBuildLogDefinition"
+            "$ref": "#/$defs/WpBuildLogDefinition",
+            "required": []
         },
         "paths": {
-            "$ref": "#/$defs/WpBuildPathsDefinition"
+            "$ref": "#/$defs/WpBuildPathsDefinition",
+            "required": [
+                "dist",
+                "src"
+            ]
         },
         "exports": {
             "type": "object",
@@ -78,13 +77,17 @@
                     "type": "boolean"
                 },
                 "context": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "devtool": {
                     "type": "boolean"
                 },
                 "entry": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "experiments": {
                     "type": "boolean"
@@ -99,172 +102,216 @@
                     "type": "boolean"
                 },
                 "mode": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "name": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "optimization": {
                     "type": "boolean"
                 },
                 "output": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "plugins": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "resolve": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "rules": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "stats": {
                     "type": "boolean"
                 },
                 "target": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "watch": {
                     "type": "boolean"
                 }
-            },
-            "required": [
-                "context",
-                "entry",
-                "mode",
-                "name",
-                "optimization",
-                "output",
-                "plugins",
-                "resolve",
-                "rules",
-                "target"
-            ]
+            }
         },
         "plugins": {
             "type": "object",
             "properties": {
                 "analyze": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "banner": {
-                    "type": "boolean"
-                },
-                "build": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                 },
                 "clean": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "copy": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "environment": {
-                    "type": "boolean"
-                },
-                "hash": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "html": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "ignore": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                 },
                 "istanbul": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "licensefiles": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                 },
                 "loghooks": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "optimization": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true,
+                    "readOnly": true
                 },
                 "progress": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "runtimevars": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "scm": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "sourcemaps": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                 },
                 "testsuite": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "tscheck": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                 },
                 "upload": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "vendormod": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                 },
                 "wait": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 }
-            },
-            "required": [
-                "environment",
-                "optimization"
-            ]
-        },
-        "vscode": {
-            "type": "object",
-            "properties": {
-                "webview": {
-                    "type": "object",
-                    "properties": {
-                        "baseDir": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "apps": {
-                            "type": "object",
-                            "patternProperties": {
-                                "^.*$": {
-                                "anyOf": [
-                                    {"type": "string"},
-                                    {"type": "null"}
-                                ]
-                                }
-                            },
-                            "additionalProperties": false
-                        }
-                    },
-                    "additionalProperties": false,
-                    "required": [
-                        "baseDir",
-                        "apps"
-                    ]
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "webview"
-            ]
+            }
         }
     },
     "additionalProperties": false,
     "required": [
+        "builds",
         "name",
         "displayName",
         "environment",
-        "modules",
         "paths",
         "exports",
         "plugins"
     ],
     "$defs":
     {
+        "DirPathValueObject": {
+            "type": "object",
+            "propertyNames": {
+                "minLength": 3,
+                "maxLength": 20,
+                "pattern": "^[a-z][a-zA-Z0-9_]+$"
+            },
+            "additionalProperties": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+$",
+                "minLength": 3,
+                "maxLength": 75
+            }
+        },
+        "FilePathValueObject": {
+            "type": "object",
+            "propertyNames": {
+                "minLength": 3,
+                "maxLength": 20,
+                "pattern": "^[a-z][a-zA-Z0-9_]+$"
+            },
+            "additionalProperties": {
+                "type": "string",
+                "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
+                "minLength": 3,
+                "maxLength": 85
+            },
+            "description": "mapping of module names to respective file that is the entry point",
+            "examples": "elative path to a file that is the entry point, path must start with a leading \"./\""
+
+        },
+        "StringValueObject": {
+            "type": "object",
+            "propertyNames": {
+                "minLength": 3,
+                "maxLength": 20,
+                "pattern": "^[a-z][a-zA-Z0-9_]+$"
+            },
+            "patternProperties": {
+                "^.*$": {
+                    "type": "string"}
+            },
+            "additionalProperties": false
+
+        },
+        "StringOrNUllValueObject": {
+            "type": "object",
+            "propertyNames": {
+                "minLength": 3,
+                "maxLength": 20,
+                "pattern": "^[a-z][a-zA-Z0-9_]+$"
+            },
+            "patternProperties": {
+                "^.*$": {
+                    "anyOf": [
+                        {"type": "string"},
+                        {"type": "null"}
+                    ]
+                }
+            },
+            "additionalProperties": false
+
+        },
         "WebpackMode":  {
             "type": "string",
             "oneOf": [
@@ -323,6 +370,9 @@
                                 "type": "string",
                                 "minLength": 1
                             },
+                            "entry": {
+                                "$ref": "#/$defs/FilePathValueObject"
+                            },
                             "mode": {
                                 "$ref": "#/$defs/WebpackMode"
                             },
@@ -331,6 +381,9 @@
                             },
                             "target": {
                                 "$ref": "#/$defs/WebpackTarget"
+                            },
+                            "overrides": {
+                                "$ref": "#/$defs/WpBuildOverridesDefinition"
                             }
                         },
                         "additionalProperties": false,
@@ -340,26 +393,10 @@
                     }
                 },
                 "overrides": {
-                    "type": "object",
-                    "properties": {
-                        "colors": {
-                            "$ref": "#/$defs/WpBuildColorsDefinition"
-                        },
-                        "log": {
-                            "$ref": "#/$defs/WpBuildLogDefinition"
-                        },
-                        "paths": {
-                            "$ref": "#/$defs/WpBuildPathsDefinition"
-                        }
-                    },
-                    "additionalProperties": false,
-                    "required": []
+                    "$ref": "#/$defs/WpBuildOverridesDefinition"
                 }
             },
-            "additionalProperties": false,
-            "required": [
-                "builds"
-            ]
+            "additionalProperties": false
         },
         "WpBuildLogColor": {
             "type": "string",
@@ -424,18 +461,20 @@
                     "$ref": "#/$defs/WpBuildLogColor"
                 },
                 "builds": {
+                    "type": "object",
+                    "propertyNames": {
+                        "minLength": 3,
+                        "maxLength": 20,
+                        "pattern": "^[a-z][a-zA-Z0-9_]+$"
+                    },
                     "patternProperties": {
                         "^.*$": {
                             "$ref": "#/$defs/WpBuildLogColor"
                         }
-                    },
-                    "additionalProperties": false
+                    }
                 }
             },
-            "additionalProperties": false,
-            "required": [
-                "default"
-            ]
+            "additionalProperties": false
         },
         "WpBuildLogLevel": {
             "type": "number",
@@ -479,8 +518,7 @@
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
-            "required": []
+            "additionalProperties": false
         },
         "WpBuildLogPadDefinition": {
             "type": "object",
@@ -498,36 +536,35 @@
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
-            "required": []
+            "additionalProperties": false
         },
-        "WpBuildPathsDefinition": {
+        "WpBuildOverridesDefinition":  {
             "type": "object",
             "properties": {
-                "dist": {
-                    "type": "string",
-                    "minLength": 1
+                "colors": {
+                    "$ref": "#/$defs/WpBuildColorsDefinition"
                 },
-                "distTests": {
+                "log": {
+                    "$ref": "#/$defs/WpBuildLogDefinition"
+                },
+                "paths": {
+                    "$ref": "#/$defs/WpBuildPathsDefinition"
+                }
+            },
+            "additionalProperties": false
+        },
+        "WpBuildPathsDefinition": {
+            "$ref": "#/$defs/DirPathValueObject",
+            "properties": {
+                "dist": {
                     "type": "string",
                     "minLength": 1
                 },
                 "src": {
                     "type": "string",
                     "minLength": 1
-                },
-                "srcTests": {
-                    "type": "string",
-                    "minLength": 1
                 }
-            },
-            "additionalProperties": false,
-            "required": [
-                "dist",
-                "distTests",
-                "src",
-                "srcTests"
-            ]
+            }
         }
     }
 }

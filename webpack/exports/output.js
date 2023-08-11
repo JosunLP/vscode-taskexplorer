@@ -29,7 +29,7 @@ const output = (app) =>
 		hashDigestLength: 20
 	};
 
-	if (app.build === "webview")
+	if (app.build === "webapp")
 	{
 		apply(app.wpc.output,
 		{

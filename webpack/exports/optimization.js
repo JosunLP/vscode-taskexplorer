@@ -1,5 +1,7 @@
 // @ts-check
 
+const { apply } = require("../utils");
+
 /**
  * @file exports/optimization.js
  * @version 0.0.1
@@ -8,7 +10,8 @@
  */
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-
+/** @typedef {import("../types").WebpackOptimization} WebpackOptimization */
+/** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 
 /**
  * @function optimization
@@ -16,8 +19,7 @@
  */
 const optimization = (app) =>
 {
-	parallelism(app);
-
+	parallelism(app)
 	if (app.isMain)
 	{
 		app.wpc.optimization =
@@ -43,26 +45,16 @@ const optimization = (app) =>
 			}
 		}
 	}
-	else {
-		app.wpc.optimization = {};
-	}
 };
 
 
 /**
  * @function optimization
- * @private
  * @param {WpBuildApp} app Webpack build environment
  */
 const parallelism = (app) =>
 {
-	if (app.build === "webview" && app.rc.vscode)
-	{
-		app.wpc.parallelism = 1 + Object.keys(app.rc.vscode.webview.apps).length;
-	}
-	else {
-		app.wpc.parallelism = 3; // extension / vendor / runtime
-	}
+	apply(app.wpc, { parallelism: 1 + Object.keys(app.rc.environment.builds[app.build]).length });
 };
 
 

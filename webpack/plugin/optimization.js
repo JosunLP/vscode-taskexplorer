@@ -28,7 +28,7 @@ const optimization = (app) =>
 		{
 			plugins.push(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }));
 		}
-		if (app.build !== "webview")
+		if (app.build !== "webapp")
 		{
 			plugins.push(new webpack.NoEmitOnErrorsPlugin());
 		}

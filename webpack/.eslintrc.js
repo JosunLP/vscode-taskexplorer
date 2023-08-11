@@ -7,9 +7,6 @@ module.exports = {
     },
     parser: "@typescript-eslint/parser",
     parserOptions: {
-        project: [
-            "tsconfig.node.json", "tsconfig.web.json", "src/test/tsconfig.json"
-        ],
         sourceType: "module",
         ecmaVersion: 2020,
         createDefaultProgram: true
@@ -21,11 +18,10 @@ module.exports = {
     overrides: [
     {
         files: [
-            "src/**/*.ts", "script/**/*.js"
+            "src/**/*.js"
         ],
         excludedFiles: [
-            "test-fixture/**", "types/**", "*.json", "dist/**", "node_modules/**",
-            "**/node_modules/**", "res/**", ".vscode-test/**"
+            "test-fixture/**", "types/**", "*.json","node_modules/**", "**/node_modules/**"
         ]
     }],
     plugins: [

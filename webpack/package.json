@@ -40,5 +40,8 @@
     ],
     "devDependencies": {
         "json-schema-to-ts": "^2.9.2"
+    },
+    "dependencies": {
+        "glob": "^10.3.3"
     }
 }

@@ -165,7 +165,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 
 		if (app.rc.plugins.copy !== false)
 		{
-			if (app.build === "webview")
+			if (app.build === "webapp")
 			{
 				/** @type {CopyPlugin.Pattern[]} */
 				const patterns = [];
@@ -260,7 +260,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
  * @returns {(CopyPlugin | WpBuildCopyPlugin)[]}
  */
 const copy = (apps, app) =>
-	app.rc.plugins.copy !== false && app.build !== "tests" && app.build !== "webview" ? new WpBuildCopyPlugin({ app, apps }).getPlugins() : [];
+	app.rc.plugins.copy !== false && app.build !== "tests" && app.build !== "webapp" ? new WpBuildCopyPlugin({ app, apps }).getPlugins() : [];
 
 
 module.exports = copy;

@@ -274,7 +274,7 @@ class WpBuildApp
 	getPaths = (app) =>
 	{
 		const paths = /** @type {WpBuildPaths} */({}),
-			  wvBase = app.rc.vscode.webview.baseDir,
+			  wvBase = app.paths.srcWebapps,
 			  baseDir = resolve(__dirname, "..", ".."),
 			  temp = resolve(process.env.TEMP || process.env.TMP  || "dist", app.rc.name, app.environment);
 		if (!existsSync(temp)) {
@@ -286,7 +286,7 @@ class WpBuildApp
             this.resolveRcPaths(baseDir, {
                 temp,
                 build: baseDir,
-                base: app.build !== "webview" ? baseDir : (wvBase ? resolve(baseDir, wvBase) :
+                base: app.build !== "webapp" ? baseDir : (wvBase ? resolve(baseDir, wvBase) :
                                                         join(baseDir, "src", "webview", "app"))
             })
         );

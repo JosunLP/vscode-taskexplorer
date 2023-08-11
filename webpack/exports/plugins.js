@@ -37,7 +37,7 @@ const plugins = (app) =>
 		runtimevars(app),        // compiler.hooks.compilation
 		ignore(app),             // compiler.hooks.normalModuleFactory
 		...tscheck(app),         // compiler.hooks.afterEnvironment, hooks.afterCompile
-		...webviewPlugins(app),  // webview specific plugins
+		...webviewPlugins(app),  // webapp specific plugins
 		...sourcemaps(app),      // compiler.hooks.compilation -> compilation.hooks.processAssets
 		...copy([], app),        // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
 		...optimization(app),    // compiler.hooks.shouldEmit, compiler.hooks.compilation->shouldRecord|optimizeChunks
@@ -62,7 +62,7 @@ const webviewPlugins = (app) =>
 {
 	/** @type {(WebpackPluginInstance | undefined)[]} */
 	const plugins = [];
-	if (app.build === "webview")
+	if (app.build === "webapp")
 	{
 		const apps = Object.keys(app.rc.vscode.webview.apps);
 		plugins.push(

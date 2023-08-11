@@ -7,7 +7,7 @@
 /**
  * @type {WpBuildModule[]}
  */
-const WpBuildModuleTypes = [ "web" , "extension", "tests", "types", "webview" ];
+const WpBuildModuleTypes = [ "web" , "extension", "tests", "types", "webapp" ];
 
 /**
  * @type {WpBuildEnvironment[]}

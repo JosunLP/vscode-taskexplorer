@@ -99,7 +99,7 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildVendorModPlugin | undefined}
  */
-const vendormod = (app) => app.rc.plugins.vendormod && app.build !== "webview" ? new WpBuildVendorModPlugin({ app }) : undefined;
+const vendormod = (app) => app.rc.plugins.vendormod && app.build !== "webapp" ? new WpBuildVendorModPlugin({ app }) : undefined;
 
 
 module.exports = vendormod;

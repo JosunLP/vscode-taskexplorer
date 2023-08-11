@@ -6,7 +6,8 @@ import {
     Asset as WebpackAsset, AssetInfo as WebpackAssetInfo, AssetEmittedInfo as WebpackAssetEmittedInfo,
     Cache as WebpackCache, Chunk as WebpackChunk, Configuration as WebpackConfig, Compilation as WebpackCompilation,
     Compiler as WebpackCompiler, EntryObject as WebpackEntryObject, sources as WebpackSources, Stats as WebpackStats,
-    StatsAsset as WebpackStatsAsset, WebpackPluginInstance, ModuleOptions, RuleSetRule, PathData as WebpackPathData
+    StatsAsset as WebpackStatsAsset, WebpackPluginInstance, ModuleOptions, RuleSetRule, PathData as WebpackPathData,
+    WebpackOptionsNormalized
 } from "webpack"
 
 
@@ -38,6 +39,7 @@ declare type WebpackLogLevel = Exclude<WebpackConfig["infrastructureLogging"], u
 declare type WebpackMode = Exclude<WebpackConfig["mode"], undefined>;
 declare type WebpackModuleOptions = { rules: WebpackRuleSetRule[]; } & ModuleOptions;
 // declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
+declare type WebpackOptimization = WebpackOptionsNormalized["optimization"];
 declare type WebpackOutput = Exclude<WebpackConfig["output"], undefined>;
 declare type WebpackRawSource = WebpackSources.RawSource;
 declare type WebpackRuleSetRule = Exclude<ConvertType<RuleSetRule, (false | "" | 0 | RuleSetRule | "..." | null | undefined)[] , RuleSetRule[]>, undefined>;
@@ -91,6 +93,7 @@ export {
     WebpackLogger,
     WebpackMode,
     WebpackModuleOptions,
+    WebpackOptimization,
     WebpackPathData,
     WebpackPluginInstance,
     WebpackLogLevel,

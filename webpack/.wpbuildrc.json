@@ -9,7 +9,7 @@
         "tests": "node",
         "types": "node",
         "web": "web",
-        "webview": "webworker"
+        "webapp": "webworker"
     },
     "colors":
     {
@@ -27,7 +27,7 @@
             "tests": "white",
             "types": "magenta",
             "web": "cyan",
-            "webview": "cyan"
+            "webapp": "cyan"
         }
     },
     "environment":
@@ -36,7 +36,28 @@
         {
             "builds": [
                 { "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
-                { "build": "webview", "environment": "dev", "mode": "development", "target": "webworker" }
+                {
+                    "build": "webapp",
+                    "environment": "dev",
+                    "mode": "development",
+                    "target": "webworker",
+                    "entry": {
+                        "home": "./home/home.ts",
+                        "license": "./license/license.ts",
+                        "monitor": "./monitor/monitor.tsx",
+                        "parsingReport": "./parsingReport/parsingReport.ts",
+                        "releaseNotes": "./releaseNotes/releaseNotes.ts",
+                        "taskCount": "./taskCount/taskCount.ts",
+                        "taskDetails": "./taskDetails/taskDetails.ts",
+                        "taskUsage": "./taskUsage/taskUsage.ts",
+                        "welcome": "./welcome/welcome.ts"
+                    },
+                    "overrides": {
+                        "paths": {
+                            "src": "src/webview/app"
+                        }
+                    }
+                }
             ],
             "overrides": {
                 "colors": {
@@ -48,7 +69,7 @@
         {
             "builds": [
                 { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-                { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" },
+                { "build": "webapp", "environment": "prod", "mode": "production", "target": "webworker" },
                 { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
             ],
             "overrides": {
@@ -63,7 +84,7 @@
         {
             "builds": [
                 { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-                { "build": "webview", "environment": "prod", "mode": "production", "target": "webworker" }
+                { "build": "webapp", "environment": "prod", "mode": "production", "target": "webworker" }
             ],
             "overrides": {
                 "colors": {
@@ -75,26 +96,7 @@
         {
             "builds": [
                 { "build": "extension", "environment": "test", "target": "node" },
-                { "build": "webview", "environment": "dev", "target": "webworker" }
-            ],
-            "overrides": {
-                "colors": {
-                    "buildBracket": "yellow"
-                },
-                "log": {
-                    "pad": {
-                        "value": 60
-                    }
-                }
-            }
-        },
-        "test2":
-        {
-            "disabled": true,
-            "build": [
-                { "build": "extension", "environment": "test", "mode": "none", "target": "node" },
-                { "build": "webview", "environment": "dev", "mode": "none", "target": "webworker" },
-                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
+                { "build": "webapp", "environment": "dev", "target": "webworker" }
             ],
             "overrides": {
                 "colors": {
@@ -123,8 +125,10 @@
     {
         "dist": "dist",
         "distTests": "dist/test",
+        "distWebapps": "res",
         "src": "src",
-        "srcTests": "src/test"
+        "srcTests": "src/test",
+        "srcWebapps": "src/webview/app"
     },
     "exports":
     {
@@ -171,22 +175,5 @@
         "upload": true,
         "vendormod": true,
         "wait": false
-    },
-    "vscode":
-    {
-        "webview": {
-            "baseDir": "src/webview/app",
-            "apps": {
-                "home": "./home/home.ts",
-                "license": "./license/license.ts",
-                "monitor": "./monitor/monitor.tsx",
-                "parsingReport": "./parsingReport/parsingReport.ts",
-                "releaseNotes": "./releaseNotes/releaseNotes.ts",
-                "taskCount": "./taskCount/taskCount.ts",
-                "taskDetails": "./taskDetails/taskDetails.ts",
-                "taskUsage": "./taskUsage/taskUsage.ts",
-                "welcome": "./welcome/welcome.ts"
-            }
-        }
     }
 }

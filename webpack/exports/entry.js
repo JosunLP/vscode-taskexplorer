@@ -11,12 +11,111 @@
 const { glob } = require("glob");
 const { apply } = require("../utils");
 
-/**
- * @module wpbuild.exports.entry
- */
-
 /** @typedef {import("../types").WebpackEntryObject} WebpackEntryObject */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
+
+
+const builds =
+{
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildApp} app Webpack build environment
+	 */
+	main: (app) =>
+	{
+		app.wpc.entry =
+		{
+			"taskexplorer": {
+				import: "./src/taskexplorer.ts",
+				layer: "release"
+			},
+			"taskexplorer.debug": {
+				import: "./src/taskexplorer.ts",
+				layer: "debug"
+			}
+		};
+		if (app.isTests) {
+			builds.tests(app, true);
+		}
+	},
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {boolean} [fromMain]
+	 */
+	tests: (app, fromMain) =>
+	{
+		app.wpc.entry = apply(app.wpc.entry || {},
+		{
+			"runTest": {
+				import: "./src/test/runTest.ts",
+				dependOn: fromMain ? [ "taskexplorer", "taskexplorer.debug" ] : undefined
+			},
+			"control": {
+				import: "./src/test/control.ts",
+				dependOn: "runTest"
+			},
+			"suite/index": {
+				import: "./src/test/suite/index.ts",
+				dependOn: "runTest"
+			},
+			...builds.testSuite(app)
+		});
+	},
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildApp} app Webpack build environment
+	 */
+	testSuite: (app) =>
+		glob.sync(
+			`./${app.paths.srcTests}/**/*.{test,spec}.ts`, {
+				absolute: false, cwd: app.paths.srcTests, dotRelative: false, posix: true
+			}
+		)
+		.reduce((obj, e)=>
+		{
+			obj[e.replace("src/test/", "").replace(".ts", "")] = {
+				import: `./${e}`,
+				dependOn: "runTest"
+			};
+			return obj;
+		}, {}
+	),
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildApp} app Webpack build environment
+	 */
+	types: (app) =>
+	{
+		app.wpc.entry = {
+			types: {
+				import: "./types/index.ts"
+			}
+		}
+	},
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildApp} app Webpack build environment
+	 */
+	webapp: (app) =>
+	{
+		app.wpc.entry = apply({}, app.rc.vscode.webview.apps);
+	}
+
+};
 
 
 /**
@@ -26,102 +125,14 @@ const { apply } = require("../utils");
  */
 const entry = (app) =>
 {
-	if (app.build === "webview" && app.rc.vscode)
+	if (app.build === "webapp" || app.build === "tests" || app.build === "types")
 	{
-		webviewEntry(app);
+		builds[app.build](app);
 	}
-	else if (app.build === "tests")
-	{
-		testSuiteEntry(app);
-	}
-	else if (app.build === "types")
-	{
-		typesEntry(app);
-	}
-	else
-	{
-		mainEntry(app);
-		if (app.environment === "test") {
-			testSuiteEntry(app);
-		}
+	else {
+		builds.main(app);
 	}
 };
-
-
-/**
- * @function
- * @description Configures `webpackconfig.exports.entry` for the **main** application` build
- * @param {WpBuildApp} app Webpack build environment
- */
-const mainEntry = (app) =>
-{
-	app.wpc.entry =
-	{
-		"taskexplorer": {
-			import: "./src/taskexplorer.ts",
-			layer: "release"
-		},
-		"taskexplorer.debug": {
-			import: "./src/taskexplorer.ts",
-			layer: "debug"
-		}
-	};
-};
-
-
-/**
- * @function
- * @private
- * @description Configures `webpackconfig.exports.entry` for the **test suite** build
- * @param {WpBuildApp} app Webpack build environment
- */
-const testSuiteEntry = (app) =>
-{
-	const entry = app.wpc.entry || {};
-	const testFiles = glob.sync("./src/test/suite/**/*.{test,spec}.ts", { dotRelative: false, posix: true }).reduce(
-		(obj, e)=>
-		{
-			obj[e.replace("src/test/", "").replace(".ts", "")] = {
-				import: `./${e}`,
-				dependOn: "runTest"
-			};
-			return obj;
-		}, {}
-	);
-	app.wpc.entry = apply(entry, {
-		"runTest": {
-			import: "./src/test/runTest.ts",
-			dependOn: [ "taskexplorer", "taskexplorer.debug" ]
-		},
-		"control": {
-			import: "./src/test/control.ts",
-			dependOn: "runTest"
-		},
-		"suite/index": {
-			import: "./src/test/suite/index.ts",
-			dependOn: "runTest"
-		},
-		...testFiles
-	});
-};
-
-
-/**
- * @function
- * @private
- * @description Configures `webpackconfig.exports.entry` for the **types** build
- * @param {WpBuildApp} app Webpack build environment
- */
-const typesEntry = (app) => { app.wpc.entry = { types: { import: "./types/index.ts" }}; };
-
-
-/**
- * @function
- * @private
- * @description Configures `webpackconfig.exports.entry` for the **vscode webview** build
- * @param {WpBuildApp} app Webpack build environment
- */
-const webviewEntry = (app) => { app.wpc.entry = apply({}, app.rc.vscode.webview.apps); };
 
 
 module.exports = entry;

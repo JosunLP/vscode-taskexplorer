@@ -90,7 +90,7 @@ class WpBuildCleanPlugin extends WpBuildPlugin
 	{
 		return [{
 			ctor: CleanWebpackPlugin,
-			options: app.build === "webview" ? {
+			options: app.build === "webapp" ? {
 				dry: false,
 				cleanOnceBeforeBuildPatterns: [
 					path.posix.join(app.paths.base, "css", "**"),

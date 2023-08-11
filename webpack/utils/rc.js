@@ -111,12 +111,6 @@ class WpBuildRc
      * @type {string | boolean}
      */
     publicInfoProject;
-    /**
-     * @member {WpBuildRcVsCode} vscode
-     * @memberof WpBuildRc.prototype
-     * @type {WpBuildRcVsCode}
-     */
-    vscode;
 
 
     /**

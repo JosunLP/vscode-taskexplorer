@@ -101,19 +101,29 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	static getTsForkCheckerPlugins = (app) =>
 	{
-		let tsConfig;
-		let tsConfigParams;
-		if (app.build === "webview")
+		let tsConfigParams,
+			tsConfig = join(app.paths.build, `tsconfig.${app.target}.json`);
+		if (!existsSync(tsConfig)) {
+			tsConfig = join(app.paths.base, `tsconfig.${app.target}.json`);
+		}
+		if (!existsSync(tsConfig)) {
+			tsConfig = join(app.paths.build, app.target, "tsconfig.json");
+		}
+		if (app.build === "webapp")
 		{
-			tsConfig = join(app.paths.build, "tsconfig.webview.json");
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.base, "tsconfig.json");
+				tsConfig = join(app.paths.build, "tsconfig.webview.json");
+			}
+			if (app.paths.webappSrc && !existsSync(tsConfig)) {
+				tsConfig = join(app.paths.webappSrc, "tsconfig.webview.json");
 			}
 			tsConfigParams = [ tsConfig, "readonly" ];
 		}
 		else if (app.build === "tests")
 		{
-			tsConfig = join(app.paths.srcTests, "tsconfig.json");
+			if (!existsSync(tsConfig)) {
+				tsConfig = join(app.paths.srcTests, "tsconfig.json");
+			}
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.srcTests, "tsconfig.test.json");
 			}
@@ -130,15 +140,10 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		}
 		else if (app.build === "types")
 		{
-			tsConfig = join(app.paths.build, "tsconfig.types.json");
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.build, "types", "tsconfig.json");
-			}
 			tsConfigParams = [ tsConfig, "write-dts" ];
 		}
 		else
 		{
-			tsConfig = join(app.paths.build, `tsconfig.${app.target}.json`);
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.build, "tsconfig.json");
 			}

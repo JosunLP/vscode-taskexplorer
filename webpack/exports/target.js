@@ -19,7 +19,7 @@
  */
 const target = (app) =>
 {
-	if (app.build === "webview")
+	if (app.build === "webapp")
 	{
 		app.wpc.target = app.target = "webworker";
 	}

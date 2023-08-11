@@ -19,7 +19,7 @@ const path = require("path");
  */
 const resolve = (app) =>
 {
-	if (app.build !== "webview")
+	if (app.build !== "webapp")
 	{
 		app.wpc.resolve =
 		{
