@@ -18,7 +18,8 @@
 
 import { WpBuildEnvironment, WpBuildBuild, WpBuildRcPaths } from "./rc";
 import {
-    WebpackConfig, WebpackEntry, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions
+    WebpackConfig, WebpackEntry, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget,
+    WebpackMode, WebpackModuleOptions
 } from "./webpack";
 
 // declare type WpBuildConfig = {
@@ -61,7 +62,7 @@ declare const __WPBUILD__: any;
 //     arge: WpBuildRuntimeEnvArgs;
 //     build: WpBuildModule;
 //     clean: boolean;
-//     disposables: Array<Disposable>;
+//     disposables: Array<IDisposable>;
 //     environment: WpBuildEnvironment;
 //     esbuild: boolean;                     // Use esbuild and esloader
 //     imageOpt: boolean;                    // Perform image optimization

@@ -16,9 +16,7 @@ const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
 const { join, resolve, isAbsolute } = require("path");
 
-
 /** @typedef {import("../utils").WpBuildRc} WpBuildRc */
-/** @typedef {import("../types").Disposable} Disposable */
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
@@ -71,9 +69,9 @@ class WpBuildApp
      */
     clean;
     /**
-     * @member {Array<Disposable>} disposables
+     * @member {Array<IDisposable>} disposables
      * @memberof WpBuildApp.prototype
-     * @type {Array<Disposable>}
+     * @type {Array<IDisposable>}
      */
     disposables;
     /**

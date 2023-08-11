@@ -43,7 +43,6 @@ const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = r
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
-/** @typedef {import("../types").IWpBuildLogger} IWpBuildLogger */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
 /** @typedef {import("../types").WebpackRawSource} WebpackRawSource */

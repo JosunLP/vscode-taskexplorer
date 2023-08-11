@@ -22,7 +22,7 @@ import WpBuildRcDefault from "./.wpbuildrc.defaults.json";
 import { ConvertType, ConvertType2, ConvertType3 } from "./generic";
 
 
-declare type WpBuildRcBuild = { build: WpBuildBuild; environment: WpBuildEnvironment; mode: WebpackMode; target: WebpackTarget; };
+declare type WpBuildRcBuild = { build: WpBuildBuild; environment?: WpBuildEnvironment; mode?: WebpackMode; target?: WebpackTarget; };
 declare type WpBuildRcBuildSet = WpBuildRcBuild[];
 // declare type WpBuildRcBuilds =  ConvertType3<typeof WpBuildRcDefault.builds, WpBuildEnvironment, WpBuildRcBuildSet>;
 declare type WpBuildRcBuilds= typeof WpBuildRcDefault.builds;
@@ -44,7 +44,7 @@ declare type WpBuildRcLogColorMap = ConvertType2<
 >;
 declare type WpBuildRcOverrides = Record<keyof typeof WpBuildRcDefault, any>;
 declare type WpBuildRcOverride = keyof WpBuildRcOverrides;
-// declare type WpBuildModule = PartialSome<typeof WpBuildRcDefault.builds.dev[0], "environment" | "mode" | "target">;
+// declare type WpBuildModule = PartialSome<typeof WpBuildRcDefault.environment.dev["builds"][0], "environment" | "mode" | "target">;
 // declare type WpBuildMainModule = ExtractValue<WpBuildRc, "name">["name"];
 declare type WpBuildBuild = keyof WpBuildRcBuilds;
 declare type WpBuildEnvironment= keyof typeof WpBuildRcDefault.environment;

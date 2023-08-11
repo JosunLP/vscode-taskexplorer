@@ -18,10 +18,9 @@
 
 import { IWpBuildApp } from "./app";
 import { WpBuildLogTrueColor } from "./logger";
-import { IDisposable } from "./generic";
 import {
-    WebpackCompilationHookName, WebpackCompilerHookName, WebpackCompiler, WebpackCompilationAssets, WebpackCompilationParams,
-    WebpackPluginInstance, WebpackCompilationHookStage
+    WebpackCompilationHookName, WebpackCompilerHookName, WebpackCompiler, WebpackCompilationAssets,
+    WebpackCompilationParams, WebpackPluginInstance, WebpackCompilationHookStage
 } from "./webpack";
 
 

@@ -27,14 +27,12 @@ class WpBuildCache
      * @type {Record<string, any>}
      */
     cache;
-
     /**
      * @member
      * @private
      * @type {WpBuildApp}
      */
     app;
-
     /**
      * @member
      * @private
