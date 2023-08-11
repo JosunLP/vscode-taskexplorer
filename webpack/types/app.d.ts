@@ -16,11 +16,10 @@
  * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
-import { WpBuildEnvironment, WpBuildModule, WpBuildRcPaths } from "./rc";
+import { WpBuildEnvironment, WpBuildBuild, WpBuildRcPaths } from "./rc";
 import {
     WebpackConfig, WebpackEntry, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions
 } from "./webpack";
-
 
 // declare type WpBuildConfig = {
 declare type WpBuildWebpackConfig = {
@@ -34,19 +33,17 @@ declare type WpBuildWebpackConfig = {
 
 declare type WpBuildRuntimeEnvArgs =
 {
-    build: WpBuildModule;
+    build: WpBuildBuild;
     environment: WpBuildEnvironment;
     mode: WebpackMode;
 } & WebpackRuntimeEnvArgs;
 
-declare interface IWpBuildGlobalEnvironment
-{
+declare type WpBuildGlobalEnvironment = {
     buildCount: number;
     cache: Record<string, any>;
     cacheDir: string;
     verbose: boolean;
-}
-declare type WpBuildGlobalEnvironment = IWpBuildGlobalEnvironment & Record<string, any>;
+} & Record<string, any>;
 
 declare type WpBuildPaths = {
     base: string;                         // context base dir path
@@ -54,10 +51,34 @@ declare type WpBuildPaths = {
     temp: string;                         // operating system temp directory
 } & WpBuildRcPaths;
 
-declare const __WPBUILD__: WpBuildRuntimeVariables;
+declare const __WPBUILD__: any;
+
+// declare interface IWpBuildApp
+// {
+//     analyze: boolean;                     // parform analysis after build
+//     rc: IWpBuildRc;                        // target js app info
+//     argv: WebpackRuntimeArgs;
+//     arge: WpBuildRuntimeEnvArgs;
+//     build: WpBuildModule;
+//     clean: boolean;
+//     disposables: Array<Disposable>;
+//     environment: WpBuildEnvironment;
+//     esbuild: boolean;                     // Use esbuild and esloader
+//     imageOpt: boolean;                    // Perform image optimization
+//     isMain: boolean;
+//     isMainProd: boolean;
+//     isMainTests: boolean;
+//     isTests: boolean;
+//     isWeb: boolean;
+//     global: WpBuildGlobalEnvironment;    // Accessible by all parallel builds
+//     logger: WpBuildConsoleLogger;
+//     paths: WpBuildPaths;
+//     target: WebpackTarget;
+//     verbosity: WebpackLogLevel;
+//     wpc: WpBuildWebpackConfig;
+// };
 
 export {
-    WpBuildModule,
     WpBuildPaths,
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,

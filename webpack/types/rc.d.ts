@@ -17,40 +17,39 @@
  */
 
 import { WpBuildLogTrueColor } from "./logger";
+import { WebpackMode, WebpackTarget } from "./webpack";
 import WpBuildRcDefault from "./.wpbuildrc.defaults.json";
 import { ConvertType, ConvertType2, ConvertType3 } from "./generic";
 
 
-// declare type WpBuildPluginTapOptionsCallbackType<T> = T extends ReturnType<IWpBuildPluginTapOptions["callback"]> ? X : never;
-// declare type WpBuildPluginTapOptionsCallbackType2 = ReturnType<IWpBuildPluginTapOptions["callback"]>;
-// declare type WpBuildPluginTapOptionsCallbackType3<T> = T extends WpBuildPluginTapOptionsCallbackType2<infer X> ? X : never;
-// interface IWpBuildPluginTapOptions2
-// {
-//     async?: boolean;
-//     hook: WebpackCompilerHookName;
-//     hookCompilation?: WebpackCompilationHookName;
-//     callback: (arg: WebpackCompiler | WebpackCompilationAssets | WebpackCompilationParams) => void | Promise<void>;
-//     stage?: WebpackCompilationHookStage;
-//     statsProperty?: string;
-// }
-
-declare type WpBuildRcBuild = { build: WpBuildModule; environment: WpBuildEnvironment; mode: WebpackMode; target: WebpackTarget; };
+declare type WpBuildRcBuild = { build: WpBuildBuild; environment: WpBuildEnvironment; mode: WebpackMode; target: WebpackTarget; };
 declare type WpBuildRcBuildSet = WpBuildRcBuild[];
-declare type WpBuildRcBuilds =  ConvertType3<typeof WpBuildRcDefault.builds, WpBuildEnvironment, WpBuildRcBuildSet>;
+// declare type WpBuildRcBuilds =  ConvertType3<typeof WpBuildRcDefault.builds, WpBuildEnvironment, WpBuildRcBuildSet>;
+declare type WpBuildRcBuilds= typeof WpBuildRcDefault.builds;
 // declare type WpBuildRcEnvironments = typeof WpBuildRcDefault.environment;
 declare type WpBuildRcEnvironments = WpBuildRcEnvironment[];
-declare type WpBuildRcEnvironment = ConvertType3<ConvertType3<typeof WpBuildRcDefault.environment["dev"], "overrides", WpBuildOverrides>, "builds", WpBuildRcBuildSet>;
+declare type WpBuildRcEnvironment = ConvertType3<
+    ConvertType3<typeof WpBuildRcDefault.environment["dev"], "overrides", WpBuildRcOverrides>, "builds", WpBuildRcBuildSet
+>;
 declare type WpBuildRcExports =  typeof WpBuildRcDefault.exports;
 declare type WpBuildRcLog= typeof WpBuildRcDefault.log;
 declare type WpBuildRcLogColors = typeof WpBuildRcDefault.colors;
 declare type WpBuildRcLogColorsBuild = typeof WpBuildRcDefault.colors.builds;
-declare type WpBuildRcModules= typeof WpBuildRcDefault.modules;
 declare type WpBuildRcPaths = typeof WpBuildRcDefault.paths;
 declare type WpBuildRcPlugins = typeof WpBuildRcDefault.plugins;
 declare type WpBuildRcVsCode= typeof WpBuildRcDefault.vscode;
 declare type WpBuildRcLogColorBuilds = ConvertType<WpBuildRcLogColorsBuild, string, WpBuildLogTrueColor>;
-declare type WpBuildRcLogColorMap = ConvertType2<WpBuildRcLogColors & { builds: WpBuildRcLogColorBuilds }, string, WpBuildLogTrueColor, WpBuildRcLogColorsBuild, WpBuildRcLogColorBuilds>;
-
+declare type WpBuildRcLogColorMap = ConvertType2<
+    WpBuildRcLogColors & { builds: WpBuildRcLogColorBuilds }, string, WpBuildLogTrueColor, WpBuildRcLogColorsBuild, WpBuildRcLogColorBuilds
+>;
+declare type WpBuildRcOverrides = Record<keyof typeof WpBuildRcDefault, any>;
+declare type WpBuildRcOverride = keyof WpBuildRcOverrides;
+// declare type WpBuildModule = PartialSome<typeof WpBuildRcDefault.builds.dev[0], "environment" | "mode" | "target">;
+// declare type WpBuildMainModule = ExtractValue<WpBuildRc, "name">["name"];
+declare type WpBuildBuild = keyof WpBuildRcBuilds;
+declare type WpBuildEnvironment= keyof typeof WpBuildRcDefault.environment;
+declare type WpBuildRcExport = keyof WpBuildRcExports;
+declare type WpBuildRcPlugin = keyof WpBuildRcPlugins;
 declare type WpBuildRcPackageJson = {
     author?: string | { name: string, email?: string };
     description: string;
@@ -61,20 +60,26 @@ declare type WpBuildRcPackageJson = {
     publisher: string;
     version: string;
 };
+// declare interface IWpBuildRc implements IDisposable
+// {
+//     builds: WpBuildRcBuilds;
+//     colors: WpBuildRcLogColorMap;
+//     detailedDisplayName: string;          // Displayed in startup banner detail line
+//     displayName: string;                  // displayName (read from package.json)
+//     exports: WpBuildRcExports;
+//     publicInfoProject: boolean | string;  // Project w/ private repo that maintains a public `info` project
+//     log: WpBuildRcLog;
+//     name: string;                         // project name (read from package.json)
+//     paths: WpBuildRcPaths;
+//     pkgJson: WpBuildRcPackageJson;
+//     plugins: WpBuildRcPlugins;
+//     vscode: WpBuildRcVsCode
+// };
 
-declare type WpBuildRcOverrides = Record<keyof typeof WpBuildRcDefault, any>;
-declare type WpBuildRcOverride = keyof WpBuildRcOverrides;
-
-// declare type WpBuildModule = PartialSome<typeof WpBuildRcDefault.builds.dev[0], "environment" | "mode" | "target">;
-// declare type WpBuildMainModule = ExtractValue<WpBuildRc, "name">["name"];
-declare type WpBuildModule = keyof WpBuildRcModules;
-declare type WpBuildEnvironment= keyof typeof WpBuildRcDefault.environment;
-declare type WpBuildRcExport = keyof WpBuildRcExports;
-declare type WpBuildRcPlugin = keyof WpBuildRcPlugins;
 
 export {
+    WpBuildBuild,
     WpBuildEnvironment,
-    WpBuildModule,
     WpBuildRcBuild,
     WpBuildRcBuilds,
     WpBuildRcBuildSet,

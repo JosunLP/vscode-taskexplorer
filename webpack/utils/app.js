@@ -22,7 +22,7 @@ const { join, resolve, isAbsolute } = require("path");
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
-/** @typedef {import("../types").WpBuildModule} WpBuildModule */
+/** @typedef {import("../types").WpBuildBuild} WpBuildBuild */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
@@ -59,9 +59,9 @@ class WpBuildApp
      */
     argv;
     /**
-     * @member {WpBuildModule} build
+     * @member {WpBuildBuild} build
      * @memberof WpBuildApp.prototype
-     * @type {WpBuildModule}
+     * @type {WpBuildBuild}
      */
     build;
     /**
@@ -299,9 +299,8 @@ class WpBuildApp
 	 * @function
 	 * @private
 	 * @template {WpBuildPaths} T
-	 * @template {WpBuildRcPaths} U
 	 * @param {string} baseDir
-	 * @param {T | Partial<T> | U | Partial<U>} paths
+	 * @param {T | Partial<T>} paths
 	 * @returns {T}
 	 */
 	resolveRcPaths = (baseDir, paths) =>

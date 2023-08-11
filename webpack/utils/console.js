@@ -21,14 +21,6 @@ const { isString, isObject, isPrimitive } = require("./utils");
 class WpBuildConsoleLogger
 {
     /**
-     * Can be used to adjust the leftmost character that console output should start at.  For example,
-     * a logger implemented in a `Mocha` test would need to use a base pad of 6 characters to align
-     * itself with Mocha's output.
-     * @member
-     * @private
-     */
-    basePad = "";
-    /**
      * The build environment that owns the WpBuildConsoleLogger instance
      * @member
      * @private
@@ -462,7 +454,7 @@ class WpBuildConsoleLogger
             }
             const envMsgClr = color || (app ? this.colors[app.rc.colors.default] : this.colors.grey),
                   envMsg = color || !(/\x1B\[/).test(msg) || envMsgClr[0] !== this.colorMap.system ? this.withColor(this.format(msg), envMsgClr) : this.format(msg);
-            console.log(`${this.basePad}${pad}${isString(icon) ? icon : this.infoIcon}${envTag}${envMsg}`);
+            console.log(`${this.app?.rc.log.pad.base || ""}${pad}${isString(icon) ? icon : this.infoIcon}${envTag}${envMsg}`);
         }
     };
 

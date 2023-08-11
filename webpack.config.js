@@ -3,7 +3,12 @@
 // @ts-check
 
 /**
- * @module webpack.config
+ * @file types/app.d.ts
+ * @version 0.0.1
+ * @license MIT
+ * @author @spmeesseman Scott Meesseman
+ *
+ * @description
  *
  * The webpack build package files from the @spmeesseman/wpbuild package are a colleactive set of
  * organized plugins and export configurations adaptable to a variety of different project builds.
@@ -21,6 +26,14 @@
  * Modules located in the plugin directory are generally named after the action that they are
  * performing, e.g. `loghooks.js` logs each hook  when it starts.  If anything, logging each stage
  * definitely to gives a good grasp on how a webpack build proceeds.
+ *
+ * NOTE: {@link WpBuildPlugin} for steps to take when adding a new plugin,
+ *
+ * Handy file links:
+ *
+ * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
+ * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
+ * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
  */
 
 
@@ -32,27 +45,22 @@ const {
 	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch, getMode
 } = require("./webpack/exports");
 
-/** @typedef {import("./webpack/types").WebpackMode} WebpackMode */
-/** @typedef {import("./webpack/types").WpBuildPaths} WpBuildPaths */
-/** @typedef {import("./webpack/types").WpBuildModule} WpBuildModule */
-/** @typedef {import("./webpack/types").WebpackTarget} WebpackTarget */
+/** @typedef {import("./webpack/plugin/base")} WpBuildPlugin */
 /** @typedef {import("./webpack/types").WpBuildRcBuild} WpBuildRcBuild */
-/** @typedef {import("./webpack/types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("./webpack/types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("./webpack/types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("./webpack/types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
-/** @typedef {import("./webpack/types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
 
 
 /**
- * Export Webpack build config<WpBuildWebpackConfig>(s)
- *
+ * Exports Webpack build configs to the webpack engine... the build(s) start here.
  * @param {WpBuildRuntimeEnvArgs} env Environment variable containing runtime options passed
- * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`).
+ * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`)
+ * as opposed to the "correct" way i.e. webpack --env environment=test --env clean`
  * @param {WebpackRuntimeArgs} argv Webpack command line args
  * @returns {WpBuildWebpackConfig|WpBuildWebpackConfig[]}
  */
-module.exports = (env, argv) =>
+const exportConfigs = (env, argv) =>
 {
 	const mode = getMode(env, argv),
 		  rc = new WpBuildRc(mode, argv, env);
@@ -65,7 +73,8 @@ module.exports = (env, argv) =>
 
 
 /**
- * @function Calls all exports.* default expoirts to construct a {@link WpBuildWebpackConfig webpack build configuration}
+ * Calls each ./exports/* default export to construct a {@link WpBuildWebpackConfig webpack build configuration}
+ * @function
  * @param {WpBuildApp} app Webpack build environment
  * @returns {WpBuildWebpackConfig}
  */
@@ -95,6 +104,8 @@ const buildConfig = (app) =>
 
 
 /**
+ * Creates an {@link WpBuildApp `app` instance} that acts as a unique wrapper for each build. As opposed
+ * to the {@link WpBuildRc `rc` instance} which is shared by all builds.
  * @function
  * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
  * @param {WebpackRuntimeArgs} argv Webpack command line args
@@ -118,3 +129,6 @@ const write = (app) =>
 		undefined, undefined, l.icons.color.start, l.colors.white
 	);
 };
+
+
+module.exports = exportConfigs;

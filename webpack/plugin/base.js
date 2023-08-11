@@ -38,6 +38,8 @@ const { relative, basename } = require("path");
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
 const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = require("../utils");
 
+
+
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
@@ -77,7 +79,6 @@ const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = r
 
 /**
  * @class WpBuildHashPlugin
- * @augments WebpackPluginInstance
  */
 class WpBuildPlugin
 {

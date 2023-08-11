@@ -112,12 +112,6 @@ class WpBuildRc
      */
     publicInfoProject;
     /**
-     * @member {string} version
-     * @memberof WpBuildRc.prototype
-     * @type {string}
-     */
-    version;
-    /**
      * @member {WpBuildRcVsCode} vscode
      * @memberof WpBuildRc.prototype
      * @type {WpBuildRcVsCode}
@@ -193,7 +187,7 @@ class WpBuildRc
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
         console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
         this.printLineSep(logger);
-        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.detailedDisplayName} Webpack Build`));
+        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.detailedDisplayName || this.displayName} Webpack Build`));
         this.printLineSep(logger);
         logger.write("   Mode  : " + logger.withColor(mode, logger.colors.grey), 1, "", 0, logger.colors.white);
         logger.write("   Argv  : " + logger.withColor(JSON.stringify(argv), logger.colors.grey), 1, "", 0, logger.colors.white);
@@ -258,7 +252,7 @@ class WpBuildRc
           (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
           \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
         ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-       (_____/|_|       | /       |_|   |_| (____/   ${this.version}  \\/ /        |/  \\:(           \\/           
+       (_____/|_|       | /       |_|   |_| (____/   ${this.pkgJson.version}  \\/ /        |/  \\:(           \\/           
                         |/${this.displayName.padStart(50 - this.displayName.length)}`;
     };
 

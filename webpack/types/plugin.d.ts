@@ -16,8 +16,9 @@
  * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
-import { WpBuildApp } from "./app";
+import { IWpBuildApp } from "./app";
 import { WpBuildLogTrueColor } from "./logger";
+import { IDisposable } from "./generic";
 import {
     WebpackCompilationHookName, WebpackCompilerHookName, WebpackCompiler, WebpackCompilationAssets, WebpackCompilationParams,
     WebpackPluginInstance, WebpackCompilationHookStage
@@ -33,7 +34,7 @@ declare type WpBuildPluginVendorOptions = Readonly<IWpBuildPluginVendorOptions> 
 
 interface IWpBuildPluginOptions
 {
-    app: WpBuildApp,
+    app: IWpBuildApp,
     plugins?: WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[],
     registerVendorPluginsFirst?: boolean;
 }
@@ -58,6 +59,12 @@ interface IWpBuildPluginTapOptions
 declare type WpBuildPluginTapOptions = Readonly<Omit<IWpBuildPluginTapOptions, "hookCompilation">> & Pick<IWpBuildPluginTapOptions, "hookCompilation">;
 declare type WpBuildPluginTapOptionsHash  = Record<string, WpBuildPluginTapOptions>
 
+// declare interface IWpBuildPlugin extends WebpackPluginInstance, IDisposable
+// {
+//     app: IWpBuildApp;
+//     cache: any;
+//     logger: WpBuildConsoleLogger;
+// }
 
 export {
     WpBuildPluginCacheOptions,

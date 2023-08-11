@@ -3,26 +3,13 @@
     "name": "vscode-taskexplorer",
     "displayName": "Task Explorer",
     "detailedDisplayName": "Task Explorer VSCode Extension",
-    "moduleName": "taskexplorer",
     "publicInfoProject": true,
     "builds": {
-        "dev": [
-            { "build": "extension", "environment": "dev" },
-            { "build": "webview", "environment": "dev", "target": "webworker" }
-        ],
-        "testprod": [
-            { "build": "extension", "environment": "prod" },
-            { "build": "webview", "environment": "prod", "target": "webworker" },
-            { "build": "tests", "environment": "test" }
-        ],
-        "prod": [
-            { "build": "extension" },
-            { "build": "webview", "target": "webworker" }
-        ],
-        "test": [
-            { "build": "extension", "environment": "test" },
-            { "build": "webview", "environment": "dev", "target": "webworker" }
-        ]
+        "extension": "node",
+        "tests": "node",
+        "types": "node",
+        "web": "web",
+        "webview": "webworker"
     },
     "colors":
     {
@@ -87,7 +74,7 @@
         "test":
         {
             "builds": [
-                { "build": "extension", "environment": "test" },
+                { "build": "extension", "environment": "test", "target": "node" },
                 { "build": "webview", "environment": "dev", "target": "webworker" }
             ],
             "overrides": {
@@ -123,21 +110,14 @@
     },
     "log":
     {
-        "level": 3,
-        "maxValueLineLength": 100,
+        "level": 2,
+        "valueMaxLineLength": 100,
         "pad": {
-            "basePad": 0,
+            "base": 0,
             "envTag": 22,
             "value": 40,
             "uploadFileName": 50
         }
-    },
-    "modules": {
-        "extension": "node",
-        "tests": "node",
-        "types": "node",
-        "web": "web",
-        "webview": "webworker"
     },
     "paths":
     {

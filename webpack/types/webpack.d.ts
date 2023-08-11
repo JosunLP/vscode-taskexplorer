@@ -10,61 +10,37 @@ import {
 } from "webpack"
 
 
-declare type WebpackTarget = "webworker" | "node" | "web";
-declare type WebpackMode = Exclude<WebpackConfig["mode"], undefined>;
-declare type WebpackEntry = Exclude<WebpackConfig["entry"], undefined>;
-declare type WebpackOutput = Exclude<WebpackConfig["output"], undefined>;
-declare type WebpackLogLevel = Exclude<WebpackConfig["infrastructureLogging"], undefined>["level"];
-
-declare type WebpackRuleSetRule = Exclude<ConvertType<RuleSetRule, (false | "" | 0 | RuleSetRule | "..." | null | undefined)[] , RuleSetRule[]>, undefined>;
-declare type WebpackModuleOptions = { rules: WebpackRuleSetRule[]; } & ModuleOptions;
-
-declare type WebpackSource = WebpackSources.Source;
-declare type WebpackRawSource = WebpackSources.RawSource;
-declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["mergeSnapshots"]>;
-
-// declare type ExtractTypings2<T, V> = T extends V<infer X> ? X : never;
-// declare type WebpackStatsPrinterType2<T> = ExtractTypings2<T, WebpackSyncHook>;
-
-declare type WebpackStatsPrinterType<T> = T extends WebpackSyncHook<infer X> ? X : never;
-declare type WebpackStatsPrinterPrint<T> =  T extends WebpackHookMap<infer X> ? X : never;
-declare type WebpackStatsPrinterContextHook<T, Y> =  T extends WebpackSyncBailHook<infer X, Y> ? X : never;
-declare type WebpackStatsPrinterContext = WebpackStatsPrinterContextHook<WebpackStatsPrinterPrint<WebpackStatsPrinterType<WebpackCompilationHook["statsPrinter"]>[0]["hooks"]["print"]>, string>[1];
-
 declare type WebpackAsyncHook<T> = AsyncSeriesHook<T>;
-declare type WebpackHookMap<H> = HookMap<H>;
-declare type WebpackSyncHook<T> = SyncHook<T>;
-declare type WebpackSyncBailHook<T, R> = SyncBailHook<T, R>;
-
+declare type WebpackCacheFacade = ReturnType<WebpackCompilation["getCache"]>;
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
 declare type WebpackCompilationHook = WebpackCompilation["hooks"];
-declare type WebpackCacheFacade = ReturnType<WebpackCompilation["getCache"]>;
-declare type WebpackLogger = ReturnType<WebpackCompilation["getLogger"]>;
-declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
-
 declare type WebpackCompilationHookName = keyof WebpackCompilationHook;
 declare interface WebpackCompilationParams {
     normalModuleFactory: any; // WebpackNormalModuleFactory;
     contextModuleFactory: any; // WebpackContextModuleFactoryy;
 }
-// declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
-// declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
-
 declare type WebpackCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIVED" | "ADDITIONS" |  "OPTIMIZE" |
                                            "OPTIMIZE_COUNT" | "OPTIMIZE_COMPATIBILITY" | "OPTIMIZE_SIZE" |
                                            "DEV_TOOLING" | "OPTIMIZE_INLINE" | "SUMMARIZE" | "OPTIMIZE_HASH" |
                                            "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT"
-
 declare type WebpackCompilerHook = WebpackCompiler["hooks"];
 declare type WebpackCompilerAsyncHook = PickByType<WebpackCompilerHook, AsyncSeriesHook<any>>;
 declare type WebpackCompilerSyncHook = PickByType<WebpackCompilerHook, SyncHook<any>>;
-
 declare type WebpackCompilerHookName = keyof WebpackCompilerHook;
 declare type WebpackCompilerAsyncHookName = keyof WebpackCompilerAsyncHook;
 declare type WebpackCompilerSyncHookName = keyof WebpackCompilerSyncHook;
-
-declare type WebpackRuntimeEnvArgs = { WEBPACK_WATCH?: boolean }
-
+// declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
+declare type WebpackEntry = Exclude<WebpackConfig["entry"], undefined>;
+declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
+declare type WebpackHookMap<H> = HookMap<H>;
+declare type WebpackLogger = ReturnType<WebpackCompilation["getLogger"]>;
+declare type WebpackLogLevel = Exclude<WebpackConfig["infrastructureLogging"], undefined>["level"];
+declare type WebpackMode = Exclude<WebpackConfig["mode"], undefined>;
+declare type WebpackModuleOptions = { rules: WebpackRuleSetRule[]; } & ModuleOptions;
+// declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
+declare type WebpackOutput = Exclude<WebpackConfig["output"], undefined>;
+declare type WebpackRawSource = WebpackSources.RawSource;
+declare type WebpackRuleSetRule = Exclude<ConvertType<RuleSetRule, (false | "" | 0 | RuleSetRule | "..." | null | undefined)[] , RuleSetRule[]>, undefined>;
 declare type WebpackRuntimeArgs = {
     clean?: boolean;
     config: string[];
@@ -72,6 +48,16 @@ declare type WebpackRuntimeArgs = {
     mode?: WebpackMode;
     watch?: boolean;
 } & Record<string, string | boolean | WebpackRuntimeEnvArgs>;
+declare type WebpackRuntimeEnvArgs = { WEBPACK_WATCH?: boolean }
+declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["mergeSnapshots"]>;
+declare type WebpackSource = WebpackSources.Source;
+declare type WebpackStatsPrinterType<T> = T extends WebpackSyncHook<infer X> ? X : never;
+declare type WebpackStatsPrinterPrint<T> =  T extends WebpackHookMap<infer X> ? X : never;
+declare type WebpackStatsPrinterContextHook<T, Y> =  T extends WebpackSyncBailHook<infer X, Y> ? X : never;
+declare type WebpackStatsPrinterContext = WebpackStatsPrinterContextHook<WebpackStatsPrinterPrint<WebpackStatsPrinterType<WebpackCompilationHook["statsPrinter"]>[0]["hooks"]["print"]>, string>[1];
+declare type WebpackSyncBailHook<T, R> = SyncBailHook<T, R>;
+declare type WebpackSyncHook<T> = SyncHook<T>;
+declare type WebpackTarget = "webworker" | "node" | "web";
 
 
 export {
