@@ -323,6 +323,12 @@
                 },
                 {
                     "const": "none"
+                },
+                {
+                    "const": "test"
+                },
+                {
+                    "const": "testproduction"
                 }
             ]
         },
@@ -340,23 +346,6 @@
                 }
             ]
         },
-        "WpBuildEnvironment": {
-            "type": "string",
-            "oneOf": [
-                {
-                    "const": "dev"
-                },
-                {
-                    "const": "prod"
-                },
-                {
-                    "const": "test"
-                },
-                {
-                    "const": "testprod"
-                }
-            ]
-        },
         "WpBuildEnvironmentDefinition": {
             "type": "object",
             "properties": {
@@ -366,6 +355,10 @@
                     "minItems": 1,
                     "items": {
                         "properties": {
+                            "name": {
+                                "type": "string",
+                                "minLength": 3
+                            },
                             "build": {
                                 "type": "string",
                                 "minLength": 1
@@ -376,9 +369,6 @@
                             "mode": {
                                 "$ref": "#/$defs/WebpackMode"
                             },
-                            "environment": {
-                                "$ref": "#/$defs/WpBuildEnvironment"
-                            },
                             "target": {
                                 "$ref": "#/$defs/WebpackTarget"
                             },
@@ -388,6 +378,7 @@
                         },
                         "additionalProperties": false,
                         "required": [
+                            "name",
                             "build"
                         ]
                     }

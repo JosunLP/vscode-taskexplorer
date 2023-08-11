@@ -35,8 +35,9 @@
         "dev":
         {
             "builds": [
-                { "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
+                { "name": "taskexplorer", "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
                 {
+                    "name": "webapp",
                     "build": "webapp",
                     "environment": "dev",
                     "mode": "development",
@@ -68,9 +69,9 @@
         "testprod":
         {
             "builds": [
-                { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-                { "build": "webapp", "environment": "prod", "mode": "production", "target": "webworker" },
-                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
+                { "name": "taskexplorer", "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
+                { "name": "webapp", "build": "webapp", "environment": "prod", "mode": "production", "target": "webworker" },
+                { "name": "tests", "build": "tests", "environment": "test", "mode": "none", "target": "node" }
             ],
             "overrides": {
                 "log": {
@@ -83,8 +84,8 @@
         "prod":
         {
             "builds": [
-                { "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-                { "build": "webapp", "environment": "prod", "mode": "production", "target": "webworker" }
+                { "name": "taskexplorer","build": "extension", "environment": "prod", "mode": "production", "target": "node" },
+                { "name": "webapp", "build": "webapp", "environment": "prod", "mode": "production", "target": "webworker" }
             ],
             "overrides": {
                 "colors": {
@@ -95,27 +96,8 @@
         "test":
         {
             "builds": [
-                { "build": "extension", "environment": "test", "target": "node" },
-                { "build": "webapp", "environment": "dev", "target": "webworker" }
-            ],
-            "overrides": {
-                "colors": {
-                    "buildBracket": "yellow"
-                },
-                "log": {
-                    "pad": {
-                        "value": 60
-                    }
-                }
-            }
-        },
-        "test2":
-        {
-            "disabled": true,
-            "build": [
-                { "build": "extension", "environment": "test", "mode": "none", "target": "node" },
-                { "build": "webapp", "environment": "dev", "mode": "none", "target": "webworker" },
-                { "build": "tests", "environment": "test", "mode": "none", "target": "node" }
+                { "name": "taskexplorer", "build": "extension", "environment": "test", "target": "node" },
+                { "name": "webapp", "build": "webapp", "environment": "dev", "target": "webworker" }
             ],
             "overrides": {
                 "colors": {
