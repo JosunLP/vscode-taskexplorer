@@ -60,6 +60,12 @@ const wrapExec = async (command) =>
 };
 
 
+const isBaseType = (type) => [
+        "WpBuildRcExports", "WpBuildRcLog", "WpBuildRcLogPad", "WpBuildRcPaths",
+        "WpBuildRcPlugins", "WpBuildRcBuild", "WpBuildLogTrueColor", "WpBuildRcLogColors"
+    ].includes(type);
+
+
 cliWrap(async () =>
 {
     const outputFile = "rc.d.ts",
@@ -102,7 +108,7 @@ cliWrap(async () =>
                    .replace(/(export type (?:.*?)\n)(export type)/g, (_, m1, m2) => `\n${m1}\n${m2}`)
                    .replace(/(";\n)(export (?:type|interface))/g, (_, m1, m2) => `${m1}\n${m2}`)
                    .replace(/\nexport interface (.*?) /g, (v, m1) => {
-                        if (m1 === "WpBuildRcExports" || m1 === "WpBuildRcLog" || m1 === "WpBuildRcLogPad" || m1 === "WpBuildRcPaths" ||  m1 === "WpBuildRcPlugins" ||  m1 === "WpBuildRcBuild") {
+                        if (isBaseType(m1)) {
                             return `\nexport declare type Type${m1} = `;
                         }
                         else if (m1 !== "WpBuildRcSchema") {
@@ -112,7 +118,7 @@ cliWrap(async () =>
                     })
                    .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n};\nexport declare type ${m1} = I${m1};\n`)
                    .replace(/\nexport declare type Type(.*?) ([^]*?)\n\}/g, (v, m1, m2) => {
-                        if (m1 === "WpBuildRcExports" || m1 === "WpBuildRcLog" || m1 === "WpBuildRcLogPad" || m1 === "WpBuildRcPaths" ||  m1 === "WpBuildRcPlugins" ||  m1 === "WpBuildRcBuild") {
+                        if (isBaseType(m1)) {
                             return `export declare type Type${m1} ${m2}\n};\nexport declare type ${m1} = Required<Type${m1}>;\n`;
                         }
                         return v;

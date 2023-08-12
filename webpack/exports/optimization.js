@@ -29,7 +29,7 @@ const optimization = (app) =>
 				runtimeChunk: "single",
 				splitChunks: false
 			};
-			if (app.build.mode !== "web")
+			if (app.build.target !== "web"|| app.build.type === "webmodule")
 			{
 				app.wpc.optimization.splitChunks =
 				{

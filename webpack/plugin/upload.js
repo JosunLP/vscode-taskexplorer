@@ -126,8 +126,6 @@ class WpBuildUploadPlugin extends WpBuildPlugin
         const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
               user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
               rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
-              /** @type {import("child_process").SpawnSyncOptions} */
-              spawnSyncOpts = { cwd: app.paths.build, encoding: "utf8", shell: true },
               sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
               sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG;
 
@@ -139,9 +137,9 @@ class WpBuildUploadPlugin extends WpBuildPlugin
 
         const plinkCmds = [
             `mkdir ${rBasePath}/${app.rc.name}`,
-            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.version}`,
-            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.version}/${app.mode}`,
-            `rm -f ${rBasePath}/${app.rc.name}/v${app.rc.version}/${app.mode}/*.*`,
+            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}`,
+            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}/${app.mode}`,
+            `rm -f ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}/${app.mode}/*.*`,
         ];
         if (app.mode === "production") { plinkCmds.pop(); }
 
@@ -160,7 +158,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
             "-q",         // quiet, don't show statistics
             "-r",         // copy directories recursively
             toUploadPath, // directory containing the files to upload, the "directpory" itself (prod/dev/test) will be
-            `${user}@${host}:"${rBasePath}/${app.rc.name}/v${app.rc.version}"` // uploaded, and created if not exists
+            `${user}@${host}:"${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}"` // uploaded, and created if not exists
         ];
 
         await copyFile(join(app.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
@@ -170,10 +168,12 @@ class WpBuildUploadPlugin extends WpBuildPlugin
         {
             logger.write("   plink: create / clear remmote directory", 1, "", logIcon);
             // logger.write("  plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`, 5, "", logIcon);
-            spawnSync("plink", plinkArgs, spawnSyncOpts);
+            await this.exec("plink " + plinkArgs.join(" "), "plink");
+            // spawnSync("plink", plinkArgs, { cwd: app.paths.build, encoding: "utf8", shell: true });
             logger.write("   pscp:  upload files", 1, "", logIcon);
             // logger.write("  pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`, 5, "", logIcon);
-            spawnSync("pscp", pscpArgs, spawnSyncOpts);
+            await this.exec("pscp " + pscpArgs.join(" "), "pscp");
+            // spawnSync("pscp", pscpArgs, { cwd: app.paths.build, encoding: "utf8", shell: true });
             filesToUpload.forEach((f) =>
                 logger.write(`   ${logger.icons.color.successTag} ${logger.withColor(`uploaded ${basename(f)}`, logger.colors.grey)}`, 1, "", logIcon)
             );

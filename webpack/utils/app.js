@@ -12,9 +12,9 @@
 const { getMode } = require("../exports");
 const { WebpackError } = require("webpack");
 const { apply, isString } = require("./utils");
+const { resolve, isAbsolute } = require("path");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
-const { join, resolve, isAbsolute } = require("path");
 
 /** @typedef {import("../utils").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").IDisposable} IDisposable */

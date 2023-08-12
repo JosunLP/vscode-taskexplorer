@@ -10,13 +10,11 @@
  */
 
 const { existsSync } = require("fs");
-const { promisify } = require("util");
 const WpBuildPlugin = require("./base");
 const { WebpackError } = require("webpack");
-const exec = promisify(require("child_process").exec);
 const { findFiles, getTsConfig } = require("../utils");
 const {readFile, unlink, access } = require("fs/promises");
-const { join, basename, relative, dirname, isAbsolute, resolve } = require("path");
+const { join, relative, dirname, isAbsolute, resolve } = require("path");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
@@ -128,47 +126,6 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 	// 	}
 	// 	await this.execTsBuild("./types", 1, typesDir);
 	// }
-
-
-	/**
-	 * @function Executes a command via a promisified node exec()
-	 * @private
-	 * @param {string} command
-	 * @param {string} dsc
-	 * @returns {Promise<number | null>}
-	 */
-	exec = async (command, dsc) =>
-	{
-		let exitCode = null,
-			stdout = "", stderr = "";
-		const logger = this.app.logger,
-			  procPromise = exec(command, { cwd: this.app.paths.build, encoding: "utf8" }),
-			  child = procPromise.child;
-		child.stdout?.on("data", (data) => { stdout += data; });
-		child.stderr?.on("data", (data) => { stderr += data; });
-		child.on("close", (code) =>
-		{
-			const clrCode = logger.withColor(code?.toString(), code === 0 ? logger.colors.green : logger.colors.red);
-			exitCode = code;
-			logger.write(`   ${dsc} completed with exit code bold(${clrCode})`);
-		});
-		await procPromise;
-		if (stdout || stderr)
-		{
-			const match = (stdout || stderr).match(/error TS([0-9]{4})\:/);
-			if (match) {
-				const [ _, err ] = match;
-				logger.error(`   tsc failed with error: ${err}`);
-			}
-			if (stdout) {
-				logger.write(`   tsc stderr: ${stdout}`, 5, "", logger.icons.color.star, logger.colors.yellow);
-			}
-			if (stderr) {
-				logger.write(`   tsc stderr: ${stderr}`, 5, "", logger.icons.color.star, logger.colors.yellow);
-			}
-		}
-		return exitCode;
-	};
 
 
 	/**

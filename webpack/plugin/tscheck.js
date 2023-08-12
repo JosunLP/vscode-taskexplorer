@@ -109,7 +109,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		if (!existsSync(tsConfig)) {
 			tsConfig = join(app.paths.build, app.target, "tsconfig.json");
 		}
-		if (app.build === "webapp")
+		if (app.build.type === "webapp" || app.build.target === "webworker")
 		{
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.build, "tsconfig.webview.json");
@@ -122,7 +122,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			}
 			tsConfigParams = [ tsConfig, "readonly" ];
 		}
-		else if (app.build === "tests")
+		else if (app.build.type === "tests")
 		{
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.src, "tsconfig.json");
@@ -141,7 +141,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			}
 			tsConfigParams = [ tsConfig, "write-tsbuildinfo" ];
 		}
-		else if (app.build === "types")
+		else if (app.build.type === "types")
 		{
 			tsConfigParams = [ tsConfig, "write-dts" ];
 		}

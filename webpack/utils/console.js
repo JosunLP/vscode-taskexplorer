@@ -52,13 +52,13 @@ class WpBuildConsoleLogger
         this.infoIcon = this.icons.color.info;
         if (app && app.rc)
         {
-            this.infoIcon = app.rc.colors.infoIcon ?
-                            this.withColor(this.icons.info, this.colors[app.rc.colors.infoIcon]) : this.icons.color.info;
-            if (app.rc.colors.default)
+            this.infoIcon = app.rc.log.colors.infoIcon ?
+                            this.withColor(this.icons.info, this.colors[app.rc.log.colors.infoIcon]) : this.icons.color.info;
+            if (app.rc.log.colors.default)
             {
                 Object.keys(this.colors).filter(c => this.colors[c][1] === this.colors.system).forEach((c) =>
                 {
-                    this.colors[c][1] = this.colorMap[app.rc.colors.default];
+                    this.colors[c][1] = this.colorMap[app.rc.log.colors.default];
                 });
             }
             app.disposables?.push(this);
@@ -219,7 +219,7 @@ class WpBuildConsoleLogger
     {
         const app = this.app,
               colors = this.colors;
-        let envTagClr = app ? colors[app.rc.colors.buildBracket] : colors.cyan;
+        let envTagClr = app ? colors[app.rc.log.colors.buildBracket] : colors.cyan;
         if (icon) {
             if (icon.includes(this.withColor(this.icons.info, colors.yellow))) {
                 envTagClr = colors.yellow;
@@ -270,7 +270,7 @@ class WpBuildConsoleLogger
      * @returns {string}
      */
     tag = (tagMsg, bracketColor, msgColor) =>
-        tagMsg ? (this.withColor("[", bracketColor || (this.app && this.app.rc ? this.colors[this.app.rc.colors.tagBracket] : null) || this.colors.blue) +
+        tagMsg ? (this.withColor("[", bracketColor || (this.app && this.app.rc ? this.colors[this.app.rc.log.colors.tagBracket] : null) || this.colors.blue) +
                  this.withColor(tagMsg, msgColor || this.colors.grey)  +
                  this.withColor("]", bracketColor || this.colors.blue)) : "";
 
@@ -389,12 +389,12 @@ class WpBuildConsoleLogger
         const icon = this.withColor(
             this.icons.star,
             iconColor ||
-            (this.app && this.app.rc.colors.valueStar ? this.colors[this.app.rc.colors.valueStar] : null) ||
+            (this.app && this.app.rc.log.colors.valueStar ? this.colors[this.app.rc.log.colors.valueStar] : null) ||
             this.colors.cyan
         );
-        if (this.app && this.app.rc.colors.valueStarText && this.app.rc.colors.valueStarText !== "white")
+        if (this.app && this.app.rc.log.colors.valueStarText && this.app.rc.log.colors.valueStarText !== "white")
         {
-            this.value(msg, `${icon} ${this.withColor(dsc, this.colors[this.app.rc.colors.valueStarText])} ${icon}`, level, pad, 0, msgColor);
+            this.value(msg, `${icon} ${this.withColor(dsc, this.colors[this.app.rc.log.colors.valueStarText])} ${icon}`, level, pad, 0, msgColor);
         }
         else {
             this.value(msg, `${icon} ${dsc} ${icon}`, level, pad, undefined, msgColor);
@@ -446,14 +446,14 @@ class WpBuildConsoleLogger
             if (app && app.rc)
             {
                 const envTagClr = this.getIconColorMapping(icon),
-                      envTagMsgClr = app ? this.colors[app.rc.colors.buildText] : this.colors.white;
+                      envTagMsgClr = app ? this.colors[app.rc.log.colors.buildText] : this.colors.white;
                 envTag = (
                     " " + this.withColor("[", envTagClr) + app.build + this.withColor("][", envTagClr) +
                     this.withColor(app.target.toString(), envTagMsgClr) + this.withColor("]", envTagClr)
                 )
                 .padEnd(app.rc.log.pad.envTag + this.withColorLength(envTagMsgClr) + (this.withColorLength(envTagClr) * 3));
             }
-            const envMsgClr = color || (app ? this.colors[app.rc.colors.default] : this.colors.grey),
+            const envMsgClr = color || (app ? this.colors[app.rc.log.colors.default] : this.colors.grey),
                   envMsg = color || !(/\x1B\[/).test(msg) || envMsgClr[0] !== this.colorMap.system ? this.withColor(this.format(msg), envMsgClr) : this.format(msg);
             console.log(`${this.app?.rc.log.pad.base || ""}${pad}${isString(icon) ? icon : this.infoIcon}${envTag}${envMsg}`);
         }
@@ -467,7 +467,7 @@ class WpBuildConsoleLogger
      * @param {WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
      */
     writeMsgTag = (msg, tagMsg, bracketColor, msgColor) =>
-        this.write(msg + "  " + this.tag(tagMsg, bracketColor, msgColor), 2, "", null, this.colors[this.app?.rc.colors.default || "grey"]);
+        this.write(msg + "  " + this.tag(tagMsg, bracketColor, msgColor), 2, "", null, this.colors[this.app?.rc.log.colors.default || "grey"]);
 
 
     /**

@@ -28,8 +28,8 @@ const resolve = (app) =>
 				":types": path.resolve(app.paths.build, "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			mainFields: app.build.mode  === "web" ? [ "web", "module", "main" ] : [ "module", "main" ],
-			fallback: app.build.mode === "web" ?
+			mainFields: app.build.target  === "web" || app.build.type === "webmodule" ? [ "web", "module", "main" ] : [ "module", "main" ],
+			fallback: app.build.target === "web" || app.build.type === "webmodule" ?
 					  {
 					  	  path: require.resolve("path-browserify"),
 					  	  os: require.resolve("os-browserify/browser")

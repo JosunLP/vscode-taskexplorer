@@ -23,7 +23,7 @@
 
 export declare type WpBuildRcBuilds = [WpBuildRcBuild, ...WpBuildRcBuild[]];
 
-export declare type WpBuildRcBuildType = "module" | "tests" | "types" | "webapp";
+export declare type WpBuildRcBuildType = "module" | "tests" | "types" | "webapp" | "webmodule";
 
 export declare type WebpackEntry = WebpackEntryPath | WebpackEntryObject;
 
@@ -101,7 +101,7 @@ export declare type TypeWpBuildRcLog =
 };
 export declare type WpBuildRcLog = Required<TypeWpBuildRcLog>;
 
-export declare type WpBuildRcLogColors = 
+export declare type TypeWpBuildRcLogColors = 
 {
     default?: WpBuildLogTrueColor ;
     buildBracket?: WpBuildLogTrueColor ;
@@ -112,7 +112,9 @@ export declare type WpBuildRcLogColors =
     tagBracket?: WpBuildLogTrueColor ;
     tagText?: WpBuildLogTrueColor ;
     uploadSymbol?: WpBuildLogTrueColor ;
-}
+};
+export declare type WpBuildRcLogColors = Required<TypeWpBuildRcLogColors>;
+
 export declare type TypeWpBuildRcLogPad = 
 {
     base?: number;
