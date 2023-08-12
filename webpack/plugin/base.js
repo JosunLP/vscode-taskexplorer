@@ -21,9 +21,9 @@
  *        file:///:\Projects\vscode-taskexplorer\webpack\utils\environment.js
  *
  *     3. Adjust the rc configuration files by adding the plugin filename (w/o/ extension)
- *        as a key of the `plugins` object
+ *        as a key of the `plugins` object in both this project's rc file and the schema json.
  *        file:///c:\Projects\vscode-taskexplorer\webpack\.wpbuildrc.json
- *        file:///c:\Projects\vscode-taskexplorer\webpack\types\.wpbuildrc.defaults.json
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\types\.wpbuildrc.schema.json
  *
  *     4. Add a module reference to plugin directory index file and add to it's module.exports
  *        file://c:\Projects\vscode-taskexplorer\webpack\plugin\index.js

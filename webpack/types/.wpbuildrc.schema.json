@@ -6,7 +6,7 @@
     "properties": {
         "$schema": {
             "type": "string",
-            "pattern": "^.*\\/\\.wpbuildrc\\.schema\\.json$"
+            "pattern": "^file(?:.*?)[\\/\\\\]\\.wpbuildrc\\.schema\\.json$"
         },
         "name": {
             "type": "string",
@@ -59,7 +59,7 @@
                     "type": "string",
                     "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
                     "examples": [
-                        "relative path to a file that is the entry point for the vscode=electron test runner, path must start with a leading \"./\", relative to the project root direcrory"
+                        "relative path to the module file that exports the run() function for the vscode-electron test runner. Must start with a leading \"./\""
                     ]
                 }
             },

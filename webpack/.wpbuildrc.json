@@ -7,7 +7,7 @@
     "development":
     {
         "builds": [
-            { "name": "taskexplorer", "build": "extension", "mode": "development", "target": "node" },
+            { "name": "taskexplorer", "mode": "development", "target": "node" },
             {
                 "name": "webapp",
                 "mode": "development",
