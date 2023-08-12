@@ -44,9 +44,10 @@ const wrapExec = async (command) =>
     await procPromise;
     if (stdout || stderr)
     {
-        if ((/error ([0-9]{4})\:/).textstdout || stderr()) {
+        const match = (stdout || stderr).match(/error TS([0-9]{4})\:/);
+        if (match) {
             const [ _, err ] = match;
-            console.error(`   ${program} failed with error: ${err}`);
+            logger.error(`   tsc failed with error: ${err}`);
         }
         if (stdout) {
             console.log(`  ${program}  stderr: ${stdout}`);

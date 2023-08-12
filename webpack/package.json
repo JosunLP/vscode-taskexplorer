@@ -21,15 +21,15 @@
     "scripts": {
         "build_types": "node ../script/generate-wpbuild-types.js",
         "build_types:test": "json2ts -f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties -i ./types/.wpbuildrc.schema.json -o types/rc.base.tmp.d.ts",
-        "cp-projrc-to-defaultrc": "cmd /c copy /Y .wpbuildrc.json types\\.wpbuildrc.defaults.json"
+        "cp-projrc-to-defaultrc": "cmd /c copy /Y .wpbuildrc.json types\\.wpbuildrc.defaults.json",
+        "upload_rc_schema": "node ../script/upload-rc-schema.js"
     },
     "files": [
         "exports",
         "plugin",
-        "types",
-        "utils",
-        ".eslintrc.js",
-        ".wpbuildrc.json"
+        "types/*.d.ts",
+        "types/.wpbuildrc.defaults.json",
+        "utils"
     ],
     "publishConfig": {
         "access": "public"

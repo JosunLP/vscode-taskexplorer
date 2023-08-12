@@ -15,11 +15,12 @@
  */
 
 const { existsSync } = require("fs");
+const { promisify } = require("util");
 const WpBuildPlugin = require("./base");
 const { join, basename } = require("path");
 const { WebpackError } = require("webpack");
-const { spawnSync } = require("child_process");
 const { RegexTestsChunk } = require("../utils");
+const exec = promisify(require("child_process").exec);
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */

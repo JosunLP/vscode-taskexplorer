@@ -6,7 +6,7 @@
     "properties": {
         "$schema": {
             "type": "string",
-            "pattern": "^file(?:.*?)[\\/\\\\]\\.wpbuildrc\\.schema\\.json$"
+            "pattern": "^(?:file(?:.*?)[\\/\\\\]|https\\:\\/\\/app1\\.spmeesseman\\.com\\/res\\/app\\/wpbuild\\/v[0-9]+\\.[0-9]+\\.[0-9]+(?:\\-pre\\.[0-9]{1,2})?)\\/\\.wpbuildrc\\.schema\\.json$"
         },
         "name": {
             "type": "string",
