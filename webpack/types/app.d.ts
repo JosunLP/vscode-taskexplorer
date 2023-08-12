@@ -36,7 +36,7 @@ declare type WpBuildRuntimeEnvArgs =
 {
     build: WpBuildBuild;
     environment: WpBuildEnvironment;
-    mode: WebpackMode;
+    mode: WpBuildWebpackMode;
 } & WebpackRuntimeEnvArgs;
 
 declare type WpBuildGlobalEnvironment = {

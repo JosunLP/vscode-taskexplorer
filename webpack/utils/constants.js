@@ -12,7 +12,7 @@ const WpBuildModuleTypes = [ "web" , "extension", "tests", "types", "webapp" ];
 /**
  * @type {WpBuildEnvironment[]}
  */
-const WpBuildBuildEnvironmentTypes = [ "dev" , "prod", "test", "testprod" ];
+const WpBuildBuildEnvironmentTypes = [ "development" , "production", "test", "testprod" ];
 
 module.exports = {
     WpBuildModuleTypes, WpBuildBuildEnvironmentTypes

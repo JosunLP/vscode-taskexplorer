@@ -1,15 +1,12 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "",
+    "description": "WpBuild configuration file schema",
+    "title": "WpBuildRcSchema",
     "type": "object",
     "properties": {
         "$schema": {
             "type": "string",
-            "patternProperties": {
-                "^.*\/\\.wpbuildrc\\.schema\\.json$": {
-                  "type": "string"
-                }
-            }
+            "pattern": "^.*\/\\.wpbuildrc\\.schema\\.json$"
         },
         "name": {
             "type": "string",
@@ -24,60 +21,130 @@
             "minLength": 10
         },
         "publicInfoProject": {
-            "type": "boolean"
+            "type": "boolean",
+            "default": false
         },
         "builds": {
-            "$ref": "#/$defs/StringValueObject"
+            "$ref": "#/$defs/WpBuildRcBuilds"
         },
-        "colors": {
-            "$ref": "#/$defs/WpBuildColorsDefinition",
-            "required": [
-                "default"
-            ]
+        "development": {
+            "$ref": "#/$defs/WpBuildRcEnvironment"
         },
-        "environment": {
+        "log": {
+            "$ref": "#/$defs/WpBuildRcLog"
+        },
+        "paths": {
+            "$ref": "#/$defs/WpBuildRcPaths"
+        },
+        "exports": {
+            "$ref": "#/$defs/WpBuildRcExports"
+        },
+        "plugins": {
+            "$ref": "#/$defs/WpBuildRcPlugins"
+        },
+        "production": {
+            "$ref": "#/$defs/WpBuildRcEnvironment"
+        },
+        "test": {
+            "$ref": "#/$defs/WpBuildRcEnvironment"
+        },
+        "testproduction": {
+            "$ref": "#/$defs/WpBuildRcEnvironment"
+        },
+        "vscode": {
+            "type": "object",
+            "title": "WpBuildRcVsCode",
+            "properties": {
+                "testsEntry": {
+                    "type": "string",
+                    "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
+                    "examples": [
+                        "relative path to a file that is the entry point for the vscode=electron test runner, path must start with a leading \"./\", relative to the project root direcrory"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "name"
+    ],
+    "$defs":
+    {
+        "WpBuildRcEnvironment": {
             "type": "object",
             "properties": {
-                "dev": {
-                    "$ref": "#/$defs/WpBuildEnvironmentDefinition"
+                "builds": {
+                    "$ref": "#/$defs/WpBuildRcBuilds"
                 },
-                "testprod": {
-                    "$ref": "#/$defs/WpBuildEnvironmentDefinition"
+                "log": {
+                    "$ref": "#/$defs/WpBuildRcLog"
                 },
-                "prod": {
-                    "$ref": "#/$defs/WpBuildEnvironmentDefinition"
+                "paths": {
+                    "$ref": "#/$defs/WpBuildRcPaths"
                 },
-                "test": {
-                    "$ref": "#/$defs/WpBuildEnvironmentDefinition"
+                "exports": {
+                    "$ref": "#/$defs/WpBuildRcExports"
+                },
+                "plugins": {
+                    "$ref": "#/$defs/WpBuildRcPlugins"
                 }
             },
             "additionalProperties": false,
             "required": [
-                "dev",
-                "testprod",
-                "prod",
-                "test"
+                "builds"
             ]
         },
-        "log": {
-            "$ref": "#/$defs/WpBuildLogDefinition",
-            "required": []
+        "WpBuildRcBuilds": {
+            "type": "array",
+            "uniqueItems": true,
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/WpBuildRcBuild"
+            }
         },
-        "paths": {
-            "$ref": "#/$defs/WpBuildPathsDefinition",
+        "WpBuildRcBuild": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "entry": {
+                    "$ref": "#/$defs/WebpackEntry"
+                },
+                "mode": {
+                    "$ref": "#/$defs/WpBuildWebpackMode"
+                },
+                "target": {
+                    "$ref": "#/$defs/WebpackTarget"
+                },
+                "log": {
+                    "$ref": "#/$defs/WpBuildRcLog"
+                },
+                "paths": {
+                    "$ref": "#/$defs/WpBuildRcPaths"
+                },
+                "exports": {
+                    "$ref": "#/$defs/WpBuildRcExports"
+                },
+                "plugins": {
+                    "$ref": "#/$defs/WpBuildRcPlugins"
+                }
+            },
+            "additionalProperties": false,
             "required": [
-                "dist",
-                "src"
+                "name"
             ]
         },
-        "exports": {
+        "WpBuildRcExports": {
             "type": "object",
             "properties": {
                 "cache": {
                     "type": "boolean"
                 },
                 "context": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
@@ -85,7 +152,6 @@
                     "type": "boolean"
                 },
                 "entry": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
@@ -102,12 +168,10 @@
                     "type": "boolean"
                 },
                 "mode": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
                 "name": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
@@ -115,22 +179,18 @@
                     "type": "boolean"
                 },
                 "output": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
                 "plugins": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
                 "resolve": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
                 "rules": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
@@ -138,16 +198,148 @@
                     "type": "boolean"
                 },
                 "target": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
                 "watch": {
                     "type": "boolean"
                 }
-            }
+            },
+            "additionalProperties": false
         },
-        "plugins": {
+        "WpBuildRcLog": {
+            "type": "object",
+            "properties": {
+                "level": {
+                    "type": "number",
+                    "title": "WpBuildLogLevel",
+                    "default": 2,
+                    "oneOf": [
+                        {
+                            "const": 0,
+                            "description": "No logging"
+                        },
+                        {
+                            "const": 1,
+                            "description": "Logging level 1 - Errors, warnings, and function start/end"
+                        },
+                        {
+                            "const": 2,
+                            "description": "Logging level 2 - Level 1 + parameter values"
+                        },
+                        {
+                            "const": 3,
+                            "description": "Logging level 3 - Level 2 + non-looping processing detail"
+                        },
+                        {
+                            "const": 4,
+                            "description": "Logging level 4 - Level 3 + looping processing detail"
+                        },
+                        {
+                            "const": 5,
+                            "description": "Logging level 5 - Verbose"
+                        }
+                    ],
+                    "additionalProperties": false
+                },
+                "valueMaxLineLength": {
+                    "type": "number",
+                    "default": 100,
+                    "minValue": 50,
+                    "maxValue": 200
+                },
+                "colors": {
+                    "type": "object",
+                    "title": "WpBuildRcLogColors",
+                    "properties": {
+                        "default": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "white"
+                        },
+                        "buildBracket": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "blue"
+                        },
+                        "buildText": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "white"
+                        },
+                        "infoIcon": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "magenta"
+                        },
+                        "valueStar": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "cyan"
+                        },
+                        "valueStarText": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "grey"
+                        },
+                        "tagBracket": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "blue"
+                        },
+                        "tagText": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "grey"
+                        },
+                        "uploadSymbol": {
+                            "$ref": "#/$defs/WpBuildLogTrueColor",
+                            "default": "grey"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": []
+                },
+                "pad": {
+                    "type": "object",
+                    "title": "WpBuildRcLogPad",
+                    "properties": {
+                        "base": {
+                            "type": "number",
+                            "default": 0
+                        },
+                        "envTag": {
+                            "type": "number",
+                            "default": 25
+                        },
+                        "value": {
+                            "type": "number",
+                            "default": 45
+                        },
+                        "uploadFileName": {
+                            "type": "number",
+                            "default": 50
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "WpBuildRcPaths": {
+            "type": "object",
+            "properties": {
+                "dist": {
+                    "type": "string",
+                    "default": "dist",
+                    "pattern": "^[a-zA-Z0-9_][~@!\\w\\.\\-\\\\\\/]+$",
+                    "minLength": 3,
+                    "maxLength": 100
+                },
+                "src": {
+                    "type": "string",
+                    "default": "src",
+                    "pattern": "^[a-zA-Z0-9_][~@!\\w\\.\\-\\\\\\/]+$",
+                    "minLength": 3,
+                    "maxLength": 100
+                }
+            },
+            "additionalProperties": false
+        },
+        "WpBuildRcPlugins": {
             "type": "object",
             "properties": {
                 "analyze": {
@@ -167,12 +359,10 @@
                     "default": false
                 },
                 "environment": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
                 "html": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
@@ -189,12 +379,10 @@
                     "default": true
                 },
                 "loghooks": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
                 "optimization": {
-                    "type": "boolean",
                     "const": true,
                     "readOnly": true
                 },
@@ -234,160 +422,43 @@
                     "type": "boolean",
                     "default": false
                 }
-            }
-        }
-    },
-    "additionalProperties": false,
-    "required": [
-        "builds",
-        "name",
-        "displayName",
-        "environment",
-        "paths",
-        "exports",
-        "plugins"
-    ],
-    "$defs":
-    {
-        "DirPathValueObject": {
-            "type": "object",
-            "propertyNames": {
-                "minLength": 3,
-                "maxLength": 20,
-                "pattern": "^[a-z][a-zA-Z0-9_]+$"
             },
-            "additionalProperties": {
-                "type": "string",
-                "pattern": "^[a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+$",
-                "minLength": 3,
-                "maxLength": 75
-            }
+            "additionalPropertes": false
         },
-        "FilePathValueObject": {
-            "type": "object",
-            "propertyNames": {
-                "minLength": 3,
-                "maxLength": 20,
-                "pattern": "^[a-z][a-zA-Z0-9_]+$"
-            },
-            "additionalProperties": {
-                "type": "string",
-                "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
-                "minLength": 3,
-                "maxLength": 85
-            },
-            "description": "mapping of module names to respective file that is the entry point",
-            "examples": "elative path to a file that is the entry point, path must start with a leading \"./\""
-
-        },
-        "StringValueObject": {
-            "type": "object",
-            "propertyNames": {
-                "minLength": 3,
-                "maxLength": 20,
-                "pattern": "^[a-z][a-zA-Z0-9_]+$"
-            },
-            "patternProperties": {
-                "^.*$": {
-                    "type": "string"}
-            },
-            "additionalProperties": false
-
-        },
-        "StringOrNUllValueObject": {
-            "type": "object",
-            "propertyNames": {
-                "minLength": 3,
-                "maxLength": 20,
-                "pattern": "^[a-z][a-zA-Z0-9_]+$"
-            },
-            "patternProperties": {
-                "^.*$": {
-                    "anyOf": [
-                        {"type": "string"},
-                        {"type": "null"}
-                    ]
-                }
-            },
-            "additionalProperties": false
-
-        },
-        "WebpackMode":  {
+        "WpBuildLogTrueColor": {
             "type": "string",
             "oneOf": [
                 {
-                    "const": "development"
+                    "const": "black"
                 },
                 {
-                    "const": "production"
+                    "const": "blue"
                 },
                 {
-                    "const": "none"
+                    "const": "cyan"
                 },
                 {
-                    "const": "test"
+                    "const": "green"
                 },
                 {
-                    "const": "testproduction"
+                    "const": "grey"
+                },
+                {
+                    "const": "magenta"
+                },
+                {
+                    "const": "red"
+                },
+                {
+                    "const": "system"
+                },
+                {
+                    "const": "white"
+                },
+                {
+                    "const": "yellow"
                 }
             ]
-        },
-        "WebpackTarget":  {
-            "type": "string",
-            "oneOf": [
-                {
-                    "const": "node"
-                },
-                {
-                    "const": "web"
-                },
-                {
-                    "const": "webworker"
-                }
-            ]
-        },
-        "WpBuildEnvironmentDefinition": {
-            "type": "object",
-            "properties": {
-                "builds": {
-                    "type": "array",
-                    "uniqueItems": true,
-                    "minItems": 1,
-                    "items": {
-                        "properties": {
-                            "name": {
-                                "type": "string",
-                                "minLength": 3
-                            },
-                            "build": {
-                                "type": "string",
-                                "minLength": 1
-                            },
-                            "entry": {
-                                "$ref": "#/$defs/FilePathValueObject"
-                            },
-                            "mode": {
-                                "$ref": "#/$defs/WebpackMode"
-                            },
-                            "target": {
-                                "$ref": "#/$defs/WebpackTarget"
-                            },
-                            "overrides": {
-                                "$ref": "#/$defs/WpBuildOverridesDefinition"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "name",
-                            "build"
-                        ]
-                    }
-                },
-                "overrides": {
-                    "$ref": "#/$defs/WpBuildOverridesDefinition"
-                }
-            },
-            "additionalProperties": false
         },
         "WpBuildLogColor": {
             "type": "string",
@@ -414,148 +485,136 @@
                     "const": "red"
                 },
                 {
+                    "const": "system"
+                },
+                {
                     "const": "white"
                 },
                 {
                     "const": "yellow"
+                },
+                {
+                    "const": "bold"
+                },
+                {
+                    "const": "inverse"
+                },
+                {
+                    "const": "italic"
+                },
+                {
+                    "const": "underline"
                 }
-            ]
-        },
-        "WpBuildColorsDefinition" : {
-            "type": "object",
-            "properties": {
-                "default": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "buildBracket": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "buildText": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "infoIcon": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "valueStar": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "valueStarText": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "tagBracket": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "tagText": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "uploadSymbol": {
-                    "$ref": "#/$defs/WpBuildLogColor"
-                },
-                "builds": {
-                    "type": "object",
-                    "propertyNames": {
-                        "minLength": 3,
-                        "maxLength": 20,
-                        "pattern": "^[a-z][a-zA-Z0-9_]+$"
-                    },
-                    "patternProperties": {
-                        "^.*$": {
-                            "$ref": "#/$defs/WpBuildLogColor"
-                        }
-                    }
-                }
-            },
+            ],
             "additionalProperties": false
         },
-        "WpBuildLogLevel": {
-            "type": "number",
+        "WpBuildWebpackMode":  {
+            "type": "string",
+            "default": "production",
             "oneOf": [
                 {
-                    "const": 0,
-                    "description": "No logging"
+                    "const": "development"
                 },
                 {
-                    "const": 1,
-                    "description": "Logging level 1 - Errors, warnings, and function start/end"
+                    "const": "production"
                 },
                 {
-                    "const": 2,
-                    "description": "Logging level 2 - Level 1 + parameter values"
+                    "const": "none"
                 },
                 {
-                    "const": 3,
-                    "description": "Logging level 3 - Level 2 + non-looping processing detail"
+                    "const": "test"
                 },
                 {
-                    "const": 4,
-                    "description": "Logging level 4 - Level 3 + looping processing detail"
+                    "const": "testproduction"
+                }
+            ],
+            "additionalProperties": false
+        },
+        "WebpackEntry": {
+            "type": "object",
+            "description": "mapping of module names to respective file that is the entry point",
+            "propertyNames": {
+                "minLength": 3,
+                "maxLength": 20,
+                "pattern": "^[a-z][a-zA-Z0-9_]+$"
+            },
+            "properties": {
+                "import": {
+                    "type": "string",
+                    "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
+                    "minLength": 3,
+                    "maxLength": 85
+                },
+                "dependsOn": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9_]+$"
+                },
+                "required": [
+                    "import"
+                ]
+            },
+            "additionalProperties": {
+                "type": "string",
+                "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
+                "minLength": 3,
+                "maxLength": 85
+            },
+            "examples": [
+                {
+                    "modulename": {
+                        "import": "./path/to/entrymodule.ts"
+                    }
                 },
                 {
-                    "const": 5,
-                    "description": "Logging level 5 - Verbose"
+                    "modulename1": {
+                        "import": "./path/to/entrymodule1.ts"
+                    },
+                    "modulename2": {
+                        "import": "./path/to/entrymodule2.ts",
+                        "dependOn": "modulename1"
+                    }
                 }
             ]
+
         },
-        "WpBuildLogDefinition": {
-            "type": "object",
-            "properties": {
-                "level": {
-                    "$ref": "#/$defs/WpBuildLogLevel"
+        "WebpackTarget":  {
+            "type": "string",
+            "default": "web",
+            "oneOf": [
+                {
+                    "const": "node"
                 },
-                "pad": {
-                    "$ref": "#/$defs/WpBuildLogPadDefinition"
+                {
+                    "const": "web"
                 },
-                "valueMaxLineLength": {
-                    "type": "number"
+                {
+                    "const": "webworker"
+                },
+                {
+                    "const": "async-node"
+                },
+                {
+                    "const": "node-webkit"
+                },
+                {
+                    "const": "electron-main"
+                },
+                {
+                    "const": "electron-renderer"
+                },
+                {
+                    "const": "electron-preload"
+                },
+                {
+                    "const": "nwjs"
+                },
+                {
+                    "const": "esX"
+                },
+                {
+                    "const": "browserlist"
                 }
-            },
-            "additionalProperties": false
-        },
-        "WpBuildLogPadDefinition": {
-            "type": "object",
-            "properties": {
-                "base": {
-                    "type": "number"
-                },
-                "envTag": {
-                    "type": "number"
-                },
-                "value": {
-                    "type": "number"
-                },
-                "uploadFileName": {
-                    "type": "number"
-                }
-            },
-            "additionalProperties": false
-        },
-        "WpBuildOverridesDefinition":  {
-            "type": "object",
-            "properties": {
-                "colors": {
-                    "$ref": "#/$defs/WpBuildColorsDefinition"
-                },
-                "log": {
-                    "$ref": "#/$defs/WpBuildLogDefinition"
-                },
-                "paths": {
-                    "$ref": "#/$defs/WpBuildPathsDefinition"
-                }
-            },
-            "additionalProperties": false
-        },
-        "WpBuildPathsDefinition": {
-            "$ref": "#/$defs/DirPathValueObject",
-            "properties": {
-                "dist": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "src": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            }
+            ]
         }
     }
 }

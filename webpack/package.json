@@ -19,9 +19,9 @@
         "url": "https://github.com/spmeesseman/wpbuild.git"
     },
     "scripts": {
-        "build_typings:json2ts": "json2ts -f -i ./types/.wpbuildrc.schema.json -o types/wbbuildrc.tmp.d.ts",
-        "build_schema": "json-schema-generator -f ./types/.wpbuildrc.defaults.json -o types/.wpbuildrc.schema.tmp.json",
-        "build_schema:quicktype": "quicktype -o types/.wpbuildrc.schema.json --src-lang schema types/.wpbuildrc.schema.json"
+        "build_types": "node ../script/generate-wpbuild-types.js",
+        "build_types:test": "json2ts -f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties -i ./types/.wpbuildrc.schema.json -o types/wbbuildrc.tmp.d.ts",
+        "build_schema": "json-schema-generator -f ./types/.wpbuildrc.defaults.json -o types/.wpbuildrc.schema.tmp.json"
     },
     "files": [
         "exports",
@@ -39,7 +39,7 @@
         "typescript"
     ],
     "devDependencies": {
-        "json-schema-to-ts": "^2.9.2"
+        "json-schema-to-typescript": "^13.0.2"
     },
     "dependencies": {
         "glob": "^10.3.3"

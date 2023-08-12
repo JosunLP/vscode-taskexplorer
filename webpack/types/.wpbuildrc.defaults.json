@@ -4,13 +4,6 @@
     "displayName": "Task Explorer",
     "detailedDisplayName": "Task Explorer VSCode Extension",
     "publicInfoProject": true,
-    "builds": {
-        "extension": "node",
-        "tests": "node",
-        "types": "node",
-        "web": "web",
-        "webapp": "webworker"
-    },
     "colors":
     {
         "default": "grey",
@@ -32,14 +25,13 @@
     },
     "environment":
     {
-        "dev":
+        "development":
         {
             "builds": [
-                { "name": "taskexplorer", "build": "extension", "environment": "dev", "mode": "development", "target": "node" },
+                { "name": "taskexplorer", "build": "extension", "mode": "development", "target": "node" },
                 {
                     "name": "webapp",
                     "build": "webapp",
-                    "environment": "dev",
                     "mode": "development",
                     "target": "webworker",
                     "entry": {
@@ -69,9 +61,9 @@
         "testprod":
         {
             "builds": [
-                { "name": "taskexplorer", "build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-                { "name": "webapp", "build": "webapp", "environment": "prod", "mode": "production", "target": "webworker" },
-                { "name": "tests", "build": "tests", "environment": "test", "mode": "none", "target": "node" }
+                { "name": "taskexplorer", "build": "extension", "mode": "production", "target": "node" },
+                { "name": "webapp", "build": "webapp", "mode": "production", "target": "webworker" },
+                { "name": "tests", "build": "tests", "mode": "none", "target": "node" }
             ],
             "overrides": {
                 "log": {
@@ -81,11 +73,11 @@
                 }
             }
         },
-        "prod":
+        "production":
         {
             "builds": [
-                { "name": "taskexplorer","build": "extension", "environment": "prod", "mode": "production", "target": "node" },
-                { "name": "webapp", "build": "webapp", "environment": "prod", "mode": "production", "target": "webworker" }
+                { "name": "taskexplorer","build": "extension", "mode": "production", "target": "node" },
+                { "name": "webapp", "build": "webapp", "mode": "production", "target": "webworker" }
             ],
             "overrides": {
                 "colors": {
@@ -96,8 +88,8 @@
         "test":
         {
             "builds": [
-                { "name": "taskexplorer", "build": "extension", "environment": "test", "target": "node" },
-                { "name": "webapp", "build": "webapp", "environment": "dev", "target": "webworker" }
+                { "name": "taskexplorer", "build": "extension", "target": "node" },
+                { "name": "webapp", "build": "webapp", "target": "webworker" }
             ],
             "overrides": {
                 "colors": {
@@ -176,5 +168,8 @@
         "upload": true,
         "vendormod": true,
         "wait": false
+    },
+    "vscode": {
+        "testsEntry": "./src/test/runTest.ts"
     }
 }

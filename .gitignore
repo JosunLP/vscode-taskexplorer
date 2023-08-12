@@ -21,3 +21,4 @@ tsconfig.tsbuildinfo
 /res/page
 /res/img/webview
 Subset.zip
+*.tmp.*

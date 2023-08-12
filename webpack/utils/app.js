@@ -18,14 +18,13 @@ const { join, resolve, isAbsolute } = require("path");
 
 /** @typedef {import("../utils").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").IDisposable} IDisposable */
-/** @typedef {import("../types").WebpackMode} WebpackMode */
+/** @typedef {import("../types").WpBuildMode} WpBuildMode */
 /** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
 /** @typedef {import("../types").WpBuildBuild} WpBuildBuild */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
@@ -57,12 +56,6 @@ class WpBuildApp
      */
     argv;
     /**
-     * @member {WpBuildBuild} build
-     * @memberof WpBuildApp.prototype
-     * @type {WpBuildBuild}
-     */
-    build;
-    /**
      * @member {boolean} clean
      * @memberof WpBuildApp.prototype
      * @type {boolean}
@@ -74,12 +67,6 @@ class WpBuildApp
      * @type {Array<IDisposable>}
      */
     disposables;
-    /**
-     * @member {WpBuildEnvironment} environment
-     * @memberof WpBuildApp.prototype
-     * @type {WpBuildEnvironment}
-     */
-    environment;
     /**
      * @member {boolean} esbuild
      * @memberof WpBuildApp.prototype
@@ -134,6 +121,12 @@ class WpBuildApp
      * @type {WpBuildConsoleLogger}
      */
     logger;
+    /**
+     * @member {WpBuildMode} mode
+     * @memberof WpBuildApp.prototype
+     * @type {WpBuildMode}
+     */
+    mode;
     /**
      * @member {WpBuildPaths} paths
      * @memberof WpBuildApp.prototype
@@ -233,16 +226,16 @@ class WpBuildApp
 		app.logger = new WpBuildConsoleLogger(app);
 		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
 
-		if (!app.environment)
+		if (!app.mode)
 		{
 			if (app.wpc.mode === "development" || argv.mode === "development") {
-				app.environment = "dev";
+				app.mode = "development";
 			}
 			else if (app.wpc.mode === "production" || argv.mode === "production") {
-				app.environment = "prod";
+				app.mode = "production";
 			}
 			else if (app.wpc.mode === "none" || argv.mode === "none") {
-				app.environment = "test";
+				app.mode = "test";
 			}
 			else {
 				const eMsg = "Could not detect build environment";
@@ -253,11 +246,11 @@ class WpBuildApp
 
 
 		apply(app, {
-			isTests: app.environment.startsWith("test"),
+			isTests: app.mode.startsWith("test"),
 			isWeb: app.target.startsWith("web"),
 			isMain: app.build === "extension" || app.build === "web",
-			isMainProd: (app.build === "extension" || app.build === "web") && app.environment === "prod",
-			isMainTests: (app.build === "extension" || app.build === "web") && app.environment.startsWith("test")
+			isMainProd: (app.build === "extension" || app.build === "web") && app.mode === "production",
+			isMainTests: (app.build === "extension" || app.build === "web") && app.mode.startsWith("test")
 		});
 
 		app.paths = this.getPaths(app);
@@ -276,7 +269,7 @@ class WpBuildApp
 		const paths = /** @type {WpBuildPaths} */({}),
 			  wvBase = app.paths.srcWebapps,
 			  baseDir = resolve(__dirname, "..", ".."),
-			  temp = resolve(process.env.TEMP || process.env.TMP  || "dist", app.rc.name, app.environment);
+			  temp = resolve(process.env.TEMP || process.env.TMP  || "dist", app.rc.name, app.mode);
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
 		}

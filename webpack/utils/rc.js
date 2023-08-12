@@ -27,7 +27,6 @@ const { resolve, basename, join, dirname } = require("path");
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
-/** @typedef {import("../types").WpBuildRcEnvironment} WpBuildRcEnvironment */
 /** @typedef {import("../types").WpBuildRcLogColorMap} WpBuildRcLogColorMap */
 /** @typedef {import("../types").WpBuildRcPackageJson} WpBuildRcPackageJson */
 /** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
@@ -64,9 +63,9 @@ class WpBuildRc
      */
     displayName;
     /**
-     * @member {WpBuildRcEnvironment} environment
+     * @member {WpBuildRcEnvironments} log
      * @memberof WpBuildRc.prototype
-     * @type {WpBuildRcEnvironment}
+     * @type {WpBuildRcEnvironments}
      */
     environment;
     /**
