@@ -163,7 +163,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 			  psxBasePath = app.paths.base.replace(/\\/g, "/"),
 			  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
-		if (app.rc.plugins.copy !== false)
+		if (app.rc.plugins.copy)
 		{
 			if (app.build === "webapp")
 			{

@@ -52,8 +52,8 @@ const builds =
 		app.wpc.entry = apply(app.wpc.entry || {},
 		{
 			"runTest": {
-				import: "./src/test/runTest.ts",
-				dependOn: fromMain ? [ "taskexplorer", "taskexplorer.debug" ] : undefined
+				import: "",
+				dependOn: fromMain ? [ "tas./src/test/runTest.tskexplorer", "taskexplorer.debug" ] : undefined
 			},
 			"control": {
 				import: "./src/test/control.ts",
@@ -125,12 +125,28 @@ const builds =
  */
 const entry = (app) =>
 {
-	if (app.build === "webapp" || app.build === "tests" || app.build === "types")
+	app.wpc.entry = {};
+	// if (app.build === "webapp" || app.build === "tests" || app.build === "types")
+	// {
+	// 	builds[app.build](app);
+	// }
+	// else {
+	// 	builds.main(app);
+	// }
+	const builds = app.rc.environment[app.mode].builds,
+		  build = builds.find(b => b === app.build);
+	if (build && build.entry)
 	{
-		builds[app.build](app);
+		
+		Object.entries(build.entry).forEach((([ chunk, path ])=>
+		{
+			app.wpc.entry[chunk] = {
+				import: path
+			};
+		}));
 	}
 	else {
-		builds.main(app);
+		// error
 	}
 };
 

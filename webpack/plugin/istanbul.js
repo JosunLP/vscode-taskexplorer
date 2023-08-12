@@ -124,7 +124,7 @@ class WpBuildIstanbulPlugin extends WpBuildPlugin
     // {
     //     /** @type {WebpackPluginInstance | undefined} */
     //     let plugin;
-    //     // if (app.rc.plugins.instrument !== false && app.build === "extension" && app.environment === "test")
+    //     // if (app.rc.plugins.instrument !== false && app.build === "extension" && app.mode === "test")
     //     // {
     //     //     plugin =
     //     //     {

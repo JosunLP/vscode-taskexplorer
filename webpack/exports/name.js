@@ -17,7 +17,7 @@
  */
 const name = (app) =>
 {
-	app.wpc.name = `${app.rc.name}|${app.rc.pkgJson.version}|${app.build}|${app.environment}|${app.target}|${app.wpc.mode}`;
+	app.wpc.name = `${app.rc.name}|${app.rc.pkgJson.version}|${app.build}|${app.mode}|${app.target}|${app.wpc.mode}`;
 };
 
 

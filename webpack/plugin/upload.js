@@ -75,7 +75,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
         //
         const app = this.app,
               logger = app.logger,
-              toUploadPath = join(app.paths.temp, app.environment), // /temp/<env>/<env>
+              toUploadPath = join(app.paths.temp, app.mode), // /temp/<env>/<env>
               logIcon = logger.withColor(logger.icons.info, logger.colors.yellow);
 
         logger.write("upload debug support files", 1, "", logIcon);
@@ -98,7 +98,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
                     {
                         const sourceMapFile = asset.info.related.sourceMap.toString();
                         logger.value("   queue sourcemap for upload", logger.tag(sourceMapFile), 2, "", logIcon);
-                        if (app.environment === "prod") {
+                        if (app.mode === "production") {
                             logger.value("   remove production sourcemap from distribution", sourceMapFile, 3);
                             await rename(join(app.rc.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
                         }
@@ -139,10 +139,10 @@ class WpBuildUploadPlugin extends WpBuildPlugin
         const plinkCmds = [
             `mkdir ${rBasePath}/${app.rc.name}`,
             `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.version}`,
-            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.version}/${app.environment}`,
-            `rm -f ${rBasePath}/${app.rc.name}/v${app.rc.version}/${app.environment}/*.*`,
+            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.version}/${app.mode}`,
+            `rm -f ${rBasePath}/${app.rc.name}/v${app.rc.version}/${app.mode}/*.*`,
         ];
-        if (app.environment === "prod") { plinkCmds.pop(); }
+        if (app.mode === "production") { plinkCmds.pop(); }
 
         const plinkArgs = [
             "-ssh",       // force use of ssh protocol

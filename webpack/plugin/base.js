@@ -185,7 +185,7 @@ class WpBuildPlugin
         this.name = this.constructor.name;
         this.options = mergeIf(options, { plugins: [] });
         this.hashDigestLength = this.app.wpc.output.hashDigestLength || 20;
-        this.cache = new WpBuildCache(this.app, `plugincache_${this.app.environment}_${this.name.replace(/WpBuild|Plugin/g, "")}.json`);
+        this.cache = new WpBuildCache(this.app, `plugincache_${this.app.mode}_${this.name.replace(/WpBuild|Plugin/g, "")}.json`);
         if (globalCache) {
             const aGLobalCache = asArray(globalCache);
             this.initGlobalEnvObject(aGLobalCache[0], aGLobalCache[1], ...aGLobalCache.slice(2));

@@ -151,7 +151,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		}
 
 		if (!tsConfigParams[0] || !existsSync(tsConfigParams[0])) {
-			throw new WpBuildError(`Could not locate tsconfig file for '${app.environment}' environment`, "plugin/tscheck.js");
+			throw new WpBuildError(`Could not locate tsconfig file for '${app.mode}' environment`, "plugin/tscheck.js");
 		}
 
 		return [{

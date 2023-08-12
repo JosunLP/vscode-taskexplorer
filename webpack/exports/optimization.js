@@ -41,7 +41,7 @@ const optimization = (app) =>
 						}
 					}
 				};
-				if (app.environment === "prod")
+				if (app.mode === "production")
 				{
 					app.wpc.optimization.chunkIds = "deterministic";
 				}
