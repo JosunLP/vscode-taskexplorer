@@ -7,6 +7,7 @@ const { posix, resolve } = require("path");
 const exec = promisify(require("child_process").exec);
 const { unlink, readFile, writeFile } = require("fs/promises");
 
+const description = "Provides types macthing the .wpbuildrc.json configuration file schema";
 const autoGenMessage = "This file was auto generated using the 'json-to-typescript' utility";
 
 //
@@ -38,7 +39,7 @@ const wrapExec = async (command) =>
     child.on("close", (code) =>
     {
         exitCode = code;
-        console.log(`   ${program} completed with exit code bold(${code})`);
+        console.log(`   ${program} completed with exit code ${code}`);
     });
     await procPromise;
     if (stdout || stderr)
@@ -61,7 +62,6 @@ const wrapExec = async (command) =>
 cliWrap(async () =>
 {
     const outputFile = "rc.d.ts",
-          // outputFile = "rc.base.d.ts",
           inputFile = ".wpbuildrc.schema.json",
           baseDir = posix.join("..", "webpack", "types"),
           outputFileTmp = `${outputFile.replace(".d.ts", ".tmp.d.ts")}`,
@@ -76,29 +76,35 @@ cliWrap(async () =>
               match = indexData.match(/\/\*\*(?:[^]*?)\*\//);
         if (match)
         {
-            const header = match[0]
-                           .replace("@file types/index.d.ts", `@file types/${outputFile}`)
-                           .replace("@spmeesseman Scott Meesseman", (v) => `${v}\r\n *\r\n * ${autoGenMessage}`);
-            let data = await readFile(tmpOutputPath, "utf8");
-            data = data.replace(/\r\n/g, "\n")
-                       .replace(/\/\*\*(?:[^]*?)\*\//g, "")
-                       .replace(/\& (?:[A-Za-z]*?)1;\n/g, ";\n")
-                       .replace(/export type (?:.*?)1 = string;$/gm, "")
-                       // .replace(/\[[a-z]\: string\]\: string;$/gm, "")
-                       .replace("[k: string]: string;", "[k: string]: string | undefined;")
-                       .replace(/\/\* eslint\-disable \*\/$/gm, "")
-                       .replace(/\n\}\nexport /g, "\n}\n\nexport ")
-                       .replace(/ \{\n    /g, " \n{\n    ")
-                       .replace(/(export type (?:.*?)\n)(export type)/g, (_, m1, m2) => `\n${m1}\n${m2}`)
-                       .replace(/(";\n)(export (?:type|interface))/g, (_, m1, m2) => `${m1}\n${m2}`)
-                       .replace(/\nexport type /g, "\nexport declare type ")
-                       .replace(/\nexport interface /g, "\nexport declare interface ")
-                       .replace(/\n    \| +/g, " | ")
-                       .replace(/(?:\n){3,}/g, "\n\n")
-                       .replace(/\n/g, "\r\n");
-            data = `\r\n${header}\r\n\r\n\r\n${data.trim()}\r\n`;
-            await writeFile(outputPath, data);
-            await unlink(tmpOutputPath);
+            let hdr = "",
+                data = await readFile(tmpOutputPath, "utf8");
+            hdr =  match[0]
+                   .replace(" with `WpBuild`", " with `WpBuildRc`")
+                   .replace("@file types/index.d.ts", `@file types/${outputFile}`)
+                   .replace("@spmeesseman Scott Meesseman", (v) => `${v}\r\n *\r\n * ${autoGenMessage}`)
+                   .replace("Exports all types for this project", description);
+            data = data
+                   .replace(/\r\n/g, "\n")
+                   .replace(/\/\*\*(?:[^]*?)\*\//g, "")
+                   .replace(/\& (?:[A-Za-z]*?)1;\n/g, ";\n")
+                   .replace(/export type (?:.*?)1 = string;$/gm, "")
+                   // .replace(/\[[a-z]\: string\]\: string;$/gm, "")
+                   .replace("[k: string]: string;", "[k: string]: string | undefined;")
+                   .replace(/\/\* eslint\-disable \*\/$/gm, "")
+                   .replace(/\n\}\nexport /g, "\n}\n\nexport ")
+                   .replace(/author\?\:(?:[^]*?)\};/g, "author?: string | { name: string; email?: string };")
+                   .replace(/export type WebpackEntry =\s+\|(?:[^]*?)\};/g, (v) => v.replace("| string", "string").replace(/\n/g, " ").replace(/ {2,}/g, " "))
+                   .replace(/ *\$schema\?\: string;\n/, "")
+                   .replace(/(export type (?:.*?)\n)(export type)/g, (_, m1, m2) => `\n${m1}\n${m2}`)
+                   .replace(/(";\n)(export (?:type|interface))/g, (_, m1, m2) => `${m1}\n${m2}`)
+                   .replace(/\nexport type /g, "\nexport declare type ")
+                   .replace(/\nexport interface (.*?) /g, (_, m1) => `\nexport declare type ${m1} = `)
+                   // .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n};\nexport declare type ${m1} = I${m1};\n`)
+                   .replace(/ \{\n    /g, " \n{\n    ")
+                   .replace(/\n    \| +/g, " | ")
+                   .replace(/(?:\n){3,}/g, "\n\n")
+                   .replace(/\n/g, "\r\n");
+            await writeFile(outputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
         }
         else {
             console.error(`Could not read header from index file '${indexPath}'`);

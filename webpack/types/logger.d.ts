@@ -16,11 +16,16 @@
  * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
-declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
-declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
-declare type WpBuildLogColor = WpBuildLogTrueColor | "bold" | "inverse" | "italic" | "underline";
 
-declare interface IWpBuildLogIconBaseSet
+import { WpBuildLogLevel, WpBuildLogTrueColor, WpBuildLogColor } from "./rc";
+
+declare type WpBuildLogIcon = keyof Omit<WpBuildLogIconSet, "blue" | "color">;
+
+declare type WpBuildLogColorValue = 0 | 3 | 4 | 7 | 22 | 23 | 24 | 27 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 39 | 90;
+
+declare type WpBuildLogColorMapping = [ WpBuildLogColorValue, WpBuildLogColorValue ];
+
+declare type WpBuildLogIconBaseSet =
 {
     bullet: string;
     error: string;
@@ -30,24 +35,22 @@ declare interface IWpBuildLogIconBaseSet
     success: string;
     up: string;
     warning: string;
-}
-declare type WpBuildLogIconBlueSet= Pick<IWpBuildLogIconBaseSet, "error"|"info"|"success"|"warning">;
-declare interface IWpBuildLogIconActionSet extends IWpBuildLogIconBaseSet
+};
+
+declare type WpBuildLogIconBlueSet = Pick<WpBuildLogIconBaseSet, "error"|"info"|"success"|"warning">;
+
+declare type WpBuildLogIconActionSet =
 {
     errorTag: string;
     starCyan: string;
     successTag: string;
-}
-declare type WpBuildLogIconActionSet = IWpBuildLogIconActionSet;
-declare interface IWpBuildLogIconSet extends IWpBuildLogIconBaseSet
+} & WpBuildLogIconBaseSet;
+
+declare type WpBuildLogIconSet = 
 {
     blue: WpBuildLogIconBlueSet;
     color: WpBuildLogIconActionSet;
-}
-declare type WpBuildLogIconSet = Required<IWpBuildLogIconSet>;
-declare type WpBuildLogIcon = keyof Omit<WpBuildLogIconSet, "blue" | "color">;
-
-declare type WpBuildLogColorMapping = [ number, number ];
+} & WpBuildLogIconBaseSet;
 
 // declare interface IWpBuildLogger implements IDisposable
 // {
@@ -70,6 +73,7 @@ declare type WpBuildLogColorMapping = [ number, number ];
 export {
     WpBuildLogColor,
     WpBuildLogColorMapping,
+    WpBuildLogColorValue,
     WpBuildLogIcon,
     WpBuildLogIconSet,
     WpBuildLogLevel,

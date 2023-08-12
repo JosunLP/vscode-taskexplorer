@@ -22,6 +22,7 @@ const { resolve, basename, join, dirname } = require("path");
 /** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
 /** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
 /** @typedef {import("../types").WpBuildRcBuilds} WpBuildRcBuilds */
+/** @typedef {import("../types").WpBuildRcSchema} WpBuildRcSchema */
 /** @typedef {import("../types").WpBuildRcVsCode} WpBuildRcVsCode */
 /** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
@@ -35,6 +36,7 @@ const { resolve, basename, join, dirname } = require("path");
 /**
  * @class
  * @implements {IDisposable}
+ * @implements {WpBuildRcSchema}
  */
 class WpBuildRc
 {

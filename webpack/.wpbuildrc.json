@@ -10,7 +10,6 @@
             { "name": "taskexplorer", "build": "extension", "mode": "development", "target": "node" },
             {
                 "name": "webapp",
-                "build": "webapp",
                 "mode": "development",
                 "target": "webworker",
                 "entry": {
@@ -24,10 +23,8 @@
                     "taskUsage": "./taskUsage/taskUsage.ts",
                     "welcome": "./welcome/welcome.ts"
                 },
-                "overrides": {
-                    "paths": {
-                        "src": "src/webview/app"
-                    }
+                "paths": {
+                    "src": "src/webview/app"
                 }
             }
         ],
@@ -40,9 +37,9 @@
     "testproduction":
     {
         "builds": [
-            { "name": "taskexplorer", "build": "extension", "mode": "production", "target": "node" },
-            { "name": "webapp", "build": "webapp", "mode": "production", "target": "webworker" },
-            { "name": "tests", "build": "tests", "mode": "none", "target": "node", "paths": { "src": "src/tests" } }
+            { "name": "taskexplorer", "mode": "testproduction", "target": "node" },
+            { "name": "webapp", "mode": "production", "target": "webworker" },
+            { "name": "tests", "mode": "testproduction", "target": "node", "paths": { "src": "src/tests" } }
         ],
         "log": {
             "pad": {
@@ -53,8 +50,8 @@
     "production":
     {
         "builds": [
-            { "name": "taskexplorer","build": "extension", "mode": "production", "target": "node" },
-            { "name": "webapp", "build": "webapp", "mode": "production", "target": "webworker" }
+            { "name": "taskexplorer" },
+            { "name": "webapp", "target": "webworker" }
         ],
         "log": {
             "colors": {
@@ -65,8 +62,8 @@
     "test":
     {
         "builds": [
-            { "name": "taskexplorer", "build": "extension", "target": "node" },
-            { "name": "webapp", "build": "webapp", "target": "webworker" }
+            { "name": "taskexplorer", "target": "node" },
+            { "name": "webapp", "target": "webworker" }
         ],
         "log": {
             "colors": {
@@ -97,14 +94,7 @@
             "valueStarText": "white",
             "tagBracket": "blue",
             "tagText": "white",
-            "uploadSymbol": "yellow",
-            "builds": {
-                "extension": "blue",
-                "tests": "white",
-                "types": "magenta",
-                "web": "cyan",
-                "webapp": "cyan"
-            }
+            "uploadSymbol": "yellow"
         }
     },
     "paths":

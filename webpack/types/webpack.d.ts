@@ -1,7 +1,7 @@
 
 /**
  * 
- * @file types/generic.d.ts
+ * @file types/webpack.d.ts
  * @version 0.0.1
  * @license MIT
  * @author @spmeesseman Scott Meesseman
@@ -14,6 +14,10 @@
  * 
  * @description
  * 
+ * This definition file provides some manipulated base webpack types specifically for this project.
+ *
+ * All types exported from this definition file are prepended with `Webpack`.
+ *
  * Targets:
  * 
  * async-node[[X].Y]	    Compile for usage in a Node.js-like environment (uses fs and vm to load chunks asynchronously)
@@ -34,6 +38,8 @@
  * browserslist             Infer a platform and the ES-features from a browserslist-config (default if browserslist config
  *                          is available)
  */
+
+
 import { ConvertType, PickByType } from "./generic";
 import { AsyncSeriesHook, HookMap, SyncHook, SyncBailHook } from "tapable"
 import { Schema as WebpackSchema } from "schema-utils/declarations/validate";
@@ -47,54 +53,85 @@ import {
 
 
 declare type WebpackAsyncHook<T> = AsyncSeriesHook<T>;
+
 declare type WebpackCacheFacade = ReturnType<WebpackCompilation["getCache"]>;
+
 declare type WebpackCompilationAssets = { [index: string]: WebpackSource; }
+
 declare type WebpackCompilationHook = WebpackCompilation["hooks"];
+
 declare type WebpackCompilationHookName = keyof WebpackCompilationHook;
-declare interface WebpackCompilationParams {
+
+declare type WebpackCompilationParams = {
     normalModuleFactory: any; // WebpackNormalModuleFactory;
     contextModuleFactory: any; // WebpackContextModuleFactoryy;
-}
+};
+// declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
+// declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
+
 declare type WebpackCompilationHookStage = "ADDITIONAL" | "PRE_PROCESS" | "DERIVED" | "ADDITIONS" |  "OPTIMIZE" |
                                            "OPTIMIZE_COUNT" | "OPTIMIZE_COMPATIBILITY" | "OPTIMIZE_SIZE" |
                                            "DEV_TOOLING" | "OPTIMIZE_INLINE" | "SUMMARIZE" | "OPTIMIZE_HASH" |
-                                           "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT"
+                                           "OPTIMIZE_TRANSFER" | "ANALYSE" | "REPORT";
+
 declare type WebpackCompilerHook = WebpackCompiler["hooks"];
+
 declare type WebpackCompilerAsyncHook = PickByType<WebpackCompilerHook, AsyncSeriesHook<any>>;
+
 declare type WebpackCompilerSyncHook = PickByType<WebpackCompilerHook, SyncHook<any>>;
+
 declare type WebpackCompilerHookName = keyof WebpackCompilerHook;
+
 declare type WebpackCompilerAsyncHookName = keyof WebpackCompilerAsyncHook;
+
 declare type WebpackCompilerSyncHookName = keyof WebpackCompilerSyncHook;
-// declare type WebpackContextModuleFactoryy = import("webpack").Compilation.ContextModuleFactory;
-// declare type WebpackEntry = Exclude<WebpackConfig["entry"], undefined>;
-//declare type WebpackEntry = EntryNormalized;
+
 declare type WebpackEtag = ReturnType<ReturnType<WebpackCompilation["getCache"]>["getLazyHashedEtag"]>;
+
 declare type WebpackHookMap<H> = HookMap<H>;
+
 declare type WebpackLogger = ReturnType<WebpackCompilation["getLogger"]>;
+
 declare type WebpackLogLevel = Exclude<WebpackConfig["infrastructureLogging"], undefined>["level"];
+
 declare type WebpackMode = Exclude<WebpackConfig["mode"], undefined>;
+
 declare type WebpackModuleOptions = { rules: WebpackRuleSetRule[]; } & ModuleOptions;
-// declare type WebpackNormalModuleFactory = import("webpack").NormalModuleFactory;
+
 declare type WebpackOptimization = WebpackOptionsNormalized["optimization"];
+
 declare type WebpackOutput = Exclude<WebpackConfig["output"], undefined>;
+
 declare type WebpackRawSource = WebpackSources.RawSource;
+
 declare type WebpackRuleSetRule = Exclude<ConvertType<RuleSetRule, (false | "" | 0 | RuleSetRule | "..." | null | undefined)[] , RuleSetRule[]>, undefined>;
-declare interface WebpackRuntimeArgs extends Record<string, string | boolean | WebpackRuntimeEnvArgs>
+
+declare type WebpackRuntimeArgs =
 {
     clean?: boolean;
     config: string[];
     env: WebpackRuntimeEnvArgs;
     mode?: WebpackMode;
     watch?: boolean;
+    [ k: string ]: string[] | string | boolean | WebpackRuntimeEnvArgs;
 };
+
 declare type WebpackRuntimeEnvArgs = { WEBPACK_WATCH?: boolean }
+
 declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["mergeSnapshots"]>;
+
 declare type WebpackSource = WebpackSources.Source;
+
 declare type WebpackStatsPrinterType<T> = T extends WebpackSyncHook<infer X> ? X : never;
+
 declare type WebpackStatsPrinterPrint<T> =  T extends WebpackHookMap<infer X> ? X : never;
+
 declare type WebpackStatsPrinterContextHook<T, Y> =  T extends WebpackSyncBailHook<infer X, Y> ? X : never;
+
 declare type WebpackStatsPrinterContext = WebpackStatsPrinterContextHook<WebpackStatsPrinterPrint<WebpackStatsPrinterType<WebpackCompilationHook["statsPrinter"]>[0]["hooks"]["print"]>, string>[1];
+
 declare type WebpackSyncBailHook<T, R> = SyncBailHook<T, R>;
+
 declare type WebpackSyncHook<T> = SyncHook<T>;
 
 

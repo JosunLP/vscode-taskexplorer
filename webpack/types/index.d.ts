@@ -13,7 +13,9 @@
  * 
  * @description
  *
- * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
+ * Exports all types for this project
+ *
+ * All types exported from this definition file are prepended with `WpBuild`.
  */
 
 /**

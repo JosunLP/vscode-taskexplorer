@@ -15,11 +15,15 @@
  * 
  * @description
  *
- * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
+ * Provides types macthing the .wpbuildrc.json configuration file schema
+ *
+ * All types exported from this definition file are prepended with `WpBuildRc`.
  */
 
 
 export declare type WpBuildRcBuilds = [WpBuildRcBuild, ...WpBuildRcBuild[]];
+
+export declare type WebpackEntry = string | { import?: string; dependsOn?: string; [k: string]: string | undefined; };
 
 export declare type WpBuildWebpackMode = "development" | "production" | "none" | "test" | "testproduction";
 
@@ -35,9 +39,8 @@ export declare type WpBuildLogTrueColor = | "black" | "blue" | "cyan" | "green" 
 
 export declare type WpBuildLogColor = | "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
 
-export declare interface WpBuildRcSchema 
+export declare type WpBuildRcSchema = 
 {
-    $schema?: string;
     name: string;
     displayName?: string;
     detailedDisplayName?: string;
@@ -54,7 +57,7 @@ export declare interface WpBuildRcSchema
     vscode?: WpBuildRcVsCode;
 }
 
-export declare interface WpBuildRcBuild 
+export declare type WpBuildRcBuild = 
 {
     name: string;
     entry?: WebpackEntry;
@@ -66,14 +69,7 @@ export declare interface WpBuildRcBuild
     plugins?: WpBuildRcPlugins;
 }
 
-export declare interface WebpackEntry 
-{
-    import: string;
-    dependsOn?: string;
-    [k: string]: string | undefined;
-}
-
-export declare interface WpBuildRcLog 
+export declare type WpBuildRcLog = 
 {
     level?: WpBuildLogLevel;
     valueMaxLineLength?: number;
@@ -81,7 +77,7 @@ export declare interface WpBuildRcLog
     pad?: WpBuildRcLogPad;
 }
 
-export declare interface WpBuildRcLogColors 
+export declare type WpBuildRcLogColors = 
 {
     default?: WpBuildLogTrueColor ;
     buildBracket?: WpBuildLogTrueColor ;
@@ -94,7 +90,7 @@ export declare interface WpBuildRcLogColors
     uploadSymbol?: WpBuildLogTrueColor ;
 }
 
-export declare interface WpBuildRcLogPad 
+export declare type WpBuildRcLogPad = 
 {
     base?: number;
     envTag?: number;
@@ -102,13 +98,13 @@ export declare interface WpBuildRcLogPad
     uploadFileName?: number;
 }
 
-export declare interface WpBuildRcPaths 
+export declare type WpBuildRcPaths = 
 {
     dist?: string;
     src?: string;
 }
 
-export declare interface WpBuildRcExports 
+export declare type WpBuildRcExports = 
 {
     cache?: boolean;
     context?: true;
@@ -130,7 +126,7 @@ export declare interface WpBuildRcExports
     watch?: boolean;
 }
 
-export declare interface WpBuildRcPlugins 
+export declare type WpBuildRcPlugins = 
 {
     analyze?: boolean;
     banner?: boolean;
@@ -154,7 +150,7 @@ export declare interface WpBuildRcPlugins
     wait?: boolean;
 }
 
-export declare interface WpBuildRcEnvironment 
+export declare type WpBuildRcEnvironment = 
 {
     builds: WpBuildRcBuilds;
     log?: WpBuildRcLog;
@@ -163,7 +159,19 @@ export declare interface WpBuildRcEnvironment
     plugins?: WpBuildRcPlugins;
 }
 
-export declare interface WpBuildRcVsCode 
+export declare type WpBuildRcVsCode = 
 {
     testsEntry?: string;
+}
+
+export declare type WpBuildRcPackageJson = 
+{
+    author?: string | { name: string; email?: string };
+    description?: string;
+    displayName?: string;
+    main?: string;
+    module?: string;
+    name?: string;
+    publisher?: string;
+    version?: string;
 }

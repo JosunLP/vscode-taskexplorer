@@ -13,7 +13,11 @@
  * 
  * @description
  *
- * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
+ * @description
+ *
+ * Provides types to interface the plugin sysem in this project.
+ *
+ * All types exported from this definition file are prepended with `WpBuildPlugin`.
  */
 
 import { IWpBuildApp } from "./app";

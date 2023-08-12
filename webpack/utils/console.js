@@ -12,9 +12,10 @@ const { isString, isObject, isPrimitive } = require("./utils");
 /** @typedef {import("../types").WpBuildLogLevel}  WpBuildLogLevel */
 /** @typedef {import("../types").WpBuildLogIconSet}  WpBuildLogIconSet */
 /** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
+/** @typedef {import("../types").WpBuildLogColorValue} WpBuildLogColorValue */
 /** @typedef {import("../types").WpBuildLogColorMapping} WpBuildLogColorMapping */
 
-/**
+/**WpBuildLogColorValue
  * @class WpBuildConsoleLogger
  * @implements {IDisposable}
  */
@@ -74,7 +75,7 @@ class WpBuildConsoleLogger
     /**
      * @member
      * @private
-     * @type {Record<WpBuildLogTrueColor, number>}
+     * @type {Record<WpBuildLogTrueColor, WpBuildLogColorValue>}
      */
     colorMap = {
         blue: 34,

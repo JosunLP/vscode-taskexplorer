@@ -6,7 +6,7 @@
     "properties": {
         "$schema": {
             "type": "string",
-            "pattern": "^.*\/\\.wpbuildrc\\.schema\\.json$"
+            "pattern": "^.*\\/\\.wpbuildrc\\.schema\\.json$"
         },
         "name": {
             "type": "string",
@@ -499,6 +499,56 @@
             ],
             "additionalProperties": false
         },
+        "WpBuildRcPackageJson": {
+            "type": "object",
+            "description": "Required package.json properties",
+            "properties": {
+                "author": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        }, 
+                        {
+                            "type": "object",
+                            "properties":
+                            {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "name"
+                            ]
+                        }
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "main": {
+                    "type": "string"
+                },
+                "module": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "publisher": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "WpBuildWebpackMode":  {
             "type": "string",
             "default": "production",
@@ -523,48 +573,69 @@
         },
         "WebpackEntry": {
             "type": "object",
-            "description": "mapping of module names to respective file that is the entry point",
-            "propertyNames": {
-                "minLength": 3,
-                "maxLength": 20,
-                "pattern": "^[a-z][a-zA-Z0-9_]+$"
-            },
-            "properties": {
-                "import": {
+            "description": "mapping of module names to respective entry point file, relative to context directory",
+            "anyOf": [
+                {
                     "type": "string",
                     "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
                     "minLength": 3,
                     "maxLength": 85
                 },
-                "dependsOn": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-zA-Z0-9_]+$"
-                }
-            },
-            "additionalProperties": {
-                "type": "string",
-                "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
-                "minLength": 3,
-                "maxLength": 85
-            },
-            "examples": [
                 {
-                    "modulename": {
-                        "import": "./path/to/entrymodule.ts"
-                    }
-                },
-                {
-                    "modulename1": {
-                        "import": "./path/to/entrymodule1.ts"
+                    "type": "object",
+                    "propertyNames": {
+                        "minLength": 3,
+                        "maxLength": 20,
+                        "pattern": "^[a-z][a-zA-Z0-9_]+$"
                     },
-                    "modulename2": {
-                        "import": "./path/to/entrymodule2.ts",
-                        "dependOn": "modulename1"
-                    }
+                    "properties": {
+                        "import": {
+                            "type": "string",
+                            "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
+                            "minLength": 3,
+                            "maxLength": 85
+                        },
+                        "dependsOn": {
+                            "type": "string",
+                            "pattern": "^[a-z][a-zA-Z0-9_]+$"
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "string",
+                        "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
+                        "minLength": 3,
+                        "maxLength": 85
+                    },
+                    "examples": [
+                        {
+                            "entry": {
+                                "modulename": "./path/to/entrymodule.ts"
+                            }
+                        },
+                        {
+                            "entry": {
+                                "modulename": {
+                                    "import": "./path/to/entrymodule.ts"
+                                }
+                            }
+                        },
+                        {
+                            "entry": {
+                                "modulename1": {
+                                    "import": "./path/to/entrymodule1.ts"
+                                },
+                                "modulename2": {
+                                    "import": "./path/to/entrymodule1.ts",
+                                    "dependOn": "modulename1"
+                                },
+                                "modulename3": {
+                                    "import": "./path/to/entrymodule2.ts",
+                                    "dependOn": "modulename2"
+                                }
+                            }
+                        }
+                    ]
                 }
-            ],
-            "required": [
-                "import"
             ]
         },
         "WebpackTarget":  {

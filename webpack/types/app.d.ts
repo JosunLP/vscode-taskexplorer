@@ -13,7 +13,9 @@
  * 
  * @description
  *
- * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
+ * Provides types to interface the base `app` runtime instances of each build.
+ *
+ * All types exported from this definition file are prepended with `WpBuildPlugin`.
  */
 
 import { WpBuildEnvironment, WpBuildBuild, WpBuildRcPaths } from "./rc";
