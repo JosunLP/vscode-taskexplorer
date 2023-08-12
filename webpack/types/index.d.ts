@@ -38,6 +38,11 @@ export * from "./plugin";
 export * from "./rc";
 
 /**
+ * WpBuild application specific types library
+ */
+export * from "./rcextensions";
+
+/**
  * Base webpack types library
  */
 export * from "./webpack";

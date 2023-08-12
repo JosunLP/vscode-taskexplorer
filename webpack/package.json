@@ -20,8 +20,7 @@
     },
     "scripts": {
         "build_types": "node ../script/generate-wpbuild-types.js",
-        "build_types:test": "json2ts -f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties -i ./types/.wpbuildrc.schema.json -o types/wbbuildrc.tmp.d.ts",
-        "build_schema": "json-schema-generator -f ./types/.wpbuildrc.defaults.json -o types/.wpbuildrc.schema.tmp.json"
+        "build_types:test": "json2ts -f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties -i ./types/.wpbuildrc.schema.json -o types/wbbuildrc.tmp.d.ts"
     },
     "files": [
         "exports",

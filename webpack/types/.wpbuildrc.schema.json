@@ -548,10 +548,7 @@
                 "dependsOn": {
                     "type": "string",
                     "pattern": "^[a-z][a-zA-Z0-9_]+$"
-                },
-                "required": [
-                    "import"
-                ]
+                }
             },
             "additionalProperties": {
                 "type": "string",
@@ -574,8 +571,10 @@
                         "dependOn": "modulename1"
                     }
                 }
+            ],
+            "required": [
+                "import"
             ]
-
         },
         "WebpackTarget":  {
             "type": "string",
