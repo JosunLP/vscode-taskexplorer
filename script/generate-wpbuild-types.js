@@ -108,6 +108,7 @@ cliWrap(async () =>
                    .replace(/(?:\n){3,}/g, "\n\n")
                    .replace(/\n/g, "\r\n");
             await writeFile(outputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
+            await unlink(tmpOutputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
         }
         else {
             console.error(`Could not read header from index file '${indexPath}'`);
