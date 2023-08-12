@@ -29,7 +29,7 @@ const optimization = (app) =>
 				runtimeChunk: "single",
 				splitChunks: false
 			};
-			if (app.build !== "web")
+			if (app.build.mode !== "web")
 			{
 				app.wpc.optimization.splitChunks =
 				{
@@ -57,7 +57,7 @@ const optimization = (app) =>
  */
 const parallelism = (app) =>
 {
-	apply(app.wpc, { parallelism: 1 + Object.keys(app.rc.environment.builds[app.build]).length });
+	apply(app.wpc, { parallelism: 1 + Object.keys(app.rc.builds[app.build.mode]).length });
 };
 
 

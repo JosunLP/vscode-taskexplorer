@@ -12,12 +12,12 @@
 const { apply, asArray } = require("../utils");
 const WpBuildPlugin = require("./base");
 
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackAsset} WebpackAsset */
 /** @typedef {import("../types").WebpackChunk} WebpackChunk */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 

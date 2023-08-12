@@ -368,7 +368,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
  * @returns {WpBuildTestSuitePlugin | undefined}
  */
 const testsuite = (app) =>
-	app.isTests && app.rc.plugins.build && app.isMain && false ? new WpBuildTestSuitePlugin({ app }) : undefined;
+	app.isTests && !app.isMain  && app.rc.plugins.testsuite ? new WpBuildTestSuitePlugin({ app }) : undefined;
 
 
 module.exports = testsuite;

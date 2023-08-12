@@ -9,10 +9,10 @@
  */
 
 const { glob } = require("glob");
-const { apply } = require("../utils");
+const { apply, isString, WpBuildError } = require("../utils");
 
-/** @typedef {import("../types").WebpackEntryObject} WebpackEntryObject */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
+/** @typedef {import("../types").WebpackEntry} WebpackEntry */
 
 
 const builds =
@@ -75,8 +75,8 @@ const builds =
 	 */
 	testSuite: (app) =>
 		glob.sync(
-			`./${app.paths.srcTests}/**/*.{test,spec}.ts`, {
-				absolute: false, cwd: app.paths.srcTests, dotRelative: false, posix: true
+			`./${app.paths.src}/**/*.{test,spec}.ts`, {
+				absolute: false, cwd: app.paths.src, dotRelative: false, posix: true
 			}
 		)
 		.reduce((obj, e)=>
@@ -89,32 +89,6 @@ const builds =
 		}, {}
 	),
 
-
-	/**
-	 * @function
-	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
-	 */
-	types: (app) =>
-	{
-		app.wpc.entry = {
-			types: {
-				import: "./types/index.ts"
-			}
-		}
-	},
-
-
-	/**
-	 * @function
-	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
-	 */
-	webapp: (app) =>
-	{
-		app.wpc.entry = apply({}, app.rc.vscode.webview.apps);
-	}
-
 };
 
 
@@ -122,31 +96,18 @@ const builds =
  * @function
  * @description Configures `webpackconfig.exports.entry`
  * @param {WpBuildApp} app Webpack build environment
+ * @throws {WpBuildError}
  */
 const entry = (app) =>
 {
-	app.wpc.entry = {};
-	// if (app.build === "webapp" || app.build === "tests" || app.build === "types")
-	// {
-	// 	builds[app.build](app);
-	// }
-	// else {
-	// 	builds.main(app);
-	// }
-	const builds = app.rc.environment[app.mode].builds,
-		  build = builds.find(b => b === app.build);
+	const builds = app.rc.builds,
+		  build = builds.find(b => b.name === app.build.name);
 	if (build && build.entry)
 	{
-		
-		Object.entries(build.entry).forEach((([ chunk, path ])=>
-		{
-			app.wpc.entry[chunk] = {
-				import: path
-			};
-		}));
+		app.wpc.entry = apply({}, build.entry);
 	}
 	else {
-		// error
+		throw new WpBuildError("entry object or path is invalid", "exports/entry.js")
 	}
 };
 

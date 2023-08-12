@@ -44,11 +44,15 @@
  */
 const target = (app) =>
 {
-	if (app.build === "webapp")
+	if (app.build.target)
+	{
+		app.wpc.target = app.target = app.build.target;
+	}
+	else if (app.build.mode === "webworker" || app.build.type  === "webapp")
 	{
 		app.wpc.target = app.target = "webworker";
 	}
-	else if (app.build === "web")
+	else if (app.build.mode === "web")
 	{
 		app.wpc.target = app.target = "web";
 	}

@@ -62,9 +62,9 @@ const webviewPlugins = (app) =>
 {
 	/** @type {(WebpackPluginInstance | undefined)[]} */
 	const plugins = [];
-	if (app.build === "webapp")
+	if (app.build.type === "webapp")
 	{
-		const apps = Object.keys(app.rc.vscode.webview.apps);
+		const apps = Object.keys(app.build.entry);
 		plugins.push(
 			cssextract(app),           //
 			...webviewapps(apps, app), //

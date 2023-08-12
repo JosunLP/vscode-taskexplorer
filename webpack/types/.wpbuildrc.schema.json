@@ -25,70 +25,89 @@
             "default": false
         },
         "builds": {
-            "$ref": "#/$defs/WpBuildRcBuilds"
+            "$ref": "#/definitions/WpBuildRcBuilds"
         },
         "development": {
-            "$ref": "#/$defs/WpBuildRcEnvironment"
+            "$ref": "#/definitions/WpBuildRcEnvironment"
         },
         "log": {
-            "$ref": "#/$defs/WpBuildRcLog"
+            "$ref": "#/definitions/WpBuildRcLog"
         },
         "paths": {
-            "$ref": "#/$defs/WpBuildRcPaths"
+            "$ref": "#/definitions/WpBuildRcPaths"
         },
         "exports": {
-            "$ref": "#/$defs/WpBuildRcExports"
+            "$ref": "#/definitions/WpBuildRcExports"
         },
         "plugins": {
-            "$ref": "#/$defs/WpBuildRcPlugins"
+            "$ref": "#/definitions/WpBuildRcPlugins"
         },
         "production": {
-            "$ref": "#/$defs/WpBuildRcEnvironment"
+            "$ref": "#/definitions/WpBuildRcEnvironment"
         },
         "test": {
-            "$ref": "#/$defs/WpBuildRcEnvironment"
+            "$ref": "#/definitions/WpBuildRcEnvironment"
         },
         "testproduction": {
-            "$ref": "#/$defs/WpBuildRcEnvironment"
+            "$ref": "#/definitions/WpBuildRcEnvironment"
         },
         "vscode": {
             "type": "object",
             "title": "WpBuildRcVsCode",
             "properties": {
                 "testsEntry": {
-                    "type": "string",
-                    "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
-                    "examples": [
-                        "relative path to the module file that exports the run() function for the vscode-electron test runner. Must start with a leading \"./\""
-                    ]
+                    "$ref": "#/definitions/FilePathRelative"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "examples": [{
+                "vscode": {
+                    "testsEntry": "./src/test/runTests.js"
+                }
+            }]
         }
     },
     "additionalProperties": false,
     "required": [
         "name"
     ],
-    "$defs":
+    "definitions":
     {
+        "FileName": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 150,
+            "pattern": "^[\\w\\.\\-]+\\.([cm]?jsx?|tsx?)$"
+        },
+        "DirectoryPathRelative": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 150,
+            "pattern": "^(?:\\.[\\\\\\/][\\w\\.\\-\\\\\\/]+|\\.\\.?)$"
+        },
+        "FilePathRelative": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 150,
+            "pattern": "^\\.[\\\\\\/][\\w\\.\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$"
+        },
         "WpBuildRcEnvironment": {
             "type": "object",
             "properties": {
                 "builds": {
-                    "$ref": "#/$defs/WpBuildRcBuilds"
+                    "$ref": "#/definitions/WpBuildRcBuilds"
                 },
                 "log": {
-                    "$ref": "#/$defs/WpBuildRcLog"
+                    "$ref": "#/definitions/WpBuildRcLog"
                 },
                 "paths": {
-                    "$ref": "#/$defs/WpBuildRcPaths"
+                    "$ref": "#/definitions/WpBuildRcPaths"
                 },
                 "exports": {
-                    "$ref": "#/$defs/WpBuildRcExports"
+                    "$ref": "#/definitions/WpBuildRcExports"
                 },
                 "plugins": {
-                    "$ref": "#/$defs/WpBuildRcPlugins"
+                    "$ref": "#/definitions/WpBuildRcPlugins"
                 }
             },
             "additionalProperties": false,
@@ -101,7 +120,7 @@
             "uniqueItems": true,
             "minItems": 1,
             "items": {
-                "$ref": "#/$defs/WpBuildRcBuild"
+                "$ref": "#/definitions/WpBuildRcBuild"
             }
         },
         "WpBuildRcBuild": {
@@ -111,31 +130,51 @@
                     "type": "string",
                     "minLength": 3
                 },
+                "type": {
+                    "$ref": "#/definitions/WpBuildRcBuildType"
+                },
                 "entry": {
-                    "$ref": "#/$defs/WebpackEntry"
+                    "$ref": "#/definitions/WebpackEntry"
                 },
                 "mode": {
-                    "$ref": "#/$defs/WpBuildWebpackMode"
+                    "$ref": "#/definitions/WpBuildWebpackMode"
                 },
                 "target": {
-                    "$ref": "#/$defs/WebpackTarget"
+                    "$ref": "#/definitions/WebpackTarget"
                 },
                 "log": {
-                    "$ref": "#/$defs/WpBuildRcLog"
+                    "$ref": "#/definitions/WpBuildRcLog"
                 },
                 "paths": {
-                    "$ref": "#/$defs/WpBuildRcPaths"
+                    "$ref": "#/definitions/WpBuildRcPaths"
                 },
                 "exports": {
-                    "$ref": "#/$defs/WpBuildRcExports"
+                    "$ref": "#/definitions/WpBuildRcExports"
                 },
                 "plugins": {
-                    "$ref": "#/$defs/WpBuildRcPlugins"
+                    "$ref": "#/definitions/WpBuildRcPlugins"
                 }
             },
             "additionalProperties": false,
             "required": [
                 "name"
+            ]
+        },
+        "WpBuildRcBuildType": {
+            "type": "string",
+            "oneOf": [
+                {
+                    "const": "module"
+                },
+                {
+                    "const": "tests"
+                },
+                {
+                    "const": "types"
+                },
+                {
+                    "const": "webapp"
+                }
             ]
         },
         "WpBuildRcExports": {
@@ -252,31 +291,31 @@
                     "title": "WpBuildRcLogColors",
                     "properties": {
                         "default": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         },
                         "buildBracket": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         },
                         "buildText": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         },
                         "infoIcon": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         },
                         "valueStar": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         },
                         "valueStarText": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         },
                         "tagBracket": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         },
                         "tagText": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         },
                         "uploadSymbol": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor"
+                            "$ref": "#/definitions/WpBuildLogTrueColor"
                         }
                     },
                     "additionalProperties": false,
@@ -315,14 +354,14 @@
                 "dist": {
                     "type": "string",
                     "default": "dist",
-                    "pattern": "^[a-zA-Z0-9_][~@!\\w\\.\\-\\\\\\/]+$",
+                    "pattern": "^[\\w][~@!\\w\\.\\-\\\\\\/]+$",
                     "minLength": 3,
                     "maxLength": 100
                 },
                 "src": {
                     "type": "string",
                     "default": "src",
-                    "pattern": "^[a-zA-Z0-9_][~@!\\w\\.\\-\\\\\\/]+$",
+                    "pattern": "^[\\w][~@!\\w\\.\\-\\\\\\/]+$",
                     "minLength": 3,
                     "maxLength": 100
                 }
@@ -570,70 +609,137 @@
             ],
             "additionalProperties": false
         },
+        "WebpackEntryPath": {
+            "type": "object",
+            "minProperties": 1,
+            "patternProperties": {
+                "^[a-z][\\w]+$": {
+                    "$ref": "#/definitions/FilePathRelative"
+                }
+            },
+            "propertyNames": {
+                "maxLength": 30
+            },
+            "examples": [
+                {
+                    "entry": {
+                        "modulename": "./path/to/entry.ts"
+                    }
+                },
+                {
+                    "entry": {
+                        "modulename1": "./path/to/entry1.ts",
+                        "modulename2": "./path/to/entry2.ts",
+                        "modulename3": "./path/to/entry3.ts"
+                    }
+                }
+            ]
+        },
+        "WebpackEntryObject": {
+            "type": "object",
+            "properties": {
+                "asyncChunks": {
+                    "type": "boolean"
+                },
+                "baseUri": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "chunkLoading": {
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string",
+                            "oneOf": [
+                                {
+                                    "const": "jsonp"
+                                },
+                                {
+                                    "const": "import"
+                                },
+                                {
+                                    "const": "importScripts"
+                                },
+                                {
+                                    "const": "require"
+                                },
+                                {
+                                    "const": "async-node"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "dependOn": {
+                    "type": "string",
+                    "pattern": "^[a-z][\\w]+$"
+                },
+                "filename": {
+                    "$ref": "#/definitions/FileName"
+                },
+                "import": {
+                    "$ref": "#/definitions/FilePathRelative"
+                },
+                "layer": {
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "const": "debug"
+                        },
+                        {
+                            "const": "release"
+                        }
+                    ]
+                },
+                "publicPath": {
+                    "$ref": "#/definitions/DirectoryPathRelative"
+                }
+            },
+            "propertyNames": {
+                "minLength": 3,
+                "maxLength": 20,
+                "pattern": "^[a-z][\\w]+$"
+            },
+            "required": [
+                "import"
+            ],
+            "examples": [
+                {
+                    "entry": {
+                        "modulename": {
+                            "import": "./path/to/entrymodule.ts"
+                        }
+                    }
+                },
+                {
+                    "entry": {
+                        "modulename1": {
+                            "import": "./path/to/entrymodule1.ts"
+                        },
+                        "modulename2": {
+                            "import": "./path/to/entrymodule1.ts",
+                            "dependOn": "modulename1"
+                        },
+                        "modulename3": {
+                            "import": "./path/to/entrymodule2.ts",
+                            "dependOn": "modulename2"
+                        }
+                    }
+                }
+            ]
+        },
         "WebpackEntry": {
             "type": "object",
             "description": "mapping of module names to respective entry point file, relative to context directory",
-            "anyOf": [
+            "minProperties": 1,
+            "oneOf": [
                 {
-                    "type": "string",
-                    "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
-                    "minLength": 3,
-                    "maxLength": 85
+                    "$ref": "#/definitions/WebpackEntryPath"
                 },
                 {
-                    "type": "object",
-                    "propertyNames": {
-                        "minLength": 3,
-                        "maxLength": 20,
-                        "pattern": "^[a-z][a-zA-Z0-9_]+$"
-                    },
-                    "properties": {
-                        "import": {
-                            "type": "string",
-                            "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
-                            "minLength": 3,
-                            "maxLength": 85
-                        },
-                        "dependsOn": {
-                            "type": "string",
-                            "pattern": "^[a-z][a-zA-Z0-9_]+$"
-                        }
-                    },
-                    "additionalProperties": {
-                        "type": "string",
-                        "pattern": "^\\.[\\\\\\/][a-zA-Z0-9_][a-zA-Z0-9\\._\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$",
-                        "minLength": 3,
-                        "maxLength": 85
-                    },
-                    "examples": [
-                        {
-                            "entry": {
-                                "modulename": "./path/to/entrymodule.ts"
-                            }
-                        },
-                        {
-                            "entry": {
-                                "modulename": {
-                                    "import": "./path/to/entrymodule.ts"
-                                }
-                            }
-                        },
-                        {
-                            "entry": {
-                                "modulename1": {
-                                    "import": "./path/to/entrymodule1.ts"
-                                },
-                                "modulename2": {
-                                    "import": "./path/to/entrymodule1.ts",
-                                    "dependOn": "modulename1"
-                                },
-                                "modulename3": {
-                                    "import": "./path/to/entrymodule2.ts",
-                                    "dependOn": "modulename2"
-                                }
-                            }
-                        }
-                    ]
+                    "$ref": "#/definitions/WebpackEntryObject"
                 }
             ]
         },

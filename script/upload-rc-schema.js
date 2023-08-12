@@ -1,20 +1,53 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/naming-convention */
 
-const { promisify } = require("util");
 const { resolve } = require("path");
+const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
+
 
 //
 // Run from script directtory so we work regardless of where cwd is set
 //
 if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
+const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
+      user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
+      rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
+      sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
+      sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
+      version = require("../webpack/package.json").version,
+      args = process.argv.splice(2);
+
+let localPath = ".wpbuildrc.schema.json",
+    remotePath = resolve("..", "webpack", "types", ".wpbuildrc.schema.json");
+
+if (args.length === 1) {
+    toUploadPath = args[0];
+}
+else if (args.length > 1)
+{
+    args.forEach((v, i, a) =>
+    {
+        if (v.startsWith("-"))
+        {
+            switch(v.replace(/^\-\-?/, ""))
+            {
+                case "i":
+                    localPath = args[i + 1];
+                    break;
+                case "o":
+                    remotePath = args[i + 1];
+                    break;
+            }
+        }
+    });
+}
 
 //
 // Command line runtime wrapper
 //
 const cliWrap = exe => argv => { exe(argv).catch(e => { try { console.error(e); } catch {} process.exit(1); }); };
+
 
 /**
  * @function Executes a command via a promisified node exec()
@@ -57,18 +90,13 @@ const wrapExec = async (command) =>
 
 cliWrap(async () =>
 {
-    const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
-          user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
-          rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
-          sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
-          sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
-          toUploadPath = resolve("..", "webpack", "types", ".wpbuildrc.schema.json"),
-          version = require("../webpack/package.json").version;
-
-    if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag)
+    if (!localPath || !remotePath)
     {
-        console.error("Required environment variables for upload are not set");
-        return;
+        throw new Error("Invalid input or output path");
+    }
+    else if (!host || !user || !rBasePath ||  !sshAuth || !sshAuthFlag)
+    {
+        throw new Error("Required environment variables for upload are not set");
     }
 
     const plinkCmds = [
@@ -90,7 +118,7 @@ cliWrap(async () =>
         sshAuthFlag,  // auth flag
         sshAuth,      // auth key
         "-q",         // quiet, don't show statistics
-        toUploadPath, // directory containing the files to upload, the "directpory" itself (prod/dev/test) will be
+        remotePath, // directory containing the files to upload, the "directpory" itself (prod/dev/test) will be
         `${user}@${host}:"${rBasePath}/wpbuild/v${version}/.wpbuildrc.schema.json"` // uploaded, and created if not exists
     ];
 

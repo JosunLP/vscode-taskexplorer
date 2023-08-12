@@ -22,7 +22,7 @@ const builds =
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
 	 */
-	main: (app) =>
+	module: (app) =>
 	{
 		if (app.isTests) {
 			builds.tests(app);
@@ -115,8 +115,8 @@ const builds =
 					configFile: path.join(app.paths.build, `tsconfig.${app.target}.json`),
 					experimentalWatchApi: false,
 					transpileOnly: false,
-					logInfoToStdOut: app.rc.log.level >= 0,
-					logLevel: app.rc.log.level >= 3 ? "info" : (app.rc.log.level >= 1 ? "warn" : "error"),
+					logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+					logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
 					compilerOptions: {
 						emitDeclarationsOnly: true
 					}
@@ -145,7 +145,7 @@ const builds =
 		},
 		{
 			test: /\.ts$/,
-			include: path.join(app.paths.src),
+			include: app.paths.src,
 			exclude: [
 				/node_modules/, /test[\\/]/, /\.d\.ts$/
 			],
@@ -155,8 +155,8 @@ const builds =
 					configFile: path.join(app.paths.build, `tsconfig.${app.target}.json`),
 					experimentalWatchApi: false,
 					transpileOnly: false,
-					logInfoToStdOut: app.rc.log.level >= 0,
-					logLevel: app.rc.log.level >= 3 ? "info" : (app.rc.log.level >= 1 ? "warn" : "error"),
+					logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+					logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
 					compilerOptions: {
 						emitDeclarationsOnly: true
 					}
@@ -165,7 +165,7 @@ const builds =
 		},
 		{
 			test: /\.ts$/,
-			include: app.paths.srcTests,
+			include: app.paths.src,
 			exclude: [
 				/node_modules/, /types[\\/]/, /\.d\.ts$/
 			],
@@ -242,7 +242,6 @@ const builds =
 };
 
 
-
 /**
  * @function
  * @private
@@ -301,13 +300,7 @@ const stripLoggingOptions = () => ({
 const rules = (app) =>
 {
 	app.wpc.module = { rules: [] };
-	if (app.build === "webapp" || app.build === "tests" || app.build === "types")
-	{
-		builds[app.build](app);
-	}
-	else {
-		builds.main(app);
-	}
+	builds[app.build.type](app);
 };
 
 

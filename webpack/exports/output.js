@@ -23,18 +23,24 @@ const { RegexTestsChunk } = require("../utils");
  */
 const output = (app) =>
 {
+	const path = resolve(app.build.paths?.dist || app.paths.dist, app.build.mode === "web" ? "web" : ".");
+
 	app.wpc.output =
 	{
+		path,
+		filename: "[name].js",
 		compareBeforeEmit: true,
-		hashDigestLength: 20
+		hashDigestLength: 20,
+		libraryTarget: "commonjs2",
+		clean: app.clean ? (app.isTests ? { keep: /(test)[\\/]/ } : app.clean) : undefined,
 	};
 
-	if (app.build === "webapp")
+	if (app.build.type === "webapp")
 	{
 		apply(app.wpc.output,
 		{
-			clean: app.clean === true ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
-			path: join(app.paths.build, "res"),
+			clean: app.clean ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
+			libraryTarget: undefined,
 			publicPath: "#{webroot}/",
 			/**
 			 * @param {WebpackPathData} pathData
@@ -50,36 +56,25 @@ const output = (app) =>
 			}
 		});
 	}
-	else if (app.build === "tests")
+	else if (app.build.type === "tests")
 	{
 		apply(app.wpc.output,
 		{
-			clean: app.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			path: app.paths.distTests,
-			filename: "[name].js",
 			libraryTarget: "umd",
 			umdNamedDefine: true
 		});
 	}
-	else if (app.build === "types")
+	else if (app.build.type === "types")
 	{
 		apply(app.wpc.output,
 		{
-			clean: app.clean === true ?  { keep: /(test)[\\/]/ } : undefined,
-			path: join(app.paths.build, "types", "dist"),
-			filename: "[name].js",
-			// libraryTarget: "umd",
-    		// umdNamedDefine: true,
-			libraryTarget: "commonjs2"
+			path: join(app.paths.build, "types", "dist")
 		});
 	}
 	else
 	{
 		apply(app.wpc.output,
 		{
-			clean: app.clean === true ? (app.isTests ? { keep: /(test)[\\/]/ } : true) : undefined,
-			path: resolve(app.rc.paths.dist, app.build === "web" ? "web" : "."),
-			// filename: "[name].[contenthash].js",
 			libraryTarget: "commonjs2",
 			/**
 			 * @param {WebpackPathData} pathData

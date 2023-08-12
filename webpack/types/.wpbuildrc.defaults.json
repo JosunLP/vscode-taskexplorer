@@ -75,8 +75,5 @@
         "upload": true,
         "vendormod": true,
         "wait": false
-    },
-    "vscode": {
-        "testsEntry": "./src/test/runTest.ts"
     }
 }

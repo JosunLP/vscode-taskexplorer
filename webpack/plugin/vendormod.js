@@ -82,9 +82,9 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
 		if (existsSync(copyPlugin))
 		{
 			let content = readFileSync(copyPlugin, "utf8").replace(/currentAssets = \[ "[\w"\., _\-]+" \]/, "currentAssets = []");
-			if (existsSync(this.app.rc.paths.dist))
+			if (existsSync(this.app.paths.dist))
 			{
-				const distFiles = `"${readdirSync(this.app.rc.paths.dist).map(f => basename(f)).join("\", \"")}"`;
+				const distFiles = `"${readdirSync(this.app.paths.dist).map(f => basename(f)).join("\", \"")}"`;
 				content = content.replace("currentAssets = []", `currentAssets = [ ${distFiles} ]`);
 			}
 			writeFileSync(copyPlugin, content);
@@ -103,7 +103,7 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildVendorModPlugin | undefined}
  */
-const vendormod = (app) => app.rc.plugins.vendormod && app.build !== "webapp" ? new WpBuildVendorModPlugin({ app }) : undefined;
+const vendormod = (app) => app.rc.plugins.vendormod && app.build.type !== "webapp" ? new WpBuildVendorModPlugin({ app }) : undefined;
 
 
 module.exports = vendormod;

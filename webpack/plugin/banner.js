@@ -22,7 +22,7 @@ const { isString } = require("../utils/utils");
  */
 const banner = (app) =>
 {
-	if (app.rc.plugins.banner !== false && app.build !== "tests" && app.wpc.mode === "production")
+	if (app.rc.plugins.banner !== false && app.build.type !== "tests" && app.wpc.mode === "production")
 	{
 		const author = isString(app.rc.pkgJson.author) ? app.rc.pkgJson.author : app.rc.pkgJson.author?.name;
 		if (author)

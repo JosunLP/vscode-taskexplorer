@@ -23,7 +23,15 @@
 
 export declare type WpBuildRcBuilds = [WpBuildRcBuild, ...WpBuildRcBuild[]];
 
-export declare type WebpackEntry = string | { import?: string; dependsOn?: string; [k: string]: string | undefined; };
+export declare type WpBuildRcBuildType = "module" | "tests" | "types" | "webapp";
+
+export declare type WebpackEntry = WebpackEntryPath | WebpackEntryObject;
+
+export declare type FilePathRelative = string;
+
+export declare type FileName = string;
+
+export declare type DirectoryPathRelative = string;
 
 export declare type WpBuildWebpackMode = "development" | "production" | "none" | "test" | "testproduction";
 
@@ -54,9 +62,10 @@ export declare interface IWpBuildRcSchema
 };
 export declare type WpBuildRcSchema = IWpBuildRcSchema;
 
-export declare type WpBuildRcBuild = 
+export declare type TypeWpBuildRcBuild = 
 {
     name: string;
+    type?: WpBuildRcBuildType ;
     entry?: WebpackEntry;
     mode?: WpBuildWebpackMode ;
     target?: WebpackTarget ;
@@ -64,15 +73,33 @@ export declare type WpBuildRcBuild =
     paths?: WpBuildRcPaths;
     exports?: WpBuildRcExports;
     plugins?: WpBuildRcPlugins;
+};
+export declare type WpBuildRcBuild = Required<TypeWpBuildRcBuild>;
+
+export declare type WebpackEntryPath = 
+{
+    [k: string]: FilePathRelative;
 }
 
-export declare type WpBuildRcLog = 
+export declare type WebpackEntryObject = 
+{
+    asyncChunks?: boolean;
+    baseUri?: string;
+    chunkLoading?: boolean | (("jsonp" | "import" | "importScripts" | "require" | "async-node") & string);
+    dependOn?: string;
+    filename?: FileName;
+    import: FilePathRelative;
+    layer?: ("debug" | "release") & string;
+    publicPath?: DirectoryPathRelative;
+}
+export declare type TypeWpBuildRcLog = 
 {
     level?: WpBuildLogLevel;
     valueMaxLineLength?: number;
     colors?: WpBuildRcLogColors;
     pad?: WpBuildRcLogPad;
-}
+};
+export declare type WpBuildRcLog = Required<TypeWpBuildRcLog>;
 
 export declare type WpBuildRcLogColors = 
 {
@@ -86,22 +113,23 @@ export declare type WpBuildRcLogColors =
     tagText?: WpBuildLogTrueColor ;
     uploadSymbol?: WpBuildLogTrueColor ;
 }
-
-export declare type WpBuildRcLogPad = 
+export declare type TypeWpBuildRcLogPad = 
 {
     base?: number;
     envTag?: number;
     value?: number;
     uploadFileName?: number;
-}
+};
+export declare type WpBuildRcLogPad = Required<TypeWpBuildRcLogPad>;
 
-export declare type WpBuildRcPaths = 
+export declare type TypeWpBuildRcPaths = 
 {
     dist?: string;
     src?: string;
-}
+};
+export declare type WpBuildRcPaths = Required<TypeWpBuildRcPaths>;
 
-export declare type WpBuildRcExports = 
+export declare type TypeWpBuildRcExports = 
 {
     cache?: boolean;
     context?: true;
@@ -121,9 +149,10 @@ export declare type WpBuildRcExports =
     stats?: boolean;
     target?: true;
     watch?: boolean;
-}
+};
+export declare type WpBuildRcExports = Required<TypeWpBuildRcExports>;
 
-export declare type WpBuildRcPlugins = 
+export declare type TypeWpBuildRcPlugins = 
 {
     analyze?: boolean;
     banner?: boolean;
@@ -145,7 +174,8 @@ export declare type WpBuildRcPlugins =
     upload?: boolean;
     vendormod?: boolean;
     wait?: boolean;
-}
+};
+export declare type WpBuildRcPlugins = Required<TypeWpBuildRcPlugins>;
 
 export declare type WpBuildRcEnvironment = 
 {
@@ -158,7 +188,7 @@ export declare type WpBuildRcEnvironment =
 
 export declare type WpBuildRcVsCode = 
 {
-    testsEntry?: string;
+    testsEntry?: FilePathRelative;
 }
 
 export declare type WpBuildRcPackageJson = 

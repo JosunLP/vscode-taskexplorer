@@ -7,7 +7,6 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../types").WpBuildModule} WpBuildModule */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 

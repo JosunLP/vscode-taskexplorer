@@ -1,26 +1,24 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-/** @typedef {import("../types").WpBuildModule} WpBuildModule */
-/** @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+/** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
+// @typedef {import("../types").WpBuildEnvironment} WpBuildEnvironment */
+
+
+// /**
+//  * @type {WpBuildModule[]}
+//  */
+// const WpBuildModuleTypes = [ "web" , "extension", "tests", "types", "webapp" ];
 
 /**
- * @type {WpBuildModule[]}
+ * @type {WpBuildWebpackMode[]}
  */
-const WpBuildModuleTypes = [ "web" , "extension", "tests", "types", "webapp" ];
-
-/**
- * @type {WpBuildEnvironment[]}
- */
-const WpBuildBuildEnvironmentTypes = [ "development" , "production", "test", "testprod" ];
-
-module.exports = {
-    WpBuildModuleTypes, WpBuildBuildEnvironmentTypes
-};
+const WpBuildBuildEnvironmentTypes = [ "development" , "production", "test", "testproduction" ];
 
 const RegexTestsChunk = (/[a-z]+\.(?:tests?|specs?)$|[\/\\]tests?|suite[\/\\]/i);
 
 
 module.exports = {
-    RegexTestsChunk
+    RegexTestsChunk,
+    /* WpBuildModuleTypes */ WpBuildBuildEnvironmentTypes
 };

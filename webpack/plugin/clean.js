@@ -90,7 +90,7 @@ class WpBuildCleanPlugin extends WpBuildPlugin
 	{
 		return [{
 			ctor: CleanWebpackPlugin,
-			options: app.build === "webapp" ? {
+			options: app.build.type === "webapp" ? {
 				dry: false,
 				cleanOnceBeforeBuildPatterns: [
 					path.posix.join(app.paths.base, "css", "**"),
@@ -115,7 +115,7 @@ class WpBuildCleanPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {(WpBuildCleanPlugin | CleanWebpackPlugin)[]}
  */
-const clean = (app) => app.rc.plugins.clean && app.build !== "tests" ? new WpBuildCleanPlugin({ app }).getPlugins() : [];
+const clean = (app) => app.rc.plugins.clean && app.build.type !== "tests" ? new WpBuildCleanPlugin({ app }).getPlugins() : [];
 
 
 module.exports = clean;

@@ -39,7 +39,7 @@ const externals = (app) =>
 		}
 		if (app.rc.vscode)
 		{
-			if (app.build !== "tests")
+			if (app.build.name !== "tests")
 			{
 				app.wpc.externals = [
 					(data, callback) => callback(logAsset(data, app), { vscode: "commonjs vscode" }),
@@ -54,7 +54,7 @@ const externals = (app) =>
 				];
 			}
 		}
-		else if (app.rc.exports.externals && app.build !== "tests" && app.build !== "types")
+		else if (app.rc.exports.externals && app.build.name !== "tests" && app.build.name !== "types")
 		{
 			app.wpc.externals = /** @type {NodeExternalsExternalItem} */(nodeExternals());
 		}

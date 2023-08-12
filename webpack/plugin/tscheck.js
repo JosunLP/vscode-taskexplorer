@@ -114,21 +114,24 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.build, "tsconfig.webview.json");
 			}
-			if (app.paths.webappSrc && !existsSync(tsConfig)) {
-				tsConfig = join(app.paths.webappSrc, "tsconfig.webview.json");
+			if (!existsSync(tsConfig)) {
+				tsConfig = join(app.paths.src, "tsconfig.webview.json");
+			}
+			if (!existsSync(tsConfig)) {
+				tsConfig = join(app.paths.src, "tsconfig.json");
 			}
 			tsConfigParams = [ tsConfig, "readonly" ];
 		}
 		else if (app.build === "tests")
 		{
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.srcTests, "tsconfig.json");
+				tsConfig = join(app.paths.src, "tsconfig.json");
 			}
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.srcTests, "tsconfig.test.json");
+				tsConfig = join(app.paths.src, "tsconfig.test.json");
 			}
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.srcTests, "tsconfig.tests.json");
+				tsConfig = join(app.paths.src, "tsconfig.tests.json");
 			}
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.build, "tsconfig.test.json");

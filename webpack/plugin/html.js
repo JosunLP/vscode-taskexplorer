@@ -27,7 +27,7 @@ const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const html = (name, app) =>
 {
     let plugin;
-    if (app.build === "webapp")
+    if (app.build.type === "webapp")
     {
         const wwwName = name.replace(/[a-z]+([A-Z])/g, (substr, token) => substr.replace(token, "-" + token.toLowerCase()));
 		plugin = new HtmlPlugin(
@@ -131,7 +131,7 @@ const htmlcsp = (app) =>
 const htmlinlinechunks = (app) =>
 {
     let plugin;
-    if (app.build === "webapp")
+    if (app.build.type === "webapp")
     {
         // plugin = new InlineChunkHtmlPlugin(HtmlPlugin, app.wpc.mode === "production" ? ["\\.css$"] : []);
         plugin = new InlineChunkHtmlPlugin(HtmlPlugin, []);
@@ -147,7 +147,7 @@ const htmlinlinechunks = (app) =>
 const imageminimizer = (app) =>
 {
     let plugin;
-    if (app.build === "webapp" && app.wpc.mode !== "production")
+    if (app.build.type === "webapp" && app.wpc.mode !== "production")
     {
         // plugin = new ImageMinimizerPlugin({
         // 	deleteOriginalAssets: true,
@@ -166,7 +166,7 @@ const imageminimizer = (app) =>
 const webviewapps = (apps, app) =>
 {
     const plugins = [];
-    if (app.build === "webapp")
+    if (app.build.type === "webapp")
     {
         apps.forEach(k => plugins.push(html(k, app)));
     }

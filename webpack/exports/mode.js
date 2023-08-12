@@ -19,18 +19,9 @@
  */
 const mode = (app) =>
 {
-	app.wpc.mode = getMode(app.arge, app.argv);
-	if (!app.mode)
-	{
-		if (app.wpc.mode === "development") {
-			app.mode = "development";
-		}
-		else if (app.wpc.mode === "none") {
-			app.mode = "test";
-		}
-		else {
-			app.mode = "production";
-		}
+	app.wpc.mode = app.mode = getMode(app.arge, app.argv);
+	if (app.mode === "none") {
+		app.mode = "test";
 	}
 };
 
@@ -46,10 +37,10 @@ const getMode = (env, argv) =>
 	let mode = argv.mode;
 	if (!mode)
 	{
-		if (env.environment === "development") {
+		if (env.build?.mode === "development") {
 			mode = "development";
 		}
-		else if (env.environment === "test" || env.build === "tests") {
+		else if (env.build?.mode === "test" || env.build?.type === "tests") {
 			mode = "none";
 		}
 		else {

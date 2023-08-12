@@ -18,13 +18,12 @@ const { join, resolve, isAbsolute } = require("path");
 
 /** @typedef {import("../utils").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").IDisposable} IDisposable */
-/** @typedef {import("../types").WpBuildMode} WpBuildMode */
 /** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
-/** @typedef {import("../types").WpBuildBuild} WpBuildBuild */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
+/** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
@@ -55,6 +54,12 @@ class WpBuildApp
      * @type {WebpackRuntimeArgs}
      */
     argv;
+    /**
+     * @member {WpBuildRcBuild} build
+     * @memberof WpBuildApp.prototype
+     * @type {WpBuildRcBuild}
+     */
+    build;
     /**
      * @member {boolean} clean
      * @memberof WpBuildApp.prototype
@@ -122,9 +127,9 @@ class WpBuildApp
      */
     logger;
     /**
-     * @member {WpBuildMode} mode
+     * @member {WpBuildWebpackMode} mode
      * @memberof WpBuildApp.prototype
-     * @type {WpBuildMode}
+     * @type {WpBuildWebpackMode}
      */
     mode;
     /**
@@ -165,7 +170,7 @@ class WpBuildApp
 	 * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
 	 * @param {WpBuildRc} rc wpbuild rc configuration
 	 * @param {any} globalEnv
-	 * @param {WpBuildRcBuild} [build]
+	 * @param {WpBuildRcBuild} build
 	 */
 	constructor(argv, env, rc, globalEnv, build)
 	{
@@ -182,29 +187,36 @@ class WpBuildApp
 	 * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
 	 * @param {WpBuildRc} rc wpbuild rc configuration
 	 * @param {any} globalEnv
-	 * @param {WpBuildRcBuild} [build]
+	 * @param {WpBuildRcBuild} build
 	 * @returns {WpBuildApp}
 	 * @throws {WebpackError}
 	 */
 	wpApp = (argv, env, rc, globalEnv, build) =>
 	{
-		const app = /** @type {WpBuildApp} */({});
+		const app = /** @type {WpBuildApp} */({}),
+              mode = getMode(env, argv);
 
 		Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
 		{   // environment "flags" should be set on the cmd line like `--env=property`, as opposed to `--env property=true`
 			env[k] = env[k].toLowerCase() === "true"; // but convert any string values of `true` to a booleans just in case
 		});
 
+        app.rc = rc;
+        app.mode = mode;
+		app.logger = new WpBuildConsoleLogger(app);
+		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
+
 		apply(app,
 		{
 			...env,
-			...build,
+			build,
 			argv,
 			arge: env,
 			global: globalEnv,
+            paths: this.getPaths(app),
 			wpc: {
 				entry: {},
-				mode: getMode(env, argv),
+				mode,
                 module: {
                     rules: []
                 },
@@ -221,10 +233,6 @@ class WpBuildApp
 			target: "node",
 			verbosity: undefined
 		});
-
-        app.rc = rc;
-		app.logger = new WpBuildConsoleLogger(app);
-		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
 
 		if (!app.mode)
 		{
@@ -244,13 +252,12 @@ class WpBuildApp
 			}
 		}
 
-
 		apply(app, {
 			isTests: app.mode.startsWith("test"),
 			isWeb: app.target.startsWith("web"),
-			isMain: app.build === "extension" || app.build === "web",
-			isMainProd: (app.build === "extension" || app.build === "web") && app.mode === "production",
-			isMainTests: (app.build === "extension" || app.build === "web") && app.mode.startsWith("test")
+			isMain: app.build.type === "module" || app.build.target === "web",
+			isMainProd: (app.build.type === "module" || app.build.target === "web") && app.mode === "production",
+			isMainTests: (app.build.type === "module" || app.build.target === "web") && app.mode.startsWith("test")
 		});
 
 		app.paths = this.getPaths(app);
@@ -267,7 +274,6 @@ class WpBuildApp
 	getPaths = (app) =>
 	{
 		const paths = /** @type {WpBuildPaths} */({}),
-			  wvBase = app.paths.srcWebapps,
 			  baseDir = resolve(__dirname, "..", ".."),
 			  temp = resolve(process.env.TEMP || process.env.TMP  || "dist", app.rc.name, app.mode);
 		if (!existsSync(temp)) {
@@ -279,8 +285,7 @@ class WpBuildApp
             this.resolveRcPaths(baseDir, {
                 temp,
                 build: baseDir,
-                base: app.build !== "webapp" ? baseDir : (wvBase ? resolve(baseDir, wvBase) :
-                                                        join(baseDir, "src", "webview", "app"))
+                base: baseDir
             })
         );
 	};

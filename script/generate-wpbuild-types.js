@@ -15,11 +15,11 @@ const autoGenMessage = "This file was auto generated using the 'json-to-typescri
 //
 if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
-
 //
 // Command line runtime wrapper
 //
 const cliWrap = exe => argv => { exe(argv).catch(e => { try { console.error(e); } catch {} process.exit(1); }); };
+
 
 /**
  * @function Executes a command via a promisified node exec()
@@ -101,9 +101,23 @@ cliWrap(async () =>
                    .replace(/ *\$schema\?\: string;\n/, "")
                    .replace(/(export type (?:.*?)\n)(export type)/g, (_, m1, m2) => `\n${m1}\n${m2}`)
                    .replace(/(";\n)(export (?:type|interface))/g, (_, m1, m2) => `${m1}\n${m2}`)
-                   .replace(/\nexport type /g, "\nexport declare type ")
-                   .replace(/\nexport interface (.*?) /g, (v, m1) => { if (m1 !== "WpBuildRcSchema") return `\nexport declare type ${m1} = `; return v; })
+                   .replace(/\nexport interface (.*?) /g, (v, m1) => {
+                        if (m1 === "WpBuildRcExports" || m1 === "WpBuildRcLog" || m1 === "WpBuildRcLogPad" || m1 === "WpBuildRcPaths" ||  m1 === "WpBuildRcPlugins" ||  m1 === "WpBuildRcBuild") {
+                            return `\nexport declare type Type${m1} = `;
+                        }
+                        else if (m1 !== "WpBuildRcSchema") {
+                            return `\nexport declare type ${m1} = `;
+                        }
+                        return v;
+                    })
                    .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n};\nexport declare type ${m1} = I${m1};\n`)
+                   .replace(/\nexport declare type Type(.*?) ([^]*?)\n\}/g, (v, m1, m2) => {
+                        if (m1 === "WpBuildRcExports" || m1 === "WpBuildRcLog" || m1 === "WpBuildRcLogPad" || m1 === "WpBuildRcPaths" ||  m1 === "WpBuildRcPlugins" ||  m1 === "WpBuildRcBuild") {
+                            return `export declare type Type${m1} ${m2}\n};\nexport declare type ${m1} = Required<Type${m1}>;\n`;
+                        }
+                        return v;
+                   })
+                   .replace(/\nexport type /g, "\nexport declare type ")
                    .replace(/ \{\n    /g, " \n{\n    ")
                    .replace(/\n    \| +/g, " | ")
                    .replace(/(?:\n){3,}/g, "\n\n")
@@ -112,10 +126,10 @@ cliWrap(async () =>
             await unlink(tmpOutputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
         }
         else {
-            console.error(`Could not read header from index file '${indexPath}'`);
+            throw new Error(`Could not read header from index file '${indexPath}'`);
         }
     }
     else {
-        console.error(`Output file '${tmpOutputPath}' does not exist`);
+        throw new Error(`Output file '${tmpOutputPath}' does not exist`);
     }
 })();

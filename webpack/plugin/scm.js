@@ -67,7 +67,7 @@ class WpBuildScmPlugin extends WpBuildPlugin
                 // sshAuth,  // auth key
                 // "-q",  // quiet, don't show statistics
                 "-r",     // copy directories recursively
-                `${user}@${host}:${this.app.rc.name}/v${this.app.rc.version}"`
+                `${user}@${host}:${this.app.rc.name}/v${this.app.rc.pkgJson.version}"`
             ];
             logger.write(`${logger.icons.color.star } ${logger.withColor(`check in resource files to ${host}`, logger.colors.grey)}`);
             try {

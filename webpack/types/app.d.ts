@@ -18,16 +18,15 @@
  * All types exported from this definition file are prepended with `WpBuildPlugin`.
  */
 
-import { WpBuildEnvironment, WpBuildBuild, WpBuildRcPaths } from "./rc";
+import { WpBuildEnvironment, WpBuildRcPaths, WpBuildWebpackEntry } from "./rc";
 import {
-    WebpackConfig, WebpackEntry, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget,
-    WebpackMode, WebpackModuleOptions
+    WebpackConfig, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions
 } from "./webpack";
 
 // declare type WpBuildConfig = {
 declare type WpBuildWebpackConfig = {
     mode: WebpackMode;
-    entry: WebpackEntry;
+    entry: WpBuildWebpackEntry;
     output: WebpackOutput;
     target: WebpackTarget;
     module: WebpackModuleOptions;
@@ -84,6 +83,7 @@ declare const __WPBUILD__: any;
 // };
 
 export {
+    WpBuildBuild,
     WpBuildPaths,
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,

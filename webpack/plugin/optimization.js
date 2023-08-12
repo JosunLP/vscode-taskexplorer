@@ -24,11 +24,11 @@ const optimization = (app) =>
 	const plugins = [];
 	if (app.rc.plugins.optimization)
 	{
-		if (app.build === "web")
+		if (app.build.target === "web")
 		{
 			plugins.push(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }));
 		}
-		if (app.build !== "webapp")
+		if (app.build.type !== "webapp")
 		{
 			plugins.push(new webpack.NoEmitOnErrorsPlugin());
 		}
