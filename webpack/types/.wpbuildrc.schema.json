@@ -253,40 +253,31 @@
                     "title": "WpBuildRcLogColors",
                     "properties": {
                         "default": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "white"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         },
                         "buildBracket": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "blue"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         },
                         "buildText": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "white"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         },
                         "infoIcon": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "magenta"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         },
                         "valueStar": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "cyan"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         },
                         "valueStarText": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "grey"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         },
                         "tagBracket": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "blue"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         },
                         "tagText": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "grey"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         },
                         "uploadSymbol": {
-                            "$ref": "#/$defs/WpBuildLogTrueColor",
-                            "default": "grey"
+                            "$ref": "#/$defs/WpBuildLogTrueColor"
                         }
                     },
                     "additionalProperties": false,

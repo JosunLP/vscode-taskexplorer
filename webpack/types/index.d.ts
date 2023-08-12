@@ -10,6 +10,10 @@
  * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
  * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
  * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
+ * 
+ * @description
+ *
+ * Defined types for internal WpBuild module are prefixed with `WpBuild` (type) and `IWpBuild` (interface) for convention.
  */
 
 /**
@@ -40,7 +44,7 @@ export * from "./rc";
 /**
  * WpBuild application specific types library
  */
-export * from "./rc.base";
+// export * from "./rc.base";
 
 /**
  * Base webpack types library

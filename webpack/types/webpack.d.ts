@@ -79,13 +79,14 @@ declare type WebpackOptimization = WebpackOptionsNormalized["optimization"];
 declare type WebpackOutput = Exclude<WebpackConfig["output"], undefined>;
 declare type WebpackRawSource = WebpackSources.RawSource;
 declare type WebpackRuleSetRule = Exclude<ConvertType<RuleSetRule, (false | "" | 0 | RuleSetRule | "..." | null | undefined)[] , RuleSetRule[]>, undefined>;
-declare type WebpackRuntimeArgs = {
+declare interface WebpackRuntimeArgs extends Record<string, string | boolean | WebpackRuntimeEnvArgs>
+{
     clean?: boolean;
     config: string[];
     env: WebpackRuntimeEnvArgs;
     mode?: WebpackMode;
     watch?: boolean;
-} & Record<string, string | boolean | WebpackRuntimeEnvArgs>;
+};
 declare type WebpackRuntimeEnvArgs = { WEBPACK_WATCH?: boolean }
 declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["mergeSnapshots"]>;
 declare type WebpackSource = WebpackSources.Source;
@@ -95,7 +96,6 @@ declare type WebpackStatsPrinterContextHook<T, Y> =  T extends WebpackSyncBailHo
 declare type WebpackStatsPrinterContext = WebpackStatsPrinterContextHook<WebpackStatsPrinterPrint<WebpackStatsPrinterType<WebpackCompilationHook["statsPrinter"]>[0]["hooks"]["print"]>, string>[1];
 declare type WebpackSyncBailHook<T, R> = SyncBailHook<T, R>;
 declare type WebpackSyncHook<T> = SyncHook<T>;
-declare type WebpackTarget = "web" /* (Default) */ | "webworker" | "node" | "async-node" | "electron-main" | "electron-renderer" | "node-webkit" | "nwjs" | "esX" | "browserlist" ;
 
 
 export {
@@ -140,6 +140,5 @@ export {
     WebpackSource,
     WebpackStats,
     WebpackStatsAsset,
-    WebpackStatsPrinterContext,
-    WebpackTarget
+    WebpackStatsPrinterContext
 };

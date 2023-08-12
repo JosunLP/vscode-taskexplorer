@@ -32,25 +32,27 @@ declare type WpBuildWebpackConfig = {
 } & WebpackConfig;
 // declare type WpBuildWebpackConfig = Omit<WebpackConfig, WpBuildConfig> & WpBuildConfig;
 
-declare type WpBuildRuntimeEnvArgs =
+declare interface WpBuildRuntimeEnvArgs extends WebpackRuntimeEnvArgs
 {
     build: WpBuildBuild;
     environment: WpBuildEnvironment;
     mode: WpBuildWebpackMode;
-} & WebpackRuntimeEnvArgs;
+};
 
-declare type WpBuildGlobalEnvironment = {
+declare interface WpBuildGlobalEnvironment extends Record<string, any>
+{
     buildCount: number;
     cache: Record<string, any>;
     cacheDir: string;
     verbose: boolean;
-} & Record<string, any>;
+};
 
-declare type WpBuildPaths = {
+declare interface WpBuildPaths extends WpBuildRcPaths
+{
     base: string;                         // context base dir path
     build: string;                        // base/root level dir path of project
     temp: string;                         // operating system temp directory
-} & WpBuildRcPaths;
+};
 
 declare const __WPBUILD__: any;
 
