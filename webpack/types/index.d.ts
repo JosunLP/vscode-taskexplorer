@@ -40,7 +40,7 @@ export * from "./rc";
 /**
  * WpBuild application specific types library
  */
-export * from "./rcextensions";
+export * from "./rc.base";
 
 /**
  * Base webpack types library

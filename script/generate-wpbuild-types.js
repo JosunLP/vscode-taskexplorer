@@ -60,7 +60,7 @@ const wrapExec = async (command) =>
 
 cliWrap(async () =>
 {
-    const outputFile = "rc.d.ts",
+    const outputFile = "rc.base.d.ts",
           inputFile = ".wpbuildrc.schema.json",
           baseDir = posix.join("..", "webpack", "types"),
           outputFileTmp = `${outputFile.replace(".d.ts", ".tmp.d.ts")}`,
@@ -76,7 +76,7 @@ cliWrap(async () =>
         if (match)
         {
             const header = match[0]
-                  .replace("@file types/index.d.ts", "@file types/rc.d.ts")
+                  .replace(`@file types/index.d.ts", "@file types/${outputFile}`)
                   .replace("@spmeesseman Scott Meesseman", (v) => `${v}\r\n *\r\n * ${autoGenMessage}`);
             let data = await readFile(tmpOutputPath, "utf8");
             data = data.replace(/\/\*\*(?:[^]*?)\*\//g, "")
