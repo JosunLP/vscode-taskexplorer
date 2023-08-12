@@ -29,17 +29,13 @@ export declare type WpBuildWebpackMode = "development" | "production" | "none" |
 
 export declare type WebpackTarget = | "node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist";
 
-export declare type WpBuildLogLevel = WpBuildLogLevel1 & WpBuildLogLevel2;
-
-export declare type WpBuildLogLevel1 = number;
-
-export declare type WpBuildLogLevel2 = 0 | 1 | 2 | 3 | 4 | 5;
+export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 export declare type WpBuildLogTrueColor = | "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
 
 export declare type WpBuildLogColor = | "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
 
-export declare type WpBuildRcSchema = 
+export declare interface IWpBuildRcSchema 
 {
     name: string;
     displayName?: string;
@@ -55,7 +51,8 @@ export declare type WpBuildRcSchema =
     test?: WpBuildRcEnvironment;
     testproduction?: WpBuildRcEnvironment;
     vscode?: WpBuildRcVsCode;
-}
+};
+export declare type WpBuildRcSchema = IWpBuildRcSchema;
 
 export declare type WpBuildRcBuild = 
 {

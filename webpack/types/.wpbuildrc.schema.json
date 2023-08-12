@@ -213,7 +213,6 @@
                 "level": {
                     "type": "number",
                     "title": "WpBuildLogLevel",
-                    "default": 2,
                     "oneOf": [
                         {
                             "const": 0,

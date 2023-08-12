@@ -27,7 +27,9 @@
         "exports",
         "plugin",
         "types",
-        "utils"
+        "utils",
+        ".eslintrc.js",
+        ".wpbuildrc.json"
     ],
     "publishConfig": {
         "access": "public"
