@@ -61,7 +61,6 @@ class WpBuildConsoleLogger
                     this.colors[c][1] = this.colorMap[app.rc.log.colors.default];
                 });
             }
-            app.disposables?.push(this);
         }
     }
 

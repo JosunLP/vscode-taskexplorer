@@ -15,7 +15,7 @@ const WpBuildConsoleLogger = require("./console");
 const { resolve, basename, join, dirname } = require("path");
 const { WpBuildError, apply, pick, merge } = require("./utils");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
-const { WpBuildRcBuildTypes, WpBuildWebpackModes, WebpackTargets } = require("./constants");
+const { isWpBuildRcBuildType, WpBuildWebpackModes, isWpBuildWebpackMode, isWebpackTarget } = require("./constants");
 
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
@@ -206,7 +206,7 @@ class WpBuildRc
     readPackageJson = () =>
     {
         const pkgJson = this.find("package.json", resolve(__dirname, "..", ".."));
-        return pick(pkgJson.data, "author", "description", "main", "module", "name", "version", "publisher");
+        return pick(/** @type {WpBuildRcPackageJson} */(pkgJson.data), "author", "description", "main", "module", "name", "version", "publisher");
     };
 
 
@@ -221,7 +221,8 @@ class WpBuildRc
      */
     readWpBuildRc = (mode, argv, arge) =>
     {
-        const rcJson = this.find(".wpbuildrc.json", resolve(__dirname, "..")),
+        const buildName = arge.name || /* deprecated */arge.build,
+              rcJson = this.find(".wpbuildrc.json", resolve(__dirname, "..")),
               defRcPath = resolve(__dirname, "..", "types", ".wpbuildrc.defaults.json"),
               pkgJson = this.readPackageJson(),
               /** @type {WpBuildRc} */
@@ -231,24 +232,24 @@ class WpBuildRc
         }
         if (!rc.builds)
         {
-            throw WpBuildError.getPropertyError("builds", "utils/rc.js", "configured mode is | " + mode + " |");
+            throw WpBuildError.getErrorProperty("builds", "utils/rc.js", null, "configured mode is | " + mode + " |");
         }
         for (const build of rc.builds)
         {
-            if (!build.name)
+            if (!buildName)
             {
-                throw WpBuildError.getPropertyError("name", "utils/rc.js");
+                throw WpBuildError.getErrorProperty("name", "utils/rc.js");
             }
             if (!build.type)
             {
-                if (WpBuildRcBuildTypes.includes(/** @type {WpBuildRcBuildType} */(build.name)))
+                if (isWpBuildRcBuildType(buildName))
                 {
-                    build.type = /** @type {WpBuildRcBuildType} */(build.name);
+                    build.type = buildName;
                 }
-                else if (build.name.includes("test")) {
+                else if (buildName.includes("test")) {
                     build.type = "tests";
                 }
-                else if (build.name.includes("types")) {
+                else if (buildName.includes("types")) {
                     build.type = "types";
                 }
                 else if (build.target === "web") {
@@ -263,9 +264,9 @@ class WpBuildRc
             }
             if (!build.mode)
             {
-                if (argv.mode && WpBuildWebpackModes.includes(/** @type {WpBuildWebpackMode} */(argv.mode)))
+                if (argv.mode && isWpBuildWebpackMode(argv.mode))
                 {
-                    build.mode = /** @type {WpBuildWebpackMode} */(argv.mode);
+                    build.mode = argv.mode;
                 }
                 else if (arge.mode && WpBuildWebpackModes.includes(arge.mode))
                 {
@@ -277,8 +278,8 @@ class WpBuildRc
             }
             if (!build.target)
             {
-                if (argv.target) {
-                    build.target = /** @type {WebpackTarget} */(argv.target);
+                if (isWebpackTarget(argv.target)) {
+                    build.target = argv.target;
                 }
                 if (!build.target) {
                     build.target = "node";

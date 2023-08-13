@@ -33,7 +33,7 @@ declare type WpBuildRcPathsExt = { base: string; build: string; temp: string; } 
 
 declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<string, any>; cacheDir: string; verbose: boolean; [ key: string ]: any };
 
-declare type WpBuildRuntimeEnvArgs = { build?: string; mode?: WpBuildWebpackMode; name?: string; type?: WpBuildRcBuildType; } & WebpackRuntimeEnvArgs;
+declare type WpBuildRuntimeEnvArgs = { /** @deprecated Use `name`*/build?: string; mode?: WpBuildWebpackMode; name?: string; type?: WpBuildRcBuildType; } & WebpackRuntimeEnvArgs;
 
 declare type WpBuildWebpackConfig = {
     mode: WebpackMode; entry: WpBuildWebpackEntry; output: WebpackOutput; target: WebpackTarget; module: WebpackModuleOptions;

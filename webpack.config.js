@@ -63,11 +63,12 @@ const {
 const exportConfigs = (env, argv) =>
 {
 	const mode = getMode(env, argv),
-		  rc = new WpBuildRc(mode, argv, env);
-	if (env.build) {
-		return buildConfig(new WpBuildApp(argv, env, rc, globalEnv, env.build));
+		  rc = new WpBuildRc(mode, argv, env),
+		  buildName = env.name || env.build;
+	if (buildName) {
+		return buildConfig(new WpBuildApp(argv, env, rc, globalEnv, buildName));
 	}
-	return rc.builds.map((build) => buildConfig(getApp(env, argv, rc, build)));
+	return rc.builds.map((build) => buildConfig(new WpBuildApp(argv, env, rc, globalEnv, build)));
 };
 
 
@@ -100,20 +101,6 @@ const buildConfig = (app) =>
 	plugins(app);        // Plugins - exports.plugins() inits all plugin.plugins
 	return app.wpc;
 };
-
-
-/**
- * Creates an {@link WpBuildApp `app` instance} that acts as a unique wrapper for each build. As opposed
- * to the {@link WpBuildRc `rc` instance} which is shared by all builds.
- *
- * @function
- * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
- * @param {WebpackRuntimeArgs} argv Webpack command line args
- * @param {WpBuildRc} rc Webpack command line args
- * @param {WpBuildRcBuild} build
- * @returns {WpBuildApp}
- */
-const getApp = (env, argv, rc, build) =>  new WpBuildApp(argv, env, rc, globalEnv, build);
 
 
 /**

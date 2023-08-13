@@ -62,7 +62,7 @@ const parallelism = (app) =>
 		apply(app.wpc, { parallelism: 1 + builds.length });
 	}
 	else {
-		throw WpBuildError.getPropertyError("name", "utils/rc.js", "configured mode is | " + app.build.mode + " |");
+		throw WpBuildError.WpBuildRcPathsExt("name", "utils/rc.js", "configured mode is | " + app.build.mode + " |");
 	}
 }; 
 

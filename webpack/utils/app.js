@@ -10,11 +10,10 @@
  */
 
 const { getMode } = require("../exports");
-const { WebpackError } = require("webpack");
-const { apply, isString, WpBuildError, merge } = require("./utils");
 const { resolve, isAbsolute } = require("path");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
+const { apply, isString, WpBuildError, merge, pick } = require("./utils");
 
 /** @typedef {import("../utils").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").IDisposable} IDisposable */
@@ -175,6 +174,7 @@ class WpBuildApp
 	 */
 	constructor(argv, arge, rc, globalEnv, build)
 	{
+        this.disposables = [];
         if (isString(build))
         {
             const thisBuild = rc.builds.find(b => b.name === "build");
@@ -184,9 +184,13 @@ class WpBuildApp
             build = thisBuild;
         }
 		apply(this, this.wpApp(argv, arge, rc, globalEnv, build));
+        this.disposables.push(
+            this.logger,
+            this
+        );
 	}
 
-    dispose = () => {};
+    dispose = () => this.logger.write(`dispose app wrapper instance for build '${this.build.name}'`, 3);
 
 
 	/**
@@ -232,7 +236,7 @@ class WpBuildApp
             app.mode = build.mode = mode;
         }
 
-        app.rc = merge({}, rc);
+        app.rc = merge({}, pick(rc, "name", "displayName", "detailedDisplayName", "publicInfoProject", "builds", "exports", "log", "paths", "plugins"));
     
         const modeRc = app.rc[mode];
         if (modeRc)
@@ -254,7 +258,6 @@ class WpBuildApp
                 delete modeRc.plugins;
             }
             merge(rc, modeRc)
-
             type = build.type,
             target = build.target,
             mode = app.mode || build.mode || getMode(arge, argv);
@@ -363,6 +366,24 @@ class WpBuildApp
             })
         );
 	};
+
+
+    /**
+	 * @function
+	 * @param {boolean} [dotRelative]
+     * @returns {string}
+     */
+    getDistPath = (dotRelative) =>
+        ((dotRelative ? "./" : "") + (this.build.paths?.dist || this.paths.dist || "dist")).replace("././", "./");
+
+
+    /**
+	 * @function
+	 * @param {boolean} [dotRelative]
+     * @returns {string}
+     */
+    getSrcPath = (dotRelative) =>
+        ((dotRelative ? "./" : "") + (this.build.paths?.src || this.paths.src || "src")).replace("././", "./");
 
 
 	/**

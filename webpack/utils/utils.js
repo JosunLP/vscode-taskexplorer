@@ -195,7 +195,7 @@ const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanc
 
 /**
  * @function
- * @template {{}} [T=Record<string, any>]
+ * @template {{}} T
  * @param {...(T | Partial<T> | undefined)} destination
  * @returns {T}
  */
@@ -263,9 +263,8 @@ const mergeIf = (...destination) =>
 
 /**
  * @function
- * @template {{}} [O=Record<string, any>]
- * @template {Record<string, any>} [T=Record<string, any>]
- * @param {O} obj
+ * @template {{}} [T=Record<string, any>]
+ * @param {T} obj
  * @param {...string} keys
  * @returns {T}
  */

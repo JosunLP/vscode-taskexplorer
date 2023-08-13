@@ -33,62 +33,17 @@
  *         file:///c:\Projects\vscode-taskexplorer\webpack\exports\plugins.js
  */
 
-const { promisify } = require("util");
 const { readFile } = require("fs/promises");
+const typedefs = require("../types/typedefs");
 const { relative, basename } = require("path");
-const exec = promisify(require("child_process").exec);
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
 const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = require("../utils");
 
-
-
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackLogger} WebpackLogger */
-/** @typedef {import("../types").WebpackSource} WebpackSource */
-/** @typedef {import("../types").IWpBuildPlugin} IWpBuildPlugin */
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
-/** @typedef {import("../types").WebpackRawSource} WebpackRawSource */
-/** @typedef {import("../types").WebpackCacheFacade} WebpackCacheFacade */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
-/** @typedef {import("../utils").WpBuildConsoleLogger} WpBuildConsoleLogger */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {import("../types").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
-/** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
-/** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
-/** @typedef {import("../types").WebpackCompilerAsyncHook} WebpackCompilerAsyncHook */
-/** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
-/** @typedef {import("../types").WebpackStatsPrinterContext} WebpackStatsPrinterContext */
-/** @typedef {import("../types").WebpackCompilationHookStage} WebpackCompilationHookStage */
-/** @typedef {import("../types").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
-/** @typedef {import("../types").WebpackCompilerSyncHookName} WebpackCompilerSyncHookName */
-/** @typedef {import("../types").WebpackSyncHook<WebpackCompiler>} WebpackSyncCompilerHook */
-/** @typedef {import("../types").WebpackCompilerAsyncHookName} WebpackCompilerAsyncHookName */
-/** @typedef {import("../types").WebpackAsyncHook<WebpackCompiler>} WebpackAsyncCompilerHook */
-/** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
-/** @typedef {import("../types").WebpackAsyncHook<WebpackCompilation>} WebpackAsyncCompilationHook */
-/** @typedef {{ file: string; snapshot?: WebpackSnapshot | null; source?: WebpackRawSource }} CacheResult */
-/** @typedef {import("../types").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
-
-/**
- * @typedef {Record<string, any>} WpBuildPluginOptions
- * @property {WpBuildApp} app
- * @property {boolean} [registerVendorPluginsFirst]
- * @property {WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[]} [plugins]
- */
-
-/**
- * This callback is displayed as part of the Requester class.
- * @callback WpBuildPluginHookCallback
- * @param {...any} args
- * @returns {any}
- */
+/** @typedef {typedefs.WpBuildPluginOptions} WpBuildPluginOptions */
 
 
 /**
- * @class WpBuildPlugin
- * @implements IWpBuildPlugin
+ * @class WpBuildHashPlugin
  */
 class WpBuildPlugin
 {
@@ -103,20 +58,20 @@ class WpBuildPlugin
      * Webpack compilation instance
      * @member {WebpackCompilation} compilation
      * @memberof WpBuildPlugin.prototype
-     * @type {WebpackCompilation}
+     * @type {typedefs.WebpackCompilation}
      * @protected
      */
     compilation;
     /**
      * @member {WebpackCompiler} compiler
-     * @type {WebpackCompiler} compiler
+     * @type {typedefs.WebpackCompiler} compiler
      * @protected
      */
     compiler;
     /**
      * @member {WpBuildApp} app
      * @memberof WpBuildPlugin.prototype
-     * @type {WpBuildApp}
+     * @type {typedefs.WpBuildApp}
      * @protected
      */
     app;
@@ -130,7 +85,7 @@ class WpBuildPlugin
      * @member {WpBuildConsoleLogger} logger
      * @memberof WpBuildPlugin.prototype
      * @protected
-     * @type {WpBuildConsoleLogger}
+     * @type {typedefs.WpBuildConsoleLogger}
      */
     logger;
     /**
@@ -156,14 +111,14 @@ class WpBuildPlugin
      * @member {WebpackCacheFacade} wpCache
      * @memberof WebpackCompiler.prototype
      * @protected
-     * @type {WebpackCacheFacade}
+     * @type {typedefs.WebpackCacheFacade}
      */
     wpCache;
     /**
      * Runtime compilation cache
      * @member {WebpackCacheFacade} wpCacheCompilation
      * @memberof WpBuildPlugin.prototype
-     * @type {WebpackCacheFacade}
+     * @type {typedefs.WebpackCacheFacade}
      * @protected
      */
     wpCacheCompilation;
@@ -176,7 +131,7 @@ class WpBuildPlugin
     /**
      * @member {WebpackLogger} wpLogger
      * @memberof WpBuildPlugin.prototype
-     * @type {WebpackLogger}
+     * @type {typedefs.WebpackLogger}
      * @protected
      */
     wpLogger;
@@ -184,7 +139,7 @@ class WpBuildPlugin
 
     /**
      * @class WpBuildPlugin
-     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
      * @param {string | [ string, any, ...any[] ]} [globalCache]
      */
 	constructor(options, globalCache)
@@ -216,7 +171,7 @@ class WpBuildPlugin
      * @public
      * @member apply
      * @abstract
-     * @param {WebpackCompiler} compiler the compiler instance
+     * @param {typedefs.WebpackCompiler} compiler the compiler instance
      */
     apply(compiler) { this.compiler = compiler; }
 
@@ -241,15 +196,15 @@ class WpBuildPlugin
      * @param {string} filePath
      * @param {string} identifier
      * @param {string} outputDir Output directory of build
-     * @param {WebpackRawSource | undefined} source
-     * @returns {Promise<CacheResult>}
+     * @param {typedefs.WebpackRawSource | undefined} source
+     * @returns {Promise<typedefs.CacheResult>}
      */
     checkSnapshot = async (filePath, identifier, outputDir, source) =>
     {
-        let data, /** @type {CacheResult} */cacheEntry;
+        let data, /** @type {typedefs.CacheResult} */cacheEntry;
         const logger = this.logger,
               filePathRel = relative(outputDir, filePath),
-              /** @type {CacheResult} */result = { file: basename(filePathRel), snapshot: null, source };
+              /** @type {typedefs.CacheResult} */result = { file: basename(filePathRel), snapshot: null, source };
 
         logger.value("   check cache for existing asset", filePathRel, 3);
         try {
@@ -328,7 +283,7 @@ class WpBuildPlugin
     {
         const logger = this.logger,
               filePathRel = relative(outputDir, filePath);
-        let /** @type {CacheResult | undefined} */cacheEntry;
+        let /** @type {typedefs.CacheResult | undefined} */cacheEntry;
         logger.value("   check cache for existing asset snapshot", filePathRel, 3);
         try {
             cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
@@ -345,7 +300,7 @@ class WpBuildPlugin
 	 * @protected
 	 * @async
 	 * @member checkSnapshotValid
-	 * @param {WebpackSnapshot} snapshot
+	 * @param {typedefs.WebpackSnapshot} snapshot
 	 * @returns {Promise<boolean | undefined>}
 	 */
 	checkSnapshotValid = async (snapshot) =>
@@ -364,7 +319,7 @@ class WpBuildPlugin
 	 * @member createSnapshot
 	 * @param {number} startTime
 	 * @param {string} dependency
-	 * @returns {Promise<WebpackSnapshot | undefined | null>}
+	 * @returns {Promise<typedefs.WebpackSnapshot | undefined | null>}
 	 */
 	createSnapshot = async (startTime, dependency) =>
 	{
@@ -374,46 +329,6 @@ class WpBuildPlugin
 				undefined, undefined, null, (e, snapshot) => { if (e) { reject(e); } else { resolve(snapshot); }}
 			);
 		});
-	};
-
-
-	/**
-	 * @function Executes a command via a promisified node exec()
-	 * @param {string} command
-	 * @param {string} dsc
-	 * @returns {Promise<number | null>}
-	 */
-	exec = async (command, dsc) =>
-	{
-		let exitCode = null,
-			stdout = "", stderr = "";
-		const logger = this.app.logger,
-			  procPromise = exec(command, { cwd: this.app.paths.build, encoding: "utf8" }),
-			  child = procPromise.child;
-		child.stdout?.on("data", (data) => { stdout += data; });
-		child.stderr?.on("data", (data) => { stderr += data; });
-		child.on("close", (code) =>
-		{
-			const clrCode = logger.withColor(code?.toString(), code === 0 ? logger.colors.green : logger.colors.red);
-			exitCode = code;
-			logger.write(`   ${dsc} completed with exit code bold(${clrCode})`);
-		});
-		await procPromise;
-		if (stdout || stderr)
-		{
-			const match = (stdout || stderr).match(/error TS([0-9]{4})\:/);
-			if (match) {
-				const [ _, err ] = match;
-				logger.error(`   tsc failed with error: ${err}`);
-			}
-			if (stdout) {
-				logger.write(`   tsc stderr: ${stdout}`, 5, "", logger.icons.color.star, logger.colors.yellow);
-			}
-			if (stderr) {
-				logger.write(`   tsc stderr: ${stderr}`, 5, "", logger.icons.color.star, logger.colors.yellow);
-			}
-		}
-		return exitCode;
 	};
 
 
@@ -467,7 +382,7 @@ class WpBuildPlugin
      * @public
      * @static
      * @member getEntriesRegex
-     * @param {WpBuildWebpackConfig} wpConfig Webpack config object
+     * @param {typedefs.WpBuildWebpackConfig} wpConfig Webpack config object
      * @param {boolean} [dbg]
      * @param {boolean} [ext]
      * @param {boolean} [hash]
@@ -487,7 +402,7 @@ class WpBuildPlugin
      * @function
      * @public
      * @member getPlugins
-     * @returns {(WebpackPluginInstance | InstanceType<WpBuildPlugin>)[]}
+     * @returns {(typedefs.WebpackPluginInstance | InstanceType<WpBuildPlugin>)[]}
      */
     getPlugins() { return this.plugins; }
 
@@ -544,7 +459,7 @@ class WpBuildPlugin
      * @private
      * @member isAsync
      * @param {any} hook
-     * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
+     * @returns {hook is typedefs.WebpackAsyncCompilerHook | typedefs.WebpackAsyncCompilationHook}
      */
     isAsync = (hook) => isFunction(hook.tapPromise);
 
@@ -574,7 +489,7 @@ class WpBuildPlugin
      * @private
      * @member isTapable
      * @param {any} hook
-     * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
+     * @returns {hook is typedefs.WebpackAsyncCompilerHook | typedefs.WebpackAsyncCompilationHook}
      */
     isTapable = (hook) => isFunction(hook.tap) || isFunction(hook.tapPromise);
 
@@ -596,8 +511,8 @@ class WpBuildPlugin
      * @function
      * @protected
      * @member onApply
-     * @param {WebpackCompiler} compiler the compiler instance
-     * @param {WpBuildPluginTapOptionsHash} options
+     * @param {typedefs.WebpackCompiler} compiler the compiler instance
+     * @param {typedefs.WpBuildPluginTapOptionsHash} options
      * @throws {WebpackError}
      */
     onApply(compiler, options)
@@ -642,7 +557,7 @@ class WpBuildPlugin
      * @function
      * @protected
      * @member onCompilation
-     * @param {WebpackCompilation} compilation
+     * @param {typedefs.WebpackCompilation} compilation
      * @returns {boolean}
      */
     onCompilation(compilation)
@@ -658,7 +573,7 @@ class WpBuildPlugin
      * @function
      * @private
      * @member tapCompilationHooks
-     * @param {[string, WpBuildPluginTapOptions][]} optionsArray
+     * @param {[string, typedefs.WpBuildPluginTapOptions][]} optionsArray
      */
     tapCompilationHooks(optionsArray)
     {
@@ -684,7 +599,7 @@ class WpBuildPlugin
                     this.handleError(new WebpackError("Invalid hook parameters: stage not specified for processAssets"));
                     return;
                 }
-                this.tapCompilationStage(name, /** @type {WpBuildPluginCompilationOptions} */(tapOpts));
+                this.tapCompilationStage(name, /** @type {typedefs.WpBuildPluginCompilationOptions} */(tapOpts));
             });
         });
     }
@@ -695,7 +610,7 @@ class WpBuildPlugin
      * @protected
      * @member tapCompilationStage
      * @param {string} optionName
-     * @param {WpBuildPluginCompilationOptions} options
+     * @param {typedefs.WpBuildPluginCompilationOptions} options
      * @returns {void}
      * @throws {WebpackError}
      */
@@ -741,7 +656,7 @@ class WpBuildPlugin
      * @protected
      * @member tapStatsPrinter
      * @param {string} name
-     * @param {WpBuildPluginCompilationOptions} options
+     * @param {typedefs.WpBuildPluginCompilationOptions} options
      */
     tapStatsPrinter(name, options)
     {
@@ -750,7 +665,7 @@ class WpBuildPlugin
         {
             this.compilation.hooks.statsPrinter.tap(name, (stats) =>
             {
-                const printFn = (/** @type {{}} */prop, /** @type {WebpackStatsPrinterContext} */context) =>
+                const printFn = (/** @type {{}} */prop, /** @type {typedefs.WebpackStatsPrinterContext} */context) =>
                       prop ? context[options.statsPropertyColor || "green"]?.(context.formatFlag?.(this.breakProp(property)) || "") || "" : "";
                 stats.hooks.print.for(`asset.info.${property}`).tap(name, printFn);
             });
@@ -762,8 +677,8 @@ class WpBuildPlugin
      * @function
      * @private
      * @member validateOptions
-     * @param {WebpackCompiler} compiler the compiler instance
-     * @param {WpBuildPluginTapOptionsHash} options Plugin options to be applied
+     * @param {typedefs.WebpackCompiler} compiler the compiler instance
+     * @param {typedefs.WpBuildPluginTapOptionsHash} options Plugin options to be applied
      * @throws {WpBuildError}
      */
 	validateApplyOptions(compiler, options)
@@ -795,7 +710,7 @@ class WpBuildPlugin
      * @function
      * @private
      * @member validateOptions
-     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
      * @throws {WpBuildError}
      */
 	validatePluginOptions(options)
@@ -818,8 +733,8 @@ class WpBuildPlugin
      * @private
      * @member wrapCallback
      * @param {string} message If camel-cased, will be formatted with {@link breakProp}
-     * @param {WpBuildPluginTapOptions} options
-     * @returns {WpBuildPluginHookCallback}
+     * @param {typedefs.WpBuildPluginTapOptions} options
+     * @returns {typedefs.WpBuildPluginHookCallback}
      */
     wrapCallback(message, options)
     {

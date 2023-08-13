@@ -24,14 +24,15 @@ const builds =
 	 */
 	module: (app) =>
 	{
+		const src = app.getSrcPath(true);
 		app.wpc.entry = apply({},
 		{
 			[ app.build.name ]: {
-				import: `./${app.build.paths.src || app.paths.src}/${app.build.name}.ts`,
+				import: `${src || app.paths.src}/${app.build.name}.ts`,
 				layer: "release"
 			},
 			[ `${app.build.name}.debug` ]: {
-				import: `./${app.build.paths.src || app.paths.src}/${app.build.name}.debug.ts`,
+				import: `${src || app.paths.src}/${app.build.name}.debug.ts`,
 				layer: "debug"
 			}
 		});
@@ -49,19 +50,19 @@ const builds =
 	 */
 	tests: (app, fromMain) =>
 	{
-		const src = app.build.paths.src || app.paths.src;
+		const src = app.getSrcPath(true);
 		app.wpc.entry = apply(app.wpc.entry || {},
 		{
 			"runTest": {
-				import: `./${src}/runTest.ts`,
+				import: `${src}/runTest.ts`,
 				dependOn: fromMain ? [ app.build.name, `${app.build.name}.debug` ] : undefined
 			},
 			"control": {
-				import: `./${src}/control.ts`,
+				import: `${src}/control.ts`,
 				dependOn: "runTest"
 			},
 			"suite/index": {
-				import: `./${src}/suite/index.ts`,
+				import: `${src}/suite/index.ts`,
 				dependOn: "runTest"
 			},
 			...builds.testSuite(app)
@@ -76,10 +77,10 @@ const builds =
 	 */
 	testSuite: (app) =>
 	{
-		const src = app.build.paths.src || app.paths.src;
+		const src = app.getSrcPath();
 		return glob.sync(
 			`./${src}/**/*.{test,spec}.ts`, {
-				absolute: false, cwd: app.paths.src, dotRelative: false, posix: true
+				absolute: false, cwd:src, dotRelative: false, posix: true
 			}
 		)
 		.reduce((obj, e)=>
@@ -102,7 +103,7 @@ const builds =
 	{
 		app.wpc.entry = {
 			types: {
-				import: `./${app.build.paths.src || app.paths.src}/index.ts`
+				import: `${app.getSrcPath(true)}/index.ts`
 			}
 		}
 	},

@@ -143,7 +143,7 @@ cliWrap(async () =>
             while ((match2 = rgx.exec(data)) !== null)
             {
                 const [ _, property, values ] = match2;
-                exported.push(`    ${property}s`);
+                exported.push(`    ${property}s`, `    is${property}`);
                 typedefs.push(
                     `/** @typedef {import("../types").${property}} ${property} */`
                 );
@@ -151,14 +151,20 @@ cliWrap(async () =>
                     "/**",
                     ` * @type {${property}[]}`,
                     " */",
-                    `const ${property}s = [ ${values.replace(/ \| /g, ", ")} ];\r\n`
+                    `const ${property}s = [ ${values.replace(/ \| /g, ", ")} ];\r\n`,
+                    "/**",
+                    " * @param {any} v Variable to check type on",
+                    ` * @returns {v is ${property}}`,
+                    " */",
+                    `const is${property} = (v) => !!v && ${property}s.includes(v);\r\n`
                 );
             }
             if (lines.length > 0)
             {
                 let outputFile2 = "constants.js",
-                    outputPath2 = resolve("..", "webpack", "utils", outputFile2);;
+                    outputPath2 = resolve("..", "webpack", "utils", outputFile2);
                 typedefs.sort((a, b) => a.length - b.length);
+                exported.sort((a, b) => a.localeCompare(b))
                 hdr = hdr.replace(`@file types/${outputFile}`, `@file utils/${outputFile2}`);
                 data = "/* eslint-disable @typescript-eslint/naming-convention */\r\n// @ts-check\r\n\r\n" + hdr + "\r\n\r\n";
                 data += typedefs.join("\r\n") + "\r\n\r\n";

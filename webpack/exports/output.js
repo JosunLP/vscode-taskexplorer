@@ -23,7 +23,7 @@ const { RegexTestsChunk } = require("../utils");
  */
 const output = (app) =>
 {
-	const path = resolve(app.build.paths?.dist || app.paths.dist, app.build.target === "web" || app.build.type === "webmodule" ? "web" : ".");
+	const path = resolve(app.getDistPath(), app.build.target === "web" || app.build.type === "webmodule" ? "web" : ".");
 
 	app.wpc.output =
 	{

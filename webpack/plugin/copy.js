@@ -12,8 +12,8 @@
 const { existsSync } = require("fs");
 const WpBuildPlugin = require("./base");
 const CopyPlugin = require("copy-webpack-plugin");
-const { join, posix, isAbsolute } = require("path");
-const { isString, apply } = require("../utils/utils");
+const { join, posix, isAbsolute, normalize, relative } = require("path");
+const { isString, apply, WpBuildError } = require("../utils/utils");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -159,8 +159,8 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 	{
 		/** @type {WpBuildPluginVendorOptions[]} */
 		const plugins = [],
-			  psxBuildPath = app.paths.build.replace(/\\/g, "/"),
-			  psxBasePath = app.paths.base.replace(/\\/g, "/"),
+			  psxBuildPath = relative(process.cwd(), app.paths.build).replace(/\\/g, "/"),
+			  psxBasePath = relative(process.cwd(), app.paths.base).replace(/\\/g, "/"),
 			  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
 		if (app.rc.plugins.copy)
@@ -191,7 +191,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 			}
 			else if (app.isMain && app.wpc.mode === "production" && app.rc.publicInfoProject)
 			{   //
-				// Copy resources to public `info` sub-project during compilation
+				// Copy resources to public info` sub-project during compilation
 				//
 				let psxDirInfoProj;
 				if (isString(app.rc.publicInfoProject))
@@ -206,6 +206,12 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 				}
 				else /* app.rc.publicInfoProject === true */ {
 					psxDirInfoProj = posix.resolve(posix.join(psxBuildPath, "..", `${app.rc.name}-info`));
+				}
+				if (!existsSync(normalize(psxBasePath))) {
+					throw WpBuildError.get("info projec directory", "plugin.copy.js", app.wpc);
+				}
+				else if (!existsSync(normalize(psxDirInfoProj))) {
+					throw WpBuildError.get("info projec directory", "plugin.copy.js", app.wpc);
 				}
 				plugins.push({
 					ctor: CopyPlugin,

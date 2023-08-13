@@ -37,10 +37,10 @@ const getMode = (env, argv) =>
 	let mode = argv.mode;
 	if (!mode)
 	{
-		if (env.build?.mode === "development") {
+		if (env.mode === "development") {
 			mode = "development";
 		}
-		else if (env.build?.mode === "test" || env.build?.type === "tests") {
+		else if (env.mode === "test" || env.type === "tests") {
 			mode = "none";
 		}
 		else {
