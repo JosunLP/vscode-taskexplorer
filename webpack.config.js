@@ -105,6 +105,7 @@ const buildConfig = (app) =>
 /**
  * Creates an {@link WpBuildApp `app` instance} that acts as a unique wrapper for each build. As opposed
  * to the {@link WpBuildRc `rc` instance} which is shared by all builds.
+ *
  * @function
  * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
  * @param {WebpackRuntimeArgs} argv Webpack command line args
