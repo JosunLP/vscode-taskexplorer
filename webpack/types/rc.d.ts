@@ -35,13 +35,13 @@ export declare type DirectoryPathRelative = string;
 
 export declare type WpBuildWebpackMode = "development" | "production" | "none" | "test" | "testproduction";
 
-export declare type WebpackTarget = | "node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist";
+export declare type WebpackTarget = "node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist";
 
 export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
-export declare type WpBuildLogTrueColor = | "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
+export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
 
-export declare type WpBuildLogColor = | "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
+export declare type WpBuildLogColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
 
 export declare interface IWpBuildRcSchema 
 {

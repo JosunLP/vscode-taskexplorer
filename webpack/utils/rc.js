@@ -12,18 +12,21 @@
 const JSON5 = require("json5");
 const gradient = require("gradient-string");
 const WpBuildConsoleLogger = require("./console");
-const { WpBuildError, apply, pick, merge } = require("./utils");
 const { resolve, basename, join, dirname } = require("path");
+const { WpBuildError, apply, pick, merge } = require("./utils");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
+const { WpBuildRcBuildTypes, WpBuildWebpackModes } = require("./constants");
 
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
+/** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
 /** @typedef {import("../types").WpBuildRcBuilds} WpBuildRcBuilds */
 /** @typedef {import("../types").WpBuildRcVsCode} WpBuildRcVsCode */
 /** @typedef {import("../types").IWpBuildRcSchema} IWpBuildRcSchema */
 /** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
+/** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
 /** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("../types").WpBuildRcEnvironment} WpBuildRcEnvironment */
@@ -108,7 +111,7 @@ class WpBuildRc
      */
     constructor(mode, argv, arge)
     {
-        apply(this, this.readWpBuildRc(mode));
+        apply(this, this.readWpBuildRc(mode, argv, arge));
         this.printBanner(mode, argv, arge);
     };
 
@@ -211,14 +214,17 @@ class WpBuildRc
      * @function
      * @private
      * @param {WpBuildWebpackMode} mode
+     * @param {WebpackRuntimeArgs} argv
+     * @param {WpBuildRuntimeEnvArgs} arge
      * @returns {WpBuildRc}
      * @throws {WpBuildError}
      */
-    readWpBuildRc = (mode) =>
+    readWpBuildRc = (mode, argv, arge) =>
     {
         const rcJson = this.find(".wpbuildrc.json", resolve(__dirname, "..")),
               defRcPath = resolve(__dirname, "..", "types", ".wpbuildrc.defaults.json"),
               pkgJson = this.readPackageJson(),
+              /** @type {WpBuildRc} */
               rc = apply(JSON5.parse(readFileSync(defRcPath, "utf8")), rcJson.data, { pkgJson });
         if (mode === "none") {
             mode = "test";
@@ -226,33 +232,52 @@ class WpBuildRc
         if (rc[mode]) {
             merge(rc, rc[mode])
         }
-        delete rc["development"];
-        delete rc["production"];
-        delete rc["test"];
-        delete rc["testproduction"];
         if (!rc.builds)
         {
-            throw new WpBuildError("Required propery 'builds' not set in rc configuratioon file", "utils/rc.js");
+            throw this.throwCfgError("builds");
+        }
+        for (const build of rc.builds)
+        {
+            if (!build.name)
+            {
+                throw this.throwCfgError("name");
+            }
+            if (!build.type)
+            {
+                if (WpBuildRcBuildTypes.includes(/** @type {WpBuildRcBuildType} */(build.name)))
+                {
+                    build.type = /** @type {WpBuildRcBuildType} */(build.name);
+                }
+                else {
+                    throw this.throwCfgError("type");
+                }
+            }
+            if (!build.mode)
+            {
+                if (argv.mode && WpBuildWebpackModes.includes(/** @type {WpBuildWebpackMode} */(argv.mode)))
+                {
+                    build.mode = /** @type {WpBuildWebpackMode} */(argv.mode);
+                }
+                else if (arge.mode && WpBuildWebpackModes.includes(arge.mode))
+                {
+                    build.mode = arge.mode;
+                }
+                if (!build.mode) {
+                    build.mode = "production";
+                }
+            }
+            if (!build.target)
+            {
+                if (argv.target) {
+                    build.target = /** @type {WebpackTarget} */(argv.target);
+                }
+                if (!build.target) {
+                    build.target = "node";
+                }
+            }
         }
         return rc;
     };
-
-
-    // /**
-    //  * @function
-    //  * @private
-    //  * @param {WpBuildConsoleLogger} logger
-    //  * @returns {string}
-    //  */
-    // const spmBanner = (app, version) =>
-    // {
-    //     return `        ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________
-    //       (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  )
-    //       \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ /
-    //     ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  /
-    //    (_____/|_|       | /       |_|   |_| (____/   ${version}   \\/
-    //                          |/${app.padStart(51 - app.length)}`;
-    // };
 
 
     /**
@@ -266,10 +291,18 @@ class WpBuildRc
           (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
           \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
         ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-       (_____/|_|       | /       |_|   |_| (____/   ${this.pkgJson.version}  \\/ /        |/  \\:(           \\/           
-                        |/${this.displayName.padStart(50 - this.displayName.length)}`;
+       (_____/|_|       | /       |_|   |_| (____/  ${this.pkgJson.version}   \\/ /        |/  \\:(           \\/           
+                        |/${this.displayName.padStart(49 - this.displayName.length)}`;
     };
 
+
+    /**
+     * @function
+     * @private
+     * @param {string} property 
+     */
+    throwCfgError = (property) =>
+        new WpBuildError(`Invalid build configuration - property '${property}' not found`, "utils/rc.js");
 }
 
 

@@ -69,8 +69,8 @@ const isBaseType = (type) => [
 cliWrap(async () =>
 {
     const outputFile = "rc.d.ts",
-          inputFile = ".wpbuildrc.schema.json",
           baseDir = posix.join("..", "webpack", "types"),
+          inputFile = ".wpbuildrc.schema.json",
           outputFileTmp = `${outputFile.replace(".d.ts", ".tmp.d.ts")}`,
           tmpOutputPath = resolve(baseDir, outputFileTmp),
           outputPath = resolve(baseDir, outputFile),
@@ -127,9 +127,57 @@ cliWrap(async () =>
                    .replace(/ \{\n    /g, " \n{\n    ")
                    .replace(/\n    \| +/g, " | ")
                    .replace(/(?:\n){3,}/g, "\n\n")
+                   .replace(/[a-z] = +\| +"[a-z]/g, (v) => v.replace("= |", "="))
                    .replace(/\n/g, "\r\n");
             await writeFile(outputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
             await unlink(tmpOutputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
+
+            let match2;
+            const exported = [],
+                  typedefs = [],
+                  lines = [],
+                  rgx = /export declare type (\w*?) = ("[a-z\| \-"]+?");\r?\n/g;
+            while ((match2 = rgx.exec(data)) !== null)
+            {
+                const [ _, property, values ] = match2;
+                exported.push(`    ${property}s`);
+                typedefs.push(
+                    `/** @typedef {import("../types").${property}} ${property} */`
+                );
+                lines.push(
+                    "/**",
+                    ` * @type {${property}[]}`,
+                    " */",
+                    `const ${property}s = [ ${values.replace(/ \| /g, ", ")} ];\r\n`
+                );
+            }
+            if (lines.length > 0)
+            {   //
+                // constants.js
+                //
+                let outputFile2 = "constants.js",
+                    outputPath2 = resolve("..", "webpack", "utils", outputFile2);;
+                typedefs.sort((a, b) => a.length - b.length);
+                hdr = hdr.replace(`@file types/${outputFile}`, `@file utils/${outputFile2}`);
+                data = "/* eslint-disable @typescript-eslint/naming-convention */\r\n// @ts-check\r\n\r\n" + hdr + "\r\n\r\n";
+                data += typedefs.join("\r\n") + "\r\n\r\n";
+                data += lines.join("\r\n") + "\r\n";
+                data += `\r\nmodule.exports = {\r\n${exported.join(",\r\n")}\r\n};\r\n`;
+                data = data.replace("'json-to-typescript' utility", "'generate-wpbuild-types' script");
+                data = data.replace(/'generate\-wpbuild\-types' script(?:[^]+?) \*\//, "\r\n */");
+                await writeFile(resolve("..", "webpack", "utils", outputFile2), data);
+                //
+                // index.js
+                //
+                outputFile2 = "index.js";
+                outputPath2 = resolve("..", "webpack", "utils", outputFile2);
+                data = await readFile(outputPath2, "utf8");
+                data = data.replace(
+                    /\/\* START_CONST_DEFS \*\/(?:.*?)\/\* END_CONST_DEFS \*\//g,
+                    `/* START_CONST_DEFS */ ${exported.map(e => e.trim()).join(", ")} /* END_CONST_DEFS */`
+                );
+                await writeFile(outputPath2, data);
+            }
         }
         else {
             throw new Error(`Could not read header from index file '${indexPath}'`);

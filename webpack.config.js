@@ -65,10 +65,9 @@ const exportConfigs = (env, argv) =>
 	const mode = getMode(env, argv),
 		  rc = new WpBuildRc(mode, argv, env);
 	if (env.build) {
-		return buildConfig(new WpBuildApp(argv, env, rc, globalEnv));
+		return buildConfig(new WpBuildApp(argv, env, rc, globalEnv, env.build));
 	}
-	const envMode = env.environment || (mode === "development" ? "dev" : (mode === "production" ? "prod" : "test"));
-	return rc.environment[envMode].builds.map(build => buildConfig(getApp(env, argv, rc, build)));
+	return rc.builds.map((build) => buildConfig(getApp(env, argv, rc, build)));
 };
 
 
@@ -110,7 +109,7 @@ const buildConfig = (app) =>
  * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
  * @param {WebpackRuntimeArgs} argv Webpack command line args
  * @param {WpBuildRc} rc Webpack command line args
- * @param {WpBuildRcBuild} [build]
+ * @param {WpBuildRcBuild} build
  * @returns {WpBuildApp}
  */
 const getApp = (env, argv, rc, build) =>  new WpBuildApp(argv, env, rc, globalEnv, build);
@@ -125,7 +124,7 @@ const write = (app) =>
 	const l = app.logger;
 	l.value(
 		`Start Webpack build ${++globalEnv.buildCount}`,
-		l.tag(app.build, l.colors.cyan, l.colors.white) + " " + l.tag(app.target, l.colors.cyan, l.colors.white),
+		l.tag(app.build.name, l.colors.cyan, l.colors.white) + " " + l.tag(app.target, l.colors.cyan, l.colors.white),
 		undefined, undefined, l.icons.color.start, l.colors.white
 	);
 };

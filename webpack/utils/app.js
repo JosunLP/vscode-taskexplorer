@@ -11,14 +11,14 @@
 
 const { getMode } = require("../exports");
 const { WebpackError } = require("webpack");
-const { apply, isString } = require("./utils");
+const { apply, isString, WpBuildError, merge } = require("./utils");
 const { resolve, isAbsolute } = require("path");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
 
 /** @typedef {import("../utils").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").IDisposable} IDisposable */
-/** @typedef {import("../types").WpBuildPaths} WpBuildPaths */
+/** @typedef {import("../types").WpBuildRcPathsExt} WpBuildRcPathsExt */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
@@ -133,9 +133,9 @@ class WpBuildApp
      */
     mode;
     /**
-     * @member {WpBuildPaths} paths
+     * @member {WpBuildRcPathsExt} paths
      * @memberof WpBuildApp.prototype
-     * @type {WpBuildPaths}
+     * @type {WpBuildRcPathsExt}
      */
     paths;
     /**
@@ -167,14 +167,22 @@ class WpBuildApp
 	/**
 	 * @class WpBuildApp
 	 * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
-	 * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
+	 * @param {WpBuildRuntimeEnvArgs} arge Webpack build environment
 	 * @param {WpBuildRc} rc wpbuild rc configuration
 	 * @param {any} globalEnv
-	 * @param {WpBuildRcBuild} build
+	 * @param {WpBuildRcBuild | string} build
 	 */
-	constructor(argv, env, rc, globalEnv, build)
+	constructor(argv, arge, rc, globalEnv, build)
 	{
-		apply(this, this.wpApp(argv, env, rc, globalEnv, build));
+        if (isString(build))
+        {
+            const thisBuild = rc.builds.find(b => b.name === "build");
+            if (!thisBuild) {
+                throw new WpBuildError(`Invalid build configuration - build name '${build}' not found`, "utils.app.js");
+            }
+            build = thisBuild;
+        }
+		apply(this, this.wpApp(argv, arge, rc, globalEnv, build));
 	}
 
     dispose = () => {};
@@ -184,36 +192,64 @@ class WpBuildApp
 	 * @function
 	 * @private
 	 * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
-	 * @param {WpBuildRuntimeEnvArgs} env Webpack build environment
+	 * @param {WpBuildRuntimeEnvArgs} arge Webpack build environment
 	 * @param {WpBuildRc} rc wpbuild rc configuration
 	 * @param {any} globalEnv
 	 * @param {WpBuildRcBuild} build
 	 * @returns {WpBuildApp}
-	 * @throws {WebpackError}
+	 * @throws {WpBuildError}
 	 */
-	wpApp = (argv, env, rc, globalEnv, build) =>
+	wpApp = (argv, arge, rc, globalEnv, build) =>
 	{
-		const app = /** @type {WpBuildApp} */({}),
-              mode = getMode(env, argv);
+		const app = /** @type {WpBuildApp} */({});
 
-		Object.keys(env).filter(k => typeof env[k] === "string" && /(?:true|false)/i.test(env[k])).forEach((k) =>
-		{   // environment "flags" should be set on the cmd line like `--env=property`, as opposed to `--env property=true`
-			env[k] = env[k].toLowerCase() === "true"; // but convert any string values of `true` to a booleans just in case
+		Object.keys(arge).filter(k => typeof arge[k] === "string" && /(?:true|false)/i.test(arge[k])).forEach((k) =>
+		{   // environment "flags" in arge should be set on the cmd line e.g. `--env=property`, as opposed to `--env property=true`
+			arge[k] = arge[k].toLowerCase() === "true"; // but convert any string values of `true` to a booleans just in case
 		});
 
-        app.rc = rc;
-        app.mode = mode;
+        let target = build.target || "node",
+            mode = app.mode || build.mode || getMode(arge, argv);
+		if (!mode)
+		{
+			if (arge.mode === "development" || argv.mode === "development") {
+				mode = "development";
+			}
+			else if (arge.mode === "production" || argv.mode === "production") {
+				mode = "production";
+			}
+			else if (arge.mode === "none" || argv.mode === "none" || arge.mode?.startsWith("test")) {
+				mode = arge.mode !== "testproduction" ? "test" : arge.mode ;
+			}
+		}
+
+        if (!mode || !target) {
+            throw new WpBuildError("Invalid build configuration - mode / target", "utils/app.js");
+        }
+
+        if ( mode === "test" || mode === "testproduction") {
+            mode = "none";
+        }
+
+        app.rc = merge({}, rc);
 		app.logger = new WpBuildConsoleLogger(app);
 		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
 
 		apply(app,
 		{
-			...env,
-			build,
+			...arge,
+			...argv,
+			arge,
 			argv,
-			arge: env,
+			build,
 			global: globalEnv,
-            paths: this.getPaths(app),
+            isTests: mode.startsWith("test"),
+			isWeb: target.startsWith("web"),
+			isMain: build.type === "module" || target === "web",
+			isMainProd: (build.type === "module" || target === "web") && mode === "production",
+			isMainTests: (build.type === "module" || target === "web") && mode.startsWith("test"),
+            mode,
+            target,
 			wpc: {
 				entry: {},
 				mode,
@@ -221,46 +257,11 @@ class WpBuildApp
                     rules: []
                 },
 				output: {},
-                target: "node"
+                target
 			}
-		},
-		{
-			analyze: false,
-			clean: false,
-			disposables: [],
-			esbuild: false,
-			imageOpt: false,
-			target: "node",
-			verbosity: undefined
 		});
 
-		if (!app.mode)
-		{
-			if (app.wpc.mode === "development" || argv.mode === "development") {
-				app.mode = "development";
-			}
-			else if (app.wpc.mode === "production" || argv.mode === "production") {
-				app.mode = "production";
-			}
-			else if (app.wpc.mode === "none" || argv.mode === "none") {
-				app.mode = "test";
-			}
-			else {
-				const eMsg = "Could not detect build environment";
-				app.logger.error("Could not detect build environment");
-				throw new WebpackError(eMsg);
-			}
-		}
-
-		apply(app, {
-			isTests: app.mode.startsWith("test"),
-			isWeb: app.target.startsWith("web"),
-			isMain: app.build.type === "module" || app.build.target === "web",
-			isMainProd: (app.build.type === "module" || app.build.target === "web") && app.mode === "production",
-			isMainTests: (app.build.type === "module" || app.build.target === "web") && app.mode.startsWith("test")
-		});
-
-		app.paths = this.getPaths(app);
+		app.paths = this.getPaths(app); // paths needs to be set "after" applying the properties above
 		return app;
 	};
 
@@ -269,11 +270,11 @@ class WpBuildApp
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app
-	 * @returns {WpBuildPaths}
+	 * @returns {WpBuildRcPathsExt}
 	 */
 	getPaths = (app) =>
 	{
-		const paths = /** @type {WpBuildPaths} */({}),
+		const paths = /** @type {WpBuildRcPathsExt} */({}),
 			  baseDir = resolve(__dirname, "..", ".."),
 			  temp = resolve(process.env.TEMP || process.env.TMP  || "dist", app.rc.name, app.mode);
 		if (!existsSync(temp)) {
@@ -294,7 +295,7 @@ class WpBuildApp
 	/**
 	 * @function
 	 * @private
-	 * @template {WpBuildPaths} T
+	 * @template {WpBuildRcPathsExt} T
 	 * @param {string} baseDir
 	 * @param {T | Partial<T>} paths
 	 * @returns {T}
