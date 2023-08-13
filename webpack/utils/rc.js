@@ -10,39 +10,23 @@
  */
 
 const JSON5 = require("json5");
-const gradient = require("gradient-string");
+const { getMode } = require("../exports");
+const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
+const { WpBuildError, apply, pick } = require("./utils");
 const { resolve, basename, join, dirname } = require("path");
-const { WpBuildError, apply, pick, merge } = require("./utils");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
-const { isWpBuildRcBuildType, WpBuildWebpackModes, isWpBuildWebpackMode, isWebpackTarget } = require("./constants");
-
-/** @typedef {import("../types").IDisposable} IDisposable */
-/** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
-/** @typedef {import("../types").WebpackTarget} WebpackTarget */
-/** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
-/** @typedef {import("../types").WpBuildRcBuilds} WpBuildRcBuilds */
-/** @typedef {import("../types").WpBuildRcVsCode} WpBuildRcVsCode */
-/** @typedef {import("../types").IWpBuildRcSchema} IWpBuildRcSchema */
-/** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
-/** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
-/** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
-/** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
-/** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
-/** @typedef {import("../types").WpBuildRcEnvironment} WpBuildRcEnvironment */
-/** @typedef {import("../types").WpBuildRcPackageJson} WpBuildRcPackageJson */
-/** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
+const { isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget } = require("./constants");
 
 
 /**
  * @class
- * @implements {IDisposable}
- * @implements {IWpBuildRcSchema}
+ * @implements {typedefs.IWpBuildRcSchema}
  */
 class WpBuildRc
 {
     /**
-     * @type {WpBuildRcBuilds}
+     * @type {typedefs.WpBuildRcBuilds}
      */
     builds;
     /**
@@ -50,7 +34,7 @@ class WpBuildRc
      */
     detailedDisplayName;
     /**
-     * @type {WpBuildRcEnvironment}
+     * @type {typedefs.WpBuildRcEnvironment}
      */
     development;
     /**
@@ -58,11 +42,11 @@ class WpBuildRc
      */
     displayName;
     /**
-     * @type {WpBuildRcExports}
+     * @type {typedefs.WpBuildRcExports}
      */
     exports;
     /**
-     * @type {WpBuildRcLog}
+     * @type {typedefs.WpBuildRcLog}
      */
     log;
     /**
@@ -70,19 +54,19 @@ class WpBuildRc
      */
     name;
     /**
-     * @type {WpBuildRcPaths}
+     * @type {typedefs.WpBuildRcPaths}
      */
     paths;
     /**
-     * @type {WpBuildRcPackageJson}
+     * @type {typedefs.WpBuildRcPackageJson}
      */
     pkgJson;
     /**
-     * @type {WpBuildRcPlugins}
+     * @type {typedefs.WpBuildRcPlugins}
      */
     plugins;
     /**
-     * @type {WpBuildRcEnvironment}
+     * @type {typedefs.WpBuildRcEnvironment}
      */
     production;
     /**
@@ -90,33 +74,33 @@ class WpBuildRc
      */
     publicInfoProject;
     /**
-     * @type {WpBuildRcEnvironment}
+     * @type {typedefs.WpBuildRcEnvironment}
      */
     test;
     /**
-     * @type {WpBuildRcEnvironment}
+     * @type {typedefs.WpBuildRcEnvironment}
      */
     testproduction;
     /**
-     * @type {WpBuildRcVsCode}
+     * @type {typedefs.WpBuildRcVsCode}
      */
     vscode;
 
 
     /**
      * @class WpBuildRc
-     * @param {WpBuildWebpackMode} mode
-     * @param {WebpackRuntimeArgs} argv
-     * @param {WpBuildRuntimeEnvArgs} arge
+     * @param {typedefs.WebpackRuntimeArgs} argv
+     * @param {typedefs.WpBuildRuntimeEnvArgs} arge
      */
-    constructor(mode, argv, arge)
+    constructor(argv, arge)
     {
+        const mode = getMode(arge, argv, true);
+        if (!isWpBuildWebpackMode(mode)) {
+            throw WpBuildError.getErrorMissing("mode", "utils/rc.js", { mode });
+        }
         apply(this, this.readWpBuildRc(mode, argv, arge));
-        this.printBanner(mode, argv, arge);
+        WpBuildConsoleLogger.printBanner(this, mode, argv, arge);
     };
-
-
-    dispose = () => {};
 
 
     /**
@@ -165,91 +149,64 @@ class WpBuildRc
     /**
      * @function
      * @private
-     * @param {WpBuildConsoleLogger} logger
+     * @param {string | undefined} buildName
+     * @param {typedefs.WpBuildWebpackMode} mode
+     * @param {typedefs.WebpackRuntimeArgs} argv
+     * @param {typedefs.WpBuildRuntimeEnvArgs} arge
+     * @param {typedefs.WpBuildRcBuilds} builds
      */
-    printLineSep = (logger) =>
-    {
-        logger.write("------------------------------------------------------------------------------------------------------------------------");
-    };
+    prep = (buildName, mode, argv, arge, builds) =>
+    {   //
+        // If build name was specified on the cmd line, remove all other builds from rc defintion
+        //
+        builds.slice().reverse().forEach(
+            (b, i, a) => builds.splice(a.length - 1 - i, !buildName && b.name !== buildName ? 1 : 0)
+        );
 
-
-    /**
-     * @function
-     * @private
-     * @param {WpBuildWebpackMode} mode
-     * @param {WebpackRuntimeArgs} argv
-     * @param {WpBuildRuntimeEnvArgs} arge
-     */
-    printBanner = (mode, argv, arge) =>
-    {
-        const logger = new WpBuildConsoleLogger();
-        this.printLineSep(logger);
-        // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
-        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(), {interpolation: "hsv"}));
-        this.printLineSep(logger);
-        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${this.detailedDisplayName || this.displayName} Webpack Build`));
-        this.printLineSep(logger);
-        logger.write("   Mode  : " + logger.withColor(mode, logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Argv  : " + logger.withColor(JSON.stringify(argv), logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Env   : " + logger.withColor(JSON.stringify(arge), logger.colors.grey), 1, "", 0, logger.colors.white);
-        this.printLineSep(logger);
-        logger.dispose();
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @returns {WpBuildRcPackageJson}
-     * @throws {WpBuildError}
-     */
-    readPackageJson = () =>
-    {
-        const pkgJson = this.find("package.json", resolve(__dirname, "..", ".."));
-        return pick(/** @type {WpBuildRcPackageJson} */(pkgJson.data), "author", "description", "main", "module", "name", "version", "publisher");
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @param {WpBuildWebpackMode} mode
-     * @param {WebpackRuntimeArgs} argv
-     * @param {WpBuildRuntimeEnvArgs} arge
-     * @returns {WpBuildRc}
-     * @throws {WpBuildError}
-     */
-    readWpBuildRc = (mode, argv, arge) =>
-    {
-        const buildName = arge.name || /* deprecated */arge.build,
-              rcJson = this.find(".wpbuildrc.json", resolve(__dirname, "..")),
-              defRcPath = resolve(__dirname, "..", "types", ".wpbuildrc.defaults.json"),
-              pkgJson = this.readPackageJson(),
-              /** @type {WpBuildRc} */
-              rc = apply(JSON5.parse(readFileSync(defRcPath, "utf8")), rcJson.data, { pkgJson });
-        if (mode === "none") {
-            mode = "test";
-        }
-        if (!rc.builds)
+        for (const build of builds)
         {
-            throw WpBuildError.getErrorProperty("builds", "utils/rc.js", null, "configured mode is | " + mode + " |");
-        }
-        for (const build of rc.builds)
-        {
-            if (!buildName)
+            build.mode = build.mode || mode;
+
+            if (!build.target)
             {
-                throw WpBuildError.getErrorProperty("name", "utils/rc.js");
+                build.target = "node"
+                if (isWebpackTarget(argv.target)) {
+                    build.target = argv.target;
+                }
+                else if ((/web(?:worker|app|view)/).test(build.name) || build.type === "webapp") {
+                    build.target = "webworker"
+                }
+                else if ((/web|browser/).test(build.name) || build.type === "webmodule") {
+                    build.target = "web"
+                }
+                else if ((/module|node/).test(build.name) || build.type === "module") {
+                    build.target = "node";
+                }
+                else if ((/tests?/).test(build.name) && mode.startsWith("test")) {
+                    build.target = "node";
+                }
+                else if ((/typ(?:es|ings)/).test(build.name)|| build.type === "types") {
+                    build.target = "node"
+                }
             }
+
             if (!build.type)
             {
-                if (isWpBuildRcBuildType(buildName))
+                build.type = "module"
+                if (isWpBuildRcBuildType(build.name))
                 {
-                    build.type = buildName;
+                    build.type = build.name;
                 }
-                else if (buildName.includes("test")) {
+                else if ((/web(?:worker|app|view)/).test(build.name)) {
+                    build.type = "webapp"
+                }
+                else if ((/web|browser/).test(build.name)) {
+                    build.type = "webmodule"
+                }
+                else if ((/tests?/).test(build.name)) {
                     build.type = "tests";
                 }
-                else if (buildName.includes("types")) {
+                else if ((/typ(?:es|ings)/).test(build.name)) {
                     build.type = "types";
                 }
                 else if (build.target === "web") {
@@ -258,51 +215,53 @@ class WpBuildRc
                 else if (build.target === "webworker") {
                     build.type = "webapp";
                 }
-                else {
-                    build.type = "module";
-                }
-            }
-            if (!build.mode)
-            {
-                if (argv.mode && isWpBuildWebpackMode(argv.mode))
-                {
-                    build.mode = argv.mode;
-                }
-                else if (arge.mode && WpBuildWebpackModes.includes(arge.mode))
-                {
-                    build.mode = arge.mode;
-                }
-                if (!build.mode) {
-                    build.mode = "production";
-                }
-            }
-            if (!build.target)
-            {
-                if (isWebpackTarget(argv.target)) {
-                    build.target = argv.target;
-                }
-                if (!build.target) {
-                    build.target = "node";
-                }
             }
         }
-        return rc;
     };
 
 
     /**
      * @function
      * @private
-     * @returns {string}
+     * @returns {typedefs.WpBuildRcPackageJson}
+     * @throws {WpBuildError}
      */
-    spmBanner = () =>
+    readPackageJson = () =>
     {
-       return `           ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
-          (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
-          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | ^- /|_| | ___/\\\\ // ___/| //
-        ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-       (_____/|_|       | /       |_|   |_| (____/  ${this.pkgJson.version}   \\/ /        |/  \\:(           \\/
-                        |/${this.displayName.padStart(49 - this.displayName.length)}`;
+        const pkgJson = this.find("package.json", resolve(__dirname, "..", ".."));
+        return pick(/** @type {typedefs.WpBuildRcPackageJson} */(pkgJson.data), "author", "description", "main", "module", "name", "version", "publisher");
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @param {typedefs.WpBuildWebpackMode} mode
+     * @param {typedefs.WebpackRuntimeArgs} argv
+     * @param {typedefs.WpBuildRuntimeEnvArgs} arge
+     * @returns {WpBuildRc}
+     * @throws {WpBuildError}
+     */
+    readWpBuildRc = (mode, argv, arge) =>
+    {
+        const buildName = arge.name || /** @deprecated */arge.build,
+              rcJson = this.find(".wpbuildrc.json", resolve(__dirname, "..")),
+              defRcPath = resolve(__dirname, "..", "types", ".wpbuildrc.defaults.json"),
+              pkgJson = this.readPackageJson();
+
+        const rc = /** @type {WpBuildRc} */(apply(JSON5.parse(readFileSync(defRcPath, "utf8")), rcJson.data, { pkgJson }));
+        if (!rc.builds)
+        {
+            throw WpBuildError.getErrorProperty("builds", "utils/rc.js", { mode: /** @type {typedefs.WebpackMode} */(mode) });
+        }
+
+        this.prep(buildName, mode, argv, arge, rc.builds);
+        this.prep(buildName, mode, argv, arge, rc.development.builds);
+        this.prep(buildName, mode, argv, arge, rc.production.builds);
+        this.prep(buildName, mode, argv, arge, rc.test.builds);
+        this.prep(buildName, mode, argv, arge, rc.testproduction.builds);
+
+        return rc;
     };
 
 }

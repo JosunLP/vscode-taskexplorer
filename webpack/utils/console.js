@@ -2,49 +2,34 @@
 /* eslint-disable jsdoc/require-property-description */ /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
+const gradient = require("gradient-string");
+const typedefs = require("../types/typedefs");
 const { isString, isObject, isPrimitive } = require("./utils");
 
-/** @typedef {import("./app")} WpBuildApp */
-/** @typedef {import("../types").IDisposable} IDisposable */
-/** @typedef {import("../types").WpBuildLogIcon} WpBuildLogIcon */
-/** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
-/** @typedef {import("../types").WpBuildLogColor} WpBuildLogColor */
-/** @typedef {import("../types").WpBuildLogLevel}  WpBuildLogLevel */
-/** @typedef {import("../types").WpBuildLogIconSet}  WpBuildLogIconSet */
-/** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
-/** @typedef {import("../types").WpBuildLogColorValue} WpBuildLogColorValue */
-/** @typedef {import("../types").WpBuildLogColorMapping} WpBuildLogColorMapping */
 
 /**WpBuildLogColorValue
  * @class WpBuildConsoleLogger
- * @implements {IDisposable}
+ * @implements {typedefs.IDisposable}
  */
 class WpBuildConsoleLogger
 {
     /**
-     * The build environment that owns the WpBuildConsoleLogger instance
-     * @member
+     * The build environment that owns the `WpBuildConsoleLogger` instance
+     *
      * @private
-     * @type {WpBuildApp | undefined}
+     * @type {typedefs.WpBuildApp | undefined}
      */
     app;
     /**
-     * @member
      * @private
      * @type {string}
      */
     infoIcon;
-    // /**
-    //  * @member
-    //  * @private
-    //  * @type {WebpackLogLevel[]}
-    //  */
-    // levelMap = [ "none", "error", "warn", "info", "log", "verbose" ];
 
 
     /**
      * @class WpBuildConsoleLogger
-     * @param {WpBuildApp} [app]
+     * @param {typedefs.WpBuildApp} [app]
      */
     constructor(app)
     {
@@ -74,7 +59,7 @@ class WpBuildConsoleLogger
     /**
      * @member
      * @private
-     * @type {Record<WpBuildLogTrueColor, WpBuildLogColorValue>}
+     * @type {Record<typedefs.WpBuildLogTrueColor, typedefs.WpBuildLogColorValue>}
      */
     colorMap = {
         blue: 34,
@@ -90,7 +75,7 @@ class WpBuildConsoleLogger
     };
 
 
-    /** @type {Record<WpBuildLogColor, WpBuildLogColorMapping>} */
+    /** @type {Record<typedefs.WpBuildLogColor, typedefs.WpBuildLogColorMapping>} */
     colors = {
         black: [ this.colorMap.black, this.colorMap.system ],
         blue: [ this.colorMap.blue, this.colorMap.system ],
@@ -110,7 +95,7 @@ class WpBuildConsoleLogger
 
 
     /**
-     * @type {WpBuildLogIconSet}
+     * @type {typedefs.WpBuildLogIconSet}
      */
     icons =
     {
@@ -212,7 +197,7 @@ class WpBuildConsoleLogger
      * @function
      * @private
      * @param {string | undefined | null | 0 | false} icon
-     * @returns {WpBuildLogColorMapping}
+     * @returns {typedefs.WpBuildLogColorMapping}
      */
     getIconColorMapping = (icon) =>
     {
@@ -234,38 +219,72 @@ class WpBuildConsoleLogger
     };
 
 
-    // /**
-    //  * @function
-    //  * @private
-    //  * @param {string} icon
-    //  * @param {WpBuildLogColorMapping} color color value
-    //  * @returns {string}
-    //  */
-    // iconColor = (icon, color) => { return this.withColor(icon, color); };
+    /**
+     * @function
+     * @private
+     * @static
+     * @param {WpBuildConsoleLogger} logger
+     */
+    static printLineSep = (logger) =>
+        logger.write("------------------------------------------------------------------------------------------------------------------------");
+
+
+    /**
+     * @function
+     * @static
+     * @param {typedefs.WpBuildRc} rc
+     * @param {typedefs.WpBuildWebpackMode} mode
+     * @param {typedefs.WebpackRuntimeArgs} argv
+     * @param {typedefs.WpBuildRuntimeEnvArgs} arge
+     */
+    static printBanner = (rc, mode, argv, arge) =>
+    {
+        const logger = new WpBuildConsoleLogger();
+        this.printLineSep(logger);
+        // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
+        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(rc), {interpolation: "hsv"}));
+        this.printLineSep(logger);
+        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${rc.detailedDisplayName || rc.displayName} Webpack Build`));
+        this.printLineSep(logger);
+        logger.write("   Mode  : " + logger.withColor(mode, logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Argv  : " + logger.withColor(JSON.stringify(argv), logger.colors.grey), 1, "", 0, logger.colors.white);
+        logger.write("   Env   : " + logger.withColor(JSON.stringify(arge), logger.colors.grey), 1, "", 0, logger.colors.white);
+        this.printLineSep(logger);
+        logger.dispose();
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @static
+     * @param {typedefs.WpBuildRc} rc
+     * @returns {string}
+     */
+    static spmBanner = (rc) =>
+    {
+       return `           ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
+          (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
+          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | ^- /|_| | ___/\\\\ // ___/| //
+        ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
+       (_____/|_|       | /       |_|   |_| (____/  ${rc.pkgJson.version}   \\/ /        |/  \\:(           \\/
+                        |/${rc.displayName.padStart(49 - rc.displayName.length)}`;
+    };
 
 
     /**
      * @function
      * @param {string | undefined} msg
-     * @param {WpBuildLogLevel} [level]
+     * @param {typedefs.WpBuildLogLevel} [level]
      */
     start = (msg, level) =>  this.write(this.icons.color.start + (msg ? "  " + msg : ""), level);
-
-
-    // /**
-    //  * @function
-    //  * @private
-    //  * @param {WpBuildLogColor} color
-    //  * @returns {WpBuildLogColorMapping}
-    //  */
-    // str2clr = (color) => this.colors[color];
 
 
     /**
      * @function
      * @param {string | undefined} tagMsg
-     * @param {WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
-     * @param {WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
+     * @param {typedefs.WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
+     * @param {typedefs.WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
      * @returns {string}
      */
     tag = (tagMsg, bracketColor, msgColor) =>
@@ -280,10 +299,10 @@ class WpBuildConsoleLogger
      * by .wpbuildrc.`log.pad.value` (defaults to 45)
      * @param {string} msg
      * @param {any} val
-     * @param {WpBuildLogLevel} [level]
+     * @param {typedefs.WpBuildLogLevel} [level]
      * @param {string} [pad] Message pre-padding
      * @param {string | undefined | null | 0 | false} [icon]
-     * @param {WpBuildLogColorMapping | null} [color]
+     * @param {typedefs.WpBuildLogColorMapping | null} [color]
      */
     value = (msg, val, level, pad, icon, color) =>
     {
@@ -378,10 +397,10 @@ class WpBuildConsoleLogger
      * @function
      * @param {string} msg
      * @param {string} dsc
-     * @param {WpBuildLogLevel} [level]
+     * @param {typedefs.WpBuildLogLevel} [level]
      * @param {string} [pad] Message pre-padding
-     * @param {WpBuildLogColorMapping | null} [iconColor]
-     * @param {WpBuildLogColorMapping | null} [msgColor]
+     * @param {typedefs.WpBuildLogColorMapping | null} [iconColor]
+     * @param {typedefs.WpBuildLogColorMapping | null} [msgColor]
      */
     valuestar = (msg, dsc, level, pad, iconColor, msgColor) =>
     {
@@ -411,7 +430,7 @@ class WpBuildConsoleLogger
     /**
      * @function
      * @param {string | undefined} msg
-     * @param {WpBuildLogColorMapping} color color value
+     * @param {typedefs.WpBuildLogColorMapping} color color value
      * @param {boolean} [sticky]
      * @returns {string}
      */
@@ -421,7 +440,7 @@ class WpBuildConsoleLogger
     /**
      * @function
      * @private
-     * @param {WpBuildLogColorMapping} color color value
+     * @param {typedefs.WpBuildLogColorMapping} color color value
      * @param {string} [msg] message to include in length calculation
      * @returns {number}
      */
@@ -431,10 +450,10 @@ class WpBuildConsoleLogger
     /**
      * @function Write / log a message to the console
      * @param {string} msg
-     * @param {WpBuildLogLevel} [level]
+     * @param {typedefs.WpBuildLogLevel} [level]
      * @param {string} [pad]
      * @param {string | undefined | null | 0 | false} [icon]
-     * @param {WpBuildLogColorMapping | null} [color]
+     * @param {typedefs.WpBuildLogColorMapping | null} [color]
      */
     write = (msg, level, pad = "", icon, color) =>
     {
@@ -462,8 +481,8 @@ class WpBuildConsoleLogger
      * @function
      * @param {string | undefined} msg
      * @param {string | undefined} tagMsg
-     * @param {WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
-     * @param {WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
+     * @param {typedefs.WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
+     * @param {typedefs.WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
      */
     writeMsgTag = (msg, tagMsg, bracketColor, msgColor) =>
         this.write(msg + "  " + this.tag(tagMsg, bracketColor, msgColor), 2, "", null, this.colors[this.app?.rc.log.colors.default || "grey"]);

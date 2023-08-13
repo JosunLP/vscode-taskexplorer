@@ -326,6 +326,7 @@ class WpBuildError extends WebpackError
         }
     }
 
+
     /**
      * @param {string} message
      * @param {string} file
@@ -339,15 +340,19 @@ class WpBuildError extends WebpackError
             if (wpc.mode) {
                 message += ` | mode:[${wpc.mode}]`;
             }
-        }
-        if (isString(detail)) {
-            message += `: ${detail}`;
+            if (wpc.target) {
+                message += ` | target:[${wpc.mode}]`;
+            }
         }
         message += ` | [${file}]`;
+        if (isString(detail)) {
+            message += ` | ${detail}`;
+        }
         const e =new WpBuildError(message, file, detail ?? undefined, false);
         WpBuildError.captureStackTrace(e, this.get);
         return e;
     }
+
 
     /**
      * @param {string} property
@@ -358,6 +363,7 @@ class WpBuildError extends WebpackError
      */
     static getErrorMissing = (property, file, wpc, detail) =>
         this.get(`Could not locate wpbuild resource '${property}' environment'${property}'`, file, wpc, detail);
+
 
     /**
      * @param {string} property

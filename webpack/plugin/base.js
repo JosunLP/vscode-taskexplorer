@@ -39,6 +39,9 @@ const { relative, basename } = require("path");
 const { WebpackError, ModuleFilenameHelpers } = require("webpack");
 const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = require("../utils");
 
+//
+// TODO: remove this typedef when all plugins have been converted to using typedefs definition file
+//
 /** @typedef {typedefs.WpBuildPluginOptions} WpBuildPluginOptions */
 
 
@@ -469,7 +472,7 @@ class WpBuildPlugin
      * @private
      * @member isAsyncType
      * @param {any} hook
-     * @returns {hook is WebpackAsyncCompilerHook | WebpackAsyncCompilationHook}
+     * @returns {hook is typedefs.WebpackAsyncCompilerHook | typedefs.WebpackAsyncCompilationHook}
      */
     isAsyncType = (hook) => isFunction(hook.tapPromise);
 

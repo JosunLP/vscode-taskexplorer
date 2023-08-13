@@ -27,7 +27,7 @@
  * performing, e.g. `loghooks.js` logs each hook  when it starts.  If anything, logging each stage
  * definitely to gives a good grasp on how a webpack build proceeds.
  *
- * NOTE: {@link WpBuildPlugin} for steps to take when adding a new plugin,
+ * NOTE: {@link typedefs.WpBuildPlugin WpBuildPlugin} for steps to take when adding a new plugin,
  *
  * Handy file links:
  *
@@ -37,6 +37,7 @@
  */
 
 
+const typedefs = require("./webpack/types/typedefs");
 const WpBuildRc = require("./webpack/utils/rc");
 const WpBuildApp = require("./webpack/utils/app");
 const { globalEnv } = require("./webpack/utils/global");
@@ -45,38 +46,37 @@ const {
 	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch, getMode
 } = require("./webpack/exports");
 
-/** @typedef {import("./webpack/plugin/base")} WpBuildPlugin */
-/** @typedef {import("./webpack/types").WpBuildRcBuild} WpBuildRcBuild */
-/** @typedef {import("./webpack/types").WebpackRuntimeArgs} WebpackRuntimeArgs */
-/** @typedef {import("./webpack/types").WpBuildWebpackConfig} WpBuildWebpackConfig */
-/** @typedef {import("./webpack/types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
-
 
 /**
  * Exports Webpack build configs to the webpack engine... the build(s) start here.
- * @param {WpBuildRuntimeEnvArgs} env Environment variable containing runtime options passed
+ * Eenvironment "flags" in arge should be set on the cmd line e.g. `--env=property`, as opposed
+ * to `--env property=true`, but any "boolean strings" will be converted to `true` to a booleans
+ *
+ * @function
+ *
+ * @param {typedefs.WpBuildRuntimeEnvArgs} arge Environment variable containing runtime options passed
  * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`)
  * as opposed to the "correct" way i.e. webpack --env environment=test --env clean`
- * @param {WebpackRuntimeArgs} argv Webpack command line args
- * @returns {WpBuildWebpackConfig|WpBuildWebpackConfig[]}
+ * @param {typedefs.WebpackRuntimeArgs} argv Webpack command line args
+ * @returns {typedefs.WpBuildWebpackConfig | typedefs.WpBuildWebpackConfig[]}
  */
-const exportConfigs = (env, argv) =>
+const exportConfigs = (arge, argv) =>
 {
-	const mode = getMode(env, argv),
-		  rc = new WpBuildRc(mode, argv, env),
-		  buildName = env.name || env.build;
-	if (buildName) {
-		return buildConfig(new WpBuildApp(argv, env, rc, globalEnv, buildName));
-	}
-	return rc.builds.map((build) => buildConfig(new WpBuildApp(argv, env, rc, globalEnv, build)));
+	Object.keys(arge).filter(k => typeof arge[k] === "string" && /(?:true|false)/i.test(arge[k])).forEach((k) =>
+	{
+		arge[k] = arge[k].toLowerCase() === "true";
+	});
+	const rc = new WpBuildRc(argv, arge);
+	return rc.builds.map((build) => buildConfig(new WpBuildApp(argv, arge, rc, globalEnv, build)));
 };
 
 
 /**
- * Calls each ./exports/* default export to construct a {@link WpBuildWebpackConfig webpack build configuration}
+ * Calls each ./exports/* default export to construct a {@link typedefs.WpBuildWebpackConfig webpack build configuration}
+ *
  * @function
  * @param {WpBuildApp} app Webpack build environment
- * @returns {WpBuildWebpackConfig}
+ * @returns {typedefs.WpBuildWebpackConfig}
  */
 const buildConfig = (app) =>
 {

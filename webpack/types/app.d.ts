@@ -20,11 +20,11 @@
 
 import { IDisposable } from "./generic";
 import {
+    WpBuildRcPaths, WpBuildWebpackEntry, WpBuildWebpackMode, WpBuildRcBuildType, WpBuildRcBuild
+} from "./rc";
+import {
     WebpackConfig, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions
 } from "./webpack";
-import {
-    IWpBuildRcSchema, WpBuildRcPaths, WpBuildWebpackEntry, WpBuildWebpackMode, WpBuildRcBuildType, WpBuildRcBuild
-} from "./rc";
 
 
 declare const __WPBUILD__: any;

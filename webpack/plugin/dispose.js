@@ -37,13 +37,8 @@
  *         file:///c:\Projects\vscode-taskexplorer\webpack\exports\plugins.js
  */
 
-const { isPromise } = require("../utils");
 const WpBuildPlugin = require("./base");
-
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackStatsAsset} WebpackStatsAsset */
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+const typedefs = require("../types/typedefs");
 
 
 /**
@@ -55,7 +50,7 @@ class WpBuildDisposePlugin extends WpBuildPlugin
      * @function Called by webpack runtime to initialize this plugin
      * @override
      * @member apply
-     * @param {WebpackCompiler} compiler the compiler instance
+     * @param {typedefs.WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
     apply(compiler)
@@ -70,23 +65,17 @@ class WpBuildDisposePlugin extends WpBuildPlugin
         });
     }
 
-    async dispose()
+    dispose()
     {
         this.logger.write("cleanup: call all registered disposables", 2);
-        for (const d of this.app.disposables.splice(0))
-        {
-            const result = d.dispose();
-            if (isPromise(result)) {
-                await result;
-            }
-        }
+        return this.app.dispose();
     }
 }
 
 
 /**
  * @function
- * @param {WpBuildApp} app
+ * @param {typedefs.WpBuildApp} app
  * @returns {WpBuildDisposePlugin}
  */
 const dispose = (app) => new WpBuildDisposePlugin({ app });
