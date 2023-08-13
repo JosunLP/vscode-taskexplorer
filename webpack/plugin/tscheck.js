@@ -103,22 +103,29 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	{
 		let tsConfigParams,
 			tsConfig = join(app.paths.build, `tsconfig.${app.target}.json`);
+
 		if (!existsSync(tsConfig)) {
 			tsConfig = join(app.paths.base, `tsconfig.${app.target}.json`);
-		}
-		if (!existsSync(tsConfig)) {
-			tsConfig = join(app.paths.build, app.target, "tsconfig.json");
+			if (!existsSync(tsConfig)) {
+				tsConfig = join(app.paths.build, app.target, "tsconfig.json");
+				if (!existsSync(tsConfig)) {
+					tsConfig = join(app.paths.base, "tsconfig.json");
+				}
+			}
 		}
 		if (app.build.type === "webapp" || app.build.target === "webworker")
 		{
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.build, "tsconfig.webview.json");
-			}
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.src, "tsconfig.webview.json");
-			}
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.src, "tsconfig.json");
+				if (!existsSync(tsConfig)) {
+					tsConfig = join(app.paths.src, "tsconfig.webview.json");
+					if (!existsSync(tsConfig)) {
+						tsConfig = join(app.paths.src, "tsconfig.json");
+						if (!existsSync(tsConfig)) {
+							tsConfig = join(app.paths.base, "tsconfig.json");
+						}
+					}
+				}
 			}
 			tsConfigParams = [ tsConfig, "readonly" ];
 		}
@@ -126,18 +133,18 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		{
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.src, "tsconfig.json");
-			}
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.src, "tsconfig.test.json");
-			}
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.src, "tsconfig.tests.json");
-			}
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.build, "tsconfig.test.json");
-			}
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.build, "tsconfig.tests.json");
+				if (!existsSync(tsConfig)) {
+					tsConfig = join(app.paths.src, "tsconfig.test.json");
+					if (!existsSync(tsConfig)) {
+						tsConfig = join(app.paths.src, "tsconfig.tests.json");
+						if (!existsSync(tsConfig)) {
+							tsConfig = join(app.paths.build, "tsconfig.test.json");
+							if (!existsSync(tsConfig)) {
+								tsConfig = join(app.paths.build, "tsconfig.tests.json");
+							}
+						}
+					}
+				}
 			}
 			tsConfigParams = [ tsConfig, "write-tsbuildinfo" ];
 		}
@@ -149,6 +156,9 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		{
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.build, "tsconfig.json");
+				if (!existsSync(tsConfig)) {
+					tsConfig = join(app.paths.base, "tsconfig.json");
+				}
 			}
 			tsConfigParams = [ tsConfig, "write-dts" ];
 		}

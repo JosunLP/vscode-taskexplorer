@@ -25,6 +25,11 @@
                 "taskUsage": "./taskUsage/taskUsage.ts",
                 "welcome": "./welcome/welcome.ts"
             },
+            "log": {
+                "colors": {
+                    "buildBracket": "yellow"
+                }
+            },
             "paths": {
                 "dist": "res",
                 "src": "src/webview/app"
@@ -35,7 +40,9 @@
     {
         "builds": [
             { "name": "taskexplorer" },
-            { "name": "webapp" }
+            {
+                "name": "webapp"
+            }
         ],
         "log": {
             "colors": {
@@ -48,7 +55,18 @@
         "builds": [
             { "name": "taskexplorer", "mode": "testproduction" },
             { "name": "webapp", "mode": "production" },
-            { "name": "tests", "paths": { "dist": "dist/test", "src": "src/tests" }}
+            {
+                "name": "tests",
+                "log": {
+                    "colors": {
+                        "buildBracket": "cyan"
+                    }
+                },
+                "paths": {
+                    "dist": "dist/test",
+                    "src": "src/tests"
+                }
+            }
         ],
         "log": {
             "pad": {
@@ -71,12 +89,17 @@
     {
         "builds": [
             { "name": "taskexplorer", "mode": "test" },
-            { "name": "webapp", "mode": "development" }
+            {
+                "name": "webapp",
+                "mode": "development",
+                "log": {
+                    "colors": {
+                        "buildBracket": "cyan"
+                    }
+                }
+            }
         ],
         "log": {
-            "colors": {
-                "buildBracket": "yellow"
-            },
             "pad": {
                 "value": 60
             }

@@ -2,14 +2,19 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
+/**
+ * @file utils/utils.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
+ */
+
 const JSON5 = require("json5");
 const { glob } = require("glob");
 const { WebpackError } = require("webpack");
 const { spawnSync } = require("child_process");
 
-/**
- * @module wpbuild.utils.utils
- */
+/** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 
 
 /**
@@ -309,42 +314,62 @@ class WpBuildError extends WebpackError
      * @param {string} message
      * @param {string} file
      * @param {string} [details]
+     * @param {boolean} [capture]
      */
-    constructor(message, file, details)
+    constructor(message, file, details, capture)
     {
         super(message);
         this.file = file;
         this.details = details;
-        Object.setPrototypeOf(this, new.target.prototype);
-        // WpBuildError.captureStackTrace(this, this.constructor);
+        // Object.setPrototypeOf(this, new.target.prototype);
+        if (capture !== false) {
+            WpBuildError.captureStackTrace(this, this.constructor);
+        }
     }
 
     /**
      * @param {string} message
      * @param {string} file
+     * @param {Partial<WpBuildWebpackConfig> | undefined | null} [wpc]
+     * @param {string | undefined | null} [detail]
      * @returns {WpBuildError}
      */
-    static get(message, file)
+    static get(message, file, wpc, detail)
     {
-        const e =new WpBuildError(message, file);
-        WpBuildError.captureStackTrace(e, this.getPropertyError);
+        if (wpc) {
+            if (wpc.mode) {
+                message += ` | mode:[${wpc.mode}]`;
+            }
+        }
+        if (isString(detail)) {
+            message += `: ${detail}`;
+        }
+        message += ` | [${file}]`;
+        const e =new WpBuildError(message, file, detail ?? undefined, false);
+        WpBuildError.captureStackTrace(e, this.get);
         return e;
     }
 
     /**
      * @param {string} property
      * @param {string} file
-     * @param {string | undefined} [shortDesc]
+     * @param {Partial<WpBuildWebpackConfig>  | undefined | null} [wpc]
+     * @param {string | undefined | null} [detail]
      * @returns {WpBuildError}
      */
-    static getPropertyError(property, file, shortDesc)
-    {
-        let eMsg = `Invalid build configuration - property '${property}'`;
-        if (isString(shortDesc)) {
-            eMsg += `: ${shortDesc}`;
-        }
-        return this.get(eMsg, file);
-    }
+    static getErrorMissing = (property, file, wpc, detail) =>
+        this.get(`Could not locate wpbuild resource '${property}' environment'${property}'`, file, wpc, detail);
+
+    /**
+     * @param {string} property
+     * @param {string} file
+     * @param {Partial<WpBuildWebpackConfig>  | undefined | null} [wpc]
+     * @param {string | undefined | null} [detail]
+     * @returns {WpBuildError}
+     */
+    static getErrorProperty = (property, file, wpc, detail) =>
+        this.get(`Invalid build configuration - property '${property}', file, wpc, shortDesc`, file, wpc, detail);
+
 }
 
 

@@ -206,7 +206,7 @@ class WpBuildApp
 
         if (!rc.builds)
         {
-            throw WpBuildError.getPropertyError("builds", "utils/rc.js");
+            throw WpBuildError.getErrorProperty("builds", "utils/rc.js");
         }
 
 		Object.keys(arge).filter(k => typeof arge[k] === "string" && /(?:true|false)/i.test(arge[k])).forEach((k) =>
@@ -262,22 +262,20 @@ class WpBuildApp
 
         if (!target)
         {
-            if (build.name.includes("webworker") || build.type === "webapp") {
+            target = "node"
+            if ((/web(?:worker|app|view)/).test(build.name) || build.type === "webapp") {
                 target = "webworker"
             }
-            else if (build.name.includes("web") || build.type === "webmodule") {
+            else if ((/web|browser/).test(build.name) || build.type === "webmodule") {
                 target = "web"
             }
-            else if (build.name.includes("module") || build.type === "module") {
+            else if ((/module|node/).test(build.name) || build.type === "module") {
                 target = "node";
             }
-            else if (build.name.includes("test") || build.type === "tests") {
+            else if ((/tests?/).test(build.name) && mode.startsWith("test")) {
                 target = "node";
             }
-            else if (build.name.includes("types") || build.type === "types") {
-                target = "node"
-            }
-            else {
+            else if ((/typ(?:es|ings)/).test(build.name)|| build.type === "types") {
                 target = "node"
             }
             app.target = build.target = target;
@@ -285,16 +283,16 @@ class WpBuildApp
 
         if (!type)
         {
-            if (build.name === "web" || target === "web") {
-                type = "webmodule"
-            }
-            else if (build.name === "webworker" || target === "webworker") {
+            if ((/web(?:worker|app|view)/).test(build.name)) {
                 type = "webapp"
             }
-            else if (build.name.includes("test")) {
+            else if ((/web|browser/).test(build.name)) {
+                type = "webmodule"
+            }
+            else if ((/tests?/).test(build.name)) {
                 type = "tests";
             }
-            else if (build.name.includes("types")) {
+            else if ((/typ(?:es|ings)/).test(build.name)) {
                 type = "types";
             }
             else if (target === "node") {
@@ -303,13 +301,13 @@ class WpBuildApp
             build.type = type;
         }
 
-        if (!mode || !target) {
-            throw new WpBuildError("Invalid build configuration - mode / target", "utils/app.js");
+        if (!mode || !target || !type) {
+            mode = mode === "test" || mode === "testproduction" ? "none" : mode
+            throw WpBuildError.getErrorProperty("mode / target / type", "utils/app.js", { mode });
         }
 
 		apply(app,
-		{
-			...arge,
+		{   ...arge,
 			...argv,
 			arge,
 			argv,
