@@ -45,12 +45,12 @@ const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = r
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackLogger} WebpackLogger */
 /** @typedef {import("../types").WebpackSource} WebpackSource */
+/** @typedef {import("../types").IWpBuildPlugin} IWpBuildPlugin */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
 /** @typedef {import("../types").WebpackRawSource} WebpackRawSource */
 /** @typedef {import("../types").WebpackCacheFacade} WebpackCacheFacade */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("../utils").WpBuildConsoleLogger} WpBuildConsoleLogger */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
@@ -58,6 +58,7 @@ const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = r
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
 /** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
 /** @typedef {import("../types").WebpackCompilerAsyncHook} WebpackCompilerAsyncHook */
+/** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
 /** @typedef {import("../types").WebpackStatsPrinterContext} WebpackStatsPrinterContext */
 /** @typedef {import("../types").WebpackCompilationHookStage} WebpackCompilationHookStage */
 /** @typedef {import("../types").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
@@ -71,6 +72,13 @@ const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = r
 /** @typedef {import("../types").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
 
 /**
+ * @typedef {Record<string, any>} WpBuildPluginOptions
+ * @property {WpBuildApp} app
+ * @property {boolean} [registerVendorPluginsFirst]
+ * @property {WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[]} [plugins]
+ */
+
+/**
  * This callback is displayed as part of the Requester class.
  * @callback WpBuildPluginHookCallback
  * @param {...any} args
@@ -79,7 +87,8 @@ const { isFunction, asArray, mergeIf, WpBuildCache, isString, WpBuildError } = r
 
 
 /**
- * @class WpBuildHashPlugin
+ * @class WpBuildPlugin
+ * @implements IWpBuildPlugin
  */
 class WpBuildPlugin
 {

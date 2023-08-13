@@ -21,10 +21,10 @@ const { WebpackError } = require("webpack");
 const { RegexTestsChunk } = require("../utils");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
+/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("./base").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
 class WpBuildUploadPlugin extends WpBuildPlugin

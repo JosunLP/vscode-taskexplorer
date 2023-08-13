@@ -301,6 +301,7 @@ const pickNot = (obj, ...keys) =>
     return ret;
 };
 
+
 class WpBuildError extends WebpackError
 {
     /**
@@ -309,15 +310,43 @@ class WpBuildError extends WebpackError
      * @param {string} file
      * @param {string} [details]
      */
-    constructor(message, file, details) { super(message); this.file = file; this.details = details; }
+    constructor(message, file, details)
+    {
+        super(message);
+        this.file = file;
+        this.details = details;
+        Object.setPrototypeOf(this, new.target.prototype);
+        // WpBuildError.captureStackTrace(this, this.constructor);
+    }
 
     /**
-     * @param {string} file
      * @param {string} message
+     * @param {string} file
      * @returns {WpBuildError}
      */
-    static get(file, message) { return new WpBuildError(file, message); }
+    static get(message, file)
+    {
+        const e =new WpBuildError(message, file);
+        WpBuildError.captureStackTrace(e, this.getPropertyError);
+        return e;
+    }
+
+    /**
+     * @param {string} property
+     * @param {string} file
+     * @param {string | undefined} [shortDesc]
+     * @returns {WpBuildError}
+     */
+    static getPropertyError(property, file, shortDesc)
+    {
+        let eMsg = `Invalid build configuration - property '${property}'`;
+        if (isString(shortDesc)) {
+            eMsg += `: ${shortDesc}`;
+        }
+        return this.get(eMsg, file);
+    }
 }
+
 
 module.exports = {
     apply, asArray, clone, findFiles, findFilesSync, getTsConfig, isArray, isDate, isEmpty, isFunction,

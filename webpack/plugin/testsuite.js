@@ -16,11 +16,11 @@ const { findFiles, getTsConfig } = require("../utils");
 const {readFile, unlink, access } = require("fs/promises");
 const { join, relative, dirname, isAbsolute, resolve } = require("path");
 
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
 /** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */

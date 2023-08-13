@@ -15,7 +15,7 @@ const WpBuildConsoleLogger = require("./console");
 const { resolve, basename, join, dirname } = require("path");
 const { WpBuildError, apply, pick, merge } = require("./utils");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
-const { WpBuildRcBuildTypes, WpBuildWebpackModes } = require("./constants");
+const { WpBuildRcBuildTypes, WpBuildWebpackModes, WebpackTargets } = require("./constants");
 
 /** @typedef {import("../types").IDisposable} IDisposable */
 /** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
@@ -229,18 +229,15 @@ class WpBuildRc
         if (mode === "none") {
             mode = "test";
         }
-        if (rc[mode]) {
-            merge(rc, rc[mode])
-        }
         if (!rc.builds)
         {
-            throw this.throwCfgError("builds");
+            throw WpBuildError.getPropertyError("builds", "utils/rc.js", "configured mode is | " + mode + " |");
         }
         for (const build of rc.builds)
         {
             if (!build.name)
             {
-                throw this.throwCfgError("name");
+                throw WpBuildError.getPropertyError("name", "utils/rc.js");
             }
             if (!build.type)
             {
@@ -248,8 +245,20 @@ class WpBuildRc
                 {
                     build.type = /** @type {WpBuildRcBuildType} */(build.name);
                 }
+                else if (build.name.includes("test")) {
+                    build.type = "tests";
+                }
+                else if (build.name.includes("types")) {
+                    build.type = "types";
+                }
+                else if (build.target === "web") {
+                    build.type = "webmodule";
+                }
+                else if (build.target === "webworker") {
+                    build.type = "webapp";
+                }
                 else {
-                    throw this.throwCfgError("type");
+                    build.type = "module";
                 }
             }
             if (!build.mode)
@@ -287,22 +296,14 @@ class WpBuildRc
      */
     spmBanner = () =>
     {
-        return `        ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
+       return `           ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
           (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
-          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | |/ /|_| | ___/\\\\ // ___/| //
+          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | ^- /|_| | ___/\\\\ // ___/| //
         ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-       (_____/|_|       | /       |_|   |_| (____/  ${this.pkgJson.version}   \\/ /        |/  \\:(           \\/           
+       (_____/|_|       | /       |_|   |_| (____/  ${this.pkgJson.version}   \\/ /        |/  \\:(           \\/
                         |/${this.displayName.padStart(49 - this.displayName.length)}`;
     };
 
-
-    /**
-     * @function
-     * @private
-     * @param {string} property 
-     */
-    throwCfgError = (property) =>
-        new WpBuildError(`Invalid build configuration - property '${property}' not found`, "utils/rc.js");
 }
 
 

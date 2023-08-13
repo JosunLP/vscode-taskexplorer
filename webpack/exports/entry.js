@@ -22,19 +22,19 @@ const builds =
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
 	 */
-	main: (app) =>
+	module: (app) =>
 	{
-		app.wpc.entry =
+		app.wpc.entry = apply({},
 		{
-			"taskexplorer": {
+			[ app.build.name ]: {
 				import: "./src/taskexplorer.ts",
 				layer: "release"
 			},
-			"taskexplorer.debug": {
+			[ `${app.build.name}.debug` ]: {
 				import: "./src/taskexplorer.ts",
 				layer: "debug"
 			}
-		};
+		});
 		if (app.isTests) {
 			builds.tests(app, true);
 		}
@@ -74,7 +74,8 @@ const builds =
 	 * @param {WpBuildApp} app Webpack build environment
 	 */
 	testSuite: (app) =>
-		glob.sync(
+	{
+		return glob.sync(
 			`./${app.paths.src}/**/*.{test,spec}.ts`, {
 				absolute: false, cwd: app.paths.src, dotRelative: false, posix: true
 			}
@@ -86,8 +87,34 @@ const builds =
 				dependOn: "runTest"
 			};
 			return obj;
-		}, {}
-	),
+		}, {});
+	},
+	
+	
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildApp} app Webpack build environment
+	 */
+	types: (app) =>
+	{
+		app.wpc.entry = {
+			types: {
+				import: "./types/index.ts"
+			}
+		}
+	},
+
+
+	// /**
+	//  * @function
+	//  * @private
+	//  * @param {WpBuildApp} app Webpack build environment
+	//  */
+	// webapp: (app) =>
+	// {
+	// 	app.wpc.entry = apply({}, app.rc.vscode.webview.apps);
+	// }
 
 };
 
@@ -100,11 +127,13 @@ const builds =
  */
 const entry = (app) =>
 {
-	const builds = app.rc.builds,
-		  build = builds.find(b => b.name === app.build.name);
-	if (build && build.entry)
+	if (app.build && app.build.entry)
 	{
-		app.wpc.entry = apply({}, build.entry);
+		app.wpc.entry = apply({}, app.build.entry);
+	}
+	else if (app.build && builds[app.build.type])
+	{
+		builds[app.build.type](app);
 	}
 	else {
 		throw new WpBuildError("entry object or path is invalid", "exports/entry.js")

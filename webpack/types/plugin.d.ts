@@ -28,28 +28,24 @@ import {
 } from "./webpack";
 
 
-interface IWpBuildPluginVendorOptions
+declare interface IWpBuildPluginVendorOptions extends Record<string, any>
 {
     ctor: new(...args: any[]) => WebpackPluginInstance,
     options: Readonly<Record<string, any>>
 }
-declare type WpBuildPluginVendorOptions = Readonly<IWpBuildPluginVendorOptions> & Record<string, any>;
+declare type WpBuildPluginVendorOptions = IWpBuildPluginVendorOptions;
 
-interface IWpBuildPluginOptions
+declare interface IWpBuildPluginOptions extends Record<string, any>
 {
     app: IWpBuildApp,
     plugins?: WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[],
     registerVendorPluginsFirst?: boolean;
 }
-declare type WpBuildPluginOptions = IWpBuildPluginOptions & Record<string, any>;
+declare type WpBuildPluginOptions = IWpBuildPluginOptions;
 
-interface IWpBuildPluginCacheOptions
-{
-    file: string;
-}
-declare type WpBuildPluginCacheOptions = IWpBuildPluginCacheOptions & Record<string, any>;
+declare type WpBuildPluginCacheOptions = { file: string; }
 
-interface IWpBuildPluginTapOptions
+declare interface IWpBuildPluginTapOptions
 {
     async?: boolean;
     hook: WebpackCompilerHookName;
@@ -62,14 +58,13 @@ interface IWpBuildPluginTapOptions
 declare type WpBuildPluginTapOptions = Readonly<Omit<IWpBuildPluginTapOptions, "hookCompilation">> & Pick<IWpBuildPluginTapOptions, "hookCompilation">;
 declare type WpBuildPluginTapOptionsHash  = Record<string, WpBuildPluginTapOptions>
 
-// declare interface IWpBuildPlugin extends WebpackPluginInstance, IDisposable
-// {
-//     app: IWpBuildApp;
-//     cache: any;
-//     logger: WpBuildConsoleLogger;
-// }
+declare interface IWpBuildPlugin
+{
+}
+
 
 export {
+    IWpBuildPlugin,
     WpBuildPluginCacheOptions,
     WpBuildPluginOptions,
     WpBuildPluginTapOptions,

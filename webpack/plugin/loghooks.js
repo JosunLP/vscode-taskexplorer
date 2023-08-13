@@ -11,17 +11,17 @@
 
 const WpBuildPlugin = require("./base");
 
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
+/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../types").WebpackSyncHook<any>} WebpackSyncHook */
+/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("../types").WebpackCompilerHook} WebpackCompilerHook */
-/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("./base").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WebpackCompilerSyncHook} WebpackCompilerSyncHook */
 /** @typedef {import("../types").WebpackCompilerHookName} WebpackCompilerHookName */
 /** @typedef {import("../types").WebpackCompilerSyncHookName} WebpackCompilerSyncHookName */
 /** @typedef {import("../types").WebpackCompilerAsyncHookName} WebpackCompilerAsyncHookName */
-/** @typedef {import("../types").WebpackSyncHook<any>} WebpackSyncHook */
 
 
 /**

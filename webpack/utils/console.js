@@ -448,7 +448,7 @@ class WpBuildConsoleLogger
                 const envTagClr = this.getIconColorMapping(icon),
                       envTagMsgClr = app ? this.colors[app.rc.log.colors.buildText] : this.colors.white;
                 envTag = (
-                    " " + this.withColor("[", envTagClr) + app.build + this.withColor("][", envTagClr) +
+                    " " + this.withColor("[", envTagClr) + app.build.name + this.withColor("][", envTagClr) +
                     this.withColor(app.target.toString(), envTagMsgClr) + this.withColor("]", envTagClr)
                 )
                 .padEnd(app.rc.log.pad.envTag + this.withColorLength(envTagMsgClr) + (this.withColorLength(envTagClr) * 3));

@@ -131,12 +131,15 @@ cliWrap(async () =>
                    .replace(/\n/g, "\r\n");
             await writeFile(outputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
             await unlink(tmpOutputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
-
+            //
+            // constants.js
+            //
             let match2;
             const exported = [],
                   typedefs = [],
                   lines = [],
-                  rgx = /export declare type (\w*?) = ("[a-z\| \-"]+?");\r?\n/g;
+                  rgx = /export declare type (\w*?) = (".*?");\r?\n/g;
+
             while ((match2 = rgx.exec(data)) !== null)
             {
                 const [ _, property, values ] = match2;
@@ -152,9 +155,7 @@ cliWrap(async () =>
                 );
             }
             if (lines.length > 0)
-            {   //
-                // constants.js
-                //
+            {
                 let outputFile2 = "constants.js",
                     outputPath2 = resolve("..", "webpack", "utils", outputFile2);;
                 typedefs.sort((a, b) => a.length - b.length);

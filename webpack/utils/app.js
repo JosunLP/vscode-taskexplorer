@@ -18,11 +18,12 @@ const WpBuildConsoleLogger = require("./console");
 
 /** @typedef {import("../utils").WpBuildRc} WpBuildRc */
 /** @typedef {import("../types").IDisposable} IDisposable */
-/** @typedef {import("../types").WpBuildRcPathsExt} WpBuildRcPathsExt */
+/** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
+/** @typedef {import("../types").WpBuildRcPathsExt} WpBuildRcPathsExt */
 /** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
@@ -169,7 +170,7 @@ class WpBuildApp
 	 * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
 	 * @param {WpBuildRuntimeEnvArgs} arge Webpack build environment
 	 * @param {WpBuildRc} rc wpbuild rc configuration
-	 * @param {any} globalEnv
+	 * @param {WpBuildGlobalEnvironment} globalEnv
 	 * @param {WpBuildRcBuild | string} build
 	 */
 	constructor(argv, arge, rc, globalEnv, build)
@@ -194,7 +195,7 @@ class WpBuildApp
 	 * @param {WebpackRuntimeArgs} argv Webpack command line argsmmand line args
 	 * @param {WpBuildRuntimeEnvArgs} arge Webpack build environment
 	 * @param {WpBuildRc} rc wpbuild rc configuration
-	 * @param {any} globalEnv
+	 * @param {WpBuildGlobalEnvironment} globalEnv
 	 * @param {WpBuildRcBuild} build
 	 * @returns {WpBuildApp}
 	 * @throws {WpBuildError}
@@ -203,37 +204,108 @@ class WpBuildApp
 	{
 		const app = /** @type {WpBuildApp} */({});
 
+        if (!rc.builds)
+        {
+            throw WpBuildError.getPropertyError("builds", "utils/rc.js");
+        }
+
 		Object.keys(arge).filter(k => typeof arge[k] === "string" && /(?:true|false)/i.test(arge[k])).forEach((k) =>
 		{   // environment "flags" in arge should be set on the cmd line e.g. `--env=property`, as opposed to `--env property=true`
 			arge[k] = arge[k].toLowerCase() === "true"; // but convert any string values of `true` to a booleans just in case
 		});
 
-        let target = build.target || "node",
+        let type = build.type,
+            target = build.target,
+            mode = build.mode || getMode(arge, argv);
+
+        if (!mode)
+        {
+            if (arge.mode === "development" || argv.mode === "development") {
+                mode = "development";
+            }
+            else if (arge.mode === "production" || argv.mode === "production") {
+                mode = "production";
+            }
+            else if (arge.mode === "none" || argv.mode === "none" || arge.mode?.startsWith("test")) {
+                mode = arge.mode !== "testproduction" ? "test" : arge.mode ;
+            }
+            app.mode = build.mode = mode;
+        }
+
+        app.rc = merge({}, rc);
+    
+        const modeRc = app.rc[mode];
+        if (modeRc)
+        {
+            if (modeRc.log) {
+                merge(app.rc.log, modeRc.log);
+                delete modeRc.log;
+            }
+            if (modeRc.paths) {
+                merge(app.rc.paths, modeRc.paths);
+                delete modeRc.paths;
+            }
+            if (modeRc.exports) {
+                merge(app.rc.exports, modeRc.exports);
+                delete modeRc.exports;
+            }
+            if (modeRc.plugins) {
+                merge(app.rc.plugins, modeRc.plugins);
+                delete modeRc.plugins;
+            }
+            merge(rc, modeRc)
+
+            type = build.type,
+            target = build.target,
             mode = app.mode || build.mode || getMode(arge, argv);
-		if (!mode)
-		{
-			if (arge.mode === "development" || argv.mode === "development") {
-				mode = "development";
-			}
-			else if (arge.mode === "production" || argv.mode === "production") {
-				mode = "production";
-			}
-			else if (arge.mode === "none" || argv.mode === "none" || arge.mode?.startsWith("test")) {
-				mode = arge.mode !== "testproduction" ? "test" : arge.mode ;
-			}
-		}
+        }
+
+        if (!target)
+        {
+            if (build.name.includes("webworker") || build.type === "webapp") {
+                target = "webworker"
+            }
+            else if (build.name.includes("web") || build.type === "webmodule") {
+                target = "web"
+            }
+            else if (build.name.includes("module") || build.type === "module") {
+                target = "node";
+            }
+            else if (build.name.includes("test") || build.type === "tests") {
+                target = "node";
+            }
+            else if (build.name.includes("types") || build.type === "types") {
+                target = "node"
+            }
+            else {
+                target = "node"
+            }
+            app.target = build.target = target;
+        }
+
+        if (!type)
+        {
+            if (build.name === "web" || target === "web") {
+                type = "webmodule"
+            }
+            else if (build.name === "webworker" || target === "webworker") {
+                type = "webapp"
+            }
+            else if (build.name.includes("test")) {
+                type = "tests";
+            }
+            else if (build.name.includes("types")) {
+                type = "types";
+            }
+            else if (target === "node") {
+                type = "module"
+            }
+            build.type = type;
+        }
 
         if (!mode || !target) {
             throw new WpBuildError("Invalid build configuration - mode / target", "utils/app.js");
         }
-
-        if ( mode === "test" || mode === "testproduction") {
-            mode = "none";
-        }
-
-        app.rc = merge({}, rc);
-		app.logger = new WpBuildConsoleLogger(app);
-		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
 
 		apply(app,
 		{
@@ -252,7 +324,7 @@ class WpBuildApp
             target,
 			wpc: {
 				entry: {},
-				mode,
+				mode: mode === "test" || mode === "testproduction" ? "none" : mode,
                 module: {
                     rules: []
                 },
@@ -261,7 +333,10 @@ class WpBuildApp
 			}
 		});
 
-		app.paths = this.getPaths(app); // paths needs to be set "after" applying the properties above
+		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
+		app.logger = new WpBuildConsoleLogger(app);
+		app.paths = this.getPaths(app);
+
 		return app;
 	};
 

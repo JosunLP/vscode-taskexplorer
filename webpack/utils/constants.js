@@ -10,6 +10,7 @@
  * This file was auto generated using the 
  */
 
+/** @typedef {import("../types").WebpackTarget} WebpackTarget */
 /** @typedef {import("../types").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
 /** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
@@ -26,6 +27,11 @@ const WpBuildRcBuildTypes = [ "module", "tests", "types", "webapp", "webmodule" 
 const WpBuildWebpackModes = [ "development", "production", "none", "test", "testproduction" ];
 
 /**
+ * @type {WebpackTarget[]}
+ */
+const WebpackTargets = [ "node", "web", "webworker", "async-node", "node-webkit", "electron-main", "electron-renderer", "electron-preload", "nwjs", "esX", "browserlist" ];
+
+/**
  * @type {WpBuildLogTrueColor[]}
  */
 const WpBuildLogTrueColors = [ "black", "blue", "cyan", "green", "grey", "magenta", "red", "system", "white", "yellow" ];
@@ -39,6 +45,7 @@ const WpBuildLogColors = [ "black", "blue", "cyan", "green", "grey", "magenta", 
 module.exports = {
     WpBuildRcBuildTypes,
     WpBuildWebpackModes,
+    WebpackTargets,
     WpBuildLogTrueColors,
     WpBuildLogColors
 };

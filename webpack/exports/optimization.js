@@ -1,6 +1,6 @@
 // @ts-check
 
-const { apply } = require("../utils");
+const { apply, WpBuildError } = require("../utils");
 
 /**
  * @file exports/optimization.js
@@ -57,8 +57,14 @@ const optimization = (app) =>
  */
 const parallelism = (app) =>
 {
-	apply(app.wpc, { parallelism: 1 + Object.keys(app.rc.builds[app.build.mode]).length });
-};
+	const builds = app.rc.builds.filter(b => b.mode === app.build.mode);
+	if (builds) {
+		apply(app.wpc, { parallelism: 1 + builds.length });
+	}
+	else {
+		throw WpBuildError.getPropertyError("name", "utils/rc.js", "configured mode is | " + app.build.mode + " |");
+	}
+}; 
 
 
 module.exports = optimization;

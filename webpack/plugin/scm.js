@@ -11,9 +11,9 @@
 
 const WpBuildPlugin = require("./base");
 
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("./base").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
 class WpBuildScmPlugin extends WpBuildPlugin

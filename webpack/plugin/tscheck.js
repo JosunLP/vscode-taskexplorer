@@ -16,9 +16,9 @@ const { apply, WpBuildError } = require("../utils");
 const WpBuildPlugin = require("./base");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
+/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("./base").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
 /** @typedef {import("fork-ts-checker-webpack-plugin/lib/issue/issue").Issue} ForkTsCheckerIssue */
@@ -154,7 +154,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		}
 
 		if (!tsConfigParams[0] || !existsSync(tsConfigParams[0])) {
-			throw new WpBuildError(`Could not locate tsconfig file for '${app.mode}' environment`, "plugin/tscheck.js");
+			throw WpBuildError.get(`Could not locate tsconfig file for '${app.mode}' environment`, "plugin/tscheck.js");
 		}
 
 		return [{
