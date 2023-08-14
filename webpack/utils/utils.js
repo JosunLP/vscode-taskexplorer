@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
 /**
@@ -18,7 +16,7 @@ const { spawnSync } = require("child_process");
 
 /**
  * @function
- * @template {{}} T=Record<string, any>
+ * @template {{}} T
  * @template {{}} U extends T
  * @param {T | Partial<T>} object
  * @param {U | T | Partial<T> | undefined} config

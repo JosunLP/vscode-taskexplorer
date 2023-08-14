@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 /**
@@ -89,8 +88,8 @@ const builds =
 			return obj;
 		}, {});
 	},
-	
-	
+
+
 	/**
 	 * @function
 	 * @private

@@ -1,15 +1,16 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "dist",
+        "baseUrl": ".",
         "declaration": true,
         "declarationDir": "types/dist",
+        "outDir": "dist",
         "paths": {
 			":env/*": [ "src/lib/env/node/*" ],
 			":types": [ "types" ]
 		},
 		"rootDir": "src",
-		"tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo"
+		"tsBuildInfoFile": "./node_modules/.cache/tsconfig.node.tsbuildinfo"
 		// "typeRoots": [ "types" ]
     },
 	"include": [

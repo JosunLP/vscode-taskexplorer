@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 const { join, resolve } = require("path");
@@ -73,19 +72,11 @@ const output = (app) =>
 	}
 	else
 	{
-		apply(app.wpc.output,
+		app.wpc.output.filename = (pathData, _assetInfo) =>
 		{
-			libraryTarget: "commonjs2",
-			/**
-			 * @param {WebpackPathData} pathData
-			 * @param {WebpackAssetInfo | undefined} _assetInfo
-			 */
-			filename: (pathData, _assetInfo) =>
-			{
-				const data = /** @type {WebpackPathDataOutput} */(pathData);
-				return RegexTestsChunk.test(data.chunk.name || "") ? "[name].js" : "[name].[contenthash].js";
-			}
-		});
+			const data = /** @type {WebpackPathDataOutput} */(pathData);
+			return RegexTestsChunk.test(data.chunk.name || "") ? "[name].js" : "[name].[contenthash].js";
+		};
 	}
 };
 

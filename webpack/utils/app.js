@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 /**
@@ -9,7 +8,7 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { isAbsolute, relative } = require("path");
+const { isAbsolute, relative, join } = require("path");
 const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
 const { existsSync, mkdirSync } = require("fs");
@@ -129,12 +128,12 @@ class WpBuildApp
 
 
     /**
-	 * @function
-	 * @static
-	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-	 * @param {typedefs.WpBuildRcBuild} build
+     * @function
+     * @static
+     * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
+     * @param {typedefs.WpBuildRcBuild} build
      * @returns {typedefs.WpBuildWebpackConfig}
-	 */
+     */
     static create = (rc, build) => new WpBuildApp(rc, build).wpc;
 
 
@@ -165,7 +164,7 @@ class WpBuildApp
 	 */
 	applyApp = (rc, build) =>
 	{
-        const mode = build.mode || this.mode || rc.mode;
+        const mode = build.mode || rc.mode;
 		apply(this,
 		{   ...rc.args,
 			// build,
@@ -189,17 +188,19 @@ class WpBuildApp
 	applyPaths = () =>
 	{
 		const paths = /** @type {typedefs.WpBuildRcPathsExt} */({}),
-			  baseDir = resolvePath(__dirname, "..", ".."),
+			  build = resolvePath(__dirname, "..", ".."),
 			  temp = resolvePath(process.env.TEMP || process.env.TMP  || "dist", this.rc.name, this.mode);
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
 		}
 		this.paths = apply(paths,
-            this.resolveRcPaths(baseDir, this.rc.paths),
-            this.resolveRcPaths(baseDir, {
+            this.resolveRcPaths(build, this.rc.paths),
+            this.resolveRcPaths(build, {
                 temp,
-                build: baseDir,
-                base: this.rc.paths.src
+                build,
+                base: this.rc.paths.src || build,
+                dist: "dist",
+                src: "src"
             })
         );
 	};
@@ -212,38 +213,49 @@ class WpBuildApp
 	 * @param {typedefs.WpBuildRcBuild} build
 	 */
     applyRc = (rc, build) =>
-    {
+    {   //
+        // Mereg/apply the current configured build properites into the main rc configs.
+        // Build config objects can override base props in rc, e.g. `log`, `paths`, etc.
+        // Note that any object property with an inner nested object as one of it's
+        // props needs to use merge(), otherwise just use apply().  FOr first operation,
+        // we merge() the base rrc into a new object, i.e. each 'WpBuildAPp' instance will
+        // have a separate rc and will not erference the same rc object.
+        //
 		this.rc = merge({}, rc);
+        if (isObject(build.log)) {
+            merge(this.rc.log, build.log);
+        }
+        if (isObject(build.paths)) {
+            merge(this.rc.paths, build.paths);
+        }
+        if (isObject(build.exports)) {
+            merge(this.rc.exports, build.exports);
+        }
+        if (isObject(build.plugins)) {
+            merge(this.rc.exports, build.plugins);
+        }
+        //
+        // If mode specific build config is present, then merge/apply it's properties to the base
+        // rc config props.
+        //
         const modeRc = this.rc[this.rc.mode];
         if (modeRc)
         {
             if (isObject(modeRc.log)) {
-                apply(this.rc.log, modeRc.log);
-                apply(build.log, modeRc.log);
-            }
-            else if (isObject(build.log)) {
-                apply(this.rc.log, build.log);
+                merge(this.rc.log, modeRc.log);
+                merge(build.log, modeRc.log);
             }
             if (isObject(modeRc.paths)) {
                 apply(this.rc.paths, modeRc.paths);
                 apply(build.paths, modeRc.paths);
             }
-            else if (isObject(build.paths)) {
-                apply(this.rc.paths, build.paths);
-            }
             if (isObject(modeRc.exports)) {
                 apply(this.rc.exports, modeRc.exports);
                 apply(build.exports, modeRc.exports);
             }
-            else if (isObject(build.exports)) {
-                apply(this.rc.exports, build.exports);
-            }
             if (isObject(modeRc.plugins)) {
                 apply(this.rc.plugins, modeRc.plugins);
                 apply(build.plugins, modeRc.plugins);
-            }
-            else if (isObject(build.plugins)) {
-                apply(this.rc.plugins, build.plugins);
             }
             if (isArray(modeRc.builds))
             {
@@ -263,6 +275,7 @@ class WpBuildApp
                 });
             }
         }
+        this.rc.mode = build.mode || this.rc.mode;
         WpBuildWebpackModes.forEach(m => delete this.rc[m]);
     };
 
@@ -278,6 +291,7 @@ class WpBuildApp
     {
         this.wpc = {
             context: this.paths.base,
+            // context: this.paths.build,
             entry: {},
             mode: this.rc.mode === "test" || this.rc.mode === "testproduction" ? "none" : this.rc.mode,
             module: { rules: [] },
@@ -304,45 +318,49 @@ class WpBuildApp
 
 
     /**
-	 * @function
-	 * @param {boolean} [rel]
-	 * @param {boolean} [dotRel]
-	 * @param {boolean} [psx]
+     * @function
+     * @param {boolean} [rel]
+     * @param {boolean} [ctxRel]
+     * @param {boolean} [dotRel]
+     * @param {boolean} [psx]
      * @returns {string} string
      */
-    getBasePath = (rel, dotRel, psx) => this.getPath(this.paths.base || this.build.paths?.src || process.cwd(), rel, dotRel, psx);
+    getBasePath = (rel, ctxRel, dotRel, psx) => this.getPath(this.paths.base || this.build.paths?.src || process.cwd(), rel, dotRel, psx);
 
 
     /**
-	 * @function
-	 * @param {boolean} [rel]
-	 * @param {boolean} [dotRel]
-	 * @param {boolean} [psx]
+     * @function
+     * @param {boolean} [rel]
+     * @param {boolean} [ctxRel]
+     * @param {boolean} [dotRel]
+     * @param {boolean} [psx]
      * @returns {string} string
      */
-    getBuildPath = (rel, dotRel, psx) => this.getPath(this.paths.build || process.cwd(), rel, dotRel, psx);
+    getBuildPath = (rel, ctxRel, dotRel, psx) => this.getPath(this.paths.build || process.cwd(), rel, dotRel, psx);
 
 
     /**
-	 * @function
-	 * @param {boolean} [rel]
-	 * @param {boolean} [dotRel]
-	 * @param {boolean} [psx]
+     * @function
+     * @param {boolean} [rel]
+     * @param {boolean} [ctxRel]
+     * @param {boolean} [dotRel]
+     * @param {boolean} [psx]
      * @returns {string} string
      */
-    getDistPath = (rel, dotRel, psx) =>this.getPath(this.build.paths?.dist || this.paths.dist || "dist", rel, dotRel, psx);
+    getDistPath = (rel, ctxRel, dotRel, psx) =>this.getPath(this.paths.dist || "dist", rel, dotRel, psx);
 
 
     /**
-	 * @function
+     * @function
      * @private
-	 * @param {string} path
-	 * @param {boolean} [rel]
-	 * @param {boolean} [dotRel]
-	 * @param {boolean} [psx]
+     * @param {string} path
+     * @param {boolean} [rel]
+     * @param {boolean} [ctxRel]
+     * @param {boolean} [dotRel]
+     * @param {boolean} [psx]
      * @returns {string} string
      */
-    getPath = (path, rel, dotRel, psx) =>
+    getPath = (path, rel, ctxRel, dotRel, psx) =>
     {
         const basePath = this.paths.build || process.cwd();
         if (rel !== false)
@@ -352,6 +370,9 @@ class WpBuildApp
         else if (!isAbsolute(path)) {
             path = resolvePath(basePath, path);
         }
+        if (ctxRel !== false) {
+            path = path.replace(/\\/g, "/")
+        }
         if (psx !== false) {
             path = path.replace(/\\/g, "/")
         }
@@ -360,15 +381,16 @@ class WpBuildApp
 
 
     /**
-	 * @function
-	 * @param {boolean} [rel]
-	 * @param {boolean} [dotRel]
-	 * @param {boolean} [psx]
+     * @function
+     * @param {boolean} [rel]
+     * @param {boolean} [ctxRel]
+     * @param {boolean} [dotRel]
+     * @param {boolean} [psx]
      * @returns {string} string
      */
-    getSrcPath = (rel, dotRel, psx) => this.getPath(this.build.paths?.src || this.paths.src || this.paths.base, rel, dotRel, psx);
-    
-    
+    getSrcPath = (rel, ctxRel, dotRel, psx) => this.getPath(this.paths.src, rel, dotRel, psx);
+
+
     /**
      * @function
      * @private

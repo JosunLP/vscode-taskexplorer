@@ -1,12 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */ /* eslint-disable jsdoc/no-undefined-types */
-/* eslint-disable jsdoc/require-property-description */ /* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable jsdoc/require-property-description */
 // @ts-check
 
 const typedefs = require("../types/typedefs");
 const { isString, isObject, isPrimitive } = require("./utils");
 
 
-/**WpBuildLogColorValue
+/**
  * @class WpBuildConsoleLogger
  * @implements {typedefs.IDisposable}
  */

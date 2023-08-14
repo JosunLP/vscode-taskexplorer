@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -97,6 +96,10 @@ class WpBuildRc
      */
     testproduction;
     /**
+     * @type {typedefs.WpBuildRcBuildType}
+     */
+    type;
+    /**
      * @type {typedefs.WpBuildRcVsCode}
      */
     vscode;
@@ -118,8 +121,12 @@ class WpBuildRc
         });
 
         apply(this,
-            { args: apply({}, arge, argv), mode: this.getMode(arge, argv, true) }
-        );
+        {
+            args: apply({}, arge, argv),
+            mode: this.getMode(arge, argv, true),
+            type: arge.type
+        });
+
         if (!isWpBuildWebpackMode(this.mode)) {
             throw WpBuildError.getErrorMissing("mode", "utils/rc.js", { mode: this.mode });
         }
@@ -128,20 +135,20 @@ class WpBuildRc
             this.getJson(this, ".wpbuildrc.json", resolve(__dirname, "..")),
             this.getJson(this, ".wpbuildrc.defaults.json", resolve(__dirname, "..", "types"))
         );
-    
+
         this.pkgJson = pick(
             this.getJson(this.pkgJson, "package.json", resolve(__dirname, "..", "..")),
             ...WpBuildRcPackageJsonProps
         );
 
         this.builds = this.builds || [];
-        this.prep(buildName, argv, arge, this.builds);
+        this.prep(buildName, argv, this.builds);
         WpBuildWebpackModes.filter(m => m !== "none" && !!this[m].builds).forEach(
-            (m) => this.prep(buildName, argv, arge, this[m].builds)
+            (m) => this.prep(buildName, argv, this[m].builds)
         );
 
 		globalEnv.verbose = !!this.args.verbosity && this.args.verbosity !== "none";
-        
+
         // if (argv.mode && !isWebpackMode(this.mode))
         // {
         //     argv.mode = "none";
@@ -210,7 +217,7 @@ class WpBuildRc
      */
     getMode = (arge, argv, wpBuild) =>
     {
-        /** @type typedefs.WebpackMode | typedefs.WpBuildWebpackMode | undefined */
+        /** @type {typedefs.WebpackMode | typedefs.WpBuildWebpackMode | undefined} */
         let mode = argv.mode;
         if (!mode)
         {
@@ -236,12 +243,10 @@ class WpBuildRc
      * @private
      * @param {string | undefined} buildName
      * @param {typedefs.WebpackRuntimeArgs} argv
-     * @param {typedefs.WpBuildRuntimeEnvArgs} arge
      * @param {typedefs.WpBuildRcBuilds} builds
      */
-    prep = (buildName, argv, arge, builds) =>
-    {   
-        //
+    prep = (buildName, argv, builds) =>
+    {   //
         // If build name was specified on the cmd line, remove all other builds from rc defintion
         //
         if (buildName) {
@@ -252,8 +257,8 @@ class WpBuildRc
 
         for (const build of builds)
         {
-            build.mode = build.mode || this.mode || arge.mode;
-            build.type = build.type || arge.type;
+            build.mode ||= this.mode;
+            build.type ||= this.type;
 
             if (!build.target)
             {

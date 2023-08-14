@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -24,15 +23,20 @@ const builds =
 	 */
 	module: (app) =>
 	{
-		if (app.isTests) {
-			//builds.tests(app);
+		if (app.isTests && !app.rc.builds.find(b => b.type === "tests")) {
+			builds.tests(app);
 		}
-console.log("***************************************************")
 		app.wpc.module.rules.push(
 		{
 			test: /\.ts$/,
 			issuerLayer: "release",
-			include: app.paths.src,
+			include: app.getSrcPath(false),
+			// include(resourcePath, issuer) {
+			// 	console.log(`  context: ${app.wpc.context} (from ${issuer})`);
+			// 	console.log(`  resourcePath: ${resourcePath} (from ${issuer})`);
+			// 	console.log(`  included: ${path.relative(app.wpc.context || ".", resourcePath)} (from ${issuer})`);
+			// 	return true; // include all
+			// },
 			loader: "string-replace-loader",
 			options: stripLoggingOptions(),
 			exclude: [
@@ -42,7 +46,7 @@ console.log("***************************************************")
 		{
 			test: /wrapper\.ts$/,
 			issuerLayer: "release",
-			include: path.join(app.paths.src, "lib"),
+			include: path.join(app.getSrcPath(false), "lib"),
 			loader: "string-replace-loader",
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
@@ -54,7 +58,7 @@ console.log("***************************************************")
 		},
 		{
 			test: /\.ts$/,
-			include: app.paths.src,
+			include: app.getSrcPath(false),
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
 			],
@@ -74,7 +78,7 @@ console.log("***************************************************")
 				loader: "ts-loader",
 				options: {
 					configFile: path.join(app.paths.build, `tsconfig.${app.target}.json`),
-					experimentalWatchApi: true,
+					// experimentalWatchApi: true,
 					transpileOnly: true
 				}
 			}

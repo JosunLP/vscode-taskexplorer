@@ -7,9 +7,7 @@ module.exports = {
     },
     parser: "@typescript-eslint/parser",
     parserOptions: {
-        sourceType: "module",
-        ecmaVersion: 2020,
-        createDefaultProgram: true
+        ecmaVersion: 2020
     },
     ignorePatterns: [
         "**/test-fixture/**/*.js", "types/**", "*.json", "node_modules", "node_modules/**",
@@ -18,7 +16,7 @@ module.exports = {
     overrides: [
     {
         files: [
-            "src/**/*.js"
+            "**/*.js"
         ],
         excludedFiles: [
             "test-fixture/**", "types/**", "*.json","node_modules/**", "**/node_modules/**"
@@ -30,9 +28,7 @@ module.exports = {
         "eslint-plugin-import",
         "eslint-plugin-prefer-arrow",
         "anti-trojan-source",
-        "@spmeesseman/eslint-plugin",
-        "@typescript-eslint",
-        "@typescript-eslint/tslint"
+        "@spmeesseman/eslint-plugin"
     ],
     globals: {
         __WPBUILD__: "readonly"
@@ -40,103 +36,6 @@ module.exports = {
     rules: {
         "@spmeesseman/extjs-array-bracket-newline": 1,
 		"anti-trojan-source/no-bidi": "error",
-        "@typescript-eslint/adjacent-overload-signatures": "warn",
-        "@typescript-eslint/array-type": [
-            "warn",
-            {
-                default: "array"
-            }
-        ],
-        "@typescript-eslint/ban-types": [
-            "warn",
-            {
-                types: {
-                    Object: {
-                        message: "Avoid using the `Object` type. Did you mean `object`?"
-                    },
-                    Function: {
-                        message: "Avoid using the `Function` type. Prefer a specific function type, like `() => void`, or use `ts.AnyFunction`."
-                    },
-                    Boolean: {
-                        message: "Avoid using the `Boolean` type. Did you mean `boolean`?"
-                    },
-                    Number: {
-                        message: "Avoid using the `Number` type. Did you mean `number`?"
-                    },
-                    String: {
-                        message: "Avoid using the `String` type. Did you mean `string`?"
-                    }
-                }
-            }
-        ],
-        "@typescript-eslint/consistent-type-assertions": "off",
-        "@typescript-eslint/consistent-type-definitions": "warn",
-        "@typescript-eslint/dot-notation": "warn",
-        "@typescript-eslint/explicit-member-accessibility": [
-            "off",
-            {
-                accessibility: "explicit"
-            }
-        ],
-        "@typescript-eslint/indent": "off",
-        "@typescript-eslint/member-delimiter-style": [
-            "warn",
-            {
-                multiline: {
-                    delimiter: "semi",
-                    requireLast: true
-                },
-                singleline: {
-                    delimiter: "semi",
-                    requireLast: false
-                }
-            }
-        ],
-        "@typescript-eslint/member-ordering": "off",
-        "@typescript-eslint/naming-convention": "warn",
-        "@typescript-eslint/no-empty-function": "off",
-        "@typescript-eslint/no-empty-interface": "off",
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-inferrable-types": "warn",
-        "@typescript-eslint/no-misused-new": "warn",
-        "@typescript-eslint/no-namespace": "off",
-        "@typescript-eslint/no-parameter-properties": "off",
-        "@typescript-eslint/no-shadow": [
-            "off",
-            {
-                hoist: "all"
-            }
-        ],
-        "@typescript-eslint/no-this-alias": "off",
-        "@typescript-eslint/no-unnecessary-qualifier": "warn",
-        "@typescript-eslint/no-unnecessary-type-assertion": "warn",
-        "@typescript-eslint/no-unused-expressions": "warn",
-        "@typescript-eslint/no-use-before-define": "off",
-        "@typescript-eslint/no-var-requires": "off",
-        "@typescript-eslint/prefer-for-of": "off",
-        "@typescript-eslint/prefer-function-type": "warn",
-        "@typescript-eslint/prefer-namespace-keyword": "warn",
-        "@typescript-eslint/quotes": [
-            "warn",
-            "double",
-            {
-                avoidEscape: true
-            }
-        ],
-        "@typescript-eslint/semi": [
-            "warn",
-            "always"
-        ],
-        "@typescript-eslint/triple-slash-reference": [
-            "off",
-            {
-                path: "always",
-                types: "prefer-import",
-                lib: "always"
-            }
-        ],
-        "@typescript-eslint/type-annotation-spacing": "warn",
-        "@typescript-eslint/unified-signatures": "warn",
         "array-bracket-spacing": [ 
             1, "always",
             {
@@ -317,26 +216,6 @@ module.exports = {
             }
         ],
         "use-isnan": "warn",
-        "valid-typeof": "off",
-        "@typescript-eslint/tslint/config": [
-            "error",
-            {
-                rules: {
-                    // ban: [
-                    //     true,
-                    //     "setInterval"
-                    // ],
-                    whitespace: [
-                        true,
-                        "check-branch",
-                        "check-decl",
-                        "check-operator",
-                        "check-module",
-                        "check-separator",
-                        "check-type"
-                    ]
-                }
-            }
-        ]
+        "valid-typeof": "off"
     }
 };
