@@ -31,6 +31,7 @@
                 }
             },
             "paths": {
+                "ctx": "src/webview/app",
                 "dist": "res",
                 "src": "src/webview/app"
             }
@@ -130,6 +131,7 @@
     },
     "paths":
     {
+        "ctx": ".",
         "dist": "dist",
         "src": "src"
     },

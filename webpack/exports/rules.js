@@ -23,6 +23,8 @@ const builds =
 	 */
 	module: (app) =>
 	{
+		const srcPath = app.getSrcPath(),
+			  buildPath = app.getBuildPath();
 		if (app.isTests && !app.rc.builds.find(b => b.type === "tests")) {
 			builds.tests(app);
 		}
@@ -30,7 +32,7 @@ const builds =
 		{
 			test: /\.ts$/,
 			issuerLayer: "release",
-			include: app.getSrcPath(false),
+			include: srcPath,
 			// include(resourcePath, issuer) {
 			// 	console.log(`  context: ${app.wpc.context} (from ${issuer})`);
 			// 	console.log(`  resourcePath: ${resourcePath} (from ${issuer})`);
@@ -46,7 +48,7 @@ const builds =
 		{
 			test: /wrapper\.ts$/,
 			issuerLayer: "release",
-			include: path.join(app.getSrcPath(false), "lib"),
+			include: path.join(srcPath, "lib"),
 			loader: "string-replace-loader",
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
@@ -58,7 +60,7 @@ const builds =
 		},
 		{
 			test: /\.ts$/,
-			include: app.getSrcPath(false),
+			include: srcPath,
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
 			],
@@ -69,15 +71,13 @@ const builds =
 					implementation: esbuild,
 					loader: "tsx",
 					target: [ "es2020", "chrome91", "node16.20" ],
-					tsconfigRaw: getTsConfig(
-						app.paths.build, path.join(app.paths.build, `tsconfig.${app.target}.json`),
-					)
+					tsconfigRaw: getTsConfig(buildPath, `tsconfig.${app.target}.json`)
 				}
 			} :
 			{
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(app.paths.build, `tsconfig.${app.target}.json`),
+					configFile: path.join(buildPath, `tsconfig.${app.target}.json`),
 					// experimentalWatchApi: true,
 					transpileOnly: true
 				}
@@ -90,86 +90,45 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {boolean} [fromMain]
 	 */
-	types: (app) =>
+	tests: (app, fromMain) =>
 	{
-		app.wpc.module.rules.push(
-		{
-			test: /\.ts$/,
-			include: path.join(app.paths.src),
-			exclude: [
-				/node_modules/, /test[\\/]/, /\.d\.ts$/
-			],
-			use: app.esbuild ?
-			{
-				loader: "esbuild-loader",
-				options: {
-					implementation: esbuild,
-					loader: "tsx",
-					target: [ "es2020", "chrome91", "node16.20" ],
-					tsconfigRaw: getTsConfig(
-						app.paths.build, path.join(app.paths.build, "types", "tsconfig.json"),
-					)
-				}
-			} :
-			{
-				loader: "ts-loader",
-				options: {
-					// configFile: path.join(app.paths.build, "types", "tsconfig.json"),
-					configFile: path.join(app.paths.build, `tsconfig.${app.target}.json`),
-					experimentalWatchApi: false,
-					transpileOnly: false,
-					logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-					logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
-					compilerOptions: {
-						emitDeclarationsOnly: true
-					}
-				}
-			}
-		});
-	},
-
-
-	/**
-	 * @function
-	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
-	 */
-	tests: (app) =>
-	{
+		const srcPath = app.getSrcPath(),
+			  buildPath = app.getBuildPath();
 		app.wpc.module.rules.push(
 		{
 			test: /index\.js$/,
-			include: path.join(app.paths.build, "node_modules", "nyc"),
+			include: path.join(buildPath, "node_modules", "nyc"),
 			loader: "string-replace-loader",
 			options: {
 				search: "selfCoverageHelper = require('../self-coverage-helper')",
 				replace: "selfCoverageHelper = { onExit () {} }"
 			}
 		},
+		// {
+		// 	test: /\.ts$/,
+		// 	include: resolve(srcPath, (fromMain ? "." : "..")),
+		// 	exclude: [
+		// 		/node_modules/, /test[\\/]/, /\.d\.ts$/
+		// 	],
+		// 	use: {
+		// 		loader: "ts-loader",
+		// 		options: {
+		// 			configFile: path.join(buildPath, `tsconfig.${app.target}.json`),
+		// 			experimentalWatchApi: false,
+		// 			transpileOnly: false,
+		// 			logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+		// 			logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
+		// 			compilerOptions: {
+		// 				emitDeclarationsOnly: true
+		// 			}
+		// 		}
+		// 	}
+		// },
 		{
 			test: /\.ts$/,
-			include: app.paths.src,
-			exclude: [
-				/node_modules/, /test[\\/]/, /\.d\.ts$/
-			],
-			use: {
-				loader: "ts-loader",
-				options: {
-					configFile: path.join(app.paths.build, `tsconfig.${app.target}.json`),
-					experimentalWatchApi: false,
-					transpileOnly: false,
-					logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-					logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
-					compilerOptions: {
-						emitDeclarationsOnly: true
-					}
-				}
-			}
-		},
-		{
-			test: /\.ts$/,
-			include: app.paths.src + "\\test",
+			include: srcPath + (fromMain ? "\\test" : ""),
 			exclude: [
 				/node_modules/, /types[\\/]/, /\.d\.ts$/
 			],
@@ -191,8 +150,55 @@ const builds =
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
 	 */
+	types: (app) =>
+	{
+		const buildPath = app.getBuildPath();
+		app.wpc.module.rules.push(
+		{
+			test: /\.ts$/,
+			include: app.getSrcPath(),
+			exclude: [
+				/node_modules/, /test[\\/]/, /\.d\.ts$/
+			],
+			use: app.esbuild ?
+			{
+				loader: "esbuild-loader",
+				options: {
+					implementation: esbuild,
+					loader: "tsx",
+					target: [ "es2020", "chrome91", "node16.20" ],
+					tsconfigRaw: getTsConfig(
+						buildPath, path.join(buildPath, "types", "tsconfig.json"),
+					)
+				}
+			} :
+			{
+				loader: "ts-loader",
+				options: {
+					// configFile: path.join(app.paths.build, "types", "tsconfig.json"),
+					configFile: path.join(buildPath, `tsconfig.${app.target}.json`),
+					experimentalWatchApi: false,
+					transpileOnly: false,
+					logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+					logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
+					compilerOptions: {
+						emitDeclarationsOnly: true
+					}
+				}
+			}
+		});
+	},
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildApp} app Webpack build environment
+	 */
 	webapp: (app) =>
 	{
+		const basePath = app.getBasePath(),
+			  srcPath = app.getSrcPath();
 		app.wpc.module.rules.push(...[
 		{
 			test: /\.m?js/,
@@ -200,7 +206,7 @@ const builds =
 		},
 		{
 			exclude: /\.d\.ts$/,
-			include: path.join(app.paths.build, "src"),
+			include: srcPath,
 			test: /\.tsx?$/,
 			use: [ app.esbuild ?
 			{
@@ -209,12 +215,12 @@ const builds =
 					implementation: esbuild,
 					loader: "tsx",
 					target: "es2020",
-					tsconfigRaw: getTsConfig(app.paths.build, path.join(app.paths.base, "tsconfig.json")),
+					tsconfigRaw: getTsConfig(basePath, "tsconfig.json"),
 				},
 			} : {
 				loader: "ts-loader",
 				options: {
-					configFile: path.join(app.paths.base, "tsconfig.json"),
+					configFile: path.join(basePath, "tsconfig.json"),
 					// experimentalWatchApi: true,
 					transpileOnly: true,
 				},

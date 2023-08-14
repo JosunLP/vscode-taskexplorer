@@ -23,9 +23,7 @@ const builds =
 	 */
 	module: (app) =>
 	{
-		const src = app.getSrcPath();
-// console.log("!!!!!!!!: " + `${src}/${app.build.name}.ts ${app.wpc.context}`)
-// throw new Error("1");
+		const src = app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true });
 		app.wpc.entry = {
 			[ app.build.name ]: {
 				import: `${src}/${app.build.name}.ts`,
@@ -36,8 +34,8 @@ const builds =
 				layer: "debug"
 			}
 		};
-		if (app.isTests) {
-			// builds.tests(app, true);
+		if (app.isTests && !app.rc.builds.find(b => b.type === "tests")) {
+			builds.tests(app, true);
 		}
 	},
 
@@ -50,7 +48,7 @@ const builds =
 	 */
 	tests: (app, fromMain) =>
 	{
-		const src = app.getSrcPath() + (fromMain ? "/test" : "");
+		const src = app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true }) + (fromMain ? "/test" : "");
 		app.wpc.entry = apply(app.wpc.entry || {},
 		{
 			"runTest": {
@@ -99,7 +97,7 @@ const builds =
 	{
 		app.wpc.entry = {
 			types: {
-				import: `${app.getSrcPath()}/index.ts`
+				import: `${app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true })}/index.ts`
 			}
 		}
 	}

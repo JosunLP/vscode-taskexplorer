@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -66,14 +65,15 @@ class WpBuildCleanPlugin extends WpBuildPlugin
      */
 	staleAssets(stats)
 	{
-		if (existsSync(this.app.rc.paths.dist))
+		const distPath = this.app.getDistPath();
+		if (existsSync(distPath))
 		{
-			readdirSync(this.app.rc.paths.dist).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
+			readdirSync(distPath).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
 			{
 				const assets = stats.compilation.getAssets(),
 					  clean = !assets.find(a => a.name === file);
 				if (clean) {
-					unlinkSync(join(this.app.rc.paths.dist, file));
+					unlinkSync(join(distPath, file));
 				}
 			});
 		}
@@ -88,14 +88,15 @@ class WpBuildCleanPlugin extends WpBuildPlugin
 	 */
 	static vendorPlugins = (app) =>
 	{
+		const basePath = app.getBasePath();
 		return [{
 			ctor: CleanWebpackPlugin,
 			options: app.build.type === "webapp" ? {
 				dry: false,
 				cleanOnceBeforeBuildPatterns: [
-					path.posix.join(app.paths.base, "css", "**"),
-					path.posix.join(app.paths.base, "js", "**"),
-					path.posix.join(app.paths.base, "page", "**")
+					path.posix.join(basePath, "css", "**"),
+					path.posix.join(basePath, "js", "**"),
+					path.posix.join(basePath, "page", "**")
 				]
 			} : {
 				dry: false,

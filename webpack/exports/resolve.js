@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-// @ts-check
+/// @ts-check
 
 /**
  * @file exports/resolve.js
@@ -8,9 +7,9 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
+const { join } = require("path");
 
-const path = require("path");
+/** @typedef {import("../types/typedefs").WpBuildApp} WpBuildApp */
 
 
 /**
@@ -24,8 +23,8 @@ const resolve = (app) =>
 		app.wpc.resolve =
 		{
 			alias: {
-				":env": path.resolve(app.paths.build, "src", "lib", "env", app.target),
-				":types": path.resolve(app.paths.build, "types")
+				":env": join(app.getSrcPath(), "lib", "env", app.target),
+				":types": join(app.getBuildPath(), "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
 			mainFields: app.build.target  === "web" || app.build.type === "webmodule" ? [ "web", "module", "main" ] : [ "module", "main" ],
@@ -41,11 +40,11 @@ const resolve = (app) =>
 	{
 		app.wpc.resolve = {
 			alias: {
-				":env": path.resolve(app.paths.build, "src", "lib", "env", "web"),
-				":types": path.resolve(app.paths.build, "types")
+				":env": join(app.getSrcPath(), "lib", "env", "web"),
+				":types": join(app.getBuildPath(), "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			modules: [ app.paths.base, "node_modules" ],
+			modules: [ app.getBasePath(), "node_modules" ],
 		};
 	}
 };

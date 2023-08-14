@@ -338,19 +338,37 @@
         "WpBuildRcPaths": {
             "type": "object",
             "properties": {
+                "ctx": {
+                    "type": "string",
+                    "default": ".",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
+                    "minLength": 3,
+                    "maxLength": 100,
+                    "description": "Path to the base context directory as defined by Webpack, relative to the project directory containing package.json"
+                },
                 "dist": {
                     "type": "string",
                     "default": "dist",
-                    "pattern": "^[\\w][~@!\\w\\.\\-\\\\\\/]+$",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
                     "minLength": 3,
-                    "maxLength": 100
+                    "maxLength": 100,
+                    "description": "Path to the distribution / output directory, relative to the project directory containing package.json"
                 },
                 "src": {
                     "type": "string",
                     "default": "src",
-                    "pattern": "^[\\w][~@!\\w\\.\\-\\\\\\/]+$",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
                     "minLength": 3,
-                    "maxLength": 100
+                    "maxLength": 100,
+                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                },
+                "tsconfig": {
+                    "type": "string",
+                    "default": "tsconfig.json",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)(?:tsconfig[(?:[\\\\-]w*?)]\\.json)?$",
+                    "minLength": 3,
+                    "maxLength": 100,
+                    "description": "Path to tsconfig file, relative to the project directory containing package.json"
                 }
             },
             "additionalProperties": false

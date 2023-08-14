@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -69,7 +68,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	bundle = () =>
 	{
-		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(join(this.app.paths.build, "types", "dist")))
+		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(join(this.app.getBuildPath(), "types", "dist")))
 		{
 			const bundleCfg = {
 				name: `@spmeesseman/${this.app.rc.name}-types`,
@@ -102,6 +101,8 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	static getTsForkCheckerPlugins = (app) =>
 	{
 		let tsConfig, tsConfigParams;
+		const basePath = app.getBasePath(),
+		      buildPath = app.getBuildPath();
 
 		const _find = (base) =>
 		{
@@ -132,27 +133,27 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			return tsCfg;
 		};
 
-		tsConfig = _find(app.paths.src);
+		tsConfig = _find(app.getSrcPath());
 		if (!existsSync(tsConfig)) {
-			tsConfig = _find(app.paths.base);
+			tsConfig = _find(basePath);
 			if (!existsSync(tsConfig)) {
-				tsConfig = _find(app.paths.build);
+				tsConfig = _find(buildPath);
 			}
 		}
 
 		if (app.build.type === "webapp" || app.build.target === "webworker")
 		{
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.build, "tsconfig.webview.json");
+				tsConfig = join(buildPath, "tsconfig.webview.json");
 			}
 			tsConfigParams = [ tsConfig, "readonly" ];
 		}
 		else if (app.build.type === "tests")
 		{
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.build, app.build.mode, "tsconfig.json");
+				tsConfig = join(buildPath, app.build.mode, "tsconfig.json");
 				if (!existsSync(tsConfig)) {
-					tsConfig = join(app.paths.base, app.build.mode, "tsconfig.json");
+					tsConfig = join(buildPath, app.build.mode, "tsconfig.json");
 				}
 			}
 			tsConfigParams = [ tsConfig, "write-tsbuildinfo" ];

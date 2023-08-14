@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
@@ -72,7 +71,7 @@ const analyze =
 		{
 			plugin = new CircularDependencyPlugin(
 			{
-				cwd: app.paths.build,
+				cwd: app.getBuildPath({ rel: false }),
 				exclude: /node_modules/,
 				failOnError: false,
 				onDetected: ({ module: _webpackModuleRecord, paths, compilation }) =>

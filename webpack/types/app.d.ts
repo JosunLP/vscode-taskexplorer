@@ -31,6 +31,8 @@ declare const __WPBUILD__: any;
 
 declare type WpBuildRcPathsExt = { base: string; build: string; temp: string; } & WpBuildRcPaths;
 
+declare type WpBuildAppGetPathOptions = { rel: boolean; ctx?: boolean; dot?: boolean; psx?: boolean; };
+
 declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<string, any>; cacheDir: string; verbose: boolean; [ key: string ]: any };
 
 declare type WpBuildRuntimeEnvArgs = { /** @deprecated Use `name`*/build?: string; mode?: WpBuildWebpackMode; name?: string; type?: WpBuildRcBuildType; verbosity?: WebpackLogLevel } & WebpackRuntimeEnvArgs;
@@ -67,6 +69,7 @@ declare class WpBuildAppType
 
 export {
     WpBuildAppType,
+    WpBuildAppGetPathOptions,
     WpBuildRcPathsExt,
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,

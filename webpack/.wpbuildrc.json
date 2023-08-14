@@ -8,7 +8,10 @@
         {
             "name": "taskexplorer",
             "target": "node",
-            "type": "module"
+            "type": "module",
+            "paths": {
+                "tsconfig": "tsconfig.node.json"
+            }
         },
         {
             "name": "webapp",
@@ -31,6 +34,7 @@
                 }
             },
             "paths": {
+                "ctx": "src/webview/app",
                 "dist": "res",
                 "src": "src/webview/app"
             }
@@ -94,8 +98,21 @@
                 "mode": "development",
                 "log": {
                     "colors": {
+                        "buildBracket": "yellow"
+                    }
+                }
+            },
+            {
+                "name": "tests",
+                "log": {
+                    "colors": {
                         "buildBracket": "cyan"
                     }
+                },
+                "paths": {
+                    "ctx": "src/test",
+                    "dist": "dist/test",
+                    "src": "src/test"
                 }
             }
         ],
@@ -130,6 +147,7 @@
     },
     "paths":
     {
+        "ctx": ".",
         "dist": "dist",
         "src": "src"
     },

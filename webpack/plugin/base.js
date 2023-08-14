@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -61,20 +60,20 @@ class WpBuildPlugin
     cache;
     /**
      * Webpack compilation instance
-     * @member {WebpackCompilation} compilation
+     * @member {typedefs.WebpackCompilation} compilation
      * @memberof WpBuildPlugin.prototype
      * @type {typedefs.WebpackCompilation}
      * @protected
      */
     compilation;
     /**
-     * @member {WebpackCompiler} compiler
+     * @member {typedefs.ypedefs.WebpackCompiler} compiler
      * @type {typedefs.WebpackCompiler} compiler
      * @protected
      */
     compiler;
     /**
-     * @member {WpBuildApp} app
+     * @member {typedefs.WpBuildApp} app
      * @memberof WpBuildPlugin.prototype
      * @type {typedefs.WpBuildApp}
      * @protected
@@ -87,7 +86,7 @@ class WpBuildPlugin
      */
     hashDigestLength;
     /**
-     * @member {WpBuildConsoleLogger} logger
+     * @member {typedefs.WpBuildConsoleLogger} logger
      * @memberof WpBuildPlugin.prototype
      * @protected
      * @type {typedefs.WpBuildConsoleLogger}
@@ -106,22 +105,22 @@ class WpBuildPlugin
      */
     options;
     /**
-     * @member {WebpackPluginInstance[]} _plugins
+     * @member {typedefs.WebpackPluginInstance[]} _plugins
      * @memberof WpBuildPlugin.prototype
      * @private
      */
     plugins;
     /**
      * Runtime compiler cache
-     * @member {WebpackCacheFacade} wpCache
-     * @memberof WebpackCompiler.prototype
+     * @member {typedefs.WebpackCacheFacade} wpCache
+     * @memberof typedefs.WebpackCompiler.prototype.prototype
      * @protected
      * @type {typedefs.WebpackCacheFacade}
      */
     wpCache;
     /**
      * Runtime compilation cache
-     * @member {WebpackCacheFacade} wpCacheCompilation
+     * @member {typedefs.WebpackCacheFacade} wpCacheCompilation
      * @memberof WpBuildPlugin.prototype
      * @type {typedefs.WebpackCacheFacade}
      * @protected
@@ -348,7 +347,7 @@ class WpBuildPlugin
 		let exitCode = null,
 			stdout = "", stderr = "";
 		const logger = this.app.logger,
-			  procPromise = exec(command, { cwd: this.app.paths.build, encoding: "utf8" }),
+			  procPromise = exec(command, { cwd: this.app.getBuildPath({ rel: false}), encoding: "utf8" }),
 			  child = procPromise.child;
 		child.stdout?.on("data", (data) => { stdout += data; });
 		child.stderr?.on("data", (data) => { stderr += data; });

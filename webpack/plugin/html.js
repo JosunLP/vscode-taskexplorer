@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -33,7 +32,7 @@ const html = (name, app) =>
 		plugin = new HtmlPlugin(
 		{
 			chunks: [ name, wwwName ],
-			filename: posix.join(app.paths.build, "res", "page", `${wwwName}.html`),
+			filename: posix.join(app.getBuildPath(), "res", "page", `${wwwName}.html`),
 			inject: true,
 			inlineSource: app.wpc.mode === "production" ? ".css$" : undefined,
 			// inlineSource: undefined,

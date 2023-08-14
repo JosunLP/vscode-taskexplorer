@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -154,13 +153,14 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 	 * @param {string[]} apps
 	 * @param {WpBuildApp} app
 	 * @returns {WpBuildPluginVendorOptions[]}
+	 * @throws {WpBuildError}
 	 */
 	static vendorPlugins = (apps, app) =>
 	{
 		/** @type {WpBuildPluginVendorOptions[]} */
 		const plugins = [],
-			  psxBuildPath = app.getBuildPath(true, false, true),
-			  psxBasePath = posix.normalize(relative(process.cwd(), app.paths.base)),
+			  psxBuildPath = app.getBuildPath({ rel: true, psx: true, dot: false, ctx: false }),
+			  psxBasePath = app.getBasePath({ rel: true, psx: true, dot: false, ctx: true }),
 			  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
 		if (app.rc.plugins.copy)
@@ -168,8 +168,9 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 			if (app.build.type === "webapp")
 			{
 				/** @type {CopyPlugin.Pattern[]} */
-				const patterns = [];
-				apps.filter((appName) => existsSync(join(app.paths.base, appName, "res"))).forEach(
+				const patterns = [],
+					  base = app.getBasePath({ rel: false });
+				apps.filter((appName) => existsSync(join(base, appName, "res"))).forEach(
 					(appName) => patterns.push(
 					{
 						from: posix.join(psxBasePath, appName, "res", "*.*"),
@@ -177,7 +178,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 						context: posix.join(psxBasePath, appName, "res")
 					})
 				);
-				if (existsSync(join(app.paths.base, "res")))
+				if (existsSync(join(base, "res")))
 				{
 					patterns.push({
 						from: posix.join(psxBasePath, "res", "*.*"),

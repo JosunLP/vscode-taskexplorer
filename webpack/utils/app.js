@@ -109,21 +109,22 @@ class WpBuildApp
 	constructor(rc, build)
 	{
         this.build = merge({}, build);
-        this.applyRc(rc, build);
-        if (!build.mode) {
+        this.applyRc(rc, this.build);
+        if (!this.build.mode) {
             throw WpBuildError.getErrorProperty("mode", "utils/app.js", null);
         }
-        if (!build.target) {
-            throw WpBuildError.getErrorProperty("target", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(build.mode) });
+        if (!this.build.target) {
+            throw WpBuildError.getErrorProperty("target", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(this.build.mode) });
         }
-        if (!build.type) {
-            throw WpBuildError.getErrorProperty("type", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(build.mode) });
+        if (!this.build.type) {
+            throw WpBuildError.getErrorProperty("type", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(this.build.mode) });
         }
-		this.applyApp(rc, build);
+		this.applyApp(rc);
 		this.applyPaths();
 		this.logger = new WpBuildConsoleLogger(this);
         this.printBuildStart();
         this.buildWebpackConfig();
+        this.printBuildProperties();
 	}
 
 
@@ -159,24 +160,22 @@ class WpBuildApp
 	 * @function
 	 * @private
 	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-	 * @param {typedefs.WpBuildRcBuild} build
 	 * @throws {WpBuildError}
 	 */
-	applyApp = (rc, build) =>
+	applyApp = (rc) =>
 	{
-        const mode = build.mode || rc.mode;
+        const mode = this.build.mode || rc.mode;
 		apply(this,
 		{   ...rc.args,
-			// build,
             disposables: [],
 			global: rc.global,
             isTests: rc.mode.startsWith("test"),
-			isWeb: build.target.startsWith("web"),
-			isMain: build.type === "module" || build.target === "web",
-			isMainProd: (build.type === "module" || build.target === "web") && rc.mode === "production",
-			isMainTests: (build.type === "module" || build.target === "web") && rc.mode.startsWith("test"),
+			isWeb: this.build.target.startsWith("web"),
+			isMain: this.build.type === "module" || this.build.target === "web",
+			isMainProd: (this.build.type === "module" || this.build.target === "web") && rc.mode === "production",
+			isMainTests: (this.build.type === "module" || this.build.target === "web") && rc.mode.startsWith("test"),
             mode,
-            target: build.target
+            target: this.build.target
 		});
 	};
 
@@ -198,7 +197,8 @@ class WpBuildApp
             this.resolveRcPaths(build, {
                 temp,
                 build,
-                base: this.rc.paths.src || build,
+                base: this.rc.paths.ctx || this.rc.paths.src || build,
+                ctx: ".",
                 dist: "dist",
                 src: "src"
             })
@@ -290,7 +290,7 @@ class WpBuildApp
     buildWebpackConfig = () =>
     {
         this.wpc = {
-            context: this.paths.base,
+            context: this.paths.build,
             // context: this.paths.build,
             entry: {},
             mode: this.rc.mode === "test" || this.rc.mode === "testproduction" ? "none" : this.rc.mode,
@@ -319,62 +319,52 @@ class WpBuildApp
 
     /**
      * @function
-     * @param {boolean} [rel]
-     * @param {boolean} [ctxRel]
-     * @param {boolean} [dotRel]
-     * @param {boolean} [psx]
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getBasePath = (rel, ctxRel, dotRel, psx) => this.getPath(this.paths.base || this.build.paths?.src || process.cwd(), rel, dotRel, psx);
+    getBasePath = (options) => this.getPath(this.paths.base, options);
 
 
     /**
      * @function
-     * @param {boolean} [rel]
-     * @param {boolean} [ctxRel]
-     * @param {boolean} [dotRel]
-     * @param {boolean} [psx]
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getBuildPath = (rel, ctxRel, dotRel, psx) => this.getPath(this.paths.build || process.cwd(), rel, dotRel, psx);
+    getBuildPath = (options) => this.getPath(this.paths.build, options);
 
 
     /**
      * @function
-     * @param {boolean} [rel]
-     * @param {boolean} [ctxRel]
-     * @param {boolean} [dotRel]
-     * @param {boolean} [psx]
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getDistPath = (rel, ctxRel, dotRel, psx) =>this.getPath(this.paths.dist || "dist", rel, dotRel, psx);
+    getDistPath = (options) =>this.getPath(this.paths.dist, options);
 
 
     /**
      * @function
      * @private
      * @param {string} path
-     * @param {boolean} [rel]
-     * @param {boolean} [ctxRel]
-     * @param {boolean} [dotRel]
-     * @param {boolean} [psx]
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getPath = (path, rel, ctxRel, dotRel, psx) =>
+    getPath = (path, options) =>
     {
-        const basePath = this.paths.build || process.cwd();
-        if (rel !== false)
+        const opts = apply({ rel: false, ctx: false, dot: false , psx: false }, options),
+              basePath = opts.ctx ? this.paths.base : this.paths.build;
+        if (opts.rel)
         {
-            path = ((dotRel !== false ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path)).replace("././", "./");
+            path = ((opts.dot !== false ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path)).replace("././", "./");
+            if (opts.psx !== false) {
+                path = path.replace(/\\/g, "/")
+            }
         }
-        else if (!isAbsolute(path)) {
+        else if (!isAbsolute(path))
+        {
             path = resolvePath(basePath, path);
-        }
-        if (ctxRel !== false) {
-            path = path.replace(/\\/g, "/")
-        }
-        if (psx !== false) {
-            path = path.replace(/\\/g, "/")
+            if (opts.psx === true) {
+                path = path.replace(/\\/g, "/")
+            }
         }
         return path;
     };
@@ -382,13 +372,10 @@ class WpBuildApp
 
     /**
      * @function
-     * @param {boolean} [rel]
-     * @param {boolean} [ctxRel]
-     * @param {boolean} [dotRel]
-     * @param {boolean} [psx]
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getSrcPath = (rel, ctxRel, dotRel, psx) => this.getPath(this.paths.src, rel, dotRel, psx);
+    getSrcPath = (options) => this.getPath(this.paths.src, options);
 
 
     /**
@@ -404,6 +391,36 @@ class WpBuildApp
             l.tag(this.build.name, l.colors.cyan, l.colors.white) + " " + l.tag(this.target, l.colors.cyan, l.colors.white),
             undefined, undefined, l.icons.color.start, l.colors.white
         );
+    };
+
+
+   /**
+    * @function
+    * @private
+    * @member logEnvironment
+    */
+    printBuildProperties = () =>
+    {
+        const l = this.logger,
+              wpc = this.wpc,
+              pad = this.rc.log.pad.value;
+
+        l.write("Global Environment:", 1, "", 0, l.colors.white);
+        Object.keys(this.global).filter(k => typeof this.global[k] !== "object").forEach(
+            (k) => l.value(`   ${k}`, this.global[k], 1)
+        );
+
+        l.write("Webpack Configuration:", 1, "", 0, l.colors.white);
+        l.value("   mode", this.wpc.mode, 1);
+        l.value("   target", this.wpc.target, 1);
+        l.value("   output directory", this.wpc.output.path, 1);
+
+        l.write("Rc Configuration:", 1, "", 0, l.colors.white);
+        l.value("   base build directory", this.getBuildPath(), 1);
+        l.value("   context directory", this.getBasePath({ rel: true }), 1);
+        l.value("   distribution directory", this.getDistPath({ rel: true }), 1);
+        l.value("   source directory", this.getSrcPath({ rel: true }), 1);
+        l.value("   tsconfig path", this.paths.tsconfig, 1);
     };
 
 

@@ -15,7 +15,7 @@ const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
 const { resolve, basename, join, dirname } = require("path");
 const { readFileSync, existsSync, writeFileSync } = require("fs");
-const { WpBuildError, apply, pick, isString } = require("./utils");
+const { WpBuildError, apply, pick, isString, merge, isObject, isArray, pickNot } = require("./utils");
 const {
     isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildWebpackModes, WpBuildRcPackageJsonProps, isWebpackMode
 } = require("./constants");
@@ -122,8 +122,9 @@ class WpBuildRc
 
         apply(this,
         {
-            args: apply({}, arge, argv),
+            args: apply({}, pickNot(arge, "build"), argv),
             mode: this.getMode(arge, argv, true),
+            name: buildName,
             type: arge.type
         });
 
@@ -147,6 +148,8 @@ class WpBuildRc
             (m) => this.prep(buildName, argv, this[m].builds)
         );
 
+        this.applyBuilds(buildName);
+
 		globalEnv.verbose = !!this.args.verbosity && this.args.verbosity !== "none";
 
         // if (argv.mode && !isWebpackMode(this.mode))
@@ -158,6 +161,47 @@ class WpBuildRc
         // }
 
         this.printBanner(this, arge, argv);
+    };
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {string | undefined} buildName
+	 */
+    applyBuilds = (buildName) =>
+    {
+        const modeRc = this[this.mode];
+        if (modeRc)
+        {
+            if (isObject(modeRc.log)) {
+                merge(this.log, modeRc.log);
+            }
+            if (isObject(modeRc.paths)) {
+                apply(this.paths, modeRc.paths);
+            }
+            if (isObject(modeRc.exports)) {
+                apply(this.exports, modeRc.exports);
+            }
+            if (isObject(modeRc.plugins)) {
+                apply(this.plugins, modeRc.plugins);
+            }
+            if (isArray(modeRc.builds))
+            {
+                modeRc.builds.forEach((modeBuild) =>
+                {
+                    const baseBuild = this.builds.find(base => base.name === modeBuild.name);
+                    if (baseBuild) {
+                        merge(baseBuild, modeBuild)
+                    }
+                    else if (!buildName || modeBuild.name === buildName) {
+                        this.builds.push(merge({}, modeBuild))
+                    }
+                });
+            }
+        }
+
+        // WpBuildWebpackModes.forEach(m => delete this[m]);
     };
 
 
@@ -176,7 +220,7 @@ class WpBuildRc
     {
         const path = join(dirPath, file);
         try {
-            if (tryCount == 1 && file === ".wpbuildrc.json" && !existsSync(path))
+            if (tryCount === 1 && file === ".wpbuildrc.json" && !existsSync(path))
             {
                 let defaultsPath = resolve(dirname(path), path.replace(".json", ".defaults.json"));
                 if (existsSync(defaultsPath))
@@ -208,8 +252,8 @@ class WpBuildRc
     /**
      * @function
      * @private
-     * @template {boolean | undefined} [T=false]
-     * @template {typedefs.WebpackMode | typedefs.WpBuildWebpackMode} [R=T extends false | undefined ? typedefs.WebpackMode : typedefs.WpBuildWebpackMode]
+     * @template {boolean | undefined} T
+     * @template {typedefs.WebpackMode | typedefs.WpBuildWebpackMode} R = T extends false | undefined ? typedefs.WebpackMode : typedefs.WpBuildWebpackMode
      * @param {typedefs.WpBuildRuntimeEnvArgs} arge Webpack build environment
      * @param {typedefs.WebpackRuntimeArgs} argv Webpack command line args
      * @param {T} [wpBuild] Convert to WpBuildWebpackMode @see {@link typedefs.WpBuildWebpackMode WpBuildWebpackMode}
@@ -254,9 +298,9 @@ class WpBuildRc
                 (b, i, a) => builds.splice(a.length - 1 - i, b.name !== buildName ? 1 : 0)
             );
         }
-
         for (const build of builds)
         {
+            // build.name = build.name || buildName || "module";
             build.mode ||= this.mode;
             build.type ||= this.type;
 
@@ -344,44 +388,6 @@ class WpBuildRc
         this.printLineSep(logger);
         logger.dispose();
     };
-
-
-	/**
-	 * @function
-	 * @private
-     * @param {WpBuildConsoleLogger} logger
-     * @param {typedefs.WpBuildRuntimeEnvArgs} arge
-     * @param {typedefs.WebpackRuntimeArgs} argv
-	 * @member logEnvironment
-	 */
-	printEnvironment = (logger, arge, argv) =>
-	{
-		const pad = this.log.pad.value;
-
-		logger.write("Build Environment:", 1, "", 0, logger.colors.white);
-		Object.keys(argv.env).filter(k => typeof argv.env[k] !== "object").forEach(
-			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${argv.env[k]}`, 1)
-		);
-
-		logger.write("Global Environment:", 1, "", 0, logger.colors.white);
-		Object.keys(globalEnv).filter(k => typeof globalEnv[k] !== "object").forEach(
-			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${globalEnv[k]}`, 1)
-		);
-
-		if (argv)
-		{
-			logger.write("Arguments:", 1, "", 0, logger.colors.white);
-			if (argv.mode) {
-				logger.write(`   ${"mode".padEnd(pad - 3)}: ${argv.mode}`, 1);
-			}
-			if (argv.watch) {
-				logger.write(`   ${"watch".padEnd(pad - 3)}: ${argv.watch}`, 1);
-			}
-			if (argv.config) {
-				logger.write(`   ${"cfg".padEnd(pad - 3)}: ${argv.config.join(", ")}`, 1);
-			}
-		}
-	};
 
 
     /**

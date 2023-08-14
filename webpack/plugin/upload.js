@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -90,19 +89,20 @@ class WpBuildUploadPlugin extends WpBuildPlugin
                 const asset = compilation.getAsset(file);
                 if (asset && chunk.name && (app.global.runtimeVars.next[chunk.name] !== app.global.runtimeVars.current[chunk.name] || !app.global.runtimeVars.previous[chunk.name]))
                 {
+                    const distPath = this.app.getDistPath();
                     logger.value("   queue asset for upload", logger.tag(file), 2, "", logIcon);
                     logger.value("      asset info", JSON.stringify(asset.info), 4);
-                    await copyFile(join(app.rc.paths.dist, file), join(toUploadPath, file));
+                    await copyFile(join(distPath, file), join(toUploadPath, file));
                     if (asset.info.related?.sourceMap)
                     {
                         const sourceMapFile = asset.info.related.sourceMap.toString();
                         logger.value("   queue sourcemap for upload", logger.tag(sourceMapFile), 2, "", logIcon);
                         if (app.mode === "production") {
                             logger.value("   remove production sourcemap from distribution", sourceMapFile, 3);
-                            await rename(join(app.rc.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
+                            await rename(join(distPath, sourceMapFile), join(toUploadPath, sourceMapFile));
                         }
                         else {
-                            await copyFile(join(app.rc.paths.dist, sourceMapFile), join(toUploadPath, sourceMapFile));
+                            await copyFile(join(distPath, sourceMapFile), join(toUploadPath, sourceMapFile));
                         }
                     }
                 }
@@ -159,19 +159,15 @@ class WpBuildUploadPlugin extends WpBuildPlugin
             `${user}@${host}:"${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}"` // uploaded, and created if not exists
         ];
 
-        await copyFile(join(app.paths.build, "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
+        await copyFile(join(this.app.getBuildPath(), "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
         logger.write(`   upload resource files to ${host}`, 1, "", logIcon);
         try
         {
             logger.write("   plink: create / clear remmote directory", 1, "", logIcon);
-            // logger.write("  plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`, 5, "", logIcon);
             await this.exec("plink " + plinkArgs.join(" "), "plink");
-            // spawnSync("plink", plinkArgs, { cwd: app.paths.build, encoding: "utf8", shell: true });
             logger.write("   pscp:  upload files", 1, "", logIcon);
-            // logger.write("  pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`, 5, "", logIcon);
             await this.exec("pscp " + pscpArgs.join(" "), "pscp");
-            // spawnSync("pscp", pscpArgs, { cwd: app.paths.build, encoding: "utf8", shell: true });
             filesToUpload.forEach((f) =>
                 logger.write(`   ${logger.icons.color.successTag} ${logger.withColor(`uploaded ${basename(f)}`, logger.colors.grey)}`, 1, "", logIcon)
             );

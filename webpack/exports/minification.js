@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 const { merge } = require("../utils/utils");

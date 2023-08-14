@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
 /**
@@ -20,7 +21,7 @@ const { spawnSync } = require("child_process");
  * @template {{}} U extends T
  * @param {T | Partial<T>} object
  * @param {U | T | Partial<T> | undefined} config
- * @param {T | Partial<T> | undefined} [defaults]
+ * @param {U | T | Partial<T> | undefined} [defaults]
  * @returns {T}
  */
 const apply = (object, config, defaults) =>
@@ -295,10 +296,11 @@ const pickBy = (obj, pickFn) =>
 
 /**
  * @function
- * @template {Record<string, T>} T
+ * @template {{}} T
+ * @template {keyof T} K
  * @param {T} obj
- * @param {...string} keys
- * @returns {Partial<T>}
+ * @param {...K} keys
+ * @returns {Omit<T, K>}
  */
 const pickNot = (obj, ...keys) =>
 {

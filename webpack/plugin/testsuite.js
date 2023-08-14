@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
@@ -62,9 +61,9 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 		this.app.logger.write("build test suite", 1);
 		this.onCompilation(compilation);
 
-		const testsDir = join(this.app.rc.paths.dist, "test");
+		const testsDir = join(this.app.getDistPath(), "test");
 		const globOptions = {
-			cwd: this.app.paths.build,
+			cwd: this.app.getBuildPath(),
 			absolute: true,
 			ignore: [ "**/node_modules/**", "**/.vscode*/**", "**/build/**", "**/dist/**", "**/res*/**", "**/doc*/**" ]
 		};
@@ -106,7 +105,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 			} catch {}
 		}
 
-		await this.execTsBuild(relative(this.app.paths.build, tsConfigFile), 2, testsDir, true);
+		await this.execTsBuild(relative(this.app.getBuildPath(), tsConfigFile), 2, testsDir, true);
 	}
 
 
@@ -117,7 +116,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 	//  */
 	// async types(_assets)
 	// {
-	// 	const bldDir = this.app.paths.build,
+	// 	const bldDir = this.app.getBuildPath(),
 	// 		  typesDir = join(bldDir, "types", "dist");
 	// 	this.app.logger.write("build types");
 	// 	if (!existsSync(typesDir))
