@@ -29,13 +29,11 @@ const builds =
 // throw new Error("1");
 		app.wpc.entry = {
 			[ app.build.name ]: {
-				import: `./${app.build.name}.ts`,
-				// import: `${src}/${app.build.name}.ts`,
+				import: `${src}/${app.build.name}.ts`,
 				layer: "release"
 			},
 			[ `${app.build.name}.debug` ]: {
-				import: `./${app.build.name}.debug.ts`,
-				// import: `${src}/${app.build.name}.debug.ts`,
+				import: `${src}/${app.build.name}.ts`,
 				layer: "debug"
 			}
 		};

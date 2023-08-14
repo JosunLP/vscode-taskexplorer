@@ -21,7 +21,7 @@ const optimization = (app) =>
 {
 	if (app.rc.exports.optimization)
 	{
-		parallelism(app)
+		apply(app.wpc, { parallelism: 1 + app.rc.builds.length });
 		if (app.isMain)
 		{
 			app.wpc.optimization =
@@ -50,21 +50,6 @@ const optimization = (app) =>
 	}
 };
 
-
-/**
- * @function optimization
- * @param {WpBuildApp} app Webpack build environment
- */
-const parallelism = (app) =>
-{
-	const builds = app.rc.builds.filter(b => b.mode === app.build.mode);
-	if (builds) {
-		apply(app.wpc, { parallelism: 1 + builds.length });
-	}
-	else {
-		throw WpBuildError.WpBuildRcPathsExt("name", "utils/rc.js", "configured mode is | " + app.build.mode + " |");
-	}
-}; 
 
 
 module.exports = optimization;

@@ -108,18 +108,22 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			let tsCfg = join(base, `tsconfig.${app.build.name}.json`);
 			if (!existsSync(tsCfg))
 			{
-				tsCfg = join(base, `tsconfig.${app.build.mode}.json`);
+				tsCfg = join(base, `tsconfig.${app.build.target}.json`);
 				if (!existsSync(tsCfg))
 				{
-					tsCfg = join(base,`tsconfig.${app.build.type}.json`);
+					tsCfg = join(base, `tsconfig.${app.build.mode}.json`);
 					if (!existsSync(tsCfg))
 					{
-						tsCfg = join(base, app.build.name, "tsconfig.json");
+						tsCfg = join(base,`tsconfig.${app.build.type}.json`);
 						if (!existsSync(tsCfg))
 						{
-							tsCfg = join(base,app.build.type, "tsconfig.json");
-							if (!existsSync(tsCfg)) {
-								tsCfg = join(base,"tsconfig.json");
+							tsCfg = join(base, app.build.name, "tsconfig.json");
+							if (!existsSync(tsCfg))
+							{
+								tsCfg = join(base,app.build.type, "tsconfig.json");
+								if (!existsSync(tsCfg)) {
+									tsCfg = join(base,"tsconfig.json");
+								}
 							}
 						}
 					}
