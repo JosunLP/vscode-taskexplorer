@@ -36,86 +36,27 @@
  * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
  */
 
-
-const typedefs = require("./webpack/types/typedefs");
 const WpBuildRc = require("./webpack/utils/rc");
 const WpBuildApp = require("./webpack/utils/app");
-const { globalEnv } = require("./webpack/utils/global");
-const {
-	cache, context, devtool, entry, experiments, externals, ignorewarnings, minification,
-	mode, name, plugins, optimization, output, resolve, rules, stats, target, watch, getMode
-} = require("./webpack/exports");
-
+const typedefs = require("./webpack/types/typedefs");
+const { isWebpackMode } = require("./webpack/utils");
 
 /**
- * Exports Webpack build configs to the webpack engine... the build(s) start here.
- * Eenvironment "flags" in arge should be set on the cmd line e.g. `--env=property`, as opposed
- * to `--env property=true`, but any "boolean strings" will be converted to `true` to a booleans
+ * Exports Webpack build configs to the webpack engine... the build(s) start here. Eenvironment "flags"
+ * in arge should be set on the cmd line e.g. `--env=property`, as opposed to `--env property=true`,
+ * but any "boolean strings" will be converted to `true` to a booleans
  *
  * @function
- *
- * @param {typedefs.WpBuildRuntimeEnvArgs} arge Environment variable containing runtime options passed
- * to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`)
- * as opposed to the "correct" way i.e. webpack --env environment=test --env clean`
+ * @param {typedefs.WpBuildRuntimeEnvArgs} arge Environment variable containing runtime options
+ * passed to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`) as
+ * opposed to the "correct" way i.e. webpack --env environment=test --env clean`
  * @param {typedefs.WebpackRuntimeArgs} argv Webpack command line args
  * @returns {typedefs.WpBuildWebpackConfig | typedefs.WpBuildWebpackConfig[]}
  */
 const exportConfigs = (arge, argv) =>
 {
-	Object.keys(arge).filter(k => typeof arge[k] === "string" && /(?:true|false)/i.test(arge[k])).forEach((k) =>
-	{
-		arge[k] = arge[k].toLowerCase() === "true";
-	});
 	const rc = new WpBuildRc(argv, arge);
-	return rc.builds.map((build) => buildConfig(new WpBuildApp(argv, arge, rc, globalEnv, build)));
+	return rc.builds.map(build => WpBuildApp.create(rc, build));
 };
-
-
-/**
- * Calls each ./exports/* default export to construct a {@link typedefs.WpBuildWebpackConfig webpack build configuration}
- *
- * @function
- * @param {WpBuildApp} app Webpack build environment
- * @returns {typedefs.WpBuildWebpackConfig}
- */
-const buildConfig = (app) =>
-{
-	target(app);         // Target i.e. "node", "webworker", "web"
-	write(app);          // Log build start after target and env is known
-	mode(app);           // Mode i.e. "production", "development", "none"
-	name(app);           // Build name / label
-	cache(app);          // Asset cache
-	context(app);        // Context for build
-	experiments(app);    // Set any experimental flags that will be used
-	entry(app);          // Entry points for built output
-	externals(app);      // External modules
-	ignorewarnings(app); // Warnings from the compiler to ignore
-	optimization(app);   // Build optimization
-	minification(app);   // Minification / Terser plugin options
-	output(app);         // Output specifications
-	devtool(app);        // Dev tool / sourcemap control
-	resolve(app);        // Resolve config
-	rules(app);          // Loaders & build rules
-	stats(app);          // Stats i.e. console output & verbosity
-	watch(app);          // Watch-mode options
-	plugins(app);        // Plugins - exports.plugins() inits all plugin.plugins
-	return app.wpc;
-};
-
-
-/**
- * @function
- * @param {WpBuildApp} app Webpack build environment
- */
-const write = (app) =>
-{
-	const l = app.logger;
-	l.value(
-		`Start Webpack build ${++globalEnv.buildCount}`,
-		l.tag(app.build.name, l.colors.cyan, l.colors.white) + " " + l.tag(app.target, l.colors.cyan, l.colors.white),
-		undefined, undefined, l.icons.color.start, l.colors.white
-	);
-};
-
 
 module.exports = exportConfigs;

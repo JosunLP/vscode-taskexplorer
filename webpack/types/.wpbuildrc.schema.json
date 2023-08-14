@@ -186,10 +186,6 @@
                 "cache": {
                     "type": "boolean"
                 },
-                "context": {
-                    "const": true,
-                    "readOnly": true
-                },
                 "devtool": {
                     "type": "boolean"
                 },
@@ -208,14 +204,6 @@
                 },
                 "minification": {
                     "type": "boolean"
-                },
-                "mode": {
-                    "const": true,
-                    "readOnly": true
-                },
-                "name": {
-                    "const": true,
-                    "readOnly": true
                 },
                 "optimization": {
                     "type": "boolean"
@@ -238,10 +226,6 @@
                 },
                 "stats": {
                     "type": "boolean"
-                },
-                "target": {
-                    "const": true,
-                    "readOnly": true
                 },
                 "watch": {
                     "type": "boolean"

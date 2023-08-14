@@ -12,28 +12,28 @@
 const JSON5 = require("json5");
 const { glob } = require("glob");
 const { WebpackError } = require("webpack");
+const typedefs = require("../types/typedefs");
 const { spawnSync } = require("child_process");
-
-/** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 
 
 /**
  * @function
- * @template {{}} [T=Record<string, any>]
+ * @template {{}} T=Record<string, any>
+ * @template {{}} U extends T
  * @param {T | Partial<T>} object
- * @param {T | Partial<T> | undefined} config
+ * @param {U | T | Partial<T> | undefined} config
  * @param {T | Partial<T> | undefined} [defaults]
  * @returns {T}
  */
 const apply = (object, config, defaults) =>
 {
-    if (object)
+    if (isObject(object))
     {
-        if (defaults) {
+        if (isObject(defaults)) {
             apply(object, defaults);
         }
-        if (config && isObject(config)) {
-            Object.keys(config).forEach((i) => { object[i] = config[i]; });
+        if (isObject(config)) {
+            Object.keys(config).forEach(i => { object[i] = config[i]; });
         }
     }
     return /** @type {T} */(object);
@@ -196,7 +196,8 @@ const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanc
 /**
  * @function
  * @template {{}} T
- * @param {...(T | Partial<T> | undefined)} destination
+ * @template {{}} U extends T
+ * @param {[ (T | Partial<T> | undefined), ...(U | T | Partial<T> | undefined)[]]} destination
  * @returns {T}
  */
 const merge = (...destination) =>
@@ -206,7 +207,7 @@ const merge = (...destination) =>
     for (let i = 1; i < ln; i++)
     {
         const object = destination[i] || {};
-        Object.keys(object).forEach((key) =>
+        Object.keys(object).filter(key => ({}.hasOwnProperty.call(object, key))).forEach((key) =>
         {
             const value = object[key];
             if (isObject(value))
@@ -216,6 +217,9 @@ const merge = (...destination) =>
                 {
                     merge(sourceKey, value);
                 }
+                // else if (isArray(sourceKey) && isArray(value)) {
+                //     base[key] = [ ...sourceKey, ...clone(value) ];
+                // }
                 else {
                     base[key] = clone(value);
                 }
@@ -330,7 +334,7 @@ class WpBuildError extends WebpackError
     /**
      * @param {string} message
      * @param {string} file
-     * @param {Partial<WpBuildWebpackConfig> | undefined | null} [wpc]
+     * @param {Partial<typedefs.WpBuildWebpackConfig> | undefined | null} [wpc]
      * @param {string | undefined | null} [detail]
      * @returns {WpBuildError}
      */
@@ -357,7 +361,7 @@ class WpBuildError extends WebpackError
     /**
      * @param {string} property
      * @param {string} file
-     * @param {Partial<WpBuildWebpackConfig>  | undefined | null} [wpc]
+     * @param {Partial<typedefs.WpBuildWebpackConfig>  | undefined | null} [wpc]
      * @param {string | undefined | null} [detail]
      * @returns {WpBuildError}
      */
@@ -368,7 +372,7 @@ class WpBuildError extends WebpackError
     /**
      * @param {string} property
      * @param {string} file
-     * @param {Partial<WpBuildWebpackConfig>  | undefined | null} [wpc]
+     * @param {Partial<typedefs.WpBuildWebpackConfig>  | undefined | null} [wpc]
      * @param {string | undefined | null} [detail]
      * @returns {WpBuildError}
      */
@@ -379,7 +383,7 @@ class WpBuildError extends WebpackError
 
 
 module.exports = {
-    apply, asArray, clone, findFiles, findFilesSync, getTsConfig, isArray, isDate, isEmpty, isFunction,
-    isObject, isObjectEmpty,isPrimitive, isPromise, isString, merge, mergeIf, pick, pickBy, pickNot,
-    WpBuildError
+    apply, asArray, clone, findFiles, findFilesSync, getTsConfig, isArray, isDate, isEmpty,
+    isFunction, isObject, isObjectEmpty,isPrimitive, isPromise, isString, merge, mergeIf,
+    pick, pickBy, pickNot, WpBuildError
 };

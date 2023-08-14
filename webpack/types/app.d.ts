@@ -23,7 +23,7 @@ import {
     WpBuildRcPaths, WpBuildWebpackEntry, WpBuildWebpackMode, WpBuildRcBuildType, WpBuildRcBuild
 } from "./rc";
 import {
-    WebpackConfig, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions
+    WebpackConfig, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions, WebpackLogLevel
 } from "./webpack";
 
 
@@ -33,7 +33,7 @@ declare type WpBuildRcPathsExt = { base: string; build: string; temp: string; } 
 
 declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<string, any>; cacheDir: string; verbose: boolean; [ key: string ]: any };
 
-declare type WpBuildRuntimeEnvArgs = { /** @deprecated Use `name`*/build?: string; mode?: WpBuildWebpackMode; name?: string; type?: WpBuildRcBuildType; } & WebpackRuntimeEnvArgs;
+declare type WpBuildRuntimeEnvArgs = { /** @deprecated Use `name`*/build?: string; mode?: WpBuildWebpackMode; name?: string; type?: WpBuildRcBuildType; verbosity?: WebpackLogLevel } & WebpackRuntimeEnvArgs;
 
 declare type WpBuildWebpackConfig = {
     mode: WebpackMode; entry: WpBuildWebpackEntry; output: WebpackOutput; target: WebpackTarget; module: WebpackModuleOptions;
@@ -42,8 +42,6 @@ declare type WpBuildWebpackConfig = {
 declare class WpBuildAppType
 {
     analyze: boolean;                 // parform analysis after build
-    arge: WpBuildRuntimeEnvArgs;
-    argv: WebpackRuntimeArgs;
     build: WpBuildRcBuild;
     clean: boolean;
     disposables: Array<IDisposable>;
@@ -59,7 +57,6 @@ declare class WpBuildAppType
     paths: WpBuildRcPathsExt;
     rc: IWpBuildRcSchemaExt;           // target js app info
     target: WebpackTarget;
-    verbosity: WebpackLogLevel;
     wpc: WpBuildWebpackConfig;
     mode: WpBuildWebpackMode;
     dispose: () => void;

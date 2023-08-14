@@ -114,8 +114,9 @@ class WpBuildSourceMapPlugin extends WpBuildPlugin
             ctor: webpack.SourceMapDevToolPlugin,
             options: {
                 test: /\.(js|jsx)($|\?)/i,
-                exclude: !app.isTests ? /(?:node_modules|(?:vendor|runtime|tests)(?:\.[a-f0-9]{16,})?\.js)/ :
-                                        /(?:node_modules|(?:vendor|runtime)(?:\.[a-f0-9]{16,})?\.js)/,
+                exclude: // !app.isTests ?
+                        /(?:node_modules|(?:vendor|runtime|tests)(?:\.[a-f0-9]{16,})?\.js)/, // :
+                                       //  /(?:node_modules|(?:vendor|runtime)(?:\.[a-f0-9]{16,})?\.js)/,
                 // filename: "[name].js.map",
                 filename: "[name].[contenthash].js.map",
                 //

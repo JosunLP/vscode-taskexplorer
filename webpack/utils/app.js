@@ -9,12 +9,17 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { getMode } = require("../exports");
+const { isAbsolute, relative } = require("path");
+const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
-const { resolve, isAbsolute } = require("path");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
-const { apply, isString, WpBuildError, merge, pick, isPromise } = require("./utils");
+const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject } = require("./utils");
+const {
+	cache, devtool, entry, experiments, externals, ignorewarnings,
+	minification, plugins, optimization, output, resolve, rules, stats, watch
+} = require("../exports");
+const { WpBuildWebpackModes } = require("./constants");
 
 
 /**
@@ -24,26 +29,14 @@ const { apply, isString, WpBuildError, merge, pick, isPromise } = require("./uti
 class WpBuildApp
 {
     /**
-     * @member {boolean} analyze
-     * @memberof WpBuildApp.prototype
      * @type {boolean}
      */
     analyze;
-    /**
-     * @type {typedefs.WpBuildRuntimeEnvArgs}
-     */
-    arge;
-    /**
-     * @type {typedefs.WebpackRuntimeArgs}
-     */
-    argv;
     /**
      * @type {typedefs.WpBuildRcBuild}
      */
     build;
     /**
-     * @member {boolean} clean
-     * @memberof WpBuildApp.prototype
      * @type {boolean}
      */
     clean;
@@ -104,10 +97,6 @@ class WpBuildApp
      */
     target;
     /**
-     * @type {typedefs.WebpackLogLevel}
-     */
-    verbosity;
-    /**
      * @type {typedefs.WpBuildWebpackConfig}
      */
     wpc;
@@ -115,25 +104,38 @@ class WpBuildApp
 
 	/**
 	 * @class WpBuildApp
-	 * @param {typedefs.WebpackRuntimeArgs} argv Webpack command line argsmmand line args
-	 * @param {typedefs.WpBuildRuntimeEnvArgs} arge Webpack build environment
 	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-	 * @param {typedefs.WpBuildGlobalEnvironment} globalEnv
-	 * @param {typedefs.WpBuildRcBuild | string} build
+	 * @param {typedefs.WpBuildRcBuild} build
 	 */
-	constructor(argv, arge, rc, globalEnv, build)
+	constructor(rc, build)
 	{
-        this.disposables = [];
-        if (isString(build))
-        {
-            const thisBuild = rc.builds.find(b => b.name === "build");
-            if (!thisBuild) {
-                throw new WpBuildError(`Invalid build configuration - build name '${build}' not found`, "utils.app.js");
-            }
-            build = thisBuild;
+        this.build = merge({}, build);
+        this.applyRc(rc, build);
+        if (!build.mode) {
+            throw WpBuildError.getErrorProperty("mode", "utils/app.js", null);
         }
-		apply(this, this.wpApp(argv, arge, rc, globalEnv, build));
+        if (!build.target) {
+            throw WpBuildError.getErrorProperty("target", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(build.mode) });
+        }
+        if (!build.type) {
+            throw WpBuildError.getErrorProperty("type", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(build.mode) });
+        }
+		this.applyApp(rc, build);
+		this.applyPaths();
+		this.logger = new WpBuildConsoleLogger(this);
+        this.printBuildStart();
+        this.buildWebpackConfig();
 	}
+
+
+    /**
+	 * @function
+	 * @static
+	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
+	 * @param {typedefs.WpBuildRcBuild} build
+     * @returns {typedefs.WpBuildWebpackConfig}
+	 */
+    static create = (rc, build) => new WpBuildApp(rc, build).wpc;
 
 
     /**
@@ -157,133 +159,230 @@ class WpBuildApp
 	/**
 	 * @function
 	 * @private
-	 * @param {typedefs.WebpackRuntimeArgs} argv Webpack command line argsmmand line args
-	 * @param {typedefs.WpBuildRuntimeEnvArgs} arge Webpack build environment
 	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-	 * @param {typedefs.WpBuildGlobalEnvironment} globalEnv
 	 * @param {typedefs.WpBuildRcBuild} build
-	 * @returns {WpBuildApp}
 	 * @throws {WpBuildError}
 	 */
-	wpApp = (argv, arge, rc, globalEnv, build) =>
+	applyApp = (rc, build) =>
 	{
-		const app = /** @type {WpBuildApp} */({});
-		let type = build.type,
-            target = build.target,
-            mode = build.mode;
-
-        app.rc = merge({}, pick(rc, "name", "displayName", "detailedDisplayName", "publicInfoProject", "builds", "exports", "log", "paths", "plugins"));
-    
-        const modeRc = app.rc[mode];
-        if (modeRc)
-        {
-            if (modeRc.log) {
-                merge(app.rc.log, modeRc.log);
-                delete modeRc.log;
-            }
-            if (modeRc.paths) {
-                merge(app.rc.paths, modeRc.paths);
-                delete modeRc.paths;
-            }
-            if (modeRc.exports) {
-                merge(app.rc.exports, modeRc.exports);
-                delete modeRc.exports;
-            }
-            if (modeRc.plugins) {
-                merge(app.rc.plugins, modeRc.plugins);
-                delete modeRc.plugins;
-            }
-            merge(rc, modeRc)
-            type = build.type,
-            target = build.target,
-            mode = app.mode || build.mode || getMode(arge, argv);
-        }
-
-        if (!mode) {
-            throw WpBuildError.getErrorProperty("mode", "utils/app.js", null);
-        }
-        if (!target) {
-            throw WpBuildError.getErrorProperty("target", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(mode) });
-        }
-        if (!type) {
-            throw WpBuildError.getErrorProperty("type", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(mode) });
-        }
-
-		apply(app,
-		{   ...arge,
-			...argv,
-			arge,
-			argv,
-			build,
-			global: globalEnv,
-            isTests: mode.startsWith("test"),
-			isWeb: target.startsWith("web"),
-			isMain: build.type === "module" || target === "web",
-			isMainProd: (build.type === "module" || target === "web") && mode === "production",
-			isMainTests: (build.type === "module" || target === "web") && mode.startsWith("test"),
+        const mode = build.mode || this.mode || rc.mode;
+		apply(this,
+		{   ...rc.args,
+			// build,
+            disposables: [],
+			global: rc.global,
+            isTests: rc.mode.startsWith("test"),
+			isWeb: build.target.startsWith("web"),
+			isMain: build.type === "module" || build.target === "web",
+			isMainProd: (build.type === "module" || build.target === "web") && rc.mode === "production",
+			isMainTests: (build.type === "module" || build.target === "web") && rc.mode.startsWith("test"),
             mode,
-            target,
-			wpc: {
-				entry: {},
-				mode: mode === "test" || mode === "testproduction" ? "none" : mode,
-                module: {
-                    rules: []
-                },
-				output: {},
-                target
-			}
+            target: build.target
 		});
-
-		globalEnv.verbose = !!app.verbosity && app.verbosity !== "none";
-		app.logger = new WpBuildConsoleLogger(app);
-		app.paths = this.getPaths(app);
-
-		return app;
 	};
 
 
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app
-	 * @returns {typedefs.WpBuildRcPathsExt}
 	 */
-	getPaths = (app) =>
+	applyPaths = () =>
 	{
 		const paths = /** @type {typedefs.WpBuildRcPathsExt} */({}),
-			  baseDir = resolve(__dirname, "..", ".."),
-			  temp = resolve(process.env.TEMP || process.env.TMP  || "dist", app.rc.name, app.mode);
+			  baseDir = resolvePath(__dirname, "..", ".."),
+			  temp = resolvePath(process.env.TEMP || process.env.TMP  || "dist", this.rc.name, this.mode);
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
 		}
-		return apply(
-            this.resolveRcPaths(baseDir, paths),
-            this.resolveRcPaths(baseDir, app.rc.paths),
+		this.paths = apply(paths,
+            this.resolveRcPaths(baseDir, this.rc.paths),
             this.resolveRcPaths(baseDir, {
                 temp,
                 build: baseDir,
-                base: baseDir
+                base: this.rc.paths.src
             })
         );
 	};
 
 
-    /**
+	/**
 	 * @function
-	 * @param {boolean} [dotRelative]
-     * @returns {string}
+	 * @private
+	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
+	 * @param {typedefs.WpBuildRcBuild} build
+	 */
+    applyRc = (rc, build) =>
+    {
+		this.rc = merge({}, rc);
+        const modeRc = this.rc[this.rc.mode];
+        if (modeRc)
+        {
+            if (isObject(modeRc.log)) {
+                apply(this.rc.log, modeRc.log);
+                apply(build.log, modeRc.log);
+            }
+            else if (isObject(build.log)) {
+                apply(this.rc.log, build.log);
+            }
+            if (isObject(modeRc.paths)) {
+                apply(this.rc.paths, modeRc.paths);
+                apply(build.paths, modeRc.paths);
+            }
+            else if (isObject(build.paths)) {
+                apply(this.rc.paths, build.paths);
+            }
+            if (isObject(modeRc.exports)) {
+                apply(this.rc.exports, modeRc.exports);
+                apply(build.exports, modeRc.exports);
+            }
+            else if (isObject(build.exports)) {
+                apply(this.rc.exports, build.exports);
+            }
+            if (isObject(modeRc.plugins)) {
+                apply(this.rc.plugins, modeRc.plugins);
+                apply(build.plugins, modeRc.plugins);
+            }
+            else if (isObject(build.plugins)) {
+                apply(this.rc.plugins, build.plugins);
+            }
+            if (isArray(modeRc.builds))
+            {
+                modeRc.builds.forEach((modeBuild) =>
+                {
+                    const baseBuild = this.rc.builds.find(base => base.name === modeBuild.name);
+                    if (baseBuild) {
+                        merge(baseBuild, modeBuild)
+                    }
+                    else {
+                        this.rc.builds.push(merge({}, modeBuild))
+                    }
+                    if (build.name === modeBuild.name)
+                    {
+                        merge(build, modeBuild)
+                    }
+                });
+            }
+        }
+        WpBuildWebpackModes.forEach(m => delete this.rc[m]);
+    };
+
+
+    /**
+     * Calls each ./exports/* default export to construct a {@link typedefs.WpBuildWebpackConfig webpack build configuration}
+     *
+     * @function
+     * @private
+     * @returns {typedefs.WpBuildWebpackConfig}
      */
-    getDistPath = (dotRelative) =>
-        ((dotRelative ? "./" : "") + (this.build.paths?.dist || this.paths.dist || "dist")).replace("././", "./");
+    buildWebpackConfig = () =>
+    {
+        this.wpc = {
+            context: this.paths.base,
+            entry: {},
+            mode: this.rc.mode === "test" || this.rc.mode === "testproduction" ? "none" : this.rc.mode,
+            module: { rules: [] },
+            name: `${this.rc.name}|${this.rc.pkgJson.version}|${this.build.name}|${this.mode}|${this.build.target}`,
+            output: {},
+            target: this.target
+        };
+        cache(this);          // Asset cache
+        experiments(this);    // Set any experimental flags that will be used
+        entry(this);          // Entry points for built output
+        externals(this);      // External modules
+        ignorewarnings(this); // Warnings from the compiler to ignore
+        optimization(this);   // Build optimization
+        minification(this);   // Minification / Terser plugin options
+        output(this);         // Output specifications
+        devtool(this);        // Dev tool / sourcemap control
+        resolve(this);        // Resolve config
+        rules(this);          // Loaders & build rules
+        stats(this);          // Stats i.e. console output & webpack verbosity
+        watch(this);          // Watch-mode options
+        plugins(this);        // Plugins - exports.plugins() inits all plugin.plugins
+        return this.wpc;
+    };
 
 
     /**
 	 * @function
-	 * @param {boolean} [dotRelative]
-     * @returns {string}
+	 * @param {boolean} [rel]
+	 * @param {boolean} [dotRel]
+	 * @param {boolean} [psx]
+     * @returns {string} string
      */
-    getSrcPath = (dotRelative) =>
-        ((dotRelative ? "./" : "") + (this.build.paths?.src || this.paths.src || "src")).replace("././", "./");
+    getBasePath = (rel, dotRel, psx) => this.getPath(this.paths.base || this.build.paths?.src || process.cwd(), rel, dotRel, psx);
+
+
+    /**
+	 * @function
+	 * @param {boolean} [rel]
+	 * @param {boolean} [dotRel]
+	 * @param {boolean} [psx]
+     * @returns {string} string
+     */
+    getBuildPath = (rel, dotRel, psx) => this.getPath(this.paths.build || process.cwd(), rel, dotRel, psx);
+
+
+    /**
+	 * @function
+	 * @param {boolean} [rel]
+	 * @param {boolean} [dotRel]
+	 * @param {boolean} [psx]
+     * @returns {string} string
+     */
+    getDistPath = (rel, dotRel, psx) =>this.getPath(this.build.paths?.dist || this.paths.dist || "dist", rel, dotRel, psx);
+
+
+    /**
+	 * @function
+     * @private
+	 * @param {string} path
+	 * @param {boolean} [rel]
+	 * @param {boolean} [dotRel]
+	 * @param {boolean} [psx]
+     * @returns {string} string
+     */
+    getPath = (path, rel, dotRel, psx) =>
+    {
+        const basePath = this.paths.build || process.cwd();
+        if (rel !== false)
+        {
+            path = ((dotRel !== false ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path)).replace("././", "./");
+        }
+        else if (!isAbsolute(path)) {
+            path = resolvePath(basePath, path);
+        }
+        if (psx !== false) {
+            path = path.replace(/\\/g, "/")
+        }
+        return path;
+    };
+
+
+    /**
+	 * @function
+	 * @param {boolean} [rel]
+	 * @param {boolean} [dotRel]
+	 * @param {boolean} [psx]
+     * @returns {string} string
+     */
+    getSrcPath = (rel, dotRel, psx) => this.getPath(this.build.paths?.src || this.paths.src || this.paths.base, rel, dotRel, psx);
+    
+    
+    /**
+     * @function
+     * @private
+     */
+    printBuildStart = () =>
+    {
+        const l = this.logger;
+        this.global.buildCount = this.global.buildCount || 0;
+        l.value(
+            `Start Webpack build ${++this.global.buildCount}`,
+            l.tag(this.build.name, l.colors.cyan, l.colors.white) + " " + l.tag(this.target, l.colors.cyan, l.colors.white),
+            undefined, undefined, l.icons.color.start, l.colors.white
+        );
+    };
 
 
 	/**
@@ -301,7 +400,7 @@ class WpBuildApp
 			if (isString(e[1], true))
 			{
 				if (!isAbsolute(e[1])) {
-					paths[e[0]] = resolve(baseDir, e[1]);
+					paths[e[0]] = resolvePath(baseDir, e[1]);
 				}
 			}
 			else {
@@ -310,7 +409,6 @@ class WpBuildApp
 		});
 		return /** @type {T} */(paths);
 	};
-
 
 }
 

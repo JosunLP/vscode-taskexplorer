@@ -128,6 +128,7 @@ cliWrap(async () =>
                    .replace(/\n    \| +/g, " | ")
                    .replace(/(?:\n){3,}/g, "\n\n")
                    .replace(/[a-z] = +\| +"[a-z]/g, (v) => v.replace("= |", "="))
+                   .replace(/\n\}\n/g, "\n};\n")
                    .replace(/\n/g, "\r\n");
             await writeFile(outputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
             await unlink(tmpOutputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
@@ -136,38 +137,48 @@ cliWrap(async () =>
             //
             let match2;
             const exported = [],
-                  typedefs = [],
                   lines = [],
-                  rgx = /export declare type (\w*?) = (".*?");\r?\n/g;
+                  rgx = /export declare type (\w*?) = (".*?");\r?\n/g,
+                  rgx2 = /export declare type (WpBuildRcPackageJson) = \r\n\{\s*([^]*?)\r\n\};\r\n/g;
+
+            const _pushExport = (property, suffix, values, valueType) =>
+            {
+                const suffix2 = suffix.substring(0, suffix.length - 1);
+                exported.push(`    ${property}${suffix}`, `    is${property}${suffix2} `);
+                lines.push(
+                    "/**",
+                    ` * @type {${!valueType ? `typedefs.${property}[]` : `${valueType}[]`}}`,
+                    " */",
+                    `const ${property}${suffix} = [ ${values.replace(/ \| /g, ", ")} ];\r\n`,
+                    "/**",
+                    " * @param {any} v Variable to check type on",
+                    ` * @returns {v is typedefs.${property}}`,
+                    " */",
+                    `const is${property}${suffix2} = (v) => !!v && ${property}${suffix}.includes(v);\r\n`
+                );
+            };
+
+            _pushExport("WebpackMode", "s", '"development" | "none" | "production"');
 
             while ((match2 = rgx.exec(data)) !== null)
             {
-                const [ _, property, values ] = match2;
-                exported.push(`    ${property}s`, `    is${property}`);
-                typedefs.push(
-                    `/** @typedef {import("../types").${property}} ${property} */`
-                );
-                lines.push(
-                    "/**",
-                    ` * @type {${property}[]}`,
-                    " */",
-                    `const ${property}s = [ ${values.replace(/ \| /g, ", ")} ];\r\n`,
-                    "/**",
-                    " * @param {any} v Variable to check type on",
-                    ` * @returns {v is ${property}}`,
-                    " */",
-                    `const is${property} = (v) => !!v && ${property}s.includes(v);\r\n`
-                );
+                _pushExport(match2[1], "s", match2[2]);
             }
+
+            while ((match2 = rgx2.exec(data)) !== null)
+            {
+                const valuesFmt = `"${match2[2].replace(/\?\:(.*?);(?:\r\n    |$)/g, "\", \"")}"`.replace(/(?:, ""|"", )/g, "");
+                _pushExport(match2[1], "Props", valuesFmt, "string");
+            }
+
             if (lines.length > 0)
             {
                 let outputFile2 = "constants.js",
                     outputPath2 = resolve("..", "webpack", "utils", outputFile2);
-                typedefs.sort((a, b) => a.length - b.length);
-                exported.sort((a, b) => a.localeCompare(b))
+                exported.sort((a, b) => a.localeCompare(b));
                 hdr = hdr.replace(`@file types/${outputFile}`, `@file utils/${outputFile2}`);
                 data = "/* eslint-disable @typescript-eslint/naming-convention */\r\n// @ts-check\r\n\r\n" + hdr + "\r\n\r\n";
-                data += typedefs.join("\r\n") + "\r\n\r\n";
+                data += "const typedefs = require(\"../types/typedefs\");\r\n\r\n";
                 data += lines.join("\r\n") + "\r\n";
                 data += `\r\nmodule.exports = {\r\n${exported.join(",\r\n")}\r\n};\r\n`;
                 data = data.replace("'json-to-typescript' utility", "'generate-wpbuild-types' script");

@@ -25,9 +25,9 @@ const builds =
 	module: (app) =>
 	{
 		if (app.isTests) {
-			builds.tests(app);
+			//builds.tests(app);
 		}
-
+console.log("***************************************************")
 		app.wpc.module.rules.push(
 		{
 			test: /\.ts$/,
@@ -165,7 +165,7 @@ const builds =
 		},
 		{
 			test: /\.ts$/,
-			include: app.paths.src,
+			include: app.paths.src + "\\test",
 			exclude: [
 				/node_modules/, /types[\\/]/, /\.d\.ts$/
 			],

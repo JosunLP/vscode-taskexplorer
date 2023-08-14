@@ -92,15 +92,12 @@ const syncWpBuildExports = (project) =>
     copyWpBuildFile(project, "ignorewarnings.js", "webpack/exports");
     copyWpBuildFile(project, "index.js", "webpack/exports");
     copyWpBuildFile(project, "minification.js", "webpack/exports");
-    copyWpBuildFile(project, "mode.js", "webpack/exports");
-    copyWpBuildFile(project, "name.js", "webpack/exports");
     // copyWpBuildFile(project, "optimization.js", "webpack/exports");
     // copyWpBuildFile(project, "output.js", "webpack/exports");
     copyWpBuildFile(project, "plugins.js", "webpack/exports");
     // copyWpBuildFile(project, "resolve.js", "webpack/exports");
     // copyWpBuildFile(project, "rules.js", "webpack/exports");
     copyWpBuildFile(project, "stats.js", "webpack/exports");
-    copyWpBuildFile(project, "target.js", "webpack/exports");
     copyWpBuildFile(project, "watch.js", "webpack/exports");
 };
 

@@ -16,7 +16,7 @@
  */
 const ignorewarnings = (app) =>
 {
-   if (app.rc.exports.ignorewarnings && (!app.verbosity || app.verbosity !== "none"))
+   if (app.rc.exports.ignorewarnings && (!app.rc.args.verbosity || app.rc.args.verbosity !== "none"))
    {
 		app.wpc.ignoreWarnings = [
 			/Critical dependency\: the request of a dependency is an expression/,

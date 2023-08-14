@@ -30,7 +30,7 @@ const stats = (app) =>
 
 		app.wpc.infrastructureLogging = {
 			colors: true,
-			level: app.verbosity || "none"
+			level: app.rc.args.verbosity || "none"
 		};
 	}
 };

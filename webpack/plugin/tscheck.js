@@ -101,49 +101,54 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	static getTsForkCheckerPlugins = (app) =>
 	{
-		let tsConfigParams,
-			tsConfig = join(app.paths.build, `tsconfig.${app.target}.json`);
+		let tsConfig, tsConfigParams;
 
-		if (!existsSync(tsConfig)) {
-			tsConfig = join(app.paths.base, `tsconfig.${app.target}.json`);
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.build, app.target, "tsconfig.json");
-				if (!existsSync(tsConfig)) {
-					tsConfig = join(app.paths.base, "tsconfig.json");
+		const _find = (base) =>
+		{
+			let tsCfg = join(base, `tsconfig.${app.build.name}.json`);
+			if (!existsSync(tsCfg))
+			{
+				tsCfg = join(base, `tsconfig.${app.build.mode}.json`);
+				if (!existsSync(tsCfg))
+				{
+					tsCfg = join(base,`tsconfig.${app.build.type}.json`);
+					if (!existsSync(tsCfg))
+					{
+						tsCfg = join(base, app.build.name, "tsconfig.json");
+						if (!existsSync(tsCfg))
+						{
+							tsCfg = join(base,app.build.type, "tsconfig.json");
+							if (!existsSync(tsCfg)) {
+								tsCfg = join(base,"tsconfig.json");
+							}
+						}
+					}
 				}
 			}
+			return tsCfg;
+		};
+
+		tsConfig = _find(app.paths.src);
+		if (!existsSync(tsConfig)) {
+			tsConfig = _find(app.paths.base);
+			if (!existsSync(tsConfig)) {
+				tsConfig = _find(app.paths.build);
+			}
 		}
+
 		if (app.build.type === "webapp" || app.build.target === "webworker")
 		{
 			if (!existsSync(tsConfig)) {
 				tsConfig = join(app.paths.build, "tsconfig.webview.json");
-				if (!existsSync(tsConfig)) {
-					tsConfig = join(app.paths.src, "tsconfig.webview.json");
-					if (!existsSync(tsConfig)) {
-						tsConfig = join(app.paths.src, "tsconfig.json");
-						if (!existsSync(tsConfig)) {
-							tsConfig = join(app.paths.base, "tsconfig.json");
-						}
-					}
-				}
 			}
 			tsConfigParams = [ tsConfig, "readonly" ];
 		}
 		else if (app.build.type === "tests")
 		{
 			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.src, "tsconfig.json");
+				tsConfig = join(app.paths.build, app.build.mode, "tsconfig.json");
 				if (!existsSync(tsConfig)) {
-					tsConfig = join(app.paths.src, "tsconfig.test.json");
-					if (!existsSync(tsConfig)) {
-						tsConfig = join(app.paths.src, "tsconfig.tests.json");
-						if (!existsSync(tsConfig)) {
-							tsConfig = join(app.paths.build, "tsconfig.test.json");
-							if (!existsSync(tsConfig)) {
-								tsConfig = join(app.paths.build, "tsconfig.tests.json");
-							}
-						}
-					}
+					tsConfig = join(app.paths.base, app.build.mode, "tsconfig.json");
 				}
 			}
 			tsConfigParams = [ tsConfig, "write-tsbuildinfo" ];
@@ -154,12 +159,6 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		}
 		else
 		{
-			if (!existsSync(tsConfig)) {
-				tsConfig = join(app.paths.build, "tsconfig.json");
-				if (!existsSync(tsConfig)) {
-					tsConfig = join(app.paths.base, "tsconfig.json");
-				}
-			}
 			tsConfigParams = [ tsConfig, "write-dts" ];
 		}
 
@@ -178,11 +177,11 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 					mode: tsConfigParams[1],
 					configFile: tsConfigParams[0]
 				},
-				logger: {
-					error: app.logger.error,
-					/** @param {string} msg */
-					log: (msg) => app.logger.write("bold(tsforkchecker): " + msg)
-				}
+				// logger: {
+				// 	error: app.logger.error,
+				// 	/** @param {string} msg */
+				// 	log: (msg) => app.logger.write("bold(tsforkchecker): " + msg)
+				// }
 			}
 		}];
 	};

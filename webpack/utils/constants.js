@@ -10,77 +10,99 @@
  * This file was auto generated using the 
  */
 
-/** @typedef {import("../types").WebpackTarget} WebpackTarget */
-/** @typedef {import("../types").WpBuildLogColor} WpBuildLogColor */
-/** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
-/** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
-/** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
+const typedefs = require("../types/typedefs");
 
 /**
- * @type {WpBuildRcBuildType[]}
+ * @type {typedefs.WebpackMode[]}
+ */
+const WebpackModes = [ "development", "none", "production" ];
+
+/**
+ * @param {any} v Variable to check type on
+ * @returns {v is typedefs.WebpackMode}
+ */
+const isWebpackMode = (v) => !!v && WebpackModes.includes(v);
+
+/**
+ * @type {typedefs.WpBuildRcBuildType[]}
  */
 const WpBuildRcBuildTypes = [ "module", "tests", "types", "webapp", "webmodule" ];
 
 /**
  * @param {any} v Variable to check type on
- * @returns {v is WpBuildRcBuildType}
+ * @returns {v is typedefs.WpBuildRcBuildType}
  */
 const isWpBuildRcBuildType = (v) => !!v && WpBuildRcBuildTypes.includes(v);
 
 /**
- * @type {WpBuildWebpackMode[]}
+ * @type {typedefs.WpBuildWebpackMode[]}
  */
 const WpBuildWebpackModes = [ "development", "production", "none", "test", "testproduction" ];
 
 /**
  * @param {any} v Variable to check type on
- * @returns {v is WpBuildWebpackMode}
+ * @returns {v is typedefs.WpBuildWebpackMode}
  */
 const isWpBuildWebpackMode = (v) => !!v && WpBuildWebpackModes.includes(v);
 
 /**
- * @type {WebpackTarget[]}
+ * @type {typedefs.WebpackTarget[]}
  */
 const WebpackTargets = [ "node", "web", "webworker", "async-node", "node-webkit", "electron-main", "electron-renderer", "electron-preload", "nwjs", "esX", "browserlist" ];
 
 /**
  * @param {any} v Variable to check type on
- * @returns {v is WebpackTarget}
+ * @returns {v is typedefs.WebpackTarget}
  */
 const isWebpackTarget = (v) => !!v && WebpackTargets.includes(v);
 
 /**
- * @type {WpBuildLogTrueColor[]}
+ * @type {typedefs.WpBuildLogTrueColor[]}
  */
 const WpBuildLogTrueColors = [ "black", "blue", "cyan", "green", "grey", "magenta", "red", "system", "white", "yellow" ];
 
 /**
  * @param {any} v Variable to check type on
- * @returns {v is WpBuildLogTrueColor}
+ * @returns {v is typedefs.WpBuildLogTrueColor}
  */
 const isWpBuildLogTrueColor = (v) => !!v && WpBuildLogTrueColors.includes(v);
 
 /**
- * @type {WpBuildLogColor[]}
+ * @type {typedefs.WpBuildLogColor[]}
  */
 const WpBuildLogColors = [ "black", "blue", "cyan", "green", "grey", "magenta", "red", "system", "white", "yellow", "bold", "inverse", "italic", "underline" ];
 
 /**
  * @param {any} v Variable to check type on
- * @returns {v is WpBuildLogColor}
+ * @returns {v is typedefs.WpBuildLogColor}
  */
 const isWpBuildLogColor = (v) => !!v && WpBuildLogColors.includes(v);
 
+/**
+ * @type {string[]}
+ */
+const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
+
+/**
+ * @param {any} v Variable to check type on
+ * @returns {v is typedefs.WpBuildRcPackageJson}
+ */
+const isWpBuildRcPackageJsonProp = (v) => !!v && WpBuildRcPackageJsonProps.includes(v);
+
 
 module.exports = {
-    isWebpackTarget,
-    isWpBuildLogColor,
-    isWpBuildLogTrueColor,
-    isWpBuildRcBuildType,
-    isWpBuildWebpackMode,
+    isWebpackMode ,
+    isWebpackTarget ,
+    isWpBuildLogColor ,
+    isWpBuildLogTrueColor ,
+    isWpBuildRcBuildType ,
+    isWpBuildRcPackageJsonProp ,
+    isWpBuildWebpackMode ,
+    WebpackModes,
     WebpackTargets,
     WpBuildLogColors,
     WpBuildLogTrueColors,
     WpBuildRcBuildTypes,
+    WpBuildRcPackageJsonProps,
     WpBuildWebpackModes
 };

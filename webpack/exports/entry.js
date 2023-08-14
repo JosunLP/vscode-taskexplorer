@@ -9,7 +9,7 @@
  */
 
 const { glob } = require("glob");
-const { apply, isString, WpBuildError } = require("../utils");
+const { apply, WpBuildError } = require("../utils");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackEntry} WebpackEntry */
@@ -24,20 +24,23 @@ const builds =
 	 */
 	module: (app) =>
 	{
-		const src = app.getSrcPath(true);
-		app.wpc.entry = apply({},
-		{
+		const src = app.getSrcPath();
+// console.log("!!!!!!!!: " + `${src}/${app.build.name}.ts ${app.wpc.context}`)
+// throw new Error("1");
+		app.wpc.entry = {
 			[ app.build.name ]: {
-				import: `${src || app.paths.src}/${app.build.name}.ts`,
+				import: `./${app.build.name}.ts`,
+				// import: `${src}/${app.build.name}.ts`,
 				layer: "release"
 			},
 			[ `${app.build.name}.debug` ]: {
-				import: `${src || app.paths.src}/${app.build.name}.debug.ts`,
+				import: `./${app.build.name}.debug.ts`,
+				// import: `${src}/${app.build.name}.debug.ts`,
 				layer: "debug"
 			}
-		});
+		};
 		if (app.isTests) {
-			builds.tests(app, true);
+			// builds.tests(app, true);
 		}
 	},
 
@@ -50,7 +53,7 @@ const builds =
 	 */
 	tests: (app, fromMain) =>
 	{
-		const src = app.getSrcPath(true);
+		const src = app.getSrcPath() + (fromMain ? "/test" : "");
 		app.wpc.entry = apply(app.wpc.entry || {},
 		{
 			"runTest": {
@@ -65,7 +68,7 @@ const builds =
 				import: `${src}/suite/index.ts`,
 				dependOn: "runTest"
 			},
-			...builds.testSuite(app)
+			...builds.testSuite(src)
 		});
 	},
 
@@ -73,22 +76,18 @@ const builds =
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {string} testsPath
 	 */
-	testSuite: (app) =>
+	testSuite: (testsPath) =>
 	{
-		const src = app.getSrcPath();
 		return glob.sync(
-			`./${src}/**/*.{test,spec}.ts`, {
-				absolute: false, cwd:src, dotRelative: false, posix: true
+			`**/*.{test,spec}.ts`, {
+				absolute: false, cwd: testsPath, dotRelative: false, posix: true
 			}
 		)
 		.reduce((obj, e)=>
 		{
-			obj[e.replace(`${src}/`, "").replace(".ts", "")] = {
-				import: `./${e}`,
-				dependOn: "runTest"
-			};
+			obj[e.replace(".ts", "")] = { import: `./${e}`, dependOn: "runTest" };
 			return obj;
 		}, {});
 	},
@@ -103,21 +102,10 @@ const builds =
 	{
 		app.wpc.entry = {
 			types: {
-				import: `${app.getSrcPath(true)}/index.ts`
+				import: `${app.getSrcPath()}/index.ts`
 			}
 		}
-	},
-
-
-	// /**
-	//  * @function
-	//  * @private
-	//  * @param {WpBuildApp} app Webpack build environment
-	//  */
-	// webapp: (app) =>
-	// {
-	// 	app.wpc.entry = apply({}, app.rc.vscode.webview.apps);
-	// }
+	}
 
 };
 
@@ -130,11 +118,11 @@ const builds =
  */
 const entry = (app) =>
 {
-	if (app.build && app.build.entry)
+	if (app.build.entry)
 	{
 		app.wpc.entry = apply({}, app.build.entry);
 	}
-	else if (app.build && builds[app.build.type])
+	else if (builds[app.build.type])
 	{
 		builds[app.build.type](app);
 	}

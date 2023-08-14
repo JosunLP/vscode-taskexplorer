@@ -136,22 +136,18 @@
     "exports":
     {
         "cache": true,
-        "context": true,
         "devtool": true,
         "entry": true,
         "experiments": true,
         "externals": true,
         "ignorewarnings": true,
         "minification": false,
-        "mode": true,
-        "name": true,
         "optimization": true,
         "output": true,
         "plugins": true,
         "resolve": true,
         "rules": true,
         "stats": true,
-        "target": true,
         "watch": true
     },
     "plugins":
@@ -173,7 +169,7 @@
         "runtimevars": true,
         "scm": true,
         "sourcemaps": true,
-        "testsuite": true,
+        "testsuite": false,
         "tscheck": true,
         "upload": true,
         "vendormod": true,

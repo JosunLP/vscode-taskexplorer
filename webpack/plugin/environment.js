@@ -49,44 +49,6 @@ class WpBuildEnvironmentPlugin extends WpBuildPlugin
 	environment = () =>
 	{
 		this.setVersion();
-		this.logEnvironment();
-	};
-
-
-	/**
-	 * @function
-	 * @private
-	 * @member logEnvironment
-	 */
-	logEnvironment = () =>
-	{
-		const app = this.app,
-			  logger = app.logger,
-			  pad = app.rc.log.pad.value;
-
-		logger.write("Build Environment:", 1, "", 0, logger.colors.white);
-		Object.keys(app.argv.env).filter(k => typeof app.argv.env[k] !== "object").forEach(
-			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${app.argv.env[k]}`, 1)
-		);
-
-		logger.write("Global Environment:", 1, "", 0, logger.colors.white);
-		Object.keys(app.global).filter(k => typeof app.global[k] !== "object").forEach(
-			(k) => logger.write(`   ${k.padEnd(pad - 3)}: ${app.global[k]}`, 1)
-		);
-
-		if (app.argv)
-		{
-			logger.write("Arguments:", 1, "", 0, logger.colors.white);
-			if (app.argv.mode) {
-				logger.write(`   ${"mode".padEnd(pad - 3)}: ${app.argv.mode}`, 1);
-			}
-			if (app.argv.watch) {
-				logger.write(`   ${"watch".padEnd(pad - 3)}: ${app.argv.watch}`, 1);
-			}
-			if (app.argv.config) {
-				logger.write(`   ${"cfg".padEnd(pad - 3)}: ${app.argv.config.join(", ")}`, 1);
-			}
-		}
 	};
 
 

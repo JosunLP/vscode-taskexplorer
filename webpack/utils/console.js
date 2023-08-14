@@ -2,7 +2,6 @@
 /* eslint-disable jsdoc/require-property-description */ /* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
-const gradient = require("gradient-string");
 const typedefs = require("../types/typedefs");
 const { isString, isObject, isPrimitive } = require("./utils");
 
@@ -216,59 +215,6 @@ class WpBuildConsoleLogger
             }
         }
         return envTagClr;
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @static
-     * @param {WpBuildConsoleLogger} logger
-     */
-    static printLineSep = (logger) =>
-        logger.write("------------------------------------------------------------------------------------------------------------------------");
-
-
-    /**
-     * @function
-     * @static
-     * @param {typedefs.WpBuildRc} rc
-     * @param {typedefs.WpBuildWebpackMode} mode
-     * @param {typedefs.WebpackRuntimeArgs} argv
-     * @param {typedefs.WpBuildRuntimeEnvArgs} arge
-     */
-    static printBanner = (rc, mode, argv, arge) =>
-    {
-        const logger = new WpBuildConsoleLogger();
-        this.printLineSep(logger);
-        // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
-        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(rc), {interpolation: "hsv"}));
-        this.printLineSep(logger);
-        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${rc.detailedDisplayName || rc.displayName} Webpack Build`));
-        this.printLineSep(logger);
-        logger.write("   Mode  : " + logger.withColor(mode, logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Argv  : " + logger.withColor(JSON.stringify(argv), logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Env   : " + logger.withColor(JSON.stringify(arge), logger.colors.grey), 1, "", 0, logger.colors.white);
-        this.printLineSep(logger);
-        logger.dispose();
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @static
-     * @param {typedefs.WpBuildRc} rc
-     * @returns {string}
-     */
-    static spmBanner = (rc) =>
-    {
-       return `           ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
-          (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
-          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | ^- /|_| | ___/\\\\ // ___/| //
-        ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-       (_____/|_|       | /       |_|   |_| (____/  ${rc.pkgJson.version}   \\/ /        |/  \\:(           \\/
-                        |/${rc.displayName.padStart(49 - rc.displayName.length)}`;
     };
 
 

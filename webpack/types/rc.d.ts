@@ -79,7 +79,7 @@ export declare type WpBuildRcBuild = Required<TypeWpBuildRcBuild>;
 export declare type WebpackEntryPath = 
 {
     [k: string]: FilePathRelative;
-}
+};
 
 export declare type WebpackEntryObject = 
 {
@@ -91,7 +91,7 @@ export declare type WebpackEntryObject =
     import: FilePathRelative;
     layer?: ("debug" | "release") & string;
     publicPath?: DirectoryPathRelative;
-}
+};
 export declare type TypeWpBuildRcLog = 
 {
     level?: WpBuildLogLevel;
@@ -134,22 +134,18 @@ export declare type WpBuildRcPaths = Required<TypeWpBuildRcPaths>;
 export declare type TypeWpBuildRcExports = 
 {
     cache?: boolean;
-    context?: true;
     devtool?: boolean;
     entry?: true;
     experiments?: boolean;
     externals?: boolean;
     ignorewarnings?: boolean;
     minification?: boolean;
-    mode?: true;
-    name?: true;
     optimization?: boolean;
     output?: true;
     plugins?: true;
     resolve?: true;
     rules?: true;
     stats?: boolean;
-    target?: true;
     watch?: boolean;
 };
 export declare type WpBuildRcExports = Required<TypeWpBuildRcExports>;
@@ -186,12 +182,12 @@ export declare type WpBuildRcEnvironment =
     paths?: WpBuildRcPaths;
     exports?: WpBuildRcExports;
     plugins?: WpBuildRcPlugins;
-}
+};
 
 export declare type WpBuildRcVsCode = 
 {
     testsEntry?: FilePathRelative;
-}
+};
 
 export declare type WpBuildRcPackageJson = 
 {
@@ -203,4 +199,4 @@ export declare type WpBuildRcPackageJson =
     name?: string;
     publisher?: string;
     version?: string;
-}
+};
