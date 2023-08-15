@@ -46,6 +46,7 @@
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("../types").WpBuildRcPathsExt} WpBuildRcPathsExt */
 /** @typedef {import("../types").WpBuildLogIconSet} WpBuildLogIconSet */
+/** @typedef {import("../types").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
 /** @typedef {import("../types").WpBuildRcPathsEnum} WpBuildRcPathsEnum */
 /** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
 /** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */

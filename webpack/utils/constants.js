@@ -19,14 +19,6 @@ const typedefs = require("../types/typedefs");
 const WebpackModes = [ "development", "none", "production" ];
 
 /**
- * @type {enum keyof WebpackModes}
- */
-const WebpackModesEnum
-{
-"development" | "none" | "production"
-};
-
-/**
  * @param {any} v Variable to check type on
  * @returns {v is typedefs.WebpackMode}
  */
@@ -36,14 +28,6 @@ const isWebpackMode = (v) => !!v && WebpackModes.includes(v);
  * @type {typedefs.WpBuildRcBuildType[]}
  */
 const WpBuildRcBuildTypes = [ "module", "tests", "types", "webapp", "webmodule" ];
-
-/**
- * @type {enum keyof WpBuildRcBuildTypes}
- */
-const WpBuildRcBuildTypesEnum
-{
-"module" | "tests" | "types" | "webapp" | "webmodule"
-};
 
 /**
  * @param {any} v Variable to check type on
@@ -57,14 +41,6 @@ const isWpBuildRcBuildType = (v) => !!v && WpBuildRcBuildTypes.includes(v);
 const WpBuildWebpackModes = [ "development", "production", "none", "test", "testproduction" ];
 
 /**
- * @type {enum keyof WpBuildWebpackModes}
- */
-const WpBuildWebpackModesEnum
-{
-"development" | "production" | "none" | "test" | "testproduction"
-};
-
-/**
  * @param {any} v Variable to check type on
  * @returns {v is typedefs.WpBuildWebpackMode}
  */
@@ -74,14 +50,6 @@ const isWpBuildWebpackMode = (v) => !!v && WpBuildWebpackModes.includes(v);
  * @type {typedefs.WebpackTarget[]}
  */
 const WebpackTargets = [ "node", "web", "webworker", "async-node", "node-webkit", "electron-main", "electron-renderer", "electron-preload", "nwjs", "esX", "browserlist" ];
-
-/**
- * @type {enum keyof WebpackTargets}
- */
-const WebpackTargetsEnum
-{
-"node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist"
-};
 
 /**
  * @param {any} v Variable to check type on
@@ -95,14 +63,6 @@ const isWebpackTarget = (v) => !!v && WebpackTargets.includes(v);
 const WpBuildLogTrueColors = [ "black", "blue", "cyan", "green", "grey", "magenta", "red", "system", "white", "yellow" ];
 
 /**
- * @type {enum keyof WpBuildLogTrueColors}
- */
-const WpBuildLogTrueColorsEnum
-{
-"black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow"
-};
-
-/**
  * @param {any} v Variable to check type on
  * @returns {v is typedefs.WpBuildLogTrueColor}
  */
@@ -112,14 +72,6 @@ const isWpBuildLogTrueColor = (v) => !!v && WpBuildLogTrueColors.includes(v);
  * @type {typedefs.WpBuildLogColor[]}
  */
 const WpBuildLogColors = [ "black", "blue", "cyan", "green", "grey", "magenta", "red", "system", "white", "yellow", "bold", "inverse", "italic", "underline" ];
-
-/**
- * @type {enum keyof WpBuildLogColors}
- */
-const WpBuildLogColorsEnum
-{
-"black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline"
-};
 
 /**
  * @param {any} v Variable to check type on
@@ -133,31 +85,33 @@ const isWpBuildLogColor = (v) => !!v && WpBuildLogColors.includes(v);
 const WpBuildRcPathsProps = [ "base", "ctx", "dist", "distTests", "src", "srcModule", "srcTests", "srcTypes", "srcWebApp", "srcWebModule", "tsconfig" ];
 
 /**
- * @type {enum keyof WpBuildRcPathsProps}
- */
-const WpBuildRcPathsPropsEnum
-{
-"base", "ctx", "dist", "distTests", "src", "srcModule", "srcTests", "srcTypes", "srcWebApp", "srcWebModule", "tsconfig"
-};
-
-/**
  * @param {any} v Variable to check type on
  * @returns {v is typedefs.WpBuildRcPaths}
  */
 const isWpBuildRcPathsProp = (v) => !!v && WpBuildRcPathsProps.includes(v);
 
 /**
+ * @type {{[ key: string ]: keyof typedefs.TypeWpBuildRcPaths}}
+ */
+const WpBuildRcPathsEnum =
+{
+    Base: "base",
+    Ctx: "ctx",
+    Dist: "dist",
+    DistTests: "distTests",
+    Src: "src",
+    SrcModule: "srcModule",
+    SrcTests: "srcTests",
+    SrcTypes: "srcTypes",
+    SrcWebApp: "srcWebApp",
+    SrcWebModule: "srcWebModule",
+    Tsconfig: "tsconfig",
+};
+
+/**
  * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
  */
 const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
-
-/**
- * @type {enum keyof WpBuildRcPackageJsonProps}
- */
-const WpBuildRcPackageJsonPropsEnum
-{
-"author", "description", "displayName", "main", "module", "name", "publisher", "version"
-};
 
 /**
  * @param {any} v Variable to check type on
@@ -176,19 +130,12 @@ module.exports = {
     isWpBuildRcPathsProp,
     isWpBuildWebpackMode,
     WebpackModes,
-    WebpackModesEnum,
     WebpackTargets,
-    WebpackTargetsEnum,
     WpBuildLogColors,
-    WpBuildLogColorsEnum,
     WpBuildLogTrueColors,
-    WpBuildLogTrueColorsEnum,
     WpBuildRcBuildTypes,
-    WpBuildRcBuildTypesEnum,
     WpBuildRcPackageJsonProps,
-    WpBuildRcPackageJsonPropsEnum,
+    WpBuildRcPathsEnum,
     WpBuildRcPathsProps,
-    WpBuildRcPathsPropsEnum,
-    WpBuildWebpackModes,
-    WpBuildWebpackModesEnum
+    WpBuildWebpackModes
 };

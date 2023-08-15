@@ -151,9 +151,12 @@ cliWrap(async () =>
                         if (isBaseType(m1))
                         {
                             const valuesFmt = m2.replace(/ *\= */, "")
-                                                .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)} = \"${m1.trim()}\",`)
+                                                .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
                                                 .replace(/\= \n/g, "\n");
-                            enums.push(`export declare enum ${m1}Enum ` + (`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n"));
+                            enums.push(
+                                `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
+                                `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n")}`
+                            );
                             return `export declare type Type${m1} ${m2}\n};\n` +
                                    `export declare type ${m1}Key = keyof ${m1};\n` +
                                    `export declare type ${m1} = Required<Type${m1}>;\n`;
@@ -186,22 +189,23 @@ cliWrap(async () =>
             const _pushExport = (property, suffix, values, valueType) =>
             {
                 const suffix2 = suffix.substring(0, suffix.length - 1);
-                exported.push(`    ${property}${suffix}`, `    ${property}${suffix}Enum`, `    is${property}${suffix2}`);
+                exported.push(`    ${property}${suffix}`, `    is${property}${suffix2}`);
                 lines.push(
                     "/**",
                     ` * @type {${!valueType ? `typedefs.${property}[]` : `${valueType}[]`}}`,
                     " */",
                     `const ${property}${suffix} = [ ${values.replace(/ \| /g, ", ")} ];${EOL}`,
                     "/**",
-                    ` * @type {enum keyof ${property}${suffix}}`,
-                    " */",
-                    `const ${property}${suffix}Enum${EOL}{${EOL}${values}${EOL}};${EOL}`,
-                    "/**",
                     " * @param {any} v Variable to check type on",
                     ` * @returns {v is typedefs.${property}}`,
                     " */",
                     `const is${property}${suffix2} = (v) => !!v && ${property}${suffix}.includes(v);${EOL}`
                 );
+                const enumeration = enums.find(e => e.includes(`${property}Enum`));
+                if (enumeration) {
+                    lines.push(enumeration);
+                    exported.push(`    ${property}Enum`);
+                }
             };
 
             _pushExport("WebpackMode", "s", '"development" | "none" | "production"');
