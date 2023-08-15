@@ -56,6 +56,7 @@
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
 /** @typedef {import("../types").WpBuildLogColorMapping} WpBuildLogColorMapping */
+/** @typedef {import("../types").WpBuildRcEnvironmentBase} WpBuildRcEnvironmentBase */
 /** @typedef {import("../types").WpBuildAppGetPathOptions} WpBuildAppGetPathOptions */
 /** @typedef {import("../types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */

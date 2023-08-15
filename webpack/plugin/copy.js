@@ -160,7 +160,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 		/** @type {WpBuildPluginVendorOptions[]} */
 		const plugins = [],
 			  psxBuildPath = app.getBuildPath({ rel: true, psx: true, dot: false, ctx: false }),
-			  psxBasePath = app.getBasePath({ rel: true, psx: true, dot: false, ctx: true }),
+			  psxBasePath = app.getContextPath({ rel: true, psx: true, dot: false, ctx: true }),
 			  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
 		if (app.rc.plugins.copy)
@@ -169,7 +169,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 			{
 				/** @type {CopyPlugin.Pattern[]} */
 				const patterns = [],
-					  base = app.getBasePath({ rel: false });
+					  base = app.getContextPath({ rel: false });
 				apps.filter((appName) => existsSync(join(base, appName, "res"))).forEach(
 					(appName) => patterns.push(
 					{

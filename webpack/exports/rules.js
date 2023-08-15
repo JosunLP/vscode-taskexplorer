@@ -197,7 +197,7 @@ const builds =
 	 */
 	webapp: (app) =>
 	{
-		const basePath = app.getBasePath(),
+		const basePath = app.getContextPath(),
 			  srcPath = app.getSrcPath();
 		app.wpc.module.rules.push(...[
 		{

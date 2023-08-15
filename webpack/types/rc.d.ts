@@ -21,8 +21,6 @@
  */
 
 
-export declare type WpBuildRcBuilds = [WpBuildRcBuild, ...WpBuildRcBuild[]];
-
 export declare type WpBuildRcBuildType = "module" | "tests" | "types" | "webapp" | "webmodule";
 
 export declare type WebpackEntry = WebpackEntryPath | WebpackEntryObject;
@@ -37,9 +35,11 @@ export declare type WpBuildWebpackMode = "development" | "production" | "none" |
 
 export declare type WebpackTarget = "node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist";
 
+export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
+
 export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
-export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
+export declare type WpBuildRcBuilds = WpBuildRcBuild[];
 
 export declare type WpBuildLogColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
 
@@ -94,10 +94,11 @@ export declare type WebpackEntryObject =
 };
 export declare type TypeWpBuildRcLog = 
 {
-    level?: WpBuildLogLevel;
-    valueMaxLineLength?: number;
+    color?: WpBuildLogTrueColor ;
     colors?: WpBuildRcLogColors;
+    level?: WpBuildLogLevel;
     pad?: WpBuildRcLogPad;
+    valueMaxLineLength?: number;
 };
 export declare type WpBuildRcLog = Required<TypeWpBuildRcLog>;
 
@@ -132,6 +133,12 @@ export declare type TypeWpBuildRcPaths =
     dist?: string;
     
     src?: string;
+    
+    srcTests?: string;
+    
+    srcTypes?: string;
+    
+    srcWebApp?: string;
     
     tsconfig?: string;
 };

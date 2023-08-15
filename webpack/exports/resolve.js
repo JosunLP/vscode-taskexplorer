@@ -44,7 +44,7 @@ const resolve = (app) =>
 				":types": join(app.getBuildPath(), "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			modules: [ app.getBasePath(), "node_modules" ],
+			modules: [ app.getContextPath(), "node_modules" ],
 		};
 	}
 };

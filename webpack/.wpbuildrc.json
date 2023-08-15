@@ -9,6 +9,9 @@
             "name": "taskexplorer",
             "target": "node",
             "type": "module",
+            "log": {
+                "color": "cyan"
+            },
             "paths": {
                 "tsconfig": "tsconfig.node.json"
             }
@@ -29,9 +32,7 @@
                 "welcome": "./welcome/welcome.ts"
             },
             "log": {
-                "colors": {
-                    "buildBracket": "yellow"
-                }
+                "color": "magenta"
             },
             "paths": {
                 "ctx": "src/webview/app",
@@ -47,12 +48,7 @@
             {
                 "name": "webapp"
             }
-        ],
-        "log": {
-            "colors": {
-                "buildBracket": "yellow"
-            }
-        }
+        ]
     },
     "testproduction":
     {
@@ -62,9 +58,7 @@
             {
                 "name": "tests",
                 "log": {
-                    "colors": {
-                        "buildBracket": "cyan"
-                    }
+                    "color": "yellow"
                 },
                 "paths": {
                     "dist": "dist/test",
@@ -80,14 +74,7 @@
     },
     "production":
     {
-        "builds": [
-            { "name": "taskexplorer" }
-        ],
-        "log": {
-            "colors": {
-                "buildBracket": "yellow"
-            }
-        }
+        "builds": []
     },
     "test":
     {
@@ -95,19 +82,12 @@
             { "name": "taskexplorer", "mode": "test" },
             {
                 "name": "webapp",
-                "mode": "development",
-                "log": {
-                    "colors": {
-                        "buildBracket": "yellow"
-                    }
-                }
+                "mode": "development"
             },
             {
                 "name": "tests",
                 "log": {
-                    "colors": {
-                        "buildBracket": "cyan"
-                    }
+                    "color": "yellow"
                 },
                 "paths": {
                     "ctx": "src/test",

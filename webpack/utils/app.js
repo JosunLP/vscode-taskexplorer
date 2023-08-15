@@ -8,17 +8,18 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { isAbsolute, relative, join } = require("path");
+const gradient = require("gradient-string");
 const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
+const { WpBuildWebpackModes } = require("./constants");
+const { isAbsolute, relative, posix, normalize } = require("path");
 const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject } = require("./utils");
 const {
-	cache, devtool, entry, experiments, externals, ignorewarnings,
-	minification, plugins, optimization, output, resolve, rules, stats, watch
+	cache, devtool, entry, experiments, externals, ignorewarnings, minification, plugins, optimization,
+    output, resolve, rules, stats, watch
 } = require("../exports");
-const { WpBuildWebpackModes } = require("./constants");
 
 
 /**
@@ -119,7 +120,7 @@ class WpBuildApp
         if (!this.build.type) {
             throw WpBuildError.getErrorProperty("type", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(this.build.mode) });
         }
-		this.applyApp(rc);
+		this.applyApp();
 		this.applyPaths();
 		this.logger = new WpBuildConsoleLogger(this);
         this.printBuildStart();
@@ -159,23 +160,22 @@ class WpBuildApp
 	/**
 	 * @function
 	 * @private
-	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-	 * @throws {WpBuildError}
 	 */
-	applyApp = (rc) =>
+	applyApp = () =>
 	{
-        const mode = this.build.mode || rc.mode;
+        const b = this.build,
+              mode = b.mode || this.rc.mode;
 		apply(this,
-		{   ...rc.args,
+		{   ...this.rc.args,
             disposables: [],
-			global: rc.global,
-            isTests: rc.mode.startsWith("test"),
-			isWeb: this.build.target.startsWith("web"),
-			isMain: this.build.type === "module" || this.build.target === "web",
-			isMainProd: (this.build.type === "module" || this.build.target === "web") && rc.mode === "production",
-			isMainTests: (this.build.type === "module" || this.build.target === "web") && rc.mode.startsWith("test"),
+			global: this.rc.global,
+            isTests: this.rc.name === "tests" || b.type === "tests" || this.rc.mode.startsWith("test"),
+			isWeb: b.type === "webmodule" || b.type === "webapp" || b.target.startsWith("web"),
+			isMain: b.type === "module" || b.target === "web" || b.name === "main" || b.name === "module",
+			isMainProd: (b.type === "module" || b.target === "web" || b.name === "main" || b.name === "module") && this.rc.mode === "production",
+			isMainTests: (b.type === "module" || b.target === "web" || b.name === "main" || b.name === "module") && this.rc.mode.startsWith("test"),
             mode,
-            target: this.build.target
+            target: b.target
 		});
 	};
 
@@ -198,7 +198,7 @@ class WpBuildApp
                 temp,
                 build,
                 base: this.rc.paths.ctx || this.rc.paths.src || build,
-                ctx: ".",
+                ctx: this.rc.paths.ctx || build,
                 dist: "dist",
                 src: "src"
             })
@@ -213,7 +213,47 @@ class WpBuildApp
 	 * @param {typedefs.WpBuildRcBuild} build
 	 */
     applyRc = (rc, build) =>
-    {   //
+    {
+        /**
+         * @param {typedefs.WpBuildRcEnvironmentBase} rcChild
+         * @param {boolean} [isModeRc]
+         */
+        const _applyOverrides = (rcChild, isModeRc) =>
+        {
+            if (isObject(rcChild.log))
+            {
+                if (rc.log.color) {
+                    this.rc.log.colors.valueStar = rc.log.color;
+                    this.rc.log.colors.buildBracket = rc.log.color;
+                    this.rc.log.colors.tagBracket = rc.log.color;
+                    this.rc.log.colors.infoIcon = rc.log.color;
+                }
+                merge(this.rc.log, rcChild.log);
+                if (isModeRc) {
+                    merge(build.log, modeRc.log);
+                }
+            }
+            if (isObject(rcChild.paths)) {
+                apply(this.rc.paths, rcChild.paths);
+                if (isModeRc) {
+                    apply(build.paths, modeRc.paths);
+                }
+            }
+            if (isObject(rcChild.exports)) {
+                apply(this.rc.exports, rcChild.exports);
+                if (isModeRc) {
+                    apply(build.exports, modeRc.exports);
+                }
+            }
+            if (isObject(rcChild.plugins)) {
+                apply(this.rc.plugins, rcChild.plugins);
+                if (isModeRc) {
+                    apply(build.plugins, modeRc.plugins);
+                }
+            }
+        };
+		this.rc = merge({}, rc);
+        //
         // Mereg/apply the current configured build properites into the main rc configs.
         // Build config objects can override base props in rc, e.g. `log`, `paths`, etc.
         // Note that any object property with an inner nested object as one of it's
@@ -221,19 +261,7 @@ class WpBuildApp
         // we merge() the base rrc into a new object, i.e. each 'WpBuildAPp' instance will
         // have a separate rc and will not erference the same rc object.
         //
-		this.rc = merge({}, rc);
-        if (isObject(build.log)) {
-            merge(this.rc.log, build.log);
-        }
-        if (isObject(build.paths)) {
-            merge(this.rc.paths, build.paths);
-        }
-        if (isObject(build.exports)) {
-            merge(this.rc.exports, build.exports);
-        }
-        if (isObject(build.plugins)) {
-            merge(this.rc.exports, build.plugins);
-        }
+		_applyOverrides(build);
         //
         // If mode specific build config is present, then merge/apply it's properties to the base
         // rc config props.
@@ -241,22 +269,7 @@ class WpBuildApp
         const modeRc = this.rc[this.rc.mode];
         if (modeRc)
         {
-            if (isObject(modeRc.log)) {
-                merge(this.rc.log, modeRc.log);
-                merge(build.log, modeRc.log);
-            }
-            if (isObject(modeRc.paths)) {
-                apply(this.rc.paths, modeRc.paths);
-                apply(build.paths, modeRc.paths);
-            }
-            if (isObject(modeRc.exports)) {
-                apply(this.rc.exports, modeRc.exports);
-                apply(build.exports, modeRc.exports);
-            }
-            if (isObject(modeRc.plugins)) {
-                apply(this.rc.plugins, modeRc.plugins);
-                apply(build.plugins, modeRc.plugins);
-            }
+		    _applyOverrides(modeRc, true);
             if (isArray(modeRc.builds))
             {
                 modeRc.builds.forEach((modeBuild) =>
@@ -266,12 +279,13 @@ class WpBuildApp
                         merge(baseBuild, modeBuild)
                     }
                     else {
-                        this.rc.builds.push(merge({}, modeBuild))
+                        this.rc.builds.push(merge({}, modeBuild));
                     }
                     if (build.name === modeBuild.name)
                     {
                         merge(build, modeBuild)
                     }
+                    _applyOverrides(modeBuild);
                 });
             }
         }
@@ -290,8 +304,7 @@ class WpBuildApp
     buildWebpackConfig = () =>
     {
         this.wpc = {
-            context: this.paths.build,
-            // context: this.paths.build,
+            context: this.paths.ctx,
             entry: {},
             mode: this.rc.mode === "test" || this.rc.mode === "testproduction" ? "none" : this.rc.mode,
             module: { rules: [] },
@@ -322,7 +335,7 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getBasePath = (options) => this.getPath(this.paths.base, options);
+    getBuildPath = (options) => this.getPath(this.paths.build, options);
 
 
     /**
@@ -330,7 +343,7 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getBuildPath = (options) => this.getPath(this.paths.build, options);
+    getContextPath = (options) => this.getPath(this.paths.base, options);
 
 
     /**
@@ -354,19 +367,13 @@ class WpBuildApp
               basePath = opts.ctx ? this.paths.base : this.paths.build;
         if (opts.rel)
         {
-            path = ((opts.dot !== false ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path)).replace("././", "./");
-            if (opts.psx !== false) {
-                path = path.replace(/\\/g, "/")
-            }
+            path = ((opts.dot ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path)).replace("././", "./");
         }
         else if (!isAbsolute(path))
         {
             path = resolvePath(basePath, path);
-            if (opts.psx === true) {
-                path = path.replace(/\\/g, "/")
-            }
         }
-        return path;
+        return !opts.psx ? normalize(path) : posix.normalize(path);
     };
 
 
@@ -391,6 +398,7 @@ class WpBuildApp
             l.tag(this.build.name, l.colors.cyan, l.colors.white) + " " + l.tag(this.target, l.colors.cyan, l.colors.white),
             undefined, undefined, l.icons.color.start, l.colors.white
         );
+        // l.write("   Mode  : " + l.withColor(), 1, "", 0, l.colors.white);
     };
 
 
@@ -402,25 +410,37 @@ class WpBuildApp
     printBuildProperties = () =>
     {
         const l = this.logger,
-              wpc = this.wpc,
-              pad = this.rc.log.pad.value;
+              wpc = this.wpc;
 
-        l.write("Global Environment:", 1, "", 0, l.colors.white);
+        l.sep();
+        l.write("Global Configuration:", 1, "", 0, l.colors.white);
         Object.keys(this.global).filter(k => typeof this.global[k] !== "object").forEach(
             (k) => l.value(`   ${k}`, this.global[k], 1)
         );
-
+        l.sep();
         l.write("Webpack Configuration:", 1, "", 0, l.colors.white);
-        l.value("   mode", this.wpc.mode, 1);
-        l.value("   target", this.wpc.target, 1);
-        l.value("   output directory", this.wpc.output.path, 1);
-
-        l.write("Rc Configuration:", 1, "", 0, l.colors.white);
-        l.value("   base build directory", this.getBuildPath(), 1);
-        l.value("   context directory", this.getBasePath({ rel: true }), 1);
-        l.value("   distribution directory", this.getDistPath({ rel: true }), 1);
-        l.value("   source directory", this.getSrcPath({ rel: true }), 1);
-        l.value("   tsconfig path", this.paths.tsconfig, 1);
+        l.value("   mode", wpc.mode, 1);
+        l.value("   target", wpc.target, 1);
+        l.value("   context directory", wpc.context, 1);
+        l.value("   output directory", wpc.output.path, 1);
+        l.sep();
+        l.write("Rc Configuration:", 2, "", 0, l.colors.white);
+        l.value("   mode", this.rc.mode, 2);
+        l.value("   base build directory", this.getBuildPath(), 2);
+        l.value("   context directory", this.getContextPath({ rel: true }), 2);
+        l.value("   distribution directory", this.getDistPath({ rel: true }), 2);
+        l.value("   source directory", this.getSrcPath({ rel: true }), 2);
+        l.value("   tsconfig path", this.paths.tsconfig, 2);
+        l.sep();
+        l.write("Merged Rc JSON:", 3, "", 0, l.colors.white);
+        l.value("   log configuration", JSON.stringify(this.rc.log), 3);
+        l.value("   paths configuration", JSON.stringify(this.rc.paths), 3);
+        l.value("   exports configuration", JSON.stringify(this.rc.exports), 3);
+        l.value("   plugins configuration", JSON.stringify(this.rc.plugins), 3);
+        l.sep();
+        // l.write("   Mode  : " + l.withColor(), 1, "", 0, l.colors.white);
+        // l.write("   Argv  : " + l.withColor(), 1, "", 0, l.colors.white);
+        // l.write("   Env   : " + l .withColor(), 1, "", 0, l.colors.white);
     };
 
 

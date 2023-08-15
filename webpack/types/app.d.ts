@@ -37,6 +37,8 @@ declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<stri
 
 declare type WpBuildRuntimeEnvArgs = { /** @deprecated Use `name`*/build?: string; mode?: WpBuildWebpackMode; name?: string; type?: WpBuildRcBuildType; verbosity?: WebpackLogLevel } & WebpackRuntimeEnvArgs;
 
+declare type WpBuildRcEnvironmentBase = Omit<WpBuildRcEnvironment, "builds">;
+
 declare type WpBuildWebpackConfig = {
     mode: WebpackMode; entry: WpBuildWebpackEntry; output: WebpackOutput; target: WebpackTarget; module: WebpackModuleOptions;
 } & WebpackConfig;
@@ -69,6 +71,7 @@ declare class WpBuildAppType
 
 export {
     WpBuildAppType,
+    WpBuildRcEnvironmentBase,
     WpBuildAppGetPathOptions,
     WpBuildRcPathsExt,
     WpBuildGlobalEnvironment,

@@ -101,7 +101,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	static getTsForkCheckerPlugins = (app) =>
 	{
 		let tsConfig, tsConfigParams;
-		const basePath = app.getBasePath(),
+		const basePath = app.getContextPath(),
 		      buildPath = app.getBuildPath();
 
 		const _find = (base) =>

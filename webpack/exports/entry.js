@@ -48,22 +48,22 @@ const builds =
 	 */
 	tests: (app, fromMain) =>
 	{
-		const src = app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true }) + (fromMain ? "/test" : "");
+		const contextRel = app.getContextPath({ rel: true, ctx: true, dot: true, psx: true }) + (fromMain ? "/test" : "");
 		app.wpc.entry = apply(app.wpc.entry || {},
 		{
 			"runTest": {
-				import: `${src}/runTest.ts`,
+				import: `${contextRel}/runTest.ts`,
 				dependOn: fromMain ? [ app.build.name, `${app.build.name}.debug` ] : undefined
 			},
 			"control": {
-				import: `${src}/control.ts`,
+				import: `${contextRel}/control.ts`,
 				dependOn: "runTest"
 			},
 			"suite/index": {
-				import: `${src}/suite/index.ts`,
+				import: `${contextRel}/suite/index.ts`,
 				dependOn: "runTest"
 			},
-			...builds.testSuite(src)
+			...builds.testSuite(app.getContextPath({ rel: true, psx: true }) + (fromMain ? "/test" : ""))
 		});
 	},
 
@@ -71,13 +71,13 @@ const builds =
 	/**
 	 * @function
 	 * @private
-	 * @param {string} testsPath
+	 * @param {string} contextAbs
 	 */
-	testSuite: (testsPath) =>
+	testSuite: (contextAbs) =>
 	{
 		return glob.sync(
 			`**/*.{test,spec}.ts`, {
-				absolute: false, cwd: testsPath, dotRelative: false, posix: true
+				absolute: false, cwd: contextAbs, dotRelative: false, posix: true
 			}
 		)
 		.reduce((obj, e)=>

@@ -8,7 +8,10 @@
         {
             "name": "taskexplorer",
             "target": "node",
-            "type": "module"
+            "type": "module",
+            "log": {
+                "color": "cyan"
+            }
         },
         {
             "name": "webapp",
@@ -26,9 +29,7 @@
                 "welcome": "./welcome/welcome.ts"
             },
             "log": {
-                "colors": {
-                    "buildBracket": "yellow"
-                }
+                "color": "magenta"
             },
             "paths": {
                 "ctx": "src/webview/app",
@@ -46,9 +47,7 @@
             }
         ],
         "log": {
-            "colors": {
-                "buildBracket": "yellow"
-            }
+            "color": "blue"
         }
     },
     "testproduction":
@@ -70,6 +69,7 @@
             }
         ],
         "log": {
+            "color": "yellow",
             "pad": {
                 "value": 60
             }
@@ -81,9 +81,7 @@
             { "name": "taskexplorer" }
         ],
         "log": {
-            "colors": {
-                "buildBracket": "yellow"
-            }
+            "color": "green"
         }
     },
     "test":
@@ -101,6 +99,7 @@
             }
         ],
         "log": {
+            "color": "yellow",
             "pad": {
                 "value": 60
             }
@@ -118,15 +117,7 @@
         },
         "colors":
         {
-            "default": "grey",
-            "buildBracket": "blue",
-            "buildText": "white",
-            "infoIcon": "magenta",
-            "valueStar": "cyan",
-            "valueStarText": "white",
-            "tagBracket": "blue",
-            "tagText": "white",
-            "uploadSymbol": "yellow"
+            "default": "grey"
         }
     },
     "paths":
@@ -178,6 +169,6 @@
         "wait": false
     },
     "vscode": {
-        "testsEntry": "./src/test/runTest.ts"
+        "testsEntry": "./path/to/test/runTest.ts"
     }
 }

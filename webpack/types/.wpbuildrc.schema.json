@@ -118,7 +118,7 @@
         "WpBuildRcBuilds": {
             "type": "array",
             "uniqueItems": true,
-            "minItems": 1,
+            "minItems": 0,
             "items": {
                 "$ref": "#/definitions/WpBuildRcBuild"
             }
@@ -236,42 +236,8 @@
         "WpBuildRcLog": {
             "type": "object",
             "properties": {
-                "level": {
-                    "type": "number",
-                    "title": "WpBuildLogLevel",
-                    "oneOf": [
-                        {
-                            "const": 0,
-                            "description": "No logging"
-                        },
-                        {
-                            "const": 1,
-                            "description": "Logging level 1 - Errors, warnings, and function start/end"
-                        },
-                        {
-                            "const": 2,
-                            "description": "Logging level 2 - Level 1 + parameter values"
-                        },
-                        {
-                            "const": 3,
-                            "description": "Logging level 3 - Level 2 + non-looping processing detail"
-                        },
-                        {
-                            "const": 4,
-                            "description": "Logging level 4 - Level 3 + looping processing detail"
-                        },
-                        {
-                            "const": 5,
-                            "description": "Logging level 5 - Verbose"
-                        }
-                    ],
-                    "additionalProperties": false
-                },
-                "valueMaxLineLength": {
-                    "type": "number",
-                    "default": 100,
-                    "minValue": 50,
-                    "maxValue": 200
+                "color": {
+                    "$ref": "#/definitions/WpBuildLogTrueColor"
                 },
                 "colors": {
                     "type": "object",
@@ -308,6 +274,37 @@
                     "additionalProperties": false,
                     "required": []
                 },
+                "level": {
+                    "type": "number",
+                    "title": "WpBuildLogLevel",
+                    "oneOf": [
+                        {
+                            "const": 0,
+                            "description": "No logging"
+                        },
+                        {
+                            "const": 1,
+                            "description": "Logging level 1 - Errors, warnings, and function start/end"
+                        },
+                        {
+                            "const": 2,
+                            "description": "Logging level 2 - Level 1 + parameter values"
+                        },
+                        {
+                            "const": 3,
+                            "description": "Logging level 3 - Level 2 + non-looping processing detail"
+                        },
+                        {
+                            "const": 4,
+                            "description": "Logging level 4 - Level 3 + looping processing detail"
+                        },
+                        {
+                            "const": 5,
+                            "description": "Logging level 5 - Verbose"
+                        }
+                    ],
+                    "additionalProperties": false
+                },
                 "pad": {
                     "type": "object",
                     "title": "WpBuildRcLogPad",
@@ -331,6 +328,12 @@
                     },
                     "additionalProperties": false,
                     "required": []
+                },
+                "valueMaxLineLength": {
+                    "type": "number",
+                    "default": 100,
+                    "minValue": 50,
+                    "maxValue": 200
                 }
             },
             "additionalProperties": false
@@ -342,14 +345,14 @@
                     "type": "string",
                     "default": ".",
                     "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
-                    "minLength": 3,
+                    "minLength": 1,
                     "maxLength": 100,
                     "description": "Path to the base context directory as defined by Webpack, relative to the project directory containing package.json"
                 },
                 "dist": {
                     "type": "string",
                     "default": "dist",
-                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
+                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
                     "minLength": 3,
                     "maxLength": 100,
                     "description": "Path to the distribution / output directory, relative to the project directory containing package.json"
@@ -358,6 +361,30 @@
                     "type": "string",
                     "default": "src",
                     "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                },
+                "srcTests": {
+                    "type": "string",
+                    "default": "src",
+                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
+                    "minLength": 3,
+                    "maxLength": 100,
+                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                },
+                "srcTypes": {
+                    "type": "string",
+                    "default": "src",
+                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
+                    "minLength": 3,
+                    "maxLength": 100,
+                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                },
+                "srcWebApp": {
+                    "type": "string",
+                    "default": "src",
+                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
                     "minLength": 3,
                     "maxLength": 100,
                     "description": "Path to the base source directory, relative to the project directory containing package.json"
@@ -365,7 +392,7 @@
                 "tsconfig": {
                     "type": "string",
                     "default": "tsconfig.json",
-                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)(?:tsconfig[(?:[\\\\-]w*?)]\\.json)?$",
+                    "pattern": "^(?:(?:\\.[\\\\\\/])?[~@!\\w\\.\\-\\\\\\/]+)?tsconfig[\\-\\.\\w]*?\\.json$",
                     "minLength": 3,
                     "maxLength": 100,
                     "description": "Path to tsconfig file, relative to the project directory containing package.json"

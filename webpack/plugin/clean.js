@@ -88,7 +88,7 @@ class WpBuildCleanPlugin extends WpBuildPlugin
 	 */
 	static vendorPlugins = (app) =>
 	{
-		const basePath = app.getBasePath();
+		const basePath = app.getContextPath();
 		return [{
 			ctor: CleanWebpackPlugin,
 			options: app.build.type === "webapp" ? {
