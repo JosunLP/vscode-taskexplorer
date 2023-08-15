@@ -8,7 +8,6 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const gradient = require("gradient-string");
 const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
 const { existsSync, mkdirSync } = require("fs");

@@ -1,4 +1,13 @@
 #!/usr/bin/env node
+// @ts-check
+
+/**
+ * @file utils/environment.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
+ */
+
 
 const { resolve } = require("path");
 const { promisify } = require("util");
@@ -15,15 +24,17 @@ const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
       rBasePath = process.env.WPBUILD_APP1_SSH_UPLOAD_PATH,
       sshAuth = process.env.WPBUILD_APP1_SSH_UPLOAD_AUTH,
       sshAuthFlag = process.env.WPBUILD_APP1_SSH_UPLOAD_FLAG,
-      version = require("../webpack/package.json").version,
+      version = require("../package.json").version,
       args = process.argv.splice(2);
 
 let localPath = ".wpbuildrc.schema.json",
     remotePath = resolve("..", "webpack", "types", ".wpbuildrc.schema.json");
 
+
 if (args.length === 1) {
-    toUploadPath = args[0];
+    remotePath = args[0];
 }
+
 else if (args.length > 1)
 {
     args.forEach((v, i, a) =>
@@ -75,7 +86,7 @@ const wrapExec = async (command) =>
         const match = (stdout || stderr).match(/error TS([0-9]{4})\:/);
         if (match) {
             const [ _, err ] = match;
-            logger.error(`   tsc failed with error: ${err}`);
+            console.error(`   tsc failed with error: ${err}`);
         }
         if (stdout) {
             console.log(`  ${program}  stderr: ${stdout}`);
@@ -90,6 +101,7 @@ const wrapExec = async (command) =>
 
 cliWrap(async () =>
 {
+
     if (!localPath || !remotePath)
     {
         throw new Error("Invalid input or output path");
@@ -123,6 +135,7 @@ cliWrap(async () =>
     ];
 
     console.log(`upload rc schema to ${host}`);
+    
     try
     {
         console.log("   plink: create / clear remmote directory");
