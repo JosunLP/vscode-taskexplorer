@@ -124,7 +124,9 @@
     {
         "ctx": ".",
         "dist": "dist",
-        "src": "src"
+        "distTests": "dist/test",
+        "src": "src",
+        "srcTests": "src/test"
     },
     "exports":
     {

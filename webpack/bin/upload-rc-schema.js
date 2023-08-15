@@ -9,16 +9,16 @@
  */
 
 
-const { resolve } = require("path");
+const { resolve, dirname } = require("path");
 const { promisify } = require("util");
-const { WpBuildConsoleLogger } = require("../utils");
 const exec = promisify(require("child_process").exec);
+const WpBuildConsoleLogger = require("../utils/console");
 
 
 //
 // Run from script directtory so we work regardless of where cwd is set
 //
-if (process.cwd() !== __dirname) { process.chdir(__dirname); }
+// if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
 const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
       user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
@@ -29,7 +29,7 @@ const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
       args = process.argv.splice(2);
 
 let localPath = ".wpbuildrc.schema.json",
-    remotePath = resolve("..", "webpack", "types", ".wpbuildrc.schema.json");
+    remotePath = resolve(__dirname, "..", "schema", ".wpbuildrc.schema.json");
 
 
 if (args.length === 1) {
