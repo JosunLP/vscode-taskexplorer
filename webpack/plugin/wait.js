@@ -21,12 +21,12 @@
  *
  *     3. Adjust the rc configuration files by adding the plugin filename (w/o/ extension)
  *        as a key of the `plugins` object in both the schema json file and the defaults file
- *        file:///c:\Projects\vscode-taskexplorer\webpack\types\.wpbuildrc.schema.json
- *        file:///c:\Projects\vscode-taskexplorer\webpack\types\.wpbuildrc.defaults.json
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\schema\.wpbuildrc.schema.json
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\schema\.wpbuildrc.defaults.json
  *
  *     4. Run the `generate-wpbuild-types` script / npm task to rebyuild rc.d.ts definition file
  *        file:///c:\Projects\vscode-taskexplorer\webpack\.wpbuildrc.json
- *        file:///c:\Projects\vscode-taskexplorer\webpack\types\.wpbuildrc.schema.json
+ *        file:///c:\Projects\vscode-taskexplorer\webpack\schema\.wpbuildrc.schema.json
  *
  *     5. Add a module reference to plugin directory index file and add to it's module.exports
  *        file://c:\Projects\vscode-taskexplorer\webpack\plugin\index.js

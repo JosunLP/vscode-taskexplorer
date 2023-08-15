@@ -246,7 +246,7 @@ class WpBuildRc
                 }
                 else
                 {
-                    defaultsPath = resolve(dirname(path), "types", path.replace(".json", ".defaults.json"));
+                    defaultsPath = resolve(dirname(path), "schema", path.replace(".json", ".defaults.json"));
                     if (existsSync(defaultsPath))
                     {
                         writeFileSync(path, readFileSync(defaultsPath));
