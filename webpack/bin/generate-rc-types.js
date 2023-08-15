@@ -151,15 +151,22 @@ cliWrap(async () =>
                         if (isBaseType(m1))
                         {
                             const valuesFmt = m2.replace(/ *\= */, "")
-                                                .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
+                                                .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)} = \"${m1.trim()}\",`)
                                                 .replace(/\= \n/g, "\n");
-                            enums.push(
-                                `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
-                                `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n")}`
-                            );
                             return `export declare type Type${m1} ${m2}\n};\n` +
+                                   // `export declare enum ${m1}Enum ` + (`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n") +
                                    `export declare type ${m1}Key = keyof ${m1};\n` +
                                    `export declare type ${m1} = Required<Type${m1}>;\n`;
+                            // const valuesFmt = m2.replace(/ *\= */, "")
+                            //                     .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
+                            //                     .replace(/\= \n/g, "\n");
+                            // enums.push(
+                            //     `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
+                            //     `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n")}`
+                            // );
+                            // return `export declare type Type${m1} ${m2}\n};\n` +
+                            //        `export declare type ${m1}Key = keyof ${m1};\n` +
+                            //        `export declare type ${m1} = Required<Type${m1}>;\n`;
                         }
                         return v;
                    })

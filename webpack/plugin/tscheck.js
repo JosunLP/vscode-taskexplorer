@@ -68,7 +68,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	bundle = () =>
 	{
-		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(join(this.app.getBuildPath(), "types", "dist")))
+		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(join(this.app.getRcPath("main", ), "types", "dist")))
 		{
 			const bundleCfg = {
 				name: `@spmeesseman/${this.app.rc.name}-types`,
@@ -102,7 +102,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	{
 		let tsConfig, tsConfigParams;
 		const basePath = app.getContextPath(),
-		      buildPath = app.getBuildPath();
+		      buildPath = app.getRcPath("main", );
 
 		const _find = (base) =>
 		{

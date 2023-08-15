@@ -12,14 +12,13 @@ const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
-const { WpBuildWebpackModes, WpBuildRcPathsProps, WpBuildRcBuildEnum } = require("./constants");
+const { WpBuildWebpackModes } = require("./constants");
 const { isAbsolute, relative, posix, normalize } = require("path");
 const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject } = require("./utils");
 const {
 	cache, devtool, entry, experiments, externals, ignorewarnings, minification, plugins, optimization,
     output, resolve, rules, stats, watch
 } = require("../exports");
-const { WpBuildRcPathsEnum } = require("../types");
 
 
 /**
@@ -201,8 +200,8 @@ class WpBuildApp
             this.resolveRcPaths(build, this.rc.paths),
             this.resolveRcPaths(build, {
                 temp,
-                build,
-                base: this.rc.paths.ctx || this.rc.paths.src || build,
+                build,/** <<-- @deprecated use `base` */
+                base: build,
                 ctx: this.rc.paths.ctx || build,
                 dist: "dist",
                 src: "src"
@@ -340,7 +339,7 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getBuildPath = (options) => this.getRcPath(WpBuildRcPathsEnum.SrcWebApp, options);
+    getBasePath = (options) => this.getRcPath("base", options);
 
 
     /**
@@ -348,7 +347,7 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getContextPath = (options) => this.getRcPath(WpBuildRcPathsEnum.Ctx, options);
+    getContextPath = (options) => this.getRcPath("ctx", options);
 
 
     /**
@@ -356,12 +355,12 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getDistPath = (options) =>this.getRcPath(WpBuildRcPathsEnum.Dist, options);
+    getDistPath = (options) =>this.getRcPath("dist", options);
 
 
     /**
      * @function
-     * @param {typedefs.WpBuildRcPathsEnum} pathKey
+     * @param {typedefs.WpBuildRcPathsKey} pathKey
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      */
     getRcPath = (pathKey, options) =>
@@ -387,7 +386,7 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getSrcPath = (options) => this.getRcPath(WpBuildRcPathsEnum.Src, options);
+    getSrcPath = (options) => this.getRcPath("src", options);
 
 
     /**
@@ -431,10 +430,16 @@ class WpBuildApp
         l.sep();
         l.write("Rc Configuration:", 2, "", 0, l.colors.white);
         l.value("   mode", this.rc.mode, 2);
-        l.value("   base build directory", this.getBuildPath(), 2);
-        l.value("   context directory", this.getContextPath({ rel: true }), 2);
-        l.value("   distribution directory", this.getDistPath({ rel: true }), 2);
-        l.value("   source directory", this.getSrcPath({ rel: true }), 2);
+        l.value("   base build directory", this.getRcPath("base"), 2);
+        l.value("   context directory", this.getRcPath("ctx", { rel: true }), 2);
+        l.value("   distribution directory", this.getRcPath("dist", { rel: true }), 2);
+        l.value("   distribution tests directory", this.getRcPath("distTests", { rel: true }), 2);
+        l.value("   source directory", this.getRcPath("src",  { rel: true }), 2);
+        l.value("   source node module directory", this.getRcPath("srcModule",  { rel: true }), 2);
+        l.value("   source tests directory", this.getRcPath("srcTests",  { rel: true }), 2);
+        l.value("   source types directory", this.getRcPath("srcTypes",  { rel: true }), 2);
+        l.value("   source web apps directory", this.getRcPath("srcWebApp",  { rel: true }), 2);
+        l.value("   source web module directory", this.getRcPath("srcWebModule",  { rel: true }), 2);
         l.value("   tsconfig path", this.paths.tsconfig, 2);
         l.sep();
         l.write("Merged Rc JSON:", 3, "", 0, l.colors.white);

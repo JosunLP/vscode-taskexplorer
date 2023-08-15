@@ -24,7 +24,7 @@ const resolve = (app) =>
 		{
 			alias: {
 				":env": join(app.getSrcPath(), "lib", "env", app.target),
-				":types": join(app.getBuildPath(), "types")
+				":types": join(app.getRcPath("main", ), "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
 			mainFields: app.build.target  === "web" || app.build.type === "webmodule" ? [ "web", "module", "main" ] : [ "module", "main" ],
@@ -41,7 +41,7 @@ const resolve = (app) =>
 		app.wpc.resolve = {
 			alias: {
 				":env": join(app.getSrcPath(), "lib", "env", "web"),
-				":types": join(app.getBuildPath(), "types")
+				":types": join(app.getRcPath("main", ), "types")
 			},
 			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
 			modules: [ app.getContextPath(), "node_modules" ],

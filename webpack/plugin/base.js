@@ -347,7 +347,7 @@ class WpBuildPlugin
 		let exitCode = null,
 			stdout = "", stderr = "";
 		const logger = this.app.logger,
-			  procPromise = exec(command, { cwd: this.app.getBuildPath({ rel: false}), encoding: "utf8" }),
+			  procPromise = exec(command, { cwd: this.app.getRcPath("main", { rel: false}), encoding: "utf8" }),
 			  child = procPromise.child;
 		child.stdout?.on("data", (data) => { stdout += data; });
 		child.stderr?.on("data", (data) => { stderr += data; });

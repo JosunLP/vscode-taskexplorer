@@ -24,7 +24,7 @@ const builds =
 	module: (app) =>
 	{
 		const srcPath = app.getSrcPath(),
-			  buildPath = app.getBuildPath();
+			  buildPath = app.getRcPath("main", );
 		if (app.isTests && !app.rc.builds.find(b => b.type === "tests") && !app.rcInst.builds.find(b => b.type === "tests")) {
 			builds.tests(app);
 		}
@@ -95,7 +95,7 @@ const builds =
 	tests: (app, fromMain) =>
 	{
 		const srcPath = app.getSrcPath(),
-			  buildPath = app.getBuildPath();
+			  buildPath = app.getRcPath("main", );
 
 		app.wpc.module.rules.push(
 		{
@@ -158,7 +158,7 @@ const builds =
 	 */
 	types: (app) =>
 	{
-		const buildPath = app.getBuildPath();
+		const buildPath = app.getRcPath("main", );
 		app.wpc.module.rules.push(
 		{
 			test: /\.ts$/,

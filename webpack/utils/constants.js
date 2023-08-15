@@ -91,24 +91,6 @@ const WpBuildRcPathsProps = [ "base", "ctx", "dist", "distTests", "src", "srcMod
 const isWpBuildRcPathsProp = (v) => !!v && WpBuildRcPathsProps.includes(v);
 
 /**
- * @type {{[ key: string ]: keyof typedefs.TypeWpBuildRcPaths}}
- */
-const WpBuildRcPathsEnum =
-{
-    Base: "base",
-    Ctx: "ctx",
-    Dist: "dist",
-    DistTests: "distTests",
-    Src: "src",
-    SrcModule: "srcModule",
-    SrcTests: "srcTests",
-    SrcTypes: "srcTypes",
-    SrcWebApp: "srcWebApp",
-    SrcWebModule: "srcWebModule",
-    Tsconfig: "tsconfig",
-};
-
-/**
  * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
  */
 const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
@@ -135,7 +117,6 @@ module.exports = {
     WpBuildLogTrueColors,
     WpBuildRcBuildTypes,
     WpBuildRcPackageJsonProps,
-    WpBuildRcPathsEnum,
     WpBuildRcPathsProps,
     WpBuildWebpackModes
 };

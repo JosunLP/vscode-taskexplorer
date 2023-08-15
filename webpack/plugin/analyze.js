@@ -71,7 +71,7 @@ const analyze =
 		{
 			plugin = new CircularDependencyPlugin(
 			{
-				cwd: app.getBuildPath({ rel: false }),
+				cwd: app.getRcPath("main", { rel: false }),
 				exclude: /node_modules/,
 				failOnError: false,
 				onDetected: ({ module: _webpackModuleRecord, paths, compilation }) =>

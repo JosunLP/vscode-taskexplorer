@@ -44,14 +44,13 @@
 /** @typedef {import("../types").IWpBuildRcSchema} IWpBuildRcSchema */
 /** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
+/** @typedef {import("../types").WpBuildRcPathsKey} WpBuildRcPathsKey */
 /** @typedef {import("../types").WpBuildRcPathsExt} WpBuildRcPathsExt */
 /** @typedef {import("../types").WpBuildLogIconSet} WpBuildLogIconSet */
 /** @typedef {import("../types").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
-/** @typedef {import("../types").WpBuildRcPathsEnum} WpBuildRcPathsEnum */
 /** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
 /** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
-/** @typedef {import("../types").WpBuildRcBuildEnum} WpBuildRcBuildEnum */
 /** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
 /** @typedef {import("../types").WpBuildRcEnvironment} WpBuildRcEnvironment */
 /** @typedef {import("../types").WpBuildRcPackageJson} WpBuildRcPackageJson */

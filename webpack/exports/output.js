@@ -67,7 +67,7 @@ const output = (app) =>
 	{
 		apply(app.wpc.output,
 		{
-			path: join(app.getBuildPath({ rel: false }), "types", "dist")
+			path: join(app.getRcPath("base", { rel: false }), "types", "dist")
 		});
 	}
 	else

@@ -63,7 +63,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 
 		const testsDir = join(this.app.getDistPath(), "test");
 		const globOptions = {
-			cwd: this.app.getBuildPath(),
+			cwd: this.app.getRcPath("main", ),
 			absolute: true,
 			ignore: [ "**/node_modules/**", "**/.vscode*/**", "**/build/**", "**/dist/**", "**/res*/**", "**/doc*/**" ]
 		};
@@ -105,7 +105,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 			} catch {}
 		}
 
-		await this.execTsBuild(relative(this.app.getBuildPath(), tsConfigFile), 2, testsDir, true);
+		await this.execTsBuild(relative(this.app.getRcPath("main", ), tsConfigFile), 2, testsDir, true);
 	}
 
 
@@ -116,7 +116,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 	//  */
 	// async types(_assets)
 	// {
-	// 	const bldDir = this.app.getBuildPath(),
+	// 	const bldDir = this.app.getRcPath("main", ),
 	// 		  typesDir = join(bldDir, "types", "dist");
 	// 	this.app.logger.write("build types");
 	// 	if (!existsSync(typesDir))
