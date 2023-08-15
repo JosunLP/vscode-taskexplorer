@@ -2,6 +2,7 @@
 /* eslint-disable jsdoc/require-property-description */
 // @ts-check
 
+const gradient = require("gradient-string");
 const typedefs = require("../types/typedefs");
 const { isString, isObject, isPrimitive } = require("./utils");
 
@@ -232,8 +233,55 @@ class WpBuildConsoleLogger
 
     /**
      * @function
+     * @static
+     * @param {string} name
+     * @param {string} version
+     * @param {string} subtitle
+     * @param {typedefs.WpBuildCallback} cb
+     * @param {tinycolor.ColorInput[]} colors
+     */
+    static printBanner = (name, version, subtitle, cb, ...colors) =>
+    {
+        const logger = new WpBuildConsoleLogger();
+        logger.sep();
+        // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
+        if (colors.length === 0) {
+            colors.push("red", "purple", "cyan", "pink", "green", "purple", "blue");
+        }
+        console.log(gradient(...colors).multiline(this.spmBanner(name, version), {interpolation: "hsv"}));
+        logger.sep();
+        if (subtitle) {
+            logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(subtitle));
+            logger.sep();
+        }
+        cb?.(logger);
+        logger.dispose();
+    };
+
+
+    /**
+     * @function
      */
     sep = () => this.write("-".padEnd(this.separatorLength + (!this.app ? 20 : 0), "-"));
+
+
+    /**
+     * @function
+     * @private
+     * @static
+     * @param {string} name
+     * @param {string} version
+     * @returns {string}
+     */
+    static spmBanner = (name, version) =>
+    {
+       return `           ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
+          (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
+          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | ^- /|_| | ___/\\\\ // ___/| //
+        ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
+       (_____/|_|       | /       |_|   |_| (____/  ${version}   \\/ /        |/  \\:(           \\/
+                        |/${name.padStart(49 - name.length)}`;
+    };
 
 
     /**

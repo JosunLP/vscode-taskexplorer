@@ -10,7 +10,6 @@
 
 const JSON5 = require("json5");
 const { globalEnv } = require("./global");
-const gradient = require("gradient-string");
 const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
 const { resolve, basename, join, dirname } = require("path");
@@ -384,36 +383,13 @@ class WpBuildRc
      */
     printBanner = (rc, arge, argv) =>
     {
-        const logger = new WpBuildConsoleLogger();
-        logger.sep();
-        // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
-        console.log(gradient("red", "cyan", "pink", "green", "purple", "blue").multiline(this.spmBanner(rc), {interpolation: "hsv"}));
-        logger.sep();
-        logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(` Start ${rc.detailedDisplayName || rc.displayName} Webpack Build`));
-        logger.sep();
-        logger.write("   Mode  : " + logger.withColor(rc.mode, logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Argv  : " + logger.withColor(JSON.stringify(argv), logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.write("   Env   : " + logger.withColor(JSON.stringify(arge), logger.colors.grey), 1, "", 0, logger.colors.white);
-        logger.sep();
-        logger.dispose();
-    };
-
-
-    /**
-     * @function
-     * @private
-     * @static
-     * @param {typedefs.WpBuildRc} rc
-     * @returns {string}
-     */
-    spmBanner = (rc) =>
-    {
-       return `           ___ ___ _/\\ ___  __ _/^\\_ __  _ __  __________________   ____/^\\.  __//\\.____ __   ____  _____
-          (   ) _ \\|  \\/  |/  _^ || '_ \\| '_ \\(  ______________  ) /  _^ | | / //\\ /  __\\:(  // __\\// ___)
-          \\ (| |_) | |\\/| (  (_| || |_) ) |_) )\\ \\          /\\/ / (  (_| | ^- /|_| | ___/\\\\ // ___/| //
-        ___)  ) __/|_|  | ^/\\__\\__| /__/| /__/__) ) Version \\  / /^\\__\\__| |\\ \\--._/\\____ \\\\/\\\\___ |_|
-       (_____/|_|       | /       |_|   |_| (____/  ${rc.pkgJson.version}   \\/ /        |/  \\:(           \\/
-                        |/${rc.displayName.padStart(49 - rc.displayName.length)}`;
+        WpBuildConsoleLogger.printBanner(rc.displayName, rc.pkgJson.version || "1.0.0", ` Start ${rc.detailedDisplayName || rc.displayName} Webpack Build`, (logger) =>
+        {
+            logger.write("   Mode  : " + logger.withColor(rc.mode, logger.colors.grey), 1, "", 0, logger.colors.white);
+            logger.write("   Argv  : " + logger.withColor(JSON.stringify(argv), logger.colors.grey), 1, "", 0, logger.colors.white);
+            logger.write("   Env   : " + logger.withColor(JSON.stringify(arge), logger.colors.grey), 1, "", 0, logger.colors.white);
+            logger.sep();
+        });
     };
 
 }

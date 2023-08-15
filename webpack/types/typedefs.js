@@ -20,7 +20,7 @@
  */
 /**
  * This callback is displayed as part of the Requester class.
- * @callback WpBuildPluginHookCallback
+ * @callback WpBuildCallback
  * @param {...any} args
  * @returns {any}
  */

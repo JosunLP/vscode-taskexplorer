@@ -779,7 +779,7 @@ class WpBuildPlugin
      * @member wrapCallback
      * @param {string} message If camel-cased, will be formatted with {@link breakProp}
      * @param {typedefs.WpBuildPluginTapOptions} options
-     * @returns {typedefs.WpBuildPluginHookCallback}
+     * @returns {typedefs.WpBuildCallback}
      */
     wrapCallback(message, options)
     {
