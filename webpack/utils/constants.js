@@ -7,19 +7,7 @@
  * @author @spmeesseman Scott Meesseman
  *
  * This file was auto generated using the 'generate-wpbuild-types' script together with
-the 'json-to-typescript' utility
- * 
- * Handy file links:
- * 
- * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
- * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
- * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
- * 
- * @description
- *
- * Provides types macthing the .wpbuildrc.json configuration file schema
- *
- * All types exported from this definition file are prepended with `WpBuildRc`.
+ * the 'json-to-typescript' utility
  */
 
 const typedefs = require("../types/typedefs");

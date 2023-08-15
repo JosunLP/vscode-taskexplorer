@@ -209,8 +209,8 @@ cliWrap(async () =>
                 data += `const typedefs = require(\"../types/typedefs\");${EOL}${EOL}`;
                 data += lines.join(EOL) + EOL;
                 data += `${EOL}module.exports = {${EOL}${exported.join("," + EOL)}${EOL}};${EOL}`;
-                data = data.replace("'json-to-typescript' utility", `'generate-wpbuild-types' script together with${EOL}the 'json-to-typescript' utility`);
-                data = data.replace(/together with the 'json\-to\-typescript' utility(?:[^]+?) \*\//, `together with the 'json-to-typescript' utility${EOL} */`);
+                data = data.replace("'json-to-typescript' utility", `'generate-wpbuild-types' script together with${EOL} * the 'json-to-typescript' utility`);
+                data = data.replace(/ \* the 'json\-to\-typescript' utility(?:[^]+?) \*\//, ` * the 'json-to-typescript' utility${EOL} */`);
                 await writeFile(resolve("..", "webpack", "utils", outputFile2), data);
                 //
                 // index.js

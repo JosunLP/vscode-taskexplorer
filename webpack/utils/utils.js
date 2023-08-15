@@ -59,7 +59,7 @@ const asArray = (v, shallow, allowEmpStr) => /** @type {Array} */(
 const capitalize = (value) =>
 {
     if (value) {
-        value = value.charAt(0).toUpperCase() + value.substr(1);
+        value = value.charAt(0).toUpperCase() + value.substring(1);
     }
     return value || '';
 };
