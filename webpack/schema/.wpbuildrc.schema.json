@@ -341,6 +341,14 @@
         "WpBuildRcPaths": {
             "type": "object",
             "properties": {
+                "base": {
+                    "type": "string",
+                    "default": "src",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                },
                 "ctx": {
                     "type": "string",
                     "default": ".",
@@ -357,6 +365,14 @@
                     "maxLength": 100,
                     "description": "Path to the distribution / output directory, relative to the project directory containing package.json"
                 },
+                "distTests": {
+                    "type": "string",
+                    "default": "dist/test",
+                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
+                    "minLength": 3,
+                    "maxLength": 100,
+                    "description": "Path to the test suite output directory, relative to the project directory containing package.json"
+                },
                 "src": {
                     "type": "string",
                     "default": "src",
@@ -365,29 +381,45 @@
                     "maxLength": 100,
                     "description": "Path to the base source directory, relative to the project directory containing package.json"
                 },
-                "srcTests": {
+                "srcModule": {
                     "type": "string",
                     "default": "src",
-                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
+                    "minLength": 3,
+                    "maxLength": 100,
+                    "description": "Path to the main module source directory (`node` target`), relative to the project directory containing package.json"
+                },
+                "srcTests": {
+                    "type": "string",
+                    "default": "src/test",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
                     "minLength": 3,
                     "maxLength": 100,
                     "description": "Path to the base source directory, relative to the project directory containing package.json"
                 },
                 "srcTypes": {
                     "type": "string",
-                    "default": "src",
-                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
+                    "default": "types",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
                     "minLength": 3,
                     "maxLength": 100,
                     "description": "Path to the base source directory, relative to the project directory containing package.json"
                 },
                 "srcWebApp": {
                     "type": "string",
-                    "default": "src",
-                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
+                    "default": "src/web/apps",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
                     "minLength": 3,
                     "maxLength": 100,
-                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                    "description": "Path to a webapps source directory, e.g. webviews in a VsCode extension, relative to the project directory containing package.json"
+                },
+                "srcWebModule": {
+                    "type": "string",
+                    "default": "src",
+                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
+                    "minLength": 3,
+                    "maxLength": 100,
+                    "description": "Path to the main module source directory (`web` target`), relative to the project directory containing package.json"
                 },
                 "tsconfig": {
                     "type": "string",

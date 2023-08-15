@@ -12,13 +12,14 @@ const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
-const { WpBuildWebpackModes } = require("./constants");
+const { WpBuildWebpackModes, WpBuildRcPathsProps, WpBuildRcBuildEnum } = require("./constants");
 const { isAbsolute, relative, posix, normalize } = require("path");
 const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject } = require("./utils");
 const {
 	cache, devtool, entry, experiments, externals, ignorewarnings, minification, plugins, optimization,
     output, resolve, rules, stats, watch
 } = require("../exports");
+const { WpBuildRcPathsEnum } = require("../types");
 
 
 /**
@@ -339,7 +340,7 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getBuildPath = (options) => this.getPath(this.paths.build, options);
+    getBuildPath = (options) => this.getRcPath(WpBuildRcPathsEnum.SrcWebApp, options);
 
 
     /**
@@ -347,7 +348,7 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getContextPath = (options) => this.getPath(this.paths.base, options);
+    getContextPath = (options) => this.getRcPath(WpBuildRcPathsEnum.Ctx, options);
 
 
     /**
@@ -355,18 +356,17 @@ class WpBuildApp
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getDistPath = (options) =>this.getPath(this.paths.dist, options);
+    getDistPath = (options) =>this.getRcPath(WpBuildRcPathsEnum.Dist, options);
 
 
     /**
      * @function
-     * @private
-     * @param {string} path
+     * @param {typedefs.WpBuildRcPathsEnum} pathKey
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
-     * @returns {string} string
      */
-    getPath = (path, options) =>
+    getRcPath = (pathKey, options) =>
     {
+        let path = this.rc.paths[pathKey];
         const opts = apply({ rel: false, ctx: false, dot: false , psx: false }, options),
               basePath = opts.ctx ? this.paths.base : this.paths.build;
         if (opts.rel)
@@ -382,18 +382,12 @@ class WpBuildApp
     };
 
 
-    getRcPath = () =>
-    {
-
-    };
-
-
     /**
      * @function
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      * @returns {string} string
      */
-    getSrcPath = (options) => this.getPath(this.paths.src, options);
+    getSrcPath = (options) => this.getRcPath(WpBuildRcPathsEnum.Src, options);
 
 
     /**

@@ -11,9 +11,9 @@
 const { EOL } = require("os");
 const { existsSync } = require("fs");
 const { promisify } = require("util");
-const { posix, resolve } = require("path");
-const { WpBuildConsoleLogger } = require("../utils");
+const { resolve, join } = require("path");
 const exec = promisify(require("child_process").exec);
+const WpBuildConsoleLogger = require("../utils/console");
 const { unlink, readFile, writeFile } = require("fs/promises");
 const description = "Provides types macthing the .wpbuildrc.json configuration file schema";
 const autoGenMessage = "This file was auto generated using the 'json-to-typescript' utility";
@@ -21,9 +21,8 @@ const autoGenMessage = "This file was auto generated using the 'json-to-typescri
 //
 // Run from script directtory so we work regardless of where cwd is set
 //
-if (process.cwd() !== __dirname) { process.chdir(__dirname); }
 
-
+console.log(process.cwd());
 /**
  * @param {string} value
  * @returns {string}
@@ -54,7 +53,7 @@ const wrapExec = async (command) =>
     let exitCode = null,
         stdout = "", stderr = "";
     const program = command.split(" ")[0],
-          procPromise = exec(command, { cwd: resolve("..", "webpack", "types"), encoding: "utf8" }),
+          procPromise = exec(command, { cwd: resolve(__dirname, "..", "schema"), encoding: "utf8" }),
           child = procPromise.child;
     child.stdout?.on("data", (data) => { stdout += data; });
     child.stderr?.on("data", (data) => { stderr += data; });
@@ -91,19 +90,22 @@ const isBaseType = (type) => [
 cliWrap(async () =>
 {
     const outputFile = "rc.d.ts",
-          baseDir = posix.join("..", "webpack", "types"),
+          typesDir = resolve(__dirname, "..",  "types"),
           inputFile = ".wpbuildrc.schema.json",
+          schemaDir = resolve(__dirname, "..", "schema"),
           outputFileTmp = `${outputFile.replace(".d.ts", ".tmp.d.ts")}`,
-          tmpOutputPath = resolve(baseDir, outputFileTmp),
-          outputPath = resolve(baseDir, outputFile),
+          tmpOutputPath = join(schemaDir, outputFileTmp),
+          outputPath = join(typesDir, outputFile),
           jsontotsFlags = "-f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties";
 
-    WpBuildConsoleLogger.printBanner("upload-rc-schema.js", "0.0.1", `generating rc configuration file type definitions`);
+    WpBuildConsoleLogger.printBanner("generate-rc-types.js", "0.0.1", `generating rc configuration file type definitions`);
 
-    await wrapExec(`json2ts ${jsontotsFlags} -i ${inputFile} -o ${outputFileTmp} --cwd "${baseDir}"`);
+
+    await wrapExec(`json2ts ${jsontotsFlags} -i ${inputFile} -o ${outputFileTmp} --cwd "${schemaDir}"`);
     if (existsSync(tmpOutputPath))
     {
-        const indexPath = resolve(baseDir, "index.d.ts"),
+        const enums = [],
+              indexPath = resolve(typesDir, "index.d.ts"),
               indexData = await readFile(indexPath, "utf8"),
               match = indexData.match(/\/\*\*(?:[^]*?)\*\//);
         if (match)
@@ -134,7 +136,8 @@ cliWrap(async () =>
                    .replace(/(";\n)(export (?:type|interface))/g, (_, m1, m2) => `${m1}\n${m2}`)
                    .replace(/\nexport interface (.*?) /g, (v, m1) =>
                    {
-                        if (isBaseType(m1)) {
+                        if (isBaseType(m1))
+                        {
                             return `\nexport declare type Type${m1} = `;
                         }
                         else if (m1 !== "WpBuildRcSchema") {
@@ -145,12 +148,13 @@ cliWrap(async () =>
                    .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n};\nexport declare type ${m1} = I${m1};\n`)
                    .replace(/\nexport declare type Type(.*?) ([^]*?)\n\}/g, (v, m1, m2) =>
                    {
-                        if (isBaseType(m1)) {
+                        if (isBaseType(m1))
+                        {
                             const valuesFmt = m2.replace(/ *\= */, "")
                                                 .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)} = \"${m1.trim()}\",`)
                                                 .replace(/\= \n/g, "\n");
+                            enums.push(`export declare enum ${m1}Enum ` + (`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n"));
                             return `export declare type Type${m1} ${m2}\n};\n` +
-                                   `export declare enum ${m1}Enum ` + (`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n") +
                                    `export declare type ${m1}Key = keyof ${m1};\n` +
                                    `export declare type ${m1} = Required<Type${m1}>;\n`;
                         }
@@ -167,6 +171,7 @@ cliWrap(async () =>
                    .replace(/ = \{ "= /g, "")
                    .replace(/"\}/g, "\"\n}")
                    .replace(/\n/g, EOL);
+
             await writeFile(outputPath, `${EOL}${hdr}${EOL}${EOL}${EOL}${data.trim()}${EOL}`);
             await unlink(tmpOutputPath);
             //
@@ -181,12 +186,16 @@ cliWrap(async () =>
             const _pushExport = (property, suffix, values, valueType) =>
             {
                 const suffix2 = suffix.substring(0, suffix.length - 1);
-                exported.push(`    ${property}${suffix}`, `    is${property}${suffix2} `);
+                exported.push(`    ${property}${suffix}`, `    ${property}${suffix}Enum`, `    is${property}${suffix2}`);
                 lines.push(
                     "/**",
                     ` * @type {${!valueType ? `typedefs.${property}[]` : `${valueType}[]`}}`,
                     " */",
                     `const ${property}${suffix} = [ ${values.replace(/ \| /g, ", ")} ];${EOL}`,
+                    "/**",
+                    ` * @type {enum keyof ${property}${suffix}}`,
+                    " */",
+                    `const ${property}${suffix}Enum${EOL}{${EOL}${values}${EOL}};${EOL}`,
                     "/**",
                     " * @param {any} v Variable to check type on",
                     ` * @returns {v is typedefs.${property}}`,
@@ -212,22 +221,21 @@ cliWrap(async () =>
             if (lines.length > 0)
             {
                 let outputFile2 = "constants.js",
-                    outputPath2 = resolve("..", "webpack", "utils", outputFile2);
+                    outputPath2 = resolve(__dirname, "..", "utils", outputFile2);
                 exported.sort((a, b) => a.localeCompare(b));
                 hdr = hdr.replace(`@file types/${outputFile}`, `@file utils/${outputFile2}`);
-                // data = "/* eslint-disable @typescript-eslint/naming-convention */${EOL}// @ts-check${EOL}${EOL}" + hdr + "${EOL}${EOL}";
-                data = `// @ts-check${EOL}${EOL}${hdr}${EOL}${EOL}`;
+                data = `/* eslint-disable no-unused-labels */${EOL}// @ts-check${EOL}${EOL}${hdr}${EOL}${EOL}`;
                 data += `const typedefs = require(\"../types/typedefs\");${EOL}${EOL}`;
                 data += lines.join(EOL) + EOL;
                 data += `${EOL}module.exports = {${EOL}${exported.join("," + EOL)}${EOL}};${EOL}`;
                 data = data.replace("'json-to-typescript' utility", `'generate-wpbuild-types' script together with${EOL} * the 'json-to-typescript' utility`);
                 data = data.replace(/ \* the 'json\-to\-typescript' utility(?:[^]+?) \*\//, ` * the 'json-to-typescript' utility${EOL} */`);
-                await writeFile(resolve("..", "webpack", "utils", outputFile2), data);
+                await writeFile(outputPath2, data);
                 //
                 // index.js
                 //
                 outputFile2 = "index.js";
-                outputPath2 = resolve("..", "webpack", "utils", outputFile2);
+                outputPath2 = resolve(__dirname, "..", "utils", outputFile2);
                 data = await readFile(outputPath2, "utf8");
                 data = data.replace(
                     /\/\* START_CONST_DEFS \*\/(?:.*?)\/\* END_CONST_DEFS \*\//g,
