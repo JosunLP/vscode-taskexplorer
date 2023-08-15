@@ -1,10 +1,18 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/naming-convention */
+// @ts-check
+
+/**
+ * @file utils/environment.js
+ * @version 0.0.1
+ * @license MIT
+ * @author Scott Meesseman @spmeesseman
+ */
 
 const { EOL } = require("os");
 const { existsSync } = require("fs");
 const { promisify } = require("util");
 const { posix, resolve } = require("path");
+const { WpBuildConsoleLogger } = require("../utils");
 const exec = promisify(require("child_process").exec);
 const { unlink, readFile, writeFile } = require("fs/promises");
 const description = "Provides types macthing the .wpbuildrc.json configuration file schema";
@@ -61,7 +69,7 @@ const wrapExec = async (command) =>
         const match = (stdout || stderr).match(/error TS([0-9]{4})\:/);
         if (match) {
             const [ _, err ] = match;
-            logger.error(`   tsc failed with error: ${err}`);
+            console.error(`   tsc failed with error: ${err}`);
         }
         if (stdout) {
             console.log(`  ${program}  stderr: ${stdout}`);
@@ -89,6 +97,9 @@ cliWrap(async () =>
           tmpOutputPath = resolve(baseDir, outputFileTmp),
           outputPath = resolve(baseDir, outputFile),
           jsontotsFlags = "-f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties";
+
+    WpBuildConsoleLogger.printBanner("upload-rc-schema.js", "0.0.1", `generating rc configuration file type definitions`);
+
     await wrapExec(`json2ts ${jsontotsFlags} -i ${inputFile} -o ${outputFileTmp} --cwd "${baseDir}"`);
     if (existsSync(tmpOutputPath))
     {

@@ -11,7 +11,7 @@
 
 const { resolve } = require("path");
 const { promisify } = require("util");
-const { printBanner } = require("../utils");
+const { WpBuildConsoleLogger } = require("../utils");
 const exec = promisify(require("child_process").exec);
 
 
@@ -135,8 +135,8 @@ cliWrap(async () =>
         `${user}@${host}:"${rBasePath}/wpbuild/v${version}/.wpbuildrc.schema.json"` // uploaded, and created if not exists
     ];
 
-    console.log(`upload rc schema to ${host}`);
-    
+    WpBuildConsoleLogger.printBanner("upload-rc-schema.js", "0.0.1", `uploading rc schema to ${host}`);
+
     try
     {
         console.log("   plink: create / clear remmote directory");

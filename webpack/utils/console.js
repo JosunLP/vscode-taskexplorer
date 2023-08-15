@@ -237,7 +237,7 @@ class WpBuildConsoleLogger
      * @param {string} name
      * @param {string} version
      * @param {string} subtitle
-     * @param {typedefs.WpBuildCallback} cb
+     * @param {typedefs.WpBuildCallback} [cb]
      * @param {tinycolor.ColorInput[]} colors
      */
     static printBanner = (name, version, subtitle, cb, ...colors) =>
