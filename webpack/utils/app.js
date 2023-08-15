@@ -93,6 +93,10 @@ class WpBuildApp
      */
     rc;
     /**
+     * @type {typedefs.WpBuildRc}
+     */
+    rcInst;
+    /**
      * @type {typedefs.WebpackTarget}
      */
     target;
@@ -109,6 +113,7 @@ class WpBuildApp
 	 */
 	constructor(rc, build)
 	{
+        this.rcInst = rc;
         this.build = merge({}, build);
         this.applyRc(rc, this.build);
         if (!this.build.mode) {
@@ -373,7 +378,14 @@ class WpBuildApp
         {
             path = resolvePath(basePath, path);
         }
-        return !opts.psx ? normalize(path) : posix.normalize(path);
+        path = !(/^\.[\\\/]$/).test(path) ? path : ".";
+        return path ? !opts.psx ? normalize(path) : posix.normalize(path) : ".";
+    };
+
+
+    getRcPath = () =>
+    {
+
     };
 
 

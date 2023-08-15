@@ -65,15 +65,28 @@ export declare type WpBuildRcSchema = IWpBuildRcSchema;
 export declare type TypeWpBuildRcBuild = 
 {
     name: string;
-    type?: WpBuildRcBuildType ;
+    type?: WpBuildRcBuildType;
     entry?: WebpackEntry;
-    mode?: WpBuildWebpackMode ;
-    target?: WebpackTarget ;
+    mode?: WpBuildWebpackMode;
+    target?: WebpackTarget;
     log?: WpBuildRcLog;
     paths?: WpBuildRcPaths;
     exports?: WpBuildRcExports;
     plugins?: WpBuildRcPlugins;
 };
+export declare enum WpBuildRcBuildEnum 
+{
+    Name = "name",
+    Type = "type",
+    Entry = "entry",
+    Mode = "mode",
+    Target = "target",
+    Log = "log",
+    Paths = "paths",
+    Exports = "exports",
+    Plugins = "plugins",
+};
+export declare type WpBuildRcBuildKey = keyof WpBuildRcBuild;
 export declare type WpBuildRcBuild = Required<TypeWpBuildRcBuild>;
 
 export declare type WebpackEntryPath = 
@@ -94,26 +107,48 @@ export declare type WebpackEntryObject =
 };
 export declare type TypeWpBuildRcLog = 
 {
-    color?: WpBuildLogTrueColor ;
+    color?: WpBuildLogTrueColor;
     colors?: WpBuildRcLogColors;
     level?: WpBuildLogLevel;
     pad?: WpBuildRcLogPad;
     valueMaxLineLength?: number;
 };
+export declare enum WpBuildRcLogEnum 
+{
+    Color = "color",
+    Colors = "colors",
+    Level = "level",
+    Pad = "pad",
+    ValueMaxLineLength = "valueMaxLineLength",
+};
+export declare type WpBuildRcLogKey = keyof WpBuildRcLog;
 export declare type WpBuildRcLog = Required<TypeWpBuildRcLog>;
 
 export declare type TypeWpBuildRcLogColors = 
 {
-    default?: WpBuildLogTrueColor ;
-    buildBracket?: WpBuildLogTrueColor ;
-    buildText?: WpBuildLogTrueColor ;
-    infoIcon?: WpBuildLogTrueColor ;
-    valueStar?: WpBuildLogTrueColor ;
-    valueStarText?: WpBuildLogTrueColor ;
-    tagBracket?: WpBuildLogTrueColor ;
-    tagText?: WpBuildLogTrueColor ;
-    uploadSymbol?: WpBuildLogTrueColor ;
+    default?: WpBuildLogTrueColor;
+    buildBracket?: WpBuildLogTrueColor;
+    buildText?: WpBuildLogTrueColor;
+    infoIcon?: WpBuildLogTrueColor;
+    valueStar?: WpBuildLogTrueColor;
+    valueStarText?: WpBuildLogTrueColor;
+    tagBracket?: WpBuildLogTrueColor;
+    tagText?: WpBuildLogTrueColor;
+    uploadSymbol?: WpBuildLogTrueColor;
 };
+export declare enum WpBuildRcLogColorsEnum 
+{
+    Default = "default",
+    BuildBracket = "buildBracket",
+    BuildText = "buildText",
+    InfoIcon = "infoIcon",
+    ValueStar = "valueStar",
+    ValueStarText = "valueStarText",
+    TagBracket = "tagBracket",
+    TagText = "tagText",
+    UploadSymbol = "uploadSymbol",
+};
+export declare type WpBuildRcLogColorsKey = keyof WpBuildRcLogColors;
 export declare type WpBuildRcLogColors = Required<TypeWpBuildRcLogColors>;
 
 export declare type TypeWpBuildRcLogPad = 
@@ -123,25 +158,37 @@ export declare type TypeWpBuildRcLogPad =
     value?: number;
     uploadFileName?: number;
 };
+export declare enum WpBuildRcLogPadEnum 
+{
+    Base = "base",
+    EnvTag = "envTag",
+    Value = "value",
+    UploadFileName = "uploadFileName",
+};
+export declare type WpBuildRcLogPadKey = keyof WpBuildRcLogPad;
 export declare type WpBuildRcLogPad = Required<TypeWpBuildRcLogPad>;
 
 export declare type TypeWpBuildRcPaths = 
 {
-    
     ctx?: string;
-    
     dist?: string;
-    
     src?: string;
-    
     srcTests?: string;
-    
     srcTypes?: string;
-    
     srcWebApp?: string;
-    
     tsconfig?: string;
 };
+export declare enum WpBuildRcPathsEnum 
+{
+    Ctx = "ctx",
+    Dist = "dist",
+    Src = "src",
+    SrcTests = "srcTests",
+    SrcTypes = "srcTypes",
+    SrcWebApp = "srcWebApp",
+    Tsconfig = "tsconfig",
+};
+export declare type WpBuildRcPathsKey = keyof WpBuildRcPaths;
 export declare type WpBuildRcPaths = Required<TypeWpBuildRcPaths>;
 
 export declare type TypeWpBuildRcExports = 
@@ -161,6 +208,24 @@ export declare type TypeWpBuildRcExports =
     stats?: boolean;
     watch?: boolean;
 };
+export declare enum WpBuildRcExportsEnum 
+{
+    Cache = "cache",
+    Devtool = "devtool",
+    Entry = "entry",
+    Experiments = "experiments",
+    Externals = "externals",
+    Ignorewarnings = "ignorewarnings",
+    Minification = "minification",
+    Optimization = "optimization",
+    Output = "output",
+    Plugins = "plugins",
+    Resolve = "resolve",
+    Rules = "rules",
+    Stats = "stats",
+    Watch = "watch",
+};
+export declare type WpBuildRcExportsKey = keyof WpBuildRcExports;
 export declare type WpBuildRcExports = Required<TypeWpBuildRcExports>;
 
 export declare type TypeWpBuildRcPlugins = 
@@ -186,6 +251,30 @@ export declare type TypeWpBuildRcPlugins =
     vendormod?: boolean;
     wait?: boolean;
 };
+export declare enum WpBuildRcPluginsEnum 
+{
+    Analyze = "analyze",
+    Banner = "banner",
+    Clean = "clean",
+    Copy = "copy",
+    Environment = "environment",
+    Html = "html",
+    Ignore = "ignore",
+    Istanbul = "istanbul",
+    Licensefiles = "licensefiles",
+    Loghooks = "loghooks",
+    Optimization = "optimization",
+    Progress = "progress",
+    Runtimevars = "runtimevars",
+    Scm = "scm",
+    Sourcemaps = "sourcemaps",
+    Testsuite = "testsuite",
+    Tscheck = "tscheck",
+    Upload = "upload",
+    Vendormod = "vendormod",
+    Wait = "wait",
+};
+export declare type WpBuildRcPluginsKey = keyof WpBuildRcPlugins;
 export declare type WpBuildRcPlugins = Required<TypeWpBuildRcPlugins>;
 
 export declare type WpBuildRcEnvironment = 

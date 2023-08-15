@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 // @ts-check
 
 /**
@@ -7,7 +6,20 @@
  * @license MIT
  * @author @spmeesseman Scott Meesseman
  *
- * This file was auto generated using the 
+ * This file was auto generated using the 'generate-wpbuild-types' script together with
+the 'json-to-typescript' utility
+ * 
+ * Handy file links:
+ * 
+ * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
+ * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
+ * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
+ * 
+ * @description
+ *
+ * Provides types macthing the .wpbuildrc.json configuration file schema
+ *
+ * All types exported from this definition file are prepended with `WpBuildRc`.
  */
 
 const typedefs = require("../types/typedefs");
@@ -79,7 +91,18 @@ const WpBuildLogColors = [ "black", "blue", "cyan", "green", "grey", "magenta", 
 const isWpBuildLogColor = (v) => !!v && WpBuildLogColors.includes(v);
 
 /**
- * @type {string[]}
+ * @type {(keyof typedefs.WpBuildRcPaths)[]}
+ */
+const WpBuildRcPathsProps = [ "ctx", "dist", "src", "srcTests", "srcTypes", "srcWebApp", "tsconfig" ];
+
+/**
+ * @param {any} v Variable to check type on
+ * @returns {v is typedefs.WpBuildRcPaths}
+ */
+const isWpBuildRcPathsProp = (v) => !!v && WpBuildRcPathsProps.includes(v);
+
+/**
+ * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
  */
 const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
 
@@ -97,6 +120,7 @@ module.exports = {
     isWpBuildLogTrueColor ,
     isWpBuildRcBuildType ,
     isWpBuildRcPackageJsonProp ,
+    isWpBuildRcPathsProp ,
     isWpBuildWebpackMode ,
     WebpackModes,
     WebpackTargets,
@@ -104,5 +128,6 @@ module.exports = {
     WpBuildLogTrueColors,
     WpBuildRcBuildTypes,
     WpBuildRcPackageJsonProps,
+    WpBuildRcPathsProps,
     WpBuildWebpackModes
 };

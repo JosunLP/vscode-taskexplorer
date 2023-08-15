@@ -34,7 +34,7 @@ const builds =
 				layer: "debug"
 			}
 		};
-		if (app.isTests && !app.rc.builds.find(b => b.type === "tests")) {
+		if (app.isTests && !app.rc.builds.find(b => b.type === "tests") && !app.rcInst.builds.find(b => b.type === "tests")) {
 			builds.tests(app, true);
 		}
 	},

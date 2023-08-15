@@ -25,7 +25,7 @@ const builds =
 	{
 		const srcPath = app.getSrcPath(),
 			  buildPath = app.getBuildPath();
-		if (app.isTests && !app.rc.builds.find(b => b.type === "tests")) {
+		if (app.isTests && !app.rc.builds.find(b => b.type === "tests") && !app.rcInst.builds.find(b => b.type === "tests")) {
 			builds.tests(app);
 		}
 		app.wpc.module.rules.push(
@@ -96,6 +96,7 @@ const builds =
 	{
 		const srcPath = app.getSrcPath(),
 			  buildPath = app.getBuildPath();
+
 		app.wpc.module.rules.push(
 		{
 			test: /index\.js$/,
@@ -106,26 +107,6 @@ const builds =
 				replace: "selfCoverageHelper = { onExit () {} }"
 			}
 		},
-		// {
-		// 	test: /\.ts$/,
-		// 	include: resolve(srcPath, (fromMain ? "." : "..")),
-		// 	exclude: [
-		// 		/node_modules/, /test[\\/]/, /\.d\.ts$/
-		// 	],
-		// 	use: {
-		// 		loader: "ts-loader",
-		// 		options: {
-		// 			configFile: path.join(buildPath, `tsconfig.${app.target}.json`),
-		// 			experimentalWatchApi: false,
-		// 			transpileOnly: false,
-		// 			logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-		// 			logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
-		// 			compilerOptions: {
-		// 				emitDeclarationsOnly: true
-		// 			}
-		// 		}
-		// 	}
-		// },
 		{
 			test: /\.ts$/,
 			include: srcPath + (fromMain ? "\\test" : ""),
@@ -142,6 +123,31 @@ const builds =
 				}
 			}
 		});
+
+		if (!fromMain)
+		{
+			app.wpc.module.rules.splice(1, 0,
+			{
+				test: /\.ts$/,
+				include: srcPath + (fromMain ? "\\test" : ""),
+				exclude: [
+					/node_modules/, /test[\\/]/, /\.d\.ts$/
+				],
+				use: {
+					loader: "ts-loader",
+					options: {
+						configFile: path.join(buildPath, `tsconfig.${app.target}.json`),
+						experimentalWatchApi: false,
+						transpileOnly: false,
+						logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+						logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
+						compilerOptions: {
+							emitDeclarationsOnly: true
+						}
+					}
+				}
+			});
+		}
 	},
 
 

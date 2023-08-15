@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/naming-convention */
 
+const { EOL } = require("os");
 const { existsSync } = require("fs");
 const { promisify } = require("util");
 const { posix, resolve } = require("path");
 const exec = promisify(require("child_process").exec);
 const { unlink, readFile, writeFile } = require("fs/promises");
-
 const description = "Provides types macthing the .wpbuildrc.json configuration file schema";
 const autoGenMessage = "This file was auto generated using the 'json-to-typescript' utility";
 
@@ -14,6 +14,20 @@ const autoGenMessage = "This file was auto generated using the 'json-to-typescri
 // Run from script directtory so we work regardless of where cwd is set
 //
 if (process.cwd() !== __dirname) { process.chdir(__dirname); }
+
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+const capitalize = (value) =>
+{
+    if (value) {
+        value = value.charAt(0).toUpperCase() + value.substr(1);
+    }
+    return value || "";
+};
+
 
 //
 // Command line runtime wrapper
@@ -88,10 +102,10 @@ cliWrap(async () =>
             hdr =  match[0]
                    .replace(" with `WpBuild`", " with `WpBuildRc`")
                    .replace("@file types/index.d.ts", `@file types/${outputFile}`)
-                   .replace("@spmeesseman Scott Meesseman", (v) => `${v}\r\n *\r\n * ${autoGenMessage}`)
+                   .replace("@spmeesseman Scott Meesseman", (v) => `${v}\n *\n * ${autoGenMessage}`)
                    .replace("Exports all types for this project", description);
             data = data
-                   .replace(/\r\n/g, "\n")
+                   .replace(/\r\n/g, "\n").replace(new RegExp(EOL,"g"), "\n")
                    .replace(/\/\*\*(?:[^]*?)\*\//g, "")
                    .replace(/\& (?:[A-Za-z]*?)1;\n/g, ";\n")
                    .replace(/export type (?:.*?)1 = string;$/gm, "")
@@ -107,7 +121,8 @@ cliWrap(async () =>
                    .replace(/ *\$schema\?\: string;\n/, "")
                    .replace(/(export type (?:.*?)\n)(export type)/g, (_, m1, m2) => `\n${m1}\n${m2}`)
                    .replace(/(";\n)(export (?:type|interface))/g, (_, m1, m2) => `${m1}\n${m2}`)
-                   .replace(/\nexport interface (.*?) /g, (v, m1) => {
+                   .replace(/\nexport interface (.*?) /g, (v, m1) =>
+                   {
                         if (isBaseType(m1)) {
                             return `\nexport declare type Type${m1} = `;
                         }
@@ -117,9 +132,16 @@ cliWrap(async () =>
                         return v;
                     })
                    .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n};\nexport declare type ${m1} = I${m1};\n`)
-                   .replace(/\nexport declare type Type(.*?) ([^]*?)\n\}/g, (v, m1, m2) => {
+                   .replace(/\nexport declare type Type(.*?) ([^]*?)\n\}/g, (v, m1, m2) =>
+                   {
                         if (isBaseType(m1)) {
-                            return `export declare type Type${m1} ${m2}\n};\nexport declare type ${m1} = Required<Type${m1}>;\n`;
+                            const valuesFmt = m2.replace(/ *\= */, "")
+                                                .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)} = \"${m1.trim()}\",`)
+                                                .replace(/\= \n/g, "\n");
+                            return `export declare type Type${m1} ${m2}\n};\n` +
+                                   `export declare enum ${m1}Enum ` + (`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n") +
+                                   `export declare type ${m1}Key = keyof ${m1};\n` +
+                                   `export declare type ${m1} = Required<Type${m1}>;\n`;
                         }
                         return v;
                    })
@@ -129,9 +151,13 @@ cliWrap(async () =>
                    .replace(/(?:\n){3,}/g, "\n\n")
                    .replace(/[a-z] = +\| +"[a-z]/g, (v) => v.replace("= |", "="))
                    .replace(/\n\}\n/g, "\n};\n")
-                   .replace(/\n/g, "\r\n");
-            await writeFile(outputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
-            await unlink(tmpOutputPath, `\r\n${hdr}\r\n\r\n\r\n${data.trim()}\r\n`);
+                   .replace(/[\w] ;/g, (v) => v.replace(" ", ""))
+                   .replace(/([;\{])\n\s*?\n(\s+)/g, (_, m1, m2) => m1 + "\n" + m2)
+                   .replace(/ = \{ "= /g, "")
+                   .replace(/"\}/g, "\"\n}")
+                   .replace(/\n/g, EOL);
+            await writeFile(outputPath, `${EOL}${hdr}${EOL}${EOL}${EOL}${data.trim()}${EOL}`);
+            await unlink(tmpOutputPath);
             //
             // constants.js
             //
@@ -139,7 +165,7 @@ cliWrap(async () =>
             const exported = [],
                   lines = [],
                   rgx = /export declare type (\w*?) = (".*?");\r?\n/g,
-                  rgx2 = /export declare type (WpBuildRcPackageJson) = \r\n\{\s*([^]*?)\r\n\};\r\n/g;
+                  rgx2 = new RegExp(`export declare type (WpBuildRcPackageJson|TypeWpBuildRcPaths) = ${EOL}\\{\\s*([^]*?)${EOL}\\};${EOL}`, "g");
 
             const _pushExport = (property, suffix, values, valueType) =>
             {
@@ -149,12 +175,12 @@ cliWrap(async () =>
                     "/**",
                     ` * @type {${!valueType ? `typedefs.${property}[]` : `${valueType}[]`}}`,
                     " */",
-                    `const ${property}${suffix} = [ ${values.replace(/ \| /g, ", ")} ];\r\n`,
+                    `const ${property}${suffix} = [ ${values.replace(/ \| /g, ", ")} ];${EOL}`,
                     "/**",
                     " * @param {any} v Variable to check type on",
                     ` * @returns {v is typedefs.${property}}`,
                     " */",
-                    `const is${property}${suffix2} = (v) => !!v && ${property}${suffix}.includes(v);\r\n`
+                    `const is${property}${suffix2} = (v) => !!v && ${property}${suffix}.includes(v);${EOL}`
                 );
             };
 
@@ -167,8 +193,9 @@ cliWrap(async () =>
 
             while ((match2 = rgx2.exec(data)) !== null)
             {
-                const valuesFmt = `"${match2[2].replace(/\?\:(.*?);(?:\r\n    |$)/g, "\", \"")}"`.replace(/(?:, ""|"", )/g, "");
-                _pushExport(match2[1], "Props", valuesFmt, "string");
+                const propFmt = match2[1].replace("Type", "");
+                const valuesFmt = `"${match2[2].replace(new RegExp(`\\?\\:(.*?);(?:${EOL}    |$)`, "gm"), "\", \"")}"`.replace(/(?:, ""|"", )/g, "");
+                _pushExport(propFmt, "Props", valuesFmt, `(keyof typedefs.${propFmt})`);
             }
 
             if (lines.length > 0)
@@ -177,12 +204,13 @@ cliWrap(async () =>
                     outputPath2 = resolve("..", "webpack", "utils", outputFile2);
                 exported.sort((a, b) => a.localeCompare(b));
                 hdr = hdr.replace(`@file types/${outputFile}`, `@file utils/${outputFile2}`);
-                data = "/* eslint-disable @typescript-eslint/naming-convention */\r\n// @ts-check\r\n\r\n" + hdr + "\r\n\r\n";
-                data += "const typedefs = require(\"../types/typedefs\");\r\n\r\n";
-                data += lines.join("\r\n") + "\r\n";
-                data += `\r\nmodule.exports = {\r\n${exported.join(",\r\n")}\r\n};\r\n`;
-                data = data.replace("'json-to-typescript' utility", "'generate-wpbuild-types' script");
-                data = data.replace(/'generate\-wpbuild\-types' script(?:[^]+?) \*\//, "\r\n */");
+                // data = "/* eslint-disable @typescript-eslint/naming-convention */${EOL}// @ts-check${EOL}${EOL}" + hdr + "${EOL}${EOL}";
+                data = `// @ts-check${EOL}${EOL}${hdr}${EOL}${EOL}`;
+                data += `const typedefs = require(\"../types/typedefs\");${EOL}${EOL}`;
+                data += lines.join(EOL) + EOL;
+                data += `${EOL}module.exports = {${EOL}${exported.join("," + EOL)}${EOL}};${EOL}`;
+                data = data.replace("'json-to-typescript' utility", `'generate-wpbuild-types' script together with${EOL}the 'json-to-typescript' utility`);
+                data = data.replace(/together with the 'json\-to\-typescript' utility(?:[^]+?) \*\//, `together with the 'json-to-typescript' utility${EOL} */`);
                 await writeFile(resolve("..", "webpack", "utils", outputFile2), data);
                 //
                 // index.js

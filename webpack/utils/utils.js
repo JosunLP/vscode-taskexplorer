@@ -53,6 +53,55 @@ const asArray = (v, shallow, allowEmpStr) => /** @type {Array} */(
 
 
 /**
+ * @param {string} value
+ * @returns {string}
+ */
+const capitalize = (value) =>
+{
+    if (value) {
+        value = value.charAt(0).toUpperCase() + value.substr(1);
+    }
+    return value || '';
+};
+
+
+// /**
+//  * @param {string} value
+//  * @returns {string}
+//  */
+// const uncapitalize = (value) =>
+// {
+//     if (value) {
+//         value = value.charAt(0).toLowerCase() + value.substr(1);
+//     }
+//     return value || '';
+// };
+
+
+// /**
+//  * @param {string} value
+//  * @param {number} length
+//  * @param {string} word
+//  * @returns {string}
+//  */
+// const ellipsis = (value, length, word) =>
+// {
+//     if (value && value.length > length)
+//     {
+//         if (word) {
+//             const vs = value.substring(0, length - 2),
+//                 index = Math.max(vs.lastIndexOf(' '), vs.lastIndexOf('.'), vs.lastIndexOf('!'), vs.lastIndexOf('?'));
+//             if (index !== -1 && index >= (length - 15)) {
+//                 return vs.substring(0, index) + "...";
+//             }
+//         }
+//         return value.substring(0, length - 3) + "...";
+//     }
+//     return value;
+// };
+
+
+/**
  * @function
  * @template T
  * @param {any} item
@@ -384,7 +433,7 @@ class WpBuildError extends WebpackError
 
 
 module.exports = {
-    apply, asArray, clone, findFiles, findFilesSync, getTsConfig, isArray, isDate, isEmpty,
-    isFunction, isObject, isObjectEmpty,isPrimitive, isPromise, isString, merge, mergeIf,
+    apply, asArray, capitalize, clone, findFiles, findFilesSync, getTsConfig, isArray, isDate,
+    isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise, isString, merge, mergeIf,
     pick, pickBy, pickNot, WpBuildError
 };
