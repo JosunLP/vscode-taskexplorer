@@ -29,7 +29,7 @@ import {
 
 declare const __WPBUILD__: any;
 
-declare type WpBuildAppGetPathOptions = { rel: boolean; ctx?: boolean; dot?: boolean; psx?: boolean; };
+declare type WpBuildAppGetPathOptions = { rel?: boolean; ctx?: boolean; dot?: boolean; psx?: boolean; stat?: boolean; };
 
 declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<string, any>; cacheDir: string; verbose: boolean; [ key: string ]: any };
 
@@ -40,6 +40,20 @@ declare type WpBuildRcEnvironmentBase = Omit<WpBuildRcEnvironment, "builds">;
 declare type WpBuildWebpackConfig = {
     mode: WebpackMode; entry: WpBuildWebpackEntry; output: WebpackOutput; target: WebpackTarget; module: WebpackModuleOptions;
 } & WebpackConfig;
+
+declare type  WpBuildAppPathsKey = keyof WpBuildRcPaths | `${"dist"|"src"}${string}`; // `${"dist"|"src"}${Capitalize<WpBuildRcBuildType>}`;
+
+
+declare interface IWpBuildApp
+{
+    build: WpBuildRcBuild;
+    global: WpBuildGlobalEnvironment; // Accessible by all parallel builds
+    logger: WpBuildConsoleLogger;
+    rc: IWpBuildRcSchemaExt;          // target js app info
+    target: WebpackTarget;
+    wpc: WpBuildWebpackConfig;
+};
+
 
 declare class WpBuildAppType
 {
@@ -68,6 +82,8 @@ declare class WpBuildAppType
 };
 
 export {
+    IWpBuildApp,
+    WpBuildAppPathsKey,
     WpBuildAppType,
     WpBuildRcEnvironmentBase,
     WpBuildAppGetPathOptions,

@@ -396,10 +396,30 @@
                     "default": "dist",
                     "description": "Path to the distribution / output directory, full path or relative to the project directory containing package.json"
                 },
+                "distModule": {
+                    "$ref": "#/definitions/DirectoryPath",
+                    "default": "dist",
+                    "description": "Path to the root or main module's output directory, full path or relative to the project directory containing package.json"
+                },
                 "distTests": {
                     "$ref": "#/definitions/DirectoryPath",
                     "default": "dist/test",
-                    "description": "Path to the test suite output directory, full path or relative to the project directory containing package.json"
+                    "description": "Path to the 'Tests target' output directory, full path or relative to the project directory containing package.json"
+                },
+                "distTypes": {
+                    "$ref": "#/definitions/DirectoryPath",
+                    "default": "types/dist",
+                    "description": "Path to the 'Types target' output directory, full path or relative to the project directory containing package.json"
+                },
+                "distWebApp": {
+                    "$ref": "#/definitions/DirectoryPath",
+                    "default": "dist/web/apps",
+                    "description": "Path to the 'WebApp target' output directory, full path or relative to the project directory containing package.json"
+                },
+                "distWebModule": {
+                    "$ref": "#/definitions/DirectoryPath",
+                    "default": "dist/web",
+                    "description": "Path to the 'WebModule' (main module web version) output directory, full path or relative to the project directory containing package.json"
                 },
                 "src": {
                     "$ref": "#/definitions/DirectoryPath",

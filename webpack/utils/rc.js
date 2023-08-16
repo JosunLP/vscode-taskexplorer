@@ -133,7 +133,7 @@ class WpBuildRc
 
         apply(this,
             this.getJson(this, ".wpbuildrc.json", resolve(__dirname, "..")),
-            this.getJson(this, ".wpbuildrc.defaults.json", resolve(__dirname, "..", "types"))
+            this.getJson(this, ".wpbuildrc.defaults.json", resolve(__dirname, "..", "schema"))
         );
 
         this.pkgJson = pick(
@@ -228,30 +228,13 @@ class WpBuildRc
      * @param {T} thisArg
      * @param {string} file
      * @param {string} dirPath
-     * @param {number} [tryCount]
      * @returns {T}
      * @throws {WpBuildError}
      */
-    getJson = (thisArg, file, dirPath = resolve(), tryCount = 1) =>
+    getJson = (thisArg, file, dirPath = resolve()) =>
     {
         const path = join(dirPath, file);
         try {
-            if (tryCount === 1 && file === ".wpbuildrc.json" && !existsSync(path))
-            {
-                let defaultsPath = resolve(dirname(path), path.replace(".json", ".defaults.json"));
-                if (existsSync(defaultsPath))
-                {
-                    writeFileSync(path, readFileSync(defaultsPath));
-                }
-                else
-                {
-                    defaultsPath = resolve(dirname(path), "schema", path.replace(".json", ".defaults.json"));
-                    if (existsSync(defaultsPath))
-                    {
-                        writeFileSync(path, readFileSync(defaultsPath));
-                    }
-                }
-            }
             return JSON5.parse(readFileSync(path, "utf8"));
         }
         catch (error)
@@ -260,7 +243,7 @@ class WpBuildRc
             if (parentDir === dirPath) {
                 throw new WpBuildError(`Could not locate or parse '${basename(file)}', check existence or syntax`, "utils/rc.js");
             }
-            return this.getJson(thisArg, file, parentDir, ++tryCount);
+            return this.getJson(thisArg, file, parentDir);
         }
     };
 

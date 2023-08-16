@@ -160,7 +160,7 @@ const builds =
 	 */
 	types: (app) =>
 	{
-		const typesDir = app.getRcPath("srcTypes") || join(app.getRcPath("base"), "types")
+		const typesDir = app.getSrcTypesPath();
 		if (existsSync(typesDir))
 		{
 			app.wpc.module.rules.push(
@@ -211,7 +211,7 @@ const builds =
 		app.wpc.module.rules.push(...[
 		{
 			test: /\.m?js/,
-			resolve: { fullySpecified: false },
+			resolve: { fullySpecified: false }
 		},
 		{
 			exclude: /\.d\.ts$/,
@@ -224,15 +224,15 @@ const builds =
 					implementation: esbuild,
 					loader: "tsx",
 					target: "es2020",
-					tsconfigRaw: getTsConfig(basePath, "tsconfig.json"),
-				},
+					tsconfigRaw: getTsConfig(basePath, "tsconfig.json")
+				}
 			} : {
 				loader: "ts-loader",
 				options: {
 					configFile: path.join(basePath, "tsconfig.json"),
 					// experimentalWatchApi: true,
-					transpileOnly: true,
-				},
+					transpileOnly: true
+				}
 			} ]
 		},
 		{
@@ -240,20 +240,20 @@ const builds =
 			exclude: /node_modules/,
 			use: [
 			{
-				loader: MiniCssExtractPlugin.loader,
+				loader: MiniCssExtractPlugin.loader
 			},
 			{
 				loader: "css-loader",
 				options: {
 					sourceMap: app.wpc.mode !== "production",
-					url: false,
-				},
+					url: false
+				}
 			},
 			{
 				loader: "sass-loader",
 				options: {
-					sourceMap: app.wpc.mode !== "production",
-				},
+					sourceMap: app.wpc.mode !== "production"
+				}
 			}]
 		}]);
 	}

@@ -22,7 +22,7 @@ const { RegexTestsChunk } = require("../utils");
  */
 const output = (app) =>
 {
-	const path = resolve(app.getDistPath({ rel: false }), app.build.target === "web" || app.build.type === "webmodule" ? "web" : ".");
+	const path = app.getDistPath();
 
 	app.wpc.output =
 	{
@@ -31,7 +31,7 @@ const output = (app) =>
 		compareBeforeEmit: true,
 		hashDigestLength: 20,
 		libraryTarget: "commonjs2",
-		clean: app.clean ? (app.isTests ? { keep: /(test)[\\/]/ } : app.clean) : undefined,
+		clean: app.clean ? (app.isTests ? { keep: /(test)[\\/]/ } : app.clean) : undefined
 	};
 
 	if (app.build.type === "webapp")
@@ -67,7 +67,7 @@ const output = (app) =>
 	{
 		apply(app.wpc.output,
 		{
-			path: join(app.getRcPath("base", { rel: false }), "types", "dist")
+			path: app.getSrcTypesPath()
 		});
 	}
 	else

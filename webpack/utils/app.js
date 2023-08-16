@@ -12,9 +12,9 @@ const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
-const { WpBuildWebpackModes } = require("./constants");
-const { isAbsolute, relative, posix, normalize } = require("path");
-const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject } = require("./utils");
+const { isAbsolute, relative, posix, normalize, join } = require("path");
+const { WpBuildWebpackModes, isWpBuildRcPathsProp } = require("./constants");
+const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject, capitalize } = require("./utils");
 const {
 	cache, devtool, entry, experiments, externals, ignorewarnings, minification, plugins, optimization,
     output, resolve, rules, stats, watch
@@ -334,22 +334,40 @@ class WpBuildApp
     };
 
 
+    /**
+     * @function
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
+     */
+    getContextPath = (options) => /* this.getRcPath(`ctx${capitalize(this.build.type)}`, options) ||*/this.getRcPath("ctx", options);
+
 
     /**
      * @function
-     * @param {typedefs.WpBuildRcPathsKey} pathKey
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
+     */
+    getDistPath = (options) =>
+    {
+        const opts = { stat: true, ...options };
+        return this.getRcPath(`dist${capitalize(this.build.type)}`, opts) || this.getRcPath("dist", opts) || join(this.paths.base, "dist");
+    };
+
+
+    /**
+     * @function
+     * @param {typedefs.WpBuildAppPathsKey} pathKey
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      */
     getRcPath = (pathKey, options) =>
     {
-        let path = this.rc.paths[pathKey];
+        let path = "";
         const opts = apply({ rel: false, ctx: false, dot: false , psx: false }, options),
               basePath = (opts.ctx ? this.paths.ctx : this.paths.base) || process.cwd();
-        if (path)
+        if (isWpBuildRcPathsProp(pathKey))
         {
+            path = this.rc.paths[pathKey] || "";
             if (opts.rel)
             {
-                path = ((opts.dot ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path)).replace("././", "./");
+                path = ((opts.dot ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path));
             }
             else if (!isAbsolute(path))
             {
@@ -357,7 +375,40 @@ class WpBuildApp
             }
             path = !(/^\.[\\\/]$/).test(path) ? path : ".";
         }
-        return path ? (!opts.psx ? normalize(path) : posix.normalize(path)) : (opts.dot ? "." : "");
+        return path ? (!opts.psx ? normalize(path) : posix.normalize(path)) : ""; // (opts.dot ? "." : "");
+    };
+
+
+    /**
+     * @function
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
+     */
+    getSrcPath = (options) =>
+    {
+        const opts = { stat: true, ...options };
+        return this.getRcPath(`src${capitalize(this.build.type)}`, opts) || this.getRcPath("src", opts) || join(this.paths.base, "src");
+    };
+
+
+    /**
+     * @function
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
+     */
+    getSrcTestsPath = (options) =>
+    {
+        const opts = { stat: true, ...options };
+        return this.getRcPath("srcTests", opts) || this.getRcPath("src", opts) || join(this.paths.base, "src", "tests");
+    };
+
+
+    /**
+     * @function
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
+     */
+    getSrcTypesPath = (options) =>
+    {
+        const opts = { stat: true, ...options };
+        return this.getRcPath("srcTypes", opts) || this.getRcPath("src", opts) || join(this.paths.base, "types");
     };
 
 
@@ -403,16 +454,16 @@ class WpBuildApp
         l.sep();
         l.write("Rc Configuration:", 2, "", 0, l.colors.white);
         l.value("   mode", this.rc.mode, 2);
-        l.value("   base build directory", this.getRcPath("base"), 2);
+        l.value("   base/project directory", this.getRcPath("base"), 2);
         l.value("   context directory", this.getRcPath("ctx", { rel: true }), 2);
-        l.value("   distribution directory", this.getRcPath("dist", { rel: true }), 2);
+        l.value("   distribution directory", this.getDistPath({ rel: true }), 2);
         l.value("   distribution tests directory", this.getRcPath("distTests", { rel: true }), 2);
-        l.value("   source directory", this.getRcPath("src",  { rel: true }), 2);
-        l.value("   source node module directory", this.getRcPath("srcModule",  { rel: true }), 2);
+        l.value("   source directory", this.getSrcPath({ rel: true }), 2);
+        l.value("   source module (nodejs) directory", this.getRcPath("srcModule",  { rel: true }), 2);
         l.value("   source tests directory", this.getRcPath("srcTests",  { rel: true }), 2);
-        l.value("   source types directory", this.getRcPath("srcTypes",  { rel: true }), 2);
+        l.value("   source types directory", this.getSrcTypesPath({ rel: true }), 2);
         l.value("   source web apps directory", this.getRcPath("srcWebApp",  { rel: true }), 2);
-        l.value("   source web module directory", this.getRcPath("srcWebModule",  { rel: true }), 2);
+        l.value("   source module (web) directory", this.getRcPath("srcWebModule",  { rel: true }), 2);
         l.value("   tsconfig path", this.paths.tsconfig, 2);
         l.sep();
         l.write("Merged Rc JSON:", 3, "", 0, l.colors.white);

@@ -67,7 +67,7 @@ export declare type WpBuildRcSchema = IWpBuildRcSchema;
 export declare type WpBuildRcBuild = 
 {
     name: string;
-    type?: WpBuildRcBuildType;
+    type: WpBuildRcBuildType;
     entry: WebpackEntry;
     mode: WpBuildWebpackMode;
     target: WebpackTarget;
@@ -77,7 +77,7 @@ export declare type WpBuildRcBuild =
     plugins: WpBuildRcPlugins;
 };
 export declare type WpBuildRcBuildKey = keyof WpBuildRcBuild;
-export declare type TypeWpBuildRcBuild = Required<TypeWpBuildRcBuild>;
+export declare type TypeWpBuildRcBuild = Required<WpBuildRcBuild>;
 
 export declare type WebpackEntryPath = 
 {
@@ -107,7 +107,7 @@ export declare type WpBuildRcLog =
     valueMaxLineLength?: number;
 };
 export declare type WpBuildRcLogKey = keyof WpBuildRcLog;
-export declare type TypeWpBuildRcLog = Required<TypeWpBuildRcLog>;
+export declare type TypeWpBuildRcLog = Required<WpBuildRcLog>;
 
 export declare type WpBuildRcLogColors = 
 {
@@ -122,7 +122,7 @@ export declare type WpBuildRcLogColors =
     uploadSymbol?: WpBuildLogTrueColor;
 };
 export declare type WpBuildRcLogColorsKey = keyof WpBuildRcLogColors;
-export declare type TypeWpBuildRcLogColors = Required<TypeWpBuildRcLogColors>;
+export declare type TypeWpBuildRcLogColors = Required<WpBuildRcLogColors>;
 
 export declare type WpBuildRcLogPad = 
 {
@@ -132,14 +132,18 @@ export declare type WpBuildRcLogPad =
     uploadFileName?: number;
 };
 export declare type WpBuildRcLogPadKey = keyof WpBuildRcLogPad;
-export declare type TypeWpBuildRcLogPad = Required<TypeWpBuildRcLogPad>;
+export declare type TypeWpBuildRcLogPad = Required<WpBuildRcLogPad>;
 
 export declare type WpBuildRcPaths = 
 {
-    base?: string;
+    base: string;
     ctx?: string;
     dist?: string;
+    distModule?: string;
     distTests?: string;
+    distTypes?: string;
+    distWebApp?: string;
+    distWebModule?: string;
     src?: string;
     srcEnv?: string;
     srcModule?: string;
@@ -151,7 +155,7 @@ export declare type WpBuildRcPaths =
     tsconfig?: string;
 };
 export declare type WpBuildRcPathsKey = keyof WpBuildRcPaths;
-export declare type TypeWpBuildRcPaths = Required<TypeWpBuildRcPaths>;
+export declare type TypeWpBuildRcPaths = Required<WpBuildRcPaths>;
 
 export declare type WpBuildRcExports = 
 {
@@ -171,7 +175,7 @@ export declare type WpBuildRcExports =
     watch?: boolean;
 };
 export declare type WpBuildRcExportsKey = keyof WpBuildRcExports;
-export declare type TypeWpBuildRcExports = Required<TypeWpBuildRcExports>;
+export declare type TypeWpBuildRcExports = Required<WpBuildRcExports>;
 
 export declare type WpBuildRcPlugins = 
 {
@@ -197,7 +201,7 @@ export declare type WpBuildRcPlugins =
     wait?: boolean;
 };
 export declare type WpBuildRcPluginsKey = keyof WpBuildRcPlugins;
-export declare type TypeWpBuildRcPlugins = Required<TypeWpBuildRcPlugins>;
+export declare type TypeWpBuildRcPlugins = Required<WpBuildRcPlugins>;
 
 export declare type WpBuildRcEnvironment = 
 {

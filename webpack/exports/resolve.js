@@ -19,7 +19,7 @@ const { apply } = require("../utils");
  */
 const resolve = (app) =>
 {
-	const typesPath = app.getRcPath("srcTypes") || join(app.getRcPath("base"), "types"),
+	const typesPath = app.getSrcTypesPath(),
 		  envPath = join((app.getRcPath("srcEnv") || join(app.getRcPath("src"), "lib", "env")), app.target);
 
     app.wpc.resolve = {
@@ -27,7 +27,7 @@ const resolve = (app) =>
 			":env": envPath,
 			":types": typesPath
 		},
-		extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
+		extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
 	};
 
 	if (app.build.type !== "webapp")
@@ -39,7 +39,7 @@ const resolve = (app) =>
 		});
 	}
 	else {
-		apply(app.wpc.resolve, { modules: [ app.getRcPath("ctx"), "node_modules" ]});
+		apply(app.wpc.resolve, { modules: [ app.getContextPath(), "node_modules" ]});
 	}
 };
 

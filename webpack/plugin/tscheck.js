@@ -61,7 +61,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	bundle = () =>
 	{
-		const typesDir = this.app.getRcPath("srcTypes") || join(this.app.getRcPath("base"), "types", "dist")
+		const typesDir = this.app.getSrcTypesPath();
 		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(typesDir))
 		{
 			const bundleCfg = {
@@ -175,7 +175,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 					build: !!tsConfigParams[2],
 					mode: tsConfigParams[1],
 					configFile: tsConfigParams[0]
-				},
+				}
 				// logger: {
 				// 	error: app.logger.error,
 				// 	/** @param {string} msg */

@@ -82,7 +82,7 @@ const isWpBuildLogColor = (v) => !!v && WpBuildLogColors.includes(v);
 /**
  * @type {(keyof typedefs.WpBuildRcPaths)[]}
  */
-const WpBuildRcPathsProps = [ "base", "ctx", "dist", "distTests", "src", "srcEnv", "srcModule", "srcTests", "srcTypes", "srcWebApp", "srcWebModule", "temp", "tsconfig" ];
+const WpBuildRcPathsProps = [ "base", "ctx", "dist", "distModule", "distTests", "distTypes", "distWebApp", "distWebModule", "src", "srcEnv", "srcModule", "srcTests", "srcTypes", "srcWebApp", "srcWebModule", "temp", "tsconfig" ];
 
 /**
  * @param {any} v Variable to check type on
@@ -91,14 +91,18 @@ const WpBuildRcPathsProps = [ "base", "ctx", "dist", "distTests", "src", "srcEnv
 const isWpBuildRcPathsProp = (v) => !!v && WpBuildRcPathsProps.includes(v);
 
 /**
- * @type {{[ key: string]: keyof typedefs.WpBuildRcPaths}}
+ * @type {{[ key: string ]: keyof typedefs.TypeWpBuildRcPaths}}
  */
 const WpBuildRcPathsEnum =
 {
     base: "base",
     ctx: "ctx",
     dist: "dist",
+    distModule: "distModule",
     distTests: "distTests",
+    distTypes: "distTypes",
+    distWebApp: "distWebApp",
+    distWebModule: "distWebModule",
     src: "src",
     srcEnv: "srcEnv",
     srcModule: "srcModule",
@@ -109,7 +113,6 @@ const WpBuildRcPathsEnum =
     temp: "temp",
     tsconfig: "tsconfig"
 };
-
 
 /**
  * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
