@@ -39,7 +39,6 @@
 const WpBuildRc = require("./webpack/utils/rc");
 const WpBuildApp = require("./webpack/utils/app");
 const typedefs = require("./webpack/types/typedefs");
-const { isWebpackMode } = require("./webpack/utils");
 
 /**
  * Exports Webpack build configs to the webpack engine... the build(s) start here. Eenvironment "flags"

@@ -241,7 +241,7 @@ const getTsConfig = (baseDir, tsConfigFile) =>
 	const result = spawnSync("npx", [ "tsc", `-p ${tsConfigFile}`, "--showConfig" ], {
 		cwd: baseDir,
 		encoding: "utf8",
-		shell: true,
+		shell: true
 	});
 	const data = result.stdout,
 		  start = data.indexOf("{"),

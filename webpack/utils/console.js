@@ -51,9 +51,13 @@ class WpBuildConsoleLogger
             envTag2: "info",
             level: 0,
             pad: {
-                value: 40, base: 0, envTag: 25
+                value: 40, base: 0
             }
         });
+        if (!this.options.pad.envTag) {
+            // @ts-ignore
+            this.options.pad.envTag = this.options.envTag1.length + this.options.envTag1.length + 5;
+        }
         // @ts-ignore
         this.separatorLength = 125; // 75 + this.options.pad.envTag + this.options.pad.base + this.options.pad.value;
         this.defaultColor = this.colors.cyan;
@@ -238,7 +242,7 @@ class WpBuildConsoleLogger
                 }
             }
         }
-        return this.colors[this.options.colors.infoIcon || this.options.color || "blue"]
+        return this.colors[this.options.colors.infoIcon || this.options.color || "blue"];
     };
 
 

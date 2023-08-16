@@ -79,7 +79,7 @@ cliWrap(async () =>
     const plinkCmds = [
         `mkdir ${rBasePath}/wpbuild`,
         `mkdir ${rBasePath}/wpbuild/v${version}`,
-        `rm -f ${rBasePath}/wpbuild/v${version}/.wpbuildrc.schema.json"`,
+        `rm -f ${rBasePath}/wpbuild/v${version}/.wpbuildrc.schema.json"`
     ];
 
     const plinkArgs = [

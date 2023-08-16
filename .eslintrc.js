@@ -161,7 +161,7 @@ module.exports = {
             "off",
             "1tbs"
         ],
-        "comma-dangle": "off",
+        "comma-dangle": "warn",
         complexity: "off",
         "constructor-super": "warn",
         curly: [

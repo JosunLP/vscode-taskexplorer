@@ -66,10 +66,14 @@ cliWrap(async () =>
     const logger = new WpBuildConsoleLogger({
         envTag1: "wpbuild", envTag2: "rctypes", colors: {}, level: 5, pad: { value: 100 }
     });
+
     logger.printBanner("generate-rc-types.js", "0.0.1", `generating rc configuration file type definitions`);
+    logger.log("creating rc configuration file types and typings from schema");
+    logger.log("   executing json2ts");
 
     await execAsync({
         logger,
+        logPad: "   ",
         execOptions: { cwd: resolve(__dirname, "..", "schema") },
         command: `json2ts ${jsontotsFlags} -i ${inputFile} -o ${outputFileTmp} --cwd "${schemaDir}"`
     });
@@ -82,6 +86,8 @@ cliWrap(async () =>
               match = indexData.match(/\/\*\*(?:[^]*?)\*\//);
         if (match)
         {
+            logger.log("   parsing json2ts output");
+
             let hdr = "",
                 data = await readFile(tmpOutputPath, "utf8");
             hdr =  match[0]
@@ -138,6 +144,10 @@ cliWrap(async () =>
                                     `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
                                     `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n")}`
                                 );
+                                logger.log(`   added enum and modified type ${m1}`);
+                            }
+                            else {
+                                logger.log(`   modified type ${m1}`);
                             }
                         }
                         return src;
@@ -156,6 +166,9 @@ cliWrap(async () =>
 
             await writeFile(outputPath, `${EOL}${hdr}${EOL}${EOL}${EOL}${data.trim()}${EOL}`);
             await unlink(tmpOutputPath);
+
+            logger.log("   created " + outputFile);
+
             //
             // constants.js
             //
@@ -185,6 +198,7 @@ cliWrap(async () =>
                     lines.push(enumeration);
                     exported.push(`    ${property}Enum`);
                 }
+                logger.log(`   added runtime constants for type ${property}`);
             };
 
             _pushExport("WebpackMode", "s", '"development" | "none" | "production"');
@@ -225,13 +239,16 @@ cliWrap(async () =>
                     `/* START_CONST_DEFS */ ${exported.map(e => e.trim()).join(", ")} /* END_CONST_DEFS */`
                 );
                 await writeFile(outputPath2, data);
+                logger.log("   created " + outputFile2);
             }
         }
         else {
-            throw new Error(`Could not read header from index file '${indexPath}'`);
+            logger.error(`Could not read header from index file '${indexPath}'`);
         }
     }
     else {
-        throw new Error(`Output file '${tmpOutputPath}' does not exist`);
+        logger.error(`Output file '${tmpOutputPath}' does not exist`);
     }
+
+    logger.log("rc types and typings created successfully");
 })();

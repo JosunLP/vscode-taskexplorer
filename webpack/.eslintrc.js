@@ -7,11 +7,13 @@ module.exports = {
     },
     parser: "@typescript-eslint/parser",
     parserOptions: {
-        ecmaVersion: 2020
+        ecmaVersion: 2020,
+        sourceType: "module",
+        createDefaultProgram: true
     },
     ignorePatterns: [
         "**/test-fixture/**/*.js", "types/**", "*.json", "node_modules", "node_modules/**",
-        "**/node_modules/**", "**/.eslint*", "dist/**", ".vscode-test/**", "*.d.ts"
+        "**/node_modules/**", "**/.eslint*", "dist/**", ".vscode-test/**", "**/webpack/**"
     ],
     overrides: [
     {
@@ -35,6 +37,10 @@ module.exports = {
     },
     rules: {
         "@spmeesseman/extjs-array-bracket-newline": 1,
+        "semi": [
+            "warn",
+            "always"
+        ],
 		"anti-trojan-source/no-bidi": "error",
         "array-bracket-spacing": [ 
             1, "always",
@@ -56,7 +62,7 @@ module.exports = {
             "off",
             "1tbs"
         ],
-        "comma-dangle": "off",
+        "comma-dangle": "warn",
         complexity: "off",
         "constructor-super": "warn",
         curly: [
