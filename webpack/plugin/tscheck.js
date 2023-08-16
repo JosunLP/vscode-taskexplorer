@@ -11,25 +11,18 @@
 const { join } = require("path");
 const dts = require("dts-bundle");
 const { existsSync } = require("fs");
-const { apply, WpBuildError } = require("../utils");
 const WpBuildPlugin = require("./base");
+const typedefs = require("../types/typedefs");
+const { apply, WpBuildError } = require("../utils");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("./base").WpBuildPluginOptions} WpBuildPluginOptions */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {import("../types").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
-/** @typedef {import("fork-ts-checker-webpack-plugin/lib/issue/issue").Issue} ForkTsCheckerIssue */
-/** @typedef {"write-tsbuildinfo" | "readonly" | "write-dts" | "write-references" | undefined} ForkTsCheckerMode */
-/** @typedef {import("fork-ts-checker-webpack-plugin/lib/plugin-options").ForkTsCheckerWebpackPluginOptions} ForkTsCheckerOptions */
 
 
 class WpBuildTsCheckPlugin extends WpBuildPlugin
 {
     /**
      * @class WpBuildLicenseFilePlugin
-     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options)
     {
@@ -42,7 +35,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
      * @function Called by webpack runtime to initialize this plugin
      * @override
      * @member apply
-     * @param {WebpackCompiler} compiler the compiler instance
+     * @param {typedefs.WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
     apply(compiler)
@@ -68,10 +61,11 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	bundle = () =>
 	{
-		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(join(this.app.getRcPath("main", ), "types", "dist")))
+		const typesDir = this.app.getRcPath("srcTypes") || join(this.app.getRcPath("base"), "types", "dist")
+		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(typesDir))
 		{
 			const bundleCfg = {
-				name: `@spmeesseman/${this.app.rc.name}-types`,
+				name: `${this.app.rc.pkgJson.name}-types`,
 				baseDir: "types/dist",
 				headerPath: "",
 				headerText: "",
@@ -85,7 +79,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			this.app.logger.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
 		}
 		else {
-			this.app.logger.write("   dts bundle already written, skip", 1);
+			this.app.logger.write("   dts bundling skipped", 1);
 		}
 	};
 
@@ -94,15 +88,15 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 * @function
 	 * @private
 	 * @static
-	 * @param {WpBuildApp} app
-	 * @returns {WpBuildPluginVendorOptions[]}
+	 * @param {typedefs.WpBuildApp} app
+	 * @returns {typedefs.WpBuildPluginVendorOptions[]}
 	 * @throws {WpBuildError}
 	 */
 	static getTsForkCheckerPlugins = (app) =>
 	{
 		let tsConfig, tsConfigParams;
 		const basePath = app.getContextPath(),
-		      buildPath = app.getRcPath("main", );
+		      buildPath = app.getRcPath("base");
 
 		const _find = (base) =>
 		{
@@ -121,7 +115,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 							tsCfg = join(base, app.build.name, "tsconfig.json");
 							if (!existsSync(tsCfg))
 							{
-								tsCfg = join(base,app.build.type, "tsconfig.json");
+								tsCfg = join(base,app.build.type || app.build.name, "tsconfig.json");
 								if (!existsSync(tsCfg)) {
 									tsCfg = join(base,"tsconfig.json");
 								}
@@ -202,7 +196,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {ForkTsCheckerIssue[]} issues
+	 * @param {import("fork-ts-checker-webpack-plugin/lib/issue/issue").Issue[]} issues
 	 */
 	tsForkCheckerIssues = (issues) =>
 {
@@ -233,7 +227,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
  * property to a boolean value of  `true` or `false`
  * @function
  * @module
- * @param {WpBuildApp} app
+ * @param {typedefs.WpBuildApp} app
  * @returns {(WpBuildTsCheckPlugin | ForkTsCheckerWebpackPlugin)[]}
  */
 const tscheck = (app) => app.rc.plugins.tscheck ? new WpBuildTsCheckPlugin({ app }).getPlugins() : [];

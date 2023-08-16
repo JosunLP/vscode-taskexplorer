@@ -45,7 +45,6 @@
 /** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("../types").WpBuildRcPathsKey} WpBuildRcPathsKey */
-/** @typedef {import("../types").WpBuildRcPathsExt} WpBuildRcPathsExt */
 /** @typedef {import("../types").WpBuildLogIconSet} WpBuildLogIconSet */
 /** @typedef {import("../types").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
 /** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
@@ -58,6 +57,7 @@
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
 /** @typedef {import("../types").WpBuildLogColorMapping} WpBuildLogColorMapping */
+/** @typedef {import("../plugin//base").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WpBuildRcEnvironmentBase} WpBuildRcEnvironmentBase */
 /** @typedef {import("../types").WpBuildAppGetPathOptions} WpBuildAppGetPathOptions */
 /** @typedef {import("../types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */

@@ -8,6 +8,7 @@
  */
 
 const { join } = require("path");
+const { apply } = require("../utils");
 
 /** @typedef {import("../types/typedefs").WpBuildApp} WpBuildApp */
 
@@ -18,34 +19,27 @@ const { join } = require("path");
  */
 const resolve = (app) =>
 {
+	const typesPath = app.getRcPath("srcTypes") || join(app.getRcPath("base"), "types"),
+		  envPath = join((app.getRcPath("srcEnv") || join(app.getRcPath("src"), "lib", "env")), app.target);
+
+    app.wpc.resolve = {
+		alias: {
+			":env": envPath,
+			":types": typesPath
+		},
+		extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
+	};
+
 	if (app.build.type !== "webapp")
 	{
-		app.wpc.resolve =
+		apply(app.wpc.resolve,
 		{
-			alias: {
-				":env": join(app.getSrcPath(), "lib", "env", app.target),
-				":types": join(app.getRcPath("main", ), "types")
-			},
-			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			mainFields: app.build.target  === "web" || app.build.type === "webmodule" ? [ "web", "module", "main" ] : [ "module", "main" ],
-			fallback: app.build.target === "web" || app.build.type === "webmodule" ?
-					  {
-					  	  path: require.resolve("path-browserify"),
-					  	  os: require.resolve("os-browserify/browser")
-					  } :
-					  undefined
-		};
+			mainFields: app.isWeb ? [ "web", "module", "main" ] : [ "module", "main" ],
+			fallback: app.isWeb ? { path: require.resolve("path-browserify"), os: require.resolve("os-browserify/browser") } : undefined
+		});
 	}
-	else
-	{
-		app.wpc.resolve = {
-			alias: {
-				":env": join(app.getSrcPath(), "lib", "env", "web"),
-				":types": join(app.getRcPath("main", ), "types")
-			},
-			extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-			modules: [ app.getContextPath(), "node_modules" ],
-		};
+	else {
+		apply(app.wpc.resolve, { modules: [ app.getRcPath("ctx"), "node_modules" ]});
 	}
 };
 

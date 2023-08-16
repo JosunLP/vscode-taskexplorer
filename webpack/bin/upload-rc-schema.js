@@ -9,9 +9,8 @@
  */
 
 
-const { resolve, dirname } = require("path");
-const { promisify } = require("util");
-const exec = promisify(require("child_process").exec);
+const { resolve } = require("path");
+const { execAsync } = require("../utils/utils");
 const WpBuildConsoleLogger = require("../utils/console");
 
 
@@ -61,48 +60,8 @@ else if (args.length > 1)
 const cliWrap = exe => argv => { exe(argv).catch(e => { try { console.error(e); } catch {} process.exit(1); }); };
 
 
-/**
- * @function Executes a command via a promisified node exec()
- * @private
- * @param {string} command
- * @returns {Promise<number | null>}
- */
-const wrapExec = async (command) =>
-{
-    let exitCode = null,
-        stdout = "", stderr = "";
-    const program = command.split(" ")[0],
-          procPromise = exec(command, { encoding: "utf8" }),
-          child = procPromise.child;
-    child.stdout?.on("data", (data) => { stdout += data; });
-    child.stderr?.on("data", (data) => { stderr += data; });
-    child.on("close", (code) =>
-    {
-        exitCode = code;
-        console.log(`   ${program} completed with exit code ${code}`);
-    });
-    await procPromise;
-    if (stdout || stderr)
-    {
-        const match = (stdout || stderr).match(/error TS([0-9]{4})\:/);
-        if (match) {
-            const [ _, err ] = match;
-            console.error(`   tsc failed with error: ${err}`);
-        }
-        if (stdout) {
-            console.log(`  ${program}  stderr: ${stdout}`);
-        }
-        if (stderr) {
-            console.log(`   ${program} stderr: ${stderr}`);
-        }
-    }
-    return exitCode;
-};
-
-
 cliWrap(async () =>
 {
-
     if (!localPath || !remotePath)
     {
         throw new Error("Invalid input or output path");
@@ -111,6 +70,11 @@ cliWrap(async () =>
     {
         throw new Error("Required environment variables for upload are not set");
     }
+
+    const logger = new WpBuildConsoleLogger({
+        envTag1: "wpbuild", envTag2: "rctypes", colors: {}, level: 5, pad: { value: 100 }
+    });
+    logger.printBanner("generate-rc-types.js", "0.0.1", `generating rc configuration file type definitions`);
 
     const plinkCmds = [
         `mkdir ${rBasePath}/wpbuild`,
@@ -135,20 +99,24 @@ cliWrap(async () =>
         `${user}@${host}:"${rBasePath}/wpbuild/v${version}/.wpbuildrc.schema.json"` // uploaded, and created if not exists
     ];
 
-    WpBuildConsoleLogger.printBanner("upload-rc-schema.js", "0.0.1", `uploading rc schema to ${host}`);
-
     try
     {
-        console.log("   plink: create / clear remmote directory");
-        // console.log("  plink ${plinkArgs.map((v, i) => (i !== 3 ? v : "<PWD>")).join(" ")}`, 5, "", logIcon);
-        await wrapExec("plink " + plinkArgs.join(" "));
-        console.log("   pscp:  upload files");
-        // console.log("  pscp ${pscpArgs.map((v, i) => (i !== 1 ? v : "<PWD>")).join(" ")}`, 5, "", logIcon);
-        await wrapExec("pscp " + pscpArgs.join(" "));
-        console.log("successfully uploaded rc schema");
+        logger.log("plink: create / clear remmote directory");
+        await execAsync({
+            logger,
+            logPad: "   ",
+            execOptions: { cwd: resolve(__dirname, "..", "schema") },
+            command: "plink " + plinkArgs.join(" ")
+        });
+        logger.log("pscp: upload files");
+        await execAsync({
+            logger,
+            logPad: "   ",
+            execOptions: { cwd: resolve(__dirname, "..", "schema") },
+            command: "pscp " + pscpArgs.join(" ")
+        });
+        logger.log("successfully uploaded rc schema");
     }
-    catch (e)
-    {
-        console.error(e);
-    }
+    catch (e) { logger.error(e); }
+
 })();

@@ -41,6 +41,8 @@ export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 export declare type WpBuildRcBuilds = WpBuildRcBuild[];
 
+export declare type DirectoryPath = string;
+
 export declare type WpBuildLogColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
 
 export declare interface IWpBuildRcSchema 
@@ -62,20 +64,20 @@ export declare interface IWpBuildRcSchema
 };
 export declare type WpBuildRcSchema = IWpBuildRcSchema;
 
-export declare type TypeWpBuildRcBuild = 
+export declare type WpBuildRcBuild = 
 {
     name: string;
     type?: WpBuildRcBuildType;
-    entry?: WebpackEntry;
-    mode?: WpBuildWebpackMode;
-    target?: WebpackTarget;
+    entry: WebpackEntry;
+    mode: WpBuildWebpackMode;
+    target: WebpackTarget;
     log?: WpBuildRcLog;
-    paths?: WpBuildRcPaths;
-    exports?: WpBuildRcExports;
-    plugins?: WpBuildRcPlugins;
+    paths: WpBuildRcPaths;
+    exports: WpBuildRcExports;
+    plugins: WpBuildRcPlugins;
 };
 export declare type WpBuildRcBuildKey = keyof WpBuildRcBuild;
-export declare type WpBuildRcBuild = Required<TypeWpBuildRcBuild>;
+export declare type TypeWpBuildRcBuild = Required<TypeWpBuildRcBuild>;
 
 export declare type WebpackEntryPath = 
 {
@@ -93,18 +95,20 @@ export declare type WebpackEntryObject =
     layer?: ("debug" | "release") & string;
     publicPath?: DirectoryPathRelative;
 };
-export declare type TypeWpBuildRcLog = 
+export declare type WpBuildRcLog = 
 {
     color?: WpBuildLogTrueColor;
-    colors?: WpBuildRcLogColors;
-    level?: WpBuildLogLevel;
-    pad?: WpBuildRcLogPad;
+    colors: WpBuildRcLogColors;
+    envTag1?: string;
+    envTag2?: string;
+    level: WpBuildLogLevel;
+    pad: WpBuildRcLogPad;
     valueMaxLineLength?: number;
 };
 export declare type WpBuildRcLogKey = keyof WpBuildRcLog;
-export declare type WpBuildRcLog = Required<TypeWpBuildRcLog>;
+export declare type TypeWpBuildRcLog = Required<TypeWpBuildRcLog>;
 
-export declare type TypeWpBuildRcLogColors = 
+export declare type WpBuildRcLogColors = 
 {
     default?: WpBuildLogTrueColor;
     buildBracket?: WpBuildLogTrueColor;
@@ -117,36 +121,38 @@ export declare type TypeWpBuildRcLogColors =
     uploadSymbol?: WpBuildLogTrueColor;
 };
 export declare type WpBuildRcLogColorsKey = keyof WpBuildRcLogColors;
-export declare type WpBuildRcLogColors = Required<TypeWpBuildRcLogColors>;
+export declare type TypeWpBuildRcLogColors = Required<TypeWpBuildRcLogColors>;
 
-export declare type TypeWpBuildRcLogPad = 
+export declare type WpBuildRcLogPad = 
 {
     base?: number;
     envTag?: number;
-    value?: number;
+    value: number;
     uploadFileName?: number;
 };
 export declare type WpBuildRcLogPadKey = keyof WpBuildRcLogPad;
-export declare type WpBuildRcLogPad = Required<TypeWpBuildRcLogPad>;
+export declare type TypeWpBuildRcLogPad = Required<TypeWpBuildRcLogPad>;
 
-export declare type TypeWpBuildRcPaths = 
+export declare type WpBuildRcPaths = 
 {
     base?: string;
     ctx?: string;
     dist?: string;
     distTests?: string;
     src?: string;
+    srcEnv?: string;
     srcModule?: string;
     srcTests?: string;
     srcTypes?: string;
     srcWebApp?: string;
     srcWebModule?: string;
+    temp?: string;
     tsconfig?: string;
 };
 export declare type WpBuildRcPathsKey = keyof WpBuildRcPaths;
-export declare type WpBuildRcPaths = Required<TypeWpBuildRcPaths>;
+export declare type TypeWpBuildRcPaths = Required<TypeWpBuildRcPaths>;
 
-export declare type TypeWpBuildRcExports = 
+export declare type WpBuildRcExports = 
 {
     cache?: boolean;
     devtool?: boolean;
@@ -164,9 +170,9 @@ export declare type TypeWpBuildRcExports =
     watch?: boolean;
 };
 export declare type WpBuildRcExportsKey = keyof WpBuildRcExports;
-export declare type WpBuildRcExports = Required<TypeWpBuildRcExports>;
+export declare type TypeWpBuildRcExports = Required<TypeWpBuildRcExports>;
 
-export declare type TypeWpBuildRcPlugins = 
+export declare type WpBuildRcPlugins = 
 {
     analyze?: boolean;
     banner?: boolean;
@@ -190,7 +196,7 @@ export declare type TypeWpBuildRcPlugins =
     wait?: boolean;
 };
 export declare type WpBuildRcPluginsKey = keyof WpBuildRcPlugins;
-export declare type WpBuildRcPlugins = Required<TypeWpBuildRcPlugins>;
+export declare type TypeWpBuildRcPlugins = Required<TypeWpBuildRcPlugins>;
 
 export declare type WpBuildRcEnvironment = 
 {

@@ -12,6 +12,8 @@ const path = require("path");
 const esbuild = require("esbuild");
 const { getTsConfig, WpBuildApp } = require("../utils");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const { join } = require("path");
+const { existsSync } = require("fs");
 
 
 const builds =
@@ -24,7 +26,7 @@ const builds =
 	module: (app) =>
 	{
 		const srcPath = app.getSrcPath(),
-			  buildPath = app.getRcPath("main", );
+			  buildPath = app.getRcPath("base");
 		if (app.isTests && !app.rc.builds.find(b => b.type === "tests") && !app.rcInst.builds.find(b => b.type === "tests")) {
 			builds.tests(app);
 		}
@@ -95,7 +97,7 @@ const builds =
 	tests: (app, fromMain) =>
 	{
 		const srcPath = app.getSrcPath(),
-			  buildPath = app.getRcPath("main", );
+			  buildPath = app.getRcPath("base");
 
 		app.wpc.module.rules.push(
 		{
@@ -158,41 +160,42 @@ const builds =
 	 */
 	types: (app) =>
 	{
-		const buildPath = app.getRcPath("main", );
-		app.wpc.module.rules.push(
+		const typesDir = app.getRcPath("srcTypes") || join(app.getRcPath("base"), "types")
+		if (existsSync(typesDir))
 		{
-			test: /\.ts$/,
-			include: app.getSrcPath(),
-			exclude: [
-				/node_modules/, /test[\\/]/, /\.d\.ts$/
-			],
-			use: app.esbuild ?
+			app.wpc.module.rules.push(
 			{
-				loader: "esbuild-loader",
-				options: {
-					implementation: esbuild,
-					loader: "tsx",
-					target: [ "es2020", "chrome91", "node16.20" ],
-					tsconfigRaw: getTsConfig(
-						buildPath, path.join(buildPath, "types", "tsconfig.json"),
-					)
-				}
-			} :
-			{
-				loader: "ts-loader",
-				options: {
-					// configFile: path.join(app.paths.build, "types", "tsconfig.json"),
-					configFile: path.join(buildPath, `tsconfig.${app.target}.json`),
-					experimentalWatchApi: false,
-					transpileOnly: false,
-					logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-					logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
-					compilerOptions: {
-						emitDeclarationsOnly: true
+				test: /\.ts$/,
+				include: app.getSrcPath(),
+				exclude: [
+					/node_modules/, /test[\\/]/, /\.d\.ts$/
+				],
+				use: app.esbuild ?
+				{
+					loader: "esbuild-loader",
+					options: {
+						implementation: esbuild,
+						loader: "tsx",
+						target: [ "es2020", "chrome91", "node16.20" ],
+						tsconfigRaw: getTsConfig(typesDir, path.join(typesDir, "tsconfig.json"))
+					}
+				} :
+				{
+					loader: "ts-loader",
+					options: {
+						// configFile: path.join(app.paths.build, "types", "tsconfig.json"),
+						configFile: path.join(typesDir, `tsconfig.${app.target}.json`),
+						experimentalWatchApi: false,
+						transpileOnly: false,
+						logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+						logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
+						compilerOptions: {
+							emitDeclarationsOnly: true
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	},
 
 

@@ -159,7 +159,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
             `${user}@${host}:"${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}"` // uploaded, and created if not exists
         ];
 
-        await copyFile(join(this.app.getRcPath("main", ), "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
+        await copyFile(join(this.app.getRcPath("base"), "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
         logger.write(`   upload resource files to ${host}`, 1, "", logIcon);
         try

@@ -84,7 +84,7 @@ class WpBuildApp
      */
     mode;
     /**
-     * @type {typedefs.WpBuildRcPathsExt}
+     * @type {typedefs.WpBuildRcPaths}
      */
     paths;
     /**
@@ -126,8 +126,7 @@ class WpBuildApp
         }
 		this.applyApp();
 		this.applyPaths();
-		this.logger = new WpBuildConsoleLogger(this);
-        this.printBuildStart();
+        this.initLogger(rc.log);
         this.buildWebpackConfig();
         this.printBuildProperties();
 	}
@@ -190,7 +189,7 @@ class WpBuildApp
 	 */
 	applyPaths = () =>
 	{
-		const paths = /** @type {typedefs.WpBuildRcPathsExt} */({}),
+		const paths = /** @type {typedefs.WpBuildRcPaths} */({}),
 			  build = resolvePath(__dirname, "..", ".."),
 			  temp = resolvePath(process.env.TEMP || process.env.TMP  || "dist", this.rc.name, this.mode);
 		if (!existsSync(temp)) {
@@ -334,29 +333,6 @@ class WpBuildApp
     };
 
 
-    /**
-     * @function
-     * @param {typedefs.WpBuildAppGetPathOptions} [options]
-     * @returns {string} string
-     */
-    getBasePath = (options) => this.getRcPath("base", options);
-
-
-    /**
-     * @function
-     * @param {typedefs.WpBuildAppGetPathOptions} [options]
-     * @returns {string} string
-     */
-    getContextPath = (options) => this.getRcPath("ctx", options);
-
-
-    /**
-     * @function
-     * @param {typedefs.WpBuildAppGetPathOptions} [options]
-     * @returns {string} string
-     */
-    getDistPath = (options) =>this.getRcPath("dist", options);
-
 
     /**
      * @function
@@ -367,35 +343,31 @@ class WpBuildApp
     {
         let path = this.rc.paths[pathKey];
         const opts = apply({ rel: false, ctx: false, dot: false , psx: false }, options),
-              basePath = opts.ctx ? this.paths.base : this.paths.build;
-        if (opts.rel)
+              basePath = (opts.ctx ? this.paths.ctx : this.paths.base) || process.cwd();
+        if (path)
         {
-            path = ((opts.dot ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path)).replace("././", "./");
+            if (opts.rel)
+            {
+                path = ((opts.dot ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path)).replace("././", "./");
+            }
+            else if (!isAbsolute(path))
+            {
+                path = resolvePath(basePath, path);
+            }
+            path = !(/^\.[\\\/]$/).test(path) ? path : ".";
         }
-        else if (!isAbsolute(path))
-        {
-            path = resolvePath(basePath, path);
-        }
-        path = !(/^\.[\\\/]$/).test(path) ? path : ".";
-        return path ? !opts.psx ? normalize(path) : posix.normalize(path) : ".";
+        return path ? (!opts.psx ? normalize(path) : posix.normalize(path)) : (opts.dot ? "." : "");
     };
 
 
     /**
      * @function
-     * @param {typedefs.WpBuildAppGetPathOptions} [options]
-     * @returns {string} string
-     */
-    getSrcPath = (options) => this.getRcPath("src", options);
-
-
-    /**
-     * @function
      * @private
+     * @param {typedefs.WpBuildRcLog} options
      */
-    printBuildStart = () =>
+    initLogger = (options) =>
     {
-        const l = this.logger;
+        const l = this.logger = new WpBuildConsoleLogger({ envTag1: this.build.name , envTag2: this.target.toString(), ...options });
         this.global.buildCount = this.global.buildCount || 0;
         l.value(
             `Start Webpack build ${++this.global.buildCount}`,
@@ -457,7 +429,7 @@ class WpBuildApp
 	/**
 	 * @function
 	 * @private
-	 * @template {typedefs.WpBuildRcPathsExt} T
+	 * @template {typedefs.WpBuildRcPaths} T
 	 * @param {string} baseDir
 	 * @param {T | Partial<T>} paths
 	 * @returns {T}

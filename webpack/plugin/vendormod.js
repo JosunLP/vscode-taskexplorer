@@ -77,7 +77,7 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
 		// the existing contents of the dist directory.  By default it's current assets list
 		// is empty, and thus will not work across IDE restarts
 		//
-		const copyPlugin = join(this.app.getRcPath("main", ), "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
+		const copyPlugin = join(this.app.getRcPath("base"), "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
 		if (existsSync(copyPlugin))
 		{
 			const distPath = this.app.getDistPath();

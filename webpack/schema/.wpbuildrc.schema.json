@@ -75,15 +75,22 @@
     {
         "FileName": {
             "type": "string",
-            "minLength": 6,
+            "minLength": 5,
             "maxLength": 150,
             "pattern": "^[\\w\\.\\-]+\\.([cm]?jsx?|tsx?)$"
         },
         "DirectoryPathRelative": {
             "type": "string",
-            "minLength": 6,
+            "minLength": 3,
             "maxLength": 150,
             "pattern": "^(?:\\.[\\\\\\/][\\w\\.\\-\\\\\\/]+|\\.\\.?)$"
+        },
+        "DirectoryPath": {
+            "type": "string",
+            "default": "src",
+            "minLength": 3,
+            "maxLength": 150,
+            "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$"
         },
         "FilePathRelative": {
             "type": "string",
@@ -274,6 +281,18 @@
                     "additionalProperties": false,
                     "required": []
                 },
+                "envTag1": {
+                    "type": "string",
+                    "default": "wpbuild",
+                    "minimum": 2,
+                    "maxLength": 15
+                },
+                "envTag2": {
+                    "type": "string",
+                    "default": "info",
+                    "minimum": 2,
+                    "maxLength": 15
+                },
                 "level": {
                     "type": "number",
                     "title": "WpBuildLogLevel",
@@ -342,92 +361,79 @@
             "type": "object",
             "properties": {
                 "base": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": "src",
-                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
-                    "minLength": 1,
-                    "maxLength": 100,
-                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                    "readOnly": true,
+                    "description": "Path to the base project directory, a full path containing project's package.json"
                 },
                 "ctx": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": ".",
-                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
-                    "minLength": 1,
-                    "maxLength": 100,
-                    "description": "Path to the base context directory as defined by Webpack, relative to the project directory containing package.json"
+                    "description": "Path to the base context directory as defined by Webpack, full path or relative to the project directory containing package.json"
                 },
                 "dist": {
                     "type": "string",
                     "default": "dist",
-                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
-                    "minLength": 3,
-                    "maxLength": 100,
-                    "description": "Path to the distribution / output directory, relative to the project directory containing package.json"
+                    "description": "Path to the distribution / output directory, full path or relative to the project directory containing package.json"
                 },
                 "distTests": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": "dist/test",
-                    "pattern": "^(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+$",
-                    "minLength": 3,
-                    "maxLength": 100,
-                    "description": "Path to the test suite output directory, relative to the project directory containing package.json"
+                    "description": "Path to the test suite output directory, full path or relative to the project directory containing package.json"
                 },
                 "src": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
+                    "default": "src",
+                    "description": "Path to the base source directory, full path or relative to the project directory containing package.json"
+                },
+                "srcEnv": {
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": "src",
                     "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
-                    "minLength": 1,
+                    "minLength": 3,
                     "maxLength": 100,
-                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                    "description": "Path to a source directory that is a parent to sub-folders that correspond to specific buiuld targets, e.g. /lib/env ~ /lib/env/node and /lib/env/web, full path or relative to the project directory containing package.json"
                 },
                 "srcModule": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": "src",
                     "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
                     "minLength": 3,
                     "maxLength": 100,
-                    "description": "Path to the main module source directory (`node` target`), relative to the project directory containing package.json"
+                    "description": "Path to the main module source directory (`node` target`), full path or relative to the project directory containing package.json"
                 },
                 "srcTests": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": "src/test",
-                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
-                    "minLength": 3,
-                    "maxLength": 100,
-                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                    "description": "Path to the base source directory, full path or relative to the project directory containing package.json"
                 },
                 "srcTypes": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": "types",
-                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
-                    "minLength": 3,
-                    "maxLength": 100,
-                    "description": "Path to the base source directory, relative to the project directory containing package.json"
+                    "description": "Path to the base source directory, full path or relative to the project directory containing package.json"
                 },
                 "srcWebApp": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": "src/web/apps",
-                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
-                    "minLength": 3,
-                    "maxLength": 100,
-                    "description": "Path to a webapps source directory, e.g. webviews in a VsCode extension, relative to the project directory containing package.json"
+                    "description": "Path to a webapps source directory, e.g. webviews in a VsCode extension, full path or relative to the project directory containing package.json"
                 },
                 "srcWebModule": {
-                    "type": "string",
+                    "$ref": "#/definitions/DirectoryPath",
                     "default": "src",
-                    "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$",
-                    "minLength": 3,
-                    "maxLength": 100,
-                    "description": "Path to the main module source directory (`web` target`), relative to the project directory containing package.json"
+                    "description": "Path to the main module source directory (`web` target`), full path or relative to the project directory containing package.json"
+                },
+                "temp": {
+                    "$ref": "#/definitions/DirectoryPath",
+                    "default": "src",
+                    "description": "Path to a temporary directory, full path or relative to the project directory containing package.json"
                 },
                 "tsconfig": {
                     "type": "string",
                     "default": "tsconfig.json",
                     "pattern": "^(?:(?:\\.[\\\\\\/])?[~@!\\w\\.\\-\\\\\\/]+)?tsconfig[\\-\\.\\w]*?\\.json$",
-                    "minLength": 3,
-                    "maxLength": 100,
-                    "description": "Path to tsconfig file, relative to the project directory containing package.json"
+                    "minLength": 13,
+                    "maxLength": 150,
+                    "description": "Path to tsconfig file, full path or relative to the project directory containing package.json"
                 }
             },
             "additionalProperties": false

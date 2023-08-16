@@ -80,17 +80,6 @@ const WpBuildLogColors = [ "black", "blue", "cyan", "green", "grey", "magenta", 
 const isWpBuildLogColor = (v) => !!v && WpBuildLogColors.includes(v);
 
 /**
- * @type {(keyof typedefs.WpBuildRcPaths)[]}
- */
-const WpBuildRcPathsProps = [ "base", "ctx", "dist", "distTests", "src", "srcModule", "srcTests", "srcTypes", "srcWebApp", "srcWebModule", "tsconfig" ];
-
-/**
- * @param {any} v Variable to check type on
- * @returns {v is typedefs.WpBuildRcPaths}
- */
-const isWpBuildRcPathsProp = (v) => !!v && WpBuildRcPathsProps.includes(v);
-
-/**
  * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
  */
 const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
@@ -109,7 +98,6 @@ module.exports = {
     isWpBuildLogTrueColor,
     isWpBuildRcBuildType,
     isWpBuildRcPackageJsonProp,
-    isWpBuildRcPathsProp,
     isWpBuildWebpackMode,
     WebpackModes,
     WebpackTargets,
@@ -117,6 +105,5 @@ module.exports = {
     WpBuildLogTrueColors,
     WpBuildRcBuildTypes,
     WpBuildRcPackageJsonProps,
-    WpBuildRcPathsProps,
     WpBuildWebpackModes
 };

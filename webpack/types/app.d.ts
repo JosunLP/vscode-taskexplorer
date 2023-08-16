@@ -29,8 +29,6 @@ import {
 
 declare const __WPBUILD__: any;
 
-declare type WpBuildRcPathsExt = { base: string; build: string; temp: string; } & WpBuildRcPaths;
-
 declare type WpBuildAppGetPathOptions = { rel: boolean; ctx?: boolean; dot?: boolean; psx?: boolean; };
 
 declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<string, any>; cacheDir: string; verbose: boolean; [ key: string ]: any };
@@ -58,7 +56,7 @@ declare class WpBuildAppType
     isWeb: boolean;
     global: WpBuildGlobalEnvironment; // Accessible by all parallel builds
     logger: WpBuildConsoleLogger;
-    paths: WpBuildRcPathsExt;
+    paths: WpBuildRcPaths;
     rc: IWpBuildRcSchemaExt;           // target js app info
     target: WebpackTarget;
     wpc: WpBuildWebpackConfig;
@@ -73,7 +71,6 @@ export {
     WpBuildAppType,
     WpBuildRcEnvironmentBase,
     WpBuildAppGetPathOptions,
-    WpBuildRcPathsExt,
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,
     WpBuildWebpackConfig,

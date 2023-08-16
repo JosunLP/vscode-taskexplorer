@@ -10,9 +10,11 @@
 
 const JSON5 = require("json5");
 const { glob } = require("glob");
+const { promisify } = require("util");
 const { WebpackError } = require("webpack");
 const typedefs = require("../types/typedefs");
 const { spawnSync } = require("child_process");
+const exec = promisify(require("child_process").exec);
 
 
 /**
@@ -132,6 +134,82 @@ const clone = (item) =>
         return /** @type {T} */(c);
     }
     return item;
+};
+
+
+/**
+ * Executes a command with a promisified child_process.exec()
+ *
+ * @function
+ * @param {object} options
+ * @property {string} command command to execute, with arguments
+ * @property {import("child_process").ExecOptions} [execOptions] options to pass to child_process.exec()
+ * @property {string | string[]} [ignoreOut] stdout or stderr lines to ignore
+ * @property {string} [program] program name to diasplay in any logging
+ * @property {typedefs.WpBuildConsoleLogger} logger a WpBuildConsoleLogger instance
+ * @property {string} [logPad] a padding to prepend any log messages with
+ * @returns {Promise<number | null>}
+ */
+const execAsync = async (options) =>
+{
+    let exitCode = null;
+    const procPromise = exec(options.command, { stdio: [ 'pipe', 'pipe', 'ignore' ], encoding: "utf8", ...options.execOptions }),
+          child = procPromise.child,
+          ignores = asArray(options.ignoreOut),
+          logPad = options.logPad || "",
+          logger = options.logger,
+          colors = logger.colors,
+          stdout = [], stderr = [],
+          program = options.program || options.command.split(" ")[0];
+
+    const _handleOutput = (out, stdarr) =>
+    {
+        const outs = out.split("\n");
+        outs.filter(o => !!o).map(o => o.toString().trim()).forEach((o) =>
+        {
+            if (ignores.every(i => !o.includes(i)))
+            {
+                if (o.startsWith(":") && stdarr.length > 0) {
+                    stdarr[stdarr.length - 1] = stdarr[stdarr.length -1] + o;
+                }
+                else if (stdarr.length > 0 && stdarr[stdarr.length - 1].endsWith(":")) {
+                    stdarr[stdarr.length - 1] = stdarr[stdarr.length -1] + " " + o;
+                }
+                else {
+                    stdarr.push(o);
+                }
+            }
+        });
+    };
+
+    child.stdout?.on("data", (data) => _handleOutput(data, stdout));
+    child.stderr?.on("data", (data) => _handleOutput(data, stderr));
+
+    child.on("close", (code) =>
+    {
+        const clrCode = logger.withColor(code?.toString(), code === 0 ? colors.green : colors.red);
+        exitCode = code;
+        logger.log(`${logPad}${program} completed with exit code bold(${clrCode})`);
+    });
+
+    await procPromise;
+
+    if (stdout.length > 0) {
+        const hdr = logger.withColor(`${program} stdout:`, colors.white);
+        stderr.forEach((m) => {
+            const msg = logger.withColor(m, colors.grey);
+            logger.log(`${logPad}${hdr} ${msg}`, m.length <= 256 ? 2 : 5, "", logger.icons.color.star);
+        });
+    }
+    if (stderr.length > 0) {
+        const hdr = logger.withColor(`${program} stderr:`, exitCode !== 0 ? colors.red : colors.yellow);
+        stderr.forEach((m) => {
+            const msg = logger.withColor(m, colors.grey);
+            logger.log(`${logPad}${hdr} ${msg}`, m.length <= 256 ? 2 : 5, "", exitCode !== 0 ? logger.icons.color.error : logger.icons.color.warning);
+        });
+    }
+
+    return exitCode;
 };
 
 
@@ -433,7 +511,7 @@ class WpBuildError extends WebpackError
 
 
 module.exports = {
-    apply, asArray, capitalize, clone, findFiles, findFilesSync, getTsConfig, isArray, isDate,
-    isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise, isString, merge, mergeIf,
-    pick, pickBy, pickNot, WpBuildError
+    apply, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, getTsConfig, isArray,
+    isDate,isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise, isString, merge,
+    mergeIf, pick, pickBy, pickNot, WpBuildError
 };

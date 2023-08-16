@@ -23,7 +23,7 @@ const builds =
 	 */
 	module: (app) =>
 	{
-		const src = app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true });
+		const src = app.getRcPath("src", { rel: true, ctx: true, dot: true, psx: true });
 		app.wpc.entry = {
 			[ app.build.name ]: {
 				import: `${src}/${app.build.name}.ts`,
@@ -48,7 +48,7 @@ const builds =
 	 */
 	tests: (app, fromMain) =>
 	{
-		const contextRel = app.getContextPath({ rel: true, ctx: true, dot: true, psx: true }) + (fromMain ? "/test" : "");
+		const contextRel = app.getRcPath("ctx", { rel: true, ctx: true, dot: true, psx: true }) + (fromMain ? "/test" : "");
 		app.wpc.entry = apply(app.wpc.entry || {},
 		{
 			"runTest": {
@@ -63,7 +63,7 @@ const builds =
 				import: `${contextRel}/suite/index.ts`,
 				dependOn: "runTest"
 			},
-			...builds.testSuite(app.getContextPath({ rel: true, psx: true }) + (fromMain ? "/test" : ""))
+			...builds.testSuite(app.getRcPath("ctx", { rel: true, psx: true }) + (fromMain ? "/test" : ""))
 		});
 	},
 
@@ -97,7 +97,7 @@ const builds =
 	{
 		app.wpc.entry = {
 			types: {
-				import: `${app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true })}/index.ts`
+				import: `${app.getRcPath("src", { rel: true, ctx: true, dot: true, psx: true })}/index.ts`
 			}
 		}
 	}

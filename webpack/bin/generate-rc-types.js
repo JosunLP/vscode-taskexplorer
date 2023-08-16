@@ -10,75 +10,40 @@
 
 const { EOL } = require("os");
 const { existsSync } = require("fs");
-const { promisify } = require("util");
 const { resolve, join } = require("path");
-const exec = promisify(require("child_process").exec);
 const WpBuildConsoleLogger = require("../utils/console");
+const { capitalize, execAsync } = require("../utils/utils");
 const { unlink, readFile, writeFile } = require("fs/promises");
 const description = "Provides types macthing the .wpbuildrc.json configuration file schema";
 const autoGenMessage = "This file was auto generated using the 'json-to-typescript' utility";
 
+
+const generateEnums = true;
+
+const requiredProperties = {
+    build: "WpBuildRcBuild",
+    colors: "WpBuildRcLog",
+    mode: "WpBuildRcBuild",
+    value: "WpBuildRcLogPad",
+    log: "WpBuildRc",
+    pad: "WpBuildRcLog",
+    level: "WpBuildRcLog",
+    entry: "WpBuildRcBuild",
+    paths: "WpBuildRcBuild",
+    exports: "WpBuildRcBuild",
+    plugins: "WpBuildRcBuild",
+    target: "WpBuildRcBuild"
+};
+
 //
 // Run from script directtory so we work regardless of where cwd is set
 //
-
-console.log(process.cwd());
-/**
- * @param {string} value
- * @returns {string}
- */
-const capitalize = (value) =>
-{
-    if (value) {
-        value = value.charAt(0).toUpperCase() + value.substr(1);
-    }
-    return value || "";
-};
 
 
 //
 // Command line runtime wrapper
 //
 const cliWrap = exe => argv => { exe(argv).catch(e => { try { console.error(e); } catch {} process.exit(1); }); };
-
-
-/**
- * @function Executes a command via a promisified node exec()
- * @private
- * @param {string} command
- * @returns {Promise<number | null>}
- */
-const wrapExec = async (command) =>
-{
-    let exitCode = null,
-        stdout = "", stderr = "";
-    const program = command.split(" ")[0],
-          procPromise = exec(command, { cwd: resolve(__dirname, "..", "schema"), encoding: "utf8" }),
-          child = procPromise.child;
-    child.stdout?.on("data", (data) => { stdout += data; });
-    child.stderr?.on("data", (data) => { stderr += data; });
-    child.on("close", (code) =>
-    {
-        exitCode = code;
-        console.log(`   ${program} completed with exit code ${code}`);
-    });
-    await procPromise;
-    if (stdout || stderr)
-    {
-        const match = (stdout || stderr).match(/error TS([0-9]{4})\:/);
-        if (match) {
-            const [ _, err ] = match;
-            console.error(`   tsc failed with error: ${err}`);
-        }
-        if (stdout) {
-            console.log(`  ${program}  stderr: ${stdout}`);
-        }
-        if (stderr) {
-            console.log(`   ${program} stderr: ${stderr}`);
-        }
-    }
-    return exitCode;
-};
 
 
 const isBaseType = (type) => [
@@ -98,10 +63,17 @@ cliWrap(async () =>
           outputPath = join(typesDir, outputFile),
           jsontotsFlags = "-f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties";
 
-    WpBuildConsoleLogger.printBanner("generate-rc-types.js", "0.0.1", `generating rc configuration file type definitions`);
+    const logger = new WpBuildConsoleLogger({
+        envTag1: "wpbuild", envTag2: "rctypes", colors: {}, level: 5, pad: { value: 100 }
+    });
+    logger.printBanner("generate-rc-types.js", "0.0.1", `generating rc configuration file type definitions`);
 
+    await execAsync({
+        logger,
+        execOptions: { cwd: resolve(__dirname, "..", "schema") },
+        command: `json2ts ${jsontotsFlags} -i ${inputFile} -o ${outputFileTmp} --cwd "${schemaDir}"`
+    });
 
-    await wrapExec(`json2ts ${jsontotsFlags} -i ${inputFile} -o ${outputFileTmp} --cwd "${schemaDir}"`);
     if (existsSync(tmpOutputPath))
     {
         const enums = [],
@@ -148,27 +120,27 @@ cliWrap(async () =>
                    .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n};\nexport declare type ${m1} = I${m1};\n`)
                    .replace(/\nexport declare type Type(.*?) ([^]*?)\n\}/g, (v, m1, m2) =>
                    {
+                        let src = v;
                         if (isBaseType(m1))
                         {
-                            const valuesFmt = m2.replace(/ *\= */, "")
-                                                .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)} = \"${m1.trim()}\",`)
-                                                .replace(/\= \n/g, "\n");
-                            return `export declare type Type${m1} ${m2}\n};\n` +
-                                   // `export declare enum ${m1}Enum ` + (`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n") +
-                                   `export declare type ${m1}Key = keyof ${m1};\n` +
-                                   `export declare type ${m1} = Required<Type${m1}>;\n`;
-                            // const valuesFmt = m2.replace(/ *\= */, "")
-                            //                     .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
-                            //                     .replace(/\= \n/g, "\n");
-                            // enums.push(
-                            //     `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
-                            //     `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n")}`
-                            // );
-                            // return `export declare type Type${m1} ${m2}\n};\n` +
-                            //        `export declare type ${m1}Key = keyof ${m1};\n` +
-                            //        `export declare type ${m1} = Required<Type${m1}>;\n`;
+                            src = `export declare type ${m1} ${m2}\n};\n` +
+                                  `export declare type ${m1}Key = keyof ${m1};\n` +
+                                  `export declare type Type${m1} = Required<Type${m1}>;\n`;
+                            Object.entries(requiredProperties).filter(([ _, t ]) => t === m1).forEach(([ p, _ ]) => {
+                                src = src.replace(new RegExp(`${p}\\?\\: `, "g"), `${p}: `);
+                            });
+                            if (generateEnums)
+                            {
+                                const valuesFmt = m2.replace(/ *\= */, "")
+                                                    .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
+                                                    .replace(/\= \n/g, "\n");
+                                enums.push(
+                                    `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
+                                    `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n")}`
+                                );
+                            }
                         }
-                        return v;
+                        return src;
                    })
                    .replace(/\nexport type /g, "\nexport declare type ")
                    .replace(/ \{\n    /g, " \n{\n    ")
