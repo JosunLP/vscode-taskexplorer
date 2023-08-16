@@ -207,10 +207,10 @@ class WpBuildRc
                     const baseBuild = this.builds.find(base => base.name === modeBuild.name);
                     if (baseBuild) {
                         _applyOverrides(modeBuild);
-                        merge(baseBuild, modeBuild)
+                        merge(baseBuild, modeBuild);
                     }
                     else if (!buildName || modeBuild.name === buildName) {
-                        this.builds.push(merge({}, modeBuild))
+                        this.builds.push(merge({}, modeBuild));
                         _applyOverrides(modeBuild);
                     }
                 });
@@ -323,15 +323,15 @@ class WpBuildRc
 
             if (!build.target)
             {
-                build.target = "node"
+                build.target = "node";
                 if (isWebpackTarget(argv.target)) {
                     build.target = argv.target;
                 }
                 else if ((/web(?:worker|app|view)/).test(build.name) || build.type === "webapp") {
-                    build.target = "webworker"
+                    build.target = "webworker";
                 }
                 else if ((/web|browser/).test(build.name) || build.type === "webmodule") {
-                    build.target = "web"
+                    build.target = "web";
                 }
                 else if ((/module|node/).test(build.name) || build.type === "module") {
                     build.target = "node";
@@ -340,7 +340,7 @@ class WpBuildRc
                     build.target = "node";
                 }
                 else if ((/typ(?:es|ings)/).test(build.name)|| build.type === "types") {
-                    build.target = "node"
+                    build.target = "node";
                 }
             }
 
@@ -352,10 +352,10 @@ class WpBuildRc
                     build.type = build.name;
                 }
                 else if ((/web(?:worker|app|view)/).test(build.name)) {
-                    build.type = "webapp"
+                    build.type = "webapp";
                 }
                 else if ((/web|browser/).test(build.name)) {
-                    build.type = "webmodule"
+                    build.type = "webmodule";
                 }
                 else if ((/tests?/).test(build.name)) {
                     build.type = "tests";

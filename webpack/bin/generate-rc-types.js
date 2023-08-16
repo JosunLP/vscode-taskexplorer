@@ -27,6 +27,8 @@ const requiredProperties = {
     value: "WpBuildRcLogPad",
     log: "WpBuildRc",
     pad: "WpBuildRcLog",
+    default: "WpBuildRcLogColors",
+    system: "WpBuildRcLogColors",
     level: "WpBuildRcLog",
     entry: "WpBuildRcBuild",
     paths: "WpBuildRcBuild",
@@ -64,7 +66,7 @@ cliWrap(async () =>
           jsontotsFlags = "-f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties";
 
     const logger = new WpBuildConsoleLogger({
-        envTag1: "wpbuild", envTag2: "rctypes", colors: {}, level: 5, pad: { value: 100 }
+        envTag1: "wpbuild", envTag2: "rctypes", colors: { default: "grey" }, level: 5, pad: { value: 100 }
     });
 
     logger.printBanner("generate-rc-types.js", "0.0.1", `generating rc configuration file type definitions`);
@@ -135,20 +137,21 @@ cliWrap(async () =>
                             Object.entries(requiredProperties).filter(([ _, t ]) => t === m1).forEach(([ p, _ ]) => {
                                 src = src.replace(new RegExp(`${p}\\?\\: `, "g"), `${p}: `);
                             });
-                            if (generateEnums)
-                            {
-                                const valuesFmt = m2.replace(/ *\= */, "")
-                                                    .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
-                                                    .replace(/\= \n/g, "\n");
-                                enums.push(
-                                    `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
-                                    `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n")}`
-                                );
-                                logger.log(`   added enum and modified type ${m1}`);
-                            }
-                            else {
-                                logger.log(`   modified type ${m1}`);
-                            }
+                        }
+                        if (generateEnums)
+                        {
+                            const valuesFmt = m2.replace(/ *\= */, "")
+                                                // .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
+                                                .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${m1}: \"${m1.trim()}\",`)
+                                                .replace(/\= \n/g, "\n");
+                            enums.push(
+                                `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
+                                `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n").replace(/",\n\};/g, "\"\n};")}`
+                            );
+                            logger.log(`   modified type ${m1} with enum`);
+                        }
+                        else {
+                            logger.log(`   modified type ${m1}`);
                         }
                         return src;
                    })
@@ -166,8 +169,7 @@ cliWrap(async () =>
 
             await writeFile(outputPath, `${EOL}${hdr}${EOL}${EOL}${EOL}${data.trim()}${EOL}`);
             await unlink(tmpOutputPath);
-
-            logger.log("   created " + outputFile);
+            logger.success(`   created ${outputFile} (${outputPath})`);
 
             //
             // constants.js
@@ -176,7 +178,7 @@ cliWrap(async () =>
             const exported = [],
                   lines = [],
                   rgx = /export declare type (\w*?) = (".*?");\r?\n/g,
-                  rgx2 = new RegExp(`export declare type (WpBuildRcPackageJson|TypeWpBuildRcPaths) = ${EOL}\\{\\s*([^]*?)${EOL}\\};${EOL}`, "g");
+                  rgx2 = new RegExp(`export declare type (WpBuildRcPackageJson|WpBuildRcPaths) = ${EOL}\\{\\s*([^]*?)${EOL}\\};${EOL}`, "g");
 
             const _pushExport = (property, suffix, values, valueType) =>
             {
@@ -217,29 +219,30 @@ cliWrap(async () =>
 
             if (lines.length > 0)
             {
-                let outputFile2 = "constants.js",
-                    outputPath2 = resolve(__dirname, "..", "utils", outputFile2);
+                const constantsFile = "constants.js",
+                      constantsPath = resolve(__dirname, "..", "utils", constantsFile);
                 exported.sort((a, b) => a.localeCompare(b));
-                hdr = hdr.replace(`@file types/${outputFile}`, `@file utils/${outputFile2}`);
+                hdr = hdr.replace(`@file types/${outputFile}`, `@file utils/${constantsFile}`);
                 data = `/* eslint-disable no-unused-labels */${EOL}// @ts-check${EOL}${EOL}${hdr}${EOL}${EOL}`;
                 data += `const typedefs = require(\"../types/typedefs\");${EOL}${EOL}`;
                 data += lines.join(EOL) + EOL;
                 data += `${EOL}module.exports = {${EOL}${exported.join("," + EOL)}${EOL}};${EOL}`;
                 data = data.replace("'json-to-typescript' utility", `'generate-wpbuild-types' script together with${EOL} * the 'json-to-typescript' utility`);
                 data = data.replace(/ \* the 'json\-to\-typescript' utility(?:[^]+?) \*\//, ` * the 'json-to-typescript' utility${EOL} */`);
-                await writeFile(outputPath2, data);
+                await writeFile(constantsPath, data);
+                logger.success(`   created ${constantsFile} (${constantsPath})`);
                 //
                 // index.js
                 //
-                outputFile2 = "index.js";
-                outputPath2 = resolve(__dirname, "..", "utils", outputFile2);
-                data = await readFile(outputPath2, "utf8");
+                const indexFile = "index.js",
+                      indexPath= resolve(__dirname, "..", "utils", indexFile);
+                data = await readFile(indexPath, "utf8");
                 data = data.replace(
                     /\/\* START_CONST_DEFS \*\/(?:.*?)\/\* END_CONST_DEFS \*\//g,
                     `/* START_CONST_DEFS */ ${exported.map(e => e.trim()).join(", ")} /* END_CONST_DEFS */`
                 );
-                await writeFile(outputPath2, data);
-                logger.log("   created " + outputFile2);
+                await writeFile(indexPath, data);
+                logger.success(`   added constants exports to ${constantsFile} (${constantsPath})`);
             }
         }
         else {
@@ -250,5 +253,5 @@ cliWrap(async () =>
         logger.error(`Output file '${tmpOutputPath}' does not exist`);
     }
 
-    logger.log("rc types and typings created successfully");
+    logger.write("rc types and typings created successfully");
 })();

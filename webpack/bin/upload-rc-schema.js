@@ -72,7 +72,7 @@ cliWrap(async () =>
     }
 
     const logger = new WpBuildConsoleLogger({
-        envTag1: "wpbuild", envTag2: "rctypes", colors: {}, level: 5, pad: { value: 100 }
+        envTag1: "wpbuild", envTag2: "rctypes", colors: { default: "grey" }, level: 5, pad: { value: 100 }
     });
     logger.printBanner("generate-rc-types.js", "0.0.1", `generating rc configuration file type definitions`);
 

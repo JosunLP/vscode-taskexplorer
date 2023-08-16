@@ -44,21 +44,7 @@ class WpBuildConsoleLogger
      */
     constructor(options)
     {
-        this.options = apply({}, options,
-        {
-            valueMaxLineLength: 150,
-            envTag1: "wpbuild",
-            envTag2: "info",
-            level: 0,
-            pad: {
-                value: 40, base: 0
-            }
-        });
-        if (!this.options.pad.envTag) {
-            // @ts-ignore
-            this.options.pad.envTag = this.options.envTag1.length + this.options.envTag1.length + 5;
-        }
-        // @ts-ignore
+        this.applyOptions(options);
         this.separatorLength = 125; // 75 + this.options.pad.envTag + this.options.pad.base + this.options.pad.value;
         this.defaultColor = this.colors.cyan;
         const infoIconClr = this.options.colors.infoIcon || this.options.color || this.options.colors.buildBracket;
@@ -78,6 +64,34 @@ class WpBuildConsoleLogger
         const msg = this.withColor("force reset console color to system default", this.colors.grey);
         this.write(msg + this.withColor("", this.colors.system, true));
     };
+
+
+    /**
+     * @function
+     * @private
+     * @param {typedefs.WpBuildRcLog} options
+     */
+    applyOptions = (options) =>
+    {
+        this.options = apply({}, options,
+        {
+            valueMaxLineLength: 150,
+            envTag1: "wpbuild",
+            envTag2: "info",
+            level: 2,
+            colors: {
+                default: "grey"
+            },
+            pad: {
+                value: 100,
+                base: 0
+            }
+        });
+        if (!this.options.pad.envTag) {
+            // @ts-ignore
+            this.options.pad.envTag = this.options.envTag1.length + this.options.envTag1.length + 5;
+        }
+    }
 
 
     /**
@@ -254,18 +268,37 @@ class WpBuildConsoleLogger
      * @param {tinycolor.ColorInput[]} colors
      */
     printBanner = (name, version, subtitle, ...colors) =>
+        WpBuildConsoleLogger.printBanner(name, version, subtitle, undefined, this);
+
+
+    /**
+     * @function
+     * @static
+     * @param {string} name
+     * @param {string} version
+     * @param {string} subtitle
+     * @param {typedefs.WpBuildCallback} [cb]
+     * @param {WpBuildConsoleLogger} [logger]
+     * @param {tinycolor.ColorInput[]} colors
+     */
+    static printBanner = (name, version, subtitle, cb, logger, ...colors) =>
     {
-        this.sep();
+        logger = logger || new WpBuildConsoleLogger({
+            envTag1: "wpbuild", envTag2: "rctypes", colors: { default: "grey" }, level: 5, pad: { value: 100 }
+        });
+        logger.sep();
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
         if (colors.length === 0) {
             colors.push("red", "purple", "cyan", "pink", "green", "purple", "blue");
         }
         console.log(gradient(...colors).multiline(this.spmBanner(name, version), {interpolation: "hsv"}));
-        this.sep();
+        logger.sep();
         if (subtitle) {
-            this.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(subtitle));
-            this.sep();
+            logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(subtitle));
+            logger.sep();
         }
+        cb?.(logger);
+        logger.dispose();
     };
 
 
@@ -282,7 +315,7 @@ class WpBuildConsoleLogger
      * @param {string} version
      * @returns {string}
      */
-    spmBanner = (name, version) =>
+    static spmBanner = (name, version) =>
     {
         const vPadStart = 8 - version.length,
               vPadEnd = 8 - version.length,
@@ -307,6 +340,14 @@ class WpBuildConsoleLogger
             this.withColor(this.icons.start, this.colors[this.options.color]) :
             this.icons.color.start) + (msg ? "  " + msg : ""), level);
 
+    /**
+     * @function
+     * @param {any} msg
+     * @param {typedefs.WpBuildLogLevel} [level]
+     * @param {string} [pad]
+     */
+    success = (msg, level, pad) => this.writeMsgTag(msg, "success", level, pad, this.colors[this.options.colors.default] || this.colors.white, this.colors.green);
+
 
     /**
      * @function
@@ -325,10 +366,8 @@ class WpBuildConsoleLogger
                  this.withColor(tagMsg, msgColor || this.colors.grey)  +
                  this.withColor("]", bracketColor || this.colors.blue)) : "";
 
-
     /**
      * @function
-     * @member
      * Write / log a message and an aligned value to the console.  The message pad space is defined
      * by .wpbuildrc.`log.pad.value` (defaults to 45)
      * @param {string} msg
@@ -511,14 +550,23 @@ class WpBuildConsoleLogger
 
     /**
      * @function
-     * @param {string | undefined} msg
+     * @param {string} msg
      * @param {string | undefined} tagMsg
+     * @param {typedefs.WpBuildLogLevel} [level]
+     * @param {string} [pad]
      * @param {typedefs.WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
      * @param {typedefs.WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
      */
-    writeMsgTag = (msg, tagMsg, bracketColor, msgColor) =>
-        this.write(msg + "  " + this.tag(tagMsg, bracketColor, msgColor), 2, "", null, this.colors[this.options.colors.default || "grey"]);
-
+    writeMsgTag = (msg, tagMsg, level, pad, bracketColor, msgColor) =>
+    {
+        let exPad = "";
+        const match = msg.match(/^( +)[\w]/);
+        if (match) { exPad = match[1]; msg = msg.trimStart(); }
+        this.write(
+            exPad + this.tag(tagMsg, bracketColor, msgColor) + " " +
+            this.withColor(msg, this.colors[this.options.colors.default || "grey"]), level, pad
+        );
+    };
 
     /**
      * @function

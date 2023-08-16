@@ -80,6 +80,38 @@ const WpBuildLogColors = [ "black", "blue", "cyan", "green", "grey", "magenta", 
 const isWpBuildLogColor = (v) => !!v && WpBuildLogColors.includes(v);
 
 /**
+ * @type {(keyof typedefs.WpBuildRcPaths)[]}
+ */
+const WpBuildRcPathsProps = [ "base", "ctx", "dist", "distTests", "src", "srcEnv", "srcModule", "srcTests", "srcTypes", "srcWebApp", "srcWebModule", "temp", "tsconfig" ];
+
+/**
+ * @param {any} v Variable to check type on
+ * @returns {v is typedefs.WpBuildRcPaths}
+ */
+const isWpBuildRcPathsProp = (v) => !!v && WpBuildRcPathsProps.includes(v);
+
+/**
+ * @type {{[ key: string]: keyof typedefs.WpBuildRcPaths}}
+ */
+const WpBuildRcPathsEnum =
+{
+    base: "base",
+    ctx: "ctx",
+    dist: "dist",
+    distTests: "distTests",
+    src: "src",
+    srcEnv: "srcEnv",
+    srcModule: "srcModule",
+    srcTests: "srcTests",
+    srcTypes: "srcTypes",
+    srcWebApp: "srcWebApp",
+    srcWebModule: "srcWebModule",
+    temp: "temp",
+    tsconfig: "tsconfig"
+};
+
+
+/**
  * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
  */
 const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
@@ -98,6 +130,7 @@ module.exports = {
     isWpBuildLogTrueColor,
     isWpBuildRcBuildType,
     isWpBuildRcPackageJsonProp,
+    isWpBuildRcPathsProp,
     isWpBuildWebpackMode,
     WebpackModes,
     WebpackTargets,
@@ -105,5 +138,7 @@ module.exports = {
     WpBuildLogTrueColors,
     WpBuildRcBuildTypes,
     WpBuildRcPackageJsonProps,
+    WpBuildRcPathsEnum,
+    WpBuildRcPathsProps,
     WpBuildWebpackModes
 };

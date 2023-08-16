@@ -269,6 +269,7 @@ class WpBuildApp
         // If mode specific build config is present, then merge/apply it's properties to the base
         // rc config props.
         //
+        /** @type {typedefs.WpBuildRcEnvironment} */
         const modeRc = this.rc[this.rc.mode];
         if (modeRc)
         {
@@ -279,14 +280,14 @@ class WpBuildApp
                 {
                     const baseBuild = this.rc.builds.find(base => base.name === modeBuild.name);
                     if (baseBuild) {
-                        merge(baseBuild, modeBuild)
+                        merge(baseBuild, modeBuild);
                     }
                     else {
                         this.rc.builds.push(merge({}, modeBuild));
                     }
                     if (build.name === modeBuild.name)
                     {
-                        merge(build, modeBuild)
+                        merge(build, modeBuild);
                     }
                     _applyOverrides(modeBuild);
                 });

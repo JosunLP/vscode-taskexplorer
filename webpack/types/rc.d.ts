@@ -103,6 +103,7 @@ export declare type WpBuildRcLog =
     envTag2?: string;
     level: WpBuildLogLevel;
     pad: WpBuildRcLogPad;
+    timestamp?: ("mm:ss" | "mm:ss:sss" | "hh:mm:ss" | "hh:mm:ss:sss") & string;
     valueMaxLineLength?: number;
 };
 export declare type WpBuildRcLogKey = keyof WpBuildRcLog;
@@ -110,7 +111,7 @@ export declare type TypeWpBuildRcLog = Required<TypeWpBuildRcLog>;
 
 export declare type WpBuildRcLogColors = 
 {
-    default?: WpBuildLogTrueColor;
+    default: WpBuildLogTrueColor;
     buildBracket?: WpBuildLogTrueColor;
     buildText?: WpBuildLogTrueColor;
     infoIcon?: WpBuildLogTrueColor;
