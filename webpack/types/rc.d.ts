@@ -41,7 +41,7 @@ export declare type WebpackTarget = "node" | "web" | "webworker" | "async-node" 
 
 export declare type WpBuildWebpackAliasValue = string | string[] | false;
 
-export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
+export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "white" | "yellow";
 
 export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 

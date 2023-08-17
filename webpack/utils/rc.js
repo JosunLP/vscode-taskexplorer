@@ -17,8 +17,20 @@ const WpBuildConsoleLogger = require("./console");
 const { resolve, basename, join, dirname } = require("path");
 const { WpBuildError, apply, pick, isString, merge, isObject, isArray, pickNot } = require("./utils");
 const {
-    isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildWebpackModes, WpBuildRcPackageJsonProps
+    isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildWebpackModes
 } = require("./constants");
+
+
+/**
+ * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
+ */
+const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
+
+/**
+ * @param {any} v Variable to check type on
+ * @returns {v is typedefs.WpBuildRcPackageJson}
+ */
+const isWpBuildRcPackageJsonProp = (v) => !!v && WpBuildRcPackageJsonProps.includes(v);
 
 
 /**

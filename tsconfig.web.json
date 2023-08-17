@@ -2,8 +2,6 @@
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
         "baseUrl": ".",
-        "declaration": true,
-        "declarationDir": "types/dist",
 		"lib": [
 			"dom", "dom.iterable", "es2020"
 		],

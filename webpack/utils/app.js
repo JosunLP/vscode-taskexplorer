@@ -12,9 +12,11 @@ const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
+const { isWpBuildRcPathsProp } = require("./constants");
 const { isAbsolute, relative, posix, normalize, join, sep } = require("path");
-const { WpBuildWebpackModes, isWpBuildRcPathsProp } = require("./constants");
-const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject, capitalize, findTsConfig, getTsConfig } = require("./utils");
+const {
+    apply, isString, WpBuildError, merge, isPromise, isObject, capitalize, findTsConfig, getTsConfig
+} = require("./utils");
 const {
 	cache, devtool, entry, experiments, externals, ignorewarnings, minification, plugins, optimization,
     output, resolve, rules, stats, watch

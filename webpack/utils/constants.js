@@ -71,7 +71,7 @@ const isWebpackTarget = (v) => !!v && WebpackTargets.includes(v);
 /**
  * @type {typedefs.WpBuildLogTrueColor[]}
  */
-const WpBuildLogTrueColors = [ "black", "blue", "cyan", "green", "grey", "magenta", "red", "system", "white", "yellow" ];
+const WpBuildLogTrueColors = [ "black", "blue", "cyan", "green", "grey", "magenta", "red", "white", "yellow" ];
 
 /**
  * @param {any} v Variable to check type on
@@ -125,17 +125,6 @@ const WpBuildRcPathsEnum =
     tsconfig: "tsconfig"
 };
 
-/**
- * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
- */
-const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
-
-/**
- * @param {any} v Variable to check type on
- * @returns {v is typedefs.WpBuildRcPackageJson}
- */
-const isWpBuildRcPackageJsonProp = (v) => !!v && WpBuildRcPackageJsonProps.includes(v);
-
 
 module.exports = {
     isWebpackMode,
@@ -143,7 +132,6 @@ module.exports = {
     isWpBuildLogColor,
     isWpBuildLogTrueColor,
     isWpBuildRcBuildType,
-    isWpBuildRcPackageJsonProp,
     isWpBuildRcPathsProp,
     isWpBuildRcSourceCodeType,
     isWpBuildWebpackMode,
@@ -152,7 +140,6 @@ module.exports = {
     WpBuildLogColors,
     WpBuildLogTrueColors,
     WpBuildRcBuildTypes,
-    WpBuildRcPackageJsonProps,
     WpBuildRcPathsEnum,
     WpBuildRcPathsProps,
     WpBuildRcSourceCodeTypes,

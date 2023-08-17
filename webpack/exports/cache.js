@@ -7,7 +7,7 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { posix, resolve, join } = require("path");
+const { join } = require("path");
 const { WpBuildApp } = require("../utils");
 
 
@@ -24,9 +24,10 @@ const cache = (app) =>
             type: "filesystem",
             cacheDirectory: join(basePath, "node_modules", ".cache", "wpbuild", "webpack"),
             name: `${app.build.name}_${app.build.type}_${app.wpc.target}`.toLowerCase(),
-            version: app.rc.pkgJson.version,
-            // version: `${process.env.GIT_REV}`
-            buildDependencies: {
+            version: app.rc.pkgJson.version, // `${process.env.GIT_REV}`
+            buildDependencies:
+            {
+                defaultWebpack: [ "webpack/lib/" ],
                 config: [
                     join(basePath, "webpack.config.js")
                 ]

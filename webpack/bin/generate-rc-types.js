@@ -150,6 +150,7 @@ const parseTypesDts = async (hdr, data) =>
           .replace(/[\w] ;/g, (v) => v.replace(" ;", ";"))
           .replace(/([;\{])\n\s*?\n(\s+)/g, (_, m1, m2) => m1 + "\n" + m2)
           .replace(/ = \{ "= /g, "")
+          // .replace(/export declare type WpBuildLogTrueColor =(?:.*?);\n/g, (v) => v + "\nexport declare type WpBuildLogTrueBaseColor = Omit<WpBuildLogTrueColor, \"system\">;\n")
           .replace(/"\}/g, "\"\n}")
           .replace(/\n/g, EOL);
 

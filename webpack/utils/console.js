@@ -97,7 +97,7 @@ class WpBuildConsoleLogger
     /**
      * @member
      * @private
-     * @type {Record<typedefs.WpBuildLogTrueColor, typedefs.WpBuildLogColorValue>}
+     * @type {Record<typedefs.WpBuildLogColor, typedefs.WpBuildLogColorValue>}
      */
     colorMap = {
         blue: 34,
@@ -109,7 +109,11 @@ class WpBuildConsoleLogger
         red: 31,
         system: 39,
         white: 37,
-        yellow: 33
+        yellow: 33,
+        bold: 1,
+        inverse: 7,
+        italic: 3,
+        underline: 4
     };
 
 

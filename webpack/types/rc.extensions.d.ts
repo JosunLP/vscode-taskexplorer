@@ -11,6 +11,7 @@ declare type WpBuildRcPackageJson =
     version?: string;
 };
 
+
 export {
     WpBuildRcPackageJson
 };

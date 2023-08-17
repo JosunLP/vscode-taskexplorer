@@ -8,12 +8,14 @@
  * @author Scott Meesseman @spmeesseman
  */
 
+const dts = require("dts-bundle");
 const { existsSync } = require("fs");
 const WpBuildPlugin = require("./base");
 const { WebpackError } = require("webpack");
-const { findFiles, getTsConfig, WpBuildError, findTsConfig } = require("../utils");
+const typedefs = require("../types/typedefs");
 const {readFile, unlink, access } = require("fs/promises");
 const { join, relative, dirname, isAbsolute, resolve } = require("path");
+const { findFiles, getTsConfig, WpBuildError, findTsConfig } = require("../utils");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -26,7 +28,7 @@ const { join, relative, dirname, isAbsolute, resolve } = require("path");
 /** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
 
 
-class WpBuildTestSuitePlugin extends WpBuildPlugin
+class WpBuildTscPlugin extends WpBuildPlugin
 {
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -38,17 +40,70 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
     {
         this.onApply(compiler,
         {
-			buildTestsSuite: {
+			// buildTestsSuite: {
+			// 	async: true,
+            //     hook: "compilation",
+			// 	stage: "ADDITIONAL",
+			// 	statsProperty: "tests",
+			// 	statsPropertyColor: "magenta",
+            //     callback: this.testsuite.bind(this)
+            // },
+			buildTypes: {
 				async: true,
-                hook: "afterCompile",
-                // hook: "compilation",
-				// stage: "ADDITIONAL",
-				statsProperty: "tests",
-				statsPropertyColor: "magenta",
+                hook: "compilation",
+				stage: "ADDITIONAL",
+				statsProperty: "types",
+				statsPropertyColor: this.app.rc.log.color || "blue",
                 callback: this.testsuite.bind(this)
-            }
+            },
+			bundleDtsFiles: {
+				hook: "compilation",
+				stage: "DERIVED",
+				callback: this.bundle.bind(this)
+			}
         });
     }
+
+
+	/**
+	 * @function
+	 * @private
+	 */
+	bundle = () =>
+	{
+		const l = this.app.logger,
+			  typesDir = existsSync(this.app.getSrcTypesPath()),
+			  typesDirDist = existsSync(this.app.getRcPath("distTypes"));
+		l.write("dts bundling", 1);
+		l.value("   types directory", typesDir, 2);
+		l.value("   is main tests", this.app.isMainTests, 3);
+		l.value("   already bundled", this.app.global.tsCheck.typesBundled,3);
+		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
+		{
+			const bundleCfg = {
+				name: `${this.app.rc.pkgJson.name}-types`,
+				baseDir: "types/dist",
+				headerPath: "",
+				headerText: "",
+				main: "types/index.d.ts",
+				out: "types.d.ts",
+				outputAsModuleFolder: true,
+				verbose: this.app.rc.log.level === 5
+			};
+			dts.bundle(bundleCfg);
+			this.app.global.tsCheck.typesBundled = true;
+			l.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
+		}
+		else if (!typesDirDist) {
+			l.warning("   types output directory doesn't exist, dts bundling skipped");
+		}
+		else if (!typesDir) {
+			l.warning("   types directory doesn't exist, dts bundling skipped");
+		}
+		else {
+			l.write("   dts bundling skipped", 1);
+		}
+	};
 
 
 	/**
@@ -93,50 +148,60 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 			} catch {}
 		}
 
-		await this.execTsBuild(relative(this.app.getRcPath("base"), tsConfigFile), 2, testsDir, true);
+		// await this.execTsBuild(relative(this.app.getRcPath("base"), tsConfigFile), 2, testsDir, true);
 	}
 
 
-	// /**
-	//  * @function
-	//  * @private
-	//  * @param {WebpackCompilationAssets} _assets
-	//  */
-	// async types(_assets)
-	// {
-	// 	const bldDir = this.app.getRcPath("base", ),
-	// 		  typesDir = join(bldDir, "types", "dist");
-	// 	this.app.logger.write("build types");
-	// 	if (!existsSync(app.getRcPath("base"))
-	// 	{
-	// 		try { await unlink(join(bldDir, "node_modules", ".cache", "tsconfig.types.tsbuildinfo")); } catch {}
-	// 	}
-	// 	await this.execTsBuild("./types", 1, typesDir);
-	// }
+	/**
+	 * @function
+	 * @private
+	 * @param {WebpackCompilationAssets} _assets
+	 */
+	async types(_assets)
+	{
+		const tsc = this.app.tsConfig;
+		if (tsc)
+		{
+			const logger = this.logger,
+				  basePath = this.app.getRcPath("base"),
+			      typesDirSrc = this.app.getSrcTypesPath({ fstat: true }),
+				  typesDirDist = this.app.getRcPath("distTypes");
+			logger.write("build types");
+			if (typesDirSrc && !existsSync(typesDirDist))
+			{
+				const tsbuildinfo = resolve(basePath, tsc.json.compilerOptions.tsBuildInfoFile ?? "tsconfig.tsbuildinfo");
+				try { await unlink(tsbuildinfo); } catch {}
+			}
+			await this.execTsBuild(tsc, [
+				 "./types", "--declaration", "--emitDeclarationsOnly", "--declarationDir", typesDirDist
+			], 1, typesDirDist);
+		}
+	}
 
 
 	/**
 	 * @function Executes a typescript build using the specified tsconfig
 	 * @private
-	 * @param {string} tsConfigFile Path to tsconfig file or dir, relative to `app.paths.build`
+	 * @param {typedefs.WpBuildAppTsConfig} tsc
+	 * @param {string[]} args
 	 * @param {number} identifier Unique group identifier to associate with the file path
 	 * @param {string} outputDir Output directory of build
 	 * @param {boolean} [alias] Write alias paths with ``
 	 */
-	execTsBuild = async (tsConfigFile, identifier, outputDir, alias) =>
+	execTsBuild = async (tsc, args, identifier, outputDir, alias) =>
 	{
 		// const babel = [
 		// 	"npx", "babel", tsConfig, "--out-dir", outputDir, "--extensions", ".ts",
 		// 	"--presets=@babel/preset-env,@babel/preset-typescript",
 		// ];
 		const logger = this.app.logger;
-		let command = `npx tsc -p ${tsConfigFile}`; // babel.join(" ");
-		logger.write(`   execute typescript build @ italic(${tsConfigFile})`, 1);
+		let command = `npx tsc ${args.join(" ")}`;
+		logger.write(`   execute typescript build @ italic(${tsc?.path})`, 1);
 
 		let code = await this.exec(command, "tsc");
 		if (code !== 0)
 		{
-			this.compilation.errors.push(new WebpackError("typescript build failed for " + tsConfigFile));
+			this.compilation.errors.push(new WebpackError("typescript build failed for " + tsc.path));
 			return;
 		}
 		//
@@ -146,7 +211,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 			await access(outputDir);
 		}
 		catch (e) {
-			this.handleError(new WebpackError("typescript build failed for " + tsConfigFile), "output directory doesn't exist");
+			this.handleError(new WebpackError("typescript build failed for " + tsc.path), "output directory doesn't exist");
 			return;
 		}
 		//
@@ -156,27 +221,11 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 		{   //
 			// Note that `tsc-alias` requires a filename e.g. tsconfig.json in it's path argument
 			//
-			if (!(/tsconfig\.(?:[\w\-_\.]+\.)?json$/).test(tsConfigFile))
-			{
-				tsConfigFile = join(tsConfigFile, "tsconfig.json");
-			}
-			if (!existsSync(tsConfigFile))
-			{
-				const files = await findFiles("tsconfig.*", { cwd: dirname(tsConfigFile), absolute: true });
-				if (files.length === 1)
-				{
-					tsConfigFile = files[0];
-				}
-				else {
-					this.handleError(new WebpackError("Invalid path to tsconfig file"));
-					return;
-				}
-			}
-			command = `tsc-alias -p ${tsConfigFile}`;
+			command = `tsc-alias -p ${tsc.path}`;
 			code = await this.exec(command, "typescript path aliasing");
 			if (code !== 0)
 			{
-				this.compilation.errors.push(new WebpackError("typescript path aliasing failed for " + tsConfigFile));
+				this.compilation.errors.push(new WebpackError("typescript path aliasing failed for " + tsc.path));
 				return;
 			}
 		}
@@ -301,7 +350,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 			}
 		}
 
-		logger.write(`   finished execution of typescript build @ italic(${tsConfigFile})`, 3);
+		logger.write(`   finished execution of typescript build @ italic(${tsc.path})`, 3);
 	};
 
 }
@@ -309,10 +358,10 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 
 /**
  * @param {WpBuildApp} app
- * @returns {WpBuildTestSuitePlugin | undefined}
+ * @returns {WpBuildTscPlugin | undefined}
  */
 const testsuite = (app) =>
-	app.isTests && !app.isMain  && app.rc.plugins.testsuite ? new WpBuildTestSuitePlugin({ app }) : undefined;
+	app.isTests || app.build.type === "webapp" ? new WpBuildTscPlugin({ app }) : undefined;
 
 
 module.exports = testsuite;

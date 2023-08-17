@@ -2,8 +2,6 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "baseUrl": ".",
-        "declaration": true,
-        "declarationDir": "types/dist",
         "outDir": "dist",
         "paths": {
 			":env/*": [ "src/lib/env/node/*", "src/webview/common/env/node/*" ],

@@ -7,10 +7,10 @@
  * PLUGINS
  */
 
-/** @typedef {import("./plugin").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
-/** @typedef {import("./plugin").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
-/** @typedef {import("./plugin").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
-/** @typedef {import("./plugin").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
+/** @typedef {import("./plugins").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
+/** @typedef {import("./plugins").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
+/** @typedef {import("./plugins").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
+/** @typedef {import("./plugins").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
 /** @typedef {{ file: string; snapshot?: WebpackSnapshot | null; source?: WebpackRawSource }} CacheResult */
 /**
  * @typedef {Record<string, any>} WpBuildPluginOptions

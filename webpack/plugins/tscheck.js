@@ -27,7 +27,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	constructor(options)
     {
 		const tsForkCheckerPlugins = WpBuildTsCheckPlugin.getTsForkCheckerPlugins(options.app);
-        super(apply(options, { plugins: tsForkCheckerPlugins }), "tsCheck");
+        super(apply(options, { plugins: tsForkCheckerPlugins }), "tsc");
     }
 
 
@@ -40,11 +40,6 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
      */
     apply(compiler)
     {
-		const tsForkCheckerHooks = ForkTsCheckerWebpackPlugin.getCompilerHooks(compiler);
-		tsForkCheckerHooks.error.tap(this.name, this.tsForkCheckerError.bind(this));
-		tsForkCheckerHooks.start.tap(this.name, this.tsForkCheckerStart.bind(this));
-		tsForkCheckerHooks.waiting.tap(this.name, this.tsForkCheckerWaiting.bind(this));
-		tsForkCheckerHooks.issues.tap(this.name, this.tsForkCheckerIssues.bind(this));
 		this.onApply(compiler,
 		{
 			bundleDtsFiles: {
@@ -61,38 +56,38 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	bundle = () =>
 	{
-		const l = this.app.logger,
-			  typesDir = existsSync(this.app.getSrcTypesPath()),
-			  typesDirDist = existsSync(this.app.getRcPath("distTypes"));
-		l.write("dts bundling", 1);
-		l.value("   types directory", typesDir, 2);
-		l.value("   is main tests", this.app.isMainTests, 3);
-		l.value("   already bundled", this.app.global.tsCheck.typesBundled,3);
-		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
-		{
-			const bundleCfg = {
-				name: `${this.app.rc.pkgJson.name}-types`,
-				baseDir: "types/dist",
-				headerPath: "",
-				headerText: "",
-				main: "types/index.d.ts",
-				out: "types.d.ts",
-				outputAsModuleFolder: true,
-				verbose: this.app.rc.log.level === 5
-			};
-			dts.bundle(bundleCfg);
-			this.app.global.tsCheck.typesBundled = true;
-			l.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
-		}
-		else if (!typesDirDist) {
-			l.warning("   types output directory doesn't exist, dts bundling skipped");
-		}
-		else if (!typesDir) {
-			l.warning("   types directory doesn't exist, dts bundling skipped");
-		}
-		else {
-			l.write("   dts bundling skipped", 1);
-		}
+		// const l = this.app.logger,
+		// 	  typesDir = existsSync(this.app.getSrcTypesPath()),
+		// 	  typesDirDist = existsSync(this.app.getRcPath("distTypes"));
+		// l.write("dts bundling", 1);
+		// l.value("   types directory", typesDir, 2);
+		// l.value("   is main tests", this.app.isMainTests, 3);
+		// l.value("   already bundled", this.app.global.tsCheck.typesBundled,3);
+		// if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
+		// {
+		// 	const bundleCfg = {
+		// 		name: `${this.app.rc.pkgJson.name}-types`,
+		// 		baseDir: "types/dist",
+		// 		headerPath: "",
+		// 		headerText: "",
+		// 		main: "types/index.d.ts",
+		// 		out: "types.d.ts",
+		// 		outputAsModuleFolder: true,
+		// 		verbose: this.app.rc.log.level === 5
+		// 	};
+		// 	dts.bundle(bundleCfg);
+		// 	this.app.global.tsCheck.typesBundled = true;
+		// 	l.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
+		// }
+		// else if (!typesDirDist) {
+		// 	l.warning("   types output directory doesn't exist, dts bundling skipped");
+		// }
+		// else if (!typesDir) {
+		// 	l.warning("   types directory doesn't exist, dts bundling skipped");
+		// }
+		// else {
+		// 	l.write("   dts bundling skipped", 1);
+		// }
 	};
 
 

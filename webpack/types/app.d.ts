@@ -96,6 +96,7 @@ declare type WpBuildAppTsConfigCompilerOptions =
     declarations: boolean;
     declarationsDir: string;
     declarationsOnly: boolean;
+    tsBuildInfoFile?: string;
 
 }
 
@@ -106,7 +107,15 @@ declare type WpBuildAppTsConfigJson =
     include: string[];
 }
 
-declare type WpBuildAppTsConfig = { raw: string; json: WpBuildAppTsConfigJson; include: string[]; path: string };
+declare type WpBuildAppTsConfig =
+{
+    raw: string;
+    json: WpBuildAppTsConfigJson;
+    include: string[];
+    path: string
+    dir: string;
+    file: string;
+};
 
 declare interface IWpBuildApp
 {

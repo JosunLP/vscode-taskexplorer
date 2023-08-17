@@ -202,7 +202,7 @@ const execAsync = async (options) =>
             if (out.length > 0)
             {
                 const hdr = logger.withColor(`${program} ${name}:`, exitCode !== 0 ? colors.red : colors.yellow);
-                stderr.forEach((m) =>
+                out.forEach((m) =>
                 {
                     const msg = logger.withColor(m, colors.grey),
                         lvl = m.length <= 256 ? 1 : (m.length <= 512 ? 2 : (m.length <= 1024 ? 3 : 5));
@@ -323,7 +323,7 @@ const getTsConfig = (app, ...xInclude) =>
         if (isArray(json.include)) {
             include.push(...json.include.filter(p => !include.includes(p)).map((path) => resolve(dir, path.replace(/\*/g, ""))));
         }
-	    return { raw, json, include: uniq(include), path: tsConfigPath };
+	    return { raw, json, include: uniq(include), path: tsConfigPath, dir: dirname(tsConfigPath), file: basename(tsConfigPath) };
     }
 };
 
