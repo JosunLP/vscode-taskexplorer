@@ -27,7 +27,7 @@ const resolve = (app) =>
 		  basePath = app.getRcPath("base"),
 		  srcPath = app.getSrcPath({ rel: true, psx: true }),
 		  envGlob = `**/${srcPath}/**/{env,environment,target}/${app.target}/`,
-		  envDirs= findFilesSync(envGlob, { cwd: basePath, absolute: false, dotRelative: false }),
+		  envDirs= findFilesSync(envGlob, { cwd: basePath, absolute: true, dotRelative: false }),
 		  tsConfig = getTsConfig(app);
 
 	const resolve = {
@@ -59,26 +59,33 @@ const resolve = (app) =>
 		});
 	}
 
-	if (tsConfig && tsConfig.json.compilerOptions?.alias)
+	if (tsConfig && tsConfig.json.compilerOptions?.paths)
 	{
-		const _map = (e) => [ e[0].replace(/[\\\/]\*{0,1}$/g, "") , e[1].replace(/[\\\/]\*{0,1}$/g, "") ];
-		_map(Object.entries(tsConfig.json.compilerOptions.alias)).forEach(([ key, path ]) =>
+		const _map = (e) => e.map ((e) => [ e[0].replace(/[\\\/]\*{0,1}$/g, "") , e[1].map(e => e.replace(/[\\\/]\*{0,1}$/g, "")) ]);
+		_map(Object.entries(tsConfig.json.compilerOptions.paths)).forEach(([ key, paths ]) =>
 		{
-			const v = resolve.alias[key];
-			if (!isAbsolute(path)) {
-				path = resolvePath(dirname(tsConfig.path), path);
-			}
-			if (isArray(v))
+			if (isArray(paths))
 			{
-				if (v.includes(path)) {
-					app.logger.warning("tsconfig alias extractions share same key/value");
-				}
-				else {
-					v.push(path);
-				}
-			}
-			else {
-				resolve.alias[key] = [ path ];
+				const v = resolve.alias[key];
+				paths.forEach((p) =>
+				{
+					if (!isAbsolute(p)) {
+						p = resolvePath(dirname(tsConfig.path), p);
+					}
+					if (isArray(v))
+					{
+						if (v.includes(p)) {
+							app.logger.warning("tsconfig alias extractions share same key/value");
+						}
+						else {
+							v.push(p);
+						}
+					}
+					else {
+						resolve.alias[key] = [ p ];
+					}
+
+				});
 			}
 		});
 	}
