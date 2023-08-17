@@ -149,16 +149,6 @@ class WpBuildApp
 
     /**
      * @function
-     * @static
-     * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-     * @param {typedefs.WpBuildRcBuild} build
-     * @returns {typedefs.WpBuildWebpackConfig}
-     */
-    static create = (rc, build) => new WpBuildApp(rc, build).wpc;
-
-
-    /**
-     * @function
      * @async
      */
     dispose = async () =>

@@ -37,26 +37,19 @@
  */
 
 const WpBuildRc = require("./webpack/utils/rc");
-const WpBuildApp = require("./webpack/utils/app");
 const typedefs = require("./webpack/types/typedefs");
-
 /**
  * Exports Webpack build configs to the webpack engine... the build(s) start here. Eenvironment "flags"
  * in arge should be set on the cmd line e.g. `--env=property`, as opposed to `--env property=true`,
  * but any "boolean strings" will be converted to `true` to a booleans
  *
  * @function
+ * @exports
+ * @module
  * @param {typedefs.WpBuildRuntimeEnvArgs} arge Environment variable containing runtime options
  * passed to webpack on the command line (e.g. `webpack --env environment=test --env clean=true`) as
  * opposed to the "correct" way i.e. webpack --env environment=test --env clean`
  * @param {typedefs.WebpackRuntimeArgs} argv Webpack command line args
  * @returns {typedefs.WpBuildWebpackConfig | typedefs.WpBuildWebpackConfig[]}
  */
-const exportConfigs = (arge, argv) =>
-{
-	const rc = new WpBuildRc(argv, arge);
-	return rc.builds.filter(b => !rc.args.name || b.name === rc.args.name || b.name === rc.args.build)
-			        .map(build => WpBuildApp.create(rc, build));
-};
-
-module.exports = exportConfigs;
+module.exports = (arge, argv) => WpBuildRc.create(argv, arge);

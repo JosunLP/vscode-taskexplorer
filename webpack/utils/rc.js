@@ -9,6 +9,7 @@
  */
 
 const JSON5 = require("json5");
+const WpBuildApp = require("./app");
 const { readFileSync } = require("fs");
 const { globalEnv } = require("./global");
 const typedefs = require("../types/typedefs");
@@ -30,6 +31,10 @@ class WpBuildRc
      * @type {typedefs.WpBuildWebpackAliasConfig}
      */
     alias;
+    /**
+     * @type {WpBuildApp[]}
+     */
+    apps;
     /**
      * @type {typedefs.WpBuildCombinedRuntimeArgs}
      */
@@ -165,6 +170,26 @@ class WpBuildRc
 		this.global.verbose = !!this.args.verbosity && this.args.verbosity !== "none";
         this.printBanner(this, arge, argv);
     };
+
+
+    /**
+     * @param {typedefs.WebpackRuntimeArgs} argv
+     * @param {typedefs.WpBuildRuntimeEnvArgs} arge
+     * @returns {typedefs.WpBuildWebpackConfig[]} arge
+     */
+    static create = (argv, arge) =>
+    {
+        const rc = new WpBuildRc(argv, arge);
+        if (arge.build && !arge.name) {
+            arge.name = arge.build;
+        }
+        rc.apps = rc.builds.filter(
+            (b) => (!arge.name  && !arge.build) || b.name === arge.name || b.name === arge.build
+        ).map(
+            (b) => new WpBuildApp(rc, b)
+        );
+        return rc.apps.map(app => app.wpc);
+    }
 
 
 	/**

@@ -278,29 +278,29 @@ const builds =
 		}]);
 
 		const typesDir = app.getSrcTypesPath();
-		if (typesDir && app.rc.args.name) //  && !existsSync(typesDir))
+		if (typesDir && app.rc.args.name && !app.rc.builds.find(b => b.type === "module")) //  && !existsSync(typesDir))
 		{
-			app.wpc.module.rules.unshift(
-			{
-				test: /\.ts$/,
-				include: srcPath,
-				exclude: [
-					/node_modules/, /test[\\/]/, /\.d\.ts$/
-				],
-				use: {
-					loader: "ts-loader",
-					options: {
-						configFile: tsConfig.path,
-						experimentalWatchApi: false,
-						transpileOnly: false,
-						logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-						logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
-						compilerOptions: {
-							emitDeclarationsOnly: true
-						}
-					}
-				}
-			});
+			// app.wpc.module.rules.unshift(
+			// {
+			// 	test: /\.ts$/,
+			// 	include: srcPath,
+			// 	exclude: [
+			// 		/node_modules/, /test[\\/]/, /\.d\.ts$/
+			// 	],
+			// 	use: {
+			// 		loader: "ts-loader",
+			// 		options: {
+			// 			configFile: tsConfig.path,
+			// 			experimentalWatchApi: false,
+			// 			transpileOnly: false,
+			// 			logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+			// 			logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
+			// 			compilerOptions: {
+			// 				emitDeclarationsOnly: true
+			// 			}
+			// 		}
+			// 	}
+			// });
 		}
 	}
 
@@ -374,9 +374,6 @@ const rules = (app) =>
 	if (tsConfig) {
 		app.logger.write("wp configuration rules found tsconfig file", 2);
 		app.logger.value("   tsConfig.path", tsConfig.path, 2);
-	}
-	else {
-
 	}
 
 	app.wpc.module = { rules: [] };
