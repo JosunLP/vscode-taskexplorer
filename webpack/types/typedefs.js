@@ -48,7 +48,6 @@
 /** @typedef {import("../types").WpBuildLogIconSet} WpBuildLogIconSet */
 /** @typedef {import("../types").WpBuildRcPathsKey} WpBuildRcPathsKey */
 /** @typedef {import("../types").WpBuildAppTsConfig} WpBuildAppTsConfig */
-/** @typedef {import("../types").WebpackAliasObject} WebpackAliasObject */
 /** @typedef {import("../types").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
 /** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
 /** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
@@ -60,10 +59,12 @@
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
 /** @typedef {import("../types").WpBuildLogColorMapping} WpBuildLogColorMapping */
+/** @typedef {import("../types").WpBuildRcSourceCodeType} WpBuildRcSourceCodeType */
 /** @typedef {import("../plugin//base").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WpBuildRcEnvironmentBase} WpBuildRcEnvironmentBase */
 /** @typedef {import("../types").WpBuildAppGetPathOptions} WpBuildAppGetPathOptions */
 /** @typedef {import("../types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
+/** @typedef {import("../types").WpBuildWebpackAliasConfig} WpBuildWebpackAliasConfig */
 /** @typedef {import("../types").WpBuildCombinedRuntimeArgs} WpBuildCombinedRuntimeArgs */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
 

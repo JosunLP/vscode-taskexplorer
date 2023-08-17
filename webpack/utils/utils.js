@@ -195,34 +195,30 @@ const execAsync = async (options) =>
 
     child.on("close", (code) =>
     {
-        const clrCode = logger.withColor(code?.toString(), code === 0 ? colors.green : colors.red);
         exitCode = code;
+        const clrCode = logger.withColor(code?.toString(), code === 0 ? colors.green : colors.red);
+        const _out = (name, out) =>
+        {
+            if (out.length > 0)
+            {
+                const hdr = logger.withColor(`${program} ${name}:`, exitCode !== 0 ? colors.red : colors.yellow);
+                stderr.forEach((m) =>
+                {
+                    const msg = logger.withColor(m, colors.grey),
+                        lvl = m.length <= 256 ? 1 : (m.length <= 512 ? 2 : (m.length <= 1024 ? 3 : 5));
+                    logger.log(
+                        `${logPad}${hdr} ${msg}`, lvl, "",
+                        exitCode !== 0 ? logger.icons.color.error : logger.icons.color.warning
+                    );
+                });
+            }
+        };
+        _out("stdout", stdout);
+        _out("stderr", stderr);
         logger.log(`${logPad}${program} completed with exit code bold(${clrCode})`);
     });
 
     await procPromise;
-
-    if (stdout.length > 0) {
-        const hdr = logger.withColor(`${program} stdout:`, colors.white);
-        stderr.forEach((m) =>
-        {
-            const msg = logger.withColor(m, colors.grey);
-            logger.log(`${logPad}${hdr} ${msg}`, m.length <= 256 ? 2 : 5, "", logger.icons.color.star);
-        });
-    }
-
-    if (stderr.length > 0) {
-        const hdr = logger.withColor(`${program} stderr:`, exitCode !== 0 ? colors.red : colors.yellow);
-        stderr.forEach((m) =>
-        {
-            const msg = logger.withColor(m, colors.grey);
-            logger.log(
-                `${logPad}${hdr} ${msg}`, m.length <= 256 ? 2 : 5, "",
-                exitCode !== 0 ? logger.icons.color.error : logger.icons.color.warning
-            );
-        });
-    }
-
     return exitCode;
 };
 

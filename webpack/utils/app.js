@@ -96,6 +96,10 @@ class WpBuildApp
      */
     rcInst;
     /**
+     * @type {typedefs.WpBuildRcSourceCodeType}
+     */
+    source;
+    /**
      * @type {typedefs.WebpackTarget}
      */
     target;
@@ -401,9 +405,9 @@ class WpBuildApp
 
     /**
      * @function
-     * @returns {typedefs.WebpackAliasObject}
+     * @returns {typedefs.WpBuildWebpackAliasConfig}
      */
-    getAliasObject = () => this.build.alias || {};
+    getAliasConfig = () => this.build.alias || {};
 
 
     /**
@@ -465,7 +469,7 @@ class WpBuildApp
      */
     getSrcTypesPath = (options) =>
     {
-        const opts = { stat: true, ...options };
+        const opts = { fstat: true, ...options };
         let path = this.getRcPath("srcTypes", opts);
         if (!path)
         {

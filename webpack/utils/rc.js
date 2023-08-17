@@ -27,7 +27,7 @@ const {
 class WpBuildRc
 {
     /**
-     * @type {typedefs.WebpackAliasObject}
+     * @type {typedefs.WpBuildWebpackAliasConfig}
      */
     alias;
     /**

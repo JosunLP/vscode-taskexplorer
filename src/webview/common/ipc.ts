@@ -99,7 +99,6 @@ export const IpcRegisterAccountMsg = new IpcNotification<IpcAccountRegistrationP
 // TASK MONITOR APP
 //
 
-export type { ITeTask, TeTaskListType };
 export type IMonitorAppTimerMode = "Hide" | "MM:SS" | "MM:SS:MS"  | "MM:SS:MSS";
 
 export interface MonitorAppState extends State

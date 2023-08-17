@@ -12,7 +12,7 @@ const path = require("path");
 const esbuild = require("esbuild");
 const { existsSync } = require("fs");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { getTsConfig, WpBuildApp, WpBuildError, uniq } = require("../utils");
+const { getTsConfig, WpBuildApp, WpBuildError, uniq, merge } = require("../utils");
 
 
 const builds =
@@ -365,13 +365,19 @@ const stripLoggingOptions = () => ({
  */
 const rules = (app) =>
 {
-	const tsConfig = getTsConfig(app);
-	if (!tsConfig) {
+	const tsConfig = merge({}, app.tsConfig);
+
+	if (!tsConfig && app.source === "typescript") {
 		throw WpBuildError.getErrorMissing("tsconfig file", "exports/rules.js", app.wpc);
 	}
 
-	app.logger.write("wp configuration rules found tsconfig file", 2);
-	app.logger.value("   tsConfig.path", tsConfig.path, 2);
+	if (tsConfig) {
+		app.logger.write("wp configuration rules found tsconfig file", 2);
+		app.logger.value("   tsConfig.path", tsConfig.path, 2);
+	}
+	else {
+
+	}
 
 	app.wpc.module = { rules: [] };
 	if (builds[app.build.type])

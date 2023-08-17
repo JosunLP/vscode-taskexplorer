@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import React from "react";
+import { ITeTask } from ":env/ipc";
 import { TeTaskControl } from "./control";
-import { ITeTask, IMonitorAppTimerMode } from "../../../common/ipc";
+import { IMonitorAppTimerMode } from "../../../common/ipc";
 
 interface ControlRefs
 {

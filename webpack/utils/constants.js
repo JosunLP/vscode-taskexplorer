@@ -25,6 +25,17 @@ const WebpackModes = [ "development", "none", "production" ];
 const isWebpackMode = (v) => !!v && WebpackModes.includes(v);
 
 /**
+ * @type {typedefs.WpBuildRcSourceCodeType[]}
+ */
+const WpBuildRcSourceCodeTypes = [ "javascript", "typescript" ];
+
+/**
+ * @param {any} v Variable to check type on
+ * @returns {v is typedefs.WpBuildRcSourceCodeType}
+ */
+const isWpBuildRcSourceCodeType = (v) => !!v && WpBuildRcSourceCodeTypes.includes(v);
+
+/**
  * @type {typedefs.WpBuildRcBuildType[]}
  */
 const WpBuildRcBuildTypes = [ "module", "tests", "types", "webapp", "webmodule" ];
@@ -134,6 +145,7 @@ module.exports = {
     isWpBuildRcBuildType,
     isWpBuildRcPackageJsonProp,
     isWpBuildRcPathsProp,
+    isWpBuildRcSourceCodeType,
     isWpBuildWebpackMode,
     WebpackModes,
     WebpackTargets,
@@ -143,5 +155,6 @@ module.exports = {
     WpBuildRcPackageJsonProps,
     WpBuildRcPathsEnum,
     WpBuildRcPathsProps,
+    WpBuildRcSourceCodeTypes,
     WpBuildWebpackModes
 };

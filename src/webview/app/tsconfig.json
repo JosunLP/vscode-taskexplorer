@@ -1,7 +1,6 @@
 {
 	"extends": "../../../tsconfig.json",
 	"compilerOptions": {
-		"baseUrl": ".",
 		"jsx": "react",
 		"outDir": "../../",
 		// "rootDir": "../..",
@@ -11,8 +10,8 @@
 			"DOM", "DOM.Iterable", "ES2020"
 		],
 		"paths": {
-			":env/*": [ "../../../src/lib/env/web/*", "../../../src/webview/common/env/web/*"  ],
-			":types": [ "../../../types" ]
+			":env/*": [ "src/lib/env/web/*", "src/webview/common/env/web/*"  ],
+			":types": [ "types" ]
 		},
 		"rootDirs": [
 			".",
@@ -20,21 +19,22 @@
 		]
 	},
 	"include": [
-		"./**/*"
+		"./**/*",
+		"../../../types/dist/types.d.ts",
+		"../common/ipc.ts"
 	],
     "exclude": [
-        "**/node_modules",
-        "**/.vscode-test",
-        "**/.vscode",
-        "**/test-fixture",
-        "**/script",
-        "**/types",
-        "**/res",
-        "**/dist",
-        "**/doc",
-        "**/.nyc_output",
-        "**/.coverage",
-        "**/src/test/**/*",
-		"**/env/node/**"
+        "node_modules",
+        ".vscode-test",
+        ".vscode",
+        "test-fixture",
+        "script",
+        "types",
+        "res",
+        "dist",
+        "doc",
+        ".nyc_output",
+        ".coverage",
+        "src/test/**/*"
     ]
 }

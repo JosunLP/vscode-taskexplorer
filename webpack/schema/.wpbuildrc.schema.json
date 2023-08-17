@@ -24,6 +24,9 @@
             "type": "boolean",
             "default": false
         },
+        "source": {
+            "$ref": "#/definitions/WpBuildRcSourceCodeType"
+        },
         "builds": {
             "$ref": "#/definitions/WpBuildRcBuilds"
         },
@@ -117,7 +120,7 @@
             "type": "object",
             "properties": {
                 "alias": {
-                    "$ref": "#/definitions/WebpackAliasObject"
+                    "$ref": "#/definitions/WpBuildWebpackAliasConfig"
                 },
                 "builds": {
                     "$ref": "#/definitions/WpBuildRcBuilds"
@@ -155,6 +158,9 @@
                     "type": "string",
                     "minLength": 3
                 },
+                "source": {
+                    "$ref": "#/definitions/WpBuildRcSourceCodeType"
+                },
                 "type": {
                     "$ref": "#/definitions/WpBuildRcBuildType"
                 },
@@ -168,7 +174,7 @@
                     "$ref": "#/definitions/WebpackTarget"
                 },
                 "alias": {
-                    "$ref": "#/definitions/WebpackAliasObject"
+                    "$ref": "#/definitions/WpBuildWebpackAliasConfig"
                 },
                 "log": {
                     "$ref": "#/definitions/WpBuildRcLog"
@@ -724,6 +730,18 @@
                 }
             }
         },
+        "WpBuildRcSourceCodeType": {
+            "type": "string",
+            "default": "typescript",
+            "oneOf": [
+                {
+                    "const": "javascript"
+                },
+                {
+                    "const": "typescript"
+                }
+            ]
+        },
         "WpBuildWebpackEntryObject": {
             "type": "object",
             "properties": {
@@ -881,7 +899,7 @@
             ],
             "additionalProperties": false
         },
-        "WpBuildAliasValue": {
+        "WpBuildWebpackAliasValue": {
             "anyOf": [
                 {
                     "$ref": "#/definitions/DirectoryPathGlob"
@@ -899,12 +917,12 @@
                 }
             ]
         },
-        "WebpackAliasObject": {
+        "WpBuildWebpackAliasConfig": {
             "type": "object",
             "minProperties": 0,
             "patternProperties": {
                 "^[a-zA-Z\\:\\@][\\w\\:\\@]+$": {
-                    "$ref": "#/definitions/WpBuildAliasValue"
+                    "$ref": "#/definitions/WpBuildWebpackAliasValue"
                 }
             },
             "propertyNames": {
@@ -915,7 +933,16 @@
                 {
                     "alias":
                     {
-                        ":env/*": "src/lib/env/node/*",
+                        ":env": "src/lib/env/node",
+                        ":types": "types"
+                    }
+                },
+                {
+                    "alias":
+                    {
+                        ":env": [
+                            "src/lib/env/web", "src/webapp/tools/env/web"
+                        ],
                         ":types": "types"
                     }
                 }

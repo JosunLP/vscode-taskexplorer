@@ -31,7 +31,7 @@ const resolve = (app) =>
 		  tsConfig = getTsConfig(app);
 
 	const resolve = {
-		alias: app.getAliasObject(),
+		alias: merge({}, app.getAliasConfig()),
 		extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
 	};
 
