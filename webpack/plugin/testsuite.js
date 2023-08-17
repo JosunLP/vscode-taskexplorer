@@ -145,7 +145,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 		let command = `npx tsc -p ${tsConfigFile}`; // babel.join(" ");
 		logger.write(`   execute typescript build @ italic(${tsConfigFile})`, 1);
 
-		let code = await this.exec(command, "typescript build");
+		let code = await this.exec(command, "tsc");
 		if (code !== 0)
 		{
 			this.compilation.errors.push(new WebpackError("typescript build failed for " + tsConfigFile));
@@ -174,7 +174,7 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 			}
 			if (!existsSync(tsConfigFile))
 			{
-				const files = await findFiles("tsconfig.*", { cwd: dirname(tsConfigFile), absolute: true,  });
+				const files = await findFiles("tsconfig.*", { cwd: dirname(tsConfigFile), absolute: true });
 				if (files.length === 1)
 				{
 					tsConfigFile = files[0];

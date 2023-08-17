@@ -283,8 +283,9 @@ class WpBuildConsoleLogger
      */
     static printBanner = (name, version, subtitle, cb, logger, ...colors) =>
     {
+        const instLogger = !!logger;
         logger = logger || new WpBuildConsoleLogger({
-            envTag1: "wpbuild", envTag2: "rctypes", colors: { default: "grey" }, level: 5, pad: { value: 100 }
+            envTagDisable: true, envTag1: "wpbuild", envTag2: "rctypes", colors: { default: "grey" }, level: 5, pad: { value: 100 }
         });
         logger.sep();
         // console.log(gradient.rainbow(spmBanner(version), {interpolation: "hsv"}));
@@ -297,8 +298,10 @@ class WpBuildConsoleLogger
             logger.write(gradient("purple", "blue", "pink", "green", "purple", "blue").multiline(subtitle));
             logger.sep();
         }
-        cb?.(logger);
-        logger.dispose();
+        if (!instLogger) {
+            cb?.(logger);
+            logger.dispose();
+        }
     };
 
 
@@ -317,7 +320,7 @@ class WpBuildConsoleLogger
      */
     static spmBanner = (name, version) =>
     {
-        const vPadStart = 8 - version.length,
+        const vPadStart = 8 - version.length + (version.length % 2 === 0 ? 1 : 0),
               vPadEnd = 8 - version.length,
               v = ("".padStart(vPadStart) + version + "".padEnd(vPadEnd)).slice(0, 11),
               n = "".padEnd(29 - (name.length / 2)) + name;
@@ -540,10 +543,10 @@ class WpBuildConsoleLogger
                   envMsgClr = color || this.colors[opts.colors.default || "grey"],
                   envMsg = color || !(/\x1B\[/).test(msg) || envMsgClr[0] !== this.colorMap.system ?
                             this.withColor(this.format(msg), envMsgClr) : this.format(msg),
-                  envTag = (this.withColor("[", envTagClr) + this.options.envTag1 + this.withColor("][", envTagClr) +
-                            this.withColor(this.options.envTag2, envTagMsgClr) + this.withColor("]", envTagClr))
-                            .padEnd((opts.pad.envTag || 25) + envTagClrLen);
-            console.log(`${this.options.pad.base || ""}${pad}${isString(icon) ? icon : this.infoIcon} ${envTag}${envMsg.trimEnd()}`);
+                  envTag = !opts.envTagDisable ? (" " + this.tag(opts.envTag1, envTagClr, envTagMsgClr) +
+                            this.tag(opts.envTag2, envTagClr, envTagMsgClr)).padEnd((opts.pad.envTag || 25) + envTagClrLen) : "",
+                  envIcon = !opts.envTagDisable ? (isString(icon) ? icon : this.infoIcon) : "";
+            console.log(`${this.options.pad.base || ""}${pad}${envIcon} ${envTag}${envMsg.trimEnd()}`);
         }
     };
 

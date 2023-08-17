@@ -27,9 +27,7 @@ const builds =
 	{
 		const srcPath = app.getSrcPath(),
 			  buildPath = app.getRcPath("base");
-		if (app.isTests && !app.rc.builds.find(b => b.type === "tests") && !app.rcInst.builds.find(b => b.type === "tests")) {
-			builds.tests(app);
-		}
+
 		app.wpc.module.rules.push(
 		{
 			test: /\.ts$/,
@@ -320,6 +318,10 @@ const rules = (app) =>
 {
 	app.wpc.module = { rules: [] };
 	builds[app.build.type](app);
+
+	if (app.isTests && !app.buildEnvHasTests()) {
+		builds.tests(app);
+	}
 };
 
 

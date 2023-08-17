@@ -14,6 +14,9 @@ const { apply, WpBuildError } = require("../utils");
 /** @typedef {import("../types").WebpackEntry} WebpackEntry */
 
 
+const globTestSuiteFiles= `**/*.{test,tests,spec,specs}.ts`;
+
+
 const builds =
 {
 	/**
@@ -23,20 +26,17 @@ const builds =
 	 */
 	module: (app) =>
 	{
-		const contextRel = app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true });
+		const srcPath = app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true });
 		app.wpc.entry = {
 			[ app.build.name ]: {
-				import: `${contextRel}/${app.build.name}.ts`,
+				import: `${srcPath}/${app.build.name}.ts`,
 				layer: "release"
 			},
 			[ `${app.build.name}.debug` ]: {
-				import: `${contextRel}/${app.build.name}.ts`,
+				import: `${srcPath}/${app.build.name}.ts`,
 				layer: "debug"
 			}
 		};
-		if (app.isTests && !app.rc.builds.find(b => b.type === "tests") && !app.rcInst.builds.find(b => b.type === "tests")) {
-			builds.tests(app, true);
-		}
 	},
 
 
@@ -48,36 +48,49 @@ const builds =
 	 */
 	tests: (app, fromMain) =>
 	{
-		const contextRel = app.getContextPath({ rel: true, ctx: true, dot: true, psx: true }) + (fromMain ? "/test" : "");
-		app.wpc.entry = apply(app.wpc.entry || {},
-		{
-			"runTest": {
-				import: `${contextRel}/runTest.ts`,
-				dependOn: fromMain ? [ app.build.name, `${app.build.name}.debug` ] : undefined
-			},
-			"control": {
-				import: `${contextRel}/control.ts`,
-				dependOn: "runTest"
-			},
-			"suite/index": {
-				import: `${contextRel}/suite/index.ts`,
-				dependOn: "runTest"
-			},
-			...builds.testSuite(app.getContextPath({ rel: true, psx: true }) + (fromMain ? "/test" : ""))
-		});
+		const testsPathAbs = app.getSrcTestsPath();
+		app.wpc.entry = {
+			...builds.testRunner(testsPathAbs, app, fromMain),
+			...builds.testSuite(testsPathAbs)
+		};
 	},
 
 
 	/**
 	 * @function
 	 * @private
-	 * @param {string} contextAbs
+	 * @param {string} testsPathAbs
+	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {boolean} [fromMain]
 	 */
-	testSuite: (contextAbs) =>
+	testRunner: (testsPathAbs, app, fromMain) =>
 	{
 		return glob.sync(
-			`**/*.{test,spec}.ts`, {
-				absolute: false, cwd: contextAbs, dotRelative: false, posix: true
+			`**/*.ts`, {
+				absolute: false, cwd: testsPathAbs, dotRelative: false, posix: true, ignore: [ globTestSuiteFiles ]
+			}
+		)
+		.reduce((obj, e)=>
+		{
+			obj[e.replace(".ts", "")] = {
+				import: `./${e}`,
+				dependOn: fromMain ? [ app.build.name, `${app.build.name}.debug` ] : undefined
+			};
+			return obj;
+		}, {});
+	},
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {string} testsPathAbs
+	 */
+	testSuite: (testsPathAbs) =>
+	{
+		return glob.sync(
+			globTestSuiteFiles, {
+				absolute: false, cwd: testsPathAbs, dotRelative: false, posix: true
 			}
 		)
 		.reduce((obj, e)=>
@@ -120,6 +133,9 @@ const entry = (app) =>
 	else if (builds[app.build.type])
 	{
 		builds[app.build.type](app);
+		if (app.isTests && !app.buildEnvHasTests()) {
+			builds.tests(app, true);
+		}
 	}
 	else {
 		throw new WpBuildError("entry object or path is invalid", "exports/entry.js");

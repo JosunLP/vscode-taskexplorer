@@ -73,10 +73,9 @@ class WpBuildUploadPlugin extends WpBuildPlugin
         //
         const app = this.app,
               logger = app.logger,
-              toUploadPath = join(app.paths.temp, app.mode), // /temp/<env>/<env>
-              logIcon = logger.withColor(logger.icons.info, logger.colors.yellow);
+              toUploadPath = join(app.paths.temp, app.mode);
 
-        logger.write("upload debug support files", 1, "", logIcon);
+        logger.write("upload debug support files", 1);
         this.compilation = compilation;
         if (!existsSync(toUploadPath)) {
             await mkdir(toUploadPath);
@@ -90,13 +89,13 @@ class WpBuildUploadPlugin extends WpBuildPlugin
                 if (asset && chunk.name && (app.global.runtimeVars.next[chunk.name] !== app.global.runtimeVars.current[chunk.name] || !app.global.runtimeVars.previous[chunk.name]))
                 {
                     const distPath = this.app.getDistPath();
-                    logger.value("   queue asset for upload", logger.tag(file), 2, "", logIcon);
+                    logger.value("   queue asset for upload", logger.tag(file), 2);
                     logger.value("      asset info", JSON.stringify(asset.info), 4);
                     await copyFile(join(distPath, file), join(toUploadPath, file));
                     if (asset.info.related?.sourceMap)
                     {
                         const sourceMapFile = asset.info.related.sourceMap.toString();
-                        logger.value("   queue sourcemap for upload", logger.tag(sourceMapFile), 2, "", logIcon);
+                        logger.value("   queue sourcemap for upload", logger.tag(sourceMapFile), 2);
                         if (app.mode === "production") {
                             logger.value("   remove production sourcemap from distribution", sourceMapFile, 3);
                             await rename(join(distPath, sourceMapFile), join(toUploadPath, sourceMapFile));
@@ -107,17 +106,17 @@ class WpBuildUploadPlugin extends WpBuildPlugin
                     }
                 }
                 else /* istanbul ignore else */if (asset) {
-                    logger.value("   unchanged, skip asset upload", logger.tag(file), 2, "", logIcon);
+                    logger.value("   unchanged, skip asset upload", logger.tag(file), 2);
                 }
                 else {
-                    logger.value("   unknown error, skip asset upload", logger.tag(file), 2, "", logIcon);
+                    logger.value("   unknown error, skip asset upload", logger.tag(file), 2);
                 }
             }
         }
         const filesToUpload = await readdir(toUploadPath);
         if (filesToUpload.length === 0)
         {
-            logger.write("no assets to upload", 1, "", logIcon);
+            logger.write("no assets to upload", 1, "");
             return;
         }
 
@@ -137,7 +136,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
             `mkdir ${rBasePath}/${app.rc.name}`,
             `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}`,
             `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}/${app.mode}`,
-            `rm -f ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}/${app.mode}/*.*`,
+            `rm -f ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}/${app.mode}/*.*`
         ];
         if (app.mode === "production") { plinkCmds.pop(); }
 
@@ -161,23 +160,23 @@ class WpBuildUploadPlugin extends WpBuildPlugin
 
         await copyFile(join(this.app.getRcPath("base"), "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
 
-        logger.write(`   upload resource files to ${host}`, 1, "", logIcon);
+        logger.write(`   upload resource files to ${host}`, 1, "");
         try
         {
-            logger.write("   plink: create / clear remmote directory", 1, "", logIcon);
+            logger.write("   plink: create / clear remmote directory", 1);
             await this.exec("plink " + plinkArgs.join(" "), "plink");
-            logger.write("   pscp:  upload files", 1, "", logIcon);
+            logger.write("   pscp:  upload files", 1, "");
             await this.exec("pscp " + pscpArgs.join(" "), "pscp");
             filesToUpload.forEach((f) =>
-                logger.write(`   ${logger.icons.color.successTag} ${logger.withColor(`uploaded ${basename(f)}`, logger.colors.grey)}`, 1, "", logIcon)
+                logger.write(`   ${logger.icons.color.successTag} ${logger.withColor(`uploaded ${basename(f)}`, logger.colors.grey)}`, 1)
             );
-            logger.write("successfully uploaded resource files", 1, "", logIcon);
+            logger.write("successfully uploaded resource files", 1);
         }
         catch (e)
         {
             logger.error("error uploading resource files:");
             filesToUpload.forEach((f) =>
-                logger.write(`   ${logger.icons.color.errorTag} ${logger.withColor(`upload ${basename(f)} failed`, logger.colors.grey)}`, 1, "", logIcon)
+                logger.write(`   ${logger.icons.color.errorTag} ${logger.withColor(`upload ${basename(f)} failed`, logger.colors.grey)}`, 1)
             );
             logger.error(e);
         }

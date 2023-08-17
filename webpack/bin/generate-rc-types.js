@@ -11,9 +11,9 @@
 const { EOL } = require("os");
 const { existsSync } = require("fs");
 const { resolve, join } = require("path");
+const { readFile, writeFile } = require("fs/promises");
 const WpBuildConsoleLogger = require("../utils/console");
 const { capitalize, execAsync } = require("../utils/utils");
-const { unlink, readFile, writeFile } = require("fs/promises");
 const description = "Provides types macthing the .wpbuildrc.json configuration file schema";
 const autoGenMessage = "This file was auto generated using the 'json-to-typescript' utility";
 
@@ -36,7 +36,8 @@ const requiredProperties = {
     plugins: "WpBuildRcBuild",
     target: "WpBuildRcBuild",
     type: "WpBuildRcBuild",
-    base: "WpBuildRcPaths"
+    base: "WpBuildRcPaths",
+    temp: "WpBuildRcPaths"
 };
 
 const outputDtsFile = "rc.d.ts";
@@ -64,9 +65,13 @@ let logger;
 //
 // Command line runtime wrapper
 //
-const cliWrap = exe => argv => { exe(argv).catch(e => { try { (logger || console).error(e); } catch {} process.exit(1); }); };
+const cliWrap = (exe) => argv => { exe(argv).catch(e => { try { (logger || console).error(e); } catch {} process.exit(1); }); };
 
 
+/**
+ * @param {string} type
+ * @returns {boolean}
+ */
 const isBaseType = (type) => [
         "WpBuildRcExports", "WpBuildRcLog", "WpBuildRcLogPad", "WpBuildRcPaths",
         "WpBuildRcPlugins", "WpBuildRcBuild", "WpBuildLogTrueColor", "WpBuildRcLogColors"
@@ -218,17 +223,20 @@ const writeConstantsJs = async (hdr, data) =>
         data = data.replace(/ \* the 'json\-to\-typescript' utility(?:[^]+?) \*\//, ` * the 'json-to-typescript' utility${EOL} */`);
 
         await writeFile(constantsPath, data);
-        logger.success(`   created ${constantsFile} (${constantsPath})`);
 
+        logger.write(`      validating ${constantsFile}`);
         const code = await execAsync({
             logger,
-            logPad: "   ",
+            logPad: "      ",
             program: "tsc",
             execOptions: { cwd: constantsDir },
             command: `npx tsc --noEmit --skipLibCheck --allowJs ./${constantsFile}`
         });
 
-        if (code !== 0) {
+        if (code === 0) {
+            logger.success(`   created ${constantsFile} (${constantsPath})`);
+        }
+        else {
             logger.error(`   created ${constantsFile}  but tsc types validation failed`);
             await writeFile(constantsPath, constantsData);
             logger.error(`   previous content restored (${constantsPath})`);
@@ -295,6 +303,7 @@ cliWrap(async () =>
         throw new Error(`Output file '${outputDtsFile}' does not exist`);
     }
 
+    logger.write(`      validating ${outputDtsFile}`);
     code = await execAsync({
         logger,
         logPad: "   ",
@@ -303,12 +312,13 @@ cliWrap(async () =>
         command: `npx tsc --noEmit --skipLibCheck ./${outputDtsFile}`
     });
 
-    if (code !== 0) {
+    if (code === 0) {
+        logger.success(`   created ${outputDtsFile} (${outputDtsPath})`);
+    }
+    else {
         await writeFile(outputDtsPath, data);
         throw new Error(`created ${outputDtsFile} but tsc types validation failed, previous content restored`);
     }
-
-    logger.success(`   created ${outputDtsFile} (${outputDtsPath})`);
 
     data = await readFile(outputDtsPath, "utf8");
     data = await parseTypesDts(hdr, data);
@@ -316,4 +326,5 @@ cliWrap(async () =>
     await writeIndexJs();
 
     logger.write("rc types and typings created successfully");
+    logger.write(" ");
 })();

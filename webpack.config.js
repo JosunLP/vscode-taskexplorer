@@ -55,7 +55,8 @@ const typedefs = require("./webpack/types/typedefs");
 const exportConfigs = (arge, argv) =>
 {
 	const rc = new WpBuildRc(argv, arge);
-	return rc.builds.map(build => WpBuildApp.create(rc, build));
+	return rc.builds.filter(b => !rc.args.name || b.name === rc.args.name || b.name === rc.args.build)
+			        .map(build => WpBuildApp.create(rc, build));
 };
 
 module.exports = exportConfigs;

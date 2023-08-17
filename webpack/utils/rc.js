@@ -111,9 +111,6 @@ class WpBuildRc
      */
     constructor(argv, arge)
     {
-        const buildName = arge.name || /** @deprecated */arge.build;
-        this.global = globalEnv;
-
         Object.keys(arge).filter(k => isString(arge[k]) && /true|false/i.test(arge[k])).forEach((k) =>
         {
             arge[k] = arge[k].toLowerCase() === "true";
@@ -123,8 +120,9 @@ class WpBuildRc
         {
             args: apply({}, pickNot(arge, "build"), argv),
             mode: this.getMode(arge, argv, true),
-            name: buildName,
-            type: arge.type
+            name: arge.name || /** @deprecated */arge.build,
+            type: arge.type,
+            global: globalEnv
         });
 
         if (!isWpBuildWebpackMode(this.mode)) {
@@ -141,15 +139,14 @@ class WpBuildRc
             ...WpBuildRcPackageJsonProps
         );
 
-        this.builds = this.builds || [];
-        this.prep(buildName, argv, this.builds);
+        this.validateRc(this);
+
+        this.prepBuilds(argv, this.builds);
         WpBuildWebpackModes.filter(m => m !== "none" && !!this[m].builds).forEach(
-            (m) => this.prep(buildName, argv, this[m].builds, m)
+            (m) => this.prepBuilds(argv, this[m].builds, m)
         );
 
-        this.applyBuilds(buildName);
-
-		globalEnv.verbose = !!this.args.verbosity && this.args.verbosity !== "none";
+        this.applyBuilds();
 
         // if (argv.mode && !isWebpackMode(this.mode))
         // {
@@ -159,6 +156,7 @@ class WpBuildRc
         //     }
         // }
 
+		this.global.verbose = !!this.args.verbosity && this.args.verbosity !== "none";
         this.printBanner(this, arge, argv);
     };
 
@@ -166,33 +164,33 @@ class WpBuildRc
 	/**
 	 * @function
 	 * @private
-	 * @param {string | undefined} buildName
 	 */
-    applyBuilds = (buildName) =>
+    applyBuilds = () =>
     {
         /**
-         * @param {typedefs.WpBuildRcEnvironmentBase} rc
+         * @param {typedefs.WpBuildRcEnvironmentBase} rcChild
+         * @param {boolean} [isModeRc]
          */
-        const _applyOverrides = (rc) =>
+        const _applyOverrides = (rcChild, isModeRc) =>
         {
-            if (isObject(rc.log))
+            if (isObject(rcChild.log))
             {
-                if (rc.log.color) {
-                    this.log.colors.valueStar = rc.log.color;
-                    this.log.colors.buildBracket = rc.log.color;
-                    this.log.colors.tagBracket = rc.log.color;
-                    this.log.colors.infoIcon = rc.log.color;
+                merge(this.log, rcChild.log);
+                if (this.log.color) {
+                    this.log.colors.valueStar = rcChild.log.color;
+                    this.log.colors.buildBracket = rcChild.log.color;
+                    this.log.colors.tagBracket = rcChild.log.color;
+                    this.log.colors.infoIcon = rcChild.log.color;
                 }
-                merge(this.log, rc.log);
             }
-            if (isObject(rc.paths)) {
-                apply(this.paths, rc.paths);
+            if (isObject(rcChild.paths)) {
+                apply(this.paths, rcChild.paths);
             }
-            if (isObject(rc.exports)) {
-                apply(this.exports, rc.exports);
+            if (isObject(rcChild.exports)) {
+                apply(this.exports, rcChild.exports);
             }
-            if (isObject(rc.plugins)) {
-                apply(this.plugins, rc.plugins);
+            if (isObject(rcChild.plugins)) {
+                apply(this.plugins, rcChild.plugins);
             }
         };
 
@@ -204,18 +202,26 @@ class WpBuildRc
             {
                 modeRc.builds.forEach((modeBuild) =>
                 {
-                    const baseBuild = this.builds.find(base => base.name === modeBuild.name);
+                    let baseBuild = this.builds.find(base => base.name === modeBuild.name);
                     if (baseBuild) {
-                        _applyOverrides(modeBuild);
+                        this.validateRc(baseBuild);
                         merge(baseBuild, modeBuild);
                     }
-                    else if (!buildName || modeBuild.name === buildName) {
-                        this.builds.push(merge({}, modeBuild));
+                    else {
+                        baseBuild = merge({}, modeBuild);
+                        this.validateRc(baseBuild);
+                        this.builds.push(baseBuild);
+                    }
+                    if (modeBuild.name === this.args.name) {
                         _applyOverrides(modeBuild);
                     }
                 });
             }
         }
+
+        // if (buildName) {
+        //     this.build = this.builds.find(b => b.name = buildName);
+        // }
 
         // WpBuildWebpackModes.forEach(m => delete this[m]);
     };
@@ -284,20 +290,12 @@ class WpBuildRc
     /**
      * @function
      * @private
-     * @param {string | undefined} buildName
      * @param {typedefs.WebpackRuntimeArgs} argv
      * @param {typedefs.WpBuildRcBuilds} builds
-     * @param {string | undefined} [modeBuild]
+     * @param {typedefs.WpBuildWebpackMode | undefined} [modeBuild]
      */
-    prep = (buildName, argv, builds, modeBuild) =>
-    {   //
-        // If build name was specified on the cmd line, remove all other builds from rc defintion
-        //
-        if (buildName) {
-            builds.slice().reverse().forEach(
-                (b, i, a) => builds.splice(a.length - 1 - i, b.name !== buildName ? 1 : 0)
-            );
-        }
+    prepBuilds = (argv, builds, modeBuild) =>
+    {
         for (const build of builds)
         {
             // build.name = build.name || buildName || "module";
@@ -373,6 +371,20 @@ class WpBuildRc
             logger.write("   Env   : " + logger.withColor(JSON.stringify(arge), logger.colors.grey), 1, "", 0, logger.colors.white);
             logger.sep();
         });
+    };
+
+
+    validateRc = (rc) =>
+    {
+        if (!rc.log.colors) {
+            rc.log.colors = { default: "grey" };
+        }
+        else if (!rc.log.colors.default) {
+            rc.log.colors.default = "grey";
+        }
+        if (!rc.builds) {
+            rc.builds = [];
+        }
     };
 
 }

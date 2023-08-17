@@ -29,7 +29,7 @@ import {
 
 declare const __WPBUILD__: any;
 
-declare type WpBuildAppGetPathOptions = { rel?: boolean; ctx?: boolean; dot?: boolean; psx?: boolean; stat?: boolean; };
+declare type WpBuildAppGetPathOptions = { rel?: boolean; ctx?: boolean; dot?: boolean; psx?: boolean; stat?: boolean; path?: string };
 
 declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<string, any>; cacheDir: string; verbose: boolean; [ key: string ]: any };
 

@@ -55,8 +55,13 @@
             "type": "object",
             "title": "WpBuildRcVsCode",
             "properties": {
-                "testsEntry": {
-                    "$ref": "#/definitions/FilePathRelative"
+                "extension": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "languageServer": {
+                    "type": "boolean",
+                    "default": false
                 }
             },
             "additionalProperties": false,
@@ -293,6 +298,11 @@
                     "default": "info",
                     "minimum": 2,
                     "maxLength": 15
+                },
+                "envTagDisable": {
+                    "type": "boolean",
+                    "default": false,
+                    "readOnly": true
                 },
                 "level": {
                     "type": "number",

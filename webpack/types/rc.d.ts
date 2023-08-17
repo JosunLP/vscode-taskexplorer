@@ -101,6 +101,7 @@ export declare type WpBuildRcLog =
     colors: WpBuildRcLogColors;
     envTag1?: string;
     envTag2?: string;
+    envTagDisable?: boolean;
     level: WpBuildLogLevel;
     pad: WpBuildRcLogPad;
     timestamp?: ("mm:ss" | "mm:ss:sss" | "hh:mm:ss" | "hh:mm:ss:sss") & string;
@@ -151,7 +152,7 @@ export declare type WpBuildRcPaths =
     srcTypes?: string;
     srcWebApp?: string;
     srcWebModule?: string;
-    temp?: string;
+    temp: string;
     tsconfig?: string;
 };
 export declare type WpBuildRcPathsKey = keyof WpBuildRcPaths;
@@ -214,7 +215,8 @@ export declare type WpBuildRcEnvironment =
 
 export declare type WpBuildRcVsCode = 
 {
-    testsEntry?: FilePathRelative;
+    extension?: boolean;
+    languageServer?: boolean;
 };
 
 export declare type WpBuildRcPackageJson = 

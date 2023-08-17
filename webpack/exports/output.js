@@ -1,6 +1,5 @@
 // @ts-check
 
-const { join, resolve } = require("path");
 const { apply } = require("../utils/utils");
 const { RegexTestsChunk } = require("../utils");
 
@@ -22,11 +21,9 @@ const { RegexTestsChunk } = require("../utils");
  */
 const output = (app) =>
 {
-	const path = app.getDistPath();
-
 	app.wpc.output =
 	{
-		path,
+		path: app.getDistPath(),
 		filename: "[name].js",
 		compareBeforeEmit: true,
 		hashDigestLength: 20,

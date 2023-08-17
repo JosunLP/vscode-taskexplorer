@@ -17,7 +17,12 @@ const WpBuildConsoleLogger = require("../utils/console");
 //
 // Run from script directtory so we work regardless of where cwd is set
 //
-// if (process.cwd() !== __dirname) { process.chdir(__dirname); }
+
+/** @type {WpBuildConsoleLogger} */
+let logger;
+
+let localPath = ".wpbuildrc.schema.json",
+    remotePath = resolve(__dirname, "..", "schema", ".wpbuildrc.schema.json");
 
 const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
       user = process.env.WPBUILD_APP1_SSH_UPLOAD_USER,
@@ -27,14 +32,10 @@ const host = process.env.WPBUILD_APP1_SSH_UPLOAD_HOST,
       version = require("../package.json").version,
       args = process.argv.splice(2);
 
-let localPath = ".wpbuildrc.schema.json",
-    remotePath = resolve(__dirname, "..", "schema", ".wpbuildrc.schema.json");
-
-
-if (args.length === 1) {
+if (args.length === 1)
+{
     remotePath = args[0];
 }
-
 else if (args.length > 1)
 {
     args.forEach((v, i, a) =>
@@ -54,10 +55,11 @@ else if (args.length > 1)
     });
 }
 
+
 //
 // Command line runtime wrapper
 //
-const cliWrap = exe => argv => { exe(argv).catch(e => { try { console.error(e); } catch {} process.exit(1); }); };
+const cliWrap = (exe) => argv => { exe(argv).catch(e => { try { (logger || console).error(e); } catch {} process.exit(1); }); };
 
 
 cliWrap(async () =>
@@ -71,7 +73,7 @@ cliWrap(async () =>
         throw new Error("Required environment variables for upload are not set");
     }
 
-    const logger = new WpBuildConsoleLogger({
+    logger = new WpBuildConsoleLogger({
         envTag1: "wpbuild", envTag2: "rctypes", colors: { default: "grey" }, level: 5, pad: { value: 100 }
     });
     logger.printBanner("generate-rc-types.js", "0.0.1", `generating rc configuration file type definitions`);
@@ -99,24 +101,21 @@ cliWrap(async () =>
         `${user}@${host}:"${rBasePath}/wpbuild/v${version}/.wpbuildrc.schema.json"` // uploaded, and created if not exists
     ];
 
-    try
-    {
-        logger.log("plink: create / clear remmote directory");
-        await execAsync({
-            logger,
-            logPad: "   ",
-            execOptions: { cwd: resolve(__dirname, "..", "schema") },
-            command: "plink " + plinkArgs.join(" ")
-        });
-        logger.log("pscp: upload files");
-        await execAsync({
-            logger,
-            logPad: "   ",
-            execOptions: { cwd: resolve(__dirname, "..", "schema") },
-            command: "pscp " + pscpArgs.join(" ")
-        });
-        logger.log("successfully uploaded rc schema");
-    }
-    catch (e) { logger.error(e); }
+    logger.log("plink: create / clear remmote directory");
+    await execAsync({
+        logger,
+        logPad: "   ",
+        execOptions: { cwd: resolve(__dirname, "..", "schema") },
+        command: "plink " + plinkArgs.join(" ")
+    });
+    logger.log("pscp: upload files");
+    await execAsync({
+        logger,
+        logPad: "   ",
+        execOptions: { cwd: resolve(__dirname, "..", "schema") },
+        command: "pscp " + pscpArgs.join(" ")
+    });
+    logger.log("successfully uploaded rc schema");
+    logger.write(" ");
 
 })();

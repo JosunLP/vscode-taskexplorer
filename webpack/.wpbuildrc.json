@@ -45,15 +45,13 @@
     {
         "builds": [
             { "name": "taskexplorer" },
-            {
-                "name": "webapp"
-            }
+            { "name": "webapp" }
         ]
     },
     "testproduction":
     {
         "builds": [
-            { "name": "taskexplorer", "mode": "testproduction" },
+            { "name": "taskexplorer" },
             { "name": "webapp", "mode": "production" },
             {
                 "name": "tests",
@@ -61,6 +59,7 @@
                     "color": "yellow"
                 },
                 "paths": {
+                    "ctx": "src/test",
                     "dist": "dist/test",
                     "src": "src/tests"
                 }
@@ -74,16 +73,16 @@
     },
     "production":
     {
-        "builds": []
+        "builds": [
+            { "name": "taskexplorer" },
+            { "name": "webapp" }
+        ]
     },
     "test":
     {
         "builds": [
-            { "name": "taskexplorer", "mode": "test" },
-            {
-                "name": "webapp",
-                "mode": "development"
-            },
+            { "name": "taskexplorer" },
+            { "name": "webapp", "mode": "development" },
             {
                 "name": "tests",
                 "log": {
@@ -174,6 +173,7 @@
         "wait": false
     },
     "vscode": {
-        "testsEntry": "./src/test/runTest.ts"
+        "extension": true,
+        "languageServer": false
     }
 }

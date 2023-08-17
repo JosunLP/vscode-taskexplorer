@@ -6,60 +6,30 @@
     "publicInfoProject": true,
     "builds": [
         {
-            "name": "taskexplorer",
+            "name": "main",
             "target": "node",
             "type": "module",
             "log": {
                 "color": "cyan"
-            }
-        },
-        {
-            "name": "webapp",
-            "target": "webworker",
-            "type": "webapp",
-            "entry": {
-                "home": "./home/home.ts",
-                "license": "./license/license.ts",
-                "monitor": "./monitor/monitor.tsx",
-                "parsingReport": "./parsingReport/parsingReport.ts",
-                "releaseNotes": "./releaseNotes/releaseNotes.ts",
-                "taskCount": "./taskCount/taskCount.ts",
-                "taskDetails": "./taskDetails/taskDetails.ts",
-                "taskUsage": "./taskUsage/taskUsage.ts",
-                "welcome": "./welcome/welcome.ts"
-            },
-            "log": {
-                "color": "magenta"
-            },
-            "paths": {
-                "ctx": "src/webview/app",
-                "dist": "res",
-                "src": "src/webview/app"
             }
         }
     ],
     "development":
     {
         "builds": [
-            { "name": "taskexplorer" },
-            {
-                "name": "webapp"
-            }
-        ],
-        "log": {
-            "color": "blue"
-        }
+            { "name": "main" }
+        ]
     },
     "testproduction":
     {
         "builds": [
-            { "name": "taskexplorer", "mode": "testproduction" },
-            { "name": "webapp", "mode": "production" },
+            { "name": "main" },
             {
                 "name": "tests",
                 "log": {
-                    "colors": {
-                        "buildBracket": "cyan"
+                    "color": "yellow",
+                    "pad": {
+                        "value": 60
                     }
                 },
                 "paths": {
@@ -67,43 +37,32 @@
                     "src": "src/tests"
                 }
             }
-        ],
-        "log": {
-            "color": "yellow",
-            "pad": {
-                "value": 60
-            }
-        }
+        ]
     },
     "production":
     {
         "builds": [
-            { "name": "taskexplorer" }
-        ],
-        "log": {
-            "color": "green"
-        }
+            { "name": "main" }
+        ]
     },
     "test":
     {
         "builds": [
-            { "name": "taskexplorer", "mode": "test" },
+            { "name": "main" },
             {
-                "name": "webapp",
-                "mode": "development",
+                "name": "tests",
                 "log": {
-                    "colors": {
-                        "buildBracket": "cyan"
+                    "color": "yellow",
+                    "pad": {
+                        "value": 60
                     }
+                },
+                "paths": {
+                    "dist": "dist/test",
+                    "src": "src/tests"
                 }
             }
-        ],
-        "log": {
-            "color": "yellow",
-            "pad": {
-                "value": 60
-            }
-        }
+        ]
     },
     "log":
     {
@@ -112,7 +71,7 @@
         "pad": {
             "base": 0,
             "envTag": 22,
-            "value": 40,
+            "value": 45,
             "uploadFileName": 50
         },
         "colors":
@@ -171,6 +130,7 @@
         "wait": false
     },
     "vscode": {
-        "testsEntry": "./path/to/test/runTest.ts"
+        "extension": false,
+        "languageserver": false
     }
 }

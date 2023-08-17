@@ -338,7 +338,7 @@ class WpBuildPlugin
 	 * @function Executes a command via a promisified node exec()
 	 * @param {string} command
 	 * @param {string} program
-	 * @param {string | string[]} ignoreOut
+	 * @param {string | string[]} [ignoreOut]
 	 * @returns {Promise<number | null>}
 	 */
 	exec = (command, program, ignoreOut) =>

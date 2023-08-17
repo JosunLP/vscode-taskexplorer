@@ -63,6 +63,8 @@ const capitalize = (value) =>
     if (value) {
         value = value.charAt(0).toUpperCase() + value.substring(1);
     }
+    if (value === "Webapp") { value = "WebApp"; }
+    else if (value === "Webmodule") { value = "WebModule"; }
     return value || '';
 };
 

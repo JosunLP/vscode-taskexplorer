@@ -20,7 +20,7 @@ const { apply } = require("../utils");
 const resolve = (app) =>
 {
 	const typesPath = app.getSrcTypesPath(),
-		  envPath = join((app.getRcPath("srcEnv") || join(app.getRcPath("src"), "lib", "env")), app.target);
+		  envPath = join((app.getRcPath("srcEnv", { stat: true }) || join(app.getRcPath("src"), "lib", "env")), app.target);
 
     app.wpc.resolve = {
 		alias: {

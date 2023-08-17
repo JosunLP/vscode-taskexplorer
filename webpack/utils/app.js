@@ -12,7 +12,7 @@ const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
 const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
-const { isAbsolute, relative, posix, normalize, join } = require("path");
+const { isAbsolute, relative, posix, normalize, join, sep } = require("path");
 const { WpBuildWebpackModes, isWpBuildRcPathsProp } = require("./constants");
 const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject, capitalize } = require("./utils");
 const {
@@ -108,13 +108,17 @@ class WpBuildApp
 	/**
 	 * @class WpBuildApp
 	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-	 * @param {typedefs.WpBuildRcBuild} build
+	 * @param {typedefs.WpBuildRcBuild | string} build
 	 */
 	constructor(rc, build)
 	{
         this.rcInst = rc;
-        this.build = merge({}, build);
-        this.applyRc(rc, this.build);
+		this.rc = merge({}, rc);
+		this.build = merge({}, !isString(build) ? build : (rc.builds.find(b => b.name === build)));
+        if (isString(build)) {
+            this.build.name = build;
+        }
+        this.applyRc();
         if (!this.build.mode) {
             throw WpBuildError.getErrorProperty("mode", "utils/app.js", null);
         }
@@ -126,7 +130,7 @@ class WpBuildApp
         }
 		this.applyApp();
 		this.applyPaths();
-        this.initLogger(rc.log);
+        this.initLogger(this.rc.log);
         this.buildWebpackConfig();
         this.printBuildProperties();
 	}
@@ -190,18 +194,17 @@ class WpBuildApp
 	applyPaths = () =>
 	{
 		const paths = /** @type {typedefs.WpBuildRcPaths} */({}),
-			  build = resolvePath(__dirname, "..", ".."),
+			  base = resolvePath(__dirname, "..", ".."),
 			  temp = resolvePath(process.env.TEMP || process.env.TMP  || "dist", this.rc.name, this.mode);
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
 		}
 		this.paths = apply(paths,
-            this.resolveRcPaths(build, this.rc.paths),
-            this.resolveRcPaths(build, {
+            this.resolveRcPaths(base, this.rc.paths),
+            this.resolveRcPaths(base, {
                 temp,
-                build,/** <<-- @deprecated use `base` */
-                base: build,
-                ctx: this.rc.paths.ctx || build,
+                base,
+                ctx: this.rc.paths.ctx || base,
                 dist: "dist",
                 src: "src"
             })
@@ -212,89 +215,57 @@ class WpBuildApp
 	/**
 	 * @function
 	 * @private
-	 * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-	 * @param {typedefs.WpBuildRcBuild} build
 	 */
-    applyRc = (rc, build) =>
+    applyRc = () =>
     {
-        /**
-         * @param {typedefs.WpBuildRcEnvironmentBase} rcChild
-         * @param {boolean} [isModeRc]
-         */
-        const _applyOverrides = (rcChild, isModeRc) =>
+        apply(this.build, this.rc.builds.find(b => b.name === this.build.name));
+        this.validateRc(this.build);
+        this.validateRc(this.rc);
+        if (isObject(this.build.log))
         {
-            if (isObject(rcChild.log))
-            {
-                if (rc.log.color) {
-                    this.rc.log.colors.valueStar = rc.log.color;
-                    this.rc.log.colors.buildBracket = rc.log.color;
-                    this.rc.log.colors.tagBracket = rc.log.color;
-                    this.rc.log.colors.infoIcon = rc.log.color;
-                }
-                merge(this.rc.log, rcChild.log);
-                if (isModeRc) {
-                    merge(build.log, modeRc.log);
-                }
-            }
-            if (isObject(rcChild.paths)) {
-                apply(this.rc.paths, rcChild.paths);
-                if (isModeRc) {
-                    apply(build.paths, modeRc.paths);
-                }
-            }
-            if (isObject(rcChild.exports)) {
-                apply(this.rc.exports, rcChild.exports);
-                if (isModeRc) {
-                    apply(build.exports, modeRc.exports);
-                }
-            }
-            if (isObject(rcChild.plugins)) {
-                apply(this.rc.plugins, rcChild.plugins);
-                if (isModeRc) {
-                    apply(build.plugins, modeRc.plugins);
-                }
-            }
-        };
-		this.rc = merge({}, rc);
-        //
-        // Mereg/apply the current configured build properites into the main rc configs.
-        // Build config objects can override base props in rc, e.g. `log`, `paths`, etc.
-        // Note that any object property with an inner nested object as one of it's
-        // props needs to use merge(), otherwise just use apply().  FOr first operation,
-        // we merge() the base rrc into a new object, i.e. each 'WpBuildAPp' instance will
-        // have a separate rc and will not erference the same rc object.
-        //
-		_applyOverrides(build);
-        //
-        // If mode specific build config is present, then merge/apply it's properties to the base
-        // rc config props.
-        //
-        /** @type {typedefs.WpBuildRcEnvironment} */
-        const modeRc = this.rc[this.rc.mode];
-        if (modeRc)
-        {
-		    _applyOverrides(modeRc, true);
-            if (isArray(modeRc.builds))
-            {
-                modeRc.builds.forEach((modeBuild) =>
-                {
-                    const baseBuild = this.rc.builds.find(base => base.name === modeBuild.name);
-                    if (baseBuild) {
-                        merge(baseBuild, modeBuild);
-                    }
-                    else {
-                        this.rc.builds.push(merge({}, modeBuild));
-                    }
-                    if (build.name === modeBuild.name)
-                    {
-                        merge(build, modeBuild);
-                    }
-                    _applyOverrides(modeBuild);
-                });
+            merge(this.rc.log, this.build.log);
+            if (this.build.log.color) {
+                this.rc.log.colors.valueStar = this.build.log.color;
+                this.rc.log.colors.buildBracket = this.build.log.color;
+                this.rc.log.colors.tagBracket = this.build.log.color;
+                this.rc.log.colors.infoIcon = this.build.log.color;
             }
         }
-        this.rc.mode = build.mode || this.rc.mode;
-        WpBuildWebpackModes.forEach(m => delete this.rc[m]);
+        if (isObject(this.build.paths)) {
+            apply(this.rc.paths, this.build.paths);
+        }
+        if (isObject(this.build.exports)) {
+            apply(this.rc.exports, this.build.exports);
+        }
+        if (isObject(this.build.plugins)) {
+            apply(this.rc.plugins, this.build.plugins);
+        }
+        this.mode = this.rc.mode = this.build.mode || this.rc.mode;
+    };
+
+
+    validateRc = (rc) =>
+    {
+        if (!rc.log) {
+            rc.log = {};
+        }
+        if (!rc.log.colors) {
+            rc.log.colors = { default: "grey" };
+        }
+        else if (!rc.log.colors.default) {
+            rc.log.colors.default = "grey";
+        }
+        if (!rc.builds) {
+            rc.builds = [];
+        }
+    };
+
+
+    buildEnvHasTests = () =>
+    {
+        return !!this.rc.builds.find(b => b.name === "tests" || b.type === "tests") ||
+               !!this.rcInst.builds.find(b => b.name === "tests" || b.type === "tests") ||
+               !!this.rcInst[this.mode]?.builds.find(b => b.name === "tests" || b.type === "tests");
     };
 
 
@@ -338,7 +309,7 @@ class WpBuildApp
      * @function
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      */
-    getContextPath = (options) => /* this.getRcPath(`ctx${capitalize(this.build.type)}`, options) ||*/this.getRcPath("ctx", options);
+    getContextPath = (options) => this.getRcPath("ctx", options);
 
 
     /**
@@ -348,7 +319,9 @@ class WpBuildApp
     getDistPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath(`dist${capitalize(this.build.type)}`, opts) || this.getRcPath("dist", opts) || join(this.paths.base, "dist");
+        return this.getRcPath(
+            `dist${capitalize(this.build.name)}`, opts) || this.getRcPath("dist", opts) || join(this.paths.base, "dist"
+        );
     };
 
 
@@ -360,22 +333,28 @@ class WpBuildApp
     getRcPath = (pathKey, options) =>
     {
         let path = "";
-        const opts = apply({ rel: false, ctx: false, dot: false , psx: false }, options),
+        const opts = apply({ path: undefined, rel: false, ctx: false, dot: false , psx: false, stat: false }, options),
               basePath = (opts.ctx ? this.paths.ctx : this.paths.base) || process.cwd();
-        if (isWpBuildRcPathsProp(pathKey))
+        if (opts.path || isWpBuildRcPathsProp(pathKey))
         {
-            path = this.rc.paths[pathKey] || "";
-            if (opts.rel)
+            path = (!opts.path ? this.rc.paths[pathKey] : opts.path) || "";
+            if (path || !opts.stat)
             {
-                path = ((opts.dot ? "./" : "") + (isAbsolute(path) ? relative(basePath, path) : path));
+                if (opts.rel)
+                {
+                    path = isAbsolute(path) ? relative(basePath, path) : path;
+                }
+                else if (!isAbsolute(path))
+                {
+                    path = resolvePath(basePath, path);
+                }
             }
-            else if (!isAbsolute(path))
-            {
-                path = resolvePath(basePath, path);
-            }
-            path = !(/^\.[\\\/]$/).test(path) ? path : ".";
         }
-        return path ? (!opts.psx ? normalize(path) : posix.normalize(path)) : ""; // (opts.dot ? "." : "");
+        path = path ? (!opts.psx ? normalize(path) : posix.normalize(path)) : "";
+        if (opts.rel && opts.dot && ! (/^\.[\\\/]/).test(path) && (path || !opts.stat)) {
+            path = "." + (opts.psx ? "/" : sep) + path;
+        }
+        return path;
     };
 
 
@@ -386,7 +365,9 @@ class WpBuildApp
     getSrcPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath(`src${capitalize(this.build.type)}`, opts) || this.getRcPath("src", opts) || join(this.paths.base, "src");
+        return this.getRcPath(
+            `src${capitalize(this.build.name)}`, opts) || this.getRcPath("src", opts) || join(this.paths.base, "src"
+        );
     };
 
 
@@ -396,8 +377,20 @@ class WpBuildApp
      */
     getSrcTestsPath = (options) =>
     {
+        let path = "";
         const opts = { stat: true, ...options };
-        return this.getRcPath("srcTests", opts) || this.getRcPath("src", opts) || join(this.paths.base, "src", "tests");
+        if (this.build.name !== "tests" || this.build.type !== "tests")
+        {
+            const build = this.rc.builds.find(b => b.type === "tests" || b.name.toLowerCase() === "tests");
+            if (build && build.paths.src)
+            {
+                path = this.getRcPath("src", { path: this.resolveRcPath(this.paths.base, build.paths.src), ...opts });
+            }
+        }
+        path = path || this.getRcPath(
+            "srcTests", opts) || this.getRcPath("src", opts) || join(this.paths.base, "src", "tests"
+        );
+        return path;
     };
 
 
@@ -408,7 +401,9 @@ class WpBuildApp
     getSrcTypesPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath("srcTypes", opts) || this.getRcPath("src", opts) || join(this.paths.base, "types");
+        return this.getRcPath(
+            "srcTypes", opts) || this.getRcPath("src", opts) || join(this.paths.base, "types"
+        );
     };
 
 
@@ -419,12 +414,15 @@ class WpBuildApp
      */
     initLogger = (options) =>
     {
-        const l = this.logger = new WpBuildConsoleLogger({ envTag1: this.build.name , envTag2: this.target.toString(), ...options });
+        const l = this.logger = new WpBuildConsoleLogger({
+            envTag1: this.build.name , envTag2: this.target.toString(), ...options
+        });
+        const c = l.colors;
         this.global.buildCount = this.global.buildCount || 0;
         l.value(
             `Start Webpack build ${++this.global.buildCount}`,
-            l.tag(this.build.name, l.colors.cyan, l.colors.white) + " " + l.tag(this.target, l.colors.cyan, l.colors.white),
-            undefined, undefined, l.icons.color.start, l.colors.white
+            l.tag(this.build.name, c.cyan, c.white) + " " + l.tag(this.target, c.cyan, c.white),
+            undefined, undefined, l.icons.color.start, c.white
         );
         // l.write("   Mode  : " + l.withColor(), 1, "", 0, l.colors.white);
     };
@@ -452,7 +450,13 @@ class WpBuildApp
         l.value("   context directory", wpc.context, 1);
         l.value("   output directory", wpc.output.path, 1);
         l.sep();
+        l.write("Build Configuration:", 2, "", 0, l.colors.white);
+        l.value("   name", this.build.name, 2);
+        l.value("   type", this.build.type, 2);
+        l.value("   target", this.build.target, 2);
+        l.sep();
         l.write("Rc Configuration:", 2, "", 0, l.colors.white);
+        l.value("   name", this.build.name, 2);
         l.value("   mode", this.rc.mode, 2);
         l.value("   base/project directory", this.getRcPath("base"), 2);
         l.value("   context directory", this.getRcPath("ctx", { rel: true }), 2);
@@ -481,26 +485,39 @@ class WpBuildApp
 	/**
 	 * @function
 	 * @private
-	 * @template {typedefs.WpBuildRcPaths} T
 	 * @param {string} baseDir
-	 * @param {T | Partial<T>} paths
-	 * @returns {T}
+	 * @param {string | undefined} path
+	 * @returns {string | undefined}
+	 */
+    resolveRcPath = (baseDir, path) =>
+	{
+        if (isString(path, true))
+        {
+            if (!isAbsolute(path)) {
+                path = resolvePath(baseDir, path);
+            }
+        }
+		return path;
+	};
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {string} baseDir
+	 * @param {typedefs.WpBuildRcPaths | Partial<typedefs.WpBuildRcPaths>} paths
+	 * @returns {typedefs.WpBuildRcPaths}
 	 */
 	resolveRcPaths = (baseDir, paths) =>
 	{
 		Object.entries(paths).forEach((e) =>
 		{
-			if (isString(e[1], true))
-			{
-				if (!isAbsolute(e[1])) {
-					paths[e[0]] = resolvePath(baseDir, e[1]);
-				}
-			}
-			else {
+			paths[e[0]] = this.resolveRcPath(baseDir, e[1]);
+			if (!paths[e[0]]) {
 				delete paths[e[0]];
 			}
 		});
-		return /** @type {T} */(paths);
+		return /** @type {typedefs.WpBuildRcPaths} */(paths);
 	};
 
 }
