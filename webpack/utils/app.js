@@ -368,6 +368,7 @@ class WpBuildApp
                this.getRcPath("src", opts) || join(this.paths.base, "src");
     };
 
+
     /**
      * @function
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
@@ -375,8 +376,26 @@ class WpBuildApp
     getSrcEnvPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath("srcEnv", opts) || this.getRcPath("src", opts) ||
-               join(this.paths.base, "src", "lib", "env");
+        let path = this.getRcPath("srcEnv", opts);
+        if (!path)
+        {
+            path = join(this.getRcPath("src"), "lib", "env");
+            if (!existsSync(path))
+            {
+                path = join(this.getRcPath("src"), "env");
+                if (!existsSync(path))
+                {
+                    path = this.getRcPath("src", opts);
+                }
+                else {
+                    path = this.getRcPath("srcEnv", { path, ...opts });
+                }
+            }
+            else {
+                path = this.getRcPath("srcEnv", { path, ...opts });
+            }
+        }
+        return path;
     };
 
 
