@@ -7,8 +7,8 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { join } = require("path");
-const { apply } = require("../utils");
+const { existsSync } = require("fs");
+const { apply, merge, isObjectEmpty, findFilesSync, WebpackTargets, getTsConfig } = require("../utils");
 
 /** @typedef {import("../types/typedefs").WpBuildApp} WpBuildApp */
 
@@ -19,17 +19,57 @@ const { apply } = require("../utils");
  */
 const resolve = (app) =>
 {
-	const typesPath = app.getSrcTypesPath(),
-		  envPath = app.getSrcEnvPath();
+	const aliasMap = {},
+		  typesPath = app.getSrcTypesPath(),
+		  envPath = app.getSrcEnvPath(),
+		  basePath = app.getRcPath("base"),
+		  aliases = app.getAliasObject(),
+		  srcPath = app.getSrcPath({ rel: true, psx: true }),
+		  envGlob = `**/${srcPath}/**/{env,environment,target}/${app.target}/`,
+		  envDirs= findFilesSync(envGlob, { cwd: basePath, absolute: false, dotRelative: false }),
+		  tsConfig = getTsConfig(app);
 
-console.log("RESOLVE");
-console.log("RESOLVE1: " + typesPath);
-console.log("RESOLVE2: " + envPath);
+	if (envDirs.length >= 0)
+	{
+		envDirs.forEach((dir) =>
+		{
+			if (aliasMap[":env"])
+			{
+				if (!aliasMap[":env"].includes(dir)) {
+					aliasMap[":env"].push(dir);
+				}
+			}
+			else {
+				aliasMap[":env"] = [ dir ];
+			}
+		});
+	}
+
+	if (tsConfig && tsConfig.json.compilerOptions?.alias)
+	{
+		Object.entries(tsConfig.json.compilerOptions.alias).map(e => [ e[0].replace(/[\\\/]\*{0,1}$/g, "") , e[1].replace(/[\\\/]\*{0,1}$/g, "") ]).forEach(([ key, path ]) =>
+		{
+			if (!aliasMap[key]) {
+				aliasMap[key] = [ path ];
+			}
+			else {
+				if (aliasMap[key].includes(path)) {
+					app.logger.warning("tsconfig alias extractions share same key/value");
+				}
+				else {
+					aliasMap[key].push(path);
+				}
+			}
+		});
+	}
+
     app.wpc.resolve = {
-		alias: {
-			":env": envPath,
+		alias: merge({
+			":env": [
+				envPath
+			],
 			":types": typesPath
-		},
+		}, aliasMap, aliases),
 		extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
 	};
 
