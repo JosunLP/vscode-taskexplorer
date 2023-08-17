@@ -31,6 +31,7 @@ const stats = (app) =>
 		app.wpc.infrastructureLogging = {
 			colors: true,
 			level: app.rc.args.verbosity || "none"
+			// debug: /webpack\.cache/
 		};
 	}
 };

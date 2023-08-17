@@ -12,7 +12,7 @@ const path = require("path");
 const esbuild = require("esbuild");
 const { existsSync } = require("fs");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { getTsConfig, WpBuildApp, WpBuildError, uniq, merge } = require("../utils");
+const { WpBuildApp, WpBuildError, uniq, merge } = require("../utils");
 
 
 const builds =
@@ -77,11 +77,7 @@ const builds =
 			} :
 			{
 				loader: "ts-loader",
-				options: {
-					configFile: tsConfig.path,
-					// experimentalWatchApi: true,
-					transpileOnly: true // !existsSync(typesPath) || tsConfig.json.compilerOptions.declarations !== true
-				}
+				options: getTsLoaderOptions(app, tsConfig)
 			}
 		});
 	},
@@ -143,12 +139,8 @@ const builds =
 				],
 				use: {
 					loader: "ts-loader",
-					options: {
-						configFile: tsConfig.path,
-						experimentalWatchApi: false,
+					options: { ...getTsLoaderOptions(app, tsConfig),
 						transpileOnly: false,
-						logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-						logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
 						compilerOptions: {
 							emitDeclarationsOnly: true
 						}
@@ -193,12 +185,8 @@ const builds =
 				{
 					loader: "ts-loader",
 					options: {
-						// configFile: path.join(app.paths.build, "types", "tsconfig.json"),
-						configFile: tsConfig.path,
-						experimentalWatchApi: false,
+						...getTsLoaderOptions(app, tsConfig),
 						transpileOnly: false,
-						logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-						logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
 						compilerOptions: {
 							emitDeclarationsOnly: true
 						}
@@ -246,12 +234,8 @@ const builds =
 				}
 			} : {
 				loader: "ts-loader",
-				options: {
-					configFile: tsConfig.path,
-					// experimentalWatchApi: true,
-					transpileOnly: true
-				}
-			} ]
+				options: getTsLoaderOptions(app, tsConfig)
+			}]
 		},
 		{
 			test: /\.s?css$/,
@@ -304,6 +288,23 @@ const builds =
 		}
 	}
 
+};
+
+
+/**
+ * @param {WpBuildApp} app
+ * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
+ * @returns {*}
+ */
+const getTsLoaderOptions = (app, tsConfig) =>
+{
+	return {
+		configFile: tsConfig.path,
+		experimentalWatchApi: false,
+		logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+		logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
+		transpileOnly: true
+	};
 };
 
 

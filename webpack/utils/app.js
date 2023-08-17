@@ -464,9 +464,13 @@ class WpBuildApp
         if (!path)
         {
             path = join(this.paths.base, "types");
-            if (!existsSync(join(this.paths.base, "types")))
+            if (!existsSync(path))
             {
                 path = join(this.getRcPath("src", opts), "types");
+                if (!existsSync(path))
+                {
+                    path = "";
+                }
             }
         }
         return path;
