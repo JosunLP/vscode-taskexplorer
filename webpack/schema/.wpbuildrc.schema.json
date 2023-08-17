@@ -24,6 +24,12 @@
             "type": "boolean",
             "default": false
         },
+        "singleBuildName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 30,
+            "readOnly": true
+        },
         "source": {
             "$ref": "#/definitions/WpBuildRcSourceCodeType"
         },
@@ -138,10 +144,7 @@
                     "$ref": "#/definitions/WpBuildRcPlugins"
                 }
             },
-            "additionalProperties": false,
-            "required": [
-                "builds"
-            ]
+            "additionalProperties": false
         },
         "WpBuildRcBuilds": {
             "type": "array",
@@ -156,7 +159,13 @@
             "properties": {
                 "name": {
                     "type": "string",
-                    "minLength": 3
+                    "minLength": 3,
+                    "maxLength": 30
+                },
+                "build": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 30
                 },
                 "source": {
                     "$ref": "#/definitions/WpBuildRcSourceCodeType"

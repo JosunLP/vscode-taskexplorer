@@ -48,6 +48,28 @@ const apply = (object, config, defaults) =>
 
 
 /**
+ * Copies all the properties of config to object if they don't already exist.
+ *
+ * @param {object} object The receiver of the properties
+ * @param {object} config The source of the properties
+ * @returns {object} returns obj
+ */
+ const applyIf = (object, config) =>
+ {
+    let property;
+    if (object && config && typeof config === "object")
+    {
+        for (property in config) {
+            if (object[property] === undefined) {
+                object[property] = config[property];
+            }
+        }
+    }
+    return object;
+};
+
+
+/**
  * @function
  * @template T
  * @param {T | Set<T> | Array<T>} v Variable to check to see if it's an array
@@ -598,7 +620,7 @@ class WpBuildError extends WebpackError
 
 
 module.exports = {
-    apply, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, findTsConfig, getTsConfig,
-    isArray, isDate,isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise, isString,
-    merge, mergeIf, pick, pickBy, pickNot, uniq, WpBuildError
+    apply, applyIf, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, findTsConfig,
+    getTsConfig, isArray, isDate,isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise,
+    isString, merge, mergeIf, pick, pickBy, pickNot, uniq, WpBuildError
 };

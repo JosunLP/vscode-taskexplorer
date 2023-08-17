@@ -59,6 +59,7 @@ export declare interface IWpBuildRcSchema
     displayName?: string;
     detailedDisplayName?: string;
     publicInfoProject?: boolean;
+    singleBuildName?: string;
     source?: WpBuildRcSourceCodeType;
     builds?: WpBuildRcBuilds;
     development?: WpBuildRcEnvironment;
@@ -76,6 +77,7 @@ export declare type WpBuildRcSchema = IWpBuildRcSchema;
 export declare type WpBuildRcBuild = 
 {
     name: string;
+    build: string;
     source?: WpBuildRcSourceCodeType;
     type: WpBuildRcBuildType;
     entry: WpBuildWebpackEntry;
@@ -223,7 +225,7 @@ export declare type TypeWpBuildRcPlugins = Required<WpBuildRcPlugins>;
 export declare type WpBuildRcEnvironment = 
 {
     alias?: WpBuildWebpackAliasConfig;
-    builds: WpBuildRcBuilds;
+    builds?: WpBuildRcBuilds;
     log?: WpBuildRcLog;
     paths?: WpBuildRcPaths;
     exports?: WpBuildRcExports;

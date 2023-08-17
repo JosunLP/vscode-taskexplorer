@@ -44,6 +44,7 @@
 /** @typedef {import("../types").IWpBuildRcSchema} IWpBuildRcSchema */
 /** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
+/** @typedef {import("../types").TypeWpBuildRcLog} TypeWpBuildRcLog */
 /** @typedef {import("../types").WpBuildRcPathsKey} WpBuildRcPathsKey */
 /** @typedef {import("../types").WpBuildLogIconSet} WpBuildLogIconSet */
 /** @typedef {import("../types").WpBuildRcPathsKey} WpBuildRcPathsKey */
@@ -52,6 +53,7 @@
 /** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
 /** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
+/** @typedef {import("../types").TypeWpBuildRcLogPad} TypeWpBuildRcLogPad */
 /** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
 /** @typedef {import("../types").WpBuildRcEnvironment} WpBuildRcEnvironment */
 /** @typedef {import("../types").WpBuildRcPackageJson} WpBuildRcPackageJson */

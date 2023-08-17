@@ -15,7 +15,7 @@ const { globalEnv } = require("./global");
 const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
 const { resolve, basename, join, dirname } = require("path");
-const { WpBuildError, apply, pick, isString, merge, isObject, isArray, pickNot } = require("./utils");
+const { WpBuildError, apply, pick, isString, merge, isObject, isArray, pickNot, mergeIf, applyIf } = require("./utils");
 const {
     isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildWebpackModes
 } = require("./constants");
@@ -108,6 +108,14 @@ class WpBuildRc
      */
     publicInfoProject;
     /**
+     * @type {string}
+     */
+    singleBuildName;
+    /**
+     * @type {typedefs.WpBuildRcSourceCodeType}
+     */
+    source;
+    /**
      * @type {typedefs.WpBuildRcEnvironment}
      */
     test;
@@ -139,13 +147,17 @@ class WpBuildRc
             arge[k] = arge[k].toLowerCase() === "true";
         });
 
+        const buildName = arge.name || /** @deprecated */arge.build;
         apply(this,
         {
-            args: apply({}, pickNot(arge, "build"), argv),
+            // args: apply({}, pickNot(arge, "build"), argv),
+            args: apply({}, arge, argv),
+            build: buildName,
+            global: globalEnv,
             mode: this.getMode(arge, argv, true),
-            name: arge.name || /** @deprecated */arge.build,
-            type: arge.type,
-            global: globalEnv
+            singleBuildName: buildName,
+            singleBuildType: arge.type,
+            type: arge.type
         });
 
         if (!isWpBuildWebpackMode(this.mode)) {
@@ -161,8 +173,6 @@ class WpBuildRc
             this.getJson(this.pkgJson, "package.json", resolve(__dirname, "..", "..")),
             ...WpBuildRcPackageJsonProps
         );
-
-        this.validateRc(this);
 
         this.prepBuilds(argv, this.builds);
         WpBuildWebpackModes.filter(m => m !== "none" && !!this[m].builds).forEach(
@@ -196,7 +206,7 @@ class WpBuildRc
             arge.name = arge.build;
         }
         rc.apps = rc.builds.filter(
-            (b) => (!arge.name  && !arge.build) || b.name === arge.name || b.name === arge.build
+            (b) => !rc.singleBuildName || b.name === rc.singleBuildName || b.build === rc.singleBuildName
         ).map(
             (b) => new WpBuildApp(rc, b)
         );
@@ -211,57 +221,59 @@ class WpBuildRc
     applyBuilds = () =>
     {
         /**
-         * @param {typedefs.WpBuildRcEnvironmentBase} rcChild
+         * @param {typedefs.WpBuildRcEnvironmentBase} dst
          */
-        const _applyOverrides = (rcChild) =>
+        const _apply = (dst, src) =>
         {
-            if (isObject(rcChild.log))
+            if (this.initializeBaseRc(dst))
             {
-                merge(this.log, rcChild.log);
-                if (this.log.color) {
-                    this.log.colors.valueStar = rcChild.log.color;
-                    this.log.colors.buildBracket = rcChild.log.color;
-                    this.log.colors.tagBracket = rcChild.log.color;
-                    this.log.colors.infoIcon = rcChild.log.color;
+                if (isObject(dst.log))
+                {
+                    mergeIf(dst.log, src.log);
+                    mergeIf(dst.log.pad, src.log.pad);
+                    mergeIf(dst.log.colors, src.log.colors);
+                    dst.log.colors.valueStar = dst.log.color;
+                    dst.log.colors.buildBracket = dst.log.color;
+                    dst.log.colors.tagBracket = dst.log.color;
+                    dst.log.colors.infoIcon = dst.log.color;
+                }
+                if (isObject(dst.paths)) {
+                    applyIf(dst.paths, src.paths);
+                }
+                if (isObject(dst.exports)) {
+                    applyIf(dst.exports, src.exports);
+                }
+                if (isObject(dst.plugins)) {
+                    applyIf(dst.plugins, src.plugins);
+                }
+                if (isObject(dst.alias)) {
+                    mergeIf(dst.alias, src.alias);
                 }
             }
-            if (isObject(rcChild.paths)) {
-                apply(this.paths, rcChild.paths);
-            }
-            if (isObject(rcChild.exports)) {
-                apply(this.exports, rcChild.exports);
-            }
-            if (isObject(rcChild.plugins)) {
-                apply(this.plugins, rcChild.plugins);
-            }
-            if (isObject(rcChild.alias)) {
-                apply(this.alias, rcChild.alias);
-            }
+            return dst;
         };
 
+        this.builds.forEach((build) => _apply(build, this));
+
         const modeRc = /** @type {Partial<typedefs.WpBuildRcEnvironment>} */(this[this.mode]);
-        if (modeRc)
+        if (modeRc && isArray(modeRc.builds))
         {
-            _applyOverrides(modeRc);
-            if (isArray(modeRc.builds))
+            modeRc.builds.forEach((modeBuild) =>
             {
-                modeRc.builds.forEach((modeBuild) =>
-                {
-                    let baseBuild = this.builds.find(base => base.name === modeBuild.name);
-                    if (baseBuild) {
-                        this.validateRc(baseBuild);
-                        merge(baseBuild, modeBuild);
-                    }
-                    else {
-                        baseBuild = merge({}, modeBuild);
-                        this.validateRc(baseBuild);
-                        this.builds.push(baseBuild);
-                    }
-                    if (modeBuild.name === this.args.name) {
-                        _applyOverrides(modeBuild);
-                    }
-                });
-            }
+                // _apply(modeBuild, this);
+                let baseBuild = this.builds.find(base => base.name === modeBuild.name);
+                if (baseBuild) {
+                    merge(baseBuild, modeBuild);
+                }
+                else {
+                    baseBuild = merge({}, modeBuild);
+                    _apply(baseBuild, this);
+                    this.builds.push(baseBuild);
+                }
+                // if (modeBuild.name === this.args.name) {
+                //     _apply(modeBuild);
+                // }
+            });
         }
 
         // if (buildName) {
@@ -406,26 +418,34 @@ class WpBuildRc
     };
 
 
-    validateRc = (rc) =>
+    /**
+     * @param {typedefs.WpBuildRcEnvironmentBase} rc
+     * @returns {rc is typedefs.WpBuildRcEnvironmentBase}
+     */
+    initializeBaseRc = (rc) =>
     {
+        if (!rc.log) {
+            rc.log = { level: 2, colors: { default: "grey" }, pad: { value: 50 } };
+        }
         if (!rc.log.colors) {
             rc.log.colors = { default: "grey" };
         }
         else if (!rc.log.colors.default) {
             rc.log.colors.default = "grey";
         }
-        if (!rc.builds) {
-            rc.builds = [];
+        if (!rc.log.pad) {
+            rc.log.pad = { value: 50 };
         }
         if (!rc.plugins) {
-            rc.plugins = [];
+            rc.plugins = {};
         }
         if (!rc.exports) {
-            rc.plugins = [];
+            rc.plugins = {};
         }
         if (!rc.alias) {
             rc.alias = {};
         }
+        return true;
     };
 
 }

@@ -73,8 +73,7 @@ class WpBuildConsoleLogger
      */
     applyOptions = (options) =>
     {
-        this.options = apply({}, options,
-        {
+        this.options = merge({
             valueMaxLineLength: 150,
             envTag1: "wpbuild",
             envTag2: "info",
@@ -84,9 +83,10 @@ class WpBuildConsoleLogger
             },
             pad: {
                 value: 100,
-                base: 0
+                base: 0,
+                envTag: 25
             }
-        });
+        }, options);
         if (!this.options.pad.envTag) {
             // @ts-ignore
             this.options.pad.envTag = this.options.envTag1.length + this.options.envTag1.length + 5;
@@ -543,14 +543,14 @@ class WpBuildConsoleLogger
             const opts = this.options,
                   envTagClr = this.getIconcolorMapping(icon),
                   envTagMsgClr = opts.colors.buildText ? this.colors[opts.colors.buildText] : this.colors.white,
-                  envTagClrLen = this.withColorLength(envTagMsgClr) + (this.withColorLength(envTagClr) * 3),
+                  envTagClrLen = (this.withColorLength(envTagMsgClr) * 2) + (this.withColorLength(envTagClr) * 4),
                   envMsgClr = color || this.colors[opts.colors.default || "grey"],
                   envMsg = color || !(/\x1B\[/).test(msg) || envMsgClr[0] !== this.colorMap.system ?
                             this.withColor(this.format(msg), envMsgClr) : this.format(msg),
-                  envTag = !opts.envTagDisable ? (" " + this.tag(opts.envTag1, envTagClr, envTagMsgClr) +
+                  envTag = !opts.envTagDisable ? (this.tag(opts.envTag1, envTagClr, envTagMsgClr) +
                             this.tag(opts.envTag2, envTagClr, envTagMsgClr)).padEnd((opts.pad.envTag || 25) + envTagClrLen) : "",
                   envIcon = !opts.envTagDisable ? (isString(icon) ? icon : this.infoIcon) : "";
-            console.log(`${this.options.pad.base || ""}${pad}${envIcon} ${envTag}${envMsg.trimEnd()}`);
+            console.log(`${this.options.pad.base || ""}${envIcon} ${envTag}${pad}${envMsg.trimEnd()}`);
         }
     };
 

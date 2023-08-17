@@ -40,6 +40,14 @@ class WpBuildTscPlugin extends WpBuildPlugin
     {
         this.onApply(compiler,
         {
+			buildTypes: {
+				async: true,
+                hook: "compilation",
+				stage: "ADDITIONAL",
+				statsProperty: "types",
+				statsPropertyColor: this.app.rc.log.color || "blue",
+                callback: this.types.bind(this)
+            } // ,
 			// buildTestsSuite: {
 			// 	async: true,
             //     hook: "compilation",
@@ -47,34 +55,100 @@ class WpBuildTscPlugin extends WpBuildPlugin
 			// 	statsProperty: "tests",
 			// 	statsPropertyColor: "magenta",
             //     callback: this.testsuite.bind(this)
-            // },
-			buildTypes: {
-				async: true,
-                hook: "compilation",
-				stage: "ADDITIONAL",
-				statsProperty: "types",
-				statsPropertyColor: this.app.rc.log.color || "blue",
-                callback: this.testsuite.bind(this)
-            },
-			bundleDtsFiles: {
-				hook: "compilation",
-				stage: "DERIVED",
-				callback: this.bundle.bind(this)
-			}
+            // }
         });
     }
+
+
+	// /**
+	//  * @function
+	//  * @private
+	//  * @param {WebpackCompilation} compilation
+	//  */
+	// async testsuite(compilation)
+	// {
+	// 	this.app.logger.write("build test suite", 1);
+	// 	this.onCompilation(compilation);
+
+	// 	const testsDir = join(this.app.getDistPath(), "test");
+
+	// 	const tsConfigFile = findTsConfig(this.app);
+	// 	if (!tsConfigFile)
+	// 	{
+	// 		const eMsg = "Could not locate tsconfig file for tests suite - must be **/tests?/tsconfig.* or **/tsconfig.tests?.json";
+	// 		this.handleError(new WebpackError(eMsg));
+	// 		this.logger.warning("consider possible solutions:");
+	// 		this.logger.warning("   (1) rename test suite config file according to convention");
+	// 		this.logger.warning("   (2) disable testsuite plugin in italic(.wsbuildrc.plugins.testsuite)");
+	// 		return;
+	// 	}
+
+	// 	this.app.logger.value("   found test suite tsconfig file", tsConfigFile, 2);
+
+	// 	if (!existsSync(testsDir))
+	// 	{
+	// 		this.app.logger.write("   checking for tsbuildinfo file path", 3);
+	// 		const tsConfig = getTsConfig(tsConfigFile);
+	// 		if (!tsConfig) {
+	// 			throw WpBuildError.getErrorMissing("tsconfig file", "exports/rules.js", this.app.wpc);
+	// 		}
+	// 		let buildInfoFile = tsConfig.json.compilerOptions.tsBuildInfoFile || join(dirname(tsConfigFile), "tsconfig.tsbuildinfo");
+	// 		if (!isAbsolute(buildInfoFile)) {
+	// 			buildInfoFile = resolve(dirname(tsConfigFile), buildInfoFile);
+	// 		}
+	// 		this.app.logger.value("   delete tsbuildinfo file", buildInfoFile, 3);
+	// 		try {
+	// 			await unlink(buildInfoFile);
+	// 		} catch {}
+	// 	}
+
+	// 	// await this.execTsBuild(relative(this.app.getRcPath("base"), tsConfigFile), 2, testsDir, true);
+	// }
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WebpackCompilationAssets} _assets
+	 */
+	async types(_assets)
+	{
+		const tsc = this.app.tsConfig;
+		if (tsc)
+		{
+			const logger = this.logger,
+				  basePath = this.app.getRcPath("base"),
+			      typesDirSrc = this.app.getSrcTypesPath({ fstat: true }),
+				  typesDirDist = this.app.getRcPath("distTypes");
+			logger.write("verify tsconfig file", 2);
+			logger.value("   base path", basePath, 3);
+			logger.value("   types src path", typesDirSrc, 3);
+			logger.value("   types dist path", typesDirDist, 3);
+			if (typesDirSrc && !existsSync(typesDirDist))
+			{
+				logger.write("force clean tsbuildinfo file", 2);
+				const tsbuildinfo = resolve(basePath, tsc.json.compilerOptions.tsBuildInfoFile || "tsconfig.tsbuildinfo");
+				try { await unlink(tsbuildinfo); } catch {}
+			}
+			logger.write("build types", 2);
+			await this.execTsBuild(tsc, [
+				"-p", "./types", "--declaration", "--emitDeclarationOnly", "--declarationDir", typesDirDist
+			], 1, typesDirDist);
+			this.typesBundleDts();
+		}
+	}
 
 
 	/**
 	 * @function
 	 * @private
 	 */
-	bundle = () =>
+	typesBundleDts = () =>
 	{
 		const l = this.app.logger,
 			  typesDir = existsSync(this.app.getSrcTypesPath()),
 			  typesDirDist = existsSync(this.app.getRcPath("distTypes"));
-		l.write("dts bundling", 1);
+		l.write("start bundle dts", 1);
 		l.value("   types directory", typesDir, 2);
 		l.value("   is main tests", this.app.isMainTests, 3);
 		l.value("   already bundled", this.app.global.tsCheck.typesBundled,3);
@@ -92,91 +166,18 @@ class WpBuildTscPlugin extends WpBuildPlugin
 			};
 			dts.bundle(bundleCfg);
 			this.app.global.tsCheck.typesBundled = true;
-			l.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
+			l.write("dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
 		}
 		else if (!typesDirDist) {
-			l.warning("   types output directory doesn't exist, dts bundling skipped");
+			l.warning("types output directory doesn't exist, dts bundling skipped");
 		}
 		else if (!typesDir) {
-			l.warning("   types directory doesn't exist, dts bundling skipped");
+			l.warning("types directory doesn't exist, dts bundling skipped");
 		}
 		else {
-			l.write("   dts bundling skipped", 1);
+			l.write("dts bundling skipped", 1);
 		}
 	};
-
-
-	/**
-	 * @function
-	 * @private
-	 * @param {WebpackCompilation} compilation
-	 */
-	async testsuite(compilation)
-	{
-		this.app.logger.write("build test suite", 1);
-		this.onCompilation(compilation);
-
-		const testsDir = join(this.app.getDistPath(), "test");
-
-		const tsConfigFile = findTsConfig(this.app);
-		if (!tsConfigFile)
-		{
-			const eMsg = "Could not locate tsconfig file for tests suite - must be **/tests?/tsconfig.* or **/tsconfig.tests?.json";
-			this.handleError(new WebpackError(eMsg));
-			this.logger.warning("consider possible solutions:");
-			this.logger.warning("   (1) rename test suite config file according to convention");
-			this.logger.warning("   (2) disable testsuite plugin in italic(.wsbuildrc.plugins.testsuite)");
-			return;
-		}
-
-		this.app.logger.value("   found test suite tsconfig file", tsConfigFile, 2);
-
-		if (!existsSync(testsDir))
-		{
-			this.app.logger.write("   checking for tsbuildinfo file path", 3);
-			const tsConfig = getTsConfig(tsConfigFile);
-			if (!tsConfig) {
-				throw WpBuildError.getErrorMissing("tsconfig file", "exports/rules.js", this.app.wpc);
-			}
-			let buildInfoFile = tsConfig.json.compilerOptions.tsBuildInfoFile || join(dirname(tsConfigFile), "tsconfig.tsbuildinfo");
-			if (!isAbsolute(buildInfoFile)) {
-				buildInfoFile = resolve(dirname(tsConfigFile), buildInfoFile);
-			}
-			this.app.logger.value("   delete tsbuildinfo file", buildInfoFile, 3);
-			try {
-				await unlink(buildInfoFile);
-			} catch {}
-		}
-
-		// await this.execTsBuild(relative(this.app.getRcPath("base"), tsConfigFile), 2, testsDir, true);
-	}
-
-
-	/**
-	 * @function
-	 * @private
-	 * @param {WebpackCompilationAssets} _assets
-	 */
-	async types(_assets)
-	{
-		const tsc = this.app.tsConfig;
-		if (tsc)
-		{
-			const logger = this.logger,
-				  basePath = this.app.getRcPath("base"),
-			      typesDirSrc = this.app.getSrcTypesPath({ fstat: true }),
-				  typesDirDist = this.app.getRcPath("distTypes");
-			logger.write("build types");
-			if (typesDirSrc && !existsSync(typesDirDist))
-			{
-				const tsbuildinfo = resolve(basePath, tsc.json.compilerOptions.tsBuildInfoFile ?? "tsconfig.tsbuildinfo");
-				try { await unlink(tsbuildinfo); } catch {}
-			}
-			await this.execTsBuild(tsc, [
-				 "./types", "--declaration", "--emitDeclarationsOnly", "--declarationDir", typesDirDist
-			], 1, typesDirDist);
-		}
-	}
 
 
 	/**
