@@ -14,6 +14,8 @@ const { promisify } = require("util");
 const { WebpackError } = require("webpack");
 const typedefs = require("../types/typedefs");
 const { spawnSync } = require("child_process");
+const { existsSync } = require("fs");
+const { join, resolve, basename, dirname } = require("path");
 const exec = promisify(require("child_process").exec);
 
 
@@ -230,25 +232,86 @@ const findFiles = async (pattern, options) => (await glob(pattern, options)).map
  * @param {import("glob").GlobOptions} options
  * @returns {string[]}
  */
-const findFilesSync = (pattern, options) => glob.sync(pattern, options).map((/** @type {{ toString: () => any; }} */ f) => f.toString());
+const findFilesSync = (pattern, options) => glob.sync(pattern, options).map((/** @type {{ toString: () => any; }} */ f) => f.toString());let tsConfig, tsConfigParams;
 
 
 /**
- * @param {string} baseDir Webpack build environment
- * @param {string} tsConfigFile
- * @returns {Record<string, any>}
+ * @param {import("../types/typedefs").WpBuildApp} app
+ * @returns {string | undefined}
  */
-const getTsConfig = (baseDir, tsConfigFile) =>
+const findTsConfig = (app) =>
 {
-	const result = spawnSync("npx", [ "tsc", `-p ${tsConfigFile}`, "--showConfig" ], {
-		cwd: baseDir,
-		encoding: "utf8",
-		shell: true
-	});
-	const data = result.stdout,
+    /**
+     * @param {string} base
+     * @returns {string | undefined}
+     */
+    const _find = (base) =>
+    {
+        let tsCfg = join(base, `tsconfig.${app.build.name}.json`);
+        if (!existsSync(tsCfg))
+        {
+            tsCfg = join(base, `tsconfig.${app.build.target}.json`);
+            if (!existsSync(tsCfg))
+            {
+                tsCfg = join(base, `tsconfig.${app.build.mode}.json`);
+                if (!existsSync(tsCfg))
+                {
+                    tsCfg = join(base,`tsconfig.${app.build.type}.json`);
+                    if (!existsSync(tsCfg))
+                    {
+                        tsCfg = join(base, app.build.name, "tsconfig.json");
+                        if (!existsSync(tsCfg))
+                        {
+                            tsCfg = join(base, app.build.type || app.build.name, "tsconfig.json");
+                            if (!existsSync(tsCfg)) {
+                                tsCfg = join(base,"tsconfig.json");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return tsCfg;
+    };
+
+    let tsConfig = _find(app.getSrcPath());
+    if (!tsConfig || !existsSync(tsConfig)) {
+        tsConfig = _find(app.getContextPath());
+        if (!tsConfig || !existsSync(tsConfig)) {
+            tsConfig = _find(app.getRcPath("base"));
+        }
+    }
+
+    if (tsConfig && existsSync(tsConfig)) {
+        return tsConfig;
+    }
+};
+
+
+/**
+ * @param {string} tsConfigPath
+ * @returns {{ raw: string; json: Record<string, any>; include: string[]; path: string }}
+ */
+const getTsConfig = (tsConfigPath) =>
+{
+    const dir = dirname(tsConfigPath),
+          file = basename(tsConfigPath),
+          result = spawnSync("npx", [ "tsc", `-p ${file}`, "--showConfig" ], { cwd: dir, encoding: "utf8", shell: true }),
+          data = result.stdout,
 		  start = data.indexOf("{"),
-		  end = data.lastIndexOf("}") + 1;
-	return JSON5.parse(data.substring(start, end));
+		  end = data.lastIndexOf("}") + 1,
+          include = [],
+          raw = data.substring(start, end),
+          json = JSON5.parse(raw);
+
+    if (json.rootDir) {
+        include.push(resolve(dir, json.rootDir));
+    }
+    if (isArray(json.include)) {
+        include.push(...json.include.filter(p => !include.includes(p)).map((path) => resolve(dir, path.replace(/\*/g, ""))));
+    }
+
+	return { raw, json, include: uniq(include), path: tsConfigPath };
 };
 
 
@@ -440,6 +503,15 @@ const pickNot = (obj, ...keys) =>
 };
 
 
+/**
+ * @function
+ * @template T
+ * @param {T[]} a
+ * @returns {T[]}
+ */
+const uniq = (a) => a.sort().filter((item, pos, arr) => !pos || item !== arr[pos - 1]);
+
+
 class WpBuildError extends WebpackError
 {
     /**
@@ -513,7 +585,7 @@ class WpBuildError extends WebpackError
 
 
 module.exports = {
-    apply, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, getTsConfig, isArray,
-    isDate,isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise, isString, merge,
-    mergeIf, pick, pickBy, pickNot, WpBuildError
+    apply, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, findTsConfig, getTsConfig,
+    isArray, isDate,isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise, isString,
+    merge, mergeIf, pick, pickBy, pickNot, uniq, WpBuildError
 };

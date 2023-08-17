@@ -319,9 +319,8 @@ class WpBuildApp
     getDistPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath(
-            `dist${capitalize(this.build.name)}`, opts) || this.getRcPath("dist", opts) || join(this.paths.base, "dist"
-        );
+        return this.getRcPath(`dist${capitalize(this.build.name)}`, opts) ||
+               this.getRcPath("dist", opts) || join(this.paths.base, "dist");
     };
 
 
@@ -365,9 +364,19 @@ class WpBuildApp
     getSrcPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath(
-            `src${capitalize(this.build.name)}`, opts) || this.getRcPath("src", opts) || join(this.paths.base, "src"
-        );
+        return this.getRcPath(`src${capitalize(this.build.name)}`, opts) ||
+               this.getRcPath("src", opts) || join(this.paths.base, "src");
+    };
+
+    /**
+     * @function
+     * @param {typedefs.WpBuildAppGetPathOptions} [options]
+     */
+    getSrcEnvPath = (options) =>
+    {
+        const opts = { stat: true, ...options };
+        return this.getRcPath("srcEnv", opts) || this.getRcPath("src", opts) ||
+               join(this.paths.base, "src", "lib", "env");
     };
 
 
@@ -401,9 +410,16 @@ class WpBuildApp
     getSrcTypesPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath(
-            "srcTypes", opts) || this.getRcPath("src", opts) || join(this.paths.base, "types"
-        );
+        let path = this.getRcPath("srcTypes", opts);
+        if (!path)
+        {
+            path = join(this.paths.base, "types");
+            if (!existsSync(join(this.paths.base, "types")))
+            {
+                path = join(this.getRcPath("src", opts), "types");
+            }
+        }
+        return path;
     };
 
 
@@ -464,6 +480,7 @@ class WpBuildApp
         l.value("   distribution tests directory", this.getRcPath("distTests", { rel: true }), 2);
         l.value("   source directory", this.getSrcPath({ rel: true }), 2);
         l.value("   source module (nodejs) directory", this.getRcPath("srcModule",  { rel: true }), 2);
+        l.value("   source env directory", this.getRcPath("srcEnv",  { rel: true }), 2);
         l.value("   source tests directory", this.getRcPath("srcTests",  { rel: true }), 2);
         l.value("   source types directory", this.getSrcTypesPath({ rel: true }), 2);
         l.value("   source web apps directory", this.getRcPath("srcWebApp",  { rel: true }), 2);

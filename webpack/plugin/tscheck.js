@@ -13,7 +13,7 @@ const dts = require("dts-bundle");
 const { existsSync } = require("fs");
 const WpBuildPlugin = require("./base");
 const typedefs = require("../types/typedefs");
-const { apply, WpBuildError } = require("../utils");
+const { apply, findTsConfig, WpBuildError } = require("../utils");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 
@@ -94,57 +94,20 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	static getTsForkCheckerPlugins = (app) =>
 	{
-		let tsConfig, tsConfigParams;
-		const basePath = app.getContextPath(),
-		      buildPath = app.getRcPath("base");
-
-		const _find = (base) =>
-		{
-			let tsCfg = join(base, `tsconfig.${app.build.name}.json`);
-			if (!existsSync(tsCfg))
-			{
-				tsCfg = join(base, `tsconfig.${app.build.target}.json`);
-				if (!existsSync(tsCfg))
-				{
-					tsCfg = join(base, `tsconfig.${app.build.mode}.json`);
-					if (!existsSync(tsCfg))
-					{
-						tsCfg = join(base,`tsconfig.${app.build.type}.json`);
-						if (!existsSync(tsCfg))
-						{
-							tsCfg = join(base, app.build.name, "tsconfig.json");
-							if (!existsSync(tsCfg))
-							{
-								tsCfg = join(base,app.build.type || app.build.name, "tsconfig.json");
-								if (!existsSync(tsCfg)) {
-									tsCfg = join(base,"tsconfig.json");
-								}
-							}
-						}
-					}
-				}
-			}
-			return tsCfg;
-		};
-
-		tsConfig = _find(app.getSrcPath());
-		if (!existsSync(tsConfig)) {
-			tsConfig = _find(basePath);
-			if (!existsSync(tsConfig)) {
-				tsConfig = _find(buildPath);
-			}
-		}
+		let tsConfigParams,
+			tsConfig = findTsConfig(app);
+		const buildPath = app.getRcPath("base");
 
 		if (app.build.type === "webapp" || app.build.target === "webworker")
 		{
-			if (!existsSync(tsConfig)) {
+			if (!tsConfig || !existsSync(tsConfig)) {
 				tsConfig = join(buildPath, "tsconfig.webview.json");
 			}
 			tsConfigParams = [ tsConfig, "readonly" ];
 		}
 		else if (app.build.type === "tests")
 		{
-			if (!existsSync(tsConfig)) {
+			if (!tsConfig || !existsSync(tsConfig)) {
 				tsConfig = join(buildPath, app.build.mode, "tsconfig.json");
 				if (!existsSync(tsConfig)) {
 					tsConfig = join(buildPath, app.build.mode, "tsconfig.json");

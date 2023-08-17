@@ -11,9 +11,6 @@
             "type": "module",
             "log": {
                 "color": "cyan"
-            },
-            "paths": {
-                "tsconfig": "tsconfig.node.json"
             }
         },
         {
@@ -37,7 +34,8 @@
             "paths": {
                 "ctx": "src/webview/app",
                 "dist": "res",
-                "src": "src/webview/app"
+                "src": "src",
+                "srcEnv": "src/lib/env/web"
             }
         }
     ],

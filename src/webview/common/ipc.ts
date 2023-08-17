@@ -11,7 +11,7 @@
  */
 
 // import { AuthenticationSession } from "vscode";;
-import { ITeTask, TeTaskListType, ITeAccount, TeSessionChangeEvent } from "../../interface";
+import { ITeTask, TeTaskListType, ITeAccount, TeSessionChangeEvent } from "../../../types";
 
 export interface BaseState
 {
