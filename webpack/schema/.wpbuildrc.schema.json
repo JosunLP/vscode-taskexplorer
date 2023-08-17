@@ -97,6 +97,10 @@
             "maxLength": 150,
             "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$"
         },
+        "DirectoryPathGlob": {
+            "$ref": "#/definitions/DirectoryPath",
+            "pattern": "^\\*{0,2}(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)\\*{0,2}$"
+        },
         "FilePathRelative": {
             "type": "string",
             "minLength": 6,
@@ -153,6 +157,9 @@
                 },
                 "target": {
                     "$ref": "#/definitions/WebpackTarget"
+                },
+                "alias": {
+                    "$ref": "#/definitions/WebpackAliasObject"
                 },
                 "log": {
                     "$ref": "#/definitions/WpBuildRcLog"
@@ -729,6 +736,57 @@
                 }
             ],
             "additionalProperties": false
+        },
+        "WebpackAliasObject": {
+            "type": "object",
+            "minProperties": 0,
+            "patternProperties": {
+                "^[a-zA-Z\\:\\@][\\w\\:\\@]+$": {
+                    "$ref": "#/definitions/DirectoryPathGlob"
+                }
+            },
+            "propertyNames": {
+                "maxLength": 20
+            },
+            "description": "Key value pairs for aliased import/require paths",
+            "examples": [
+                {
+                    "alias":
+                    {
+                        ":env/*": "src/lib/env/node/*",
+                        ":types": "types"
+                    }
+                }
+            ],
+            "additionalProperties": true
+        },
+        "WebpackConfigOverride": {
+            "type": "object",
+            "minProperties": 0,
+            "patternProperties": {
+                "^[a-z][\\w]+$": {
+                    "$ref": "#"
+                }
+            },
+            "propertyNames": {
+                "maxLength": 20
+            },
+            "description": "An object that is directly applied to the webpack configurqtion before it is returned to the main process",
+            "examples": [
+                {
+                    "context": "/usr/lib/projectname/src",
+                    "resolve":
+                        {
+                            "alias":
+                            {
+                                ":env/*": "src/lib/env/node/*",
+                                ":types": "types"
+                            },
+                           "extensions": [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
+                        }
+                }
+            ],
+            "additionalProperties": true
         },
         "WebpackEntryPath": {
             "type": "object",

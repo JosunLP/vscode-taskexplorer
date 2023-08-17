@@ -10,7 +10,7 @@
 			"DOM", "DOM.Iterable", "ES2020"
 		],
 		"paths": {
-			":env/*": [ "src/lib/env/web/*" ],
+			":env/*": [ "src/lib/env/web/*", "src/webview/common/env/web/*" ],
 			":types": [ "../../..types" ]
 		},
 		"rootDirs": [
@@ -34,6 +34,7 @@
         "doc",
         ".nyc_output",
         ".coverage",
-        "src/test/**/*"
+        "src/test/**/*",
+        "**/common/node/**/*",
     ]
 }

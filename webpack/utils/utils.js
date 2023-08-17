@@ -18,6 +18,10 @@ const { existsSync } = require("fs");
 const { join, resolve, basename, dirname } = require("path");
 const exec = promisify(require("child_process").exec);
 
+const globOptions = {
+    ignore: [ "**/node_modules/**", "**/.vscode*/**", "**/build/**", "**/dist/**", "**/res*/**", "**/doc*/**" ]
+};
+
 
 /**
  * @function
@@ -157,7 +161,7 @@ const clone = (item) =>
 const execAsync = async (options) =>
 {
     let exitCode = null;
-    const procPromise = exec(options.command, { stdio: [ 'pipe', 'pipe', 'ignore' ], encoding: "utf8", ...options.execOptions }),
+    const procPromise = exec(options.command, { stdio: [ "pipe", "pipe", "pipe" ], encoding: "utf8", ...options.execOptions }),
           child = procPromise.child,
           ignores = asArray(options.ignoreOut),
           logPad = options.logPad || "",
@@ -200,16 +204,22 @@ const execAsync = async (options) =>
 
     if (stdout.length > 0) {
         const hdr = logger.withColor(`${program} stdout:`, colors.white);
-        stderr.forEach((m) => {
+        stderr.forEach((m) =>
+        {
             const msg = logger.withColor(m, colors.grey);
             logger.log(`${logPad}${hdr} ${msg}`, m.length <= 256 ? 2 : 5, "", logger.icons.color.star);
         });
     }
+
     if (stderr.length > 0) {
         const hdr = logger.withColor(`${program} stderr:`, exitCode !== 0 ? colors.red : colors.yellow);
-        stderr.forEach((m) => {
+        stderr.forEach((m) =>
+        {
             const msg = logger.withColor(m, colors.grey);
-            logger.log(`${logPad}${hdr} ${msg}`, m.length <= 256 ? 2 : 5, "", exitCode !== 0 ? logger.icons.color.error : logger.icons.color.warning);
+            logger.log(
+                `${logPad}${hdr} ${msg}`, m.length <= 256 ? 2 : 5, "",
+                exitCode !== 0 ? logger.icons.color.error : logger.icons.color.warning
+            );
         });
     }
 
@@ -223,7 +233,7 @@ const execAsync = async (options) =>
  * @param {import("glob").GlobOptions} options
  * @returns {Promise<string[]>}
  */
-const findFiles = async (pattern, options) => (await glob(pattern, options)).map((/** @type {{ toString: () => any; }} */ f) => f.toString());
+const findFiles = async (pattern, options) => (await glob(pattern, merge(globOptions, options))).map((f) => f.toString());
 
 
 /**
@@ -232,7 +242,7 @@ const findFiles = async (pattern, options) => (await glob(pattern, options)).map
  * @param {import("glob").GlobOptions} options
  * @returns {string[]}
  */
-const findFilesSync = (pattern, options) => glob.sync(pattern, options).map((/** @type {{ toString: () => any; }} */ f) => f.toString());let tsConfig, tsConfigParams;
+const findFilesSync = (pattern, options) => glob.sync(pattern, merge(globOptions, options)).map((f) => f.toString());
 
 
 /**
@@ -274,11 +284,15 @@ const findTsConfig = (app) =>
         return tsCfg;
     };
 
-    let tsConfig = _find(app.getSrcPath());
-    if (!tsConfig || !existsSync(tsConfig)) {
-        tsConfig = _find(app.getContextPath());
+    let tsConfig = app.paths.tsconfig;
+    if (!tsConfig || !existsSync(tsConfig))
+    {
+        tsConfig = _find(app.getSrcPath());
         if (!tsConfig || !existsSync(tsConfig)) {
-            tsConfig = _find(app.getRcPath("base"));
+            tsConfig = _find(app.getContextPath());
+            if (!tsConfig || !existsSync(tsConfig)) {
+                tsConfig = _find(app.getRcPath("base"));
+            }
         }
     }
 
@@ -289,29 +303,32 @@ const findTsConfig = (app) =>
 
 
 /**
- * @param {string} tsConfigPath
- * @returns {{ raw: string; json: Record<string, any>; include: string[]; path: string }}
+ * @param {import("../types/typedefs").WpBuildApp | string} app
+ * @param {string[]} xInclude
+ * @returns {typedefs.WpBuildTsConfigSearchResult | undefined}
  */
-const getTsConfig = (tsConfigPath) =>
+const getTsConfig = (app, ...xInclude) =>
 {
-    const dir = dirname(tsConfigPath),
-          file = basename(tsConfigPath),
-          result = spawnSync("npx", [ "tsc", `-p ${file}`, "--showConfig" ], { cwd: dir, encoding: "utf8", shell: true }),
-          data = result.stdout,
-		  start = data.indexOf("{"),
-		  end = data.lastIndexOf("}") + 1,
-          include = [],
-          raw = data.substring(start, end),
-          json = JSON5.parse(raw);
-
-    if (json.rootDir) {
-        include.push(resolve(dir, json.rootDir));
+    const tsConfigPath = isString(app) ? app : findTsConfig(app);
+    if (tsConfigPath && existsSync(tsConfigPath))
+    {
+        const dir = dirname(tsConfigPath),
+              file = basename(tsConfigPath),
+            result = spawnSync("npx", [ "tsc", `-p ${file}`, "--showConfig" ], { cwd: dir, encoding: "utf8", shell: true }),
+            data = result.stdout,
+            start = data.indexOf("{"),
+            end = data.lastIndexOf("}") + 1,
+            include = [ ...xInclude ],
+            raw = data.substring(start, end),
+            json = JSON5.parse(raw);
+        if (json.rootDir) {
+            include.push(resolve(dir, json.rootDir));
+        }
+        if (isArray(json.include)) {
+            include.push(...json.include.filter(p => !include.includes(p)).map((path) => resolve(dir, path.replace(/\*/g, ""))));
+        }
+	    return { raw, json, include: uniq(include), path: tsConfigPath };
     }
-    if (isArray(json.include)) {
-        include.push(...json.include.filter(p => !include.includes(p)).map((path) => resolve(dir, path.replace(/\*/g, ""))));
-    }
-
-	return { raw, json, include: uniq(include), path: tsConfigPath };
 };
 
 

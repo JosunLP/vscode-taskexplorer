@@ -11,9 +11,8 @@
 const path = require("path");
 const esbuild = require("esbuild");
 const { existsSync } = require("fs");
-const { dirname, basename, resolve } = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { getTsConfig, WpBuildApp, WpBuildError, findTsConfig, isArray, uniq } = require("../utils");
+const { getTsConfig, WpBuildApp, WpBuildError, uniq } = require("../utils");
 
 
 const builds =
@@ -22,7 +21,7 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
-	 * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
+	 * @param {import("../types").WpBuildTsConfigSearchResult} tsConfig
 	 * @throws {WpBuildError}
 	 */
 	module: (app, tsConfig) =>
@@ -62,7 +61,7 @@ const builds =
 		},
 		{
 			test: /\.ts$/,
-			include: uniq(tsConfig.include),
+			include: tsConfig.include,
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/, /\.vscode/
 			],
@@ -81,7 +80,7 @@ const builds =
 				options: {
 					configFile: tsConfig.path,
 					// experimentalWatchApi: true,
-					transpileOnly: true
+					transpileOnly: true // !existsSync(typesPath) || tsConfig.json.compilerOptions.declarations !== true
 				}
 			}
 		});
@@ -92,7 +91,7 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
-	 * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
+	 * @param {import("../types").WpBuildTsConfigSearchResult} tsConfig
 	 * @param {boolean} [fromMain]
 	 */
 	tests: (app, tsConfig, fromMain) =>
@@ -103,6 +102,8 @@ const builds =
 
 		const srcPath = app.getSrcPath(),
 			  buildPath = app.getRcPath("base");
+
+		tsConfig.include.push(srcPath);
 
 		app.wpc.module.rules.push(
 		{
@@ -116,7 +117,7 @@ const builds =
 		},
 		{
 			test: /\.ts$/,
-			include: srcPath + (fromMain ? "\\test" : ""),
+			include: tsConfig.include,
 			exclude: [
 				/node_modules/, /types[\\/]/, /\.d\.ts$/
 			],
@@ -162,7 +163,7 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app
-	 * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
+	 * @param {import("../types").WpBuildTsConfigSearchResult} tsConfig
 	 * @throws {WpBuildError}
 	 */
 	types: (app, tsConfig) =>
@@ -170,13 +171,6 @@ const builds =
 		const typesDir = app.getSrcTypesPath();
 		if (existsSync(typesDir))
 		{
-			const tsConfigPath = findTsConfig(app);
-
-			if (!tsConfigPath) {
-				throw WpBuildError.getErrorMissing("tsconfig file", "exports/rules.js", app.wpc);
-			}
-
-			const tsConfig = getTsConfig(tsConfigPath);
 			tsConfig.include.push(typesDir);
 
 			app.wpc.module.rules.push(
@@ -224,13 +218,7 @@ const builds =
 	 */
 	webapp: (app, tsConfig) =>
 	{
-		const basePath = app.getContextPath();
 		tsConfig.include.push(app.getSrcPath());
-
-console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-console.log("basePath: " + basePath);
-console.log("context: " + app.wpc.context);
-console.log("tsConfigInclude: " + uniq(tsConfig.include));
 
 		app.wpc.module.rules.push(...[
 		{
@@ -350,11 +338,13 @@ const stripLoggingOptions = () => ({
  */
 const rules = (app) =>
 {
-	const tsConfigPath = findTsConfig(app);
-	if (!tsConfigPath) {
+	const tsConfig = getTsConfig(app);
+	if (!tsConfig) {
 		throw WpBuildError.getErrorMissing("tsconfig file", "exports/rules.js", app.wpc);
 	}
-	const tsConfig = getTsConfig(tsConfigPath);
+
+	app.logger.write("wp configuration rules found tsconfig file", 2);
+	app.logger.value("   tsConfig.path", tsConfig.path, 2);
 
 	app.wpc.module = { rules: [] };
 	if (builds[app.build.type])

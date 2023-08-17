@@ -43,6 +43,7 @@ declare type WpBuildWebpackConfig = {
 
 declare type  WpBuildAppPathsKey = keyof WpBuildRcPaths | `${"dist"|"src"}${string}`; // `${"dist"|"src"}${Capitalize<WpBuildRcBuildType>}`;
 
+declare type WpBuildTsConfigSearchResult = { raw: string; json: Record<string, any>; include: string[]; path: string };
 
 declare interface IWpBuildApp
 {
@@ -89,6 +90,7 @@ export {
     WpBuildAppGetPathOptions,
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,
+    WpBuildTsConfigSearchResult,
     WpBuildWebpackConfig,
     __WPBUILD__
 };

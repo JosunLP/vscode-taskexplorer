@@ -15,7 +15,7 @@
         "noUnusedLocals": false,
         "noEmitOnError": true,
         "paths": {
-			":env/*": [ "src/lib/env/node/*" ],
+			":env/*": [ "src/lib/env/node/*", "src/webview/common/env/node/*" ],
 			":types": [ "types" ]
 		},
 		"skipLibCheck": true,

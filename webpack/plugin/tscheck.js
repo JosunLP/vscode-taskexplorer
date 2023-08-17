@@ -61,7 +61,12 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	 */
 	bundle = () =>
 	{
-		const typesDir = this.app.getSrcTypesPath();
+		const l = this.app.logger,
+			  typesDir = this.app.getSrcTypesPath();
+		l.write("dts bundling", 1);
+		l.value("   types directory", typesDir, 2);
+		l.value("   is main tests", this.app.isMainTests, 3);
+		l.value("   already bundled", this.app.global.tsCheck.typesBundled,3);
 		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(typesDir))
 		{
 			const bundleCfg = {
@@ -76,10 +81,10 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			};
 			dts.bundle(bundleCfg);
 			this.app.global.tsCheck.typesBundled = true;
-			this.app.logger.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
+			l.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
 		}
 		else {
-			this.app.logger.write("   dts bundling skipped", 1);
+			l.write("   dts bundling skipped", 1);
 		}
 	};
 

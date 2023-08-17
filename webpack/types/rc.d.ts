@@ -43,6 +43,8 @@ export declare type WpBuildRcBuilds = WpBuildRcBuild[];
 
 export declare type DirectoryPath = string;
 
+export declare type DirectoryPathGlob = string;
+
 export declare type WpBuildLogColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
 
 export declare interface IWpBuildRcSchema 
@@ -71,6 +73,7 @@ export declare type WpBuildRcBuild =
     entry: WebpackEntry;
     mode: WpBuildWebpackMode;
     target: WebpackTarget;
+    alias?: WebpackAliasObject;
     log?: WpBuildRcLog;
     paths: WpBuildRcPaths;
     exports: WpBuildRcExports;
@@ -94,6 +97,11 @@ export declare type WebpackEntryObject =
     import: FilePathRelative;
     layer?: ("debug" | "release") & string;
     publicPath?: DirectoryPathRelative;
+};
+
+export declare type WebpackAliasObject = 
+{
+    [k: string]: unknown;
 };
 export declare type WpBuildRcLog = 
 {
@@ -229,4 +237,9 @@ export declare type WpBuildRcPackageJson =
     name?: string;
     publisher?: string;
     version?: string;
+};
+
+export declare type WebpackConfigOverride = 
+{
+    [k: string]: unknown;
 };

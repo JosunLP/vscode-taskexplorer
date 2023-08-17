@@ -9,7 +9,7 @@
 		],
 		"outDir": "dist/web",
 		"paths": {
-			":env/*": ["src/lib/env/web/*"],
+			":env/*": ["src/lib/env/web/*", "src/webview/common/env/web/*" ],
 			":types": [ "types" ],
 			"path": ["node_modules/path-browserify"]
 		},
@@ -28,6 +28,7 @@
         "script",
         "src/test/**/*",
         "src/webview/app/**/*",
+        "src/webview/common/node/**/*",
         "src/lib/env/node/**/*",
         "test-fixture",
         "types"

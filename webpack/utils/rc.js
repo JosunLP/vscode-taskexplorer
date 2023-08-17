@@ -27,6 +27,10 @@ const {
 class WpBuildRc
 {
     /**
+     * @type {typedefs.WebpackAliasObject}
+     */
+    alias;
+    /**
      * @type {typedefs.WpBuildRuntimeEnvArgs}
      */
     args;
@@ -191,6 +195,9 @@ class WpBuildRc
             }
             if (isObject(rcChild.plugins)) {
                 apply(this.plugins, rcChild.plugins);
+            }
+            if (isObject(rcChild.alias)) {
+                apply(this.alias, rcChild.alias);
             }
         };
 
@@ -384,6 +391,15 @@ class WpBuildRc
         }
         if (!rc.builds) {
             rc.builds = [];
+        }
+        if (!rc.plugins) {
+            rc.plugins = [];
+        }
+        if (!rc.exports) {
+            rc.plugins = [];
+        }
+        if (!rc.alias) {
+            rc.alias = {};
         }
     };
 

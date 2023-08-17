@@ -240,6 +240,9 @@ class WpBuildApp
         if (isObject(this.build.plugins)) {
             apply(this.rc.plugins, this.build.plugins);
         }
+        if (isObject(this.build.alias)) {
+            apply(this.rc.alias, this.build.alias);
+        }
         this.mode = this.rc.mode = this.build.mode || this.rc.mode;
     };
 
@@ -367,6 +370,13 @@ class WpBuildApp
         return this.getRcPath(`src${capitalize(this.build.name)}`, opts) ||
                this.getRcPath("src", opts) || join(this.paths.base, "src");
     };
+
+
+    /**
+     * @function
+     * @returns {typedefs.WebpackAliasObject}
+     */
+    getAliasObject = () => this.build.alias || {};
 
 
     /**

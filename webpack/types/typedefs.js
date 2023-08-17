@@ -46,6 +46,7 @@
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("../types").WpBuildRcPathsKey} WpBuildRcPathsKey */
 /** @typedef {import("../types").WpBuildLogIconSet} WpBuildLogIconSet */
+/** @typedef {import("../types").WebpackAliasObject} WebpackAliasObject */
 /** @typedef {import("../types").WpBuildAppPathsKey} WpBuildAppPathsKey */
 /** @typedef {import("../types").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
 /** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
@@ -62,6 +63,7 @@
 /** @typedef {import("../types").WpBuildRcEnvironmentBase} WpBuildRcEnvironmentBase */
 /** @typedef {import("../types").WpBuildAppGetPathOptions} WpBuildAppGetPathOptions */
 /** @typedef {import("../types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
+/** @typedef {import("../types").WpBuildTsConfigSearchResult} WpBuildTsConfigSearchResult */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
 
 

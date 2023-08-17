@@ -6,7 +6,7 @@
         "declarationDir": "types/dist",
         "outDir": "dist",
         "paths": {
-			":env/*": [ "src/lib/env/node/*" ],
+			":env/*": [ "src/lib/env/node/*", "src/webview/common/env/node/*" ],
 			":types": [ "types" ]
 		},
 		"rootDir": "src",
@@ -28,6 +28,7 @@
         "script",
         "src/test/**/*",
         "src/webview/app/**/*",
+        "src/webview/common/web/**/*",
         "src/lib/env/web/**/*",
         "test-fixture",
         "types"

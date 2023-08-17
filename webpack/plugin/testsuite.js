@@ -11,7 +11,7 @@
 const { existsSync } = require("fs");
 const WpBuildPlugin = require("./base");
 const { WebpackError } = require("webpack");
-const { findFiles, getTsConfig } = require("../utils");
+const { findFiles, getTsConfig, WpBuildError, findTsConfig } = require("../utils");
 const {readFile, unlink, access } = require("fs/promises");
 const { join, relative, dirname, isAbsolute, resolve } = require("path");
 
@@ -62,23 +62,8 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 		this.onCompilation(compilation);
 
 		const testsDir = join(this.app.getDistPath(), "test");
-		const globOptions = {
-			cwd: this.app.getRcPath("base"),
-			absolute: true,
-			ignore: [ "**/node_modules/**", "**/.vscode*/**", "**/build/**", "**/dist/**", "**/res*/**", "**/doc*/**" ]
-		};
 
-		let tsConfigFile,
-			files = await findFiles("**/src/**/test{,s}/tsconfig.*", globOptions);
-		if (files.length === 0)
-		{
-			files = await findFiles("**/src/**tsconfig.test{,s}.*", globOptions);
-		}
-		if (files.length >= 1)
-		{
-			tsConfigFile = files[0];
-		}
-
+		const tsConfigFile = findTsConfig(this.app);
 		if (!tsConfigFile)
 		{
 			const eMsg = "Could not locate tsconfig file for tests suite - must be **/tests?/tsconfig.* or **/tsconfig.tests?.json";
@@ -94,8 +79,11 @@ class WpBuildTestSuitePlugin extends WpBuildPlugin
 		if (!existsSync(testsDir))
 		{
 			this.app.logger.write("   checking for tsbuildinfo file path", 3);
-			const tsConfig = getTsConfig(dirname(tsConfigFile), tsConfigFile);
-			let buildInfoFile = tsConfig.compilerOptions.tsBuildInfoFile || join(dirname(tsConfigFile), "tsconfig.tsbuildinfo");
+			const tsConfig = getTsConfig(tsConfigFile);
+			if (!tsConfig) {
+				throw WpBuildError.getErrorMissing("tsconfig file", "exports/rules.js", this.app.wpc);
+			}
+			let buildInfoFile = tsConfig.json.compilerOptions.tsBuildInfoFile || join(dirname(tsConfigFile), "tsconfig.tsbuildinfo");
 			if (!isAbsolute(buildInfoFile)) {
 				buildInfoFile = resolve(dirname(tsConfigFile), buildInfoFile);
 			}
