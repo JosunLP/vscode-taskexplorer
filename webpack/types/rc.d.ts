@@ -236,18 +236,6 @@ export declare type WpBuildRcVsCode =
     languageServer?: boolean;
 };
 
-export declare type WpBuildRcPackageJson = 
-{
-    author?: string | { name: string; email?: string };
-    description?: string;
-    displayName?: string;
-    main?: string;
-    module?: string;
-    name?: string;
-    publisher?: string;
-    version?: string;
-};
-
 export declare type WebpackConfigOverride = 
 {
     [k: string]: unknown;

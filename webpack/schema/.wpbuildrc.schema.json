@@ -680,56 +680,6 @@
             ],
             "additionalProperties": false
         },
-        "WpBuildRcPackageJson": {
-            "type": "object",
-            "description": "Required package.json properties",
-            "properties": {
-                "author": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        }, 
-                        {
-                            "type": "object",
-                            "properties":
-                            {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "email": {
-                                    "type": "string"
-                                }
-                            },
-                            "additionalProperties": false,
-                            "required": [
-                                "name"
-                            ]
-                        }
-                    ]
-                },
-                "description": {
-                    "type": "string"
-                },
-                "displayName": {
-                    "type": "string"
-                },
-                "main": {
-                    "type": "string"
-                },
-                "module": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "publisher": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
         "WpBuildRcSourceCodeType": {
             "type": "string",
             "default": "typescript",

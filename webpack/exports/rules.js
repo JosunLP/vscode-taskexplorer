@@ -296,6 +296,22 @@ const builds =
  * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
  * @returns {*}
  */
+const getEsBuildOptions = (app, tsConfig) =>
+{
+	return {
+		implementation: esbuild,
+		loader: "tsx",
+		target: "es2020",
+		tsconfigRaw: tsConfig.json
+	};
+};
+
+
+/**
+ * @param {WpBuildApp} app
+ * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
+ * @returns {*}
+ */
 const getTsLoaderOptions = (app, tsConfig) =>
 {
 	return {
