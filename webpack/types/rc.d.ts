@@ -23,17 +23,21 @@
 
 export declare type WpBuildRcBuildType = "module" | "tests" | "types" | "webapp" | "webmodule";
 
-export declare type WebpackEntry = WebpackEntryPath | WebpackEntryObject;
+export declare type WpBuildWebpackEntryValue = FilePathRelativeLeadingDot | WpBuildWebpackEntryObject;
 
-export declare type FilePathRelative = string;
+export declare type FilePathRelativeLeadingDot = string;
 
 export declare type FileName = string;
+
+export declare type FilePathRelative = string;
 
 export declare type DirectoryPathRelative = string;
 
 export declare type WpBuildWebpackMode = "development" | "production" | "none" | "test" | "testproduction";
 
 export declare type WebpackTarget = "node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist";
+
+export declare type WpBuildAliasValue = string | string[] | false;
 
 export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow";
 
@@ -70,7 +74,7 @@ export declare type WpBuildRcBuild =
 {
     name: string;
     type: WpBuildRcBuildType;
-    entry: WebpackEntry;
+    entry: WpBuildWebpackEntry;
     mode: WpBuildWebpackMode;
     target: WebpackTarget;
     alias?: WebpackAliasObject;
@@ -82,12 +86,12 @@ export declare type WpBuildRcBuild =
 export declare type WpBuildRcBuildKey = keyof WpBuildRcBuild;
 export declare type TypeWpBuildRcBuild = Required<WpBuildRcBuild>;
 
-export declare type WebpackEntryPath = 
+export declare type WpBuildWebpackEntry = 
 {
-    [k: string]: FilePathRelative;
+    [k: string]: WpBuildWebpackEntryValue;
 };
 
-export declare type WebpackEntryObject = 
+export declare type WpBuildWebpackEntryObject = 
 {
     asyncChunks?: boolean;
     baseUri?: string;
@@ -101,7 +105,7 @@ export declare type WebpackEntryObject =
 
 export declare type WebpackAliasObject = 
 {
-    [k: string]: unknown;
+    [k: string]: WpBuildAliasValue;
 };
 export declare type WpBuildRcLog = 
 {
@@ -214,6 +218,7 @@ export declare type TypeWpBuildRcPlugins = Required<WpBuildRcPlugins>;
 
 export declare type WpBuildRcEnvironment = 
 {
+    alias?: WebpackAliasObject;
     builds: WpBuildRcBuilds;
     log?: WpBuildRcLog;
     paths?: WpBuildRcPaths;

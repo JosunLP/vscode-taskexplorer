@@ -62,12 +62,13 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 	bundle = () =>
 	{
 		const l = this.app.logger,
-			  typesDir = this.app.getSrcTypesPath();
+			  typesDir = existsSync(this.app.getSrcTypesPath()),
+			  typesDirDist = existsSync(this.app.getRcPath("distTypes"));
 		l.write("dts bundling", 1);
 		l.value("   types directory", typesDir, 2);
 		l.value("   is main tests", this.app.isMainTests, 3);
 		l.value("   already bundled", this.app.global.tsCheck.typesBundled,3);
-		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && existsSync(typesDir))
+		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
 		{
 			const bundleCfg = {
 				name: `${this.app.rc.pkgJson.name}-types`,
@@ -82,6 +83,12 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			dts.bundle(bundleCfg);
 			this.app.global.tsCheck.typesBundled = true;
 			l.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
+		}
+		else if (!typesDirDist) {
+			l.warning("   types output directory doesn't exist, dts bundling skipped");
+		}
+		else if (!typesDir) {
+			l.warning("   types directory doesn't exist, dts bundling skipped");
 		}
 		else {
 			l.write("   dts bundling skipped", 1);
@@ -133,6 +140,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 			throw WpBuildError.get(`Could not locate tsconfig file for '${app.mode}' environment`, "plugin/tscheck.js");
 		}
 
+		app.logger.write(`add tsconfig file '${tsConfigParams[0]}' to tsforkchecker in ${tsConfigParams[1]} mode (build=${!!tsConfigParams[2]})`, 2);
 		return [{
 			ctor: ForkTsCheckerWebpackPlugin,
 			options:

@@ -39,8 +39,8 @@
         "res",
         "script",
         "src/test/**/*",
-        "src/webview/app/**/*",
-        "src/lib/env/web/**/*",
+        "src/webview/app/**",
+        "**/env/web/**",
         "test-fixture",
         "types"
     ]

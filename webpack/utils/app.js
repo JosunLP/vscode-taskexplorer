@@ -14,7 +14,7 @@ const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
 const { isAbsolute, relative, posix, normalize, join, sep } = require("path");
 const { WpBuildWebpackModes, isWpBuildRcPathsProp } = require("./constants");
-const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject, capitalize } = require("./utils");
+const { apply, isString, WpBuildError, merge, isPromise, isArray, isObject, capitalize, findTsConfig, getTsConfig } = require("./utils");
 const {
 	cache, devtool, entry, experiments, externals, ignorewarnings, minification, plugins, optimization,
     output, resolve, rules, stats, watch
@@ -100,6 +100,10 @@ class WpBuildApp
      */
     target;
     /**
+     * @type {typedefs.WpBuildAppTsConfig | undefined}
+     */
+    tsConfig;
+    /**
      * @type {typedefs.WpBuildWebpackConfig}
      */
     wpc;
@@ -130,6 +134,9 @@ class WpBuildApp
         }
 		this.applyApp();
 		this.applyPaths();
+        if (this.paths.tsconfig) {
+            this.tsConfig = getTsConfig(this);
+        }
         this.initLogger(this.rc.log);
         this.buildWebpackConfig();
         this.printBuildProperties();
@@ -209,6 +216,9 @@ class WpBuildApp
                 src: "src"
             })
         );
+        if (!this.paths.tsconfig) {
+            this.paths.tsconfig = this.build.paths.tsconfig = this.rc.paths.tsconfig = findTsConfig(this);
+        }
 	};
 
 
@@ -261,6 +271,12 @@ class WpBuildApp
         if (!rc.builds) {
             rc.builds = [];
         }
+        if (!rc.paths) {
+            rc.paths = {};
+        }
+        if (!rc.alias) {
+            rc.alias = {};
+        }
     };
 
 
@@ -310,6 +326,16 @@ class WpBuildApp
 
     /**
      * @function
+     * @param {"src" | "dist"} type
+     * @returns {typedefs.WpBuildRcPathsKey}
+     */
+    getBuildPathKey = (type) => {
+        return /** @type {typedefs.WpBuildRcPathsKey} */(`${type}${capitalize(this.build.type)}`);
+    };
+
+
+    /**
+     * @function
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      */
     getContextPath = (options) => this.getRcPath("ctx", options);
@@ -322,25 +348,25 @@ class WpBuildApp
     getDistPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath(`dist${capitalize(this.build.name)}`, opts) ||
+        return this.getRcPath(this.getBuildPathKey("dist"), opts) ||
                this.getRcPath("dist", opts) || join(this.paths.base, "dist");
     };
 
 
     /**
      * @function
-     * @param {typedefs.WpBuildAppPathsKey} pathKey
+     * @param {typedefs.WpBuildRcPathsKey} pathKey
      * @param {typedefs.WpBuildAppGetPathOptions} [options]
      */
     getRcPath = (pathKey, options) =>
     {
         let path = "";
-        const opts = apply({ path: undefined, rel: false, ctx: false, dot: false , psx: false, stat: false }, options),
+        const opts = options || {},
               basePath = (opts.ctx ? this.paths.ctx : this.paths.base) || process.cwd();
         if (opts.path || isWpBuildRcPathsProp(pathKey))
         {
             path = (!opts.path ? this.rc.paths[pathKey] : opts.path) || "";
-            if (path || !opts.stat)
+            if (!opts.stat || (path && (!opts.fstat || existsSync(path))))
             {
                 if (opts.rel)
                 {
@@ -353,7 +379,8 @@ class WpBuildApp
             }
         }
         path = path ? (!opts.psx ? normalize(path) : posix.normalize(path)) : "";
-        if (opts.rel && opts.dot && ! (/^\.[\\\/]/).test(path) && (path || !opts.stat)) {
+        if (opts.rel && opts.dot && ! (/^\.[\\\/]/).test(path) && (path || !opts.stat))
+        {
             path = "." + (opts.psx ? "/" : sep) + path;
         }
         return path;
@@ -367,7 +394,7 @@ class WpBuildApp
     getSrcPath = (options) =>
     {
         const opts = { stat: true, ...options };
-        return this.getRcPath(`src${capitalize(this.build.name)}`, opts) ||
+        return this.getRcPath(this.getBuildPathKey("src"), opts) ||
                this.getRcPath("src", opts) || join(this.paths.base, "src");
     };
 
@@ -494,6 +521,10 @@ class WpBuildApp
         l.value("   target", wpc.target, 1);
         l.value("   context directory", wpc.context, 1);
         l.value("   output directory", wpc.output.path, 1);
+        l.value("   entry", JSON.stringify(this.wpc.entry), 3);
+        l.value("   resolve", JSON.stringify(this.wpc.resolve), 3);
+        l.value("   output", JSON.stringify(this.wpc.output), 4);
+        l.value("   rules", JSON.stringify(this.wpc.module.rules), 4);
         l.sep();
         l.write("Build Configuration:", 2, "", 0, l.colors.white);
         l.value("   name", this.build.name, 2);

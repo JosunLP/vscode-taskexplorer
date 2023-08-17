@@ -7,7 +7,7 @@
 		"isolatedModules": false,
 		"outDir": "./dist",
         "paths": {
-			":env/*": [ "src/lib/env/node/*" ],
+			":env/*": [ "src/lib/env/node/*", "src/webview/common/env/node/*" ],
 			":types": [ "types" ]
 		},
 		"rootDir": "../src",
@@ -31,7 +31,8 @@
         "../script",
         "../src/test/**/*",
         "../src/webview/**/*",
-        "../src/lib/env/browser/*",
+        "../src/lib/env/web/**",
+        "../src/webview/common/env/web/**",
         "../test-fixture",
         "**/dist/**/*"
     ]

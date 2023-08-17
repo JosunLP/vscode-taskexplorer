@@ -305,7 +305,7 @@ const findTsConfig = (app) =>
 /**
  * @param {import("../types/typedefs").WpBuildApp | string} app
  * @param {string[]} xInclude
- * @returns {typedefs.WpBuildTsConfigSearchResult | undefined}
+ * @returns {typedefs.WpBuildAppTsConfig | undefined}
  */
 const getTsConfig = (app, ...xInclude) =>
 {

@@ -94,13 +94,13 @@ declare type WebpackLogger = ReturnType<WebpackCompilation["getLogger"]>;
 
 declare type WebpackLogLevel = Exclude<WebpackConfig["infrastructureLogging"], undefined>["level"];
 
-declare type WebpackMode = Exclude<WebpackConfig["mode"], undefined>;
+declare type WebpackMode = WebpackConfig["mode"];
 
 declare type WebpackModuleOptions = { rules: WebpackRuleSetRule[] } & ModuleOptions;
 
 declare type WebpackOptimization = WebpackOptionsNormalized["optimization"];
 
-declare type WebpackOutput = Exclude<WebpackConfig["output"], undefined>;
+declare type WebpackOutput = WebpackConfig["output"];
 
 declare type WebpackRawSource = WebpackSources.RawSource;
 
@@ -113,10 +113,10 @@ declare type WebpackRuntimeArgs =
     env: WebpackRuntimeEnvArgs;
     mode?: WebpackMode;
     watch?: boolean;
-    [ k: string ]: string[] | string | boolean | WebpackRuntimeEnvArgs;
+    [ k: string ]: string[] | string | boolean | WebpackRuntimeEnvArgs | undefined;
 };
 
-declare type WebpackRuntimeEnvArgs = { WEBPACK_WATCH?: boolean; watch: boolean }
+declare type WebpackRuntimeEnvArgs = { WEBPACK_WATCH?: boolean; watch?: boolean }
 
 declare type WebpackSnapshot = ReturnType<WebpackCompilation["fileSystemInfo"]["mergeSnapshots"]>;
 

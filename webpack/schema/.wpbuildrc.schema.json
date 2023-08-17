@@ -84,6 +84,12 @@
             "maxLength": 150,
             "pattern": "^[\\w\\.\\-]+\\.([cm]?jsx?|tsx?)$"
         },
+        "FilePathRelativeLeadingDot": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 150,
+            "pattern": "^\\.[\\\\\\/][\\w\\.\\-\\\\\\/]+?\\.\\w+$"
+        },
         "DirectoryPathRelative": {
             "type": "string",
             "minLength": 3,
@@ -110,6 +116,9 @@
         "WpBuildRcEnvironment": {
             "type": "object",
             "properties": {
+                "alias": {
+                    "$ref": "#/definitions/WebpackAliasObject"
+                },
                 "builds": {
                     "$ref": "#/definitions/WpBuildRcBuilds"
                 },
@@ -150,7 +159,7 @@
                     "$ref": "#/definitions/WpBuildRcBuildType"
                 },
                 "entry": {
-                    "$ref": "#/definitions/WebpackEntry"
+                    "$ref": "#/definitions/WpBuildWebpackEntry"
                 },
                 "mode": {
                     "$ref": "#/definitions/WpBuildWebpackMode"
@@ -715,106 +724,7 @@
                 }
             }
         },
-        "WpBuildWebpackMode":  {
-            "type": "string",
-            "default": "production",
-            "oneOf": [
-                {
-                    "const": "development"
-                },
-                {
-                    "const": "production"
-                },
-                {
-                    "const": "none"
-                },
-                {
-                    "const": "test"
-                },
-                {
-                    "const": "testproduction"
-                }
-            ],
-            "additionalProperties": false
-        },
-        "WebpackAliasObject": {
-            "type": "object",
-            "minProperties": 0,
-            "patternProperties": {
-                "^[a-zA-Z\\:\\@][\\w\\:\\@]+$": {
-                    "$ref": "#/definitions/DirectoryPathGlob"
-                }
-            },
-            "propertyNames": {
-                "maxLength": 20
-            },
-            "description": "Key value pairs for aliased import/require paths",
-            "examples": [
-                {
-                    "alias":
-                    {
-                        ":env/*": "src/lib/env/node/*",
-                        ":types": "types"
-                    }
-                }
-            ],
-            "additionalProperties": true
-        },
-        "WebpackConfigOverride": {
-            "type": "object",
-            "minProperties": 0,
-            "patternProperties": {
-                "^[a-z][\\w]+$": {
-                    "$ref": "#"
-                }
-            },
-            "propertyNames": {
-                "maxLength": 20
-            },
-            "description": "An object that is directly applied to the webpack configurqtion before it is returned to the main process",
-            "examples": [
-                {
-                    "context": "/usr/lib/projectname/src",
-                    "resolve":
-                        {
-                            "alias":
-                            {
-                                ":env/*": "src/lib/env/node/*",
-                                ":types": "types"
-                            },
-                           "extensions": [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
-                        }
-                }
-            ],
-            "additionalProperties": true
-        },
-        "WebpackEntryPath": {
-            "type": "object",
-            "minProperties": 1,
-            "patternProperties": {
-                "^[a-z][\\w]+$": {
-                    "$ref": "#/definitions/FilePathRelative"
-                }
-            },
-            "propertyNames": {
-                "maxLength": 30
-            },
-            "examples": [
-                {
-                    "entry": {
-                        "modulename": "./path/to/entry.ts"
-                    }
-                },
-                {
-                    "entry": {
-                        "modulename1": "./path/to/entry1.ts",
-                        "modulename2": "./path/to/entry2.ts",
-                        "modulename3": "./path/to/entry3.ts"
-                    }
-                }
-            ]
-        },
-        "WebpackEntryObject": {
+        "WpBuildWebpackEntryObject": {
             "type": "object",
             "properties": {
                 "asyncChunks": {
@@ -886,13 +796,50 @@
             },
             "required": [
                 "import"
-            ],
+            ]
+        },
+        "WpBuildWebpackEntryValue": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/FilePathRelativeLeadingDot"
+                },
+                {
+                    "$ref": "#/definitions/WpBuildWebpackEntryObject"
+                }
+            ]
+        },
+        "WpBuildWebpackEntry": {
+            "type": "object",
+            "description": "mapping of module names to respective entry point file, relative to context directory",
+            "minProperties": 1,
+            "patternProperties": {
+                "^[a-z][\\w\\-\\.]+$": {
+                    "$ref": "#/definitions/WpBuildWebpackEntryValue"
+                }
+            },
+            "propertyNames": {
+                "maxLength": 30
+            },
+            "additionalProperties": false,
             "examples": [
+                {
+                    "entry": {
+                        "modulename": "./path/to/entry.ts"
+                    }
+                },
+                {
+                    "entry": {
+                        "modulename1": "./path/to/entry1.ts",
+                        "modulename2": "./path/to/entry2.ts",
+                        "modulename3": "./path/to/entry3.ts"
+                    }
+                },
                 {
                     "entry": {
                         "modulename": {
                             "import": "./path/to/entrymodule.ts"
-                        }
+                        },
+                        "modulename2": "./path/to/entry2.ts"
                     }
                 },
                 {
@@ -912,19 +859,95 @@
                 }
             ]
         },
-        "WebpackEntry": {
-            "type": "object",
-            "description": "mapping of module names to respective entry point file, relative to context directory",
-            "minProperties": 1,
+        "WpBuildWebpackMode":  {
+            "type": "string",
+            "default": "production",
             "oneOf": [
                 {
-                    "$ref": "#/definitions/WebpackEntryPath"
+                    "const": "development"
                 },
                 {
-                    "$ref": "#/definitions/WebpackEntryObject"
+                    "const": "production"
+                },
+                {
+                    "const": "none"
+                },
+                {
+                    "const": "test"
+                },
+                {
+                    "const": "testproduction"
                 }
             ],
             "additionalProperties": false
+        },
+        "WpBuildAliasValue": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/DirectoryPathGlob"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DirectoryPathGlob"
+                    }
+                },
+                {
+                    "type": "boolean",
+                    "const": false,
+                    "readOnly": true
+                }
+            ]
+        },
+        "WebpackAliasObject": {
+            "type": "object",
+            "minProperties": 0,
+            "patternProperties": {
+                "^[a-zA-Z\\:\\@][\\w\\:\\@]+$": {
+                    "$ref": "#/definitions/WpBuildAliasValue"
+                }
+            },
+            "propertyNames": {
+                "maxLength": 20
+            },
+            "description": "Key value pairs for aliased import/require paths",
+            "examples": [
+                {
+                    "alias":
+                    {
+                        ":env/*": "src/lib/env/node/*",
+                        ":types": "types"
+                    }
+                }
+            ]
+        },
+        "WebpackConfigOverride": {
+            "type": "object",
+            "minProperties": 0,
+            "patternProperties": {
+                "^[a-z][\\w]+$": {
+                    "$ref": "#"
+                }
+            },
+            "propertyNames": {
+                "maxLength": 20
+            },
+            "description": "An object that is directly applied to the webpack configurqtion before it is returned to the main process",
+            "examples": [
+                {
+                    "context": "/usr/lib/projectname/src",
+                    "resolve":
+                        {
+                            "alias":
+                            {
+                                ":env/*": "src/lib/env/node/*",
+                                ":types": "types"
+                            },
+                           "extensions": [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
+                        }
+                }
+            ],
+            "additionalProperties": true
         },
         "WebpackTarget":  {
             "type": "string",

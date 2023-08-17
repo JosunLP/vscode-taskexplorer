@@ -21,7 +21,7 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
-	 * @param {import("../types").WpBuildTsConfigSearchResult} tsConfig
+	 * @param {import("../types").WpBuildAppTsConfig} tsConfig
 	 * @throws {WpBuildError}
 	 */
 	module: (app, tsConfig) =>
@@ -91,7 +91,7 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app Webpack build environment
-	 * @param {import("../types").WpBuildTsConfigSearchResult} tsConfig
+	 * @param {import("../types").WpBuildAppTsConfig} tsConfig
 	 * @param {boolean} [fromMain]
 	 */
 	tests: (app, tsConfig, fromMain) =>
@@ -163,7 +163,7 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app
-	 * @param {import("../types").WpBuildTsConfigSearchResult} tsConfig
+	 * @param {import("../types").WpBuildAppTsConfig} tsConfig
 	 * @throws {WpBuildError}
 	 */
 	types: (app, tsConfig) =>
@@ -218,7 +218,8 @@ const builds =
 	 */
 	webapp: (app, tsConfig) =>
 	{
-		tsConfig.include.push(app.getSrcPath());
+		const srcPath = app.getSrcPath();
+		tsConfig.include.push(srcPath);
 
 		app.wpc.module.rules.push(...[
 		{
@@ -275,6 +276,32 @@ const builds =
 				}
 			}]
 		}]);
+
+		const typesDir = app.getSrcTypesPath();
+		if (typesDir && app.rc.args.name) //  && !existsSync(typesDir))
+		{
+			app.wpc.module.rules.unshift(
+			{
+				test: /\.ts$/,
+				include: srcPath,
+				exclude: [
+					/node_modules/, /test[\\/]/, /\.d\.ts$/
+				],
+				use: {
+					loader: "ts-loader",
+					options: {
+						configFile: tsConfig.path,
+						experimentalWatchApi: false,
+						transpileOnly: false,
+						logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
+						logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
+						compilerOptions: {
+							emitDeclarationsOnly: true
+						}
+					}
+				}
+			});
+		}
 	}
 
 };

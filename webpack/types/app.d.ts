@@ -19,44 +19,51 @@
  */
 
 import { IDisposable } from "./generic";
+import { IWpBuildLogger } from "./logger";
 import {
-    WpBuildRcPaths, WpBuildWebpackEntry, WpBuildWebpackMode, WpBuildRcBuildType, WpBuildRcBuild
+    WpBuildRcPaths, WpBuildWebpackEntry, WpBuildWebpackMode, WpBuildRcBuildType, WpBuildRcBuild, WebpackTarget, WpBuildRcEnvironment, IWpBuildRcSchema, WpBuildRcPathsKey
 } from "./rc";
 import {
-    WebpackConfig, WebpackOutput, WebpackRuntimeEnvArgs, WebpackTarget, WebpackMode, WebpackModuleOptions, WebpackLogLevel
+    WebpackConfig, WebpackEntry, WebpackModuleOptions, WebpackLogLevel
 } from "./webpack";
 
 
 declare const __WPBUILD__: any;
 
-declare type WpBuildAppGetPathOptions = { rel?: boolean; ctx?: boolean; dot?: boolean; psx?: boolean; stat?: boolean; path?: string };
+declare type WpBuildAppGetPathOptions = { rel?: boolean; ctx?: boolean; dot?: boolean; psx?: boolean; stat?: boolean; fstat?: boolean; path?: string };
 
 declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<string, any>; cacheDir: string; verbose: boolean; [ key: string ]: any };
 
-declare type WpBuildRuntimeEnvArgs = { /** @deprecated Use `name`*/build?: string; mode?: WpBuildWebpackMode; name?: string; type?: WpBuildRcBuildType; verbosity?: WebpackLogLevel } & WebpackRuntimeEnvArgs;
+declare type WpBuildRuntimeEnvArgs =  { /** @deprecated Use `name`*/build?: string; mode?: WpBuildWebpackMode; name?: string; type?: WpBuildRcBuildType; verbosity?: WebpackLogLevel };
 
 declare type WpBuildRcEnvironmentBase = Omit<WpBuildRcEnvironment, "builds">;
 
-declare type WpBuildWebpackConfig = {
-    mode: WebpackMode; entry: WpBuildWebpackEntry; output: WebpackOutput; target: WebpackTarget; module: WebpackModuleOptions;
-} & WebpackConfig;
+declare type WpBuildCombinedRuntimeArgs = WebpackRuntimeArgs & WebpackRuntimeEnvArgs & WpBuildRuntimeEnvArgs;
 
-declare type  WpBuildAppPathsKey = keyof WpBuildRcPaths | `${"dist"|"src"}${string}`; // `${"dist"|"src"}${Capitalize<WpBuildRcBuildType>}`;
+declare interface IWpBuildWebpackConfig extends WebpackConfig
+{
+    mode: Exclude<WebpackConfig["mode"], undefined>;
+    entry: WpBuildWebpackEntry | WebpackEntry;
+    output: Exclude<WebpackConfig["output"], undefined>;
+    target: WebpackTarget;
+    module: WebpackModuleOptions;
+};
+declare type WpBuildWebpackConfig = IWpBuildWebpackConfig;
 
-declare type WpBuildTsConfigSearchResult = { raw: string; json: Record<string, any>; include: string[]; path: string };
+declare type WpBuildAppTsConfig = { raw: string; json: Record<string, any>; include: string[]; path: string };
 
 declare interface IWpBuildApp
 {
     build: WpBuildRcBuild;
     global: WpBuildGlobalEnvironment; // Accessible by all parallel builds
-    logger: WpBuildConsoleLogger;
-    rc: IWpBuildRcSchemaExt;          // target js app info
+    logger: IWpBuildLogger;
+    rc: IWpBuildRcSchema;          // target js app info
     target: WebpackTarget;
+    tsConfig: WpBuildAppTsConfig | undefined;
     wpc: WpBuildWebpackConfig;
-};
+}
 
-
-declare class WpBuildAppType
+declare class ClsWpBuildApp
 {
     analyze: boolean;                 // parform analysis after build
     build: WpBuildRcBuild;
@@ -70,9 +77,9 @@ declare class WpBuildAppType
     isTests: boolean;
     isWeb: boolean;
     global: WpBuildGlobalEnvironment; // Accessible by all parallel builds
-    logger: WpBuildConsoleLogger;
+    logger: IWpBuildLogger;
     paths: WpBuildRcPaths;
-    rc: IWpBuildRcSchemaExt;           // target js app info
+    rc: IWpBuildRcSchema;           // target js app info
     target: WebpackTarget;
     wpc: WpBuildWebpackConfig;
     mode: WpBuildWebpackMode;
@@ -80,17 +87,17 @@ declare class WpBuildAppType
     private wpApp;
     private getPaths;
     private resolveRcPaths;
-};
+}
 
 export {
+    ClsWpBuildApp,
     IWpBuildApp,
-    WpBuildAppPathsKey,
-    WpBuildAppType,
+    WpBuildCombinedRuntimeArgs,
     WpBuildRcEnvironmentBase,
     WpBuildAppGetPathOptions,
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,
-    WpBuildTsConfigSearchResult,
+    WpBuildAppTsConfig,
     WpBuildWebpackConfig,
     __WPBUILD__
 };

@@ -52,25 +52,23 @@ declare type WpBuildLogIconSet =
     color: WpBuildLogIconActionSet;
 } & WpBuildLogIconBaseSet;
 
-// declare interface IWpBuildLogger implements IDisposable
-// {
-//     colors: Record<WpBuildLogColor, WpBuildLogColorMapping>;
-//     icons: WpBuildLogIconSet;
-//     private basePad: string;
-//     private app: WpBuildApp;
-//     private infoIcon: string;
-//     withColor(msg: string | undefined, color: WpBuildLogColorMapping, sticky?: boolean): string;
-//     error: (msg: any, pad?: string) => void;
-//     start: (msg: string, level?: WpBuildLogLevel) => void;
-//     tag: (msg: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
-//     value: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, icon?: string | undefined | null | 0 | false, color?: WpBuildLogColorMapping | null) => void;
-//     valuestar: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, iconColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
-//     warning: (msg: any, pad?: string) => void;
-//     write: (msg: string, level?: WpBuildLogLevel, pad?: string, icon: string | undefined | null | 0 | false, color: WpBuildLogColorMapping | null) => void;
-//     writeMsgTag: (msg: string, tagMsg: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
-// }
+declare interface IWpBuildLogger
+{
+    colors: Record<WpBuildLogColor, WpBuildLogColorMapping>;
+    icons: WpBuildLogIconSet;
+    withColor(msg: string | undefined, color: WpBuildLogColorMapping, sticky?: boolean): string;
+    error: (msg: any, pad?: string) => void;
+    start: (msg: string, level?: WpBuildLogLevel) => void;
+    tag: (msg: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
+    value: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, icon?: string | undefined | null | 0 | false, color?: WpBuildLogColorMapping | null) => void;
+    valuestar: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, iconColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
+    warning: (msg: any, pad?: string) => void;
+    write: (msg: string, level?: WpBuildLogLevel, pad?: string, icon?: string | undefined | null | 0 | false, color?: WpBuildLogColorMapping | null) => void;
+    writeMsgTag: (msg: string, tagMsg: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
+}
 
 export {
+    IWpBuildLogger,
     WpBuildLogColor,
     WpBuildLogColorMapping,
     WpBuildLogColorValue,

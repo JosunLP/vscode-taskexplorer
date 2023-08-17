@@ -9,11 +9,11 @@
  */
 
 const JSON5 = require("json5");
+const { readFileSync } = require("fs");
 const { globalEnv } = require("./global");
 const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
 const { resolve, basename, join, dirname } = require("path");
-const { readFileSync, existsSync, writeFileSync } = require("fs");
 const { WpBuildError, apply, pick, isString, merge, isObject, isArray, pickNot } = require("./utils");
 const {
     isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildWebpackModes, WpBuildRcPackageJsonProps
@@ -31,7 +31,7 @@ class WpBuildRc
      */
     alias;
     /**
-     * @type {typedefs.WpBuildRuntimeEnvArgs}
+     * @type {typedefs.WpBuildCombinedRuntimeArgs}
      */
     args;
     /**
@@ -115,8 +115,10 @@ class WpBuildRc
      */
     constructor(argv, arge)
     {
+        // @ts-ignore
         Object.keys(arge).filter(k => isString(arge[k]) && /true|false/i.test(arge[k])).forEach((k) =>
         {
+            // @ts-ignore
             arge[k] = arge[k].toLowerCase() === "true";
         });
 
@@ -173,9 +175,8 @@ class WpBuildRc
     {
         /**
          * @param {typedefs.WpBuildRcEnvironmentBase} rcChild
-         * @param {boolean} [isModeRc]
          */
-        const _applyOverrides = (rcChild, isModeRc) =>
+        const _applyOverrides = (rcChild) =>
         {
             if (isObject(rcChild.log))
             {
@@ -273,20 +274,7 @@ class WpBuildRc
      */
     getMode = (arge, argv, wpBuild) =>
     {
-        /** @type {typedefs.WebpackMode | typedefs.WpBuildWebpackMode | undefined} */
-        let mode = argv.mode;
-        if (!mode)
-        {
-            if (arge.mode === "development" || argv.mode === "development") {
-                mode = "development";
-            }
-            else if (arge.mode === "none" || argv.mode === "none" || arge.mode === "test" || arge.type === "tests") {
-                mode = "none";
-            }
-            else {
-                mode = "production";
-            }
-        }
+        let mode = argv.mode || arge.mode || "production";
         if (wpBuild === true && mode === "none") {
             mode = "test";
         }

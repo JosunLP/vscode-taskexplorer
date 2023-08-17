@@ -34,7 +34,7 @@ class WpBuildCleanPlugin extends WpBuildPlugin
         super(
 			apply(options, options.app.clean !== true ? {} :
 			{
-				plugins: WpBuildCleanPlugin.vendorPlugins(options.app),
+				plugins: WpBuildCleanPlugin.vendorPlugins(options.app)
 			})
 		);
     }

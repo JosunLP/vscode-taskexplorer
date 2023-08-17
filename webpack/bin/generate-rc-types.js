@@ -110,33 +110,33 @@ const parseTypesDts = async (hdr, data) =>
                   }
                   return v;
               })
-          .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n};\nexport declare type ${m1} = I${m1};\n`)
+          .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n}\nexport declare type ${m1} = I${m1};\n`)
           .replace(/\nexport declare type Type(.*?) ([^]*?)\n\}/g, (v, m1, m2) =>
           {
                   let src = v;
                   if (isBaseType(m1))
                   {
                       src = `export declare type ${m1} ${m2}\n};\n` +
-                              `export declare type ${m1}Key = keyof ${m1};\n` +
-                              `export declare type Type${m1} = Required<${m1}>;\n`;
+                            `export declare type ${m1}Key = keyof ${m1};\n` +
+                            `export declare type Type${m1} = Required<${m1}>;\n`;
                       Object.entries(requiredProperties).filter(([ _, t ]) => t === m1).forEach(([ p, _ ]) => {
                           src = src.replace(new RegExp(`${p}\\?\\: `, "g"), `${p}: `);
                       });
-                  }
-                  if (generateEnums)
-                  {
-                      const valuesFmt = m2.replace(/ *\= */, "")
-                                          // .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
-                                          .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${m1}: \"${m1.trim()}\",`)
-                                          .replace(/\= \n/g, "\n");
-                      enums.push(
-                          `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
-                          `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n").replace(/",\n\};/g, "\"\n};")}`
-                      );
-                      logger.log(`      modified type ${m1} with enum`);
-                  }
-                  else {
-                      logger.log(`      modified type ${m1}`);
+                      if (generateEnums)
+                      {
+                          const valuesFmt = m2.replace(/ *\= */, "")
+                                              // .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${capitalize(m1)}: \"${m1.trim()}\",`)
+                                              .replace(/\s*(.*?)\??\:(?:.*?);(?:\n\}|\n {4,}|$)/g, (_, m1) => `\n    ${m1}: \"${m1.trim()}\",`)
+                                              .replace(/\= \n/g, "\n");
+                          enums.push(
+                              `/**\n * @type {{[ key: string ]: keyof typedefs.Type${m1}}}\n */\n` +
+                              `const ${m1}Enum =${EOL}${(`${valuesFmt}\n};\n`).replace(/",\};/g, "\"\n};\n").replace(/",\n\};/g, "\"\n};")}`
+                          );
+                          logger.log(`      modified type ${m1} with enum`);
+                      }
+                      else {
+                          logger.log(`      modified type ${m1}`);
+                      }
                   }
                   return src;
           })
@@ -146,7 +146,8 @@ const parseTypesDts = async (hdr, data) =>
           .replace(/(?:\n){3,}/g, "\n\n")
           .replace(/[a-z] = +\| +"[a-z]/g, (v) => v.replace("= |", "="))
           .replace(/\n\}\n/g, "\n};\n")
-          .replace(/[\w] ;/g, (v) => v.replace(" ", ""))
+          .replace(/(export declare type (?:[^]*?)\}\n)/g, v => v.slice(0, v.length - 1) + ";\n")
+          .replace(/[\w] ;/g, (v) => v.replace(" ;", ";"))
           .replace(/([;\{])\n\s*?\n(\s+)/g, (_, m1, m2) => m1 + "\n" + m2)
           .replace(/ = \{ "= /g, "")
           .replace(/"\}/g, "\"\n}")

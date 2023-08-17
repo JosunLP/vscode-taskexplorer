@@ -10,6 +10,7 @@
 		"tsBuildInfoFile": "../../node_modules/.cache/tsconfig.test.tsbuildinfo",
         "paths": {
 			// "interface/*": [ "../../types" ],
+			":env/*": [ "../../src/lib/env/web/*", "../../src/webview/common/env/web/*" ],
 			":types": [ "../../types" ]
 		} // ,
 		// "typeRoots": [ "../../types/dist" ]
@@ -17,5 +18,19 @@
 	"include": [
 		"./**/*"
 	],
-	"exclude": []
+    "exclude": [
+        "**/.coverage",
+        "**/.nyc_output",
+        "**/.vscode",
+        "**/.vscode-test",
+        "**/dist",
+        "**/doc",
+        "**/node_modules",
+        "**/res",
+        "**/script",
+        "**/src/webview/app/**",
+        "**/src/lib/env/web/**",
+        "**/src/webview/common/env/web/**",
+        "**/test-fixture"
+    ]
 }

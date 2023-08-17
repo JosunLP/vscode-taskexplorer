@@ -45,7 +45,7 @@ const minification = (app) =>
 						// Keep the class names otherwise @log won"t provide a useful name
 						keepNames: true,
 						// keep_names: true,
-						target: "es2020",
+						target: "es2020"
 					}
 				} :
 				{
@@ -53,7 +53,7 @@ const minification = (app) =>
 					parallel: true,
 					terserOptions: {
 						compress: {
-							drop_debugger: true,
+							drop_debugger: true
 						},
 						// compress: true,
 						// mangle: true,   // Default `false`
@@ -70,7 +70,7 @@ const minification = (app) =>
 						// nameCache: null,
 						// Keep the class names otherwise @log won"t provide a useful name
 						keep_classnames: true,
-						module: true,
+						module: true
 					}
 				})
 			]

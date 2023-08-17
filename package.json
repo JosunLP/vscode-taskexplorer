@@ -216,7 +216,7 @@
 		"tsc-typecheck-all": "npm run tsc-typecheck-extension && npm run tsc-typecheck-extension:web && npm run tsc-typecheck-tests && npm run tsc-typecheck-webviews",
 		"tsc-typecheck-extension": "tsc --noEmit -p .\\tsconfig.node.json",
 		"tsc-typecheck-extension:web": "tsc --noEmit -p .\\tsconfig.web.json",
-		"tsc-typecheck-tests": "tsc --noEmit -p .\\src\\test\\tsconfig.node.json",
+		"tsc-typecheck-tests": "tsc --noEmit -p .\\src\\test\\tsconfig.json",
 		"tsc-typecheck-webviews": "tsc --noEmit -p .\\src\\webview\\app\\tsconfig.json",
 		"tsc-watch": "npm run tsc-build && (concurrently \"tsc -p ./tsconfig.json -w\" \"tsc-alias -p ./tsconfig.json -w\" \"tsc-alias -p ./tsconfig.json -w\")",
 		"view-coverage": "cmd /c \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" file://c:/Projects/vscode-taskexplorer/.coverage/index.html",

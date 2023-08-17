@@ -26,10 +26,9 @@
         "node_modules",
         "res",
         "script",
-        "src/test/**/*",
-        "src/webview/app/**/*",
-        "src/webview/common/web/**/*",
-        "src/lib/env/web/**/*",
+        "src/test/**",
+        "src/webview/app/**",
+        "**/env/web/**",
         "test-fixture",
         "types"
     ]

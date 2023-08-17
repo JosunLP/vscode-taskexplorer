@@ -101,7 +101,7 @@
     },
     "log":
     {
-        "level": 2,
+        "level": 3,
         "valueMaxLineLength": 100,
         "pad": {
             "base": 0,
