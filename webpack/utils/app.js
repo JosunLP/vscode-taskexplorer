@@ -143,8 +143,6 @@ class WpBuildApp
         if (this.paths.tsconfig) {
             this.tsConfig = getTsConfig(this);
         }
-console.log("%%%%%% 1111111111111111111 %%%%%%%");
-console.log(JSON.stringify(this.build.log, null, 4));;
         this.initLogger(/** @type {typedefs.TypeWpBuildRcLog} */(this.build.log));
         this.buildWebpackConfig();
         this.printBuildProperties();
@@ -487,8 +485,6 @@ console.log(JSON.stringify(this.build.log, null, 4));;
      */
     initLogger = (options) =>
     {
-console.log("%%%%%% 222222222222222222222222 %%%%%%%");
-console.log(JSON.stringify(options, null, 4));;
         const l = this.logger = new WpBuildConsoleLogger({
             envTag1: this.build.name , envTag2: this.target.toString(), ...options
         });

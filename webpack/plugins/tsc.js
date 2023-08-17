@@ -151,8 +151,8 @@ class WpBuildTscPlugin extends WpBuildPlugin
 		l.write("start bundle dts", 1);
 		l.value("   types directory", typesDir, 2);
 		l.value("   is main tests", this.app.isMainTests, 3);
-		l.value("   already bundled", this.app.global.tsCheck.typesBundled,3);
-		if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
+		l.value("   already bundled", this.app.global.tsc.typesBundled,3);
+		if (!this.app.global.tsc.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
 		{
 			const bundleCfg = {
 				name: `${this.app.rc.pkgJson.name}-types`,
@@ -165,7 +165,7 @@ class WpBuildTscPlugin extends WpBuildPlugin
 				verbose: this.app.rc.log.level === 5
 			};
 			dts.bundle(bundleCfg);
-			this.app.global.tsCheck.typesBundled = true;
+			this.app.global.tsc.typesBundled = true;
 			l.write("dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
 		}
 		else if (!typesDirDist) {
@@ -239,116 +239,118 @@ class WpBuildTscPlugin extends WpBuildPlugin
 			let data, source, hash, newHash, cacheEntry, persistedCache;
 			const filePathRel = relative(this.compiler.outputPath, filePath);
 
-			logger.value("   process test suite output file", filePathRel, 3);
-			logger.write("      check compilation cache for snapshot", 4);
-			try {
-				persistedCache = this.cache.get();
-				cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
-			}
-			catch (e) {
-				this.handleError(e, "failed while checking cache");
-				return;
-			}
+		// 	logger.value("   process test suite output file", filePathRel, 3);
+		// 	logger.write("      check compilation cache for snapshot", 4);
+		// 	try {
+		// 		persistedCache = this.cache.get();
+		// 		cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
+		// 	}
+		// 	catch (e) {
+		// 		this.handleError(e, "failed while checking cache");
+		// 		return;
+		// 	}
 
-			if (cacheEntry)
-			{
-				let isValidSnapshot;
-				logger.write("      check snapshot valid", 4);
-				try {
-					isValidSnapshot = await this.checkSnapshotValid(cacheEntry.snapshot);
-				}
-				catch (e) {
-					this.handleError(e, "failed while checking snapshot");
-					return;
-				}
-				if (isValidSnapshot)
-				{
-					logger.write("      snapshot is valid", 4);
-					({ hash, source } = cacheEntry);
-					data = data || await readFile(filePath);
-					newHash = newHash || this.getContentHash(data);
-					if (newHash === hash)
-					{
-						logger.write("      asset is unchanged since last snapshot", 4);
-					}
-					else {
-						logger.write("      asset has changed since last snapshot", 4);
-					}
-				}
-				else {
-					logger.write("      snapshot is invalid", 4);
-				}
-			}
+		// 	if (cacheEntry)
+		// 	{
+		// 		let isValidSnapshot;
+		// 		logger.write("      check snapshot valid", 4);
+		// 		try {
+		// 			isValidSnapshot = await this.checkSnapshotValid(cacheEntry.snapshot);
+		// 		}
+		// 		catch (e) {
+		// 			this.handleError(e, "failed while checking snapshot");
+		// 			return;
+		// 		}
+		// 		if (isValidSnapshot)
+		// 		{
+		// 			logger.write("      snapshot is valid", 4);
+		// 			({ hash, source } = cacheEntry);
+		// 			data = data || await readFile(filePath);
+		// 			newHash = newHash || this.getContentHash(data);
+		// 			if (newHash === hash)
+		// 			{
+		// 				logger.write("      asset is unchanged since last snapshot", 4);
+		// 			}
+		// 			else {
+		// 				logger.write("      asset has changed since last snapshot", 4);
+		// 			}
+		// 		}
+		// 		else {
+		// 			logger.write("      snapshot is invalid", 4);
+		// 		}
+		// 	}
 
-			if (!source)
-			{
-				let snapshot;
-				const startTime = Date.now();
-				data = data || await readFile(filePath);
-				source = new this.compiler.webpack.sources.RawSource(data);
-				logger.write("      create snapshot", 4);
-				try {
-					snapshot = await this.createSnapshot(startTime, filePath);
-				}
-				catch (e) {
-					this.handleError(e, "failed while creating snapshot for " + filePathRel);
-					return;
-				}
-				if (snapshot)
-				{
-					logger.write("      cache snapshot", 4);
-					try {
-						newHash = newHash || this.getContentHash(source.buffer());
-						snapshot.setFileHashes(hash);
-						await this.wpCacheCompilation.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
-						cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
-					}
-					catch (e) {
-						this.handleError(e, "failed while caching snapshot " + filePathRel);
-						return;
-					}
-				}
-			}
+		// 	if (!source)
+		// 	{
+		// 		let snapshot;
+		// 		const startTime = Date.now();
+		// 		data = data || await readFile(filePath);
+		// 		source = new this.compiler.webpack.sources.RawSource(data);
+		// 		logger.write("      create snapshot", 4);
+		// 		try {
+		// 			snapshot = await this.createSnapshot(startTime, filePath);
+		// 		}
+		// 		catch (e) {
+		// 			this.handleError(e, "failed while creating snapshot for " + filePathRel);
+		// 			return;
+		// 		}
+		// 		if (snapshot)
+		// 		{
+		// 			logger.write("      cache snapshot", 4);
+		// 			try {
+		// 				newHash = newHash || this.getContentHash(source.buffer());
+		// 				snapshot.setFileHashes(hash);
+		// 				await this.wpCacheCompilation.storePromise(`${filePath}|${identifier}`, null, { source, snapshot, hash });
+		// 				cacheEntry = await this.wpCacheCompilation.getPromise(`${filePath}|${identifier}`, null);
+		// 			}
+		// 			catch (e) {
+		// 				this.handleError(e, "failed while caching snapshot " + filePathRel);
+		// 				return;
+		// 			}
+		// 		}
+		// 	}
 
-			data = data || await readFile(filePath);
-			newHash = newHash || this.getContentHash(data);
-			if (newHash === persistedCache[filePathRel])
-			{
-				logger.write("      asset is unchanged", 4);
-			}
-			else {
-				logger.write("      asset has changed, update hash in persistent cache", 4);
-				persistedCache[filePathRel] = newHash;
-				this.cache.set(persistedCache);
-			}
+		// 	data = data || await readFile(filePath);
+		// 	newHash = newHash || this.getContentHash(data);
+		// 	if (newHash === persistedCache[filePathRel])
+		// 	{
+		// 		logger.write("      asset is unchanged", 4);
+		// 	}
+		// 	else {
+		// 		logger.write("      asset has changed, update hash in persistent cache", 4);
+		// 		persistedCache[filePathRel] = newHash;
+		// 		this.cache.set(persistedCache);
+		// 	}
 
-			const info = /** @type {WebpackAssetInfo} */({
-				contenthash: newHash,
-				development: true,
-				immutable: newHash === persistedCache[filePathRel],
-				javascriptModule: false,
-				tests: true
-			});
+		const info = /** @type {WebpackAssetInfo} */({
+			// contenthash: newHash,
+			development: true,
+			immutable: true, // newHash === persistedCache[filePathRel],
+			javascriptModule: false,
+			types: true
+		});
+		this.compilation.buildDependencies.add(filePathRel);
+		// this.compilation.emitAsset(filePathRel, source, info);
 
-			// this.compilation.additionalChunkAssets.push(filePathRel);
+		// 	// this.compilation.additionalChunkAssets.push(filePathRel);
 
-			const existingAsset = this.compilation.getAsset(filePathRel);
-			if (!existingAsset)
-			{
-				logger.write("      emit asset", 3);
-				this.compilation.emitAsset(filePathRel, source, info);
-			}
-			else if (this.options.force)
-			{
-				logger.write("      update asset", 3);
-				this.compilation.updateAsset(filePathRel, source, info);
-			}
-			else {
-				logger.write("      asset compared for emit", 3);
-				this.compilation.buildDependencies.add(filePathRel);
-				this.compilation.comparedForEmitAssets.add(filePathRel);
-				this.compilation.compilationDependencies.add(filePathRel);
-			}
+		// 	const existingAsset = this.compilation.getAsset(filePathRel);
+		// 	if (!existingAsset)
+		// 	{
+		// 		logger.write("      emit asset", 3);
+		// 		this.compilation.emitAsset(filePathRel, source, info);
+		// 	}
+		// 	else if (this.options.force)
+		// 	{
+		// 		logger.write("      update asset", 3);
+		// 		this.compilation.updateAsset(filePathRel, source, info);
+		// 	}
+		// 	else {
+		// 		logger.write("      asset compared for emit", 3);
+		// 		this.compilation.buildDependencies.add(filePathRel);
+		// 		this.compilation.comparedForEmitAssets.add(filePathRel);
+		// 		this.compilation.compilationDependencies.add(filePathRel);
+		// 	}
 		}
 
 		logger.write(`   finished execution of typescript build @ italic(${tsc.path})`, 3);
