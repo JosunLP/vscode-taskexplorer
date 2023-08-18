@@ -1,39 +1,31 @@
 {
     "extends": "../tsconfig.json",
 	"compilerOptions": {
+        "baseUrl": ".",
         "declaration": true,
         "declarationMap": false,
 		"emitDeclarationOnly": true,
 		"isolatedModules": false,
-		"outDir": "./dist",
+		"outDir": "./build",
         "paths": {
-			":env/*": [ "src/lib/env/node/*", "src/webview/common/env/node/*" ],
-			":types": [ "types" ]
+			":env/*": [ "../src/lib/env/node/*", "../src/webview/common/env/node/*", "../src/lib/env/web/*", "../src/webview/common/env/web/*" ],
+			":types/*": [ "../types/*", "types/*" ]
 		},
 		"rootDir": "../src",
-		// "rootDirs": [ "../src", "." ],
 		"sourceMap": false,
 		"tsBuildInfoFile": "../node_modules/.cache/tsconfig.types.tsbuildinfo"
 	},
 	"include": [
-		"../src",
-        // "./index.ts"
+		"../src"
 	],
     "exclude": [
-        "../.coverage",
-        "../.nyc_output",
-        "../.vscode",
-        "../.vscode-test",
+        "../.*",
         "../dist",
         "../doc",
         "../node_modules",
         "../res",
         "../script",
-        "../src/test/**/*",
-        "../src/webview/**/*",
-        "../src/lib/env/web/**",
-        "../src/webview/common/env/web/**",
-        "../test-fixture",
-        "**/dist/**/*"
+        "../src/webview/app",
+        "../**/test"
     ]
 }

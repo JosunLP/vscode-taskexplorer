@@ -11,30 +11,29 @@
 const dts = require("dts-bundle");
 const { existsSync } = require("fs");
 const WpBuildPlugin = require("./base");
+const { findFiles } = require("../utils");
 const { WebpackError } = require("webpack");
 const typedefs = require("../types/typedefs");
-const {readFile, unlink, access } = require("fs/promises");
-const { join, relative, dirname, isAbsolute, resolve } = require("path");
-const { findFiles, getTsConfig, WpBuildError, findTsConfig } = require("../utils");
-
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackSnapshot} WebpackSnapshot */
-/** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WpBuildPluginOptions} WpBuildPluginOptions */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {import("../types").WebpackCompilationAssets} WebpackCompilationAssets */
-/** @typedef {import("../types").WebpackCompilationParams} WebpackCompilationParams */
+const { unlink, access } = require("fs/promises");
+const { join, relative, resolve } = require("path");
 
 
 class WpBuildTscPlugin extends WpBuildPlugin
 {
     /**
+     * @class WpBuildLicenseFilePlugin
+     * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
+     */
+	constructor(options)
+    {
+		super(options, "tsc");
+    }
+
+    /**
      * @function Called by webpack runtime to initialize this plugin
      * @override
      * @member apply
-     * @param {WebpackCompiler} compiler the compiler instance
+     * @param {typedefs.WebpackCompiler} compiler the compiler instance
      */
     apply(compiler)
     {
@@ -109,7 +108,7 @@ class WpBuildTscPlugin extends WpBuildPlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {WebpackCompilationAssets} _assets
+	 * @param {typedefs.WebpackCompilationAssets} _assets
 	 */
 	async types(_assets)
 	{
@@ -132,7 +131,7 @@ class WpBuildTscPlugin extends WpBuildPlugin
 			}
 			logger.write("build types", 2);
 			await this.execTsBuild(tsc, [
-				"-p", "./types", "--declaration", "--emitDeclarationOnly", "--declarationDir", typesDirDist
+				"-p", "./tsconfig.node.json", "--declaration", "--emitDeclarationOnly", "--declarationDir", typesDirDist
 			], 1, typesDirDist);
 			this.typesBundleDts();
 		}
@@ -159,7 +158,7 @@ class WpBuildTscPlugin extends WpBuildPlugin
 				baseDir: "types/dist",
 				headerPath: "",
 				headerText: "",
-				main: "types/index.d.ts",
+				main: "types/build/interface/index.d.ts",
 				out: "types.d.ts",
 				outputAsModuleFolder: true,
 				verbose: this.app.rc.log.level === 5
@@ -322,7 +321,7 @@ class WpBuildTscPlugin extends WpBuildPlugin
 		// 		this.cache.set(persistedCache);
 		// 	}
 
-		const info = /** @type {WebpackAssetInfo} */({
+		const info = /** @type {typedefs.WebpackAssetInfo} */({
 			// contenthash: newHash,
 			development: true,
 			immutable: true, // newHash === persistedCache[filePathRel],
@@ -360,7 +359,7 @@ class WpBuildTscPlugin extends WpBuildPlugin
 
 
 /**
- * @param {WpBuildApp} app
+ * @param {typedefs.WpBuildApp} app
  * @returns {WpBuildTscPlugin | undefined}
  */
 const testsuite = (app) =>

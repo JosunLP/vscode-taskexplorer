@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"jsx": "react",
 		"outDir": "../../",
+		"baseUrl": ".",
 		// "rootDir": "../..",
 		"tsBuildInfoFile": "../../../node_modules/.cache/tsconfig.webview.tsbuildinfo",
 		"useDefineForClassFields": false,
@@ -10,8 +11,8 @@
 			"DOM", "DOM.Iterable", "ES2020"
 		],
 		"paths": {
-			":env/*": [ "src/lib/env/web/*", "src/webview/common/env/web/*"  ],
-			":types": [ "types" ]
+			":env/*": [ "../../../src/lib/env/web/*", "../common/env/web/*", "env/web/*"  ],
+			":types/*": [ "../../../types/*" ]
 		},
 		"rootDirs": [
 			".",
@@ -20,21 +21,16 @@
 	},
 	"include": [
 		"./**/*",
-		"../../../types/dist/types.d.ts",
-		"../common/ipc.ts"
+		"../common/ipc.ts",
+		"../../../types/dist/types.d.ts"
 	],
     "exclude": [
-        "node_modules",
-        ".vscode-test",
-        ".vscode",
-        "test-fixture",
-        "script",
-        "types",
-        "res",
-        "dist",
-        "doc",
-        ".nyc_output",
-        ".coverage",
-        "src/test/**/*"
+        ".*",
+        "../../../script",
+        "../../../types",
+        "../../../res",
+        "../../../dist",
+        "../../../doc",
+        "../../../**/test"
     ]
 }

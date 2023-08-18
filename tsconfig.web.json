@@ -15,17 +15,14 @@
 		"tsBuildInfoFile": "node_modules/.cache/tsconfig.web.tsbuildinfo"
 	},
     "exclude": [
-        ".coverage",
-        ".nyc_output",
-        ".vscode",
-        ".vscode-test",
+        ".*",
         "dist",
         "doc",
         "node_modules",
         "res",
         "script",
-        "src/test/**",
-        "src/webview/app/**",
+        "src/test",
+        "src/webview/app",
         "**/env/node/**",
         "test-fixture",
         "types"

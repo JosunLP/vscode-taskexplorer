@@ -168,22 +168,17 @@ const clone = (item) =>
 
 
 /**
- * Executes a command with a promisified child_process.exec()
+ * Executes node.eXec() wrapped in a promise via util.promisify().
  *
  * @function
- * @param {object} options
- * @property {string} command command to execute, with arguments
- * @property {import("child_process").ExecOptions} [execOptions] options to pass to child_process.exec()
- * @property {string | string[]} [ignoreOut] stdout or stderr lines to ignore
- * @property {string} [program] program name to diasplay in any logging
- * @property {typedefs.WpBuildConsoleLogger} logger a WpBuildConsoleLogger instance
- * @property {string} [logPad] a padding to prepend any log messages with
+ * @async
+ * @param {typedefs.ExecAsyncOptions} options
  * @returns {Promise<number | null>}
  */
 const execAsync = async (options) =>
 {
     let exitCode = null;
-    const procPromise = exec(options.command, { stdio: [ "pipe", "pipe", "pipe" ], encoding: "utf8", ...options.execOptions }),
+    const procPromise = exec(options.command, { encoding: "utf8", ...options.execOptions }),
           child = procPromise.child,
           ignores = asArray(options.ignoreOut),
           logPad = options.logPad || "",
@@ -197,7 +192,7 @@ const execAsync = async (options) =>
         const outs = out.split("\n");
         outs.filter(o => !!o).map(o => o.toString().trim()).forEach((o) =>
         {
-            if (ignores.every(i => !o.includes(i)))
+            if (ignores.every(i => !o.toLowerCase().includes(i.toLowerCase())))
             {
                 if (o.startsWith(":") && stdarr.length > 0) {
                     stdarr[stdarr.length - 1] = stdarr[stdarr.length -1] + o;

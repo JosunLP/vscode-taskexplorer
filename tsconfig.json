@@ -16,7 +16,7 @@
         "noEmitOnError": true,
         "paths": {
 			":env/*": [ "src/lib/env/node/*", "src/webview/common/env/node/*" ],
-			":types": [ "types" ]
+			":types/*": [ "types/*" ]
 		},
 		"skipLibCheck": true,
         "sourceMap": true,
@@ -29,17 +29,14 @@
 		"src"
 	],
     "exclude": [
-        ".coverage",
-        ".nyc_output",
-        ".vscode",
-        ".vscode-test",
+        ".*",
         "dist",
         "doc",
         "node_modules",
         "res",
         "script",
-        "src/test/**/*",
-        "src/webview/app/**",
+        "src/test",
+        "src/webview/app",
         "**/env/web/**",
         "test-fixture",
         "types"

@@ -8,10 +8,9 @@
  */
 
 const { glob } = require("glob");
-const { apply, WpBuildError } = require("../utils");
-
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackEntry} WebpackEntry */
+const { extname, isAbsolute, relative } = require("path");
+const typedefs = require("../types/typedefs");
+const { apply, WpBuildError, merge, isObjectEmpty, isObject, isString } = require("../utils");
 
 
 const globTestSuiteFiles= `**/*.{test,tests,spec,specs}.ts`;
@@ -22,7 +21,7 @@ const builds =
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {typedefs.WpBuildApp} app Webpack build environment
 	 */
 	module: (app) =>
 	{
@@ -43,7 +42,7 @@ const builds =
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {typedefs.WpBuildApp} app Webpack build environment
 	 * @param {boolean} [fromMain]
 	 */
 	tests: (app, fromMain) =>
@@ -60,7 +59,7 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {string} testsPathAbs
-	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {typedefs.WpBuildApp} app Webpack build environment
 	 * @param {boolean} [fromMain]
 	 */
 	testRunner: (testsPathAbs, app, fromMain) =>
@@ -104,13 +103,18 @@ const builds =
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
+	 * @param {typedefs.WpBuildApp} app Webpack build environment
 	 */
 	types: (app) =>
 	{
+		let typesPath = app.getSrcTypesPath({ rel: true, ctx: true, dot: true, psx: true });
+		if (!typesPath) {
+			typesPath = app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true });
+		}
 		app.wpc.entry = {
-			types: {
-				import: `${app.getSrcPath({ rel: true, ctx: true, dot: true, psx: true })}/index.ts`
+			[ app.build.name ]: {
+				import: `${typesPath}/${app.build.name}.ts`,
+				layer: "release"
 			}
 		};
 	}
@@ -120,26 +124,61 @@ const builds =
 
 /**
  * @function
- * @description Configures `webpackconfig.exports.entry`
- * @param {WpBuildApp} app Webpack build environment
+ * @private
+ * @param {typedefs.WpBuildApp} app Webpack build environment
+ * @param {string} file
+ * @param {Partial<typedefs.EntryObject|typedefs.WpBuildWebpackEntry>} xOpts
+ */
+const addEntry= (app, file, xOpts) =>
+{
+	if (app.build.entry)
+	{
+		merge(app.wpc.entry, app.build.entry);
+	}
+	else
+	{   const ext = extname(file),
+			  chunkName = file.replace(new RegExp(`${ext}$`), ""),
+			  relPath = !isAbsolute(file) ? file : relative(app.wpc.context, file);
+		app.wpc.entry[chunkName] = {
+			import: `${relPath}/${chunkName}.${ext}`
+		};
+	}
+	return apply(app.wpc.entry, { ...xOpts });
+};
+
+
+/**
+ * Configures `webpackconfig.exports.entry`
+ *
+ * @function
+ * @param {typedefs.WpBuildApp} app Webpack build environment
  * @throws {WpBuildError}
  */
 const entry = (app) =>
 {
-	if (app.build.entry)
+	if (isObject(app.build.entry) && !isObjectEmpty(app.build.entry))
 	{
-		app.wpc.entry = apply({}, app.build.entry);
+		app.wpc.entry = merge({}, app.build.entry);
 	}
 	else if (builds[app.build.type])
 	{
 		builds[app.build.type](app);
-		if (app.isTests && !app.buildEnvHasTests()) {
-			builds.tests(app, true);
-		}
+		// if (app.isTests && !app.buildEnvHasTests()) {
+		// 	builds.tests(app, true);
+		// }
 	}
 	else {
-		throw new WpBuildError("entry object or path is invalid", "exports/entry.js");
+		 throw WpBuildError.getErrorProperty("entry", "exports/entry.js", app.wpc);
 	}
+	Object.values(app.wpc.entry).every((e) =>
+	{
+		if ((isString(e) && !e.startsWith(".")) || (!isString(e) && e.import.startsWith(".")))
+		{
+			app.logger.warning("entry target should contain a leading './' in path");
+			return false;
+		}
+		return true;
+	});
 };
 
 

@@ -54,9 +54,32 @@ class WpBuildUploadPlugin extends WpBuildPlugin
                 async: true,
                 hook: "afterEmit",
                 callback: this.debugSupportFiles.bind(this)
+            },
+            cleanup: {
+                async: true,
+                hook: "done",
+                callback: this.cleanup.bind(this)
             }
         });
     }
+
+
+    /**
+     * @function
+     * @private
+     * @param {WebpackCompilation} compilation
+     * @throws {WebpackError}
+     */
+    async cleanup(compilation)
+    {
+        const tmpUploadPath = join(this.app.paths.temp, this.app.mode),
+              tmpFiles = await readdir(tmpUploadPath);
+        if (tmpFiles.length > 0)
+        {
+            await rm(tmpUploadPath, { recursive: true, force: true });
+        }
+        this.app.logger.write("upload plugin cleanup completed");
+    };
 
 
     /**
@@ -164,7 +187,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
         try
         {
             logger.write("   plink: create / clear remmote directory", 1);
-            await this.exec("plink " + plinkArgs.join(" "), "plink");
+            await this.exec("plink " + plinkArgs.join(" "), "plink", [ "cannot create directory", "File exists" ]);
             logger.write("   pscp:  upload files", 1, "");
             await this.exec("pscp " + pscpArgs.join(" "), "pscp");
             filesToUpload.forEach((f) =>

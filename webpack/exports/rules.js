@@ -397,12 +397,10 @@ const rules = (app) =>
 	if (builds[app.build.type])
 	{
 		builds[app.build.type](app, tsConfig);
-		builds.tests(app, tsConfig, true);
 	}
 	else if (builds[app.build.name])
 	{
 		builds[app.build.name](app, tsConfig);
-		builds.tests(app, tsConfig, true);
 	}
 	else {
 		throw WpBuildError.getErrorProperty("rules", "exports/rules.js", app.wpc);

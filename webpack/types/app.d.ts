@@ -42,6 +42,7 @@ declare type WpBuildCombinedRuntimeArgs = WebpackRuntimeArgs & WebpackRuntimeEnv
 
 declare interface IWpBuildWebpackConfig extends WebpackConfig
 {
+    context: string;
     mode: Exclude<WebpackConfig["mode"], undefined>;
     entry: WpBuildWebpackEntry | WebpackEntry;
     output: Exclude<WebpackConfig["output"], undefined>;

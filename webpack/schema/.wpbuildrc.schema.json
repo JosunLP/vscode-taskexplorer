@@ -89,26 +89,26 @@
     {
         "FileName": {
             "type": "string",
-            "minLength": 5,
+            "minLength": 3,
             "maxLength": 150,
             "pattern": "^[\\w\\.\\-]+\\.([cm]?jsx?|tsx?)$"
         },
         "FilePathRelativeLeadingDot": {
             "type": "string",
-            "minLength": 5,
+            "minLength": 6,
             "maxLength": 150,
             "pattern": "^\\.[\\\\\\/][\\w\\.\\-\\\\\\/]+?\\.\\w+$"
         },
         "DirectoryPathRelative": {
             "type": "string",
-            "minLength": 3,
+            "minLength": 1,
             "maxLength": 150,
             "pattern": "^(?:\\.[\\\\\\/][\\w\\.\\-\\\\\\/]+|\\.\\.?)$"
         },
         "DirectoryPath": {
             "type": "string",
             "default": "src",
-            "minLength": 3,
+            "minLength": 1,
             "maxLength": 150,
             "pattern": "^(?:\\.|(?:\\.[\\\\\\/])?[\\w][~@!\\w\\.\\-\\\\\\/]+)$"
         },
@@ -118,7 +118,7 @@
         },
         "FilePathRelative": {
             "type": "string",
-            "minLength": 6,
+            "minLength": 5,
             "maxLength": 150,
             "pattern": "^\\.[\\\\\\/][\\w\\.\\-\\\\\\/]+\\.([cm]?jsx?|tsx?)$"
         },
@@ -171,7 +171,17 @@
                     "$ref": "#/definitions/WpBuildRcSourceCodeType"
                 },
                 "type": {
-                    "$ref": "#/definitions/WpBuildRcBuildType"
+                    "$ref": "#/definitions/WpBuildRcBuildType",
+                    "if": {
+                        "value": "webapp"
+                      },
+                      "then": {
+                        "minLength": 3
+                      },
+                      "else": {
+                        "const": 0
+                      }
+                    
                 },
                 "entry": {
                     "$ref": "#/definitions/WpBuildWebpackEntry"
@@ -199,9 +209,36 @@
                 }
             },
             "additionalProperties": false,
-            "required": [
-                "name"
-            ]
+            "if": {
+                "properties": {
+                    "type": { 
+                        "oneOf": [
+                            { "const": "webapp"},
+                            { "const": "webmodule "}
+                        ]
+                    }
+                }
+            },
+            "then": { 
+                "properties": {
+                    "mode": { 
+                        "oneOf": [
+                            { "const": "web"},
+                            { "const": "webworker "}
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "type"
+                ]
+            },
+            "else": {
+                "required": [
+                    "name",
+                    "type"
+                ]
+            }
         },
         "WpBuildRcBuildType": {
             "type": "string",

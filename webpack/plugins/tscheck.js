@@ -2,7 +2,7 @@
 // @ts-check
 
 /**
- * @file plugin/tscheck.js
+ * @file plugin/tsforker.js
  * @version 0.0.1
  * @license MIT
  * @author Scott Meesseman @spmeesseman
@@ -14,11 +14,11 @@ const { existsSync } = require("fs");
 const WpBuildPlugin = require("./base");
 const typedefs = require("../types/typedefs");
 const { apply, findTsConfig, WpBuildError } = require("../utils");
-const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+const ForkTsForkererWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 
 
-class WpBuildTsCheckPlugin extends WpBuildPlugin
+class WpBuildTsForkerPlugin extends WpBuildPlugin
 {
     /**
      * @class WpBuildLicenseFilePlugin
@@ -26,8 +26,8 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
      */
 	constructor(options)
     {
-		const tsForkCheckerPlugins = WpBuildTsCheckPlugin.getTsForkCheckerPlugins(options.app);
-        super(apply(options, { plugins: tsForkCheckerPlugins }), "tsc");
+		const tsForkCheckerPlugins = WpBuildTsForkerPlugin.getTsForkCheckerPlugins(options.app);
+        super(apply(options, { plugins: tsForkCheckerPlugins }), "tsForker");
     }
 
 
@@ -62,8 +62,8 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		// l.write("dts bundling", 1);
 		// l.value("   types directory", typesDir, 2);
 		// l.value("   is main tests", this.app.isMainTests, 3);
-		// l.value("   already bundled", this.app.global.tsCheck.typesBundled,3);
-		// if (!this.app.global.tsCheck.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
+		// l.value("   already bundled", this.app.global.tsForker.typesBundled,3);
+		// if (!this.app.global.tsForker.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
 		// {
 		// 	const bundleCfg = {
 		// 		name: `${this.app.rc.pkgJson.name}-types`,
@@ -76,7 +76,7 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		// 		verbose: this.app.rc.log.level === 5
 		// 	};
 		// 	dts.bundle(bundleCfg);
-		// 	this.app.global.tsCheck.typesBundled = true;
+		// 	this.app.global.tsForker.typesBundled = true;
 		// 	l.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
 		// }
 		// else if (!typesDirDist) {
@@ -132,12 +132,12 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 		}
 
 		if (!tsConfigParams[0] || !existsSync(tsConfigParams[0])) {
-			throw WpBuildError.get(`Could not locate tsconfig file for '${app.mode}' environment`, "plugin/tscheck.js");
+			throw WpBuildError.get(`Could not locate tsconfig file for '${app.mode}' environment`, "plugin/tsforker.js");
 		}
 
 		app.logger.write(`add tsconfig file '${tsConfigParams[0]}' to tsforkchecker in ${tsConfigParams[1]} mode (build=${!!tsConfigParams[2]})`, 2);
 		return [{
-			ctor: ForkTsCheckerWebpackPlugin,
+			ctor: ForkTsForkererWebpackPlugin,
 			options:
 			{
 				async: false,
@@ -193,15 +193,15 @@ class WpBuildTsCheckPlugin extends WpBuildPlugin
 
 
 /**
- * Returns a `WpBuildTsCheckPlugin` instance if appropriate for the current build
- * environment. Can be enabled/disable in .wpconfigrc.json by setting the `plugins.tscheck`
+ * Returns a `WpBuildTsForkerPlugin` instance if appropriate for the current build
+ * environment. Can be enabled/disable in .wpconfigrc.json by setting the `plugins.tsforker`
  * property to a boolean value of  `true` or `false`
  * @function
  * @module
  * @param {typedefs.WpBuildApp} app
- * @returns {(WpBuildTsCheckPlugin | ForkTsCheckerWebpackPlugin)[]}
+ * @returns {(WpBuildTsForkerPlugin | ForkTsForkererWebpackPlugin)[]}
  */
-const tscheck = (app) => app.rc.plugins.tscheck ? new WpBuildTsCheckPlugin({ app }).getPlugins() : [];
+const tsforker = (app) => []; // app.rc.plugins.tsforker ? new WpBuildTsForkerPlugin({ app }).getPlugins() : [];
 
 
-module.exports = tscheck;
+module.exports = tsforker;

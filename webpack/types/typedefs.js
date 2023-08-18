@@ -7,10 +7,10 @@
  * PLUGINS
  */
 
-/** @typedef {import("./plugins").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
-/** @typedef {import("./plugins").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
-/** @typedef {import("./plugins").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
-/** @typedef {import("./plugins").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
+/** @typedef {import("./plugin").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
+/** @typedef {import("./plugin").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
+/** @typedef {import("./plugin").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
+/** @typedef {import("./plugin").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
 /** @typedef {{ file: string; snapshot?: WebpackSnapshot | null; source?: WebpackRawSource }} CacheResult */
 /**
  * @typedef {Record<string, any>} WpBuildPluginOptions
@@ -41,6 +41,7 @@
 /** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
 /** @typedef {import("../types").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("../types").WpBuildLogLevel} WpBuildLogLevel */
+/** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("../types").IWpBuildRcSchema} IWpBuildRcSchema */
 /** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
 /** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
@@ -53,6 +54,7 @@
 /** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
 /** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
 /** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
+/** @typedef {import("../types").WpBuildWebpackEntry} WpBuildWebpackEntry */
 /** @typedef {import("../types").TypeWpBuildRcLogPad} TypeWpBuildRcLogPad */
 /** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
 /** @typedef {import("../types").WpBuildRcEnvironment} WpBuildRcEnvironment */
@@ -81,9 +83,23 @@
 
 
 /**
+ * Executes a command with a promisified child_process.exec()
+ * @typedef {object} ExecAsyncOptions
+ * @property {string} command command to execute, with arguments
+ * @property {import("child_process").ExecOptions} [execOptions] options to pass to child_process.exec()
+ * @property {string | string[]} [ignoreOut] stdout or stderr lines to ignore
+ * @property {string} [program] program name to diasplay in any logging
+ * @property {typedefs.WpBuildConsoleLogger} logger a WpBuildConsoleLogger instance
+ * @property {string} [logPad] a padding to prepend any log messages with
+ * @returns {Promise<number | null>}
+ */
+
+
+/**
  * WEBPACK
  */
 
+/** @typedef {import("./webpack").EntryObject} EntryObject */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
 /** @typedef {import("./webpack").WebpackLogger} WebpackLogger */
 /** @typedef {import("./webpack").WebpackSource} WebpackSource */

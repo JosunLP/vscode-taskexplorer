@@ -293,7 +293,7 @@ class WpBuildApp
     buildWebpackConfig = () =>
     {
         this.wpc = {
-            context: this.paths.ctx,
+            context: this.paths.ctx || this.paths.base,
             entry: {},
             mode: this.rc.mode === "test" || this.rc.mode === "testproduction" ? "none" : this.rc.mode,
             module: { rules: [] },
