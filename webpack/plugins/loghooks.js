@@ -29,7 +29,7 @@ const WpBuildPlugin = require("./base");
 class WpBuildLogHookStagesPlugin extends WpBuildPlugin
 {
     /**
-     * @class WpBuildLicenseFilePlugin
+     * @class WpBuildLogHookStagesPlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options) { super(options, "hooksLog"); }

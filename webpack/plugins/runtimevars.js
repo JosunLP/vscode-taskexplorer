@@ -54,7 +54,7 @@ const { isString, apply, isObjectEmpty, merge, WpBuildError } = require("../util
 class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
 {
     /**
-     * @class WpBuildLicenseFilePlugin
+     * @class WpBuildRuntimeVarsPlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options)

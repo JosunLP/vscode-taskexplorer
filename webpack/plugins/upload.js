@@ -29,7 +29,7 @@ const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 class WpBuildUploadPlugin extends WpBuildPlugin
 {
     /**
-     * @class WpBuildLicenseFilePlugin
+     * @class WpBuildUploadPlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options)
@@ -67,18 +67,25 @@ class WpBuildUploadPlugin extends WpBuildPlugin
     /**
      * @function
      * @private
-     * @param {WebpackCompilation} compilation
+     * @param {WebpackCompilation} _compilation
      * @throws {WebpackError}
      */
-    async cleanup(compilation)
+    async cleanup(_compilation)
     {
-        const tmpUploadPath = join(this.app.paths.temp, this.app.mode),
-              tmpFiles = await readdir(tmpUploadPath);
-        if (tmpFiles.length > 0)
-        {
-            await rm(tmpUploadPath, { recursive: true, force: true });
+        const tmpUploadPath = join(this.app.paths.temp, this.app.mode);
+        try
+        {   if (existsSync(tmpUploadPath))
+            {
+                const tmpFiles = await readdir(tmpUploadPath);
+                if (tmpFiles.length > 0)
+                {
+                    await rm(tmpUploadPath, { recursive: true, force: true });
+                }
+                this.app.logger.write("upload plugin cleanup completed");
+        }   }
+        catch (e) {
+            this.handleError(e);
         }
-        this.app.logger.write("upload plugin cleanup completed");
     };
 
 

@@ -46,6 +46,7 @@ const { isFunction, asArray, mergeIf, execAsync, WpBuildCache, isString, WpBuild
 
 /**
  * @class WpBuildHashPlugin
+ * @abstract
  */
 class WpBuildPlugin
 {

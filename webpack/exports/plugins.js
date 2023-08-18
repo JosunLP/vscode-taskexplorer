@@ -9,9 +9,9 @@
  */
 
 const {
-	analyze, banner, clean, copy, dispose, environment, istanbul, loghooks,
-	ignore, optimization, progress, runtimevars, sourcemaps, licensefiles, tscheck, upload, wait,
-	cssextract, htmlcsp, imageminimizer, htmlinlinechunks, tsc, vendormod, webviewapps, scm
+	analyze, banner, clean, copy, dispose, environment, istanbul, loghooks, ignore, optimization,
+	progress, runtimevars, sourcemaps, licensefiles, tscheck, upload, wait, cssextract, htmlcsp,
+	imageminimizer, htmlinlinechunks, testsuite, types, vendormod, webviewapps, scm
 } = require("../plugins");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
@@ -31,7 +31,8 @@ const plugins = (app) =>
 		progress(app),           // n/a - reports progress from webpack engine
 		wait(app),               // compiler.run
 		...clean(app),           // compiler.hooks.emit, compiler.hooks.done
-		tsc(app),                // compiler.hooks.beforeCompile - build tests / test suite
+		types(app),              // compiler.hooks.beforeCompile - build tests / test suite
+		testsuite(app),          // compiler.hooks.beforeCompile - build tests / test suite
 		banner(app),             // compiler.hooks.compilation -> compilation.hooks.processAssets
 		istanbul(app),           // compiler.hooks.compilation - add istanbul ignores to node-requires
 		runtimevars(app),        // compiler.hooks.compilation

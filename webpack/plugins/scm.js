@@ -18,7 +18,7 @@ const WpBuildPlugin = require("./base");
 class WpBuildScmPlugin extends WpBuildPlugin
 {
     /**
-     * @class WpBuildLicenseFilePlugin
+     * @class WpBuildScmPlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options) { super(options, "scm"); }

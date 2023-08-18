@@ -21,7 +21,7 @@ const ForkTsForkererWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 class WpBuildTsForkerPlugin extends WpBuildPlugin
 {
     /**
-     * @class WpBuildLicenseFilePlugin
+     * @class WpBuildTsForkerPlugin
      * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options)

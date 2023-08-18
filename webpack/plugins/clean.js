@@ -26,7 +26,7 @@ const { apply } = require("../utils");
 class WpBuildCleanPlugin extends WpBuildPlugin
 {
     /**
-     * @class WpBuildLicenseFilePlugin
+     * @class WpBuildCleanPlugin
      * @param {WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options)
@@ -65,18 +65,18 @@ class WpBuildCleanPlugin extends WpBuildPlugin
      */
 	staleAssets(stats)
 	{
-		const distPath = this.app.getDistPath();
-		if (existsSync(distPath))
-		{
-			readdirSync(distPath).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
-			{
-				const assets = stats.compilation.getAssets(),
-					  clean = !assets.find(a => a.name === file);
-				if (clean) {
-					unlinkSync(join(distPath, file));
-				}
-			});
-		}
+		// const distPath = this.app.getDistPath();
+		// if (existsSync(distPath))
+		// {
+		// 	readdirSync(distPath).filter(p => this.fileNameHashRegex().test(p)).forEach((file) =>
+		// 	{
+		// 		const assets = stats.compilation.getAssets(),
+		// 			  clean = !assets.find(a => a.name === file);
+		// 		if (clean) {
+		// 			unlinkSync(join(distPath, file));
+		// 		}
+		// 	});
+		// }
 	}
 
 
