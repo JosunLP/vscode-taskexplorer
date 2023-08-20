@@ -22,12 +22,12 @@
 import { IDisposable } from "./generic";
 import { IWpBuildLogger } from "./logger";
 import {
-    WebpackConfig, WebpackEntry, WebpackModuleOptions, WebpackLogLevel, WebpackRuntimeArgs,
-    WebpackRuntimeEnvArgs
+    WebpackConfig, WebpackEntry, WebpackModuleOptions, WebpackLogLevel, WebpackRuntimeArgs, WebpackRuntimeEnvArgs,
+    WebpackResolveOptions
 } from "./webpack";
 import {
-    WpBuildRcPaths, WpBuildWebpackEntry, WpBuildWebpackMode, WpBuildLogLevel, WpBuildRcBuild,
-    WebpackTarget, WpBuildRcEnvironment, IWpBuildRcSchema
+    WpBuildRcPaths, WpBuildWebpackEntry, WpBuildWebpackMode, WpBuildLogLevel, WpBuildRcBuild, WebpackTarget,
+    WpBuildRcEnvironment, IWpBuildRcSchema
 } from "./rc";
 
 
@@ -51,6 +51,7 @@ declare interface IWpBuildWebpackConfig extends WebpackConfig
     mode: Exclude<WebpackConfig["mode"], undefined>;
     entry: WpBuildWebpackEntry | WebpackEntry;
     output: Exclude<WebpackConfig["output"], undefined>;
+    resolve: WebpackResolveOptions;
     target: WebpackTarget;
     module: WebpackModuleOptions;
 };
@@ -103,14 +104,14 @@ declare type WpBuildAppTsConfigCompilerOptions =
     declarationsDir?: string;
     declarationsOnly?: boolean;
     tsBuildInfoFile?: string;
-
 }
 
 declare type WpBuildAppTsConfigJson =
 {
     compilerOptions: WpBuildAppTsConfigCompilerOptions;
-    exclude?: string[];
-    include?: string[];
+    exclude: string[];
+    files: string[];
+    include: string[];
     extends?: string | string[];
 }
 
@@ -176,6 +177,8 @@ export {
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,
     WpBuildAppTsConfig,
+    WpBuildAppTsConfigJson,
+    WpBuildAppTsConfigCompilerOptions,
     WpBuildWebpackConfig,
     __WPBUILD__
 };

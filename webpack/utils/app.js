@@ -135,9 +135,7 @@ class WpBuildApp
             this.tsConfig = getTsConfig(this.build);
         }
 
-        this.initLogger(/** @type {typedefs.TypeWpBuildRcLog} */(this.build.log));
-        this.buildWebpackConfig();
-        this.printBuildProperties();
+        this.initLogger();
 	}
 
 
@@ -245,10 +243,10 @@ class WpBuildApp
 
 
     /**
-     * Calls each ./exports/* default export to construct a {@link typedefs.WpBuildWebpackConfig webpack build configuration}
+     * Called by top level rc wrapper after instantiating this app wrapper instance.
+     * Calls each ./exports/* default export to construct a {@link typedefs.WpBuildWebpackConfig webpack build configuration}.
      *
      * @function
-     * @private
      * @returns {typedefs.WpBuildWebpackConfig}
      */
     buildWebpackConfig = () =>
@@ -260,6 +258,7 @@ class WpBuildApp
             module: { rules: [] },
             name: `${this.rc.name}|${this.rc.pkgJson.version}|${this.build.name}|${this.mode}|${this.build.target}`,
             output: {},
+            resolve: {},
             target: this.target
         };
         cache(this);          // Asset cache
@@ -276,6 +275,7 @@ class WpBuildApp
         stats(this);          // Stats i.e. console output & webpack verbosity
         watch(this);          // Watch-mode options
         plugins(this);        // Plugins - exports.plugins() inits all plugin.plugins
+        this.printBuildProperties();
         return this.wpc;
     };
 
@@ -286,7 +286,7 @@ class WpBuildApp
      */
     getAliasConfig = () =>
     {
-        const alias = this.build.alias || {},
+        const alias = merge({}, this.build.alias),
               tsConfig = this.tsConfig;
 
         if (tsConfig && tsConfig.json.compilerOptions?.paths)
@@ -336,7 +336,7 @@ class WpBuildApp
      * @param {string} name
      * @returns {typedefs.WpBuildRcBuild | undefined}
      */
-    getAppBuild = (name) => this.rc.apps.find(a => a.build.type === name || a.build.name === name)?.build;
+    getAppBuild = (name) => this.rc.builds.find(b => b.type === name || b.name === name);
 
 
     /**
@@ -428,7 +428,7 @@ class WpBuildApp
             path = _getPath(build.paths[pathKey]);
         }
 
-        return /** @type {R} */(path || _getPath(this.rc.paths[pathKey]) || _getPath(basePath));
+        return /** @type {R} */(path || _getPath(this.build.paths[pathKey]) || _getPath(this.rc.paths[pathKey]) || _getPath(basePath));
     };
 
 
@@ -480,21 +480,17 @@ class WpBuildApp
     /**
      * @function
      * @private
-     * @param {typedefs.WpBuildRcLog} options
      */
-    initLogger = (options) =>
+    initLogger = () =>
     {
-        const l = this.logger = new WpBuildConsoleLogger({
-            envTag1: this.build.name , envTag2: this.target.toString(), ...options
-        });
-        const c = l.colors;
+        apply(this.build.log, { envTag1: this.build.name , envTag2: this.target.toString() });
+        const l = this.logger = new WpBuildConsoleLogger(this.build.log);
         this.global.buildCount = this.global.buildCount || 0;
         l.value(
             `Start Webpack build ${++this.global.buildCount}`,
-            l.tag(this.build.name, c.cyan, c.white) + " " + l.tag(this.target, c.cyan, c.white),
-            undefined, undefined, l.icons.color.start, c.white
+            l.tag(this.build.name) + " " + l.tag(this.target),
+            undefined, undefined, l.icons.color.start, l.colors.white
         );
-        // l.write("   Mode  : " + l.withColor(), 1, "", 0, l.colors.white);
     };
 
 
@@ -505,21 +501,19 @@ class WpBuildApp
     */
     printBuildProperties = () =>
     {
-        const l = this.logger,
-              wpc = this.wpc;
-
+        const l = this.logger;
         l.sep();
         l.write("Global Configuration:", 1, "", 0, l.colors.white);
         Object.keys(this.global).filter(k => typeof this.global[k] !== "object").forEach(
             (k) => l.value(`   ${k}`, this.global[k], 1)
         );
         l.sep();
-        l.write("Rc Configuration:", 2, "", 0, l.colors.white);
-        l.value("   name", this.rc.name, 2);
-        l.value("   mode", this.rc.mode, 2);
-        l.value("   version", this.rc.pkgJson.version, 2);
+        l.write("Rc Configuration:", 1, "", 0, l.colors.white);
+        l.value("   name", this.rc.name, 1);
+        l.value("   mode", this.rc.mode, 1);
+        l.value("   version", this.rc.pkgJson.version, 1);
         l.sep();
-        l.write("Build Configuration:", 3, "", 0, l.colors.white);
+        l.write("Build Configuration:", 2, "", 0, l.colors.white);
         l.value("   name", this.build.name, 2);
         l.value("   type", this.build.type, 2);
         l.value("   target", this.build.target, 2);
@@ -529,7 +523,7 @@ class WpBuildApp
         l.value("   paths configuration", JSON.stringify(this.build.paths), 3);
         l.value("   plugins configuration", JSON.stringify(this.build.plugins), 3);
         l.sep();
-        l.write("Build Paths Configuration:", 3, "", 0, l.colors.white);
+        l.write("Build Paths Configuration:", 2, "", 0, l.colors.white);
         l.value("   base/project directory", this.getRcPath("base"), 2);
         l.value("   context directory", this.getRcPath("ctx", { rel: true }), 2);
         l.value("   distribution directory", this.getDistPath({ rel: true }), 2);
@@ -538,21 +532,19 @@ class WpBuildApp
         l.value("   source directory", this.getSrcPath({ rel: true }), 2);
         l.value("   source tests directory", this.getSrcPath({ rel: true, build: "tests" }), 2);
         l.value("   source types directory", this.getSrcPath({ rel: true, build: "types" }), 2);
+        l.value("   temp directory", this.getRcPath("temp"), 2);
         l.value("   tsconfig path", this.build.paths.tsconfig, 2);
         l.sep();
         l.write("Webpack Configuration:", 1, "", 0, l.colors.white);
-        l.value("   mode", wpc.mode, 1);
-        l.value("   target", wpc.target, 1);
-        l.value("   context directory", wpc.context, 1);
-        l.value("   output directory", wpc.output.path, 1);
+        l.value("   mode", this.wpc.mode, 1);
+        l.value("   target",this.wpc.target, 1);
+        l.value("   context directory", this.wpc.context, 1);
+        l.value("   output directory", this.wpc.output.path, 1);
         l.value("   entry", JSON.stringify(this.wpc.entry), 3);
         l.value("   resolve", JSON.stringify(this.wpc.resolve), 3);
-        l.value("   output", JSON.stringify(this.wpc.output), 4);
-        l.value("   rules", JSON.stringify(this.wpc.module.rules), 4);
+        l.value("   output", JSON.stringify(this.wpc.output), 3);
+        l.value("   rules", JSON.stringify(this.wpc.module.rules), 3);
         l.sep();
-        // l.write("   Mode  : " + l.withColor(), 1, "", 0, l.colors.white);
-        // l.write("   Argv  : " + l.withColor(), 1, "", 0, l.colors.white);
-        // l.write("   Env   : " + l .withColor(), 1, "", 0, l.colors.white);
     };
 }
 

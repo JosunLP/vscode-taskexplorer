@@ -49,7 +49,7 @@ import {
     Cache as WebpackCache, Chunk as WebpackChunk, Configuration as WebpackConfig, Compilation as WebpackCompilation,
     Compiler as WebpackCompiler, EntryObject as WebpackEntry, sources as WebpackSources, Stats as WebpackStats,
     StatsAsset as WebpackStatsAsset, WebpackPluginInstance, ModuleOptions, RuleSetRule, PathData as WebpackPathData,
-    WebpackOptionsNormalized, RuleSetUse, RuleSetUseItem
+    WebpackOptionsNormalized, RuleSetUse, RuleSetUseItem, ResolveOptionsWithDependencyType as WebpackResolveOptions
 } from "webpack"
 
 
@@ -175,6 +175,7 @@ export {
     WebpackLogLevel,
     WebpackOutput,
     WebpackRawSource,
+    WebpackResolveOptions,
     WebpackRuleSetRule,
     WebpackRuleSetUse,
     WebpackRuleSetUseItem,

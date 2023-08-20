@@ -66,6 +66,9 @@ class WpBuildConsoleLogger
     };
 
 
+    get level() { return this.options.level; }
+
+
     /**
      * @function
      * @private
@@ -541,7 +544,7 @@ class WpBuildConsoleLogger
         if (level === undefined || level <= this.options.level)
         {
             const opts = this.options,
-                  envTagClr = this.getIconcolorMapping(icon),
+                  envTagClr =  opts.colors.buildBracket ? this.colors[opts.colors.buildBracket] : this.getIconcolorMapping(icon),
                   envTagMsgClr = opts.colors.buildText ? this.colors[opts.colors.buildText] : this.colors.white,
                   envTagClrLen = (this.withColorLength(envTagMsgClr) * 2) + (this.withColorLength(envTagClr) * 4),
                   envMsgClr = color || this.colors[opts.colors.default || "grey"],

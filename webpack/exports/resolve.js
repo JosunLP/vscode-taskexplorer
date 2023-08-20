@@ -16,45 +16,47 @@ const { apply, merge, findFilesSync, isArray, WpBuildApp } = require("../utils")
  */
 const resolve = (app) =>
 {
-	const basePath = app.getRcPath("base"),
-		  srcPath = app.getSrcPath({ rel: true, psx: true }),
-		  envGlob = `**/${srcPath}/**/{env,environment,target}/${app.target}/`,
-		  envDirs = findFilesSync(envGlob, { cwd: basePath, absolute: true, dotRelative: false });
-
-	const resolve = {
+	apply(app.wpc.resolve,
+	{   // app.getAliasConfig() will map `tsconfig.paths` and `[buildrc].alias`
 		alias: merge({}, app.getAliasConfig()),
 		extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
-	};
+	});
 
-	if (envDirs.length >= 0)
+	const alias = app.wpc.resolve.alias;
+	if (!alias[":env"])
 	{
-		envDirs.forEach((dir) =>
+		const basePath = app.getRcPath("base"),
+			  srcPath = app.getSrcPath({ rel: true, psx: true }),
+			  envGlob = `**/${srcPath}/**/{env,environment,target}/${app.target}/`,
+			  envDirs = findFilesSync(envGlob, { cwd: basePath, absolute: true, dotRelative: false });
+		if (envDirs.length >= 0)
 		{
-			if (isArray(resolve.alias[":env"]))
+			envDirs.forEach((dir) =>
 			{
-				if (!resolve.alias[":env"].includes(dir)) {
-					resolve.alias[":env"].push(dir);
+				if (isArray(alias[":env"]))
+				{
+					if (!alias[":env"].includes(dir)) {
+						alias[":env"].push(dir);
+					}
 				}
-			}
-			else {
-				resolve.alias[":env"] = [ dir ];
-			}
-		});
+				else {
+					alias[":env"] = [ dir ];
+				}
+			});
+		}
 	}
 
 	if (app.build.type !== "webapp")
 	{
-		apply(resolve,
+		apply(app.wpc.resolve,
 		{
 			mainFields: app.isWeb ? [ "web", "module", "main" ] : [ "module", "main" ],
 			fallback: app.isWeb ? { path: require.resolve("path-browserify"), os: require.resolve("os-browserify/browser") } : undefined
 		});
 	}
 	else {
-		apply(resolve, { modules: [ app.getContextPath(), "node_modules" ]});
+		apply(app.wpc.resolve, { modules: [ app.getContextPath(), "node_modules" ]});
 	}
-
-	app.wpc.resolve = resolve;
 };
 
 

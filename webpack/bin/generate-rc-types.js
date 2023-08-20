@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable import/no-extraneous-dependencies */
 // @ts-check
 
 /**
@@ -11,14 +12,15 @@
 const { EOL } = require("os");
 const { existsSync } = require("fs");
 const { resolve, join } = require("path");
+const { execAsync } = require("../utils/utils");
 const { readFile, writeFile } = require("fs/promises");
 const WpBuildConsoleLogger = require("../utils/console");
-const { capitalize, execAsync } = require("../utils/utils");
-const description = "Provides types macthing the .wpbuildrc.json configuration file schema";
-const autoGenMessage = "This file was auto generated using the 'json-to-typescript' utility";
 
 
 const generateEnums = true;
+
+const description = "Provides types macthing the .wpbuildrc.json configuration file schema";
+const autoGenMessage = "This file was auto generated using the 'json-to-typescript' utility";
 
 const requiredProperties = [
     [ "build", "WpBuildRcBuild" ],
@@ -39,6 +41,9 @@ const requiredProperties = [
     [ "target", "WpBuildRcBuild" ],
     [ "type", "WpBuildRcBuild" ],
     [ "base", "WpBuildRcPaths" ],
+    [ "ctx", "WpBuildRcPaths" ],
+    [ "dist", "WpBuildRcPaths" ],
+    [ "src", "WpBuildRcPaths" ],
     [ "temp", "WpBuildRcPaths" ]
 ];
 
@@ -70,8 +75,10 @@ let logger;
 //
 // Command line runtime wrapper
 //
-const cliWrap = (exe) => argv => { exe(argv).catch(e => { try { (logger || console).error(e); } catch {} process.exit(1); }); };
-
+const cliWrap = (/** @type {(arg0: string[]) => Promise<any> } */ exe) =>
+                (/** @type {string[]} */ argv) => {
+                    exe(argv).catch(e => { try { (logger || console).error(e); } catch {} process.exit(1); });
+                };
 
 /**
  * @param {string} type
@@ -83,6 +90,10 @@ const isBaseType = (type) => [
     ].includes(type);
 
 
+/**
+ * @param {string} hdr
+ * @param {string} data
+ */
 const parseTypesDts = async (hdr, data) =>
 {
     logger.log("   parsing json2ts output");
@@ -166,6 +177,41 @@ const parseTypesDts = async (hdr, data) =>
 };
 
 
+/**
+ * @param {string} file
+ * @param {string} previousContent
+ * @returns {Promise<boolean>}
+ */
+const promptForRestore = async (file, previousContent) =>
+{
+    const promptSchema = {
+        properties: {
+            inVersion: {
+                description: "Enter yes (y) or no (n)",
+                pattern: /^(?:yes|no|y|n)$/i,
+                default: "no",
+                message: "Must enter yes (y) or no (n)",
+                required: false
+            }
+        }
+    };
+    const prompt = require("prompt");
+    prompt.start();
+    const { result } = await prompt.get(promptSchema);
+    if (result && result.toString().toLowerCase().startsWith("y")) {
+        await writeFile(file, previousContent);
+        return true;
+    }
+    return false;
+};
+
+
+/**
+ * @param {string} property
+ * @param {string} suffix
+ * @param {string} values
+ * @param {string} [valueType]
+ */
 const pushExport = (property, suffix, values, valueType) =>
 {
     const suffix2 = suffix.substring(0, suffix.length - 1);
@@ -190,6 +236,10 @@ const pushExport = (property, suffix, values, valueType) =>
 };
 
 
+/**
+ * @param {string} hdr
+ * @param {string} data
+ */
 const writeConstantsJs = async (hdr, data) =>
 {
     logger.log("   create implementation constants from new types");
@@ -247,9 +297,12 @@ const writeConstantsJs = async (hdr, data) =>
             logger.success(`   created ${constantsFile} (${constantsPath})`);
         }
         else {
-            logger.error(`   created ${constantsFile}  but tsc types validation failed`);
-            await writeFile(constantsPath, constantsData);
-            logger.error(`   previous content restored (${constantsPath})`);
+            if (await promptForRestore(constantsPath, constantsData)) {
+                throw new Error(`created ${constantsFile}  but tsc types validation failed, previous content restored`);
+            }
+            else {
+                throw new Error(`created ${constantsFile}  but tsc types validation failed, new content retained`);
+            }
         }
     }
 };
@@ -340,8 +393,12 @@ cliWrap(async () =>
         logger.success(`   created ${outputDtsFile} (${outputDtsPath})`);
     }
     else {
-        await writeFile(outputDtsPath, data);
-        throw new Error(`created ${outputDtsFile} but tsc types validation failed, previous content restored`);
+        if (await promptForRestore(outputDtsPath, data)) {
+            throw new Error(`created ${outputDtsFile} but tsc types validation failed, previous content restored`);
+        }
+        else {
+            throw new Error(`created ${outputDtsFile} but tsc types validation failed, new content retained`);
+        }
     }
 
     data = await readFile(outputDtsPath, "utf8");

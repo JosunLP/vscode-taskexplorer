@@ -59,7 +59,10 @@ else if (args.length > 1)
 //
 // Command line runtime wrapper
 //
-const cliWrap = (exe) => argv => { exe(argv).catch(e => { try { (logger || console).error(e); } catch {} process.exit(1); }); };
+const cliWrap = (/** @type {(arg0: string[]) => Promise<any> } */ exe) =>
+                (/** @type {string[]} */ argv) => {
+                    exe(argv).catch(e => { try { (logger || console).error(e); } catch {} process.exit(1); });
+                };
 
 
 cliWrap(async () =>

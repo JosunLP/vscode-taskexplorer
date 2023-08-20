@@ -21,6 +21,8 @@ const {
 } = require("./constants");
 
 
+const defaultTempDir = `node_modules${sep}.cache${sep}wpbuild${sep}temp`;
+
 /**
  * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
  */
@@ -139,6 +141,7 @@ class WpBuildRc
 
         apply(this,
         {
+            apps: [],
             args: apply({}, arge, argv),
             global: globalEnv,
             mode: this.getMode(arge, argv, true)
@@ -181,9 +184,12 @@ class WpBuildRc
     static create = (argv, arge) =>
     {
         const rc = new WpBuildRc(argv, arge);
-        rc.apps = rc.builds.filter((b) => !arge.build || b.name === arge.build)
-                           .map((b) => new WpBuildApp(rc, merge({}, b)));
-        return rc.apps.map(app => app.wpc);
+        rc.apps.push(
+            ...rc.builds.filter(
+                (b) => !arge.build || b.name === arge.build).map((b) => new WpBuildApp(rc, merge({}, b))
+            )
+        );
+        return rc.apps.map(app => app.buildWebpackConfig());
     }
 
 
@@ -205,13 +211,16 @@ class WpBuildRc
                 dst.source = dst.source || this.source || "typescript";
                 dst.target = this.getTarget(dst);
                 dst.type = this.getType(dst);
+                const ccColors = merge({}, dst.log.colors);
                 mergeIf(dst.log, src.log);
                 mergeIf(dst.log.pad, src.log.pad);
                 mergeIf(dst.log.colors, src.log.colors);
-                dst.log.colors.valueStar = dst.log.color;
-                dst.log.colors.buildBracket = dst.log.color;
-                dst.log.colors.tagBracket = dst.log.color;
-                dst.log.colors.infoIcon = dst.log.color;
+                if (dst.log.color) {
+                    dst.log.colors.valueStar = ccColors.valueStar || dst.log.color;
+                    dst.log.colors.buildBracket = ccColors.buildBracket || dst.log.color;
+                    dst.log.colors.tagBracket = ccColors.tagBracket || dst.log.color;
+                    dst.log.colors.infoIcon = ccColors.infoIcon || dst.log.color;
+                }
                 applyIf(dst.paths, src.paths);
                 applyIf(dst.exports, src.exports);
                 applyIf(dst.plugins, src.plugins);
@@ -429,8 +438,28 @@ class WpBuildRc
         {
             rc.paths = {
                 base: ".",
-                temp: "node_modules/.cache/wpbuild/temp"
+                src: "src",
+                dist: "dist",
+                ctx: ".",
+                temp: defaultTempDir
             };
+        }
+        else
+        {   if (!rc.paths.base) {
+                rc.paths.base = ".";
+            }
+            if (!rc.paths.src) {
+                rc.paths.src = "src";
+            }
+            if (!rc.paths.dist) {
+                rc.paths.dist = "dist";
+            }
+            if (!rc.paths.ctx) {
+                rc.paths.ctx = ".";
+            }
+            if (!rc.paths.temp) {
+                rc.paths.temp = defaultTempDir;
+            }
         }
         return true;
     };
@@ -445,8 +474,7 @@ class WpBuildRc
 	{
 		const base = resolve(__dirname, "..", ".."),
               ostemp = process.env.TEMP || process.env.TMP,
-			  temp = resolve(ostemp ? `${ostemp}${sep}${this.name}` :
-                                      `${base}${sep}node_modules${sep}.cache${sep}wpbuild${sep}temp`, build.mode);
+			  temp = resolve(ostemp ? `${ostemp}${sep}${this.name}` : defaultTempDir, build.mode);
         /**
          * @param {string} b base directory
          * @param {string} p configured path (relative or absolute)
@@ -458,7 +486,7 @@ class WpBuildRc
 		}
 
         build.paths.base = base;
-        build.paths.temp = temp;
+        build.paths.temp = build.paths.temp && build.paths.temp !== defaultTempDir ? build.paths.temp : temp;
         build.paths.ctx = build.paths.ctx ? _resolveRcPath(base, build.paths.ctx) : base;
         build.paths.src = _resolveRcPath(base, build.paths.src || "src");
         build.paths.dist = _resolveRcPath(base, build.paths.dist || "dist");

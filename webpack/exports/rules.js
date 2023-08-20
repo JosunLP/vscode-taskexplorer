@@ -14,7 +14,11 @@ const { existsSync } = require("fs");
 const typedefs = require("../types/typedefs");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { WpBuildApp, WpBuildError, uniq, merge, isObject, isArray, apply } = require("../utils");
-const { isAbsolute, resolve } = require("path");
+const { isAbsolute, resolve, posix, relative } = require("path");
+
+/**
+ * @typedef {{ include: [], exclude: [], json: typedefs.WpBuildAppTsConfigJson, path: string, dir: string }} RulesConfig
+ */
 
 
 const builds =
@@ -23,51 +27,50 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
-	 * @param {typedefs.WpBuildAppTsConfig} tsConfig
+	 * @param {RulesConfig} rulesConfig
 	 * @throws {WpBuildError}
 	 */
-	module: (app, tsConfig) =>
+	module: (app, rulesConfig) =>
 	{
-		const srcPath = app.getSrcPath();
-		tsConfig.include.push(srcPath);
+		const exclude = getExcludes(app, rulesConfig),
+			  include = getIncludes(app, rulesConfig);
+
+		if (app.build.debug)
+		{
+			app.wpc.module.rules.push(
+			{
+				include,
+				exclude,
+				test: /\.ts$/,
+				issuerLayer: "release",
+				// include(resourcePath, issuer) {
+				// 	console.log(`  context: ${app.wpc.context} (from ${issuer})`);
+				// 	console.log(`  resourcePath: ${resourcePath} (from ${issuer})`);
+				// 	console.log(`  included: ${path.relative(app.wpc.context || ".", resourcePath)} (from ${issuer})`);
+				// 	return true; // include all
+				// },
+				loader: "string-replace-loader",
+				options: stripLoggingOptions()
+			},
+			{
+				include,
+				exclude,
+				test: /wrapper\.ts$/,
+				issuerLayer: "release",
+				loader: "string-replace-loader",
+				options: {
+					search: /^log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
+					replace: "() => {}]"
+				}
+			});
+		}
 
 		app.wpc.module.rules.push(
 		{
+			include,
+			exclude,
 			test: /\.ts$/,
-			issuerLayer: "release",
-			include: srcPath,
-			// include(resourcePath, issuer) {
-			// 	console.log(`  context: ${app.wpc.context} (from ${issuer})`);
-			// 	console.log(`  resourcePath: ${resourcePath} (from ${issuer})`);
-			// 	console.log(`  included: ${path.relative(app.wpc.context || ".", resourcePath)} (from ${issuer})`);
-			// 	return true; // include all
-			// },
-			loader: "string-replace-loader",
-			options: stripLoggingOptions(),
-			exclude: [
-				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
-			]
-		},
-		{
-			test: /wrapper\.ts$/,
-			issuerLayer: "release",
-			include: path.join(srcPath, "lib"),
-			loader: "string-replace-loader",
-			exclude: [
-				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/
-			],
-			options: {
-				search: /^log\.(?:write2?|error|warn|info|values?|method[A-Z][a-z]+)\]/g,
-				replace: "() => {}]"
-			}
-		},
-		{
-			test: /\.ts$/,
-			include: tsConfig.include,
-			use: getTsSourceLoader(app, tsConfig),
-			exclude: [
-				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/, /\.vscode/
-			]
+			use: getLoader(app, rulesConfig)
 		});
 	},
 
@@ -76,18 +79,15 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
-	 * @param {typedefs.WpBuildAppTsConfig} tsConfig Cloned copy of app.tsConfig info object
+	 * @param {RulesConfig} rulesConfig Cloned copy of app.tsConfig info object
 	 */
-	tests: (app, tsConfig) =>
+	tests: (app, rulesConfig) =>
 	{
 		if (app.build.type !== "tests" && app.isTests && app.hasTests()) {
 			return;
 		}
 
-		const srcPath = app.getSrcPath(),
-			  buildPath = app.getRcPath("base");
-
-		tsConfig.include.push(srcPath);
+		const buildPath = app.getRcPath("base");
 
 		app.wpc.module.rules.push(
 		{
@@ -101,12 +101,15 @@ const builds =
 		},
 		{
 			test: /\.ts$/,
-			include: getTsIncludesAbs(app, tsConfig),
-			use: getTsSourceLoader(app, tsConfig, "babel"),
-			exclude: [
-				/node_modules/, /types[\\/]/, /\.d\.ts$/
-			]
+			include: getIncludes(app, rulesConfig),
+			use: getLoader(app, rulesConfig, "babel"),
+			exclude: getExcludes(app, rulesConfig, true)
 		});
+
+		if (app.hasTypes())
+		{
+			builds.types(app, rulesConfig);
+		}
 	},
 
 
@@ -114,17 +117,22 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app
-	 * @param {typedefs.WpBuildAppTsConfig} tsConfig Cloned copy of app.tsConfig info object
+	 * @param {RulesConfig} rulesConfig Cloned copy of app.tsConfig info object
 	 * @throws {WpBuildError}
 	 */
-	types: (app, tsConfig) =>
+	types: (app, rulesConfig) =>
 	{
-		const typesDir = app.getSrcPath({ build: app.build.name }),
+		const mainBuild = app.getAppBuild("module"),
+			  typesSrcPath= app.getSrcPath({ build: app.build.name }),
 			  typesDirDist = app.getDistPath({ build: app.build.name });
-		if (typesDir && existsSync(typesDir))
+console.log("rules main.name: " + mainBuild?.name);
+console.log("typesSrcPath: " + typesSrcPath);
+console.log("typesDirDist: " + typesDirDist);
+		if (mainBuild && typesSrcPath && existsSync(typesSrcPath))
 		{
+			const loader = getLoader(app, rulesConfig);
+			// mainSrcPath = app.getSrcPath({ build: mainApp.build.name, rel: true, ctx: true, dot: true, psx: true });
 			// tsConfig.include.push(typesDir);
-			const loader = getTsSourceLoader(app, tsConfig);
 			if (loader.loader === "ts-loader")
 			{
 				apply(loader.options,
@@ -137,14 +145,16 @@ const builds =
 					}
 				});
 			}
+			else {
+				// TODO - Babel / esbuild loader
+			}
 			app.wpc.module.rules.push(
 			{
 				use: loader,
 				test: /\.ts$/,
-				include: app.getSrcPath(),
-				exclude: [
-					/node_modules/, /test[\\/]/
-				]
+				// include: uniq([ mainSrcPath, typesSrcPath ]),
+				include: getIncludes(app, rulesConfig),
+				exclude: getExcludes(app, rulesConfig, false, true, true)
 			});
 		}
 	},
@@ -154,35 +164,29 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app
-	 * @param {typedefs.WpBuildAppTsConfig} tsConfig Cloned copy of app.tsConfig info object
+	 * @param {RulesConfig} rulesConfig Cloned copy of app.tsConfig info object
 	 * @throws {WpBuildError}
 	 */
-	webapp: (app, tsConfig) =>
+	webapp: (app, rulesConfig) =>
 	{
-		const srcPath = app.getSrcPath();
-		tsConfig.include.push(srcPath);
+		const exclude = getExcludes(app, rulesConfig),
+			  typesDir = app.getSrcPath({ build: app.build.name });
 
 		app.wpc.module.rules.push(...[
 		{
+			exclude,
 			test: /\.m?js/,
-			exclude: [
-				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/, /\.vscode/
-			],
 			resolve: { fullySpecified: false }
 		},
 		{
-			include: uniq(tsConfig.include),
+			exclude,
+			include: uniq(rulesConfig.include),
 			test: /\.tsx?$/,
-			use: getTsSourceLoader(app, tsConfig),
-			exclude: [
-				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/, /\.vscode/
-			]
+			use: getLoader(app, rulesConfig)
 		},
 		{
+			exclude,
 			test: /\.s?css$/,
-			exclude: [
-				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/, /\.vscode/
-			],
 			use: [
 			{
 				loader: MiniCssExtractPlugin.loader
@@ -202,11 +206,11 @@ const builds =
 			}]
 		}]);
 
-		const typesDir = app.getSrcPath({ build: app.build.name });
 		if (typesDir && app.args.name && !app.rc.builds.find(b => b.type === "module")) //  && !existsSync(typesDir))
 		{
 			// app.wpc.module.rules.unshift(
 			// {
+			// exclude,
 			// 	test: /\.ts$/,
 			// 	include: srcPath,
 			// 	exclude: [
@@ -234,30 +238,68 @@ const builds =
 
 /**
  * @param {WpBuildApp} app
- * @param {typedefs.WpBuildAppTsConfig} tsConfig
- * @returns {string[]}
+ * @param {RulesConfig} rulesConfig
+ * @param {boolean} [allowTest]
+ * @param {boolean} [allowTypes]
+ * @param {boolean} [allowDts]
+ * @returns {RegExp[]}
  */
-const getTsIncludesAbs = (app, tsConfig) =>
+const getExcludes = (app, rulesConfig, allowTest, allowTypes, allowDts) =>
 {
-	return tsConfig.include.map(path => isAbsolute(path) ? path : resolve(app.getRcPath("base"), path));
+	const ex = [ /node_modules/, /\\.vscode[\\\/]/ ];
+	if (allowTest !== true) {
+		ex.push(/test[\\\/]/);
+	}
+	if (allowTypes !== true) {
+		ex.push(/types[\\\/]/);
+	}
+	if (allowDts !== true) {
+		ex.push(/\.d\.ts$/);
+	}
+	ex.push(...rulesConfig.json.exclude.map(
+		(glob) => {
+			let base = rulesConfig.dir;
+			glob = glob.replace(/\\/g, "/");
+			while (glob.startsWith("../")) {
+				base = resolve(base, "..");
+				glob = glob.replace("../", "");
+			}
+			const rel = relative(app.getContextPath(), base);
+			glob = ((rel ? rel + "/" : "") + glob).replace(/\*\*/g, "(?:.*?)").replace(/\*/g, "(?:.*?)");
+			return new RegExp(glob);
+		}
+	));
+	return uniq(ex);
 };
 
 
 /**
  * @param {WpBuildApp} app
- * @param {typedefs.WpBuildAppTsConfig} tsConfig
+ * @param {RulesConfig} rulesConfig
+ * @returns {string[]}
+ */
+const getIncludes = (app, rulesConfig) =>
+{
+	rulesConfig.include.push(app.getSrcPath());
+	return uniq(rulesConfig.include.map(path => isAbsolute(path) ? path : resolve(rulesConfig.dir, path)));
+};
+
+
+/**
+ * @param {WpBuildApp} app
+ * @param {RulesConfig} rulesConfig
  * @param {string} [loader]
  * @returns {typedefs.WebpackRuleSetUseItem}
  */
-const getTsSourceLoader = (app, tsConfig, loader) =>
+const getLoader = (app, rulesConfig, loader) =>
 {
 	if (app.args.esbuild || loader === "esbuild") {
-		return buildOptions.esbuild(app, tsConfig);
+		return buildOptions.esbuild(app, rulesConfig);
 	}
-	if (app.args.babel || loader === "babel") {
-		return buildOptions.babel(app, tsConfig);
+	if (app.source === "javascript" || app.args.babel || loader === "babel") {
+		return buildOptions.babel(app, rulesConfig);
 	}
-	return buildOptions.ts(app, tsConfig);
+	return buildOptions.ts(app, rulesConfig);
 };
 
 
@@ -265,10 +307,10 @@ const buildOptions =
 {
 	/**
 	 * @param {WpBuildApp} app
-	 * @param {typedefs.WpBuildAppTsConfig} tsConfig
+	 * @param {RulesConfig} rulesConfig
 	 * @returns {typedefs.WebpackRuleSetUseItem}
 	 */
-	babel: (app, tsConfig) =>
+	babel: (app, rulesConfig) =>
 	{
 		return {
 			loader: "babel-loader",
@@ -283,10 +325,10 @@ const buildOptions =
 
 	/**
 	 * @param {WpBuildApp} app
-	 * @param {typedefs.WpBuildAppTsConfig} tsConfig
+	 * @param {RulesConfig} rulesConfig
 	 * @returns {typedefs.WebpackRuleSetUseItem}
 	 */
-	esbuild: (app, tsConfig) =>
+	esbuild: (app, rulesConfig) =>
 	{
 		return {
 			loader: "esbuild",
@@ -294,22 +336,22 @@ const buildOptions =
 				implementation: esbuild,
 				loader: "tsx",
 				target: "es2020",
-				tsconfigRaw: tsConfig.json
+				tsconfigRaw: rulesConfig.json
 			}
 		};
 	},
 
 	/**
 	 * @param {WpBuildApp} app
-	 * @param {typedefs.WpBuildAppTsConfig} tsConfig
+	 * @param {RulesConfig} rulesConfig
 	 * @returns {typedefs.WebpackRuleSetUseItem}
 	 */
-	ts: (app, tsConfig) =>
+	ts: (app, rulesConfig) =>
 	{
 		return {
 			loader: "ts-loader",
 			options: {
-				configFile: tsConfig.path,
+				configFile: rulesConfig.path,
 				experimentalWatchApi: false,
 				logInfoToStdOut: app.build.log.level && app.build.log.level >= 0,
 				logLevel: app.build.log.level && app.build.log.level >= 3 ? "info" : (app.build.log.level && app.build.log.level >= 1 ? "warn" : "error"),
@@ -380,33 +422,31 @@ const stripLoggingOptions = () => ({
  */
 const rules = (app) =>
 {
-	const tsConfig = merge({}, app.tsConfig);
+	app.logger.start("create rules", 2);
 
-	if (!tsConfig && app.source === "typescript") {
-		throw WpBuildError.getErrorMissing("tsconfig file", "exports/rules.js", app.wpc);
-	}
-
-	if (tsConfig) {
-		app.logger.write("wp configuration rules found tsconfig file", 2);
-		app.logger.value("   tsConfig.path", tsConfig.path, 2);
-	}
-
-	if (!isObject(app.wpc.module))
+	const tsConfig = merge({}, app.tsConfig); // make a merged clone, 'include' will be altered
+	if (app.source === "typescript")
 	{
-		app.wpc.module = { rules: [] };
+		if (!app.tsConfig) {
+			throw WpBuildError.getErrorMissing("tsconfig file", "exports/rules.js", app.wpc);
+		}
+		app.logger.value("   using tsconfig file", tsConfig.path, 2);
 	}
-	else if (!isArray(app.wpc.module.rules))
-	{
-		app.wpc.module.rules = [];
+	else {
+		tsConfig.include = [];
 	}
 
-	if (builds[app.build.type || app.build.name])
+	const buildFn = builds[app.build.name] || builds[app.build.type];
+	if (buildFn)
 	{
-		builds[app.build.type || app.build.name](app, tsConfig);
+		app.logger.write(`   create rules for build '${app.build.name}' [ type: ${app.build.type} ]`, 2);
+		buildFn(app, tsConfig);
 	}
 	else {
 		throw WpBuildError.getErrorProperty("rules", "exports/rules.js", app.wpc);
 	}
+
+	app.logger.write("   rules created successfully", 2);
 };
 
 

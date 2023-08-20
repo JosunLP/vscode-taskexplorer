@@ -60,22 +60,15 @@
     ],
     "development":
     {
-        "builds": [
-            { "name": "taskexplorer" },
-            { "name": "webapp" }
-        ]
+        "builds": []
     },
     "production":
     {
-        "builds": [
-            { "name": "taskexplorer" },
-            { "name": "webapp" }
-        ]
+        "builds": []
     },
     "test":
     {
         "builds": [
-            { "name": "taskexplorer" },
             { "name": "webapp", "mode": "development" },
             {
                 "name": "tests",
@@ -153,8 +146,8 @@
         "scm": false,
         "sourcemaps": true,
         "testsuite": false,
-        "tscheck": true,
-        "types": true,
+        "tscheck": false,
+        "types": false,
         "upload": true,
         "vendormod": true,
         "wait": false

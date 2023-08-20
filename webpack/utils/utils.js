@@ -303,20 +303,20 @@ const findTsConfig = (build) =>
         }
     };
 
-    let tsConfig = build.paths.tsconfig;
-    if (!tsConfig || !existsSync(tsConfig))
-    {
-        tsConfig = _find(build.paths.src);
-        if (!tsConfig || !existsSync(tsConfig)) {
-            tsConfig = _find(build.paths.ctx);
-            if (!tsConfig || !existsSync(tsConfig)) {
-                tsConfig = _find(build.paths.base);
-            }
-        }
+    if (build.paths.tsconfig && existsSync(build.paths.tsconfig)) {
+        return build.paths.tsconfig;
     }
 
-    if (tsConfig && existsSync(tsConfig)) {
-        return tsConfig;
+    const tryPaths = [
+        build.paths.src, join(build.paths.ctx, build.name), join(build.paths.base, build.name),
+        join(build.paths.ctx, build.type), join(build.paths.base, build.type), build.paths.ctx, build.paths.base
+    ];
+    for (const base of tryPaths)
+    {
+        const tsConfig = _find(base);
+        if (tsConfig && existsSync(tsConfig)) {
+            return tsConfig;
+        }
     }
 };
 
@@ -329,24 +329,57 @@ const findTsConfig = (build) =>
 const getTsConfig = (build, ...xInclude) =>
 {
     const tsConfigPath = isString(build) ? build : findTsConfig(build);
-    if (tsConfigPath && existsSync(tsConfigPath))
+    const _getData= (/** @type {string} */ file, /** @type {string} */ dir) =>
     {
-        const dir = dirname(tsConfigPath),
-              file = basename(tsConfigPath),
-              result = spawnSync("npx", [ "tsc", `-p ${file}`, "--showConfig" ], { cwd: dir, encoding: "utf8", shell: true }),
+        const result = spawnSync("npx", [ "tsc", `-p ${file}`, "--showConfig" ], { cwd: dir, encoding: "utf8", shell: true }),
               data = result.stdout,
               start = data.indexOf("{"),
               end = data.lastIndexOf("}") + 1,
-              include = [ ...xInclude ],
-              raw = data.substring(start, end),
-              json = JSON5.parse(raw);
-        if (json.rootDir) {
-            include.push(resolve(dir, json.rootDir));
+              raw = data.substring(start, end);
+        return { raw, json: /** @type {typedefs.WpBuildAppTsConfigJson} */(JSON5.parse(raw)) };
+    };
+
+    if (tsConfigPath && existsSync(tsConfigPath))
+    {
+        const include = [ ...xInclude ],
+              dir = dirname(tsConfigPath),
+              json = /** @type {typedefs.WpBuildAppTsConfigJson} */({});
+
+        asArray(json.extends).map(e => resolve(dir, e)).filter(e => existsSync(e)).forEach((extendFile) =>
+        {
+            merge(json, _getData(basename(extendFile), dirname(extendFile)).json);
+        });
+
+        const buildJson = _getData(dirname(tsConfigPath), dir);
+        merge(json, buildJson.json);
+
+        if (json.compilerOptions.rootDir) {
+            include.push(resolve(dir, json.compilerOptions.rootDir));
         }
+
         if (isArray(json.include)) {
             include.push(...json.include.filter(p => !include.includes(p)).map((path) => resolve(dir, path.replace(/\*/g, ""))));
         }
-	    return { raw, json, include: uniq(include), path: tsConfigPath, dir: dirname(tsConfigPath), file: basename(tsConfigPath) };
+        else if (!json.include) {
+            json.include = [];
+        }
+
+        if (!json.files) {
+            json.files = [];
+        }
+
+        if (!json.exclude) {
+            json.exclude = [];
+        }
+
+	    return {
+            json,
+            raw: buildJson.raw,
+            path: tsConfigPath,
+            include: uniq(include),
+            dir: dirname(tsConfigPath),
+            file: basename(tsConfigPath)
+        };
     }
 };
 

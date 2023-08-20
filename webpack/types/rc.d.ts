@@ -160,9 +160,9 @@ export declare type TypeWpBuildRcLogPad = Required<WpBuildRcLogPad>;
 export declare type WpBuildRcPaths = 
 {
     base: string;
-    ctx?: string;
-    dist?: string;
-    src?: string;
+    ctx: string;
+    dist: string;
+    src: string;
     temp: string;
     tsconfig?: string;
 };

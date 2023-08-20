@@ -74,6 +74,7 @@
 /** @typedef {import("../types").WpBuildLogColorValue} WpBuildLogColorValue */
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 /** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
+/** @typedef {import("../types").WpBuildAppTsConfigJson} WpBuildAppTsConfigJson */
 /** @typedef {import("../types").WpBuildLogColorMapping} WpBuildLogColorMapping */
 /** @typedef {import("../plugin//base").WpBuildPluginOptions} WpBuildPluginOptions */
 /** @typedef {import("../types").WpBuildRcEnvironmentBase} WpBuildRcEnvironmentBase */
@@ -84,6 +85,7 @@
 /** @typedef {import("../types").WpBuildWebpackAliasConfig} WpBuildWebpackAliasConfig */
 /** @typedef {import("../types").WpBuildCombinedRuntimeArgs} WpBuildCombinedRuntimeArgs */
 /** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
+/** @typedef {import("../types").WpBuildAppTsConfigCompilerOptions} WpBuildAppTsConfigCompilerOptions */
 
 
 /**
