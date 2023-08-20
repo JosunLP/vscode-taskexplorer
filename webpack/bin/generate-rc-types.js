@@ -20,25 +20,27 @@ const autoGenMessage = "This file was auto generated using the 'json-to-typescri
 
 const generateEnums = true;
 
-const requiredProperties = {
-    build: "WpBuildRcBuild",
-    colors: "WpBuildRcLog",
-    mode: "WpBuildRcBuild",
-    value: "WpBuildRcLogPad",
-    log: "WpBuildRc",
-    pad: "WpBuildRcLog",
-    default: "WpBuildRcLogColors",
-    system: "WpBuildRcLogColors",
-    level: "WpBuildRcLog",
-    entry: "WpBuildRcBuild",
-    paths: "WpBuildRcBuild",
-    exports: "WpBuildRcBuild",
-    plugins: "WpBuildRcBuild",
-    target: "WpBuildRcBuild",
-    type: "WpBuildRcBuild",
-    base: "WpBuildRcPaths",
-    temp: "WpBuildRcPaths"
-};
+const requiredProperties = [
+    [ "build", "WpBuildRcBuild" ],
+    [ "colors", "WpBuildRcLog" ],
+    [ "mode", "WpBuildRcBuild" ],
+    [ "value", "WpBuildRcLogPad" ],
+    [ "log", "WpBuildRc" ],
+    [ "pad", "WpBuildRcLog" ],
+    [ "default", "WpBuildRcLogColors" ],
+    [ "system", "WpBuildRcLogColors" ],
+    [ "level", "WpBuildRcLog" ],
+    [ "entry", "WpBuildRcBuild" ],
+    [ "alias", "WpBuildRcBuild" ],
+    [ "log", "WpBuildRcBuild" ],
+    [ "paths", "WpBuildRcBuild" ],
+    [ "exports", "WpBuildRcBuild" ],
+    [ "plugins", "WpBuildRcBuild" ],
+    [ "target", "WpBuildRcBuild" ],
+    [ "type", "WpBuildRcBuild" ],
+    [ "base", "WpBuildRcPaths" ],
+    [ "temp", "WpBuildRcPaths" ]
+];
 
 const outputDtsFile = "rc.d.ts";
 const outputDtsDir = resolve(__dirname, "..",  "types");
@@ -49,6 +51,9 @@ const enums = [];
 
 /** @type {string[]} */
 const exported = [];
+
+/** @type {string[]} */
+const properties = [];
 
 /** @type {string[]} */
 const lines = [];
@@ -119,7 +124,7 @@ const parseTypesDts = async (hdr, data) =>
                       src = `export declare type ${m1} ${m2}\n};\n` +
                             `export declare type ${m1}Key = keyof ${m1};\n` +
                             `export declare type Type${m1} = Required<${m1}>;\n`;
-                      Object.entries(requiredProperties).filter(([ _, t ]) => t === m1).forEach(([ p, _ ]) => {
+                      requiredProperties.filter(([ _, t ]) => t === m1).forEach(([ p, _ ]) => {
                           src = src.replace(new RegExp(`${p}\\?\\: `, "g"), `${p}: `);
                       });
                       if (generateEnums)
@@ -197,6 +202,7 @@ const writeConstantsJs = async (hdr, data) =>
 
     while ((match = rgx.exec(data)) !== null)
     {
+        properties.push(match[1]);
         pushExport(match[1], "s", match[2]);
     }
 
@@ -226,6 +232,8 @@ const writeConstantsJs = async (hdr, data) =>
 
         await writeFile(constantsPath, data);
 
+        await writeTypedefsJs();
+
         logger.write(`      validating ${constantsFile}`);
         const code = await execAsync({
             logger,
@@ -243,8 +251,6 @@ const writeConstantsJs = async (hdr, data) =>
             await writeFile(constantsPath, constantsData);
             logger.error(`   previous content restored (${constantsPath})`);
         }
-
-        return data;
     }
 };
 
@@ -255,11 +261,27 @@ const writeIndexJs = async () =>
           indexPath= resolve(__dirname, "..", "utils", indexFile);
     let data = await readFile(indexPath, "utf8");
     data = data.replace(
-        /\/\* START_CONST_DEFS \*\/(?:.*?)\/\* END_CONST_DEFS \*\//g,
-        `/* START_CONST_DEFS */ ${exported.map(e => e.trim()).join(", ")} /* END_CONST_DEFS */`
+        /\/\* START_RC_DEFS \*\/(?:.*?)\/\* END_RC_DEFS \*\//g,
+        `/* START_RC_DEFS */ ${exported.map(e => e.trim()).join(", ")} /* END_RC_DEFS */`
     );
     await writeFile(indexPath, data);
     logger.success(`   updated exports in utils/${indexFile} (${indexPath})`);
+};
+
+
+const writeTypedefsJs = async () =>
+{
+    const typesFile = "typedefs.js",
+          typesPath= resolve(__dirname, "..", "types", typesFile);
+    let data = await readFile(typesPath, "utf8");
+    data = data.replace(
+        /\/\* START_RC_DEFS \*\/(?:[^]*?)\/\* END_RC_DEFS \*\//g,
+        `/* START_RC_DEFS */\r\n${properties.map(e => e.trim())
+                                            .map(e => `/** @typedef {import("../types").${e}} ${e} */`)
+                                            .join("\r\n")}\r\n/* END_RC_DEFS */`
+    );
+    await writeFile(typesPath, data);
+    logger.success(`   updated definitions in types/${typesFile} (${typesPath})`);
 };
 
 
@@ -324,7 +346,7 @@ cliWrap(async () =>
 
     data = await readFile(outputDtsPath, "utf8");
     data = await parseTypesDts(hdr, data);
-    data = await writeConstantsJs(hdr, data);
+    await writeConstantsJs(hdr, data);
     await writeIndexJs();
 
     logger.write("rc types and typings created successfully");

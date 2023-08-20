@@ -22,11 +22,11 @@ const nodeExternals = require("webpack-node-externals");
 
 /**
  * @function
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const externals = (app) =>
 {
-	if (app.rc.exports.externals || app.rc.vscode)
+	if (app.build.exports.externals || app.vscode)
 	{
 		if (app.isWeb) {
 			app.wpc.externalsPresets = { web: true };
@@ -35,7 +35,7 @@ const externals = (app) =>
 			app.wpc.externalsPresets = { node: true };
 		}
 	}
-	if (app.rc.vscode)
+	if (app.vscode)
 	{
 		if (app.build.name !== "tests")
 		{
@@ -55,7 +55,7 @@ const externals = (app) =>
 			];
 		}
 	}
-	else if (app.rc.exports.externals && app.build.name !== "tests" && app.build.name !== "types")
+	else if (app.build.exports.externals && app.build.name !== "tests" && app.build.name !== "types")
 	{
 		app.wpc.externals = /** @type {NodeExternalsExternalItem} */(nodeExternals());
 	}
@@ -64,7 +64,7 @@ const externals = (app) =>
 
 /**
  * @param {Readonly<ExternalItemFunctionData>} data
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const logAsset = (data, app) =>
 {

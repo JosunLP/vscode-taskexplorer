@@ -7,41 +7,24 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { existsSync } = require("fs");
-const { isAbsolute, dirname } = require("path");
-const resolvePath = require("path").resolve;
-const { apply, merge, isObjectEmpty, findFilesSync, WebpackTargets, getTsConfig, isArray } = require("../utils");
-
-/** @typedef {import("../types/typedefs").WpBuildApp} WpBuildApp */
+const { apply, merge, findFilesSync, isArray, WpBuildApp } = require("../utils");
 
 
 /**
  * @function
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const resolve = (app) =>
 {
-	const typesSrcPath = app.getSrcTypesPath({ fstat: true }),
-		  // typesDistPath = app.getRcPath("distTypes", { stat: true }),
-		  envPath = app.getSrcEnvPath(),
-		  basePath = app.getRcPath("base"),
+	const basePath = app.getRcPath("base"),
 		  srcPath = app.getSrcPath({ rel: true, psx: true }),
 		  envGlob = `**/${srcPath}/**/{env,environment,target}/${app.target}/`,
-		  envDirs= findFilesSync(envGlob, { cwd: basePath, absolute: true, dotRelative: false }),
-		  tsConfig = getTsConfig(app);
+		  envDirs = findFilesSync(envGlob, { cwd: basePath, absolute: true, dotRelative: false });
 
 	const resolve = {
 		alias: merge({}, app.getAliasConfig()),
 		extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
 	};
-
-	if (envPath) {
-		apply(resolve.alias, { ":env": [ envPath ] });
-	}
-
-	if (typesSrcPath) {
-		apply(resolve.alias, { ":types": typesSrcPath });
-	}
 
 	if (envDirs.length >= 0)
 	{
@@ -55,37 +38,6 @@ const resolve = (app) =>
 			}
 			else {
 				resolve.alias[":env"] = [ dir ];
-			}
-		});
-	}
-
-	if (tsConfig && tsConfig.json.compilerOptions?.paths)
-	{
-		const _map = (e) => e.map ((e) => [ e[0].replace(/[\\\/]\*{0,1}$/g, "") , e[1].map(e => e.replace(/[\\\/]\*{0,1}$/g, "")) ]);
-		_map(Object.entries(tsConfig.json.compilerOptions.paths)).forEach(([ key, paths ]) =>
-		{
-			if (isArray(paths))
-			{
-				const v = resolve.alias[key];
-				paths.forEach((p) =>
-				{
-					if (!isAbsolute(p)) {
-						p = resolvePath(dirname(tsConfig.path), p);
-					}
-					if (isArray(v))
-					{
-						if (v.includes(p)) {
-							app.logger.warning("tsconfig alias extractions share same key/value");
-						}
-						else {
-							v.push(p);
-						}
-					}
-					else {
-						resolve.alias[key] = [ p ];
-					}
-
-				});
 			}
 		});
 	}

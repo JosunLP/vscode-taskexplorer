@@ -163,7 +163,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
 			  psxBasePath = app.getContextPath({ rel: true, psx: true, dot: false, ctx: true }),
 			  psxBaseCtxPath = posix.join(psxBasePath, "res");
 
-		if (app.rc.plugins.copy)
+		if (app.build.plugins.copy)
 		{
 			if (app.build.type === "webapp")
 			{
@@ -266,8 +266,7 @@ class WpBuildCopyPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {(CopyPlugin | WpBuildCopyPlugin)[]}
  */
-const copy = (apps, app) =>
-	app.rc.plugins.copy !== false && app.build.type !== "tests" && app.build.type !== "webapp" ? new WpBuildCopyPlugin({ app, apps }).getPlugins() : [];
+const copy = (apps, app) => app.build.plugins.copy ? new WpBuildCopyPlugin({ app, apps }).getPlugins() : [];
 
 
 module.exports = copy;

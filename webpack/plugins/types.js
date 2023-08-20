@@ -46,7 +46,7 @@ class WpBuildTypesPlugin extends WpBuildTscPlugin
                 hook: "compilation",
 				stage: "ADDITIONAL",
 				statsProperty: "types",
-				statsPropertyColor: this.app.rc.log.color || "blue",
+				statsPropertyColor: this.app.build.log.color || "blue",
                 callback: this.types.bind(this)
             }
         });
@@ -64,24 +64,27 @@ class WpBuildTypesPlugin extends WpBuildTscPlugin
 		if (tsc)
 		{
 			const logger = this.logger,
-				  basePath = this.app.getRcPath("base"),
-			      typesDirSrc = this.app.getSrcTypesPath({ fstat: true }),
-				  typesDirDist = this.app.getRcPath("distTypes");
-			logger.write("verify tsconfig file", 2);
+				  basePath = /** @type {string} */(this.app.getRcPath("base")),
+			      typesDirSrc = this.app.getSrcPath({ build: this.app.build.name, stat: true }),
+				  typesDirDist = this.app.getDistPath({ build: this.app.build.name });
+			logger.write("start types build", 2);
 			logger.value("   base path", basePath, 3);
 			logger.value("   types src path", typesDirSrc, 3);
 			logger.value("   types dist path", typesDirDist, 3);
-			if (typesDirSrc && !existsSync(typesDirDist))
+			if (typesDirSrc)
 			{
-				logger.write("force clean tsbuildinfo file", 2);
-				const tsbuildinfo = resolve(basePath, tsc.json.compilerOptions.tsBuildInfoFile || "tsconfig.tsbuildinfo");
-				try { await unlink(tsbuildinfo); } catch {}
+				if (typesDirSrc && !existsSync(typesDirDist))
+				{
+					logger.write("   force clean tsbuildinfo file", 2);
+					const tsbuildinfo = resolve(basePath, tsc.json.compilerOptions.tsBuildInfoFile || "tsconfig.tsbuildinfo");
+					try { await unlink(tsbuildinfo); } catch {}
+				}
+				await this.execTsBuild(tsc, [
+					"-p", "./tsconfig.node.json", "--declaration", "--emitDeclarationOnly", "--declarationDir", typesDirDist
+				], 1, typesDirDist);
+				this.typesBundleDts();
+				logger.write("type definitions created successfully @ " + typesDirDist, 1);
 			}
-			logger.write("build types", 2);
-			await this.execTsBuild(tsc, [
-				"-p", "./tsconfig.node.json", "--declaration", "--emitDeclarationOnly", "--declarationDir", typesDirDist
-			], 1, typesDirDist);
-			this.typesBundleDts();
 		}
 	}
 
@@ -93,23 +96,23 @@ class WpBuildTypesPlugin extends WpBuildTscPlugin
 	typesBundleDts = () =>
 	{
 		const l = this.app.logger,
-			  typesDir = existsSync(this.app.getSrcTypesPath()),
-			  typesDirDist = existsSync(this.app.getRcPath("distTypes"));
+			  typesDirSrc = this.app.getSrcPath({ build: this.app.build.name, stat: true }),
+			  typesDirDist = /** @type {string} */(this.app.getDistPath({ build: this.app.build.name }));
 		l.write("start bundle dts", 1);
-		l.value("   types directory", typesDir, 2);
+		l.value("   types directory", typesDirSrc, 2);
 		l.value("   is main tests", this.app.isMainTests, 3);
 		l.value("   already bundled", this.app.global.tsc.typesBundled,3);
-		if (!this.app.global.tsc.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
+		if (!this.app.global.tsc.typesBundled && typesDirSrc && typesDirDist)
 		{
 			const bundleCfg = {
-				name: `${this.app.rc.pkgJson.name}-types`,
+				name: `${this.app.pkgJson.name}-types`,
 				baseDir: "types/dist",
 				headerPath: "",
 				headerText: "",
 				main: "types/build/interface/index.d.ts",
 				out: "types.d.ts",
 				outputAsModuleFolder: true,
-				verbose: this.app.rc.log.level === 5
+				verbose: this.app.build.log.level === 5
 			};
 			dts.bundle(bundleCfg);
 			this.app.global.tsc.typesBundled = true;
@@ -118,8 +121,8 @@ class WpBuildTypesPlugin extends WpBuildTscPlugin
 		else if (!typesDirDist) {
 			l.warning("types output directory doesn't exist, dts bundling skipped");
 		}
-		else if (!typesDir) {
-			l.warning("types directory doesn't exist, dts bundling skipped");
+		else if (!typesDirSrc) {
+			l.warning("types source directory doesn't exist, dts bundling skipped");
 		}
 		else {
 			l.write("dts bundling skipped", 1);
@@ -134,7 +137,7 @@ class WpBuildTypesPlugin extends WpBuildTscPlugin
  * @returns {WpBuildTypesPlugin | undefined}
  */
 const types = (app) => undefined;
-	// app.isTests || app.build.type === "webapp" && app.rc.plugins.testsuite ? ? new WpBuildTscPlugin({ app }) : undefined;
+	// app.isTests || app.build.type === "webapp" && app.build.plugins.testsuite ? ? new WpBuildTscPlugin({ app }) : undefined;
 
 
 module.exports = types;

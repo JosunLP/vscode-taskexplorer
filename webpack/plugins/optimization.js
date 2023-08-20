@@ -16,13 +16,13 @@ const webpack = require("webpack");
 
 /**
  * @function optimization
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  * @returns {WebpackPluginInstance[]}
  */
 const optimization = (app) =>
 {
 	const plugins = [];
-	if (app.rc.plugins.optimization)
+	if (app.build.plugins.optimization)
 	{
 		if (app.build.target === "web")
 		{

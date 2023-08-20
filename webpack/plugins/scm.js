@@ -66,7 +66,7 @@ class WpBuildScmPlugin extends WpBuildPlugin
                 // sshAuth,  // auth key
                 // "-q",  // quiet, don't show statistics
                 "-r",     // copy directories recursively
-                `${user}@${host}:${this.app.rc.name}/v${this.app.rc.pkgJson.version}"`
+                `${user}@${host}:${this.app.rc.name}/v${this.app.pkgJson.version}"`
             ];
             logger.write(`${logger.icons.color.star } ${logger.withColor(`check in resource files to ${host}`, logger.colors.grey)}`);
             try {
@@ -92,7 +92,7 @@ class WpBuildScmPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildScmPlugin | undefined}
  */
-const scm = (app) => app.rc.plugins.scm && app.isMainProd ? new WpBuildScmPlugin({ app }) : undefined;
+const scm = (app) => app.build.plugins.scm && app.isMainProd ? new WpBuildScmPlugin({ app }) : undefined;
 
 
 module.exports = scm;

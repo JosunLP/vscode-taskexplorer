@@ -10,12 +10,12 @@
 
 const JSON5 = require("json5");
 const WpBuildApp = require("./app");
-const { readFileSync } = require("fs");
+const { readFileSync, mkdirSync, existsSync } = require("fs");
 const { globalEnv } = require("./global");
 const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
-const { resolve, basename, join, dirname } = require("path");
-const { WpBuildError, apply, pick, isString, merge, isObject, isArray, pickNot, mergeIf, applyIf } = require("./utils");
+const { resolve, basename, join, dirname, isAbsolute, sep } = require("path");
+const { WpBuildError, apply, pick, isString, merge, isObject, isArray, pickNot, mergeIf, applyIf, findTsConfig } = require("./utils");
 const {
     isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildWebpackModes
 } = require("./constants");
@@ -28,7 +28,7 @@ const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "mai
 
 /**
  * @param {any} v Variable to check type on
- * @returns {v is typedefs.WpBuildRcPackageJson}
+ * @returns {v is typedefs.IWpBuildAppSchema}
  */
 const isWpBuildRcPackageJsonProp = (v) => !!v && WpBuildRcPackageJsonProps.includes(v);
 
@@ -108,10 +108,6 @@ class WpBuildRc
      */
     publicInfoProject;
     /**
-     * @type {string}
-     */
-    singleBuildName;
-    /**
      * @type {typedefs.WpBuildRcSourceCodeType}
      */
     source;
@@ -123,10 +119,6 @@ class WpBuildRc
      * @type {typedefs.WpBuildRcEnvironment}
      */
     testproduction;
-    /**
-     * @type {typedefs.WpBuildRcBuildType}
-     */
-    type;
     /**
      * @type {typedefs.WpBuildRcVsCode}
      */
@@ -140,24 +132,16 @@ class WpBuildRc
      */
     constructor(argv, arge)
     {
-        // @ts-ignore
         Object.keys(arge).filter(k => isString(arge[k]) && /true|false/i.test(arge[k])).forEach((k) =>
         {
-            // @ts-ignore
             arge[k] = arge[k].toLowerCase() === "true";
         });
 
-        const buildName = arge.name || /** @deprecated */arge.build;
         apply(this,
         {
-            // args: apply({}, pickNot(arge, "build"), argv),
             args: apply({}, arge, argv),
-            build: buildName,
             global: globalEnv,
-            mode: this.getMode(arge, argv, true),
-            singleBuildName: buildName,
-            singleBuildType: arge.type,
-            type: arge.type
+            mode: this.getMode(arge, argv, true)
         });
 
         if (!isWpBuildWebpackMode(this.mode)) {
@@ -174,12 +158,7 @@ class WpBuildRc
             ...WpBuildRcPackageJsonProps
         );
 
-        this.prepBuilds(argv, this.builds);
-        WpBuildWebpackModes.filter(m => m !== "none" && !!this[m].builds).forEach(
-            (m) => this.prepBuilds(argv, this[m].builds, m)
-        );
-
-        this.applyBuilds();
+        this.configureBuilds();
 
         // if (argv.mode && !isWebpackMode(this.mode))
         // {
@@ -202,14 +181,8 @@ class WpBuildRc
     static create = (argv, arge) =>
     {
         const rc = new WpBuildRc(argv, arge);
-        if (arge.build && !arge.name) {
-            arge.name = arge.build;
-        }
-        rc.apps = rc.builds.filter(
-            (b) => !rc.singleBuildName || b.name === rc.singleBuildName || b.build === rc.singleBuildName
-        ).map(
-            (b) => new WpBuildApp(rc, b)
-        );
+        rc.apps = rc.builds.filter((b) => !arge.build || b.name === arge.build)
+                           .map((b) => new WpBuildApp(rc, merge({}, b)));
         return rc.apps.map(app => app.wpc);
     }
 
@@ -218,70 +191,71 @@ class WpBuildRc
 	 * @function
 	 * @private
 	 */
-    applyBuilds = () =>
+    configureBuilds = () =>
     {
         /**
-         * @param {typedefs.WpBuildRcEnvironmentBase} dst
+         * @param {typedefs.WpBuildRcBuild} dst
+         * @param {typedefs.WpBuildRcEnvironmentBase} src
          */
-        const _apply = (dst, src) =>
+        const _applyBase = (dst, src) =>
         {
-            if (this.initializeBaseRc(dst))
+            dst.mode = dst.mode || this.mode;
+            if (this.initializeBaseRc(dst) && this.initializeBaseRc(src))
             {
-                if (isObject(dst.log))
-                {
-                    mergeIf(dst.log, src.log);
-                    mergeIf(dst.log.pad, src.log.pad);
-                    mergeIf(dst.log.colors, src.log.colors);
-                    dst.log.colors.valueStar = dst.log.color;
-                    dst.log.colors.buildBracket = dst.log.color;
-                    dst.log.colors.tagBracket = dst.log.color;
-                    dst.log.colors.infoIcon = dst.log.color;
-                }
-                if (isObject(dst.paths)) {
-                    applyIf(dst.paths, src.paths);
-                }
-                if (isObject(dst.exports)) {
-                    applyIf(dst.exports, src.exports);
-                }
-                if (isObject(dst.plugins)) {
-                    applyIf(dst.plugins, src.plugins);
-                }
-                if (isObject(dst.alias)) {
-                    mergeIf(dst.alias, src.alias);
-                }
+                dst.source = dst.source || this.source || "typescript";
+                dst.target = this.getTarget(dst);
+                dst.type = this.getType(dst);
+                mergeIf(dst.log, src.log);
+                mergeIf(dst.log.pad, src.log.pad);
+                mergeIf(dst.log.colors, src.log.colors);
+                dst.log.colors.valueStar = dst.log.color;
+                dst.log.colors.buildBracket = dst.log.color;
+                dst.log.colors.tagBracket = dst.log.color;
+                dst.log.colors.infoIcon = dst.log.color;
+                applyIf(dst.paths, src.paths);
+                applyIf(dst.exports, src.exports);
+                applyIf(dst.plugins, src.plugins);
+                mergeIf(dst.alias, src.alias);
             }
             return dst;
         };
 
-        this.builds.forEach((build) => _apply(build, this));
+        this.builds.forEach((build) => _applyBase(build, this));
 
         const modeRc = /** @type {Partial<typedefs.WpBuildRcEnvironment>} */(this[this.mode]);
-        if (modeRc && isArray(modeRc.builds))
+        modeRc?.builds?.filter(b => isArray(b)).forEach((modeBuild) =>
         {
-            modeRc.builds.forEach((modeBuild) =>
-            {
-                // _apply(modeBuild, this);
-                let baseBuild = this.builds.find(base => base.name === modeBuild.name);
-                if (baseBuild) {
-                    merge(baseBuild, modeBuild);
-                }
-                else {
-                    baseBuild = merge({}, modeBuild);
-                    _apply(baseBuild, this);
-                    this.builds.push(baseBuild);
-                }
-                // if (modeBuild.name === this.args.name) {
-                //     _apply(modeBuild);
-                // }
-            });
-        }
+            let baseBuild = this.builds.find(base => base.name === modeBuild.name);
+            if (baseBuild) {
+                _applyBase(baseBuild, modeBuild);
+            }
+            else {
+                baseBuild = merge({}, modeBuild);
+                _applyBase(baseBuild, this);
+                this.builds.push(baseBuild);
+            }
+        });
 
-        // if (buildName) {
-        //     this.build = this.builds.find(b => b.name = buildName);
-        // }
-
-        // WpBuildWebpackModes.forEach(m => delete this[m]);
+        this.builds.forEach((build) => this.resolvePaths(build));
     };
+
+
+    // /**
+    //  * @param {typedefs.WpBuildRcBuild | string} build
+    //  * @returns {Required<typedefs.WpBuildRcBuild>}
+    //  */
+    // getBuild = (build) =>
+    // {
+    //     const builds = /** @type {Required<typedefs.WpBuildRcBuilds>}  */(this.builds);
+    //     if (!isString(build) && this.initializeBaseRc(build)) {
+    //         return build;
+    //     }
+    //     const b = this.builds.find(b => b.name === build);
+    //     if (b) {
+    //         return merge({}, b);
+    //     }
+    //     return this.builds[0];
+    // };
 
 
     /**
@@ -334,68 +308,72 @@ class WpBuildRc
     /**
      * @function
      * @private
-     * @param {typedefs.WebpackRuntimeArgs} argv
-     * @param {typedefs.WpBuildRcBuilds} builds
-     * @param {typedefs.WpBuildWebpackMode | undefined} [modeBuild]
+     * @param {typedefs.WpBuildRcBuild} build
      */
-    prepBuilds = (argv, builds, modeBuild) =>
+    getTarget = (build) =>
     {
-        for (const build of builds)
+        let target = build.target;
+        if (!target)
         {
-            // build.name = build.name || buildName || "module";
-            build.mode = build.mode || modeBuild || this.mode;
-            build.type ||= this.type;
-
-            if (!build.target)
-            {
-                build.target = "node";
-                if (isWebpackTarget(argv.target)) {
-                    build.target = argv.target;
-                }
-                else if ((/web(?:worker|app|view)/).test(build.name) || build.type === "webapp") {
-                    build.target = "webworker";
-                }
-                else if ((/web|browser/).test(build.name) || build.type === "webmodule") {
-                    build.target = "web";
-                }
-                else if ((/module|node/).test(build.name) || build.type === "module") {
-                    build.target = "node";
-                }
-                else if ((/tests?/).test(build.name) && build.mode.startsWith("test")) {
-                    build.target = "node";
-                }
-                else if ((/typ(?:es|ings)/).test(build.name)|| build.type === "types") {
-                    build.target = "node";
-                }
+            target = "node";
+            if (isWebpackTarget(this.args.target)) {
+                target = this.args.target;
             }
-
-            if (!build.type)
-            {
-                build.type = "module";
-                if (isWpBuildRcBuildType(build.name))
-                {
-                    build.type = build.name;
-                }
-                else if ((/web(?:worker|app|view)/).test(build.name)) {
-                    build.type = "webapp";
-                }
-                else if ((/web|browser/).test(build.name)) {
-                    build.type = "webmodule";
-                }
-                else if ((/tests?/).test(build.name)) {
-                    build.type = "tests";
-                }
-                else if ((/typ(?:es|ings)/).test(build.name)) {
-                    build.type = "types";
-                }
-                else if (build.target === "web") {
-                    build.type = "webmodule";
-                }
-                else if (build.target === "webworker") {
-                    build.type = "webapp";
-                }
+            else if ((/web(?:worker|app|view)/).test(build.name) || build.type === "webapp") {
+                target = "webworker";
+            }
+            else if ((/web|browser/).test(build.name) || build.type === "webmodule") {
+                target = "web";
+            }
+            else if ((/module|node/).test(build.name) || build.type === "module") {
+                target = "node";
+            }
+            else if ((/tests?/).test(build.name) && build.mode.startsWith("test")) {
+                target = "node";
+            }
+            else if ((/typ(?:es|ings)/).test(build.name)|| build.type === "types") {
+                target = "node";
             }
         }
+        return target;
+    };
+
+
+    /**
+     * @function
+     * @private
+     * @param {typedefs.WpBuildRcBuild} build
+     */
+    getType = (build) =>
+    {
+        let type = build.type;
+        if (!type)
+        {
+            type = "module";
+            if (isWpBuildRcBuildType(build.name))
+            {
+                type = build.name;
+            }
+            else if ((/web(?:worker|app|view)/).test(build.name)) {
+                type = "webapp";
+            }
+            else if ((/web|browser/).test(build.name)) {
+                type = "webmodule";
+            }
+            else if ((/tests?/).test(build.name)) {
+                type = "tests";
+            }
+            else if ((/typ(?:es|ings)/).test(build.name)) {
+                type = "types";
+            }
+            else if (build.target === "web") {
+                type = "webmodule";
+            }
+            else if (build.target === "webworker") {
+                type = "webapp";
+            }
+        }
+        return type;
     };
 
 
@@ -419,8 +397,10 @@ class WpBuildRc
 
 
     /**
+     * @function
+     * @private
      * @param {typedefs.WpBuildRcEnvironmentBase} rc
-     * @returns {rc is typedefs.WpBuildRcEnvironmentBase}
+     * @returns {rc is Required<typedefs.WpBuildRcEnvironmentBase>}
      */
     initializeBaseRc = (rc) =>
     {
@@ -440,13 +420,55 @@ class WpBuildRc
             rc.plugins = {};
         }
         if (!rc.exports) {
-            rc.plugins = {};
+            rc.exports = {};
         }
         if (!rc.alias) {
             rc.alias = {};
         }
+        if (!rc.paths)
+        {
+            rc.paths = {
+                base: ".",
+                temp: "node_modules/.cache/wpbuild/temp"
+            };
+        }
         return true;
     };
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {typedefs.WpBuildRcBuild} build
+	 */
+	resolvePaths = (build) =>
+	{
+		const base = resolve(__dirname, "..", ".."),
+              ostemp = process.env.TEMP || process.env.TMP,
+			  temp = resolve(ostemp ? `${ostemp}${sep}${this.name}` :
+                                      `${base}${sep}node_modules${sep}.cache${sep}wpbuild${sep}temp`, build.mode);
+        /**
+         * @param {string} b base directory
+         * @param {string} p configured path (relative or absolute)
+         */
+        const _resolveRcPath = (b, p) => { if (!isAbsolute(p)) { p = resolve(b, p); } return p; };
+
+		if (!existsSync(temp)) {
+			mkdirSync(temp, { recursive: true });
+		}
+
+        build.paths.base = base;
+        build.paths.temp = temp;
+        build.paths.ctx = build.paths.ctx ? _resolveRcPath(base, build.paths.ctx) : base;
+        build.paths.src = _resolveRcPath(base, build.paths.src || "src");
+        build.paths.dist = _resolveRcPath(base, build.paths.dist || "dist");
+        if (build.source === "typescript") {
+            build.paths.tsconfig = build.paths.tsconfig ? _resolveRcPath(base, build.paths.tsconfig) : findTsConfig(build);
+        }
+        else {
+            build.paths.tsconfig = undefined;
+        }
+	};
 
 }
 

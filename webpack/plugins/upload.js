@@ -72,7 +72,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
      */
     async cleanup(_compilation)
     {
-        const tmpUploadPath = join(this.app.paths.temp, this.app.mode);
+        const tmpUploadPath = join(this.app.build.paths.temp, this.app.mode);
         try
         {   if (existsSync(tmpUploadPath))
             {
@@ -103,7 +103,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
         //
         const app = this.app,
               logger = app.logger,
-              toUploadPath = join(app.paths.temp, app.mode);
+              toUploadPath = join(app.build.paths.temp, app.mode);
 
         logger.write("upload debug support files", 1);
         this.compilation = compilation;
@@ -164,9 +164,9 @@ class WpBuildUploadPlugin extends WpBuildPlugin
 
         const plinkCmds = [
             `mkdir ${rBasePath}/${app.rc.name}`,
-            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}`,
-            `mkdir ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}/${app.mode}`,
-            `rm -f ${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}/${app.mode}/*.*`
+            `mkdir ${rBasePath}/${app.rc.name}/v${app.pkgJson.version}`,
+            `mkdir ${rBasePath}/${app.rc.name}/v${app.pkgJson.version}/${app.mode}`,
+            `rm -f ${rBasePath}/${app.rc.name}/v${app.pkgJson.version}/${app.mode}/*.*`
         ];
         if (app.mode === "production") { plinkCmds.pop(); }
 
@@ -185,7 +185,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
             "-q",         // quiet, don't show statistics
             "-r",         // copy directories recursively
             toUploadPath, // directory containing the files to upload, the "directpory" itself (prod/dev/test) will be
-            `${user}@${host}:"${rBasePath}/${app.rc.name}/v${app.rc.pkgJson.version}"` // uploaded, and created if not exists
+            `${user}@${host}:"${rBasePath}/${app.rc.name}/v${app.pkgJson.version}"` // uploaded, and created if not exists
         ];
 
         await copyFile(join(this.app.getRcPath("base"), "node_modules", "source-map", "lib", "mappings.wasm"), join(toUploadPath, "mappings.wasm"));
@@ -226,7 +226,7 @@ class WpBuildUploadPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildUploadPlugin | undefined} plugin instance
  */
-const upload = (app) => app.rc.plugins.upload && app.isMain ? new WpBuildUploadPlugin({ app }) : undefined;
+const upload = (app) => app.build.plugins.upload ? new WpBuildUploadPlugin({ app }) : undefined;
 
 
 module.exports = upload;

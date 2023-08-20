@@ -137,7 +137,7 @@ class WpBuildWaitPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildWaitPlugin | undefined}
  */
-const wait = (app) => app.rc.plugins.wait && app.isTests ? new WpBuildWaitPlugin({ app }) : undefined;
+const wait = (app) => app.build.plugins.wait ? new WpBuildWaitPlugin({ app }) : undefined;
 
 
 module.exports = wait;

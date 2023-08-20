@@ -9,11 +9,11 @@
  */
 
 const { existsSync } = require("fs");
-const WpBuildTscPlugin = require("./tsc")
+const WpBuildTscPlugin = require("./tsc");
+const { unlink } = require("fs/promises");
 const { WebpackError } = require("webpack");
-const {readFile, unlink, access } = require("fs/promises");
+const { getTsConfig, WpBuildError, findTsConfig } = require("../utils");
 const { join, relative, dirname, isAbsolute, resolve } = require("path");;
-const { findFiles, getTsConfig, WpBuildError, findTsConfig } = require("../utils");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
@@ -63,7 +63,7 @@ class WpBuildTestSuitePlugin extends WpBuildTscPlugin
 
 		const testsDir = join(this.app.getDistPath(), "test");
 
-		const tsConfigFile = findTsConfig(this.app);
+		const tsConfigFile = findTsConfig(this.app.build);
 		if (!tsConfigFile)
 		{
 			const eMsg = "Could not locate tsconfig file for tests suite - must be **/tests?/tsconfig.* or **/tsconfig.tests?.json";
@@ -104,7 +104,7 @@ class WpBuildTestSuitePlugin extends WpBuildTscPlugin
  * @returns {WpBuildTestSuitePlugin | undefined}
  */
 const testsuite = (app) => undefined;
-	// app.isTests && !app.isMain  && app.rc.plugins.testsuite ? new WpBuildTestSuitePlugin({ app }) : undefined;
+	// app.isTests && !app.isMain  && app.build.plugins.testsuite ? new WpBuildTestSuitePlugin({ app }) : undefined;
 
 
 module.exports = testsuite;

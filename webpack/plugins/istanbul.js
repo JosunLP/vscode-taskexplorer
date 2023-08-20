@@ -77,7 +77,7 @@ class WpBuildIstanbulPlugin extends WpBuildPlugin
         const regex = /\n[ \t]*module\.exports \= require\(/gm,
               sourceCode = sourceInfo.source().toString().replace(regex, (v) => "/* istanbul ignore next */" + v),
               { source, map } = sourceInfo.sourceAndMap();
-        return map && (this.compiler.options.devtool || this.app.rc.plugins.sourcemaps) ?
+        return map && (this.compiler.options.devtool || this.app.build.plugins.sourcemaps) ?
                new this.compiler.webpack.sources.SourceMapSource(sourceCode, file, map, source) :
                new this.compiler.webpack.sources.RawSource(sourceCode);
     }
@@ -102,7 +102,7 @@ class WpBuildIstanbulPlugin extends WpBuildPlugin
     //     const { source, map } = osourceInfold.sourceAndMap(),
     //           regex = /\n[ \t]*module\.exports \= require\(/gm,
     //           content = source.toString().replace(regex, (v) => "/* istanbul ignore next */" + v);
-    //     return map && (compiler.options.devtool || this.app.rc.plugins.sourcemaps) ?
+    //     return map && (compiler.options.devtool || this.app.build.plugins.sourcemaps) ?
     //            new compiler.webpack.sources.SourceMapSource(content, file, map) :
     //            new compiler.webpack.sources.RawSource(content);
     // }
@@ -123,7 +123,7 @@ class WpBuildIstanbulPlugin extends WpBuildPlugin
     // {
     //     /** @type {WebpackPluginInstance | undefined} */
     //     let plugin;
-    //     // if (app.rc.plugins.instrument !== false && app.build === "extension" && app.mode === "test")
+    //     // if (app.build.plugins.instrument !== false && app.build === "extension" && app.mode === "test")
     //     // {
     //     //     plugin =
     //     //     {
@@ -199,7 +199,7 @@ class WpBuildIstanbulPlugin extends WpBuildPlugin
  * @returns {WpBuildIstanbulPlugin | undefined}
  */
 const istanbul = (app) =>
-    (app.rc.plugins.istanbul !== false && app.isMainTests ? new WpBuildIstanbulPlugin({ app }) : undefined);
+    (app.build.plugins.istanbul && app.isMainTests ? new WpBuildIstanbulPlugin({ app }) : undefined);
 
 
 module.exports = istanbul;

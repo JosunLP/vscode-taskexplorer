@@ -49,7 +49,7 @@ const isWpBuildRcBuildType = (v) => !!v && WpBuildRcBuildTypes.includes(v);
 /**
  * @type {typedefs.WpBuildWebpackMode[]}
  */
-const WpBuildWebpackModes = [ "development", "production", "none", "test", "testproduction" ];
+const WpBuildWebpackModes = [ "development", "production", "none", "test" ];
 
 /**
  * @param {any} v Variable to check type on
@@ -91,9 +91,20 @@ const WpBuildLogColors = [ "black", "blue", "cyan", "green", "grey", "magenta", 
 const isWpBuildLogColor = (v) => !!v && WpBuildLogColors.includes(v);
 
 /**
+ * @type {typedefs.WebpackLibraryType[]}
+ */
+const WebpackLibraryTypes = [ "var", "module", "assign", "assign-properties", "this", "window", "self", "global", "commonjs", "commonjs2", "commonjs-module", "commonjs-static'", "amd", "amd-require", "umd'", "umd2", "jsonp", "system" ];
+
+/**
+ * @param {any} v Variable to check type on
+ * @returns {v is typedefs.WebpackLibraryType}
+ */
+const isWebpackLibraryType = (v) => !!v && WebpackLibraryTypes.includes(v);
+
+/**
  * @type {(keyof typedefs.WpBuildRcPaths)[]}
  */
-const WpBuildRcPathsProps = [ "base", "ctx", "dist", "distModule", "distTests", "distTypes", "distWebApp", "distWebModule", "src", "srcEnv", "srcModule", "srcTests", "srcTypes", "srcWebApp", "srcWebModule", "temp", "tsconfig" ];
+const WpBuildRcPathsProps = [ "base", "ctx", "dist", "src", "temp", "tsconfig" ];
 
 /**
  * @param {any} v Variable to check type on
@@ -109,24 +120,14 @@ const WpBuildRcPathsEnum =
     base: "base",
     ctx: "ctx",
     dist: "dist",
-    distModule: "distModule",
-    distTests: "distTests",
-    distTypes: "distTypes",
-    distWebApp: "distWebApp",
-    distWebModule: "distWebModule",
     src: "src",
-    srcEnv: "srcEnv",
-    srcModule: "srcModule",
-    srcTests: "srcTests",
-    srcTypes: "srcTypes",
-    srcWebApp: "srcWebApp",
-    srcWebModule: "srcWebModule",
     temp: "temp",
     tsconfig: "tsconfig"
 };
 
 
 module.exports = {
+    isWebpackLibraryType,
     isWebpackMode,
     isWebpackTarget,
     isWpBuildLogColor,
@@ -135,6 +136,7 @@ module.exports = {
     isWpBuildRcPathsProp,
     isWpBuildRcSourceCodeType,
     isWpBuildWebpackMode,
+    WebpackLibraryTypes,
     WebpackModes,
     WebpackTargets,
     WpBuildLogColors,

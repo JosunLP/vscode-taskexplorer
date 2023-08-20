@@ -11,8 +11,10 @@
 const path = require("path");
 const esbuild = require("esbuild");
 const { existsSync } = require("fs");
+const typedefs = require("../types/typedefs");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { WpBuildApp, WpBuildError, uniq, merge } = require("../utils");
+const { WpBuildApp, WpBuildError, uniq, merge, isObject, isArray, apply } = require("../utils");
+const { isAbsolute, resolve } = require("path");
 
 
 const builds =
@@ -20,8 +22,8 @@ const builds =
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
-	 * @param {import("../types").WpBuildAppTsConfig} tsConfig
+	 * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
+	 * @param {typedefs.WpBuildAppTsConfig} tsConfig
 	 * @throws {WpBuildError}
 	 */
 	module: (app, tsConfig) =>
@@ -62,23 +64,10 @@ const builds =
 		{
 			test: /\.ts$/,
 			include: tsConfig.include,
+			use: getTsSourceLoader(app, tsConfig),
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/, /\.vscode/
-			],
-			use: app.esbuild ?
-			{
-				loader: "esbuild-loader",
-				options: {
-					implementation: esbuild,
-					loader: "tsx",
-					target: [ "es2020", "chrome91", "node16.20" ],
-					tsconfigRaw: tsConfig.json
-				}
-			} :
-			{
-				loader: "ts-loader",
-				options: getTsLoaderOptions(app, tsConfig)
-			}
+			]
 		});
 	},
 
@@ -86,13 +75,12 @@ const builds =
 	/**
 	 * @function
 	 * @private
-	 * @param {WpBuildApp} app Webpack build environment
-	 * @param {import("../types").WpBuildAppTsConfig} tsConfig
-	 * @param {boolean} [fromMain]
+	 * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
+	 * @param {typedefs.WpBuildAppTsConfig} tsConfig Cloned copy of app.tsConfig info object
 	 */
-	tests: (app, tsConfig, fromMain) =>
+	tests: (app, tsConfig) =>
 	{
-		if (app.build.type !== "tests" && app.isTests && app.buildEnvHasTests()) {
+		if (app.build.type !== "tests" && app.isTests && app.hasTests()) {
 			return;
 		}
 
@@ -113,41 +101,12 @@ const builds =
 		},
 		{
 			test: /\.ts$/,
-			include: tsConfig.include,
+			include: getTsIncludesAbs(app, tsConfig),
+			use: getTsSourceLoader(app, tsConfig, "babel"),
 			exclude: [
 				/node_modules/, /types[\\/]/, /\.d\.ts$/
-			],
-			use: {
-				loader: "babel-loader",
-				options: {
-					presets: [
-						[ "@babel/preset-env", { targets: "defaults" }],
-						[ "@babel/preset-typescript" ]
-					]
-				}
-			}
+			]
 		});
-
-		if (!fromMain)
-		{
-			app.wpc.module.rules.splice(1, 0,
-			{
-				test: /\.ts$/,
-				include: srcPath + (fromMain ? "\\test" : ""),
-				exclude: [
-					/node_modules/, /test[\\/]/, /\.d\.ts$/
-				],
-				use: {
-					loader: "ts-loader",
-					options: { ...getTsLoaderOptions(app, tsConfig),
-						transpileOnly: false,
-						compilerOptions: {
-							emitDeclarationsOnly: true
-						}
-					}
-				}
-			});
-		}
 	},
 
 
@@ -155,43 +114,37 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app
-	 * @param {import("../types").WpBuildAppTsConfig} tsConfig
+	 * @param {typedefs.WpBuildAppTsConfig} tsConfig Cloned copy of app.tsConfig info object
 	 * @throws {WpBuildError}
 	 */
 	types: (app, tsConfig) =>
 	{
-		const typesDir = app.getSrcTypesPath();
-		if (existsSync(typesDir))
+		const typesDir = app.getSrcPath({ build: app.build.name }),
+			  typesDirDist = app.getDistPath({ build: app.build.name });
+		if (typesDir && existsSync(typesDir))
 		{
-			tsConfig.include.push(typesDir);
-
+			// tsConfig.include.push(typesDir);
+			const loader = getTsSourceLoader(app, tsConfig);
+			if (loader.loader === "ts-loader")
+			{
+				apply(loader.options,
+				{
+					transpileOnly: false,
+					compilerOptions: {
+						declaration: true,
+						declarationDir: typesDirDist,
+						emitDeclarationsOnly: true
+					}
+				});
+			}
 			app.wpc.module.rules.push(
 			{
+				use: loader,
 				test: /\.ts$/,
 				include: app.getSrcPath(),
 				exclude: [
-					/node_modules/, /test[\\/]/, /\.d\.ts$/
-				],
-				use: app.esbuild ?
-				{
-					loader: "esbuild-loader",
-					options: {
-						implementation: esbuild,
-						loader: "tsx",
-						target: [ "es2020", "chrome91", "node16.20" ],
-						tsconfigRaw: tsConfig.json
-					}
-				} :
-				{
-					loader: "ts-loader",
-					options: {
-						...getTsLoaderOptions(app, tsConfig),
-						transpileOnly: false,
-						compilerOptions: {
-							emitDeclarationsOnly: true
-						}
-					}
-				}
+					/node_modules/, /test[\\/]/
+				]
 			});
 		}
 	},
@@ -201,7 +154,7 @@ const builds =
 	 * @function
 	 * @private
 	 * @param {WpBuildApp} app
-	 * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
+	 * @param {typedefs.WpBuildAppTsConfig} tsConfig Cloned copy of app.tsConfig info object
 	 * @throws {WpBuildError}
 	 */
 	webapp: (app, tsConfig) =>
@@ -220,22 +173,10 @@ const builds =
 		{
 			include: uniq(tsConfig.include),
 			test: /\.tsx?$/,
+			use: getTsSourceLoader(app, tsConfig),
 			exclude: [
 				/node_modules/, /test[\\/]/, /types[\\/]/, /\.d\.ts$/, /\.vscode/
-			],
-			use: [ app.esbuild ?
-			{
-				loader: "esbuild-loader",
-				options: {
-					implementation: esbuild,
-					loader: "tsx",
-					target: "es2020",
-					tsconfigRaw: tsConfig.json
-				}
-			} : {
-				loader: "ts-loader",
-				options: getTsLoaderOptions(app, tsConfig)
-			}]
+			]
 		},
 		{
 			test: /\.s?css$/,
@@ -261,8 +202,8 @@ const builds =
 			}]
 		}]);
 
-		const typesDir = app.getSrcTypesPath();
-		if (typesDir && app.rc.args.name && !app.rc.builds.find(b => b.type === "module")) //  && !existsSync(typesDir))
+		const typesDir = app.getSrcPath({ build: app.build.name });
+		if (typesDir && app.args.name && !app.rc.builds.find(b => b.type === "module")) //  && !existsSync(typesDir))
 		{
 			// app.wpc.module.rules.unshift(
 			// {
@@ -277,8 +218,8 @@ const builds =
 			// 			configFile: tsConfig.path,
 			// 			experimentalWatchApi: false,
 			// 			transpileOnly: false,
-			// 			logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-			// 			logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
+			// 			logInfoToStdOut: app.build.log.level && app.build.log.level >= 0,
+			// 			logLevel: app.build.log.level && app.build.log.level >= 3 ? "info" : (app.build.log.level && app.build.log.level >= 1 ? "warn" : "error"),
 			// 			compilerOptions: {
 			// 				emitDeclarationsOnly: true
 			// 			}
@@ -293,34 +234,89 @@ const builds =
 
 /**
  * @param {WpBuildApp} app
- * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
- * @returns {*}
+ * @param {typedefs.WpBuildAppTsConfig} tsConfig
+ * @returns {string[]}
  */
-const getEsBuildOptions = (app, tsConfig) =>
+const getTsIncludesAbs = (app, tsConfig) =>
 {
-	return {
-		implementation: esbuild,
-		loader: "tsx",
-		target: "es2020",
-		tsconfigRaw: tsConfig.json
-	};
+	return tsConfig.include.map(path => isAbsolute(path) ? path : resolve(app.getRcPath("base"), path));
 };
 
 
 /**
  * @param {WpBuildApp} app
- * @param {{ raw: string; json: Record<string, any>; include: string[]; path: string }} tsConfig
- * @returns {*}
+ * @param {typedefs.WpBuildAppTsConfig} tsConfig
+ * @param {string} [loader]
+ * @returns {typedefs.WebpackRuleSetUseItem}
  */
-const getTsLoaderOptions = (app, tsConfig) =>
+const getTsSourceLoader = (app, tsConfig, loader) =>
 {
-	return {
-		configFile: tsConfig.path,
-		experimentalWatchApi: false,
-		logInfoToStdOut: app.rc.log.level && app.rc.log.level >= 0,
-		logLevel: app.rc.log.level && app.rc.log.level >= 3 ? "info" : (app.rc.log.level && app.rc.log.level >= 1 ? "warn" : "error"),
-		transpileOnly: true
-	};
+	if (app.args.esbuild || loader === "esbuild") {
+		return buildOptions.esbuild(app, tsConfig);
+	}
+	if (app.args.babel || loader === "babel") {
+		return buildOptions.babel(app, tsConfig);
+	}
+	return buildOptions.ts(app, tsConfig);
+};
+
+
+const buildOptions =
+{
+	/**
+	 * @param {WpBuildApp} app
+	 * @param {typedefs.WpBuildAppTsConfig} tsConfig
+	 * @returns {typedefs.WebpackRuleSetUseItem}
+	 */
+	babel: (app, tsConfig) =>
+	{
+		return {
+			loader: "babel-loader",
+			options: {
+				presets: [
+					[ "@babel/preset-env", { targets: "defaults" }],
+					[ "@babel/preset-typescript" ]
+				]
+			}
+		};
+	},
+
+	/**
+	 * @param {WpBuildApp} app
+	 * @param {typedefs.WpBuildAppTsConfig} tsConfig
+	 * @returns {typedefs.WebpackRuleSetUseItem}
+	 */
+	esbuild: (app, tsConfig) =>
+	{
+		return {
+			loader: "esbuild",
+			options: {
+				implementation: esbuild,
+				loader: "tsx",
+				target: "es2020",
+				tsconfigRaw: tsConfig.json
+			}
+		};
+	},
+
+	/**
+	 * @param {WpBuildApp} app
+	 * @param {typedefs.WpBuildAppTsConfig} tsConfig
+	 * @returns {typedefs.WebpackRuleSetUseItem}
+	 */
+	ts: (app, tsConfig) =>
+	{
+		return {
+			loader: "ts-loader",
+			options: {
+				configFile: tsConfig.path,
+				experimentalWatchApi: false,
+				logInfoToStdOut: app.build.log.level && app.build.log.level >= 0,
+				logLevel: app.build.log.level && app.build.log.level >= 3 ? "info" : (app.build.log.level && app.build.log.level >= 1 ? "warn" : "error"),
+				transpileOnly: true
+			}
+		};
+	}
 };
 
 
@@ -376,8 +372,10 @@ const stripLoggingOptions = () => ({
 
 
 /**
+ * @see {@link https://webpack.js.org/configuration/rules webpack.js.org/rules}
+ *
  * @function
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  * @throws {WpBuildError}
  */
 const rules = (app) =>
@@ -393,14 +391,18 @@ const rules = (app) =>
 		app.logger.value("   tsConfig.path", tsConfig.path, 2);
 	}
 
-	app.wpc.module = { rules: [] };
-	if (builds[app.build.type])
+	if (!isObject(app.wpc.module))
 	{
-		builds[app.build.type](app, tsConfig);
+		app.wpc.module = { rules: [] };
 	}
-	else if (builds[app.build.name])
+	else if (!isArray(app.wpc.module.rules))
 	{
-		builds[app.build.name](app, tsConfig);
+		app.wpc.module.rules = [];
+	}
+
+	if (builds[app.build.type || app.build.name])
+	{
+		builds[app.build.type || app.build.name](app, tsConfig);
 	}
 	else {
 		throw WpBuildError.getErrorProperty("rules", "exports/rules.js", app.wpc);

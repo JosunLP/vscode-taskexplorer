@@ -71,7 +71,7 @@ class WpBuildEnvironmentPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildEnvironmentPlugin | undefined}
  */
-const environment = (app) => app.rc.plugins.environment && app.mode === "production" ? new WpBuildEnvironmentPlugin({ app }) : undefined;
+const environment = (app) => app.mode === "production" ? new WpBuildEnvironmentPlugin({ app }) : undefined;
 
 
 module.exports = environment;

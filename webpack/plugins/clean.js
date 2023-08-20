@@ -103,7 +103,7 @@ class WpBuildCleanPlugin extends WpBuildPlugin
 				cleanStaleWebpackAssets: true,
 				dangerouslyAllowCleanPatternsOutsideProject: true,
 				cleanOnceBeforeBuildPatterns: [
-					`${app.paths.temp}/**`
+					`${app.build.paths.temp}/**`
 				]
 			}
 		}];
@@ -116,7 +116,7 @@ class WpBuildCleanPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {(WpBuildCleanPlugin | CleanWebpackPlugin)[]}
  */
-const clean = (app) => app.rc.plugins.clean && app.build.type !== "tests" ? new WpBuildCleanPlugin({ app }).getPlugins() : [];
+const clean = (app) => app.build.plugins.clean && app.build.type !== "tests" ? new WpBuildCleanPlugin({ app }).getPlugins() : [];
 
 
 module.exports = clean;

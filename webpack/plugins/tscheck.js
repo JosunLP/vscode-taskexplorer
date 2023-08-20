@@ -66,14 +66,14 @@ class WpBuildTsForkerPlugin extends WpBuildPlugin
 		// if (!this.app.global.tsForker.typesBundled && this.app.isMainTests && typesDir && typesDirDist)
 		// {
 		// 	const bundleCfg = {
-		// 		name: `${this.app.rc.pkgJson.name}-types`,
+		// 		name: `${this.app.pkgJson.name}-types`,
 		// 		baseDir: "types/dist",
 		// 		headerPath: "",
 		// 		headerText: "",
 		// 		main: "types/index.d.ts",
 		// 		out: "types.d.ts",
 		// 		outputAsModuleFolder: true,
-		// 		verbose: this.app.rc.log.level === 5
+		// 		verbose: this.app.build.log.level === 5
 		// 	};
 		// 	dts.bundle(bundleCfg);
 		// 	this.app.global.tsForker.typesBundled = true;
@@ -102,7 +102,7 @@ class WpBuildTsForkerPlugin extends WpBuildPlugin
 	static getTsForkCheckerPlugins = (app) =>
 	{
 		let tsConfigParams,
-			tsConfig = findTsConfig(app);
+			tsConfig = findTsConfig(app.build);
 		const buildPath = app.getRcPath("base");
 
 		if (app.build.type === "webapp" || app.build.target === "webworker")
@@ -201,7 +201,7 @@ class WpBuildTsForkerPlugin extends WpBuildPlugin
  * @param {typedefs.WpBuildApp} app
  * @returns {(WpBuildTsForkerPlugin | ForkTsForkererWebpackPlugin)[]}
  */
-const tsforker = (app) => []; // app.rc.plugins.tsforker ? new WpBuildTsForkerPlugin({ app }).getPlugins() : [];
+const tsforker = (app) => []; // app.build.plugins.tsforker ? new WpBuildTsForkerPlugin({ app }).getPlugins() : [];
 
 
 module.exports = tsforker;

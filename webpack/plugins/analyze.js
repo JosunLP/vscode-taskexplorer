@@ -46,7 +46,7 @@ const analyze =
 	bundle(app)
 	{
 		let plugin;
-		if (app.rc.plugins.analyze !== false && app.analyze === true && app.build.type !== "tests" && app.build.type !== "webapp")
+		if (app.args.analyze)
 		{
 			plugin = new BundleAnalyzerPlugin({
 				analyzerPort: "auto",
@@ -67,7 +67,7 @@ const analyze =
 	circular(app)
 	{
 		let plugin;
-		if (app.rc.plugins.analyze !== false  && app.analyze === true && app.build.type !== "tests" && app.build.type !== "webapp")
+		if (app.args.analyze)
 		{
 			plugin = new CircularDependencyPlugin(
 			{
@@ -85,15 +85,15 @@ const analyze =
 
 	/**
 	 * @param {WpBuildApp} app
-	 * @returns {VisualizerPlugin | undefined}
+	 * @returns {InstanceType<VisualizerPlugin> | undefined}
 	 */
 	visualizer(app)
 	{
 		let plugin;
-		if (app.rc.plugins.analyze !== false && app.analyze === true && app.build.type !== "tests" && app.build.type !== "webapp") {
+		if (app.args.analyze) {
 			plugin = new VisualizerPlugin({ filename: "../.coverage/visualizer.html" });
 		}
-		return /** @type {VisualizerPlugin | undefined}) */(plugin);
+		return plugin;
 	}
 };
 

@@ -10,13 +10,14 @@
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 /**
+ * @see {@link https://webpack.js.org/configuration/other-options/#ignorewarnings webpack.js.org/ignorewarnings}
+ *
  * @function ignorewarnings
- * https://webpack.js.org/configuration/other-options/#ignorewarnings
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const ignorewarnings = (app) =>
 {
-   if (app.rc.exports.ignorewarnings && (!app.rc.args.verbosity || app.rc.args.verbosity !== "none"))
+   if (app.build.exports.ignorewarnings && (!app.args.verbosity || app.args.verbosity !== "none"))
    {
 		app.wpc.ignoreWarnings = [
 			/Critical dependency\: the request of a dependency is an expression/,

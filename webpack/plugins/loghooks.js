@@ -183,7 +183,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
  * @returns {WpBuildLogHookStagesPlugin | undefined}
  */
 const loghooks = (app) =>
-	(app.rc.plugins.loghooks ? new WpBuildLogHookStagesPlugin({ app }) : undefined);
+	(app.build.plugins.loghooks ? new WpBuildLogHookStagesPlugin({ app }) : undefined);
 
 
 module.exports = loghooks;

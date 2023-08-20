@@ -28,16 +28,16 @@
  *
  * @function
  * @private
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const devtool = (app) =>
 {   //
 	// Disabled for this build - Using source-map-plugin - see webpack.plugin.js#sourcemaps
 	// ann the plugins() function below
 	//
-	if (app.rc.exports.devtool)
+	if (app.build.exports.devtool)
 	{
-		if (app.rc.plugins.sourcemaps)
+		if (app.build.plugins.sourcemaps)
 		{
 			app.wpc.devtool = false;
 		}

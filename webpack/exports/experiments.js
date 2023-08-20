@@ -12,11 +12,11 @@
 
 /**
  * @function entry
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const experiments = (app) =>
 {
-	if (app.rc.exports.experiments)
+	if (app.build.exports.experiments)
 	{
 		app.wpc.experiments = { layers: app.isMain };
 	}

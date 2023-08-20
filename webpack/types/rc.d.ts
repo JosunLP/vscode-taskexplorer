@@ -9,6 +9,7 @@
  * 
  * Handy file links:
  * 
+ * WEBPACK TYPES: file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\types.d.ts
  * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
  * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
  * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
@@ -31,11 +32,9 @@ export declare type FilePathRelativeLeadingDot = string;
 
 export declare type FileName = string;
 
-export declare type FilePathRelative = string;
-
 export declare type DirectoryPathRelative = string;
 
-export declare type WpBuildWebpackMode = "development" | "production" | "none" | "test" | "testproduction";
+export declare type WpBuildWebpackMode = "development" | "production" | "none" | "test";
 
 export declare type WebpackTarget = "node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist";
 
@@ -51,7 +50,11 @@ export declare type DirectoryPath = string;
 
 export declare type DirectoryPathGlob = string;
 
+export declare type FilePathRelative = string;
+
 export declare type WpBuildLogColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
+
+export declare type WebpackLibraryType = "var" | "module" | "assign" | "assign-properties" | "this" | "window" | "self" | "global" | "commonjs" | "commonjs2" | "commonjs-module" | "commonjs-static'" | "amd" | "amd-require" | "umd'" | "umd2" | "jsonp" | "system";
 
 export declare interface IWpBuildRcSchema 
 {
@@ -64,12 +67,12 @@ export declare interface IWpBuildRcSchema
     builds?: WpBuildRcBuilds;
     development?: WpBuildRcEnvironment;
     log?: WpBuildRcLog;
+    alias?: WpBuildWebpackAliasConfig;
     paths?: WpBuildRcPaths;
     exports?: WpBuildRcExports;
     plugins?: WpBuildRcPlugins;
     production?: WpBuildRcEnvironment;
     test?: WpBuildRcEnvironment;
-    testproduction?: WpBuildRcEnvironment;
     vscode?: WpBuildRcVsCode;
 };
 export declare type WpBuildRcSchema = IWpBuildRcSchema;
@@ -78,13 +81,14 @@ export declare type WpBuildRcBuild =
 {
     name: string;
     build: string;
+    debug?: boolean;
     source?: WpBuildRcSourceCodeType;
     type: WpBuildRcBuildType;
     entry: WpBuildWebpackEntry;
     mode: WpBuildWebpackMode;
     target: WebpackTarget;
-    alias?: WpBuildWebpackAliasConfig;
-    log?: WpBuildRcLog;
+    alias: WpBuildWebpackAliasConfig;
+    log: WpBuildRcLog;
     paths: WpBuildRcPaths;
     exports: WpBuildRcExports;
     plugins: WpBuildRcPlugins;
@@ -102,9 +106,9 @@ export declare type WpBuildWebpackEntryObject =
     asyncChunks?: boolean;
     baseUri?: string;
     chunkLoading?: boolean | (("jsonp" | "import" | "importScripts" | "require" | "async-node") & string);
-    dependOn?: string;
+    dependOn?: string | string[];
     filename?: FileName;
-    import: FilePathRelative;
+    import: FilePathRelativeLeadingDot;
     layer?: ("debug" | "release") & string;
     publicPath?: DirectoryPathRelative;
 };
@@ -158,18 +162,7 @@ export declare type WpBuildRcPaths =
     base: string;
     ctx?: string;
     dist?: string;
-    distModule?: string;
-    distTests?: string;
-    distTypes?: string;
-    distWebApp?: string;
-    distWebModule?: string;
     src?: string;
-    srcEnv?: string;
-    srcModule?: string;
-    srcTests?: string;
-    srcTypes?: string;
-    srcWebApp?: string;
-    srcWebModule?: string;
     temp: string;
     tsconfig?: string;
 };
@@ -180,17 +173,11 @@ export declare type WpBuildRcExports =
 {
     cache?: boolean;
     devtool?: boolean;
-    entry?: true;
     experiments?: boolean;
     externals?: boolean;
     ignorewarnings?: boolean;
     minification?: boolean;
     optimization?: boolean;
-    output?: true;
-    plugins?: true;
-    resolve?: true;
-    rules?: true;
-    stats?: boolean;
     watch?: boolean;
 };
 export declare type WpBuildRcExportsKey = keyof WpBuildRcExports;
@@ -198,11 +185,9 @@ export declare type TypeWpBuildRcExports = Required<WpBuildRcExports>;
 
 export declare type WpBuildRcPlugins = 
 {
-    analyze?: boolean;
     banner?: boolean;
     clean?: boolean;
     copy?: boolean;
-    environment?: true;
     html?: true;
     ignore?: boolean;
     istanbul?: boolean;
@@ -215,6 +200,7 @@ export declare type WpBuildRcPlugins =
     sourcemaps?: boolean;
     testsuite?: boolean;
     tscheck?: boolean;
+    types?: boolean;
     upload?: boolean;
     vendormod?: boolean;
     wait?: boolean;

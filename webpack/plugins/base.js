@@ -638,7 +638,7 @@ class WpBuildPlugin
         {
             if (stageEnum && options.hookCompilation === "processAssets")
             {
-                const logMsg = this.breakProp(optionName).padEnd(this.app.rc.log.pad.value - 3) + this.logger.tag(`processassets: ${options.stage} stage`);
+                const logMsg = this.breakProp(optionName).padEnd(this.app.build.log.pad.value - 3) + this.logger.tag(`processassets: ${options.stage} stage`);
                 if (!options.async) {
                     hook.tap({ name, stage: stageEnum }, this.wrapCallback(logMsg, options).bind(this));
                 }

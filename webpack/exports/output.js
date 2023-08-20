@@ -16,8 +16,10 @@ const { RegexTestsChunk } = require("../utils");
 /** @typedef {import("../types").RequireKeys<WebpackPathData, "filename" | "chunk">} WebpackPathDataOutput */
 
 /**
+ * @see {@link https://webpack.js.org/configuration/output webpack.js.org/output}
+ *
  * @function
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const output = (app) =>
 {
@@ -27,15 +29,15 @@ const output = (app) =>
 		filename: "[name].js",
 		compareBeforeEmit: true,
 		hashDigestLength: 20,
-		libraryTarget: "commonjs2",
-		clean: app.clean ? (app.isTests ? { keep: /(test)[\\/]/ } : app.clean) : undefined
+		libraryTarget: "commonjs2"
+		// clean: app.clean ? (app.isTests ? { keep: /(test)[\\/]/ } : app.clean) : undefined
 	};
 
-	if (app.build.type === "webapp")
+	if (app.wpc.target === "webworker")
 	{
 		apply(app.wpc.output,
 		{
-			clean: app.clean ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
+			// clean: app.clean ? { keep: /(img|font|readme|walkthrough)[\\/]/ } : undefined,
 			libraryTarget: undefined,
 			publicPath: "#{webroot}/",
 			/**
@@ -44,7 +46,7 @@ const output = (app) =>
 			 */
 			filename: (pathData, _assetInfo) =>
 			{
-				let name = "[name]";
+				let name = "[name].js";
 				if (pathData.chunk?.name) {
 					name = pathData.chunk.name.replace(/[a-z]+([A-Z])/g, (substr, token) => substr.replace(token, "-" + token.toLowerCase()));
 				}
@@ -58,13 +60,6 @@ const output = (app) =>
 		{
 			libraryTarget: "umd",
 			umdNamedDefine: true
-		});
-	}
-	else if (app.build.type === "types")
-	{
-		apply(app.wpc.output,
-		{
-			path: app.getSrcTypesPath()
 		});
 	}
 	else

@@ -77,17 +77,17 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
 		// the existing contents of the dist directory.  By default it's current assets list
 		// is empty, and thus will not work across IDE restarts
 		//
-		const copyPlugin = join(this.app.getRcPath("base"), "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
-		if (existsSync(copyPlugin))
+		const cleanPlugin = join(this.app.getRcPath("base"), "node_modules", "clean-webpack-plugin", "dist", "clean-webpack-plugin.js");
+		if (existsSync(cleanPlugin))
 		{
 			const distPath = this.app.getDistPath();
-			let content = readFileSync(copyPlugin, "utf8").replace(/currentAssets = \[ "[\w"\., _\-]+" \]/, "currentAssets = []");
+			let content = readFileSync(cleanPlugin, "utf8").replace(/currentAssets = \[ "[\w"\., _\-]*" \]/, "currentAssets = []");
 			if (existsSync(distPath))
 			{
 				const distFiles = `"${readdirSync(distPath).map(f => basename(f)).join("\", \"")}"`;
 				content = content.replace("currentAssets = []", `currentAssets = [ ${distFiles} ]`);
 			}
-			writeFileSync(copyPlugin, content);
+			writeFileSync(cleanPlugin, content);
 		}
 	};
 
@@ -103,7 +103,7 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildVendorModPlugin | undefined}
  */
-const vendormod = (app) => app.rc.plugins.vendormod && app.build.type !== "webapp" ? new WpBuildVendorModPlugin({ app }) : undefined;
+const vendormod = (app) => app.build.plugins.vendormod ? new WpBuildVendorModPlugin({ app }) : undefined;
 
 
 module.exports = vendormod;

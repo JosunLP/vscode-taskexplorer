@@ -1,5 +1,7 @@
 // @ts-check
 
+const { isString } = require("../utils");
+
 /**
  * @file exports/stats.js
  * @version 0.0.1
@@ -9,13 +11,48 @@
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
+
+/**
+ * @param {import("../types").WpBuildLogLevel | import("../types").WebpackLogLevel | undefined} loglevel
+ * @returns {import("../types").WebpackLogLevel}
+ */
+const level = (loglevel) =>
+{
+	if (isString(loglevel))
+	{
+		return loglevel;
+	}
+	else if (loglevel === 1)
+	{
+		return "error";
+	}
+	else if (loglevel === 2)
+	{
+		return "warn";
+	}
+	else if (loglevel === 3)
+	{
+		return "info";
+	}
+	else if (loglevel === 4)
+	{
+		return "log";
+	}
+	else if (loglevel === 5)
+	{
+		return "verbose";
+	}
+	return "none";
+};
+
+
 /**
  * @function stats
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const stats = (app) =>
 {
-	if (app.rc.exports.stats)
+	if (app.args.loglevel !== 0 && app.args.loglevel !== "none")
 	{
 		app.wpc.stats = {
 			preset: "errors-warnings",
@@ -30,7 +67,7 @@ const stats = (app) =>
 
 		app.wpc.infrastructureLogging = {
 			colors: true,
-			level: app.rc.args.verbosity || "none"
+			level: level(app.args.loglevel)
 			// debug: /webpack\.cache/
 		};
 	}

@@ -10,8 +10,12 @@
             "name": "taskexplorer",
             "target": "node",
             "type": "module",
+            "debug": true,
             "log": {
                 "color": "cyan"
+            },
+            "plugins": {
+                "licensefiles": true
             }
         },
         {
@@ -35,8 +39,22 @@
             "paths": {
                 "ctx": "src/webview/app",
                 "dist": "res",
-                "src": "src",
-                "srcEnv": "src/lib/env/web"
+                "src": "src"
+            }
+        },
+        {
+            "name": "types",
+            "target": "node",
+            "type": "types",
+            "log": {
+                "color": "white",
+                "colors": {
+                    "buildBracket": "cyan",
+                    "tagBracket": "cyan"
+                }
+            },
+            "paths": {
+                "dist": "types/dist"
             }
         }
     ],
@@ -46,29 +64,6 @@
             { "name": "taskexplorer" },
             { "name": "webapp" }
         ]
-    },
-    "testproduction":
-    {
-        "builds": [
-            { "name": "taskexplorer" },
-            { "name": "webapp", "mode": "production" },
-            {
-                "name": "tests",
-                "log": {
-                    "color": "yellow"
-                },
-                "paths": {
-                    "ctx": "src/test",
-                    "dist": "dist/test",
-                    "src": "src/tests"
-                }
-            }
-        ],
-        "log": {
-            "pad": {
-                "value": 60
-            }
-        }
     },
     "production":
     {
@@ -91,6 +86,9 @@
                     "ctx": "src/test",
                     "dist": "dist/test",
                     "src": "src/test"
+                },
+                "plugins": {
+                    "istanbul": true
                 }
             }
         ],
@@ -133,40 +131,30 @@
     {
         "cache": true,
         "devtool": true,
-        "entry": true,
         "experiments": true,
         "externals": true,
         "ignorewarnings": true,
         "minification": false,
         "optimization": true,
-        "output": true,
-        "plugins": true,
-        "resolve": true,
-        "rules": true,
-        "stats": true,
         "watch": true
     },
     "plugins":
     {
-        "analyze": true,
         "banner": true,
         "clean": true,
         "copy": true,
-        "dispose": true,
-        "environment": true,
-        "hash": true,
-        "html": true,
-        "ignore": false,
-        "istanbul": true,
-        "licensefiles": true,
+        "ignore": true,
+        "istanbul": false,
+        "licensefiles": false,
         "loghooks": true,
         "optimization": true,
         "progress": false,
         "runtimevars": true,
-        "scm": true,
+        "scm": false,
         "sourcemaps": true,
         "testsuite": false,
         "tscheck": true,
+        "types": true,
         "upload": true,
         "vendormod": true,
         "wait": false

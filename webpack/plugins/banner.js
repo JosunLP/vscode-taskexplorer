@@ -21,9 +21,9 @@ const { isString } = require("../utils/utils");
  */
 const banner = (app) =>
 {
-	if (app.rc.plugins.banner !== false && app.build.type !== "tests" && app.wpc.mode === "production")
+	if (app.build.plugins.banner !== false && app.build.type !== "tests" && app.wpc.mode === "production")
 	{
-		const author = isString(app.rc.pkgJson.author) ? app.rc.pkgJson.author : app.rc.pkgJson.author?.name;
+		const author = isString(app.pkgJson.author) ? app.pkgJson.author : app.pkgJson.author?.name;
 		if (author)
 		{
 			return new WpBuildPlugin({

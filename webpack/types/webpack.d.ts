@@ -8,6 +8,7 @@
  * 
  * Handy file links:
  * 
+ * WEBPACK TYPES: file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\types.d.ts
  * COMPILER  : file:///c:\Projects\vscode-taskexplorer\node_modules\webpack\lib\Compiler.js
  * TAPABLE   : file:///c:\Projects\vscode-taskexplorer\node_modules\tapable\tapable.d.ts
  * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
@@ -48,7 +49,7 @@ import {
     Cache as WebpackCache, Chunk as WebpackChunk, Configuration as WebpackConfig, Compilation as WebpackCompilation,
     Compiler as WebpackCompiler, EntryObject as WebpackEntry, sources as WebpackSources, Stats as WebpackStats,
     StatsAsset as WebpackStatsAsset, WebpackPluginInstance, ModuleOptions, RuleSetRule, PathData as WebpackPathData,
-    WebpackOptionsNormalized
+    WebpackOptionsNormalized, RuleSetUse, RuleSetUseItem
 } from "webpack"
 
 
@@ -134,6 +135,9 @@ declare type WebpackSyncBailHook<T, R> = SyncBailHook<T, R>;
 
 declare type WebpackSyncHook<T> = SyncHook<T>;
 
+declare type WebpackRuleSetUse = Exclude<RuleSetUse, string>;
+
+declare type WebpackRuleSetUse = Exclude<RuleSetUseItem, string>;
 
 export {
     WebpackRuntimeArgs,
@@ -172,6 +176,8 @@ export {
     WebpackOutput,
     WebpackRawSource,
     WebpackRuleSetRule,
+    WebpackRuleSetUse,
+    WebpackRuleSetUseItem,
     WebpackSchema,
     WebpackSnapshot,
     WebpackSource,

@@ -1,6 +1,6 @@
 // @ts-check
 
-const { apply, WpBuildError } = require("../utils");
+const { apply } = require("../utils");
 
 /**
  * @file exports/optimization.js
@@ -13,13 +13,14 @@ const { apply, WpBuildError } = require("../utils");
 /** @typedef {import("../types").WebpackOptimization} WebpackOptimization */
 /** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
 
+
 /**
  * @function optimization
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const optimization = (app) =>
 {
-	if (app.rc.exports.optimization)
+	if (app.build.exports.optimization)
 	{
 		apply(app.wpc, { parallelism: 1 + app.rc.builds.length });
 		if (app.isMain)

@@ -13,18 +13,18 @@ const { WpBuildApp } = require("../utils");
 
 /**
  * @function
- * @param {WpBuildApp} app Webpack build environment
+ * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */
 const cache = (app) =>
 {
-	if (app.rc.exports.cache)
+	if (app.build.exports.cache)
 	{
         const basePath = app.getRcPath("base");
 		app.wpc.cache = {
             type: "filesystem",
             cacheDirectory: join(basePath, "node_modules", ".cache", "wpbuild", "webpack"),
             name: `${app.build.name}_${app.build.type}_${app.wpc.target}`.toLowerCase(),
-            version: app.rc.pkgJson.version, // `${process.env.GIT_REV}`
+            version: app.pkgJson.version, // `${process.env.GIT_REV}`
             buildDependencies:
             {
                 defaultWebpack: [ "webpack/lib/" ],

@@ -21,12 +21,12 @@ const ignore = (app) =>
 {
     /** @type {webpack.IgnorePlugin | undefined} */
     let plugin;
-    if (app.rc.plugins.ignore !== false && app.wpc.mode === "production")
+    if (app.build.plugins.ignore) //  && app.build.mode === "production")
     {
         plugin = new webpack.IgnorePlugin(
         {
             resourceRegExp: /^\.\/locale$/,
-            contextRegExp: /moment$/,
+            contextRegExp: /moment$/
         });
     }
     return plugin;

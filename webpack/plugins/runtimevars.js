@@ -113,7 +113,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
     {
         const logger = this.app.logger,
               hashInfo = this.app.global.runtimeVars,
-              labelLength = this.app.rc.log.pad.value || 45;
+              labelLength = this.app.build.log.pad.value || 45;
         logger.write(`${rotated ? "read" : "saved"} asset state for build environment ${logger.withColor(this.app.mode, logger.colors.italic)}`, 1);
         logger.write("   previous:", 2);
         if (!isObjectEmpty(hashInfo.current))
@@ -276,7 +276,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
     sourceObj(file, content, sourceInfo)
     {
         const { source, map } = sourceInfo.sourceAndMap();
-        return map && (this.compiler.options.devtool || this.app.rc.plugins.sourcemaps) ?
+        return map && (this.compiler.options.devtool || this.app.build.plugins.sourcemaps) ?
                new this.compiler.webpack.sources.SourceMapSource(content, file, map, source) :
                new this.compiler.webpack.sources.RawSource(content);
     }
@@ -311,7 +311,7 @@ class WpBuildRuntimeVarsPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {WpBuildRuntimeVarsPlugin | undefined}
  */
-const runtimevars = (app) => app.rc.plugins.runtimevars && app.isMain ? new WpBuildRuntimeVarsPlugin({ app }) : undefined;
+const runtimevars = (app) => app.build.plugins.runtimevars && app.isMain ? new WpBuildRuntimeVarsPlugin({ app }) : undefined;
 
 
 module.exports = runtimevars;

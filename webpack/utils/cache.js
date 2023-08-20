@@ -42,7 +42,7 @@ class WpBuildCache
 
     /**
      * @class WpBuildApplication
-     * @param {WpBuildApp} app Webpack build environment
+     * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
      * @param {string} file Filename to read/write cache to
      */
     constructor(app, file)

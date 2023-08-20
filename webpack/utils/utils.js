@@ -235,7 +235,10 @@ const execAsync = async (options) =>
         logger.log(`${logPad}${program} completed with exit code bold(${clrCode})`);
     });
 
-    await procPromise;
+    try {
+        await procPromise;
+    } catch{}
+
     return exitCode;
 };
 
@@ -259,52 +262,55 @@ const findFilesSync = (pattern, options) => glob.sync(pattern, merge(globOptions
 
 
 /**
- * @param {import("../types/typedefs").WpBuildApp} app
+ * @param {import("../types/typedefs").WpBuildRcBuild} build
  * @returns {string | undefined}
  */
-const findTsConfig = (app) =>
+const findTsConfig = (build) =>
 {
     /**
-     * @param {string} base
+     * @param {string | undefined} base
      * @returns {string | undefined}
      */
     const _find = (base) =>
     {
-        let tsCfg = join(base, `tsconfig.${app.build.name}.json`);
-        if (!existsSync(tsCfg))
+        if (base)
         {
-            tsCfg = join(base, `tsconfig.${app.build.target}.json`);
+            let tsCfg = join(base, `tsconfig.${build.name}.json`);
             if (!existsSync(tsCfg))
             {
-                tsCfg = join(base, `tsconfig.${app.build.mode}.json`);
+                tsCfg = join(base, `tsconfig.${build.target}.json`);
                 if (!existsSync(tsCfg))
                 {
-                    tsCfg = join(base,`tsconfig.${app.build.type}.json`);
+                    tsCfg = join(base, `tsconfig.${build.mode}.json`);
                     if (!existsSync(tsCfg))
                     {
-                        tsCfg = join(base, app.build.name, "tsconfig.json");
+                        tsCfg = join(base,`tsconfig.${build.type}.json`);
                         if (!existsSync(tsCfg))
                         {
-                            tsCfg = join(base, app.build.type || app.build.name, "tsconfig.json");
-                            if (!existsSync(tsCfg)) {
-                                tsCfg = join(base,"tsconfig.json");
+                            tsCfg = join(base, build.name, "tsconfig.json");
+                            if (!existsSync(tsCfg))
+                            {
+                                tsCfg = join(base, build.type || build.name, "tsconfig.json");
+                                if (!existsSync(tsCfg)) {
+                                    tsCfg = join(base,"tsconfig.json");
+                                }
                             }
                         }
                     }
                 }
             }
+            return tsCfg;
         }
-        return tsCfg;
     };
 
-    let tsConfig = app.paths.tsconfig;
+    let tsConfig = build.paths.tsconfig;
     if (!tsConfig || !existsSync(tsConfig))
     {
-        tsConfig = _find(app.getSrcPath());
+        tsConfig = _find(build.paths.src);
         if (!tsConfig || !existsSync(tsConfig)) {
-            tsConfig = _find(app.getContextPath());
+            tsConfig = _find(build.paths.ctx);
             if (!tsConfig || !existsSync(tsConfig)) {
-                tsConfig = _find(app.getRcPath("base"));
+                tsConfig = _find(build.paths.base);
             }
         }
     }
@@ -316,24 +322,24 @@ const findTsConfig = (app) =>
 
 
 /**
- * @param {import("../types/typedefs").WpBuildApp | string} app
+ * @param {import("../types/typedefs").WpBuildRcBuild | string} build
  * @param {string[]} xInclude
  * @returns {typedefs.WpBuildAppTsConfig | undefined}
  */
-const getTsConfig = (app, ...xInclude) =>
+const getTsConfig = (build, ...xInclude) =>
 {
-    const tsConfigPath = isString(app) ? app : findTsConfig(app);
+    const tsConfigPath = isString(build) ? build : findTsConfig(build);
     if (tsConfigPath && existsSync(tsConfigPath))
     {
         const dir = dirname(tsConfigPath),
               file = basename(tsConfigPath),
-            result = spawnSync("npx", [ "tsc", `-p ${file}`, "--showConfig" ], { cwd: dir, encoding: "utf8", shell: true }),
-            data = result.stdout,
-            start = data.indexOf("{"),
-            end = data.lastIndexOf("}") + 1,
-            include = [ ...xInclude ],
-            raw = data.substring(start, end),
-            json = JSON5.parse(raw);
+              result = spawnSync("npx", [ "tsc", `-p ${file}`, "--showConfig" ], { cwd: dir, encoding: "utf8", shell: true }),
+              data = result.stdout,
+              start = data.indexOf("{"),
+              end = data.lastIndexOf("}") + 1,
+              include = [ ...xInclude ],
+              raw = data.substring(start, end),
+              json = JSON5.parse(raw);
         if (json.rootDir) {
             include.push(resolve(dir, json.rootDir));
         }
@@ -389,7 +395,7 @@ const isObject = (v, allowArray) => !!v && Object.prototype.toString.call(v) ===
  * @param {any} v Variable to check to see if it's and empty object
  * @returns {boolean}
  */
-const isObjectEmpty = (v) => { if (v) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };
+const isObjectEmpty = (v) => { if (isObject(v)) { return Object.keys(v).filter(k => ({}.hasOwnProperty.call(v, k))).length === 0; } return true; };
 
 
 /**
