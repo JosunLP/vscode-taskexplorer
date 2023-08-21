@@ -43,7 +43,6 @@ export * from "./plugin";
  * WpBuild application specific types library
  */
 export * from "./rc";
-export * from "./rc.extensions";
 
 /**
  * WpBuild application specific types library
@@ -55,3 +54,7 @@ export * from "./rc.extensions";
  */
 export * from "./webpack";
 // import * as wp from "./webpack";
+
+
+// export * from "./constants";
+// const {/* START_CONST_DEFS */ isWebpackMode, isWebpackTarget, isWpBuildLogColor, isWpBuildLogTrueColor, isWpBuildRcBuildType, isWpBuildRcPathsProp, isWpBuildRcSourceCodeType, isWpBuildWebpackMode, WebpackModes, WebpackTargets, WpBuildLogColors, WpBuildLogTrueColors, WpBuildRcBuildTypes, WpBuildRcPathsEnum, WpBuildRcPathsProps, WpBuildRcSourceCodeTypes, WpBuildWebpackModes /* END_CONST_DEFS */} = require("./constants");

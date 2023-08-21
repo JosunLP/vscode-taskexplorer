@@ -4,8 +4,8 @@
 
 const gradient = require("gradient-string");
 const typedefs = require("../types/typedefs");
-const { isWpBuildLogColor, WpBuildLogTrueColors } = require("./constants");
-const { isString, isObject, isPrimitive, merge, apply } = require("./utils");
+const { isString, isObject, isPrimitive, merge } = require("./utils");
+const { isWpBuildLogColor, WpBuildLogTrueColors } = require("../types/constants");
 
 
 /**

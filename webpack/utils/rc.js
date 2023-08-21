@@ -14,12 +14,12 @@ const { globalEnv } = require("./global");
 const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
 const { readFileSync, mkdirSync, existsSync } = require("fs");
-const { resolve, basename, join, dirname, isAbsolute, sep } = require("path");
+const { resolve, basename, join, dirname, isAbsolute, sep, relative } = require("path");
 const {
     isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildRcPackageJsonProps
-} = require("./constants");
+} = require("../types/constants");
 const {
-    WpBuildError, apply, pick, isString, merge, isArray, mergeIf, applyIf, findTsConfig, getTsConfig
+    WpBuildError, apply, pick, isString, merge, isArray, mergeIf, applyIf, findTsConfig, getTsConfig, findFilesSync
 } = require("./utils");
 
 
@@ -116,6 +116,10 @@ class WpBuildRc
      * @type {typedefs.WpBuildRcBuildModeConfig}
      */
     testproduction;
+    /**
+     * @type {string[]}
+     */
+    warnings;
 
 
     /**
@@ -142,13 +146,15 @@ class WpBuildRc
         apply(this,
         {
             apps: [],
+            errors: [],
+            warnings: [],
             args: apply({}, arge, argv),
             global: globalEnv,
             mode: this.getMode(arge, argv, true)
         });
 
         if (!isWpBuildWebpackMode(this.mode)) {
-            throw WpBuildError.getErrorMissing("mode", "utils/rc.js", { mode: this.mode });
+            throw WpBuildError.getErrorMissing("mode", "utils/rc.js");
         }
 
         apply(this,
@@ -289,6 +295,7 @@ class WpBuildRc
         {
             this.resolvePaths(build);
             this.configureTypescript(build);
+            this.resolveAliasPaths(build);
         });
     };
 
@@ -308,6 +315,10 @@ class WpBuildRc
             if (build.paths.tsconfig)
             {
                 this.tsConfig = getTsConfig(build);
+                if (!this.tsConfig) {
+                    // build.paths.tsconfig = undefined;
+                    this.warnings.push("Could not locate tsconfig file while configuring typescript build");
+                }
             }
         }
     };
@@ -371,6 +382,9 @@ class WpBuildRc
         let mode = argv.mode || arge.mode || "production";
         if (wpBuild === true && mode === "none") {
             mode = "test";
+        }
+        else if (!wpBuild && mode === "test") {
+            mode = "none";
         }
         return /** @type {R} */(mode);
     };
@@ -475,61 +489,81 @@ class WpBuildRc
      */
     initializeBaseRc = (rc) =>
     {
-        if (!rc.log) {
-            rc.log = { level: 2, colors: { default: "grey" }, pad: { value: 50 } };
+        if (!rc.log) { rc.log = { level: 2, colors: { default: "grey" }, pad: { value: 50 } }; }
+        if (!rc.log.colors) { rc.log.colors = { default: "grey" }; }
+        else if (!rc.log.colors.default) { rc.log.colors.default = "grey"; }
+        if (!rc.log.pad) { rc.log.pad = { value: 50 }; }
+        if (!rc.plugins) { rc.plugins = {}; }
+        if (!rc.exports) { rc.exports = {}; }
+        if (!rc.alias) { rc.alias = {}; }
+        if (!rc.vscode) { rc.vscode = { type: "none" }; }
+        else if (!rc.vscode.type) { rc.vscode.type = "none"; }
+        if (!rc.paths) {
+            rc.paths = { base: ".", src: "src", dist: "dist", ctx: ".", temp: defaultTempDir };
         }
-        if (!rc.log.colors) {
-            rc.log.colors = { default: "grey" };
-        }
-        else if (!rc.log.colors.default) {
-            rc.log.colors.default = "grey";
-        }
-        if (!rc.log.pad) {
-            rc.log.pad = { value: 50 };
-        }
-        if (!rc.plugins) {
-            rc.plugins = {};
-        }
-        if (!rc.exports) {
-            rc.exports = {};
-        }
-        if (!rc.alias) {
-            rc.alias = {};
-        }
-        if (!rc.vscode) {
-            rc.vscode = { type: "none" };
-        }
-        else if (!rc.vscode.type) {
-            rc.vscode.type = "none";
-        }
-        if (!rc.paths)
-        {
-            rc.paths = {
-                base: ".",
-                src: "src",
-                dist: "dist",
-                ctx: ".",
-                temp: defaultTempDir
-            };
-        }
-        else
-        {   if (!rc.paths.base) {
-                rc.paths.base = ".";
-            }
-            if (!rc.paths.src) {
-                rc.paths.src = "src";
-            }
-            if (!rc.paths.dist) {
-                rc.paths.dist = "dist";
-            }
-            if (!rc.paths.ctx) {
-                rc.paths.ctx = ".";
-            }
-            if (!rc.paths.temp) {
-                rc.paths.temp = defaultTempDir;
-            }
+        else {
+            if (!rc.paths.base) { rc.paths.base = "."; }
+            if (!rc.paths.src) { rc.paths.src = "src"; }
+            if (!rc.paths.dist) { rc.paths.dist = "dist"; }
+            if (!rc.paths.ctx) { rc.paths.ctx = "."; }
+            if (!rc.paths.temp) { rc.paths.temp = defaultTempDir; }
         }
         return true;
+    };
+
+
+    /**
+     * @param {string} b base directory
+     * @param {string} p configured path (relative or absolute)
+     */
+    relativrPath = (b, p) => { if (isAbsolute(p)) { p = relative(b, p); } return p; };
+
+
+    /**
+     * @function
+     * @private
+     * @param {typedefs.WpBuildRcBuild} build
+     */
+    resolveAliasPaths = (build) =>
+    {
+        const alias = build.alias,
+              tsConfig = this.tsConfig,
+              tscPaths = tsConfig?.json.compilerOptions.paths;
+
+        const _pushAlias = (/** @type {string} */ key, /** @type {string} */ path) =>
+        {
+            const value = alias[key];
+            if (isArray(value))
+            {
+                if (value.includes(path)) {
+                    this.warnings.push(`tsconfig alias extractions have same key/value ${value} / ${path}`);
+                }
+                else {
+                    value.push(path);
+                }
+            }
+            else { alias[key] = [ path ]; }
+        };
+
+        if (tscPaths)
+        {
+            Object.entries(tscPaths).filter(p => isArray(p)).forEach(([ key, paths ]) =>
+            {
+                paths.forEach((p) => _pushAlias(key, this.resolvePath(dirname(tsConfig.path), p)), this);
+            });
+        }
+
+        if (!alias[":env"])
+        {
+            const basePath = build.paths.base,
+                  srcPath = this.relativrPath(basePath, build.paths.src),
+                  envGlob = `**/${srcPath}/**/{env,environment,target}/${build.target}/`,
+                  envDirs = findFilesSync(envGlob, { cwd: basePath, absolute: true, dotRelative: false });
+            if (envDirs.length >= 0)
+            {
+                envDirs.forEach((path) => _pushAlias(":env", path), this);
+            }
+        }
     };
 
 

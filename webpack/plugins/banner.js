@@ -10,33 +10,35 @@
 
 const webpack = require("webpack");
 const WpBuildPlugin = require("./base");
-const { isString } = require("../utils/utils");
+const { isString, isObject } = require("../utils/utils");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 
 /**
  * @param {WpBuildApp} app
- * @returns {WpBuildPlugin | undefined}
+ * @returns {webpack.BannerPlugin | undefined}
  */
 const banner = (app) =>
 {
-	if (app.build.plugins.banner !== false && app.build.type !== "tests" && app.wpc.mode === "production")
+	if (app.build.banner)
 	{
-		const author = isString(app.pkgJson.author) ? app.pkgJson.author : app.pkgJson.author?.name;
-		if (author)
+		let banner = isString(app.build.banner) ? app.build.banner : undefined;
+
+		if (!banner)
 		{
-			return new WpBuildPlugin({
-				app,
-				plugins: [
-				{
-					ctor: webpack.BannerPlugin,
-					options: {
-						banner: `Copyright ${(new Date()).getFullYear()} ${author}`,
-						entryOnly: true,
-						test: WpBuildPlugin.getEntriesRegex(app.wpc, true, true)
-					}
-				}]
+			const author = isString(app.pkgJson.author) ? app.pkgJson.author : app.pkgJson.author?.name;
+			if (author) {
+				banner = "Copyright [DATE_STAMP_YEAR] " + author;
+			}
+		}
+
+		if (banner)
+		{
+			return new webpack.BannerPlugin({
+				entryOnly: true,
+				test: WpBuildPlugin.getEntriesRegex(app.wpc, true, true),
+				banner: banner.replace(new RegExp("\\[DATE_STAMP_YEAR\\]"), new Date().getFullYear().toString())
 			});
 		}
 	}

@@ -2,7 +2,7 @@
 // @ts-check
 
 /**
- * @file utils/constants.js
+ * @file types/constants.js
  * @version 0.0.1
  * @license MIT
  * @author @spmeesseman Scott Meesseman

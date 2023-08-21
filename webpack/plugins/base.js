@@ -159,7 +159,10 @@ class WpBuildPlugin
             const aGLobalCache = asArray(globalCache);
             this.initGlobalEnvObject(aGLobalCache[0], aGLobalCache[1], ...aGLobalCache.slice(2));
         }
-        if (options.registerVendorPluginsOnly) {
+        if (options.wrapPlugin) {
+            this.plugins = [ ...this.options.plugins.map(p => new p.ctor(this.getOptions())), this ];
+        }
+        else if (options.registerVendorPluginsOnly) {
             this.plugins = [ ...this.options.plugins.map(p => new p.ctor(p.options)) ];
         }
         else if (options.registerVendorPluginsFirst) {
@@ -414,6 +417,14 @@ class WpBuildPlugin
             `${!hash ? "?" : ""}(?:\\.js|\\.js\\.map)${!ext ? "?" : ""}`
         );
     };
+
+
+    /**
+     * @function
+     * @protected
+     * @abstract
+     */
+    getOptions() {}
 
 
     /**
@@ -749,7 +760,6 @@ class WpBuildPlugin
     /**
      * @function
      * @private
-     * @member wrapCallback
      * @param {string} message If camel-cased, will be formatted with {@link breakProp}
      * @param {typedefs.WpBuildPluginTapOptions} options
      * @returns {typedefs.WpBuildCallback}
@@ -764,6 +774,14 @@ class WpBuildPlugin
         }
         return async (...args) => { logger.start(logMsg, 1); await callback.call(this, ...args); };
     }
+
+
+    /**
+     * @param {typeof WpBuildPlugin} clsType Plugin options to be applied
+     * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
+     * @returns {WpBuildPlugin}
+     */
+    static wrapVendorPlugin = (clsType, options) => new clsType({ wrapPlugin: true, ...options });
 
 
     // /**

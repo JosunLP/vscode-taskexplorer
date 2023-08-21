@@ -89,6 +89,7 @@ export declare type WpBuildRcBuild =
     name: string;
     active?: boolean;
     auto?: boolean;
+    banner?: boolean | string;
     bundleDts?: boolean;
     debug?: boolean;
     dts?: boolean;

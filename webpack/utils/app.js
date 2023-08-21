@@ -10,14 +10,12 @@
  * @author Scott Meesseman @spmeesseman
  */
 
+const { existsSync } = require("fs");
 const resolvePath = require("path").resolve;
 const typedefs = require("../types/typedefs");
-const { existsSync, mkdirSync } = require("fs");
 const WpBuildConsoleLogger = require("./console");
-const { isAbsolute, relative, posix, normalize, sep, dirname } = require("path");
-const {
-    apply, isString, WpBuildError, merge, isPromise, isObject, capitalize, findTsConfig, getTsConfig, isArray
-} = require("./utils");
+const { isAbsolute, relative, sep } = require("path");
+const { apply, WpBuildError, isPromise } = require("./utils");
 const {
 	cache, devtool, entry, experiments, externals, ignorewarnings, minification, plugins, optimization,
     output, resolve, rules, stats, watch
@@ -263,49 +261,6 @@ class WpBuildApp
         this.printBuildProperties();
         return this.wpc;
     };
-
-
-    /**
-     * @function
-     * @returns {typedefs.WpBuildWebpackAliasConfig}
-     */
-    getAliasConfig = () =>
-    {
-        const alias = merge({}, this.build.alias),
-              tsConfig = this.tsConfig;
-
-        if (tsConfig && tsConfig.json.compilerOptions?.paths)
-        {
-            const _map = (e) => e.map ((e) => [ e[0].replace(/[\\\/]\*{0,1}$/g, "") , e[1].map(e => e.replace(/[\\\/]\*{0,1}$/g, "")) ]);
-            _map(Object.entries(tsConfig.json.compilerOptions.paths)).forEach(([ key, paths ]) =>
-            {
-                if (isArray(paths))
-                {
-                    const v = alias[key];
-                    paths.forEach((p) =>
-                    {
-                        if (!isAbsolute(p)) {
-                            p = resolvePath(dirname(tsConfig.path), p);
-                        }
-                        if (isArray(v))
-                        {
-                            if (v.includes(p)) {
-                                this.logger.warning("tsconfig alias extractions share same key/value");
-                            }
-                            else {
-                                v.push(p);
-                            }
-                        }
-                        else {
-                            alias[key] = [ p ];
-                        }
-                    });
-                }
-            });
-        }
-
-        return alias || {};
-    }
 
 
     /**

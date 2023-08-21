@@ -173,6 +173,18 @@
                     "type": "boolean",
                     "readOnly": true
                 },
+                "banner": {
+                    "oneOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 500,
+                        "pattern": "^[\\w\\-\\.,\\&\\%\\# \\|\\(\\)\\@\\[\\]\\r\\n]+$"
+                    }]
+                },
                 "bundleDts": {
                     "type": "boolean"
                 },

@@ -69,8 +69,7 @@ class WpBuildTsBundlePlugin extends WpBuildBaseTsPlugin
  * @param {typedefs.WpBuildApp} app
  * @returns {WpBuildTsBundlePlugin | undefined}
  */
-const tsbundle = (app) =>
-	app.build.plugins.tsbundle && app.build.type === "types" ? new WpBuildTsBundlePlugin({ app }) : undefined;
+const tsbundle = (app) => app.build.bundleDts ? new WpBuildTsBundlePlugin({ app }) : undefined;
 
 
 module.exports = tsbundle;

@@ -31,13 +31,9 @@ class WpBuildCleanPlugin extends WpBuildPlugin
      */
 	constructor(options)
     {
-        super(
-			apply(options, options.app.clean !== true ? {} :
-			{
-				plugins: WpBuildCleanPlugin.vendorPlugins(options.app)
-			})
-		);
+        super(apply(options, { plugins: WpBuildCleanPlugin.vendorPlugins(options.app) }));
     }
+
 
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -116,7 +112,7 @@ class WpBuildCleanPlugin extends WpBuildPlugin
  * @param {WpBuildApp} app
  * @returns {(WpBuildCleanPlugin | CleanWebpackPlugin)[]}
  */
-const clean = (app) => app.build.plugins.clean && app.build.type !== "tests" ? new WpBuildCleanPlugin({ app }).getPlugins() : [];
+const clean = (app) => app.args.clean && app.build.type !== "tests" ? new WpBuildCleanPlugin({ app }).getPlugins() : [];
 
 
 module.exports = clean;

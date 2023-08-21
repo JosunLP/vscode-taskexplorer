@@ -18,17 +18,6 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 class WpBuildTsForkerPlugin extends WpBuildPlugin
 {
     /**
-     * @class WpBuildTsForkerPlugin
-     * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
-     */
-	constructor(options)
-    {
-		const tsForkCheckerPlugins = WpBuildTsForkerPlugin.getTsForkCheckerPlugins(options.app);
-        super(apply(options, { plugins: tsForkCheckerPlugins, registerVendorPluginsOnly: true }), "tsForker");
-    }
-
-
-    /**
      * @function Called by webpack runtime to initialize this plugin
      * @override
      * @member apply
@@ -59,14 +48,14 @@ class WpBuildTsForkerPlugin extends WpBuildPlugin
 
 	/**
 	 * @function
-	 * @private
-	 * @static
-	 * @param {typedefs.WpBuildApp} app
+	 * @protected
+	 * @override
 	 * @returns {typedefs.WpBuildPluginVendorOptions[]}
 	 * @throws {WpBuildError}
 	 */
-	static getTsForkCheckerPlugins = (app) =>
+	getOptions = () =>
 	{
+		const app = this.app;
 		const plugins = [];
 
 		if (app.tsConfig)
@@ -162,7 +151,7 @@ class WpBuildTsForkerPlugin extends WpBuildPlugin
  * @param {typedefs.WpBuildApp} app
  * @returns {ForkTsCheckerWebpackPlugin | undefined}
  */
-const tscheck = (app) => app.build.plugins.tscheck ? (new WpBuildTsForkerPlugin({ app }).getPlugins()[0]) : undefined;
+const tscheck = (app) => undefined; // app.build.source === "typescript" ? (new WpBuildTsForkerPlugin({ app }).getPlugins()[0]) : undefined;
 
 
 module.exports = tscheck;

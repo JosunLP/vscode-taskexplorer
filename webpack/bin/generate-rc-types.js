@@ -131,7 +131,7 @@ const parseTypesDts = async (hdr, data) =>
                       return `\nexport declare type ${m1} = `;
                   }
                   return v;
-              })
+          })
           .replace(/\nexport interface (.*?) ([^]*?)\n\}/g, (v, m1, m2) => `export declare interface I${m1} ${m2}\n}\nexport declare type ${m1} = I${m1};\n`)
           .replace(/\nexport declare type Type(.*?) ([^]*?)\n\}/g, (v, m1, m2) =>
           {
@@ -180,8 +180,8 @@ const parseTypesDts = async (hdr, data) =>
           .replace(/\n/g, EOL);
 
     await writeFile(outputDtsPath, `${EOL}${hdr}${EOL}${EOL}${EOL}${data.trim()}${EOL}`);
-
     logger.success(`   created ${outputDtsFile} (${outputDtsPath})`);
+
     return data;
 };
 
@@ -229,7 +229,6 @@ const pushExport = (property, suffix, values, valueType) =>
     const suffix2 = suffix.substring(0, suffix.length - 1),
           pName1 = `${property}${suffix}`,
           pName2 = `${property}${suffix2}`;
-    typedefs.push(pName1, pName2);
     exported.push(`    ${pName1}`, `    is${pName2}`);
     lines.push(
         "/**",
@@ -271,6 +270,7 @@ const writeConstantsJs = async (hdr, data) =>
         typedefs.push(match[1]);
         properties.push(match[1]);
         pushExport(match[1], "s", match[2]);
+        typedefs.push(`${match[1]}s`, `${match[1]}${match[2]}`);
     }
 
     while ((match = rgx2.exec(data)) !== null)
@@ -280,17 +280,24 @@ const writeConstantsJs = async (hdr, data) =>
               valuesFmt = `"${match[2].replace(new RegExp(`[\\?]?\\:(.*?);(?:${EOL}    |$)`, "gm"), "\", \"")}"`
                                       .replace(/(?:, ""|"", )/g, "");
         pushExport(propFmt, "Props", valuesFmt, `(keyof typedefs.${propFmt})`);
+        typedefs.push(`${propFmt}Props`, `${propFmt}${valuesFmt}`);
+    }
+
+    const rgx3 = /export declare type (\w*?) = (\w*?) \& (\w*?);\r?\n/g;
+    while ((match = rgx3.exec(data)) !== null)
+    {
+        typedefs.push(match[1]);
     }
 
     if (lines.length > 0)
     {
         const constantsFile = "constants.js",
-              constantsDir = resolve(__dirname, "..", "utils"),
+              constantsDir = resolve(__dirname, "..", "types"),
               constantsPath = join(constantsDir, constantsFile),
               constantsData = await readFile(constantsPath, "utf8");
 
         exported.sort((a, b) => a.localeCompare(b));
-        hdr = hdr.replace(`@file types/${outputDtsFile}`, `@file utils/${constantsFile}`);
+        hdr = hdr.replace(`@file types/${outputDtsFile}`, `@file types/${constantsFile}`);
         data = `/* eslint-disable no-unused-labels */${EOL}// @ts-check${EOL}${EOL}${hdr}${EOL}${EOL}`;
         data += `const typedefs = require(\"../types/typedefs\");${EOL}${EOL}`;
         data += lines.join(EOL) + EOL;
