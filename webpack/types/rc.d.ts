@@ -44,9 +44,11 @@ export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | 
 
 export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
-export declare type WpBuildRcBuilds = WpBuildRcBuild[];
+export declare type WpBuildRcPlugins = WpBuildRcPluginsUser & WpBuildRcPluginsInternal;
 
 export declare type BooleanReadOnly = boolean;
+
+export declare type WpBuildRcBuilds = WpBuildRcBuild[];
 
 export declare type DirectoryPath = string;
 
@@ -55,8 +57,6 @@ export declare type DirectoryPathGlob = string;
 export declare type FilePathRelative = string;
 
 export declare type WpBuildRcExports = WpBuildRcExportsUser & WpBuildRcExportsInternal;
-
-export declare type WpBuildRcPlugins = WpBuildRcPluginsUser & WpBuildRcPluginsInternal;
 
 export declare type WpBuildLogColor = "black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline";
 
@@ -89,12 +89,7 @@ export declare type WpBuildRcBuild =
     name: string;
     active?: boolean;
     auto?: boolean;
-    banner?: boolean | string;
-    bundleDts?: boolean;
     debug?: boolean;
-    dts?: boolean;
-    hash?: boolean;
-    upload?: WpBuildRcUploadConfig;
     source?: WpBuildRcSourceCodeType;
     type: WpBuildRcBuildType;
     entry: WpBuildWebpackEntry;
@@ -104,26 +99,11 @@ export declare type WpBuildRcBuild =
     log: WpBuildRcLog;
     paths: WpBuildRcPaths;
     exports: WpBuildRcExportsUser;
-    plugins: WpBuildRcPluginsUser;
+    plugins: WpBuildRcPlugins;
     vscode?: WpBuildRcVsCodeConfig;
 };
 export declare type WpBuildRcBuildKey = keyof WpBuildRcBuild;
 export declare type TypeWpBuildRcBuild = Required<WpBuildRcBuild>;
-
-export declare type WpBuildRcUploadConfig = 
-{
-    url?: string;
-    plink?: 
-{
-        user?: string;
-        key?: string;
-    };
-    scp?: 
-{
-        user?: string;
-        key?: string;
-    };
-};
 
 export declare type WpBuildWebpackEntry = 
 {
@@ -212,7 +192,7 @@ export declare type WpBuildRcExportsUser =
 
 export declare type WpBuildRcPluginsUser = 
 {
-    banner?: boolean;
+    banner?: boolean | string;
     ignore?: boolean;
     istanbul?: boolean;
     licensefiles?: boolean;
@@ -221,8 +201,44 @@ export declare type WpBuildRcPluginsUser =
     progress?: boolean;
     scm?: boolean;
     sourcemaps?: boolean;
-    upload?: boolean;
-    vendormod?: boolean;
+    upload?: boolean | WpBuildRcUploadConfig;
+    vendormod?:
+        | boolean
+        | 
+{
+              clean_plugin: boolean;
+              ts_loader: boolean;
+          };
+};
+
+export declare type WpBuildRcUploadConfig = 
+{
+    url?: string;
+    plink?: 
+{
+        user?: string;
+        key?: string;
+    };
+    scp?: 
+{
+        user?: string;
+        key?: string;
+    };
+};
+
+export declare type WpBuildRcPluginsInternal = 
+{
+    clean?: BooleanReadOnly;
+    copy?: BooleanReadOnly;
+    dispose?: BooleanReadOnly;
+    environment?: BooleanReadOnly;
+    html?: BooleanReadOnly;
+    runtimevars?: BooleanReadOnly;
+    testsuite?: BooleanReadOnly;
+    tsbundle?: BooleanReadOnly;
+    tscheck?: BooleanReadOnly;
+    types?: BooleanReadOnly;
+    wait?: BooleanReadOnly;
 };
 
 export declare type WpBuildRcVsCodeConfig = 
@@ -260,21 +276,6 @@ export declare type WpBuildRcPackageJson =
     name: string;
     publisher?: string;
     version: string;
-};
-
-export declare type WpBuildRcPluginsInternal = 
-{
-    clean?: BooleanReadOnly;
-    copy?: BooleanReadOnly;
-    dispose?: BooleanReadOnly;
-    environment?: BooleanReadOnly;
-    html?: BooleanReadOnly;
-    runtimevars?: BooleanReadOnly;
-    testsuite?: BooleanReadOnly;
-    tsbundle?: BooleanReadOnly;
-    tscheck?: BooleanReadOnly;
-    types?: BooleanReadOnly;
-    wait?: BooleanReadOnly;
 };
 
 export declare type WebpackConfigOverride = 

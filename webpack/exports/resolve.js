@@ -7,8 +7,9 @@
  * @author Scott Meesseman @spmeesseman
  */
 
-const { join } = require("path");
-const { apply, merge, findFilesSync, isArray, WpBuildApp } = require("../utils");
+const { apply } = require("../utils");
+
+/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 
 
 /**
@@ -18,8 +19,8 @@ const { apply, merge, findFilesSync, isArray, WpBuildApp } = require("../utils")
 const resolve = (app) =>
 {
 	apply(app.wpc.resolve,
-	{   // app.getAliasConfig() will map `tsconfig.paths` and `[buildrc].alias`
-		alias: merge({}, app.build.alias),
+	{
+		alias: app.build.alias,
 		extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
 	});
 
@@ -35,20 +36,6 @@ const resolve = (app) =>
 	else {
 		apply(app.wpc.resolve, { modules: [ app.getContextPath(), "node_modules" ]});
 	}
-
-
-
-
-app.wpc.resolve = {
-	modules: [ app.getContextPath(), "node_modules" ],
-	extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
-	alias: {
-		":env": [ join(app.build.paths.base, "src", "lib", "env", app.target) ],
-		":types": [ join(app.build.paths.base, "types") ]
-	}
-};
-
-
 };
 
 

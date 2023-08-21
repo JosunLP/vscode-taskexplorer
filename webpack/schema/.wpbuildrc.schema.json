@@ -173,32 +173,8 @@
                     "type": "boolean",
                     "readOnly": true
                 },
-                "banner": {
-                    "oneOf": [
-                    {
-                        "type": "boolean"
-                    },
-                    {
-                        "type": "string",
-                        "minLength": 2,
-                        "maxLength": 500,
-                        "pattern": "^[\\w\\-\\.,\\&\\%\\# \\|\\(\\)\\@\\[\\]\\r\\n]+$"
-                    }]
-                },
-                "bundleDts": {
-                    "type": "boolean"
-                },
                 "debug": {
                     "type": "boolean"
-                },
-                "dts": {
-                    "type": "boolean"
-                },
-                "hash": {
-                    "type": "boolean"
-                },
-                "upload": {
-                    "$ref": "#/definitions/WpBuildRcUploadConfig"
                 },
                 "source": {
                     "$ref": "#/definitions/WpBuildRcSourceCodeType"
@@ -228,39 +204,13 @@
                     "$ref": "#/definitions/WpBuildRcExportsUser"
                 },
                 "plugins": {
-                    "$ref": "#/definitions/WpBuildRcPluginsUser"
+                    "$ref": "#/definitions/WpBuildRcPlugins"
                 },
                 "vscode": {
                     "$ref": "#/definitions/WpBuildRcVsCodeConfig"
                 }
             },
             "dependencies": {
-                "bundleDts": {
-                    "allOf": [
-                    {
-                        "if": {
-                            "properties": {
-                                "bundle": { 
-                                    "const": true
-                                }
-                            }
-                        },
-                        "then": { 
-                            "properties": {
-                                "type": { 
-                                    "enum": [
-                                        "types", "module"
-                                    ]
-                                },
-                                "dts": {
-                                    "not": {
-                                        "const": false
-                                    }
-                                }
-                            }
-                        }
-                    }]
-                },
                 "debug": {
                     "if": {
                         "properties": {
@@ -307,49 +257,79 @@
                         }]
                     }
                 },
-                "dts": {
-                    "allOf": [
-                    {
-                        "if": {
-                            "properties": {
-                                "dts": { 
-                                    "const": true
-                                }
-                            }
-                        },
-                        "then": { 
-                            "properties": {
-                                "type": { 
-                                    "enum": [
-                                        "types", "module"
-                                    ]
-                                }
-                            }
-                        }
-                    }]
-                },
-                "hash": {
-                    "allOf": [
-                    {
-                        "if": {
-                            "properties": {
-                                "hash": { 
-                                    "const": true
-                                }
-                            }
-                        },
-                        "then": { 
-                            "properties": {
-                                "type": {
-                                    "not": {
-                                        "enum": [
-                                            "tests", "types"
-                                        ]
+                "plugins": {
+                    "properties": {
+                        "dts": {
+                            "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "dts": { 
+                                            "const": true
+                                        }
+                                    }
+                                },
+                                "then": { 
+                                    "properties": {
+                                        "type": { 
+                                            "enum": [
+                                                "types", "module"
+                                            ]
+                                        }
                                     }
                                 }
-                            }
+                            }]
+                        },
+                        "hash": {
+                            "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "hash": { 
+                                            "const": true
+                                        }
+                                    }
+                                },
+                                "then": { 
+                                    "properties": {
+                                        "type": {
+                                            "not": {
+                                                "enum": [
+                                                    "tests", "types"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }]
+                        },
+                        "bundleDts": {
+                            "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "bundle": { 
+                                            "const": true
+                                        }
+                                    }
+                                },
+                                "then": { 
+                                    "properties": {
+                                        "type": { 
+                                            "enum": [
+                                                "types", "module"
+                                            ]
+                                        },
+                                        "dts": {
+                                            "not": {
+                                                "const": false
+                                            }
+                                        }
+                                    }
+                                }
+                            }]
                         }
-                    }]
+                    }
                 },
                 "type": {
                     "allOf": [
@@ -779,7 +759,16 @@
             "additionalProperties": false,
             "properties": {
                 "banner": {
-                    "type": "boolean"
+                    "oneOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 500,
+                        "pattern": "^[\\w\\-\\.,\\&\\%\\# \\|\\(\\)\\@\\[\\]\\r\\n]+$"
+                    }]
                 },
                 "ignore": {
                     "type": "boolean"
@@ -806,10 +795,36 @@
                     "type": "boolean"
                 },
                 "upload": {
-                    "type": "boolean"
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "$ref": "#/definitions/WpBuildRcUploadConfig"
+                        }
+                    ]
                 },
                 "vendormod": {
-                    "type": "boolean"
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "typef": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "clean_plugin", "ts_loader"
+                            ],
+                            "properties": {
+                                "clean_plugin": {
+                                    "type": "boolean"
+                                },
+                                "ts_loader": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    ]
                 }
             }
         },
@@ -860,6 +875,37 @@
                 },
                 "wait": {
                     "$ref": "#/definitions/BooleanReadOnly"
+                }
+            },
+            "dependencies": {
+                "tsbundle": {
+                    "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "tsbundle": { 
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": { 
+                            "oneOf": [
+                            {
+                                "properties": {
+                                    "dts": {
+                                        "const": true
+                                    }
+                                }
+                            },
+                            {
+                                "properties": {
+                                    "tscheck": {
+                                        "const": true
+                                    }
+                                }
+                            }]
+                        }
+                    }]
                 }
             }
         },

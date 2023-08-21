@@ -15,7 +15,7 @@ const { WebpackError } = require("webpack");
 const typedefs = require("../types/typedefs");
 const { spawnSync } = require("child_process");
 const { existsSync } = require("fs");
-const { join, resolve, basename, dirname, isAbsolute } = require("path");
+const { join, resolve, basename, dirname, isAbsolute, relative } = require("path");
 const exec = promisify(require("child_process").exec);
 
 const globOptions = {
@@ -594,6 +594,20 @@ const pickNot = (obj, ...keys) =>
 
 
 /**
+ * @param {string} b base directory
+ * @param {string} p configured path (relative or absolute)
+ */
+const relativrPath = (b, p) => { if (isAbsolute(p)) { p = relative(b, p); } return p; };
+
+
+/**
+ * @param {string} b base directory
+ * @param {string} p configured path (relative or absolute)
+ */
+const resolvePath = (b, p) => { if (!isAbsolute(p)) { p = resolve(b, p); } return p; };
+
+
+/**
  * @function
  * @template T
  * @param {T[]} a
@@ -677,5 +691,5 @@ class WpBuildError extends WebpackError
 module.exports = {
     apply, applyIf, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, findTsConfig,
     getTsConfig, isArray, isDate,isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise,
-    isString, merge, mergeIf, pick, pickBy, pickNot, uniq, WpBuildError
+    isString, merge, mergeIf, pick, pickBy, pickNot, uniq, WpBuildError, relativrPath, resolvePath
 };

@@ -11,20 +11,19 @@
  */
 
 const { existsSync } = require("fs");
-const resolvePath = require("path").resolve;
+const wpexports = require("../exports");
 const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
-const { isAbsolute, relative, sep } = require("path");
-const { apply, WpBuildError, isPromise } = require("./utils");
+const { isAbsolute, relative, sep, dirname } = require("path");
 const {
-	cache, devtool, entry, experiments, externals, ignorewarnings, minification, plugins, optimization,
-    output, resolve, rules, stats, watch
-} = require("../exports");
+    apply, WpBuildError, isPromise, findTsConfig, getTsConfig, isArray, findFilesSync,
+    resolvePath, relativrPath
+} = require("./utils");
 
 
 /**
  * @class WpBuildApp
- * @implements {typedefs.IDisposable}
+ * @implements {typedefs.IWpBuildApp}
  */
 class WpBuildApp
 {
@@ -165,65 +164,6 @@ class WpBuildApp
 	};
 
 
-	// /**
-	//  * @function
-	//  * @private
-	//  * @param {typedefs.WpBuildRc} rc wpbuild rc configuration
-	//  * @param {typedefs.WpBuildRcBuild | string} build
-	//  */
-    // applyRc = (rc, build) =>
-    // {
-    //     this.rc = rc; // rc.getBuildRc(build);
-	// 	this.build = merge({}, !isString(build) ? build : (this.rc.builds.find(b => b.name === build)));
-    //     this.rc = rc; // rc.getBuildRc(build);
-    // };
-
-
-    // /**
-    //  * @private
-    //  * @param {typedefs.WpBuildRcBuild | string} build
-    //  * @returns {typedefs.WpBuildRcBuildModeConfigBase}
-    //  */
-    // applyBuildRc = (build) =>
-    // {
-    //     const rc = {
-    //         alias: merge({}, this.alias),
-    //         // builds: this.builds.map(b => merge({}, b)),
-    //         exports: merge({}, this.exports),
-    //         log: merge({}, this.log),
-    //         paths: merge({}, this.paths),
-    //         plugins: merge({}, this.plugins)
-    //     };
-	// 	if (isString(build)) {
-    //         build = apply({}, this.builds.find(b => b.name === build));
-    //     }
-    //     if (isObject(build.log))
-    //     {
-    //         merge(rc.log, build.log);
-    //         if (build.log.color) {
-    //             rc.log.colors.valueStar = build.log.color;
-    //             rc.log.colors.buildBracket = build.log.color;
-    //             rc.log.colors.tagBracket = build.log.color;
-    //             rc.log.colors.infoIcon = build.log.color;
-    //         }
-    //     }
-    //     if (isObject(build.paths)) {
-    //         apply(rc.paths, build.paths);
-    //     }
-    //     if (isObject(build.exports)) {
-    //         apply(rc.exports, build.exports);
-    //     }
-    //     if (isObject(build.plugins)) {
-    //         apply(rc.plugins, build.plugins);
-    //     }
-    //     if (isObject(build.alias)) {
-    //         apply(rc.alias, build.alias);
-    //     }
-    //     build.mode = build.mode || this.mode;
-    //     return rc;
-    // };
-
-
     /**
      * Called by top level rc wrapper after instantiating this app wrapper instance.
      * Calls each ./exports/* default export to construct a {@link typedefs.WpBuildWebpackConfig webpack build configuration}.
@@ -233,33 +173,71 @@ class WpBuildApp
      */
     buildWebpackConfig = () =>
     {
+        const build = this.build;
         this.wpc = {
-            context: this.build.paths.ctx || this.build.paths.base,
+            context: build.paths.ctx || build.paths.base,
             entry: {},
-            mode: this.rc.mode === "test" ? "none" : this.rc.mode,
+            mode: build.mode === "test" ? "none" : build.mode,
             module: { rules: [] },
-            name: `${this.rc.name}|${this.rc.pkgJson.version}|${this.build.name}|${this.mode}|${this.build.target}`,
+            name: `${this.rc.name}|${this.pkgJson.version}|${build.name}|${build.mode}|${build.target}`,
             output: {},
             plugins: [],
             resolve: {},
-            target: this.target
+            target: build.target
         };
-        cache(this);          // Asset cache
-        experiments(this);    // Set any experimental flags that will be used
-        entry(this);          // Entry points for built output
-        externals(this);      // External modules
-        ignorewarnings(this); // Warnings from the compiler to ignore
-        optimization(this);   // Build optimization
-        minification(this);   // Minification / Terser plugin options
-        output(this);         // Output specifications
-        devtool(this);        // Dev tool / sourcemap control
-        resolve(this);        // Resolve config
-        rules(this);          // Loaders & build rules
-        stats(this);          // Stats i.e. console output & webpack verbosity
-        watch(this);          // Watch-mode options
-        plugins(this);        // Plugins - exports.plugins() inits all plugin.plugins
+        wpexports.cache(this);          // Asset cache
+        wpexports.experiments(this);    // Set any experimental flags that will be used
+        wpexports.entry(this);          // Entry points for built output
+        wpexports.externals(this);      // External modules
+        wpexports.ignorewarnings(this); // Warnings from the compiler to ignore
+        wpexports.optimization(this);   // Build optimization
+        wpexports.minification(this);   // Minification / Terser plugin options
+        wpexports.output(this);         // Output specifications
+        wpexports.devtool(this);        // Dev tool / sourcemap control
+        wpexports.resolve(this);        // Resolve config
+        wpexports.rules(this);          // Loaders & build rules
+        wpexports.stats(this);          // Stats i.e. console output & webpack verbosity
+        wpexports.watch(this);          // Watch-mode options
+        wpexports.plugins(this);        // Plugins - exports.plugins() inits all plugin.plugins
         this.printBuildProperties();
         return this.wpc;
+    };
+
+
+    /**
+     * @function
+     * @returns {typedefs.WpBuildWebpackConfig}
+     */
+    configureAppBuild = () =>
+    {
+        this.configureTypescript();
+        this.resolveAliasPaths();
+        return this.buildWebpackConfig();
+    };
+
+
+	/**
+	 * @function
+	 * @private
+	 */
+    configureTypescript = () =>
+    {
+        const build = this.build;
+        if (build.source === "typescript")
+        {
+            build.paths.tsconfig = build.paths.tsconfig ?
+                                   resolvePath(build.paths.base, build.paths.tsconfig) :
+                                   findTsConfig(build);
+            if (build.paths.tsconfig)
+            {
+                this.tsConfig = getTsConfig(build);
+                if (!this.tsConfig) {
+                    // build.paths.tsconfig = undefined;
+                    // this.warnings.push("Could not locate tsconfig file while configuring build" + build.name);
+                    throw WpBuildError.getErrorMissing("tsconfig file", "utils/rc.js");
+                }
+            }
+        }
     };
 
 
@@ -428,13 +406,18 @@ class WpBuildApp
         l.value("   type", this.build.type, 1);
         l.value("   target", this.build.target, 1);
         l.value("   source type", this.build.source, 2);
-        l.value("   hash filename output", !!this.build.hash, 2);
-        l.value("   has upload config", !!this.build.upload, 2);
         l.value("   is vscode extension", this.build.vscode && this.build.vscode.type && this.build.vscode.type !== "none", 2);
         l.value("   alias configuration", JSON.stringify(this.build.alias), 3);
         l.value("   log configuration", JSON.stringify(this.build.log), 3);
         l.value("   exports configuration", JSON.stringify(this.build.exports), 3);
         l.value("   paths configuration", JSON.stringify(this.build.paths), 3);
+        l.sep();
+        l.write("Build Plugins Configuration:", 2, "", 0, l.colors.white);
+        l.value("   testsuite enabled", !!this.build.plugins.testsuite, 2);
+        l.value("   types enabled", !!this.build.plugins.types, 2);
+        l.value("   tsbundle enabled", !!this.build.plugins.tsbundle, 2);
+        l.value("   tscheck enabled", !!this.build.plugins.tscheck, 2);
+        l.value("   upload enabled", !!this.build.plugins.upload, 2);
         l.value("   plugins configuration", JSON.stringify(this.build.plugins), 3);
         l.sep();
         l.write("Build Paths Configuration:", 2, "", 0, l.colors.white);
@@ -460,6 +443,55 @@ class WpBuildApp
         l.value("   rules", JSON.stringify(this.wpc.module.rules), 3);
         l.sep();
     };
+
+
+    /**
+     * @function
+     * @private
+     */
+    resolveAliasPaths = () =>
+    {
+        const build = this.build,
+              alias = this.build.alias,
+              tsConfig = this.tsConfig,
+              tscPaths = tsConfig?.json.compilerOptions.paths;
+
+        const _pushAlias = (/** @type {string} */ key, /** @type {string} */ path) =>
+        {
+            const value = alias[key];
+            if (isArray(value))
+            {
+                if (value.includes(path)) {
+                    this.rc.warnings.push(`tsconfig alias extractions have same key/value ${value} / ${path}`);
+                }
+                else {
+                    value.push(path);
+                }
+            }
+            else { alias[key] = [ path ]; }
+        };
+
+        if (tscPaths)
+        {
+            Object.entries(tscPaths).filter(p => isArray(p)).forEach(([ key, paths ]) =>
+            {
+                paths.forEach((p) => _pushAlias(key, resolvePath(dirname(tsConfig.path), p)), this);
+            });
+        }
+
+        if (!alias[":env"])
+        {
+            const basePath = build.paths.base,
+                  srcPath = relativrPath(basePath, build.paths.src),
+                  envGlob = `**/${srcPath}/**/{env,environment,target}/${build.target}/`,
+                  envDirs = findFilesSync(envGlob, { cwd: basePath, absolute: true, dotRelative: false });
+            if (envDirs.length >= 0)
+            {
+                envDirs.forEach((path) => _pushAlias(":env", path), this);
+            }
+        }
+    };
+
 }
 
 

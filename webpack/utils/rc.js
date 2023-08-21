@@ -14,13 +14,13 @@ const { globalEnv } = require("./global");
 const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
 const { readFileSync, mkdirSync, existsSync } = require("fs");
-const { resolve, basename, join, dirname, isAbsolute, sep, relative } = require("path");
+const { resolve, basename, join, dirname, sep } = require("path");
+const {
+    WpBuildError, apply, pick, isString, merge, isArray, mergeIf, applyIf, resolvePath
+} = require("./utils");
 const {
     isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildRcPackageJsonProps
 } = require("../types/constants");
-const {
-    WpBuildError, apply, pick, isString, merge, isArray, mergeIf, applyIf, findTsConfig, getTsConfig, findFilesSync
-} = require("./utils");
 
 
 const defaultTempDir = `node_modules${sep}.cache${sep}wpbuild${sep}temp`;
@@ -213,7 +213,7 @@ class WpBuildRc
         if (rc.hasTypes)
         {
             const typesBuild = rc.getBuild("types");
-            if (typesBuild && (!rc.isSingleBuild || !existsSync(typesBuild.paths.dist)))
+            if (typesBuild && arge.build !== typesBuild.name && (!rc.isSingleBuild || !existsSync(typesBuild.paths.dist)))
             {
                 rc.apps.push(new WpBuildApp(rc, merge({}, typesBuild)));
                 typesBuild.auto = true;
@@ -227,8 +227,8 @@ class WpBuildRc
             {
                 throw WpBuildError.getErrorProperty("type", "utils/app.js");
             }
+            wpConfigs.push(app.configureAppBuild());
             app.build.active = true;
-            wpConfigs.push(app.buildWebpackConfig());
         }
 
         return wpConfigs;
@@ -291,36 +291,7 @@ class WpBuildRc
             }
         });
 
-        this.builds.forEach((build) =>
-        {
-            this.resolvePaths(build);
-            this.configureTypescript(build);
-            this.resolveAliasPaths(build);
-        });
-    };
-
-
-	/**
-	 * @function
-	 * @private
-	 * @param {typedefs.WpBuildRcBuild} build
-	 */
-    configureTypescript = (build) =>
-    {
-        if (build.source === "typescript")
-        {
-            build.paths.tsconfig = build.paths.tsconfig ?
-                                   this.resolvePath(build.paths.base, build.paths.tsconfig) :
-                                   findTsConfig(build);
-            if (build.paths.tsconfig)
-            {
-                this.tsConfig = getTsConfig(build);
-                if (!this.tsConfig) {
-                    // build.paths.tsconfig = undefined;
-                    this.warnings.push("Could not locate tsconfig file while configuring typescript build");
-                }
-            }
-        }
+        this.builds.forEach(this.resolvePaths, this);
     };
 
 
@@ -512,68 +483,6 @@ class WpBuildRc
     };
 
 
-    /**
-     * @param {string} b base directory
-     * @param {string} p configured path (relative or absolute)
-     */
-    relativrPath = (b, p) => { if (isAbsolute(p)) { p = relative(b, p); } return p; };
-
-
-    /**
-     * @function
-     * @private
-     * @param {typedefs.WpBuildRcBuild} build
-     */
-    resolveAliasPaths = (build) =>
-    {
-        const alias = build.alias,
-              tsConfig = this.tsConfig,
-              tscPaths = tsConfig?.json.compilerOptions.paths;
-
-        const _pushAlias = (/** @type {string} */ key, /** @type {string} */ path) =>
-        {
-            const value = alias[key];
-            if (isArray(value))
-            {
-                if (value.includes(path)) {
-                    this.warnings.push(`tsconfig alias extractions have same key/value ${value} / ${path}`);
-                }
-                else {
-                    value.push(path);
-                }
-            }
-            else { alias[key] = [ path ]; }
-        };
-
-        if (tscPaths)
-        {
-            Object.entries(tscPaths).filter(p => isArray(p)).forEach(([ key, paths ]) =>
-            {
-                paths.forEach((p) => _pushAlias(key, this.resolvePath(dirname(tsConfig.path), p)), this);
-            });
-        }
-
-        if (!alias[":env"])
-        {
-            const basePath = build.paths.base,
-                  srcPath = this.relativrPath(basePath, build.paths.src),
-                  envGlob = `**/${srcPath}/**/{env,environment,target}/${build.target}/`,
-                  envDirs = findFilesSync(envGlob, { cwd: basePath, absolute: true, dotRelative: false });
-            if (envDirs.length >= 0)
-            {
-                envDirs.forEach((path) => _pushAlias(":env", path), this);
-            }
-        }
-    };
-
-
-    /**
-     * @param {string} b base directory
-     * @param {string} p configured path (relative or absolute)
-     */
-    resolvePath = (b, p) => { if (!isAbsolute(p)) { p = resolve(b, p); } return p; };
-
-
 	/**
 	 * @function
 	 * @private
@@ -591,9 +500,9 @@ class WpBuildRc
 
         build.paths.base = base;
         build.paths.temp = build.paths.temp && build.paths.temp !== defaultTempDir ? build.paths.temp : temp;
-        build.paths.ctx = build.paths.ctx ? this.resolvePath(base, build.paths.ctx) : base;
-        build.paths.src = this.resolvePath(base, build.paths.src || "src");
-        build.paths.dist = this.resolvePath(base, build.paths.dist || "dist");
+        build.paths.ctx = build.paths.ctx ? resolvePath(base, build.paths.ctx) : base;
+        build.paths.src = resolvePath(base, build.paths.src || "src");
+        build.paths.dist = resolvePath(base, build.paths.dist || "dist");
 	};
 
 }

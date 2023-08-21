@@ -86,10 +86,6 @@ const builds =
 	 */
 	tests: (app, rulesConfig) =>
 	{
-		if (app.build.type !== "tests" && app.isTests && app.hasTests()) {
-			return;
-		}
-
 		const buildPath = app.getRcPath("base");
 
 		app.wpc.module.rules.push(
@@ -108,11 +104,6 @@ const builds =
 			use: getLoader(app, rulesConfig, "babel"),
 			exclude: getExcludes(app, rulesConfig, true)
 		});
-
-		if (app.hasTypes())
-		{
-			builds.types(app, rulesConfig);
-		}
 	},
 
 

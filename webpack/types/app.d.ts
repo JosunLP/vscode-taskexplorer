@@ -45,6 +45,49 @@ declare type WpBuildRcBuildModeConfigBase = Omit<WpBuildRcBuildModeConfig, "buil
 
 declare type WpBuildCombinedRuntimeArgs = WebpackRuntimeArgs & WebpackRuntimeEnvArgs & WpBuildRuntimeEnvArgs;
 
+
+declare interface IWpBuildAppSchema extends IWpBuildRcSchema
+{
+    args: WpBuildCombinedRuntimeArgs
+}
+
+declare interface IWpBuildApp extends IDisposable
+{
+    build: WpBuildRcBuild;
+    global: WpBuildGlobalEnvironment; // Accessible by all parallel builds
+    logger: IWpBuildLogger;
+    rc: IWpBuildAppSchema;          // target js app info
+    target: WebpackTarget;
+    tsConfig: WpBuildAppTsConfig | undefined;
+    wpc: WpBuildWebpackConfig;
+}
+
+declare class ClsWpBuildApp
+{
+    analyze: boolean;                 // parform analysis after build
+    build: WpBuildRcBuild;
+    clean: boolean;
+    disposables: Array<IDisposable>;
+    esbuild: boolean;                 // Use esbuild and esloader
+    imageOpt: boolean;                // Perform image optimization
+    isMain: boolean;
+    isMainProd: boolean;
+    isMainTests: boolean;
+    isTests: boolean;
+    isWeb: boolean;
+    global: WpBuildGlobalEnvironment; // Accessible by all parallel builds
+    logger: IWpBuildLogger;
+    paths: WpBuildRcPaths;
+    rc: IWpBuildRcSchema;           // target js app info
+    target: WebpackTarget;
+    wpc: WpBuildWebpackConfig;
+    mode: WpBuildWebpackMode;
+    dispose: () => void;
+    private wpApp;
+    private getPaths;
+    private resolveRcPaths;
+}
+
 declare interface IWpBuildWebpackConfig extends WebpackConfig
 {
     context: string;
@@ -130,48 +173,6 @@ declare type WpBuildAppTsConfig =
     path: string;
     raw: string;
 };
-
-declare interface IWpBuildAppSchema extends IWpBuildRcSchema
-{
-    args: WpBuildCombinedRuntimeArgs
-}
-
-declare interface IWpBuildApp
-{
-    build: WpBuildRcBuild;
-    global: WpBuildGlobalEnvironment; // Accessible by all parallel builds
-    logger: IWpBuildLogger;
-    rc: IWpBuildAppSchema;          // target js app info
-    target: WebpackTarget;
-    tsConfig: WpBuildAppTsConfig | undefined;
-    wpc: WpBuildWebpackConfig;
-}
-
-declare class ClsWpBuildApp
-{
-    analyze: boolean;                 // parform analysis after build
-    build: WpBuildRcBuild;
-    clean: boolean;
-    disposables: Array<IDisposable>;
-    esbuild: boolean;                 // Use esbuild and esloader
-    imageOpt: boolean;                // Perform image optimization
-    isMain: boolean;
-    isMainProd: boolean;
-    isMainTests: boolean;
-    isTests: boolean;
-    isWeb: boolean;
-    global: WpBuildGlobalEnvironment; // Accessible by all parallel builds
-    logger: IWpBuildLogger;
-    paths: WpBuildRcPaths;
-    rc: IWpBuildRcSchema;           // target js app info
-    target: WebpackTarget;
-    wpc: WpBuildWebpackConfig;
-    mode: WpBuildWebpackMode;
-    dispose: () => void;
-    private wpApp;
-    private getPaths;
-    private resolveRcPaths;
-}
 
 export {
     ClsWpBuildApp,

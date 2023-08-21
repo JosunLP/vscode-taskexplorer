@@ -65,7 +65,7 @@ declare interface IWpBuildLogger
     valuestar: (msg: string, value: any, level?: WpBuildLogLevel, pad?: string, iconColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
     warning: (msg: any, pad?: string) => void;
     write: (msg: string, level?: WpBuildLogLevel, pad?: string, icon?: string | undefined | null | 0 | false, color?: WpBuildLogColorMapping | null) => void;
-    writeMsgTag: (msg: string, tagMsg: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
+    writeMsgTag: (msg: string, tagMsg: string, level?: WpBuildLogLevel, pad?: string, bracketColor?: WpBuildLogColorMapping | null, msgColor?: WpBuildLogColorMapping | null) => void;
 }
 
 export {
