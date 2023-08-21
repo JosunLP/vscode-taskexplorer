@@ -105,6 +105,10 @@ class WpBuildUploadPlugin extends WpBuildPlugin
               logger = app.logger,
               toUploadPath = join(app.build.paths.temp, app.mode);
 
+        if (!app.global.runtimeVars) {
+            return;
+        }
+
         logger.write("upload debug support files", 1);
         this.compilation = compilation;
         if (!existsSync(toUploadPath)) {

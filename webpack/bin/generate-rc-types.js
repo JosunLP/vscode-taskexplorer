@@ -11,7 +11,7 @@
 
 const { EOL } = require("os");
 const { existsSync } = require("fs");
-const { resolve, join } = require("path");
+const { resolve, join, basename } = require("path");
 const { execAsync } = require("../utils/utils");
 const { readFile, writeFile } = require("fs/promises");
 const WpBuildConsoleLogger = require("../utils/console");
@@ -63,6 +63,9 @@ const properties = [];
 /** @type {string[]} */
 const lines = [];
 
+/** @type {string[]} */
+const typedefs = [];
+
 /** @type {WpBuildConsoleLogger} */
 let logger;
 
@@ -85,7 +88,7 @@ const cliWrap = (/** @type {(arg0: string[]) => Promise<any> } */ exe) =>
  * @returns {boolean}
  */
 const isBaseType = (type) => [
-        "WpBuildRcExports", "WpBuildRcLog", "WpBuildRcLogPad", "WpBuildRcPaths",
+        "WpBuildRcExports", "WpBuildRcLog", "WpBuildRcLogPad", "WpBuildRcPaths", "WpBuildRcVsCode",
         "WpBuildRcPlugins", "WpBuildRcBuild", "WpBuildLogTrueColor", "WpBuildRcLogColors"
     ].includes(type);
 
@@ -108,9 +111,12 @@ const parseTypesDts = async (hdr, data) =>
           .replace("export type WpBuildLogLevel1 = number;\n", "")
           .replace("export type WpBuildLogLevel = WpBuildLogLevel1 & WpBuildLogLevel2;\n", "")
           .replace("export type WpBuildLogLevel2 = 0 | 1 | 2 | 3 | 4 | 5;", "export type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;")
+          .replace("export type WpBuildRcBuild = ", "export interface WpBuildRcBuild ")
+          .replace(/\n\} +\& WpBuildRcBuild[0-9] *; *\n/g, "\n}\n")
+          .replace(/export type WpBuildRcBuild[0-9](?:[^]*?)\};\n/, "")
           .replace(/\/\* eslint\-disable \*\/$/gm, "")
           .replace(/\n\}\nexport /g, "\n}\n\nexport ")
-          .replace(/author\?\:(?:[^]*?)\};/g, "author?: string | { name: string; email?: string };")
+          .replace(/author\?\:[^]*?(?:\}|\));/, "author?: string | { name: string; email?: string };")
           .replace(/export type WebpackEntry =\s+\|(?:[^]*?)\};/g, (v) => v.replace("| string", "string").replace(/\n/g, " ").replace(/ {2,}/g, " "))
           .replace(/ *\$schema\?\: string;\n/, "")
           .replace(/(export type (?:.*?)\n)(export type)/g, (_, m1, m2) => `\n${m1}\n${m2}`)
@@ -138,6 +144,7 @@ const parseTypesDts = async (hdr, data) =>
                       requiredProperties.filter(([ _, t ]) => t === m1).forEach(([ p, _ ]) => {
                           src = src.replace(new RegExp(`${p}\\?\\: `, "g"), `${p}: `);
                       });
+                      typedefs.push(m1, `${m1}Key`, `Type${m1}`);
                       if (generateEnums)
                       {
                           const valuesFmt = m2.replace(/ *\= */, "")
@@ -161,9 +168,11 @@ const parseTypesDts = async (hdr, data) =>
           .replace(/\n    \| +/g, " | ")
           .replace(/(?:\n){3,}/g, "\n\n")
           .replace(/[a-z] = +\| +"[a-z]/g, (v) => v.replace("= |", "="))
-          .replace(/\n\}\n/g, "\n};\n")
-          .replace(/(export declare type (?:[^]*?)\}\n)/g, v => v.slice(0, v.length - 1) + ";\n")
           .replace(/[\w] ;/g, (v) => v.replace(" ;", ";"))
+          .replace(/;\n\s+;\n/g, ";\n\n")
+          .replace(/\n\};?\n/g, "\n}\n")
+          .replace(/(export declare type (?:[^]*?)\}\n)/g, v => v.slice(0, v.length - 1) + ";\n")
+          .replace(/(export declare interface (?:[^]*?)\};\n)/g, v => v.slice(0, v.length - 2) + "\n\n")
           .replace(/([;\{])\n\s*?\n(\s+)/g, (_, m1, m2) => m1 + "\n" + m2)
           .replace(/ = \{ "= /g, "")
           // .replace(/export declare type WpBuildLogTrueColor =(?:.*?);\n/g, (v) => v + "\nexport declare type WpBuildLogTrueBaseColor = Omit<WpBuildLogTrueColor, \"system\">;\n")
@@ -180,14 +189,14 @@ const parseTypesDts = async (hdr, data) =>
 /**
  * @param {string} file
  * @param {string} previousContent
- * @returns {Promise<boolean>}
+ * @returns {Promise<0|1>}
  */
 const promptForRestore = async (file, previousContent) =>
 {
     const promptSchema = {
         properties: {
-            inVersion: {
-                description: "Enter yes (y) or no (n)",
+            result: {
+                description: "Restore previous content? : yes (y) or no (n)",
                 pattern: /^(?:yes|no|y|n)$/i,
                 default: "no",
                 message: "Must enter yes (y) or no (n)",
@@ -198,11 +207,14 @@ const promptForRestore = async (file, previousContent) =>
     const prompt = require("prompt");
     prompt.start();
     const { result } = await prompt.get(promptSchema);
-    if (result && result.toString().toLowerCase().startsWith("y")) {
+    if (result && result.toString().toLowerCase().startsWith("y"))
+    {
         await writeFile(file, previousContent);
-        return true;
+        logger.warning(`created ${basename(file)} but tsc validation failed, previous content has been restored`, "   ");
+        return 1;
     }
-    return false;
+    logger.warning(`created ${basename(file)} but tsc validation failed, new content was retained`, "   ");
+    return 0;
 };
 
 
@@ -214,22 +226,26 @@ const promptForRestore = async (file, previousContent) =>
  */
 const pushExport = (property, suffix, values, valueType) =>
 {
-    const suffix2 = suffix.substring(0, suffix.length - 1);
-    exported.push(`    ${property}${suffix}`, `    is${property}${suffix2}`);
+    const suffix2 = suffix.substring(0, suffix.length - 1),
+          pName1 = `${property}${suffix}`,
+          pName2 = `${property}${suffix2}`;
+    typedefs.push(pName1, pName2);
+    exported.push(`    ${pName1}`, `    is${pName2}`);
     lines.push(
         "/**",
         ` * @type {${!valueType ? `typedefs.${property}[]` : `${valueType}[]`}}`,
         " */",
-        `const ${property}${suffix} = [ ${values.replace(/ \| /g, ", ")} ];${EOL}`,
+        `const ${pName1} = [ ${values.replace(/ \| /g, ", ")} ];${EOL}`,
         "/**",
         " * @param {any} v Variable to check type on",
         ` * @returns {v is typedefs.${property}}`,
         " */",
-        `const is${property}${suffix2} = (v) => !!v && ${property}${suffix}.includes(v);${EOL}`
+        `const is${pName2} = (v) => !!v && ${pName1}.includes(v);${EOL}`
     );
     const enumeration = enums.find(e => e.includes(`${property}Enum`));
     if (enumeration) {
         lines.push(enumeration);
+        typedefs.push(`${property}Enum`);
         exported.push(`    ${property}Enum`);
     }
     logger.log(`      added runtime constants for type ${property}`);
@@ -252,15 +268,17 @@ const writeConstantsJs = async (hdr, data) =>
 
     while ((match = rgx.exec(data)) !== null)
     {
+        typedefs.push(match[1]);
         properties.push(match[1]);
         pushExport(match[1], "s", match[2]);
     }
 
     while ((match = rgx2.exec(data)) !== null)
     {
+        typedefs.push(match[1]);
         const propFmt = match[1].replace("Type", ""),
-                valuesFmt = `"${match[2].replace(new RegExp(`[\\?]?\\:(.*?);(?:${EOL}    |$)`, "gm"), "\", \"")}"`
-                                        .replace(/(?:, ""|"", )/g, "");
+              valuesFmt = `"${match[2].replace(new RegExp(`[\\?]?\\:(.*?);(?:${EOL}    |$)`, "gm"), "\", \"")}"`
+                                      .replace(/(?:, ""|"", )/g, "");
         pushExport(propFmt, "Props", valuesFmt, `(keyof typedefs.${propFmt})`);
     }
 
@@ -290,19 +308,14 @@ const writeConstantsJs = async (hdr, data) =>
             logPad: "      ",
             program: "tsc",
             execOptions: { cwd: constantsDir },
-            command: `npx tsc --noEmit --skipLibCheck --allowJs ./${constantsFile}`
+            command: `npx tsc --target es2020 --noEmit --skipLibCheck --allowJs ./${constantsFile}`
         });
 
         if (code === 0) {
             logger.success(`   created ${constantsFile} (${constantsPath})`);
         }
         else {
-            if (await promptForRestore(constantsPath, constantsData)) {
-                throw new Error(`created ${constantsFile}  but tsc types validation failed, previous content restored`);
-            }
-            else {
-                throw new Error(`created ${constantsFile}  but tsc types validation failed, new content retained`);
-            }
+            await promptForRestore(constantsPath, constantsData);
         }
     }
 };
@@ -315,7 +328,7 @@ const writeIndexJs = async () =>
     let data = await readFile(indexPath, "utf8");
     data = data.replace(
         /\/\* START_RC_DEFS \*\/(?:.*?)\/\* END_RC_DEFS \*\//g,
-        `/* START_RC_DEFS */ ${exported.map(e => e.trim()).join(", ")} /* END_RC_DEFS */`
+        `/* START_RC_DEFS */ ${exported.sort((a, b) => a.localeCompare(b)).map(e => e.trim()).join(", ")} /* END_RC_DEFS */`
     );
     await writeFile(indexPath, data);
     logger.success(`   updated exports in utils/${indexFile} (${indexPath})`);
@@ -329,8 +342,9 @@ const writeTypedefsJs = async () =>
     let data = await readFile(typesPath, "utf8");
     data = data.replace(
         /\/\* START_RC_DEFS \*\/(?:[^]*?)\/\* END_RC_DEFS \*\//g,
-        `/* START_RC_DEFS */\r\n${properties.map(e => e.trim())
-                                            .map(e => `/** @typedef {import("../types").${e}} ${e} */`)
+        `/* START_RC_DEFS */\r\n${typedefs.sort((a, b) => a.length - b.length)
+                                            .map(e => e.trim())
+                                            .map(e => `/** @typedef {import("./rc").${e}} ${e} */`)
                                             .join("\r\n")}\r\n/* END_RC_DEFS */`
     );
     await writeFile(typesPath, data);
@@ -386,25 +400,23 @@ cliWrap(async () =>
         logPad: "   ",
         program: "tsc",
         execOptions: { cwd: outputDtsDir },
-        command: `npx tsc --noEmit --skipLibCheck ./${outputDtsFile}`
+        command: `npx tsc --target es2020 --noEmit --skipLibCheck ./${outputDtsFile}`
     });
 
     if (code === 0) {
         logger.success(`   created ${outputDtsFile} (${outputDtsPath})`);
     }
     else {
-        if (await promptForRestore(outputDtsPath, data)) {
-            throw new Error(`created ${outputDtsFile} but tsc types validation failed, previous content restored`);
-        }
-        else {
-            throw new Error(`created ${outputDtsFile} but tsc types validation failed, new content retained`);
-        }
+        code = await promptForRestore(outputDtsPath, data);
     }
 
-    data = await readFile(outputDtsPath, "utf8");
-    data = await parseTypesDts(hdr, data);
-    await writeConstantsJs(hdr, data);
-    await writeIndexJs();
+    if (code === 0)
+    {
+        data = await readFile(outputDtsPath, "utf8");
+        data = await parseTypesDts(hdr, data);
+        await writeConstantsJs(hdr, data);
+        await writeIndexJs();
+    }
 
     logger.write("rc types and typings created successfully");
     logger.write(" ");

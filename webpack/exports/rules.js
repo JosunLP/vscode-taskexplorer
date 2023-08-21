@@ -6,19 +6,22 @@
  * @version 0.0.1
  * @license MIT
  * @author Scott Meesseman @spmeesseman
+ *
+ * @description
+ *
+ * @see {@link https://webpack.js.org/configuration/rules webpack.js.org/rules}
+ *
  */
 
 const path = require("path");
 const esbuild = require("esbuild");
 const { existsSync } = require("fs");
 const typedefs = require("../types/typedefs");
+const { isAbsolute, resolve } = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { WpBuildApp, WpBuildError, uniq, merge, isObject, isArray, apply } = require("../utils");
-const { isAbsolute, resolve, posix, relative } = require("path");
+const { WpBuildApp, WpBuildError, uniq, merge, apply } = require("../utils");
 
-/**
- * @typedef {{ include: [], exclude: [], json: typedefs.WpBuildAppTsConfigJson, path: string, dir: string }} RulesConfig
- */
+/** @typedef {typedefs.WpBuildAppTsConfig} RulesConfig */
 
 
 const builds =
@@ -125,9 +128,7 @@ const builds =
 		const mainBuild = app.getAppBuild("module"),
 			  typesSrcPath= app.getSrcPath({ build: app.build.name }),
 			  typesDirDist = app.getDistPath({ build: app.build.name });
-console.log("rules main.name: " + mainBuild?.name);
-console.log("typesSrcPath: " + typesSrcPath);
-console.log("typesDirDist: " + typesDirDist);
+
 		if (mainBuild && typesSrcPath && existsSync(typesSrcPath))
 		{
 			const loader = getLoader(app, rulesConfig);
@@ -135,13 +136,23 @@ console.log("typesDirDist: " + typesDirDist);
 			// tsConfig.include.push(typesDir);
 			if (loader.loader === "ts-loader")
 			{
+				const tsCheckerEnabled = !!app.build.plugins.tscheck;
 				apply(loader.options,
 				{
-					transpileOnly: false,
+					transpileOnly: tsCheckerEnabled,
+					// reportFiles: [
+					// 	"src/**/*.{ts,tsx}", "!src/taskexplorer.ts"
+					// ],
 					compilerOptions: {
 						declaration: true,
+						declarationMap: false,
 						declarationDir: typesDirDist,
-						emitDeclarationsOnly: true
+						//
+						// emitDeclarationsOnly:
+						// See `plugins/vendormod`, setting this flag will skip ts-loader entry output check
+						//
+						emitDeclarationsOnly: true, // !tsCheckerEnabled,
+						noEmit: false // tsCheckerEnabled
 					}
 				});
 			}
@@ -180,8 +191,8 @@ console.log("typesDirDist: " + typesDirDist);
 		},
 		{
 			exclude,
-			include: uniq(rulesConfig.include),
 			test: /\.tsx?$/,
+			include: getIncludes(app, rulesConfig),
 			use: getLoader(app, rulesConfig)
 		},
 		{
@@ -206,7 +217,7 @@ console.log("typesDirDist: " + typesDirDist);
 			}]
 		}]);
 
-		if (typesDir && app.args.name && !app.rc.builds.find(b => b.type === "module")) //  && !existsSync(typesDir))
+		if (typesDir && !!app.args.build && app.rc.builds.find(b => b.type === "types" || b.name === "types")) //  && !existsSync(typesDir))
 		{
 			// app.wpc.module.rules.unshift(
 			// {
@@ -256,20 +267,8 @@ const getExcludes = (app, rulesConfig, allowTest, allowTypes, allowDts) =>
 	if (allowDts !== true) {
 		ex.push(/\.d\.ts$/);
 	}
-	ex.push(...rulesConfig.json.exclude.map(
-		(glob) => {
-			let base = rulesConfig.dir;
-			glob = glob.replace(/\\/g, "/");
-			while (glob.startsWith("../")) {
-				base = resolve(base, "..");
-				glob = glob.replace("../", "");
-			}
-			const rel = relative(app.getContextPath(), base);
-			glob = ((rel ? rel + "/" : "") + glob).replace(/\*\*/g, "(?:.*?)").replace(/\*/g, "(?:.*?)");
-			return new RegExp(glob);
-		}
-	));
-	return uniq(ex);
+	// ex.push(...rulesConfig.excludeAbs);
+	return ex;
 };
 
 
@@ -278,11 +277,7 @@ const getExcludes = (app, rulesConfig, allowTest, allowTypes, allowDts) =>
  * @param {RulesConfig} rulesConfig
  * @returns {string[]}
  */
-const getIncludes = (app, rulesConfig) =>
-{
-	rulesConfig.include.push(app.getSrcPath());
-	return uniq(rulesConfig.include.map(path => isAbsolute(path) ? path : resolve(rulesConfig.dir, path)));
-};
+const getIncludes = (app, rulesConfig) => uniq([ app.getSrcPath(), ...rulesConfig.includeAbs ]);
 
 
 /**
@@ -433,7 +428,7 @@ const rules = (app) =>
 		app.logger.value("   using tsconfig file", tsConfig.path, 2);
 	}
 	else {
-		tsConfig.include = [];
+		 apply(tsConfig, { include: [], exclude: [], files: [], json: {}, raw: "", dir: "", file: "", path: "" });
 	}
 
 	const buildFn = builds[app.build.name] || builds[app.build.type];

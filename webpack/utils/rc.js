@@ -10,34 +10,25 @@
 
 const JSON5 = require("json5");
 const WpBuildApp = require("./app");
-const { readFileSync, mkdirSync, existsSync } = require("fs");
 const { globalEnv } = require("./global");
 const typedefs = require("../types/typedefs");
 const WpBuildConsoleLogger = require("./console");
+const { readFileSync, mkdirSync, existsSync } = require("fs");
 const { resolve, basename, join, dirname, isAbsolute, sep } = require("path");
-const { WpBuildError, apply, pick, isString, merge, isObject, isArray, pickNot, mergeIf, applyIf, findTsConfig } = require("./utils");
 const {
-    isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildWebpackModes
+    isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildRcPackageJsonProps
 } = require("./constants");
+const {
+    WpBuildError, apply, pick, isString, merge, isArray, mergeIf, applyIf, findTsConfig, getTsConfig
+} = require("./utils");
 
 
 const defaultTempDir = `node_modules${sep}.cache${sep}wpbuild${sep}temp`;
 
-/**
- * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
- */
-const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
-
-/**
- * @param {any} v Variable to check type on
- * @returns {v is typedefs.IWpBuildAppSchema}
- */
-const isWpBuildRcPackageJsonProp = (v) => !!v && WpBuildRcPackageJsonProps.includes(v);
-
 
 /**
  * @class
- * @implements {typedefs.IWpBuildRcSchema}
+ * @implements {typedefs.IWpBuildRcSchema}s
  */
 class WpBuildRc
 {
@@ -62,13 +53,17 @@ class WpBuildRc
      */
     detailedDisplayName;
     /**
-     * @type {typedefs.WpBuildRcEnvironment}
+     * @type {typedefs.WpBuildRcBuildModeConfig}
      */
     development;
     /**
      * @type {string}
      */
     displayName;
+    /**
+     * @type {WpBuildError[]}
+     */
+    errors;
     /**
      * @type {typedefs.WpBuildRcExports}
      */
@@ -102,7 +97,7 @@ class WpBuildRc
      */
     plugins;
     /**
-     * @type {typedefs.WpBuildRcEnvironment}
+     * @type {typedefs.WpBuildRcBuildModeConfig}
      */
     production;
     /**
@@ -114,21 +109,26 @@ class WpBuildRc
      */
     source;
     /**
-     * @type {typedefs.WpBuildRcEnvironment}
+     * @type {typedefs.WpBuildRcBuildModeConfig}
      */
     test;
     /**
-     * @type {typedefs.WpBuildRcEnvironment}
+     * @type {typedefs.WpBuildRcBuildModeConfig}
      */
     testproduction;
-    /**
-     * @type {typedefs.WpBuildRcVsCode}
-     */
-    vscode;
 
 
     /**
+     * Top level rc configuration wrapper.  Initializes build configurations and Wraps
+     * all build level 'WpBuildRcApp' instances.  Builds are initialized by merging
+     * each layer's configuration from top level down, (i.e. the top level, `this`, and
+     * the current mode/environement e.g. `production`) into each defined build config.
+     *
+     * @see {@link WpBuildRc.create WpBuildRc.create()} for wbbuild initiantiation process
+     * @see {@link WpBuildApp} for build lvel wrapper defintion.  Stupidly named `app` (???).
+     *
      * @class WpBuildRc
+     * @private
      * @param {typedefs.WebpackRuntimeArgs} argv
      * @param {typedefs.WpBuildRuntimeEnvArgs} arge
      */
@@ -161,6 +161,10 @@ class WpBuildRc
             ...WpBuildRcPackageJsonProps
         );
 
+        //
+        // Merge the base rc level and the environment level configurations into each
+        // build configuration and update`this.builds` with fully configured build defs.
+        //
         this.configureBuilds();
 
         // if (argv.mode && !isWebpackMode(this.mode))
@@ -176,7 +180,16 @@ class WpBuildRc
     };
 
 
+    get hasTests() { return !!this.builds.find(b => b.type === "tests" || b.name.toLowerCase().startsWith("test")); }
+    get hasTypes() { return !!this.getBuild("types"); }
+    get isSingleBuild() { return !!this.args.build; }
+
+
     /**
+     * Base entry function to initialize build configurations and provide the webpack
+     * configuration export(s) to webpack.config.js.
+     * @see ample {@link file:///./../examples/webpack.config.js swebpack.config.js}
+     *
      * @param {typedefs.WebpackRuntimeArgs} argv
      * @param {typedefs.WpBuildRuntimeEnvArgs} arge
      * @returns {typedefs.WpBuildWebpackConfig[]} arge
@@ -184,16 +197,42 @@ class WpBuildRc
     static create = (argv, arge) =>
     {
         const rc = new WpBuildRc(argv, arge);
+
         rc.apps.push(
             ...rc.builds.filter(
                 (b) => !arge.build || b.name === arge.build).map((b) => new WpBuildApp(rc, merge({}, b))
             )
         );
-        return rc.apps.map(app => app.buildWebpackConfig());
+
+        if (rc.hasTypes)
+        {
+            const typesBuild = rc.getBuild("types");
+            if (typesBuild && (!rc.isSingleBuild || !existsSync(typesBuild.paths.dist)))
+            {
+                rc.apps.push(new WpBuildApp(rc, merge({}, typesBuild)));
+                typesBuild.auto = true;
+            }
+        }
+
+        const wpConfigs = [];
+        for (const app of rc.apps)
+        {
+            if (!app.build.mode || !app.build.target || !app.build.type)
+            {
+                throw WpBuildError.getErrorProperty("type", "utils/app.js");
+            }
+            app.build.active = true;
+            wpConfigs.push(app.buildWebpackConfig());
+        }
+
+        return wpConfigs;
     }
 
 
 	/**
+	 * Merges the base rc level and the environment level configurations into each
+	 * build configuration and update`this.builds` with fully configured build defs.
+	 *
 	 * @function
 	 * @private
 	 */
@@ -201,7 +240,7 @@ class WpBuildRc
     {
         /**
          * @param {typedefs.WpBuildRcBuild} dst
-         * @param {typedefs.WpBuildRcEnvironmentBase} src
+         * @param {typedefs.WpBuildRcBuildModeConfigBase} src
          */
         const _applyBase = (dst, src) =>
         {
@@ -231,7 +270,7 @@ class WpBuildRc
 
         this.builds.forEach((build) => _applyBase(build, this));
 
-        const modeRc = /** @type {Partial<typedefs.WpBuildRcEnvironment>} */(this[this.mode]);
+        const modeRc = /** @type {Partial<typedefs.WpBuildRcBuildModeConfig>} */(this[this.mode]);
         modeRc?.builds?.filter(b => isArray(b)).forEach((modeBuild) =>
         {
             let baseBuild = this.builds.find(base => base.name === modeBuild.name);
@@ -245,26 +284,48 @@ class WpBuildRc
             }
         });
 
-        this.builds.forEach((build) => this.resolvePaths(build));
+        this.builds.forEach((build) =>
+        {
+            this.resolvePaths(build);
+            this.configureTypescript(build);
+        });
     };
 
 
-    // /**
-    //  * @param {typedefs.WpBuildRcBuild | string} build
-    //  * @returns {Required<typedefs.WpBuildRcBuild>}
-    //  */
-    // getBuild = (build) =>
-    // {
-    //     const builds = /** @type {Required<typedefs.WpBuildRcBuilds>}  */(this.builds);
-    //     if (!isString(build) && this.initializeBaseRc(build)) {
-    //         return build;
-    //     }
-    //     const b = this.builds.find(b => b.name === build);
-    //     if (b) {
-    //         return merge({}, b);
-    //     }
-    //     return this.builds[0];
-    // };
+	/**
+	 * @function
+	 * @private
+	 * @param {typedefs.WpBuildRcBuild} build
+	 */
+    configureTypescript = (build) =>
+    {
+        if (build.source === "typescript")
+        {
+            build.paths.tsconfig = build.paths.tsconfig ?
+                                   this.resolvePath(build.paths.base, build.paths.tsconfig) :
+                                   findTsConfig(build);
+            if (build.paths.tsconfig)
+            {
+                this.tsConfig = getTsConfig(build);
+            }
+        }
+    };
+
+
+    /**
+     * @function
+     * @param {string} name
+     * @returns {typedefs.WpBuildApp | undefined}
+     */
+    getApp = (name) => this.apps.find(a => a.build.type === name || a.build.name === name);
+
+
+    /**
+     * @function
+     * @param {string} name
+     * @returns {typedefs.WpBuildRcBuild | undefined}
+     */
+    getBuild = (name) => this.builds.find(b => b.type === name || b.name === name);
 
 
     /**
@@ -408,8 +469,8 @@ class WpBuildRc
     /**
      * @function
      * @private
-     * @param {typedefs.WpBuildRcEnvironmentBase} rc
-     * @returns {rc is Required<typedefs.WpBuildRcEnvironmentBase>}
+     * @param {typedefs.WpBuildRcBuildModeConfigBase} rc
+     * @returns {rc is Required<typedefs.WpBuildRcBuildModeConfigBase>}
      */
     initializeBaseRc = (rc) =>
     {
@@ -465,6 +526,13 @@ class WpBuildRc
     };
 
 
+    /**
+     * @param {string} b base directory
+     * @param {string} p configured path (relative or absolute)
+     */
+    resolvePath = (b, p) => { if (!isAbsolute(p)) { p = resolve(b, p); } return p; };
+
+
 	/**
 	 * @function
 	 * @private
@@ -475,11 +543,6 @@ class WpBuildRc
 		const base = resolve(__dirname, "..", ".."),
               ostemp = process.env.TEMP || process.env.TMP,
 			  temp = resolve(ostemp ? `${ostemp}${sep}${this.name}` : defaultTempDir, build.mode);
-        /**
-         * @param {string} b base directory
-         * @param {string} p configured path (relative or absolute)
-         */
-        const _resolveRcPath = (b, p) => { if (!isAbsolute(p)) { p = resolve(b, p); } return p; };
 
 		if (!existsSync(temp)) {
 			mkdirSync(temp, { recursive: true });
@@ -487,15 +550,9 @@ class WpBuildRc
 
         build.paths.base = base;
         build.paths.temp = build.paths.temp && build.paths.temp !== defaultTempDir ? build.paths.temp : temp;
-        build.paths.ctx = build.paths.ctx ? _resolveRcPath(base, build.paths.ctx) : base;
-        build.paths.src = _resolveRcPath(base, build.paths.src || "src");
-        build.paths.dist = _resolveRcPath(base, build.paths.dist || "dist");
-        if (build.source === "typescript") {
-            build.paths.tsconfig = build.paths.tsconfig ? _resolveRcPath(base, build.paths.tsconfig) : findTsConfig(build);
-        }
-        else {
-            build.paths.tsconfig = undefined;
-        }
+        build.paths.ctx = build.paths.ctx ? this.resolvePath(base, build.paths.ctx) : base;
+        build.paths.src = this.resolvePath(base, build.paths.src || "src");
+        build.paths.dist = this.resolvePath(base, build.paths.dist || "dist");
 	};
 
 }

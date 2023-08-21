@@ -7,6 +7,8 @@
  * @author Scott Meesseman @spmeesseman
  */
 
+const typedefs = require("../types/typedefs");
+
 const analyze = require("./analyze");
 const banner = require("./banner");
 const clean = require("./clean");
@@ -23,7 +25,18 @@ const progress = require("./progress");
 const scm = require("./scm");
 const sourcemaps = require("./sourcemaps");
 const testsuite = require("./testsuite");
+const tsbundle = require("./tsbundle");
 const types = require("./types");
+
+
+// /**
+//  * @param {typedefs.WpBuildApp} app
+//  * @param {boolean} [force]
+//  * @returns {WpBuildTsBundlePlugin | undefined}
+//  */
+// const tsbundle = (app, force) => force || app.build.plugins.tsbundle ? new WpBuildTsBundlePlugin({ app }) : undefined;
+
+
 const tscheck = require("./tscheck");
 const upload = require("./upload");
 const vendormod = require("./vendormod");
@@ -32,6 +45,6 @@ const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = r
 
 module.exports = {
     analyze, banner, clean, copy, cssextract, dispose, environment, htmlcsp, htmlinlinechunks,
-    ignore, imageminimizer, istanbul, licensefiles, loghooks, optimization, progress,
-    runtimevars, scm, sourcemaps, testsuite, types, tscheck, upload, vendormod, webviewapps, wait
+    ignore, imageminimizer, istanbul, licensefiles, loghooks, optimization, progress, runtimevars,
+    scm, sourcemaps, testsuite, tsbundle, tscheck, types, upload, vendormod, webviewapps, wait
 };

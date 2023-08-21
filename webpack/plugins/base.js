@@ -98,7 +98,7 @@ class WpBuildPlugin
      */
     name;
     /**
-     * @member {WpBuildPluginOptions} options
+     * @member {typedefs.WpBuildPluginOptionsRequired} options
      * @memberof WpBuildPlugin.prototype
      * @protected
      */
@@ -152,18 +152,21 @@ class WpBuildPlugin
         this.logger = this.app.logger;
         this.wpConfig = options.app.wpc;
         this.name = this.constructor.name;
-        this.options = mergeIf(options, { plugins: [] });
+        this.options = /** @type {typedefs.WpBuildPluginOptionsRequired} */(mergeIf(options, { plugins: [] }));
         this.hashDigestLength = this.app.wpc.output.hashDigestLength || 20;
         this.cache = new WpBuildCache(this.app, `plugincache_${this.app.mode}_${this.name.replace(/WpBuild|Plugin/g, "")}.json`);
         if (globalCache) {
             const aGLobalCache = asArray(globalCache);
             this.initGlobalEnvObject(aGLobalCache[0], aGLobalCache[1], ...aGLobalCache.slice(2));
         }
-        if (!options.registerVendorPluginsFirst) {
-            this.plugins = [ this, ...asArray(options.plugins).map(p => new p.ctor(p.options)) ];
+        if (options.registerVendorPluginsOnly) {
+            this.plugins = [ ...this.options.plugins.map(p => new p.ctor(p.options)) ];
+        }
+        else if (options.registerVendorPluginsFirst) {
+            this.plugins = [ ...this.options.plugins.map(p => new p.ctor(p.options)), this ];
         }
         else {
-            this.plugins = [ ...asArray(options.plugins).map(p => new p.ctor(p.options)), this ];
+            this.plugins = [ this, ...this.options.plugins.map(p => new p.ctor(p.options)) ];
         }
     }
 

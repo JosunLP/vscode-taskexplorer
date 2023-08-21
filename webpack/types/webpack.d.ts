@@ -47,9 +47,9 @@ import { Schema as WebpackSchema } from "schema-utils/declarations/validate";
 import {
     Asset as WebpackAsset, AssetInfo as WebpackAssetInfo, AssetEmittedInfo as WebpackAssetEmittedInfo,
     Cache as WebpackCache, Chunk as WebpackChunk, Configuration as WebpackConfig, Compilation as WebpackCompilation,
-    Compiler as WebpackCompiler, EntryObject as WebpackEntry, sources as WebpackSources, Stats as WebpackStats,
+    Compiler as WebpackCompiler, EntryObject, sources as WebpackSources, Stats as WebpackStats,
     StatsAsset as WebpackStatsAsset, WebpackPluginInstance, ModuleOptions, RuleSetRule, PathData as WebpackPathData,
-    WebpackOptionsNormalized, RuleSetUse, RuleSetUseItem, ResolveOptionsWithDependencyType as WebpackResolveOptions
+    WebpackOptionsNormalized, RuleSetUse, RuleSetUseItem, ResolveOptions as WebpackResolveOptions
 } from "webpack"
 
 
@@ -101,6 +101,8 @@ declare type WebpackModuleOptions = { rules: WebpackRuleSetRule[] } & ModuleOpti
 
 declare type WebpackOptimization = WebpackOptionsNormalized["optimization"];
 
+declare type WebpackEntry = EntryObject;
+
 declare type WebpackOutput = WebpackConfig["output"];
 
 declare type WebpackRawSource = WebpackSources.RawSource;
@@ -137,7 +139,9 @@ declare type WebpackSyncHook<T> = SyncHook<T>;
 
 declare type WebpackRuleSetUse = Exclude<RuleSetUse, string>;
 
-declare type WebpackRuleSetUse = Exclude<RuleSetUseItem, string>;
+// declare type WebpackRuleSetUseItem = Exclude<RuleSetUseItem, (string | undefined)>;
+declare type WebpackRuleSetUseItem = { ident?: string; loader?: string; options: Record<string, any> };
+
 
 export {
     WebpackRuntimeArgs,

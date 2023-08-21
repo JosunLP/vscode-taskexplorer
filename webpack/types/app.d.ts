@@ -23,11 +23,11 @@ import { IDisposable } from "./generic";
 import { IWpBuildLogger } from "./logger";
 import {
     WebpackConfig, WebpackEntry, WebpackModuleOptions, WebpackLogLevel, WebpackRuntimeArgs, WebpackRuntimeEnvArgs,
-    WebpackResolveOptions
+    WebpackResolveOptions, WebpackPluginInstance, WebpackCompiler
 } from "./webpack";
 import {
     WpBuildRcPaths, WpBuildWebpackEntry, WpBuildWebpackMode, WpBuildLogLevel, WpBuildRcBuild, WebpackTarget,
-    WpBuildRcEnvironment, IWpBuildRcSchema
+    WpBuildRcBuildModeConfig, IWpBuildRcSchema
 } from "./rc";
 
 
@@ -39,9 +39,9 @@ declare type WpBuildGlobalEnvironment = { buildCount: number; cache: Record<stri
 
 declare type WpBuildRuntimeEnvArgs =  { analyze?: boolean; build?: string; mode?: WpBuildWebpackMode; loglevel?: WpBuildLogLevel | WebpackLogLevel };
 
-declare type WpBuildRcEnvironmentBase = Omit<WpBuildRcEnvironment, "builds">;
+declare type WpBuildRcBuildModeConfigBase = Omit<WpBuildRcBuildModeConfig, "builds">;
 
-// declare interface IWpBuildRcEnvironmentBase extends WpBuildRcEnvironmentBase {};
+// declare interface WpBuildRModeConfig extends WpBuildRModeConfig {};
 
 declare type WpBuildCombinedRuntimeArgs = WebpackRuntimeArgs & WebpackRuntimeEnvArgs & WpBuildRuntimeEnvArgs;
 
@@ -49,12 +49,17 @@ declare interface IWpBuildWebpackConfig extends WebpackConfig
 {
     context: string;
     mode: Exclude<WebpackConfig["mode"], undefined>;
-    entry: WpBuildWebpackEntry | WebpackEntry;
+    entry: WpBuildWebpackEntry & WebpackEntry;
     output: Exclude<WebpackConfig["output"], undefined>;
+    plugins: (
+		| undefined
+		| ((this: WebpackCompiler, compiler: WebpackCompiler) => void)
+		| WebpackPluginInstance
+	)[];
     resolve: WebpackResolveOptions;
     target: WebpackTarget;
     module: WebpackModuleOptions;
-};
+}
 declare type WpBuildWebpackConfig = IWpBuildWebpackConfig;
 
 export declare type WpBuildAppTsConfigPaths = { [k: string]: string[]; };
@@ -100,9 +105,9 @@ declare type WpBuildAppTsConfigCompilerOptions =
     experimentalDecorators?: boolean;       // Enables experimental support for ES7 decorators
     emitDecoratorMetadata?:  boolean;       // Enables experimental support for emitting type metadata for decorators
     incremental?: boolean;
-    declarations?: boolean;
     declarationsDir?: string;
     declarationsOnly?: boolean;
+    declarationMap?: boolean;
     tsBuildInfoFile?: string;
 }
 
@@ -117,12 +122,13 @@ declare type WpBuildAppTsConfigJson =
 
 declare type WpBuildAppTsConfig =
 {
-    raw: string;
-    json: WpBuildAppTsConfigJson;
-    include: string[];
-    path: string
     dir: string;
+    excludeAbs: string[];
     file: string;
+    includeAbs: string[];
+    json: WpBuildAppTsConfigJson;
+    path: string;
+    raw: string;
 };
 
 declare interface IWpBuildAppSchema extends IWpBuildRcSchema
@@ -172,7 +178,7 @@ export {
     IWpBuildApp,
     IWpBuildAppSchema,
     WpBuildCombinedRuntimeArgs,
-    WpBuildRcEnvironmentBase,
+    WpBuildRcBuildModeConfigBase,
     WpBuildAppGetPathOptions,
     WpBuildGlobalEnvironment,
     WpBuildRuntimeEnvArgs,

@@ -9,7 +9,8 @@
  * @description
  *
  * NOTE: The vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be
- * webpack'ed, -> https://webpack.js.org/configuration/externals/
+ * webpack'ed, -> @see {@link https://webpack.js.org/configuration/externals/}
+ *
  */
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
@@ -21,6 +22,8 @@ const nodeExternals = require("webpack-node-externals");
 
 
 /**
+ * @see {@link https://webpack.js.org/configuration/externals/}
+ *
  * @function
  * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
  */

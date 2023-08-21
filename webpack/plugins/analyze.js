@@ -46,7 +46,7 @@ const analyze =
 	bundle(app)
 	{
 		let plugin;
-		if (app.args.analyze)
+		if (app.rc.args.analyze)
 		{
 			plugin = new BundleAnalyzerPlugin({
 				analyzerPort: "auto",
@@ -67,7 +67,7 @@ const analyze =
 	circular(app)
 	{
 		let plugin;
-		if (app.args.analyze)
+		if (app.rc.args.analyze)
 		{
 			plugin = new CircularDependencyPlugin(
 			{
@@ -90,7 +90,7 @@ const analyze =
 	visualizer(app)
 	{
 		let plugin;
-		if (app.args.analyze) {
+		if (app.rc.args.analyze) {
 			plugin = new VisualizerPlugin({ filename: "../.coverage/visualizer.html" });
 		}
 		return plugin;

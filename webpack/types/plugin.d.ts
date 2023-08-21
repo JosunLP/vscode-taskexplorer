@@ -23,6 +23,7 @@
 
 import { IWpBuildApp } from "./app";
 import { WpBuildLogTrueColor } from "./logger";
+import { Options as DtsBundleOptions } from "dts-bundle/lib";
 import {
     WebpackCompilationHookName, WebpackCompilerHookName, WebpackCompiler, WebpackCompilationAssets,
     WebpackCompilationParams, WebpackPluginInstance, WebpackCompilationHookStage
@@ -41,6 +42,7 @@ declare interface IWpBuildPluginOptions extends Record<string, any>
     app: IWpBuildApp,
     plugins?: WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[],
     registerVendorPluginsFirst?: boolean;
+    registerVendorPluginsOnly?: boolean;
 }
 declare type WpBuildPluginOptions = IWpBuildPluginOptions;
 
@@ -63,9 +65,12 @@ declare interface IWpBuildPlugin
 {
 }
 
+declare type WpBuildDtsBundleOptions = DtsBundleOptions & { baseDir: string; name: string; out: string; };
+
 
 export {
     IWpBuildPlugin,
+    WpBuildDtsBundleOptions,
     WpBuildPluginCacheOptions,
     WpBuildPluginOptions,
     WpBuildPluginTapOptions,

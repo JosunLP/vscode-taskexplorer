@@ -115,29 +115,13 @@ class WpBuildApp
 	 */
 	constructor(rc, build)
 	{
-        if (!build.mode) {
-            throw WpBuildError.getErrorProperty("mode", "utils/app.js", null);
-        }
-        if (!build.target) {
-            throw WpBuildError.getErrorProperty("target", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(build.mode) });
-        }
-        if (!build.type) {
-            throw WpBuildError.getErrorProperty("type", "utils/app.js", { mode: /** @type {typedefs.WebpackMode} */(build.mode) });
-        }
-
         this.rc = rc;
         this.build = build;
         this.errors = [];
         this.disposables = [];
-
 		this.applyAppRc();
-        if (this.build.paths.tsconfig) {
-            this.tsConfig = getTsConfig(this.build);
-        }
-
         this.initLogger();
 	}
-
 
     /**
      * @function
@@ -200,7 +184,7 @@ class WpBuildApp
     // /**
     //  * @private
     //  * @param {typedefs.WpBuildRcBuild | string} build
-    //  * @returns {typedefs.WpBuildRcEnvironmentBase}
+    //  * @returns {typedefs.WpBuildRcBuildModeConfigBase}
     //  */
     // applyBuildRc = (build) =>
     // {
@@ -258,6 +242,7 @@ class WpBuildApp
             module: { rules: [] },
             name: `${this.rc.name}|${this.rc.pkgJson.version}|${this.build.name}|${this.mode}|${this.build.target}`,
             output: {},
+            plugins: [],
             resolve: {},
             target: this.target
         };
@@ -328,7 +313,7 @@ class WpBuildApp
      * @param {string} name
      * @returns {typedefs.WpBuildApp | undefined}
      */
-    getApp = (name) => this.rc.apps.find(a => a.build.type === name || a.build.name === name);
+    getApp = (name) => this.rc.getApp(name);
 
 
     /**
@@ -336,7 +321,7 @@ class WpBuildApp
      * @param {string} name
      * @returns {typedefs.WpBuildRcBuild | undefined}
      */
-    getAppBuild = (name) => this.rc.builds.find(b => b.type === name || b.name === name);
+    getAppBuild = (name) => this.rc.getBuild(name);
 
 
     /**
@@ -359,14 +344,28 @@ class WpBuildApp
     getContextPath = (options) => this.getRcPath("ctx", options);
 
 
+    // /**
+    //  * @function
+    //  * @template {typedefs.WpBuildAppGetPathOptions | undefined} P
+    //  * @template {string | undefined} [R = P extends { stat: true } ? string | undefined : string]
+    //  * @param {P} [options]
+    //  * @returns {R}
+    //  */
+    // getDistPath = (options) => /** @type {R} */(this.getRcPath("dist", options));
     /**
      * @function
-     * @template {typedefs.WpBuildAppGetPathOptions | undefined} P
-     * @template {string | undefined} [R = P extends { stat: true } ? string | undefined : string]
-     * @param {P} [options]
-     * @returns {R}
+     * @param {typedefs.WpBuildAppGetPathOptions & { stat: true }} options
+     * @returns {string | undefined}
      */
-    getDistPath = (options) => /** @type {R} */(this.getRcPath("dist", options));
+    getDistPath(options)
+    /** @param {typedefs.WpBuildAppGetPathOptions & { stat: false }} options @returns {string} */
+    getDistPath(options)
+    /** @param {typedefs.WpBuildAppGetPathOptions} [options] @returns {string} */
+    getDistPath(options)
+    /** @function @returns {string} */
+    getDistPath()
+    /** @function @param {typedefs.WpBuildAppGetPathOptions} [options] */
+    getDistPath(options) { return /** @type {string} */(this.getRcPath("src", options)); }
 
 
     /**
@@ -396,6 +395,9 @@ class WpBuildApp
                         }
                         else {
                             path = relative(basePath, path);
+                            if (opts.dot) {
+                                path = "." + (opts.psx ? "/" : sep) + path;
+                            }
                         }
                     }
                     else
@@ -418,7 +420,7 @@ class WpBuildApp
                     }
                 }
 
-                return path ? (!opts.psx ? normalize(path) : posix.normalize(path)) : undefined;
+                return path ? (!opts.psx ? path : path.replace(/\\/g, "/")) : undefined;
             }
         };
 
@@ -432,49 +434,28 @@ class WpBuildApp
     };
 
 
+    // /**
+    //  * @function
+    //  * @template {typedefs.WpBuildAppGetPathOptions | undefined} P
+    //  * @template {string | undefined} [R = P extends { stat: true } ? string | undefined : string]
+    //  * @param {P} [options]
+    //  * @returns {R}
+    //  */
+    // getSrcPath = (options) => this.getRcPath("src", options);
     /**
      * @function
-     * @template {typedefs.WpBuildAppGetPathOptions | undefined} P
-     * @template {string | undefined} [R = P extends { stat: true } ? string | undefined : string]
-     * @param {P} [options]
-     * @returns {R}
+     * @param {typedefs.WpBuildAppGetPathOptions & { stat: true }} options
+     * @returns {string | undefined}
      */
-    getSrcPath = (options) => this.getRcPath("src", options);
-    // /**
-    //  * @function
-    //  * @param {typedefs.WpBuildAppGetPathOptions & { stat: true }} options
-    //  * @returns {string | undefined}
-    //  */
-    // getSrcPath(options)
-    // /**
-    //  * @function
-    //  * @param {typedefs.WpBuildAppGetPathOptions & { stat: false }} options
-    //  * @returns {string}
-    //  */
-    // getSrcPath(options)
-    // /**
-    //  * @function
-    //  * @param {typedefs.WpBuildAppGetPathOptions} [options]
-    //  * @returns {string}
-    //  */
-    // getSrcPath(options)
-    // /**
-    //  * @function
-    //  * @returns {string}
-    //  */
-    // getSrcPath()
-    // /**
-    //  * @function
-    //  * @param {typedefs.WpBuildAppGetPathOptions} [options]
-    //  * @returns {string}
-    //  */
-    // getSrcPath(options) { return /** @type {string} */(this.getRcPath("src", options)); }
-
-
-    hasTests = () => !!this.rc.builds.find(b => b.type === "tests" || b.name.toLowerCase().startsWith("test"));
-
-
-    hasTypes = () => !!this.rc.builds.find(b => b.type === "types" || b.name.toLowerCase().startsWith("type"));
+    getSrcPath(options)
+    /** @param {typedefs.WpBuildAppGetPathOptions & { stat: false }} options @returns {string} */
+    getSrcPath(options)
+    /** @param {typedefs.WpBuildAppGetPathOptions} [options] @returns {string} */
+    getSrcPath(options)
+    /** @returns {string} */
+    getSrcPath()
+    /**  @function @param {typedefs.WpBuildAppGetPathOptions} [options]  */
+    getSrcPath(options) { return /** @type {string} */(this.getRcPath("src", options)); }
 
 
     /**

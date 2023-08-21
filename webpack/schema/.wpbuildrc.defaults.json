@@ -14,6 +14,9 @@
             },
             "plugins": {
                 "licensefiles": true
+            },
+            "vscode": {
+                "type": "extension"
             }
         }
     ],
@@ -41,12 +44,16 @@
                         "value": 60
                     }
                 },
+                "debug": true,
                 "paths": {
                     "dist": "dist/test",
                     "src": "src/tests"
                 },
                 "plugins": {
                     "istanbul": false
+                },
+                "vscode": {
+                    "type": "tests"
                 }
             }
         ]
@@ -87,27 +94,26 @@
     },
     "plugins":
     {
-        "banner": true,
+        "banner": false,
         "clean": true,
-        "copy": true,
-        "html": true,
+        "copy": false,
         "ignore": true,
         "istanbul": false,
         "licensefiles": false,
         "loghooks": true,
         "optimization": true,
         "progress": false,
-        "runtimevars": true,
+        "runtimevars": false,
         "scm": false,
         "sourcemaps": true,
         "testsuite": false,
-        "tscheck": true,
-        "upload": true,
-        "vendormod": true,
-        "wait": false
+        "tsbundle": false,
+        "tscheck": false,
+        "types": false,
+        "upload": false,
+        "vendormod": true
     },
     "vscode": {
-        "extension": false,
-        "languageServer": false
+        "type": "none"
     }
 }

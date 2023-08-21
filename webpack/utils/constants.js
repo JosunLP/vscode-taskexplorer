@@ -125,6 +125,17 @@ const WpBuildRcPathsEnum =
     tsconfig: "tsconfig"
 };
 
+/**
+ * @type {(keyof typedefs.WpBuildRcPackageJson)[]}
+ */
+const WpBuildRcPackageJsonProps = [ "author", "description", "displayName", "main", "module", "name", "publisher", "version" ];
+
+/**
+ * @param {any} v Variable to check type on
+ * @returns {v is typedefs.WpBuildRcPackageJson}
+ */
+const isWpBuildRcPackageJsonProp = (v) => !!v && WpBuildRcPackageJsonProps.includes(v);
+
 
 module.exports = {
     isWebpackLibraryType,
@@ -133,6 +144,7 @@ module.exports = {
     isWpBuildLogColor,
     isWpBuildLogTrueColor,
     isWpBuildRcBuildType,
+    isWpBuildRcPackageJsonProp,
     isWpBuildRcPathsProp,
     isWpBuildRcSourceCodeType,
     isWpBuildWebpackMode,
@@ -142,6 +154,7 @@ module.exports = {
     WpBuildLogColors,
     WpBuildLogTrueColors,
     WpBuildRcBuildTypes,
+    WpBuildRcPackageJsonProps,
     WpBuildRcPathsEnum,
     WpBuildRcPathsProps,
     WpBuildRcSourceCodeTypes,

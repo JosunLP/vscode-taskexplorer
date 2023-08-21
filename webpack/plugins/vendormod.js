@@ -39,6 +39,7 @@
 const { basename, join } = require("path");
 const WpBuildPlugin = require("./base");
 const { existsSync, readFileSync, readdirSync, writeFileSync } = require("fs");
+const { build } = require("esbuild");
 
 /** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
@@ -47,6 +48,7 @@ const { existsSync, readFileSync, readdirSync, writeFileSync } = require("fs");
 
 class WpBuildVendorModPlugin extends WpBuildPlugin
 {
+	static ranOnce = false;
 
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -61,7 +63,7 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
         {
             modifyVendorPlugins: {
                 hook: "afterEnvironment",
-                callback: this.modifyVendorPlugins.bind(this)
+                callback: this.modifyVendorSource.bind(this)
             }
         });
     }
@@ -71,7 +73,22 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
 	 * @function
 	 * @private
 	 */
-	modifyVendorPlugins = () =>
+	modifyVendorSource = () =>
+	{
+		if (!WpBuildVendorModPlugin.ranOnce)
+		{
+			this.cleanPLugin();
+			this.tsLoader();
+		}
+		WpBuildVendorModPlugin.ranOnce = true;
+	};
+
+
+	/**
+	 * @function
+	 * @private
+	 */
+	cleanPLugin = () =>
 	{   //
 		// Make a lil change to the copy-plugin to initialize the current assets array to
 		// the existing contents of the dist directory.  By default it's current assets list
@@ -88,6 +105,30 @@ class WpBuildVendorModPlugin extends WpBuildPlugin
 				content = content.replace("currentAssets = []", `currentAssets = [ ${distFiles} ]`);
 			}
 			writeFileSync(cleanPlugin, content);
+		}
+	}
+
+
+	/**
+	 * @function
+	 * @private
+	 */
+	tsLoader = () =>
+	{   //
+		// TS-LOADER
+		// file:///c:\Projects\vscode-taskexplorer\node_modules\ts-loader\dist\index.js
+		//
+		// A hck to allow just a straight up types 'declarations only' build.
+		//
+		const tsLoader = join(this.app.getRcPath("base"), "node_modules", "ts-loader", "dist", "index.js");
+		if (existsSync(tsLoader))
+		{
+			let content = readFileSync(tsLoader, "utf8").replace(
+				/if \(outputText === null \|\| outputText === undefined\)/,
+				"if ((outputText === null || outputText === undefined) && (!instance.loaderOptions.compilerOptions || !instance.loaderOptions.compilerOptions.emitDeclarationsOnly))"
+			);
+			content = content.replace("callback(null, output, sourceMap);", "callback(null, (!instance.loaderOptions.compilerOptions || !instance.loaderOptions.compilerOptions.emitDeclarationsOnly ? output : \"\"), sourceMap);");
+			writeFileSync(tsLoader, content);
 		}
 	};
 

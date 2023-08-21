@@ -8,12 +8,18 @@ const { RegexTestsChunk } = require("../utils");
  * @version 0.0.1
  * @license MIT
  * @author Scott Meesseman @spmeesseman
+ *
+ * @description
+ *
+ * @see {@link https://webpack.js.org/configuration/output webpack.js.org/output}
+ *
  */
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackPathData}  WebpackPathData */
 /** @typedef {import("../types").WebpackAssetInfo}  WebpackAssetInfo */
 /** @typedef {import("../types").RequireKeys<WebpackPathData, "filename" | "chunk">} WebpackPathDataOutput */
+
 
 /**
  * @see {@link https://webpack.js.org/configuration/output webpack.js.org/output}
@@ -23,7 +29,9 @@ const { RegexTestsChunk } = require("../utils");
  */
 const output = (app) =>
 {
-	app.wpc.output =
+	app.logger.start("create output configuration", 2);
+
+	apply(app.wpc.output,
 	{
 		path: app.getDistPath(),
 		filename: "[name].js",
@@ -31,9 +39,11 @@ const output = (app) =>
 		hashDigestLength: 20,
 		libraryTarget: "commonjs2"
 		// clean: app.clean ? (app.isTests ? { keep: /(test)[\\/]/ } : app.clean) : undefined
-	};
+	});
 
-	if (app.wpc.target === "webworker")
+	app.logger.write(`   configure output for build '${app.build.name}' [ type: ${app.build.type} ]`, 2);
+
+	if (app.build.type === "webapp")
 	{
 		apply(app.wpc.output,
 		{
@@ -62,7 +72,18 @@ const output = (app) =>
 			umdNamedDefine: true
 		});
 	}
-	else
+	else if (app.build.type === "types")
+	{
+		apply(app.wpc.output,
+		{
+		    libraryTarget: undefined
+			// publicPath: "types/"
+			// library: "types",
+			// libraryTarget: 'umd',
+			// umdNamedDefine: true
+		});
+	}
+	else // type: module
 	{
 		app.wpc.output.filename = (pathData, _assetInfo) =>
 		{
@@ -70,6 +91,8 @@ const output = (app) =>
 			return RegexTestsChunk.test(data.chunk.name || "") ? "[name].js" : "[name].[contenthash].js";
 		};
 	}
+
+	app.logger.write("   output configuration created successfully", 2);
 };
 
 

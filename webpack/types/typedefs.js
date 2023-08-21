@@ -3,99 +3,130 @@
  * @namespace typedefs
  */
 
-/**
- * PLUGINS
- */
 
+/***********************************************************************************************************************
+ * WPBUILDRC
+ ***********************************************************************************************************************/
+
+/* START_RC_DEFS */
+/** @typedef {import("./rc").WebpackMode} WebpackMode */
+/** @typedef {import("./rc").WpBuildRcLog} WpBuildRcLog */
+/** @typedef {import("./rc").WebpackModes} WebpackModes */
+/** @typedef {import("./rc").WebpackTarget} WebpackTarget */
+/** @typedef {import("./rc").WebpackTarget} WebpackTarget */
+/** @typedef {import("./rc").WpBuildRcBuild} WpBuildRcBuild */
+/** @typedef {import("./rc").WpBuildRcPaths} WpBuildRcPaths */
+/** @typedef {import("./rc").WebpackTargets} WebpackTargets */
+/** @typedef {import("./rc").WpBuildRcPaths} WpBuildRcPaths */
+/** @typedef {import("./rc").WpBuildRcLogKey} WpBuildRcLogKey */
+/** @typedef {import("./rc").WpBuildRcLogPad} WpBuildRcLogPad */
+/** @typedef {import("./rc").WpBuildLogColor} WpBuildLogColor */
+/** @typedef {import("./rc").WpBuildLogColor} WpBuildLogColor */
+/** @typedef {import("./rc").TypeWpBuildRcLog} TypeWpBuildRcLog */
+/** @typedef {import("./rc").WpBuildRcExports} WpBuildRcExports */
+/** @typedef {import("./rc").WpBuildRcPlugins} WpBuildRcPlugins */
+/** @typedef {import("./rc").WpBuildLogColors} WpBuildLogColors */
+/** @typedef {import("./rc").WpBuildRcBuildKey} WpBuildRcBuildKey */
+/** @typedef {import("./rc").WpBuildRcPathsKey} WpBuildRcPathsKey */
+/** @typedef {import("./rc").TypeWpBuildRcBuild} TypeWpBuildRcBuild */
+/** @typedef {import("./rc").WpBuildRcLogColors} WpBuildRcLogColors */
+/** @typedef {import("./rc").WpBuildRcLogPadKey} WpBuildRcLogPadKey */
+/** @typedef {import("./rc").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
+/** @typedef {import("./rc").WpBuildRcBuildType} WpBuildRcBuildType */
+/** @typedef {import("./rc").WpBuildRcBuildType} WpBuildRcBuildType */
+/** @typedef {import("./rc").WpBuildWebpackMode} WpBuildWebpackMode */
+/** @typedef {import("./rc").WpBuildWebpackMode} WpBuildWebpackMode */
+/** @typedef {import("./rc").WebpackLibraryType} WebpackLibraryType */
+/** @typedef {import("./rc").WebpackLibraryType} WebpackLibraryType */
+/** @typedef {import("./rc").WpBuildRcPathsProp} WpBuildRcPathsProp */
+/** @typedef {import("./rc").WpBuildRcPathsEnum} WpBuildRcPathsEnum */
+/** @typedef {import("./rc").TypeWpBuildRcLogPad} TypeWpBuildRcLogPad */
+/** @typedef {import("./rc").WpBuildRcExportsKey} WpBuildRcExportsKey */
+/** @typedef {import("./rc").WpBuildRcPluginsKey} WpBuildRcPluginsKey */
+/** @typedef {import("./rc").WpBuildRcBuildTypes} WpBuildRcBuildTypes */
+/** @typedef {import("./rc").WpBuildWebpackModes} WpBuildWebpackModes */
+/** @typedef {import("./rc").WpBuildLogTrueColor} WpBuildLogTrueColor */
+/** @typedef {import("./rc").WpBuildLogTrueColor} WpBuildLogTrueColor */
+/** @typedef {import("./rc").WebpackLibraryTypes} WebpackLibraryTypes */
+/** @typedef {import("./rc").WpBuildRcPathsProps} WpBuildRcPathsProps */
+/** @typedef {import("./rc").TypeWpBuildRcExports} TypeWpBuildRcExports */
+/** @typedef {import("./rc").TypeWpBuildRcPlugins} TypeWpBuildRcPlugins */
+/** @typedef {import("./rc").WpBuildLogTrueColors} WpBuildLogTrueColors */
+/** @typedef {import("./rc").WpBuildRcPackageJson} WpBuildRcPackageJson */
+/** @typedef {import("./rc").WpBuildRcLogColorsKey} WpBuildRcLogColorsKey */
+/** @typedef {import("./rc").TypeWpBuildRcLogColors} TypeWpBuildRcLogColors */
+/** @typedef {import("./rc").WpBuildRcSourceCodeType} WpBuildRcSourceCodeType */
+/** @typedef {import("./rc").WpBuildRcSourceCodeType} WpBuildRcSourceCodeType */
+/** @typedef {import("./rc").WpBuildRcSourceCodeTypes} WpBuildRcSourceCodeTypes */
+/** @typedef {import("./rc").WpBuildRcPackageJsonProp} WpBuildRcPackageJsonProp */
+/** @typedef {import("./rc").WpBuildRcPackageJsonProps} WpBuildRcPackageJsonProps */
+/* END_RC_DEFS */
+
+/** @typedef {import("./rc").WpBuildRcBuilds} WpBuildRcBuilds */
+/** @typedef {import("./rc").WpBuildRcVsCode} WpBuildRcVsCode */
+/** @typedef {import("./rc").WpBuildLogLevel} WpBuildLogLevel */
+/** @typedef {import("./rc").IWpBuildRcSchema} IWpBuildRcSchema */
+/** @typedef {import("./rc").WpBuildWebpackEntry} WpBuildWebpackEntry */
+/** @typedef {import("./rc").WpBuildWebpackEntryValue} WpBuildWebpackEntryValue */
+/** @typedef {import("./rc").WpBuildRcBuildModeConfig} WpBuildRcBuildModeConfig */
+/** @typedef {import("./rc").WpBuildWebpackEntryObject} WpBuildWebpackEntryObject */
+/** @typedef {import("./rc").WpBuildWebpackAliasConfig} WpBuildWebpackAliasConfig */
+
+
+/***********************************************************************************************************************
+ * WPBUILDAPP
+ ***********************************************************************************************************************/
+
+
+/** @typedef {import("./app").IWpBuildApp} IWpBuildApp */
+/** @typedef {import("./app").IWpBuildAppSchema} IWpBuildAppSchema */
+/** @typedef {import("./app").WpBuildAppTsConfig} WpBuildAppTsConfig */
+/** @typedef {import("./app").WpBuildWebpackConfig} WpBuildWebpackConfig */
+/** @typedef {import("./app").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
+/** @typedef {import("./app").WpBuildAppTsConfigJson} WpBuildAppTsConfigJson */
+/** @typedef {import("./app").WpBuildAppGetPathOptions} WpBuildAppGetPathOptions */
+/** @typedef {import("./app").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
+/** @typedef {import("./app").WpBuildCombinedRuntimeArgs} WpBuildCombinedRuntimeArgs */
+/** @typedef {import("./app").WpBuildRcBuildModeConfigBase} WpBuildRcBuildModeConfigBase */
+/** @typedef {import("./app").WpBuildAppTsConfigCompilerOptions} WpBuildAppTsConfigCompilerOptions */
+
+
+/***********************************************************************************************************************
+ * PLUGINS
+ ***********************************************************************************************************************/
+
+/** @typedef {import("./plugin").WpBuildDtsBundleOptions} WpBuildDtsBundleOptions */
 /** @typedef {import("./plugin").WpBuildPluginTapOptions} WpBuildPluginTapOptions */
 /** @typedef {import("./plugin").WpBuildPluginVendorOptions} WpBuildPluginVendorOptions */
 /** @typedef {import("./plugin").WpBuildPluginTapOptionsHash} WpBuildPluginTapOptionsHash */
-/** @typedef {import("./plugin").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
+/** @typedef {import("./generic").RequireKeys<WpBuildPluginTapOptions, "stage" | "hookCompilation">} WpBuildPluginCompilationOptions */
 /** @typedef {{ file: string; snapshot?: WebpackSnapshot | null; source?: WebpackRawSource }} CacheResult */
+
 /**
- * @typedef {Record<string, any>} WpBuildPluginOptions
+ * @typedef {object} WpBuildPluginOptions
  * @property {WpBuildApp} app
+ * @property {string} [build]
  * @property {boolean} [registerVendorPluginsFirst]
+ * @property {boolean} [registerVendorPluginsOnly]
  * @property {WpBuildPluginVendorOptions | WpBuildPluginVendorOptions[]} [plugins]
  */
-/**
- * This callback is displayed as part of the Requester class.
- * @callback WpBuildCallback
- * @param {...any} args
- * @returns {any}
- */
 
 
-/**
- * WPBUILDRC
- */
-
-/* START_RC_DEFS */
-/** @typedef {import("../types").WpBuildRcSourceCodeType} WpBuildRcSourceCodeType */
-/** @typedef {import("../types").WpBuildRcBuildType} WpBuildRcBuildType */
-/** @typedef {import("../types").WpBuildWebpackMode} WpBuildWebpackMode */
-/** @typedef {import("../types").WebpackTarget} WebpackTarget */
-/** @typedef {import("../types").WpBuildLogTrueColor} WpBuildLogTrueColor */
-/** @typedef {import("../types").WpBuildLogColor} WpBuildLogColor */
-/** @typedef {import("../types").WebpackLibraryType} WebpackLibraryType */
-/* END_RC_DEFS */
-
-
-/**
- * WPBUILDAPP
- */
-
-/** @typedef {import("../types").IDisposable} IDisposable */
-/** @typedef {import("../types").WpBuildRcLog} WpBuildRcLog */
-/** @typedef {import("../types").WpBuildLogIcon} WpBuildLogIcon */
-/** @typedef {import("../types").WpBuildRcPaths} WpBuildRcPaths */
-/** @typedef {import("../types").WpBuildRcBuild} WpBuildRcBuild */
-/** @typedef {import("../types").WpBuildRcBuilds} WpBuildRcBuilds */
-/** @typedef {import("../types").WpBuildRcVsCode} WpBuildRcVsCode */
-/** @typedef {import("../types").WebpackLogLevel} WebpackLogLevel */
-/** @typedef {import("../types").WpBuildLogLevel} WpBuildLogLevel */
-/** @typedef {import("../types").WebpackAssetInfo} WebpackAssetInfo */
-/** @typedef {import("../types").IWpBuildRcSchema} IWpBuildRcSchema */
-/** @typedef {import("../types").WpBuildRcExports} WpBuildRcExports */
-/** @typedef {import("../types").WpBuildRcPlugins} WpBuildRcPlugins */
-/** @typedef {import("../types").TypeWpBuildRcLog} TypeWpBuildRcLog */
-/** @typedef {import("../types").WpBuildRcPathsKey} WpBuildRcPathsKey */
-/** @typedef {import("../types").WpBuildLogIconSet} WpBuildLogIconSet */
-/** @typedef {import("../types").WpBuildRcPathsKey} WpBuildRcPathsKey */
-/** @typedef {import("../types").IWpBuildAppSchema} IWpBuildAppSchema */
-/** @typedef {import("../types").TypeWpBuildRcBuild} TypeWpBuildRcBuild */
-/** @typedef {import("../types").WpBuildAppTsConfig} WpBuildAppTsConfig */
-/** @typedef {import("../types").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
-/** @typedef {import("../types").WebpackRuntimeArgs} WebpackRuntimeArgs */
-/** @typedef {import("../types").WpBuildWebpackEntry} WpBuildWebpackEntry */
-/** @typedef {import("../types").TypeWpBuildRcLogPad} TypeWpBuildRcLogPad */
-/** @typedef {import("../types").WpBuildRcEnvironment} WpBuildRcEnvironment */
-/** @typedef {import("../types").WpBuildRcPackageJson} WpBuildRcPackageJson */
-/** @typedef {import("../types").WpBuildLogColorValue} WpBuildLogColorValue */
-/** @typedef {import("../types").WpBuildWebpackConfig} WpBuildWebpackConfig */
-/** @typedef {import("../types").WpBuildRuntimeEnvArgs} WpBuildRuntimeEnvArgs */
-/** @typedef {import("../types").WpBuildAppTsConfigJson} WpBuildAppTsConfigJson */
-/** @typedef {import("../types").WpBuildLogColorMapping} WpBuildLogColorMapping */
-/** @typedef {import("../plugin//base").WpBuildPluginOptions} WpBuildPluginOptions */
-/** @typedef {import("../types").WpBuildRcEnvironmentBase} WpBuildRcEnvironmentBase */
-/** @typedef {import("../types").WpBuildAppGetPathOptions} WpBuildAppGetPathOptions */
-/** @typedef {import("../types").WpBuildGlobalEnvironment} WpBuildGlobalEnvironment */
-/** @typedef {import("../types").WpBuildWebpackEntryValue} WpBuildWebpackEntryValue */
-/** @typedef {import("../types").WpBuildWebpackEntryObject} WpBuildWebpackEntryObject */
-/** @typedef {import("../types").WpBuildWebpackAliasConfig} WpBuildWebpackAliasConfig */
-/** @typedef {import("../types").WpBuildCombinedRuntimeArgs} WpBuildCombinedRuntimeArgs */
-/** @typedef {import("../types").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
-/** @typedef {import("../types").WpBuildAppTsConfigCompilerOptions} WpBuildAppTsConfigCompilerOptions */
-
-
-/**
+/***********************************************************************************************************************
  * UTILS
- */
+ ***********************************************************************************************************************/
 
 /** @typedef {import("../utils").WpBuildRc} WpBuildRc */
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../utils").WpBuildConsoleLogger} WpBuildConsoleLogger */
 
+/** @typedef {import("./logger").WpBuildLogIcon} WpBuildLogIcon */
+/** @typedef {import("./logger").WpBuildLogIconSet} WpBuildLogIconSet */
+/** @typedef {import("./logger").WpBuildLogColorValue} WpBuildLogColorValue */
+/** @typedef {import("./logger").WpBuildLogColorMapping} WpBuildLogColorMapping */
+
+/** @typedef {import("./generic").IDisposable} IDisposable */
+/** @typedef {import("./generic").RequireKeys<WpBuildPluginOptions, "plugins">} WpBuildPluginOptionsRequired */
 
 /**
  * Executes a command with a promisified child_process.exec()
@@ -109,10 +140,17 @@
  * @returns {Promise<number | null>}
  */
 
-
 /**
- * WEBPACK
+ * This callback is displayed as part of the Requester class.
+ * @callback WpBuildCallback
+ * @param {...any} args
+ * @returns {any}
  */
+
+
+/***********************************************************************************************************************
+ * WEBPACK
+ ***********************************************************************************************************************/
 
 /** @typedef {import("./webpack").EntryObject} EntryObject */
 /** @typedef {import("../types").WebpackMode} WebpackMode */
@@ -120,8 +158,11 @@
 /** @typedef {import("./webpack").WebpackSource} WebpackSource */
 /** @typedef {import("./webpack").WebpackCompiler} WebpackCompiler */
 /** @typedef {import("./webpack").WebpackSnapshot} WebpackSnapshot */
+/** @typedef {import("./webpack").WebpackLogLevel} WebpackLogLevel */
 /** @typedef {import("./webpack").WebpackRawSource} WebpackRawSource */
+/** @typedef {import("./webpack").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("./webpack").WebpackRuleSetUse} WebpackRuleSetUse */
+/** @typedef {import("./webpack").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("./webpack").WebpackCacheFacade} WebpackCacheFacade */
 /** @typedef {import("./webpack").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("./webpack").WebpackPluginInstance} WebpackPluginInstance */
@@ -135,6 +176,7 @@
 /** @typedef {import("./webpack").WebpackSyncHook<WebpackCompiler>} WebpackSyncCompilerHook */
 /** @typedef {import("./webpack").WebpackCompilerAsyncHookName} WebpackCompilerAsyncHookName */
 /** @typedef {import("./webpack").WebpackAsyncHook<WebpackCompiler>} WebpackAsyncCompilerHook */
+/** @typedef {import("./webpack").WebpackSyncHook<WebpackCompilation>} WebpackSyncCompilationHook */
 /** @typedef {import("./webpack").WebpackAsyncHook<WebpackCompilation>} WebpackAsyncCompilationHook */
 
 

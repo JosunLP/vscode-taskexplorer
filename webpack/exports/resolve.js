@@ -7,6 +7,7 @@
  * @author Scott Meesseman @spmeesseman
  */
 
+const { join } = require("path");
 const { apply, merge, findFilesSync, isArray, WpBuildApp } = require("../utils");
 
 
@@ -23,7 +24,7 @@ const resolve = (app) =>
 	});
 
 	const alias = app.wpc.resolve.alias;
-	if (!alias[":env"])
+	if (alias && !alias[":env"])
 	{
 		const basePath = app.getRcPath("base"),
 			  srcPath = app.getSrcPath({ rel: true, psx: true }),
@@ -57,6 +58,20 @@ const resolve = (app) =>
 	else {
 		apply(app.wpc.resolve, { modules: [ app.getContextPath(), "node_modules" ]});
 	}
+
+
+
+
+app.wpc.resolve = {
+	modules: [ app.getContextPath(), "node_modules" ],
+	extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ],
+	alias: {
+		":env": [ join(app.build.paths.base, "src", "lib", "env", app.target) ],
+		":types": [ join(app.build.paths.base, "types") ]
+	}
+};
+
+
 };
 
 

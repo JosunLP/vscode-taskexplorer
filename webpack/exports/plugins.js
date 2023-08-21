@@ -11,7 +11,7 @@
 const {
 	analyze, banner, clean, copy, dispose, environment, istanbul, loghooks, ignore, optimization,
 	progress, runtimevars, sourcemaps, licensefiles, tscheck, upload, wait, cssextract, htmlcsp,
-	imageminimizer, htmlinlinechunks, testsuite, types, vendormod, webviewapps, scm
+	imageminimizer, htmlinlinechunks, testsuite, tsbundle, types, vendormod, webviewapps, scm
 } = require("../plugins");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
@@ -24,7 +24,7 @@ const {
  */
 const plugins = (app) =>
 {
-	const plugins = app.wpc.plugins = [
+	app.wpc.plugins.push(
 		loghooks(app),           // n/a - logs all compiler.hooks.* when they run
 		environment(app),        // compiler.hooks.environment
 		vendormod(app),          // compiler.hooks.afterEnvironment - mods to vendor plugins and/or modules
@@ -37,20 +37,21 @@ const plugins = (app) =>
 		istanbul(app),           // compiler.hooks.compilation - add istanbul ignores to node-requires
 		runtimevars(app),        // compiler.hooks.compilation
 		ignore(app),             // compiler.hooks.normalModuleFactory
-		...tscheck(app),         // compiler.hooks.afterEnvironment, hooks.afterCompile
+		tscheck(app),            // compiler.hooks.afterEnvironment, hooks.afterCompile
+		tsbundle(app),           // compiler.hooks.afterEnvironment, hooks.afterCompile
 		...webviewPlugins(app),  // webapp specific plugins
 		...sourcemaps(app),      // compiler.hooks.compilation -> compilation.hooks.processAssets
 		...copy([], app),        // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
 		...optimization(app),    // compiler.hooks.shouldEmit, compiler.hooks.compilation->shouldRecord|optimizeChunks
 		analyze.bundle(app),     // compiler.hooks.done
-		analyze.visualizer(app), // compiler.hooks.emit
+		// analyze.visualizer(app), // compiler.hooks.emit
 		analyze.circular(app),   // compiler.hooks.compilation -> compilation.hooks.optimizeModules
 		licensefiles(app),       // compiler.hooks.shutdown
 		upload(app),             // compiler.hooks.afterDone
 		scm(app),                // compiler.hooks.shutdown
 		dispose(app)             // perform cleanup, dispose registred disposables
-	];
-	plugins.slice().reverse().forEach((p, i, a) => { if (!p) { plugins.splice(a.length - 1 - i, 1); }});
+	);
+	app.wpc.plugins.slice().reverse().forEach((p, i, a) => { if (!p) { app.wpc.plugins.splice(a.length - 1 - i, 1); }});
 };
 
 

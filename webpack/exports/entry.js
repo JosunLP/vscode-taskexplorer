@@ -5,13 +5,17 @@
  * @version 0.0.1
  * @license MIT
  * @author Scott Meesseman @spmeesseman
+ *
+ * @description
+ *
+ * @see {@link https://webpack.js.org/configuration/entry-context/}
+ *
  */
 
-const { existsSync } = require("fs");
 const { glob } = require("glob");
-const { extname, isAbsolute, relative, basename } = require("path");
+const { existsSync } = require("fs");
 const typedefs = require("../types/typedefs");
-const { apply, WpBuildError, merge, isObjectEmpty, isObject, isString, WpBuildApp } = require("../utils");
+const { apply, WpBuildError, merge, isObjectEmpty, isString, WpBuildApp } = require("../utils");
 
 
 const globTestSuiteFiles= `**/*.{test,tests,spec,specs}.ts`;
@@ -65,22 +69,23 @@ const builds =
 				...builds.testRunner(testsPath),
 				...builds.testSuite(testsPath)
 			});
-			if (app.hasTypes())
-			{
-				const typesPath = app.getDistPath({ build: "types" });
-				if (!existsSync(typesPath))
-				{
-					const typesApp = app.getApp("types");
-					if (!typesApp)  {
-						throw WpBuildError.getErrorProperty("types entry", "exports/entry.js", app.wpc);
-					}
-					Object.values(app.wpc.entry).forEach((/** @type {typedefs.WpBuildWebpackEntryObject} */e) =>
-					{
-						e.dependOn = typesApp.build.name;
-					});
-					builds.types(typesApp);
-				}
-			}
+			// if (app.hasTypes())
+			// {
+			// 	if (!app.isSingleBuild || !existsSync(app.getDistPath({ build: "types" })))
+			// 	{
+			// 		const typesBuild= app.getAppBuild("types");
+			// 		if (!typesBuild)  {
+			// 			throw WpBuildError.getErrorProperty("types entry", "exports/entry.js", app.wpc);
+			// 		}
+			// 		Object.values(app.wpc.entry).forEach((e) =>
+			// 		{
+			// 			if (!isString(e)) {
+			// 				e.dependOn = typesBuild.name;
+			// 			}
+			// 		});
+			// 		builds.typesWrap(typesBuild, app);
+			// 	}
+			// }
 		}
 	},
 
@@ -130,12 +135,13 @@ const builds =
 	/**
 	 * @function
 	 * @private
+	 * @param {typedefs.WpBuildRcBuild} build
 	 * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
 	 */
-	types: (app) =>
+	typesWrap: (build, app) =>
 	{
 		const mainBuild = app.getAppBuild("module"),
-			  typesPath = app.getSrcPath({ build: app.build.name, rel: true, ctx: true, dot: true, psx: true });
+			  typesPath = app.getSrcPath({ build: build.name, rel: true, ctx: true, dot: true, psx: true });
 		if (mainBuild && typesPath)
 		{
 			const mainSrcPath = app.getSrcPath({ build: mainBuild.name, rel: true, ctx: true, dot: true, psx: true });
@@ -146,7 +152,15 @@ const builds =
 				[ app.build.name ]: `${mainSrcPath}/${mainBuild.name}.ts`
 			});
 		}
-	}
+	},
+
+
+	/**
+	 * @function
+	 * @private
+	 * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
+	 */
+	types: (app) => builds.typesWrap(app.build, app)
 
 
 	// /**
@@ -205,6 +219,7 @@ const builds =
 
 /**
  * Configures `webpackconfig.exports.entry`
+ * @see {@link https://webpack.js.org/configuration/entry-context/}
  *
  * @function
  * @param {WpBuildApp} app The current build's rc wrapper @see {@link WpBuildApp}
@@ -212,7 +227,6 @@ const builds =
  */
 const entry = (app) =>
 {
-	app.wpc.entry = {};
 	app.logger.start("create entry points", 2);
 
 	if (!isObjectEmpty(app.build.entry))

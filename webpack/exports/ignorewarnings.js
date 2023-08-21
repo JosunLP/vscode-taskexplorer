@@ -5,9 +5,15 @@
  * @version 0.0.1
  * @license MIT
  * @author Scott Meesseman @spmeesseman
+ *
+ * @description
+ *
+ * @see {@link https://webpack.js.org/configuration/other-options/#ignorewarnings webpack.js.org/ignorewarnings}
+ *
  */
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
+
 
 /**
  * @see {@link https://webpack.js.org/configuration/other-options/#ignorewarnings webpack.js.org/ignorewarnings}

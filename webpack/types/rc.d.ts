@@ -23,6 +23,26 @@
 
 
 export declare type WpBuildRcSourceCodeType = "javascript" | "typescript";
+export declare type WpBuildRcBuild = 
+{
+    name: string;
+    active?: boolean;
+    auto?: boolean;
+    debug?: boolean;
+    source?: WpBuildRcSourceCodeType;
+    type: WpBuildRcBuildType;
+    entry: WpBuildWebpackEntry;
+    mode: WpBuildWebpackMode;
+    target: WebpackTarget;
+    alias: WpBuildWebpackAliasConfig;
+    log: WpBuildRcLog;
+    paths: WpBuildRcPaths;
+    exports: WpBuildRcExports;
+    plugins: WpBuildRcPlugins;
+    vscode?: WpBuildRcVsCodeConfig;
+};
+export declare type WpBuildRcBuildKey = keyof WpBuildRcBuild;
+export declare type TypeWpBuildRcBuild = Required<WpBuildRcBuild>;
 
 export declare type WpBuildRcBuildType = "module" | "tests" | "types" | "webapp" | "webmodule";
 
@@ -64,37 +84,19 @@ export declare interface IWpBuildRcSchema
     publicInfoProject?: boolean;
     singleBuildName?: string;
     source?: WpBuildRcSourceCodeType;
-    builds?: WpBuildRcBuilds;
-    development?: WpBuildRcEnvironment;
+    builds: WpBuildRcBuilds;
+    development?: WpBuildRcBuildModeConfig;
     log?: WpBuildRcLog;
     alias?: WpBuildWebpackAliasConfig;
     paths?: WpBuildRcPaths;
     exports?: WpBuildRcExports;
     plugins?: WpBuildRcPlugins;
-    production?: WpBuildRcEnvironment;
-    test?: WpBuildRcEnvironment;
-    vscode?: WpBuildRcVsCode;
-};
-export declare type WpBuildRcSchema = IWpBuildRcSchema;
+    production?: WpBuildRcBuildModeConfig;
+    test?: WpBuildRcBuildModeConfig;
+    vscode?: WpBuildRcVsCodeConfig;
+}
 
-export declare type WpBuildRcBuild = 
-{
-    name: string;
-    build: string;
-    debug?: boolean;
-    source?: WpBuildRcSourceCodeType;
-    type: WpBuildRcBuildType;
-    entry: WpBuildWebpackEntry;
-    mode: WpBuildWebpackMode;
-    target: WebpackTarget;
-    alias: WpBuildWebpackAliasConfig;
-    log: WpBuildRcLog;
-    paths: WpBuildRcPaths;
-    exports: WpBuildRcExports;
-    plugins: WpBuildRcPlugins;
-};
-export declare type WpBuildRcBuildKey = keyof WpBuildRcBuild;
-export declare type TypeWpBuildRcBuild = Required<WpBuildRcBuild>;
+export declare type WpBuildRcSchema = IWpBuildRcSchema;
 
 export declare type WpBuildWebpackEntry = 
 {
@@ -188,27 +190,35 @@ export declare type WpBuildRcPlugins =
     banner?: boolean;
     clean?: boolean;
     copy?: boolean;
-    html?: true;
     ignore?: boolean;
     istanbul?: boolean;
     licensefiles?: boolean;
-    loghooks?: true;
-    optimization?: true;
+    loghooks?: boolean;
+    optimization?: boolean;
     progress?: boolean;
     runtimevars?: boolean;
     scm?: boolean;
     sourcemaps?: boolean;
     testsuite?: boolean;
+    tsbundle?: boolean;
     tscheck?: boolean;
     types?: boolean;
     upload?: boolean;
     vendormod?: boolean;
-    wait?: boolean;
 };
 export declare type WpBuildRcPluginsKey = keyof WpBuildRcPlugins;
 export declare type TypeWpBuildRcPlugins = Required<WpBuildRcPlugins>;
 
-export declare type WpBuildRcEnvironment = 
+export declare type WpBuildRcVsCodeConfig = 
+{
+    type: (false | "extension" | "languageclient" | "languageserver" | "none" | "tests") &
+        (
+            | ((false | "extension" | "languageclient" | "languageserver" | "none" | "tests") & string)
+            | (boolean & (false | "extension" | "languageclient" | "languageserver" | "none" | "tests"))
+        );
+};
+
+export declare type WpBuildRcBuildModeConfig = 
 {
     alias?: WpBuildWebpackAliasConfig;
     builds?: WpBuildRcBuilds;
@@ -216,12 +226,36 @@ export declare type WpBuildRcEnvironment =
     paths?: WpBuildRcPaths;
     exports?: WpBuildRcExports;
     plugins?: WpBuildRcPlugins;
+    vscode?: WpBuildRcVsCodeConfig;
 };
 
-export declare type WpBuildRcVsCode = 
+export declare type WpBuildRcExportsInternal = 
 {
-    extension?: boolean;
-    languageServer?: boolean;
+    entry?: boolean;
+    output?: boolean;
+    plugins?: boolean;
+    resolve?: boolean;
+    rules?: boolean;
+};
+
+export declare type WpBuildRcPackageJson = 
+{
+    author?: string | { name: string; email?: string };
+    description?: string;
+    displayName?: string;
+    main?: string;
+    module?: string;
+    name: string;
+    publisher?: string;
+    version: string;
+};
+
+export declare type WpBuildRcPluginsInternal = 
+{
+    dispose?: boolean;
+    environment?: boolean;
+    html?: boolean;
+    wait?: boolean;
 };
 
 export declare type WebpackConfigOverride = 

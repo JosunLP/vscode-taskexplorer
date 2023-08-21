@@ -15,7 +15,7 @@ const { WebpackError } = require("webpack");
 const typedefs = require("../types/typedefs");
 const { spawnSync } = require("child_process");
 const { existsSync } = require("fs");
-const { join, resolve, basename, dirname } = require("path");
+const { join, resolve, basename, dirname, isAbsolute } = require("path");
 const exec = promisify(require("child_process").exec);
 
 const globOptions = {
@@ -341,7 +341,8 @@ const getTsConfig = (build, ...xInclude) =>
 
     if (tsConfigPath && existsSync(tsConfigPath))
     {
-        const include = [ ...xInclude ],
+        const exclude = [],
+              include = [ ...xInclude ],
               dir = dirname(tsConfigPath),
               json = /** @type {typedefs.WpBuildAppTsConfigJson} */({});
 
@@ -353,30 +354,50 @@ const getTsConfig = (build, ...xInclude) =>
         const buildJson = _getData(dirname(tsConfigPath), dir);
         merge(json, buildJson.json);
 
+        if (!json.compilerOptions) {
+            json.compilerOptions = {};
+        }
         if (json.compilerOptions.rootDir) {
             include.push(resolve(dir, json.compilerOptions.rootDir));
         }
 
         if (isArray(json.include)) {
-            include.push(...json.include.filter(p => !include.includes(p)).map((path) => resolve(dir, path.replace(/\*/g, ""))));
+            include.push(
+                ...json.include.filter(p => !include.includes(p))
+                   .map((path) => isAbsolute(path) ? path : resolve(dir, path.replace(/\*/g, "")))
+            );
         }
-        else if (!json.include) {
-            json.include = [];
+        else if (isString(json.include)) {
+            include.push(json.include);
         }
 
         if (!json.files) {
             json.files = [];
         }
 
-        if (!json.exclude) {
-            json.exclude = [];
+        if (isArray(json.exclude))
+        {
+            // exclude.push(...rulesConfig.json.exclude.map(
+            // 	(glob) => {
+            // 		let base = rulesConfig.dir;
+            // 		glob = glob.replace(/\\/g, "/");
+            // 		while (glob.startsWith("../")) {
+            // 			base = resolve(base, "..");
+            // 			glob = glob.replace("../", "");
+            // 		}
+            // 		const rel = relative(app.getContextPath(), base);
+            // 		glob = ((rel ? rel + "/" : "") + glob).replace(/\*\*/g, "(?:.*?)").replace(/\*/g, "(?:.*?)");
+            // 		return new RegExp(glob);
+            // 	}
+            // ));
         }
 
 	    return {
             json,
             raw: buildJson.raw,
             path: tsConfigPath,
-            include: uniq(include),
+            includeAbs: uniq(include),
+            excludeAbs: uniq(exclude),
             dir: dirname(tsConfigPath),
             file: basename(tsConfigPath)
         };
