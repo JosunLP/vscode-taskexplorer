@@ -212,6 +212,19 @@ class WpBuildApp
     {
         this.configureTypescript();
         this.resolveAliasPaths();
+        if (this.build.type === "types")
+        {
+            this.build.plugins.tsbundle = true;
+            this.build.plugins.tscheck = false;
+        }
+        else if (this.build.type === "tests")
+        {
+            this.build.plugins.tsbundle = true;
+            this.build.plugins.tscheck = false;
+        }
+        else {
+            this.build.plugins.tscheck = this.source === "typescript";
+        }
         return this.buildWebpackConfig();
     };
 

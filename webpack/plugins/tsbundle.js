@@ -10,6 +10,7 @@
 
 const WpBuildBaseTsPlugin = require("./tsc");
 const typedefs = require("../types/typedefs");
+const { existsSync } = require("fs");
 
 
 /**
@@ -35,7 +36,8 @@ class WpBuildTsBundlePlugin extends WpBuildBaseTsPlugin
      */
     apply(compiler)
     {
-		if (this.app.args.build === this.app.build.name)
+		const distPath = this.app.getDistPath({ build: "types" });
+		if (distPath && existsSync(distPath) && this.app.args.build === this.app.build.name)
 		{
 			this.onApply(compiler,
 			{
@@ -69,7 +71,7 @@ class WpBuildTsBundlePlugin extends WpBuildBaseTsPlugin
  * @param {typedefs.WpBuildApp} app
  * @returns {WpBuildTsBundlePlugin | undefined}
  */
-const tsbundle = (app) => app.build.bundleDts ? new WpBuildTsBundlePlugin({ app }) : undefined;
+const tsbundle = (app) => app.build.plugins.tsbundle ? new WpBuildTsBundlePlugin({ app }) : undefined;
 
 
 module.exports = tsbundle;

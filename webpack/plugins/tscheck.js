@@ -151,7 +151,7 @@ class WpBuildTsForkerPlugin extends WpBuildPlugin
  * @param {typedefs.WpBuildApp} app
  * @returns {ForkTsCheckerWebpackPlugin | undefined}
  */
-const tscheck = (app) => undefined; // app.build.source === "typescript" ? (new WpBuildTsForkerPlugin({ app }).getPlugins()[0]) : undefined;
+const tscheck = (app) => app.build.plugins.tscheck ? (new WpBuildTsForkerPlugin({ app }).getPlugins()[0]) : undefined;
 
 
 module.exports = tscheck;
