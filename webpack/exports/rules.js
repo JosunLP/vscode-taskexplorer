@@ -18,7 +18,7 @@ const esbuild = require("esbuild");
 const { existsSync } = require("fs");
 const typedefs = require("../types/typedefs");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { WpBuildApp, WpBuildError, uniq, merge, apply } = require("../utils");
+const { WpBuildApp, WpBuildError, uniq, merge, apply, getExcludes } = require("../utils");
 
 /** @typedef {typedefs.WpBuildAppTsConfig} RulesConfig */
 
@@ -234,31 +234,6 @@ const builds =
 		}
 	}
 
-};
-
-
-/**
- * @param {WpBuildApp} app
- * @param {RulesConfig} rulesConfig
- * @param {boolean} [allowTest]
- * @param {boolean} [allowTypes]
- * @param {boolean} [allowDts]
- * @returns {RegExp[]}
- */
-const getExcludes = (app, rulesConfig, allowTest, allowTypes, allowDts) =>
-{
-	const ex = [ /node_modules/, /\\.vscode[\\\/]/ ];
-	if (allowTest !== true) {
-		ex.push(/test[\\\/]/);
-	}
-	if (allowTypes !== true) {
-		ex.push(/types[\\\/]/);
-	}
-	if (allowDts !== true) {
-		ex.push(/\.d\.ts$/);
-	}
-	// ex.push(...rulesConfig.excludeAbs);
-	return ex;
 };
 
 

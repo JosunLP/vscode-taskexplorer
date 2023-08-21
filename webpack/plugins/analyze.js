@@ -12,6 +12,7 @@
 const webpack = require("webpack");
 const VisualizerPlugin = require("webpack-visualizer-plugin2");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
+const { getExcludes } = require("../utils");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
@@ -71,12 +72,12 @@ const analyze =
 		{
 			plugin = new CircularDependencyPlugin(
 			{
-				cwd: app.getRcPath("base"),
-				exclude: /node_modules/,
+				cwd: app.getBasePath(),
+				exclude: new RegExp(getExcludes(app, app.tsConfig).join("|"), "gi"),
 				failOnError: false,
 				onDetected: ({ module: _webpackModuleRecord, paths, compilation }) =>
 				{
-					compilation.warnings.push(/** @type {*}*/(new webpack.WebpackError(paths.join(" -> "))));
+					compilation.warnings.push(new webpack.WebpackError(paths.join(" -> ")));
 				}
 			});
 		}

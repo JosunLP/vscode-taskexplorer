@@ -322,6 +322,32 @@ const findTsConfig = (build) =>
 
 
 /**
+ * @param {typedefs.WpBuildApp} app
+ * @param {typedefs.WpBuildAppTsConfig} [srcConfig]
+ * @param {boolean} [allowTest]
+ * @param {boolean} [allowTypes]
+ * @param {boolean} [allowDts]
+ * @returns {RegExp[]}
+ */
+const getExcludes = (app, srcConfig, allowTest, allowTypes, allowDts) =>
+{
+    const ex = [ /node_modules/, /\\.vscode[\\\/]/ ];
+    if (allowTest !== true) {
+        ex.push(/test[\\\/]/);
+    }
+    if (allowTypes !== true) {
+        ex.push(/types[\\\/]/);
+    }
+    if (allowDts !== true) {
+        ex.push(/\.d\.ts$/);
+    }
+    // ex.push(...rulesConfig.excludeAbs);
+    return ex;
+};
+
+
+
+/**
  * @param {import("../types/typedefs").WpBuildRcBuild | string} build
  * @param {string[]} xInclude
  * @returns {typedefs.WpBuildAppTsConfig | undefined}
@@ -689,7 +715,7 @@ class WpBuildError extends WebpackError
 
 
 module.exports = {
-    apply, applyIf, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, findTsConfig,
+    apply, applyIf, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, findTsConfig, getExcludes,
     getTsConfig, isArray, isDate,isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise,
     isString, merge, mergeIf, pick, pickBy, pickNot, uniq, WpBuildError, relativrPath, resolvePath
 };
