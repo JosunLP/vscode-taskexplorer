@@ -162,7 +162,7 @@ class WpBuildApp
             pkgJson: this.rc.pkgJson,
             target: b.target,
             source: b.source || this.rc.source,
-            vscode: this.rc.vscode
+            vscode: b.vscode
 		});
 	};
 
@@ -344,28 +344,14 @@ class WpBuildApp
     getContextPath = (options) => this.getRcPath("ctx", options);
 
 
-    // /**
-    //  * @function
-    //  * @template {typedefs.WpBuildAppGetPathOptions | undefined} P
-    //  * @template {string | undefined} [R = P extends { stat: true } ? string | undefined : string]
-    //  * @param {P} [options]
-    //  * @returns {R}
-    //  */
-    // getDistPath = (options) => /** @type {R} */(this.getRcPath("dist", options));
     /**
      * @function
-     * @param {typedefs.WpBuildAppGetPathOptions & { stat: true }} options
-     * @returns {string | undefined}
+     * @template {typedefs.WpBuildAppGetPathOptions | undefined} P
+     * @template {string | undefined} [R = P extends { stat: true } ? string | undefined : string]
+     * @param {P} [options]
+     * @returns {R}
      */
-    getDistPath(options)
-    /** @param {typedefs.WpBuildAppGetPathOptions & { stat: false }} options @returns {string} */
-    getDistPath(options)
-    /** @param {typedefs.WpBuildAppGetPathOptions} [options] @returns {string} */
-    getDistPath(options)
-    /** @function @returns {string} */
-    getDistPath()
-    /** @function @param {typedefs.WpBuildAppGetPathOptions} [options] */
-    getDistPath(options) { return /** @type {string} */(this.getRcPath("src", options)); }
+    getDistPath = (options) => /** @type {R} */(this.getRcPath("dist", options));
 
 
     /**
@@ -434,28 +420,14 @@ class WpBuildApp
     };
 
 
-    // /**
-    //  * @function
-    //  * @template {typedefs.WpBuildAppGetPathOptions | undefined} P
-    //  * @template {string | undefined} [R = P extends { stat: true } ? string | undefined : string]
-    //  * @param {P} [options]
-    //  * @returns {R}
-    //  */
-    // getSrcPath = (options) => this.getRcPath("src", options);
     /**
      * @function
-     * @param {typedefs.WpBuildAppGetPathOptions & { stat: true }} options
-     * @returns {string | undefined}
+     * @template {typedefs.WpBuildAppGetPathOptions | undefined} P
+     * @template {string | undefined} [R = P extends { stat: true } ? string | undefined : string]
+     * @param {P} [options]
+     * @returns {R}
      */
-    getSrcPath(options)
-    /** @param {typedefs.WpBuildAppGetPathOptions & { stat: false }} options @returns {string} */
-    getSrcPath(options)
-    /** @param {typedefs.WpBuildAppGetPathOptions} [options] @returns {string} */
-    getSrcPath(options)
-    /** @returns {string} */
-    getSrcPath()
-    /**  @function @param {typedefs.WpBuildAppGetPathOptions} [options]  */
-    getSrcPath(options) { return /** @type {string} */(this.getRcPath("src", options)); }
+    getSrcPath = (options) => this.getRcPath("src", options);
 
 
     /**
@@ -493,11 +465,17 @@ class WpBuildApp
         l.value("   name", this.rc.name, 1);
         l.value("   mode", this.rc.mode, 1);
         l.value("   version", this.rc.pkgJson.version, 1);
+        l.value("   # of builds", this.rc.builds.length, 2);
+        l.value("   # of active builds", this.rc.apps.length, 2);
         l.sep();
-        l.write("Build Configuration:", 2, "", 0, l.colors.white);
-        l.value("   name", this.build.name, 2);
-        l.value("   type", this.build.type, 2);
-        l.value("   target", this.build.target, 2);
+        l.write("Build Configuration:", 1, "", 0, l.colors.white);
+        l.value("   name", this.build.name, 1);
+        l.value("   type", this.build.type, 1);
+        l.value("   target", this.build.target, 1);
+        l.value("   source type", this.build.source, 2);
+        l.value("   hash filename output", !!this.build.hash, 2);
+        l.value("   has upload config", !!this.build.upload, 2);
+        l.value("   is vscode extension", this.build.vscode && this.build.vscode.type && this.build.vscode.type !== "none", 2);
         l.value("   alias configuration", JSON.stringify(this.build.alias), 3);
         l.value("   log configuration", JSON.stringify(this.build.log), 3);
         l.value("   exports configuration", JSON.stringify(this.build.exports), 3);

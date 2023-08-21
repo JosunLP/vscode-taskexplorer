@@ -264,6 +264,7 @@ class WpBuildRc
                 applyIf(dst.exports, src.exports);
                 applyIf(dst.plugins, src.plugins);
                 mergeIf(dst.alias, src.alias);
+                mergeIf(dst.vscode, src.vscode);
             }
             return dst;
         };
@@ -494,6 +495,12 @@ class WpBuildRc
         }
         if (!rc.alias) {
             rc.alias = {};
+        }
+        if (!rc.vscode) {
+            rc.vscode = { type: "none" };
+        }
+        else if (!rc.vscode.type) {
+            rc.vscode.type = "none";
         }
         if (!rc.paths)
         {

@@ -23,8 +23,6 @@
 /** @typedef {import("./rc").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("./rc").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("./rc").TypeWpBuildRcLog} TypeWpBuildRcLog */
-/** @typedef {import("./rc").WpBuildRcExports} WpBuildRcExports */
-/** @typedef {import("./rc").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("./rc").WpBuildLogColors} WpBuildLogColors */
 /** @typedef {import("./rc").WpBuildRcBuildKey} WpBuildRcBuildKey */
 /** @typedef {import("./rc").WpBuildRcPathsKey} WpBuildRcPathsKey */
@@ -41,16 +39,12 @@
 /** @typedef {import("./rc").WpBuildRcPathsProp} WpBuildRcPathsProp */
 /** @typedef {import("./rc").WpBuildRcPathsEnum} WpBuildRcPathsEnum */
 /** @typedef {import("./rc").TypeWpBuildRcLogPad} TypeWpBuildRcLogPad */
-/** @typedef {import("./rc").WpBuildRcExportsKey} WpBuildRcExportsKey */
-/** @typedef {import("./rc").WpBuildRcPluginsKey} WpBuildRcPluginsKey */
 /** @typedef {import("./rc").WpBuildRcBuildTypes} WpBuildRcBuildTypes */
 /** @typedef {import("./rc").WpBuildWebpackModes} WpBuildWebpackModes */
 /** @typedef {import("./rc").WpBuildLogTrueColor} WpBuildLogTrueColor */
 /** @typedef {import("./rc").WpBuildLogTrueColor} WpBuildLogTrueColor */
 /** @typedef {import("./rc").WebpackLibraryTypes} WebpackLibraryTypes */
 /** @typedef {import("./rc").WpBuildRcPathsProps} WpBuildRcPathsProps */
-/** @typedef {import("./rc").TypeWpBuildRcExports} TypeWpBuildRcExports */
-/** @typedef {import("./rc").TypeWpBuildRcPlugins} TypeWpBuildRcPlugins */
 /** @typedef {import("./rc").WpBuildLogTrueColors} WpBuildLogTrueColors */
 /** @typedef {import("./rc").WpBuildRcPackageJson} WpBuildRcPackageJson */
 /** @typedef {import("./rc").WpBuildRcLogColorsKey} WpBuildRcLogColorsKey */
@@ -66,6 +60,7 @@
 /** @typedef {import("./rc").WpBuildRcVsCode} WpBuildRcVsCode */
 /** @typedef {import("./rc").WpBuildLogLevel} WpBuildLogLevel */
 /** @typedef {import("./rc").IWpBuildRcSchema} IWpBuildRcSchema */
+/** @typedef {import("./rc").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("./rc").WpBuildWebpackEntry} WpBuildWebpackEntry */
 /** @typedef {import("./rc").WpBuildWebpackEntryValue} WpBuildWebpackEntryValue */
 /** @typedef {import("./rc").WpBuildRcBuildModeConfig} WpBuildRcBuildModeConfig */

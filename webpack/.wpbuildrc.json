@@ -11,6 +11,18 @@
             "target": "node",
             "type": "module",
             "debug": true,
+            "hash": true,
+            "upload": {
+                "url": "",
+                "plink": {
+                    "user": "",
+                    "key": ""
+                },
+                "scp": {
+                    "user": "",
+                    "key": ""
+                }
+            },
             "log": {
                 "color": "cyan"
             },
@@ -143,21 +155,14 @@
     "plugins":
     {
         "banner": true,
-        "clean": true,
-        "copy": true,
         "ignore": true,
         "istanbul": false,
         "licensefiles": false,
         "loghooks": true,
         "optimization": true,
         "progress": false,
-        "runtimevars": true,
         "scm": false,
         "sourcemaps": true,
-        "testsuite": false,
-        "tsbundle": false,
-        "tscheck": false,
-        "types": false,
         "upload": true,
         "vendormod": true
     }

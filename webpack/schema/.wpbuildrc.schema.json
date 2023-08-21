@@ -54,10 +54,10 @@
             "$ref": "#/definitions/WpBuildRcPaths"
         },
         "exports": {
-            "$ref": "#/definitions/WpBuildRcExports"
+            "$ref": "#/definitions/WpBuildRcExportsUser"
         },
         "plugins": {
-            "$ref": "#/definitions/WpBuildRcPlugins"
+            "$ref": "#/definitions/WpBuildRcPluginsUser"
         },
         "production": {
             "$ref": "#/definitions/WpBuildRcBuildModeConfig"
@@ -71,6 +71,11 @@
     },
     "definitions":
     {
+        "BooleanReadOnly": {
+            "type": "boolean",
+            "readOnly": true,
+            "default": false
+        },
         "DirectoryPathRelative": {
             "type": "string",
             "maxLength": 100,
@@ -168,8 +173,20 @@
                     "type": "boolean",
                     "readOnly": true
                 },
+                "bundleDts": {
+                    "type": "boolean"
+                },
                 "debug": {
                     "type": "boolean"
+                },
+                "dts": {
+                    "type": "boolean"
+                },
+                "hash": {
+                    "type": "boolean"
+                },
+                "upload": {
+                    "$ref": "#/definitions/WpBuildRcUploadConfig"
                 },
                 "source": {
                     "$ref": "#/definitions/WpBuildRcSourceCodeType"
@@ -196,16 +213,42 @@
                     "$ref": "#/definitions/WpBuildRcPaths"
                 },
                 "exports": {
-                    "$ref": "#/definitions/WpBuildRcExports"
+                    "$ref": "#/definitions/WpBuildRcExportsUser"
                 },
                 "plugins": {
-                    "$ref": "#/definitions/WpBuildRcPlugins"
+                    "$ref": "#/definitions/WpBuildRcPluginsUser"
                 },
                 "vscode": {
                     "$ref": "#/definitions/WpBuildRcVsCodeConfig"
                 }
             },
             "dependencies": {
+                "bundleDts": {
+                    "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "bundle": { 
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": { 
+                            "properties": {
+                                "type": { 
+                                    "enum": [
+                                        "types", "module"
+                                    ]
+                                },
+                                "dts": {
+                                    "not": {
+                                        "const": false
+                                    }
+                                }
+                            }
+                        }
+                    }]
+                },
                 "debug": {
                     "if": {
                         "properties": {
@@ -251,6 +294,50 @@
                             }]
                         }]
                     }
+                },
+                "dts": {
+                    "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "dts": { 
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": { 
+                            "properties": {
+                                "type": { 
+                                    "enum": [
+                                        "types", "module"
+                                    ]
+                                }
+                            }
+                        }
+                    }]
+                },
+                "hash": {
+                    "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "hash": { 
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": { 
+                            "properties": {
+                                "type": {
+                                    "not": {
+                                        "enum": [
+                                            "tests", "types"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }]
                 },
                 "type": {
                     "allOf": [
@@ -334,10 +421,10 @@
                     "$ref": "#/definitions/WpBuildRcPaths"
                 },
                 "exports": {
-                    "$ref": "#/definitions/WpBuildRcExports"
+                    "$ref": "#/definitions/WpBuildRcExportsUser"
                 },
                 "plugins": {
-                    "$ref": "#/definitions/WpBuildRcPlugins"
+                    "$ref": "#/definitions/WpBuildRcPluginsUser"
                 },
                 "vscode": {
                     "$ref": "#/definitions/WpBuildRcVsCodeConfig"
@@ -364,7 +451,7 @@
                 }
             ]
         },
-        "WpBuildRcExports": {
+        "WpBuildRcExportsUser": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -415,6 +502,17 @@
                     "type": "boolean"
                 }
             }
+        },
+        "WpBuildRcExports": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/WpBuildRcExportsUser"
+                },
+                {
+                    "$ref": "#/definitions/WpBuildRcExportsInternal"
+                }
+            ]
         },
         "WpBuildRcLog": {
             "type": "object",
@@ -664,7 +762,7 @@
             },
             "additionalProperties": false
         },
-        "WpBuildRcPlugins": {
+        "WpBuildRcPluginsUser": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -703,11 +801,11 @@
                 }
             }
         },
-        "WpBuildRcPluginsAll": {
+        "WpBuildRcPlugins": {
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "#/definitions/WpBuildRcPlugins"
+                    "$ref": "#/definitions/WpBuildRcPluginsUser"
                 },
                 {
                     "$ref": "#/definitions/WpBuildRcPluginsInternal"
@@ -717,40 +815,91 @@
         "WpBuildRcPluginsInternal": {
             "type": "object",
             "additionalProperties": false,
-            "readOnly": true,
             "properties": {
                 "clean": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "copy": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "dispose": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "environment": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "html": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "runtimevars": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "testsuite": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "tsbundle": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "tscheck": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "types": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
                 },
                 "wait": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/BooleanReadOnly"
+                }
+            }
+        },
+        "WpBuildRcUploadConfig": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "maxLength": 150,
+                    "pattern": "^https?\\:\\/\\/[\\w\\.\\-]+\\.[a-z]{2,5}[\\\\\\/\\?][\\w\\W\\.\\-\\\\\\//\\&]+"
+                },
+                "plink": {
+                    "type": "object",
+                    "properties": {
+                        "user": {
+                            "type": "string",
+                            "maxLength": 30
+                        },
+                        "key": {
+                            "type": "string",
+                            "maxLength": 60
+                        }
+                    },
+                    "examples": [
+                    {
+                        "plink":
+                            {
+                                "kwy": "${REPLACED_ENVVAR_PLINK_KEY}",
+                                "user": "${REPLACED_ENVVAR_PLINK_USER}"
+                            }
+                    }]
+                },
+                "scp": {
+                    "type": "object",
+                    "properties": {
+                        "user": {
+                            "type": "string",
+                            "maxLength": 30
+                        },
+                        "key": {
+                            "type": "string",
+                            "maxLength": 60
+                        }
+                    },
+                    "examples": [
+                    {
+                        "plink":
+                            {
+                                "kwy": "${REPLACED_ENVVAR_SCP_KEY}",
+                                "user": "${REPLACED_ENVVAR_SCP_USER}"
+                            }
+                    }]
                 }
             }
         },
@@ -856,25 +1005,13 @@
                         "string",
                         "boolean"
                     ],
-                    "oneOf": [
-                        {
-                            "const": false
-                        },
-                        {
-                            "const": "extension"
-                        },
-                        {
-                            "const": "languageclient"
-                        },
-                        {
-                            "const": "languageserver"
-                        },
-                        {
-                            "const": "none"
-                        },
-                        {
-                            "const": "tests"
-                        }
+                    "enum": [
+                        false,
+                        "extension",
+                        "languageclient",
+                        "languageserver",
+                        "none",
+                        "tests"
                     ]
                 }
             },

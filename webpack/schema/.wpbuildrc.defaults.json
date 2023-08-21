@@ -9,6 +9,7 @@
         {
             "name": "main",
             "debug": false,
+            "hash": true,
             "log": {
                 "color": "cyan"
             },
@@ -23,7 +24,7 @@
     "development":
     {
         "builds": [
-            { "name": "main" }
+            { "name": "main", "bundleDts": true }
         ]
     },
     "production":
@@ -95,22 +96,14 @@
     "plugins":
     {
         "banner": false,
-        "clean": true,
-        "copy": false,
         "ignore": true,
         "istanbul": false,
         "licensefiles": false,
         "loghooks": true,
         "optimization": true,
         "progress": false,
-        "runtimevars": false,
         "scm": false,
         "sourcemaps": true,
-        "testsuite": false,
-        "tsbundle": false,
-        "tscheck": false,
-        "types": false,
-        "upload": false,
         "vendormod": true
     },
     "vscode": {
