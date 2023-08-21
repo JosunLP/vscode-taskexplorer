@@ -857,18 +857,20 @@
                 "url": {
                     "type": "string",
                     "maxLength": 150,
-                    "pattern": "^https?\\:\\/\\/[\\w\\.\\-]+\\.[a-z]{2,5}[\\\\\\/\\?][\\w\\W\\.\\-\\\\\\//\\&]+"
+                    "pattern": "^https?\\:\\/\\/[\\$\\{\\}\\w\\.\\-]+[\\\\\\/\\?][\\$\\{\\}\\w\\W\\.\\-\\\\\\//\\&]+"
                 },
                 "plink": {
                     "type": "object",
                     "properties": {
                         "user": {
                             "type": "string",
-                            "maxLength": 30
+                            "minLength": 4,
+                            "maxLength": 100
                         },
                         "key": {
                             "type": "string",
-                            "maxLength": 60
+                            "minLength": 4,
+                            "maxLength": 100
                         }
                     },
                     "examples": [
@@ -885,11 +887,13 @@
                     "properties": {
                         "user": {
                             "type": "string",
-                            "maxLength": 30
+                            "minLength": 4,
+                            "maxLength": 100
                         },
                         "key": {
                             "type": "string",
-                            "maxLength": 60
+                            "minLength": 4,
+                            "maxLength": 100
                         }
                     },
                     "examples": [

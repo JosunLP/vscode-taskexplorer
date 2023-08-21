@@ -13,14 +13,14 @@
             "debug": true,
             "hash": true,
             "upload": {
-                "url": "",
+                "url": "https://${WPBUILD_APP1_SSH_UPLOAD_HOST}/res/app",
                 "plink": {
-                    "user": "",
-                    "key": ""
+                    "user": "${WPBUILD_APP1_SSH_UPLOAD_USER}",
+                    "key": "${WPBUILD_APP1_SSH_UPLOAD_AUTH}"
                 },
                 "scp": {
-                    "user": "",
-                    "key": ""
+                    "user": "${WPBUILD_APP1_SSH_UPLOAD_USER}",
+                    "key": "${WPBUILD_APP1_SSH_UPLOAD_AUTH}"
                 }
             },
             "log": {
@@ -61,6 +61,8 @@
             "name": "types",
             "target": "node",
             "type": "types",
+            "bundleDts": true,
+            "dts": true,
             "log": {
                 "color": "white",
                 "colors": {
@@ -70,9 +72,6 @@
             },
             "paths": {
                 "dist": "types/build"
-            },
-            "plugins": {
-                "tsbundle": true
             }
         }
     ],
