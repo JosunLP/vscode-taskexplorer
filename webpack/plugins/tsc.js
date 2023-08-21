@@ -86,6 +86,9 @@ class WpBuildBaseTsPlugin extends WpBuildPlugin
 				try {
 					dts.bundle(bundleCfg);
 					this.app.global.tsbundle.typesBundled = true;
+					this.compilation.buildDependencies.add(join(typesDirDist, bundleCfg.out));
+					// this.compilation.compilationDependencies.add();this.compilation.
+					// this.compilation.contextDependencies.add();
 					l.write("   dts bundle created successfully @ " + join(bundleCfg.baseDir, bundleCfg.out), 1);
 				}
 				catch (e) {
