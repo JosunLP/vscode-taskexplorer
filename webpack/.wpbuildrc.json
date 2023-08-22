@@ -11,23 +11,22 @@
             "target": "node",
             "type": "module",
             "debug": true,
-            "hash": true,
-            "upload": {
-                "url": "https://${WPBUILD_APP1_SSH_UPLOAD_HOST}/res/app",
-                "plink": {
-                    "user": "${WPBUILD_APP1_SSH_UPLOAD_USER}",
-                    "key": "${WPBUILD_APP1_SSH_UPLOAD_AUTH}"
-                },
-                "scp": {
-                    "user": "${WPBUILD_APP1_SSH_UPLOAD_USER}",
-                    "key": "${WPBUILD_APP1_SSH_UPLOAD_AUTH}"
-                }
-            },
             "log": {
                 "color": "cyan"
             },
             "plugins": {
-                "licensefiles": true
+                "licensefiles": true,
+                "upload": {
+                    "url": "https://${WPBUILD_APP1_SSH_UPLOAD_HOST}/res/app",
+                    "plink": {
+                        "user": "${WPBUILD_APP1_SSH_UPLOAD_USER}",
+                        "key": "${WPBUILD_APP1_SSH_UPLOAD_AUTH}"
+                    },
+                    "scp": {
+                        "user": "${WPBUILD_APP1_SSH_UPLOAD_USER}",
+                        "key": "${WPBUILD_APP1_SSH_UPLOAD_AUTH}"
+                    }
+                }
             },
             "vscode": {
                 "type": "extension"
@@ -61,8 +60,6 @@
             "name": "types",
             "target": "node",
             "type": "types",
-            "bundleDts": true,
-            "dts": true,
             "log": {
                 "color": "white",
                 "colors": {
@@ -75,16 +72,13 @@
             }
         }
     ],
-    "development":
-    {
+    "development": {
         "builds": []
     },
-    "production":
-    {
+    "production": {
         "builds": []
     },
-    "test":
-    {
+    "test": {
         "builds": [
             { "name": "webapp", "mode": "development" },
             {
@@ -97,9 +91,6 @@
                     "dist": "dist/test",
                     "src": "src/test"
                 },
-                "plugins": {
-                    "istanbul": true
-                },
                 "vscode": {
                     "type": "tests"
                 }
@@ -111,8 +102,7 @@
             }
         }
     },
-    "log":
-    {
+    "log": {
         "level": 3,
         "valueMaxLineLength": 100,
         "pad": {
@@ -121,27 +111,15 @@
             "value": 40,
             "uploadFileName": 50
         },
-        "colors":
-        {
-            "default": "grey",
-            "buildBracket": "blue",
-            "buildText": "white",
-            "infoIcon": "magenta",
-            "valueStar": "cyan",
-            "valueStarText": "white",
-            "tagBracket": "blue",
-            "tagText": "white",
-            "uploadSymbol": "yellow"
+        "colors": {
+            "default": "grey"
         }
     },
-    "paths":
-    {
-        "ctx": ".",
+    "paths": {
         "dist": "dist",
         "src": "src"
     },
-    "exports":
-    {
+    "exports": {
         "cache": true,
         "devtool": true,
         "experiments": true,
@@ -152,8 +130,12 @@
         "stats": true,
         "watch": true
     },
-    "plugins":
-    {
+    "plugins": {
+        "analyze": {
+            "circular": true,
+            "analyzer": false,
+            "visualizer": false
+        },
         "banner": true,
         "ignore": true,
         "istanbul": false,

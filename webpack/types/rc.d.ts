@@ -44,9 +44,9 @@ export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | 
 
 export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
-export declare type WpBuildRcPlugins = WpBuildRcPluginsUser & WpBuildRcPluginsInternal;
+export declare type WpBuildRcPlugins = WpBuildRcPluginsUser | WpBuildRcPluginsInternal;
 
-export declare type WpBuildRcPluginsAnalyze = | boolean | 
+export declare type WpBuildRcPluginConfigAnalyze = | boolean | 
 {
           analyzer?: boolean;
           circular?: boolean;
@@ -55,14 +55,26 @@ export declare type WpBuildRcPluginsAnalyze = | boolean |
 
 export declare type WpBuildRcPluginConfigBanner = boolean | string;
 
-export declare type WpBuildRcPluginConfigUpload = boolean | WpBuildRcUploadConfig;
+export declare type WpBuildRcPluginConfigUpload = | boolean | 
+{
+          url?: string;
+          plink?: 
+{
+              user: string;
+              key: string;
+          };
+          scp?: 
+{
+              user: string;
+              key: string;
+          };
+      };
+
 export declare type WpBuildRcPluginConfigVendorMod = | boolean | 
 {
           clean_plugin: boolean;
           ts_loader: boolean;
       };
-
-export declare type BooleanReadOnly = boolean;
 
 export declare type WpBuildRcBuilds = WpBuildRcBuild[];
 
@@ -209,7 +221,7 @@ export declare type WpBuildRcExportsUser =
 
 export declare type WpBuildRcPluginsUser = 
 {
-    analyze?: WpBuildRcPluginsAnalyze;
+    analyze?: WpBuildRcPluginConfigAnalyze;
     banner?: WpBuildRcPluginConfigBanner;
     ignore?: boolean;
     istanbul?: boolean;
@@ -223,34 +235,19 @@ export declare type WpBuildRcPluginsUser =
     vendormod?: WpBuildRcPluginConfigVendorMod;
 };
 
-export declare type WpBuildRcUploadConfig = 
-{
-    url?: string;
-    plink?: 
-{
-        user: string;
-        key: string;
-    };
-    scp?: 
-{
-        user: string;
-        key: string;
-    };
-};
-
 export declare type WpBuildRcPluginsInternal = 
 {
-    clean?: BooleanReadOnly;
-    copy?: BooleanReadOnly;
-    dispose?: BooleanReadOnly;
-    environment?: BooleanReadOnly;
-    html?: BooleanReadOnly;
-    runtimevars?: BooleanReadOnly;
-    testsuite?: BooleanReadOnly;
-    tsbundle?: BooleanReadOnly;
-    tscheck?: BooleanReadOnly;
-    types?: BooleanReadOnly;
-    wait?: BooleanReadOnly;
+    readonly clean?: boolean;
+    readonly copy?: boolean;
+    readonly dispose?: boolean;
+    readonly environment?: boolean;
+    readonly html?: boolean;
+    readonly runtimevars?: boolean;
+    readonly testsuite?: boolean;
+    readonly tsbundle?: boolean;
+    readonly tscheck?: boolean;
+    readonly types?: boolean;
+    readonly wait?: boolean;
 };
 
 export declare type WpBuildRcVsCodeConfig = 

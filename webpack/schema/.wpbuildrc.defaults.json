@@ -8,8 +8,7 @@
     "builds": [
         {
             "name": "main",
-            "debug": false,
-            "hash": true,
+            "debug": true,
             "log": {
                 "color": "cyan"
             },
@@ -21,20 +20,17 @@
             }
         }
     ],
-    "development":
-    {
-        "builds": [
-            { "name": "main", "bundleDts": true }
-        ]
-    },
-    "production":
-    {
+    "development": {
         "builds": [
             { "name": "main" }
         ]
     },
-    "test":
-    {
+    "production": {
+        "builds": [
+            { "name": "main", "debug": false }
+        ]
+    },
+    "test": {
         "builds": [
             { "name": "main" },
             {
@@ -45,7 +41,6 @@
                         "value": 60
                     }
                 },
-                "debug": true,
                 "paths": {
                     "dist": "dist/test",
                     "src": "src/tests"
@@ -59,8 +54,7 @@
             }
         ]
     },
-    "log":
-    {
+    "log": {
         "level": 2,
         "valueMaxLineLength": 100,
         "pad": {
@@ -69,21 +63,23 @@
             "value": 45,
             "uploadFileName": 50
         },
-        "colors":
-        {
-            "default": "grey"
+        "colors": {
+            "default": "grey",
+            "buildBracket": "blue",
+            "buildText": "white",
+            "infoIcon": "magenta",
+            "valueStar": "cyan",
+            "valueStarText": "white",
+            "tagBracket": "blue",
+            "tagText": "white",
+            "uploadSymbol": "yellow"
         }
     },
-    "paths":
-    {
-        "base": ".",
-        "ctx": ".",
+    "paths": {
         "dist": "dist",
-        "src": "src",
-        "temp": "node_modules/.cache/wpbuild/temp"
+        "src": "src"
     },
-    "exports":
-    {
+    "exports": {
         "cache": true,
         "devtool": true,
         "experiments": true,
@@ -94,8 +90,12 @@
         "stats": true,
         "watch": true
     },
-    "plugins":
-    {
+    "plugins": {
+        "analyze": {
+            "circular": true,
+            "analyzer": false,
+            "visualizer": false
+        },
         "banner": false,
         "ignore": true,
         "istanbul": false,

@@ -171,6 +171,8 @@ const parseTypesDts = async (hdr, data) =>
           .replace(/[\w] ;/g, (v) => v.replace(" ;", ";"))
           .replace(/;\n\s+;\n/g, ";\n\n")
           .replace(/\n\};?\n/g, "\n}\n")
+          .replace(/    (.*?)\?\: BooleanReadOnly;/g, (v, m) => `    readonly ${m}?: boolean;`)
+          .replace("export declare type BooleanReadOnly = boolean;\n\n", "")
           .replace(/(export declare type (?:[^]*?)\}\n)/g, v => v.slice(0, v.length - 1) + ";\n")
           .replace(/(export declare interface (?:[^]*?)\};\n)/g, v => v.slice(0, v.length - 2) + "\n\n")
           .replace(/([;\{])\n\s*?\n(\s+)/g, (_, m1, m2) => m1 + "\n" + m2)

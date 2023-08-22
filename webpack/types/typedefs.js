@@ -20,7 +20,6 @@
 /** @typedef {import("./rc").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("./rc").TypeWpBuildRcLog} TypeWpBuildRcLog */
 /** @typedef {import("./rc").WpBuildLogColors} WpBuildLogColors */
-/** @typedef {import("./rc").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("./rc").WpBuildRcExports} WpBuildRcExports */
 /** @typedef {import("./rc").WpBuildRcBuildKey} WpBuildRcBuildKey */
 /** @typedef {import("./rc").WpBuildRcPathsKey} WpBuildRcPathsKey */
