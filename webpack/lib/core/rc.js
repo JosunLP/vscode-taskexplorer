@@ -10,17 +10,17 @@
 
 const JSON5 = require("json5");
 const WpBuildApp = require("./app");
-const { globalEnv } = require("./global");
-const typedefs = require("../types/typedefs");
-const WpBuildConsoleLogger = require("./console");
+const { globalEnv } = require("../../utils/global");
+const typedefs = require("../../types/typedefs");
+const WpBuildConsoleLogger = require("../../utils/console");
 const { readFileSync, mkdirSync, existsSync } = require("fs");
 const { resolve, basename, join, dirname, sep } = require("path");
 const {
     WpBuildError, apply, pick, isString, merge, isArray, mergeIf, applyIf, resolvePath
-} = require("./utils");
+} = require("../../utils/utils");
 const {
     isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildRcPackageJsonProps
-} = require("../types/constants");
+} = require("../../types/constants");
 
 
 const defaultTempDir = `node_modules${sep}.cache${sep}wpbuild${sep}temp`;

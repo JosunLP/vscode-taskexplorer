@@ -1,7 +1,7 @@
 // @ts-check
 
-const WpBuildRc = require("./rc");
-const WpBuildApp = require("./app");
+const WpBuildRc = require("../lib/core/rc");
+const WpBuildApp = require("../lib/core/app");
 const WpBuildCache = require("./cache");
 const { RegexTestsChunk } = require("./regex");
 const WpBuildConsoleLogger = require("./console");

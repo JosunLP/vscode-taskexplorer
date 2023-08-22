@@ -11,14 +11,14 @@
  */
 
 const { existsSync } = require("fs");
-const wpexports = require("../exports");
-const typedefs = require("../types/typedefs");
-const WpBuildConsoleLogger = require("./console");
+const wpexports = require("../../exports");
+const typedefs = require("../../types/typedefs");
+const WpBuildConsoleLogger = require("../../utils/console");
 const { isAbsolute, relative, sep, dirname } = require("path");
 const {
     apply, WpBuildError, isPromise, findTsConfig, getTsConfig, isArray, findFilesSync,
     resolvePath, relativrPath
-} = require("./utils");
+} = require("../../utils/utils");
 
 
 /**
