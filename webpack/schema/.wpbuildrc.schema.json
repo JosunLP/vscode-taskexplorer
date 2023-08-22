@@ -932,6 +932,7 @@
         },
         "WpBuildRcUploadConfig": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "url": {
                     "type": "string",
@@ -952,6 +953,9 @@
                             "maxLength": 100
                         }
                     },
+                    "required": [
+                        "user", "key"
+                    ],
                     "examples": [
                     {
                         "plink":
@@ -975,109 +979,103 @@
                             "maxLength": 100
                         }
                     },
+                    "required": [
+                        "user", "key"
+                    ],
                     "examples": [
                     {
-                        "plink":
-                            {
-                                "kwy": "${REPLACED_ENVVAR_SCP_KEY}",
-                                "user": "${REPLACED_ENVVAR_SCP_USER}"
-                            }
+                        "plink": {
+                            "kwy": "${REPLACED_ENVVAR_SCP_KEY}",
+                            "user": "${REPLACED_ENVVAR_SCP_USER}"
+                        }
                     }]
                 }
             }
         },
         "WpBuildLogTrueColor": {
             "type": "string",
-            "oneOf": [
-                {
-                    "const": "black"
-                },
-                {
-                    "const": "blue"
-                },
-                {
-                    "const": "cyan"
-                },
-                {
-                    "const": "green"
-                },
-                {
-                    "const": "grey"
-                },
-                {
-                    "const": "magenta"
-                },
-                {
-                    "const": "red"
-                },
-                {
-                    "const": "white"
-                },
-                {
-                    "const": "yellow"
-                }
-            ],
-            "additionalProperties": false
+            "oneOf": [{
+                "const": "black"
+            },
+            {
+                "const": "blue"
+            },
+            {
+                "const": "cyan"
+            },
+            {
+                "const": "green"
+            },
+            {
+                "const": "grey"
+            },
+            {
+                "const": "magenta"
+            },
+            {
+                "const": "red"
+            },
+            {
+                "const": "white"
+            },
+            {
+                "const": "yellow"
+            }]
         },
         "WpBuildLogColor": {
             "type": "string",
-            "oneOf": [
-                {
-                    "const": "black"
-                },
-                {
-                    "const": "blue"
-                },
-                {
-                    "const": "cyan"
-                },
-                {
-                    "const": "green"
-                },
-                {
-                    "const": "grey"
-                },
-                {
-                    "const": "magenta"
-                },
-                {
-                    "const": "red"
-                },
-                {
-                    "const": "system"
-                },
-                {
-                    "const": "white"
-                },
-                {
-                    "const": "yellow"
-                },
-                {
-                    "const": "bold"
-                },
-                {
-                    "const": "inverse"
-                },
-                {
-                    "const": "italic"
-                },
-                {
-                    "const": "underline"
-                }
-            ],
-            "additionalProperties": false
+            "oneOf": [{
+                "const": "black"
+            },
+            {
+                "const": "blue"
+            },
+            {
+                "const": "cyan"
+            },
+            {
+                "const": "green"
+            },
+            {
+                "const": "grey"
+            },
+            {
+                "const": "magenta"
+            },
+            {
+                "const": "red"
+            },
+            {
+                "const": "system"
+            },
+            {
+                "const": "white"
+            },
+            {
+                "const": "yellow"
+            },
+            {
+                "const": "bold"
+            },
+            {
+                "const": "inverse"
+            },
+            {
+                "const": "italic"
+            },
+            {
+                "const": "underline"
+            }]
         },
         "WpBuildRcSourceCodeType": {
             "type": "string",
             "default": "typescript",
-            "oneOf": [
-                {
-                    "const": "javascript"
-                },
-                {
-                    "const": "typescript"
-                }
-            ]
+            "oneOf": [{
+                "const": "javascript"
+            },
+            {
+                "const": "typescript"
+            }]
         },
         "WpBuildRcVsCodeConfig": {
             "type": "object",
@@ -1118,48 +1116,40 @@
                     "minLength": 1
                 },
                 "chunkLoading": {
-                    "oneOf": [
-                        {
-                            "type": "boolean"
+                    "oneOf": [{
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "string",
+                        "oneOf": [{
+                            "const": "jsonp"
                         },
                         {
-                            "type": "string",
-                            "oneOf": [
-                                {
-                                    "const": "jsonp"
-                                },
-                                {
-                                    "const": "import"
-                                },
-                                {
-                                    "const": "importScripts"
-                                },
-                                {
-                                    "const": "require"
-                                },
-                                {
-                                    "const": "async-node"
-                                }
-                            ],
-                            "additionalProperties": false
-                        }
-                    ],
-                    "additionalProperties": false
+                            "const": "import"
+                        },
+                        {
+                            "const": "importScripts"
+                        },
+                        {
+                            "const": "require"
+                        },
+                        {
+                            "const": "async-node"
+                        }]
+                    }]
                 },
                 "dependOn": {
-                    "oneOf": [
-                        {
+                    "oneOf": [{
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][\\w]+$"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
                             "type": "string",
                             "pattern": "^[a-zA-Z][\\w]+$"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "pattern": "^[a-zA-Z][\\w]+$"
-                            }
                         }
-                    ]
+                    }]
                 },
                 "filename": {
                     "$ref": "#/definitions/FileName"
@@ -1169,15 +1159,12 @@
                 },
                 "layer": {
                     "type": "string",
-                    "oneOf": [
-                        {
-                            "const": "debug"
-                        },
-                        {
-                            "const": "release"
-                        }
-                    ],
-                    "additionalProperties": false
+                    "oneOf": [{
+                        "const": "debug"
+                    },
+                    {
+                        "const": "release"
+                    }]
                 },
                 "publicPath": {
                     "$ref": "#/definitions/DirectoryPathRelative"
@@ -1194,13 +1181,12 @@
         },
         "WpBuildWebpackEntryValue": {
             "anyOf": [
-                {
-                    "$ref": "#/definitions/FilePathRelativeLeadingDot"
-                },
-                {
-                    "$ref": "#/definitions/WpBuildWebpackEntryObject"
-                }
-            ]
+            {
+                "$ref": "#/definitions/FilePathRelativeLeadingDot"
+            },
+            {
+                "$ref": "#/definitions/WpBuildWebpackEntryObject"
+            }]
         },
         "WpBuildWebpackEntry": {
             "type": "object",
@@ -1215,80 +1201,74 @@
                 "maxLength": 30
             },
             "additionalProperties": false,
-            "examples": [
-                {
-                    "entry": {
-                        "modulename": "./path/to/entry.ts"
-                    }
-                },
-                {
-                    "entry": {
-                        "modulename1": "./path/to/entry1.ts",
-                        "modulename2": "./path/to/entry2.ts",
-                        "modulename3": "./path/to/entry3.ts"
-                    }
-                },
-                {
-                    "entry": {
-                        "modulename": {
-                            "import": "./path/to/entrymodule.ts"
-                        },
-                        "modulename2": "./path/to/entry2.ts"
-                    }
-                },
-                {
-                    "entry": {
-                        "modulename1": {
-                            "import": "./path/to/entrymodule1.ts"
-                        },
-                        "modulename2": {
-                            "import": "./path/to/entrymodule1.ts",
-                            "dependOn": "modulename1"
-                        },
-                        "modulename3": {
-                            "import": "./path/to/entrymodule2.ts",
-                            "dependOn": "modulename2"
-                        }
+            "examples": [{
+                "entry": {
+                    "modulename": "./path/to/entry.ts"
+                }
+            },
+            {
+                "entry": {
+                    "modulename1": "./path/to/entry1.ts",
+                    "modulename2": "./path/to/entry2.ts",
+                    "modulename3": "./path/to/entry3.ts"
+                }
+            },
+            {
+                "entry": {
+                    "modulename": {
+                        "import": "./path/to/entrymodule.ts"
+                    },
+                    "modulename2": "./path/to/entry2.ts"
+                }
+            },
+            {
+                "entry": {
+                    "modulename1": {
+                        "import": "./path/to/entrymodule1.ts"
+                    },
+                    "modulename2": {
+                        "import": "./path/to/entrymodule1.ts",
+                        "dependOn": "modulename1"
+                    },
+                    "modulename3": {
+                        "import": "./path/to/entrymodule2.ts",
+                        "dependOn": "modulename2"
                     }
                 }
-            ]
+            }]
         },
         "WpBuildWebpackMode":  {
             "type": "string",
             "default": "production",
             "oneOf": [
-                {
-                    "const": "development"
-                },
-                {
-                    "const": "production"
-                },
-                {
-                    "const": "none"
-                },
-                {
-                    "const": "test"
-                }
-            ],
-            "additionalProperties": false
+            {
+                "const": "development"
+            },
+            {
+                "const": "production"
+            },
+            {
+                "const": "none"
+            },
+            {
+                "const": "test"
+            }]
         },
         "WpBuildWebpackAliasValue": {
-            "anyOf": [
-                {
+            "anyOf": [{
+                "$ref": "#/definitions/DirectoryPathGlob"
+            },
+            {
+                "type": "array",
+                "items": {
                     "$ref": "#/definitions/DirectoryPathGlob"
-                },
-                {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/DirectoryPathGlob"
-                    }
-                },
-                {
-                    "type": "boolean",
-                    "const": false,
-                    "readOnly": true
                 }
-            ]
+            },
+            {
+                "type": "boolean",
+                "const": false,
+                "readOnly": true
+            }]
         },
         "WpBuildWebpackAliasConfig": {
             "type": "object",
@@ -1302,28 +1282,27 @@
                 "maxLength": 20
             },
             "description": "Key value pairs for aliased import/require paths",
-            "examples": [
+            "examples": [{
+                "alias":
                 {
-                    "alias":
-                    {
-                        ":env": "src/lib/env/node",
-                        ":types": "types"
-                    }
-                },
-                {
-                    "alias":
-                    {
-                        ":env": [
-                            "src/lib/env/web", "src/webapp/tools/env/web"
-                        ],
-                        ":types": "types"
-                    }
+                    ":env": "src/lib/env/node",
+                    ":types": "types"
                 }
-            ]
+            },
+            {
+                "alias":
+                {
+                    ":env": [
+                        "src/lib/env/web", "src/webapp/tools/env/web"
+                    ],
+                    ":types": "types"
+                }
+            }]
         },
         "WebpackConfigOverride": {
             "type": "object",
             "minProperties": 0,
+            "additionalProperties": true,
             "patternProperties": {
                 "^[a-z][\\w]+$": {
                     "$ref": "#"
@@ -1334,120 +1313,113 @@
             },
             "description": "An object that is directly applied to the webpack configurqtion before it is returned to the main process",
             "examples": [
-                {
-                    "context": "/usr/lib/projectname/src",
-                    "resolve":
+            {
+                "context": "/usr/lib/projectname/src",
+                "resolve":
+                    {
+                        "alias":
                         {
-                            "alias":
-                            {
-                                ":env/*": "src/lib/env/node/*",
-                                ":types": "types"
-                            },
-                           "extensions": [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
-                        }
-                }
-            ],
-            "additionalProperties": true
+                            ":env/*": "src/lib/env/node/*",
+                            ":types": "types"
+                        },
+                        "extensions": [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
+                    }
+            }]
         },
         "WebpackTarget":  {
             "type": "string",
             "default": "web",
-            "oneOf": [
-                {
-                    "const": "node"
-                },
-                {
-                    "const": "web"
-                },
-                {
-                    "const": "webworker"
-                },
-                {
-                    "const": "async-node"
-                },
-                {
-                    "const": "node-webkit"
-                },
-                {
-                    "const": "electron-main"
-                },
-                {
-                    "const": "electron-renderer"
-                },
-                {
-                    "const": "electron-preload"
-                },
-                {
-                    "const": "nwjs"
-                },
-                {
-                    "const": "esX"
-                },
-                {
-                    "const": "browserlist"
-                }
-            ],
-            "additionalProperties": false
+            "oneOf": [{
+                "const": "node"
+            },
+            {
+                "const": "web"
+            },
+            {
+                "const": "webworker"
+            },
+            {
+                "const": "async-node"
+            },
+            {
+                "const": "node-webkit"
+            },
+            {
+                "const": "electron-main"
+            },
+            {
+                "const": "electron-renderer"
+            },
+            {
+                "const": "electron-preload"
+            },
+            {
+                "const": "nwjs"
+            },
+            {
+                "const": "esX"
+            },
+            {
+                "const": "browserlist"
+            }]
         },
         "WebpackLibraryType": {
             "type": "string",
             "default": "commonjs2",
-            "oneOf": [
-                {
-                    "const": "var"
-                },
-                {
-                    "const": "module"
-                },
-                {
-                    "const": "assign"
-                },
-                {
-                    "const": "assign-properties"
-                },
-                {
-                    "const": "this"
-                },
-                {
-                    "const": "window"
-                },
-                {
-                    "const": "self"
-                },
-                {
-                    "const": "global"
-                },
-                {
-                    "const": "commonjs"
-                },
-                {
-                    "const": "commonjs2"
-                },
-                {
-                    "const": "commonjs-module"
-                },
-                {
-                    "const": "commonjs-static'"
-                },
-                {
-                    "const": "amd"
-                },
-                {
-                    "const": "amd-require"
-                },
-                {
-                    "const": "umd'"
-                },
-                {
-                    "const": "umd2"
-                },
-                {
-                    "const": "jsonp"
-                },
-                {
-                    "const": "system"
-                }
-            ]
+            "oneOf": [{
+                "const": "var"
+            },
+            {
+                "const": "module"
+            },
+            {
+                "const": "assign"
+            },
+            {
+                "const": "assign-properties"
+            },
+            {
+                "const": "this"
+            },
+            {
+                "const": "window"
+            },
+            {
+                "const": "self"
+            },
+            {
+                "const": "global"
+            },
+            {
+                "const": "commonjs"
+            },
+            {
+                "const": "commonjs2"
+            },
+            {
+                "const": "commonjs-module"
+            },
+            {
+                "const": "commonjs-static'"
+            },
+            {
+                "const": "amd"
+            },
+            {
+                "const": "amd-require"
+            },
+            {
+                "const": "umd'"
+            },
+            {
+                "const": "umd2"
+            },
+            {
+                "const": "jsonp"
+            },
+            {
+                "const": "system"
+            }]
         }
     }
 }

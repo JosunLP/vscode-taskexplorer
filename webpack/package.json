@@ -19,10 +19,10 @@
         "url": "https://github.com/spmeesseman/wpbuild.git"
     },
     "scripts": {
-        "build_rc_types": "node bin/generate-rc-types.js",
-        "build_rc_types:test": "json2ts -f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties -i ./types/.wpbuildrc.schema.json -o types/rc.base.tmp.d.ts",
-        "cp-projrc-to-defaultrc": "cmd /c copy /Y .wpbuildrc.json schema\\.wpbuildrc.defaults.json",
-        "upload_rc_schema": "node bin/upload-rc-schema.js",
+        "build_types-upload_schema": "npm run build_types && npm run upload_schema",
+        "build_types": "node bin/generate-rc-types.js",
+        "build_types:test": "json2ts -f --unreachableDefinitions --style.tabWidth 4 --no-additionalProperties -i ./types/.wpbuildrc.schema.json -o types/rc.base.tmp.d.ts",
+        "upload_schema": "node bin/upload-rc-schema.js",
         "types-check": "tsc --target es2020 --noEmit --skipLibCheck ./types/index.d.ts && tsc --target es2020 --noEmit --skipLibCheck --allowJs ./utils/constants.js"
     },
     "files": [

@@ -46,6 +46,22 @@ export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 export declare type WpBuildRcPlugins = WpBuildRcPluginsUser & WpBuildRcPluginsInternal;
 
+export declare type WpBuildRcPluginsAnalyze = | boolean | 
+{
+          analyzer?: boolean;
+          circular?: boolean;
+          visualizer?: boolean;
+      };
+
+export declare type WpBuildRcPluginConfigBanner = boolean | string;
+
+export declare type WpBuildRcPluginConfigUpload = boolean | WpBuildRcUploadConfig;
+export declare type WpBuildRcPluginConfigVendorMod = | boolean | 
+{
+          clean_plugin: boolean;
+          ts_loader: boolean;
+      };
+
 export declare type BooleanReadOnly = boolean;
 
 export declare type WpBuildRcBuilds = WpBuildRcBuild[];
@@ -187,12 +203,14 @@ export declare type WpBuildRcExportsUser =
     ignorewarnings?: boolean;
     minification?: boolean;
     optimization?: boolean;
+    stats?: boolean;
     watch?: boolean;
 };
 
 export declare type WpBuildRcPluginsUser = 
 {
-    banner?: boolean | string;
+    analyze?: WpBuildRcPluginsAnalyze;
+    banner?: WpBuildRcPluginConfigBanner;
     ignore?: boolean;
     istanbul?: boolean;
     licensefiles?: boolean;
@@ -201,14 +219,8 @@ export declare type WpBuildRcPluginsUser =
     progress?: boolean;
     scm?: boolean;
     sourcemaps?: boolean;
-    upload?: boolean | WpBuildRcUploadConfig;
-    vendormod?:
-        | boolean
-        | 
-{
-              clean_plugin: boolean;
-              ts_loader: boolean;
-          };
+    upload?: WpBuildRcPluginConfigUpload;
+    vendormod?: WpBuildRcPluginConfigVendorMod;
 };
 
 export declare type WpBuildRcUploadConfig = 
@@ -216,13 +228,13 @@ export declare type WpBuildRcUploadConfig =
     url?: string;
     plink?: 
 {
-        user?: string;
-        key?: string;
+        user: string;
+        key: string;
     };
     scp?: 
 {
-        user?: string;
-        key?: string;
+        user: string;
+        key: string;
     };
 };
 
