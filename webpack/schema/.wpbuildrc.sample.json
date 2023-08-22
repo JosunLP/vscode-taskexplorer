@@ -50,28 +50,6 @@
             }
         ]
     },
-    "testproduction":
-    {
-        "builds": [
-            { "name": "taskexplorer", "mode": "testproduction" },
-            { "name": "webapp", "mode": "production" },
-            {
-                "name": "tests",
-                "log": {
-                    "color": "yellow"
-                },
-                "paths": {
-                    "dist": "dist/test",
-                    "src": "src/tests"
-                }
-            }
-        ],
-        "log": {
-            "pad": {
-                "value": 60
-            }
-        }
-    },
     "production":
     {
         "builds": []
@@ -135,16 +113,11 @@
     {
         "cache": true,
         "devtool": true,
-        "entry": true,
         "experiments": true,
         "externals": true,
         "ignorewarnings": true,
         "minification": false,
         "optimization": true,
-        "output": true,
-        "plugins": true,
-        "resolve": true,
-        "rules": true,
         "stats": true,
         "watch": true
     },

@@ -468,6 +468,9 @@
                 "optimization": {
                     "type": "boolean"
                 },
+                "stats": {
+                    "type": "boolean"
+                },
                 "watch": {
                     "type": "boolean"
                 }
@@ -758,9 +761,30 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "banner": {
-                    "oneOf": [
+                "analyze": {
+                    "$id": "WpBuildRcPluginsAnalyze",
+                    "oneOf": [{
+                        "type": "boolean"
+                    },
                     {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "analyzer": {
+                                "type": "boolean"
+                            },
+                            "circular": {
+                                "type": "boolean"
+                            },
+                            "visualizer": {
+                                "type": "boolean"
+                            }
+                        }
+                    }]
+                },
+                "banner": {
+                    "$id": "WpBuildRcPluginConfigBanner",
+                    "oneOf": [{
                         "type": "boolean"
                     },
                     {
@@ -795,49 +819,46 @@
                     "type": "boolean"
                 },
                 "upload": {
-                    "oneOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "$ref": "#/definitions/WpBuildRcUploadConfig"
-                        }
-                    ]
+                    "$id": "WpBuildRcPluginConfigUpload",
+                    "oneOf": [{
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/WpBuildRcUploadConfig"
+                    }]
                 },
                 "vendormod": {
-                    "oneOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "typef": "object",
-                            "additionalProperties": false,
-                            "required": [
-                                "clean_plugin", "ts_loader"
-                            ],
-                            "properties": {
-                                "clean_plugin": {
-                                    "type": "boolean"
-                                },
-                                "ts_loader": {
-                                    "type": "boolean"
-                                }
+                    "$id": "WpBuildRcPluginConfigVendorMod",
+                    "oneOf": [{
+                        "type": "boolean"
+                    },
+                    {
+                        "typef": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "clean_plugin", "ts_loader"
+                        ],
+                        "properties": {
+                            "clean_plugin": {
+                                "type": "boolean"
+                            },
+                            "ts_loader": {
+                                "type": "boolean"
                             }
                         }
-                    ]
+                    }]
                 }
             }
         },
         "WpBuildRcPlugins": {
             "type": "object",
-            "allOf": [
-                {
-                    "$ref": "#/definitions/WpBuildRcPluginsUser"
-                },
-                {
-                    "$ref": "#/definitions/WpBuildRcPluginsInternal"
-                }
-            ]
+            "additionalProperties": false,
+            "allOf": [{
+                "$ref": "#/definitions/WpBuildRcPluginsUser"
+            },
+            {
+                "$ref": "#/definitions/WpBuildRcPluginsInternal"
+            }]
         },
         "WpBuildRcPluginsInternal": {
             "type": "object",

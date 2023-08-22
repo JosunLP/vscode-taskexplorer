@@ -36,7 +36,7 @@ const vendormod = require("./vendormod");
 const wait = require("./wait");
 const { cssextract, htmlcsp, imageminimizer, htmlinlinechunks, webviewapps } = require("./html");
 
-const analyzer = require("./analyze/analyze");
+const analyzer = require("./analyze/analyzer");
 const circular = require("./analyze/circular");
 const visualizer = require("./analyze/visualizer");
 const analyze = { analyzer, circular, visualizer };

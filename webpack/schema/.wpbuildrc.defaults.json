@@ -91,6 +91,7 @@
         "ignorewarnings": true,
         "minification": false,
         "optimization": true,
+        "stats": true,
         "watch": true
     },
     "plugins":
@@ -104,6 +105,7 @@
         "progress": false,
         "scm": false,
         "sourcemaps": true,
+        "upload": false,
         "vendormod": true
     },
     "vscode": {

@@ -52,7 +52,7 @@ const level = (loglevel) =>
  */
 const stats = (app) =>
 {
-	if (app.args.loglevel !== 0 && app.args.loglevel !== "none")
+	if (app.args.loglevel !== 0 && app.args.loglevel !== "none" && app.build.exports.stats)
 	{
 		app.wpc.stats = {
 			preset: "errors-warnings",

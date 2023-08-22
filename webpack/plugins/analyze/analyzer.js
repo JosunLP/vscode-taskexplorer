@@ -17,9 +17,9 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 
 /**
  * @param {WpBuildApp} app
- *  @returns {BundleAnalyzerPlugin | undefined}
+ * @returns {BundleAnalyzerPlugin | undefined}
  */
-const analyze = (app) =>
+const analyzer = (app) =>
 {
     let plugin;
 	if (app.rc.args.analyze)
@@ -37,4 +37,4 @@ const analyze = (app) =>
 };
 
 
-module.exports = analyze;
+module.exports = analyzer;

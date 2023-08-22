@@ -44,7 +44,7 @@ const plugins = (app) =>
 		...sourcemaps(app),      // compiler.hooks.compilation -> compilation.hooks.processAssets
 		...copy([], app),        // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
 		...optimization(app),    // compiler.hooks.shouldEmit, compiler.hooks.compilation->shouldRecord|optimizeChunks
-		analyze.analyze(app),    // compiler.hooks.done
+		analyze.analyzer(app),   // compiler.hooks.done
 		analyze.visualizer(app), // compiler.hooks.emit
 		analyze.circular(app),   // compiler.hooks.compilation -> compilation.hooks.optimizeModules
 		licensefiles(app),       // compiler.hooks.shutdown
