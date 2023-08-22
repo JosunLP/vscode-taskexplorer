@@ -9,7 +9,7 @@
  */
 
 const WpBuildPlugin = require("./base");
-const typedefs = require("../types/typedefs");
+const typedefs = require("../../types/typedefs");
 
 
 /**
@@ -21,7 +21,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
      * @class WpBuildLogHookStagesPlugin
      * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
      */
-	constructor(options) { super(options, "hooksLog"); }
+	constructor(options) { super(options); }
 
     /**
      * @function Called by webpack runtime to initialize this plugin
@@ -152,9 +152,9 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
 	writeBuildTag(hook)
 	{
 		const key = hook +this.app.wpc.name;
-		if (!this.app.global.hooksLog[key])
+		if (!this.app.global.logHooks[key])
 		{
-			this.app.global.hooksLog[key] = true;
+			this.app.global.logHooks[key] = true;
 			this.logger.valuestar("build stage hook", hook);
 		}
 	};

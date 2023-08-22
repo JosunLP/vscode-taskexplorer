@@ -17,12 +17,12 @@ const { existsSync } = require("fs");
 const WpBuildPlugin = require("./base");
 const { join, basename } = require("path");
 const { WebpackError } = require("webpack");
-const { RegexTestsChunk } = require("../utils");
+const { RegexTestsChunk, apply } = require("../utils");
 const { copyFile, rm, readdir, rename, mkdir } = require("fs/promises");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
+/** @typedef {import("../../types").WebpackCompiler} WebpackCompiler */
+/** @typedef {import("../../types").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("./base").WpBuildPluginOptions} WpBuildPluginOptions */
 
 
@@ -34,8 +34,9 @@ class WpBuildUploadPlugin extends WpBuildPlugin
      */
 	constructor(options)
     {
-        super(options);
-        this.initGlobalEnvObject("upload", 0, "callCount", "readyCount");
+        super(options); // apply(options, { globalCacheProps: [ "callCount", "readyCount" ] }));
+        this.app.global.upload.callCount = 0;
+        this.app.global.upload.readyCount = 0;
     }
 
 

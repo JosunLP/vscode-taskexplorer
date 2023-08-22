@@ -9,7 +9,7 @@
  */
 
 const WpBuildBaseTsPlugin = require("./tsc");
-const typedefs = require("../types/typedefs");
+const typedefs = require("../../types/typedefs");
 const { existsSync } = require("fs");
 
 
@@ -24,7 +24,7 @@ class WpBuildTsBundlePlugin extends WpBuildBaseTsPlugin
      */
 	constructor(options)
     {
-		super(options, "tsbundle");
+		super(options);
     }
 
     /**

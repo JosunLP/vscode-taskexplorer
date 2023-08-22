@@ -15,7 +15,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
+/** @typedef {import("../../types").WebpackPluginInstance} WebpackPluginInstance */
 
 
 /**
@@ -47,7 +47,7 @@ const html = (name, app) =>
 				removeEmptyAttributes: true,
 				removeStyleLinkTypeAttributes: true,
 				keepClosingSlash: true,
-				minifyCSS: true,
+				minifyCSS: true
 			}
 		});
     }
@@ -108,11 +108,11 @@ const htmlcsp = (app) =>
         hashingMethod: "sha256",
         hashEnabled: {
             "script-src": true,
-            "style-src": app.wpc.mode === "production",
+            "style-src": app.wpc.mode === "production"
         },
         nonceEnabled: {
             "script-src": true,
-            "style-src": app.wpc.mode === "production",
+            "style-src": app.wpc.mode === "production"
         }
     });
     //
