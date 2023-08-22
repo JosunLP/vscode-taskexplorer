@@ -144,7 +144,7 @@ const parseTypesDts = async (hdr, data) =>
                       requiredProperties.filter(([ _, t ]) => t === m1).forEach(([ p, _ ]) => {
                           src = src.replace(new RegExp(`${p}\\?\\: `, "g"), `${p}: `);
                       });
-                      typedefs.push(m1, `${m1}Key`, `Type${m1}`);
+                      pushTypedef(m1, `${m1}Key`, `Type${m1}`);
                       if (generateEnums)
                       {
                           const valuesFmt = m2.replace(/ *\= */, "")
@@ -227,6 +227,7 @@ const promptForRestore = async (file, previousContent) =>
  * @param {string} suffix
  * @param {string} values
  * @param {string} [valueType]
+ * @returns {[ string, string ]}
  */
 const pushExport = (property, suffix, values, valueType) =>
 {
@@ -248,10 +249,23 @@ const pushExport = (property, suffix, values, valueType) =>
     const enumeration = enums.find(e => e.includes(`${property}Enum`));
     if (enumeration) {
         lines.push(enumeration);
-        typedefs.push(`${property}Enum`);
+        pushTypedef(`${property}Enum`);
         exported.push(`    ${property}Enum`);
     }
     logger.log(`      added runtime constants for type ${property}`);
+    return [ pName1, `is${pName2}` ];
+};
+
+
+/**
+ * @param {string[]} properties
+ */
+const pushTypedef = (...properties) =>
+{
+    typedefs.push(...properties);
+    for (const property of properties) {
+        logger.log(`      added typedef for type ${property}`);
+    }
 };
 
 
@@ -271,26 +285,24 @@ const writeConstantsJs = async (hdr, data) =>
 
     while ((match = rgx.exec(data)) !== null)
     {
-        typedefs.push(match[1]);
+        pushTypedef(match[1]);
         properties.push(match[1]);
-        pushExport(match[1], "s", match[2]);
-        typedefs.push(`${match[1]}s`, `${match[1]}${match[2]}`);
+        pushTypedef(...pushExport(match[1], "s", match[2]));
     }
 
     while ((match = rgx2.exec(data)) !== null)
     {
-        typedefs.push(match[1]);
+        pushTypedef(match[1]);
         const propFmt = match[1].replace("Type", ""),
               valuesFmt = `"${match[2].replace(new RegExp(`[\\?]?\\:(.*?);(?:${EOL}    |$)`, "gm"), "\", \"")}"`
                                       .replace(/(?:, ""|"", )/g, "");
-        pushExport(propFmt, "Props", valuesFmt, `(keyof typedefs.${propFmt})`);
-        typedefs.push(`${propFmt}Props`, `${propFmt}${valuesFmt}`);
+        pushTypedef(...pushExport(propFmt, "Props", valuesFmt, `(keyof typedefs.${propFmt})`));
     }
 
     const rgx3 = /export declare type (\w*?) = (\w*?) \& (\w*?);\r?\n/g;
     while ((match = rgx3.exec(data)) !== null)
     {
-        typedefs.push(match[1]);
+        pushTypedef(match[1]);
     }
 
     if (lines.length > 0)
@@ -353,7 +365,7 @@ const writeTypedefsJs = async () =>
     let data = await readFile(typesPath, "utf8");
     data = data.replace(
         /\/\* START_RC_DEFS \*\/(?:[^]*?)\/\* END_RC_DEFS \*\//g,
-        `/* START_RC_DEFS */\r\n${typedefs.sort((a, b) => a.length - b.length)
+        `/* START_RC_DEFS */\r\n${typedefs.sort((a, b) => (a.length - b.length) || a.localeCompare(b))
                                             .map(e => e.trim())
                                             .map(e => `/** @typedef {import("./rc").${e}} ${e} */`)
                                             .join("\r\n")}\r\n/* END_RC_DEFS */`

@@ -11,49 +11,49 @@
 /* START_RC_DEFS */
 /** @typedef {import("./rc").WpBuildRcLog} WpBuildRcLog */
 /** @typedef {import("./rc").WebpackTarget} WebpackTarget */
+/** @typedef {import("./rc").WebpackTargets} WebpackTargets */
 /** @typedef {import("./rc").WpBuildRcBuild} WpBuildRcBuild */
 /** @typedef {import("./rc").WpBuildRcPaths} WpBuildRcPaths */
-/** @typedef {import("./rc").WebpackTargets} WebpackTargets */
 /** @typedef {import("./rc").WpBuildRcPaths} WpBuildRcPaths */
+/** @typedef {import("./rc").isWebpackTarget} isWebpackTarget */
+/** @typedef {import("./rc").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("./rc").WpBuildRcLogKey} WpBuildRcLogKey */
 /** @typedef {import("./rc").WpBuildRcLogPad} WpBuildRcLogPad */
-/** @typedef {import("./rc").WpBuildLogColor} WpBuildLogColor */
 /** @typedef {import("./rc").TypeWpBuildRcLog} TypeWpBuildRcLog */
 /** @typedef {import("./rc").WpBuildLogColors} WpBuildLogColors */
-/** @typedef {import("./rc").WpBuildRcPlugins} WpBuildRcPlugins */
 /** @typedef {import("./rc").WpBuildRcExports} WpBuildRcExports */
+/** @typedef {import("./rc").WpBuildRcPlugins} WpBuildRcPlugins */
+/** @typedef {import("./rc").isWpBuildLogColor} isWpBuildLogColor */
 /** @typedef {import("./rc").WpBuildRcBuildKey} WpBuildRcBuildKey */
 /** @typedef {import("./rc").WpBuildRcPathsKey} WpBuildRcPathsKey */
 /** @typedef {import("./rc").TypeWpBuildRcBuild} TypeWpBuildRcBuild */
+/** @typedef {import("./rc").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
+/** @typedef {import("./rc").WebpackLibraryType} WebpackLibraryType */
+/** @typedef {import("./rc").WpBuildRcBuildType} WpBuildRcBuildType */
 /** @typedef {import("./rc").WpBuildRcLogColors} WpBuildRcLogColors */
 /** @typedef {import("./rc").WpBuildRcLogPadKey} WpBuildRcLogPadKey */
-/** @typedef {import("./rc").TypeWpBuildRcPaths} TypeWpBuildRcPaths */
-/** @typedef {import("./rc").WpBuildRcBuildType} WpBuildRcBuildType */
-/** @typedef {import("./rc").WpBuildWebpackMode} WpBuildWebpackMode */
-/** @typedef {import("./rc").WebpackLibraryType} WebpackLibraryType */
 /** @typedef {import("./rc").WpBuildRcPathsEnum} WpBuildRcPathsEnum */
+/** @typedef {import("./rc").WpBuildWebpackMode} WpBuildWebpackMode */
 /** @typedef {import("./rc").TypeWpBuildRcLogPad} TypeWpBuildRcLogPad */
-/** @typedef {import("./rc").WpBuildRcBuildTypes} WpBuildRcBuildTypes */
-/** @typedef {import("./rc").WpBuildWebpackModes} WpBuildWebpackModes */
-/** @typedef {import("./rc").WpBuildLogTrueColor} WpBuildLogTrueColor */
 /** @typedef {import("./rc").WebpackLibraryTypes} WebpackLibraryTypes */
+/** @typedef {import("./rc").WpBuildLogTrueColor} WpBuildLogTrueColor */
+/** @typedef {import("./rc").WpBuildRcBuildTypes} WpBuildRcBuildTypes */
 /** @typedef {import("./rc").WpBuildRcPathsProps} WpBuildRcPathsProps */
+/** @typedef {import("./rc").WpBuildWebpackModes} WpBuildWebpackModes */
+/** @typedef {import("./rc").isWebpackLibraryType} isWebpackLibraryType */
+/** @typedef {import("./rc").isWpBuildRcBuildType} isWpBuildRcBuildType */
+/** @typedef {import("./rc").isWpBuildRcPathsProp} isWpBuildRcPathsProp */
+/** @typedef {import("./rc").isWpBuildWebpackMode} isWpBuildWebpackMode */
 /** @typedef {import("./rc").WpBuildLogTrueColors} WpBuildLogTrueColors */
 /** @typedef {import("./rc").WpBuildRcPackageJson} WpBuildRcPackageJson */
+/** @typedef {import("./rc").isWpBuildLogTrueColor} isWpBuildLogTrueColor */
 /** @typedef {import("./rc").WpBuildRcLogColorsKey} WpBuildRcLogColorsKey */
 /** @typedef {import("./rc").TypeWpBuildRcLogColors} TypeWpBuildRcLogColors */
 /** @typedef {import("./rc").WpBuildRcSourceCodeType} WpBuildRcSourceCodeType */
 /** @typedef {import("./rc").WpBuildRcSourceCodeTypes} WpBuildRcSourceCodeTypes */
+/** @typedef {import("./rc").isWpBuildRcSourceCodeType} isWpBuildRcSourceCodeType */
 /** @typedef {import("./rc").WpBuildRcPackageJsonProps} WpBuildRcPackageJsonProps */
-/** @typedef {import("./rc").WpBuildRcSourceCodeType"javascript" | "typescript"} WpBuildRcSourceCodeType"javascript" | "typescript" */
-/** @typedef {import("./rc").WpBuildRcPaths"base", "ctx", "dist", "src", "temp", "tsconfig"} WpBuildRcPaths"base", "ctx", "dist", "src", "temp", "tsconfig" */
-/** @typedef {import("./rc").WpBuildWebpackMode"development" | "production" | "none" | "test"} WpBuildWebpackMode"development" | "production" | "none" | "test" */
-/** @typedef {import("./rc").WpBuildRcBuildType"module" | "tests" | "types" | "webapp" | "webmodule"} WpBuildRcBuildType"module" | "tests" | "types" | "webapp" | "webmodule" */
-/** @typedef {import("./rc").WpBuildLogTrueColor"black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "white" | "yellow"} WpBuildLogTrueColor"black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "white" | "yellow" */
-/** @typedef {import("./rc").WpBuildRcPackageJson"author", "description", "displayName", "main", "module", "name", "publisher", "version"} WpBuildRcPackageJson"author", "description", "displayName", "main", "module", "name", "publisher", "version" */
-/** @typedef {import("./rc").WpBuildLogColor"black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline"} WpBuildLogColor"black" | "blue" | "cyan" | "green" | "grey" | "magenta" | "red" | "system" | "white" | "yellow" | "bold" | "inverse" | "italic" | "underline" */
-/** @typedef {import("./rc").WebpackTarget"node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist"} WebpackTarget"node" | "web" | "webworker" | "async-node" | "node-webkit" | "electron-main" | "electron-renderer" | "electron-preload" | "nwjs" | "esX" | "browserlist" */
-/** @typedef {import("./rc").WebpackLibraryType"var" | "module" | "assign" | "assign-properties" | "this" | "window" | "self" | "global" | "commonjs" | "commonjs2" | "commonjs-module" | "commonjs-static'" | "amd" | "amd-require" | "umd'" | "umd2" | "jsonp" | "system"} WebpackLibraryType"var" | "module" | "assign" | "assign-properties" | "this" | "window" | "self" | "global" | "commonjs" | "commonjs2" | "commonjs-module" | "commonjs-static'" | "amd" | "amd-require" | "umd'" | "umd2" | "jsonp" | "system" */
+/** @typedef {import("./rc").isWpBuildRcPackageJsonProp} isWpBuildRcPackageJsonProp */
 /* END_RC_DEFS */
 
 /** @typedef {import("./rc").WpBuildRcBuilds} WpBuildRcBuilds */
