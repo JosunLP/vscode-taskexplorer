@@ -9,18 +9,7 @@
  */
 
 const WpBuildPlugin = require("./base");
-
-/** @typedef {import("../utils").WpBuildApp} WpBuildApp */
-/** @typedef {import("../types").WebpackCompiler} WebpackCompiler */
-/** @typedef {import("../types").WebpackSyncHook<any>} WebpackSyncHook */
-/** @typedef {import("../types").WebpackCompilation} WebpackCompilation */
-/** @typedef {import("../types").WebpackCompilerHook} WebpackCompilerHook */
-/** @typedef {import("./base").WpBuildPluginOptions} WpBuildPluginOptions */
-/** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
-/** @typedef {import("../types").WebpackCompilerSyncHook} WebpackCompilerSyncHook */
-/** @typedef {import("../types").WebpackCompilerHookName} WebpackCompilerHookName */
-/** @typedef {import("../types").WebpackCompilerSyncHookName} WebpackCompilerSyncHookName */
-/** @typedef {import("../types").WebpackCompilerAsyncHookName} WebpackCompilerAsyncHookName */
+const typedefs = require("../types/typedefs");
 
 
 /**
@@ -30,7 +19,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
 {
     /**
      * @class WpBuildLogHookStagesPlugin
-     * @param {WpBuildPluginOptions} options Plugin options to be applied
+     * @param {typedefs.WpBuildPluginOptions} options Plugin options to be applied
      */
 	constructor(options) { super(options, "hooksLog"); }
 
@@ -38,7 +27,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
      * @function Called by webpack runtime to initialize this plugin
      * @override
      * @member apply
-     * @param {WebpackCompiler} compiler the compiler instance
+     * @param {typedefs.WebpackCompiler} compiler the compiler instance
      * @returns {void}
      */
     apply(compiler)
@@ -50,7 +39,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {WebpackCompilerHookName} hook
+	 * @param {typedefs.WebpackCompilerHookName} hook
 	 * @param {(arg: any) => any} [cb]
 	 */
 	addCompilerHook(hook, cb)
@@ -66,7 +55,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
 	/**
 	 * @function
 	 * @private
-	 * @param {WebpackCompilerAsyncHookName} hook
+	 * @param {typedefs.WebpackCompilerAsyncHookName} hook
 	 */
 	addCompilerHookPromise(hook)
 	{
@@ -120,7 +109,7 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
 			// );
 		});
 		this.addCompilerHook("make");
-		this.addCompilerHook("afterCompile", /** @param {WebpackCompilation} compilation */(compilation) =>
+		this.addCompilerHook("afterCompile", /** @param {typedefs.WebpackCompilation} compilation */(compilation) =>
 		{
 			// const stats = compilation.getStats();
 			// stats.toJson().
@@ -177,9 +166,10 @@ class WpBuildLogHookStagesPlugin extends WpBuildPlugin
  * Returns a `WpBuildLogHookStagesPlugin` instance if appropriate for the current build
  * environment. Can be enabled/disable in .wpconfigrc.json by setting the `plugins.loghooks`
  * property to a boolean value of  `true` or `false`
+ *
  * @function
  * @module
- * @param {WpBuildApp} app
+ * @param {typedefs.WpBuildApp} app
  * @returns {WpBuildLogHookStagesPlugin | undefined}
  */
 const loghooks = (app) =>

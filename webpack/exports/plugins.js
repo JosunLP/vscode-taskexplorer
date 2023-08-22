@@ -14,6 +14,7 @@ const {
 	imageminimizer, htmlinlinechunks, testsuite, tsbundle, types, vendormod, webviewapps, scm
 } = require("../plugins");
 
+
 /** @typedef {import("../utils").WpBuildApp} WpBuildApp */
 /** @typedef {import("../types").WebpackPluginInstance} WebpackPluginInstance */
 
@@ -43,8 +44,8 @@ const plugins = (app) =>
 		...sourcemaps(app),      // compiler.hooks.compilation -> compilation.hooks.processAssets
 		...copy([], app),        // compiler.hooks.thisCompilation -> compilation.hooks.processAssets
 		...optimization(app),    // compiler.hooks.shouldEmit, compiler.hooks.compilation->shouldRecord|optimizeChunks
-		analyze.bundle(app),     // compiler.hooks.done
-		// analyze.visualizer(app), // compiler.hooks.emit
+		analyze.analyze(app),    // compiler.hooks.done
+		analyze.visualizer(app), // compiler.hooks.emit
 		analyze.circular(app),   // compiler.hooks.compilation -> compilation.hooks.optimizeModules
 		licensefiles(app),       // compiler.hooks.shutdown
 		upload(app),             // compiler.hooks.afterDone

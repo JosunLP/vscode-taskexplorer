@@ -99,6 +99,7 @@
  * @typedef {object} WpBuildPluginOptions
  * @property {WpBuildApp} app
  * @property {string} [build]
+ * @property {string[]} [globalCacheProps]
  * @property {boolean} [registerVendorPluginsFirst]
  * @property {boolean} [registerVendorPluginsOnly]
  * @property {boolean} [wrapPlugin]
@@ -156,11 +157,13 @@
 /** @typedef {import("./webpack").WebpackRawSource} WebpackRawSource */
 /** @typedef {import("./webpack").WebpackAssetInfo} WebpackAssetInfo */
 /** @typedef {import("./webpack").WebpackRuleSetUse} WebpackRuleSetUse */
+/** @typedef {import("./webpack").WebpackSyncHook<any>} WebpackSyncHook */
 /** @typedef {import("./webpack").WebpackRuntimeArgs} WebpackRuntimeArgs */
 /** @typedef {import("./webpack").WebpackCacheFacade} WebpackCacheFacade */
 /** @typedef {import("./webpack").WebpackCompilation} WebpackCompilation */
 /** @typedef {import("./webpack").WebpackPluginInstance} WebpackPluginInstance */
 /** @typedef {import("./webpack").WebpackRuleSetUseItem} WebpackRuleSetUseItem */
+/** @typedef {import("./webpack").WebpackCompilerHookName} WebpackCompilerHookName */
 /** @typedef {import("./webpack").WebpackCompilationAssets} WebpackCompilationAssets */
 /** @typedef {import("./webpack").WebpackCompilationParams} WebpackCompilationParams */
 /** @typedef {import("./webpack").WebpackCompilerAsyncHook} WebpackCompilerAsyncHook */

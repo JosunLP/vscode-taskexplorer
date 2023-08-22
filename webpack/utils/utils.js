@@ -502,6 +502,28 @@ const isString = (v, notEmpty) => (!!v || (v === "" && !notEmpty)) && (v instanc
 
 
 /**
+ * @param {string} s
+ * @param {boolean} [removeSpaces]
+ * @returns {string}
+ */
+const lowerCaseFirstChar = (s, removeSpaces) =>
+{
+    let fs = "";
+    if (s)
+    {
+        fs = s[0].toString().toLowerCase();
+        if (s.length > 1) {
+            fs += s.substring(1);
+        }
+        if (removeSpaces) {
+            fs = fs.replace(/ /g, "");
+        }
+    }
+    return fs;
+};
+
+
+/**
  * @function
  * @template {{}} T
  * @template {{}} U extends T
@@ -717,5 +739,5 @@ class WpBuildError extends WebpackError
 module.exports = {
     apply, applyIf, asArray, capitalize, clone, execAsync, findFiles, findFilesSync, findTsConfig, getExcludes,
     getTsConfig, isArray, isDate,isEmpty, isFunction, isObject, isObjectEmpty,isPrimitive, isPromise,
-    isString, merge, mergeIf, pick, pickBy, pickNot, uniq, WpBuildError, relativrPath, resolvePath
+    isString, lowerCaseFirstChar, merge, mergeIf, pick, pickBy, pickNot, uniq, WpBuildError, relativrPath, resolvePath
 };
