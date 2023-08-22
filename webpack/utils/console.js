@@ -76,6 +76,14 @@ class WpBuildConsoleLogger
      */
     applyOptions = (options) =>
     {
+        let envTagLen = options.envTag1 && options.envTag2 ? options.envTag1.length + options.envTag2.length + 2 : 0;
+        if (envTagLen === 0) {
+            envTagLen = options.envTag1 ? options.envTag1.length + 2 : 0;
+        }
+        if (envTagLen === 0) {
+            envTagLen = 22;
+        }
+
         this.options = merge({
             valueMaxLineLength: 150,
             envTag1: "wpbuild",
@@ -87,12 +95,12 @@ class WpBuildConsoleLogger
             pad: {
                 value: 100,
                 base: 0,
-                envTag: 25
+                envTag: envTagLen
             }
         }, options);
-        if (!this.options.pad.envTag) {
-            // @ts-ignore
-            this.options.pad.envTag = this.options.envTag1.length + this.options.envTag1.length + 5;
+
+        if (envTagLen > /** @type {number} */(this.options.pad.envTag)) {
+            options.pad.envTag = envTagLen;
         }
     }
 
@@ -355,8 +363,14 @@ class WpBuildConsoleLogger
      * @param {any} msg
      * @param {typedefs.WpBuildLogLevel} [level]
      * @param {string} [pad]
+     * @param {boolean} [successIcon]
      */
-    success = (msg, level, pad) => this.writeMsgTag(msg, "success", level, pad, this.colors[this.options.colors.default] || this.colors.white, this.colors.green);
+    success = (msg, level, pad, successIcon) => this.writeMsgTag(
+        msg, "success", level, pad,
+        this.colors[this.options.colors.default] || this.colors.white,
+        this.colors.green,
+        successIcon ? this.icons.color.success : null
+    );
 
 
     /**
@@ -566,15 +580,16 @@ class WpBuildConsoleLogger
      * @param {string} [pad]
      * @param {typedefs.WpBuildLogColorMapping | undefined | null} [bracketColor] surrounding bracket color value
      * @param {typedefs.WpBuildLogColorMapping | undefined | null} [msgColor] msg color value
+     * @param {string | undefined | null | 0 | false} [icon]
      */
-    writeMsgTag = (msg, tagMsg, level, pad, bracketColor, msgColor) =>
+    writeMsgTag = (msg, tagMsg, level, pad, bracketColor, msgColor, icon) =>
     {
         let exPad = "";
         const match = msg.match(/^( +)[\w]/);
         if (match) { exPad = match[1]; msg = msg.trimStart(); }
         this.write(
             exPad + this.tag(tagMsg, bracketColor, msgColor) + " " +
-            this.withColor(msg, this.colors[this.options.colors.default || "grey"]), level, pad
+            this.withColor(msg, this.colors[this.options.colors.default || "grey"]), level, pad, icon
         );
     };
 

@@ -429,6 +429,7 @@ cliWrap(async () =>
         await writeIndexJs();
     }
 
-    logger.write("rc types and typings created successfully");
+    logger.write(" ");
+    logger.success("rc types and typings created successfully", undefined, "", true);
     logger.write(" ");
 })();

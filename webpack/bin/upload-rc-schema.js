@@ -104,21 +104,22 @@ cliWrap(async () =>
         `${user}@${host}:"${rBasePath}/wpbuild/v${version}/.wpbuildrc.schema.json"` // uploaded, and created if not exists
     ];
 
-    logger.log("plink: create / clear remmote directory");
+    logger.log("   plink: create / clear remmote directory");
     await execAsync({
         logger,
         logPad: "   ",
         execOptions: { cwd: resolve(__dirname, "..", "schema") },
         command: "plink " + plinkArgs.join(" ")
     });
-    logger.log("pscp: upload files");
+    logger.log("   pscp: upload files");
     await execAsync({
         logger,
         logPad: "   ",
         execOptions: { cwd: resolve(__dirname, "..", "schema") },
         command: "pscp " + pscpArgs.join(" ")
     });
-    logger.log("successfully uploaded rc schema");
+    logger.write(" ");
+    logger.success("successfully uploaded rc schema", undefined, "", true);
     logger.write(" ");
 
 })();
