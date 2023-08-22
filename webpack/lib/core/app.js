@@ -18,7 +18,7 @@ const { isAbsolute, relative, sep, dirname } = require("path");
 const {
     apply, WpBuildError, isPromise, findTsConfig, getTsConfig, isArray, findFilesSync,
     resolvePath, relativrPath
-} = require("../../utils/utils");
+} = require("../utils/utils");
 
 
 /**

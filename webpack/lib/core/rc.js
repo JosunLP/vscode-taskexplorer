@@ -17,7 +17,7 @@ const { readFileSync, mkdirSync, existsSync } = require("fs");
 const { resolve, basename, join, dirname, sep } = require("path");
 const {
     WpBuildError, apply, pick, isString, merge, isArray, mergeIf, applyIf, resolvePath
-} = require("../../utils/utils");
+} = require("../utils/utils");
 const {
     isWpBuildRcBuildType, isWpBuildWebpackMode, isWebpackTarget, WpBuildRcPackageJsonProps
 } = require("../../types/constants");
