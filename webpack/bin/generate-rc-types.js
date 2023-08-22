@@ -164,8 +164,8 @@ const parseTypesDts = async (hdr, data) =>
                   return src;
           })
           .replace(/\nexport type /g, "\nexport declare type ")
-          .replace(/ \{\n    /g, " \n{\n    ")
-          .replace(/\n    \| +/g, " | ")
+          .replace(/([^\|]) \{\n    /g, (_, m) => m + " \n{\n    ")
+          .replace(/\n    \| +(["0-9])/g, (_, m) => " | " + m)
           .replace(/(?:\n){3,}/g, "\n\n")
           .replace(/[a-z] = +\| +"[a-z]/g, (v) => v.replace("= |", "="))
           .replace(/[\w] ;/g, (v) => v.replace(" ;", ";"))
@@ -173,10 +173,12 @@ const parseTypesDts = async (hdr, data) =>
           .replace(/\n\};?\n/g, "\n}\n")
           .replace(/    (.*?)\?\: BooleanReadOnly;/g, (v, m) => `    readonly ${m}?: boolean;`)
           .replace("export declare type BooleanReadOnly = boolean;\n\n", "")
+          .replace("WpBuildRcPluginsUser | WpBuildRcPluginsInternal", "WpBuildRcPluginsUser & WpBuildRcPluginsInternal")
           .replace(/(export declare type (?:[^]*?)\}\n)/g, v => v.slice(0, v.length - 1) + ";\n")
           .replace(/(export declare interface (?:[^]*?)\};\n)/g, v => v.slice(0, v.length - 2) + "\n\n")
           .replace(/([;\{])\n\s*?\n(\s+)/g, (_, m1, m2) => m1 + "\n" + m2)
           .replace(/ = \{ "= /g, "")
+          .replace(/\: \n\{\n {14}/g, ":\n          {\n              ")
           // .replace(/export declare type WpBuildLogTrueColor =(?:.*?);\n/g, (v) => v + "\nexport declare type WpBuildLogTrueBaseColor = Omit<WpBuildLogTrueColor, \"system\">;\n")
           .replace(/"\}/g, "\"\n}")
           .replace(/\n/g, EOL);

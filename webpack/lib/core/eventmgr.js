@@ -2,17 +2,17 @@
 // @ts-check
 
 /**
- * @file plugin/loghooks.js
+ * @file lib/core/eventmgr.js
  * @version 0.0.1
  * @license MIT
  * @author Scott Meesseman @spmeesseman
  */
 
-const WpBuildPlugin = require("../../plugins/base"),
-	  typedefs = require("../../types/typedefs");
+const typedefs = require("../../types/typedefs");
 
 
 /**
+ * @class WpBuildLogHookStagesPlugin
  * @implements {typedefs.IDisposable}
  */
 class WpBuildEventManager

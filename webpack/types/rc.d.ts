@@ -44,10 +44,11 @@ export declare type WpBuildLogTrueColor = "black" | "blue" | "cyan" | "green" | 
 
 export declare type WpBuildLogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
-export declare type WpBuildRcPlugins = WpBuildRcPluginsUser | WpBuildRcPluginsInternal;
+export declare type WpBuildRcPlugins = WpBuildRcPluginsUser & WpBuildRcPluginsInternal;
 
-export declare type WpBuildRcPluginConfigAnalyze = | boolean | 
-{
+export declare type WpBuildRcPluginConfigAnalyze =
+    | boolean
+    | {
           analyzer?: boolean;
           circular?: boolean;
           visualizer?: boolean;
@@ -55,23 +56,25 @@ export declare type WpBuildRcPluginConfigAnalyze = | boolean |
 
 export declare type WpBuildRcPluginConfigBanner = boolean | string;
 
-export declare type WpBuildRcPluginConfigUpload = | boolean | 
-{
+export declare type WpBuildRcPluginConfigUpload =
+    | boolean
+    | {
           url?: string;
-          plink?: 
-{
+          plink?:
+          {
               user: string;
               key: string;
           };
-          scp?: 
-{
+          scp?:
+          {
               user: string;
               key: string;
           };
       };
 
-export declare type WpBuildRcPluginConfigVendorMod = | boolean | 
-{
+export declare type WpBuildRcPluginConfigVendorMod =
+    | boolean
+    | {
           clean_plugin: boolean;
           ts_loader: boolean;
       };
