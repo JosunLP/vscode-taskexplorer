@@ -36,8 +36,8 @@
  * RC DEFAULTS : file:///c:\Projects\vscode-taskexplorer\webpack\utils\app.js
  */
 
-const WpBuildRc = require("./webpack/utils/rc");
-const typedefs = require("./webpack/types/typedefs");
+const WpBuildRc = require("@spmeesseman/webpack-wrap/src/core/rc");
+const typedefs = require("@spmeesseman/webpack-wrap/src/types/typedefs");
 /**
  * Exports Webpack build configs to the webpack engine... the build(s) start here. Eenvironment "flags"
  * in arge should be set on the cmd line e.g. `--env=property`, as opposed to `--env property=true`,

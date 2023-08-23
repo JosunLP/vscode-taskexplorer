@@ -261,6 +261,7 @@
 		"@spmeesseman/eslint-plugin": "^1.0.0",
 		"@spmeesseman/test-utils": "^0.1.1",
 		"@spmeesseman/vscode-taskexplorer-types": "^2.13.1",
+		"@spmeesseman/webpack-wrap": "file:../@spmeesseman/webpack-wrap",
 		"@types/chai": "^4.3.4",
 		"@types/circular-dependency-plugin": "^5.0.5",
 		"@types/marked": "^4.0.8",
