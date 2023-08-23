@@ -71,6 +71,7 @@
 		"build-test-suite": "tsc -b ./src/test && tsc-alias -p ./src/test/tsconfig.json",
 		"build-test-suite:wp": "webpack --env build=tests --env mode=test --config ./webpack.config.js",
 		"build-types:wp": "webpack --env build=types --mode none --env mode=test --config ./webpack.config.js",
+		"build-types:wpwrap_test": "wpwrap --env build=types --mode none --env mode=test --config ./webpack.config.js",
 		"build-types": "tsc -p ./types",
 		"build-types-bundle": "dts-bundle --name @spmeesseman/vscode-taskexplorer-types --baseDir types/dist --main types/build/interface/index.d.ts --out types.d.ts --outputAsModuleFolder --removeSource",
 		"build-webviews-prod": "webpack --mode production --env build=webapp --config ./webpack.config.js",
