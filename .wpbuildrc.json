@@ -68,6 +68,10 @@
             },
             "paths": {
                 "dist": "types/build"
+            },
+            "plugins": {
+                "tscheck": true,
+                "tsbundle": true
             }
         }
     ],
