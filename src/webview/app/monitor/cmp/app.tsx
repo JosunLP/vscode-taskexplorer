@@ -5,10 +5,7 @@ import { TeTaskTab } from "./tab";
 import { AppLoadMask } from "./loadMask";
 import { AppMenuButton } from "./menuButton";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import {
-    IMonitorAppTimerMode, MonitorAppSnapShot, MonitorAppState
-} from "../../../common/ipc";
-import { ITeTask, TeTaskListType } from ":env/ipc";
+import { ITeTask, TeTaskListType, IMonitorAppTimerMode, MonitorAppSnapShot, MonitorAppState } from ":types";
 
 type ITabDictionary<T> = { [id in TeTaskListType]: T; };
 

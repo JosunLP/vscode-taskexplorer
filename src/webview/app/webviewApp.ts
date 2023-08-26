@@ -5,7 +5,7 @@ import "./common/scss/te.scss";
 import { Disposable, DOM } from "./common/dom";
 import {
 	IpcCommand, IIpcMessage, IpcMessageParams, IpcFocusChangedCommand, IpcReadyCommand, IpcExecCommand
-} from "../common/ipc";
+} from ":types";
 
 interface VsCodeApi {
 	postMessage(msg: unknown): void;

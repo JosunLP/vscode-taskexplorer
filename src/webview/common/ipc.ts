@@ -11,7 +11,7 @@
  */
 
 // import { AuthenticationSession } from "vscode";;
-import { ITeTask, TeTaskListType, ITeAccount, TeSessionChangeEvent } from ":env/ipc";
+import { ITeTask, TeTaskListType, ITeAccount, TeSessionChangeEvent } from "../../interface";
 
 export interface BaseState
 {

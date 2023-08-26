@@ -3,8 +3,7 @@
 import React from "react";
 import { TeTaskButton } from "./button";
 import { TeReactTaskTimer } from "./timer";
-import { IMonitorAppTimerMode } from "../../../common/ipc";
-import { ITeTask } from ":env/ipc";
+import { ITeTask, IMonitorAppTimerMode } from ":types";
 
 interface ReactState
 {

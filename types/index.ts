@@ -1,6 +1,11 @@
 
 // import { WpBuildRuntimeVariables, __WPBUILD__ } from "../webpack/types";
-// export * from "../src/interface";
+export * from "../src/interface";
+export * from "../src/webview/common/ipc";
+// import * as ipc from "../src/webview/common/ipc";
+// export { ipc };
+
+// export * from ":env/ipc";
 // export * from "../src/lib/utils/log";
 // export * from "../src/lib/wrapper";
 // export * from "../src/lib/utils/fs";
@@ -12,5 +17,9 @@
 // export * from "../src/tree/node/file";
 // export * from "../src/tree/node/folder";
 // export * from "../src/tree/node/item";
-import { TeWrapper } from "../src/lib/wrapper"
+// import { TeWrapper } from "../src/lib/wrapper"
 //export { TeWrapper } from "../src/lib/wrapper"
+
+// import { IEventQueue } from "../src/interface/IEventQueue";
+// export { IEventQueue };
+

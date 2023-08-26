@@ -13,7 +13,7 @@
             "log": {
                 "color": "cyan"
             },
-            "plugins": {
+            "options": {
                 "licensefiles": true,
                 "upload": {
                     "url": "https://${WPBUILD_APP1_SSH_UPLOAD_HOST}/res/app",
@@ -67,11 +67,15 @@
                 }
             },
             "paths": {
-                "dist": "types/build"
+                "dist": "types/dist",
+                "src": "types"
             },
-            "plugins": {
+            "options": {
                 "tscheck": true,
-                "tsbundle": true
+                "tsbundle": true,
+                "typesPackage": "entry",
+                "typesEntryMode": "index",
+                "copy": false
             }
         }
     ],
@@ -79,7 +83,12 @@
         "builds": []
     },
     "production": {
-        "builds": []
+        "builds": [],
+        "options": {
+            "analyze": {
+                "circular": true
+            }
+        }
     },
     "test": {
         "builds": [
@@ -122,33 +131,34 @@
         "dist": "dist",
         "src": "src"
     },
-    "exports": {
-        "cache": true,
-        "devtool": true,
-        "experiments": true,
-        "externals": true,
-        "ignorewarnings": true,
-        "minification": false,
-        "optimization": true,
-        "stats": true,
-        "watch": true
-    },
-    "plugins": {
+    "options": {
         "analyze": {
-            "circular": true,
+            "circular": false,
             "analyzer": false,
             "visualizer": false
         },
-        "banner": true,
+        "banner": false,
+        "cache": true,
+        "copy": false,
+        "devtool": true,
+        "experiments": true,
+        "externals": true,
         "ignore": true,
+        "ignorewarnings": true,
         "istanbul": false,
         "licensefiles": false,
         "loghooks": true,
+        "minification": false,
         "optimization": true,
         "progress": false,
+        "runtimevars": false,
         "scm": false,
         "sourcemaps": true,
+        "tscheck": false,
+        "tsbundle": false,
+        "types": false,
         "upload": false,
-        "vendormod": true
+        "vendormod": false,
+        "watch": false
     }
 }
