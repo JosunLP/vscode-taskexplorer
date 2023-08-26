@@ -13,24 +13,37 @@
         "group": {
             "kind": "test"
         },
-        "problemMatcher": {
-            "owner": "javascript",
-            "source": "javascript",
-            "pattern": [
-                {
-                    "regexp": "\\[tsl\\] ERROR",
-                    "file": 1,
-                    "location": 2,
-                    "message": 3
-                }
-            ],
-            "background": {
-                "activeOnStart": true,
-                "beginsPattern": "[a-z]+\\:[a-z]\\:",
-                "endsPattern": "compiled\\s+successfully\\s+in\\s+[0-9]+\\s+ms"
-            }
-        }
+        "problemMatcher": ["$ts-checker5-webpack-watch", "$ts-checker5-eslint-webpack-watch"]
+        // "problemMatcher": {
+        //     "owner": "javascript",
+        //     "source": "javascript",
+        //     "pattern": [
+        //         {
+        //             "regexp": "\\[tsl\\] ERROR",
+        //             "file": 1,
+        //             "location": 2,
+        //             "message": 3
+        //         }
+        //     ],
+        //     "background": {
+        //         "activeOnStart": true,
+        //         "beginsPattern": "[a-z]+\\:[a-z]\\:",
+        //         "endsPattern": "compiled\\s+successfully\\s+in\\s+[0-9]+\\s+ms"
+        //     }
+        // }
     },
+    // {
+    //     "type": "npm",
+    //     "script": "build",
+    //     "group": "build",
+    //     "problemMatcher": ["$ts-checker5-webpack", "$ts-checker5-eslint-webpack"]
+    // },
+    // {
+    //     "type": "npm",
+    //     "script": "lint",
+    //     "group": "build",
+    //     "problemMatcher": ["$eslint-stylish"]
+    // },
     {
         "label": "Publish Types Package",
         "type": "shell",
