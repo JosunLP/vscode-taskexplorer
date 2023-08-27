@@ -6,7 +6,7 @@
         "declarationMap": false,
 		"emitDeclarationOnly": true,
 		"isolatedModules": false,
-		"outDir": "./dist",
+		"outDir": "./build",
         "paths": {
 			":env/*": [ "../src/lib/env/node/*", "../src/lib/env/web/*" ]
 		},

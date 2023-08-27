@@ -44,32 +44,25 @@ export class TeTreeView implements ITaskTreeView, Disposable
 	dispose = () => this._disposables.splice(0).forEach((d) => d.dispose());
 
 
-    get tree(): TaskTree {
-        return this._tree;
-    }
-
-    get view(): TreeView<TreeItem> {
-        return this._view;
-    }
-
+    get tree(): TaskTree { return this._tree; }
+    get view(): TreeView<TreeItem> { return this._view; }
     get enabled(): boolean {
         return this.wrapper.config.get<boolean>(this.id === `${WebviewPrefix.View}taskTreeExplorer` ? "enableExplorerView" : "enableSideBar", false);
     }
-
-    get visible(): boolean {
-        return this._visible;
-    }
+    get visible(): boolean { return this._visible; }
 
     // onElementCollapsed = (e: TreeViewExpansionEvent<TreeItem>) =>
     //     this.wrapper.log.methodOnce("tree view", "element collapsed", 2, "", [[ "label", e.element.label ], [ "id", e.element.id ]]);
 
 
-    onElementExpanded = (e: TreeViewExpansionEvent<TreeItem>) =>
+    onElementExpanded = (e: TreeViewExpansionEvent<TreeItem>) => {
         this.wrapper.log.methodEvent("tree view", "element expanded", 5, [[ "label", e.element.label ], [ "id", e.element.id ]]);
+    };
 
 
-    onElementSelectionChanged = (e: TreeViewSelectionChangeEvent<TreeItem>) =>
+    onElementSelectionChanged = (e: TreeViewSelectionChangeEvent<TreeItem>) => {
         this.wrapper.log.methodEvent("tree view", "selection changed", 5, [[ "selections", e.selection.map(i => i.label).join(", ") ]]);
+    };
 
 
     onVisibilityChanged(e: TreeViewVisibilityChangeEvent)

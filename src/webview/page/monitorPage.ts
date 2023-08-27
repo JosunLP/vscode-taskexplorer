@@ -100,11 +100,13 @@ export class MonitorPage extends TeWebviewPanel<MonitorAppState>
 	}
 
 
-	protected override onVisibilityChanged = (visible: boolean) =>
+	protected override onVisibilityChanged = (visible: boolean) => {
 		this.wrapper.log.methodEvent("task monitor", "visibility changed", 2, [[ "visible", visible ]]);
+	};
 
 
-	protected override onFocusChanged = (focused: boolean): void =>
+	protected override onFocusChanged = (focused: boolean): void => {
 		this.wrapper.log.methodEvent("task monitor", "focus changed", 2, [[ "focused", focused ]]);
+	};
 
 }

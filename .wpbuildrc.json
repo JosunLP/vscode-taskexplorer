@@ -14,7 +14,9 @@
                 "color": "cyan"
             },
             "options": {
+                "copy": true,
                 "licensefiles": true,
+                "runtimevars": true,
                 "upload": {
                     "url": "https://${WPBUILD_APP1_SSH_UPLOAD_HOST}/res/app",
                     "plink": {
@@ -67,7 +69,7 @@
                 }
             },
             "paths": {
-                "dist": "types/dist",
+                "dist": "types/build",
                 "src": "types"
             },
             "options": {

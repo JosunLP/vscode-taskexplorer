@@ -83,12 +83,14 @@ export class TaskWatcher implements Disposable
     }
 
 
-    private taskProcessStartEvent = (e: TaskProcessStartEvent) =>
+    private taskProcessStartEvent = (e: TaskProcessStartEvent) => {
         this.wrapper.log.methodEvent("task watcher", "process start", 2, [[ "pid", e.processId ], [ "task name", e.execution.task.name ]]);
+    };
 
 
-    private taskProcessFinishedEvent = (e: TaskProcessEndEvent) =>
+    private taskProcessFinishedEvent = (e: TaskProcessEndEvent) => {
         this.wrapper.log.methodEvent("task watcher", "process finished", 2, [[ "exit code", e.exitCode ], [ "task name", e.execution.task.name ]]);
+    };
 
 
     private taskStartEvent(e: TaskStartEvent): void
