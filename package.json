@@ -66,6 +66,7 @@
 		"build-extension-prod:verbose": "webpack --mode production --stats verbose --env verbosity=verbose --env build=taskexplorer --config ./webpack.config.js",
 		"build-extension-test": "webpack --env build=taskexplorer --mode none --env mode=test --config ./webpack.config.js",
 		"build-extension-test:prod": "webpack --mode production --env mode=test --env build=taskexplorer --config ./webpack.config.js",
+		"build-jsdoc:wp": "webpack --env build=docs --mode production --config ./webpack.config.js",
 		"build-test-all": "webpack --mode none --env mode=test --config ./webpack.config.js",
 		"build-test-extension": "webpack --env build=taskexplorer --mode none --env mode=test --config ./webpack.config.js",
 		"build-test-extension:wpwrap_test": "wpwrap --env build=taskexplorer --mode none --env mode=test --config ./webpack.config.js",
