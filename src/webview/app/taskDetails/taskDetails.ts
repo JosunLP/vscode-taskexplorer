@@ -4,7 +4,7 @@ import "../common/css/page.css";
 import "../common/scss/page.scss";
 import "./task-details.css";
 
-import { State } from "../../common/ipc";
+import { State } from ":types";
 import { TeWebviewApp } from "../webviewApp";
 
 

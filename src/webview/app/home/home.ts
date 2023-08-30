@@ -5,7 +5,7 @@ import "./home.css";
 import "./home.scss";
 
 import { Disposable } from "vscode";
-import { State } from "../../common/ipc";
+import { State } from ":types";
 import { TeWebviewApp } from "../webviewApp";
 
 export class HomeWebviewApp extends TeWebviewApp<State>

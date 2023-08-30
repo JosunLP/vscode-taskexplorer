@@ -9,6 +9,7 @@
             "color": "cyan"
         },
         "options": {
+            "banner": true,
             "copy": true,
             "licensefiles": true,
             "runtimevars": true,
@@ -88,48 +89,52 @@
     },
     "production": {
         "builds": [{
+            "name": "taskexplorer",
+            "options": {
+                "analyze": {
+                    "circular": true
+                }
+            }
+        },
+        {
             "name": "docs",
             "type": "jsdoc",
             "options": {
                 "jsdoc": {
-                    "outDir": "dist/docs",
-                    "rootDir": "src",
+                    "type": "plugin",
+                    "destination": "dist/docs",
                     "title": "Task Explorer Source Documentation"
                 }
             }
-        }],
-        "options": {
-            "analyze": {
-                "circular": true
-            }
-        }
+        }]
     },
     "test": {
-        "builds": [
-            { "name": "webapp", "mode": "development" },
-            {
-                "name": "tests",
-                "log": {
-                    "color": "yellow"
-                },
-                "options": {
-                    "wait": {
-                        "type": "event",
-                        "name": "done",
-                        "target": "types",
-                        "timeout": 7500
-                    }
-                },
-                "paths": {
-                    "ctx": "src/test",
-                    "dist": "dist/test",
-                    "src": "src/test"
-                },
-                "vscode": {
-                    "type": "tests"
+        "builds": [{
+            "name": "webapp",
+            "mode": "development"
+        },
+        {
+            "name": "tests",
+            "log": {
+                "color": "yellow"
+            },
+            "options": {
+                "wait": {
+                    "type": "event",
+                    "name": "done",
+                    "target": "types",
+                    "timeout": 7500
                 }
+            },
+            "paths": {
+                "ctx": "src/test",
+                "dist": "dist/test",
+                "src": "src/test"
+            },
+            "vscode": {
+                "type": "tests"
             }
-        ],
+        }],
         "log": {
             "pad": {
                 "value": 60
@@ -154,33 +159,8 @@
         "src": "src"
     },
     "options": {
-        "analyze": {
-            "circular": false,
-            "analyzer": false,
-            "visualizer": false
-        },
-        "banner": false,
         "cache": true,
-        "copy": false,
-        "devtool": true,
-        "experiments": true,
-        "externals": true,
-        "ignore": true,
         "ignorewarnings": true,
-        "istanbul": false,
-        "licensefiles": false,
-        "loghooks": true,
-        "minification": false,
-        "optimization": true,
-        "progress": false,
-        "runtimevars": false,
-        "scm": false,
-        "sourcemaps": true,
-        "tscheck": false,
-        "tsbundle": false,
-        "types": false,
-        "upload": false,
-        "vendormod": false,
-        "watch": false
+        "sourcemaps": true
     }
 }

@@ -3,7 +3,7 @@ import "../common/css/vscode.css";
 import "../common/css/view.css";
 import "./task-usage.css";
 
-import { State } from "../../common/ipc";
+import { State } from ":types";
 import { TeWebviewApp } from "../webviewApp";
 
 
