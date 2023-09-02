@@ -54,12 +54,22 @@
                 "name": "done",
                 "target": "types",
                 "timeout": 7500
+            },
+            "web": {
+                "publicPath": "#{webroot}/",
+                "transform": {
+                    "camelToDash": true,
+                    "jsDirectory": true
+                }
             }
         },
         "paths": {
             "ctx": "src/webview/app",
             "dist": "res",
             "src": "src"
+        },
+        "vscode": {
+            "type": "webview"
         }
     },
     {
