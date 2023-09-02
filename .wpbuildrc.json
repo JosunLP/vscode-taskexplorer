@@ -9,11 +9,24 @@
             "color": "cyan"
         },
         "options": {
-            "banner": true,
-            "copy": true,
-            "licensefiles": true,
-            "runtimevars": true,
-            "tscheck": true,
+            "banner": {
+                "enabled": true,
+                "text": "Copyright {DATE_STAMP_YEAR} Scott P Meesseman, All RIghts Reserved"
+            },
+            "copy": {
+                "enabled": true,
+                "defaults": true,
+                "items": []
+            },
+            "licensefiles": {
+                "enabled": true
+            },
+            "runtimevars": {
+                "enabled": true
+            },
+            "tscheck": {
+                "enabled": true
+            },
             "upload": {
                 "url": "https://${WPBUILD_APP1_SSH_UPLOAD_HOST}/res/app",
                 "plink": {
@@ -50,14 +63,16 @@
         },
         "options": {
             "wait": {
-                "type": "event",
-                "name": "done",
-                "target": "types",
-                "timeout": 7500
+                "items": [{
+                    "type": "event",
+                    "name": "done",
+                    "target": "types",
+                    "timeout": 7500
+                }]
             },
             "web": {
                 "publicPath": "#{webroot}/",
-                "transform": {
+                "filename": {
                     "camelToDash": true,
                     "jsDirectory": true
                 }
@@ -84,10 +99,16 @@
             }
         },
         "options": {
-            "tscheck": true,
-            "tsbundle": true,
-            "typesPackage": "entry",
-            "typesEntryMode": "index"
+            "tscheck": {
+                "enabled": true
+            },
+            "tsbundle": {
+                "enabled": true
+            },
+            "types": {
+                "mode": "plugin",
+                "entry": "index"
+            }
         },
         "paths": {
             "dist": "types/build",
@@ -130,10 +151,12 @@
             },
             "options": {
                 "wait": {
-                    "type": "event",
-                    "name": "done",
-                    "target": "types",
-                    "timeout": 7500
+                    "items": [{
+                        "type": "event",
+                        "name": "done",
+                        "target": "types",
+                        "timeout": 7500
+                    }]
                 }
             },
             "paths": {
@@ -169,8 +192,14 @@
         "src": "src"
     },
     "options": {
-        "cache": true,
-        "ignorewarnings": true,
-        "sourcemaps": true
+        "cache": {
+            "enabled": true
+        },
+        "ignorewarnings": {
+            "enabled": true
+        },
+        "sourcemaps": {
+            "enabled": true
+        }
     }
 }
