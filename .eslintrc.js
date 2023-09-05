@@ -15,8 +15,8 @@ module.exports = {
         createDefaultProgram: true
     },
     ignorePatterns: [
-        "**/test-fixture/**/*.js", "types/**", "*.json", "node_modules", "node_modules/**",
-        "**/node_modules/**", "**/.eslint*", "dist/**", ".vscode-test/**", "*.d.ts"
+        "**/test-fixture/**/*.js", "types/**", "*.json",
+        "**/node_modules/**", "**/.eslint*", "**/dist/**", "**/.vscode-test/**", "*.d.ts"
     ],
     overrides: [
     {
@@ -25,7 +25,7 @@ module.exports = {
         ],
         excludedFiles: [
             "test-fixture/**", "types/**", "*.json", "dist/**", "node_modules/**",
-            "**/node_modules/**", "res/**", ".vscode-test/**"
+            "**/node_modules/**", "res/**", "**/.vscode-test/**"
         ]
     }],
     plugins: [
