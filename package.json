@@ -18,6 +18,10 @@
 		"type": "git",
 		"url": "https://github.com/spmeesseman/vscode-taskexplorer-info.git"
 	},
+    "funding": {
+        "type": "paypal",
+        "url": "https://www.paypal.com/donate/?hosted_button_id=VNYX9PP5ZT5F8"
+    },
 	"engines": {
 		"node": ">=14.0.0",
 		"vscode": "^1.68.1"
