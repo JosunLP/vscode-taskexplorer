@@ -54,16 +54,15 @@ export class TeTaskTab extends React.Component<ReactProps, ReactState, ReactSnap
         this.children.splice(0);
         this.state.tasks.forEach((t: ITeTask) =>
         {
-            this.controlRefs[t.treeId] = React.createRef<TeTaskControl>();
+            const ref = this.controlRefs[t.treeId] = React.createRef<TeTaskControl>();
             this.children.push(
                 <TeTaskControl
                     task={t}
                     log={this.props.log}
                     webroot={this.props.webroot}
-                    ref={this.controlRefs[t.treeId]}
+                    ref={ref}
                     timerMode={this.props.timerMode}
                     executeCommand={this.props.executeCommand}
-                    key={`te-id-task-control-${++this.counter}`}
                 />
             );
         });
