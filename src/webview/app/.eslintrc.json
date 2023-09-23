@@ -7,6 +7,6 @@
 		"import/extensions": ["error", "never", { "js": "always" }]
 	},
 	"parserOptions": {
-		"project": "src/webview/app/tsconfig.json"
+		"project": "tsconfig.json"
 	}
 }

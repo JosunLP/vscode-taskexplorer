@@ -123,7 +123,7 @@ export abstract class Log implements ILog, ILogDisposable
             error: <"✘">this.withColor("✘", this._colors.blue),
             info: <"ℹ">this.withColor("ℹ", this._colors.blue),
             success: <"✔">this.withColor("✔", this._colors.blue),
-            warning: <"⚠">this.withColor("⚠", this._colors.blue),
+            warning: <"⚠">this.withColor("⚠", this._colors.blue)
         },
         color:
         {
@@ -134,7 +134,7 @@ export abstract class Log implements ILog, ILogDisposable
             start: <"▶">this.withColor("▶", this._colors.green),
             end: <"◀">this.withColor("◀", this._colors.green),
             pointer: <"❯">this.withColor("❯", this._colors.grey),
-            up: <"△">this.withColor("△", this._colors.green),
+            up: <"△">this.withColor("△", this._colors.green)
         }
     };
 
@@ -343,7 +343,7 @@ export abstract class Log implements ILog, ILogDisposable
             lastWriteWasBlankError: false,
             lastWriteToConsoleWasBlank: false,
             msgQueue: {},
-            tzOffset: (new Date()).getTimezoneOffset() * 60000,
+            tzOffset: (new Date()).getTimezoneOffset() * 60000
         };
     };
 
@@ -399,7 +399,7 @@ export abstract class Log implements ILog, ILogDisposable
             error: <"✘">this.withColor("✘", this._colors.blue),
             info: <"ℹ">this.withColor("ℹ", this._colors.blue),
             success: <"✔">this.withColor("✔", this._colors.blue),
-            warning: <"⚠">this.withColor("⚠", this._colors.blue),
+            warning: <"⚠">this.withColor("⚠", this._colors.blue)
         },
         color:
         {
@@ -410,7 +410,7 @@ export abstract class Log implements ILog, ILogDisposable
             start: <"▶">this.withColor("▶", this._colors.green),
             end: <"◀">this.withColor("◀", this._colors.green),
             pointer: <"❯">this.withColor("❯", this._colors.grey),
-            up: <"△">this.withColor("△", this._colors.green),
+            up: <"△">this.withColor("△", this._colors.green)
         }
     });
 
