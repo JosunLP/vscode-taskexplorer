@@ -1,9 +1,9 @@
 {
-    "$schema": "https://app1.spmeesseman.com/res/app/wpbuild/v0.0.1/schema/.wpbuildrc.schema.json",
+    "$schema": "./node_modules/@spmeesseman/webpack-wrap/schema/spm.schema.wpw.json",
     "builds": [{
         "name": "taskexplorer",
         "target": "node",
-        "type": "module",
+        "type": "app",
         "debug": true,
         "log": {
             "color": "cyan"
@@ -64,10 +64,8 @@
         "options": {
             "wait": {
                 "items": [{
-                    "type": "event",
-                    "name": "done",
-                    "target": "types",
-                    "timeout": 7500
+                    "mode": "event",
+                    "name": "types"
                 }]
             },
             "web": {
@@ -102,12 +100,9 @@
             "tscheck": {
                 "enabled": true
             },
-            "tsbundle": {
-                "enabled": true
-            },
             "types": {
                 "mode": "plugin",
-                "entry": "index"
+                "bundle": true
             }
         },
         "paths": {
@@ -130,10 +125,12 @@
         {
             "name": "docs",
             "type": "jsdoc",
+            "log": {
+                "color": "magenta"
+            },
             "options": {
                 "jsdoc": {
-                    "type": "plugin",
-                    "destination": "dist/docs",
+                    "mode": "auto",
                     "title": "Task Explorer Source Documentation"
                 }
             }
@@ -152,10 +149,8 @@
             "options": {
                 "wait": {
                     "items": [{
-                        "type": "event",
-                        "name": "done",
-                        "target": "types",
-                        "timeout": 7500
+                        "mode": "event",
+                        "name": "types"
                     }]
                 }
             },
@@ -178,10 +173,7 @@
         "level": 3,
         "valueMaxLineLength": 100,
         "pad": {
-            "base": 0,
-            "envTag": 23,
-            "value": 40,
-            "uploadFileName": 50
+            "value": 40
         },
         "colors": {
             "default": "grey"
@@ -191,14 +183,14 @@
         "dist": "dist",
         "src": "src"
     },
+    "source": {
+        "type": "typescript"
+    },
     "options": {
         "cache": {
             "enabled": true
         },
         "ignorewarnings": {
-            "enabled": true
-        },
-        "sourcemaps": {
             "enabled": true
         }
     }
