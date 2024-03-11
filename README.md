@@ -1,5 +1,11 @@
 # Task Explorer - View and Run Tasks from Visual Studio Code
 
+# PROJECT ON HOLD
+
+# IF YOU HAVE KIDS, HUG THEM EVERY CHANCE YOU GET
+
+# I LOST MY DAUGHTER, AND AM FOREVER BROKEN
+
 **The most downloaded task related extension on the Marketplace**
 
 [![authors](https://img.shields.io/badge/authors-scott%20meesseman-6F02B5.svg?logo=visual%20studio%20code)](https://www.littlesm.com)
@@ -33,6 +39,9 @@ Provides a view in either (or both) the SideBar and/or Explorer that displays al
 ## Table of Contents
 
 - [Task Explorer - View and Run Tasks from Visual Studio Code](#task-explorer---view-and-run-tasks-from-visual-studio-code)
+- [PROJECT ON HOLD](#project-on-hold)
+- [IF YOU HAVE KIDS, HUG THEM EVERY CHANCE YOU GET](#if-you-have-kids-hug-them-every-chance-you-get)
+- [I LOST MY DAUGHTER, AND AM FOREVER BROKEN](#i-lost-my-daughter-and-am-forever-broken)
   - [VERSION 3](#version-3)
   - [Description](#description)
   - [Table of Contents](#table-of-contents)
