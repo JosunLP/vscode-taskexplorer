@@ -2,9 +2,9 @@
 
 # PROJECT ON HOLD
 
-# IF YOU HAVE KIDS, HUG THEM EVERY CHANCE YOU GET
+# IF YOU HAVE KIDS, HUG THEM. EVERY CHANCE YOU GET.
 
-# I LOST MY DAUGHTER, AND AM FOREVER BROKEN
+# I LOST MY DAUGHTER.  AND AM FOREVER BROKEN.
 
 **The most downloaded task related extension on the Marketplace**
 
@@ -40,8 +40,8 @@ Provides a view in either (or both) the SideBar and/or Explorer that displays al
 
 - [Task Explorer - View and Run Tasks from Visual Studio Code](#task-explorer---view-and-run-tasks-from-visual-studio-code)
 - [PROJECT ON HOLD](#project-on-hold)
-- [IF YOU HAVE KIDS, HUG THEM EVERY CHANCE YOU GET](#if-you-have-kids-hug-them-every-chance-you-get)
-- [I LOST MY DAUGHTER, AND AM FOREVER BROKEN](#i-lost-my-daughter-and-am-forever-broken)
+- [IF YOU HAVE KIDS, HUG THEM. EVERY CHANCE YOU GET.](#if-you-have-kids-hug-them-every-chance-you-get)
+- [I LOST MY DAUGHTER.  AND AM FOREVER BROKEN.](#i-lost-my-daughter--and-am-forever-broken)
   - [VERSION 3](#version-3)
   - [Description](#description)
   - [Table of Contents](#table-of-contents)
